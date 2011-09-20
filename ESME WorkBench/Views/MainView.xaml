@@ -59,8 +59,7 @@
         </ProgressBar>
       </StatusBarItem>
     </StatusBar>
-    <r:Ribbon x:Name="Ribbon" SelectedIndex="{Binding SelectedRibbonTabIndex, Mode=TwoWay}" DockPanel.Dock="Top">
-            <!-- <r:Ribbon x:Name="Ribbon" SelectedIndex="2" DockPanel.Dock="Top"> -->
+        <r:Ribbon x:Name="Ribbon" SelectedIndex="{Binding Source={x:Static p:Settings.Default}, Path=SelectedRibbonTabIndex, Mode=TwoWay}" DockPanel.Dock="Top">
       <r:Ribbon.ApplicationMenu>
         <r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
           <r:RibbonApplicationMenuItem Header="Open Scenario" InputGestureText="Ctrl+O"
@@ -335,12 +334,11 @@
     </r:Ribbon>
     <Grid>
       <Grid.ColumnDefinitions>
-        <ColumnDefinition
-Width="{Binding LayersListWidth, Converter={StaticResource gridLengthConverter}, Mode=TwoWay}" />
+                <ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Path=LayersWidth, Mode=TwoWay, Converter={StaticResource gridLengthConverter}}" />
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" MinWidth="500" />
       </Grid.ColumnDefinitions>
-      <TabControl Visibility="{Binding IsLayerListViewVisible, Converter={StaticResource TrueVisibleFalseCollapsed}}">
+      <TabControl>
         <TabItem Header="Map Layers">
           <LocalControls:LayerListView />
         </TabItem>

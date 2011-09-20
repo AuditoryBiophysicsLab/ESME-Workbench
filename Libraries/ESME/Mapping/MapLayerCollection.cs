@@ -62,14 +62,9 @@ namespace ESME.Mapping
 
     public class MapLayerCollection : ObservableList<MapLayerViewModel>
     {
-        internal MapLayerCollection(string collectionName)
+        public MapLayerCollection(string baseMapShapefileName, string baseMapLayerName = "Base Map")
         {
-            Name = collectionName;
             CurrentExtent = new RectangleShape(-180, 90, 180, -90);
-        }
-
-        internal MapLayerCollection(string collectionName, string baseMapShapefileName, string baseMapLayerName = "Base Map") : this(collectionName)
-        {
             base.Add(new ShapefileMapLayer
             {
                 LayerType = LayerType.BaseMap,
@@ -82,6 +77,8 @@ namespace ESME.Mapping
                 Name = baseMapLayerName,
                 MapLayers = this,
             });
+            MediatorMessage.Send(MediatorMessage.SetMapLayers, this);
+            MediatorMessage.Send(MediatorMessage.SetCurrentExtent, CurrentExtent);
         }
 
         public IEnumerable<MapLayerViewModel> Find(LayerType layerType)
@@ -99,8 +96,6 @@ namespace ESME.Mapping
             if (Count == 0) return null;
             return this.Where(layer => layer.LayerType == layerType).Where(layer => layer.Name == layerName).FirstOrDefault() as T;
         }
-
-        public string Name { get; private set; }
 
         public new void Add(MapLayerViewModel item)
         {
@@ -359,47 +354,5 @@ namespace ESME.Mapping
                 break;
             }
         }
-    }
-
-    public class MapLayerCollections : List<MapLayerCollection>
-    {
-        public MapLayerCollection this[string collectionName] { get { return Find(collection => collection.Name == collectionName); } }
-
-        public void Add(string collectionName)
-        {
-            Add(new MapLayerCollection(collectionName));
-        }
-
-        public void Add(string collectionName, string baseMapShapefileName, string baseMapLayerName = "Base Map")
-        {
-            Add(new MapLayerCollection(collectionName, baseMapShapefileName, baseMapLayerName));
-        }
-
-        public new void Add(MapLayerCollection mapLayerCollection)
-        {
-            var result = Find(collection => collection.Name == mapLayerCollection.Name);
-            if (result != null) throw new DuplicateKeyException("MapLayerCollections: \"" + mapLayerCollection.Name + "\" already exists");
-            base.Add(mapLayerCollection);
-        }
-
-        public new bool Remove(MapLayerCollection collectionToRemove)
-        {
-            if (collectionToRemove == ActiveLayer) throw new InvalidOperationException("MapLayerCollections: Cannot remove the active layer");
-            return base.Remove(collectionToRemove);
-        }
-
-        public MapLayerCollection ActiveLayer
-        {
-            get { return _activeLayer; }
-            set
-            {
-                if (_activeLayer == value) return;
-                _activeLayer = value;
-                MediatorMessage.Send(MediatorMessage.SetMapLayers, _activeLayer);
-                MediatorMessage.Send(MediatorMessage.SetCurrentExtent, _activeLayer.CurrentExtent);
-            }
-        }
-
-        MapLayerCollection _activeLayer;
     }
 }

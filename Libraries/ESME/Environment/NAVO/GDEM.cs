@@ -318,6 +318,8 @@ namespace ESME.Environment.NAVO
             var missingValue = ((NcAttShort)data.Attributes.Find(att => att.Name == "missing_value"))[0];
             var scaleFactor = ((NcAttFloat)data.Attributes.Find(att => att.Name == "scale_factor"))[0];
             var addOffset = ((NcAttFloat)data.Attributes.Find(att => att.Name == "add_offset"))[0];
+            if (dataVarName == "water_temp") Logger.Log("Temperature worker in GDEM.ReadFile at 1");
+            
 
             var north = region.North;
             var south = region.South;
@@ -335,37 +337,57 @@ namespace ESME.Environment.NAVO
             for (var i = 0; i < lats.Length; i++) if (lats[i] >= south && lats[i] <= north) latMap.Add(new AxisMap((float)lats[i], i));
             var selectedLons = lonMap.Select(x => x.Value).ToArray();
             var selectedLats = latMap.Select(y => y.Value).ToArray();
+            if (dataVarName == "water_temp") Logger.Log("Temperature worker in GDEM.ReadFile at 2");
 
             var latCount = selectedLats.Length;
             var lonCount = selectedLons.Length;
 
+            int lastLatIndex = -1, lastLonIndex = -1, lastDepthIndex = -1;
             var newFieldEnvironmentData = new List<SoundSpeedProfile>();
-
-            for (var lonIndex = 0; lonIndex < lonCount; lonIndex++)
+            try
             {
-                var lon = lonMap[lonIndex].Value;
-                var wrappedLon = lon;
-                while (wrappedLon > 180) wrappedLon -= 360;
-                while (wrappedLon < -180) wrappedLon += 360;
-
-                var lonSourceIndex = lonMap[lonIndex].Index;
-                for (var latIndex = 0; latIndex < latCount; latIndex++)
+                for (var lonIndex = 0; lonIndex < lonCount; lonIndex++)
                 {
-                    var lat = latMap[latIndex].Value;
-                    var latSourceIndex = latMap[latIndex].Index;
-                    var newProfile = new SoundSpeedProfile(new EarthCoordinate(lat, wrappedLon));
-                    for (var depthIndex = 0; depthIndex < depths.Length; depthIndex++)
+                    lastLonIndex = lonIndex;
+                    var lon = lonMap[lonIndex].Value;
+                    var wrappedLon = lon;
+                    while (wrappedLon > 180) wrappedLon -= 360;
+                    while (wrappedLon < -180) wrappedLon += 360;
+
+                    var lonSourceIndex = lonMap[lonIndex].Index;
+                    for (var latIndex = 0; latIndex < latCount; latIndex++)
                     {
-                        var curValue = data[(uint)depthIndex, (uint)latSourceIndex, (uint)lonSourceIndex];
-                        if (curValue == missingValue) break;
-                        newProfile.Data.Add(new DepthValuePair<float>((float)depths[depthIndex], ((curValue) * scaleFactor) + addOffset));
+                        lastLatIndex = latIndex;
+                        var lat = latMap[latIndex].Value;
+                        var latSourceIndex = latMap[latIndex].Index;
+                        var newProfile = new SoundSpeedProfile(new EarthCoordinate(lat, wrappedLon));
+                        for (var depthIndex = 0; depthIndex < depths.Length; depthIndex++)
+                        {
+                            lastDepthIndex = depthIndex;
+                            var curValue = data[(uint)depthIndex, (uint)latSourceIndex, (uint)lonSourceIndex];
+                            if (curValue == missingValue) break;
+                            newProfile.Data.Add(new DepthValuePair<float>((float)depths[depthIndex], ((curValue) * scaleFactor) + addOffset));
+                        }
+                        if (newProfile.Data.Count > 0) newFieldEnvironmentData.Add(newProfile);
                     }
-                    if (newProfile.Data.Count > 0) newFieldEnvironmentData.Add(newProfile);
                 }
             }
+            catch (Exception e)
+            {
+                Logger.Log("Caught exception: {0}", e.Message);
+                Logger.Log("Source: {0}", e.Source);
+                Logger.Log("Stack trace: {0}", e.StackTrace);
+                Logger.Log("File name: {0}, Data variable: {1}, Time Period: {2}", fileName, dataVarName, month);
+                Logger.Log("lat index: {0}, lon index: {1}, depth index: {2}", lastLatIndex, lastLonIndex, lastDepthIndex);
+                throw;
+            }
+            if (dataVarName == "water_temp") Logger.Log("Temperature worker in GDEM.ReadFile at 3");
             var newField = new SoundSpeedField { TimePeriod = month };
+            if (dataVarName == "water_temp") Logger.Log("Temperature worker in GDEM.ReadFile at 4");
             newField.EnvironmentData.AddRange(newFieldEnvironmentData);
+            if (dataVarName == "water_temp") Logger.Log("Temperature worker in GDEM.ReadFile at 5");
             newField.EnvironmentData.Sort();
+            if (dataVarName == "water_temp") Logger.Log("Temperature worker in GDEM.ReadFile at 6");
             return newField;
         }
 

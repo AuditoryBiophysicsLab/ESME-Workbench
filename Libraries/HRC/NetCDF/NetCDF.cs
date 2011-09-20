@@ -21,11 +21,13 @@ namespace HRC.NetCDF
             if (_reader.ReadNetCDFUint() == (uint)NcField.Dimension) Dimensions = NcDim.ReadAll(_reader);
             if (_reader.ReadNetCDFUint() == (uint)NcField.Attribute) Attributes = NcAtt.ReadAll(_reader);
             if (_reader.ReadNetCDFUint() == (uint)NcField.Variable) Variables = NcVar.ReadAll(_reader, Dimensions);
+            //_buffer[0] = 1;
         }
 
         public void Close() {_reader.Close();}
         public void Dispose() {Close();}
         ~NetCDF(){Close();}
+        //private readonly int[] _buffer = new int[100000];
 
         public byte Version { get; private set; }
         public uint RecordCount { get; private set; }
@@ -65,52 +67,122 @@ namespace HRC.NetCDF
 
     public static class NetCDFReaders
     {
+        public static Action<string> Logger;
+
         public static unsafe float ReadNetCDFFloat(this BinaryReader reader)
         {
-            var bytes = reader.ReadBytes(4);
-
-            var result = float.NaN;
-            var pointer = (byte*)&result;
-            pointer[0] = bytes[3];
-            pointer[1] = bytes[2];
-            pointer[2] = bytes[1];
-            pointer[3] = bytes[0];
-            return result;
+            try
+            {
+                var bytes = reader.ReadBytes(4);
+                if (bytes.Length != 4) throw new EndOfStreamException("ReadNetCDFFloat encountered an end of stream");
+                var result = float.NaN;
+                var pointer = (byte*)&result;
+                pointer[0] = bytes[3];
+                pointer[1] = bytes[2];
+                pointer[2] = bytes[1];
+                pointer[3] = bytes[0];
+                return result;
+            }
+            catch (Exception e)
+            {
+                if (Logger != null)
+                {
+                    Logger(string.Format("ReadNetCDFFloat() Caught exception: {0}", e.Message));
+                    Logger(string.Format("Source: {0}", e.Source));
+                    Logger(string.Format("Stack trace: {0}", e.StackTrace));
+                }
+                throw;
+            }
         }
 
         public static unsafe double ReadNetCDFDouble(this BinaryReader reader)
         {
-            var bytes = reader.ReadBytes(8);
-
-            var result = double.NaN;
-            var pointer = (byte*)&result;
-            pointer[0] = bytes[7];
-            pointer[1] = bytes[6];
-            pointer[2] = bytes[5];
-            pointer[3] = bytes[4];
-            pointer[4] = bytes[3];
-            pointer[5] = bytes[2];
-            pointer[6] = bytes[1];
-            pointer[7] = bytes[0];
-            return result;
+            try
+            {
+                var bytes = reader.ReadBytes(8);
+                var result = double.NaN;
+                if (bytes.Length != 8) throw new EndOfStreamException("ReadNetCDFDouble encountered an end of stream");
+                var pointer = (byte*)&result;
+                pointer[0] = bytes[7];
+                pointer[1] = bytes[6];
+                pointer[2] = bytes[5];
+                pointer[3] = bytes[4];
+                pointer[4] = bytes[3];
+                pointer[5] = bytes[2];
+                pointer[6] = bytes[1];
+                pointer[7] = bytes[0];
+                return result;
+            }
+            catch (Exception e)
+            {
+                if (Logger != null)
+                {
+                    Logger(string.Format("ReadNetCDFDouble() Caught exception: {0}", e.Message));
+                    Logger(string.Format("Source: {0}", e.Source));
+                    Logger(string.Format("Stack trace: {0}", e.StackTrace));
+                }
+                throw;
+            }
         }
 
         public static uint ReadNetCDFUint(this BinaryReader reader)
         {
-            var bytes = reader.ReadBytes(4);
-            return (uint)(bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3]);
+            try
+            {
+                var bytes = reader.ReadBytes(4);
+                if (bytes.Length != 4) throw new EndOfStreamException("ReadNetCDFUint encountered an end of stream");
+                return (uint)(bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3]);
+            }
+            catch (Exception e)
+            {
+                if (Logger != null)
+                {
+                    Logger(string.Format("ReadNetCDFUint() Caught exception: {0}", e.Message));
+                    Logger(string.Format("Source: {0}", e.Source));
+                    Logger(string.Format("Stack trace: {0}", e.StackTrace));
+                }
+                throw;
+            }
         }
 
         public static int ReadNetCDFInt(this BinaryReader reader)
         {
-            var bytes = reader.ReadBytes(4);
-            return bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3];
+            try
+            {
+                var bytes = reader.ReadBytes(4);
+                if (bytes.Length != 4) throw new EndOfStreamException("ReadNetCDFInt encountered an end of stream");
+                return bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3];
+            }
+            catch (Exception e)
+            {
+                if (Logger != null)
+                {
+                    Logger(string.Format("ReadNetCDFInt() Caught exception: {0}", e.Message));
+                    Logger(string.Format("Source: {0}", e.Source));
+                    Logger(string.Format("Stack trace: {0}", e.StackTrace));
+                }
+                throw;
+            }
         }
 
         public static short ReadNetCDFShort(this BinaryReader reader)
         {
-            var bytes = reader.ReadBytes(2);
-            return (short)(bytes[0] << 8 | bytes[1]);
+            try
+            {
+                var bytes = reader.ReadBytes(2);
+                if (bytes.Length != 2) throw new EndOfStreamException("ReadNetCDFShort encountered an end of stream");
+                return (short)(bytes[0] << 8 | bytes[1]);
+            }
+            catch (Exception e)
+            {
+                if (Logger != null)
+                {
+                    Logger(string.Format("ReadNetCDFShort() Caught exception: {0}", e.Message));
+                    Logger(string.Format("Source: {0}", e.Source));
+                    Logger(string.Format("Stack trace: {0}", e.StackTrace));
+                }
+                throw;
+            }
         }
     }
 }

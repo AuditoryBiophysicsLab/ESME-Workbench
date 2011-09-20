@@ -20,7 +20,7 @@ namespace HRC.NetCDF
         protected uint[] Strides { get; set; }
         protected BinaryReader Reader { get; set; }
 
-        public static List<NcVar>  ReadAll(BinaryReader reader, List<NcDim> dimensions)
+        public static List<NcVar> ReadAll(BinaryReader reader, List<NcDim> dimensions)
         {
             var result = new List<NcVar>();
             var varCount = reader.ReadNetCDFUint();
@@ -92,6 +92,8 @@ namespace HRC.NetCDF
 
     public abstract class NcVar<T> : NcVar, IEnumerable<T> where T : struct
     {
+        public static Action<string> Logger;
+
         protected NcVar()
         {
             var t = typeof(T);
@@ -112,7 +114,21 @@ namespace HRC.NetCDF
                 }
                 if (_values != null) return _values[requestedDataOffset];
                 Reader.BaseStream.Seek(Offset + (requestedDataOffset * UnitSize), SeekOrigin.Begin);
-                return Read();
+                try
+                {
+                    return Read();
+                }
+                catch (Exception e)
+                {
+                    if (Logger != null)
+                    {
+                        var idxs = string.Join(", ", indices.Select(index => index.ToString()));
+                        Logger(string.Format("NcVar<T>.this[{0}] Caught exception: {1}", idxs, e.Message));
+                        Logger(string.Format("Source: {0}", e.Source));
+                        Logger(string.Format("Stack trace: {0}", e.StackTrace));
+                    }
+                    throw;
+                }
             }
         }
 
@@ -138,26 +154,106 @@ namespace HRC.NetCDF
 
     public class NcVarByte : NcVar<byte>
     {
-        protected override byte Read() { return Reader.ReadByte(); }
+        protected override byte Read()
+        {
+            try
+            {
+                return Reader.ReadByte();
+            }
+            catch (Exception e)
+            {
+                if (Logger != null)
+                {
+                    Logger(string.Format("NcVarByte.Read() Caught exception: {0}", e.Message));
+                    Logger(string.Format("Source: {0}", e.Source));
+                    Logger(string.Format("Stack trace: {0}", e.StackTrace));
+                }
+                throw;
+            }
+        }
     }
 
     public class NcVarShort : NcVar<short>
     {
-        protected override short Read() { return Reader.ReadNetCDFShort(); }
+        protected override short Read()
+        {
+            try
+            {
+                return Reader.ReadNetCDFShort();
+            }
+            catch (Exception e)
+            {
+                if (Logger != null)
+                {
+                    Logger(string.Format("NcVarShort.Read() Caught exception: {0}", e.Message));
+                    Logger(string.Format("Source: {0}", e.Source));
+                    Logger(string.Format("Stack trace: {0}", e.StackTrace));
+                }
+                throw;
+            }
+        }
     }
 
     public class NcVarInt : NcVar<int>
     {
-        protected override int Read() { return Reader.ReadNetCDFInt(); }
+        protected override int Read()
+        {
+            try
+            {
+                return Reader.ReadNetCDFInt();
+            }
+            catch (Exception e)
+            {
+                if (Logger != null)
+                {
+                    Logger(string.Format("NcVarInt.Read() Caught exception: {0}", e.Message));
+                    Logger(string.Format("Source: {0}", e.Source));
+                    Logger(string.Format("Stack trace: {0}", e.StackTrace));
+                }
+                throw;
+            }
+        }
     }
 
     public class NcVarFloat : NcVar<float>
     {
-        protected override float Read() { return Reader.ReadNetCDFFloat(); }
+        protected override float Read()
+        {
+            try
+            {
+                return Reader.ReadNetCDFFloat();
+            }
+            catch (Exception e)
+            {
+                if (Logger != null)
+                {
+                    Logger(string.Format("NcVarFloat.Read() Caught exception: {0}", e.Message));
+                    Logger(string.Format("Source: {0}", e.Source));
+                    Logger(string.Format("Stack trace: {0}", e.StackTrace));
+                }
+                throw;
+            }
+        }
     }
 
     public class NcVarDouble : NcVar<double>
     {
-        protected override double Read() { return Reader.ReadNetCDFDouble(); }
+        protected override double Read()
+        {
+            try
+            {
+                return Reader.ReadNetCDFDouble();
+            }
+            catch (Exception e)
+            {
+                if (Logger != null)
+                {
+                    Logger(string.Format("NcVarDouble.Read() Caught exception: {0}", e.Message));
+                    Logger(string.Format("Source: {0}", e.Source));
+                    Logger(string.Format("Stack trace: {0}", e.StackTrace));
+                }
+                throw;
+            }
+        }
     }
 }

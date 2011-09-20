@@ -8,15 +8,16 @@
   <?define ProductCode="{C2113C4A-86D3-4BA8-AED4-30976D5539A6}"?>
   <?define UpgradeCode="{f82eae19-b38d-47f9-bed7-33454e612509}"?>
   <?define ESMERoot="C:\Projects\ESME Deliverables"?>
-  <?define ESMEPath="$(var.ESMERoot)\ESME WorkBench\bin\Release"?>
+  <?define ESMEPath="$(var.ESMERoot)\ESME WorkBench\bin\Debug"?>
   <?define HDFPath="$(var.ESMERoot)\Libraries\ESME\External References"?>
-  <?define ESMEViewsPath="$(var.ESMERoot)\ESME.Controls\bin\Release"?>
+  <?define ESMEViewsPath="$(var.ESMERoot)\ESME.Controls\bin\Debug"?>
   <?define BellhopPath="$(var.ESMERoot)\Utilities\bellhop"?>
   <?define MMMBSPath="$(var.ESMERoot)\Utilities\3MB"?>
   <?define MergeModulesPath="C:\Program Files (x86)\Common Files\Merge Modules"?>
   <?define ReleaseNotesPath="$(var.ESMERoot)\Release Notes"?>
-  <?define TransmissionLossViewerPath="$(var.ESMERoot)\TransmissionLossViewer\bin\Release"?>
-  <?define TransmissionLossCalculatorPath="$(var.ESMERoot)\TransmissionLossCalculator\bin\Release"?>
+  <?define TransmissionLossViewerPath="$(var.ESMERoot)\TransmissionLossViewer\bin\Debug"?>
+  <?define TransmissionLossCalculatorPath="$(var.ESMERoot)\TransmissionLossCalculator\bin\Debug"?>
+  <?define WorkaroundPath="$(var.ESMERoot)\TransmissionLossCalculator\bin\Debug"?>
   <Product Id="$(var.ProductCode)" 
            Name="$(var.ProductName)" 
            Version="$(var.ProductVersion)" 
@@ -115,6 +116,7 @@
 
             <!-- OAML extraction programs -->
             <!-- GDEM Database Extractor (NetCDF format) -->
+            <!--
             <File Id="ImportGDEM.exe"
                   Name="ImportGDEM.exe"
                   Source="$(var.ESMEPath)\ImportGDEM.exe" />
@@ -124,6 +126,7 @@
             <File Id="NetCDF_Wrapper.dll"
                   Name="NetCDF_Wrapper.dll"
                   Source="$(var.ESMEPath)\NetCDF_Wrapper.dll" />
+                                              -->
             <!-- End OAML extraction programs -->
 
             <!-- Bellhop acoustic simulator -->
@@ -231,8 +234,8 @@
                   Source="$(var.ESMEPath)\Microsoft.Windows.Shell.dll" />
 
             <!-- Microsoft Ribbon assembly -->
-            <File Id="RibbonControlsLibrary.dll" 
-                  Name="RibbonControlsLibrary.dll" 
+            <File Id="RibbonControlsLibrary.dll"
+                  Name="RibbonControlsLibrary.dll"
                   Source="$(var.ESMEPath)\RibbonControlsLibrary.dll" />
           </Component>
           

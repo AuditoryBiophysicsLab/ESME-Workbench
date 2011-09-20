@@ -27,7 +27,6 @@ namespace ESMEWorkBench.ViewModels.Main
             WizardViewModel.LaunchWizardIfNeeded(_visualizerService);
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             AreAllViewModelsReady = true;
-            UpdateMapLayerVisibility();
             if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
             SelectedRangeComplexIndex = -1;
             SelectedAreaIndex = -1;
@@ -37,10 +36,6 @@ namespace ESMEWorkBench.ViewModels.Main
             //_dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
             //_dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
         }
-
-        public MapLayerCollection EnvironmentTabMapLayers { get; set; }
-
-        public MapLayerCollection CurrentMapLayers { get; set; }
 
         #region public bool AreAllViewModelsReady { get; set; }
 
@@ -501,15 +496,10 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void DisplayWorldMap()
         {
-            if (MapLayerCollections["Environment"] == null)
-            {
-                MapLayerCollections.Add("Environment", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
-                EnvironmentTabMapLayers = MapLayerCollections["Environment"];
-                ZoomToWorldMap();
-            }
-            if (MapLayerCollections["Home"] != null) return;
-            MapLayerCollections.Add("Home", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
-            CurrentMapLayers = SelectedRibbonTabIndex == 2 ? EnvironmentTabMapLayers : MapLayerCollections["Home"];
+            if (MapLayerCollections.ContainsKey("Map")) return;
+            MapLayerCollections.Add("Map", new MapLayerCollection(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp")));
+            CurrentMapLayers = MapLayerCollections["Map"];
+            ZoomToWorldMap();
         }
 
         void DisplayRangeComplex()

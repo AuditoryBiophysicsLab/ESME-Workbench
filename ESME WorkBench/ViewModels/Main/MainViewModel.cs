@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -286,6 +287,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
         public ImportProgressCollection ImportProgressCollection { get; private set; }
         public RangeComplexes RangeComplexes { get; private set; }
+        public MapLayerCollection CurrentMapLayers { get; set; }
 
 #if EXPERIMENTS_SUPPORTED
 
@@ -646,54 +648,11 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region public int SelectedRibbonTabIndex { get; set; }
-
-        public int SelectedRibbonTabIndex
-        {
-            get
-            {
-                IsLayerListViewVisible = Settings.Default.SelectedRibbonTabIndex != 2;
-                CurrentMapLayers = IsLayerListViewVisible ? MapLayerCollections["Home"] : MapLayerCollections["Environment"];
-                return Settings.Default.SelectedRibbonTabIndex;
-            }
-            set
-            {
-                Settings.Default.SelectedRibbonTabIndex = value;
-                IsLayerListViewVisible = Settings.Default.SelectedRibbonTabIndex != 2;
-                CurrentMapLayers = IsLayerListViewVisible ? MapLayerCollections["Home"] : MapLayerCollections["Environment"];
-                NotifyPropertyChanged(RibbonTabIndexChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs RibbonTabIndexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRibbonTabIndex);
-
-        #endregion
-
-        #region public bool IsLayerListViewVisible { get; set; }
-
-        public bool IsLayerListViewVisible
-        {
-            get { return _isLayerListViewVisible; }
-            set
-            {
-                if (_isLayerListViewVisible == value) return;
-                _isLayerListViewVisible = value;
-                NotifyPropertyChanged(IsLayerListViewVisibleChangedEventArgs);
-                NotifyPropertyChanged(LayersListWidthChangedEventArgs);
-                UpdateMapLayerVisibility();
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsLayerListViewVisibleChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsLayerListViewVisible);
-        bool _isLayerListViewVisible;
-
-        #endregion
-
         #region public MapLayerCollections MapLayerCollections { get; set; }
 
-        public MapLayerCollections MapLayerCollections
+        public Dictionary<string, MapLayerCollection> MapLayerCollections
         {
-            get { return _mapLayerCollections ?? (_mapLayerCollections = new MapLayerCollections()); }
+            get { return _mapLayerCollections ?? (_mapLayerCollections = new Dictionary<string, MapLayerCollection>()); }
             set
             {
                 if (_mapLayerCollections == value) return;
@@ -703,41 +662,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         static readonly PropertyChangedEventArgs MapLayerCollectionsChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MapLayerCollections);
-        MapLayerCollections _mapLayerCollections;
-
-        #endregion
-
-        void UpdateMapLayerVisibility()
-        {
-            if ((!IsLayerListViewVisible) && MapLayerCollections["Environment"] != null)
-            {
-                MapLayerCollections.ActiveLayer = MapLayerCollections["Environment"];
-                if (RangeComplexes.SelectedRangeComplex == NewRangeComplex.None) ZoomToWorldMap();
-                else ZoomToRangeComplex();
-            }
-            else 
-            {
-                if (MapLayerCollections["Home"] != null)
-                {
-                    MapLayerCollections.ActiveLayer = MapLayerCollections["Home"];
-                }
-            }
-        }
-
-        #region public double LayersListWidth { get; set; }
-
-        public double LayersListWidth
-        {
-            get { return IsLayerListViewVisible ? Math.Max(100, Settings.Default.LayersWidth) : 0; }
-            set
-            {
-                if (!IsLayerListViewVisible) return;
-                Settings.Default.LayersWidth = value;
-                NotifyPropertyChanged(LayersListWidthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs LayersListWidthChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.LayersListWidth);
+        Dictionary<string, MapLayerCollection> _mapLayerCollections;
 
         #endregion
 

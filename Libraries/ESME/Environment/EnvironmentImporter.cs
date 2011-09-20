@@ -17,10 +17,38 @@ using Cinch;
 using ESME.Environment.Descriptors;
 using HRC.Navigation;
 using ESME.Environment.NAVO;
+using HRC.NetCDF;
 using HRC.Utility;
 
 namespace ESME.Environment
 {
+
+    public static class Logger
+    {
+        public static void Start(string fileName)
+        {
+            if (_writer != null) _writer.Close();
+            _writer = File.AppendText(fileName);
+        }
+
+        public static void LogString(string message) { Log(message); }
+
+        static StreamWriter _writer;
+        public static void Log(string format, params object[] args)
+        {
+            Console.WriteLine("{0} {1}", DateTime.Now, string.Format(format, args));
+            if (_writer == null) return;
+            _writer.WriteLine("{0} {1}", DateTime.Now, string.Format(format, args));
+            _writer.Flush();
+        }
+
+        public static void Stop()
+        {
+            if (_writer != null) _writer.Close();
+            _writer = null;
+        }
+    }
+
     public static class NAVOImporter
     {
         static readonly ActionBlock<ImportJobDescriptor> TemperatureWorker;
@@ -40,15 +68,23 @@ namespace ESME.Environment
 
         static NAVOImporter()
         {
+            NcVarInt.Logger = Logger.LogString;
+            NetCDFReaders.Logger = Logger.LogString;
+            Logger.Start(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "esme.log"));
+            Logger.Log("About to create temperature worker");
             if (TemperatureWorker == null) TemperatureWorker = new ActionBlock<ImportJobDescriptor>(async job =>
             {
+                Logger.Log("Temperature worker starting job");
                 TemperatureProgress.JobStarting(job);
                 if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                 {
                     //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
+                    Logger.Log("Temperature worker about to call GDEM.ReadFile");
                     var temperatureField = GDEM.ReadFile(GDEM.FindTemperatureFile(job.TimePeriod), "water_temp", job.TimePeriod, job.GeoRect);
+                    Logger.Log("Temperature worker back from GDEM.ReadFile");
                     var temperature = new SoundSpeed();
                     temperature.SoundSpeedFields.Add(temperatureField);
+                    Logger.Log("Temperature worker added to sound speed field");
                     if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                     {
                         temperature.Save(job.DestinationFilename);
@@ -61,6 +97,7 @@ namespace ESME.Environment
                     }
                 }
                 //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
+                Logger.Log("Temperature worker job complete", DateTime.Now);
                 TemperatureProgress.JobCompleted(job);
             },
             new ExecutionDataflowBlockOptions
@@ -68,8 +105,7 @@ namespace ESME.Environment
                 TaskScheduler = TaskScheduler.Default,
                 BoundedCapacity = 4,
                 MaxDegreeOfParallelism = 4,
-            })
-            ;
+            });
             TemperatureProgress = new ImportProgressViewModel("Temperature", TemperatureWorker);
 
             if (SalinityWorker == null) SalinityWorker = new ActionBlock<ImportJobDescriptor>(async job =>
@@ -98,15 +134,14 @@ namespace ESME.Environment
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = 4,
-                MaxDegreeOfParallelism = 4,
-            })
-            ;
+                BoundedCapacity = 1,
+                MaxDegreeOfParallelism = 1,
+            });
             SalinityProgress = new ImportProgressViewModel("Salinity", SalinityWorker);
-
             if (SedimentWorker == null) SedimentWorker = new ActionBlock<ImportJobDescriptor>(async job =>
             {
                 SedimentProgress.JobStarting(job);
+#if true
                 if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                 {
                     //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
@@ -123,15 +158,15 @@ namespace ESME.Environment
                     }
                 }
                 //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
+#endif
                 SedimentProgress.JobCompleted(job);
             },
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = 1,
-                MaxDegreeOfParallelism = 1,
-            })
-            ;
+                BoundedCapacity = 4,
+                MaxDegreeOfParallelism = 4,
+            });
             SedimentProgress = new ImportProgressViewModel("Sediment", SedimentWorker);
 
             if (WindWorker == null) WindWorker = new ActionBlock<ImportJobDescriptor>(async
@@ -159,8 +194,8 @@ namespace ESME.Environment
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = 4,
-                MaxDegreeOfParallelism = 4,
+                BoundedCapacity = 1,
+                MaxDegreeOfParallelism = 1,
             });
             WindProgress = new ImportProgressViewModel("Wind", WindWorker);
 
@@ -245,8 +280,7 @@ namespace ESME.Environment
                 TaskScheduler = TaskScheduler.Default,
                 BoundedCapacity = 4,
                 MaxDegreeOfParallelism = 4,
-            })
-            ;
+            });
             BathymetryProgress = new ImportProgressViewModel("Bathymetry", BathymetryWorker);
 
             if (BottomLossWorker == null) BottomLossWorker = new ActionBlock<ImportJobDescriptor>(async
@@ -277,8 +311,7 @@ namespace ESME.Environment
                 TaskScheduler = TaskScheduler.Default,
                 BoundedCapacity = 4,
                 MaxDegreeOfParallelism = 4,
-            })
-            ;
+            });
             BottomLossProgress = new ImportProgressViewModel("Bottom Loss", BottomLossWorker);
         }
 
@@ -348,7 +381,9 @@ namespace ESME.Environment
                     SedimentProgress.Post(jobDescriptor);
                     break;
                 case EnvironmentDataType.Temperature:
+                    Logger.Log("Temperature job about to post");
                     TemperatureProgress.Post(jobDescriptor);
+                    Logger.Log("Temperature job after post");
                     break;
                 case EnvironmentDataType.Wind:
                     WindProgress.Post(jobDescriptor);
@@ -403,29 +438,35 @@ namespace ESME.Environment
 
         async void AwaitCompletion()
         {
+#if true
             try
             {
                 await _importer.Completion;
             }
-            catch {}
-            _dispatcher.InvokeInBackgroundIfRequired(() =>
+            catch
             {
-                IsCompleted = _importer.Completion.IsCompleted;
-                IsCanceled = _importer.Completion.IsCanceled;
-                IsFaulted = _importer.Completion.IsFaulted;
-                if (IsFaulted)
+#else
+            await _importer.Completion;
+            {
+#endif
+                _dispatcher.InvokeInBackgroundIfRequired(() =>
                 {
-                    Debug.WriteLine("{0} Importer has caught an exception.  Message follows.", DateTime.Now);
-                    System.Media.SystemSounds.Beep.Play();
-                    Status = "Error";
-                    ToolTip = "";
-                    foreach (var ex in _importer.Completion.Exception.InnerExceptions)
-                        ToolTip += FormatExceptionMessage(ex, 0) + "\r\n";
-                    ToolTip.Remove(ToolTip.Length - 2, 2);
-                    ToolTip.Trim();
-                    Debug.WriteLine("{0} {1}", DateTime.Now, ToolTip);
-                }
-            });
+                    IsCompleted = _importer.Completion.IsCompleted;
+                    IsCanceled = _importer.Completion.IsCanceled;
+                    IsFaulted = _importer.Completion.IsFaulted;
+                    if (IsFaulted)
+                    {
+                        Logger.Log("Importer has caught an exception.  Message follows.");
+                        System.Media.SystemSounds.Beep.Play();
+                        Status = "Error";
+                        ToolTip = "";
+                        foreach (var ex in _importer.Completion.Exception.InnerExceptions) ToolTip += FormatExceptionMessage(ex, 0) + "\r\n";
+                        ToolTip.Remove(ToolTip.Length - 2, 2);
+                        ToolTip.Trim();
+                        Logger.Log("{0}", ToolTip);
+                    }
+                });
+            }
         }
 
         public string FormatExceptionMessage(Exception exception, int indentLevel)

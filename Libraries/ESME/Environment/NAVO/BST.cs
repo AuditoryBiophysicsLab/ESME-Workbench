@@ -117,7 +117,7 @@ namespace ESME.Environment.NAVO
                 H5D.close(data);
                 return readBuf;
             }
-            catch (H5DopenException)
+            catch (HDFException)
             {
                 return null;
             }
