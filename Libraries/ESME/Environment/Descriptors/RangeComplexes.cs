@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -337,6 +338,9 @@ namespace ESME.Environment.Descriptors
                     _selectedBathymetry.Reset();
                 }
                 _selectedBathymetry = value ?? BathymetryFile.None;
+                if (_selectedSoundSpeed == null) Debug.WriteLine("{0} SelectedBathymetry set to NULL", DateTime.Now);
+                else if (_selectedSoundSpeed == SoundSpeedFile.None) Debug.WriteLine("{0} SelectedBathymetry set to NONE", DateTime.Now);
+                else Debug.WriteLine("{0} SelectedBathymetry set to {1", DateTime.Now, _selectedBathymetry.Name);
                 if ((SelectedTimePeriod != NAVOTimePeriod.Invalid) && (SelectedRangeComplex != NewRangeComplex.None))
                 {
                     SelectedSoundSpeed = (SoundSpeedFile)SelectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", SelectedTimePeriod)];
@@ -423,6 +427,11 @@ namespace ESME.Environment.Descriptors
             {
                 if (_selectedSoundSpeed == value) return;
                 _selectedSoundSpeed = value ?? SoundSpeedFile.None;
+
+                if (_selectedSoundSpeed == null) Debug.WriteLine("{0} SelectedSoundSpeed set to NULL", DateTime.Now);
+                else if (_selectedSoundSpeed == SoundSpeedFile.None) Debug.WriteLine("{0} SelectedSoundSpeed set to NONE", DateTime.Now);
+                else Debug.WriteLine("{0} SelectedSoundSpeed set to {1}", DateTime.Now, _selectedSoundSpeed.TimePeriod);
+                
                 NotifyPropertyChanged(SelectedSoundSpeedChangedEventArgs);
             }
         }
@@ -450,7 +459,7 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
-        void CheckEnvironment()
+        public void CheckEnvironment()
         {
             if ((SelectedRangeComplex != NewRangeComplex.None) && (SelectedTimePeriod != NAVOTimePeriod.Invalid) &&
                 (SelectedArea != RangeComplexArea.None) && (SelectedBathymetry != BathymetryFile.None))
@@ -458,23 +467,32 @@ namespace ESME.Environment.Descriptors
             else IsEnvironmentFullySpecified = false;
         }
 
+        public void LoadEnvironment()
+        {
+            if ((SelectedBathymetry != null) && (SelectedBathymetry != BathymetryFile.None)) SelectedBathymetry.GetMyDataAsync();
+            if ((SelectedBottomLoss != null) && (SelectedBottomLoss != BottomLossFile.None)) SelectedBottomLoss.GetMyDataAsync();
+            if ((SelectedSoundSpeed != null) && (SelectedSoundSpeed != SoundSpeedFile.None)) SelectedSoundSpeed.GetMyDataAsync();
+            if ((SelectedSediment != null) && (SelectedSediment != SedimentFile.None)) SelectedSediment.GetMyDataAsync();
+            if ((SelectedWind != null) && (SelectedWind != WindFile.None)) SelectedWind.GetMyDataAsync();
+        }
+
         public void ResetEnvironment()
         {
             if (SelectedBathymetry != BathymetryFile.None) SelectedBathymetry.Reset();
-            if (SelectedWind != WindFile.None) SelectedWind.Reset();
             if (SelectedBottomLoss != BottomLossFile.None) SelectedBottomLoss.Reset();
-            if (SelectedSediment != SedimentFile.None) SelectedSediment.Reset();
             if (SelectedSoundSpeed != SoundSpeedFile.None) SelectedSoundSpeed.Reset();
+            if (SelectedSediment != SedimentFile.None) SelectedSediment.Reset();
+            if (SelectedWind != WindFile.None) SelectedWind.Reset();
         }
 
         public void ClearEnvironment()
         {
             ResetEnvironment();
             SelectedBathymetry = BathymetryFile.None;
-            SelectedWind = WindFile.None;
             SelectedBottomLoss = BottomLossFile.None;
-            SelectedSediment = SedimentFile.None;
             SelectedTimePeriod = NAVOTimePeriod.Invalid;
+            SelectedSediment = SedimentFile.None;
+            SelectedWind = WindFile.None;
         }
 
         public void ClearSoundSpeed()
