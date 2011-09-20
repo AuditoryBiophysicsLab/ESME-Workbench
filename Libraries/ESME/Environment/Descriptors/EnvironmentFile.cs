@@ -350,12 +350,14 @@ namespace ESME.Environment.Descriptors
             [MethodImpl(MethodImplOptions.Synchronized)]
             set
             {
+#if false
                 if (_dataTask != null)
                 {
                     if (_dataTask.IsCompleted) _dataTask.Dispose();
                     else if (_dataTask.Status != TaskStatus.Created)
                         throw new InvalidOperationException("Data is being imported and cannot be cleared at this time");
                 }
+#endif
                 _dataTask = value;
             }
         }
@@ -463,9 +465,11 @@ namespace ESME.Environment.Descriptors
 
         public override void Reset()
         {
+            Debug.WriteLine("{0} SoundSpeed {1} reset", DateTime.Now, TimePeriod);
             base.Reset();
             if ((SelectedBathymetry == null) || (SelectedBathymetry == BathymetryFile.None) || (RangeComplexToken == null))
             {
+                Debug.WriteLine("{0} SoundSpeed {1} missing bathymetry or range complex token", DateTime.Now, TimePeriod);
                 DataTask = null;
                 return;
             }
@@ -523,6 +527,7 @@ namespace ESME.Environment.Descriptors
             });
 
             DataTask = dataTask;
+            Debug.WriteLine("{0} SoundSpeed {1} reset successful", DateTime.Now, TimePeriod);
         }
     }
 
