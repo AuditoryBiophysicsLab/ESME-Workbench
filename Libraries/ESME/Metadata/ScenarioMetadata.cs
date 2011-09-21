@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Xml.Serialization;
 using Cinch;
 using ESME.TransmissionLoss;
 using HRC.Utility;
@@ -12,12 +12,18 @@ namespace ESME.Metadata
     [Serializable]
     public class ScenarioMetadata : PropertyChangedBase
     {
-        ScenarioMetadata(string nemoFilename)
+        static readonly List<Type> ReferencedTypes = new List<Type> { typeof(ScenarioMetadata), typeof(NemoModeToAcousticModelNameMap), typeof(ObservableList<AnalysisPoint>), typeof(AnalysisPoint), typeof(SoundSource) };
+        public ScenarioMetadata()
         {
-            NemoFilename = nemoFilename;
-            Filename = MetadataFilename(nemoFilename);
             AnalysisPoints = new ObservableList<AnalysisPoint>();
             PropertyChanged += (s, e) => Save();
+            AnalysisPoints.CollectionChanged += (s, e) => Save();
+        }
+        
+        ScenarioMetadata(string nemoFilename) : this()
+        {
+            _nemoFilename = nemoFilename;
+            _filename = MetadataFilename(nemoFilename);
             Save();
         }
 
@@ -26,10 +32,18 @@ namespace ESME.Metadata
             return Path.Combine(Path.GetDirectoryName(nemoFilename), Path.GetFileNameWithoutExtension(nemoFilename) + ".emf");
         }
 
-        public void Initialize(IEnumerable<string> distinctModePSMNames)
+        public void Initialize(List<string> distinctModePSMNames)
         {
             if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(distinctModePSMNames, TransmissionLossAlgorithm.CASS);
             else NemoModeToAcousticModelNameMap.UpdateModes(distinctModePSMNames, TransmissionLossAlgorithm.CASS);
+        }
+
+        public void Save(string filename = null)
+        {
+            if (filename == null) filename = Filename;
+            if (filename == null) return;
+            var serializer = new XmlSerializer<ScenarioMetadata> { Data = this };
+            serializer.Save(filename, ReferencedTypes);
         }
 
         public static ScenarioMetadata LoadOrCreate(string nemoFilename)
@@ -37,11 +51,9 @@ namespace ESME.Metadata
             var metadataFilename = MetadataFilename(nemoFilename);
             try
             {
-                ScenarioMetadata result;
-                if (!File.Exists(metadataFilename)) return new ScenarioMetadata(nemoFilename);
-                using (var stream = new FileStream(metadataFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    result = (ScenarioMetadata)new BinaryFormatter().Deserialize(stream);
+                var result = XmlSerializer<ScenarioMetadata>.Load(nemoFilename, ReferencedTypes);
                 result.PropertyChanged += (s, e) => result.Save();
+                result.AnalysisPoints.CollectionChanged += (s, e) => result.Save();
                 result._filename = metadataFilename;
                 return result;
             }
@@ -52,15 +64,8 @@ namespace ESME.Metadata
             return new ScenarioMetadata(nemoFilename);
         }
 
-        public void Save(string filename = null)
-        {
-            if (filename == null) filename = Filename;
-            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
-                new BinaryFormatter().Serialize(stream, this);
-        }
-
         #region public string Filename { get; set; }
-
+        [XmlIgnore]
         public string Filename
         {
             get { return _filename; }
@@ -69,6 +74,7 @@ namespace ESME.Metadata
                 if (_filename == value) return;
                 _filename = value;
                 NotifyPropertyChanged(FilenameChangedEventArgs);
+                if (_filename != null) Save();
             }
         }
 
@@ -132,7 +138,7 @@ namespace ESME.Metadata
         #endregion
 
         #region public string NemoFilename { get; set; }
-
+        [XmlIgnore]
         public string NemoFilename
         {
             get { return _nemoFilename; }
@@ -167,7 +173,6 @@ namespace ESME.Metadata
         ObservableList<AnalysisPoint> _analysisPoints;
 
         #endregion
-
     }
 #if false
     [Serializable]

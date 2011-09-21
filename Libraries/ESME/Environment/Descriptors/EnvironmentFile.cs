@@ -362,7 +362,11 @@ namespace ESME.Environment.Descriptors
         public override void Reset()
         {
             DataAvailability = DataAvailability.NotLoaded;
-            if (DataTask != null && DataTask.IsCompleted) DataTask.Dispose();
+            if (DataTask != null && DataTask.IsCompleted)
+            {
+                Debug.WriteLine("{0} Disposing task of type {1}", DateTime.Now, DataTask.Result);
+                DataTask.Dispose();
+            }
         }
 
         async Task GetRequiredFilesAsync()
@@ -485,6 +489,7 @@ namespace ESME.Environment.Descriptors
     [Serializable]
     public sealed class SoundSpeedFile : EnvironmentFile<SoundSpeed>
     {
+        readonly object _lockObject = new object();
         public static SoundSpeedFile None = new SoundSpeedFile {DataAvailability = DataAvailability.NotLoaded};
 
         public SoundSpeedFile()
@@ -496,9 +501,19 @@ namespace ESME.Environment.Descriptors
         public SoundSpeedFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
             : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { }
 
-        public BathymetryFile SelectedBathymetry { get; set; }
+        BathymetryFile _selectedBathymetry;
+        public BathymetryFile SelectedBathymetry
+        {
+            get { return _selectedBathymetry; }
+            set { lock(_lockObject) _selectedBathymetry = value; }
+        }
 
-        public RangeComplexToken RangeComplexToken { get; set; }
+        RangeComplexToken _rangeComplexToken;
+        public RangeComplexToken RangeComplexToken
+        {
+            get { return _rangeComplexToken; }
+            set { lock (_lockObject) _rangeComplexToken = value; }
+        }
 
         public override void Reset()
         {
@@ -512,57 +527,62 @@ namespace ESME.Environment.Descriptors
             }
             var dataTask = new Task<SoundSpeed>(() =>
             {
-                var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(TimePeriod).ToList();
-                Debug.WriteLine("{0} Computing soundspeed for {1}", DateTime.Now, TimePeriod);
-                foreach (var month in months)
-                {
-                    RangeComplexToken[string.Format("{0}.temperature", month)].Reset();
-                    RangeComplexToken[string.Format("{0}.salinity", month)].Reset();
-                }
-                var sources = (from month in months
-                               select new
-                               {
-                                   Month = month,
-                                   TemperatureFile = (TemperatureFile)RangeComplexToken[string.Format("{0}.temperature", month)],
-                                   TemperatureDataTask = ((TemperatureFile)RangeComplexToken[string.Format("{0}.temperature", month)]).GetMyDataAsync(),
-                                   SalinityFile = (SalinityFile)RangeComplexToken[string.Format("{0}.salinity", month)],
-                                   SalinityDataTask = ((SalinityFile)RangeComplexToken[string.Format("{0}.salinity", month)]).GetMyDataAsync(),
-                               }).ToDictionary(item => item.Month);
-                var sourceTasks = new List<Task>();
-                foreach (var month in months)
-                {
-                    Debug.WriteLine("{0} Loading temperature and salinity data for {1}", DateTime.Now, month);
-                    sourceTasks.Add(sources[month].TemperatureDataTask);
-                    sourceTasks.Add(sources[month].SalinityDataTask);
-                }
-                if (SelectedBathymetry == BathymetryFile.None) return null;
-                Debug.WriteLine("{0} Loading bathymetry resolution {1}", DateTime.Now, SelectedBathymetry.Name);
-                sourceTasks.Add(SelectedBathymetry.GetMyDataAsync());
-                var continuation = TaskEx.WhenAll(sourceTasks).ContinueWith(task =>
+                lock (_lockObject)
                 {
                     if (SelectedBathymetry == BathymetryFile.None || SelectedBathymetry.DataTask == null) return null;
-                    Debug.WriteLine("{0} Required data loaded.  Computing monthly sound speeds fields", DateTime.Now);
-                    var soundSpeedFields = (from month in months
-                                            select new
-                                            {
-                                                Month = month,
-                                                SoundSpeedField = SoundSpeedField.Create(sources[month].TemperatureFile.DataTask.Result[month],
-                                                                                         sources[month].SalinityFile.DataTask.Result[month],
-                                                                                         SelectedBathymetry.DataTask.Result.DeepestPoint,
-                                                                                         SelectedBathymetry.GeoRect),
-                                            }).ToDictionary(item => item.Month);
-                    var monthlySoundSpeeds = new SoundSpeed();
+                    if (RangeComplexToken == null) return null;
+                    var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(TimePeriod).ToList();
+                    Debug.WriteLine("{0} SSP: Computing soundspeed for {1}", DateTime.Now, TimePeriod);
                     foreach (var month in months)
                     {
-                        Debug.WriteLine("{0} Releasing temperature and salinity data for {1}", DateTime.Now, month);
-                        sources[month].TemperatureFile.Reset();
-                        sources[month].SalinityFile.Reset();
-                        monthlySoundSpeeds.Add(soundSpeedFields[month].SoundSpeedField);
+                        RangeComplexToken[string.Format("{0}.temperature", month)].Reset();
+                        RangeComplexToken[string.Format("{0}.salinity", month)].Reset();
                     }
-                    Debug.WriteLine("{0} Computing average sound speed for {1}", DateTime.Now, TimePeriod);
-                    return SoundSpeed.Average(monthlySoundSpeeds, new List<NAVOTimePeriod> {TimePeriod});
-                });
-                return continuation.Result;
+                    var sources = (from month in months
+                                   select new
+                                   {
+                                       Month = month,
+                                       TemperatureFile = (TemperatureFile)RangeComplexToken[string.Format("{0}.temperature", month)],
+                                       TemperatureDataTask = ((TemperatureFile)RangeComplexToken[string.Format("{0}.temperature", month)]).GetMyDataAsync(),
+                                       SalinityFile = (SalinityFile)RangeComplexToken[string.Format("{0}.salinity", month)],
+                                       SalinityDataTask = ((SalinityFile)RangeComplexToken[string.Format("{0}.salinity", month)]).GetMyDataAsync(),
+                                   }).ToDictionary(item => item.Month);
+                    var sourceTasks = new List<Task>();
+                    foreach (var month in months)
+                    {
+                        Debug.WriteLine("{0} SSP: Loading temperature and salinity data for {1}", DateTime.Now, month);
+                        sourceTasks.Add(sources[month].TemperatureDataTask);
+                        sourceTasks.Add(sources[month].SalinityDataTask);
+                    }
+                    if (SelectedBathymetry == BathymetryFile.None) return null;
+                    Debug.WriteLine("{0} SSP: Loading bathymetry resolution {1}", DateTime.Now, SelectedBathymetry.Name);
+                    sourceTasks.Add(SelectedBathymetry.GetMyDataAsync());
+                    var continuation = TaskEx.WhenAll(sourceTasks).ContinueWith(task =>
+                    {
+                        if (SelectedBathymetry == BathymetryFile.None || SelectedBathymetry.DataTask == null) return null;
+                        Debug.WriteLine("{0} SSP: Required data loaded.  Computing monthly sound speeds fields", DateTime.Now);
+                        var soundSpeedFields = (from month in months
+                                                select new
+                                                {
+                                                    Month = month,
+                                                    SoundSpeedField = SoundSpeedField.Create(sources[month].TemperatureFile.DataTask.Result[month],
+                                                                                             sources[month].SalinityFile.DataTask.Result[month],
+                                                                                             SelectedBathymetry.DataTask.Result.DeepestPoint,
+                                                                                             SelectedBathymetry.GeoRect),
+                                                }).ToDictionary(item => item.Month);
+                        var monthlySoundSpeeds = new SoundSpeed();
+                        foreach (var month in months)
+                        {
+                            Debug.WriteLine("{0} SSP: Releasing temperature and salinity data for {1}", DateTime.Now, month);
+                            sources[month].TemperatureFile.Reset();
+                            sources[month].SalinityFile.Reset();
+                            monthlySoundSpeeds.Add(soundSpeedFields[month].SoundSpeedField);
+                        }
+                        Debug.WriteLine("{0} SSP: Computing average sound speed for {1}", DateTime.Now, TimePeriod);
+                        return SoundSpeed.Average(monthlySoundSpeeds, new List<NAVOTimePeriod> {TimePeriod});
+                    });
+                    return continuation.Result;
+                }
             });
 
             DataTask = dataTask;

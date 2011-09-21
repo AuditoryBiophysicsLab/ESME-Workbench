@@ -91,28 +91,6 @@ namespace ESMEWorkBench.ViewModels.Main
                 InitializeEnvironmentManager();
         }
 
-        void HookPropertyChanged(INotifyPropertyChanged experiment)
-        {
-            experiment.PropertyChanged += delegate(object s, PropertyChangedEventArgs e)
-                                          {
-                                              switch (e.PropertyName)
-                                              {
-                                                  case "IsChanged":
-                                                      if (_experiment.IsChanged)
-                                                      {
-                                                          if (DecoratedExperimentName.EndsWith(" *")) return;
-                                                          DecoratedExperimentName += " *";
-                                                      }
-                                                      else
-                                                      {
-                                                          if (!DecoratedExperimentName.EndsWith(" *")) return;
-                                                          DecoratedExperimentName.Remove(DecoratedExperimentName.Length - 2);
-                                                      }
-                                                      break;
-                                              }
-                                          };
-        }
-
         protected override void OnDispose()
         {
             base.OnDispose();
@@ -150,22 +128,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (_mouseEarthCoordinate == value) return;
                 _mouseEarthCoordinate = value;
-#if EXPERIMENTS_SUPPORTED
                 return;
-                if (_experiment.Bathymetry != null)
-                {
-                    EarthCoordinate<float> mouseDepth;
-                    if (_experiment.Bathymetry.Samples.GeoRect.Contains(_mouseEarthCoordinate))
-                    {
-                        mouseDepth = _experiment.Bathymetry.Samples[_mouseEarthCoordinate];
-                        if (mouseDepth != null) MouseDepth = mouseDepth.Data;
-                        else MouseDepth = null;
-                    }
-                    else MouseDepth = null;
-                }
-#else
-#endif
-                NotifyPropertyChanged(MouseEarthCoordinateChangedEventArgs);
             }
         }
 
@@ -222,33 +185,27 @@ namespace ESMEWorkBench.ViewModels.Main
                     switch (e.PropertyName)
                     {
                         case "SelectedRangeComplex":
-                            SelectedRangeComplex = RangeComplexes.SelectedRangeComplex;
+                            UpdateRangeComplex();
+                            NotifyPropertyChanged(IsTimePeriodSelectionEnabledChangedEventArgs);
                             break;
                         case "SelectedTimePeriod":
-                            SelectedTimePeriod = RangeComplexes.SelectedTimePeriod;
+                            UpdateTimePeriod();
                             break;
                         case "SelectedArea":
-                            SelectedArea = RangeComplexes.SelectedArea;
-                            if (ScenarioMetadata != null)
+                            DisplaySelectedArea();
+                            if (IsScenarioLoaded && RangeComplexes.IsAreaSelected)
+                                ScenarioMetadata.SelectedAreaName = RangeComplexes.SelectedArea.Name;
+                            if (IsScenarioLoaded && !RangeComplexes.IsAreaSelected)
                             {
-                                if (SelectedArea == null || SelectedArea == RangeComplexArea.None)
-                                {
-                                    ScenarioMetadata.SelectedAreaName = null;
-                                    ScenarioMetadata.SelectedResolutionName = null;
-                                }
-                                else ScenarioMetadata.SelectedAreaName = SelectedArea.Name;
+                                ScenarioMetadata.SelectedAreaName = null;
+                                ScenarioMetadata.SelectedResolutionName = null;
                             }
                             break;
                         case "SelectedBathymetry":
-                            if (SelectedBathymetry != null && SelectedBathymetry != BathymetryFile.None) SelectedBathymetry.Reset();
-                            SelectedBathymetry = RangeComplexes.SelectedBathymetry;
-                            if (ScenarioMetadata != null)
-                            {
-                                if (SelectedBathymetry == null || SelectedBathymetry == BathymetryFile.None)
-                                    ScenarioMetadata.SelectedResolutionName = null;
-                                else
-                                    ScenarioMetadata.SelectedResolutionName = SelectedBathymetry.Name;
-                            }
+                            UpdateSoundSpeedData();
+                            DisplayBathymetry();
+                            if (IsScenarioLoaded)
+                                ScenarioMetadata.SelectedResolutionName = RangeComplexes.IsBathymetrySelected ? RangeComplexes.SelectedBathymetry.Name : null;
                             break;
                     }
                 };
@@ -258,6 +215,9 @@ namespace ESMEWorkBench.ViewModels.Main
                 _messageBoxService.ShowError(e.Message);
             }
         }
+        public bool IsTimePeriodSelectionEnabled { get { return RangeComplexes.IsRangeComplexSelected && IsScenarioNotLoaded; } }
+        static readonly PropertyChangedEventArgs IsTimePeriodSelectionEnabledChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsTimePeriodSelectionEnabled);
+
         public ImportProgressCollection ImportProgressCollection { get; private set; }
         public RangeComplexes RangeComplexes { get; private set; }
         public MapLayerCollection CurrentMapLayers { get; set; }

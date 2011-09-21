@@ -224,6 +224,19 @@ namespace ESME.Environment.Descriptors
             }
         }
 
+        public bool SelectDataset(string rangeComplexName, NAVOTimePeriod navoTimePeriod, string areaName, string resolutionName)
+        {
+            if (rangeComplexName == null || navoTimePeriod == NAVOTimePeriod.Invalid || areaName == null || resolutionName == null) return false;
+
+            _selectedRangeComplex = RangeComplexCollection[rangeComplexName];
+            _selectedTimePeriod = navoTimePeriod;
+            if (_selectedRangeComplex != NewRangeComplex.None) _selectedArea = _selectedRangeComplex.AreaCollection[areaName];
+            if (_selectedArea != RangeComplexArea.None) _selectedBathymetry = (BathymetryFile)_selectedArea.BathymetryFiles[resolutionName];
+            CheckEnvironment();
+            if (IsEnvironmentFullySpecified) LoadEnvironment();
+            return IsEnvironmentFullySpecified;
+        }
+
         #region public NewRangeComplex SelectedRangeComplex { get; set; }
 
         public NewRangeComplex SelectedRangeComplex
@@ -232,26 +245,35 @@ namespace ESME.Environment.Descriptors
             set
             {
                 if (_selectedRangeComplex == value) return;
-                if (_selectedRangeComplex != NewRangeComplex.None)
-                    ClearEnvironment();
+                if (_selectedRangeComplex != NewRangeComplex.None) ClearEnvironment();
                 _selectedRangeComplex = value ?? NewRangeComplex.None;
-                if (_selectedRangeComplex != NewRangeComplex.None)
-                {
-                    SelectedWind = (WindFile)_selectedRangeComplex.EnvironmentFiles["data.wind"];
-                    SelectedBottomLoss = (BottomLossFile)_selectedRangeComplex.EnvironmentFiles["data.bottomloss"];
-                    SelectedSediment = (SedimentFile)_selectedRangeComplex.EnvironmentFiles["data.sediment"];
-                    if ((SelectedTimePeriod != NAVOTimePeriod.Invalid) && (SelectedBathymetry != BathymetryFile.None))
-                    {
-                        SelectedSoundSpeed = (SoundSpeedFile)_selectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", SelectedTimePeriod)];
-                        SelectedSoundSpeed.RangeComplexToken = _selectedRangeComplex.EnvironmentFiles;
-                        SelectedSoundSpeed.SelectedBathymetry = SelectedBathymetry;
-                        SelectedSoundSpeed.Reset();
-                    }
-                }
+                IsRangeComplexSelected = _selectedRangeComplex != NewRangeComplex.None;
+
+                SelectedBottomLoss = (BottomLossFile)_selectedRangeComplex.EnvironmentFiles["data.bottomloss"];
+                SelectedSediment = (SedimentFile)_selectedRangeComplex.EnvironmentFiles["data.sediment"];
+                if (IsTimePeriodSelected) SelectedWind = (WindFile)_selectedRangeComplex.EnvironmentFiles["data.wind"];
+
                 NotifyPropertyChanged(SelectedRangeComplexChangedEventArgs);
-                CheckEnvironment();
             }
         }
+
+        #region public bool IsRangeComplexSelected { get; set; }
+
+        public bool IsRangeComplexSelected
+        {
+            get { return _isRangeComplexSelected; }
+            set
+            {
+                if (_isRangeComplexSelected == value) return;
+                _isRangeComplexSelected = value;
+                NotifyPropertyChanged(IsRangeComplexSelectedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsRangeComplexSelectedChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.IsRangeComplexSelected);
+        bool _isRangeComplexSelected;
+
+        #endregion
 
         static readonly PropertyChangedEventArgs SelectedRangeComplexChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedRangeComplex);
         NewRangeComplex _selectedRangeComplex = NewRangeComplex.None;
@@ -268,20 +290,33 @@ namespace ESME.Environment.Descriptors
                 if (_selectedTimePeriod == value) return;
                 if (_selectedTimePeriod != NAVOTimePeriod.Invalid) ClearSoundSpeed();
                 _selectedTimePeriod = value;
-                if (_selectedTimePeriod != NAVOTimePeriod.Invalid)
-                {
-                    if ((SelectedRangeComplex != NewRangeComplex.None) && (SelectedBathymetry != BathymetryFile.None))
-                    {
-                        SelectedSoundSpeed = (SoundSpeedFile)SelectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", _selectedTimePeriod)];
-                        SelectedSoundSpeed.RangeComplexToken = _selectedRangeComplex.EnvironmentFiles;
-                        SelectedSoundSpeed.SelectedBathymetry = SelectedBathymetry;
-                        SelectedSoundSpeed.Reset();
-                    }
-                }
-                NotifyPropertyChanged(SelectedTimePeriodChangedEventArgs);
+                IsTimePeriodSelected = _selectedTimePeriod != NAVOTimePeriod.Invalid;
+
+                if (IsRangeComplexSelected && IsTimePeriodSelected) SelectedWind = (WindFile)_selectedRangeComplex.EnvironmentFiles["data.wind"];
+
                 CheckEnvironment();
+                CheckSoundSpeed();
+                NotifyPropertyChanged(SelectedTimePeriodChangedEventArgs);
             }
         }
+
+        #region public bool IsTimePeriodSelected { get; set; }
+
+        public bool IsTimePeriodSelected
+        {
+            get { return _isTimePeriodSelected; }
+            set
+            {
+                if (_isTimePeriodSelected == value) return;
+                _isTimePeriodSelected = value;
+                NotifyPropertyChanged(IsTimePeriodSelectedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsTimePeriodSelectedChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.IsTimePeriodSelected);
+        bool _isTimePeriodSelected;
+
+        #endregion
 
         static readonly PropertyChangedEventArgs SelectedTimePeriodChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedTimePeriod);
         NAVOTimePeriod _selectedTimePeriod = NAVOTimePeriod.Invalid;
@@ -298,7 +333,9 @@ namespace ESME.Environment.Descriptors
                 if (_selectedArea == value) return;
                 if (_selectedArea != RangeComplexArea.None) SelectedBathymetry = BathymetryFile.None;
                 _selectedArea = value ?? RangeComplexArea.None;
-                if (_selectedArea != RangeComplexArea.None)
+                IsAreaSelected = _selectedArea != RangeComplexArea.None;
+                
+                if (IsRangeComplexSelected && IsAreaSelected && !IsBathymetrySelected)
                 {
                     uint maxSamplesSeen = 0;
                     var selectedBathymetry = BathymetryFile.None;
@@ -312,12 +349,32 @@ namespace ESME.Environment.Descriptors
                         maxSamplesSeen = samples;
                         selectedBathymetry = bathymetryFile;
                     }
-                    SelectedBathymetry = selectedBathymetry;
+                    _selectedBathymetry = selectedBathymetry;
                 }
-                NotifyPropertyChanged(SelectedAreaChangedEventArgs);
+
                 CheckEnvironment();
+                CheckSoundSpeed();
+                NotifyPropertyChanged(SelectedAreaChangedEventArgs);
             }
         }
+
+        #region public bool IsAreaSelected { get; set; }
+
+        public bool IsAreaSelected
+        {
+            get { return _isAreaSelected; }
+            set
+            {
+                if (_isAreaSelected == value) return;
+                _isAreaSelected = value;
+                NotifyPropertyChanged(IsAreaSelectedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsAreaSelectedChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.IsAreaSelected);
+        bool _isAreaSelected;
+
+        #endregion
 
         static readonly PropertyChangedEventArgs SelectedAreaChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedArea);
         RangeComplexArea _selectedArea = RangeComplexArea.None;
@@ -338,21 +395,37 @@ namespace ESME.Environment.Descriptors
                     _selectedBathymetry.Reset();
                 }
                 _selectedBathymetry = value ?? BathymetryFile.None;
+                IsBathymetrySelected = _selectedBathymetry != BathymetryFile.None;
+
+                if (IsBathymetrySelected) _selectedBathymetry.Reset();
+
                 if (_selectedSoundSpeed == null) Debug.WriteLine("{0} SelectedBathymetry set to NULL", DateTime.Now);
                 else if (_selectedSoundSpeed == SoundSpeedFile.None) Debug.WriteLine("{0} SelectedBathymetry set to NONE", DateTime.Now);
                 else Debug.WriteLine("{0} SelectedBathymetry set to {1}", DateTime.Now, _selectedBathymetry.Name);
-                if (_selectedBathymetry != BathymetryFile.None) _selectedBathymetry.Reset();
-                if ((SelectedTimePeriod != NAVOTimePeriod.Invalid) && (SelectedRangeComplex != NewRangeComplex.None))
-                {
-                    SelectedSoundSpeed = (SoundSpeedFile)SelectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", SelectedTimePeriod)];
-                    SelectedSoundSpeed.RangeComplexToken = SelectedRangeComplex.EnvironmentFiles;
-                    SelectedSoundSpeed.SelectedBathymetry = _selectedBathymetry;
-                    SelectedSoundSpeed.Reset();
-                }
-                NotifyPropertyChanged(SelectedBathymetryChangedEventArgs);
+
                 CheckEnvironment();
+                CheckSoundSpeed();
+                NotifyPropertyChanged(SelectedBathymetryChangedEventArgs);
             }
         }
+
+        #region public bool IsBathymetrySelected { get; set; }
+
+        public bool IsBathymetrySelected
+        {
+            get { return _isBathymetrySelected; }
+            set
+            {
+                if (_isBathymetrySelected == value) return;
+                _isBathymetrySelected = value;
+                NotifyPropertyChanged(IsBathymetrySelectedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsBathymetrySelectedChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.IsBathymetrySelected);
+        bool _isBathymetrySelected;
+
+        #endregion
 
         static readonly PropertyChangedEventArgs SelectedBathymetryChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedBathymetry);
         BathymetryFile _selectedBathymetry = BathymetryFile.None;
@@ -369,10 +442,29 @@ namespace ESME.Environment.Descriptors
                 if (_selectedWind == value) return;
                 if (_selectedWind != WindFile.None) _selectedWind.Reset();
                 _selectedWind = value ?? WindFile.None;
-                if (_selectedWind != WindFile.None) _selectedWind.Reset();
+                IsWindSelected = _selectedWind != WindFile.None;
+                if (IsWindSelected) _selectedWind.Reset();
                 NotifyPropertyChanged(SelectedWindChangedEventArgs);
             }
         }
+
+        #region public bool IsWindSelected { get; set; }
+
+        public bool IsWindSelected
+        {
+            get { return _isWindSelected; }
+            set
+            {
+                if (_isWindSelected == value) return;
+                _isWindSelected = value;
+                NotifyPropertyChanged(IsWindSelectedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsWindSelectedChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.IsWindSelected);
+        bool _isWindSelected;
+
+        #endregion
 
         static readonly PropertyChangedEventArgs SelectedWindChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedWind);
         WindFile _selectedWind = WindFile.None;
@@ -389,10 +481,29 @@ namespace ESME.Environment.Descriptors
                 if (_selectedBottomLoss == value) return;
                 if (_selectedBottomLoss != BottomLossFile.None) _selectedBottomLoss.Reset();
                 _selectedBottomLoss = value ?? BottomLossFile.None;
-                if (_selectedBottomLoss != BottomLossFile.None) _selectedBottomLoss.Reset();
+                IsBottomLossSelected = _selectedBottomLoss != BottomLossFile.None;
+                if (IsBottomLossSelected) _selectedBottomLoss.Reset();
                 NotifyPropertyChanged(SelectedBottomLossChangedEventArgs);
             }
         }
+
+        #region public bool IsBottomLossSelected { get; set; }
+
+        public bool IsBottomLossSelected
+        {
+            get { return _isBottomLossSelected; }
+            set
+            {
+                if (_isBottomLossSelected == value) return;
+                _isBottomLossSelected = value;
+                NotifyPropertyChanged(IsBottomLossSelectedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsBottomLossSelectedChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.IsBottomLossSelected);
+        bool _isBottomLossSelected;
+
+        #endregion
 
         static readonly PropertyChangedEventArgs SelectedBottomLossChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedBottomLoss);
         BottomLossFile _selectedBottomLoss = BottomLossFile.None;
@@ -409,10 +520,29 @@ namespace ESME.Environment.Descriptors
                 if (_selectedSediment == value) return;
                 if (_selectedSediment != SedimentFile.None) _selectedSediment.Reset();
                 _selectedSediment = value ?? SedimentFile.None;
+                IsSedimentSelected = _selectedSediment != SedimentFile.None;
                 if (_selectedSediment != SedimentFile.None) _selectedSediment.Reset();
                 NotifyPropertyChanged(SelectedSedimentChangedEventArgs);
             }
         }
+
+        #region public bool IsSedimentSelected { get; set; }
+
+        public bool IsSedimentSelected
+        {
+            get { return _isSedimentSelected; }
+            set
+            {
+                if (_isSedimentSelected == value) return;
+                _isSedimentSelected = value;
+                NotifyPropertyChanged(IsSedimentSelectedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsSedimentSelectedChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.IsSedimentSelected);
+        bool _isSedimentSelected;
+
+        #endregion
 
         static readonly PropertyChangedEventArgs SelectedSedimentChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedSediment);
         SedimentFile _selectedSediment = SedimentFile.None;
@@ -428,6 +558,7 @@ namespace ESME.Environment.Descriptors
             {
                 if (_selectedSoundSpeed == value) return;
                 _selectedSoundSpeed = value ?? SoundSpeedFile.None;
+                IsSoundSpeedSelected = _selectedSoundSpeed != SoundSpeedFile.None;
 
                 if (_selectedSoundSpeed == null) Debug.WriteLine("{0} SelectedSoundSpeed set to NULL", DateTime.Now);
                 else if (_selectedSoundSpeed == SoundSpeedFile.None) Debug.WriteLine("{0} SelectedSoundSpeed set to NONE", DateTime.Now);
@@ -436,6 +567,35 @@ namespace ESME.Environment.Descriptors
                 NotifyPropertyChanged(SelectedSoundSpeedChangedEventArgs);
             }
         }
+
+        void CheckSoundSpeed()
+        {
+            if (IsEnvironmentFullySpecified && SelectedBathymetry.IsCached)
+            {
+                SelectedSoundSpeed = (SoundSpeedFile)SelectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", SelectedTimePeriod)];
+                SelectedSoundSpeed.RangeComplexToken = SelectedRangeComplex.EnvironmentFiles;
+                SelectedSoundSpeed.SelectedBathymetry = _selectedBathymetry;
+                SelectedSoundSpeed.Reset();
+            }
+        }
+
+        #region public bool IsSoundSpeedSelected { get; set; }
+
+        public bool IsSoundSpeedSelected
+        {
+            get { return _isSoundSpeedSelected; }
+            set
+            {
+                if (_isSoundSpeedSelected == value) return;
+                _isSoundSpeedSelected = value;
+                NotifyPropertyChanged(IsSoundSpeedSelectedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsSoundSpeedSelectedChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.IsSoundSpeedSelected);
+        bool _isSoundSpeedSelected;
+
+        #endregion
 
         static readonly PropertyChangedEventArgs SelectedSoundSpeedChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedSoundSpeed);
         SoundSpeedFile _selectedSoundSpeed = SoundSpeedFile.None;

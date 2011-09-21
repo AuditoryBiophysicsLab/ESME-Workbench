@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
+using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.Environment
 {
@@ -21,7 +23,7 @@ namespace ESME.Environment
         {
             return TaskEx.Run(() => Load(filename));
         }
-
+#if false
         public static Bathymetry Load(string filename)
         {
             var retry = 20;
@@ -52,6 +54,38 @@ namespace ESME.Environment
             using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None)) 
                 new BinaryFormatter().Serialize(stream, Samples);
         }
+#else
+        public void Save(string filename)
+        {
+            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var writer = new BinaryWriter(stream))
+            {
+                writer.Write(new[]{'b', 't', 'h', 'y'});
+                writer.Write(Samples.Count);
+                foreach (var sample in Samples)
+                {
+                    writer.Write(sample.Latitude);
+                    writer.Write(sample.Longitude);
+                    writer.Write(sample.Data);
+                }
+            }
+        }
+
+        public static Bathymetry Load(string filename)
+        {
+            using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var reader = new BinaryReader(stream))
+            {
+                var header = reader.ReadBytes(4);
+                if (header[0] != 'b' || header[1] != 't' || header[2] != 'h' || header[3] != 'y') throw new FileFormatException("Bathymetry file header not in the expected format");
+                var result = new Bathymetry();
+                var count = reader.ReadInt32();
+                for (var i = 0; i < count; i++)
+                    result.Samples.Add(new EarthCoordinate<float>(reader.ReadDouble(), reader.ReadDouble(), reader.ReadSingle()));
+                return result;
+            }
+        }
+#endif
 
         public static Bathymetry FromYXZ(string fileName, float scaleFactor)
         {

@@ -168,7 +168,6 @@ namespace ESME.TransmissionLoss
 
         #endregion
 
-
         #region public int Radius { get; set; }
 
         /// <summary>

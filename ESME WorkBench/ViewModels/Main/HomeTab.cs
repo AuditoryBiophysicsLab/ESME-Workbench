@@ -5,16 +5,12 @@ using System.Diagnostics;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
 using ESME;
@@ -77,33 +73,62 @@ namespace ESMEWorkBench.ViewModels.Main
                     _messageBoxService.ShowError("This file does not contain a scenario");
                     return;
                 }
+                // Create the list of TreeView nodes that will hold the roots of the tree-structured view of the scenario
+                TreeViewRootNodes = new ObservableList<TreeNode> { new ScenarioNode(NemoFile.Scenario) };
+                var regex = new Regex(@"Environment: [\s\S]+$");
+                TreeViewRootNodes.RemoveAll(item => regex.IsMatch(item.Name));
+                var environmentRoot = new EnvironmentNode("Environment");
+                TreeViewRootNodes.Add(environmentRoot);
+
+                CurrentMapLayers.CollectionChanged += MapLayersCollectionChanged;
+                foreach (var layer in CurrentMapLayers) PlaceMapLayerInTree(layer);
 
                 // If the metadata file is not found, it will be constructed and returned by the Load static method
                 ScenarioMetadata = ScenarioMetadata.LoadOrCreate(fileName);
 
-                RangeComplexes.SelectedRangeComplex = RangeComplexes.RangeComplexCollection[NemoFile.Scenario.SimAreaName];
-                RangeComplexes.SelectedTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), NemoFile.Scenario.TimeFrame);
+                // Get the time frame of the scenario
+                var scenarioTimeFrame = (NAVOTimePeriod)Enum.Parse(typeof (NAVOTimePeriod), NemoFile.Scenario.TimeFrame);
+                
+                // Try to select the environment data set as a whole piece
+                if (!RangeComplexes.SelectDataset(NemoFile.Scenario.SimAreaName, scenarioTimeFrame, ScenarioMetadata.SelectedAreaName, ScenarioMetadata.SelectedResolutionName))
+                {
+                    RangeComplexes.SelectedRangeComplex = RangeComplexes.RangeComplexCollection[NemoFile.Scenario.SimAreaName];
+                    RangeComplexes.SelectedTimePeriod = scenarioTimeFrame;
+
+                    // If the previously-selected area does not exist, set the name to null
+                    if ((ScenarioMetadata.SelectedAreaName != null) && (!RangeComplexes.SelectedRangeComplex.AreaCollection.ContainsKey(ScenarioMetadata.SelectedAreaName))) ScenarioMetadata.SelectedAreaName = null;
+
+                    // Use the selected area if it exists, otherwise use the sim area
+                    RangeComplexes.SelectedArea = ScenarioMetadata.SelectedAreaName != null
+                                                      ? RangeComplexes.SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName]
+                                                      : RangeComplexes.SelectedRangeComplex.SimArea;
+
+                    // If an area name has been selected, and the selected range complex has an area of that same name, select it as the current area
+                    if (!string.IsNullOrEmpty(ScenarioMetadata.SelectedAreaName) && (RangeComplexes.SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName] != null)) RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName];
+
+                    // If an resolution has been selected, and the selected area has cached bathymetry of that resolution, select it
+                    if (!string.IsNullOrEmpty(ScenarioMetadata.SelectedResolutionName) && (RangeComplexes.SelectedArea != RangeComplexArea.None) &&
+                        (RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName] != null) && RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName].IsCached) RangeComplexes.SelectedBathymetry = (BathymetryFile)RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName];
+                    else
+                    {
+                        uint maxSamplesSeen = 0;
+                        var selectedBathymetry = BathymetryFile.None;
+                        foreach (var entry in RangeComplexes.SelectedArea.BathymetryFiles)
+                        {
+                            var bathymetryFile = (BathymetryFile)entry.Value;
+                            var isCached = bathymetryFile.IsCached;
+                            var samples = bathymetryFile.SampleCount;
+                            if (!isCached) continue;
+                            if (samples <= maxSamplesSeen || samples > 512000) continue;
+                            maxSamplesSeen = samples;
+                            selectedBathymetry = bathymetryFile;
+                        }
+                        RangeComplexes.SelectedBathymetry = selectedBathymetry;
+                    }
+                }
 
                 // Initialize the scenario metadata with the list of distinct mode names from the scenario file
                 ScenarioMetadata.Initialize(NemoFile.Scenario.DistinctModePSMNames);
-
-                // If the previously-selected area does not exist, set the name to null
-                if ((ScenarioMetadata.SelectedAreaName != null) && (!RangeComplexes.SelectedRangeComplex.AreaCollection.ContainsKey(ScenarioMetadata.SelectedAreaName))) ScenarioMetadata.SelectedAreaName = null;
-
-                // Use the selected area if it exists, otherwise use the sim area
-                RangeComplexes.SelectedArea = ScenarioMetadata.SelectedAreaName != null ? RangeComplexes.SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName] : RangeComplexes.SelectedRangeComplex.SimArea;
-
-                // Create the list of TreeView nodes that will hold the roots of the tree-structured view of the scenario
-                TreeViewRootNodes = new ObservableList<TreeNode> {new ScenarioNode(NemoFile.Scenario)};
-
-                // If an area name has been selected, and the selected range complex has an area of that same name, select it as the current area
-                if (!string.IsNullOrEmpty(ScenarioMetadata.SelectedAreaName) && (SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName] != null))
-                    RangeComplexes.SelectedArea = SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName];
-
-                // If an resolution has been selected, and the selected area has cached bathymetry of that resolution, select it
-                if (!string.IsNullOrEmpty(ScenarioMetadata.SelectedResolutionName) && (SelectedArea != RangeComplexArea.None) &&
-                    (SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName] != null) && SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName].IsCached)
-                    RangeComplexes.SelectedBathymetry = (BathymetryFile)SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName];
 
                 // Display any animal layers on the map asynchronously
                 if (NemoFile.Scenario.Animals != null)
@@ -118,7 +143,7 @@ namespace ESMEWorkBench.ViewModels.Main
                             }
                             catch (Exception e)
                             {
-                                _messageBoxService.ShowError("Error loading animats");
+                                _messageBoxService.ShowError("Error loading animats: " + e.Message);
                             }
                         }
 
@@ -155,15 +180,15 @@ namespace ESMEWorkBench.ViewModels.Main
                     {
                         case "SelectedAreaName":
                         case "SelectedResolutionName":
-                            if ((SelectedBathymetry != BathymetryFile.None) || (SelectedArea == RangeComplexArea.None)) return;
+                            if ((RangeComplexes.SelectedBathymetry != BathymetryFile.None) || (RangeComplexes.SelectedArea == RangeComplexArea.None)) return;
                             var retry = 20;
                             while (--retry > 0)
                             {
-                                if (SelectedBathymetry.DataTask == null) await TaskEx.Delay(50);
+                                if (RangeComplexes.SelectedBathymetry.DataTask == null) await TaskEx.Delay(50);
                                 else break;
                             }
-                            if (SelectedBathymetry.DataTask == null) return;
-                            SelectedBathymetry.DataTask.ContinueWith(task => ReprocessCASSOutputs());
+                            if (RangeComplexes.SelectedBathymetry.DataTask == null) return;
+                            RangeComplexes.SelectedBathymetry.DataTask.ContinueWith(task => ReprocessCASSOutputs());
                             break;
                         default:
                             break;
@@ -227,16 +252,6 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_nemoFile == value) return;
                 _nemoFile = value;
 
-                _scenarioPath = Path.GetDirectoryName(_nemoFile.FileName);
-                _propagationPath = Path.Combine(_scenarioPath, "Propagation", _nemoFile.Scenario.TimeFrame);
-                _pressurePath = Path.Combine(_scenarioPath, "Pressure", _nemoFile.Scenario.TimeFrame);
-                if (_nemoFile.Scenario.DistinctModes != null)
-                {
-                    _distinctModeProperties = new List<AcousticProperties>();
-                    foreach (var mode in _nemoFile.Scenario.DistinctModes)
-                        _distinctModeProperties.Add(mode.AcousticProperties);
-                }
-
                 NotifyPropertyChanged(NemoFileChangedEventArgs);
                 NotifyPropertyChanged(IsScenarioLoadedChangedEventArgs);
                 NotifyPropertyChanged(IsScenarioNotLoadedChangedEventArgs);
@@ -245,20 +260,31 @@ namespace ESMEWorkBench.ViewModels.Main
                 MainWindowTitle = _nemoFile != null ? string.Format("ESME WorkBench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", NemoFile.Scenario.EventName, NemoFile.Scenario.TimeFrame) : string.Format("ESME WorkBench 2011{0}: <No scenario loaded>", Configuration.IsUnclassifiedModel ? " (public)" : "");
                 if (_nemoFile == null)
                 {
-                    ScenarioLoadedToolTip = "Switching range complexes or time periods is disabled while a scenario is loaded";
+                    ScenarioLoadedToolTip = null;
                     _cassFileQueue.Complete();
                     _cassFileQueue = null;
                     _cassOutputProcessor = null;
                 }
                 else
                 {
+                    ScenarioLoadedToolTip = "Switching range complexes or time periods is disabled while a scenario is loaded";
+                    _scenarioPath = Path.GetDirectoryName(_nemoFile.FileName);
+                    _propagationPath = Path.Combine(_scenarioPath, "Propagation", _nemoFile.Scenario.TimeFrame);
+                    _pressurePath = Path.Combine(_scenarioPath, "Pressure", _nemoFile.Scenario.TimeFrame);
+                    if (_nemoFile.Scenario.DistinctModes != null)
+                    {
+                        _distinctModeProperties = new List<AcousticProperties>();
+                        foreach (var mode in _nemoFile.Scenario.DistinctModes)
+                            _distinctModeProperties.Add(mode.AcousticProperties);
+                    }
+
                     ScenarioLoadedToolTip = null;
 
                     _cassOutputProcessor = new ActionBlock<CASSOutput>(newItem =>
                     {
                         if (!IsScenarioLoaded) return;
                         Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName, newItem.ModeName);
-                        newItem.Bathymetry = new WeakReference<Bathymetry>(SelectedBathymetry.DataTask.Result);
+                        newItem.Bathymetry = new WeakReference<Bathymetry>(RangeComplexes.SelectedBathymetry.DataTask.Result);
                         newItem.CheckThreshold(Globals.AppSettings.TransmissionLossContourThreshold, _dispatcher);
                         if (!IsScenarioLoaded) return;
                         _dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayPropagationPoint(newItem));
@@ -382,7 +408,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     foreach (CASSOutput oldItem in args.OldItems)
                     {
                         Debug.WriteLine("Removed CASSOutput: {0}|{1}|{2}", oldItem.PlatformName, oldItem.SourceName, oldItem.ModeName);
-                        _dispatcher.InvokeIfRequired(() => MapLayers.RemovePropagationPoint(oldItem));
+                        _dispatcher.InvokeIfRequired(() => CurrentMapLayers.RemovePropagationPoint(oldItem));
                     }
                     break;
                 case NotifyCollectionChangedAction.Reset:
@@ -424,7 +450,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         SimpleCommand<object, object> _exportAnalysisPoints;
 
-        void ExportAnalysisPointsHandler()
+        static void ExportAnalysisPointsHandler()
         {
             throw new NotImplementedException();
             //ScenarioMetadata.ExportAnalysisPoints();
@@ -528,17 +554,22 @@ namespace ESMEWorkBench.ViewModels.Main
         #region NewScenarioCommand
         public SimpleCommand<object, object> NewScenarioCommand
         {
-            get { return _newScenario ?? (_newScenario = new SimpleCommand<object, object>(delegate { return IsNewScenarioCommandEnabled; }, delegate { NewScenarioHandler(); })); }
+            get { return _newScenario ?? (_newScenario = new SimpleCommand<object, object>(delegate { NewScenarioHandler(); })); }
         }
 
         SimpleCommand<object, object> _newScenario;
 
-        bool IsNewScenarioCommandEnabled
+        static void NewScenarioHandler()
         {
-            get { return true; }
+            new Process
+            {
+                StartInfo =
+                {
+                    FileName = Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath,
+                    WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath),
+                }
+            }.Start();
         }
-
-        void NewScenarioHandler() { }
         #endregion
 
         #region ZoomToScenarioCommand
@@ -629,21 +660,6 @@ namespace ESMEWorkBench.ViewModels.Main
         {
         }
 
-        #region public MapLayerCollection MapLayers { get; set; }
-        [XmlIgnore]
-        public MapLayerCollection MapLayers
-        {
-            get { return _mapLayers; }
-            set
-            {
-                if (_mapLayers == value) return;
-                if (_mapLayers != null) _mapLayers.CollectionChanged -= MapLayersCollectionChanged;
-                _mapLayers = value;
-                if (_mapLayers != null) _mapLayers.CollectionChanged += MapLayersCollectionChanged;
-                NotifyPropertyChanged(MapLayersChangedEventArgs);
-            }
-        }
-
         void MapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
@@ -678,12 +694,9 @@ namespace ESMEWorkBench.ViewModels.Main
                     Debug.WriteLine("NotifyCollectionChangedAction.Reset");
                     break;
             }
-            NotifyPropertyChanged(MapLayersChangedEventArgs);
+            //NotifyPropertyChanged(MapLayersChangedEventArgs);
         }
-        static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MapLayers);
-        MapLayerCollection _mapLayers;
 
-        #endregion
         #region public ObservableList<TreeNode> TreeViewRootNodes { get; set; }
         [XmlIgnore]
         public ObservableList<TreeNode> TreeViewRootNodes
@@ -702,36 +715,6 @@ namespace ESMEWorkBench.ViewModels.Main
         ObservableList<TreeNode> _treeViewRootNodes;
 
         void PlaceMapLayerInTree(MapLayerViewModel mapLayer) { foreach (var tree in TreeViewRootNodes) tree.AddMapLayer(mapLayer); }
-
-#if false
-        void DisplaySelectedEnvironment()
-        {
-            var regex = new Regex(@"Environment: [\s\S]+$");
-            TreeViewRootNodes.RemoveAll(item => regex.IsMatch(item.Name));
-            var environmentRoot = new EnvironmentNode("Environment");
-            TreeViewRootNodes.Add(environmentRoot);
-            foreach (var layer in _mapLayers) PlaceMapLayerInTree(layer);
-
-            var samplePoints = _selectedEnvironment.Data.Locations.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
-            var bathymetryBounds = SelectedBathymetry.GeoRect;
-            _scenarioBounds.Union(bathymetryBounds);
-            var bathyBitmapLayer = MapLayers.DisplayBathymetryRaster("Bathymetry", Path.Combine(_imagesPath, _selectedEnvironment.Metadata.BathymetryName + ".bmp"), true, false, true, bathymetryBounds);
-            Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer));
-            MapLayers.DisplayOverlayShapes("Sound Speed", LayerType.SoundSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Circle, false, null, false);
-            MapLayers.DisplayOverlayShapes("Wind", LayerType.WindSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
-            foreach (var sedimentType in _selectedEnvironment.Data.SedimentTypes)
-            {
-                samplePoints = sedimentType.Value.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
-                MapLayers.DisplayOverlayShapes(string.Format("Sediment: {0}", sedimentType.Key.ToLower()), LayerType.BottomType, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
-            }
-            ZoomToScenarioHandler();
-            Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RefreshMap, true));
-            // Get a list of transmission loss files that match the modes in the current scenario
-            if (CASSOutputs == null) CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
-            else CASSOutputs.RefreshInBackground();
-            //UpdateEnvironmentTreeRoot();
-        }
-#endif
 
         void UpdateEnvironmentTreeRoot()
         {

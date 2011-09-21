@@ -220,7 +220,7 @@ namespace ESMEWorkBench.ViewModels.Map
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    Debug.WriteLine("MapView: LayerCollection.Add");
+                    //Debug.WriteLine("MapView: LayerCollection.Add");
                     for (var itemIndex = 0; itemIndex < e.NewItems.Count; itemIndex++)
                     {
                         _wpfMap.Overlays.Add(((MapLayerViewModel)e.NewItems[itemIndex]).Overlay);
@@ -228,7 +228,7 @@ namespace ESMEWorkBench.ViewModels.Map
                     }
                     break;
                 case NotifyCollectionChangedAction.Move:
-                    Debug.WriteLine("MapView: LayerCollection.Move");
+                    //Debug.WriteLine("MapView: LayerCollection.Move");
                     for (var itemIndex = 0; itemIndex < e.NewItems.Count; itemIndex++)
                     {
                         _wpfMap.Overlays.RemoveAt(e.OldStartingIndex);
@@ -237,14 +237,14 @@ namespace ESMEWorkBench.ViewModels.Map
                     _wpfMap.Refresh();
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    Debug.WriteLine("MapView: LayerCollection.Remove");
+                    //Debug.WriteLine("MapView: LayerCollection.Remove");
                     for (var itemIndex = 0; itemIndex < e.OldItems.Count; itemIndex++)
                     {
                         _wpfMap.Overlays.Remove(((MapLayerViewModel)e.OldItems[itemIndex]).Overlay);
                     }
                     break;
                 case NotifyCollectionChangedAction.Replace:
-                    Debug.WriteLine("MapView: LayerCollection.Replace (OldItemCount = {0}, OldStartIndex = {1}, NewItemCount = {2}, NewStartIndex = {3}", e.OldItems.Count, e.OldStartingIndex, e.NewItems.Count, e.NewStartingIndex);
+                    //Debug.WriteLine("MapView: LayerCollection.Replace (OldItemCount = {0}, OldStartIndex = {1}, NewItemCount = {2}, NewStartIndex = {3}", e.OldItems.Count, e.OldStartingIndex, e.NewItems.Count, e.NewStartingIndex);
                     for (var itemIndex = 0; itemIndex < e.OldItems.Count; itemIndex++)
                     {
                         _wpfMap.Overlays.Remove(((MapLayerViewModel)e.OldItems[itemIndex]).Overlay);
@@ -256,7 +256,7 @@ namespace ESMEWorkBench.ViewModels.Map
                     //_wpfMap.Refresh();
                     break;
                 case NotifyCollectionChangedAction.Reset:
-                    Debug.WriteLine("MapView: LayerCollection.Reset");
+                    //Debug.WriteLine("MapView: LayerCollection.Reset");
                     _wpfMap.Overlays.Clear();
                     foreach (var layer in MapLayers) _wpfMap.Overlays.Add(layer.Overlay);
                     break;

@@ -130,7 +130,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region public NAEMOScenarioMetadata ScenarioMetadata { get; set; }
+        #region public ScenarioMetadata ScenarioMetadata { get; set; }
 
         public NAEMOScenarioMetadata ScenarioMetadata
         {
