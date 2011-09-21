@@ -377,6 +377,42 @@ namespace ESME.Data
         }
 
         #endregion
+
+        #region public bool DisplayContoursOnTransmissionLoss { get; set; }
+
+        public bool DisplayContoursOnTransmissionLoss
+        {
+            get { return _displayContoursOnTransmissionLoss; }
+            set
+            {
+                if (_displayContoursOnTransmissionLoss == value) return;
+                _displayContoursOnTransmissionLoss = value;
+                NotifyPropertyChanged(DisplayContoursOnTransmissionLossChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DisplayContoursOnTransmissionLossChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.DisplayContoursOnTransmissionLoss);
+        bool _displayContoursOnTransmissionLoss = true;
+
+        #endregion
+
+        #region public float TransmissionLossContourThreshold { get; set; }
+
+        public float TransmissionLossContourThreshold
+        {
+            get { return _transmissionLossContourThreshold; }
+            set
+            {
+                if (Math.Abs(_transmissionLossContourThreshold - value) < .01) return;
+                _transmissionLossContourThreshold = value;
+                NotifyPropertyChanged(TransmissionLossContourThresholdChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs TransmissionLossContourThresholdChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.TransmissionLossContourThreshold);
+        float _transmissionLossContourThreshold = 120;
+
+        #endregion
     }
 
     public sealed class NAEMOTools : ValidatingViewModel

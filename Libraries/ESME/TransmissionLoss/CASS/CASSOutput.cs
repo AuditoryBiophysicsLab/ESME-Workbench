@@ -290,17 +290,20 @@ namespace ESME.TransmissionLoss.CASS
                 _thresholdRadius = value;
                 NotifyPropertyChanged(ThresholdRadiusChangedEventArgs);
                 Debug.WriteLine("{0}: [{1:0.####}, {2:0.####}] {3}|{4}|{5} threshold radius {6:0.##}m", DateTime.Now, Latitude, Longitude, PlatformName, SourceName, ModeName, _thresholdRadius);
-                OnThresholdRadiusChanged();
+                //OnThresholdRadiusChanged();
             }
         }
 
         static readonly PropertyChangedEventArgs ThresholdRadiusChangedEventArgs = ObservableHelper.CreateArgs<CASSOutput>(x => x.ThresholdRadius);
         float _thresholdRadius = float.NaN;
+
+#if false
         public event EventHandler ThresholdRadiusChanged;
         protected virtual void OnThresholdRadiusChanged()
         {
             if (ThresholdRadiusChanged != null) ThresholdRadiusChanged(this, new EventArgs());
         }
+#endif
 
         #endregion
 
@@ -349,6 +352,14 @@ namespace ESME.TransmissionLoss.CASS
             if (Pressures == null) throw new ApplicationException("No radial data found");
             var allRadialsBelowThreshold = true;
             ThresholdRadii = new float[Pressures.Count];
+            for (var i = 0; i < Pressures.Count; i++)
+            {
+                float rangeBelowThreshold;
+                var isBelowThreshold = IsRadialBelowThreshold(Pressures[i], threshold, out rangeBelowThreshold);
+                if (!isBelowThreshold) allRadialsBelowThreshold = false;
+                ThresholdRadii[i] = rangeBelowThreshold;
+            }
+#if false
             Parallel.For(0, Pressures.Count, radialIndex =>
             {
                 float rangeBelowThreshold;
@@ -356,8 +367,10 @@ namespace ESME.TransmissionLoss.CASS
                 if (!isBelowThreshold) allRadialsBelowThreshold = false;
                 ThresholdRadii[radialIndex] = rangeBelowThreshold;
             });
+#endif
             ThresholdRadius = ThresholdRadii.Max();
-            dispatcher.InvokeIfRequired(() => IsRadiusSufficient = allRadialsBelowThreshold);
+            //dispatcher.InvokeIfRequired(() => IsRadiusSufficient = allRadialsBelowThreshold);
+            IsRadiusSufficient = allRadialsBelowThreshold;
             if (unloadAfterCheck) Pressures = null;
         }
 

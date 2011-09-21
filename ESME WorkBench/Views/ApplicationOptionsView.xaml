@@ -125,25 +125,6 @@
                     </GroupBox>
                 </StackPanel>
             </TabItem>
-            <!--
-            <TabItem Header="[Collapsed]"
-			         Visibility="Collapsed"
-			         HorizontalContentAlignment="Stretch"
-			         VerticalContentAlignment="Stretch">
-                <StackPanel Orientation="Vertical"
-				            VerticalAlignment="Top">
-                    <CheckBox IsChecked="{Binding AppSettings.UseOAMLDataSources}"
-					          Margin="5 10">
-                        Use Oceanographic and Atmospheric Master Library (OAML) data sources
-                    </CheckBox>
-                    <Controls:FileOrDirectorySetting Caption="Environment database directory"
-					                                 IsEnabled="{Binding AppSettings.UseESMEDataSources}"
-					                                 Margin="5 20 5 10"
-					                                 IsDirectoryBrowser="True"
-					                                 FileName="{Binding AppSettings.EnvironmentDatabaseDirectory}" />
-                </StackPanel>
-            </TabItem>
-            -->
             <TabItem Header="Acoustic Simulators">
                 <Views:AcousticSimulatorOptionsControl DataContext="{Binding AppSettings}"/>
             </TabItem>
@@ -195,6 +176,17 @@
 
                     </StackPanel>
 
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Misc">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Content="Display threshold contour of " 
+                              IsChecked="{Binding AppSettings.DisplayContoursOnTransmissionLoss}"
+                              VerticalAlignment="Center"/>
+                    <TextBox Text="{Binding AppSettings.TransmissionLossContourThreshold}" 
+                             Width="30"
+                             VerticalAlignment="Center" />  
+                    <TextBlock Text=" dB on transmission loss points" VerticalAlignment="Center"/>
                 </StackPanel>
             </TabItem>
         </TabControl>

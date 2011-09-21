@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -78,7 +79,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 }
 
                 // If the metadata file is not found, it will be constructed and returned by the Load static method
-                ScenarioMetadata = NAEMOScenarioMetadata.LoadOrCreate(fileName);
+                ScenarioMetadata = ScenarioMetadata.LoadOrCreate(fileName);
 
                 RangeComplexes.SelectedRangeComplex = RangeComplexes.RangeComplexCollection[NemoFile.Scenario.SimAreaName];
                 RangeComplexes.SelectedTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), NemoFile.Scenario.TimeFrame);
@@ -144,6 +145,30 @@ namespace ESMEWorkBench.ViewModels.Main
                             else _scenarioBounds.Union(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
                         }
                 }
+
+                if (CASSOutputs == null) CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
+                else CASSOutputs.RefreshInBackground();
+
+                ScenarioMetadata.PropertyChanged += async (s, e) =>
+                {
+                    switch (e.PropertyName)
+                    {
+                        case "SelectedAreaName":
+                        case "SelectedResolutionName":
+                            if ((SelectedBathymetry != BathymetryFile.None) || (SelectedArea == RangeComplexArea.None)) return;
+                            var retry = 20;
+                            while (--retry > 0)
+                            {
+                                if (SelectedBathymetry.DataTask == null) await TaskEx.Delay(50);
+                                else break;
+                            }
+                            if (SelectedBathymetry.DataTask == null) return;
+                            SelectedBathymetry.DataTask.ContinueWith(task => ReprocessCASSOutputs());
+                            break;
+                        default:
+                            break;
+                    }
+                };
             }
             catch (Exception ex)
             {
@@ -159,6 +184,8 @@ namespace ESMEWorkBench.ViewModels.Main
                 CloseScenarioHandler();
             }
         }
+
+        List<AcousticProperties> _distinctModeProperties;
 
         GeoRect _scenarioBounds;
 
@@ -199,15 +226,58 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (_nemoFile == value) return;
                 _nemoFile = value;
+
+                _scenarioPath = Path.GetDirectoryName(_nemoFile.FileName);
+                _propagationPath = Path.Combine(_scenarioPath, "Propagation", _nemoFile.Scenario.TimeFrame);
+                _pressurePath = Path.Combine(_scenarioPath, "Pressure", _nemoFile.Scenario.TimeFrame);
+                if (_nemoFile.Scenario.DistinctModes != null)
+                {
+                    _distinctModeProperties = new List<AcousticProperties>();
+                    foreach (var mode in _nemoFile.Scenario.DistinctModes)
+                        _distinctModeProperties.Add(mode.AcousticProperties);
+                }
+
                 NotifyPropertyChanged(NemoFileChangedEventArgs);
                 NotifyPropertyChanged(IsScenarioLoadedChangedEventArgs);
                 NotifyPropertyChanged(IsScenarioNotLoadedChangedEventArgs);
                 NotifyPropertyChanged(IsTimePeriodSelectionEnabledChangedEventArgs);
 
-                if (_nemoFile != null) ScenarioLoadedToolTip = "Switching range complexes or time periods is disabled while a scenario is loaded";
                 MainWindowTitle = _nemoFile != null ? string.Format("ESME WorkBench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", NemoFile.Scenario.EventName, NemoFile.Scenario.TimeFrame) : string.Format("ESME WorkBench 2011{0}: <No scenario loaded>", Configuration.IsUnclassifiedModel ? " (public)" : "");
+                if (_nemoFile == null)
+                {
+                    ScenarioLoadedToolTip = "Switching range complexes or time periods is disabled while a scenario is loaded";
+                    _cassFileQueue.Complete();
+                    _cassFileQueue = null;
+                    _cassOutputProcessor = null;
+                }
+                else
+                {
+                    ScenarioLoadedToolTip = null;
+
+                    _cassOutputProcessor = new ActionBlock<CASSOutput>(newItem =>
+                    {
+                        if (!IsScenarioLoaded) return;
+                        Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName, newItem.ModeName);
+                        newItem.Bathymetry = new WeakReference<Bathymetry>(SelectedBathymetry.DataTask.Result);
+                        newItem.CheckThreshold(Globals.AppSettings.TransmissionLossContourThreshold, _dispatcher);
+                        if (!IsScenarioLoaded) return;
+                        _dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayPropagationPoint(newItem));
+                    },
+                    new ExecutionDataflowBlockOptions
+                    {
+                        TaskScheduler = TaskScheduler.Default,
+                        BoundedCapacity = 4,
+                        MaxDegreeOfParallelism = 4,
+                    });
+                    _cassFileQueue = new BufferBlock<CASSOutput>();
+                    _cassFileQueue.LinkTo(_cassOutputProcessor);
+                    _cassFileQueue.Completion.ContinueWith(task => _cassFileQueue.Complete());
+                }
             }
         }
+        string _scenarioPath;
+        string _propagationPath;
+        string _pressurePath;
 
         public bool IsScenarioLoaded { get { return NemoFile != null; } }
         public bool IsScenarioNotLoaded { get { return !IsScenarioLoaded; } }
@@ -218,7 +288,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region public NAEMOScenarioMetadata ScenarioMetadata { get; set; }
+        #region public ScenarioMetadata ScenarioMetadata { get; set; }
 #if false
         public NAEMOScenarioMetadata ScenarioMetadata
         {
@@ -262,7 +332,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 #endif
 
-        public NAEMOScenarioMetadata ScenarioMetadata
+        public ScenarioMetadata ScenarioMetadata
         {
             get { return _scenarioMetadata; }
             set
@@ -274,11 +344,15 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         static readonly PropertyChangedEventArgs ScenarioMetadataChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.ScenarioMetadata);
-        NAEMOScenarioMetadata _scenarioMetadata;
+        ScenarioMetadata _scenarioMetadata;
 
         #endregion
 
+        ActionBlock<CASSOutput> _cassOutputProcessor;
+        BufferBlock<CASSOutput> _cassFileQueue;
+
         #region public CASSOutputs CASSOutputs { get; set; }
+
         public CASSOutputs CASSOutputs
         {
             get { return _cassOutputs; }
@@ -301,13 +375,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     foreach (CASSOutput newItem in args.NewItems)
                     {
                         Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName, newItem.ModeName);
-                        newItem.Bathymetry = new WeakReference<Bathymetry>(SelectedBathymetry.DataTask.Result);
-                        newItem.ThresholdRadiusChanged += (s, e) => _dispatcher.InvokeIfRequired(() => MapLayers.DisplayPropagationPoint(newItem));
-                        _dispatcher.InvokeIfRequired(() => MapLayers.DisplayPropagationPoint(newItem));
-                        Task.Factory.StartNew(() =>
-                        {
-                            newItem.CheckThreshold(120, _dispatcher);
-                        });
+                        _cassFileQueue.Post(newItem);
                     }
                     break;
                 case NotifyCollectionChangedAction.Remove:
@@ -323,6 +391,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
+        void ReprocessCASSOutputs() { CASSOutputs.ForEach(item => _cassFileQueue.Post(item)); }
         #endregion
 
         #region ConfigureAcousticModelsCommand

@@ -232,7 +232,7 @@
     <Compile Include="Metadata\Deprecated\NAEMOMetadata.cs" />
     <Compile Include="Metadata\Deprecated\NAEMOMetadataBase.cs" />
     <Compile Include="Metadata\Deprecated\NAEMOOverlayMetadata.cs" />
-    <Compile Include="Metadata\NAEMOScenarioMetadata.cs" />
+    <Compile Include="Metadata\ScenarioMetadata.cs" />
     <Compile Include="Animats\AnimatInterface.cs" />
     <Compile Include="NEMO\Exceptions.cs" />
     <Compile Include="NEMO\Overlay\Exceptions.cs" />

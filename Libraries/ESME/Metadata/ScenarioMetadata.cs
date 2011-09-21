@@ -10,9 +10,9 @@ using HRC.Utility;
 namespace ESME.Metadata
 {
     [Serializable]
-    public class NAEMOScenarioMetadata : PropertyChangedBase
+    public class ScenarioMetadata : PropertyChangedBase
     {
-        NAEMOScenarioMetadata(string nemoFilename)
+        ScenarioMetadata(string nemoFilename)
         {
             NemoFilename = nemoFilename;
             Filename = MetadataFilename(nemoFilename);
@@ -32,15 +32,16 @@ namespace ESME.Metadata
             else NemoModeToAcousticModelNameMap.UpdateModes(distinctModePSMNames, TransmissionLossAlgorithm.CASS);
         }
 
-        public static NAEMOScenarioMetadata LoadOrCreate(string nemoFilename)
+        public static ScenarioMetadata LoadOrCreate(string nemoFilename)
         {
             var metadataFilename = MetadataFilename(nemoFilename);
             try
             {
-                NAEMOScenarioMetadata result;
-                if (!File.Exists(metadataFilename)) return new NAEMOScenarioMetadata(nemoFilename);
+                ScenarioMetadata result;
+                if (!File.Exists(metadataFilename)) return new ScenarioMetadata(nemoFilename);
                 using (var stream = new FileStream(metadataFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    result = (NAEMOScenarioMetadata)new BinaryFormatter().Deserialize(stream);
+                    result = (ScenarioMetadata)new BinaryFormatter().Deserialize(stream);
+                result.PropertyChanged += (s, e) => result.Save();
                 result._filename = metadataFilename;
                 return result;
             }
@@ -48,7 +49,7 @@ namespace ESME.Metadata
             {
                 if (File.Exists(metadataFilename)) File.Delete(metadataFilename);
             }
-            return new NAEMOScenarioMetadata(nemoFilename);
+            return new ScenarioMetadata(nemoFilename);
         }
 
         public void Save(string filename = null)
@@ -71,7 +72,7 @@ namespace ESME.Metadata
             }
         }
 
-        static readonly PropertyChangedEventArgs FilenameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.Filename);
+        static readonly PropertyChangedEventArgs FilenameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.Filename);
         [NonSerialized] string _filename;
 
         #endregion
@@ -89,7 +90,7 @@ namespace ESME.Metadata
             }
         }
 
-        static readonly PropertyChangedEventArgs NemoModeToAcousticModelNameMapChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.NemoModeToAcousticModelNameMap);
+        static readonly PropertyChangedEventArgs NemoModeToAcousticModelNameMapChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.NemoModeToAcousticModelNameMap);
         NemoModeToAcousticModelNameMap _nemoModeToAcousticModelNameMap;
 
         #endregion
@@ -107,7 +108,7 @@ namespace ESME.Metadata
             }
         }
 
-        static readonly PropertyChangedEventArgs SelectedAreaNameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.SelectedAreaName);
+        static readonly PropertyChangedEventArgs SelectedAreaNameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.SelectedAreaName);
         string _selectedAreaName;
 
         #endregion
@@ -125,7 +126,7 @@ namespace ESME.Metadata
             }
         }
 
-        static readonly PropertyChangedEventArgs SelectedResolutionNameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.SelectedResolutionName);
+        static readonly PropertyChangedEventArgs SelectedResolutionNameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.SelectedResolutionName);
         string _selectedResolutionName;
 
         #endregion
@@ -143,7 +144,7 @@ namespace ESME.Metadata
             }
         }
 
-        static readonly PropertyChangedEventArgs NemoFileNameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.NemoFilename);
+        static readonly PropertyChangedEventArgs NemoFileNameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.NemoFilename);
         string _nemoFilename;
 
         #endregion
@@ -162,7 +163,7 @@ namespace ESME.Metadata
             }
         }
 
-        static readonly PropertyChangedEventArgs AnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.AnalysisPoints);
+        static readonly PropertyChangedEventArgs AnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.AnalysisPoints);
         ObservableList<AnalysisPoint> _analysisPoints;
 
         #endregion
