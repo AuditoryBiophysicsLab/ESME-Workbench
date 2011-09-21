@@ -202,7 +202,9 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(NemoFileChangedEventArgs);
                 NotifyPropertyChanged(IsScenarioLoadedChangedEventArgs);
                 NotifyPropertyChanged(IsScenarioNotLoadedChangedEventArgs);
+                NotifyPropertyChanged(IsTimePeriodSelectionEnabledChangedEventArgs);
 
+                if (_nemoFile != null) ScenarioLoadedToolTip = "Switching range complexes and time periods is disabled while a scenario is loaded";
                 MainWindowTitle = _nemoFile != null ? string.Format("ESME WorkBench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", NemoFile.Scenario.EventName, NemoFile.Scenario.TimeFrame) : string.Format("ESME WorkBench 2011{0}: <No scenario loaded>", Configuration.IsUnclassifiedModel ? " (public)" : "");
             }
         }

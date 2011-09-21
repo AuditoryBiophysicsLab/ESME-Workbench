@@ -138,11 +138,7 @@ namespace ESME.Environment
         public void TrimToNearestPoints(GeoRect geoRect, double? rangeOutKm = null)
         {
             var trimRect = GeoRect.Inflate(geoRect, rangeOutKm.HasValue ? rangeOutKm.Value : 0.01);
-            var matchingPoints = _arrayList.Where(trimRect.Contains).ToList();
-            var pointsToKeep = from point in matchingPoints
-                               select point;
-            Clear();
-            AddRange(pointsToKeep);
+            _arrayList.RemoveAll(point => (point != null) && (!trimRect.Contains(point)));
         }
 
         #region List<T> overrides

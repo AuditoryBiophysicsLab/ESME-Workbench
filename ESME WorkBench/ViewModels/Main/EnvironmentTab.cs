@@ -115,6 +115,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(SelectedRangeComplexChangedEventArgs);
                 IsRangeComplexSelected = _selectedRangeComplex != NewRangeComplex.None;
                 NotifyPropertyChanged(IsRangeComplexSelectedChangedEventArgs);
+                NotifyPropertyChanged(IsTimePeriodSelectionEnabledChangedEventArgs);
                 DisplayRangeComplex();
                 if (IsRangeComplexSelected)
                 {
@@ -222,6 +223,18 @@ namespace ESMEWorkBench.ViewModels.Main
             else if (EnvironmentLayers[EnvironmentDataType.Wind] != null) EnvironmentLayers[EnvironmentDataType.Wind].IsEnabled = false;
             UpdateSoundSpeedData();
         }
+
+        #region public bool IsTimePeriodSelectionEnabled { get; set; }
+
+        public bool IsTimePeriodSelectionEnabled
+        {
+            get { return IsScenarioLoaded && IsScenarioNotLoaded; }
+        }
+
+        static readonly PropertyChangedEventArgs IsTimePeriodSelectionEnabledChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsTimePeriodSelectionEnabled);
+
+        #endregion
+
 
         void UpdateSoundSpeedData()
         {
@@ -635,6 +648,24 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _clearBathymetrySelectionCommand;
+        #endregion
+
+        #region public string ScenarioLoadedToolTip { get; set; }
+
+        public string ScenarioLoadedToolTip
+        {
+            get { return _scenarioLoadedToolTip; }
+            set
+            {
+                if (_scenarioLoadedToolTip == value) return;
+                _scenarioLoadedToolTip = value;
+                NotifyPropertyChanged(ScenarioLoadedToolTipChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ScenarioLoadedToolTipChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.ScenarioLoadedToolTip);
+        string _scenarioLoadedToolTip;
+
         #endregion
 
         void DisplayWorldMap()

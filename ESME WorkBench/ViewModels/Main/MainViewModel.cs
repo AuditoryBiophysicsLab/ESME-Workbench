@@ -13,7 +13,6 @@ using ESME.Environment;
 using ESME.Mapping;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.NAVO;
 using ESMEWorkBench.ViewModels.RecentFiles;
 using HRC.Navigation;
 using HRC.Services;
@@ -230,16 +229,25 @@ namespace ESMEWorkBench.ViewModels.Main
                             break;
                         case "SelectedArea":
                             SelectedArea = RangeComplexes.SelectedArea;
-                            if (ScenarioMetadata != null && SelectedArea != null && SelectedArea != RangeComplexArea.None) 
-                                ScenarioMetadata.SelectedAreaName = SelectedArea.Name;
+                            if (ScenarioMetadata != null)
+                            {
+                                if (SelectedArea == null || SelectedArea == RangeComplexArea.None)
+                                {
+                                    ScenarioMetadata.SelectedAreaName = null;
+                                    ScenarioMetadata.SelectedResolutionName = null;
+                                }
+                                else ScenarioMetadata.SelectedAreaName = SelectedArea.Name;
+                            }
                             break;
                         case "SelectedBathymetry":
                             if (SelectedBathymetry != null && SelectedBathymetry != BathymetryFile.None) SelectedBathymetry.Reset();
                             SelectedBathymetry = RangeComplexes.SelectedBathymetry;
-                            if (ScenarioMetadata != null && SelectedBathymetry != null && SelectedBathymetry != BathymetryFile.None)
+                            if (ScenarioMetadata != null)
                             {
-                                ScenarioMetadata.SelectedResolutionName = SelectedBathymetry.Name;
-                                //SelectedBathymetry.GetMyDataAsync();
+                                if (SelectedBathymetry == null || SelectedBathymetry == BathymetryFile.None)
+                                    ScenarioMetadata.SelectedResolutionName = null;
+                                else
+                                    ScenarioMetadata.SelectedResolutionName = SelectedBathymetry.Name;
                             }
                             break;
                     }

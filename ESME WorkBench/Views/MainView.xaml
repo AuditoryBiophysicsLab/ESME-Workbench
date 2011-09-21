@@ -259,8 +259,8 @@
           <r:RibbonButton Label="World Map" LargeImageSource="..\Images\LargeIcons\globe-icon.png"
                           SmallImageSource="..\Images\SmallIcons\globe-icon.png" Command="{Binding ZoomToWorldMapCommand}" />
         </r:RibbonGroup>
-        <r:RibbonGroup Header="Range Complex" IsEnabled="{Binding IsScenarioNotLoaded}">
-          <ListView Width="150" Height="66" ItemsSource="{Binding RangeComplexes.RangeComplexList}"
+                <r:RibbonGroup Header="Range Complex" ToolTip="{Binding ScenarioLoadedToolTip}">
+                    <ListView Width="150" Height="66" ItemsSource="{Binding RangeComplexes.RangeComplexList}" IsEnabled="{Binding IsScenarioNotLoaded}" 
                     SelectedItem="{Binding RangeComplexes.SelectedRangeComplex}" SelectedIndex="{Binding SelectedRangeComplexIndex}"
                     DisplayMemberPath="Name" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionMode="Single">
             <ListView.ItemsPanel>
@@ -270,23 +270,23 @@
             </ListView.ItemsPanel>
           </ListView>
           <r:RibbonButton Label="New" LargeImageSource="..\Images\LargeIcons\world_add.png"
-                          SmallImageSource="..\Images\SmallIcons\world_add.png"
+                          SmallImageSource="..\Images\SmallIcons\world_add.png" IsEnabled="{Binding IsScenarioNotLoaded}" 
                           ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" ToolTipDescription="Define a new range complex"
-                          Command="{Binding NewRangeComplexCommand}" IsEnabled="{Binding RangeComplexes.IsEnabled}" />
+                          Command="{Binding NewRangeComplexCommand}" />
           <r:RibbonButton SmallImageSource="..\Images\SmallIcons\world_go.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" IsEnabled="{Binding IsScenarioNotLoaded}" 
                           ToolTipDescription="Show the selected range complex on the map" Command="{Binding ZoomToRangeComplexCommand}" />
           <r:RibbonButton SmallImageSource="..\Images\SmallIcons\world_delete.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" IsEnabled="{Binding IsScenarioNotLoaded}" 
                           ToolTipDescription="Delete the selected range complex, and all data within it"
                           Command="{Binding DeleteRangeComplexCommand}" />
           <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_undo.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" IsEnabled="{Binding IsScenarioNotLoaded}" 
                           ToolTipDescription="Clear the currently selected range complex" Command="{Binding ClearRangeComplexSelectionCommand}" />
         </r:RibbonGroup>
-                <r:RibbonGroup Header="Time Period" IsEnabled="{Binding IsScenarioNotLoaded}">
-          <ListView Width="80" Height="66" ItemsSource="{x:Static NAVO:NAVOConfiguration.AllTimePeriods}"
-                    IsEnabled="{Binding IsRangeComplexSelected}" SelectedItem="{Binding RangeComplexes.SelectedTimePeriod}"
+                <r:RibbonGroup Header="Time Period" ToolTip="{Binding ScenarioLoadedToolTip}">
+          <ListView Width="80" Height="66" ItemsSource="{x:Static NAVO:NAVOConfiguration.AllTimePeriods}" 
+                    IsEnabled="{Binding IsTimePeriodSelectionEnabled}" SelectedItem="{Binding RangeComplexes.SelectedTimePeriod}"
                     SelectedIndex="{Binding SelectedTimePeriodIndex}" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                     SelectionMode="Single">
             <ListView.ItemsPanel>
