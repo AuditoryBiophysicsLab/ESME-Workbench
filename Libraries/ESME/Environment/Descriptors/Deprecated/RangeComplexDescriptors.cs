@@ -10,6 +10,7 @@ using HRC.Navigation;
 
 namespace ESME.Environment.Descriptors
 {
+#if false
     public class RangeComplexDescriptors : NAEMODescriptors<RangeComplexDescriptor>
     {
         private RangeComplexDescriptors() { }
@@ -165,4 +166,5 @@ namespace ESME.Environment.Descriptors
             File.Move(newCSVFileName, oldCSVFileName);
         }
     }
+#endif
 }

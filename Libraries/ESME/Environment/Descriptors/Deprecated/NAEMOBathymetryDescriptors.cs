@@ -7,6 +7,7 @@ using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
+#if false
     public class NAEMOBathymetryDescriptors : NAEMODescriptors<NAEMOBathymetryDescriptor>
     {
         public NAEMOBathymetryDescriptors(string selectedRangeComplexName) : base(selectedRangeComplexName, "Bathymetry", "*.txt", Filter) { Refresh(); }
@@ -69,4 +70,5 @@ namespace ESME.Environment.Descriptors
             File.Delete(bathymetryDescriptor.Metadata.Filename);
         }
     }
+#endif
 }

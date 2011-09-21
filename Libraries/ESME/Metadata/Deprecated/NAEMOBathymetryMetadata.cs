@@ -13,6 +13,7 @@ using HRC.Utility;
 
 namespace ESME.Metadata
 {
+#if false
     public class NAEMOBathymetryMetadata : NAEMOMetadataBase
     {
         new internal static readonly List<Type> ReferencedTypes = new List<Type>(NAEMOMetadataBase.ReferencedTypes) { typeof(EarthCoordinate), typeof(GeoRect) };
@@ -177,4 +178,5 @@ namespace ESME.Metadata
         #endregion
 
     }
+#endif
 }

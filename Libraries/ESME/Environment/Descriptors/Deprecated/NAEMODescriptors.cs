@@ -7,6 +7,7 @@ using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
+#if false
     public abstract class NAEMODescriptors<T> : ObservableList<KeyValuePair<string, T>> where T : NAEMODescriptor, new()
     {
         public delegate KeyValuePair<string, T> NewDescriptor(string sourceFilename);
@@ -81,4 +82,5 @@ namespace ESME.Environment.Descriptors
 
         public bool Remove(T item) { return Remove(Find(entry => entry.Value == item)); }
     }
+#endif
 }

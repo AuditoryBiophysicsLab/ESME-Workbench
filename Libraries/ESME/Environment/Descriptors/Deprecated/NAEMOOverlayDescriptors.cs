@@ -10,6 +10,7 @@ using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
+#if false
     public class NAEMOOverlayDescriptors : NAEMODescriptors<NAEMOOverlayDescriptor>
     {
         public NAEMOOverlayDescriptors(string selectedRangeComplexName) : base(selectedRangeComplexName, "Areas", "*.ovr") { Refresh(); }
@@ -142,4 +143,5 @@ namespace ESME.Environment.Descriptors
             File.Delete(targetOverlayDescriptor.Metadata.Filename);
         }
     }
+#endif
 }

@@ -2,6 +2,7 @@
 
 namespace ESME.Environment.Descriptors
 {
+#if false
     public abstract class NAEMODescriptor<TData, TMetadata> : NAEMODescriptor where TMetadata : NAEMOMetadataBase, new()
     {
 
@@ -21,4 +22,5 @@ namespace ESME.Environment.Descriptors
         public abstract void Save();
         public string DataFilename { get; set; }
     }
+#endif
 }

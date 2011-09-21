@@ -4,6 +4,7 @@ using Cinch;
 
 namespace ESME.Metadata
 {
+#if false
     public class NAEMOOverlayMetadata : NAEMOMetadataBase
     {
         public static NAEMOOverlayMetadata Load(string metaDataFilename) { return Load<NAEMOOverlayMetadata>(metaDataFilename); }
@@ -28,4 +29,5 @@ namespace ESME.Metadata
 
         public void Save(string filename = null) { Save(this, ReferencedTypes, filename); }
     }
+#endif
 }

@@ -8,6 +8,7 @@ using ESME.TransmissionLoss.CASS;
 
 namespace ESME.Metadata
 {
+#if false
     public class NAEMOEnvironmentMetadata : NAEMOMetadataBase
     {
         public NAEMOEnvironmentMetadata() {  }
@@ -86,4 +87,5 @@ namespace ESME.Metadata
 
         #endregion
     }
+#endif
 }

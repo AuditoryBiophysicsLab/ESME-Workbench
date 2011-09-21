@@ -5,6 +5,7 @@ using ESME.TransmissionLoss.CASS;
 
 namespace ESME.Environment.Descriptors
 {
+#if false
     public class NAEMOEnvironmentDescriptor : NAEMODescriptor<NAEMOEnvironmentFile, NAEMOEnvironmentMetadata>, IEqualityComparer<NAEMOEnvironmentDescriptor>, IComparable<NAEMOEnvironmentDescriptor>
     {
         #region public OverlayFile Data { get; set; }
@@ -49,5 +50,6 @@ namespace ESME.Environment.Descriptors
         public int CompareTo(NAEMOEnvironmentDescriptor other) { return DataFilename.CompareTo(other.DataFilename); }
         #endregion
     }
+#endif
 
 }

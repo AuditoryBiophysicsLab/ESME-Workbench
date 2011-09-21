@@ -8,6 +8,7 @@ using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
+#if false
     public class NAEMOEnvironmentDescriptors : NAEMODescriptors<NAEMOEnvironmentDescriptor>
     {
         public NAEMOEnvironmentDescriptors() {  }
@@ -87,4 +88,6 @@ namespace ESME.Environment.Descriptors
         }
 
     }
+#endif
+
 }

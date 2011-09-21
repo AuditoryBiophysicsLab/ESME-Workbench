@@ -10,6 +10,7 @@ using HRC.Utility;
 
 namespace ESME.Metadata
 {
+#if false
     public class NAEMOMetadataBase : PropertyChangedBase
     {
         protected static readonly List<Type> ReferencedTypes = new List<Type> { typeof(string), typeof(DateTime), typeof(NAVOTimePeriod), typeof(NAEMOEnvironmentLocation), typeof(NAEMOEnvironmentFile) };
@@ -139,4 +140,5 @@ namespace ESME.Metadata
 
         #endregion
     }
+#endif
 }

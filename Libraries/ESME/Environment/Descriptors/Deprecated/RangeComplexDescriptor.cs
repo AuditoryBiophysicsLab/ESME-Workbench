@@ -2,6 +2,7 @@
 
 namespace ESME.Environment.Descriptors
 {
+#if false
     public class RangeComplexDescriptor : NAEMODescriptor<RangeComplex, RangeComplexMetadata>
     {
         public override RangeComplex Data { get; internal set; }
@@ -10,4 +11,5 @@ namespace ESME.Environment.Descriptors
         public NAEMOBathymetryDescriptors NAEMOBathymetryDescriptors { get; set; }
         public NAEMOEnvironmentDescriptors NAEMOEnvironmentDescriptors { get; set; }
     }
+#endif
 }

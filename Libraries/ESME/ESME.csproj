@@ -155,12 +155,12 @@
     <Compile Include="Environment\Bathymetry.cs" />
     <Compile Include="Environment\BottomLoss.cs" />
     <Compile Include="Environment\Descriptors\EnvironmentFile.cs" />
-    <Compile Include="Environment\Descriptors\NAEMOBathymetryDescriptor.cs" />
-    <Compile Include="Environment\Descriptors\NAEMOBathymetryDescriptors.cs" />
-    <Compile Include="Environment\Descriptors\NAEMODescriptor.cs" />
-    <Compile Include="Environment\Descriptors\NAEMOEnvironmentDescriptors.cs" />
-    <Compile Include="Environment\Descriptors\NAEMOOverlayDescriptor.cs" />
-    <Compile Include="Environment\Descriptors\NAEMOOverlayDescriptors.cs" />
+    <Compile Include="Environment\Descriptors\Deprecated\NAEMOBathymetryDescriptor.cs" />
+    <Compile Include="Environment\Descriptors\Deprecated\NAEMOBathymetryDescriptors.cs" />
+    <Compile Include="Environment\Descriptors\Deprecated\NAEMODescriptor.cs" />
+    <Compile Include="Environment\Descriptors\Deprecated\NAEMOEnvironmentDescriptors.cs" />
+    <Compile Include="Environment\Descriptors\Deprecated\NAEMOOverlayDescriptor.cs" />
+    <Compile Include="Environment\Descriptors\Deprecated\NAEMOOverlayDescriptors.cs" />
     <Compile Include="Environment\Descriptors\NewRangeComplex.cs" />
     <Compile Include="Environment\Descriptors\RangeComplexArea.cs" />
     <Compile Include="Environment\Descriptors\RangeComplexes.cs" />
@@ -171,40 +171,39 @@
     <Compile Include="Environment\EnvironmentData.cs" />
     <Compile Include="Environment\EnvironmentImporter.cs" />
     <Compile Include="Environment\EnvironmentMetadata.cs" />
-    <Compile Include="Environment\Location.cs" />
-    <Compile Include="Environment\NAVO\BottomLossDatabase.cs" />
-    <Compile Include="Environment\NAVO\BottomSedimentTypeDatabase.cs" />
+    <Compile Include="Environment\NAVO\Deprecated\BottomLossDatabase.cs" />
+    <Compile Include="Environment\NAVO\Deprecated\BottomSedimentTypeDatabase.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeTable.cs" />
-    <Compile Include="Environment\NAVO\BSTBackgroundExtractor.cs">
+    <Compile Include="Environment\NAVO\Deprecated\BSTBackgroundExtractor.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Environment\NAVO\ChenMilleroLi.cs" />
-    <Compile Include="Environment\NAVO\BottomLossBackgroundExtractor.cs">
+    <Compile Include="Environment\NAVO\Deprecated\BottomLossBackgroundExtractor.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Environment\NAVO\BST.cs" />
     <Compile Include="Environment\NAVO\DBDB.cs" />
     <Compile Include="Environment\NAVO\SMGC.cs" />
-    <Compile Include="Environment\NAVO\DBDBBackgroundExtractor.cs">
+    <Compile Include="Environment\NAVO\Deprecated\DBDBBackgroundExtractor.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Environment\NAVO\DigitalBathymetricDatabase.cs" />
-    <Compile Include="Environment\NAVO\GDEMBackgroundExtractor.cs" />
+    <Compile Include="Environment\NAVO\Deprecated\DigitalBathymetricDatabase.cs" />
+    <Compile Include="Environment\NAVO\Deprecated\GDEMBackgroundExtractor.cs" />
     <Compile Include="Environment\NAVO\GDEM.cs" />
-    <Compile Include="Environment\NAVO\GeneralizedDigitalEnvironmentModelDatabase.cs" />
-    <Compile Include="Environment\NAVO\NAVOBackgroundExtractor.cs">
+    <Compile Include="Environment\NAVO\Deprecated\GeneralizedDigitalEnvironmentModelDatabase.cs" />
+    <Compile Include="Environment\NAVO\Deprecated\NAVOBackgroundExtractor.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Environment\NAVO\NAVOConfiguration.cs" />
     <Compile Include="Environment\NAVO\NAVOExtractionProgram.cs" />
     <Compile Include="Environment\NAVO\NAVODataSources.cs" />
     <Compile Include="Environment\NAVO\NAVOTimePeriod.cs" />
-    <Compile Include="Environment\NAVO\SMGCBackgroundExtractor.cs">
+    <Compile Include="Environment\NAVO\Deprecated\SMGCBackgroundExtractor.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Environment\NAVO\SoundSpeedBackgroundAverager.cs" />
-    <Compile Include="Environment\NAVO\TemperatureAndSalinityFileWriter.cs" />
-    <Compile Include="Environment\Descriptors\RangeComplexDescriptor.cs" />
+    <Compile Include="Environment\NAVO\Deprecated\SoundSpeedBackgroundAverager.cs" />
+    <Compile Include="Environment\NAVO\Deprecated\TemperatureAndSalinityFileWriter.cs" />
+    <Compile Include="Environment\Descriptors\Deprecated\RangeComplexDescriptor.cs" />
     <Compile Include="Mapping\CustomStartEndLineStyle.cs" />
     <Compile Include="Mapping\LayerListViewModel.cs" />
     <Compile Include="Mapping\LayerType.cs" />
@@ -219,9 +218,8 @@
     <Compile Include="Mapping\ShapefileMapLayer.cs" />
     <Compile Include="Mapping\TreeNode.cs" />
     <Compile Include="Metadata\PropertiesViewModel.cs" />
-    <Compile Include="Metadata\RangeComplexMetadata.cs" />
     <Compile Include="Environment\Sediment.cs" />
-    <Compile Include="Environment\NAVO\SurfaceMarineGriddedClimatologyDatabase.cs" />
+    <Compile Include="Environment\NAVO\Deprecated\SurfaceMarineGriddedClimatologyDatabase.cs" />
     <Compile Include="Environment\SoundSpeed.cs" />
     <Compile Include="Environment\SoundSpeedField.cs" />
     <Compile Include="Environment\SoundSpeedProfile.cs" />
@@ -229,19 +227,19 @@
     <Compile Include="Environment\UNESCO.cs" />
     <Compile Include="Environment\Wind.cs" />
     <Compile Include="MediatorMessages.cs" />
-    <Compile Include="Metadata\NAEMOBathymetryMetadata.cs" />
-    <Compile Include="Metadata\NAEMOEnvironmentMetadata.cs" />
-    <Compile Include="Metadata\NAEMOMetadata.cs" />
-    <Compile Include="Metadata\NAEMOMetadataBase.cs" />
-    <Compile Include="Metadata\NAEMOOverlayMetadata.cs" />
+    <Compile Include="Metadata\Deprecated\NAEMOBathymetryMetadata.cs" />
+    <Compile Include="Metadata\Deprecated\NAEMOEnvironmentMetadata.cs" />
+    <Compile Include="Metadata\Deprecated\NAEMOMetadata.cs" />
+    <Compile Include="Metadata\Deprecated\NAEMOMetadataBase.cs" />
+    <Compile Include="Metadata\Deprecated\NAEMOOverlayMetadata.cs" />
     <Compile Include="Metadata\NAEMOScenarioMetadata.cs" />
     <Compile Include="Animats\AnimatInterface.cs" />
     <Compile Include="NEMO\Exceptions.cs" />
     <Compile Include="NEMO\Overlay\Exceptions.cs" />
-    <Compile Include="Environment\Descriptors\NAEMODescriptors.cs" />
+    <Compile Include="Environment\Descriptors\Deprecated\NAEMODescriptors.cs" />
     <Compile Include="NEMO\Overlay\OverlayCircle.cs" />
     <Compile Include="NEMO\Overlay\OverlayFile.cs" />
-    <Compile Include="Environment\Descriptors\NAEMOEnvironmentDescriptor.cs" />
+    <Compile Include="Environment\Descriptors\Deprecated\NAEMOEnvironmentDescriptor.cs" />
     <Compile Include="NEMO\Overlay\OverlayLabel.cs" />
     <Compile Include="NEMO\Overlay\OverlayLineSegments.cs" />
     <Compile Include="NEMO\Overlay\OverlayParser.cs" />
@@ -288,7 +286,7 @@
     <Compile Include="TransmissionLoss\Bellhop\TransmissionLossSettings.cs" />
     <Compile Include="TransmissionLoss\CASS\CassFiles.cs" />
     <Compile Include="TransmissionLoss\CASS\NAEMOEnvironmentLocation.cs" />
-    <Compile Include="Environment\Descriptors\RangeComplexDescriptors.cs" />
+    <Compile Include="Environment\Descriptors\Deprecated\RangeComplexDescriptors.cs" />
     <Compile Include="TransmissionLoss\RAM\Ram.cs">
       <SubType>Code</SubType>
     </Compile>
