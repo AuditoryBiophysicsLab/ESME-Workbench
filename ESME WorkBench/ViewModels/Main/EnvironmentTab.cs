@@ -228,7 +228,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public bool IsTimePeriodSelectionEnabled
         {
-            get { return IsScenarioLoaded && IsScenarioNotLoaded; }
+            get { return IsRangeComplexSelected && IsScenarioNotLoaded; }
         }
 
         static readonly PropertyChangedEventArgs IsTimePeriodSelectionEnabledChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsTimePeriodSelectionEnabled);

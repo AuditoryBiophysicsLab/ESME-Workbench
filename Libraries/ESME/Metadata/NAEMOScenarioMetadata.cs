@@ -42,6 +42,7 @@ namespace ESME.Metadata
                 using (var stream = new FileStream(metadataFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
                     result = (NAEMOScenarioMetadata)new BinaryFormatter().Deserialize(stream);
                 result._filename = metadataFilename;
+                return result;
             }
             catch (Exception)
             {
