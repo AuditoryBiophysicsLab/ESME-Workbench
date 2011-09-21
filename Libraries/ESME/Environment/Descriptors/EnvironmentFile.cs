@@ -78,9 +78,6 @@ namespace ESME.Environment.Descriptors
             }
         }
 
-        public virtual Task GetDataAsync() { throw new NotImplementedException(); }
-        public virtual void Reset() { throw new NotImplementedException(); }
-
         #region public bool IsDeleteable { get; set; }
 
         public bool IsDeleteable
@@ -343,14 +340,12 @@ namespace ESME.Environment.Descriptors
         public void Initialize()
         {
             DataAvailability = DataAvailability.NotLoaded;
-            Months = new ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<T>>();
-            MonthsList = ObservableList<EnvironmentFile<T>>.FromObservableConcurrentDictionary(Months, kvp => kvp.Value, (kvp, ef) => kvp.Key == ef.TimePeriod);
-            _sourceTasks = new List<Task>();
+            Reset();
         }
 
-        public override Task GetDataAsync() { return GetMyDataAsync(); }
         public Task<T> GetMyDataAsync()
         {
+            if (DataTask == null) Reset();
             if (DataTask == null) throw new InvalidOperationException("Requested data has not been imported");
             if (DataTask.Status != TaskStatus.Created) return DataTask;
             DataTask.Start();
@@ -359,7 +354,7 @@ namespace ESME.Environment.Descriptors
             return DataTask;
         }
 
-        public override void Reset()
+        public virtual void Reset()
         {
             DataAvailability = DataAvailability.NotLoaded;
             if (DataTask != null && DataTask.IsCompleted)
@@ -368,22 +363,6 @@ namespace ESME.Environment.Descriptors
                 DataTask.Dispose();
             }
         }
-
-        async Task GetRequiredFilesAsync()
-        {
-            if (RequiredFiles.Count == 0) return;
-            var tasks = RequiredFiles.Select(file => file.GetDataAsync()).ToList();
-            await TaskEx.WhenAll(tasks);
-        }
-
-        public void LinkTo<TSource, TData>(TSource sourceMonth)
-            where TSource : EnvironmentFile<TData>
-            where TData : class
-        {
-            _sourceTasks.Add(sourceMonth.DataTask);
-        }
-
-        [NonSerialized] List<Task> _sourceTasks;
 
         public Task<T> DataTask
         {
@@ -407,43 +386,6 @@ namespace ESME.Environment.Descriptors
             }
         }
         [NonSerialized] Task<T> _dataTask;
-
-        #region public ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<T>> Months { get; set; }
-
-        public ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<T>> Months
-        {
-            get { return _months; }
-            set
-            {
-                if (_months == value) return;
-                _months = value;
-                NotifyPropertyChanged(MonthsChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs MonthsChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile<T>>(x => x.Months);
-        [NonSerialized] ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<T>> _months;
-
-        #endregion
-
-        #region public ObservableList<EnvironmentFile<T>> MonthsList { get; set; }
-
-        public ObservableList<EnvironmentFile<T>> MonthsList
-        {
-            get { return _monthsList; }
-            private set
-            {
-                if (_monthsList == value) return;
-                _monthsList = value;
-                NotifyPropertyChanged(MonthsListChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs MonthsListChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile<T>>(x => x.MonthsList);
-        [NonSerialized] ObservableList<EnvironmentFile<T>> _monthsList;
-
-        #endregion
-
     }
 
     [Serializable]
@@ -535,8 +477,8 @@ namespace ESME.Environment.Descriptors
                     Debug.WriteLine("{0} SSP: Computing soundspeed for {1}", DateTime.Now, TimePeriod);
                     foreach (var month in months)
                     {
-                        RangeComplexToken[string.Format("{0}.temperature", month)].Reset();
-                        RangeComplexToken[string.Format("{0}.salinity", month)].Reset();
+                        ((TemperatureFile)RangeComplexToken[string.Format("{0}.temperature", month)]).Reset();
+                        ((SalinityFile)RangeComplexToken[string.Format("{0}.salinity", month)]).Reset();
                     }
                     var sources = (from month in months
                                    select new

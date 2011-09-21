@@ -108,7 +108,7 @@ namespace ESMEWorkBench.ViewModels.Main
             DisplayRangeComplex();
             if (RangeComplexes.IsRangeComplexSelected)
             {
-                RangeComplexes.SelectedSediment.GetDataAsync();
+                RangeComplexes.SelectedSediment.GetMyDataAsync();
                 RangeComplexes.SelectedSediment.DataTask.ContinueWith(task =>
                 {
                     var result = task.Result.Samples.GroupBy(sample => sample.Data.SampleValue);
@@ -130,7 +130,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                            false)));
                     }
                 });
-                RangeComplexes.SelectedBottomLoss.GetDataAsync();
+                RangeComplexes.SelectedBottomLoss.GetMyDataAsync();
                 RangeComplexes.SelectedBottomLoss.DataTask.ContinueWith(task =>
                 {
                     var samplePoints = task.Result.Samples.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
@@ -161,7 +161,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             if (RangeComplexes.IsRangeComplexSelected && RangeComplexes.IsTimePeriodSelected)
             {
-                RangeComplexes.SelectedWind.GetDataAsync();
+                RangeComplexes.SelectedWind.GetMyDataAsync();
                 RangeComplexes.SelectedWind.DataTask.ContinueWith(task =>
                 {
                     var samplePoints = task.Result[RangeComplexes.SelectedTimePeriod].EnvironmentData.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
@@ -178,7 +178,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (RangeComplexes.SelectedSoundSpeed.DataTask != null)
                 {
-                    RangeComplexes.SelectedSoundSpeed.GetDataAsync();
+                    RangeComplexes.SelectedSoundSpeed.GetMyDataAsync();
                     RangeComplexes.SelectedSoundSpeed.DataTask.ContinueWith(task =>
                     {
 

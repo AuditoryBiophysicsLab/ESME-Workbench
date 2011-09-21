@@ -88,43 +88,40 @@ namespace ESMEWorkBench.ViewModels.Main
 
                 // Get the time frame of the scenario
                 var scenarioTimeFrame = (NAVOTimePeriod)Enum.Parse(typeof (NAVOTimePeriod), NemoFile.Scenario.TimeFrame);
-                
-                // Try to select the environment data set as a whole piece
-                if (!RangeComplexes.SelectDataset(NemoFile.Scenario.SimAreaName, scenarioTimeFrame, ScenarioMetadata.SelectedAreaName, ScenarioMetadata.SelectedResolutionName))
+
+               
+                RangeComplexes.SelectedRangeComplex = RangeComplexes.RangeComplexCollection[NemoFile.Scenario.SimAreaName];
+                RangeComplexes.SelectedTimePeriod = scenarioTimeFrame;
+
+                // If the previously-selected area does not exist, set the name to null
+                if ((ScenarioMetadata.SelectedAreaName != null) && (!RangeComplexes.SelectedRangeComplex.AreaCollection.ContainsKey(ScenarioMetadata.SelectedAreaName))) ScenarioMetadata.SelectedAreaName = null;
+
+                // Use the selected area if it exists, otherwise use the sim area
+                RangeComplexes.SelectedArea = ScenarioMetadata.SelectedAreaName != null
+                                                    ? RangeComplexes.SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName]
+                                                    : RangeComplexes.SelectedRangeComplex.SimArea;
+
+                // If an area name has been selected, and the selected range complex has an area of that same name, select it as the current area
+                if (!string.IsNullOrEmpty(ScenarioMetadata.SelectedAreaName) && (RangeComplexes.SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName] != null)) RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName];
+
+                // If an resolution has been selected, and the selected area has cached bathymetry of that resolution, select it
+                if (!string.IsNullOrEmpty(ScenarioMetadata.SelectedResolutionName) && (RangeComplexes.SelectedArea != RangeComplexArea.None) &&
+                    (RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName] != null) && RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName].IsCached) RangeComplexes.SelectedBathymetry = (BathymetryFile)RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName];
+                else
                 {
-                    RangeComplexes.SelectedRangeComplex = RangeComplexes.RangeComplexCollection[NemoFile.Scenario.SimAreaName];
-                    RangeComplexes.SelectedTimePeriod = scenarioTimeFrame;
-
-                    // If the previously-selected area does not exist, set the name to null
-                    if ((ScenarioMetadata.SelectedAreaName != null) && (!RangeComplexes.SelectedRangeComplex.AreaCollection.ContainsKey(ScenarioMetadata.SelectedAreaName))) ScenarioMetadata.SelectedAreaName = null;
-
-                    // Use the selected area if it exists, otherwise use the sim area
-                    RangeComplexes.SelectedArea = ScenarioMetadata.SelectedAreaName != null
-                                                      ? RangeComplexes.SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName]
-                                                      : RangeComplexes.SelectedRangeComplex.SimArea;
-
-                    // If an area name has been selected, and the selected range complex has an area of that same name, select it as the current area
-                    if (!string.IsNullOrEmpty(ScenarioMetadata.SelectedAreaName) && (RangeComplexes.SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName] != null)) RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName];
-
-                    // If an resolution has been selected, and the selected area has cached bathymetry of that resolution, select it
-                    if (!string.IsNullOrEmpty(ScenarioMetadata.SelectedResolutionName) && (RangeComplexes.SelectedArea != RangeComplexArea.None) &&
-                        (RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName] != null) && RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName].IsCached) RangeComplexes.SelectedBathymetry = (BathymetryFile)RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName];
-                    else
+                    uint maxSamplesSeen = 0;
+                    var selectedBathymetry = BathymetryFile.None;
+                    foreach (var entry in RangeComplexes.SelectedArea.BathymetryFiles)
                     {
-                        uint maxSamplesSeen = 0;
-                        var selectedBathymetry = BathymetryFile.None;
-                        foreach (var entry in RangeComplexes.SelectedArea.BathymetryFiles)
-                        {
-                            var bathymetryFile = (BathymetryFile)entry.Value;
-                            var isCached = bathymetryFile.IsCached;
-                            var samples = bathymetryFile.SampleCount;
-                            if (!isCached) continue;
-                            if (samples <= maxSamplesSeen || samples > 512000) continue;
-                            maxSamplesSeen = samples;
-                            selectedBathymetry = bathymetryFile;
-                        }
-                        RangeComplexes.SelectedBathymetry = selectedBathymetry;
+                        var bathymetryFile = (BathymetryFile)entry.Value;
+                        var isCached = bathymetryFile.IsCached;
+                        var samples = bathymetryFile.SampleCount;
+                        if (!isCached) continue;
+                        if (samples <= maxSamplesSeen || samples > 512000) continue;
+                        maxSamplesSeen = samples;
+                        selectedBathymetry = bathymetryFile;
                     }
+                    RangeComplexes.SelectedBathymetry = selectedBathymetry;
                 }
 
                 // Initialize the scenario metadata with the list of distinct mode names from the scenario file
@@ -174,23 +171,15 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (CASSOutputs == null) CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
                 else CASSOutputs.RefreshInBackground();
 
-                ScenarioMetadata.PropertyChanged += async (s, e) =>
+                RangeComplexes.PropertyChanged += (s, e) =>
                 {
                     switch (e.PropertyName)
                     {
-                        case "SelectedAreaName":
-                        case "SelectedResolutionName":
-                            if ((RangeComplexes.SelectedBathymetry != BathymetryFile.None) || (RangeComplexes.SelectedArea == RangeComplexArea.None)) return;
-                            var retry = 20;
-                            while (--retry > 0)
-                            {
-                                if (RangeComplexes.SelectedBathymetry.DataTask == null) await TaskEx.Delay(50);
-                                else break;
-                            }
-                            if (RangeComplexes.SelectedBathymetry.DataTask == null) return;
-                            RangeComplexes.SelectedBathymetry.DataTask.ContinueWith(task => ReprocessCASSOutputs());
-                            break;
-                        default:
+                        case "SelectedArea":
+                        case "SelectedBathymetry":
+                            if (!RangeComplexes.SelectedBathymetry.IsCached) return;
+                            if (RangeComplexes.SelectedBathymetry.DataTask == null) RangeComplexes.SelectedBathymetry.Reset();
+                            RangeComplexes.SelectedBathymetry.GetMyDataAsync().ContinueWith(task => ReprocessCASSOutputs());
                             break;
                     }
                 };
@@ -233,7 +222,6 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             if (ScenarioMetadata != null) ScenarioMetadata.Save();
             ScenarioMetadata = null;
-            TreeViewRootNodes = null;
             NemoFile = null;
             var scenarioLayerTypes = new List<LayerType> { LayerType.AnalysisPoint, LayerType.Animal, LayerType.Pressure, LayerType.Propagation, LayerType.Track };
             scenarioLayerTypes.ForEach(layerType => CurrentMapLayers.RemoveAll(layer => layer.LayerType == layerType));
@@ -262,8 +250,6 @@ namespace ESMEWorkBench.ViewModels.Main
                 {
                     ScenarioLoadedToolTip = null;
                     _cassFileQueue.Complete();
-                    _cassFileQueue = null;
-                    _cassOutputProcessor = null;
                 }
                 else
                 {
@@ -297,7 +283,12 @@ namespace ESMEWorkBench.ViewModels.Main
                     });
                     _cassFileQueue = new BufferBlock<CASSOutput>();
                     _cassFileQueue.LinkTo(_cassOutputProcessor);
-                    _cassFileQueue.Completion.ContinueWith(task => _cassFileQueue.Complete());
+                    _cassFileQueue.Completion.ContinueWith(task =>
+                    {
+                        _cassOutputProcessor.Complete();
+                        _cassOutputProcessor.Completion.ContinueWith(t => { _cassOutputProcessor = null; });
+                        _cassFileQueue = null;
+                    });
                 }
             }
         }
@@ -675,6 +666,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     Debug.WriteLine("NotifyCollectionChangedAction.Move");
                     break;
                 case NotifyCollectionChangedAction.Remove:
+                    if (TreeViewRootNodes == null) return;
                     foreach (MapLayerViewModel item in e.OldItems)
                     {
                         foreach (var tree in TreeViewRootNodes) tree.RemoveMapLayer(item);

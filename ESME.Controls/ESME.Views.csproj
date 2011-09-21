@@ -148,7 +148,6 @@
     <Compile Include="EnvironmentBuilder\EnvironmentBuilderView.xaml.cs">
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EnvironmentBuilder\EnvironmentSelectionViewModel.cs" />
     <Compile Include="EnvironmentBuilder\ImportProgressListView.xaml.cs">
       <DependentUpon>ImportProgressListView.xaml</DependentUpon>
     </Compile>

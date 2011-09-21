@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml.Serialization;
 using Cinch;
+using ESME.Environment;
 using ESME.TransmissionLoss;
 using HRC.Utility;
 
@@ -16,8 +18,6 @@ namespace ESME.Metadata
         public ScenarioMetadata()
         {
             AnalysisPoints = new ObservableList<AnalysisPoint>();
-            PropertyChanged += (s, e) => Save();
-            AnalysisPoints.CollectionChanged += (s, e) => Save();
         }
         
         ScenarioMetadata(string nemoFilename) : this()
@@ -40,28 +40,21 @@ namespace ESME.Metadata
 
         public void Save(string filename = null)
         {
-            if (filename == null) filename = Filename;
+            if (filename == null) filename = _filename;
             if (filename == null) return;
-            var serializer = new XmlSerializer<ScenarioMetadata> { Data = this };
-            serializer.Save(filename, ReferencedTypes);
+            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
+                new BinaryFormatter().Serialize(stream, this);
         }
 
         public static ScenarioMetadata LoadOrCreate(string nemoFilename)
         {
             var metadataFilename = MetadataFilename(nemoFilename);
-            try
-            {
-                var result = XmlSerializer<ScenarioMetadata>.Load(nemoFilename, ReferencedTypes);
-                result.PropertyChanged += (s, e) => result.Save();
-                result.AnalysisPoints.CollectionChanged += (s, e) => result.Save();
-                result._filename = metadataFilename;
-                return result;
-            }
-            catch (Exception)
-            {
-                if (File.Exists(metadataFilename)) File.Delete(metadataFilename);
-            }
-            return new ScenarioMetadata(nemoFilename);
+            if (!File.Exists(metadataFilename)) return new ScenarioMetadata(nemoFilename);
+            ScenarioMetadata result;
+            using (var stream = new FileStream(metadataFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
+                result = (ScenarioMetadata)new BinaryFormatter().Deserialize(stream);
+            result._filename = metadataFilename;
+            return result;
         }
 
         #region public string Filename { get; set; }

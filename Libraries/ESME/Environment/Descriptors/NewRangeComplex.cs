@@ -54,10 +54,6 @@ namespace ESME.Environment.Descriptors
             Directory.CreateDirectory(SpeciesPath);
             Directory.CreateDirectory(Path.Combine(RangeComplexPath, "GeographicAreas"));
 
-            TemperatureFile = new TemperatureFile();
-            SalinityFile = new SalinityFile();
-            SoundSpeedFile = new SoundSpeedFile();
-
             EnvironmentFiles = RangeComplexToken.Load(Path.Combine(DataPath, Name + ".token"));
             EnvironmentList = EnvironmentFiles.GetObservableWrapper<EnvironmentFile>();
             _dispatcher.InvokeIfRequired(() =>
@@ -68,32 +64,6 @@ namespace ESME.Environment.Descriptors
             IsLoading = false;
             UpdateAreas();
             if ((EnvironmentFiles.GeoRect == null) || (!EnvironmentFiles.GeoRect.Contains(GeoRect))) EnvironmentFiles.ReextractionRequired = true;
-
-            foreach (var envFile in EnvironmentFiles)
-            {
-                switch (envFile.Value.DataType)
-                {
-                    case EnvironmentDataType.Bathymetry:
-                        throw new NotImplementedException();
-                    case EnvironmentDataType.BottomLoss:
-                        BottomLossFile = (BottomLossFile)envFile.Value;
-                        break;
-                    case EnvironmentDataType.Salinity:
-                        var salinityFile = (SalinityFile)envFile.Value;
-                        SalinityFile.Months.Add(salinityFile.TimePeriod, salinityFile);
-                        break;
-                    case EnvironmentDataType.Sediment:
-                        SedimentFile = (SedimentFile)envFile.Value;
-                        break;
-                    case EnvironmentDataType.Temperature:
-                        var temperatureFile = (TemperatureFile)envFile.Value;
-                        TemperatureFile.Months.Add(temperatureFile.TimePeriod, temperatureFile);
-                        break;
-                    case EnvironmentDataType.Wind:
-                        WindFile = (WindFile)envFile.Value;
-                        break;
-                }
-            }
         }
 
         [NotNull] readonly Dispatcher _dispatcher;
@@ -206,33 +176,6 @@ namespace ESME.Environment.Descriptors
             }
         }
         
-        void LinkToSourceMonths<TEnvironment, TData>(TEnvironment envFile, NAVOTimePeriod timePeriod, EnvironmentDataType sourceType) where TEnvironment: EnvironmentFile<TData> where TData : class
-        {
-            var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod).ToList();
-            envFile.RequiredFiles.Clear();
-            foreach (var month in months)
-            {
-                string key;
-                switch (sourceType)
-                {
-                    case EnvironmentDataType.Wind:
-                    case EnvironmentDataType.Sediment:
-                    case EnvironmentDataType.BottomLoss:
-                        key = string.Format("data.{0}", sourceType.ToString().ToLower());
-                        break;
-                    case EnvironmentDataType.Salinity:
-                    case EnvironmentDataType.SoundSpeed:
-                    case EnvironmentDataType.Temperature:
-                        key = string.Format("{0}.{1}", timePeriod, sourceType.ToString().ToLower());
-                        break;
-                    default:
-                        throw new ApplicationException(string.Format("Unknown environment data type: {0}", sourceType));
-                }
-                envFile.LinkTo<TEnvironment, TData>((TEnvironment)EnvironmentFiles[key]);
-                envFile.RequiredFiles.Add(EnvironmentFiles[string.Format("{0}.{1}", month, sourceType.ToString().ToLower())]);
-            }
-        }
-
         EnvironmentFile NewEnvironmentFile(string fileName, uint sampleCount, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
         {
             switch (dataType)
@@ -284,16 +227,16 @@ namespace ESME.Environment.Descriptors
                         envFile = BottomLossFile = (BottomLossFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
                         break;
                     case EnvironmentDataType.Salinity:
-                        envFile = SalinityFile.Months[timePeriod] = (SalinityFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
+                        envFile = SalinityFile = (SalinityFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
                         break;
                     case EnvironmentDataType.Sediment:
                         envFile = SedimentFile = (SedimentFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
                         break;
                     case EnvironmentDataType.Temperature:
-                        envFile = TemperatureFile.Months[timePeriod] = (TemperatureFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
+                        envFile = TemperatureFile = (TemperatureFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
                         break;
                     case EnvironmentDataType.SoundSpeed:
-                        envFile = SoundSpeedFile.Months[timePeriod] = (SoundSpeedFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
+                        envFile = SoundSpeedFile = (SoundSpeedFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
                         break;
                     case EnvironmentDataType.Wind:
                         envFile = WindFile = (WindFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);

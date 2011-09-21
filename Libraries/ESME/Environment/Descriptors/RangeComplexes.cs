@@ -335,23 +335,6 @@ namespace ESME.Environment.Descriptors
                 _selectedArea = value ?? RangeComplexArea.None;
                 IsAreaSelected = _selectedArea != RangeComplexArea.None;
                 
-                if (IsRangeComplexSelected && IsAreaSelected && !IsBathymetrySelected)
-                {
-                    uint maxSamplesSeen = 0;
-                    var selectedBathymetry = BathymetryFile.None;
-                    foreach (var entry in _selectedArea.BathymetryFiles)
-                    {
-                        var bathymetryFile = (BathymetryFile)entry.Value;
-                        var isCached = bathymetryFile.IsCached;
-                        var samples = bathymetryFile.SampleCount;
-                        if (!isCached) continue;
-                        if (samples <= maxSamplesSeen || samples > 512000) continue;
-                        maxSamplesSeen = samples;
-                        selectedBathymetry = bathymetryFile;
-                    }
-                    _selectedBathymetry = selectedBathymetry;
-                }
-
                 CheckEnvironment();
                 CheckSoundSpeed();
                 NotifyPropertyChanged(SelectedAreaChangedEventArgs);
