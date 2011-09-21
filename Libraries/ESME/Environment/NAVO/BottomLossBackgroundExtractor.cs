@@ -13,6 +13,7 @@ using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
+#if false
     public class BottomLossBackgroundExtractor : NAVOBackgroundExtractor
     {
         #region public bool UseHFBL { get; set; }
@@ -377,4 +378,5 @@ namespace ESME.Environment.NAVO
             return null;
         }
     }
+#endif
 }

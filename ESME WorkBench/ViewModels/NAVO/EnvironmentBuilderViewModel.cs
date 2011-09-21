@@ -23,6 +23,7 @@ using HRC.Utility;
 
 namespace ESMEWorkBench.ViewModels.NAVO
 {
+#if false
     public class EnvironmentBuilderViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         Dispatcher _dispatcher;
@@ -789,4 +790,5 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #endregion
     }
+#endif
 }

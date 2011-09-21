@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 namespace ESME.TransmissionLoss
 {
+    [Serializable]
     public class NemoModeToAcousticModelNameMap : List<HRC.Collections.EditableKeyValuePair<string, TransmissionLossAlgorithm>>
     {
         public NemoModeToAcousticModelNameMap() {  }

@@ -6,6 +6,7 @@ using HDF5DotNet;
 
 namespace ESME.Environment.NAVO
 {
+#if false
     public class BottomSedimentTypeDatabase
     {
         public static string DatabasePath { get; set; }
@@ -109,4 +110,5 @@ namespace ESME.Environment.NAVO
             }
         }
     }
+#endif
 }

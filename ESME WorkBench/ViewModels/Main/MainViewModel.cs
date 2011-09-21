@@ -86,6 +86,7 @@ namespace ESMEWorkBench.ViewModels.Main
             IsLatLonGridVisible = Settings.Default.ShowGrid;
             IsScaleBarVisible = Settings.Default.ShowScaleBar;
             IsPanZoomVisible = Settings.Default.ShowPanZoom;
+            IsEnvironmentTabSelected = Settings.Default.SelectedRibbonTabIndex == 1;
 
             if (Globals.AppSettings != null && Globals.AppSettings.ScenarioDataDirectory != null && File.Exists(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv")))
                 InitializeEnvironmentManager();
@@ -210,45 +211,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region Drag/Drop
-
-        public bool IsAddScenarioFilePossible()
-        {
-            return ((Globals.AppSettings.ScenarioDataDirectory != null) && (Directory.Exists(Globals.AppSettings.ScenarioDataDirectory)) && (_experiment != null) && (_experiment.NemoFile == null));
-        }
-
-        public void FilesDropped(Object sender, DragEventArgs e)
-        {
-            if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
-            var droppedFilePaths = (string[])e.Data.GetData(DataFormats.FileDrop, true);
-            var refreshNeeded = false;
-            foreach (var file in droppedFilePaths)
-            {
-                try
-                {
-                    switch (Path.GetExtension(file).ToLower())
-                    {
-                        case ".shp":
-                        case ".ovr":
-                            MediatorMessage.Send(MediatorMessage.AddFileCommand, file);
-                            refreshNeeded = true;
-                            break;
-                        case ".nemo":
-                            if (!UserWantsToReplaceScenarioFileIfPresent(file)) continue;
-                            MediatorMessage.Send(MediatorMessage.AddScenarioFileCommand, file);
-                            refreshNeeded = true;
-                            break;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Globals.DisplayException(_messageBoxService, ex, "Error opening dropped file {0}", file);
-                }
-            }
-            if (refreshNeeded) MediatorMessage.Send(MediatorMessage.RefreshMap);
-        }
-        #endregion
-
         async void InitializeEnvironmentManager()
         {
             RangeComplexes = RangeComplexes.Singleton;
@@ -302,6 +264,8 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (Settings.Default.SelectedRibbonTabIndex == value) return;
                 Settings.Default.SelectedRibbonTabIndex = value;
                 IsEnvironmentTabSelected = Settings.Default.SelectedRibbonTabIndex == 1;
+                if (!IsEnvironmentTabSelected) SelectedSidebarTabIndex = IsScenarioLoaded ? 1 : 0;
+
                 NotifyPropertyChanged(SelectedRibbonTabIndexChangedEventArgs);
             }
         }
@@ -328,148 +292,23 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public int SelectedSidebarTabIndex { get; set; }
 
-#if EXPERIMENTS_SUPPORTED
-
-        public bool UserWantsToAddScenarioFile(string fileName)
+        public int SelectedSidebarTabIndex
         {
-            if (!IsAddScenarioFilePossible()) return false;
-            if ((_experiment.ScenarioFileName != null) && (_messageBoxService.ShowYesNo("A scenario is already part of this experiment.\nWould you like to replace the current scenario file with this one?", CustomDialogIcons.Exclamation) != CustomDialogResults.Yes)) return false;
-            return true;
-        }
-
-        #region Experiment Load/Save and associated utility functions
-
-        void OpenExperiment(string fileName)
-        {
-            if (fileName == null)
+            get { return _selectedSidebarTabIndex; }
+            set
             {
-                _openFileService.Filter = "ESME files (*.esme)|*.esme|All files (*.*)|*.*";
-                _openFileService.InitialDirectory = Settings.Default.LastExperimentFileDirectory;
-                _openFileService.FileName = null;
-                var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
-                if ((!result.HasValue) || (!result.Value)) return;
-                _experiment.FileName = _openFileService.FileName;
-                Settings.Default.LastExperimentFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
-            }
-            using (new OverrideCursor(Cursors.Wait)) 
-            {
-                LoadExperimentFile(_openFileService.FileName);
-                RecentFiles.InsertFile(_openFileService.FileName);
+                if (_selectedSidebarTabIndex == value) return;
+                _selectedSidebarTabIndex = value;
+                NotifyPropertyChanged(SelectedSidebarTabIndexChangedEventArgs);
             }
         }
 
-        void LoadExperimentFile(string fileName)
-        {
-            try
-            {
-                using (new OverrideCursor(Cursors.Wait)) 
-                {
-                    MediatorMessage.Send(MediatorMessage.EnableGUI, false);
-                    Experiment newExperiment;
-                    try
-                    {
-                        newExperiment = Experiment.Load(fileName);
-                        newExperiment.FileName = fileName;
-                    }
-                    catch (UserCanceledOperationException)
-                    {
-                        return;
-                    }
-                    catch (Exception e)
-                    {
-                        _messageBoxService.ShowError("Error opening experiment: " + e.Message);
-                        return;
-                    }
-                    MediatorMessage.Send(MediatorMessage.SetExperiment, (Experiment)null);
-                    _experiment = newExperiment;
-                    DecoratedExperimentName = Path.GetFileName(_experiment.FileName);
-                    HookPropertyChanged(_experiment);
-                    _experiment.InitializeIfViewModelsReady();
-                }
-            }
-            finally
-            {
-                MediatorMessage.Send(MediatorMessage.EnableGUI, true);
-                IsLatLonGridVisible = Settings.Default.ShowGrid;
-                IsScaleBarVisible = Settings.Default.ShowScaleBar;
-                IsPanZoomVisible = Settings.Default.ShowPanZoom;
-            }
-        }
-
-        void NewExperiment()
-        {
-            if (_experiment != null) _experiment.Close();
-            _experiment = new Experiment();
-            _experiment.InitializeIfViewModelsReady();
-            DecoratedExperimentName = "<New experiment>";
-            HookPropertyChanged(_experiment);
-        }
-
-        bool SaveExperimentDialog()
-        {
-            _saveFileService.Filter = "ESME files (*.esme)|*.esme|All files (*.*)|*.*";
-            _saveFileService.OverwritePrompt = true;
-            _saveFileService.InitialDirectory = Settings.Default.LastExperimentFileDirectory;
-            _saveFileService.FileName = null;
-            var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
-            if ((!result.HasValue) || (!result.Value)) return false;
-            _experiment.FileName = _saveFileService.FileName;
-            Settings.Default.LastExperimentFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-            return true;
-        }
-
-        bool SaveExperimentAs()
-        {
-            var oldRoot = _experiment.LocalStorageRoot;
-            if (!SaveExperimentDialog()) return false;
-            var newRoot = _experiment.LocalStorageRoot;
-            _experiment.Save();
-            if (oldRoot != newRoot)
-            {
-                var oldRootInfo = new DirectoryInfo(oldRoot);
-                var newRootInfo = new DirectoryInfo(newRoot);
-                Experiment.CopyAllPrivateFiles(oldRootInfo, newRootInfo);
-            }
-            DecoratedExperimentName = Path.GetFileName(_experiment.FileName);
-            return true;
-        }
-
-        /// <summary>
-        ///   If the experiment has not been given a file name, prompt the user for it, then save
-        /// </summary>
-        /// <returns>true if the file was saved, false otherwise.</returns>
-        bool SaveExperiment()
-        {
-            if (_experiment.FileName == null)
-            {
-                if (!SaveExperimentDialog()) return false;
-            }
-            _experiment.Save();
-            DecoratedExperimentName = Path.GetFileName(_experiment.FileName);
-            RecentFiles.InsertFile(_experiment.FileName);
-            return true;
-        }
+        static readonly PropertyChangedEventArgs SelectedSidebarTabIndexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedSidebarTabIndex);
+        int _selectedSidebarTabIndex;
 
         #endregion
-
-#endif
-        void OpenScenarioFile(string fileName)
-        {
-            _openFileService.FileName = null;
-            if (fileName == null)
-            {
-                _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
-                _openFileService.InitialDirectory = Settings.Default.LastScenarioFileDirectory;
-                _openFileService.FileName = null;
-                var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
-                if (!result.HasValue || !result.Value) return;
-                fileName = _openFileService.FileName;
-            }
-            if (!UserWantsToReplaceScenarioFileIfPresent(fileName)) return;
-            if (_openFileService.FileName != null) Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
-            MediatorMessage.Send(MediatorMessage.AddScenarioFileCommand, fileName);
-        }
 
         void ShowAboutView()
         {
@@ -477,44 +316,6 @@ namespace ESMEWorkBench.ViewModels.Main
             _visualizerService.ShowDialog("AboutView", aboutViewModel);
         }
 
-#if EXPERIMENTS_SUPPORTED
-
-        bool UserWantsToReplaceScenarioFileIfPresent(string filename)
-        {
-            if ((_experiment != null) && (_experiment.ScenarioFileName != null) && (filename != _experiment.ScenarioFileName))
-            {
-                var result = _messageBoxService.ShowYesNo(string.Format("This experiment already has a scenario file.  Replace it with \"{0}\"", filename), CustomDialogIcons.Exclamation);
-                if (result == CustomDialogResults.No) return false;
-            }
-            return true;
-        }
-
-        bool CanShowEnvironmentSettings
-        {
-            get
-            {
-                return ((_experiment != null) && (_experiment.NemoFile != null) && (_experiment.FileName != null) && Globals.AppSettings.NAVOConfiguration.IsValid);
-            }
-        }
-
-        
-        void ShowEnvironmentSettingsView()
-        {
-            var environmentBuilderViewModel = new EnvironmentBuilderViewModel(_messageBoxService, Globals.AppSettings, _experiment);
-            try
-            {
-                var result = _visualizerService.ShowDialog("EnvironmentBuilderView", environmentBuilderViewModel);
-                if (result.HasValue && result.Value)
-                {
-                    _experiment.InitializeEnvironment(false);
-                }
-            }
-            catch (ApplicationException ex)
-            {
-                _messageBoxService.ShowError(string.Format("{0}: {1}", ex.Message, ex.InnerException.Message));
-            }
-        }
-#endif
         #region public bool IsLatLonGridVisible { get; set; }
 
         public bool IsLatLonGridVisible

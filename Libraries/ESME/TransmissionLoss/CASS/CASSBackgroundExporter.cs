@@ -7,6 +7,7 @@ using ESME.Environment.NAVO;
 
 namespace ESME.TransmissionLoss.CASS
 {
+#if false
     public class CASSBackgroundExporter : NAVOBackgroundExtractor
     {
         #region public string BathymetryFileName { get; set; }
@@ -245,4 +246,5 @@ namespace ESME.TransmissionLoss.CASS
             backgroundExtractor.Value++;
         }
     }
+#endif
 }

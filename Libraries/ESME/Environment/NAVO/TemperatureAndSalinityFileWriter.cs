@@ -5,6 +5,7 @@ using Cinch;
 
 namespace ESME.Environment.NAVO
 {
+#if false
     public class TemperatureAndSalinityFileWriter : NAVOBackgroundExtractor
     {
         #region public SoundSpeed Temperature { get; set; }
@@ -60,4 +61,5 @@ namespace ESME.Environment.NAVO
             backgroundTask.Value++;
         }
     }
+#endif
 }

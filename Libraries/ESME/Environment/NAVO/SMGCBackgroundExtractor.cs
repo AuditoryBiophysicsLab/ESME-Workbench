@@ -11,6 +11,7 @@ using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
+#if false
     public class SMGCBackgroundExtractor : NAVOBackgroundExtractor
     {
         #region public Wind Wind { get; set; }
@@ -384,4 +385,5 @@ namespace ESME.Environment.NAVO
             }
         }
     }
+#endif
 }

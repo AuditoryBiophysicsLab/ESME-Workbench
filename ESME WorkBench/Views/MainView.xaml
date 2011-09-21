@@ -405,11 +405,11 @@
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" MinWidth="500" />
       </Grid.ColumnDefinitions>
-      <TabControl>
+      <TabControl SelectedIndex="{Binding SelectedSidebarTabIndex}">
         <TabItem Header="Map Layers">
           <LocalControls:LayerListView />
         </TabItem>
-        <TabItem Header="Scenario View">
+                <TabItem Header="Scenario View" Visibility="{Binding IsScenarioLoaded, Converter={StaticResource TrueVisibleFalseCollapsed}}">
           <LocalControls:LayerTreeView />
         </TabItem>
         <TabItem Header="Environment Explorer" Visibility="{Binding IsEnvironmentTabSelected, Converter={StaticResource TrueVisibleFalseCollapsed}}">

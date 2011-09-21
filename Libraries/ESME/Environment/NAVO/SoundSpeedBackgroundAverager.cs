@@ -5,6 +5,7 @@ using Cinch;
 
 namespace ESME.Environment.NAVO
 {
+#if false
     public class SoundSpeedBackgroundAverager : NAVOBackgroundExtractor
     {
         #region public SoundSpeed ExtendedMonthlySoundSpeeds { get; set; }
@@ -67,4 +68,6 @@ namespace ESME.Environment.NAVO
             ExtendedAverageSoundSpeedField = SoundSpeed.Average(ExtendedMonthlySoundSpeeds, backgroundExtractor.TimePeriod);
         }
     }
+#endif
+
 }

@@ -8,6 +8,7 @@ using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
+#if false
     public static class SurfaceMarineGriddedClimatologyDatabase
     {
         public static string DatabasePath { get; set; }
@@ -258,4 +259,5 @@ namespace ESME.Environment.NAVO
             }
         }
     }
+#endif
 }

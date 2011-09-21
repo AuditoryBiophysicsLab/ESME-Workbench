@@ -296,6 +296,7 @@ namespace ESME.TransmissionLoss.REFMS
 
         public static async Task<SVPFile> Create(Geo location, float waterDepth, NAVOTimePeriod timePeriod, BackgroundTaskAggregator backgroundTaskAggregator)
         {
+#if false
             var assemblyLocation = Assembly.GetCallingAssembly().Location;
             var extractionPath = Path.GetDirectoryName(assemblyLocation);
             if (extractionPath == null) throw new ApplicationException("Extraction path can't be null!");
@@ -381,7 +382,9 @@ namespace ESME.TransmissionLoss.REFMS
                 soundSpeedExtractors.Add(soundSpeedExtractor);
                 backgroundTaskAggregator.BackgroundTasks.Add(soundSpeedExtractor);
             }
+#endif
             return null;
+
         }
 
         public void Write(string fileName)

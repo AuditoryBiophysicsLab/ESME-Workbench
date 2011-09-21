@@ -1,42 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Threading;
-using System.Xml.Serialization;
 using Cinch;
-using ESME.Environment;
-using ESME.Environment.Descriptors;
-using ESME.Environment.NAVO;
-using ESME.Mapping;
-using ESME.Model;
-using ESME.NEMO;
-using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
-using ESME.TransmissionLoss.CASS;
-using HRC.Navigation;
 using HRC.Utility;
-using ThinkGeo.MapSuite.Core;
-using Cursors = System.Windows.Input.Cursors;
-using TreeNode = ESME.Mapping.TreeNode;
 
 namespace ESME.Metadata
 {
     [Serializable]
     public class NAEMOScenarioMetadata : PropertyChangedBase
     {
-        public NAEMOScenarioMetadata() 
+        NAEMOScenarioMetadata(string nemoFilename)
         {
+            NemoFilename = nemoFilename;
+            Filename = MetadataFilename(nemoFilename);
             AnalysisPoints = new ObservableList<AnalysisPoint>();
+            PropertyChanged += (s, e) => Save();
+            Save();
+        }
+
+        public static string MetadataFilename(string nemoFilename)
+        {
+            return Path.Combine(Path.GetDirectoryName(nemoFilename), Path.GetFileNameWithoutExtension(nemoFilename) + ".emf");
         }
 
         public void Initialize(IEnumerable<string> distinctModePSMNames)
@@ -45,13 +32,22 @@ namespace ESME.Metadata
             else NemoModeToAcousticModelNameMap.UpdateModes(distinctModePSMNames, TransmissionLossAlgorithm.CASS);
         }
 
-        public static NAEMOScenarioMetadata Load(string filename)
+        public static NAEMOScenarioMetadata LoadOrCreate(string nemoFilename)
         {
-            NAEMOScenarioMetadata result;
-            using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
-                result = (NAEMOScenarioMetadata)new BinaryFormatter().Deserialize(stream);
-            result.Filename = filename;
-            return result;
+            var metadataFilename = MetadataFilename(nemoFilename);
+            try
+            {
+                NAEMOScenarioMetadata result;
+                if (!File.Exists(metadataFilename)) return new NAEMOScenarioMetadata(nemoFilename);
+                using (var stream = new FileStream(metadataFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    result = (NAEMOScenarioMetadata)new BinaryFormatter().Deserialize(stream);
+                result._filename = metadataFilename;
+            }
+            catch (Exception)
+            {
+                if (File.Exists(metadataFilename)) File.Delete(metadataFilename);
+            }
+            return new NAEMOScenarioMetadata(nemoFilename);
         }
 
         public void Save(string filename = null)
@@ -133,21 +129,21 @@ namespace ESME.Metadata
 
         #endregion
 
-        #region public string NemoFileName { get; set; }
+        #region public string NemoFilename { get; set; }
 
-        public string NemoFileName
+        public string NemoFilename
         {
-            get { return _nemoFileName; }
+            get { return _nemoFilename; }
             set
             {
-                if (_nemoFileName == value) return;
-                _nemoFileName = value;
+                if (_nemoFilename == value) return;
+                _nemoFilename = value;
                 NotifyPropertyChanged(NemoFileNameChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs NemoFileNameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.NemoFileName);
-        string _nemoFileName;
+        static readonly PropertyChangedEventArgs NemoFileNameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.NemoFilename);
+        string _nemoFilename;
 
         #endregion
 
@@ -160,6 +156,7 @@ namespace ESME.Metadata
             {
                 if (_analysisPoints == value) return;
                 _analysisPoints = value;
+                if (_analysisPoints != null) _analysisPoints.CollectionChanged += (s, e) => this.Save();
                 NotifyPropertyChanged(AnalysisPointsChangedEventArgs);
             }
         }

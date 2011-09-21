@@ -8,6 +8,7 @@ using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
+#if false
     public class DBDBBackgroundExtractor : NAVOBackgroundExtractor
     {
         protected override async void Run(object sender, DoWorkEventArgs e)
@@ -77,4 +78,5 @@ namespace ESME.Environment.NAVO
             if (progress != null) progress.Report(taskProgress);
         }
     }
+#endif
 }

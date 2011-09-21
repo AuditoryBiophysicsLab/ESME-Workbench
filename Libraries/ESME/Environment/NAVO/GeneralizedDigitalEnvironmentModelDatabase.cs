@@ -6,6 +6,7 @@ using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
+#if false
     public static class GeneralizedDigitalEnvironmentModelDatabase
     {
         public const float GridSpacing = 0.25f;
@@ -60,4 +61,6 @@ namespace ESME.Environment.NAVO
             backgroundExtractor.Value++;
         }
     }
+#endif
+
 }

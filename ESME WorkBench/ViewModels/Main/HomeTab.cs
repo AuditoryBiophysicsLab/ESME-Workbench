@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -75,17 +76,13 @@ namespace ESMEWorkBench.ViewModels.Main
                     _messageBoxService.ShowError("This file does not contain a scenario");
                     return;
                 }
+
+                // If the metadata file is not found, it will be constructed and returned by the Load static method
+                ScenarioMetadata = NAEMOScenarioMetadata.LoadOrCreate(fileName);
+
                 RangeComplexes.SelectedRangeComplex = RangeComplexes.RangeComplexCollection[NemoFile.Scenario.SimAreaName];
                 RangeComplexes.SelectedTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), NemoFile.Scenario.TimeFrame);
 
-                // Load the metadata file if it exists, or create one if it doesn't
-                var metadataFileName = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".emf");
-                if (File.Exists(metadataFileName)) ScenarioMetadata = NAEMOScenarioMetadata.Load(metadataFileName);
-                else ScenarioMetadata = new NAEMOScenarioMetadata()
-                {
-                    Filename = metadataFileName,
-                    NemoFileName = fileName,
-                };
                 // Initialize the scenario metadata with the list of distinct mode names from the scenario file
                 ScenarioMetadata.Initialize(NemoFile.Scenario.DistinctModePSMNames);
 
@@ -95,26 +92,58 @@ namespace ESMEWorkBench.ViewModels.Main
                 // Use the selected area if it exists, otherwise use the sim area
                 RangeComplexes.SelectedArea = ScenarioMetadata.SelectedAreaName != null ? RangeComplexes.SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName] : RangeComplexes.SelectedRangeComplex.SimArea;
 
-                // Check if the chosen resolution (if any) is valid.  If so, use it.  If not, use the 2 minute bathymetry from the current area
-                if ((ScenarioMetadata.SelectedResolutionName != null) && 
-                    (RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName] != null) && 
-                    (RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName].IsCached)) 
-                    RangeComplexes.SelectedBathymetry = (BathymetryFile)RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName];
-                else RangeComplexes.SelectedBathymetry = (BathymetryFile)RangeComplexes.SelectedArea.BathymetryFiles["2.00min"];
-
                 // Create the list of TreeView nodes that will hold the roots of the tree-structured view of the scenario
                 TreeViewRootNodes = new ObservableList<TreeNode> {new ScenarioNode(NemoFile.Scenario)};
+
+                // If an area name has been selected, and the selected range complex has an area of that same name, select it as the current area
+                if (!string.IsNullOrEmpty(ScenarioMetadata.SelectedAreaName) && (SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName] != null))
+                    RangeComplexes.SelectedArea = SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName];
+
+                // If an resolution has been selected, and the selected area has cached bathymetry of that resolution, select it
+                if (!string.IsNullOrEmpty(ScenarioMetadata.SelectedResolutionName) && (SelectedArea != RangeComplexArea.None) &&
+                    (SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName] != null) && SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName].IsCached)
+                    RangeComplexes.SelectedBathymetry = (BathymetryFile)SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName];
 
                 // Display any animal layers on the map asynchronously
                 if (NemoFile.Scenario.Animals != null)
                     foreach (var animal in _nemoFile.Scenario.Animals)
                         foreach (var species in animal.Species)
                         {
-                            species.AnimatDataTask.Start();
-                            var localSpecies = species;
-                            species.AnimatDataTask.ContinueWith(task => _dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplaySpecies(localSpecies.SpeciesName, localSpecies.AnimatDataTask.Result)));
+                            try
+                            {
+                                species.AnimatDataTask.Start();
+                                var localSpecies = species;
+                                species.AnimatDataTask.ContinueWith(task => _dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplaySpecies(localSpecies.SpeciesName, localSpecies.AnimatDataTask.Result)));
+                            }
+                            catch (Exception e)
+                            {
+                                _messageBoxService.ShowError("Error loading animats");
+                            }
                         }
-                DisplayScenario();
+
+                // Display the scenario overlays and tracks on the map
+                if (_nemoFile.Scenario.OverlayFile != null) CurrentMapLayers.DisplayOverlayShapes(string.Format("{0} sim area", NemoFile.Scenario.SimAreaName), LayerType.SimArea, Colors.Transparent, _nemoFile.Scenario.OverlayFile.Shapes);
+                foreach (var platform in _nemoFile.Scenario.Platforms)
+                {
+                    if (platform.Trackdefs.Count == 1)
+                    {
+                        CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} op area", platform.Name), LayerType.OpArea, Colors.Transparent, platform.Trackdefs[0].OverlayFile.Shapes, canBeRemoved: false);
+                        if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[0].OverlayFile.Shapes[0].BoundingBox);
+                        else _scenarioBounds.Union(platform.Trackdefs[0].OverlayFile.Shapes[0].BoundingBox);
+                        platform.CalculateBehavior();
+                        if (platform.BehaviorModel != null && platform.BehaviorModel.CourseOverlay != null)
+                            CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} track", platform.Name), LayerType.Track, Colors.Transparent,
+                                                                  new List<OverlayShape> { platform.BehaviorModel.CourseOverlay }, 0, PointSymbolType.Circle, true, new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, Colors.DarkGray, 1), false, true, false);
+                    }
+                    else
+                        for (var trackIndex = 0; trackIndex < platform.Trackdefs.Count; trackIndex++)
+                        {
+                            CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} OpArea{1}", platform.Name, trackIndex + 1), LayerType.OpArea, Colors.Transparent,
+                                                                  platform.Trackdefs[0].OverlayFile.Shapes, canBeRemoved: false);
+                            if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
+                            else _scenarioBounds.Union(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
+                        }
+                }
             }
             catch (Exception ex)
             {
@@ -127,35 +156,10 @@ namespace ESMEWorkBench.ViewModels.Main
                     inner = inner.InnerException;
                 }
                 _messageBoxService.ShowError("Error opening scenario \"" + Path.GetFileName(fileName) + "\":\n" + sb);
-                //ScenarioMetadata = null;
+                CloseScenarioHandler();
             }
         }
 
-        void DisplayScenario()
-        {
-            if (_nemoFile.Scenario.OverlayFile != null) CurrentMapLayers.DisplayOverlayShapes(string.Format("{0} sim area", NemoFile.Scenario.SimAreaName), LayerType.SimArea, Colors.Transparent, _nemoFile.Scenario.OverlayFile.Shapes);
-            foreach (var platform in _nemoFile.Scenario.Platforms)
-            {
-                if (platform.Trackdefs.Count == 1)
-                {
-                    CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} op area", platform.Name), LayerType.OpArea, Colors.Transparent, platform.Trackdefs[0].OverlayFile.Shapes, canBeRemoved: false);
-                    if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[0].OverlayFile.Shapes[0].BoundingBox);
-                    else _scenarioBounds.Union(platform.Trackdefs[0].OverlayFile.Shapes[0].BoundingBox);
-                    platform.CalculateBehavior();
-                    if (platform.BehaviorModel != null && platform.BehaviorModel.CourseOverlay != null)
-                        CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} track", platform.Name), LayerType.Track, Colors.Transparent,
-                                                              new List<OverlayShape> { platform.BehaviorModel.CourseOverlay }, 0, PointSymbolType.Circle, true, new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, Colors.DarkGray, 1), false, true, false);
-                }
-                else
-                    for (var trackIndex = 0; trackIndex < platform.Trackdefs.Count; trackIndex++)
-                    {
-                        CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} OpArea{1}", platform.Name, trackIndex + 1), LayerType.OpArea, Colors.Transparent,
-                                                              platform.Trackdefs[0].OverlayFile.Shapes, canBeRemoved: false);
-                        if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
-                        else _scenarioBounds.Union(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
-                    }
-            }
-        }
         GeoRect _scenarioBounds;
 
         #endregion
@@ -167,15 +171,23 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _closeScenario ?? (_closeScenario = new SimpleCommand<object, object>(
                     delegate { return IsScenarioLoaded; },
-                    delegate
-                    {
-                        NemoFile = null;
-                        ScenarioMetadata = null;
-                    }));
+                    delegate { CloseScenarioHandler(); }));
             }
         }
 
         SimpleCommand<object, object> _closeScenario;
+
+        void CloseScenarioHandler()
+        {
+            if (ScenarioMetadata != null) ScenarioMetadata.Save();
+            ScenarioMetadata = null;
+            TreeViewRootNodes = null;
+            NemoFile = null;
+            var scenarioLayerTypes = new List<LayerType> { LayerType.AnalysisPoint, LayerType.Animal, LayerType.Pressure, LayerType.Propagation, LayerType.Track };
+            scenarioLayerTypes.ForEach(layerType => CurrentMapLayers.RemoveAll(layer => layer.LayerType == layerType));
+            CurrentMapLayers.RemoveAll(layer => layer.Name.StartsWith("Platform:"));
+            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+        }
         #endregion
 
         #region public NemoFile NemoFile { get; set; }

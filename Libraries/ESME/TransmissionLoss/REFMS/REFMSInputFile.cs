@@ -99,6 +99,7 @@ namespace ESME.TransmissionLoss.REFMS
 
         void CreateSVP(BackgroundTaskAggregator backgroundTaskAggregator)
         {
+#if false
             var assemblyLocation = Assembly.GetCallingAssembly().Location;
             var extractionPath = Path.GetDirectoryName(assemblyLocation);
             if (extractionPath == null) throw new ApplicationException("Extraction path can't be null!");
@@ -183,6 +184,7 @@ namespace ESME.TransmissionLoss.REFMS
                 soundSpeedExtractors.Add(soundSpeedExtractor);
                 backgroundTaskAggregator.BackgroundTasks.Add(soundSpeedExtractor);
             }
+#endif
         }
 
         public void WriteBatchFile()

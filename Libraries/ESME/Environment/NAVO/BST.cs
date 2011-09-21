@@ -71,7 +71,6 @@ namespace ESME.Environment.NAVO
             sediment.Samples.AddRange(dedupeList);
             sediment.Samples.Sort();
             if (currentState != null) lock (currentState) currentState.Report("Trimming excess data");
-            sediment.Samples.TrimToNearestPoints(region);
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             H5G.close(lowResGroup);
             H5G.close(highResGroup);

@@ -9,6 +9,7 @@ using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
+#if false
     public class BSTBackgroundExtractor : NAVOBackgroundExtractor
     {
         #region public Sediment Sediment { get; set; }
@@ -171,4 +172,5 @@ namespace ESME.Environment.NAVO
         }
 
     }
+#endif
 }

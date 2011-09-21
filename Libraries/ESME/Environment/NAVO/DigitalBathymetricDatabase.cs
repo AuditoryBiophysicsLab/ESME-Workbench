@@ -10,6 +10,7 @@ using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
+#if false
     public class DigitalBathymetricDatabase : ViewModelBase
     {
         static DigitalBathymetricDatabase()
@@ -104,4 +105,5 @@ namespace ESME.Environment.NAVO
             return bathymetry;
         }
     }
+#endif
 }

@@ -13,6 +13,7 @@ using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
+#if false
     public class NAVODataSources : ViewModelBase
     {
         IViewAwareStatus _viewAwareStatus;
@@ -386,4 +387,5 @@ namespace ESME.Environment.NAVO
             _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
         }
     }
+#endif
 }

@@ -13,6 +13,7 @@ using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
+#if false
     public class GDEMBackgroundExtractor : NAVOBackgroundExtractor
     {
         #region public SoundSpeedField TemperatureField { get; set; }
@@ -252,4 +253,5 @@ namespace ESME.Environment.NAVO
             if (progress != null) progress.Report(taskProgress);
         }
     }
+#endif
 }

@@ -7,6 +7,7 @@ using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
+#if false
     public abstract class NAVOBackgroundExtractor : BackgroundTask
     {
         #region public GeoRect ExtractionArea { get; set; }
@@ -179,4 +180,5 @@ namespace ESME.Environment.NAVO
 
         #endregion
     }
+#endif
 }

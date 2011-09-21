@@ -301,18 +301,6 @@ namespace ESMEWorkBench.ViewModels.Main
 #endif
         #endregion
 
-        #region OpenExperimentCommand
-#if EXPERIMENTS_SUPPORTED
-
-        public SimpleCommand<object, object> OpenExperimentCommand
-        {
-            get { return _openExperiment ?? (_openExperiment = new SimpleCommand<object, object>(obj => OpenExperiment(null))); }
-        }
-
-        SimpleCommand<object, object> _openExperiment;
-#endif
-        #endregion
-
         #region RefreshMapCommand
         public SimpleCommand<object, object> RefreshMapCommand
         {
@@ -340,56 +328,6 @@ namespace ESMEWorkBench.ViewModels.Main
 #endif
         #endregion
 
-        #region ShowEnvironmentSettingsCommand
-        public SimpleCommand<object, object> ShowEnvironmentSettingsCommand
-        {
-            get
-            {
-                return _showEnvironmentSettings ?? (_showEnvironmentSettings = new SimpleCommand<object, object>(
-                                                                                       arg => CanShowEnvironmentSettings,
-                                                                                       obj => ShowEnvironmentSettingsView()));
-            }
-        }
-
-        SimpleCommand<object, object> _showEnvironmentSettings;
-        #endregion
-
-        #region SaveExperimentCommand
-#if EXPERIMENTS_SUPPORTED
-
-        public SimpleCommand<object, object> SaveExperimentCommand
-        {
-            get { return _saveExperiment ?? (_saveExperiment = new SimpleCommand<object, object>(arg => _experiment.CanSave, obj => SaveExperiment())); }
-        }
-
-        SimpleCommand<object, object> _saveExperiment;
-#endif
-        #endregion
-
-        #region SaveExperimentAsCommand
-#if EXPERIMENTS_SUPPORTED
-
-        public SimpleCommand<object, object> SaveExperimentAsCommand
-        {
-            get { return _saveExperimentAs ?? (_saveExperimentAs = new SimpleCommand<object, object>(arg => _experiment.CanSaveAs, obj => SaveExperimentAs())); }
-        }
-
-        SimpleCommand<object, object> _saveExperimentAs;
-#endif
-        #endregion
-
-        #region NewExperimentCommand
-#if EXPERIMENTS_SUPPORTED
-
-        public SimpleCommand<object, object> NewExperimentCommand
-        {
-            get { return _newExperiment ?? (_newExperiment = new SimpleCommand<object, object>(obj => NewExperiment())); }
-        }
-
-        SimpleCommand<object, object> _newExperiment;
-#endif
-        #endregion
-
         #region AddShapefileCommand
         public SimpleCommand<object, object> AddShapefileCommand
         {
@@ -409,15 +347,6 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _addShapefile;
-        #endregion
-
-        #region AddScenarioFileCommand
-        public SimpleCommand<object, object> AddScenarioFileCommand
-        {
-            get { return _addScenarioFile ?? (_addScenarioFile = new SimpleCommand<object, object>(arg => IsAddScenarioFilePossible(), obj => OpenScenarioFile(null))); }
-        }
-
-        SimpleCommand<object, object> _addScenarioFile;
         #endregion
 
         #region AddOverlayFileCommand
@@ -576,26 +505,6 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _about;
-        #endregion
-
-        #region NAVOEnvironmentBuilderCommand
-#if EXPERIMENTS_SUPPORTED
-
-        public SimpleCommand<object, object> NAVOEnvironmentBuilderCommand
-        {
-            get
-            {
-                return _navoEnvironmentBuilder ?? (_navoEnvironmentBuilder = new SimpleCommand<object, object>(delegate { return true; }, delegate
-                {
-                    var environmentBuilderViewModel = new EnvironmentBuilderViewModel(_messageBoxService, Globals.AppSettings, _experiment);
-                    var result = _visualizerService.ShowDialog("EnvironmentBuilderView", environmentBuilderViewModel);
-                    if (result.HasValue && result.Value) {}
-                }));
-            }
-        }
-
-        SimpleCommand<object, object> _navoEnvironmentBuilder;
-#endif
         #endregion
 
         #region ConfigureAcousticModelsCommand
