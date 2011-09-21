@@ -1005,8 +1005,8 @@ namespace ESMEWorkBench.Data
                 };
                 MapLayers.Add(speciesLayer);
             }
-            var startPoints = species.AnimatData.AnimatStartPoints.Select(startPoint => new OverlayPoint(startPoint));
-            speciesLayer.ToolTip = String.Format("Layer contains {0} animats", species.AnimatData.TotalAnimats);
+            var startPoints = species.AnimatDataTask.Result.AnimatStartPoints.Select(startPoint => new OverlayPoint(startPoint));
+            speciesLayer.ToolTip = String.Format("Layer contains {0} animats", species.AnimatDataTask.Result.TotalAnimats);
             speciesLayer.Clear();
             speciesLayer.Add(startPoints);
             speciesLayer.Done();

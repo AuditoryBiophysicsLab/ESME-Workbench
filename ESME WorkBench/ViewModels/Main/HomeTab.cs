@@ -105,15 +105,15 @@ namespace ESMEWorkBench.ViewModels.Main
                 // Create the list of TreeView nodes that will hold the roots of the tree-structured view of the scenario
                 TreeViewRootNodes = new ObservableList<TreeNode> {new ScenarioNode(NemoFile.Scenario)};
 
-                // Display any animal layers on the map
+                // Display any animal layers on the map asynchronously
                 if (NemoFile.Scenario.Animals != null)
-                    foreach (var species in _nemoFile.Scenario.Animals.SelectMany(animal => animal.Species))
-                        CurrentMapLayers.DisplaySpecies(species);
-
-                // Start the environment loading while the rest of the scenario initialization progresses
-
-
-                // Display the scenario layers on the map
+                    foreach (var animal in _nemoFile.Scenario.Animals)
+                        foreach (var species in animal.Species)
+                        {
+                            species.AnimatDataTask.Start();
+                            var localSpecies = species;
+                            species.AnimatDataTask.ContinueWith(task => _dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplaySpecies(localSpecies.SpeciesName, localSpecies.AnimatDataTask.Result)));
+                        }
                 DisplayScenario();
             }
             catch (Exception ex)
@@ -189,14 +189,16 @@ namespace ESMEWorkBench.ViewModels.Main
                 _nemoFile = value;
                 NotifyPropertyChanged(NemoFileChangedEventArgs);
                 NotifyPropertyChanged(IsScenarioLoadedChangedEventArgs);
+                NotifyPropertyChanged(IsScenarioNotLoadedChangedEventArgs);
 
                 MainWindowTitle = _nemoFile != null ? string.Format("ESME WorkBench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", NemoFile.Scenario.EventName, NemoFile.Scenario.TimeFrame) : string.Format("ESME WorkBench 2011{0}: <No scenario loaded>", Configuration.IsUnclassifiedModel ? " (public)" : "");
             }
         }
 
         public bool IsScenarioLoaded { get { return NemoFile != null; } }
+        public bool IsScenarioNotLoaded { get { return !IsScenarioLoaded; } }
         static readonly PropertyChangedEventArgs IsScenarioLoadedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsScenarioLoaded);
-
+        static readonly PropertyChangedEventArgs IsScenarioNotLoadedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsScenarioNotLoaded);
         static readonly PropertyChangedEventArgs NemoFileChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.NemoFile);
         NemoFile _nemoFile;
 

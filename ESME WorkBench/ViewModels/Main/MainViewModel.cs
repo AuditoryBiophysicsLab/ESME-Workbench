@@ -292,6 +292,43 @@ namespace ESMEWorkBench.ViewModels.Main
         public RangeComplexes RangeComplexes { get; private set; }
         public MapLayerCollection CurrentMapLayers { get; set; }
 
+        #region public int SelectedRibbonTabIndex { get; set; }
+
+        public int SelectedRibbonTabIndex
+        {
+            get { return Settings.Default.SelectedRibbonTabIndex; }
+            set
+            {
+                if (Settings.Default.SelectedRibbonTabIndex == value) return;
+                Settings.Default.SelectedRibbonTabIndex = value;
+                IsEnvironmentTabSelected = Settings.Default.SelectedRibbonTabIndex == 1;
+                NotifyPropertyChanged(SelectedRibbonTabIndexChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedRibbonTabIndexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRibbonTabIndex);
+
+        #endregion
+
+        #region public bool IsEnvironmentTabSelected { get; set; }
+
+        public bool IsEnvironmentTabSelected
+        {
+            get { return _isEnvironmentTabSelected; }
+            set
+            {
+                if (_isEnvironmentTabSelected == value) return;
+                _isEnvironmentTabSelected = value;
+                NotifyPropertyChanged(IsEnvironmentTabSelectedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsEnvironmentTabSelectedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsEnvironmentTabSelected);
+        bool _isEnvironmentTabSelected;
+
+        #endregion
+
+
 #if EXPERIMENTS_SUPPORTED
 
         public bool UserWantsToAddScenarioFile(string fileName)

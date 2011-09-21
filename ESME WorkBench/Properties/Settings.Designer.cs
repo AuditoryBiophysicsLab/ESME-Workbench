@@ -61,7 +61,7 @@ namespace ESMEWorkBench.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("900")]
         public double WindowWidth {
             get {
                 return ((double)(this["WindowWidth"]));
@@ -325,7 +325,7 @@ namespace ESMEWorkBench.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int SelectedRibbonTabIndex {
             get {
                 return ((int)(this["SelectedRibbonTabIndex"]));
