@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
@@ -8,6 +9,7 @@ using System.Threading;
 using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.BellhopNL;
+using ESME.TransmissionLoss.REFMS;
 using HRC;
 using ESME.TransmissionLoss;
 
@@ -35,11 +37,33 @@ namespace BellhopNL
             ComputeRadial(data, out arrivalsFile);
             //give NLWrapper the arrivals file. 
             BellhopNLWrapper.ModelType modelType;
-            var modelOK = Enum.TryParse(data.ModelType, true, out modelType);
-            if (!modelOK) throw new ApplicationException("modelType invalid.  'arons' or 'chapman'.");
+            var modelOk = Enum.TryParse(data.ModelType, true, out modelType);
+            if (!modelOk) throw new ApplicationException("modelType invalid.  'arons' or 'chapman'.");
             var result =BellhopNLWrapper.Run(arrivalsFile, data.ChargeDepth, data.ChargeMass, data.OutputFreq, data.OutputTime, modelType).Waveforms;
 
             //todo: make a refms-like file from this data.
+            List<EffectsRecord> records = Transform(result, data);
+        }
+
+        static List<EffectsRecord> Transform(double[,,] waveforms, DataBlob data)
+        {
+            var result = new List<EffectsRecord>();
+            for (var i = 0; i < waveforms.GetLength(0); i++)//ranges
+            {
+                
+                for (var j = 0; j < waveforms.GetLength(1); j++)//depths
+                {
+                    var effectsRecord = new EffectsRecord(){Depth = data.Depths[j],Range = data.Ranges[i]};
+                    var maxPa = double.MinValue;
+                    for (var k = 0; k < waveforms.GetLength(2); k++)//payload waveform.  May NOT ACTUALLY BE IN Pa!!
+                    {
+                        if (waveforms[i, j, k] > maxPa) maxPa = waveforms[i, j, k];
+                    }
+                    effectsRecord.PeakPressurekPa = maxPa;
+                    result.Add(effectsRecord);
+                }
+            }
+            return result;
         }
 
         static void ComputeRadial(DataBlob data, out string shdfile)

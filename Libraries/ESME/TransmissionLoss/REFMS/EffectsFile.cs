@@ -80,15 +80,15 @@ namespace ESME.TransmissionLoss.REFMS
 
     public class EffectsRecord
     {
-        public double Depth { get; private set; }
-        public double Range { get; private set; }
-        public double PeakPressurekPa { get; private set; }
-        public double PeakPressure200dB { get; private set; }
-        public double Impulse { get; private set; }
-        public double Energy164dB { get; private set; }
-        public double EnergyThirdOct { get; private set; }
-        public double MidFreq { get; private set; }
-        public double PeakEnergy { get; private set; }
+        public double Depth { get;  set; }
+        public double Range { get;  set; }
+        public double PeakPressurekPa { get;  set; }
+        public double PeakPressure200dB { get;  set; }
+        public double Impulse { get;  set; }
+        public double Energy164dB { get;  set; }
+        public double EnergyThirdOct { get;  set; }
+        public double MidFreq { get;  set; }
+        public double PeakEnergy { get;  set; }
 
         public static EffectsRecord Parse(string sourceLine)
         {

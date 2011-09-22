@@ -22,6 +22,8 @@ namespace ESME.TransmissionLoss.BellhopNL
         public string BottomProfile { get; set; }
         public double[,] TopReflectionCoefficients { get; set; }
         public float Bearing { get; set; }
+        public double[] Depths { get; set; }
+        public double[] Ranges { get; set; }
 
         public static DataBlob Load(string filename)
         {

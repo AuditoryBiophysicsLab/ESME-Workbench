@@ -27,7 +27,7 @@ namespace BellhopNL
                     ModelName = new MWCharArray(modelType.ToString()),
             };
             var result = (MWNumericArray)new NLDelaySum().NL_delaysum(wrapper.ArrivalsFile, wrapper.ChargeDepth, wrapper.ChargeMass, wrapper.OutputSampleRate, wrapper.OutputWaveformDuration, wrapper.ModelName);
-
+            
             var dimensions = result.Dimensions;
             wrapper.Waveforms = new double[dimensions[1],dimensions[2],dimensions[0]];
             for (var i = 0; i < dimensions[0]; i++)
