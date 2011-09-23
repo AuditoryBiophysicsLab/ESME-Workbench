@@ -299,8 +299,57 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
-        public ObservableConcurrentDictionary<EnvironmentDataType, EnvironmentFile> SelectedEnvironment { get; set; }
-        public ObservableConcurrentDictionary<EnvironmentDataType, Task> EnvironmentData { get; set; }
+        #region public ObservableConcurrentDictionary<EnvironmentDataType, EnvironmentFile> SelectedEnvironment { get; set; }
+
+        public ObservableConcurrentDictionary<EnvironmentDataType, EnvironmentFile> SelectedEnvironment
+        {
+            get { return _selectedEnvironment; }
+            set
+            {
+                if (_selectedEnvironment == value) return;
+                _selectedEnvironment = value;
+                NotifyPropertyChanged(SelectedEnvironmentChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedEnvironmentChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedEnvironment);
+        ObservableConcurrentDictionary<EnvironmentDataType, EnvironmentFile> _selectedEnvironment = new ObservableConcurrentDictionary<EnvironmentDataType, EnvironmentFile>
+        {
+            {EnvironmentDataType.Bathymetry, null},
+            {EnvironmentDataType.BottomLoss, null},
+            {EnvironmentDataType.Sediment, null},
+            {EnvironmentDataType.SoundSpeed, null},
+            {EnvironmentDataType.Wind, null},
+        };
+
+        #endregion
+
+        #region public ObservableConcurrentDictionary<EnvironmentDataType, Task> EnvironmentData { get; set; }
+
+        public ObservableConcurrentDictionary<EnvironmentDataType, Task> EnvironmentData
+        {
+            get { return _environmentData; }
+            set
+            {
+                if (_environmentData == value) return;
+                _environmentData = value;
+                NotifyPropertyChanged(EnvironmentDataChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs EnvironmentDataChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.EnvironmentData);
+        ObservableConcurrentDictionary<EnvironmentDataType, Task> _environmentData = new ObservableConcurrentDictionary<EnvironmentDataType, Task>
+        {
+            {EnvironmentDataType.Bathymetry, null},
+            {EnvironmentDataType.BottomLoss, null},
+            {EnvironmentDataType.Sediment, null},
+            {EnvironmentDataType.SoundSpeed, null},
+            {EnvironmentDataType.Wind, null},
+        };
+
+        #endregion
+
+
 #if false
         #region public WindFile SelectedWind { get; set; }
 
@@ -467,6 +516,7 @@ namespace ESME.Environment.Descriptors
                             EnvironmentData[EnvironmentDataType.SoundSpeed] =
                                 new Task<SoundSpeed>(() => EnvironmentFile.CalculateSoundSpeed(SelectedRangeComplex, SelectedTimePeriod, bathyTask, SelectedBathymetry.GeoRect));
                             IsEnvironmentFullySpecified = true;
+                            LoadEnvironment();
                             return;
                         }
                     }

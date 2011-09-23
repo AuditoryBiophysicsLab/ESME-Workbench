@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -170,12 +171,8 @@ namespace ESME.Metadata
                     {
                         Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName, newItem.ModeName);
                         newItem.Bathymetry = _bathymetry;
-                        //newItem.ThresholdRadiusChanged += (s, e) => Dispatcher.InvokeIfRequired(() => CurrentMapLayers.DisplayPropagationPoint(newItem));
                         Dispatcher.InvokeIfRequired(() => CurrentMapLayers.DisplayPropagationPoint(newItem));
-                        Task.Factory.StartNew(() =>
-                        {
-                            newItem.CheckThreshold(120, Dispatcher);
-                        });
+                        _cassFileQueue.Post(newItem);
                     }
                     break;
                 case NotifyCollectionChangedAction.Remove:
@@ -240,6 +237,28 @@ namespace ESME.Metadata
                     RangeComplexes.SelectedTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), _nemoFile.Scenario.TimeFrame);
                     if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
                     else NemoModeToAcousticModelNameMap.UpdateModes(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
+                    _cassOutputProcessor = new ActionBlock<CASSOutput>(newItem =>
+                    {
+                        Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName, newItem.ModeName);
+                        //newItem.Bathymetry = new WeakReference<Bathymetry>(RangeComplexes.SelectedBathymetry.DataTask.Result);
+                        newItem.CheckThreshold(Globals.AppSettings.TransmissionLossContourThreshold, Dispatcher);
+                        Dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayPropagationPoint(newItem));
+                    },
+                    new ExecutionDataflowBlockOptions
+                    {
+                        TaskScheduler = TaskScheduler.Default,
+                        BoundedCapacity = 4,
+                        MaxDegreeOfParallelism = 4,
+                    });
+                    _cassFileQueue = new BufferBlock<CASSOutput>();
+                    _cassFileQueue.LinkTo(_cassOutputProcessor);
+                    _cassFileQueue.Completion.ContinueWith(task =>
+                    {
+                        _cassOutputProcessor.Complete();
+                        _cassOutputProcessor.Completion.ContinueWith(t => { _cassOutputProcessor = null; });
+                        _cassFileQueue = null;
+                    });
+
                 }
                 else
                 {
@@ -255,6 +274,9 @@ namespace ESME.Metadata
         static readonly PropertyChangedEventArgs NemoFileChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.NemoFile);
         NemoFile _nemoFile;
         List<AcousticProperties> _distinctModeProperties;
+
+        ActionBlock<CASSOutput> _cassOutputProcessor;
+        BufferBlock<CASSOutput> _cassFileQueue;
 
         string _propagationPath;
         string _pressurePath;

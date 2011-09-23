@@ -145,17 +145,19 @@ namespace ESME.Environment
                 if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                 {
                     //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
-                    var sediment = BST.Extract(job.GeoRect);
-                    if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                    Dispatcher.InvokeInBackgroundIfRequired(async () =>
                     {
-                        sediment.Save(job.DestinationFilename);
-                        job.SampleCount = (uint)sediment.Samples.Count;
-                        job.Resolution = 5;
-                        //job.CompletionAction(job);
-                        job.CompletionTask.Start();
-                        await
-                        job.CompletionTask;
-                    }
+                        var sediment = BST.Extract(job.GeoRect);
+                        if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                        {
+                            sediment.Save(job.DestinationFilename);
+                            job.SampleCount = (uint)sediment.Samples.Count;
+                            job.Resolution = 5;
+                            //job.CompletionAction(job);
+                            job.CompletionTask.Start();
+                            await job.CompletionTask;
+                        }
+                    });
                 }
                 //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
 #endif
