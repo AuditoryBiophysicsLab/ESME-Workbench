@@ -45,6 +45,16 @@ namespace ESMEWorkBench.ViewModels.Main
             SelectedTimePeriodIndex = 0;
             SelectedAreaIndex = -1;
             SelectedBathymetryIndex = -1;
+            RangeComplexes.PropertyChanged += (s, e) =>
+            {
+                switch (e.PropertyName)
+                {
+                    case "IsEnvironmentFullySpecified":
+                        if (RangeComplexes.IsEnvironmentFullySpecified) HookLayerData();
+                        else ClearLayerData();
+                        break;
+                }
+            };
         }
 
         public Dictionary<EnvironmentDataType, MapLayerViewModel> EnvironmentLayers { get; private set; }
