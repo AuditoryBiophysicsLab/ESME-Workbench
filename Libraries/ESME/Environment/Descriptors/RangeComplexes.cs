@@ -71,7 +71,7 @@ namespace ESME.Environment.Descriptors
         {
             if (!File.Exists(simAreaFile)) throw new FileNotFoundException("Error reading sim area file", simAreaFile);
             SimAreaPath = Path.GetDirectoryName(simAreaFile);
-            var actionBlock = new ActionBlock<Tuple<string, double, double, double, double, string, string>>(
+            var actionBlock = new ActionBlock<RangeComplexMetadata>(
 		        info => _dispatcher.InvokeInBackgroundIfRequired(() =>
 		        {
 		            var rangeComplex = NewRangeComplex.Load(SimAreaPath, info, _dispatcher);
@@ -107,7 +107,7 @@ namespace ESME.Environment.Descriptors
                 if (!double.TryParse(lonString, out longitude)) throw new FormatException(string.Format("RangeComplexes: Error reading sim area file \"{0}\"\nError: Invalid longitude", simAreaFile));
                 if (!double.TryParse(heightString, out height)) throw new FormatException(string.Format("RangeComplexes: Error reading sim area file \"{0}\"\nError: Invalid height", simAreaFile));
                 if (!double.TryParse(geoidString, out geoid)) throw new FormatException(string.Format("RangeComplexes: Error reading sim area file \"{0}\"\nError: Invalid geoid separation value", simAreaFile));
-                actionBlock.Post(Tuple.Create(rangeComplexName, height, latitude, longitude, geoid, opsLimitFile, simLimitFile));
+                actionBlock.Post(new RangeComplexMetadata(rangeComplexName, height, latitude, longitude, geoid, opsLimitFile, simLimitFile));
             }
             actionBlock.Complete();
             return actionBlock.Completion;
@@ -133,8 +133,8 @@ namespace ESME.Environment.Descriptors
             var rangeComplexPath = Path.Combine(SimAreaPath, rangeComplexName);
 
             if (Directory.Exists(rangeComplexPath)) Directory.Delete(rangeComplexPath, true);
-
-            var result = NewRangeComplex.Create(SimAreaPath, rangeComplexName, opAreaLimits, simAreaLimits, _dispatcher);
+            var rangeComplexMetadata = new RangeComplexMetadata(rangeComplexName, height, latitude, longitude, geoid, rangeComplexName + "_OpArea.ovr", rangeComplexName + "_SimArea.ovr");
+            var result = NewRangeComplex.Create(SimAreaPath, rangeComplexMetadata, opAreaLimits, simAreaLimits, _dispatcher);
 
             lock (_lockObject)
             {
@@ -422,6 +422,25 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
+        #region public bool IsEnvironmentLoaded { get; set; }
+
+        public bool IsEnvironmentLoaded
+        {
+            get { return _isEnvironmentLoaded; }
+            set
+            {
+                if (_isEnvironmentLoaded == value) return;
+                _isEnvironmentLoaded = value;
+                NotifyPropertyChanged(IsEnvironmentLoadedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsEnvironmentLoadedChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.IsEnvironmentLoaded);
+        bool _isEnvironmentLoaded;
+
+        #endregion
+
+
         public void CheckEnvironment()
         {
             const string bottomLossFilename = "data.bottomloss";
@@ -459,15 +478,28 @@ namespace ESME.Environment.Descriptors
         public void LoadEnvironment()
         {
             if (!IsEnvironmentFullySpecified) return;
+            IsEnvironmentLoading = true;
+            var tasks = new List<Task>();
             EnvironmentData[EnvironmentDataType.BottomLoss].Start();
+            tasks.Add(EnvironmentData[EnvironmentDataType.BottomLoss]);
             EnvironmentData[EnvironmentDataType.Sediment].Start();
+            tasks.Add(EnvironmentData[EnvironmentDataType.Sediment]);
             EnvironmentData[EnvironmentDataType.Wind].Start();
+            tasks.Add(EnvironmentData[EnvironmentDataType.Wind]);
             EnvironmentData[EnvironmentDataType.Bathymetry].Start();
+            tasks.Add(EnvironmentData[EnvironmentDataType.Bathymetry]);
             EnvironmentData[EnvironmentDataType.SoundSpeed].Start();
+            tasks.Add(EnvironmentData[EnvironmentDataType.SoundSpeed]);
+            TaskEx.WhenAll(tasks).ContinueWith(task =>
+            {
+                IsEnvironmentLoading = false;
+                IsEnvironmentLoaded = true;
+            });
         }
 
         public void ClearEnvironment()
         {
+            IsEnvironmentLoaded = false;
             SelectedTimePeriod = NAVOTimePeriod.Invalid;
             SelectedArea = null;
             SelectedBathymetry = null;

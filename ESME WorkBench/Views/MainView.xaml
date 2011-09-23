@@ -39,61 +39,11 @@
     <StatusBar DockPanel.Dock="Bottom">
       <StatusBarItem HorizontalAlignment="Left">
         <StackPanel Orientation="Horizontal">
-          <TextBlock Text="{Binding MouseEarthCoordinate.Latitude, StringFormat=Lat: {0:0.000000}}" />
+          <TextBlock Text="{Binding MouseEarthCoordinate.Latitude, StringFormat=Lat: {0:0.0000}}" />
           <TextBlock Text=" " />
-          <TextBlock Text="{Binding MouseEarthCoordinate.Longitude, StringFormat=Lon: {0:0.000000}}" />
+          <TextBlock Text="{Binding MouseEarthCoordinate.Longitude, StringFormat=Lon: {0:0.0000}}" />
           <TextBlock Text=" " />
           <TextBlock Text="{Binding MouseDepth, StringFormat=Depth: {0:0.0}}" />
-        </StackPanel>
-      </StatusBarItem>
-      <StatusBarItem HorizontalAlignment="Right">
-        <StackPanel Orientation="Horizontal">
-          <TextBlock Text="Data: " />
-          <Ellipse Width="12" Height="12" Margin="1"
-                   Fill="{Binding RangeComplexes.SelectedWind.DataAvailabilityBrush, Mode=OneWay}" VerticalAlignment="Center">
-            <Ellipse.ToolTip>
-              <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Wind: " />
-                <TextBlock Text="{Binding RangeComplexes.SelectedWind.DataAvailability, Mode=OneWay}" />
-              </StackPanel>
-            </Ellipse.ToolTip>
-          </Ellipse>
-          <Ellipse Width="12" Height="12" Margin="1"
-                   Fill="{Binding RangeComplexes.SelectedSoundSpeed.DataAvailabilityBrush, Mode=OneWay}" VerticalAlignment="Center">
-            <Ellipse.ToolTip>
-              <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Sound Speed: " />
-                <TextBlock Text="{Binding RangeComplexes.SelectedSoundSpeed.DataAvailability, Mode=OneWay}" />
-              </StackPanel>
-            </Ellipse.ToolTip>
-          </Ellipse>
-          <Ellipse Width="12" Height="12" Margin="1"
-                   Fill="{Binding RangeComplexes.SelectedBathymetry.DataAvailabilityBrush, Mode=OneWay}" VerticalAlignment="Center">
-            <Ellipse.ToolTip>
-              <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Bathymetry: " />
-                <TextBlock Text="{Binding RangeComplexes.SelectedBathymetry.DataAvailability, Mode=OneWay}" />
-              </StackPanel>
-            </Ellipse.ToolTip>
-          </Ellipse>
-          <Ellipse Width="12" Height="12" Margin="1"
-                   Fill="{Binding RangeComplexes.SelectedSediment.DataAvailabilityBrush, Mode=OneWay}" VerticalAlignment="Center">
-            <Ellipse.ToolTip>
-              <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Sediment: " />
-                <TextBlock Text="{Binding RangeComplexes.SelectedSediment.DataAvailability, Mode=OneWay}" />
-              </StackPanel>
-            </Ellipse.ToolTip>
-          </Ellipse>
-          <Ellipse Width="12" Height="12" Margin="1"
-                   Fill="{Binding RangeComplexes.SelectedBottomLoss.DataAvailabilityBrush, Mode=OneWay}" VerticalAlignment="Center">
-            <Ellipse.ToolTip>
-              <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Bottom Loss: " />
-                <TextBlock Text="{Binding RangeComplexes.SelectedBottomLoss.DataAvailability, Mode=OneWay}" />
-              </StackPanel>
-            </Ellipse.ToolTip>
-          </Ellipse>
         </StackPanel>
       </StatusBarItem>
     </StatusBar>

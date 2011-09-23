@@ -1,27 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
+using System.Threading.Tasks;
 using ESME.Data;
 using ESME.Environment;
+using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
-using ESME.Model;
 using ESME.NEMO;
+using HRC.Collections;
 using HRC.Navigation;
-using HRC.Utility;
 
 namespace ESME.TransmissionLoss.CASS
 {
     public static class CASSFiles
     {
-        public static void WriteAcousticSimulatorFiles(AppSettings appSettings, IEnumerable<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoFile nemoFile, string cassBathymetryFileName, string cassEnvironmentFileName, NemoModeToAcousticModelNameMap modeToAcousticModelNameMap, EnvironmentInformation environmentInformation, RangeComplex rangeComplex)
+        public static void WriteAcousticSimulatorFiles(AppSettings appSettings, IEnumerable<string> timePeriods, 
+            IList<AnalysisPoint> analysisPoints, NemoFile nemoFile, 
+            NemoModeToAcousticModelNameMap modeToAcousticModelNameMap,
+            ObservableConcurrentDictionary<EnvironmentDataType, Task> environmentTasks, RangeComplexes rangeComplexes)
         {
             if ((analysisPoints == null) || (analysisPoints.Count == 0)) return;
+            var rangeComplex = rangeComplexes.SelectedRangeComplex;
+            var cassBathymetryFileName = Path.Combine(rangeComplexes.SelectedRangeComplex.BathymetryPath, string.Format("{0}_{1}_bathy.txt", rangeComplexes.SelectedArea.Name, rangeComplexes.SelectedBathymetry.Name));
             var nemoScenario = nemoFile.Scenario;
             foreach (var timePeriod in timePeriods)
             {
+                var cassEnvironmentFileName = Path.Combine(rangeComplexes.SelectedRangeComplex.EnvironmentPath, string.Format("{0}_{1}_env_{2}.txt", rangeComplexes.SelectedArea.Name, rangeComplexes.SelectedBathymetry.Name, timePeriod));
                 // These are for CASS and RAM (Restricted NAVY TL models)
                 var curScenarioDataPath = Path.GetDirectoryName(nemoFile.FileName);
                 var curPropagationPath = Path.Combine(curScenarioDataPath, "Propagation");
@@ -113,7 +118,7 @@ namespace ESME.TransmissionLoss.CASS
                 }
         }
 
-        public static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, TransmissionLossAlgorithm simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName, string cassEnvironmentFileName, RangeComplex rangeComplex)
+        public static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, TransmissionLossAlgorithm simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName, string cassEnvironmentFileName, NewRangeComplex rangeComplex)
         {
             var nemoScenario = nemoFile.Scenario;
 
@@ -183,7 +188,7 @@ namespace ESME.TransmissionLoss.CASS
                 writer.WriteLine("Range Complex                           ,{0}", nemoScenario.SimAreaName);
                 writer.WriteLine("Sim Area                                ,{0}", nemoScenario.SimAreaName);
                 writer.WriteLine("Event Name                              ,{0}", nemoScenario.EventName);
-                writer.WriteLine("Reference Location                      ,{0:0.000} DEG, {1:0.000} DEG", rangeComplex.Latitude, rangeComplex.Longitude);
+                writer.WriteLine("Reference Location                      ,{0:0.000} DEG, {1:0.000} DEG", rangeComplex.RangeComplexMetadata.Latitude, rangeComplex.RangeComplexMetadata.Longitude);
                 writer.WriteLine("Enviro File                             ,{0}", Path.GetFileName(cassEnvironmentFileName));
                 float stepCount;
                 float stepSize;

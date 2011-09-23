@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Xml.Serialization;
-using ESME.Environment;
+using ESME.Environment.Descriptors;
 using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.RAM;
@@ -22,7 +22,7 @@ namespace ESME.TransmissionLoss
             TransmissionLossRunFileRadials = new List<TransmissionLossRunFileRadial>();
         }
 
-        public static TransmissionLossRunFile Create(TransmissionLossAlgorithm algorithm, SoundSource soundSource, string rangeComplexName, string bathymetryName, string environmentName, string platformName, string sourceName, string modeName, string timePeriodName, RangeComplex rangeComplex)
+        public static TransmissionLossRunFile Create(TransmissionLossAlgorithm algorithm, SoundSource soundSource, string rangeComplexName, string bathymetryName, string environmentName, string platformName, string sourceName, string modeName, string timePeriodName, NewRangeComplex rangeComplex)
         {
             TransmissionLossRunFile result = null;
             string fileType = null;
@@ -65,7 +65,7 @@ namespace ESME.TransmissionLoss
             result.RangeComplexName = rangeComplexName;
             result.BathymetryName = bathymetryName;
             result.EnvironmentName = environmentName;
-            result.ReferenceLocation = new EarthCoordinate(rangeComplex);
+            result.ReferenceLocation = new EarthCoordinate(rangeComplex.RangeComplexMetadata.Latitude, rangeComplex.RangeComplexMetadata.Longitude);
             var lat = soundSource.Latitude;
             var lon = soundSource.Longitude;
             var locationString = string.Format("{0}{1:0.####}_{2}{3:0.####}",

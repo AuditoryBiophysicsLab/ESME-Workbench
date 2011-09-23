@@ -18,19 +18,19 @@ namespace ESME.Environment.Descriptors
 {
     public class NewRangeComplex : ViewModelBase
     {
-        NewRangeComplex(string simAreaPath, string rangeComplexName, bool isCreate, Dispatcher dispatcher)
+        NewRangeComplex(string simAreaPath, RangeComplexMetadata rangeComplexMetadata, bool isCreate, Dispatcher dispatcher)
         {
             IsLoading = true;
             _dispatcher = dispatcher;
-            var rangeComplexPath = Path.Combine(simAreaPath, rangeComplexName);
-            Name = rangeComplexName;
-            RangeComplexPath = rangeComplexPath;
-            AreasPath = Path.Combine(rangeComplexPath, "Areas");
-            BathymetryPath = Path.Combine(rangeComplexPath, "Bathymetry");
-            DataPath = Path.Combine(rangeComplexPath, "Data");
-            EnvironmentPath = Path.Combine(rangeComplexPath, "Environment");
-            ImagesPath = Path.Combine(rangeComplexPath, "Images");
-            SpeciesPath = Path.Combine(rangeComplexPath, "Species");
+            RangeComplexMetadata = rangeComplexMetadata;
+            Name = RangeComplexMetadata.Name;
+            RangeComplexPath = Path.Combine(simAreaPath, Name);
+            AreasPath = Path.Combine(RangeComplexPath, "Areas");
+            BathymetryPath = Path.Combine(RangeComplexPath, "Bathymetry");
+            DataPath = Path.Combine(RangeComplexPath, "Data");
+            EnvironmentPath = Path.Combine(RangeComplexPath, "Environment");
+            ImagesPath = Path.Combine(RangeComplexPath, "Images");
+            SpeciesPath = Path.Combine(RangeComplexPath, "Species");
             if (isCreate)
             {
                 Directory.CreateDirectory(RangeComplexPath);
@@ -40,7 +40,7 @@ namespace ESME.Environment.Descriptors
             {
                 if (!Directory.Exists(RangeComplexPath) || !Directory.Exists(AreasPath))
                 {
-                    RangeComplexes.Singleton.DeleteRangeComplexFromDisk(rangeComplexName);
+                    RangeComplexes.Singleton.DeleteRangeComplexFromDisk(Name);
                     throw new InvalidOperationException(string.Format("The range complex \"{0}\" is missing critical files or directories.\r\nThe range complex has been deleted", Name));
                 }
             }
@@ -64,6 +64,8 @@ namespace ESME.Environment.Descriptors
         }
 
         [NotNull] readonly Dispatcher _dispatcher;
+
+        [NotNull] public RangeComplexMetadata RangeComplexMetadata { get; private set; }
 
         [NotNull] public string Name { get; private set; }
         [NotNull] public string RangeComplexPath { get; private set; }
@@ -244,23 +246,23 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
-        internal static NewRangeComplex Create(string simAreaPath, string rangeComplexName, IEnumerable<Geo> opAreaLimits, IEnumerable<Geo> simAreaLimits, Dispatcher dispatcher)
+        internal static NewRangeComplex Create(string simAreaPath, RangeComplexMetadata rangeComplexMetadata, IEnumerable<Geo> opAreaLimits, IEnumerable<Geo> simAreaLimits, Dispatcher dispatcher)
         {
-            var result = new NewRangeComplex(simAreaPath, rangeComplexName, true, dispatcher);
-            result.OpArea = result.CreateAreaPrivate(String.Format("{0}_OpArea", rangeComplexName), opAreaLimits);
-            result.SimArea = result.CreateAreaPrivate(String.Format("{0}_SimArea", rangeComplexName), simAreaLimits);
+            var result = new NewRangeComplex(simAreaPath, rangeComplexMetadata, true, dispatcher);
+            result.OpArea = result.CreateAreaPrivate(String.Format("{0}_OpArea", rangeComplexMetadata.Name), opAreaLimits);
+            result.SimArea = result.CreateAreaPrivate(String.Format("{0}_SimArea", rangeComplexMetadata.Name), simAreaLimits);
             result.UpdateAreas();
             result.ValidateEnvironment();
             return result;
         }
 
-        internal static NewRangeComplex Load(string simAreaPath, Tuple<string, double, double, double, double, string, string> rangeComplexInfo, Dispatcher dispatcher)
+        internal static NewRangeComplex Load(string simAreaPath, RangeComplexMetadata rangeComplexMetadata, Dispatcher dispatcher)
         {
-            var result = new NewRangeComplex(simAreaPath, rangeComplexInfo.Item1, false, dispatcher);
+            var result = new NewRangeComplex(simAreaPath, rangeComplexMetadata, false, dispatcher);
             try
             {
-                result.OpArea = result.AreaCollection[Path.GetFileNameWithoutExtension(rangeComplexInfo.Item6)];
-                result.SimArea = result.AreaCollection[Path.GetFileNameWithoutExtension(rangeComplexInfo.Item7)];
+                result.OpArea = result.AreaCollection[Path.GetFileNameWithoutExtension(rangeComplexMetadata.OpsLimitFile)];
+                result.SimArea = result.AreaCollection[Path.GetFileNameWithoutExtension(rangeComplexMetadata.SimLimitFile)];
             }
             catch (Exception)
             {
@@ -439,5 +441,27 @@ namespace ESME.Environment.Descriptors
                     Debug.WriteLine("{0}         [{1}]  size: {2}", DateTime.Now, area.Key, area.Value.FileSize);
             }
         }
+    }
+
+    public class RangeComplexMetadata
+    {
+        public RangeComplexMetadata(string rangeComplexName, double height, double latitude, double longitude, double geoid, string opsLimitFile, string simLimitFile)
+        {
+            Name = rangeComplexName;
+            Height = height;
+            Latitude = latitude;
+            Longitude = longitude;
+            GeoidSeparation = geoid;
+            OpsLimitFile = opsLimitFile;
+            SimLimitFile = simLimitFile;
+        }
+
+        public string Name { get; private set; }
+        public double Height { get; private set; }
+        public double Latitude { get; private set; }
+        public double Longitude { get; private set; }
+        public double GeoidSeparation { get; private set; }
+        public string OpsLimitFile { get; private set; }
+        public string SimLimitFile { get; private set; }
     }
 }

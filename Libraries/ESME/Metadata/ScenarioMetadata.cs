@@ -1,210 +1,100 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
+using ESME.Environment.Descriptors;
+using ESME.Environment.NAVO;
+using ESME.Mapping;
+using ESME.Model;
+using ESME.NEMO;
+using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.CASS;
+using HRC.Navigation;
 using HRC.Utility;
+using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Metadata
 {
     [Serializable]
     public class ScenarioMetadata : PropertyChangedBase
     {
-        static readonly List<Type> ReferencedTypes = new List<Type> { typeof(ScenarioMetadata), typeof(NemoModeToAcousticModelNameMap), typeof(ObservableList<AnalysisPoint>), typeof(AnalysisPoint), typeof(SoundSource) };
+        protected static readonly List<Type> ReferencedTypes = new List<Type> { typeof(string), typeof(DateTime), typeof(NAVOTimePeriod), typeof(NAEMOEnvironmentLocation), typeof(NAEMOEnvironmentFile), typeof(NemoModeToAcousticModelNameMap) };
+
         public ScenarioMetadata()
         {
-            AnalysisPoints = new ObservableList<AnalysisPoint>();
-        }
-        
-        ScenarioMetadata(string nemoFilename) : this()
-        {
-            _nemoFilename = nemoFilename;
-            _filename = MetadataFilename(nemoFilename);
-            Save();
+            TreeViewRootNodes = new ObservableList<TreeNode>();
+            Creator = System.Environment.UserName;
+            CreationDateTime = DateTime.Now;
         }
 
-        public static string MetadataFilename(string nemoFilename)
+        public static ScenarioMetadata Load(string metaDataFilename, RangeComplexes rangeComplexes)
         {
-            return Path.Combine(Path.GetDirectoryName(nemoFilename), Path.GetFileNameWithoutExtension(nemoFilename) + ".emf");
-        }
+            if (!File.Exists(metaDataFilename)) return null;
+            var result = XmlSerializer<ScenarioMetadata>.Load(metaDataFilename, ReferencedTypes);
+            result.Filename = metaDataFilename;
+            result.RangeComplexes = rangeComplexes;
+            result.RangeComplexes.PropertyChanged += result.RangeComplexesPropertyChanged;
+            // Any other initialization code goes here
 
-        public void Initialize(List<string> distinctModePSMNames)
-        {
-            if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(distinctModePSMNames, TransmissionLossAlgorithm.CASS);
-            else NemoModeToAcousticModelNameMap.UpdateModes(distinctModePSMNames, TransmissionLossAlgorithm.CASS);
+            return result;
         }
 
         public void Save(string filename = null)
         {
-            if (filename == null) filename = _filename;
-            if (filename == null) return;
-            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
-                new BinaryFormatter().Serialize(stream, this);
+            if (string.IsNullOrEmpty(filename)) filename = Filename;
+            var serializer = new XmlSerializer<ScenarioMetadata> { Data = this };
+            serializer.Save(filename, ReferencedTypes);
         }
 
-        public static ScenarioMetadata LoadOrCreate(string nemoFilename)
+        void RangeComplexesPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
-            var metadataFilename = MetadataFilename(nemoFilename);
-            if (!File.Exists(metadataFilename)) return new ScenarioMetadata(nemoFilename);
-            ScenarioMetadata result;
-            using (var stream = new FileStream(metadataFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
-                result = (ScenarioMetadata)new BinaryFormatter().Deserialize(stream);
-            result._filename = metadataFilename;
-            return result;
-        }
-
-        #region public string Filename { get; set; }
-        [XmlIgnore]
-        public string Filename
-        {
-            get { return _filename; }
-            set
+            switch (args.PropertyName)
             {
-                if (_filename == value) return;
-                _filename = value;
-                NotifyPropertyChanged(FilenameChangedEventArgs);
-                if (_filename != null) Save();
+                case "IsEnvironmentLoaded":
+                    if (RangeComplexes.IsEnvironmentLoaded)
+                    {
+                        _bathymetry = new WeakReference<Bathymetry>(((Task<Bathymetry>)RangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).Result);
+
+                    }
+                    else
+                    {
+                        _bathymetry = null;
+                    }
+                    break;
             }
         }
-
-        static readonly PropertyChangedEventArgs FilenameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.Filename);
-        [NonSerialized] string _filename;
-
-        #endregion
-
-        #region public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap { get; set; }
-
-        public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap
-        {
-            get { return _nemoModeToAcousticModelNameMap; }
-            set
-            {
-                if (_nemoModeToAcousticModelNameMap == value) return;
-                _nemoModeToAcousticModelNameMap = value;
-                NotifyPropertyChanged(NemoModeToAcousticModelNameMapChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs NemoModeToAcousticModelNameMapChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.NemoModeToAcousticModelNameMap);
-        NemoModeToAcousticModelNameMap _nemoModeToAcousticModelNameMap;
-
-        #endregion
-
-        #region public string SelectedAreaName { get; set; }
-
-        public string SelectedAreaName
-        {
-            get { return _selectedAreaName; }
-            set
-            {
-                if (_selectedAreaName == value) return;
-                _selectedAreaName = value;
-                NotifyPropertyChanged(SelectedAreaNameChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedAreaNameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.SelectedAreaName);
-        string _selectedAreaName;
-
-        #endregion
-
-        #region public string SelectedResolutionName { get; set; }
-
-        public string SelectedResolutionName
-        {
-            get { return _selectedResolutionName; }
-            set
-            {
-                if (_selectedResolutionName == value) return;
-                _selectedResolutionName = value;
-                NotifyPropertyChanged(SelectedResolutionNameChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedResolutionNameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.SelectedResolutionName);
-        string _selectedResolutionName;
-
-        #endregion
-
-        #region public string NemoFilename { get; set; }
-        [XmlIgnore]
-        public string NemoFilename
-        {
-            get { return _nemoFilename; }
-            set
-            {
-                if (_nemoFilename == value) return;
-                _nemoFilename = value;
-                NotifyPropertyChanged(NemoFileNameChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs NemoFileNameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.NemoFilename);
-        string _nemoFilename;
-
-        #endregion
-
-        #region public ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
-
-        public ObservableList<AnalysisPoint> AnalysisPoints
-        {
-            get { return _analysisPoints; }
-            set
-            {
-                if (_analysisPoints == value) return;
-                _analysisPoints = value;
-                if (_analysisPoints != null) _analysisPoints.CollectionChanged += (s, e) => this.Save();
-                NotifyPropertyChanged(AnalysisPointsChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs AnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.AnalysisPoints);
-        ObservableList<AnalysisPoint> _analysisPoints;
-
-        #endregion
-    }
-#if false
-    [Serializable]
-    public class NAEMOScenarioMetadata : NAEMOMetadataBase
-    {
-        new internal static readonly List<Type> ReferencedTypes = new List<Type>(NAEMOMetadataBase.ReferencedTypes) {typeof(NemoModeToAcousticModelNameMap)};
-
-        public NAEMOScenarioMetadata()
-        {
-            TreeViewRootNodes = new ObservableList<TreeNode>();
-        }
-
-        public static NAEMOScenarioMetadata Load(string metaDataFilename)
-        {
-            var result = Load<NAEMOScenarioMetadata>(metaDataFilename);
-            // Any other initialization code goes here
-            return result;
-        }
-
-        public void Save(string filename = null) { Save(this, ReferencedTypes, filename); }
 
         #region Properties that MUST be initialized before setting the ScenarioFilename property
 
         #region public MapLayerCollection MapLayers { get; set; }
         [XmlIgnore]
-        public MapLayerCollection MapLayers
+        public MapLayerCollection CurrentMapLayers
         {
-            get { return _mapLayers; }
+            get { return _currentMapLayers; }
             set
             {
-                if (_mapLayers == value) return;
-                if (_mapLayers != null) _mapLayers.CollectionChanged -= MapLayersCollectionChanged;
-                _mapLayers = value;
-                if (_mapLayers != null) _mapLayers.CollectionChanged += MapLayersCollectionChanged;
+                if (_currentMapLayers == value) return;
+                if (_currentMapLayers != null) _currentMapLayers.CollectionChanged -= CurrentMapLayersCollectionChanged;
+                _currentMapLayers = value;
+                if (_currentMapLayers != null) _currentMapLayers.CollectionChanged += CurrentMapLayersCollectionChanged;
                 NotifyPropertyChanged(MapLayersChangedEventArgs);
             }
         }
 
-        void MapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        void CurrentMapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
@@ -240,18 +130,19 @@ namespace ESME.Metadata
             }
             NotifyPropertyChanged(MapLayersChangedEventArgs);
         }
-        static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.MapLayers);
+        static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.CurrentMapLayers);
         [XmlIgnore]
-        MapLayerCollection _mapLayers;
+        MapLayerCollection _currentMapLayers;
 
         #endregion
-   
         [XmlIgnore]
         public Dispatcher Dispatcher { get; set; }
         [XmlIgnore]
-        public RangeComplexDescriptors RangeComplexDescriptors { get; set; }
+        public RangeComplexes RangeComplexes { get; set; }
         [XmlIgnore]
         public IUIVisualizerService VisualizerService { get; set; }
+        [XmlIgnore]
+        public IMessageBoxService MessageBoxService { get; set; }
         #endregion
 
         #region public CASSOutputs CASSOutputs { get; set; }
@@ -267,7 +158,7 @@ namespace ESME.Metadata
             }
         }
 
-        static readonly PropertyChangedEventArgs CASSOutputsChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.CASSOutputs);
+        static readonly PropertyChangedEventArgs CASSOutputsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.CASSOutputs);
         CASSOutputs _cassOutputs;
 
         void CASSOutputsChanged(object sender, NotifyCollectionChangedEventArgs args)
@@ -278,10 +169,9 @@ namespace ESME.Metadata
                     foreach (CASSOutput newItem in args.NewItems)
                     {
                         Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName, newItem.ModeName);
-                        if ((_bathymetry == null) || (!_bathymetry.IsAlive)) _bathymetry = new WeakReference<Bathymetry>(SelectedBathymetry.Data);
                         newItem.Bathymetry = _bathymetry;
-                        newItem.ThresholdRadiusChanged += (s, e) => Dispatcher.InvokeIfRequired(() => MapLayers.DisplayPropagationPoint(newItem));
-                        Dispatcher.InvokeIfRequired(() => MapLayers.DisplayPropagationPoint(newItem));
+                        //newItem.ThresholdRadiusChanged += (s, e) => Dispatcher.InvokeIfRequired(() => CurrentMapLayers.DisplayPropagationPoint(newItem));
+                        Dispatcher.InvokeIfRequired(() => CurrentMapLayers.DisplayPropagationPoint(newItem));
                         Task.Factory.StartNew(() =>
                         {
                             newItem.CheckThreshold(120, Dispatcher);
@@ -292,7 +182,7 @@ namespace ESME.Metadata
                     foreach (CASSOutput oldItem in args.OldItems)
                     {
                         Debug.WriteLine("Removed CASSOutput: {0}|{1}|{2}", oldItem.PlatformName, oldItem.SourceName, oldItem.ModeName);
-                        Dispatcher.InvokeIfRequired(() => MapLayers.RemovePropagationPoint(oldItem));
+                        Dispatcher.InvokeIfRequired(() => CurrentMapLayers.RemovePropagationPoint(oldItem));
                     }
                     break;
                 case NotifyCollectionChangedAction.Reset:
@@ -314,15 +204,9 @@ namespace ESME.Metadata
                 _nemoFile = value;
                 if (_nemoFile != null)
                 {
-                    _rangeComplexPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory,
-                                                     _nemoFile.Scenario.SimAreaName);
-                    _areasPath = Path.Combine(_rangeComplexPath, "Areas");
-                    _bathymetryPath = Path.Combine(_rangeComplexPath, "Bathymetry");
-                    _environmentPath = Path.Combine(_rangeComplexPath, "Environment");
-                    _imagesPath = Path.Combine(_rangeComplexPath, "Images");
-                    _scenarioPath = Path.GetDirectoryName(_nemoFile.FileName);
-                    _propagationPath = Path.Combine(_scenarioPath, "Propagation", _nemoFile.Scenario.TimeFrame);
-                    _pressurePath = Path.Combine(_scenarioPath, "Pressure", _nemoFile.Scenario.TimeFrame);
+                    var scenarioPath = Path.GetDirectoryName(_nemoFile.FileName);
+                    _propagationPath = Path.Combine(scenarioPath, "Propagation", _nemoFile.Scenario.TimeFrame);
+                    _pressurePath = Path.Combine(scenarioPath, "Pressure", _nemoFile.Scenario.TimeFrame);
                     if (_nemoFile.Scenario.DistinctModes != null)
                     {
                         _distinctModeProperties = new List<AcousticProperties>();
@@ -332,63 +216,72 @@ namespace ESME.Metadata
 
                     UpdateScenarioTreeRoot();
 
-                    if ((_nemoFile.Scenario != null) && (_nemoFile.Scenario.Animals != null))
-                    {
-                        foreach (var species in _nemoFile.Scenario.Animals.SelectMany(animal => animal.Species))
-                            MapLayers.DisplaySpecies(species);
-                    }
+                    // Display any animal layers on the map asynchronously
+                    if (_nemoFile.Scenario.Animals != null)
+                        foreach (var animal in _nemoFile.Scenario.Animals)
+                            foreach (var species in animal.Species)
+                            {
+                                try
+                                {
+                                    species.AnimatDataTask.Start();
+                                    var localSpecies = species;
+                                    species.AnimatDataTask.ContinueWith(task => Dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplaySpecies(localSpecies.SpeciesName, localSpecies.AnimatDataTask.Result)));
+                                }
+                                catch (Exception e)
+                                {
+                                    MessageBoxService.ShowError("Error loading animats: " + e.Message);
+                                }
+                            }
+
+
 
                     DisplayScenario();
-                    if (EnvironmentName != null) SelectedEnvironment = (NAEMOEnvironmentDescriptor)AvailableEnvironments[EnvironmentName];
+                    _selectedRangeComplex = RangeComplexes.RangeComplexCollection[_nemoFile.Scenario.SimAreaName];
+                    RangeComplexes.SelectedTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), _nemoFile.Scenario.TimeFrame);
                     if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
                     else NemoModeToAcousticModelNameMap.UpdateModes(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
                 }
                 else
                 {
-                    _rangeComplexPath = _areasPath = _bathymetryPath = _environmentPath = _imagesPath = null;
+                    _selectedRangeComplex = null;
                     _scenarioBounds = null;
                     NemoModeToAcousticModelNameMap = null;
-                    AvailableEnvironments = null;
                 }
                 NotifyPropertyChanged(NemoFileChangedEventArgs);
                 NotifyPropertyChanged(CanPlaceAnalysisPointChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs NemoFileChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.NemoFile);
+        static readonly PropertyChangedEventArgs NemoFileChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.NemoFile);
         NemoFile _nemoFile;
         List<AcousticProperties> _distinctModeProperties;
 
-        string _rangeComplexPath;
-        string _areasPath;
-        string _bathymetryPath;
-        string _environmentPath;
-        string _imagesPath;
-        string _scenarioPath;
         string _propagationPath;
         string _pressurePath;
+        NewRangeComplex _selectedRangeComplex;
         GeoRect _scenarioBounds;
+        WeakReference<Bathymetry> _bathymetry;
 
         void DisplayScenario()
         {
-            if (_nemoFile.Scenario.OverlayFile != null) MapLayers.DisplayOverlayShapes(string.Format("{0} sim area", _nemoFile.Scenario.SimAreaName), LayerType.SimArea, Colors.Transparent, _nemoFile.Scenario.OverlayFile.Shapes);
+            if (_nemoFile.Scenario.OverlayFile != null) CurrentMapLayers.DisplayOverlayShapes(string.Format("{0} sim area", _nemoFile.Scenario.SimAreaName), LayerType.SimArea, Colors.Transparent, _nemoFile.Scenario.OverlayFile.Shapes);
             foreach (var platform in _nemoFile.Scenario.Platforms)
             {
                 if (platform.Trackdefs.Count == 1)
                 {
-                    MapLayers.DisplayOverlayShapes(string.Format("Platform: {0} op area", platform.Name), LayerType.OpArea, Colors.Transparent, platform.Trackdefs[0].OverlayFile.Shapes, canBeRemoved:false);
+                    CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} op area", platform.Name), LayerType.OpArea, Colors.Transparent, platform.Trackdefs[0].OverlayFile.Shapes, canBeRemoved: false);
                     if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[0].OverlayFile.Shapes[0].BoundingBox);
                     else _scenarioBounds.Union(platform.Trackdefs[0].OverlayFile.Shapes[0].BoundingBox);
                     platform.CalculateBehavior();
                     if (platform.BehaviorModel != null && platform.BehaviorModel.CourseOverlay != null)
-                        MapLayers.DisplayOverlayShapes(string.Format("Platform: {0} track", platform.Name), LayerType.Track, Colors.Transparent,
+                        CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} track", platform.Name), LayerType.Track, Colors.Transparent,
                                                               new List<OverlayShape> { platform.BehaviorModel.CourseOverlay }, 0, PointSymbolType.Circle, true, new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, Colors.DarkGray, 1), false, true, false);
                 }
                 else
                     for (var trackIndex = 0; trackIndex < platform.Trackdefs.Count; trackIndex++)
                     {
-                        MapLayers.DisplayOverlayShapes(string.Format("Platform: {0} OpArea{1}", platform.Name, trackIndex + 1), LayerType.OpArea, Colors.Transparent,
-                                                              platform.Trackdefs[0].OverlayFile.Shapes, canBeRemoved:false);
+                        CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} OpArea{1}", platform.Name, trackIndex + 1), LayerType.OpArea, Colors.Transparent,
+                                                              platform.Trackdefs[0].OverlayFile.Shapes, canBeRemoved: false);
                         if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
                         else _scenarioBounds.Union(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
                     }
@@ -412,7 +305,7 @@ namespace ESME.Metadata
             }
         }
 
-        static readonly PropertyChangedEventArgs ScenarioFilenameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.ScenarioFilename);
+        static readonly PropertyChangedEventArgs ScenarioFilenameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.ScenarioFilename);
         string _scenarioFilename;
 
         #endregion
@@ -430,27 +323,26 @@ namespace ESME.Metadata
             }
         }
 
-        static readonly PropertyChangedEventArgs EnvironmentNameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.EnvironmentName);
+        static readonly PropertyChangedEventArgs EnvironmentNameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.EnvironmentName);
         string _environmentName;
 
         #endregion
 
+        #region public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap { get; set; }
 
-        #region public NAEMOEnvironmentDescriptors AvailableEnvironments { get; set; }
-        [XmlIgnore]
-        public NAEMOEnvironmentDescriptors AvailableEnvironments
+        public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap
         {
-            get { return _availableEnvironments; }
+            get { return _nemoModeToAcousticModelNameMap; }
             set
             {
-                if (_availableEnvironments == value) return;
-                _availableEnvironments = value;
-                NotifyPropertyChanged(AvailableEnvironmentsChangedEventArgs);
+                if (_nemoModeToAcousticModelNameMap == value) return;
+                _nemoModeToAcousticModelNameMap = value;
+                NotifyPropertyChanged(NemoModeToAcousticModelNameMapChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs AvailableEnvironmentsChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.AvailableEnvironments);
-        NAEMOEnvironmentDescriptors _availableEnvironments;
+        static readonly PropertyChangedEventArgs NemoModeToAcousticModelNameMapChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.NemoModeToAcousticModelNameMap);
+        NemoModeToAcousticModelNameMap _nemoModeToAcousticModelNameMap;
 
         #endregion
 
@@ -474,80 +366,6 @@ namespace ESME.Metadata
         }
 
         void EditEnvironmentHandler() { }
-        #endregion
-
-        #region public NAEMOEnvironmentDescriptor SelectedEnvironment { get; set; }
-        [XmlIgnore]
-        public NAEMOEnvironmentDescriptor SelectedEnvironment
-        {
-            get { return _selectedEnvironment; }
-            set
-            {
-                if (_selectedEnvironment == value) return;
-                _selectedEnvironment = value;
-                NotifyPropertyChanged(SelectedEnvironmentChangedEventArgs);
-                NotifyPropertyChanged(CanPlaceAnalysisPointChangedEventArgs);
-                if (_selectedEnvironment != null) EnvironmentName = Path.GetFileNameWithoutExtension(_selectedEnvironment.Metadata.Filename);
-                Task.Factory.StartNew(() => Dispatcher.InvokeIfRequired(DisplaySelectedEnvironment, DispatcherPriority.Normal));
-                CommandManager.InvalidateRequerySuggested();
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedEnvironmentChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.SelectedEnvironment);
-        NAEMOEnvironmentDescriptor _selectedEnvironment;
-
-        void DisplaySelectedEnvironment()
-        {
-            if (_selectedEnvironment == null) return;
-
-            var regex = new Regex(@"Environment: [\s\S]+$");
-            TreeViewRootNodes.RemoveAll(item => regex.IsMatch(item.Name));
-            var environmentRoot = new EnvironmentNode("Environment: {0}", Path.GetFileNameWithoutExtension(_selectedEnvironment.DataFilename));
-            TreeViewRootNodes.Add(environmentRoot);
-            foreach (var layer in _mapLayers) PlaceMapLayerInTree(layer);
-
-            var samplePoints = _selectedEnvironment.Data.Locations.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
-            var bathymetryBounds = SelectedBathymetry.GeoRect;
-            _scenarioBounds.Union(bathymetryBounds);
-            var bathyBitmapLayer = MapLayers.DisplayBathymetryRaster("Bathymetry", Path.Combine(_imagesPath, _selectedEnvironment.Metadata.BathymetryName + ".bmp"), true, false, true, bathymetryBounds);
-            Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer));
-            MapLayers.DisplayOverlayShapes("Sound Speed", LayerType.SoundSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Circle, false, null, false);
-            MapLayers.DisplayOverlayShapes("Wind", LayerType.WindSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
-            foreach (var sedimentType in _selectedEnvironment.Data.SedimentTypes)
-            {
-                samplePoints = sedimentType.Value.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
-                MapLayers.DisplayOverlayShapes(string.Format("Sediment: {0}", sedimentType.Key.ToLower()), LayerType.BottomType, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
-            }
-            ZoomToScenarioHandler();
-            Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RefreshMap, true));
-            // Get a list of transmission loss files that match the modes in the current scenario
-            if (CASSOutputs == null) CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
-            else CASSOutputs.RefreshInBackground();
-            //UpdateEnvironmentTreeRoot();
-        }
-
-        #endregion
-
-        #region public BathymetryFile SelectedBathymetry { get; set; }
-
-        public BathymetryFile SelectedBathymetry
-        {
-            get { return _selectedBathymetry; }
-            set
-            {
-                if (_selectedBathymetry == value) return;
-                _selectedBathymetry = value;
-                if ((_selectedBathymetry != null) && (_selectedBathymetry != BathymetryFile.None) && (_selectedBathymetry.IsCached)) 
-                    _selectedBathymetry.GetMyDataAsync();
-                NotifyPropertyChanged(SelectedBathymetryChangedEventArgs);
-                NotifyPropertyChanged(CanPlaceAnalysisPointChangedEventArgs);
-                if ((_selectedBathymetry != null) && (AnalysisPoints != null)) SetBathymetryForAnalysisPoints();
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedBathymetryChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.SelectedBathymetry);
-        BathymetryFile _selectedBathymetry;
-        WeakReference<Bathymetry> _bathymetry;
         #endregion
 
         #region ZoomToScenarioCommand
@@ -602,7 +420,7 @@ namespace ESME.Metadata
             }
         }
 
-        static readonly PropertyChangedEventArgs IsInAnalysisPointModeChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.IsInAnalysisPointMode);
+        static readonly PropertyChangedEventArgs IsInAnalysisPointModeChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.IsInAnalysisPointMode);
         bool _isInAnalysisPointMode;
 
         #endregion
@@ -610,8 +428,8 @@ namespace ESME.Metadata
         #region public bool CanPlaceAnalysisPoint { get; set; }
 
         [XmlIgnore]
-        public bool CanPlaceAnalysisPoint { get { return (NemoFile != null) && (SelectedBathymetry != null) && (SelectedEnvironment != null); } }
-        static readonly PropertyChangedEventArgs CanPlaceAnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.CanPlaceAnalysisPoint);
+        public bool CanPlaceAnalysisPoint { get { return (NemoFile != null) && (RangeComplexes.IsEnvironmentFullySpecified); } }
+        static readonly PropertyChangedEventArgs CanPlaceAnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.CanPlaceAnalysisPoint);
 
         #endregion
 
@@ -654,18 +472,17 @@ namespace ESME.Metadata
 
         void SetBathymetryForAnalysisPoints()
         {
-            if ((AnalysisPoints == null) || (AnalysisPoints.Count == 0) || (SelectedBathymetry == null) || (SelectedBathymetry.Data == null)) return;
-            if ((_bathymetry == null) || (!_bathymetry.IsAlive)) _bathymetry = new WeakReference<Bathymetry>(SelectedBathymetry.Data);
+            if ((AnalysisPoints == null) || (AnalysisPoints.Count == 0) || (!RangeComplexes.IsEnvironmentLoaded)) return;
             foreach (var analysisPoint in AnalysisPoints) analysisPoint.Bathymetry = _bathymetry;
         }
 
         void DisplayExistingAnalysisPoints()
         {
-            if (AnalysisPoints == null || MapLayers == null) return;
+            if (AnalysisPoints == null || CurrentMapLayers == null) return;
             TreeViewRootNodes.RemoveAll(item => item.Name == "Analysis points");
             var analysisPointNode = new AnalysisPointNode("Analysis points");
             TreeViewRootNodes.Add(analysisPointNode);
-            foreach (var analysisPoint in AnalysisPoints) MapLayers.DisplayAnalysisPoint(analysisPoint);
+            foreach (var analysisPoint in AnalysisPoints) CurrentMapLayers.DisplayAnalysisPoint(analysisPoint);
         }
 
         void AnalysisPointsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -678,9 +495,7 @@ namespace ESME.Metadata
                     {
                         foreach (var newPoint in e.NewItems)
                         {
-                            if (MapLayers != null) MapLayers.DisplayAnalysisPoint((AnalysisPoint)newPoint);
-                            if ((SelectedBathymetry == null) || (SelectedBathymetry.Data == null)) continue;
-                            if ((_bathymetry == null) || (!_bathymetry.IsAlive)) _bathymetry = new WeakReference<Bathymetry>(SelectedBathymetry.Data);
+                            if (CurrentMapLayers != null) CurrentMapLayers.DisplayAnalysisPoint((AnalysisPoint)newPoint);
                             ((AnalysisPoint)newPoint).Bathymetry = _bathymetry;
                         }
                     }
@@ -698,7 +513,7 @@ namespace ESME.Metadata
             if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RefreshMap, true));
         }
 
-        static readonly PropertyChangedEventArgs AnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.AnalysisPoints);
+        static readonly PropertyChangedEventArgs AnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.AnalysisPoints);
         ObservableCollection<AnalysisPoint> _analysisPoints;
 
         #endregion
@@ -717,22 +532,21 @@ namespace ESME.Metadata
             }
         }
 
-        static readonly PropertyChangedEventArgs TreeViewRootNodesChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.TreeViewRootNodes);
+        static readonly PropertyChangedEventArgs TreeViewRootNodesChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.TreeViewRootNodes);
         ObservableList<TreeNode> _treeViewRootNodes;
 
         void PlaceMapLayerInTree(MapLayerViewModel mapLayer) { foreach (var tree in TreeViewRootNodes) tree.AddMapLayer(mapLayer); }
 
         void UpdateEnvironmentTreeRoot()
         {
-            var regex = new Regex(@"Environment: [\s\S]+$");
-            TreeViewRootNodes.RemoveAll(item => regex.IsMatch(item.Name));
-            var environmentRoot = new TreeNode("Environment: {0}", Path.GetFileNameWithoutExtension(_selectedEnvironment.DataFilename));
+            var environmentRoot = new TreeNode("Environment");
             TreeViewRootNodes.Add(environmentRoot);
-            environmentRoot.MapLayers.Add(MapLayers.Find(LayerType.BaseMap, "Base Map").FirstOrDefault());
-            environmentRoot.MapLayers.Add(MapLayers.Find(LayerType.BathymetryRaster, "Bathymetry").FirstOrDefault());
-            environmentRoot.MapLayers.Add(MapLayers.Find(LayerType.SoundSpeed, "Sound Speed").FirstOrDefault());
-            environmentRoot.MapLayers.Add(MapLayers.Find(LayerType.WindSpeed, "Wind").FirstOrDefault());
-            environmentRoot.MapLayers.AddRange(MapLayers.Find(LayerType.WindSpeed, new Regex(@"Sediment: \S+$", RegexOptions.Singleline)));
+            environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.BaseMap, "Base Map").FirstOrDefault());
+            environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.BathymetryRaster, "Bathymetry").FirstOrDefault());
+            environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.SoundSpeed, "Sound Speed").FirstOrDefault());
+            environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.WindSpeed, "Wind").FirstOrDefault());
+            environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.BottomType, "Bottom Loss").FirstOrDefault());
+            environmentRoot.MapLayers.AddRange(CurrentMapLayers.Find(LayerType.BottomType, new Regex(@"Sediment: \S+$", RegexOptions.Singleline)));
         }
 
         void UpdateScenarioTreeRoot()
@@ -753,20 +567,115 @@ namespace ESME.Metadata
 
         public void ExportAnalysisPoints()
         {
-#if false
-            Will do this after the rest works properly
             Directory.CreateDirectory(_propagationPath);
-            //Directory.CreateDirectory(pressureTimePath);
-            var rangeComplex = ((RangeComplexDescriptor)RangeComplexDescriptors[NemoFile.Scenario.SimAreaName]).Data;
-            SelectedEnvironment.Data.EnvironmentInformation.Bathymetry = SelectedBathymetry.Data;
-            CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings, new List<string> {NemoFile.Scenario.TimeFrame},
+            CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings, new List<string> { NemoFile.Scenario.TimeFrame },
                                                   AnalysisPoints, NemoFile,
-                                                  SelectedBathymetry.DataFilename, SelectedEnvironment.DataFilename,
                                                   NemoModeToAcousticModelNameMap,
-                                                  SelectedEnvironment.Data.EnvironmentInformation, rangeComplex);
+                                                  RangeComplexes.EnvironmentData, RangeComplexes);
             Globals.WorkDirectories.Add(_propagationPath, true);
-#endif
         }
+
+        public static string MetadataFilename(string sourceFilename)
+        {
+            var metadataPath = Path.GetDirectoryName(sourceFilename);
+            var metadataFile = Path.GetFileNameWithoutExtension(sourceFilename);
+            return Path.Combine(metadataPath, metadataFile + ".xml");
+        }
+
+        #region public string OverlayFilename { get; set; }
+
+        public string OverlayFilename
+        {
+            get { return _overlayFilename; }
+            set
+            {
+                if (_overlayFilename == value) return;
+                _overlayFilename = Path.GetFileNameWithoutExtension(value);
+                if (!string.IsNullOrEmpty(_overlayFilename) && !string.IsNullOrEmpty(Filename))
+                    if (!OverlayFileExists) _overlayFilename = null;
+                NotifyPropertyChanged(OverlayNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs OverlayNameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.OverlayFilename);
+        string _overlayFilename;
+
+        bool OverlayFileExists { get { return File.Exists(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(Filename)), "Areas", OverlayFilename + ".ovr")); } }
+
+        #endregion
+
+        #region public string Creator { get; set; }
+
+        public string Creator
+        {
+            get { return _creator; }
+            set
+            {
+                if (_creator == value) return;
+                _creator = value;
+                NotifyPropertyChanged(CreatorChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CreatorChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.Creator);
+        string _creator;
+
+        #endregion
+
+        #region public DateTime CreationDateTime { get; set; }
+
+        public DateTime CreationDateTime
+        {
+            get { return _creationDateTime; }
+            set
+            {
+                if (_creationDateTime == value) return;
+                _creationDateTime = value;
+                NotifyPropertyChanged(CreationDateChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CreationDateChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.CreationDateTime);
+        DateTime _creationDateTime;
+
+        #endregion
+
+        #region public GeoRect Bounds { get; set; }
+
+        public GeoRect Bounds
+        {
+            get { return _bounds; }
+            set
+            {
+                if (_bounds == value) return;
+                _bounds = value;
+                NotifyPropertyChanged(BoundsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BoundsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.Bounds);
+        GeoRect _bounds;
+
+        #endregion
+
+        #region public string Filename { get; set; }
+
+        public string Filename
+        {
+            get { return _filename; }
+            set
+            {
+                if (_filename == value) return;
+                _filename = value;
+                if (!string.IsNullOrEmpty(OverlayFilename) && !string.IsNullOrEmpty(_filename))
+                    if (!OverlayFileExists) OverlayFilename = null;
+                NotifyPropertyChanged(FilenameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs FilenameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.Filename);
+        string _filename;
+
+        #endregion
     }
-#endif
 }
