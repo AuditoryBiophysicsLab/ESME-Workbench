@@ -18,9 +18,6 @@ namespace ESME.Environment.Descriptors
 {
     public class NewRangeComplex : ViewModelBase
     {
-        public static NewRangeComplex None = new NewRangeComplex {Name = "None"};
-        NewRangeComplex() { }
-
         NewRangeComplex(string simAreaPath, string rangeComplexName, bool isCreate, Dispatcher dispatcher)
         {
             IsLoading = true;
@@ -84,13 +81,6 @@ namespace ESME.Environment.Descriptors
         [NotNull] public ObservableConcurrentDictionary<string, RangeComplexArea> AreaCollection { get; private set; }
         [NotNull] public ObservableList<RangeComplexArea> AreaList { get; private set; }
         [NotNull] public ObservableList<EnvironmentFile> EnvironmentList { get; private set; }
-
-        public WindFile WindFile { get; private set; }
-        public BottomLossFile BottomLossFile { get; private set; }
-        public SedimentFile SedimentFile { get; private set; }
-        public TemperatureFile TemperatureFile { get; private set; }
-        public SoundSpeedFile SoundSpeedFile { get; private set; }
-        public SalinityFile SalinityFile { get; private set; }
 
         public RangeComplexArea this[string areaName] { get { return AreaCollection[areaName]; } }
 
@@ -176,27 +166,6 @@ namespace ESME.Environment.Descriptors
             }
         }
         
-        EnvironmentFile NewEnvironmentFile(string fileName, uint sampleCount, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
-        {
-            switch (dataType)
-            {
-                case EnvironmentDataType.BottomLoss:
-                    return new BottomLossFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod, resolution);
-                case EnvironmentDataType.Salinity:
-                    return new SalinityFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod, resolution);
-                case EnvironmentDataType.Sediment:
-                    return new SedimentFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod, resolution);
-                case EnvironmentDataType.SoundSpeed:
-                    return new SoundSpeedFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod, resolution);
-                case EnvironmentDataType.Temperature:
-                    return new TemperatureFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod, resolution);
-                case EnvironmentDataType.Wind:
-                    return new WindFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod, resolution);
-                default:
-                    throw new ApplicationException(string.Format("Unknown environment data type: {0}", dataType));
-            }
-        }
-
         Tuple<EnvironmentFile, ImportJobDescriptor> CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType dataType, float resolution, bool createJobIfRequired, NAVOTimePeriod timePeriod = NAVOTimePeriod.Invalid)
         {
             var samplesPerDegree = 60.0f / resolution;
@@ -220,30 +189,7 @@ namespace ESME.Environment.Descriptors
             {
                 // Given that we MIGHT want to extract the data from the database, let's create an envFile of the appropriate type
                 // to contain the metadata we are going to want to know
-                EnvironmentFile envFile;
-                switch (dataType)
-                {
-                    case EnvironmentDataType.BottomLoss:
-                        envFile = BottomLossFile = (BottomLossFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
-                        break;
-                    case EnvironmentDataType.Salinity:
-                        envFile = SalinityFile = (SalinityFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
-                        break;
-                    case EnvironmentDataType.Sediment:
-                        envFile = SedimentFile = (SedimentFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
-                        break;
-                    case EnvironmentDataType.Temperature:
-                        envFile = TemperatureFile = (TemperatureFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
-                        break;
-                    case EnvironmentDataType.SoundSpeed:
-                        envFile = SoundSpeedFile = (SoundSpeedFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
-                        break;
-                    case EnvironmentDataType.Wind:
-                        envFile = WindFile = (WindFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
-                        break;
-                    default:
-                        throw new ApplicationException(string.Format("Unknown environment data type: {0}", dataType));
-                }
+                var envFile = new EnvironmentFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod, resolution);
                 EnvironmentFiles[fileName] = envFile;
                 // OK so let's actually go ahead and create a job if we DO want to extract this data from the database
                 if (createJobIfRequired)

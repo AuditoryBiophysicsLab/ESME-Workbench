@@ -63,7 +63,7 @@
     <!-- ================================================================================================================================================== -->
     <!-- Basic BathymetryFile                                                                                                                              -->
     <!-- ================================================================================================================================================== -->
-    <HierarchicalDataTemplate DataType="{x:Type Descriptors:BathymetryFile}">
+    <HierarchicalDataTemplate DataType="{x:Type Descriptors:EnvironmentFile}">
       <TreeViewItem Header="{Binding Name}" Margin="-20 0 0 0" Style="{StaticResource DataCachedDisplayStyle}">
         <ContentPresenter ContentTemplate="{StaticResource EnvironmentFileTemplate}" />
       </TreeViewItem>

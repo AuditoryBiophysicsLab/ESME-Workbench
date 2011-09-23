@@ -105,15 +105,15 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (!string.IsNullOrEmpty(ScenarioMetadata.SelectedAreaName) && (RangeComplexes.SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName] != null)) RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName];
 
                 // If an resolution has been selected, and the selected area has cached bathymetry of that resolution, select it
-                if (!string.IsNullOrEmpty(ScenarioMetadata.SelectedResolutionName) && (RangeComplexes.SelectedArea != RangeComplexArea.None) &&
-                    (RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName] != null) && RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName].IsCached) RangeComplexes.SelectedBathymetry = (BathymetryFile)RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName];
+                if (!string.IsNullOrEmpty(ScenarioMetadata.SelectedResolutionName) && (RangeComplexes.SelectedArea != null) &&
+                    (RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName] != null) && RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName].IsCached) RangeComplexes.SelectedBathymetry = RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName];
                 else
                 {
                     uint maxSamplesSeen = 0;
-                    var selectedBathymetry = BathymetryFile.None;
+                    EnvironmentFile selectedBathymetry = null;
                     foreach (var entry in RangeComplexes.SelectedArea.BathymetryFiles)
                     {
-                        var bathymetryFile = (BathymetryFile)entry.Value;
+                        var bathymetryFile = entry.Value;
                         var isCached = bathymetryFile.IsCached;
                         var samples = bathymetryFile.SampleCount;
                         if (!isCached) continue;
@@ -170,19 +170,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
                 if (CASSOutputs == null) CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
                 else CASSOutputs.RefreshInBackground();
-
-                RangeComplexes.PropertyChanged += (s, e) =>
-                {
-                    switch (e.PropertyName)
-                    {
-                        case "SelectedArea":
-                        case "SelectedBathymetry":
-                            if (!RangeComplexes.SelectedBathymetry.IsCached) return;
-                            if (RangeComplexes.SelectedBathymetry.DataTask == null) RangeComplexes.SelectedBathymetry.Reset();
-                            RangeComplexes.SelectedBathymetry.GetMyDataAsync().ContinueWith(task => ReprocessCASSOutputs());
-                            break;
-                    }
-                };
             }
             catch (Exception ex)
             {
@@ -243,7 +230,6 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(NemoFileChangedEventArgs);
                 NotifyPropertyChanged(IsScenarioLoadedChangedEventArgs);
                 NotifyPropertyChanged(IsScenarioNotLoadedChangedEventArgs);
-                NotifyPropertyChanged(IsTimePeriodSelectionEnabledChangedEventArgs);
 
                 MainWindowTitle = _nemoFile != null ? string.Format("ESME WorkBench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", NemoFile.Scenario.EventName, NemoFile.Scenario.TimeFrame) : string.Format("ESME WorkBench 2011{0}: <No scenario loaded>", Configuration.IsUnclassifiedModel ? " (public)" : "");
                 if (_nemoFile == null)
@@ -270,7 +256,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     {
                         if (!IsScenarioLoaded) return;
                         Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName, newItem.ModeName);
-                        newItem.Bathymetry = new WeakReference<Bathymetry>(RangeComplexes.SelectedBathymetry.DataTask.Result);
+                        //newItem.Bathymetry = new WeakReference<Bathymetry>(RangeComplexes.SelectedBathymetry.DataTask.Result);
                         newItem.CheckThreshold(Globals.AppSettings.TransmissionLossContourThreshold, _dispatcher);
                         if (!IsScenarioLoaded) return;
                         _dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayPropagationPoint(newItem));

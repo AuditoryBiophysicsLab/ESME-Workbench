@@ -15,9 +15,6 @@ namespace ESME.Environment.Descriptors
 {
     public class RangeComplexArea : ViewModelBase
     {
-        public static readonly RangeComplexArea None = new RangeComplexArea {Name = "None"};
-        RangeComplexArea() { }
-
         RangeComplexArea(NewRangeComplex rangeComplex, string areaName, OverlayShape overlayShape)
         {
             IsEnabled = false;
@@ -27,7 +24,7 @@ namespace ESME.Environment.Descriptors
             GeoRect = new GeoRect(overlayShape.BoundingBox);
             BathymetryPath = Path.Combine(_rangeComplex.DataPath, Name);
             BathymetryFiles = RangeComplexToken.Load(Path.Combine(BathymetryPath, Name + ".token"));
-            BathymetryList = BathymetryFiles.GetObservableWrapper<BathymetryFile>();
+            BathymetryList = BathymetryFiles.GetObservableWrapper<EnvironmentFile>();
             Directory.CreateDirectory(BathymetryPath);
             UpdateAvailableBathymetry();
             IsEnabled = true;
@@ -56,13 +53,12 @@ namespace ESME.Environment.Descriptors
                     (BathymetryFiles[fileName] == null) || (fileInfo.Length != BathymetryFiles[fileName].FileSize) ||
                     (fileInfo.LastWriteTime != BathymetryFiles[fileName].LastWriteTime))
                 {
-                    var bathymetryFile = new BathymetryFile(BathymetryPath, fileName, sampleCount, GeoRect,
+                    var bathymetryFile = new EnvironmentFile(BathymetryPath, fileName, sampleCount, GeoRect,
                                                                    EnvironmentDataType.Bathymetry, NAVOTimePeriod.Invalid, resolution);
                     BathymetryFiles[fileName] = bathymetryFile;
                     if (sampleCount <= 512000)
                         ImportBathymetry(bathymetryFile);
                 }
-                else ((BathymetryFile)BathymetryFiles[fileName]).Reset();
             }
         }
 
@@ -84,14 +80,7 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
-        public bool CanBeDeleted
-        {
-            get
-            {
-                if (this == None) return false;
-                return (_rangeComplex.OpArea.Name != Name) && (_rangeComplex.SimArea.Name != Name);
-            }
-        }
+        public bool CanBeDeleted { get { return (_rangeComplex.OpArea.Name != Name) && (_rangeComplex.SimArea.Name != Name); } }
 
         internal static RangeComplexArea Create(NewRangeComplex rangeComplex, string areaName, IEnumerable<Geo> limits)
         {
@@ -110,7 +99,7 @@ namespace ESME.Environment.Descriptors
             return new RangeComplexArea(rangeComplex, areaName, overlay.Shapes[0]);
         }
 
-        public void ImportBathymetry(BathymetryFile bathymetryFile)
+        public void ImportBathymetry(EnvironmentFile bathymetryFile)
         {
             var jobDescriptor = new ImportJobDescriptor
             {
@@ -121,11 +110,10 @@ namespace ESME.Environment.Descriptors
                 CompletionFunction = arg =>
                 {
                     var job = (ImportJobDescriptor)arg;
-                    var thisFile = (BathymetryFile)BathymetryFiles[bathymetryFile.FileName];
+                    var thisFile = BathymetryFiles[bathymetryFile.FileName];
                     thisFile.GeoRect = job.GeoRect;
                     thisFile.SampleCount = job.SampleCount;
                     thisFile.IsCached = true;
-                    thisFile.Reset();
                     BathymetryFiles[bathymetryFile.FileName] = thisFile;
                     return job;
                 }
@@ -134,17 +122,15 @@ namespace ESME.Environment.Descriptors
             _rangeComplex.QueueImportJob(jobDescriptor);
         }
 
-        public bool CanRemoveBathymetry(BathymetryFile bathymetryFile) { return bathymetryFile.SampleCount >= 512000; }
+        public bool CanRemoveBathymetry(EnvironmentFile bathymetryFile) { return bathymetryFile.SampleCount >= 512000; }
 
-        public void RemoveBathymetry(BathymetryFile bathymetryFile)
+        public void RemoveBathymetry(EnvironmentFile bathymetryFile)
         {
             if (bathymetryFile.SampleCount < 512000) throw new InvalidOperationException("This bathymetry file may not be removed.  You may, however, choose to re-import it");
-            var thisFile = (BathymetryFile)BathymetryFiles[bathymetryFile.FileName];
+            var thisFile = BathymetryFiles[bathymetryFile.FileName];
             bathymetryFile.IsCached = false;
-            bathymetryFile.Reset();
             File.Delete(Path.Combine(BathymetryPath, bathymetryFile.FileName));
             thisFile.IsCached = false;
-            thisFile.Reset();
             BathymetryFiles[bathymetryFile.FileName] = thisFile;
         }
 
@@ -161,12 +147,12 @@ namespace ESME.Environment.Descriptors
             foreach (var item in BathymetryFiles) Debug.WriteLine("{0}     [{1}]  size: {2}", DateTime.Now, item.Key, item.Value.FileSize);
         }
 
-        public BathymetryFile this[string resolutionString]
+        public EnvironmentFile this[string resolutionString]
         {
-            get { return (BathymetryFile)BathymetryFiles[resolutionString]; }
+            get { return BathymetryFiles[resolutionString]; }
         }
 
-        [NotNull] public ObservableList<BathymetryFile> BathymetryList { get; private set; }
+        [NotNull] public ObservableList<EnvironmentFile> BathymetryList { get; private set; }
 
         [NotNull] public string Name { get; private set; }
         [NotNull] public string BathymetryPath { get; private set; }

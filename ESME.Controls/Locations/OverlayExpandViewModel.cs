@@ -11,7 +11,7 @@ namespace ESME.Views.Locations
     {
         public OverlayExpandViewModel(NewRangeComplex rangeComplex, RangeComplexArea sourceArea)
         {
-            if ((rangeComplex == null) || (rangeComplex == NewRangeComplex.None) || (sourceArea == null) || (sourceArea == RangeComplexArea.None)) throw new ApplicationException("Range Complex and/or Area has not been selected");
+            if ((rangeComplex == null) || (sourceArea == null)) throw new ApplicationException("Range Complex and/or Area has not been selected");
             _areaName = sourceArea.Name;
             ValidationRules.Add(new ValidationRule
             {

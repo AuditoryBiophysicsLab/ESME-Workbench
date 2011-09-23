@@ -185,27 +185,13 @@ namespace ESMEWorkBench.ViewModels.Main
                     switch (e.PropertyName)
                     {
                         case "SelectedRangeComplex":
-                            UpdateRangeComplex();
-                            NotifyPropertyChanged(IsTimePeriodSelectionEnabledChangedEventArgs);
-                            break;
-                        case "SelectedTimePeriod":
-                            UpdateTimePeriod();
+                            DisplayRangeComplex();
                             break;
                         case "SelectedArea":
                             DisplaySelectedArea();
-                            if (IsScenarioLoaded && RangeComplexes.IsAreaSelected)
-                                ScenarioMetadata.SelectedAreaName = RangeComplexes.SelectedArea.Name;
-                            if (IsScenarioLoaded && !RangeComplexes.IsAreaSelected)
-                            {
-                                ScenarioMetadata.SelectedAreaName = null;
-                                ScenarioMetadata.SelectedResolutionName = null;
-                            }
                             break;
                         case "SelectedBathymetry":
-                            UpdateSoundSpeedData();
                             DisplayBathymetry();
-                            if (IsScenarioLoaded)
-                                ScenarioMetadata.SelectedResolutionName = RangeComplexes.IsBathymetrySelected ? RangeComplexes.SelectedBathymetry.Name : null;
                             break;
                     }
                 };
@@ -215,8 +201,6 @@ namespace ESMEWorkBench.ViewModels.Main
                 _messageBoxService.ShowError(e.Message);
             }
         }
-        public bool IsTimePeriodSelectionEnabled { get { return RangeComplexes.IsRangeComplexSelected && IsScenarioNotLoaded; } }
-        static readonly PropertyChangedEventArgs IsTimePeriodSelectionEnabledChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsTimePeriodSelectionEnabled);
 
         public ImportProgressCollection ImportProgressCollection { get; private set; }
         public RangeComplexes RangeComplexes { get; private set; }

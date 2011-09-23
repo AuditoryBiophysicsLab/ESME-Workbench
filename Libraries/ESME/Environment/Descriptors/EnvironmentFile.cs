@@ -78,17 +78,6 @@ namespace ESME.Environment.Descriptors
             }
         }
 
-        #region public bool IsDeleteable { get; set; }
-
-        public bool IsDeleteable
-        {
-            get { return IsCached && (DataAvailability != DataAvailability.Loading); }
-        }
-
-        static readonly PropertyChangedEventArgs IsDeleteableChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile>(x => x.IsDeleteable);
-
-        #endregion
-
         #region public bool IsCached { get; set; }
 
         public bool IsCached
@@ -99,7 +88,6 @@ namespace ESME.Environment.Descriptors
                 if (_isCached == value) return;
                 _isCached = value;
                 NotifyPropertyChanged(IsCachedChangedEventArgs);
-                NotifyPropertyChanged(IsDeleteableChangedEventArgs);
             }
         }
 
@@ -209,83 +197,6 @@ namespace ESME.Environment.Descriptors
         float _resolution;
 
         #endregion
-        #region public DataAvailability DataAvailability { get; protected set; }
-        public DataAvailability DataAvailability
-        {
-            get { return _dataAvailability; }
-            protected set
-            {
-                if (_dataAvailability == value) return;
-                _dataAvailability = value;
-                Debug.WriteLine("{0} DataAvailability for {1} changed to {2}", DateTime.Now, FileName, _dataAvailability);
-                OnDataAvailabilityChanged(_dataAvailability);
-                NotifyPropertyChanged(DataAvailabilityChangedEventArgs);
-                NotifyPropertyChanged(IsDeleteableChangedEventArgs);
-                NotifyPropertyChanged(DataAvailabilityColorChangedEventArgs);
-            }
-        }
-        [NonSerialized]
-        DataAvailability _dataAvailability = DataAvailability.NotLoaded;
-        static readonly PropertyChangedEventArgs DataAvailabilityChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile>(x => x.DataAvailability);
-
-        #region public Brush DataAvailabilityBrush { get; set; }
-
-        public Brush DataAvailabilityBrush
-        {
-            get
-            {
-                switch (DataAvailability)
-                {
-                    case DataAvailability.NotLoaded:
-                        return Brushes.Black;
-                    case DataAvailability.Loading:
-                        return Brushes.Orange;
-                    case DataAvailability.Available:
-                        return Brushes.Green;
-                    default:
-                        throw new ApplicationException(string.Format("Unknown value for DataAvailability: {0}", DataAvailability));
-                }
-            }
-        }
-
-        static readonly PropertyChangedEventArgs DataAvailabilityColorChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile>(x => x.DataAvailabilityBrush);
-
-        #endregion
-
-        [NonSerialized]
-        private EventHandler<DataAvailabilityChangedEventArgs> _dataAvailabilityChanged;
-        public event EventHandler<DataAvailabilityChangedEventArgs> DataAvailabilityChanged
-        {
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            add
-            {
-                _dataAvailabilityChanged = (EventHandler<DataAvailabilityChangedEventArgs>)Delegate.Combine(_dataAvailabilityChanged, value);
-            }
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            remove
-            {
-                _dataAvailabilityChanged = (EventHandler<DataAvailabilityChangedEventArgs>)Delegate.Remove(_dataAvailabilityChanged, value);
-            }
-        }
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        protected virtual void OnDataAvailabilityChanged(DataAvailability availability)
-        {
-            var eventArgs = new DataAvailabilityChangedEventArgs(availability);
-            //if (Name != null) Debug.WriteLine("{0} {1} [{2}]", DateTime.Now, Name, e.Action);
-            var handlers = _dataAvailabilityChanged;
-            if (handlers == null) return;
-            foreach (EventHandler<DataAvailabilityChangedEventArgs> handler in handlers.GetInvocationList())
-            {
-                var localHandler = handler;
-                try
-                {
-                    if (handler.Target is DispatcherObject) ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, eventArgs));
-                    else handler(this, eventArgs);
-                }
-                catch (Exception) { }
-            }
-        }
-        #endregion
 
         public EnvironmentDataType DataType { get; protected set; }
         public NAVOTimePeriod TimePeriod { get; private set; }
@@ -322,302 +233,59 @@ namespace ESME.Environment.Descriptors
         }
 
         #endregion
-    }
 
-    [Serializable]
-    public class EnvironmentFile<T> : EnvironmentFile, IDeserializationCallback where T : class
-    {
-        protected EnvironmentFile() { Initialize(); }
-
-        public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Initialize(); }
-
-        void IDeserializationCallback.OnDeserialization(object sender)
+        public static SoundSpeed CalculateSoundSpeed(NewRangeComplex rangeComplex, NAVOTimePeriod timePeriod, Task<Bathymetry> bathymetryTask, GeoRect bathymetryBounds)
         {
-            Initialize();
-        }
+            if (rangeComplex == null) throw new ArgumentException("rangeComplex");
+            if (timePeriod == NAVOTimePeriod.Invalid) throw new ArgumentException("timePeriod");
+            if (bathymetryTask == null) throw new ArgumentNullException("bathymetryTask");
+            if (bathymetryBounds == null) throw new ArgumentNullException("bathymetryBounds");
 
-        public void Initialize()
-        {
-            DataAvailability = DataAvailability.NotLoaded;
-            Reset();
-        }
-
-        public Task<T> GetMyDataAsync()
-        {
-            if (DataTask == null) Reset();
-            if (DataTask == null) throw new InvalidOperationException("Requested data has not been imported");
-            if (DataTask.Status != TaskStatus.Created) return DataTask;
-            DataTask.Start();
-            DataAvailability = DataAvailability.Loading;
-            DataTask.ContinueWith(task => DataAvailability = DataAvailability.Available);
-            return DataTask;
-        }
-
-        public virtual void Reset()
-        {
-            DataAvailability = DataAvailability.NotLoaded;
-            if (DataTask != null && DataTask.IsCompleted)
+            Debug.WriteLine("{0} SSP: Loading bathymetry", DateTime.Now);
+            if (bathymetryTask.Status == TaskStatus.Created) bathymetryTask.Start();
+            var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod).ToList();
+            Debug.WriteLine("{0} SSP: Computing soundspeed for {1}", DateTime.Now, timePeriod);
+            var sources = (from month in months
+                           select new
+                           {
+                               Month = month,
+                               TemperatureTask = new Task<SoundSpeed>(() => SoundSpeed.Load(Path.Combine(rangeComplex.DataPath, string.Format("{0}.temperature", month)))),
+                               SalinityTask = new Task<SoundSpeed>(() => SoundSpeed.Load(Path.Combine(rangeComplex.DataPath, string.Format("{0}.salinity", month)))),
+                           }).ToDictionary(item => item.Month);
+            var sourceTasks = new List<Task>();
+            foreach (var month in months)
             {
-                Debug.WriteLine("{0} Disposing task of type {1}", DateTime.Now, DataTask.Result);
-                DataTask.Dispose();
+                Debug.WriteLine("{0} SSP: Loading temperature and salinity data for {1}", DateTime.Now, month);
+                sources[month].TemperatureTask.Start();
+                sources[month].SalinityTask.Start();
+                sourceTasks.Add(sources[month].TemperatureTask);
+                sourceTasks.Add(sources[month].SalinityTask);
             }
-        }
-
-        public Task<T> DataTask
-        {
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            get
+            sourceTasks.Add(bathymetryTask);
+            var continuation = TaskEx.WhenAll(sourceTasks).ContinueWith(task =>
             {
-                return _dataTask;
-            }
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            set
-            {
-#if false
-                if (_dataTask != null)
+                Debug.WriteLine("{0} SSP: Required data loaded.  Computing monthly sound speeds fields", DateTime.Now);
+                var soundSpeedFields = (from month in months
+                                        select new
+                                        {
+                                            Month = month,
+                                            SoundSpeedField = SoundSpeedField.Create(sources[month].TemperatureTask.Result[month],
+                                                                                     sources[month].SalinityTask.Result[month],
+                                                                                     bathymetryTask.Result.DeepestPoint,
+                                                                                     bathymetryBounds),
+                                        }).ToDictionary(item => item.Month);
+                var monthlySoundSpeeds = new SoundSpeed();
+                foreach (var month in months)
                 {
-                    if (_dataTask.IsCompleted) _dataTask.Dispose();
-                    else if (_dataTask.Status != TaskStatus.Created)
-                        throw new InvalidOperationException("Data is being imported and cannot be cleared at this time");
+                    Debug.WriteLine("{0} SSP: Releasing temperature and salinity data for {1}", DateTime.Now, month);
+                    sources[month].TemperatureTask.Dispose();
+                    sources[month].SalinityTask.Dispose();
+                    monthlySoundSpeeds.Add(soundSpeedFields[month].SoundSpeedField);
                 }
-#endif
-                _dataTask = value;
-            }
-        }
-        [NonSerialized] Task<T> _dataTask;
-    }
-
-    [Serializable]
-    public sealed class TemperatureFile : EnvironmentFile<SoundSpeed>
-    {
-        public static TemperatureFile None = new TemperatureFile { DataAvailability = DataAvailability.NotLoaded };
-        public TemperatureFile()
-        {
-            DataType = EnvironmentDataType.Temperature;
-            IsCached = false;
-        }
-
-        public TemperatureFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
-
-        public override void Reset() 
-        {
-            base.Reset();
-            DataTask = IsCached ? new Task<SoundSpeed>(() => SoundSpeed.Load(Path.Combine(DataPath, FileName))) : null;
-        }
-    }
-
-    [Serializable]
-    public sealed class SalinityFile : EnvironmentFile<SoundSpeed>
-    {
-        public static SalinityFile None = new SalinityFile { DataAvailability = DataAvailability.NotLoaded };
-        public SalinityFile()
-        {
-            DataType = EnvironmentDataType.Salinity;
-            IsCached = false;
-        }
-
-        public SalinityFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
-
-        public override void Reset() 
-        {
-            base.Reset();
-            DataTask = IsCached ? new Task<SoundSpeed>(() => SoundSpeed.Load(Path.Combine(DataPath, FileName))) : null;
-        }
-    }
-
-    [Serializable]
-    public sealed class SoundSpeedFile : EnvironmentFile<SoundSpeed>
-    {
-        readonly object _lockObject = new object();
-        public static SoundSpeedFile None = new SoundSpeedFile {DataAvailability = DataAvailability.NotLoaded};
-
-        public SoundSpeedFile()
-        {
-            DataType = EnvironmentDataType.SoundSpeed;
-            IsCached = false;
-        }
-
-        public SoundSpeedFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { }
-
-        BathymetryFile _selectedBathymetry;
-        public BathymetryFile SelectedBathymetry
-        {
-            get { return _selectedBathymetry; }
-            set { lock(_lockObject) _selectedBathymetry = value; }
-        }
-
-        RangeComplexToken _rangeComplexToken;
-        public RangeComplexToken RangeComplexToken
-        {
-            get { return _rangeComplexToken; }
-            set { lock (_lockObject) _rangeComplexToken = value; }
-        }
-
-        public override void Reset()
-        {
-            Debug.WriteLine("{0} SoundSpeed {1} reset", DateTime.Now, TimePeriod);
-            base.Reset();
-            if ((SelectedBathymetry == null) || (SelectedBathymetry == BathymetryFile.None) || (RangeComplexToken == null))
-            {
-                Debug.WriteLine("{0} SoundSpeed {1} missing bathymetry or range complex token", DateTime.Now, TimePeriod);
-                DataTask = null;
-                return;
-            }
-            var dataTask = new Task<SoundSpeed>(() =>
-            {
-                lock (_lockObject)
-                {
-                    if (SelectedBathymetry == BathymetryFile.None || SelectedBathymetry.DataTask == null) return null;
-                    if (RangeComplexToken == null) return null;
-                    var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(TimePeriod).ToList();
-                    Debug.WriteLine("{0} SSP: Computing soundspeed for {1}", DateTime.Now, TimePeriod);
-                    foreach (var month in months)
-                    {
-                        ((TemperatureFile)RangeComplexToken[string.Format("{0}.temperature", month)]).Reset();
-                        ((SalinityFile)RangeComplexToken[string.Format("{0}.salinity", month)]).Reset();
-                    }
-                    var sources = (from month in months
-                                   select new
-                                   {
-                                       Month = month,
-                                       TemperatureFile = (TemperatureFile)RangeComplexToken[string.Format("{0}.temperature", month)],
-                                       TemperatureDataTask = ((TemperatureFile)RangeComplexToken[string.Format("{0}.temperature", month)]).GetMyDataAsync(),
-                                       SalinityFile = (SalinityFile)RangeComplexToken[string.Format("{0}.salinity", month)],
-                                       SalinityDataTask = ((SalinityFile)RangeComplexToken[string.Format("{0}.salinity", month)]).GetMyDataAsync(),
-                                   }).ToDictionary(item => item.Month);
-                    var sourceTasks = new List<Task>();
-                    foreach (var month in months)
-                    {
-                        Debug.WriteLine("{0} SSP: Loading temperature and salinity data for {1}", DateTime.Now, month);
-                        sourceTasks.Add(sources[month].TemperatureDataTask);
-                        sourceTasks.Add(sources[month].SalinityDataTask);
-                    }
-                    if (SelectedBathymetry == BathymetryFile.None) return null;
-                    Debug.WriteLine("{0} SSP: Loading bathymetry resolution {1}", DateTime.Now, SelectedBathymetry.Name);
-                    sourceTasks.Add(SelectedBathymetry.GetMyDataAsync());
-                    var continuation = TaskEx.WhenAll(sourceTasks).ContinueWith(task =>
-                    {
-                        if (SelectedBathymetry == BathymetryFile.None || SelectedBathymetry.DataTask == null) return null;
-                        Debug.WriteLine("{0} SSP: Required data loaded.  Computing monthly sound speeds fields", DateTime.Now);
-                        var soundSpeedFields = (from month in months
-                                                select new
-                                                {
-                                                    Month = month,
-                                                    SoundSpeedField = SoundSpeedField.Create(sources[month].TemperatureFile.DataTask.Result[month],
-                                                                                             sources[month].SalinityFile.DataTask.Result[month],
-                                                                                             SelectedBathymetry.DataTask.Result.DeepestPoint,
-                                                                                             SelectedBathymetry.GeoRect),
-                                                }).ToDictionary(item => item.Month);
-                        var monthlySoundSpeeds = new SoundSpeed();
-                        foreach (var month in months)
-                        {
-                            Debug.WriteLine("{0} SSP: Releasing temperature and salinity data for {1}", DateTime.Now, month);
-                            sources[month].TemperatureFile.Reset();
-                            sources[month].SalinityFile.Reset();
-                            monthlySoundSpeeds.Add(soundSpeedFields[month].SoundSpeedField);
-                        }
-                        Debug.WriteLine("{0} SSP: Computing average sound speed for {1}", DateTime.Now, TimePeriod);
-                        return SoundSpeed.Average(monthlySoundSpeeds, new List<NAVOTimePeriod> {TimePeriod});
-                    });
-                    return continuation.Result;
-                }
+                Debug.WriteLine("{0} SSP: Computing average sound speed for {1}", DateTime.Now, timePeriod);
+                return SoundSpeed.Average(monthlySoundSpeeds, new List<NAVOTimePeriod> { timePeriod });
             });
-
-            DataTask = dataTask;
-            Debug.WriteLine("{0} SoundSpeed {1} reset successful", DateTime.Now, TimePeriod);
-        }
-    }
-
-    [Serializable]
-    public sealed class SedimentFile : EnvironmentFile<Sediment>
-    {
-        public static SedimentFile None = new SedimentFile { DataAvailability = DataAvailability.NotLoaded };
-        SedimentFile()
-        {
-            DataType = EnvironmentDataType.SoundSpeed;
-            IsCached = false;
-        }
-
-        public SedimentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
-
-
-        public override void Reset() 
-        {
-            base.Reset();
-            DataTask = IsCached ? new Task<Sediment>(() => Sediment.Load(Path.Combine(DataPath, FileName))) : null;
-        }
-    }
-
-    [Serializable]
-    public sealed class WindFile : EnvironmentFile<Wind>
-    {
-        public static WindFile None = new WindFile { DataAvailability = DataAvailability.NotLoaded };
-        WindFile()
-        {
-            DataType = EnvironmentDataType.Wind;
-            IsCached = false;
-        }
-
-        public WindFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
-
-        public override void Reset() 
-        {
-            base.Reset();
-            DataTask = IsCached ? new Task<Wind>(() => Wind.Load(Path.Combine(DataPath, FileName))) : null;
-        }
-    }
-
-    [Serializable]
-    public sealed class BathymetryFile : EnvironmentFile<Bathymetry>
-    {
-        public static BathymetryFile None = new BathymetryFile { DataAvailability = DataAvailability.NotLoaded };
-        BathymetryFile()
-        {
-            DataType = EnvironmentDataType.Bathymetry;
-            IsCached = false;
-        }
-
-        public string BitmapFilename
-        {
-            get { return !IsCached ? null : Path.Combine(DataPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"); }
-        }
-
-        public BathymetryFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution)
-        {
-            Reset();
-        }
-
-        public override void Reset() 
-        {
-            base.Reset();
-            DataTask = IsCached ? new Task<Bathymetry>(() => Bathymetry.Load(Path.Combine(DataPath, FileName))) : null;
-        }
-    }
-
-    [Serializable]
-    public sealed class BottomLossFile : EnvironmentFile<BottomLoss>
-    {
-        public static BottomLossFile None = new BottomLossFile { DataAvailability = DataAvailability.NotLoaded };
-        BottomLossFile()
-        {
-            DataType = EnvironmentDataType.BottomLoss;
-            IsCached = false;
-        }
-
-        public BottomLossFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
-
-        public override void Reset()
-        {
-            base.Reset();
-            DataTask = IsCached ? new Task<BottomLoss>(() => BottomLoss.Load(Path.Combine(DataPath, FileName))) : null;
+            return continuation.Result;            
         }
     }
 
@@ -630,18 +298,5 @@ namespace ESME.Environment.Descriptors
         Bathymetry,
         BottomLoss,
         SoundSpeed,
-    }
-
-    public class DataAvailabilityChangedEventArgs : EventArgs
-    {
-        public DataAvailabilityChangedEventArgs(DataAvailability dataAvailability) { DataAvailability = dataAvailability; }
-        public DataAvailability DataAvailability { get; private set; }
-    }
-
-    public enum DataAvailability
-    {
-        NotLoaded,
-        Loading,
-        Available
     }
 }
