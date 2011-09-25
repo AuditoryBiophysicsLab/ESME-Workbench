@@ -68,23 +68,23 @@ namespace ESME.Environment
 
         static NAVOImporter()
         {
-            NcVarInt.Logger = Logger.LogString;
-            NetCDFReaders.Logger = Logger.LogString;
-            Logger.Start(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "esme.log"));
-            Logger.Log("About to create temperature worker");
+            //NcVarInt.Logger = Logger.LogString;
+            //NetCDFReaders.Logger = Logger.LogString;
+            //Logger.Start(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "esme.log"));
+            //Logger.Log("About to create temperature worker");
             if (TemperatureWorker == null) TemperatureWorker = new ActionBlock<ImportJobDescriptor>(async job =>
             {
-                Logger.Log("Temperature worker starting job");
+                //Logger.Log("Temperature worker starting job");
                 TemperatureProgress.JobStarting(job);
                 if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                 {
                     //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
-                    Logger.Log("Temperature worker about to call GDEM.ReadFile");
+                    //Logger.Log("Temperature worker about to call GDEM.ReadFile");
                     var temperatureField = GDEM.ReadFile(GDEM.FindTemperatureFile(job.TimePeriod), "water_temp", job.TimePeriod, job.GeoRect);
-                    Logger.Log("Temperature worker back from GDEM.ReadFile");
+                    //Logger.Log("Temperature worker back from GDEM.ReadFile");
                     var temperature = new SoundSpeed();
                     temperature.SoundSpeedFields.Add(temperatureField);
-                    Logger.Log("Temperature worker added to sound speed field");
+                    //Logger.Log("Temperature worker added to sound speed field");
                     if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                     {
                         temperature.Save(job.DestinationFilename);
@@ -97,7 +97,7 @@ namespace ESME.Environment
                     }
                 }
                 //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
-                Logger.Log("Temperature worker job complete", DateTime.Now);
+                //Logger.Log("Temperature worker job complete", DateTime.Now);
                 TemperatureProgress.JobCompleted(job);
             },
             new ExecutionDataflowBlockOptions
@@ -134,8 +134,8 @@ namespace ESME.Environment
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = 1,
-                MaxDegreeOfParallelism = 1,
+                BoundedCapacity = 4,
+                MaxDegreeOfParallelism = 4,
             });
             SalinityProgress = new ImportProgressViewModel("Salinity", SalinityWorker);
             if (SedimentWorker == null) SedimentWorker = new ActionBlock<ImportJobDescriptor>(async job =>
@@ -383,9 +383,9 @@ namespace ESME.Environment
                     SedimentProgress.Post(jobDescriptor);
                     break;
                 case EnvironmentDataType.Temperature:
-                    Logger.Log("Temperature job about to post");
+                    //Logger.Log("Temperature job about to post");
                     TemperatureProgress.Post(jobDescriptor);
-                    Logger.Log("Temperature job after post");
+                    //Logger.Log("Temperature job after post");
                     break;
                 case EnvironmentDataType.Wind:
                     WindProgress.Post(jobDescriptor);
@@ -458,14 +458,14 @@ namespace ESME.Environment
                     IsFaulted = _importer.Completion.IsFaulted;
                     if (IsFaulted)
                     {
-                        Logger.Log("Importer has caught an exception.  Message follows.");
+                        //Logger.Log("Importer has caught an exception.  Message follows.");
                         System.Media.SystemSounds.Beep.Play();
                         Status = "Error";
                         ToolTip = "";
                         foreach (var ex in _importer.Completion.Exception.InnerExceptions) ToolTip += FormatExceptionMessage(ex, 0) + "\r\n";
                         ToolTip.Remove(ToolTip.Length - 2, 2);
                         ToolTip.Trim();
-                        Logger.Log("{0}", ToolTip);
+                        //Logger.Log("{0}", ToolTip);
                     }
                 });
             }
