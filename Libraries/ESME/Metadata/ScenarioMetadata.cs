@@ -48,6 +48,7 @@ namespace ESME.Metadata
             result.Filename = metaDataFilename;
             result.RangeComplexes = rangeComplexes;
             result.RangeComplexes.PropertyChanged += result.RangeComplexesPropertyChanged;
+            result.PropertyChanged += (s, e) => result.Save();
             // Any other initialization code goes here
 
             return result;
@@ -74,6 +75,12 @@ namespace ESME.Metadata
                     {
                         _bathymetry = null;
                     }
+                    break;
+                case "SelectedArea":
+                    SelectedAreaName = RangeComplexes.SelectedArea == null ? null : RangeComplexes.SelectedArea.Name;
+                    break;
+                case "SelectedBathymetry":
+                    SelectedBathymetryName = RangeComplexes.SelectedBathymetry == null ? null : RangeComplexes.SelectedBathymetry.FileName;
                     break;
             }
         }
@@ -222,7 +229,12 @@ namespace ESME.Metadata
                                 {
                                     species.AnimatDataTask.Start();
                                     var localSpecies = species;
-                                    species.AnimatDataTask.ContinueWith(task => Dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplaySpecies(localSpecies.SpeciesName, localSpecies.AnimatDataTask.Result)));
+                                    species.AnimatDataTask.ContinueWith(task => Dispatcher.InvokeInBackgroundIfRequired(() =>
+                                    {
+                                        CurrentMapLayers.DisplaySpecies(localSpecies.SpeciesName,
+                                                                        localSpecies.AnimatDataTask.Result);
+                                        UpdateAnimalsTreeRoot();
+                                    }));
                                 }
                                 catch (Exception e)
                                 {
@@ -233,10 +245,25 @@ namespace ESME.Metadata
 
 
                     DisplayScenario();
-                    RangeComplexes.SelectedRangeComplex =
-                            RangeComplexes.RangeComplexCollection[_nemoFile.Scenario.SimAreaName];
+
+                    if (!RangeComplexes.RangeComplexCollection.ContainsKey(_nemoFile.Scenario.SimAreaName))
+                        throw new ApplicationException(
+                                string.Format("The range complex specified by this scenario ({0}) was not found",
+                                              _nemoFile.Scenario.SimAreaName));
+                        
+                    // Set the selected range complex
+                    RangeComplexes.SelectedRangeComplex = RangeComplexes.RangeComplexCollection[_nemoFile.Scenario.SimAreaName];
                     _selectedRangeComplex = RangeComplexes.SelectedRangeComplex;
                     RangeComplexes.SelectedTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), _nemoFile.Scenario.TimeFrame);
+                    
+                    if ((SelectedAreaName != null) && (RangeComplexes.SelectedRangeComplex.AreaCollection.ContainsKey(SelectedAreaName)))
+                        RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.AreaCollection[SelectedAreaName];
+                    else SelectedAreaName = null;
+
+                    if ((SelectedBathymetryName != null) && (RangeComplexes.SelectedArea.BathymetryFiles[SelectedBathymetryName] != null))
+                        RangeComplexes.SelectedBathymetry = RangeComplexes.SelectedArea.BathymetryFiles[SelectedBathymetryName];
+                    else SelectedBathymetryName = null;
+
                     if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
                     else NemoModeToAcousticModelNameMap.UpdateModes(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
                     _cassOutputProcessor = new ActionBlock<CASSOutput>(newItem =>
@@ -261,6 +288,8 @@ namespace ESME.Metadata
                         _cassFileQueue = null;
                     });
 
+                    if (CASSOutputs == null) CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
+                    else CASSOutputs.RefreshInBackground();
                 }
                 else
                 {
@@ -334,21 +363,39 @@ namespace ESME.Metadata
 
         #endregion
 
-        #region public string EnvironmentName { get; set; }
+        #region public string SelectedAreaName { get; set; }
 
-        public string EnvironmentName
+        public string SelectedAreaName
         {
-            get { return _environmentName; }
+            get { return _selectedAreaName; }
             set
             {
-                if (_environmentName == value) return;
-                _environmentName = value;
-                NotifyPropertyChanged(EnvironmentNameChangedEventArgs);
+                if (_selectedAreaName == value) return;
+                _selectedAreaName = value;
+                NotifyPropertyChanged(SelectedAreaNameChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs EnvironmentNameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.EnvironmentName);
-        string _environmentName;
+        static readonly PropertyChangedEventArgs SelectedAreaNameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.SelectedAreaName);
+        string _selectedAreaName;
+
+        #endregion
+
+        #region public string SelectedBathymetryName { get; set; }
+
+        public string SelectedBathymetryName
+        {
+            get { return _selectedBathymetryName; }
+            set
+            {
+                if (_selectedBathymetryName == value) return;
+                _selectedBathymetryName = value;
+                NotifyPropertyChanged(SelectedBathymetryNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedBathymetryNameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.SelectedBathymetryName);
+        string _selectedBathymetryName;
 
         #endregion
 

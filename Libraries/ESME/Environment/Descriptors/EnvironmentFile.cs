@@ -287,7 +287,61 @@ namespace ESME.Environment.Descriptors
             });
             return continuation.Result;            
         }
+
+        public static SoundSpeed SeasonalAverage(NewRangeComplex rangeComplex, NAVOTimePeriod timePeriod, EnvironmentDataType dataType)
+        {
+            if (rangeComplex == null) throw new ArgumentException("rangeComplex");
+            if (timePeriod == NAVOTimePeriod.Invalid) throw new ArgumentException("timePeriod");
+            string fileType;
+            switch (dataType)
+            {
+                case EnvironmentDataType.Salinity:
+                    fileType = "salinity";
+                    break;
+                case EnvironmentDataType.Temperature:
+                    fileType = "temperature";
+                    break;
+                default:
+                    throw new ArgumentException("Must be Salinity or Temperature", "dataType");
+            }
+            var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod).ToList();
+            var soundSpeed = new SoundSpeed();
+            var sources = (from month in months
+                           select new
+                           {
+                               Month = month,
+                               DataTask = new Task<SoundSpeed>(() =>
+                               {
+                                   var result = SoundSpeed.Load(Path.Combine(rangeComplex.DataPath,
+                                                                string.Format("{0}.{1}", month, fileType)));
+                                   lock(soundSpeed) soundSpeed.SoundSpeedFields.Add(result[month]);
+                                   return result;
+                               }),
+                           }).ToDictionary(item => item.Month);
+            var sourceTasks = new List<Task>();
+            foreach (var month in months)
+            {
+                Debug.WriteLine("{0} AVG: Loading {1} data for {2}", DateTime.Now, fileType, month);
+                sources[month].DataTask.Start();
+                sourceTasks.Add(sources[month].DataTask);
+            }
+            var continuation = TaskEx.WhenAll(sourceTasks).ContinueWith(task =>
+            {
+                if (months.Count == 1)
+                {
+                    Debug.WriteLine("{0} AVG: Requested data for a single month.  Returning loaded {1} data", DateTime.Now, fileType);
+                    return sources[timePeriod].DataTask.Result;
+                }
+                Debug.WriteLine("{0} AVG: Required data loaded. Computing average {1} field for {2}", DateTime.Now, fileType, timePeriod);
+                var result = new SoundSpeed();
+                result.SoundSpeedFields.Add(SoundSpeed.Average(soundSpeed, timePeriod));
+                Debug.WriteLine("{0} AVG: Returning average {1} field for {2}", DateTime.Now, fileType, timePeriod);
+                return result;
+            });
+            return continuation.Result;
+        }
     }
+
 
     public enum EnvironmentDataType
     {

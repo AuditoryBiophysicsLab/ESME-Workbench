@@ -234,8 +234,6 @@ namespace ESME.Environment.Descriptors
                 if (_selectedRangeComplex == value) return;
                 _selectedRangeComplex = value;
                 NotifyPropertyChanged(SelectedRangeComplexChangedEventArgs);
-                if ((_selectedRangeComplex != null) && (SelectedRangeComplexIndex == -1))
-                    SelectedRangeComplexIndex = RangeComplexList.IndexOf(_selectedRangeComplex);
                 ClearEnvironment();
             }
         }
@@ -259,7 +257,7 @@ namespace ESME.Environment.Descriptors
         }
 
         static readonly PropertyChangedEventArgs SelectedRangeComplexIndexChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedRangeComplexIndex);
-        int _selectedRangeComplexIndex;
+        int _selectedRangeComplexIndex = -1;
 
         #endregion
 
@@ -296,7 +294,7 @@ namespace ESME.Environment.Descriptors
         }
 
         static readonly PropertyChangedEventArgs SelectedTimePeriodIndexChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedTimePeriodIndex);
-        int _selectedTimePeriodIndex;
+        int _selectedTimePeriodIndex = -1;
 
         #endregion
 
@@ -334,7 +332,7 @@ namespace ESME.Environment.Descriptors
         }
 
         static readonly PropertyChangedEventArgs SelectedAreaIndexChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedAreaIndex);
-        int _selectedAreaIndex;
+        int _selectedAreaIndex = -1;
 
         #endregion
 
@@ -352,7 +350,7 @@ namespace ESME.Environment.Descriptors
         }
 
         static readonly PropertyChangedEventArgs SelectedBathymetryIndexChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedBathymetryIndex);
-        int _selectedBathymetryIndex;
+        int _selectedBathymetryIndex = -1;
 
         #endregion
 
@@ -394,7 +392,9 @@ namespace ESME.Environment.Descriptors
             {EnvironmentDataType.Bathymetry, null},
             {EnvironmentDataType.BottomLoss, null},
             {EnvironmentDataType.Sediment, null},
+            {EnvironmentDataType.Salinity, null},
             {EnvironmentDataType.SoundSpeed, null},
+            {EnvironmentDataType.Temperature, null},
             {EnvironmentDataType.Wind, null},
         };
 
@@ -419,7 +419,9 @@ namespace ESME.Environment.Descriptors
             {EnvironmentDataType.Bathymetry, null},
             {EnvironmentDataType.BottomLoss, null},
             {EnvironmentDataType.Sediment, null},
+            {EnvironmentDataType.Salinity, null},
             {EnvironmentDataType.SoundSpeed, null},
+            {EnvironmentDataType.Temperature, null},
             {EnvironmentDataType.Wind, null},
         };
 
@@ -511,12 +513,12 @@ namespace ESME.Environment.Descriptors
         #endregion
 #endif
 
-        #region public bool IsEnvironmentFullySpecified { get; set; }
+        #region public bool IsEnvironmentFullySpecified { get; private set; }
 
         public bool IsEnvironmentFullySpecified
         {
             get { return _isEnvironmentFullySpecified; }
-            set
+            private set
             {
                 if (_isEnvironmentFullySpecified == value) return;
                 _isEnvironmentFullySpecified = value;
@@ -580,7 +582,17 @@ namespace ESME.Environment.Descriptors
                 if (SelectedTimePeriod != NAVOTimePeriod.Invalid)
                 {
                     SelectedEnvironment[EnvironmentDataType.Wind] = SelectedRangeComplex.EnvironmentFiles[windFilename];
-                    EnvironmentData[EnvironmentDataType.Wind] = new Task<Wind>(() => Wind.Load(Path.Combine(SelectedRangeComplex.DataPath, windFilename)));
+                    EnvironmentData[EnvironmentDataType.Wind] =
+                            new Task<Wind>(() => Wind.Load(Path.Combine(SelectedRangeComplex.DataPath, windFilename)));
+                    EnvironmentData[EnvironmentDataType.Salinity] =
+                            new Task<SoundSpeed>(
+                                    () =>
+                                    EnvironmentFile.SeasonalAverage(SelectedRangeComplex, SelectedTimePeriod,
+                                                                    EnvironmentDataType.Salinity));
+                    EnvironmentData[EnvironmentDataType.Temperature] =
+                            new Task<SoundSpeed>(
+                                    () => EnvironmentFile.SeasonalAverage(SelectedRangeComplex, SelectedTimePeriod,
+                                                                          EnvironmentDataType.Temperature));
                     if (SelectedArea != null)
                     {
                         if (SelectedBathymetry != null && SelectedBathymetry.IsCached)
@@ -614,6 +626,10 @@ namespace ESME.Environment.Descriptors
             tasks.Add(EnvironmentData[EnvironmentDataType.Wind]);
             EnvironmentData[EnvironmentDataType.Bathymetry].Start();
             tasks.Add(EnvironmentData[EnvironmentDataType.Bathymetry]);
+            EnvironmentData[EnvironmentDataType.Salinity].Start();
+            tasks.Add(EnvironmentData[EnvironmentDataType.Salinity]);
+            EnvironmentData[EnvironmentDataType.Temperature].Start();
+            tasks.Add(EnvironmentData[EnvironmentDataType.Temperature]);
             EnvironmentData[EnvironmentDataType.SoundSpeed].Start();
             tasks.Add(EnvironmentData[EnvironmentDataType.SoundSpeed]);
             TaskEx.WhenAll(tasks).ContinueWith(task =>
@@ -633,6 +649,8 @@ namespace ESME.Environment.Descriptors
             ClearEnvironment(EnvironmentDataType.Sediment);
             ClearEnvironment(EnvironmentDataType.Wind);
             ClearEnvironment(EnvironmentDataType.Bathymetry);
+            ClearEnvironment(EnvironmentDataType.Salinity);
+            ClearEnvironment(EnvironmentDataType.Temperature);
             ClearEnvironment(EnvironmentDataType.SoundSpeed);
         }
 
