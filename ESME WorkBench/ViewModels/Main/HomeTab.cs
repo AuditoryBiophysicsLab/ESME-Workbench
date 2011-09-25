@@ -144,7 +144,12 @@ namespace ESMEWorkBench.ViewModels.Main
         #region ConfigureAcousticModelsCommand
         public SimpleCommand<object, object> ConfigureAcousticModelsCommand
         {
-            get { return _configureAcousticModels ?? (_configureAcousticModels = new SimpleCommand<object, object>(delegate { ConfigureAcousticModelsHandler(); })); }
+            get
+            {
+                return _configureAcousticModels ??
+                       (_configureAcousticModels =
+                        new SimpleCommand<object, object>(delegate { ConfigureAcousticModelsHandler(); }));
+            }
         }
 
         SimpleCommand<object, object> _configureAcousticModels;

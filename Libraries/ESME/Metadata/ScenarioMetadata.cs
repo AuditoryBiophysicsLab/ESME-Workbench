@@ -233,7 +233,9 @@ namespace ESME.Metadata
 
 
                     DisplayScenario();
-                    _selectedRangeComplex = RangeComplexes.RangeComplexCollection[_nemoFile.Scenario.SimAreaName];
+                    RangeComplexes.SelectedRangeComplex =
+                            RangeComplexes.RangeComplexCollection[_nemoFile.Scenario.SimAreaName];
+                    _selectedRangeComplex = RangeComplexes.SelectedRangeComplex;
                     RangeComplexes.SelectedTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), _nemoFile.Scenario.TimeFrame);
                     if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
                     else NemoModeToAcousticModelNameMap.UpdateModes(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);

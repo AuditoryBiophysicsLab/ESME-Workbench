@@ -11,14 +11,16 @@
                 xmlns:Main="clr-namespace:ESMEWorkBench.ViewModels.Main"
                 xmlns:EnvironmentBuilder="clr-namespace:ESME.Views.EnvironmentBuilder;assembly=ESME.Views"
                 xmlns:NAVO="clr-namespace:ESME.Environment.NAVO;assembly=ESME"
-                mef:ViewModelLocator.ViewModel="MainViewModel" SnapsToDevicePixels="True" Title="{Binding MainWindowTitle}"
+                xmlns:Utility="clr-namespace:HRC.Utility;assembly=HRC" mef:ViewModelLocator.ViewModel="MainViewModel" SnapsToDevicePixels="True" Title="{Binding MainWindowTitle}"
                 Icon="..\Wave.ico" Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
                 Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
                 Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
                 Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}" d:DesignWidth="1400"
                 d:DesignHeight="800" mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=Main:MainViewModel}">
   <r:RibbonWindow.Resources>
-    <WPF:GridLengthConverter x:Key="gridLengthConverter" />
+    <WPF:GridLengthConverter x:Key="GridLengthConverter" />
+    <Utility:NotNullConverter x:Key="NotNull" />
+    <Utility:BooleanNegatingConverter x:Key="NegatingConverter" />
   </r:RibbonWindow.Resources>
   <r:RibbonWindow.InputBindings>
     <KeyBinding Command="{Binding CancelCurrentCommand}" Key="Escape" />
@@ -127,11 +129,11 @@
                           Command="{Binding NewScenarioCommand}" />
           <r:RibbonButton Label="Edit" SmallImageSource="..\Images\SmallIcons\application-icon.png"
                           ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" ToolTipDescription="Launch the scenario editor"
-                          IsEnabled="{Binding IsScenarioLoaded}" Command="{Binding EditScenarioCommand}" />
+                          IsEnabled="{Binding IsScenarioLoaded}" Command="{Binding ScenarioMetadata.EditScenarioCommand}" />
           <r:RibbonButton Label="Zoom" SmallImageSource="..\Images\SmallIcons\Magnifying-Glass-icon.png"
                           ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                           ToolTipDescription="Resets the map position to the current scenario" IsEnabled="{Binding IsScenarioLoaded}"
-                          Command="{Binding ZoomToScenarioCommand}" />
+                          Command="{Binding ScenarioMetadata.ZoomToScenarioCommand}" />
         </r:RibbonGroup>
         <r:RibbonGroup Header="Acoustics">
           <r:RibbonButton Label="Export" LargeImageSource="..\Images\LargeIcons\hourglass_go.png"
@@ -155,8 +157,9 @@
                           SmallImageSource="..\Images\SmallIcons\globe-icon.png" Command="{Binding ZoomToWorldMapCommand}" />
         </r:RibbonGroup>
                 <r:RibbonGroup Header="Range Complex" ToolTip="{Binding ScenarioLoadedToolTip}">
-                    <ListView Width="150" Height="66" ItemsSource="{Binding RangeComplexes.RangeComplexList}" IsEnabled="{Binding IsScenarioNotLoaded}" 
-                    SelectedItem="{Binding RangeComplexes.SelectedRangeComplex}" SelectedIndex="{Binding SelectedRangeComplexIndex}"
+                    <ListView Width="150" Height="66" ItemsSource="{Binding RangeComplexes.RangeComplexList}" 
+                              IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}" 
+                    SelectedItem="{Binding RangeComplexes.SelectedRangeComplex}" SelectedIndex="{Binding RangeComplexes.SelectedRangeComplexIndex}"
                     DisplayMemberPath="Name" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionMode="Single">
             <ListView.ItemsPanel>
               <ItemsPanelTemplate>
@@ -165,24 +168,25 @@
             </ListView.ItemsPanel>
           </ListView>
           <r:RibbonButton Label="New" LargeImageSource="..\Images\LargeIcons\world_add.png"
-                          SmallImageSource="..\Images\SmallIcons\world_add.png" IsEnabled="{Binding IsScenarioNotLoaded}" 
+                          SmallImageSource="..\Images\SmallIcons\world_add.png" IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}"
                           ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" ToolTipDescription="Define a new range complex"
                           Command="{Binding NewRangeComplexCommand}" />
           <r:RibbonButton SmallImageSource="..\Images\SmallIcons\world_go.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" IsEnabled="{Binding IsScenarioNotLoaded}" 
+                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}"
                           ToolTipDescription="Show the selected range complex on the map" Command="{Binding ZoomToRangeComplexCommand}" />
           <r:RibbonButton SmallImageSource="..\Images\SmallIcons\world_delete.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" IsEnabled="{Binding IsScenarioNotLoaded}" 
+                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}"
                           ToolTipDescription="Delete the selected range complex, and all data within it"
                           Command="{Binding DeleteRangeComplexCommand}" />
           <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_undo.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" IsEnabled="{Binding IsScenarioNotLoaded}" 
+                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}"
                           ToolTipDescription="Clear the currently selected range complex" Command="{Binding ClearRangeComplexSelectionCommand}" />
         </r:RibbonGroup>
                 <r:RibbonGroup Header="Time Period" ToolTip="{Binding ScenarioLoadedToolTip}">
           <ListView Width="80" Height="66" ItemsSource="{x:Static NAVO:NAVOConfiguration.AllTimePeriods}" 
-                    IsEnabled="{Binding IsTimePeriodSelectionEnabled}" SelectedItem="{Binding RangeComplexes.SelectedTimePeriod}"
-                    SelectedIndex="{Binding SelectedTimePeriodIndex}" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}" 
+                    SelectedItem="{Binding RangeComplexes.SelectedTimePeriod}"
+                    SelectedIndex="{Binding RangeComplexes.SelectedTimePeriodIndex}" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                     SelectionMode="Single">
             <ListView.ItemsPanel>
               <ItemsPanelTemplate>
@@ -193,8 +197,8 @@
         </r:RibbonGroup>
         <r:RibbonGroup Header="Area">
           <ListView Width="200" Height="66"
-                    ItemsSource="{Binding RangeComplexes.SelectedRangeComplex.AreaList}" IsEnabled="{Binding RangeComplexes.IsRangeComplexSelected}"
-                    SelectedItem="{Binding RangeComplexes.SelectedArea}" SelectedIndex="{Binding SelectedAreaIndex}"
+                    ItemsSource="{Binding RangeComplexes.SelectedRangeComplex.AreaList}" IsEnabled="{Binding RangeComplexes.SelectedRangeComplex, Converter={StaticResource NotNull}}"
+                    SelectedItem="{Binding RangeComplexes.SelectedArea}" SelectedIndex="{Binding RangeComplexes.SelectedAreaIndex}"
                     DisplayMemberPath="Name" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ToolTip="Select a simulation area"
                     SelectionMode="Single">
             <ListView.ItemsPanel>
@@ -222,8 +226,9 @@
         </r:RibbonGroup>
         <r:RibbonGroup Header="Bathymetry">
           <ListView Width="75" Height="66" ItemContainerStyle="{StaticResource DataCachedDisplayStyle}"
-                    IsEnabled="{Binding RangeComplexes.IsRangeComplexSelected}" ItemsSource="{Binding RangeComplexes.SelectedArea.BathymetryList}"
-                    SelectedItem="{Binding RangeComplexes.SelectedBathymetry}" SelectedIndex="{Binding SelectedBathymetryIndex}"
+                    IsEnabled="{Binding RangeComplexes.SelectedRangeComplex, Converter={StaticResource NotNull}}" 
+                    ItemsSource="{Binding RangeComplexes.SelectedArea.BathymetryList}"
+                    SelectedItem="{Binding RangeComplexes.SelectedBathymetry}" SelectedIndex="{Binding RangeComplexes.SelectedBathymetryIndex}"
                     DisplayMemberPath="Name" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ToolTip="Select a simulation area"
                     SelectionMode="Single" />
           <r:RibbonButton Label="Add" LargeImageSource="..\Images\LargeIcons\map_add.png"
@@ -278,15 +283,6 @@
                           ToolTipDescription="Launch the Marine Mammal Movement and Behavior Simulator to define animat populations."
                           SmallImageSource="..\Images\3mbNewIcon.ico" LargeImageSource="..\Images\3mbNewIcon.ico"
                           IsEnabled="{Binding IsScenarioLoaded}" Command="{Binding LaunchMMMBSCommand}" />
-          <!--
-                    <r:RibbonButton Label="Launch SpeciesBuilder"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Launches the Marine Mammal Movement and Behavior Simulator's Species File Editor"
-					                SmallImageSource="..\Images\SmallIcons\Dolphin.png"
-					                LargeImageSource="..\Images\LargeIcons\Dolphin.png"
-					                Command="{Binding LaunchMMMBSpeciesBuilderCommand}" />
-                    -->
-
           <r:RibbonButton Label="Export Bathymetry File" SmallImageSource="..\Images\SmallIcons\export-icon.png"
                           ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                           ToolTipDescription="Create a bathymetry file that will be loaded by MMMBS" IsEnabled="{Binding IsScenarioLoaded}"
@@ -296,7 +292,7 @@
     </r:Ribbon>
     <Grid>
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Path=LayersWidth, Mode=TwoWay, Converter={StaticResource gridLengthConverter}}" />
+        <ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Path=LayersWidth, Mode=TwoWay, Converter={StaticResource GridLengthConverter}}" />
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" MinWidth="500" />
       </Grid.ColumnDefinitions>

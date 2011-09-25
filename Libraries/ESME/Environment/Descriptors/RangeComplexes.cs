@@ -234,6 +234,8 @@ namespace ESME.Environment.Descriptors
                 if (_selectedRangeComplex == value) return;
                 _selectedRangeComplex = value;
                 NotifyPropertyChanged(SelectedRangeComplexChangedEventArgs);
+                if ((_selectedRangeComplex != null) && (SelectedRangeComplexIndex == -1))
+                    SelectedRangeComplexIndex = RangeComplexList.IndexOf(_selectedRangeComplex);
                 ClearEnvironment();
             }
         }
@@ -242,6 +244,25 @@ namespace ESME.Environment.Descriptors
         NewRangeComplex _selectedRangeComplex;
 
         #endregion
+
+        #region public int SelectedRangeComplexIndex { get; set; }
+
+        public int SelectedRangeComplexIndex
+        {
+            get { return _selectedRangeComplexIndex; }
+            set
+            {
+                if (_selectedRangeComplexIndex == value) return;
+                _selectedRangeComplexIndex = value;
+                NotifyPropertyChanged(SelectedRangeComplexIndexChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedRangeComplexIndexChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedRangeComplexIndex);
+        int _selectedRangeComplexIndex;
+
+        #endregion
+
 
         #region public NAVOTimePeriod SelectedTimePeriod { get; set; }
 
@@ -261,6 +282,25 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
+        #region public int SelectedTimePeriodIndex { get; set; }
+
+        public int SelectedTimePeriodIndex
+        {
+            get { return _selectedTimePeriodIndex; }
+            set
+            {
+                if (_selectedTimePeriodIndex == value) return;
+                _selectedTimePeriodIndex = value;
+                NotifyPropertyChanged(SelectedTimePeriodIndexChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedTimePeriodIndexChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedTimePeriodIndex);
+        int _selectedTimePeriodIndex;
+
+        #endregion
+
+
         #region public RangeComplexArea SelectedArea { get; set; }
 
         public RangeComplexArea SelectedArea
@@ -277,6 +317,42 @@ namespace ESME.Environment.Descriptors
 
         static readonly PropertyChangedEventArgs SelectedAreaChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedArea);
         RangeComplexArea _selectedArea;
+
+        #endregion
+
+        #region public int SelectedAreaIndex { get; set; }
+
+        public int SelectedAreaIndex
+        {
+            get { return _selectedAreaIndex; }
+            set
+            {
+                if (_selectedAreaIndex == value) return;
+                _selectedAreaIndex = value;
+                NotifyPropertyChanged(SelectedAreaIndexChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedAreaIndexChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedAreaIndex);
+        int _selectedAreaIndex;
+
+        #endregion
+
+        #region public int SelectedBathymetryIndex { get; set; }
+
+        public int SelectedBathymetryIndex
+        {
+            get { return _selectedBathymetryIndex; }
+            set
+            {
+                if (_selectedBathymetryIndex == value) return;
+                _selectedBathymetryIndex = value;
+                NotifyPropertyChanged(SelectedBathymetryIndexChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedBathymetryIndexChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedBathymetryIndex);
+        int _selectedBathymetryIndex;
 
         #endregion
 

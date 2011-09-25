@@ -94,6 +94,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <hrc:BooleanNegatingConverter x:Key="NegatingConverter" />
         <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed" TrueValue="Visible" FalseValue="Collapsed"/>
         <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed" TrueValue="Collapsed" FalseValue="Visible"/>
         <ResourceDictionary x:Key="ControlTemplates">

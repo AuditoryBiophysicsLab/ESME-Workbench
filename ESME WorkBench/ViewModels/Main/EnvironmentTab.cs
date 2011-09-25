@@ -41,10 +41,6 @@ namespace ESMEWorkBench.ViewModels.Main
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             AreAllViewModelsReady = true;
             if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
-            SelectedRangeComplexIndex = -1;
-            SelectedTimePeriodIndex = 0;
-            SelectedAreaIndex = -1;
-            SelectedBathymetryIndex = -1;
             RangeComplexes.PropertyChanged += (s, e) =>
             {
                 switch (e.PropertyName)
@@ -173,83 +169,11 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public void ClearLayerData()
         {
-            CurrentMapLayers.Select(layer => (layer.LayerType == LayerType.BottomType) && (layer.Name.StartsWith("Sediment: ")));
+            CurrentMapLayers.RemoveAll(layer => (layer.LayerType == LayerType.BottomType) && (layer.Name.StartsWith("Sediment: ")));
             if (EnvironmentLayers[EnvironmentDataType.BottomLoss] != null) EnvironmentLayers[EnvironmentDataType.BottomLoss].IsEnabled = false;
             if (EnvironmentLayers[EnvironmentDataType.Wind] != null) EnvironmentLayers[EnvironmentDataType.Wind].IsEnabled = false;
             if (EnvironmentLayers[EnvironmentDataType.SoundSpeed] != null) EnvironmentLayers[EnvironmentDataType.SoundSpeed].IsEnabled = false;
         }
-
-
-        #region public int SelectedRangeComplexIndex { get; set; }
-
-        public int SelectedRangeComplexIndex
-        {
-            get { return _selectedRangeComplexIndex; }
-            set
-            {
-                if (_selectedRangeComplexIndex == value) return;
-                _selectedRangeComplexIndex = value;
-                NotifyPropertyChanged(SelectedRangeComplexIndexChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedRangeComplexIndexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRangeComplexIndex);
-        int _selectedRangeComplexIndex;
-
-        #endregion
-
-        #region public int SelectedTimePeriodIndex { get; set; }
-
-        public int SelectedTimePeriodIndex
-        {
-            get { return _selectedTimePeriodIndex; }
-            set
-            {
-                if (_selectedTimePeriodIndex == value) return;
-                _selectedTimePeriodIndex = value;
-                NotifyPropertyChanged(SelectedTimePeriodIndexChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedTimePeriodIndexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedTimePeriodIndex);
-        int _selectedTimePeriodIndex;
-        #endregion
-
-        #region public int SelectedAreaIndex { get; set; }
-
-        public int SelectedAreaIndex
-        {
-            get { return _selectedAreaIndex; }
-            set
-            {
-                if (_selectedAreaIndex == value) return;
-                _selectedAreaIndex = value;
-                NotifyPropertyChanged(SelectedAreaIndexChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedAreaIndexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedAreaIndex);
-        int _selectedAreaIndex;
-
-        #endregion
-
-        #region public int SelectedBathymetryIndex { get; set; }
-
-        public int SelectedBathymetryIndex
-        {
-            get { return _selectedBathymetryIndex; }
-            set
-            {
-                if (_selectedBathymetryIndex == value) return;
-                _selectedBathymetryIndex = value;
-                NotifyPropertyChanged(SelectedBathymetryIndexChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedBathymetryIndexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedBathymetryIndex);
-        int _selectedBathymetryIndex;
-
-        #endregion
 
         #region NewRangeComplexCommand
         public SimpleCommand<object, object> NewRangeComplexCommand
@@ -336,7 +260,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     delegate
                     {
                         RangeComplexes.SelectedRangeComplex = null;
-                        SelectedRangeComplexIndex = -1;
+                        RangeComplexes.SelectedRangeComplexIndex = -1;
                     }));
             }
         }
@@ -444,7 +368,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     delegate
                     {
                         RangeComplexes.SelectedArea = null;
-                        SelectedAreaIndex = -1;
+                        RangeComplexes.SelectedAreaIndex = -1;
                     }));
             }
         }
@@ -484,11 +408,11 @@ namespace ESMEWorkBench.ViewModels.Main
                     },
                     delegate
                     {
-                        var selectedIndex = SelectedBathymetryIndex;
+                        var selectedIndex = RangeComplexes.SelectedBathymetryIndex;
                         var selectedBathymetry = RangeComplexes.SelectedBathymetry;
-                        SelectedBathymetryIndex = -1;
+                        RangeComplexes.SelectedBathymetryIndex = -1;
                         RangeComplexes.SelectedArea.RemoveBathymetry(selectedBathymetry);
-                        SelectedBathymetryIndex = selectedIndex;
+                        RangeComplexes.SelectedBathymetryIndex = selectedIndex;
                     }));
             }
         }
@@ -524,7 +448,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     delegate
                     {
                         RangeComplexes.SelectedBathymetry = null;
-                        SelectedBathymetryIndex = -1;
+                        RangeComplexes.SelectedBathymetryIndex = -1;
                     }));
             }
         }
@@ -600,7 +524,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
             RasterMapLayer bathyBitmapLayer;
-            if ((RangeComplexes.SelectedBathymetry == null) || (RangeComplexes.SelectedBathymetry == null) || (RangeComplexes.SelectedBathymetry.FileName == null))
+            if ((RangeComplexes.SelectedBathymetry == null) || (!RangeComplexes.SelectedBathymetry.IsCached) || (RangeComplexes.SelectedBathymetry.FileName == null))
             {
                 bathyBitmapLayer = CurrentMapLayers.Find<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry");
                 if (bathyBitmapLayer != null)
@@ -610,10 +534,13 @@ namespace ESMEWorkBench.ViewModels.Main
                 }
                 return;
             }
-            var bitmapFilename = Path.Combine(RangeComplexes.SelectedArea.BathymetryPath, Path.GetFileNameWithoutExtension(RangeComplexes.SelectedBathymetry.FileName) + ".bmp");
-            bathyBitmapLayer = CurrentMapLayers.DisplayBathymetryRaster("Bathymetry", bitmapFilename, true, false, true, RangeComplexes.SelectedBathymetry.GeoRect);
-            bathyBitmapLayer.IsEnabled = true;
-            MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
+            if ((RangeComplexes.SelectedBathymetry != null) && (RangeComplexes.SelectedBathymetry.IsCached) && (RangeComplexes.SelectedBathymetry.FileName != null))
+            {
+                var bitmapFilename = Path.Combine(RangeComplexes.SelectedArea.BathymetryPath, Path.GetFileNameWithoutExtension(RangeComplexes.SelectedBathymetry.FileName) + ".bmp");
+                bathyBitmapLayer = CurrentMapLayers.DisplayBathymetryRaster("Bathymetry", bitmapFilename, true, false, true, RangeComplexes.SelectedBathymetry.GeoRect);
+                bathyBitmapLayer.IsEnabled = true;
+                MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
+            }
         }
     }
 }

@@ -36,4 +36,35 @@ namespace HRC.Utility
             return null;
         }
     }
+
+    [ValueConversion(typeof(bool), typeof(bool))]
+    public sealed class BooleanNegatingConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            if (!(value is bool)) return null;
+            return !((bool)value);
+        }
+
+        public object ConvertBack(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            if (!(value is bool)) return null;
+            return !((bool)value);
+        }
+    }
+
+    [ValueConversion(typeof(object), typeof(bool))]
+    public sealed class NotNullConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            return (value != null);
+        }
+
+        public object ConvertBack(object value, Type targetType,
+            object parameter, CultureInfo culture) { throw new NotImplementedException(); }
+    }
 }
