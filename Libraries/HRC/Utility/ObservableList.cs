@@ -250,8 +250,9 @@ namespace HRC.Utility
             if (handlers == null) return;
             foreach (NotifyCollectionChangedEventHandler handler in handlers.GetInvocationList())
             {
+                var curHandler = handler;
                 if (handler.Target is CollectionView)
-                    ((CollectionView)handler.Target).Refresh();
+                    ((CollectionView)handler.Target).Dispatcher.InvokeIfRequired(() => ((CollectionView)curHandler.Target).Refresh());
                 else
                     handler(this, e);
             }

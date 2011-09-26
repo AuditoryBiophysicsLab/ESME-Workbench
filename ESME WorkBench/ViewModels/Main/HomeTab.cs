@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.ComponentModel;
 using System.IO;
 using System.Text;
+using System.Timers;
 using System.Windows;
 using System.Windows.Input;
 using Cinch;
@@ -11,9 +12,11 @@ using ESME;
 using ESME.Mapping;
 using ESME.Metadata;
 using ESME.Model;
+using ESME.NEMO;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.AcousticBuilder;
+using ESME.Views.Misc;
 using ESME.Views.TransmissionLoss;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.NAVO;
@@ -47,7 +50,6 @@ namespace ESMEWorkBench.ViewModels.Main
                     };
                     _scenarioMetadata.Dispatcher = _dispatcher;
                     _scenarioMetadata.VisualizerService = _visualizerService;
-                    _scenarioMetadata.CurrentMapLayers = CurrentMapLayers;
                 }
                 IsScenarioLoaded = _scenarioMetadata != null;
             }
@@ -105,11 +107,56 @@ namespace ESMEWorkBench.ViewModels.Main
             try
             {
                 ScenarioMetadata = ScenarioMetadata.Load(ScenarioMetadata.MetadataFilename(fileName), RangeComplexes) ?? new ScenarioMetadata { Filename = ScenarioMetadata.MetadataFilename(fileName), RangeComplexes = RangeComplexes };
+                ScenarioMetadata.CurrentMapLayers = CurrentMapLayers;
                 _dispatcher.InvokeIfRequired(() =>
                 {
                     ScenarioMetadata.ScenarioFilename = fileName;
                     MainWindowTitle = string.Format("ESME WorkBench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", ScenarioMetadata.NemoFile.Scenario.EventName, ScenarioMetadata.NemoFile.Scenario.TimeFrame);
                 });
+                if (_scenarioFileWatcher != null)
+                {
+                    _scenarioFileWatcher.EnableRaisingEvents = false;
+                    _scenarioFileWatcher.Dispose();
+                }
+                _scenarioFileWatcher = new FileSystemWatcher(Path.GetDirectoryName(fileName), "*" + Path.GetExtension(fileName))
+                {
+                    NotifyFilter = NotifyFilters.LastWrite,
+                };
+                _scenarioFileWatcher.Changed += (s, e) =>
+                {
+                    if (_scenarioFileTimer != null) return;
+                    _scenarioFileTimer = new Timer(1000) {AutoReset = false};
+                    CloseScenarioHandler();
+                    _scenarioFileTimer.Start();
+                    _scenarioFileTimer.Elapsed += (s1, e1) =>
+                    {
+                        ScenarioMetadata =
+                                ScenarioMetadata.Load(ScenarioMetadata.MetadataFilename(fileName), RangeComplexes) ??
+                                new ScenarioMetadata
+                                {
+                                        Filename = ScenarioMetadata.MetadataFilename(fileName),
+                                        RangeComplexes = RangeComplexes
+                                };
+                        ScenarioMetadata.CurrentMapLayers = CurrentMapLayers;
+                        _dispatcher.InvokeIfRequired(() =>
+                        {
+                            ScenarioMetadata.ScenarioFilename = fileName;
+                            MainWindowTitle = string.Format("ESME WorkBench 2011{0}: {1} [{2}]",
+                                                            Configuration.IsUnclassifiedModel ? " (public)" : "",
+                                                            ScenarioMetadata.NemoFile.Scenario.EventName,
+                                                            ScenarioMetadata.NemoFile.Scenario.TimeFrame);
+                        });
+                        _scenarioFileTimer = null;
+                    };
+                };
+                _scenarioFileWatcher.Deleted += (s, e) =>
+                {
+                    CloseScenarioHandler();
+                    _messageBoxService.ShowError(string.Format("Scenario file {0} was deleted", fileName));
+                };
+                _scenarioFileWatcher.EnableRaisingEvents = true;
+
+
             }
             catch (Exception ex)
             {
@@ -125,6 +172,8 @@ namespace ESMEWorkBench.ViewModels.Main
                 ScenarioMetadata = null;
             }
         }
+        FileSystemWatcher _scenarioFileWatcher;
+        Timer _scenarioFileTimer;
         #endregion
 
         #region CloseScenarioCommand
@@ -137,6 +186,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void CloseScenarioHandler()
         {
+            ScenarioMetadata.RemoveScenarioDisplay();
             ScenarioMetadata = null;
         }
         #endregion

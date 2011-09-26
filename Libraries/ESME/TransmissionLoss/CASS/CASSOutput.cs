@@ -326,12 +326,12 @@ namespace ESME.TransmissionLoss.CASS
         #endregion
 
 
-        public void CheckThreshold(float threshold, Dispatcher dispatcher)
+        public void CheckThreshold(float threshold)
         {
             if (SourceLevel < threshold)
             {
                 ThresholdRadius = 0;
-                dispatcher.InvokeIfRequired(() => IsRadiusSufficient = true);
+                IsRadiusSufficient = true;
                 return;
             }
             var unloadAfterCheck = false;
@@ -369,7 +369,6 @@ namespace ESME.TransmissionLoss.CASS
             });
 #endif
             ThresholdRadius = ThresholdRadii.Max();
-            //dispatcher.InvokeIfRequired(() => IsRadiusSufficient = allRadialsBelowThreshold);
             IsRadiusSufficient = allRadialsBelowThreshold;
             if (unloadAfterCheck) Pressures = null;
         }

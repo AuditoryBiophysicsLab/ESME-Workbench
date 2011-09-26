@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Windows.Input;
@@ -44,7 +45,23 @@ namespace ESME.Metadata
         public static ScenarioMetadata Load(string metaDataFilename, RangeComplexes rangeComplexes)
         {
             if (!File.Exists(metaDataFilename)) return null;
-            var result = XmlSerializer<ScenarioMetadata>.Load(metaDataFilename, ReferencedTypes);
+            var retry = 10;
+            ScenarioMetadata result = null;
+            Exception exception = null;
+            while (--retry > 0)
+            {
+                try
+                {
+                    exception = null;
+                    result = XmlSerializer<ScenarioMetadata>.Load(metaDataFilename, ReferencedTypes);
+                }
+                catch (Exception e)
+                {
+                    exception = e;
+                    Thread.Sleep(100);
+                }
+            }
+            if (exception != null) throw exception;
             result.Filename = metaDataFilename;
             result.RangeComplexes = rangeComplexes;
             result.RangeComplexes.PropertyChanged += result.RangeComplexesPropertyChanged;
@@ -69,11 +86,14 @@ namespace ESME.Metadata
                     if (RangeComplexes.IsEnvironmentLoaded)
                     {
                         _bathymetry = new WeakReference<Bathymetry>(((Task<Bathymetry>)RangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).Result);
-
+                        Debug.WriteLine("{0} Bathymetry weak reference is set", DateTime.Now);
+                        ProcessCassOutputs();
                     }
                     else
                     {
                         _bathymetry = null;
+                        Debug.WriteLine("{0} Bathymetry weak reference is null", DateTime.Now);
+                        ProcessCassOutputs();
                     }
                     break;
                 case "SelectedArea":
@@ -81,11 +101,19 @@ namespace ESME.Metadata
                     break;
                 case "SelectedBathymetry":
                     SelectedBathymetryName = RangeComplexes.SelectedBathymetry == null ? null : RangeComplexes.SelectedBathymetry.FileName;
+                    ProcessCassOutputs();
                     break;
             }
         }
 
-        #region Properties that MUST be initialized before setting the ScenarioFilename property
+        [XmlIgnore]
+        public Dispatcher Dispatcher { get; set; }
+        [XmlIgnore]
+        public RangeComplexes RangeComplexes { get; set; }
+        [XmlIgnore]
+        public IUIVisualizerService VisualizerService { get; set; }
+        [XmlIgnore]
+        public IMessageBoxService MessageBoxService { get; set; }
 
         #region public MapLayerCollection MapLayers { get; set; }
         [XmlIgnore]
@@ -143,15 +171,6 @@ namespace ESME.Metadata
         MapLayerCollection _currentMapLayers;
 
         #endregion
-        [XmlIgnore]
-        public Dispatcher Dispatcher { get; set; }
-        [XmlIgnore]
-        public RangeComplexes RangeComplexes { get; set; }
-        [XmlIgnore]
-        public IUIVisualizerService VisualizerService { get; set; }
-        [XmlIgnore]
-        public IMessageBoxService MessageBoxService { get; set; }
-        #endregion
 
         #region public CASSOutputs CASSOutputs { get; set; }
         [XmlIgnore]
@@ -178,7 +197,6 @@ namespace ESME.Metadata
                     {
                         Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName, newItem.ModeName);
                         newItem.Bathymetry = _bathymetry;
-                        Dispatcher.InvokeIfRequired(() => CurrentMapLayers.DisplayPropagationPoint(newItem));
                         _cassFileQueue.Post(newItem);
                     }
                     break;
@@ -242,8 +260,6 @@ namespace ESME.Metadata
                                 }
                             }
 
-
-
                     DisplayScenario();
 
                     if (!RangeComplexes.RangeComplexCollection.ContainsKey(_nemoFile.Scenario.SimAreaName))
@@ -266,30 +282,6 @@ namespace ESME.Metadata
 
                     if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
                     else NemoModeToAcousticModelNameMap.UpdateModes(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
-                    _cassOutputProcessor = new ActionBlock<CASSOutput>(newItem =>
-                    {
-                        Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName, newItem.ModeName);
-                        //newItem.Bathymetry = new WeakReference<Bathymetry>(RangeComplexes.SelectedBathymetry.DataTask.Result);
-                        newItem.CheckThreshold(Globals.AppSettings.TransmissionLossContourThreshold, Dispatcher);
-                        Dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayPropagationPoint(newItem));
-                    },
-                    new ExecutionDataflowBlockOptions
-                    {
-                        TaskScheduler = TaskScheduler.Default,
-                        BoundedCapacity = 4,
-                        MaxDegreeOfParallelism = 4,
-                    });
-                    _cassFileQueue = new BufferBlock<CASSOutput>();
-                    _cassFileQueue.LinkTo(_cassOutputProcessor);
-                    _cassFileQueue.Completion.ContinueWith(task =>
-                    {
-                        _cassOutputProcessor.Complete();
-                        _cassOutputProcessor.Completion.ContinueWith(t => { _cassOutputProcessor = null; });
-                        _cassFileQueue = null;
-                    });
-
-                    if (CASSOutputs == null) CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
-                    else CASSOutputs.RefreshInBackground();
                 }
                 else
                 {
@@ -299,6 +291,50 @@ namespace ESME.Metadata
                 }
                 NotifyPropertyChanged(NemoFileChangedEventArgs);
                 NotifyPropertyChanged(CanPlaceAnalysisPointChangedEventArgs);
+            }
+        }
+
+        void ProcessCassOutputs()
+        {
+            if (_cassOutputProcessor == null)
+            {
+                _cassOutputProcessor = new ActionBlock<CASSOutput>(newItem =>
+                {
+                    Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName,
+                                    newItem.ModeName);
+                    newItem.Bathymetry = _bathymetry;
+                    newItem.CheckThreshold(Globals.AppSettings.TransmissionLossContourThreshold);
+                    Dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayPropagationPoint(newItem));
+                },
+                new ExecutionDataflowBlockOptions
+                {
+                        TaskScheduler = TaskScheduler.Default,
+                        BoundedCapacity = 4,
+                        MaxDegreeOfParallelism = 4,
+                });
+                _cassFileQueue = new BufferBlock<CASSOutput>();
+                _cassFileQueue.LinkTo(_cassOutputProcessor);
+                _cassFileQueue.Completion.ContinueWith(task =>
+                {
+                    _cassOutputProcessor.Complete();
+                    _cassOutputProcessor.Completion.ContinueWith(t => { _cassOutputProcessor = null; });
+                    _cassFileQueue = null;
+                });
+                AwaitCassOutputProcessorCompletion();
+            }
+            if (CASSOutputs == null) CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
+            else CASSOutputs.RefreshInBackground();
+        }
+
+        async void AwaitCassOutputProcessorCompletion()
+        {
+            try
+            {
+                await _cassOutputProcessor.Completion;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Caught exception from CASS Output processor: " + e.Message);
             }
         }
 
@@ -339,6 +375,18 @@ namespace ESME.Metadata
                         else _scenarioBounds.Union(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
                     }
             }
+            if (RangeComplexes.SelectedArea != null) _scenarioBounds.Union(RangeComplexes.SelectedArea.GeoRect);
+        }
+
+        public void RemoveScenarioDisplay()
+        {
+            CurrentMapLayers.RemoveAll(
+                                       layer =>
+                                       layer.LayerType == LayerType.OpArea && layer.Name.StartsWith("Platform:"));
+            CurrentMapLayers.RemoveAll(
+                                       layer =>
+                                       layer.LayerType == LayerType.Track && layer.Name.StartsWith("Platform:"));
+            _scenarioBounds = RangeComplexes.SelectedArea == null ? null : RangeComplexes.SelectedArea.GeoRect;
         }
 
         #endregion
@@ -653,28 +701,6 @@ namespace ESME.Metadata
             return Path.Combine(metadataPath, metadataFile + ".xml");
         }
 
-        #region public string OverlayFilename { get; set; }
-
-        public string OverlayFilename
-        {
-            get { return _overlayFilename; }
-            set
-            {
-                if (_overlayFilename == value) return;
-                _overlayFilename = Path.GetFileNameWithoutExtension(value);
-                if (!string.IsNullOrEmpty(_overlayFilename) && !string.IsNullOrEmpty(Filename))
-                    if (!OverlayFileExists) _overlayFilename = null;
-                NotifyPropertyChanged(OverlayNameChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs OverlayNameChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.OverlayFilename);
-        string _overlayFilename;
-
-        bool OverlayFileExists { get { return File.Exists(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(Filename)), "Areas", OverlayFilename + ".ovr")); } }
-
-        #endregion
-
         #region public string Creator { get; set; }
 
         public string Creator
@@ -738,8 +764,6 @@ namespace ESME.Metadata
             {
                 if (_filename == value) return;
                 _filename = value;
-                if (!string.IsNullOrEmpty(OverlayFilename) && !string.IsNullOrEmpty(_filename))
-                    if (!OverlayFileExists) OverlayFilename = null;
                 NotifyPropertyChanged(FilenameChangedEventArgs);
             }
         }

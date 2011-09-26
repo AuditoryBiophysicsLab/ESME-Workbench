@@ -22,11 +22,21 @@ namespace ESME.TransmissionLoss.CASS
         {
             if ((analysisPoints == null) || (analysisPoints.Count == 0)) return;
             var rangeComplex = rangeComplexes.SelectedRangeComplex;
-            var cassBathymetryFileName = Path.Combine(rangeComplexes.SelectedRangeComplex.BathymetryPath, string.Format("{0}_{1}_bathy.txt", rangeComplexes.SelectedArea.Name, rangeComplexes.SelectedBathymetry.Name));
             var nemoScenario = nemoFile.Scenario;
+            var bathymetry = ((Task<Bathymetry>)environmentTasks[EnvironmentDataType.Bathymetry]).Result;
+            var sediment = ((Task<Sediment>)environmentTasks[EnvironmentDataType.Sediment]).Result;
+            var bottomLossSamples = ((Task<BottomLoss>)environmentTasks[EnvironmentDataType.BottomLoss]).Result.Samples;
+            var cassBathymetryFileName = Path.Combine(rangeComplexes.SelectedRangeComplex.BathymetryPath, string.Format("{0}_{1}_bathy.txt", rangeComplexes.SelectedArea.Name, rangeComplexes.SelectedBathymetry.Name));
+            if (!File.Exists(cassBathymetryFileName)) bathymetry.ToYXZ(cassBathymetryFileName, -1);
             foreach (var timePeriod in timePeriods)
             {
-                var cassEnvironmentFileName = Path.Combine(rangeComplexes.SelectedRangeComplex.EnvironmentPath, string.Format("{0}_{1}_env_{2}.txt", rangeComplexes.SelectedArea.Name, rangeComplexes.SelectedBathymetry.Name, timePeriod));
+                var cassEnvironmentFileName = Path.Combine(rangeComplexes.SelectedRangeComplex.EnvironmentPath, string.Format("{0}_{1}_env_{2}", rangeComplexes.SelectedArea.Name, rangeComplexes.SelectedBathymetry.Name, timePeriod));
+                var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof (NAVOTimePeriod), timePeriod, true);
+                var soundspeedField = ((Task<SoundSpeed>)environmentTasks[EnvironmentDataType.SoundSpeed]).Result[curTimePeriod];
+                var wind = ((Task<Wind>)environmentTasks[EnvironmentDataType.Wind]).Result[curTimePeriod];
+                WriteEnvironmentFiles(cassEnvironmentFileName, bathymetry.Samples.GeoRect, sediment, soundspeedField,
+                                      wind, cassBathymetryFileName, rangeComplexes.SelectedArea.Name + ".ovr",
+                                      bottomLossSamples);
                 // These are for CASS and RAM (Restricted NAVY TL models)
                 var curScenarioDataPath = Path.GetDirectoryName(nemoFile.FileName);
                 var curPropagationPath = Path.Combine(curScenarioDataPath, "Propagation");
@@ -181,6 +191,12 @@ namespace ESME.TransmissionLoss.CASS
                 }
             }
 
+            var frequency = Math.Sqrt(mode.LowFrequency * mode.HighFrequency);
+            string environmentFileType;
+            if (frequency < 1000) environmentFileType = "-lfbl-pe";
+            else if (frequency < 1500) environmentFileType = "-lfbl-hfb";
+            else if (frequency < 4000) environmentFileType = "-hfbl";
+            else environmentFileType = "";
             using (var writer = new StreamWriter(inputFilePath, true))
             {
                 writer.WriteLine("*Loadcase");
@@ -189,7 +205,7 @@ namespace ESME.TransmissionLoss.CASS
                 writer.WriteLine("Sim Area                                ,{0}", nemoScenario.SimAreaName);
                 writer.WriteLine("Event Name                              ,{0}", nemoScenario.EventName);
                 writer.WriteLine("Reference Location                      ,{0:0.000} DEG, {1:0.000} DEG", rangeComplex.RangeComplexMetadata.Latitude, rangeComplex.RangeComplexMetadata.Longitude);
-                writer.WriteLine("Enviro File                             ,{0}", Path.GetFileName(cassEnvironmentFileName));
+                writer.WriteLine("Enviro File                             ,{0}{1}.dat", Path.GetFileName(cassEnvironmentFileName), environmentFileType);
                 float stepCount;
                 float stepSize;
                 switch (simulatorName)
@@ -223,7 +239,7 @@ namespace ESME.TransmissionLoss.CASS
                 writer.WriteLine("Platform Name                           ,{0}", platform.Name);
                 writer.WriteLine("Source Name                             ,{0}", source.Name);
                 writer.WriteLine("Mode Name                               ,{0}", mode.Name);
-                writer.WriteLine("Frequency                               ,{0:0.000} HZ", Math.Sqrt(mode.LowFrequency * mode.HighFrequency));
+                writer.WriteLine("Frequency                               ,{0:0.000} HZ", frequency);
                 writer.WriteLine("DE Angle                                ,{0:0.000} DEG", mode.DepressionElevationAngle);
                 writer.WriteLine("Vertical Beam                           ,{0:0.000} DEG", mode.VerticalBeamWidth);
                 writer.WriteLine("Source Depth                            ,{0:0.000} M", mode.SourceDepth);
@@ -274,19 +290,23 @@ namespace ESME.TransmissionLoss.CASS
 
         public static void WriteEnvironmentFiles(string environmentFileName, GeoRect geoRect, Sediment sedimentType, 
                                                  SoundSpeedField soundSpeedField, TimePeriodEnvironmentData<WindSample> wind, string bathymetryFileName, 
-                                                 string overlayFileName, bool exportHFEVA, bool exportHFBL, bool exportLFBLHFB, bool exportLFBLPE,
-                                                 EnvironmentData<BottomLossSample> bottomLossSamples)
+                                                 string overlayFileName, EnvironmentData<BottomLossSample> bottomLossSamples)
         {
-            if (exportHFEVA) WriteEnvironmentFileHeader(environmentFileName, geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "HFEVA", bottomLossSamples);
-            if (exportHFBL) WriteEnvironmentFileHeader(environmentFileName + "-hfbl", geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "HFBL", bottomLossSamples);
-            if (exportLFBLHFB) WriteEnvironmentFileHeader(environmentFileName + "-lfbl-hfb", geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "LFBL_HFB", bottomLossSamples);
-            if (exportLFBLPE) WriteEnvironmentFileHeader(environmentFileName + "-lfbl-pe", geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "LFBL_PE", bottomLossSamples);
+            WriteEnvironmentFileHeader(environmentFileName, geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "HFEVA", bottomLossSamples);
+            if (bottomLossSamples == null) return;
+            WriteEnvironmentFileHeader(environmentFileName + "-hfbl", geoRect, sedimentType, soundSpeedField,
+                                       wind, bathymetryFileName, overlayFileName, "HFBL", bottomLossSamples);
+            WriteEnvironmentFileHeader(environmentFileName + "-lfbl-hfb", geoRect, sedimentType, soundSpeedField,
+                                       wind, bathymetryFileName, overlayFileName, "LFBL_HFB", bottomLossSamples);
+            WriteEnvironmentFileHeader(environmentFileName + "-lfbl-pe", geoRect, sedimentType, soundSpeedField,
+                                       wind, bathymetryFileName, overlayFileName, "LFBL_PE", bottomLossSamples);
         }
 
         static void WriteEnvironmentFileHeader(string environmentFileName, GeoRect geoRect, Sediment sedimentType, 
                                          TimePeriodEnvironmentData<SoundSpeedProfile> soundSpeedField, TimePeriodEnvironmentData<WindSample> wind, string bathymetryFileName,
                                          string overlayFileName, string model, EnvironmentData<BottomLossSample> bottomLossSamples)
         {
+            if (File.Exists(environmentFileName + ".dat")) return;
             var isFirstPoint = true;
             using (var envFile = new StreamWriter(environmentFileName + ".dat", false))
             {
