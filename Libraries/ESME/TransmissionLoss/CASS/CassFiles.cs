@@ -74,7 +74,6 @@ namespace ESME.TransmissionLoss.CASS
                                     case TransmissionLossAlgorithm.RAMGEO:
                                         foreach (var curSource in modeSources)
                                         {
-#if true
                                             var runFile = TransmissionLossRunFile.Create(thisModel, curSource,
                                                                                          nemoFile.Scenario.SimAreaName,
                                                                                          Path.GetFileNameWithoutExtension(cassBathymetryFileName),
@@ -85,24 +84,6 @@ namespace ESME.TransmissionLoss.CASS
                                             // todo: If the file already exists, load it and see if it's the same as the one we just
                                             // created.  If it is, don't write a new one.
                                             if (!File.Exists(runFileName)) runFile.Save(runFileName);
-#else
-                                            var lat = curSource.Latitude;
-                                            var lon = curSource.Longitude;
-                                            var northSouth = lat >= 0 ? "n" : "s";
-                                            var eastWest = lon >= 0 ? "e" : "w";
-                                            var jobName = string.Format("{0}_{1}{2:0.####}_{3}{4:0.####}",
-                                                                        curSource.Name.Replace('|', '_'), northSouth, Math.Abs(lat),
-                                                                        eastWest, Math.Abs(lon));
-                                            var runfile = TransmissionLossRunFile.Create(thisModel,
-                                                                                         new TransmissionLossJob
-                                                                                         {
-                                                                                             SoundSource = curSource,
-                                                                                             Name = jobName,
-                                                                                         },
-                                                                                         environmentInformation,
-                                                                                         Globals.AppSettings);
-                                            runfile.Save(curTimePeriodPath);
-#endif
                                         }
                                         break;
                                 }
