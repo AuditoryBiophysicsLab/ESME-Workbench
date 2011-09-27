@@ -4,14 +4,17 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
+using ESME.Environment.Descriptors;
+using ESME.Environment.NAVO;
 using ESME.Model;
 using ESME.NEMO;
+using HRC.Collections;
 using HRC.Navigation;
-using HRC.Utility;
 
 namespace ESME.TransmissionLoss.REFMS
 {
@@ -19,12 +22,48 @@ namespace ESME.TransmissionLoss.REFMS
     {
         public ExplosivePoint() { }
 
-        public ExplosivePoint(Geo location, NemoPlatform platform, NemoMode mode, float delta) : base(location)
+        public ExplosivePoint(string outputPath, Geo location, NemoPlatform platform, NemoMode mode, float delta = 1) : base(location)
         {
+            OutputPath = outputPath;
             ExplosionDepth = Math.Abs(platform.Trackdefs[0].InitialHeight) + mode.DepthOffset;
             Delta = delta;
             SoundSources = new List<SoundSource> {new SoundSource(location, mode, 1)};
         }
+
+        #region public NemoMode NemoMode { get; set; }
+        public NemoMode NemoMode
+        {
+            get { return _nemoMode; }
+            set
+            {
+                if (_nemoMode == value) return;
+                _nemoMode = value;
+                NotifyPropertyChanged(NemoModeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs NemoModeChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.NemoMode);
+        NemoMode _nemoMode;
+
+        #endregion
+
+        #region public string OutputPath { get; set; }
+        [XmlIgnore]
+        public string OutputPath
+        {
+            get { return _outputPath; }
+            set
+            {
+                if (_outputPath == value) return;
+                _outputPath = value;
+                NotifyPropertyChanged(OutputPathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs OutputPathChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.OutputPath);
+        string _outputPath;
+
+        #endregion
 
         #region public Geo OldLocation { get; set; }
 
@@ -134,7 +173,7 @@ namespace ESME.TransmissionLoss.REFMS
         }
 
         static readonly PropertyChangedEventArgs DeltaChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.Delta);
-        double _delta;
+        double _delta = 1;
 
         #endregion
 
@@ -246,25 +285,63 @@ namespace ESME.TransmissionLoss.REFMS
 
         #endregion
 
-        #region public WeakReference<Bathymetry> Bathymetry { get; set; }
+        #region public NAVOTimePeriod TimePeriod { get; set; }
 
-        [XmlIgnore]
-        public WeakReference<Bathymetry> Bathymetry
+        public NAVOTimePeriod TimePeriod
         {
-            get { return _bathymetry ?? (_bathymetry = new WeakReference<Bathymetry>(null)); }
+            get { return _timePeriod; }
             set
             {
-                if (_bathymetry == value) return;
-                _bathymetry = value;
-                foreach (var soundSource in SoundSources) soundSource.Bathymetry = _bathymetry;
+                if (_timePeriod == value) return;
+                _timePeriod = value;
+                NotifyPropertyChanged(TimePeriodChangedEventArgs);
             }
         }
 
-        WeakReference<Bathymetry> _bathymetry;
+        static readonly PropertyChangedEventArgs TimePeriodChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.TimePeriod);
+        NAVOTimePeriod _timePeriod;
 
         #endregion
 
-        public List<SoundSource> SoundSources { get; set; }
+        #region public ObservableConcurrentDictionary<EnvironmentDataType, Task> EnvironmentData { get; set; }
+        [XmlIgnore]
+        public ObservableConcurrentDictionary<EnvironmentDataType, Task> EnvironmentData
+        {
+            get { return _environmentData; }
+            set
+            {
+                if (_environmentData == value) return;
+                _environmentData = value;
+                NotifyPropertyChanged(EnvironmentDataChangedEventArgs);
+                
+                var temperatureData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[TimePeriod].EnvironmentData[this];
+                var salinityData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[TimePeriod].EnvironmentData[this];
+                var soundSpeedData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[TimePeriod].EnvironmentData[this];
+                SVPLocation = new Geo(soundSpeedData);
+                BottomLossData = ((Task<BottomLoss>)EnvironmentData[EnvironmentDataType.BottomLoss]).Result.Samples[this].Data;
+                WaterDepth = ((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples[this].Data;
+                GeoRect = ((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GeoRect;
+
+                TemperatureData = new double[temperatureData.Data.Count];
+                DepthData = new double[temperatureData.Data.Count];
+                SalinityData = new double[salinityData.Data.Count];
+                SoundSpeedData = new double[soundSpeedData.Data.Count];
+                for (var i = 0; i < temperatureData.Data.Count; i++)
+                {
+                    TemperatureData[i] = temperatureData.Data[i].Value;
+                    DepthData[i] = temperatureData.Data[i].Depth;
+                    SalinityData[i] = salinityData.Data[i].Value;
+                    SoundSpeedData[i] = soundSpeedData.Data[i].Value;
+                }
+
+                _svpFile = SVPFile.Create(DepthData, TemperatureData, SalinityData, SoundSpeedData, BottomLossData, Delta);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs EnvironmentDataChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.EnvironmentData);
+        ObservableConcurrentDictionary<EnvironmentDataType, Task> _environmentData;
+
+        #endregion
 
         #region public bool IsValid { get; set; }
 
@@ -312,34 +389,22 @@ namespace ESME.TransmissionLoss.REFMS
 
         #endregion
 
-        #region public float Depth { get; set; }
+        public double[] TemperatureData { get; set; }
+        public double[] SalinityData { get; set; }
+        public double[] SoundSpeedData { get; set; }
+        public double[] DepthData { get; set; }
+        public double WaterDepth { get; set; }
+        public BottomLossData BottomLossData { get; set; }
+        public Geo SVPLocation { get; set; }
 
-        public float Depth
-        {
-            get { return _depth; }
-            set
-            {
-                if (_depth == value) return;
-                _depth = value;
-                NotifyPropertyChanged(DepthChangedEventArgs);
-            }
-        }
+        [XmlIgnore]
+        public GeoRect GeoRect { get; set; }
 
-        static readonly PropertyChangedEventArgs DepthChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.Depth);
-        float _depth;
-
-        #endregion
+        public List<SoundSource> SoundSources { get; set; }
 
         public void Validate()
         {
-            if ((Bathymetry == null) || (Bathymetry.Target == null))
-            {
-                ValidationErrorText = "Unable to validate";
-                return;
-            }
-
-            var bathymetry = Bathymetry.Target;
-            if (!bathymetry.Samples.GeoRect.Contains(this))
+            if (!GeoRect.Contains(this))
             {
                 ValidationErrorText = "Explosive point not contained within bathymetry bounds";
                 return;
@@ -366,6 +431,175 @@ namespace ESME.TransmissionLoss.REFMS
                     foreach (var sourceName in sourcesInError) result.AppendLine(string.Format("  • {0}", sourceName));
                     ValidationErrorText = result.ToString();
                     break;
+            }
+        }
+
+        public void WriteInputFile()
+        {
+            var fileName = Path.Combine(OutputPath, BaseFilename + "refms.in");
+            using (var writer = new StreamWriter(fileName, false))
+            {
+                writer.WriteLine("");
+                writer.WriteLine("COMMENT");
+                writer.WriteLine("For: {0}[{1}] Build {2} ({3})", SVPFilename, NemoMode.PSMName, BuildInformation.SVNVersion, BuildInformation.BuildDateTime);
+                writer.WriteLine("");
+                writer.WriteLine("UNITS       1 - Metric Units");
+                writer.WriteLine("EXPLOSIVE   1    	Explosive composition (1=TNT)");
+                writer.WriteLine("NemoMode.SourceLevel       {0:0.000} 	kg", NemoMode.SourceLevel); // From Mode/sourceLevel
+                writer.WriteLine("CLUSTER     {0}   	Charges", NemoMode.ClusterCount); // From Mode/clusterCount
+                writer.WriteLine("DEXPLOSION  {0:0.00} 	Depth of explosion in meters", ExplosionDepth); // Platform/trackDef/initialHeight plus Mode/depthOffset
+                writer.WriteLine("");
+                //writer.WriteLine("RADIUS      0.   	Skip ship response");   
+                writer.WriteLine("DURATION    {0:0.0} 	Duration in secs after bottom reflection", NemoMode.Duration.Seconds); // Mode/duration
+                //writer.WriteLine("IMULT       0    	Second Order Reflection");
+                writer.WriteLine("IRB1        {0}   	Compute bottom reflections", BottomReflectionsEnabled ? "1." : "0.");
+                // if water depth > 2000m, uncheck the "Include exponential at bottom" checkbox.  Otherwise check it, but allow the user to override if they wish.
+                writer.WriteLine("IRB2        1.   	Compute rays surf to gage"); // Always 1
+                writer.WriteLine("IRSC        0    	Compute rays in sound channel"); // Always 0
+                writer.WriteLine("IC          1.   	Disables cavitation."); // Always 1
+                writer.WriteLine("");
+                writer.WriteLine("FILTER     -2    	 "); // Always -2
+                writer.WriteLine("");
+                writer.WriteLine("DWATER      {0:0.0} 	Depth of water in meters", WaterDepth - 0.1);               // Bathymetry at analysis point - 0.1
+                writer.WriteLine("");
+                writer.WriteLine("BSSRATIO    {0:0.000} 	Soil Type: Sound Speed Ratio", BottomLossData.RATIOD);  // From LFBL
+                writer.WriteLine("BRHO        {0:0.000} 	Soil Type: Density", BottomLossData.RHOSD);             // From LFBL
+                writer.WriteLine("BSWSPEED    {0:0.000} 	Soil Type: Shear Wave Velocity", ShearWaveVelocity);    // Computed by property getter
+                writer.WriteLine("BMAT        1.0 "); // Always 1.0
+                writer.WriteLine("SCALEI      no   "); // Always no
+                writer.WriteLine("SVPFILE     loc.svp   "); // Always loc.svp
+                writer.WriteLine("");
+                writer.WriteLine("SE          1   make 3rd-octave energy spectra"); // Always 1
+                var splCutoff = SourceCount == 1 ? Globals.AppSettings.REFMSSettings.SPLCutoffSingleSource : Globals.AppSettings.REFMSSettings.SPLCutoffMultiSource;
+                writer.WriteLine("SPLCUTOFF   {0:0.000}  	 from {1} sources", splCutoff, SourceCount); // From scenario - single or multi based on num sources (used below)
+                writer.WriteLine("SELCUTOFF   {0}   ", Globals.AppSettings.REFMSSettings.SELCutoffLine); // From REFMS Settings, just copy the string
+                writer.WriteLine("SOURCES     {0}   ", SourceCount); // Num sources in scenario
+                writer.WriteLine("");
+                writer.WriteLine("DEPTHE");
+                writer.WriteLine(" {0:0.00} {1:0.00} {2} ", Globals.AppSettings.REFMSSettings.MinimumDepth, WaterDepth, 20); // REFMS min depth config, depth at analysis point, 20
+                writer.WriteLine("LOOPE");
+                writer.WriteLine(" {0:0.00} {1:0.00} {2} ", NemoMode.LowFrequency, NemoMode.HighFrequency * 0.2, 20); // Mode/Low Freq, Mode/Hi Freq * 0.2, 20
+                writer.WriteLine("LOOPL");
+                writer.WriteLine(" {0:0.00} {1:0.00} {2} ", NemoMode.HighFrequency * 0.25, NemoMode.HighFrequency, 15); // Mode/High Freq * 0.25, Mode/Hi freq, 15
+                writer.WriteLine("STOP");
+            }
+        }
+
+        public void WriteBatchFile()
+        {
+            var scriptBase = Path.Combine(OutputPath, string.Format("{0}", BaseFilename));
+            using (var writer = new StreamWriter(scriptBase + "-refms.bat", false))
+            {
+                writer.WriteLine("");
+                writer.WriteLine("mkdir \"{0}\"", BaseFilename);
+                writer.WriteLine("COPY /Y \"{0}refms.in\" \"{0}\\refms.in\" ", BaseFilename);
+                writer.WriteLine("COPY /Y \"{0}.svp\" \"{1}\\loc.svp\" ", SVPFilename, BaseFilename);
+                writer.WriteLine("rem effects header - ");
+                writer.WriteLine("cd \"{0}\"", BaseFilename);
+                writer.WriteLine("echo #head=> ref_effect.head");
+                writer.WriteLine("echo #tstamp=%DATE% %TIME%>> ref_effect.head");
+                writer.WriteLine("echo #sysver=%COMPUTERNAME%^|{0}^|{1}^|{2}^|{3}^|null>> ref_effect.head", System.Environment.UserName, System.Environment.OSVersion.VersionString,
+                                 System.Environment.OSVersion.ServicePack, System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"));
+                writer.WriteLine("echo #title=Explosives Test, EC_SimArea>> ref_effect.head");
+                writer.WriteLine("echo #mode={0}>> ref_effect.head", NemoMode.Name);
+                writer.WriteLine("echo #bin=E12>> ref_effect.head"); // Where does this come from?
+                writer.WriteLine("echo #season={0}>> ref_effect.head", TimePeriod);
+                writer.WriteLine("echo #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}>> ref_effect.head", ExplosionDepth, NemoMode.SourceLevel, NemoMode.Duration.Seconds,
+                                 BottomLossData.RATIOD, -20, -15); // where do -20 and -15 come from?
+                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}>> ref_effect.head", Latitude, Longitude);
+                writer.WriteLine("echo #splineloc={0:0.000000} {1:0.000000}>> ref_effect.head", SVPLocation.Latitude, SVPLocation.Longitude);
+                writer.WriteLine("echo #units=meters>> ref_effect.head");
+                writer.WriteLine("start \"REFMS\" /wait  \"{0}\"", Globals.AppSettings.REFMSSettings.REFMSExecutablePath);
+                writer.WriteLine("COPY /Y ref_effect.head + refms.out refms.effects");
+                writer.WriteLine("echo # SPEC:{0}refms.spec >> refms.effects");
+                writer.WriteLine("COPY /Y refms.effects + refms.spec refms.effects");
+                var specFilename = string.Format("\"..\\{0}refms.spec\"", BaseFilename);
+                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}> {2}", Latitude, Longitude, specFilename);
+                writer.WriteLine("COPY /Y {0} + refms.spec {0}", specFilename);
+                writer.WriteLine("cd ..");
+            }
+            using (var writer = new StreamWriter(scriptBase + "-refms.sh", false))
+            {
+                writer.WriteLine("#!/bin/sh");
+                writer.WriteLine("mkdir \"{0}\"", BaseFilename);
+                writer.WriteLine("cp \"{0}refms.in\" \"{0}\\refms.in\" ", BaseFilename);
+                writer.WriteLine("cp \"{0}\" \"{1}\\loc.svp\" ", SVPFilename, BaseFilename);
+                writer.WriteLine("# effects header - ");
+                writer.WriteLine("cd \"{0}\"", BaseFilename);
+                writer.WriteLine("echo -n #head\\n> ref_effect.head");
+                writer.WriteLine("echo -n #tstamp=$(date +\"%F %T\")\\n>> ref_effect.head");
+                writer.WriteLine("echo -n #sysver=$(hostname)\\|{0}\\|{1}\\|{2}\\|{3}\\|null\\n>> ref_effect.head", System.Environment.UserName, System.Environment.OSVersion.VersionString,
+                                 System.Environment.OSVersion.ServicePack, System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"));
+                writer.WriteLine("echo -n #title=Explosives Test, EC_SimArea\\n>> ref_effect.head");
+                writer.WriteLine("echo -n #mode={0}\\n>> ref_effect.head", NemoMode.Name);
+                writer.WriteLine("echo -n #bin=E12\\n>> ref_effect.head"); // Where does this come from?
+                writer.WriteLine("echo -n #season={0}\\n>> ref_effect.head", TimePeriod);
+                writer.WriteLine("echo -n #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}\\n>> ref_effect.head", ExplosionDepth, NemoMode.SourceLevel, NemoMode.Duration.Seconds,
+                                 BottomLossData.RATIOD, -20, -15); // where do -20 and -15 come from?
+                writer.WriteLine("echo -n #location={0:0.000000} {1:0.000000}\\n>> ref_effect.head", Latitude, Longitude);
+                writer.WriteLine("echo -n #splineloc={0:0.000000} {1:0.000000}\\n>> ref_effect.head", SVPLocation.Latitude, SVPLocation.Longitude);
+                writer.WriteLine("echo -n #units=meters\\n>> ref_effect.head");
+                writer.WriteLine("refms");
+                writer.WriteLine("echo -en ref_effect.head + refms.out refms.effects");
+                writer.WriteLine("echo # SPEC:{0}refms.spec >> refms.effects");
+                writer.WriteLine("COPY /Y refms.effects + refms.spec refms.effects");
+                var specFilename = string.Format("\"..\\{0}refms.spec\"", BaseFilename);
+                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}> {2}", Latitude, Longitude, specFilename);
+                writer.WriteLine("COPY /Y {0} + refms.spec {0}", specFilename);
+                writer.WriteLine("cd ..");
+            }
+        }
+
+        static readonly Random Random = new Random();
+
+        string BaseFilename
+        {
+            get
+            {
+                var step1 = NemoMode.PSMId.Replace(' ', '_').Replace(':', '+').Replace('|', '~');
+                return string.Format("{0}_{1}{2:0.#}", step1, SVPFilename, ExplosionDepth);
+            }
+        }
+
+        string SVPFilename
+        {
+            get
+            {
+                var northSouth = SVPLocation.Latitude >= 0 ? "N" : "S";
+                var eastWest = SVPLocation.Longitude >= 0 ? "E" : "W";
+                var randomInt = Random.Next(99);
+                return string.Format("LOC_{0}{1}_{2}{3}_{4}-{5}", DegreesMinutes(SVPLocation.Latitude), northSouth, DegreesMinutes(SVPLocation.Longitude), eastWest, randomInt, TimePeriod);
+            }
+        }
+
+        static string DegreesMinutes(double itude)
+        {
+            var degrees = (int)(Math.Abs(itude));
+            var fraction = ((int)((Math.Abs(itude) - degrees) * 100)) / 100.0;
+            var minutes = (int)(fraction * 60.0);
+            return string.Format("{0}{1}", degrees, minutes);
+        }
+
+        double ShearWaveVelocity
+        {
+            get
+            {
+                double bSwSpeed;
+                var vSedKM = (BottomLossData.RATIOD * _svpFile.Layers.Last().SoundVelocity) / 1000.0;
+
+                if (vSedKM < 1.555)
+                {
+                    //if (vSedKM < 1.512)
+                    //    warn("Sediment Compression Velocity outside of algorithm range.");
+                    bSwSpeed = (3.884 * vSedKM - 5.757) * 1000.0;
+                }
+                else if (vSedKM < 1.650)
+                    bSwSpeed = (1.137 * vSedKM - 1.485) * 1000.0;
+                else if (vSedKM < 2.150)
+                    bSwSpeed = (0.991 - 1.136 * vSedKM + 0.47 * vSedKM * vSedKM) * 1000.0;
+                else
+                    bSwSpeed = (0.78 * vSedKM - 0.962) * 1000.0;
+                return bSwSpeed;
             }
         }
     }
@@ -477,12 +711,12 @@ namespace ESME.TransmissionLoss.REFMS
         {
             using (var writer = new StreamWriter(fileName, false))
             {
-                writer.WriteLine("Layers: {0}", Layers.Count);
+                writer.WriteLine("LAYERS {0}", Layers.Count);
                 foreach (var layer in Layers) writer.WriteLine(layer);
                 writer.WriteLine();
                 writer.WriteLine();
                 writer.WriteLine(" DELTA {0,9:0.0000}", Delta);
-                writer.WriteLine("LOCATION: {0,10:##0.000000} {1,10:##0.000000}", Latitude, Longitude);
+                writer.WriteLine("LOCATION: {0,10:0.000000} {1,10:0.000000}", Latitude, Longitude);
             }
         }
 

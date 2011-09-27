@@ -281,7 +281,6 @@ namespace ESME.Metadata
                         
                     // Set the selected range complex
                     RangeComplexes.SelectedRangeComplex = RangeComplexes.RangeComplexCollection[_nemoFile.Scenario.SimAreaName];
-                    _selectedRangeComplex = RangeComplexes.SelectedRangeComplex;
                     RangeComplexes.SelectedTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), _nemoFile.Scenario.TimeFrame);
                     
                     if ((SelectedAreaName != null) && (RangeComplexes.SelectedRangeComplex.AreaCollection.ContainsKey(SelectedAreaName)))
@@ -298,7 +297,6 @@ namespace ESME.Metadata
                 }
                 else
                 {
-                    _selectedRangeComplex = null;
                     _scenarioBounds = null;
                     NemoModeToAcousticModelNameMap = null;
                 }
@@ -382,7 +380,6 @@ namespace ESME.Metadata
 
         string _propagationPath;
         string _pressurePath;
-        NewRangeComplex _selectedRangeComplex;
         GeoRect _scenarioBounds;
         WeakReference<Bathymetry> _bathymetry;
 
@@ -612,7 +609,7 @@ namespace ESME.Metadata
                 if (mode.Mode.Name.ToLower() != "explosive") analysisPoint.SoundSources.Add(new SoundSource(analysisPoint, mode.Mode, 16));
                 else
                 {
-                    if (explosivePoint == null) explosivePoint = new ExplosivePoint(location, mode.Platform, mode.Mode, 1.0f);
+                    if (explosivePoint == null) explosivePoint = new ExplosivePoint(_pressurePath, location, mode.Platform, mode.Mode, 1.0f);
                     else explosivePoint.SoundSources.Add(new SoundSource(location, mode.Mode, 1));
                 }
             }
@@ -660,7 +657,8 @@ namespace ESME.Metadata
                         foreach (var newPoint in e.NewItems)
                         {
                             if (CurrentMapLayers != null) CurrentMapLayers.DisplayExplosivePoint((ExplosivePoint)newPoint);
-                            ((ExplosivePoint)newPoint).Bathymetry = _bathymetry;
+                            if (RangeComplexes.IsEnvironmentLoaded) 
+                                ((ExplosivePoint)newPoint).EnvironmentData = RangeComplexes.EnvironmentData;
                         }
                     }
                     break;
@@ -720,7 +718,7 @@ namespace ESME.Metadata
             {
                 foreach (var explosivePoint in ExplosivePoints)
                 {
-                    explosivePoint.Bathymetry = _bathymetry;
+                    explosivePoint.EnvironmentData = RangeComplexes.EnvironmentData;
                     explosivePoint.Validate();
                 }
             }
@@ -837,7 +835,6 @@ namespace ESME.Metadata
             {
                 foreach (var point in ExplosivePoints)
                 {
-                    
                 }
             }
             Globals.WorkDirectories.Add(_propagationPath, true);
