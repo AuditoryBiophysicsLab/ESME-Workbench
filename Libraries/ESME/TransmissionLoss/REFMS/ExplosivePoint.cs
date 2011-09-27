@@ -22,9 +22,11 @@ namespace ESME.TransmissionLoss.REFMS
     {
         public ExplosivePoint() { }
 
-        public ExplosivePoint(string outputPath, Geo location, NemoPlatform platform, NemoMode mode, float delta = 1) : base(location)
+        public ExplosivePoint(string outputPath, Geo location, NemoPlatform platform, NemoMode mode, NAVOTimePeriod timePeriod, float delta = 1) : base(location)
         {
+            TimePeriod = timePeriod;
             OutputPath = outputPath;
+            Directory.CreateDirectory(OutputPath);
             ExplosionDepth = Math.Abs(platform.Trackdefs[0].InitialHeight) + mode.DepthOffset;
             Delta = delta;
             SoundSources = new List<SoundSource> {new SoundSource(location, mode, 1)};
@@ -89,28 +91,6 @@ namespace ESME.TransmissionLoss.REFMS
 
         static readonly PropertyChangedEventArgs ExplosionDepthChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.ExplosionDepth);
         double _explosionDepth;
-
-        #endregion
-
-        #region public string SVPFileName { get; set; }
-
-        public string SVPFileName
-        {
-            get { return _svpFileName; }
-            set
-            {
-                if (_svpFileName == value) return;
-                _svpFileName = value;
-                NotifyPropertyChanged(SVPFileNameChangedEventArgs);
-                if ((_svpFileName != null) && (File.Exists(_svpFileName)))
-                {
-                    SVPFile = SVPFile.Read(_svpFileName);
-                }
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SVPFileNameChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.SVPFileName);
-        string _svpFileName;
 
         #endregion
 
@@ -303,8 +283,7 @@ namespace ESME.TransmissionLoss.REFMS
             {
                 if (_environmentData == value) return;
                 _environmentData = value;
-                NotifyPropertyChanged(EnvironmentDataChangedEventArgs);
-                
+
                 var temperatureData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[TimePeriod].EnvironmentData[this];
                 var salinityData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[TimePeriod].EnvironmentData[this];
                 var soundSpeedData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[TimePeriod].EnvironmentData[this];
@@ -315,8 +294,8 @@ namespace ESME.TransmissionLoss.REFMS
 
                 TemperatureData = new double[temperatureData.Data.Count];
                 DepthData = new double[temperatureData.Data.Count];
-                SalinityData = new double[salinityData.Data.Count];
-                SoundSpeedData = new double[soundSpeedData.Data.Count];
+                SalinityData = new double[temperatureData.Data.Count];
+                SoundSpeedData = new double[temperatureData.Data.Count];
                 for (var i = 0; i < temperatureData.Data.Count; i++)
                 {
                     TemperatureData[i] = temperatureData.Data[i].Value;
@@ -325,7 +304,9 @@ namespace ESME.TransmissionLoss.REFMS
                     SoundSpeedData[i] = soundSpeedData.Data[i].Value;
                 }
 
-                _svpFile = SVPFile.Create(DepthData, TemperatureData, SalinityData, SoundSpeedData, BottomLossData, Delta);
+                _svpFile = SVPFile.Create(SVPLocation, DepthData, TemperatureData, SalinityData, SoundSpeedData, BottomLossData, Delta);
+
+                NotifyPropertyChanged(EnvironmentDataChangedEventArgs);
             }
         }
 
@@ -415,7 +396,7 @@ namespace ESME.TransmissionLoss.REFMS
             foreach (var source in SoundSources)
             {
                 source.Validate();
-                if (!source.IsValid) sourcesInError.Add(source.Name);
+                if (!source.IsValid) sourcesInError.Add(source.Name); 
             }
             switch (sourcesInError.Count)
             {
@@ -443,7 +424,7 @@ namespace ESME.TransmissionLoss.REFMS
 
         void WriteSVPFile()
         {
-            _svpFile.Write(Path.Combine(OutputPath, SVPFileName + ".svp"));
+            _svpFile.Write(Path.Combine(OutputPath, SVPFilename + ".svp"));
         }
 
         void WriteInputFile()
@@ -659,7 +640,7 @@ namespace ESME.TransmissionLoss.REFMS
         public List<SVPLayer> Layers { get; private set; }
         public double Delta { get; private set; }
 
-        public static SVPFile Create(double[] depths, double[] temps, double[] salinities, double[] soundspeeds, BottomLossData bottomLossData, double delta)
+        public static SVPFile Create(Geo geo, double[] depths, double[] temps, double[] salinities, double[] soundspeeds, BottomLossData bottomLossData, double delta)
         {
             var maxDepth = depths.Last();
             // this creates the depth increments
@@ -694,7 +675,7 @@ namespace ESME.TransmissionLoss.REFMS
             // this is the implementation of the layers function
 
             nodes = depthIncs.Length;
-            var result = new SVPFile {Layers = new List<SVPLayer>()};
+            var result = new SVPFile {Layers = new List<SVPLayer>(), Latitude = geo.Latitude, Longitude = geo.Longitude, Delta = delta};
             int start = 0, prev = 0;
             for (var inc = 0; inc < nodes; inc++)
             {

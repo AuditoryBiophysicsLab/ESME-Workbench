@@ -609,7 +609,7 @@ namespace ESME.Metadata
                 if (mode.Mode.Name.ToLower() != "explosive") analysisPoint.SoundSources.Add(new SoundSource(analysisPoint, mode.Mode, 16));
                 else
                 {
-                    if (explosivePoint == null) explosivePoint = new ExplosivePoint(_pressurePath, location, mode.Platform, mode.Mode, 1.0f);
+                    if (explosivePoint == null) explosivePoint = new ExplosivePoint(_pressurePath, location, mode.Platform, mode.Mode, RangeComplexes.SelectedTimePeriod, 0.5f);
                     else explosivePoint.SoundSources.Add(new SoundSource(location, mode.Mode, 1));
                 }
             }
@@ -835,6 +835,7 @@ namespace ESME.Metadata
             {
                 foreach (var point in ExplosivePoints)
                 {
+                    point.OutputPath = _pressurePath;
                     point.Write();
                 }
             }
