@@ -28,24 +28,15 @@ namespace ESME.TransmissionLoss.REFMS
             ExplosionDepth = Math.Abs(platform.Trackdefs[0].InitialHeight) + mode.DepthOffset;
             Delta = delta;
             SoundSources = new List<SoundSource> {new SoundSource(location, mode, 1)};
+            PSMId = mode.PSMId;
+            PSMName = mode.PSMName;
+            SourceLevel = mode.SourceLevel;
+            ClusterCount = mode.ClusterCount;
+            Duration = mode.Duration;
+            LowFrequency = mode.LowFrequency;
+            HighFrequency = mode.HighFrequency;
+            ModeName = mode.Name;
         }
-
-        #region public NemoMode NemoMode { get; set; }
-        public NemoMode NemoMode
-        {
-            get { return _nemoMode; }
-            set
-            {
-                if (_nemoMode == value) return;
-                _nemoMode = value;
-                NotifyPropertyChanged(NemoModeChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs NemoModeChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.NemoMode);
-        NemoMode _nemoMode;
-
-        #endregion
 
         #region public string OutputPath { get; set; }
         [XmlIgnore]
@@ -397,6 +388,15 @@ namespace ESME.TransmissionLoss.REFMS
         public BottomLossData BottomLossData { get; set; }
         public Geo SVPLocation { get; set; }
 
+        public string PSMId { get; set; }
+        public string PSMName { get; set; }
+        public float SourceLevel { get; set; }
+        public int ClusterCount { get; set; }
+        public TimeSpan Duration { get; set; }
+        public double LowFrequency { get; set; }
+        public double HighFrequency { get; set; }
+        public string ModeName { get; set; }
+
         [XmlIgnore]
         public GeoRect GeoRect { get; set; }
 
@@ -434,23 +434,35 @@ namespace ESME.TransmissionLoss.REFMS
             }
         }
 
-        public void WriteInputFile()
+        public void Write()
+        {
+            WriteInputFile();
+            WriteBatchFile();
+            WriteSVPFile();
+        }
+
+        void WriteSVPFile()
+        {
+            _svpFile.Write(Path.Combine(OutputPath, SVPFileName + ".svp"));
+        }
+
+        void WriteInputFile()
         {
             var fileName = Path.Combine(OutputPath, BaseFilename + "refms.in");
             using (var writer = new StreamWriter(fileName, false))
             {
                 writer.WriteLine("");
                 writer.WriteLine("COMMENT");
-                writer.WriteLine("For: {0}[{1}] Build {2} ({3})", SVPFilename, NemoMode.PSMName, BuildInformation.SVNVersion, BuildInformation.BuildDateTime);
+                writer.WriteLine("For: {0}[{1}] Build {2} ({3})", SVPFilename, PSMName, BuildInformation.SVNVersion, BuildInformation.BuildDateTime);
                 writer.WriteLine("");
                 writer.WriteLine("UNITS       1 - Metric Units");
                 writer.WriteLine("EXPLOSIVE   1    	Explosive composition (1=TNT)");
-                writer.WriteLine("NemoMode.SourceLevel       {0:0.000} 	kg", NemoMode.SourceLevel); // From Mode/sourceLevel
-                writer.WriteLine("CLUSTER     {0}   	Charges", NemoMode.ClusterCount); // From Mode/clusterCount
+                writer.WriteLine("NemoMode.SourceLevel       {0:0.000} 	kg", SourceLevel); // From Mode/sourceLevel
+                writer.WriteLine("CLUSTER     {0}   	Charges", ClusterCount); // From Mode/clusterCount
                 writer.WriteLine("DEXPLOSION  {0:0.00} 	Depth of explosion in meters", ExplosionDepth); // Platform/trackDef/initialHeight plus Mode/depthOffset
                 writer.WriteLine("");
                 //writer.WriteLine("RADIUS      0.   	Skip ship response");   
-                writer.WriteLine("DURATION    {0:0.0} 	Duration in secs after bottom reflection", NemoMode.Duration.Seconds); // Mode/duration
+                writer.WriteLine("DURATION    {0:0.0} 	Duration in secs after bottom reflection", Duration.Seconds); // Mode/duration
                 //writer.WriteLine("IMULT       0    	Second Order Reflection");
                 writer.WriteLine("IRB1        {0}   	Compute bottom reflections", BottomReflectionsEnabled ? "1." : "0.");
                 // if water depth > 2000m, uncheck the "Include exponential at bottom" checkbox.  Otherwise check it, but allow the user to override if they wish.
@@ -478,14 +490,14 @@ namespace ESME.TransmissionLoss.REFMS
                 writer.WriteLine("DEPTHE");
                 writer.WriteLine(" {0:0.00} {1:0.00} {2} ", Globals.AppSettings.REFMSSettings.MinimumDepth, WaterDepth, 20); // REFMS min depth config, depth at analysis point, 20
                 writer.WriteLine("LOOPE");
-                writer.WriteLine(" {0:0.00} {1:0.00} {2} ", NemoMode.LowFrequency, NemoMode.HighFrequency * 0.2, 20); // Mode/Low Freq, Mode/Hi Freq * 0.2, 20
+                writer.WriteLine(" {0:0.00} {1:0.00} {2} ", LowFrequency, HighFrequency * 0.2, 20); // Mode/Low Freq, Mode/Hi Freq * 0.2, 20
                 writer.WriteLine("LOOPL");
-                writer.WriteLine(" {0:0.00} {1:0.00} {2} ", NemoMode.HighFrequency * 0.25, NemoMode.HighFrequency, 15); // Mode/High Freq * 0.25, Mode/Hi freq, 15
+                writer.WriteLine(" {0:0.00} {1:0.00} {2} ", HighFrequency * 0.25, HighFrequency, 15); // Mode/High Freq * 0.25, Mode/Hi freq, 15
                 writer.WriteLine("STOP");
             }
         }
 
-        public void WriteBatchFile()
+        void WriteBatchFile()
         {
             var scriptBase = Path.Combine(OutputPath, string.Format("{0}", BaseFilename));
             using (var writer = new StreamWriter(scriptBase + "-refms.bat", false))
@@ -501,10 +513,10 @@ namespace ESME.TransmissionLoss.REFMS
                 writer.WriteLine("echo #sysver=%COMPUTERNAME%^|{0}^|{1}^|{2}^|{3}^|null>> ref_effect.head", System.Environment.UserName, System.Environment.OSVersion.VersionString,
                                  System.Environment.OSVersion.ServicePack, System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"));
                 writer.WriteLine("echo #title=Explosives Test, EC_SimArea>> ref_effect.head");
-                writer.WriteLine("echo #mode={0}>> ref_effect.head", NemoMode.Name);
+                writer.WriteLine("echo #mode={0}>> ref_effect.head", ModeName);
                 writer.WriteLine("echo #bin=E12>> ref_effect.head"); // Where does this come from?
                 writer.WriteLine("echo #season={0}>> ref_effect.head", TimePeriod);
-                writer.WriteLine("echo #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}>> ref_effect.head", ExplosionDepth, NemoMode.SourceLevel, NemoMode.Duration.Seconds,
+                writer.WriteLine("echo #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}>> ref_effect.head", ExplosionDepth, SourceLevel, Duration.Seconds,
                                  BottomLossData.RATIOD, -20, -15); // where do -20 and -15 come from?
                 writer.WriteLine("echo #location={0:0.000000} {1:0.000000}>> ref_effect.head", Latitude, Longitude);
                 writer.WriteLine("echo #splineloc={0:0.000000} {1:0.000000}>> ref_effect.head", SVPLocation.Latitude, SVPLocation.Longitude);
@@ -531,10 +543,10 @@ namespace ESME.TransmissionLoss.REFMS
                 writer.WriteLine("echo -n #sysver=$(hostname)\\|{0}\\|{1}\\|{2}\\|{3}\\|null\\n>> ref_effect.head", System.Environment.UserName, System.Environment.OSVersion.VersionString,
                                  System.Environment.OSVersion.ServicePack, System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"));
                 writer.WriteLine("echo -n #title=Explosives Test, EC_SimArea\\n>> ref_effect.head");
-                writer.WriteLine("echo -n #mode={0}\\n>> ref_effect.head", NemoMode.Name);
+                writer.WriteLine("echo -n #mode={0}\\n>> ref_effect.head", ModeName);
                 writer.WriteLine("echo -n #bin=E12\\n>> ref_effect.head"); // Where does this come from?
                 writer.WriteLine("echo -n #season={0}\\n>> ref_effect.head", TimePeriod);
-                writer.WriteLine("echo -n #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}\\n>> ref_effect.head", ExplosionDepth, NemoMode.SourceLevel, NemoMode.Duration.Seconds,
+                writer.WriteLine("echo -n #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}\\n>> ref_effect.head", ExplosionDepth, SourceLevel, Duration.Seconds,
                                  BottomLossData.RATIOD, -20, -15); // where do -20 and -15 come from?
                 writer.WriteLine("echo -n #location={0:0.000000} {1:0.000000}\\n>> ref_effect.head", Latitude, Longitude);
                 writer.WriteLine("echo -n #splineloc={0:0.000000} {1:0.000000}\\n>> ref_effect.head", SVPLocation.Latitude, SVPLocation.Longitude);
@@ -556,7 +568,7 @@ namespace ESME.TransmissionLoss.REFMS
         {
             get
             {
-                var step1 = NemoMode.PSMId.Replace(' ', '_').Replace(':', '+').Replace('|', '~');
+                var step1 = PSMId.Replace(' ', '_').Replace(':', '+').Replace('|', '~');
                 return string.Format("{0}_{1}{2:0.#}", step1, SVPFilename, ExplosionDepth);
             }
         }

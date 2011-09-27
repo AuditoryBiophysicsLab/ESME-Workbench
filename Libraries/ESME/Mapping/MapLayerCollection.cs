@@ -285,7 +285,6 @@ namespace ESME.Mapping
             explosivePointLayer.IsEnabled = true;
 
             explosivePointLayer.ExplosivePoint = curPoint;
-            explosivePointLayer.Validate();
 
             explosivePointLayer.Clear();
             foreach (var soundSource in curPoint.SoundSources)

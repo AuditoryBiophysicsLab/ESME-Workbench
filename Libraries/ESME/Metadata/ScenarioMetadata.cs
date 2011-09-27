@@ -657,7 +657,7 @@ namespace ESME.Metadata
                         foreach (var newPoint in e.NewItems)
                         {
                             if (CurrentMapLayers != null) CurrentMapLayers.DisplayExplosivePoint((ExplosivePoint)newPoint);
-                            if (RangeComplexes.IsEnvironmentLoaded) 
+                            if (RangeComplexes != null && RangeComplexes.IsEnvironmentLoaded) 
                                 ((ExplosivePoint)newPoint).EnvironmentData = RangeComplexes.EnvironmentData;
                         }
                     }
@@ -835,6 +835,7 @@ namespace ESME.Metadata
             {
                 foreach (var point in ExplosivePoints)
                 {
+                    point.Write();
                 }
             }
             Globals.WorkDirectories.Add(_propagationPath, true);
