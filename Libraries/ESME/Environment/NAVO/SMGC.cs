@@ -131,6 +131,15 @@ namespace ESME.Environment.NAVO
                 wind.TimePeriods.Add(wind.SeasonalAverage(curSeason));
             if (currentState != null) lock (currentState) currentState.Report("Saving");
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+
+            foreach (var period in NAVOConfiguration.AllTimePeriods)
+            {
+                foreach (var sample in wind[period].EnvironmentData)
+                {
+                    if (float.IsNaN(sample.Data)) Debugger.Break();
+                }
+            }
+
             return wind;
         }
 
@@ -208,21 +217,33 @@ namespace ESME.Environment.NAVO
 
                     if ((f99 != 99.0f) || (f380 != 380.0f)) throw new ApplicationException("Invalid byte order in file " + fileName);
 
-                    Months = new List<SMGCMonth>
-                         {
-                             new SMGCMonth(NAVOTimePeriod.January, reader),
-                             new SMGCMonth(NAVOTimePeriod.February, reader),
-                             new SMGCMonth(NAVOTimePeriod.March, reader),
-                             new SMGCMonth(NAVOTimePeriod.April, reader),
-                             new SMGCMonth(NAVOTimePeriod.May, reader),
-                             new SMGCMonth(NAVOTimePeriod.June, reader),
-                             new SMGCMonth(NAVOTimePeriod.July, reader),
-                             new SMGCMonth(NAVOTimePeriod.August, reader),
-                             new SMGCMonth(NAVOTimePeriod.September, reader),
-                             new SMGCMonth(NAVOTimePeriod.October, reader),
-                             new SMGCMonth(NAVOTimePeriod.November, reader),
-                             new SMGCMonth(NAVOTimePeriod.December, reader)
-                         };
+                    Months = new List<SMGCMonth>();
+                    var curMonth = SMGCMonth.Read(NAVOTimePeriod.January, reader);
+                    if (curMonth != null) Months.Add(curMonth);
+                    curMonth = SMGCMonth.Read(NAVOTimePeriod.February, reader);
+                    if (curMonth != null) Months.Add(curMonth);
+                    curMonth = SMGCMonth.Read(NAVOTimePeriod.February, reader);
+                    if (curMonth != null) Months.Add(curMonth);
+                    curMonth = SMGCMonth.Read(NAVOTimePeriod.March, reader);
+                    if (curMonth != null) Months.Add(curMonth);
+                    curMonth = SMGCMonth.Read(NAVOTimePeriod.April, reader);
+                    if (curMonth != null) Months.Add(curMonth);
+                    curMonth = SMGCMonth.Read(NAVOTimePeriod.May, reader);
+                    if (curMonth != null) Months.Add(curMonth);
+                    curMonth = SMGCMonth.Read(NAVOTimePeriod.June, reader);
+                    if (curMonth != null) Months.Add(curMonth);
+                    curMonth = SMGCMonth.Read(NAVOTimePeriod.July, reader);
+                    if (curMonth != null) Months.Add(curMonth);
+                    curMonth = SMGCMonth.Read(NAVOTimePeriod.August, reader);
+                    if (curMonth != null) Months.Add(curMonth);
+                    curMonth = SMGCMonth.Read(NAVOTimePeriod.September, reader);
+                    if (curMonth != null) Months.Add(curMonth);
+                    curMonth = SMGCMonth.Read(NAVOTimePeriod.October, reader);
+                    if (curMonth != null) Months.Add(curMonth);
+                    curMonth = SMGCMonth.Read(NAVOTimePeriod.November, reader);
+                    if (curMonth != null) Months.Add(curMonth);
+                    curMonth = SMGCMonth.Read(NAVOTimePeriod.December, reader);
+                    if (curMonth != null) Months.Add(curMonth);
                 }
             }
         }
@@ -233,7 +254,7 @@ namespace ESME.Environment.NAVO
             public float MeanWaveHeight { get; private set; }
             public NAVOTimePeriod NAVOTimePeriod { get; private set; }
 
-            public SMGCMonth(NAVOTimePeriod timePeriod, BinaryReader reader)
+            SMGCMonth(NAVOTimePeriod timePeriod, BinaryReader reader)
             {
                 NAVOTimePeriod = timePeriod;
 
@@ -253,6 +274,7 @@ namespace ESME.Environment.NAVO
                 // Record index 17 is wind speed
                 var windSpeed = new SMGCRecordTypeA(reader, 0.1f);
                 MeanWindSpeed = windSpeed.MeanValue;
+                //if (float.IsNaN(MeanWindSpeed)) Debugger.Break();
                 if (!float.IsNaN(MeanWindSpeed))
                 {
                     if ((MeanWindSpeed < 0.0f) || (MeanWindSpeed > 40.1f)) Console.WriteLine("Mean Wind Speed value {0} outside stated range for {1}.  File may be corrupt.\n", MeanWindSpeed, timePeriod);
@@ -260,6 +282,16 @@ namespace ESME.Environment.NAVO
 
                 // Skip the B records at the end of the current month
                 for (var i = 0; i < 4; i++) SkipRecord(reader);
+            }
+
+            public static SMGCMonth Read(NAVOTimePeriod timePeriod, BinaryReader reader)
+            {
+                try
+                {
+                    var result = new SMGCMonth(timePeriod, reader);
+                    if (float.IsNaN(result.MeanWindSpeed)) return null;
+                    return result;
+                } catch { return null; }
             }
 
             public override string ToString() { return string.Format("Mean Wind speed [{0}]: {1} m/s\n", NAVOTimePeriod, MeanWindSpeed); }
@@ -306,6 +338,7 @@ namespace ESME.Environment.NAVO
 
                     reclen -= 28;
                 }
+                //if (float.IsNaN(MeanValue)) Debugger.Break();
                 reader.BaseStream.Seek(reclen, SeekOrigin.Current);
                 //SkipRecord(reader);
             }

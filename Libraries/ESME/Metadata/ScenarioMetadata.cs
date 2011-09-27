@@ -594,7 +594,6 @@ namespace ESME.Metadata
             if (ExplosivePoints == null) ExplosivePoints = new ObservableCollection<ExplosivePoint>();
 
             var analysisPoint = new AnalysisPoint(location);
-            ExplosivePoint explosivePoint = null;
             var distinctModes = (from platform in NemoFile.Scenario.Platforms
                                  from source in platform.Sources
                                  from mode in source.Modes
@@ -607,14 +606,10 @@ namespace ESME.Metadata
             foreach (var mode in distinctModes)
             {
                 if (mode.Mode.Name.ToLower() != "explosive") analysisPoint.SoundSources.Add(new SoundSource(analysisPoint, mode.Mode, 16));
-                else
-                {
-                    if (explosivePoint == null) explosivePoint = new ExplosivePoint(_pressurePath, location, mode.Platform, mode.Mode, RangeComplexes.SelectedTimePeriod, 0.5f);
-                    else explosivePoint.SoundSources.Add(new SoundSource(location, mode.Mode, 1));
-                }
+                else ExplosivePoints.Add(new ExplosivePoint(_pressurePath, location, mode.Platform, mode.Mode,
+                                                            RangeComplexes.SelectedTimePeriod, 0.5f));
             }
             if (analysisPoint.SoundSources.Count > 0) AnalysisPoints.Add(analysisPoint);
-            if ((explosivePoint != null) && (explosivePoint.SoundSources.Count > 0)) ExplosivePoints.Add(explosivePoint);
             Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));
         }
 

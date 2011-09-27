@@ -217,7 +217,7 @@ namespace ESME.Environment
                         await job.CompletionTask;
                     }
 #if true
-                    Dispatcher.InvokeAsynchronouslyInBackground(() =>
+                    Dispatcher.InvokeIfRequired(() =>
                     {
                         var colormap = new DualColormap(Colormap.Summer, Colormap.Jet) {Threshold = 0};
                         var bathysize = Math.Max(bathymetry.Samples.Longitudes.Length, bathymetry.Samples.Latitudes.Length);
@@ -280,8 +280,8 @@ namespace ESME.Environment
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = 4,
-                MaxDegreeOfParallelism = 4,
+                BoundedCapacity = 1,
+                MaxDegreeOfParallelism = 1,
             });
             BathymetryProgress = new ImportProgressViewModel("Bathymetry", BathymetryWorker);
 
