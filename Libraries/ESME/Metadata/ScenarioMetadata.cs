@@ -24,6 +24,7 @@ using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
+using ESME.TransmissionLoss.REFMS;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
@@ -42,9 +43,18 @@ namespace ESME.Metadata
             CreationDateTime = DateTime.Now;
         }
 
+        public ScenarioMetadata(string metaDataFilename, RangeComplexes rangeComplexes)
+            : this()
+        {
+            Filename = metaDataFilename;
+            RangeComplexes = rangeComplexes;
+            RangeComplexes.PropertyChanged += RangeComplexesPropertyChanged;
+            PropertyChanged += (s, e) => Save();
+        }
+
         public static ScenarioMetadata Load(string metaDataFilename, RangeComplexes rangeComplexes)
         {
-            if (!File.Exists(metaDataFilename)) return null;
+            if (!File.Exists(metaDataFilename)) return new ScenarioMetadata(metaDataFilename, rangeComplexes);
             var retry = 10;
             ScenarioMetadata result = null;
             Exception exception = null;
@@ -87,21 +97,24 @@ namespace ESME.Metadata
                     {
                         _bathymetry = new WeakReference<Bathymetry>(((Task<Bathymetry>)RangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).Result);
                         Debug.WriteLine("{0} Bathymetry weak reference is set", DateTime.Now);
-                        ProcessCassOutputs();
+                        NotifyPropertyChanged(CanPlaceAnalysisPointChangedEventArgs);
                     }
                     else
                     {
                         _bathymetry = null;
                         Debug.WriteLine("{0} Bathymetry weak reference is null", DateTime.Now);
-                        ProcessCassOutputs();
                     }
+                    Task.Factory.StartNew(() =>
+                    {
+                        SetBathymetryAndValidate();
+                        ProcessCassOutputs();
+                    });
                     break;
                 case "SelectedArea":
                     SelectedAreaName = RangeComplexes.SelectedArea == null ? null : RangeComplexes.SelectedArea.Name;
                     break;
                 case "SelectedBathymetry":
                     SelectedBathymetryName = RangeComplexes.SelectedBathymetry == null ? null : RangeComplexes.SelectedBathymetry.FileName;
-                    ProcessCassOutputs();
                     break;
             }
         }
@@ -282,6 +295,7 @@ namespace ESME.Metadata
 
                     if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
                     else NemoModeToAcousticModelNameMap.UpdateModes(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
+                    NemoModeToAcousticModelNameMap.CollectionChanged += (s, e) => Save();
                 }
                 else
                 {
@@ -403,6 +417,7 @@ namespace ESME.Metadata
                 NotifyPropertyChanged(ScenarioFilenameChangedEventArgs);
                 NemoFile = _scenarioFilename != null ? new NemoFile(_scenarioFilename, Globals.AppSettings.ScenarioDataDirectory) : null;
                 DisplayExistingAnalysisPoints();
+                DisplayExistingExplosivePoints();
             }
         }
 
@@ -547,7 +562,10 @@ namespace ESME.Metadata
         #region public bool CanPlaceAnalysisPoint { get; set; }
 
         [XmlIgnore]
-        public bool CanPlaceAnalysisPoint { get { return (NemoFile != null) && (RangeComplexes.IsEnvironmentFullySpecified); } }
+        public bool CanPlaceAnalysisPoint
+        {
+            get { return (NemoFile != null) && (RangeComplexes.IsEnvironmentLoaded); }
+        }
         static readonly PropertyChangedEventArgs CanPlaceAnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.CanPlaceAnalysisPoint);
 
         #endregion
@@ -555,15 +573,94 @@ namespace ESME.Metadata
         public void PlaceAnalysisPoint(EarthCoordinate location)
         {
             if (AnalysisPoints == null) AnalysisPoints = new ObservableCollection<AnalysisPoint>();
+            if (ExplosivePoints == null) ExplosivePoints = new ObservableCollection<ExplosivePoint>();
+
             var analysisPoint = new AnalysisPoint(location);
+            ExplosivePoint explosivePoint = null;
             var distinctModes = (from platform in NemoFile.Scenario.Platforms
                                  from source in platform.Sources
                                  from mode in source.Modes
-                                 select mode).Distinct();
-            foreach (var mode in distinctModes) analysisPoint.SoundSources.Add(new SoundSource(analysisPoint, mode, 16));
-            AnalysisPoints.Add(analysisPoint);
+                                 select new
+                                 {
+                                     Platform = platform,
+                                     Source = source,
+                                     Mode = mode,
+                                 }).Distinct().ToList();
+            foreach (var mode in distinctModes)
+            {
+                if (mode.Mode.Name.ToLower() != "explosive") analysisPoint.SoundSources.Add(new SoundSource(analysisPoint, mode.Mode, 16));
+                else
+                {
+                    if (explosivePoint == null) explosivePoint = new ExplosivePoint(location, mode.Platform, mode.Mode, 1.0f);
+                    else explosivePoint.SoundSources.Add(new SoundSource(location, mode.Mode, 1));
+                }
+            }
+            if (analysisPoint.SoundSources.Count > 0) AnalysisPoints.Add(analysisPoint);
+            if ((explosivePoint != null) && (explosivePoint.SoundSources.Count > 0)) ExplosivePoints.Add(explosivePoint);
             Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));
         }
+
+        #region public ObservableCollection<ExplosivePoint> ExplosivePoints { get; set; }
+
+        public ObservableCollection<ExplosivePoint> ExplosivePoints
+        {
+            get { return _explosivePoints; }
+            set
+            {
+                if (_explosivePoints == value) return;
+                if (_explosivePoints != null)
+                {
+                    _explosivePoints.CollectionChanged -= ExplosivePointsCollectionChanged;
+                    TreeViewRootNodes.RemoveAll(item => item.Name == "Analysis points");
+                }
+                _explosivePoints = value;
+                if (_explosivePoints != null)
+                {
+                    _explosivePoints.CollectionChanged += ExplosivePointsCollectionChanged;
+                }
+                NotifyPropertyChanged(ExplosivePointsChangedEventArgs);
+            }
+        }
+
+        void DisplayExistingExplosivePoints()
+        {
+            if (AnalysisPoints == null || CurrentMapLayers == null) return;
+            foreach (var explosivePoint in ExplosivePoints) CurrentMapLayers.DisplayExplosivePoint(explosivePoint);
+        }
+
+        void ExplosivePointsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            NotifyPropertyChanged(ExplosivePointsChangedEventArgs);
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    if (e.NewItems != null)
+                    {
+                        foreach (var newPoint in e.NewItems)
+                        {
+                            if (CurrentMapLayers != null) CurrentMapLayers.DisplayExplosivePoint((ExplosivePoint)newPoint);
+                            ((ExplosivePoint)newPoint).Bathymetry = _bathymetry;
+                        }
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    if (e.OldItems != null) { }
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    break;
+            }
+            if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RefreshMap, true));
+        }
+
+
+        static readonly PropertyChangedEventArgs ExplosivePointsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.ExplosivePoints);
+        ObservableCollection<ExplosivePoint> _explosivePoints;
+
+        #endregion
 
         #region public ObservableCollection<AnalysisPoint> AnalysisPoints { get; set; }
 
@@ -576,7 +673,6 @@ namespace ESME.Metadata
                 if (_analysisPoints != null)
                 {
                     _analysisPoints.CollectionChanged -= AnalysisPointsCollectionChanged;
-
                     TreeViewRootNodes.RemoveAll(item => item.Name == "Analysis points");
                 }
                 _analysisPoints = value;
@@ -585,14 +681,28 @@ namespace ESME.Metadata
                     _analysisPoints.CollectionChanged += AnalysisPointsCollectionChanged;
                 }
                 NotifyPropertyChanged(AnalysisPointsChangedEventArgs);
-                SetBathymetryForAnalysisPoints();
+                SetBathymetryAndValidate();
             }
         }
 
-        void SetBathymetryForAnalysisPoints()
+        void SetBathymetryAndValidate()
         {
-            if ((AnalysisPoints == null) || (AnalysisPoints.Count == 0) || (!RangeComplexes.IsEnvironmentLoaded)) return;
-            foreach (var analysisPoint in AnalysisPoints) analysisPoint.Bathymetry = _bathymetry;
+            if ((AnalysisPoints != null) && (AnalysisPoints.Count != 0) && (RangeComplexes.IsEnvironmentLoaded))
+            {
+                foreach (var analysisPoint in AnalysisPoints)
+                {
+                    analysisPoint.Bathymetry = _bathymetry;
+                    analysisPoint.Validate();
+                }
+            }
+            if ((ExplosivePoints != null) && (ExplosivePoints.Count != 0) && (RangeComplexes.IsEnvironmentLoaded))
+            {
+                foreach (var explosivePoint in ExplosivePoints)
+                {
+                    explosivePoint.Bathymetry = _bathymetry;
+                    explosivePoint.Validate();
+                }
+            }
         }
 
         void DisplayExistingAnalysisPoints()
@@ -687,10 +797,21 @@ namespace ESME.Metadata
         public void ExportAnalysisPoints()
         {
             Directory.CreateDirectory(_propagationPath);
-            CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings, new List<string> { NemoFile.Scenario.TimeFrame },
-                                                  AnalysisPoints, NemoFile,
-                                                  NemoModeToAcousticModelNameMap,
-                                                  RangeComplexes.EnvironmentData, RangeComplexes);
+            if (AnalysisPoints != null && AnalysisPoints.Count() > 0)
+            {
+                CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings,
+                                                      new List<string> {NemoFile.Scenario.TimeFrame},
+                                                      AnalysisPoints, NemoFile,
+                                                      NemoModeToAcousticModelNameMap,
+                                                      RangeComplexes.EnvironmentData, RangeComplexes);
+            }
+            else
+            {
+                foreach (var point in ExplosivePoints)
+                {
+                    
+                }
+            }
             Globals.WorkDirectories.Add(_propagationPath, true);
         }
 

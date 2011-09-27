@@ -17,5 +17,6 @@
         Animal,
         Propagation,
         Pressure,
+        ExplosivePoint,
     }
 }

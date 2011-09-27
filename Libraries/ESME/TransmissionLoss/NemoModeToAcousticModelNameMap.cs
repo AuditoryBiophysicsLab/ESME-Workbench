@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 namespace ESME.TransmissionLoss
 {
     [Serializable]
-    public class NemoModeToAcousticModelNameMap : List<HRC.Collections.EditableKeyValuePair<string, TransmissionLossAlgorithm>>
+    public class NemoModeToAcousticModelNameMap : List<HRC.Collections.EditableKeyValuePair<string, TransmissionLossAlgorithm>>, INotifyCollectionChanged
     {
         public NemoModeToAcousticModelNameMap() {  }
         public NemoModeToAcousticModelNameMap(IEnumerable<string> distinctModePSMNames, TransmissionLossAlgorithm defaultAcousticModel)
@@ -13,7 +14,7 @@ namespace ESME.TransmissionLoss
                 Add(new HRC.Collections.EditableKeyValuePair<string, TransmissionLossAlgorithm>(curMode, defaultAcousticModel));
         }
 
-        public void UpdateModes(IEnumerable<string> distinctModePSMNames, TransmissionLossAlgorithm defaultAcousticModel)
+        public void UpdateModes(List<string> distinctModePSMNames, TransmissionLossAlgorithm defaultAcousticModel)
         {
             var orphansFound = true;
 
@@ -48,11 +49,22 @@ namespace ESME.TransmissionLoss
             {
                 foreach (var curEntry in this.Where(curEntry => curEntry.Key == key))
                 {
+                    var oldEntry = curEntry;
                     curEntry.Value = value;
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, curEntry, oldEntry));
                     return;
                 }
-                Add(new HRC.Collections.EditableKeyValuePair<string, TransmissionLossAlgorithm>(key, value));
+                var newEntry = new HRC.Collections.EditableKeyValuePair<string, TransmissionLossAlgorithm>(key, value);
+                Add(newEntry);
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newEntry));
             }
         }
+
+        protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            if (CollectionChanged != null) CollectionChanged(this, e);
+        }
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
     }
 }

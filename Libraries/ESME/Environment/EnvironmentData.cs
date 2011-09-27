@@ -18,7 +18,7 @@ namespace ESME.Environment
 
         public T this[int index] { get { return _arrayList[index]; } }
 
-        public T this[EarthCoordinate location]
+        public T this[Geo location]
         {
             get
             {

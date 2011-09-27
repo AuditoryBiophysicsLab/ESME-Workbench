@@ -22,6 +22,12 @@ namespace ESME
         public const string ViewAnalysisPoint = "ViewAnalysisPointMessage";
         public const string CalculateAnalysisPoint = "CalculateAnalysisPointMessage";
 
+        public const string AddExplosivePoint = "AddExplosivePointMessage";
+        public const string EditExplosivePoint = "EditExplosivePointMessage";
+        public const string RemoveExplosivePoint = "RemoveExplosivePointMessage";
+        public const string ViewExplosivePoint = "ViewExplosivePointMessage";
+        public const string CalculateExplosivePoint = "CalculateExplosivePointMessage";
+
         public const string ViewPropagation = "ViewPropagationMessage";
 
         public const string ShowProperties = "ShowPropertiesMessage";

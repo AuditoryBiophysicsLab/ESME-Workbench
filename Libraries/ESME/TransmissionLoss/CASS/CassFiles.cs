@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.NEMO;
+using ESME.TransmissionLoss.REFMS;
 using HRC.Collections;
 using HRC.Navigation;
 

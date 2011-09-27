@@ -15,6 +15,7 @@ using ESME.Model;
 using ESME.NEMO;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
+using ESME.TransmissionLoss.REFMS;
 using ESME.Views.AcousticBuilder;
 using ESME.Views.Misc;
 using ESME.Views.TransmissionLoss;
@@ -106,7 +107,7 @@ namespace ESMEWorkBench.ViewModels.Main
             //NemoScenario.Test(fileName);
             try
             {
-                ScenarioMetadata = ScenarioMetadata.Load(ScenarioMetadata.MetadataFilename(fileName), RangeComplexes) ?? new ScenarioMetadata { Filename = ScenarioMetadata.MetadataFilename(fileName), RangeComplexes = RangeComplexes };
+                ScenarioMetadata = ScenarioMetadata.Load(ScenarioMetadata.MetadataFilename(fileName), RangeComplexes);
                 ScenarioMetadata.CurrentMapLayers = CurrentMapLayers;
                 _dispatcher.InvokeIfRequired(() =>
                 {
@@ -398,6 +399,26 @@ namespace ESMEWorkBench.ViewModels.Main
         public void RemoveAnalysisPoint(AnalysisPoint analysisPoint)
         {
             ScenarioMetadata.AnalysisPoints.Remove(analysisPoint);
+            ScenarioMetadata.Save();
+        }
+
+        [MediatorMessageSink(MediatorMessage.EditExplosivePoint)]
+        public void EditExplosivePoint(ExplosivePoint explosivePoint)
+        {
+            //var explosivePointPropertiesViewModel = new ExplosivePointPropertiesViewModel(explosivePoint);
+            var settingsResult = _visualizerService.ShowDialog("ExplosivePointPropertiesView", explosivePoint);
+            if (settingsResult.HasValue && settingsResult.Value)
+            {
+                ScenarioMetadata.CurrentMapLayers.DisplayExplosivePoint(explosivePoint);
+                MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+            }
+            explosivePoint.Validate();
+        }
+
+        [MediatorMessageSink(MediatorMessage.RemoveExplosivePoint)]
+        public void RemoveExplosivePoint(ExplosivePoint explosivePoint)
+        {
+            ScenarioMetadata.ExplosivePoints.Remove(explosivePoint);
             ScenarioMetadata.Save();
         }
 

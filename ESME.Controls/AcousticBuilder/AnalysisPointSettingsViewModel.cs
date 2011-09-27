@@ -8,6 +8,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.TransmissionLoss;
+using HRC.Navigation;
 using HRC.Validation;
 using MEFedMVVM.ViewModelLocator;
 
@@ -24,6 +25,7 @@ namespace ESME.Views.AcousticBuilder
             IsItemSelected = false;
             Latitude = AnalysisPoint.Latitude;
             Longitude = AnalysisPoint.Longitude;
+            AnalysisPoint.OldLocation = new EarthCoordinate(AnalysisPoint);
             
             ValidationRules.AddRange(new List<ValidationRule>
             {

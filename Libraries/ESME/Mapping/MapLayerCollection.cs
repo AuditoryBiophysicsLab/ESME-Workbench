@@ -9,6 +9,7 @@ using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
+using ESME.TransmissionLoss.REFMS;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
@@ -250,6 +251,57 @@ namespace ESME.Mapping
                 analysisPointLayer.Add(new OverlayLineSegments(circlePoints.ToArray(), Colors.Red, 5));
             }
             analysisPointLayer.Done();
+        }
+
+        public void DisplayExplosivePoint(ExplosivePoint curPoint)
+        {
+            var oldIndex = -1;
+            if (curPoint.OldLocation != null)
+            {
+                var oldName = string.Format("Explosive Point: [{0:0.###}, {1:0.###}]", curPoint.OldLocation.Latitude, curPoint.OldLocation.Longitude);
+                var oldLayer = Find<OverlayShapeMapLayer>(LayerType.AnalysisPoint, oldName);
+                oldIndex = IndexOf(oldLayer);
+                //if (oldLayer != null) Remove(oldLayer);
+                //oldIndex--;
+                curPoint.OldLocation = null;
+            }
+            var explosivePointName = string.Format("Explosive Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude, curPoint.Longitude);
+            var explosivePointLayer = Find<ExplosivePointLayer>(LayerType.AnalysisPoint, explosivePointName);
+            if (explosivePointLayer == null)
+            {
+                explosivePointLayer = new ExplosivePointLayer
+                {
+                    Name = explosivePointName,
+                    LineWidth = 1,
+                    CanBeRemoved = true,
+                    CanBeReordered = true,
+                    CanChangeLineColor = true,
+                    CanChangeLineWidth = true,
+                    CanChangeAreaColor = false,
+                };
+                if (oldIndex < 0) Add(explosivePointLayer);
+                else this[oldIndex] = explosivePointLayer;
+            }
+            explosivePointLayer.IsEnabled = true;
+
+            explosivePointLayer.ExplosivePoint = curPoint;
+            explosivePointLayer.Validate();
+
+            explosivePointLayer.Clear();
+            foreach (var soundSource in curPoint.SoundSources)
+            {
+                var sourcePoints = new List<EarthCoordinate>();
+                if (!soundSource.ShouldBeCalculated) continue;
+                for (var i = 0; i < 8; i++)
+                {
+                    sourcePoints.Add(curPoint);
+                    sourcePoints.Add(EarthCoordinate.Move(curPoint, i * 45f, soundSource.Radius));
+                    sourcePoints.Add(EarthCoordinate.Move(curPoint, (i * 45) + 22.5f, soundSource.Radius / 2f));
+                    sourcePoints.Add(EarthCoordinate.Move(curPoint, (i + 1) * 45f, soundSource.Radius));
+                }
+                explosivePointLayer.Add(new OverlayLineSegments(sourcePoints.ToArray(), Colors.Red, 5));
+            }
+            explosivePointLayer.Done();
         }
 
         public void RemovePropagationPoint(CASSOutput curPoint)

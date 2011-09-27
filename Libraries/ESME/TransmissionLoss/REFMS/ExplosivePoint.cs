@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reflection;
+using System.Text;
 using System.Windows.Threading;
+using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
-using ESME.Environment.NAVO;
+using ESME.Model;
 using ESME.NEMO;
 using HRC.Navigation;
 using HRC.Utility;
-using System.Threading.Tasks;
 
 namespace ESME.TransmissionLoss.REFMS
 {
-    public class ExplosivePoint : EarthCoordinate, INotifyPropertyChanged
+    public class ExplosivePoint : EarthCoordinate, ISupportValidation
     {
         public ExplosivePoint() { }
 
@@ -23,7 +23,26 @@ namespace ESME.TransmissionLoss.REFMS
         {
             ExplosionDepth = Math.Abs(platform.Trackdefs[0].InitialHeight) + mode.DepthOffset;
             Delta = delta;
+            SoundSources = new List<SoundSource> {new SoundSource(location, mode, 1)};
         }
+
+        #region public Geo OldLocation { get; set; }
+
+        public Geo OldLocation
+        {
+            get { return _oldLocation; }
+            set
+            {
+                if (_oldLocation == value) return;
+                _oldLocation = value;
+                NotifyPropertyChanged(OldLocationChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs OldLocationChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.OldLocation);
+        Geo _oldLocation;
+
+        #endregion
 
         #region public double ExplosionDepth { get; set; }
 
@@ -186,6 +205,111 @@ namespace ESME.TransmissionLoss.REFMS
         }
 
         #endregion
+
+        #region public WeakReference<Bathymetry> Bathymetry { get; set; }
+
+        [XmlIgnore]
+        public WeakReference<Bathymetry> Bathymetry
+        {
+            get { return _bathymetry ?? (_bathymetry = new WeakReference<Bathymetry>(null)); }
+            set
+            {
+                if (_bathymetry == value) return;
+                _bathymetry = value;
+                foreach (var soundSource in SoundSources) soundSource.Bathymetry = _bathymetry;
+            }
+        }
+
+        WeakReference<Bathymetry> _bathymetry;
+
+        #endregion
+
+        public List<SoundSource> SoundSources { get; set; }
+
+        #region public bool IsValid { get; set; }
+
+        [XmlIgnore]
+        public bool IsValid
+        {
+            get
+            {
+                Validate();
+                return _isValid;
+            }
+            private set
+            {
+                if (_isValid == value) return;
+                _isValid = value;
+                NotifyPropertyChanged(IsValidChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsValidChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.IsValid);
+        bool _isValid;
+
+        #endregion
+
+        #region public string ValidationErrorText { get; set; }
+        [XmlIgnore]
+        public string ValidationErrorText
+        {
+            get
+            {
+                Validate();
+                return _validationErrorText;
+            }
+            private set
+            {
+                if (_validationErrorText == value) return;
+                _validationErrorText = value;
+                IsValid = string.IsNullOrEmpty(_validationErrorText);
+                NotifyPropertyChanged(ValidationErrorTextChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.ValidationErrorText);
+        string _validationErrorText;
+
+        #endregion
+
+        public void Validate()
+        {
+            if ((Bathymetry == null) || (Bathymetry.Target == null))
+            {
+                ValidationErrorText = "Unable to validate";
+                return;
+            }
+
+            var bathymetry = Bathymetry.Target;
+            if (!bathymetry.Samples.GeoRect.Contains(this))
+            {
+                ValidationErrorText = "Explosive point not contained within bathymetry bounds";
+                return;
+            }
+
+            var sourcesInError = new List<string>();
+
+            foreach (var source in SoundSources)
+            {
+                source.Validate();
+                if (!source.IsValid) sourcesInError.Add(source.Name);
+            }
+            switch (sourcesInError.Count)
+            {
+                case 0:
+                    ValidationErrorText = null;
+                    break;
+                case 1:
+                    ValidationErrorText = string.Format("Source {0} has errors", sourcesInError[0]);
+                    break;
+                default:
+                    var result = new StringBuilder();
+                    result.AppendLine("The following sources have errors:");
+                    foreach (var sourceName in sourcesInError) result.AppendLine(string.Format("  • {0}", sourceName));
+                    ValidationErrorText = result.ToString();
+                    break;
+            }
+        }
     }
 
     public class SVPLayer
@@ -229,15 +353,11 @@ namespace ESME.TransmissionLoss.REFMS
     public class SVPFile : EarthCoordinate
     {
         public List<SVPLayer> Layers { get; private set; }
-        public BottomLossData BottomLossData { get; private set; }
-        public double Delta;
+        public double Delta { get; private set; }
 
-        double[] _depths, _temps, _salinities, _soundspeeds;
-
-        void MakeLayers(double delta)
+        public static SVPFile Create(double[] depths, double[] temps, double[] salinities, double[] soundspeeds, BottomLossData bottomLossData, double delta)
         {
-            Delta = delta;
-            var maxDepth = _depths.Last();
+            var maxDepth = depths.Last();
             // this creates the depth increments
             var nodes = (int)Math.Floor(maxDepth);
             var dinc = Math.Floor(maxDepth) / (nodes - 1);
@@ -250,9 +370,9 @@ namespace ESME.TransmissionLoss.REFMS
             }
             // this implements the spline function
             var interp = new SplineInterpolator();
-            var temperatureFunction = interp.Interpolate(_depths, _temps);
-            var salinityFunction = interp.Interpolate(_depths, _salinities);
-            var soundspeedFunction = interp.Interpolate(_depths, _soundspeeds);
+            var temperatureFunction = interp.Interpolate(depths, temps);
+            var salinityFunction = interp.Interpolate(depths, salinities);
+            var soundspeedFunction = interp.Interpolate(depths, soundspeeds);
 
             var td = new double[depthIncs.Length];
             var sd = new double[depthIncs.Length];
@@ -270,7 +390,7 @@ namespace ESME.TransmissionLoss.REFMS
             // this is the implementation of the layers function
 
             nodes = depthIncs.Length;
-            Layers = new List<SVPLayer>();
+            var result = new SVPFile {Layers = new List<SVPLayer>()};
             int start = 0, prev = 0;
             for (var inc = 0; inc < nodes; inc++)
             {
@@ -278,10 +398,10 @@ namespace ESME.TransmissionLoss.REFMS
 
                 var deltaSVP = Math.Abs(svpd[inc] - svpd[start]);
 
-                if (deltaSVP >= Delta || (inc == (nodes - 1)))
+                if (deltaSVP >= delta || (inc == (nodes - 1)))
                 {
                     start = inc;
-                    Layers.Add(new SVPLayer
+                    result.Layers.Add(new SVPLayer
                     {
                         Depth = depthIncs[inc],
                         Thickness = Math.Abs(depthIncs[prev] - depthIncs[start]),
@@ -292,99 +412,7 @@ namespace ESME.TransmissionLoss.REFMS
                     prev = inc;
                 }
             }
-        }
-
-        public static async Task<SVPFile> Create(Geo location, float waterDepth, NAVOTimePeriod timePeriod, BackgroundTaskAggregator backgroundTaskAggregator)
-        {
-#if false
-            var assemblyLocation = Assembly.GetCallingAssembly().Location;
-            var extractionPath = Path.GetDirectoryName(assemblyLocation);
-            if (extractionPath == null) throw new ApplicationException("Extraction path can't be null!");
-            var gdemExtractionProgramPath = Path.Combine(extractionPath, "ImportGDEM.exe");
-            var gdemRequiredSupportFiles = new List<string>
-            {
-                Path.Combine(extractionPath, "netcdf.dll"),
-                Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
-            };
-
-            var requiredMonths = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod);
-            var uniqueMonths = requiredMonths.Distinct().ToList();
-            uniqueMonths.Sort();
-
-            var lat = Math.Round(location.Latitude * 4) / 4;
-            var lon = Math.Round(location.Longitude * 4) / 4;
-            var extractionArea = new GeoRect(lat, lat, lon, lon);
-            var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
-            if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
-            var maxDepth = new EarthCoordinate<float>(location.Latitude, location.Longitude, waterDepth);
-            var monthlyTemperature = new SoundSpeed();
-            var monthlySalinity = new SoundSpeed();
-            var monthlyExtendedSoundSpeed = new SoundSpeed();
-            //var bottomLossData = await BottomLossBackgroundExtractor.ExtractAsync(false, true, true, (float)lat, (float)lat, (float)lon, (float)lon);
-            var bottomLossExtractor = new BottomLossBackgroundExtractor
-            {
-                WorkerSupportsCancellation = false,
-                ExtractionArea = extractionArea,
-                NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                UseExpandedExtractionArea = false,
-                TaskName = "Bottom loss extraction",
-                PointExtractionMode = true,
-            };
-            backgroundTaskAggregator.BackgroundTasks.Add(bottomLossExtractor);
-            var soundSpeedExtractors = new List<GDEMBackgroundExtractor>();
-            foreach (var month in uniqueMonths)
-            {
-                var soundSpeedExtractor = new GDEMBackgroundExtractor
-                {
-                    WorkerSupportsCancellation = false,
-                    TimePeriod = month,
-                    ExtractionArea = extractionArea,
-                    NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                    DestinationPath = tempPath,
-                    UseExpandedExtractionArea = false,
-                    ExtractionProgramPath = gdemExtractionProgramPath,
-                    MaxDepth = maxDepth,
-                    PointExtractionMode = true,
-                };
-                soundSpeedExtractor.RunWorkerCompleted += (sender, e) =>
-                {
-                    var extractor = (GDEMBackgroundExtractor)sender;
-                    monthlyTemperature.SoundSpeedFields.Add(extractor.TemperatureField);
-                    monthlySalinity.SoundSpeedFields.Add(extractor.SalinityField);
-                    monthlyExtendedSoundSpeed.SoundSpeedFields.Add(extractor.ExtendedSoundSpeedField);
-                    if (soundSpeedExtractors.Any(ssfExtractor => ssfExtractor.IsBusy)) return;
-                    if (bottomLossExtractor.IsBusy) return;
-                    SoundSpeedField averageTemperature;
-                    SoundSpeedField averageSalinity;
-                    SoundSpeedField averageSoundspeed;
-                    if (uniqueMonths.Count <= 1)
-                    {
-                        averageTemperature = monthlyTemperature[timePeriod];
-                        averageSalinity = monthlySalinity[timePeriod];
-                        averageSoundspeed = monthlyExtendedSoundSpeed[timePeriod];
-                    }
-                    else
-                    {
-                        averageTemperature = SoundSpeed.Average(monthlyTemperature, timePeriod);
-                        averageSalinity = SoundSpeed.Average(monthlySalinity, timePeriod);
-                        averageSoundspeed = SoundSpeed.Average(monthlyExtendedSoundSpeed, timePeriod);
-                    }
-                    // Here is where we create the SVP using the PCHIP algorithm, etc. from the average temp/salinity
-                    var result = new SVPFile
-                    {
-                        //BottomLossData = bottomLossExtractor.BottomLossData[0],
-                        _depths = (from temp in averageTemperature.EnvironmentData[0].Data select temp.Depth).Cast<double>().ToArray(),
-                        _temps = (from temp in averageTemperature.EnvironmentData[0].Data select temp.Depth).Cast<double>().ToArray(),
-                        _salinities = (from temp in averageSalinity.EnvironmentData[0].Data select temp.Depth).Cast<double>().ToArray(),
-                        _soundspeeds = (from temp in averageSoundspeed.EnvironmentData[0].Data select temp.Depth).Cast<double>().ToArray(),
-                    };
-                };
-                soundSpeedExtractors.Add(soundSpeedExtractor);
-                backgroundTaskAggregator.BackgroundTasks.Add(soundSpeedExtractor);
-            }
-#endif
-            return null;
-
+            return result;
         }
 
         public void Write(string fileName)

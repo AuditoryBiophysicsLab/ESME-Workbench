@@ -24,11 +24,12 @@ namespace ESME.TransmissionLoss.REFMS
         public double Delta { get; private set; }
         public bool IsComplete { get; private set; }
 
-        SVPFile _svpFile;
-
         readonly ExplosivePoint _explosivePoint;
+        SVPFile _svpFile;
         
-        public REFMSInputFile(string outputPath, ExplosivePoint explosivePoint, NemoScenario scenario, NemoMode mode, float waterDepth, Geo svpLocation, double svpDelta, BackgroundTaskAggregator backgroundTaskAggregator)
+        public REFMSInputFile(string outputPath, ExplosivePoint explosivePoint, NemoScenario scenario, NemoMode mode, 
+                              float waterDepth, Geo svpLocation, double svpDelta, 
+                              TimePeriodEnvironmentData<SoundSpeedProfile> temperature, TimePeriodEnvironmentData<SoundSpeedProfile> salinity, TimePeriodEnvironmentData<SoundSpeedProfile> soundSpeed)
         {
             _explosivePoint = explosivePoint;
             OutputPath = outputPath;
@@ -43,7 +44,20 @@ namespace ESME.TransmissionLoss.REFMS
             foreach (var curPlatform in scenario.Platforms) 
                 foreach (var curSource in curPlatform.Sources) 
                     if (curSource.Type.ToLower() == "explosive") SourceCount++;
-            CreateSVP(backgroundTaskAggregator);
+            var tempData = temperature.EnvironmentData[svpLocation];
+            var temps = new double[tempData.Data.Count];
+            var depths = new double[tempData.Data.Count];
+            var salinities = new double[tempData.Data.Count];
+            var soundspeeds = new double[tempData.Data.Count];
+            for (var i = 0; i < tempData.Data.Count; i++)
+            {
+                temps[i] = temperature.EnvironmentData[svpLocation].Data[i].Value;
+                depths[i] = temperature.EnvironmentData[svpLocation].Data[i].Depth;
+                salinities[i] = salinity.EnvironmentData[svpLocation].Data[i].Value;
+                soundspeeds[i] = soundSpeed.EnvironmentData[svpLocation].Data[i].Value;
+            }
+
+            _svpFile = SVPFile.Create(depths, temps, salinities, soundspeeds, BottomLossData, Delta);
         }
 
         void WriteInputFile()
@@ -97,7 +111,7 @@ namespace ESME.TransmissionLoss.REFMS
             }
         }
 
-        void CreateSVP(BackgroundTaskAggregator backgroundTaskAggregator)
+        void CreateSVP()
         {
 #if false
             var assemblyLocation = Assembly.GetCallingAssembly().Location;
@@ -123,67 +137,16 @@ namespace ESME.TransmissionLoss.REFMS
             var monthlyTemperature = new SoundSpeed();
             var monthlySalinity = new SoundSpeed();
             var monthlyExtendedSoundSpeed = new SoundSpeed();
-            var bottomLossExtractor = new BottomLossBackgroundExtractor
-            {
-                WorkerSupportsCancellation = false,
-                ExtractionArea = extractionArea,
-                NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                UseExpandedExtractionArea = false,
-                TaskName = "Bottom loss extraction",
-                PointExtractionMode = true,
-            };
-            backgroundTaskAggregator.BackgroundTasks.Add(bottomLossExtractor);
-            var soundSpeedExtractors = new List<GDEMBackgroundExtractor>();
-            foreach (var month in uniqueMonths)
-            {
-                var soundSpeedExtractor = new GDEMBackgroundExtractor
-                {
-                    WorkerSupportsCancellation = false,
-                    TimePeriod = month,
-                    ExtractionArea = extractionArea,
-                    NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                    DestinationPath = tempPath,
-                    UseExpandedExtractionArea = false,
-                    ExtractionProgramPath = gdemExtractionProgramPath,
-                    MaxDepth = maxDepth,
-                    PointExtractionMode = true,
-                };
-                soundSpeedExtractor.RunWorkerCompleted += (sender, e) =>
-                {
-                    var extractor = (GDEMBackgroundExtractor)sender;
-                    monthlyTemperature.SoundSpeedFields.Add(extractor.TemperatureField);
-                    monthlySalinity.SoundSpeedFields.Add(extractor.SalinityField);
-                    monthlyExtendedSoundSpeed.SoundSpeedFields.Add(extractor.ExtendedSoundSpeedField);
-                    if (soundSpeedExtractors.Any(ssfExtractor => ssfExtractor.IsBusy)) return;
-                    if (bottomLossExtractor.IsBusy) return;
-                    //BottomLossData = bottomLossExtractor.BottomLossData[0];
-                    SoundSpeedField averageTemperature;
-                    SoundSpeedField averageSalinity;
-                    SoundSpeedField averageSoundspeed;
-                    if (uniqueMonths.Count <= 1)
-                    {
-                        averageTemperature = monthlyTemperature[TimePeriod];
-                        averageSalinity = monthlySalinity[TimePeriod];
-                        averageSoundspeed = monthlyExtendedSoundSpeed[TimePeriod];
-                    }
-                    else
-                    {
-                        averageTemperature = SoundSpeed.Average(monthlyTemperature, TimePeriod);
-                        averageSalinity = SoundSpeed.Average(monthlySalinity, TimePeriod);
-                        averageSoundspeed = SoundSpeed.Average(monthlyExtendedSoundSpeed, TimePeriod);
-                    }
-                    // Here is where we create the SVP using the PCHIP algorithm, etc. from the average temp/salinity
-                    //_svpFile = new SVPFile(SVPLocation, Delta, averageTemperature, averageSalinity, averageSoundspeed);
-                    var svpFilename = Path.Combine(OutputPath, SVPFilename + ".svp");
-                    // Write out the SVP file
-                    _svpFile.Write(svpFilename);
-                    WriteInputFile();
-                    WriteBatchFile();
-                    IsComplete = true;
-                };
-                soundSpeedExtractors.Add(soundSpeedExtractor);
-                backgroundTaskAggregator.BackgroundTasks.Add(soundSpeedExtractor);
-            }
+            // Here is where we create the SVP using the PCHIP algorithm, etc. from the average temp/salinity
+            _svpFile = SVPFile.Create(SVPLocation, Delta, averageTemperature, averageSalinity, averageSoundspeed);
+            var svpFilename = Path.Combine(OutputPath, SVPFilename + ".svp");
+            // Write out the SVP file
+            _svpFile.Write(svpFilename);
+            WriteInputFile();
+            WriteBatchFile();
+            IsComplete = true;
+            soundSpeedExtractors.Add(soundSpeedExtractor);
+            backgroundTaskAggregator.BackgroundTasks.Add(soundSpeedExtractor);
 #endif
         }
 
