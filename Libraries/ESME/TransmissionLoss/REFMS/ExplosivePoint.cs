@@ -72,11 +72,33 @@ namespace ESME.TransmissionLoss.REFMS
                 if (_svpFileName == value) return;
                 _svpFileName = value;
                 NotifyPropertyChanged(SVPFileNameChangedEventArgs);
+                if ((_svpFileName != null) && (File.Exists(_svpFileName)))
+                {
+                    SVPFile = SVPFile.Read(_svpFileName);
+                }
             }
         }
 
         static readonly PropertyChangedEventArgs SVPFileNameChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.SVPFileName);
         string _svpFileName;
+
+        #endregion
+
+        #region public SVPFile SVPFile { get; set; }
+        [XmlIgnore]
+        public SVPFile SVPFile
+        {
+            get { return _svpFile; }
+            set
+            {
+                if (_svpFile == value) return;
+                _svpFile = value;
+                NotifyPropertyChanged(SVPFileChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SVPFileChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.SVPFile);
+        SVPFile _svpFile;
 
         #endregion
 
@@ -149,6 +171,24 @@ namespace ESME.TransmissionLoss.REFMS
 
         static readonly PropertyChangedEventArgs DepthLimitChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.DepthLimit);
         double _depthLimit;
+
+        #endregion
+
+        #region public bool DepthLimitEnabled { get; set; }
+
+        public bool DepthLimitEnabled
+        {
+            get { return _depthLimitEnabled; }
+            set
+            {
+                if (_depthLimitEnabled == value) return;
+                _depthLimitEnabled = value;
+                NotifyPropertyChanged(DepthLimitEnabledChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DepthLimitEnabledChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.DepthLimitEnabled);
+        bool _depthLimitEnabled;
 
         #endregion
 
@@ -269,6 +309,24 @@ namespace ESME.TransmissionLoss.REFMS
 
         static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.ValidationErrorText);
         string _validationErrorText;
+
+        #endregion
+
+        #region public float Depth { get; set; }
+
+        public float Depth
+        {
+            get { return _depth; }
+            set
+            {
+                if (_depth == value) return;
+                _depth = value;
+                NotifyPropertyChanged(DepthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DepthChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.Depth);
+        float _depth;
 
         #endregion
 

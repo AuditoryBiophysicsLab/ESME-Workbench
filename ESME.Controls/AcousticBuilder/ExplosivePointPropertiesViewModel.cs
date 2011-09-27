@@ -28,18 +28,18 @@ namespace ESME.Views.AcousticBuilder
             
             ValidationRules.AddRange(new List<ValidationRule>
             {
-                    new ValidationRule
-                    {
-                            PropertyName = "Latitude",
-                            Description = "Latitude is out of range",
-                            RuleDelegate = (o, r) =>RangeCheck(((ExplosivePointPropertiesViewModel)o).Latitude, -90, 90),
-                    },
-                    new ValidationRule
-                    {
-                            PropertyName = "Longitude",
-                            Description = "Longitude is out of range",
-                            RuleDelegate = (o, r) =>RangeCheck(((ExplosivePointPropertiesViewModel)o).Longitude, -180, 180),
-                    },
+                new ValidationRule
+                {
+                    PropertyName = "Latitude",
+                    Description = "Latitude is out of range",
+                    RuleDelegate = (o, r) =>RangeCheck(((ExplosivePointPropertiesViewModel)o).Latitude, -90, 90),
+                },
+                new ValidationRule
+                {
+                    PropertyName = "Longitude",
+                    Description = "Longitude is out of range",
+                    RuleDelegate = (o, r) =>RangeCheck(((ExplosivePointPropertiesViewModel)o).Longitude, -180, 180),
+                },
             });
         }
 
@@ -79,7 +79,7 @@ namespace ESME.Views.AcousticBuilder
 
         #endregion
 
-        #region public AnalysisPoint AnalysisPoint { get; set; }
+        #region public ExplosivePoint ExplosivePoint { get; set; }
 
         public ExplosivePoint ExplosivePoint
         {
@@ -214,54 +214,26 @@ namespace ESME.Views.AcousticBuilder
 
         #endregion
 
-        #region ApplyToAllModesCommand
-
-        public SimpleCommand<object, object> ApplyToAllModesCommand
+        #region RegenerateCommand
+        public SimpleCommand<object, object> RegenerateCommand
         {
             get
             {
-                return _applyToAllModes ?? (_applyToAllModes = new SimpleCommand<object, object>(
-                    delegate { return IsItemSelected && AvailableModes.Count > 0 && SelectedMode.BearingsStringIsValid; },
-                    delegate
-                    {
-                        var result = MessageBoxService.ShowOkCancel("Are you sure you want to use this configuration\nfor all modes in this analysis point?", CustomDialogIcons.Question);
-                        if (result != CustomDialogResults.OK) {}
-                        else
-                        {
-                            var tmpRadials = new List<float>(SelectedMode.RadialBearings);
-                            var radialsToSet = tmpRadials.Distinct().ToList();
-                            radialsToSet.Sort();
-                            AnalysisPointIsChanged = true;
-                            foreach (var soundsource in ExplosivePoint.SoundSources)
-                            {
-                                soundsource.RadialBearings = new List<float>(radialsToSet);
-                                soundsource.Validate();
-                            }
-                        }
-                    }));
+                return _regenerate ??
+                       (_regenerate =
+                        new SimpleCommand<object, object>(delegate { return IsRegenerateCommandEnabled; },
+                                                          delegate { RegenerateHandler(); }));
             }
         }
 
-        SimpleCommand<object, object> _applyToAllModes;
+        SimpleCommand<object, object> _regenerate;
 
-        #endregion
-
-        #region RadialsLostFocusCommand
-        public SimpleCommand<object, object> RadialsLostFocusCommand
+        bool IsRegenerateCommandEnabled
         {
-            get
-            {
-                return _radialsLostFocus ??
-                       (_radialsLostFocus =
-                        new SimpleCommand<object, object>(delegate
-                        {
-                            foreach (var mode in AvailableModes) mode.BearingsString = null;
-                        }));
-            }
+            get { return true; }
         }
 
-        SimpleCommand<object, object> _radialsLostFocus;
-
+        void RegenerateHandler() { }
         #endregion
 
         #region Mediator Registration

@@ -405,8 +405,8 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.EditExplosivePoint)]
         public void EditExplosivePoint(ExplosivePoint explosivePoint)
         {
-            //var explosivePointPropertiesViewModel = new ExplosivePointPropertiesViewModel(explosivePoint);
-            var settingsResult = _visualizerService.ShowDialog("ExplosivePointPropertiesView", explosivePoint);
+            var explosivePointPropertiesViewModel = new ExplosivePointPropertiesViewModel(explosivePoint);
+            var settingsResult = _visualizerService.ShowDialog("ExplosivePointPropertiesView", explosivePointPropertiesViewModel);
             if (settingsResult.HasValue && settingsResult.Value)
             {
                 ScenarioMetadata.CurrentMapLayers.DisplayExplosivePoint(explosivePoint);

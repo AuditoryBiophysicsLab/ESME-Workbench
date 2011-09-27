@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -77,7 +78,22 @@ namespace HRC.Utility
         /// <param name="referencedTypes"></param>
         public void Save(string fileName, List<Type> referencedTypes)
         {
-            File.WriteAllText(fileName, Serialize(referencedTypes));
+            var retry = 10;
+            Exception ex = null;
+            while (--retry > 0)
+            {
+                try
+                {
+                    File.WriteAllText(fileName, Serialize(referencedTypes));
+                    return;
+                }
+                catch (Exception e)
+                {
+                    ex = e;
+                    Thread.Sleep(100);
+                }
+            }
+            throw ex;
         }
 
         #endregion
