@@ -107,7 +107,7 @@ namespace ESME.Metadata
                     Task.Factory.StartNew(() =>
                     {
                         SetBathymetryAndValidate();
-                        ProcessCassOutputs();
+                        ProcessCassOutputs(Dispatcher);
                     });
                     break;
                 case "SelectedArea":
@@ -210,7 +210,7 @@ namespace ESME.Metadata
                     {
                         Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName, newItem.ModeName);
                         newItem.Bathymetry = _bathymetry;
-                        _cassFileQueue.Post(newItem);
+                        _inputQueue.Post(newItem);
                     }
                     break;
                 case NotifyCollectionChangedAction.Remove:
@@ -250,6 +250,8 @@ namespace ESME.Metadata
                     }
 
                     UpdateScenarioTreeRoot();
+                    UpdateAnimalsTreeRoot();
+                    UpdateEnvironmentTreeRoot();
 
                     // Display any animal layers on the map asynchronously
                     if (_nemoFile.Scenario.Animals != null)
@@ -260,12 +262,9 @@ namespace ESME.Metadata
                                 {
                                     species.AnimatDataTask.Start();
                                     var localSpecies = species;
-                                    species.AnimatDataTask.ContinueWith(task => Dispatcher.InvokeInBackgroundIfRequired(() =>
-                                    {
+                                    species.AnimatDataTask.ContinueWith(task => Dispatcher.InvokeInBackgroundIfRequired(() => 
                                         CurrentMapLayers.DisplaySpecies(localSpecies.SpeciesName,
-                                                                        localSpecies.AnimatDataTask.Result);
-                                        UpdateAnimalsTreeRoot();
-                                    }));
+                                        localSpecies.AnimatDataTask.Result)));
                                 }
                                 catch (Exception e)
                                 {
@@ -308,32 +307,53 @@ namespace ESME.Metadata
             }
         }
 
-        void ProcessCassOutputs()
+        void ProcessCassOutputs(Dispatcher dispatcher)
         {
-            if (_cassOutputProcessor == null)
+            if (_maxRadiusCalculator == null)
             {
-                _cassOutputProcessor = new ActionBlock<CASSOutput>(newItem =>
+                _inputQueue = new BufferBlock<CASSOutput>();
+                _inputQueue.Completion.ContinueWith(task =>
+                {
+                    _maxRadiusCalculator.Complete();
+                    _maxRadiusCalculator.Completion.ContinueWith(t => { _maxRadiusCalculator = null; });
+                    _inputQueue = null;
+                });
+
+                _maxRadiusCalculator = new TransformBlock<CASSOutput, CASSOutput>(newItem =>
                 {
                     Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName,
                                     newItem.ModeName);
                     newItem.Bathymetry = _bathymetry;
                     newItem.CheckThreshold(Globals.AppSettings.TransmissionLossContourThreshold);
-                    Dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayPropagationPoint(newItem));
+                    return newItem;
                 },
                 new ExecutionDataflowBlockOptions
                 {
                         TaskScheduler = TaskScheduler.Default,
-                        BoundedCapacity = 4,
-                        MaxDegreeOfParallelism = 4,
+                        BoundedCapacity = -1,
+                        MaxDegreeOfParallelism = -1,
                 });
-                _cassFileQueue = new BufferBlock<CASSOutput>();
-                _cassFileQueue.LinkTo(_cassOutputProcessor);
-                _cassFileQueue.Completion.ContinueWith(task =>
+
+                _outputQueue = new BufferBlock<CASSOutput>();
+
+                dispatcher.InvokeIfRequired(() =>
                 {
-                    _cassOutputProcessor.Complete();
-                    _cassOutputProcessor.Completion.ContinueWith(t => { _cassOutputProcessor = null; });
-                    _cassFileQueue = null;
+                    _uiUpdater = new ActionBlock<CASSOutput>(newItem =>
+                    {
+                        CurrentMapLayers.DisplayPropagationPoint(newItem);
+                        newItem.Validate();
+                    },
+                    new ExecutionDataflowBlockOptions
+                    {
+                        TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext(),
+                        BoundedCapacity = 1,
+                        MaxDegreeOfParallelism = 1,
+                    });
                 });
+
+                _inputQueue.LinkTo(_maxRadiusCalculator);
+                _maxRadiusCalculator.LinkTo(_outputQueue);
+                _outputQueue.LinkTo(_uiUpdater);
                 AwaitCassOutputProcessorCompletion();
             }
             if (CASSOutputs == null) CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
@@ -344,7 +364,7 @@ namespace ESME.Metadata
         {
             try
             {
-                await _cassOutputProcessor.Completion;
+                await _maxRadiusCalculator.Completion;
             }
             catch (Exception e)
             {
@@ -356,8 +376,9 @@ namespace ESME.Metadata
         NemoFile _nemoFile;
         List<AcousticProperties> _distinctModeProperties;
 
-        ActionBlock<CASSOutput> _cassOutputProcessor;
-        BufferBlock<CASSOutput> _cassFileQueue;
+        TransformBlock<CASSOutput, CASSOutput> _maxRadiusCalculator;
+        ActionBlock<CASSOutput> _uiUpdater;
+        BufferBlock<CASSOutput> _inputQueue, _outputQueue;
 
         string _propagationPath;
         string _pressurePath;
@@ -768,14 +789,21 @@ namespace ESME.Metadata
 
         void UpdateEnvironmentTreeRoot()
         {
-            var environmentRoot = new TreeNode("Environment");
+            TreeViewRootNodes.RemoveAll(node => node.Name.StartsWith("Environment"));
+            var environmentRoot = new EnvironmentNode("Environment");
             TreeViewRootNodes.Add(environmentRoot);
-            environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.BaseMap, "Base Map").FirstOrDefault());
-            environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.BathymetryRaster, "Bathymetry").FirstOrDefault());
-            environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.SoundSpeed, "Sound Speed").FirstOrDefault());
-            environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.WindSpeed, "Wind").FirstOrDefault());
-            environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.BottomType, "Bottom Loss").FirstOrDefault());
-            environmentRoot.MapLayers.AddRange(CurrentMapLayers.Find(LayerType.BottomType, new Regex(@"Sediment: \S+$", RegexOptions.Singleline)));
+            var curLayer = CurrentMapLayers.Find(LayerType.BaseMap, "Base Map").FirstOrDefault();
+            if (curLayer != null) environmentRoot.MapLayers.Add(curLayer);
+            curLayer = CurrentMapLayers.Find(LayerType.WindSpeed, "Wind").FirstOrDefault();
+            if (curLayer != null) environmentRoot.MapLayers.Add(curLayer);
+            curLayer = CurrentMapLayers.Find(LayerType.SoundSpeed, "Sound Speed").FirstOrDefault();
+            if (curLayer != null) environmentRoot.MapLayers.Add(curLayer);
+            curLayer = CurrentMapLayers.Find(LayerType.BathymetryRaster, "Bathymetry").FirstOrDefault();
+            if (curLayer != null) environmentRoot.MapLayers.Add(curLayer);
+            var curLayers = CurrentMapLayers.Find(LayerType.BottomType, new Regex(@"Sediment: \S+$", RegexOptions.Singleline));
+            if (curLayers != null) environmentRoot.MapLayers.AddRange(curLayers);
+            curLayer = CurrentMapLayers.Find(LayerType.BottomType, "Bottom Loss").FirstOrDefault();
+            if (curLayer != null) environmentRoot.MapLayers.Add(curLayer);
         }
 
         void UpdateScenarioTreeRoot()
@@ -788,8 +816,8 @@ namespace ESME.Metadata
 
         void UpdateAnimalsTreeRoot()
         {
-            var regex = new Regex(@"Animals: [\s\S]+$");
-            TreeViewRootNodes.RemoveAll(item => regex.IsMatch(item.Name));
+            TreeViewRootNodes.RemoveAll(node => node.Name.StartsWith("Animals"));
+            TreeViewRootNodes.Add(new AnimalNode("Animals"));
         }
 
         #endregion

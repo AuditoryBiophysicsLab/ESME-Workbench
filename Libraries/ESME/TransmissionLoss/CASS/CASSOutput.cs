@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
@@ -180,6 +179,7 @@ namespace ESME.TransmissionLoss.CASS
         }
 
         WeakReference<Bathymetry> _bathymetry;
+
         #region public bool IsValid { get; set; }
 
         [XmlIgnore]
@@ -253,85 +253,22 @@ namespace ESME.TransmissionLoss.CASS
                 }
             }
             if (float.IsNaN(ThresholdRadius)) errors.AppendLine("Checking radials for threshold value, please wait...");
-            else if (!IsRadiusSufficient) errors.AppendLine("Calculation radius too small");
+            else if (ThresholdRadius >= MaxRangeDistance) errors.AppendLine("Calculation radius too small");
             ValidationErrorText = errors.ToString().Trim();
         }
 
         #endregion
 
-        #region public bool IsRadiusSufficient { get; set; }
         [XmlIgnore]
-        public bool IsRadiusSufficient
-        {
-            get { return _isRadiusSufficient; }
-            set
-            {
-                if (_isRadiusSufficient == value) return;
-                _isRadiusSufficient = value;
-                NotifyPropertyChanged(IsRadiusSufficientChangedEventArgs);
-                if (_isRadiusSufficient) return;
-                Validate();
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsRadiusSufficientChangedEventArgs = ObservableHelper.CreateArgs<CASSOutput>(x => x.IsRadiusSufficient);
-        bool _isRadiusSufficient;
-
-        #endregion
-
-        #region public float ThresholdRadius { get; set; }
-
+        public float ThresholdRadius { get; private set; }
         [XmlIgnore]
-        public float ThresholdRadius
-        {
-            get { return _thresholdRadius; }
-            set
-            {
-                _thresholdRadius = value;
-                NotifyPropertyChanged(ThresholdRadiusChangedEventArgs);
-                Debug.WriteLine("{0}: [{1:0.####}, {2:0.####}] {3}|{4}|{5} threshold radius {6:0.##}m", DateTime.Now, Latitude, Longitude, PlatformName, SourceName, ModeName, _thresholdRadius);
-                //OnThresholdRadiusChanged();
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ThresholdRadiusChangedEventArgs = ObservableHelper.CreateArgs<CASSOutput>(x => x.ThresholdRadius);
-        float _thresholdRadius = float.NaN;
-
-#if false
-        public event EventHandler ThresholdRadiusChanged;
-        protected virtual void OnThresholdRadiusChanged()
-        {
-            if (ThresholdRadiusChanged != null) ThresholdRadiusChanged(this, new EventArgs());
-        }
-#endif
-
-        #endregion
-
-        #region public float[] ThresholdRadii { get; set; }
-
-        public float[] ThresholdRadii
-        {
-            get { return _thresholdRadii; }
-            set
-            {
-                if (_thresholdRadii == value) return;
-                _thresholdRadii = value;
-                NotifyPropertyChanged(ThresholdRadiiChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ThresholdRadiiChangedEventArgs = ObservableHelper.CreateArgs<CASSOutput>(x => x.ThresholdRadii);
-        float[] _thresholdRadii;
-
-        #endregion
-
+        public float[] ThresholdRadii { get; private set; }
 
         public void CheckThreshold(float threshold)
         {
             if (SourceLevel < threshold)
             {
                 ThresholdRadius = 0;
-                IsRadiusSufficient = true;
                 return;
             }
             var unloadAfterCheck = false;
@@ -350,44 +287,27 @@ namespace ESME.TransmissionLoss.CASS
                 return;    
             }
             if (Pressures == null) throw new ApplicationException("No radial data found");
-            var allRadialsBelowThreshold = true;
             ThresholdRadii = new float[Pressures.Count];
-            for (var i = 0; i < Pressures.Count; i++)
-            {
-                float rangeBelowThreshold;
-                var isBelowThreshold = IsRadialBelowThreshold(Pressures[i], threshold, out rangeBelowThreshold);
-                if (!isBelowThreshold) allRadialsBelowThreshold = false;
-                ThresholdRadii[i] = rangeBelowThreshold;
-            }
-#if false
-            Parallel.For(0, Pressures.Count, radialIndex =>
-            {
-                float rangeBelowThreshold;
-                var isBelowThreshold = IsRadialBelowThreshold(Pressures[radialIndex], threshold, out rangeBelowThreshold);
-                if (!isBelowThreshold) allRadialsBelowThreshold = false;
-                ThresholdRadii[radialIndex] = rangeBelowThreshold;
-            });
-#endif
+            for (var i = 0; i < Pressures.Count; i++) ThresholdRadii[i] = RangeAtThreshold(Pressures[i], threshold);
             ThresholdRadius = ThresholdRadii.Max();
-            IsRadiusSufficient = allRadialsBelowThreshold;
             if (unloadAfterCheck) Pressures = null;
         }
 
-        public bool IsRadialBelowThreshold(float[,] radial, float thresholdValue, out float rangeBelowThreshold)
+        float RangeAtThreshold(float[,] radial, float thresholdValue)
         {
-            rangeBelowThreshold = MaxRangeDistance;
+            var rangeAtThreshold = MaxRangeDistance;
             var initialCheck = true;
             for (var rangeIndex = RangeCellCount - 1; rangeIndex > 0; rangeIndex--)    // Start at the end and work backwards
             {
                 var maxPressure = float.MinValue;
                 for (var depthIndex = 0; depthIndex < DepthCellCount; depthIndex++)
                     maxPressure = Math.Max(maxPressure, radial[depthIndex, rangeIndex]);
-                if ((initialCheck) && (maxPressure >= thresholdValue)) return false;
+                if ((initialCheck) && (maxPressure >= thresholdValue)) return rangeAtThreshold;
                 initialCheck = false;
-                if (maxPressure >= thresholdValue) return true;
-                rangeBelowThreshold = RangeDistanceIncrement * rangeIndex;
+                if (maxPressure >= thresholdValue) return rangeAtThreshold;
+                rangeAtThreshold = RangeDistanceIncrement * rangeIndex;
             }
-            return true;
+            return 0;
         }
 
         public static CASSOutput FromBinaryFile(string fileName, bool headerOnly)

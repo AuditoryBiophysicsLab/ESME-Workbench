@@ -33,7 +33,7 @@ namespace ESME.Mapping
         {
             if (MapLayerMatchesMe(mapLayer))
             {
-                var existingLayer = MapLayers.Find(layer => layer.Name == mapLayer.Name);
+                var existingLayer = MapLayers.Find(layer => layer != null && layer.Name == mapLayer.Name);
                 if (existingLayer != null) MapLayers[MapLayers.IndexOf(existingLayer)] = mapLayer;
                 else MapLayers.Add(mapLayer);
             }
@@ -269,7 +269,8 @@ namespace ESME.Mapping
 
     public class EnvironmentNode : TreeNode
     {
-        public EnvironmentNode(string format, params object[] args) : base(format, args)
+        public EnvironmentNode(string format, params object[] args)
+            : base(format, args)
         {
             WindowTitle = "Environment properties";
         }
@@ -279,6 +280,20 @@ namespace ESME.Mapping
             return mapLayer.LayerType == LayerType.BaseMap || mapLayer.LayerType == LayerType.Bathymetry ||
                    mapLayer.LayerType == LayerType.BathymetryRaster || mapLayer.LayerType == LayerType.BottomType ||
                    mapLayer.LayerType == LayerType.SoundSpeed || mapLayer.LayerType == LayerType.WindSpeed;
+        }
+    }
+
+    public class AnimalNode : TreeNode
+    {
+        public AnimalNode(string format, params object[] args)
+            : base(format, args)
+        {
+            WindowTitle = "Animal properties";
+        }
+
+        protected override bool MapLayerMatchesMe(MapLayerViewModel mapLayer)
+        {
+            return mapLayer.LayerType == LayerType.Animal;
         }
     }
 
