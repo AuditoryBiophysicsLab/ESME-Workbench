@@ -276,7 +276,7 @@ namespace ESME.TransmissionLoss.CASS
                                                  string overlayFileName, EnvironmentData<BottomLossSample> bottomLossSamples)
         {
             WriteEnvironmentFileHeader(environmentFileName, geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "HFEVA", bottomLossSamples);
-            if (bottomLossSamples == null) return;
+            if (bottomLossSamples == null || bottomLossSamples.Count == 0) return;
             WriteEnvironmentFileHeader(environmentFileName + "-hfbl", geoRect, sedimentType, soundSpeedField,
                                        wind, bathymetryFileName, overlayFileName, "HFBL", bottomLossSamples);
             WriteEnvironmentFileHeader(environmentFileName + "-lfbl-hfb", geoRect, sedimentType, soundSpeedField,
