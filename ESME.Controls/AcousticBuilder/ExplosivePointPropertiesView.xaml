@@ -74,11 +74,11 @@
                             Style="{StaticResource DetailLabelStyle}" Margin="5 0 0 0"/>
                 </Grid>
                 <TextBlock Text="Profile name" Style="{StaticResource DetailLabelStyle}"/>
-                <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding ExplosivePoint.SVPFileName}" />
+                <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding ExplosivePoint.SVPFilename}" />
                 <TextBlock Text="Layer count" Style="{StaticResource DetailLabelStyle}"/>
                 <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding ExplosivePoint.SVPFile.Layers.Count}" />
                 <TextBlock Text="Profile depth (m)" Style="{StaticResource DetailLabelStyle}"/>
-                <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding ExplosivePoint.Depth}" />
+                <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding ExplosivePoint.WaterDepth}" />
             </StackPanel>
         </GroupBox>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

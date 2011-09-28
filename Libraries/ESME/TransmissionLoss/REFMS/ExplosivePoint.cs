@@ -162,7 +162,7 @@ namespace ESME.TransmissionLoss.REFMS
         }
 
         static readonly PropertyChangedEventArgs SourceCountChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.SourceCount);
-        int _sourceCount;
+        int _sourceCount = 1;
 
         #endregion
 
@@ -180,7 +180,7 @@ namespace ESME.TransmissionLoss.REFMS
         }
 
         static readonly PropertyChangedEventArgs DepthLimitChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.DepthLimit);
-        double _depthLimit;
+        double _depthLimit = 2000.0;
 
         #endregion
 
@@ -303,6 +303,7 @@ namespace ESME.TransmissionLoss.REFMS
                     SalinityData[i] = salinityData.Data[i].Value;
                     SoundSpeedData[i] = soundSpeedData.Data[i].Value;
                 }
+                ProfileDepth = temperatureData.Data.Last().Depth;
 
                 _svpFile = SVPFile.Create(SVPLocation, DepthData, TemperatureData, SalinityData, SoundSpeedData, BottomLossData, Delta);
 
@@ -366,6 +367,7 @@ namespace ESME.TransmissionLoss.REFMS
         public double[] SoundSpeedData { get; set; }
         public double[] DepthData { get; set; }
         public double WaterDepth { get; set; }
+        public double ProfileDepth { get; set; }
         public BottomLossData BottomLossData { get; set; }
         public Geo SVPLocation { get; set; }
 
@@ -554,7 +556,7 @@ namespace ESME.TransmissionLoss.REFMS
             }
         }
 
-        string SVPFilename
+        public string SVPFilename
         {
             get
             {

@@ -199,7 +199,11 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _configureAcousticModels ??
                        (_configureAcousticModels =
-                        new SimpleCommand<object, object>(delegate { ConfigureAcousticModelsHandler(); }));
+                        new SimpleCommand<object, object>(delegate
+                        {
+                            return (ScenarioMetadata != null && ScenarioMetadata.AnalysisPoints != null && ScenarioMetadata.AnalysisPoints.Count > 0);
+                        },
+                        delegate { ConfigureAcousticModelsHandler(); }));
             }
         }
 
@@ -220,8 +224,12 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _exportAnalysisPoints ??
                        (_exportAnalysisPoints =
-                        new SimpleCommand<object, object>(delegate { return ScenarioMetadata != null; },
-                                                          delegate { ExportAnalysisPointsHandler(); }));
+                        new SimpleCommand<object, object>(delegate
+                        {
+                            return (ScenarioMetadata != null && ScenarioMetadata.AnalysisPoints != null && ScenarioMetadata.AnalysisPoints.Count > 0) ||
+                                   (ScenarioMetadata != null && ScenarioMetadata.ExplosivePoints != null && ScenarioMetadata.ExplosivePoints.Count > 0);
+                        },
+                        delegate { ExportAnalysisPointsHandler(); }));
             }
         }
 
