@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +8,6 @@ using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.NEMO;
-using ESME.TransmissionLoss.REFMS;
 using HRC.Collections;
 using HRC.Navigation;
 
@@ -261,12 +259,14 @@ namespace ESME.TransmissionLoss.CASS
                     if (!string.IsNullOrEmpty(appSettings.NAEMOTools.RAMSupportJarFile) && !string.IsNullOrEmpty(appSettings.NAEMOTools.RAMExecutable)) 
                         using (var writer = new StreamWriter(batchFilePath))
                             writer.WriteLine("java -Dlog4j.configuration=ram-log4j.xml -jar \"{0}\" {1} \"{2}\"", appSettings.NAEMOTools.RAMSupportJarFile, inputFileName, appSettings.NAEMOTools.RAMExecutable);
+                    else throw new ApplicationException("Could not create RAM batch file because the RAM Support JAR file and/or the RAM Executable file options have not been set.  Please check your configuration and try again.");
                     break;
-                //case TransmissionLossAlgorithm.CASS:
+                case TransmissionLossAlgorithm.CASS:
                 default:
-                    if (!string.IsNullOrEmpty(appSettings.CASSSettings.PythonExecutablePath) && !string.IsNullOrEmpty(appSettings.CASSSettings.PythonScriptPath) && !string.IsNullOrEmpty(appSettings.CASSSettings.CASSExecutablePath)) 
-                        using (var writer = new StreamWriter(batchFilePath)) 
+                    if (!string.IsNullOrEmpty(appSettings.CASSSettings.PythonExecutablePath) && !string.IsNullOrEmpty(appSettings.CASSSettings.PythonScriptPath) && !string.IsNullOrEmpty(appSettings.CASSSettings.CASSExecutablePath))
+                        using (var writer = new StreamWriter(batchFilePath))
                             writer.WriteLine("start /wait \"{0}\" \"{1}\" \"{2}\" \"{3}\"", appSettings.CASSSettings.PythonExecutablePath, appSettings.CASSSettings.PythonScriptPath, inputFileName, appSettings.CASSSettings.CASSExecutablePath);
+                    else throw new ApplicationException("Could not create CASS batch file because one or more of the Python Executable Path, the Python Script Path, and/or the CASS Executable path options have not been set.  Please check your configuration and try again.");
                     break;
             }
         }

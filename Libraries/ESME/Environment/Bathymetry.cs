@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.IO.MemoryMappedFiles;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading;
 using System.Threading.Tasks;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
@@ -23,38 +19,7 @@ namespace ESME.Environment
         {
             return TaskEx.Run(() => Load(filename));
         }
-#if false
-        public static Bathymetry Load(string filename)
-        {
-            var retry = 20;
-            Exception exception = new NotImplementedException();
-            while (--retry > 0)
-            {
-                try
-                {
-                    using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    {
-                        var result = new Bathymetry {Samples = (EnvironmentData<EarthCoordinate<float>>)new BinaryFormatter().Deserialize(stream)};
-                        return result;
-                    }
-                }
-                catch (IOException e)
-                {
-                    Debug.WriteLine("{0} Bathymetry.Load caught IOException.  Retry count is now {1}", DateTime.Now, retry);
-                    exception = e;
-                    Thread.Sleep(100);
-                }
-            }
-            Debug.WriteLine("{0} Bathymetry.Load giving up", DateTime.Now);
-            throw exception;
-        }
 
-        public void Save(string filename)
-        {
-            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None)) 
-                new BinaryFormatter().Serialize(stream, Samples);
-        }
-#else
         public void Save(string filename)
         {
             using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
@@ -85,7 +50,6 @@ namespace ESME.Environment
                 return result;
             }
         }
-#endif
 
         public static Bathymetry FromYXZ(string fileName, float scaleFactor)
         {

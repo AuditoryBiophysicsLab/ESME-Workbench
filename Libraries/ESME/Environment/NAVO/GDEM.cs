@@ -98,182 +98,6 @@ namespace ESME.Environment.NAVO
             }
             return soundspeed;
         }
-#if false
-        public static async Task<SoundSpeed> ReadTemperatureAsync(ICollection<NAVOTimePeriod> months, GeoRect region, IProgress<float> progress = null)
-        {
-            var progressStep = 100f / (months.Count + 1);
-            var totalProgress = 0f;
-            var transformBlock = new TransformBlock<Tuple<NAVOTimePeriod, GeoRect>, SoundSpeedField>(data =>
-                {
-                    var temp = ReadTemperature(data.Item1, data.Item2);
-                    if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-                    return temp;
-                },
-                new ExecutionDataflowBlockOptions
-                {
-                    TaskScheduler = TaskScheduler.Default,
-                    MaxDegreeOfParallelism = 4,
-                });
-            var batchBlock = new BatchBlock<SoundSpeedField>(months.Count);
-            transformBlock.LinkTo(batchBlock);
-            transformBlock.Completion.ContinueWith(task => batchBlock.Complete());
-            foreach (var month in months) transformBlock.Post(new Tuple<NAVOTimePeriod, GeoRect>(month, region));
-            transformBlock.Complete();
-            await transformBlock.Completion;
-            var result = new SoundSpeed {SoundSpeedFields = batchBlock.Receive().ToList()};
-            if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-            return result;
-        }
-
-        public static SoundSpeed ReadTemperature(List<NAVOTimePeriod> months, GeoRect region)
-        {
-            var result = new SoundSpeed();
-            foreach (var month in months) result.SoundSpeedFields.Add(ReadTemperature(month, region));
-            return result;
-        }
-
-        public static SoundSpeedField ReadTemperature(NAVOTimePeriod month, GeoRect region)
-        {
-            return ReadFile(FindTemperatureFile(month), "water_temp", month, region);
-        }
-
-        public async static Task<SoundSpeed> ReadSalinityAsync(ICollection<NAVOTimePeriod> months, GeoRect region, IProgress<float> progress = null)
-        {
-            var progressStep = 100f / (months.Count + 1);
-            var totalProgress = 0f;
-            var transformBlock = new TransformBlock<Tuple<NAVOTimePeriod, GeoRect>, SoundSpeedField>(data => 
-                {
-                    var salinity = ReadSalinity(data.Item1, data.Item2);
-                    if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-                    return salinity;
-                },
-                new ExecutionDataflowBlockOptions
-                {
-                    TaskScheduler = TaskScheduler.Default,
-                    MaxDegreeOfParallelism = 4,
-                });
-            var batchBlock = new BatchBlock<SoundSpeedField>(months.Count);
-            transformBlock.LinkTo(batchBlock);
-            transformBlock.Completion.ContinueWith(task => batchBlock.Complete());
-            foreach (var month in months) transformBlock.Post(new Tuple<NAVOTimePeriod, GeoRect>(month, region));
-            transformBlock.Complete();
-            await transformBlock.Completion;
-            var result = new SoundSpeed { SoundSpeedFields = batchBlock.Receive().ToList() };
-            if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-            return result;
-        }
-
-        public static SoundSpeed ReadSalinity(List<NAVOTimePeriod> months, GeoRect region)
-        {
-            var result = new SoundSpeed();
-            foreach (var month in months) result.SoundSpeedFields.Add(ReadSalinity(month, region));
-            return result;
-        }
-
-        public static SoundSpeedField ReadSalinity(NAVOTimePeriod month, GeoRect region)
-        {
-            return ReadFile(FindSalinityFile(month), "salinity", month, region);
-        }
-
-        public async static Task<SoundSpeed> ReadSoundSpeedAsync(ICollection<NAVOTimePeriod> months, GeoRect region, EarthCoordinate<float> deepestPoint = null, IProgress<float> progress = null)
-        {
-            var progressStep = 100f / (months.Count + 1);
-            var totalProgress = 0f;
-            var transformBlock = new TransformBlock<Tuple<NAVOTimePeriod, GeoRect, EarthCoordinate<float>>, SoundSpeedField>(data =>
-                {
-                    var soundSpeed = ReadSoundSpeed(data.Item1, data.Item2, data.Item3);
-                    if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-                    return soundSpeed;
-                },
-                new ExecutionDataflowBlockOptions
-                {
-                    TaskScheduler = TaskScheduler.Default,
-                    MaxDegreeOfParallelism = 4,
-                });
-            var batchBlock = new BatchBlock<SoundSpeedField>(months.Count);
-            transformBlock.LinkTo(batchBlock);
-            transformBlock.Completion.ContinueWith(task => batchBlock.Complete());
-            foreach (var month in months) transformBlock.Post(new Tuple<NAVOTimePeriod, GeoRect, EarthCoordinate<float>>(month, region, deepestPoint));
-            transformBlock.Complete();
-            await transformBlock.Completion;
-            var result = new SoundSpeed { SoundSpeedFields = batchBlock.Receive().ToList() };
-            if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-            return result;
-        }
-
-        public static SoundSpeed ReadSoundSpeed(List<NAVOTimePeriod> months, GeoRect region, EarthCoordinate<float> deepestPoint = null)
-        {
-            var result = new SoundSpeed();
-            foreach (var month in months) result.SoundSpeedFields.Add(ReadSoundSpeed(month, region, deepestPoint));
-            return result;
-        }
-
-        public static SoundSpeedField ReadSoundSpeed(NAVOTimePeriod month, GeoRect region, EarthCoordinate<float> deepestPoint = null)
-        {
-            var temperature = ReadTemperature(month, region);
-            var salinity = ReadSalinity(month, region);
-            var soundspeed = SoundSpeedField.Create(temperature, salinity);
-            if (deepestPoint != null) soundspeed = soundspeed.Extend(temperature, salinity, deepestPoint);
-            return soundspeed;
-        }
-
-        public async static Task<SoundSpeed> CalculateSoundSpeedAsync(SoundSpeed temperature, SoundSpeed salinity, EarthCoordinate<float> deepestPoint = null, IProgress<float> progress = null)
-        {
-            var progressStep = 100f / (temperature.SoundSpeedFields.Count + 1);
-            var totalProgress = 0f;
-            var transformBlock = new TransformBlock<Tuple<SoundSpeedField, SoundSpeedField, EarthCoordinate<float>>, SoundSpeedField>(data =>
-                {
-                    var soundSpeed = CalculateSoundSpeed(data.Item1, data.Item2, data.Item3);
-                    if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-                    return soundSpeed;
-                },
-                new ExecutionDataflowBlockOptions
-                {
-                    TaskScheduler = TaskScheduler.Default,
-                    MaxDegreeOfParallelism = 4,
-                });
-            var batchBlock = new BatchBlock<SoundSpeedField>(temperature.SoundSpeedFields.Count);
-            transformBlock.LinkTo(batchBlock);
-            transformBlock.Completion.ContinueWith(task => batchBlock.Complete());
-            foreach (var field in temperature.SoundSpeedFields) transformBlock.Post(new Tuple<SoundSpeedField, SoundSpeedField, EarthCoordinate<float>>(field, salinity[field.TimePeriod], deepestPoint));
-            transformBlock.Complete();
-            await transformBlock.Completion;
-            var result = new SoundSpeed { SoundSpeedFields = batchBlock.Receive().ToList() };
-            if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-            return result;
-        }
-
-        public static SoundSpeed CalculateSoundSpeed(SoundSpeed temperature, SoundSpeed salinity, EarthCoordinate<float> deepestPoint = null)
-        {
-            var result = new SoundSpeed();
-            foreach (var field in temperature.SoundSpeedFields)
-                result.SoundSpeedFields.Add(CalculateSoundSpeed(field, salinity[field.TimePeriod], deepestPoint));
-            return result;
-        }
-
-        public static SoundSpeedField CalculateSoundSpeed(SoundSpeedField temperatureField, SoundSpeedField salinityField, EarthCoordinate<float> deepestPoint = null)
-        {
-            if (temperatureField.TimePeriod != salinityField.TimePeriod) throw new DataException("time period mismatch");
-            VerifyThatProfilePointsMatch(temperatureField, salinityField);
-            var environmentData = temperatureField.EnvironmentData.Select(temperatureProfile => ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]));
-            var soundSpeedField = new SoundSpeedField { TimePeriod = temperatureField.TimePeriod };
-            soundSpeedField.EnvironmentData.AddRange(environmentData);
-
-            if (deepestPoint != null)
-            {
-                VerifyThatProfilePointsMatch(temperatureField, salinityField);
-                VerifyThatProfilePointsMatch(temperatureField, soundSpeedField);
-
-                soundSpeedField.DeepestPoint = deepestPoint;
-                var deepestSSP = soundSpeedField.DeepestSSP;
-                if (deepestPoint.Data > soundSpeedField.DeepestSSP.Data.MaxDepth)
-                    deepestSSP.Extend(deepestPoint.Data, temperatureField.EnvironmentData[deepestSSP], salinityField.EnvironmentData[deepestSSP]);
-                foreach (var profile in soundSpeedField.EnvironmentData.Where(profile => profile != deepestSSP))
-                    profile.Extend(deepestSSP);
-            }
-            return soundSpeedField;
-        }
-#endif
 
         static void VerifyThatProfilePointsMatch(TimePeriodEnvironmentData<SoundSpeedProfile> profile1, TimePeriodEnvironmentData<SoundSpeedProfile> profile2)
         {
@@ -318,7 +142,6 @@ namespace ESME.Environment.NAVO
             var missingValue = ((NcAttShort)data.Attributes.Find(att => att.Name == "missing_value"))[0];
             var scaleFactor = ((NcAttFloat)data.Attributes.Find(att => att.Name == "scale_factor"))[0];
             var addOffset = ((NcAttFloat)data.Attributes.Find(att => att.Name == "add_offset"))[0];
-            if (dataVarName == "water_temp") Logger.Log("Temperature worker in GDEM.ReadFile at 1");
             
 
             var north = region.North;
@@ -337,57 +160,40 @@ namespace ESME.Environment.NAVO
             for (var i = 0; i < lats.Length; i++) if (lats[i] >= south && lats[i] <= north) latMap.Add(new AxisMap((float)lats[i], i));
             var selectedLons = lonMap.Select(x => x.Value).ToArray();
             var selectedLats = latMap.Select(y => y.Value).ToArray();
-            if (dataVarName == "water_temp") Logger.Log("Temperature worker in GDEM.ReadFile at 2");
 
             var latCount = selectedLats.Length;
             var lonCount = selectedLons.Length;
 
             int lastLatIndex = -1, lastLonIndex = -1, lastDepthIndex = -1;
             var newFieldEnvironmentData = new List<SoundSpeedProfile>();
-            try
+            for (var lonIndex = 0; lonIndex < lonCount; lonIndex++)
             {
-                for (var lonIndex = 0; lonIndex < lonCount; lonIndex++)
-                {
-                    lastLonIndex = lonIndex;
-                    var lon = lonMap[lonIndex].Value;
-                    var wrappedLon = lon;
-                    while (wrappedLon > 180) wrappedLon -= 360;
-                    while (wrappedLon < -180) wrappedLon += 360;
+                lastLonIndex = lonIndex;
+                var lon = lonMap[lonIndex].Value;
+                var wrappedLon = lon;
+                while (wrappedLon > 180) wrappedLon -= 360;
+                while (wrappedLon < -180) wrappedLon += 360;
 
-                    var lonSourceIndex = lonMap[lonIndex].Index;
-                    for (var latIndex = 0; latIndex < latCount; latIndex++)
+                var lonSourceIndex = lonMap[lonIndex].Index;
+                for (var latIndex = 0; latIndex < latCount; latIndex++)
+                {
+                    lastLatIndex = latIndex;
+                    var lat = latMap[latIndex].Value;
+                    var latSourceIndex = latMap[latIndex].Index;
+                    var newProfile = new SoundSpeedProfile(new EarthCoordinate(lat, wrappedLon));
+                    for (var depthIndex = 0; depthIndex < depths.Length; depthIndex++)
                     {
-                        lastLatIndex = latIndex;
-                        var lat = latMap[latIndex].Value;
-                        var latSourceIndex = latMap[latIndex].Index;
-                        var newProfile = new SoundSpeedProfile(new EarthCoordinate(lat, wrappedLon));
-                        for (var depthIndex = 0; depthIndex < depths.Length; depthIndex++)
-                        {
-                            lastDepthIndex = depthIndex;
-                            var curValue = data[(uint)depthIndex, (uint)latSourceIndex, (uint)lonSourceIndex];
-                            if (curValue == missingValue) break;
-                            newProfile.Data.Add(new DepthValuePair<float>((float)depths[depthIndex], ((curValue) * scaleFactor) + addOffset));
-                        }
-                        if (newProfile.Data.Count > 0) newFieldEnvironmentData.Add(newProfile);
+                        lastDepthIndex = depthIndex;
+                        var curValue = data[(uint)depthIndex, (uint)latSourceIndex, (uint)lonSourceIndex];
+                        if (curValue == missingValue) break;
+                        newProfile.Data.Add(new DepthValuePair<float>((float)depths[depthIndex], ((curValue) * scaleFactor) + addOffset));
                     }
+                    if (newProfile.Data.Count > 0) newFieldEnvironmentData.Add(newProfile);
                 }
             }
-            catch (Exception e)
-            {
-                Logger.Log("Caught exception: {0}", e.Message);
-                Logger.Log("Source: {0}", e.Source);
-                Logger.Log("Stack trace: {0}", e.StackTrace);
-                Logger.Log("File name: {0}, Data variable: {1}, Time Period: {2}", fileName, dataVarName, month);
-                Logger.Log("lat index: {0}, lon index: {1}, depth index: {2}", lastLatIndex, lastLonIndex, lastDepthIndex);
-                throw;
-            }
-            if (dataVarName == "water_temp") Logger.Log("Temperature worker in GDEM.ReadFile at 3");
             var newField = new SoundSpeedField { TimePeriod = month };
-            if (dataVarName == "water_temp") Logger.Log("Temperature worker in GDEM.ReadFile at 4");
             newField.EnvironmentData.AddRange(newFieldEnvironmentData);
-            if (dataVarName == "water_temp") Logger.Log("Temperature worker in GDEM.ReadFile at 5");
             newField.EnvironmentData.Sort();
-            if (dataVarName == "water_temp") Logger.Log("Temperature worker in GDEM.ReadFile at 6");
             return newField;
         }
 

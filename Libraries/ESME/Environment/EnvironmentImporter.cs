@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -17,12 +15,10 @@ using Cinch;
 using ESME.Environment.Descriptors;
 using HRC.Navigation;
 using ESME.Environment.NAVO;
-using HRC.NetCDF;
 using HRC.Utility;
 
 namespace ESME.Environment
 {
-
     public static class Logger
     {
         public static void Start(string fileName)
@@ -63,7 +59,6 @@ namespace ESME.Environment
         public static readonly ImportProgressViewModel WindProgress;
         public static readonly ImportProgressViewModel BathymetryProgress;
         public static readonly ImportProgressViewModel BottomLossProgress;
-        static readonly object BitmapLockObject = new object();
         static readonly Dispatcher Dispatcher = Dispatcher.CurrentDispatcher;
 
         static NAVOImporter()
@@ -138,10 +133,10 @@ namespace ESME.Environment
                 MaxDegreeOfParallelism = 4,
             });
             SalinityProgress = new ImportProgressViewModel("Salinity", SalinityWorker);
+
             if (SedimentWorker == null) SedimentWorker = new ActionBlock<ImportJobDescriptor>(async job =>
             {
                 SedimentProgress.JobStarting(job);
-#if true
                 if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                 {
                     //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
@@ -160,14 +155,13 @@ namespace ESME.Environment
                     });
                 }
                 //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
-#endif
-                SedimentProgress.JobCompleted(job);
+               SedimentProgress.JobCompleted(job);
             },
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = 4,
-                MaxDegreeOfParallelism = 4,
+                BoundedCapacity = 1,
+                MaxDegreeOfParallelism = 1,
             });
             SedimentProgress = new ImportProgressViewModel("Sediment", SedimentWorker);
 
@@ -196,8 +190,8 @@ namespace ESME.Environment
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = 1,
-                MaxDegreeOfParallelism = 1,
+                BoundedCapacity = 4,
+                MaxDegreeOfParallelism = 4,
             });
             WindProgress = new ImportProgressViewModel("Wind", WindWorker);
 
@@ -217,61 +211,49 @@ namespace ESME.Environment
                         await job.CompletionTask;
                     }
 #if true
-                    Dispatcher.InvokeIfRequired(() =>
+                    var colormap = new DualColormap(Colormap.Summer, Colormap.Jet) {Threshold = 0};
+                    var bathysize = Math.Max(bathymetry.Samples.Longitudes.Length, bathymetry.Samples.Latitudes.Length);
+                    var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
+                    var displayValues = bathymetry.Samples;
+                    if (bathysize > screenSize)
                     {
-                        var colormap = new DualColormap(Colormap.Summer, Colormap.Jet) {Threshold = 0};
-                        var bathysize = Math.Max(bathymetry.Samples.Longitudes.Length, bathymetry.Samples.Latitudes.Length);
-                        var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
-                        var displayValues = bathymetry.Samples;
-                        if (bathysize > screenSize)
-                        {
-                            var scaleFactor = screenSize / bathysize;
-                            displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples, (int)(bathymetry.Samples.Longitudes.Length * scaleFactor),
-                                                                                             (int)(bathymetry.Samples.Latitudes.Length * scaleFactor));
-                        }
+                        var scaleFactor = screenSize / bathysize;
+                        displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples, (int)(bathymetry.Samples.Longitudes.Length * scaleFactor),
+                                                                                            (int)(bathymetry.Samples.Latitudes.Length * scaleFactor));
+                    }
 
-                        var imageFilename = Path.GetFileNameWithoutExtension(job.DestinationFilename) + ".bmp";
-                        var imagePath = Path.GetDirectoryName(job.DestinationFilename);
+                    var imageFilename = Path.GetFileNameWithoutExtension(job.DestinationFilename) + ".bmp";
+                    var imagePath = Path.GetDirectoryName(job.DestinationFilename);
                         
-                        lock (BitmapLockObject)
+                    var retryCount = 10;
+                    Exception ex = null;
+                    while (--retryCount > 0)
+                    {
+                        try
                         {
-                            var retryCount = 10;
-                            Exception ex = null;
-                            while (--retryCount > 0)
-                            {
-                                try
-                                {
-                                    var bitmapData = new float[displayValues.Longitudes.Length, displayValues.Latitudes.Length];
-                                    for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
-                                    var displayBitmap = colormap.ToBitmap(bitmapData, bathymetry.Minimum.Data, bathymetry.Maximum.Data < 0 ? bathymetry.Maximum.Data : 8000);
-                                    var tmpBitmap = new Bitmap(displayBitmap.Width, displayBitmap.Height);
-                                    var g = Graphics.FromImage(tmpBitmap);
-                                    g.DrawImage(displayBitmap, 0, 0, displayBitmap.Width, displayBitmap.Height);
-                                    g.Dispose();
-                                    displayBitmap.Dispose();
-                                    tmpBitmap.Save(Path.Combine(imagePath, imageFilename), ImageFormat.Bmp);
-                                    ex = null;
-                                    break;
-                                }
-                                catch (Exception e)
-                                {
-                                    ex = e;
-                                    Debug.WriteLine("{0} Bitmap creation caught exception {1}", DateTime.Now, e.Message);
-                                    Thread.Sleep(50);
-                                }
-                            }
-                            if (ex != null) throw ex;
+                            var bitmapData = new float[displayValues.Longitudes.Length, displayValues.Latitudes.Length];
+                            for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
+                            var displayData = colormap.ToPixelValues(bitmapData, bathymetry.Minimum.Data, bathymetry.Maximum.Data < 0 ? bathymetry.Maximum.Data : 8000);
+                            BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
+                            break;
                         }
+                        catch (Exception e)
+                        {
+                            ex = e;
+                            Debug.WriteLine("{0} Bitmap creation caught exception {1}", DateTime.Now, e.Message);
+                            Thread.Sleep(50);
+                        }
+                    }
+                    if (ex != null) throw ex;
 
-                        var sb = new StringBuilder();
-                        sb.AppendLine(job.Resolution.ToString());
-                        sb.AppendLine("0.0");
-                        sb.AppendLine("0.0");
-                        sb.AppendLine(job.Resolution.ToString());
-                        sb.AppendLine(bathymetry.Samples.GeoRect.West.ToString());
-                        sb.AppendLine(bathymetry.Samples.GeoRect.North.ToString());
-                        using (var writer = new StreamWriter(Path.Combine(imagePath, Path.GetFileNameWithoutExtension(imageFilename) + ".bpw"), false)) writer.Write(sb.ToString());
-                    });
+                    var sb = new StringBuilder();
+                    sb.AppendLine(job.Resolution.ToString());
+                    sb.AppendLine("0.0");
+                    sb.AppendLine("0.0");
+                    sb.AppendLine(job.Resolution.ToString());
+                    sb.AppendLine(bathymetry.Samples.GeoRect.West.ToString());
+                    sb.AppendLine(bathymetry.Samples.GeoRect.North.ToString());
+                    using (var writer = new StreamWriter(Path.Combine(imagePath, Path.GetFileNameWithoutExtension(imageFilename) + ".bpw"), false)) writer.Write(sb.ToString());
 #endif
                 }
                 //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(job.DestinationFilename)), Path.GetFileNameWithoutExtension(job.DestinationFilename), job.DataType);
@@ -280,8 +262,8 @@ namespace ESME.Environment
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = 1,
-                MaxDegreeOfParallelism = 1,
+                BoundedCapacity = 4,
+                MaxDegreeOfParallelism = 4,
             });
             BathymetryProgress = new ImportProgressViewModel("Bathymetry", BathymetryWorker);
 

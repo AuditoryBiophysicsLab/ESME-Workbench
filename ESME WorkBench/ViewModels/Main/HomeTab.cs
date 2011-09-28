@@ -108,6 +108,7 @@ namespace ESMEWorkBench.ViewModels.Main
             try
             {
                 ScenarioMetadata = ScenarioMetadata.Load(ScenarioMetadata.MetadataFilename(fileName), RangeComplexes);
+                ScenarioMetadata.MessageBoxService = _messageBoxService;
                 ScenarioMetadata.CurrentMapLayers = CurrentMapLayers;
                 _dispatcher.InvokeIfRequired(() =>
                 {

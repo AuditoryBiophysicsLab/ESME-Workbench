@@ -820,11 +820,18 @@ namespace ESME.Metadata
             Directory.CreateDirectory(_propagationPath);
             if (AnalysisPoints != null && AnalysisPoints.Count() > 0)
             {
-                CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings,
-                                                      new List<string> {NemoFile.Scenario.TimeFrame},
-                                                      AnalysisPoints, NemoFile,
-                                                      NemoModeToAcousticModelNameMap,
-                                                      RangeComplexes.EnvironmentData, RangeComplexes);
+                try
+                {
+                    CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings,
+                                                          new List<string> { NemoFile.Scenario.TimeFrame },
+                                                          AnalysisPoints, NemoFile,
+                                                          NemoModeToAcousticModelNameMap,
+                                                          RangeComplexes.EnvironmentData, RangeComplexes);
+                }
+                catch (Exception e)
+                {
+                    MessageBoxService.ShowError("Error exporting acoustic simulator files\r\n" + e.Message);
+                }
             }
             else
             {
