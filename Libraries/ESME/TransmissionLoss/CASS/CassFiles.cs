@@ -339,8 +339,7 @@ namespace ESME.TransmissionLoss.CASS
             var ssp = soundSpeedField.EnvironmentData[requestedLocation];
             var roundedLat = Math.Round(requestedLocation.Latitude * 4) / 4;
             var roundedLon = Math.Round(requestedLocation.Longitude * 4) / 4;
-            BottomLossSample bottomLossSample = null;
-            if (bottomLossSamples != null) bottomLossSample = bottomLossSamples[requestedLocation];
+            
             if (ssp.Data.Count == 0) return;
             envFile.WriteLine(isFirstPoint ? "RESET ENVIRONMENT NUMBER" : "INCREMENT ENVIRONMENT NUMBER");
             envFile.WriteLine("COMMENT TABLE");
@@ -365,21 +364,29 @@ namespace ESME.TransmissionLoss.CASS
                 var sedimentTypeName = findResult == null ? "SAND" : findResult.Name;
                 envFile.WriteLine(sedimentTypeName);
             }
-            if (model == "HFBL" || model == "LFBL_HFB") envFile.WriteLine("BOTTOM PROVINCE                       = {0}", bottomLossSample.Data.CurveNumber);
-            if (model == "LFBL_HFB" || model == "LFBL_PE")
+
+            if (bottomLossSamples != null && bottomLossSamples.Count > 0)
             {
-                envFile.WriteLine("BOTTOM-TO-WATER SOUND SPEED RATIO        = {0}", bottomLossSample.Data.RATIOD);
-                envFile.WriteLine("THIN LAYER THICKNESS                     = {0}", bottomLossSample.Data.DLD);
-                envFile.WriteLine("THIN LAYER SEDIMENT DENSITY              = {0}", bottomLossSample.Data.RHOLD);
-                envFile.WriteLine("SEDIMENT-SURFACE DENSITY                 = {0}", bottomLossSample.Data.RHOSD);
-                envFile.WriteLine("SOUND-SPEED GRADIENT AT TOP OF SEDIMENT  = {0}", bottomLossSample.Data.GD);
-                envFile.WriteLine("BETA SOUND-SPEED CURVATURE PARAMETER     = {0}", bottomLossSample.Data.BETAD);
-                envFile.WriteLine("ATTENUATION--LOSS AT TOP OF SEDIMENT     = {0}", bottomLossSample.Data.FKZD);
-                envFile.WriteLine("ATTENUATION GRADIENT                     = {0}", bottomLossSample.Data.FKZP);
-                envFile.WriteLine("FREQUENCY EXPONENT                       = {0}", bottomLossSample.Data.FEXP);
-                envFile.WriteLine("BASEMENT REFLECTION LOSS                 = {0}", -20.0 * Math.Log10(bottomLossSample.Data.BRFLD));
-                envFile.WriteLine("TWO WAY TRAVEL TIME TO GEOLOGIC BASEMENT = {0}", bottomLossSample.Data.SEDTHK_S);
+                var bottomLossSample = bottomLossSamples[requestedLocation];
+
+                if (model == "HFBL" || model == "LFBL_HFB") envFile.WriteLine("BOTTOM PROVINCE                       = {0}", bottomLossSample.Data.CurveNumber);
+                if (model == "LFBL_HFB" || model == "LFBL_PE")
+                {
+                    envFile.WriteLine("BOTTOM-TO-WATER SOUND SPEED RATIO        = {0}", bottomLossSample.Data.RATIOD);
+                    envFile.WriteLine("THIN LAYER THICKNESS                     = {0}", bottomLossSample.Data.DLD);
+                    envFile.WriteLine("THIN LAYER SEDIMENT DENSITY              = {0}", bottomLossSample.Data.RHOLD);
+                    envFile.WriteLine("SEDIMENT-SURFACE DENSITY                 = {0}", bottomLossSample.Data.RHOSD);
+                    envFile.WriteLine("SOUND-SPEED GRADIENT AT TOP OF SEDIMENT  = {0}", bottomLossSample.Data.GD);
+                    envFile.WriteLine("BETA SOUND-SPEED CURVATURE PARAMETER     = {0}", bottomLossSample.Data.BETAD);
+                    envFile.WriteLine("ATTENUATION--LOSS AT TOP OF SEDIMENT     = {0}", bottomLossSample.Data.FKZD);
+                    envFile.WriteLine("ATTENUATION GRADIENT                     = {0}", bottomLossSample.Data.FKZP);
+                    envFile.WriteLine("FREQUENCY EXPONENT                       = {0}", bottomLossSample.Data.FEXP);
+                    envFile.WriteLine("BASEMENT REFLECTION LOSS                 = {0}",
+                                      -20.0 * Math.Log10(bottomLossSample.Data.BRFLD));
+                    envFile.WriteLine("TWO WAY TRAVEL TIME TO GEOLOGIC BASEMENT = {0}", bottomLossSample.Data.SEDTHK_S);
+                }
             }
+
             //var sedimentSample = sedimentType.Samples[location];
             //var sedimentTypeName = BottomSedimentTypeTable.Lookup(sedimentSample.Data.SampleValue).ToUpper();
             envFile.WriteLine("WIND SPEED                            = {0:0.###} KNOTS", wind.EnvironmentData[requestedLocation].Data * 1.94384449);

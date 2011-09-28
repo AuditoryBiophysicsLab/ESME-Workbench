@@ -42,7 +42,7 @@ namespace BellhopNL
             var result =BellhopNLWrapper.Run(arrivalsFile, data.ChargeDepth, data.ChargeMass, data.OutputFreq, data.OutputTime, modelType).Waveforms;
 
             //todo: make a refms-like file from this data.
-            List<EffectsRecord> records = Transform(result, data);
+            var records = Transform(result, data);
         }
 
         static List<EffectsRecord> Transform(double[,,] waveforms, DataBlob data)
