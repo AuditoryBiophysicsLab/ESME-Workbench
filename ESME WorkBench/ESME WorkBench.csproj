@@ -122,7 +122,6 @@
     <Compile Include="MediatorMessages.cs" />
     <Compile Include="ViewModels\Layers\CustomUnitScaleBarAdornmentLayer.cs" />
     <Compile Include="ViewModels\Main\AboutViewModel.cs" />
-    <Compile Include="ViewModels\Main\BackgroundTaskSupport.cs" />
     <Compile Include="ViewModels\Main\EditableLabelListViewModel.cs" />
     <Compile Include="ViewModels\Main\EnvironmentTab.cs">
       <SubType>Code</SubType>

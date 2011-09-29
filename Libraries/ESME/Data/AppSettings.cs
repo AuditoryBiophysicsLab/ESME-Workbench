@@ -199,38 +199,6 @@ namespace ESME.Data
 
         #endregion
 
-        #region public bool IsNavyVersion { get; set; }
-
-        public bool IsNavyVersion
-        {
-            get { return _isNavyVersion; }
-            set
-            {
-                if (_isNavyVersion == value) return;
-                _isNavyVersion = value;
-                NotifyPropertyChanged(IsNavyVersionChangedEventArgs);
-                NotifyPropertyChanged(NavyOptionsVisibilityChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsNavyVersionChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.IsNavyVersion);
-        bool _isNavyVersion = true;
-
-        #region public Visibility NavyOptionsVisibility { get; set; }
-
-        [XmlElement]
-        public Visibility NavyOptionsVisibility
-        {
-            get { return _isNavyVersion ? Visibility.Visible : Visibility.Collapsed; }
-        }
-
-        [XmlIgnore]
-        static readonly PropertyChangedEventArgs NavyOptionsVisibilityChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.NavyOptionsVisibility);
-
-        #endregion
-
-        #endregion
-
         #region public CASSSettings CASSSettings { get; set; }
 
         public CASSSettings CASSSettings

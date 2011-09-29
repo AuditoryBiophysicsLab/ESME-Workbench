@@ -105,7 +105,7 @@
             </StackPanel>
         </TabItem>
         <TabItem Header="CASS"
-					         Visibility="{Binding NavyOptionsVisibility}">
+					         Visibility="{Binding ClassifiedVisibility}">
             <DockPanel LastChildFill="True">
                 <GroupBox Header="Options"
 							          Margin="5 5 5 0"
@@ -179,7 +179,7 @@
             </DockPanel>
         </TabItem>
         <TabItem Header="REFMS"
-			     Visibility="{Binding NavyOptionsVisibility}">
+			     Visibility="{Binding ClassifiedVisibility}">
             <DockPanel LastChildFill="True">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Vertical"

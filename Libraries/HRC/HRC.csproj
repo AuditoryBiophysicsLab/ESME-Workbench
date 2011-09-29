@@ -185,9 +185,7 @@
     <Compile Include="Services\HRCSaveFileService.cs" />
     <Compile Include="Utility\AppEventLog.cs" />
     <Compile Include="Utility\AssemblyTricks.cs" />
-    <Compile Include="Utility\BackgroundTaskAggregator.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Utility\BackgroundTaskAggregator.cs" />
     <Compile Include="Utility\BitFields.cs" />
     <Compile Include="Utility\BitmapWriter.cs" />
     <Compile Include="Utility\BooleanToVisibilityConverter.cs" />
@@ -196,14 +194,10 @@
     <Compile Include="Utility\Decimator2D.cs" />
     <Compile Include="Utility\EmbeddedResources.cs" />
     <Compile Include="Utility\ExtensionMethods.cs" />
-    <Compile Include="Utility\GenericBackgroundTask.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Utility\GenericBackgroundTask.cs" />
     <Compile Include="Utility\GenericWeakReference.cs" />
     <Compile Include="Utility\GeoDistanceUnit.cs" />
-    <Compile Include="Utility\BackgroundTask.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Utility\BackgroundTask.cs" />
     <Compile Include="Collections\EditableKeyValuePair.cs" />
     <Compile Include="Utility\MediatorBase.cs" />
     <Compile Include="Utility\Minidump.cs" />

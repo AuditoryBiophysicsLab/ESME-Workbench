@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿#if false
+using System.ComponentModel;
 using System.Threading;
 
 namespace HRC.Utility
@@ -18,3 +19,4 @@ namespace HRC.Utility
         }
     }
 }
+#endif

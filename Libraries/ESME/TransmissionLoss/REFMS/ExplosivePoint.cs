@@ -497,28 +497,28 @@ namespace ESME.TransmissionLoss.REFMS
                 writer.WriteLine("COPY /Y \"{0}.svp\" \"{1}\\loc.svp\" ", SVPFilename, BaseFilename);
                 writer.WriteLine("rem effects header - ");
                 writer.WriteLine("cd \"{0}\"", BaseFilename);
-                writer.WriteLine("echo #head=> ref_effect.head");
-                writer.WriteLine("echo #tstamp=%DATE% %TIME%>> ref_effect.head");
-                writer.WriteLine("echo #sysver=%COMPUTERNAME%^|{0}^|{1}^|{2}^|{3}^|null>> ref_effect.head", System.Environment.UserName, System.Environment.OSVersion.VersionString,
-                                 System.Environment.OSVersion.ServicePack, System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"));
-                writer.WriteLine("echo #title=Explosives Test, EC_SimArea>> ref_effect.head");
-                writer.WriteLine("echo #mode={0}>> ref_effect.head", ModeName);
-                writer.WriteLine("echo #bin=E12>> ref_effect.head"); // Where does this come from?
-                writer.WriteLine("echo #season={0}>> ref_effect.head", TimePeriod);
-                writer.WriteLine("echo #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}>> ref_effect.head", ExplosionDepth, SourceLevel, Duration.Seconds,
-                                 BottomLossData.RATIOD, -20, -15); // where do -20 and -15 come from?
-                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}>> ref_effect.head", Latitude, Longitude);
-                writer.WriteLine("echo #splineloc={0:0.000000} {1:0.000000}>> ref_effect.head", SVPLocation.Latitude, SVPLocation.Longitude);
-                writer.WriteLine("echo #units=meters>> ref_effect.head");
+                writer.WriteLine("echo #head=> \"{0}\\ref_effect.head\"", BaseFilename);
+                writer.WriteLine("echo #tstamp=%DATE% %TIME%>> \"{0}\\ref_effect.head\"", BaseFilename);
+                writer.WriteLine("echo #sysver=%COMPUTERNAME%^|{0}^|{1}^|{2}^|{3}^|null>> \"{4}\\ref_effect.head\"", System.Environment.UserName, System.Environment.OSVersion.VersionString,
+                                 System.Environment.OSVersion.ServicePack, System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"), BaseFilename);
+                writer.WriteLine("echo #title=Explosives Test, EC_SimArea>> \"{0}\\ref_effect.head\"", BaseFilename);
+                writer.WriteLine("echo #mode={0}>> \"{1}\\ref_effect.head\"", ModeName, BaseFilename);
+                writer.WriteLine("echo #bin=E12>> \"{0}\\ref_effect.head\"", BaseFilename); // Where does this come from?
+                writer.WriteLine("echo #season={0}>> \"{1}\\ref_effect.head\"", TimePeriod, BaseFilename);
+                writer.WriteLine("echo #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}>> \"{6}\\ref_effect.head\"", ExplosionDepth, SourceLevel, Duration.Seconds,
+                                 BottomLossData.RATIOD, -20, -15, BaseFilename); // where do -20 and -15 come from?
+                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}>> \"{2}\\ref_effect.head\"", Latitude, Longitude, BaseFilename);
+                writer.WriteLine("echo #splineloc={0:0.000000} {1:0.000000}>> \"{2}\\ref_effect.head\"", SVPLocation.Latitude, SVPLocation.Longitude, BaseFilename);
+                writer.WriteLine("echo #units=meters>> \"{0}\\ref_effect.head\"", BaseFilename);
                 writer.WriteLine("start \"REFMS\" /wait  \"{0}\"", Globals.AppSettings.REFMSSettings.REFMSExecutablePath);
-                writer.WriteLine("COPY /Y ref_effect.head + refms.out refms.effects");
-                writer.WriteLine("echo # SPEC:{0}refms.spec >> refms.effects");
-                writer.WriteLine("COPY /Y refms.effects + refms.spec refms.effects");
-                var specFilename = string.Format("\"..\\{0}refms.spec\"", BaseFilename);
-                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}> {2}", Latitude, Longitude, specFilename);
-                writer.WriteLine("COPY /Y {0} + refms.spec {0}", specFilename);
                 writer.WriteLine("cd ..");
+                writer.WriteLine("COPY /Y \"{0}\\ref_effect.head\" + \"{0}\\refms.out\" \"{0}refms.effects\"", BaseFilename);
+                writer.WriteLine("echo # SPEC:{0}refms.spec >> \"{0}refms.effects\"", BaseFilename);
+                writer.WriteLine("COPY /Y \"{0}refms.effects\" + \"{0}refms.spec\" \"{0}refms.effects\"", BaseFilename);
+                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}>  \"{2}refms.spec\"", Latitude, Longitude, BaseFilename);
+                writer.WriteLine("COPY /Y \"{0}refms.spec\" + \"{0}\\refms.spec\"  \"{0}refms.spec\"", BaseFilename);
             }
+#if false
             using (var writer = new StreamWriter(scriptBase + "-refms.sh", false))
             {
                 writer.WriteLine("#!/bin/sh");
@@ -549,6 +549,7 @@ namespace ESME.TransmissionLoss.REFMS
                 writer.WriteLine("COPY /Y {0} + refms.spec {0}", specFilename);
                 writer.WriteLine("cd ..");
             }
+#endif
         }
 
         static readonly Random Random = new Random();

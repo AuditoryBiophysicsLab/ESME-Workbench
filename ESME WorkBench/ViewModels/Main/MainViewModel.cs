@@ -47,9 +47,6 @@ namespace ESMEWorkBench.ViewModels.Main
         [ImportingConstructor]
         public MainViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService)
         {
-            BackgroundTaskAggregator = new BackgroundTaskAggregator();
-            BackgroundTaskAggregator.Start();
-
             try
             {
                 Mediator.Instance.Register(this);
@@ -201,7 +198,18 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        public ImportProgressCollection ImportProgressCollection { get; private set; }
+        public ImportProgressCollection ImportProgressCollection
+        {
+            get { return _importProgressCollection; }
+            private set
+            {
+                if (_importProgressCollection == value) return;
+                _importProgressCollection = value;
+                NotifyPropertyChanged(ImportProgressCollectionChangedEventArgs);
+            }
+        }
+        static readonly PropertyChangedEventArgs ImportProgressCollectionChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.ImportProgressCollection);
+        ImportProgressCollection _importProgressCollection;
 
         [XmlIgnore]
         public RangeComplexes RangeComplexes
@@ -211,6 +219,8 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (_rangeComplexes == value) return;
                 _rangeComplexes = value;
+                NotifyPropertyChanged(RangeComplexesChangedEventArgs);
+
                 if (_rangeComplexes != null) _rangeComplexes.PropertyChanged += (s, e) =>
                 {
                     switch (e.PropertyName)
@@ -223,6 +233,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 };
             }
         }
+        static readonly PropertyChangedEventArgs RangeComplexesChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RangeComplexes);
         RangeComplexes _rangeComplexes;
 
         public MapLayerCollection CurrentMapLayers { get; set; }

@@ -134,7 +134,7 @@ namespace ESME.Environment
             });
             SalinityProgress = new ImportProgressViewModel("Salinity", SalinityWorker);
 
-            if (SedimentWorker == null) SedimentWorker = new ActionBlock<ImportJobDescriptor>(async job =>
+            if (SedimentWorker == null) SedimentWorker = new ActionBlock<ImportJobDescriptor>(job =>
             {
                 SedimentProgress.JobStarting(job);
                 if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
@@ -299,47 +299,6 @@ namespace ESME.Environment
             BottomLossProgress = new ImportProgressViewModel("Bottom Loss", BottomLossWorker);
         }
 
-        public async static void AwaitFailure()
-        {
-            try
-            {
-                var workers = new Dictionary<string, IDataflowBlock>
-                {
-                    {"Temperature", TemperatureWorker},
-                    {"Salinity", SalinityWorker},
-                    {"Sediment", SedimentWorker},
-                    {"Wind", WindWorker},
-                    {"Bathymetry", BathymetryWorker},
-                    {"Bottom Loss", BottomLossWorker},
-                };
-                while (workers.Count > 0)
-                {
-                    var runningTasks = (from worker in workers.Values
-                                        where worker.Completion.IsCanceled == false &&
-                                              worker.Completion.IsCompleted == false &&
-                                              worker.Completion.IsFaulted == false
-                                        select worker.Completion).ToList();
-                    if (runningTasks.Count == 0)
-                    {
-                        Debug.WriteLine("{0} All workers have completed");
-                        break;
-                    }
-                    await TaskEx.WhenAny(runningTasks);
-                    Debug.WriteLine("{0} Worker completed", DateTime.Now);
-                    workers.ToList().ForEach(
-                                             worker =>
-                                             Debug.WriteLine("{0} {1,15}: completed: {2,-5}  canceled: {3,-5}  faulted: {4,-5}", DateTime.Now, worker.Key, worker.Value.Completion.IsCompleted,
-                                                             worker.Value.Completion.IsCanceled, worker.Value.Completion.IsFaulted));
-                }
-            }
-            catch (Exception e)
-            {
-                System.Media.SystemSounds.Beep.Play();
-                Debug.WriteLine("************* AwaitFailure caught exception **************");
-                Debugger.Break();
-            }
-        }
-
         public static void Import(IEnumerable<ImportJobDescriptor> jobDescriptors)
         {
             foreach (var jobDescriptor in jobDescriptors)
@@ -481,7 +440,7 @@ namespace ESME.Environment
             });
         }
 
-        public async void JobCompleted(ImportJobDescriptor job)
+        public void JobCompleted(ImportJobDescriptor job)
         {
             _dispatcher.InvokeInBackgroundIfRequired(() =>
             {

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿#if false
+using System.ComponentModel;
 using System.Windows;
 using Cinch;
 using HRC.Utility;
@@ -46,3 +47,4 @@ namespace ESME.Views.Controls
         #endregion
     }
 }
+#endif
