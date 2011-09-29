@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using BellhopNL;
 using ESME;
 using ESME.Animats;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.BellhopNL;
 using ESME.TransmissionLoss.CASS;
 using HRC;
 using ESME.Model;
@@ -36,17 +38,21 @@ namespace grahams_little_sandbox
                     @"C:\Users\Graham Voysey\Desktop\test.3mb";
             var output = MMMB.Load(mmmbFile);
             var foo = output.AnimatStartPoints;
-            
+#endif
+                                            
             string arrFile = @"C:\Projects\ESME Deliverables\Utilities\bellhopNL\score.arr";
             var z = 2500 / 3.2808;
             var w = 300 * 0.45359237;
             var fs     = 88200;
             var T      = 0.25;
             var model = BellhopNLWrapper.ModelType.arons;
+            var blob = new DataBlob
+            {};
 
-            BellhopNLWrapper result = BellhopNLWrapper.Run(arrFile, z, w, fs, T, model);
+            var result = BellhopNLWrapper.Run(arrFile, z, w, fs, T, model);
 
-#endif
+
+
                                         }
     }
 }
