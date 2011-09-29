@@ -12,12 +12,10 @@ using ESME;
 using ESME.Mapping;
 using ESME.Metadata;
 using ESME.Model;
-using ESME.NEMO;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using ESME.TransmissionLoss.REFMS;
 using ESME.Views.AcousticBuilder;
-using ESME.Views.Misc;
 using ESME.Views.TransmissionLoss;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.NAVO;
@@ -28,7 +26,7 @@ namespace ESMEWorkBench.ViewModels.Main
     {
         public MapLayerCollection ScenarioMapLayers { get; set; }
 
-        #region public NAEMOScenarioMetadata ScenarioMetadata { get; set; }
+        #region public ScenarioMetadata ScenarioMetadata { get; set; }
 
         public ScenarioMetadata ScenarioMetadata
         {
@@ -354,17 +352,22 @@ namespace ESMEWorkBench.ViewModels.Main
         #region NewScenarioCommand
         public SimpleCommand<object, object> NewScenarioCommand
         {
-            get { return _newScenario ?? (_newScenario = new SimpleCommand<object, object>(delegate { return IsNewScenarioCommandEnabled; }, delegate { NewScenarioHandler(); })); }
+            get { return _newScenario ?? (_newScenario = new SimpleCommand<object, object>(delegate { NewScenarioHandler(); })); }
         }
 
         SimpleCommand<object, object> _newScenario;
 
-        bool IsNewScenarioCommandEnabled
+        static void NewScenarioHandler()
         {
-            get { return true; }
+            new Process
+            {
+                StartInfo =
+                {
+                    FileName = Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath,
+                    WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath),
+                }
+            }.Start();
         }
-
-        void NewScenarioHandler() { }
         #endregion
 
         readonly List<Tuple<IHaveProperties, Window>> _openPropertyWindows = new List<Tuple<IHaveProperties, Window>>();

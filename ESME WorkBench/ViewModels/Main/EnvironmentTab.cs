@@ -38,15 +38,21 @@ namespace ESMEWorkBench.ViewModels.Main
             };
             Console.WriteLine("All view models are ready!");
             WizardViewModel.LaunchWizardIfNeeded(_visualizerService);
+
+            if (Globals.AppSettings != null && Globals.AppSettings.ScenarioDataDirectory != null && File.Exists(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv")))
+                InitializeEnvironmentManager();
+            else
+                _messageBoxService.ShowError("ESME Workbench is not fully configured, and may not function properly.  Please complete the configuration wizard or fill in the proper configuration details in the Application Options Configuration dialog.");
+
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             AreAllViewModelsReady = true;
             if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
-            RangeComplexes.PropertyChanged += (s, e) =>
+            if (RangeComplexes != null) RangeComplexes.PropertyChanged += (s, e) =>
             {
                 switch (e.PropertyName)
                 {
                     case "IsEnvironmentFullySpecified":
-                        if (RangeComplexes.IsEnvironmentFullySpecified) HookLayerData();
+                        if (RangeComplexes != null && RangeComplexes.IsEnvironmentFullySpecified) HookLayerData();
                         else ClearLayerData();
                         break;
                 }
@@ -213,7 +219,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #region ZoomToRangeComplexCommand
         public SimpleCommand<object, object> ZoomToRangeComplexCommand
         {
-            get { return _zoomToRangeComplex ?? (_zoomToRangeComplex = new SimpleCommand<object, object>(delegate { return RangeComplexes.SelectedRangeComplex != null; }, delegate { ZoomToRangeComplex(); })); }
+            get { return _zoomToRangeComplex ?? (_zoomToRangeComplex = new SimpleCommand<object, object>(delegate { return RangeComplexes != null && RangeComplexes.SelectedRangeComplex != null; }, delegate { ZoomToRangeComplex(); })); }
         }
 
         SimpleCommand<object, object> _zoomToRangeComplex;
@@ -233,7 +239,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #region DeleteRangeComplexCommand
         public SimpleCommand<object, object> DeleteRangeComplexCommand
         {
-            get { return _deleteRangeComplex ?? (_deleteRangeComplex = new SimpleCommand<object, object>(delegate { return RangeComplexes.SelectedRangeComplex != null; }, delegate { DeleteRangeComplexHandler(); })); }
+            get { return _deleteRangeComplex ?? (_deleteRangeComplex = new SimpleCommand<object, object>(delegate { return RangeComplexes != null && RangeComplexes.SelectedRangeComplex != null; }, delegate { DeleteRangeComplexHandler(); })); }
         }
 
         SimpleCommand<object, object> _deleteRangeComplex;
@@ -258,7 +264,7 @@ namespace ESMEWorkBench.ViewModels.Main
             get
             {
                 return _clearRangeComplexSelection ?? (_clearRangeComplexSelection = new SimpleCommand<object, object>(
-                    delegate { return RangeComplexes.SelectedRangeComplex != null; },
+                    delegate { return RangeComplexes != null && RangeComplexes.SelectedRangeComplex != null; },
                     delegate
                     {
                         RangeComplexes.SelectedRangeComplex = null;
@@ -276,7 +282,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _newOverlay ?? (_newOverlay = new SimpleCommand<object, object>(delegate { return RangeComplexes.SelectedRangeComplex != null; }, delegate { NewOverlayHandler(); }));
+                return _newOverlay ?? (_newOverlay = new SimpleCommand<object, object>(delegate { return RangeComplexes != null && RangeComplexes.SelectedRangeComplex != null; }, delegate { NewOverlayHandler(); }));
             }
         }
 
@@ -366,7 +372,7 @@ namespace ESMEWorkBench.ViewModels.Main
             get
             {
                 return _clearAreaSelectionCommand ?? (_clearAreaSelectionCommand = new SimpleCommand<object, object>(
-                    delegate { return RangeComplexes.SelectedArea != null; },
+                    delegate { return RangeComplexes != null && RangeComplexes.SelectedArea != null; },
                     delegate
                     {
                         RangeComplexes.SelectedArea = null;
@@ -386,7 +392,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 return _addBathymetry ?? (_addBathymetry = new SimpleCommand<object, object>(
                     delegate
                     {
-                        return RangeComplexes.SelectedArea != null && RangeComplexes.SelectedBathymetry != null && !RangeComplexes.SelectedBathymetry.IsCached;
+                        return RangeComplexes != null && RangeComplexes.SelectedArea != null && RangeComplexes.SelectedBathymetry != null && !RangeComplexes.SelectedBathymetry.IsCached;
                     },
                     delegate
                     {
@@ -406,7 +412,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 return _removeBathymetry ?? (_removeBathymetry = new SimpleCommand<object, object>(
                     delegate
                     {
-                        return RangeComplexes.SelectedArea != null && RangeComplexes.SelectedBathymetry != null && RangeComplexes.SelectedArea.CanRemoveBathymetry(RangeComplexes.SelectedBathymetry);
+                        return RangeComplexes != null && RangeComplexes.SelectedArea != null && RangeComplexes.SelectedBathymetry != null && RangeComplexes.SelectedArea.CanRemoveBathymetry(RangeComplexes.SelectedBathymetry);
                     },
                     delegate
                     {
@@ -428,7 +434,7 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return _reloadBathymetry ?? (_reloadBathymetry = new SimpleCommand<object, object>(
                 delegate
                 {
-                    return RangeComplexes.SelectedBathymetry != null && RangeComplexes.SelectedBathymetry.IsCached;
+                    return RangeComplexes != null && RangeComplexes.SelectedBathymetry != null && RangeComplexes.SelectedBathymetry.IsCached;
                 }, 
                 delegate
                 {
@@ -446,7 +452,7 @@ namespace ESMEWorkBench.ViewModels.Main
             get
             {
                 return _clearBathymetrySelectionCommand ?? (_clearBathymetrySelectionCommand = new SimpleCommand<object, object>(
-                    delegate { return RangeComplexes.SelectedBathymetry != null; },
+                    delegate { return RangeComplexes != null && RangeComplexes.SelectedBathymetry != null; },
                     delegate
                     {
                         RangeComplexes.SelectedBathymetry = null;

@@ -387,6 +387,12 @@ namespace ESME.TransmissionLoss.REFMS
 
         public void Validate()
         {
+            if (GeoRect == null)
+            {
+                ValidationErrorText = "Unable to validate, environment not specified";
+                return;
+            }
+
             if (!GeoRect.Contains(this))
             {
                 ValidationErrorText = "Explosive point not contained within bathymetry bounds";

@@ -7,6 +7,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using System.Xml.Serialization;
 using Cinch;
 using ESME;
 using ESME.Environment;
@@ -87,8 +88,6 @@ namespace ESMEWorkBench.ViewModels.Main
             IsPanZoomVisible = Settings.Default.ShowPanZoom;
             IsEnvironmentTabSelected = Settings.Default.SelectedRibbonTabIndex == 1;
 
-            if (Globals.AppSettings != null && Globals.AppSettings.ScenarioDataDirectory != null && File.Exists(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv")))
-                InitializeEnvironmentManager();
         }
 
         protected override void OnDispose()
@@ -203,7 +202,29 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         public ImportProgressCollection ImportProgressCollection { get; private set; }
-        public RangeComplexes RangeComplexes { get; private set; }
+
+        [XmlIgnore]
+        public RangeComplexes RangeComplexes
+        {
+            get { return _rangeComplexes; }
+            private set
+            {
+                if (_rangeComplexes == value) return;
+                _rangeComplexes = value;
+                if (_rangeComplexes != null) _rangeComplexes.PropertyChanged += (s, e) =>
+                {
+                    switch (e.PropertyName)
+                    {
+                        case "IsEnvironmentFullySpecified":
+                            if (RangeComplexes != null && RangeComplexes.IsEnvironmentFullySpecified) HookLayerData();
+                            else ClearLayerData();
+                            break;
+                    }
+                };
+            }
+        }
+        RangeComplexes _rangeComplexes;
+
         public MapLayerCollection CurrentMapLayers { get; set; }
 
         #region public int SelectedRibbonTabIndex { get; set; }

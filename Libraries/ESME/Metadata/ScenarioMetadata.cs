@@ -412,12 +412,7 @@ namespace ESME.Metadata
 
         public void RemoveScenarioDisplay()
         {
-            CurrentMapLayers.RemoveAll(
-                                       layer =>
-                                       layer.LayerType == LayerType.OpArea && layer.Name.StartsWith("Platform:"));
-            CurrentMapLayers.RemoveAll(
-                                       layer =>
-                                       layer.LayerType == LayerType.Track && layer.Name.StartsWith("Platform:"));
+            CurrentMapLayers.RemoveAll(layer => layer.Name != "Base Map");
             _scenarioBounds = RangeComplexes.SelectedArea == null ? null : RangeComplexes.SelectedArea.GeoRect;
         }
 
