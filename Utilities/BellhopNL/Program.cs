@@ -33,8 +33,7 @@ namespace BellhopNL
                         return;
                 }
             }
-            string arrivalsFile;
-            ComputeRadial(data, out arrivalsFile);
+            var arrivalsFile = ComputeRadial(data);
             //give NLWrapper the arrivals file. 
             BellhopNLWrapper.ModelType modelType;
             var modelOk = Enum.TryParse(data.ModelType, true, out modelType);
@@ -50,12 +49,12 @@ namespace BellhopNL
             var result = new List<EffectsRecord>();
             for (var i = 0; i < waveforms.GetLength(0); i++)//ranges
             {
-                
                 for (var j = 0; j < waveforms.GetLength(1); j++)//depths
                 {
                     var effectsRecord = new EffectsRecord(){Depth = data.Depths[j],Range = data.Ranges[i]};
                     var maxPa = double.MinValue;
-                    for (var k = 0; k < waveforms.GetLength(2); k++)//payload waveform.  May NOT ACTUALLY BE IN Pa!!
+
+                    for (var k = 0; k < waveforms.GetLength(2); k++)//payload waveform.
                     {
                         if (waveforms[i, j, k] > maxPa) maxPa = waveforms[i, j, k];
                     }
@@ -66,10 +65,10 @@ namespace BellhopNL
             return result;
         }
 
-        static void ComputeRadial(DataBlob data, out string shdfile)
+        static string ComputeRadial(DataBlob data)
         {
             var envFile = File.ReadAllText(data.EnvFilename);
-            shdfile = null;
+            string shdfile = null;
             var outputData = new StringBuilder();
             var workingDirectory = CreateTemporaryDirectory();
             TransmissionLossRadial result = null;
@@ -161,7 +160,7 @@ namespace BellhopNL
                 Console.WriteLine(@"{0}: Bellhop failure: {1}", DateTime.Now, errorText);
                 Console.WriteLine(@"{0}: Bellhop input: {1}", DateTime.Now, data.BellhopConfiguration);
                 Console.WriteLine(@"{0}: Bellhop output: {1}", DateTime.Now, outputData);
-                return;
+                throw new FileIsEmptyException("arrivals file contains errors");
             }
             
            // if (File.Exists(shdfile)) result = new TransmissionLossRadial(data.Bearing, new BellhopOutput(shdfile));
@@ -184,7 +183,7 @@ namespace BellhopNL
             shdfile = Path.Combine(workingDirectory, "SHDFIL");
             if(shdfile == null) throw new FileIsEmptyException("arrivals file not generated!");
             transmissionLossProcess.ProgressPercent = 100;
-            return;
+            return shdfile;
         }
 
         protected static string CreateTemporaryDirectory()

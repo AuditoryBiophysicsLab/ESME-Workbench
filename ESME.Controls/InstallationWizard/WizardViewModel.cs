@@ -51,6 +51,7 @@ namespace ESME.Views.InstallationWizard
                                    new Uri("http://www.oracle.com/technetwork/java/javase/downloads/index.html"),
                                    HyperlinkText = "the Oracle Java download page.",
                                    FieldName = "Java Executable (javaw.exe)",
+                                   DialogTitle = "Locate the Java executable",
                                    UserResponse =
                                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86) +
                                    @"\Java\",
@@ -119,6 +120,7 @@ namespace ESME.Views.InstallationWizard
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
                                    Hyperlink = new Uri("http://esme.bu.edu"),
                                    HyperlinkText = "the ESME Workbench webpage.",
+                                   DialogTitle = "Locate the BST HDF5 file",
                                    FieldName = "BST",
                                    FileNameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
                                    PropertyName = "BST",
@@ -136,6 +138,7 @@ namespace ESME.Views.InstallationWizard
                                    Hyperlink = new Uri("http://esme.bu.edu"),
                                    HyperlinkText = "the ESME Workbench webpage.",
                                    FieldName = "DBDB",
+                                   DialogTitle = "Locate the DBDB HDF5 file",
                                    FileNameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
                                    PropertyName = "DBDB",
                            });
@@ -151,6 +154,7 @@ namespace ESME.Views.InstallationWizard
                                    Hyperlink = new Uri("http://esme.bu.edu"),
                                    HyperlinkText = "the ESME Workbench webpage.",
                                    FieldName = "DBDB Extractor (dbv5_command.exe)",
+                                   DialogTitle = "Locate the DBDB Extractor program",
                                    FileNameFilter =
                                    "DBDB Extractor (dbv5_command.exe)|dbv5_command.exe|Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
                                    PropertyName = "DBDBExtractor",
