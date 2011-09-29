@@ -59,6 +59,17 @@ namespace ESME.Views.InstallationWizard
                                    PropertyName = "javaw",
                            });
 
+            if (string.IsNullOrEmpty(AppSettings.NAEMOTools.NAEMOToolsDirectory) || !File.Exists(AppSettings.NAEMOTools.NAEMOToolsDirectory)) Panels.Add(
+             new WizardPanelInfo
+             {
+                 DescriptiveText = "The Naval Underseas Warfare Center (NUWC) provides a collection of java applications necessary for the proper operation of the One Navy Model.\n\n" +
+                 "Please select the NUWC Scenario Builder (scenario-builder.jar) that is stored in a directory containing the complete NUWC application collection.",
+                 FieldName = "NUWC Application (*.jar)",
+                 DialogTitle = "Locate the Scenario Builder (scenario-builder.jar)",
+                 FileNameFilter = "NUWC Scenario Builder (scenario-builder.jar)|scenario-builder.jar|Java executables(*.jar)|*.jar|All files(*.*)|(*.*)",
+                 PropertyName = "NUWCToolsDirectory",
+             });
+
             if (string.IsNullOrEmpty(AppSettings.ScenarioDataDirectory) ||
                 !Directory.Exists(AppSettings.ScenarioDataDirectory))
                 Panels.Add(
@@ -336,6 +347,9 @@ namespace ESME.Views.InstallationWizard
                     case "javaw":
                         AppSettings.NAEMOTools.JavaExecutablePath = panel.UserResponse;
                         break;
+                    case "NUWCToolsDirectory":
+                        AppSettings.NAEMOTools.NAEMOToolsDirectory = panel.UserResponse;
+                        break;
                     case "ScenarioDataDirectory":
                         AppSettings.ValidateScenarioDataDirectory(panel.UserResponse);
                         break;
@@ -461,6 +475,19 @@ namespace ESME.Views.InstallationWizard
                                 if (PropertyName != "javaw") return true;
                                 var fileName = Path.GetFileName(ruleTarget);
                                 return fileName != null && (!string.IsNullOrEmpty(ruleTarget) && (fileName.ToLowerInvariant() == "javaw.exe"));
+                            },
+                    },
+                    new ValidationRule
+                    {
+                            PropertyName = "UserResponse",
+                            Description = "The directory does not contain the required files",
+                            RuleDelegate = (o,r) =>
+                            {
+                                var ruleTarget = ((WizardPanelInfo)o).UserResponse;
+                                if (PropertyName != "NUWCToolsDirectory") return true;
+                                var dirname = Path.GetDirectoryName(ruleTarget);
+                                var fileName = Path.GetFileName(ruleTarget);
+                                return dirname != null && (!string.IsNullOrEmpty(ruleTarget) && ( fileName !=null && fileName.ToLowerInvariant() == "scenario-builder.jar"));
                             },
                     },
             });
