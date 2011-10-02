@@ -332,7 +332,6 @@
     <Compile Include="NEMO\Overlay\LineReader.cs" />
     <Compile Include="NEMO\Overlay\OverlayLineSegment.cs" />
     <Compile Include="NEMO\Overlay\Tokenizer.cs" />
-    <Compile Include="Shapes\TransmissionLossFieldShape.cs" />
     <Compile Include="TransmissionLoss\Bellhop\Bellhop.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossFieldCache.cs" />
   </ItemGroup>
@@ -348,7 +347,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Database\" />
-    <Folder Include="Simulation\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

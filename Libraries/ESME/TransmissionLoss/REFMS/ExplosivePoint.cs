@@ -289,7 +289,8 @@ namespace ESME.TransmissionLoss.REFMS
                 var soundSpeedData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[TimePeriod].EnvironmentData[this];
                 SVPLocation = new Geo(soundSpeedData);
                 BottomLossData = ((Task<BottomLoss>)EnvironmentData[EnvironmentDataType.BottomLoss]).Result.Samples[this].Data;
-                WaterDepth = ((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples[this].Data;
+                WaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples[this].Data);
+                SVPWaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples[SVPLocation].Data);
                 GeoRect = ((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GeoRect;
 
                 TemperatureData = new double[temperatureData.Data.Count];
@@ -370,6 +371,7 @@ namespace ESME.TransmissionLoss.REFMS
         public double ProfileDepth { get; set; }
         public BottomLossData BottomLossData { get; set; }
         public Geo SVPLocation { get; set; }
+        public double SVPWaterDepth { get; set; }
 
         public string PSMId { get; set; }
         public string PSMName { get; set; }
@@ -552,8 +554,6 @@ namespace ESME.TransmissionLoss.REFMS
 #endif
         }
 
-        static readonly Random Random = new Random();
-
         string BaseFilename
         {
             get
@@ -569,8 +569,7 @@ namespace ESME.TransmissionLoss.REFMS
             {
                 var northSouth = SVPLocation.Latitude >= 0 ? "N" : "S";
                 var eastWest = SVPLocation.Longitude >= 0 ? "E" : "W";
-                var randomInt = Random.Next(99);
-                return string.Format("LOC_{0}{1}_{2}{3}_{4}-{5}", DegreesMinutes(SVPLocation.Latitude), northSouth, DegreesMinutes(SVPLocation.Longitude), eastWest, randomInt, TimePeriod);
+                return string.Format("LOC_{0}{1}_{2}{3}_{4:0}-{5}", DegreesMinutes(SVPLocation.Latitude), northSouth, DegreesMinutes(SVPLocation.Longitude), eastWest, SVPWaterDepth, TimePeriod);
             }
         }
 
