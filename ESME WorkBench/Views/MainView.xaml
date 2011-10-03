@@ -40,13 +40,7 @@
   <DockPanel LastChildFill="True">
     <StatusBar DockPanel.Dock="Bottom">
       <StatusBarItem HorizontalAlignment="Left">
-        <StackPanel Orientation="Horizontal">
-          <TextBlock Text="{Binding MouseEarthCoordinate.Latitude, StringFormat=Lat: {0:0.0000}}" />
-          <TextBlock Text=" " />
-          <TextBlock Text="{Binding MouseEarthCoordinate.Longitude, StringFormat=Lon: {0:0.0000}}" />
-          <TextBlock Text=" " />
-          <TextBlock Text="{Binding MouseDepth, StringFormat=Depth: {0:0.0}}" />
-        </StackPanel>
+                <TextBlock Text="{Binding MouseLocationInfo}" />
       </StatusBarItem>
     </StatusBar>
         <!-- SelectedIndex="{Binding Source={x:Static p:Settings.Default}, Path=SelectedRibbonTabIndex, Mode=TwoWay}" -->

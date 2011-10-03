@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -124,7 +125,8 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (_mouseEarthCoordinate == value) return;
                 _mouseEarthCoordinate = value;
-                return;
+                NotifyPropertyChanged(MouseEarthCoordinateChangedEventArgs);
+                NotifyPropertyChanged(MouseLocationInfoChangedEventArgs);
             }
         }
 
@@ -132,6 +134,39 @@ namespace ESMEWorkBench.ViewModels.Main
         EarthCoordinate _mouseEarthCoordinate;
 
         #endregion
+
+        #region public string MouseLocationInfo { get; set; }
+
+        public string MouseLocationInfo
+        {
+            get
+            {
+                if (MouseEarthCoordinate == null) return null;
+                var lat = MouseEarthCoordinate.Latitude;
+                var lon = MouseEarthCoordinate.Longitude;
+                if (-90 > lat || lat > 90) return null;
+                if (-180 > lon || lon > 180) return null;
+                var northSouth = lat >= 0 ? "N" : "S";
+                var eastWest = lon >= 0 ? "E" : "W";
+                if (RangeComplexes != null && RangeComplexes.SelectedBathymetry != null)
+                {
+                    if ((_bathymetry == null || _bathymetry.Target == null) && RangeComplexes.IsEnvironmentLoaded)
+                    {
+                        _bathymetry = new WeakReference<Bathymetry>(((Task<Bathymetry>)RangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).Result);
+                    }
+                    //if (_bathymetry != null && _bathymetry.Target != null)
+                    //    return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3} Depth: {4:0.#}m", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest, _bathymetry.Target.Samples[MouseEarthCoordinate].Data);
+                }
+                return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3}", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MouseLocationInfoChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MouseLocationInfo);
+        string _mouseLocationInfo;
+        WeakReference<Bathymetry> _bathymetry;
+
+        #endregion
+
 
         #region public float? MouseDepth { get; set; }
 
