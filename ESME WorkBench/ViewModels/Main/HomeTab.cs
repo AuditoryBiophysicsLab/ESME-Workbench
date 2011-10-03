@@ -71,7 +71,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 _isScenarioLoaded = value;
                 NotifyPropertyChanged(IsScenarioLoadedChangedEventArgs);
                 CommandManager.InvalidateRequerySuggested();
-                if (!_isScenarioLoaded) MainWindowTitle = "ESME WorkBench 2011: <No scenario loaded>";
+                if (!_isScenarioLoaded) MainWindowTitle = "One Navy Model: <No scenario loaded>";
             }
         }
 
@@ -112,7 +112,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 _dispatcher.InvokeIfRequired(() =>
                 {
                     ScenarioMetadata.ScenarioFilename = fileName;
-                    MainWindowTitle = string.Format("ESME WorkBench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", ScenarioMetadata.NemoFile.Scenario.EventName, ScenarioMetadata.NemoFile.Scenario.TimeFrame);
+                    MainWindowTitle = string.Format("One Navy Model{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", ScenarioMetadata.NemoFile.Scenario.EventName, ScenarioMetadata.NemoFile.Scenario.TimeFrame);
                 });
                 if (_scenarioFileWatcher != null)
                 {
@@ -142,7 +142,7 @@ namespace ESMEWorkBench.ViewModels.Main
                         _dispatcher.InvokeIfRequired(() =>
                         {
                             ScenarioMetadata.ScenarioFilename = fileName;
-                            MainWindowTitle = string.Format("ESME WorkBench 2011{0}: {1} [{2}]",
+                            MainWindowTitle = string.Format("One Navy Model{0}: {1} [{2}]",
                                                             Configuration.IsUnclassifiedModel ? " (public)" : "",
                                                             ScenarioMetadata.NemoFile.Scenario.EventName,
                                                             ScenarioMetadata.NemoFile.Scenario.TimeFrame);
@@ -346,7 +346,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         static readonly PropertyChangedEventArgs MainWindowTitleChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MainWindowTitle);
-        string _mainWindowTitle = Configuration.IsUnclassifiedModel ? "ESME WorkBench 2011 (public): <No scenario loaded>" : "ESME WorkBench 2011: <No scenario loaded>";
+        string _mainWindowTitle = Configuration.IsUnclassifiedModel ? "One Navy Model (public): <No scenario loaded>" : "One Navy Model: <No scenario loaded>";
 
         #endregion
 
