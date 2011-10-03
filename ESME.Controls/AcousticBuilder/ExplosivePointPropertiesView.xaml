@@ -63,7 +63,7 @@
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Delta" Style="{StaticResource DetailLabelStyle}"/>
                 <Controls:ValidatingTextBox Style="{StaticResource DetailValueStyleEditable}"
-						                            BoundField="Delta" />
+						                            BoundField="Delta" /> 
                 <TextBlock Text="Profile name" Style="{StaticResource DetailLabelStyle}"/>
                 <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding SVPFilename}" />
                 <TextBlock Text="Layer count" Style="{StaticResource DetailLabelStyle}"/>

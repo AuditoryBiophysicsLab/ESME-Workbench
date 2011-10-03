@@ -440,7 +440,5 @@ namespace ESME.Views.AcousticBuilder
             var minutes = (int)(fraction * 60.0);
             return string.Format("{0}{1:00}", degrees, minutes);
         }
-
-
     }
 }
