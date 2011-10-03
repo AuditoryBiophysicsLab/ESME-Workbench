@@ -16,7 +16,7 @@ using MEFedMVVM.ViewModelLocator;
 namespace ESME.Views.TransmissionLossViewer
 {
     [ExportViewModel("PropagationViewModel")]
-    class PropagationViewModel : ViewModelBase, IViewStatusAwareInjectionAware
+    public class PropagationViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
@@ -30,15 +30,15 @@ namespace ESME.Views.TransmissionLossViewer
 
         #region public constructor
         [ImportingConstructor]
-        public PropagationViewModel(CASSOutput cassOutput, IHRCSaveFileService saveFileService, IHRCOpenFileService openFileService, IViewParameterService viewParameterService, IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IUIVisualizerService visualizerService)
+        public PropagationViewModel(CASSOutput cassOutput, IHRCSaveFileService saveFileService, IHRCOpenFileService openFileService, IMessageBoxService messageBoxService, IUIVisualizerService visualizerService)
         {
             RegisterMediator();
             _saveFileService = saveFileService;
             _openFileService = openFileService;
             _messageBoxService = messageBoxService;
             _visualizerService = visualizerService;
-            _viewParameterService = viewParameterService;
-            _viewParameterService.TransmissionLayersWidth = Properties.Settings.Default.TransmissionLayersWidth;
+            _viewParameterService = new ViewParameterService
+            {TransmissionLayersWidth = Properties.Settings.Default.TransmissionLayersWidth};
             _viewParameterService.PropertyChanged += (s, e) =>
             {
                 switch (e.PropertyName)
@@ -48,41 +48,9 @@ namespace ESME.Views.TransmissionLossViewer
                         break;
                 }
             };
-            _viewAwareStatus = viewAwareStatus;
-            _viewAwareStatus.ViewLoaded += ViewLoaded;
-
             CASSOutput = cassOutput;
-            var tlf = TransmissionLossField.FromCASS(CASSOutput);
-            MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged, tlf);
         }
-
-        void ViewLoaded()
-        {
-            //todo
-#if false
-            var args = System.Environment.GetCommandLineArgs();
-            if (args.Length == 2)
-            {
-                if (File.Exists(args[1]))
-                {
-                    if (args[1].ToLower().EndsWith(".bin"))
-                    {
-                        try
-                        {
-                            OpenCASSFile(args[1]);
-                        }
-                        catch (Exception ex)
-                        {
-                            _messageBoxService.ShowError(string.Format("Error opening CASS file \"{0}\":\n{1}", args[1], ex.Message));
-                        }
-                    }
-                }
-            } 
-#endif
-        }
-
-
-
+        
         #endregion
 
         #region public double SelectedRadialBearing { get; set; }
@@ -267,6 +235,9 @@ namespace ESME.Views.TransmissionLossViewer
             _viewAwareStatus = viewAwareStatusService;
             _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
             //_iAmInitialized = true;
+            CASSOutput.Load();
+            var tlf = TransmissionLossField.FromCASS(CASSOutput);
+            MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged, tlf);
         }
 
         void RegisterMediator()

@@ -19,6 +19,7 @@ using ESME.Views.AcousticBuilder;
 using ESME.Views.TransmissionLoss;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.NAVO;
+using ESME.Views.TransmissionLossViewer;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -437,6 +438,8 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.ViewPropagation)]
         public void ViewPropagation(CASSOutput cassOutput)
         {
+            var propagationViewModel = new PropagationViewModel(cassOutput,_saveFileService,_openFileService,_messageBoxService,_visualizerService);
+            _visualizerService.ShowDialog("PropagationView", propagationViewModel);
         }
     }
 }
