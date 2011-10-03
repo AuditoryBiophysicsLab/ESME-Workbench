@@ -363,17 +363,12 @@ namespace ESME.Environment
 
         async void AwaitCompletion()
         {
-#if true
             try
             {
                 await _importer.Completion;
             }
             catch
             {
-#else
-            await _importer.Completion;
-            {
-#endif
                 _dispatcher.InvokeInBackgroundIfRequired(() =>
                 {
                     IsCompleted = _importer.Completion.IsCompleted;

@@ -57,25 +57,6 @@ namespace TransmissionLossViewer
                                                      };
             _viewAwareStatus = viewAwareStatus;
             _viewAwareStatus.ViewLoaded += ViewLoaded;
-            
-            
-
-#if false
-
-            if (_iAmInitialized)
-            {
-                Debug.WriteLine("MainViewModel: Initializing analysis point");
-                MediatorMessage.Send(MediatorMessage.AnalysisPointChanged, analysisPoint);
-                TransmissionLossFieldChanged(analysisPoint.TransmissionLossFields[0]);
-                
-            }
-            else
-            {
-                Debug.WriteLine("MainViewModel: Deferring initialization of analysis point");
-                _tempAnalysisPoint = analysisPoint;
-            }
-#endif
-          
         }
 
         void ViewLoaded()
@@ -324,15 +305,6 @@ namespace TransmissionLossViewer
             _viewAwareStatus = viewAwareStatusService;
             _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
             //_iAmInitialized = true;
-
-#if false
-            if (_tempAnalysisPoint != null)
-            {
-                TransmissionLossFieldChanged(_tempAnalysisPoint.TransmissionLossFields[0]);
-                MediatorMessage.Send(MediatorMessage.AnalysisPointChanged, _tempAnalysisPoint);
-                Debug.WriteLine("MainViewModel: Deferred initialization of analysis point completed");
-            }
-#endif
         }
 
         void RegisterMediator()

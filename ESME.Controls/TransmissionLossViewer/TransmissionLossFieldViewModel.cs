@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Text;
 using System.Windows;
 using System.Windows.Forms;
 using Cinch;
@@ -74,6 +75,35 @@ namespace ESME.Views.TransmissionLossViewer
         TransmissionLossField _transmissionLossField;
 
         #endregion
+
+        #region public string SelectedBearingGeometry { get; set; }
+
+        public string SelectedBearingGeometry
+        {
+            get
+            {
+                var sb = new StringBuilder();
+                const double radius = 8;
+                double x, y;
+                for (double angle = 0; angle <= 2 * Math.PI; angle += Math.PI / 32.0)
+                {
+                    sb.Append(sb.Length == 0 ? "M" : "L");
+                    x = (Math.Sin(angle) * radius) + radius;
+                    y = (Math.Cos(angle) * radius) + radius;
+                    sb.Append(string.Format(" {0:0.###},{1:0.###} ", x, y));
+                }
+                sb.Append(string.Format("M {0:0.###}, {0:0.###} ", radius));
+                x = (Math.Sin(SelectedRadialBearing * (Math.PI / 180)) * radius) + radius;
+                y = (-Math.Cos(SelectedRadialBearing * (Math.PI / 180)) * radius) + radius;
+                sb.Append(string.Format("L {0:0.###},{1:0.###} ", x, y));
+                return sb.ToString();
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedBearingGeometryChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.SelectedBearingGeometry);
+
+        #endregion
+
        
         #region public double SelectedRadialBearing { get; set; }
 
@@ -85,6 +115,7 @@ namespace ESME.Views.TransmissionLossViewer
                 if (_selectedRadialBearing == value) return;
                 _selectedRadialBearing = value;
                 NotifyPropertyChanged(SelectedRadialBearingChangedEventArgs);
+                NotifyPropertyChanged(SelectedBearingGeometryChangedEventArgs);
             }
         }
 

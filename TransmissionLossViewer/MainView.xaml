@@ -37,11 +37,11 @@
     </i:Interaction.Triggers>
 
 	<Window.Title>
-		<MultiBinding StringFormat="Transmission Loss: {0} radial bearing {1:0.#} degrees">
+		<MultiBinding StringFormat="Transmission Loss: {0} radial bearing {1:000.0} degrees">
 			<Binding Path="SelectedTransmissionLossFieldName" />
 			<Binding Path="SelectedRadialBearing" />
 		</MultiBinding>
-	</Window.Title>
+    </Window.Title>
 
 	<DockPanel LastChildFill="True">
 
