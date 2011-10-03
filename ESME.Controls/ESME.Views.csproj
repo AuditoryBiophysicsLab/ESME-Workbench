@@ -181,6 +181,7 @@
     <Compile Include="TransmissionLossViewer\PropagationView.xaml.cs">
       <DependentUpon>PropagationView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="TransmissionLossViewer\PropagationViewModel.cs" />
     <Compile Include="TransmissionLossViewer\TransmissionLossFieldListItemViewModel.cs" />
     <Compile Include="TransmissionLossViewer\TransmissionLossFieldView.xaml.cs">
       <DependentUpon>TransmissionLossFieldView.xaml</DependentUpon>
