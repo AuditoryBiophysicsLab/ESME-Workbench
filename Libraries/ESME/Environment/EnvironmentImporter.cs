@@ -210,7 +210,6 @@ namespace ESME.Environment
                         job.CompletionTask.Start();
                         await job.CompletionTask;
                     }
-#if true
                     var colormap = new DualColormap(Colormap.Summer, Colormap.Jet) {Threshold = 0};
                     var bathysize = Math.Max(bathymetry.Samples.Longitudes.Length, bathymetry.Samples.Latitudes.Length);
                     var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
@@ -225,26 +224,10 @@ namespace ESME.Environment
                     var imageFilename = Path.GetFileNameWithoutExtension(job.DestinationFilename) + ".bmp";
                     var imagePath = Path.GetDirectoryName(job.DestinationFilename);
                         
-                    var retryCount = 10;
-                    Exception ex = null;
-                    while (--retryCount > 0)
-                    {
-                        try
-                        {
-                            var bitmapData = new float[displayValues.Longitudes.Length, displayValues.Latitudes.Length];
-                            for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
-                            var displayData = colormap.ToPixelValues(bitmapData, bathymetry.Minimum.Data, bathymetry.Maximum.Data < 0 ? bathymetry.Maximum.Data : 8000);
-                            BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
-                            break;
-                        }
-                        catch (Exception e)
-                        {
-                            ex = e;
-                            Debug.WriteLine("{0} Bitmap creation caught exception {1}", DateTime.Now, e.Message);
-                            Thread.Sleep(50);
-                        }
-                    }
-                    if (ex != null) throw ex;
+                    var bitmapData = new float[displayValues.Longitudes.Length, displayValues.Latitudes.Length];
+                    for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
+                    var displayData = colormap.ToPixelValues(bitmapData, bathymetry.Minimum.Data, bathymetry.Maximum.Data < 0 ? bathymetry.Maximum.Data : 8000);
+                    BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
 
                     var sb = new StringBuilder();
                     sb.AppendLine(job.Resolution.ToString());
@@ -254,7 +237,6 @@ namespace ESME.Environment
                     sb.AppendLine(bathymetry.Samples.GeoRect.West.ToString());
                     sb.AppendLine(bathymetry.Samples.GeoRect.North.ToString());
                     using (var writer = new StreamWriter(Path.Combine(imagePath, Path.GetFileNameWithoutExtension(imageFilename) + ".bpw"), false)) writer.Write(sb.ToString());
-#endif
                 }
                 //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(job.DestinationFilename)), Path.GetFileNameWithoutExtension(job.DestinationFilename), job.DataType);
                 BathymetryProgress.JobCompleted(job);

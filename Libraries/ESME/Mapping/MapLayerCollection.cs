@@ -259,14 +259,14 @@ namespace ESME.Mapping
             if (curPoint.OldLocation != null)
             {
                 var oldName = string.Format("Explosive Point: [{0:0.###}, {1:0.###}]", curPoint.OldLocation.Latitude, curPoint.OldLocation.Longitude);
-                var oldLayer = Find<OverlayShapeMapLayer>(LayerType.AnalysisPoint, oldName);
+                var oldLayer = Find<ExplosivePointLayer>(LayerType.ExplosivePoint, oldName);
                 oldIndex = IndexOf(oldLayer);
                 //if (oldLayer != null) Remove(oldLayer);
                 //oldIndex--;
                 curPoint.OldLocation = null;
             }
             var explosivePointName = string.Format("Explosive Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude, curPoint.Longitude);
-            var explosivePointLayer = Find<ExplosivePointLayer>(LayerType.AnalysisPoint, explosivePointName);
+            var explosivePointLayer = Find<ExplosivePointLayer>(LayerType.ExplosivePoint, explosivePointName);
             if (explosivePointLayer == null)
             {
                 explosivePointLayer = new ExplosivePointLayer

@@ -284,30 +284,7 @@ namespace ESME.TransmissionLoss.REFMS
                 if (_environmentData == value) return;
                 _environmentData = value;
 
-                var temperatureData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[TimePeriod].EnvironmentData[this];
-                var salinityData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[TimePeriod].EnvironmentData[this];
-                var soundSpeedData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[TimePeriod].EnvironmentData[this];
-                SVPLocation = new Geo(soundSpeedData);
-                BottomLossData = ((Task<BottomLoss>)EnvironmentData[EnvironmentDataType.BottomLoss]).Result.Samples[this].Data;
-                WaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples[this].Data);
-                SVPWaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples[SVPLocation].Data);
-                GeoRect = ((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GeoRect;
-
-                TemperatureData = new double[temperatureData.Data.Count];
-                DepthData = new double[temperatureData.Data.Count];
-                SalinityData = new double[temperatureData.Data.Count];
-                SoundSpeedData = new double[temperatureData.Data.Count];
-                for (var i = 0; i < temperatureData.Data.Count; i++)
-                {
-                    TemperatureData[i] = temperatureData.Data[i].Value;
-                    DepthData[i] = temperatureData.Data[i].Depth;
-                    SalinityData[i] = salinityData.Data[i].Value;
-                    SoundSpeedData[i] = soundSpeedData.Data[i].Value;
-                }
-                ProfileDepth = temperatureData.Data.Last().Depth;
-
-                _svpFile = SVPFile.Create(SVPLocation, DepthData, TemperatureData, SalinityData, SoundSpeedData, BottomLossData, Delta);
-
+                UpdateEnvironmentData();
                 NotifyPropertyChanged(EnvironmentDataChangedEventArgs);
             }
         }
@@ -386,6 +363,33 @@ namespace ESME.TransmissionLoss.REFMS
         public GeoRect GeoRect { get; set; }
 
         public List<SoundSource> SoundSources { get; set; }
+
+        public void UpdateEnvironmentData()
+        {
+            var temperatureData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[TimePeriod].EnvironmentData[this];
+            var salinityData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[TimePeriod].EnvironmentData[this];
+            var soundSpeedData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[TimePeriod].EnvironmentData[this];
+            SVPLocation = new Geo(soundSpeedData);
+            BottomLossData = ((Task<BottomLoss>)EnvironmentData[EnvironmentDataType.BottomLoss]).Result.Samples[this].Data;
+            WaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples[this].Data);
+            SVPWaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples[SVPLocation].Data);
+            GeoRect = ((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GeoRect;
+
+            TemperatureData = new double[temperatureData.Data.Count];
+            DepthData = new double[temperatureData.Data.Count];
+            SalinityData = new double[temperatureData.Data.Count];
+            SoundSpeedData = new double[temperatureData.Data.Count];
+            for (var i = 0; i < temperatureData.Data.Count; i++)
+            {
+                TemperatureData[i] = temperatureData.Data[i].Value;
+                DepthData[i] = temperatureData.Data[i].Depth;
+                SalinityData[i] = salinityData.Data[i].Value;
+                SoundSpeedData[i] = soundSpeedData.Data[i].Value;
+            }
+            ProfileDepth = temperatureData.Data.Last().Depth;
+
+            _svpFile = SVPFile.Create(SVPLocation, DepthData, TemperatureData, SalinityData, SoundSpeedData, BottomLossData, Delta);
+        }
 
         public void Validate()
         {
@@ -578,7 +582,7 @@ namespace ESME.TransmissionLoss.REFMS
             var degrees = (int)(Math.Abs(itude));
             var fraction = ((int)((Math.Abs(itude) - degrees) * 100)) / 100.0;
             var minutes = (int)(fraction * 60.0);
-            return string.Format("{0}{1}", degrees, minutes);
+            return string.Format("{0}{1:00}", degrees, minutes);
         }
 
         double ShearWaveVelocity

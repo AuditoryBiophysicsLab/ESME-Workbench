@@ -40,45 +40,36 @@
                     <StackPanel Orientation="Vertical" Margin="0,0,3,0">
                         <TextBlock Text="Latitude" Style="{StaticResource DetailLabelStyle}" />
                         <Controls:ValidatingTextBox Style="{StaticResource DetailValueStyleEditable}"
-						                            BoundField="ExplosivePoint.Latitude" />
+						                            BoundField="Latitude" />
                         <TextBlock Text="Longitude" Style="{StaticResource DetailLabelStyle}" />
                         <Controls:ValidatingTextBox Style="{StaticResource DetailValueStyleEditable}"
-						                            BoundField="ExplosivePoint.Longitude" />
+						                            BoundField="Longitude" />
                     </StackPanel>
             </GroupBox>
             <GroupBox Header="Simulation" Padding="5">
                 <StackPanel Orientation="Vertical">
-                    <CheckBox Content="Limit depth to" IsChecked="{Binding ExplosivePoint.DepthLimitEnabled}" Style="{StaticResource DetailLabelStyle}" />
+                    <CheckBox Content="Limit depth to" IsChecked="{Binding DepthLimitEnabled}" Style="{StaticResource DetailLabelStyle}" />
                     <Controls:ValidatingTextBox Style="{StaticResource DetailValueStyleEditable}"
-						                            BoundField="ExplosivePoint.DepthLimit" />
+						                            BoundField="DepthLimit" />
                     <TextBlock Text="Source count" Style="{StaticResource DetailLabelStyle}"/>
                     <Controls:ValidatingTextBox Style="{StaticResource DetailValueStyleEditable}"
-						                            BoundField="ExplosivePoint.SourceCount" />
-                    <CheckBox Content="Enable bottom reflections" IsChecked="{Binding ExplosivePoint.BottomReflectionsEnabled}" Style="{StaticResource DetailLabelStyle}" />
-                    <CheckBox Content="Include exponential at bottom" IsChecked="{Binding ExplosivePoint.BottomExponentialEnabled}" Style="{StaticResource DetailLabelStyle}" />
+						                            BoundField="SourceCount" />
+                    <CheckBox Content="Enable bottom reflections" IsChecked="{Binding BottomReflectionsEnabled}" Style="{StaticResource DetailLabelStyle}" />
+                    <CheckBox Content="Include exponential at bottom" IsChecked="{Binding BottomExponentialEnabled}" Style="{StaticResource DetailLabelStyle}" />
                 </StackPanel>
             </GroupBox>
         </StackPanel>
         <GroupBox Header="Sound velocity profile" Padding="5">
             <StackPanel Orientation="Vertical">
-                <CheckBox Content="Enabled" IsChecked="{Binding ExplosivePoint.IsEnabled}" Style="{StaticResource DetailLabelStyle}" />
                 <TextBlock Text="Delta" Style="{StaticResource DetailLabelStyle}"/>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="75" />
-                    </Grid.ColumnDefinitions>
-                    <Controls:ValidatingTextBox Style="{StaticResource DetailValueStyleEditable}"
-						                            BoundField="ExplosivePoint.Delta" />
-                    <Button Grid.Column="1" Content="Regenerate" Command="{Binding RegenerateCommand}"
-                            Style="{StaticResource DetailLabelStyle}" Margin="5 0 0 0"/>
-                </Grid>
+                <Controls:ValidatingTextBox Style="{StaticResource DetailValueStyleEditable}"
+						                            BoundField="Delta" />
                 <TextBlock Text="Profile name" Style="{StaticResource DetailLabelStyle}"/>
-                <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding ExplosivePoint.SVPFilename}" />
+                <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding SVPFilename}" />
                 <TextBlock Text="Layer count" Style="{StaticResource DetailLabelStyle}"/>
-                <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding ExplosivePoint.SVPFile.Layers.Count}" />
+                <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding SVPFile.Layers.Count}" />
                 <TextBlock Text="Profile depth (m)" Style="{StaticResource DetailLabelStyle}"/>
-                <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding ExplosivePoint.WaterDepth}" />
+                <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding SVPWaterDepth}" />
             </StackPanel>
         </GroupBox>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

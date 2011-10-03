@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Xml.Serialization;
+using System.Threading.Tasks;
 using Cinch;
+using ESME.Environment;
+using ESME.Environment.Descriptors;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.REFMS;
+using HRC.Collections;
+using HRC.Navigation;
 using HRC.Validation;
 using MEFedMVVM.ViewModelLocator;
 
@@ -19,13 +22,7 @@ namespace ESME.Views.AcousticBuilder
     {
         public ExplosivePointPropertiesViewModel(ExplosivePoint explosivePoint)
         {
-            RegisterMediator();
             AvailableModes = new ObservableCollection<SoundSource>();
-            ExplosivePoint = explosivePoint;
-            IsItemSelected = false;
-            Latitude = ExplosivePoint.Latitude;
-            Longitude = ExplosivePoint.Longitude;
-            
             ValidationRules.AddRange(new List<ValidationRule>
             {
                 new ValidationRule
@@ -41,6 +38,19 @@ namespace ESME.Views.AcousticBuilder
                     RuleDelegate = (o, r) =>RangeCheck(((ExplosivePointPropertiesViewModel)o).Longitude, -180, 180),
                 },
             });
+            explosivePoint.OldLocation = new Geo(explosivePoint);
+            ExplosivePoint = explosivePoint;
+            EnvironmentData = ExplosivePoint.EnvironmentData;
+            Latitude = ExplosivePoint.Latitude;
+            Longitude = ExplosivePoint.Longitude;
+            UpdateEnvironmentData();
+            DepthLimit = explosivePoint.WaterDepth;
+            if (DepthLimit > 2000) DepthLimitEnabled = true;
+            SourceCount = AvailableModes.Count;
+            BottomReflectionsEnabled = explosivePoint.BottomReflectionsEnabled;
+            BottomExponentialEnabled = DepthLimit < 2000;
+            IsEnabled = true;
+            Delta = explosivePoint.Delta;
         }
 
         public static IMessageBoxService MessageBoxService { get; set; }
@@ -54,6 +64,7 @@ namespace ESME.Views.AcousticBuilder
             {
                 _latitude = value;
                 NotifyPropertyChanged(LatitudeChangedEventArgs);
+                UpdateEnvironmentData();
             }
         }
 
@@ -71,11 +82,175 @@ namespace ESME.Views.AcousticBuilder
             {
                 _longitude = value;
                 NotifyPropertyChanged(LongitudeChangedEventArgs);
+                UpdateEnvironmentData();
             }
         }
 
         static readonly PropertyChangedEventArgs LongitudeChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointPropertiesViewModel>(x => x.Longitude);
         double _longitude;
+
+        #endregion
+
+        #region public bool DepthLimitEnabled { get; set; }
+
+        public bool DepthLimitEnabled
+        {
+            get { return _depthLimitEnabled; }
+            set
+            {
+                if (_depthLimitEnabled == value) return;
+                _depthLimitEnabled = value;
+                NotifyPropertyChanged(DepthLimitEnabledChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DepthLimitEnabledChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.DepthLimitEnabled);
+        bool _depthLimitEnabled;
+
+        #endregion
+
+        #region public double DepthLimit { get; set; }
+
+        public double DepthLimit
+        {
+            get { return _depthLimit; }
+            set
+            {
+                if (_depthLimit == value) return;
+                _depthLimit = value;
+                NotifyPropertyChanged(DepthLimitChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DepthLimitChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.DepthLimit);
+        double _depthLimit;
+
+        #endregion
+
+        #region public int SourceCount { get; set; }
+
+        public int SourceCount
+        {
+            get { return _sourceCount; }
+            set
+            {
+                if (_sourceCount == value) return;
+                _sourceCount = value;
+                NotifyPropertyChanged(SourceCountChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SourceCountChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.SourceCount);
+        int _sourceCount;
+
+        #endregion
+
+        #region public bool BottomReflectionsEnabled { get; set; }
+
+        public bool BottomReflectionsEnabled
+        {
+            get { return _bottomReflectionsEnabled; }
+            set
+            {
+                if (_bottomReflectionsEnabled == value) return;
+                _bottomReflectionsEnabled = value;
+                NotifyPropertyChanged(BottomReflectionsEnabledChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BottomReflectionsEnabledChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.BottomReflectionsEnabled);
+        bool _bottomReflectionsEnabled;
+
+        #endregion
+
+        #region public bool BottomExponentialEnabled { get; set; }
+
+        public bool BottomExponentialEnabled
+        {
+            get { return _bottomExponentialEnabled; }
+            set
+            {
+                if (_bottomExponentialEnabled == value) return;
+                _bottomExponentialEnabled = value;
+                NotifyPropertyChanged(BottomExponentialEnabledChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BottomExponentialEnabledChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.BottomExponentialEnabled);
+        bool _bottomExponentialEnabled;
+
+        #endregion
+
+        #region public bool IsEnabled { get; set; }
+
+        public bool IsEnabled
+        {
+            get { return _isEnabled; }
+            set
+            {
+                if (_isEnabled == value) return;
+                _isEnabled = value;
+                NotifyPropertyChanged(IsEnabledChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.IsEnabled);
+        bool _isEnabled;
+
+        #endregion
+
+        #region public double Delta { get; set; }
+
+        public double Delta
+        {
+            get { return _delta; }
+            set
+            {
+                if (_delta == value) return;
+                _delta = value;
+                NotifyPropertyChanged(DeltaChangedEventArgs);
+                UpdateEnvironmentData();
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DeltaChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.Delta);
+        double _delta;
+
+        #endregion
+
+        #region public SVPFile SVPFile { get; set; }
+
+        public SVPFile SVPFile
+        {
+            get { return _svpFile; }
+            set
+            {
+                if (_svpFile == value) return;
+                _svpFile = value;
+                NotifyPropertyChanged(SVPFileChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SVPFileChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.SVPFile);
+        SVPFile _svpFile;
+
+        #endregion
+
+        #region public double ProfileDepth { get; set; }
+
+        public double ProfileDepth
+        {
+            get { return _profileDepth; }
+            set
+            {
+                if (_profileDepth == value) return;
+                _profileDepth = value;
+                NotifyPropertyChanged(ProfileDepthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ProfileDepthChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.ProfileDepth);
+        double _profileDepth;
 
         #endregion
 
@@ -121,61 +296,6 @@ namespace ESME.Views.AcousticBuilder
 
         #endregion
 
-        #region public SoundSource SelectedMode { get; set; }
-
-        public SoundSource SelectedMode
-        {
-            get { return _selectedMode; }
-            set
-            {
-                if (_selectedMode == value) return;
-                _selectedMode = value;
-                NotifyPropertyChanged(SelectedModeChangedEventArgs);
-                IsItemSelected = _selectedMode != null;
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedModeChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointPropertiesViewModel>(x => x.SelectedMode);
-        SoundSource _selectedMode;
-
-        #endregion
-
-        #region public bool IsItemSelected { get; set; }
-        [XmlIgnore]
-        public bool IsItemSelected
-        {
-            get { return _isItemSelected; }
-            set
-            {
-                if (_isItemSelected == value) return;
-                _isItemSelected = value;
-                NotifyPropertyChanged(IsItemSelectedChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsItemSelectedChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointPropertiesViewModel>(x => x.IsItemSelected);
-        bool _isItemSelected;
-
-        #endregion
-
-        #region public bool AnalysisPointIsChanged { get; set; }
-
-        public bool AnalysisPointIsChanged
-        {
-            get { return _analysisPointIsChanged; }
-            set
-            {
-                if (_analysisPointIsChanged == value) return;
-                _analysisPointIsChanged = value;
-                NotifyPropertyChanged(AnalysisPointIsChangedChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs AnalysisPointIsChangedChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointPropertiesViewModel>(x => x.AnalysisPointIsChanged);
-        bool _analysisPointIsChanged;
-
-        #endregion
-
         #region OkCommand
 
         public SimpleCommand<object, object> OkCommand
@@ -189,7 +309,14 @@ namespace ESME.Views.AcousticBuilder
                                              {
                                                  ExplosivePoint.Latitude = Latitude;
                                                  ExplosivePoint.Longitude = Longitude;
+                                                 ExplosivePoint.Delta = Delta;
+                                                 if (DepthLimitEnabled) ExplosivePoint.WaterDepth = DepthLimit;
+                                                 ExplosivePoint.BottomReflectionsEnabled = BottomReflectionsEnabled;
+                                                 ExplosivePoint.BottomExponentialEnabled = BottomExponentialEnabled;
+
                                                  if (ExplosivePoint != null) ExplosivePoint.Validate();
+                                                 
+                                                 ExplosivePoint.UpdateEnvironmentData();
                                                  CloseActivePopUpCommand.Execute(true);
                                              }));
             }
@@ -205,7 +332,6 @@ namespace ESME.Views.AcousticBuilder
         {
             get { return _cancelCommand ?? (_cancelCommand = new SimpleCommand<object, object>(delegate
                                                                                                {
-                                                                                                   AnalysisPointIsChanged = false;
                                                                                                    CloseActivePopUpCommand.Execute(false);
                                                                                                })); }
         }
@@ -214,43 +340,107 @@ namespace ESME.Views.AcousticBuilder
 
         #endregion
 
-        #region RegenerateCommand
-        public SimpleCommand<object, object> RegenerateCommand
+        #region public ObservableConcurrentDictionary<EnvironmentDataType, Task> EnvironmentData { get; set; }
+
+        public ObservableConcurrentDictionary<EnvironmentDataType, Task> EnvironmentData
+        {
+            get { return _environmentData; }
+            set
+            {
+                if (_environmentData == value) return;
+                _environmentData = value;
+                NotifyPropertyChanged(EnvironmentDataChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs EnvironmentDataChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.EnvironmentData);
+        ObservableConcurrentDictionary<EnvironmentDataType, Task> _environmentData;
+
+        #endregion
+
+        #region public Geo SVPLocation { get; set; }
+
+        public Geo SVPLocation
+        {
+            get { return _svpLocation; }
+            set
+            {
+                if (_svpLocation == value) return;
+                _svpLocation = value;
+                NotifyPropertyChanged(SVPLocationChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SVPLocationChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.SVPLocation);
+        Geo _svpLocation;
+
+        #endregion
+
+        #region public double SVPWaterDepth { get; set; }
+
+        public double SVPWaterDepth
+        {
+            get { return _svpWaterDepth; }
+            set
+            {
+                if (_svpWaterDepth == value) return;
+                _svpWaterDepth = value;
+                NotifyPropertyChanged(SVPWaterDepthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SVPWaterDepthChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.SVPWaterDepth);
+        double _svpWaterDepth;
+
+        #endregion
+
+        public void UpdateEnvironmentData()
+        {
+            var curLocation = new Geo(Latitude, Longitude);
+            var tempData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[ExplosivePoint.TimePeriod].EnvironmentData[curLocation];
+            var salData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[ExplosivePoint.TimePeriod].EnvironmentData[curLocation];
+            var sspData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[ExplosivePoint.TimePeriod].EnvironmentData[curLocation];
+            SVPLocation = new Geo(sspData);
+            NotifyPropertyChanged(SVPFilenameChangedEventArgs);
+            var bottomLossData = ((Task<BottomLoss>)EnvironmentData[EnvironmentDataType.BottomLoss]).Result.Samples[curLocation].Data;
+            DepthLimit = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples[curLocation].Data);
+            SVPWaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples[SVPLocation].Data);
+
+            var temperatureData = new double[tempData.Data.Count];
+            var depthData = new double[tempData.Data.Count];
+            var salinityData = new double[tempData.Data.Count];
+            var soundSpeedData = new double[tempData.Data.Count];
+            for (var i = 0; i < tempData.Data.Count; i++)
+            {
+                temperatureData[i] = tempData.Data[i].Value;
+                depthData[i] = tempData.Data[i].Depth;
+                salinityData[i] = salData.Data[i].Value;
+                soundSpeedData[i] = sspData.Data[i].Value;
+            }
+            ProfileDepth = tempData.Data.Last().Depth;
+            SVPFile = SVPFile.Create(SVPLocation, depthData, temperatureData, salinityData, soundSpeedData, bottomLossData, Delta);
+        }
+
+        public string SVPFilename
         {
             get
             {
-                return _regenerate ??
-                       (_regenerate =
-                        new SimpleCommand<object, object>(delegate { return IsRegenerateCommandEnabled; },
-                                                          delegate { RegenerateHandler(); }));
+                if (SVPLocation == null) return null;
+                var northSouth = SVPLocation.Latitude >= 0 ? "N" : "S";
+                var eastWest = SVPLocation.Longitude >= 0 ? "E" : "W";
+                return string.Format("LOC_{0}{1}_{2}{3}_{4:0}-{5}", DegreesMinutes(SVPLocation.Latitude), northSouth, DegreesMinutes(SVPLocation.Longitude), eastWest, SVPWaterDepth, ExplosivePoint.TimePeriod);
             }
         }
+        static readonly PropertyChangedEventArgs SVPFilenameChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.SVPFilename);
 
-        SimpleCommand<object, object> _regenerate;
-
-        bool IsRegenerateCommandEnabled
+        static string DegreesMinutes(double itude)
         {
-            get { return true; }
+            var degrees = (int)(Math.Abs(itude));
+            var fraction = ((int)((Math.Abs(itude) - degrees) * 100)) / 100.0;
+            var minutes = (int)(fraction * 60.0);
+            return string.Format("{0}{1:00}", degrees, minutes);
         }
 
-        void RegenerateHandler() { }
-        #endregion
 
-        #region Mediator Registration
-
-        void RegisterMediator()
-        {
-            try
-            {
-                Mediator.Instance.Register(this);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("***********\nAnalysisPointSettingsViewModel: Mediator registration failed: " + ex.Message + "\n***********");
-                throw;
-            }
-        }
-
-        #endregion
     }
 }
