@@ -116,7 +116,7 @@ namespace DavesConsoleTester
         
         static async void gdem(string[] args)
         {
-            var settings = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME WorkBench"), "settings.xml");
+            var settings = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "One Navy Model"), "settings.xml");
             ESME.Globals.AppSettings = AppSettings.Load(settings);
 
             string outputDirectory = null;
@@ -243,7 +243,7 @@ namespace DavesConsoleTester
 
         static void Main(string[] args)
         {
-            var settings = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME WorkBench"), "settings.xml");
+            var settings = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "One Navy Model"), "settings.xml");
             ESME.Globals.AppSettings = AppSettings.Load(settings);
 
             const float north = 32.964529899922404f;

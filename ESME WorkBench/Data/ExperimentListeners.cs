@@ -16,8 +16,9 @@ using ESME.TransmissionLoss;
 using ThinkGeo.MapSuite.Core;
 using ESME.Views.AcousticBuilder;
 using BehaviorModel = ESME.Platform.BehaviorModel;
+using Globals = OneNavyModel.Globals;
 
-namespace ESMEWorkBench.Data
+namespace OneNavyModel.Data
 {
     public partial class Experiment
     {

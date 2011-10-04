@@ -4,18 +4,17 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
 using Cinch;
 using ESME;
 using ESME.Data;
-using ESME.Environment.Descriptors;
 using ESME.Mapping;
 using ESME.Views.LogFileViewer;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.NAVO;
-using ESMEWorkBench.ViewModels.TransmissionLoss;
+using OneNavyModel.Properties;
+using OneNavyModel.ViewModels.NAVO;
+using OneNavyModel.ViewModels.TransmissionLoss;
+using Globals = OneNavyModel.Globals;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace OneNavyModel.ViewModels.Main
 {
     public partial class MainViewModel
     {
@@ -171,7 +170,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void HelpHandler()
         {
-            var userManual = Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ESME Workbench*Manual*.pdf");
+            var userManual = Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "One Navy Model*Manual*.pdf");
             if (userManual.Length == 0)
             {
                 _messageBoxService.ShowError("The user manual was not found!");

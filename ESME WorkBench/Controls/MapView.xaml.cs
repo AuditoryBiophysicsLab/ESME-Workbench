@@ -1,6 +1,4 @@
-﻿using System.Windows.Controls;
-
-namespace ESMEWorkBench.Controls
+﻿namespace OneNavyModel.Controls
 {
     /// <summary>
     ///   Interaction logic for MapView.xaml

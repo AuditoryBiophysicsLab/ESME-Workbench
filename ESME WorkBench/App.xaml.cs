@@ -6,13 +6,16 @@ using System.Reflection;
 using System.Windows;
 using Cinch;
 using ESME.Views;
-using ESMEWorkBench.Properties;
 using HRC.Utility;
+using OneNavyModel.Properties;
+
 #if DEBUG
 using System.Security.Principal;
+using OneNavyModel.Properties;
+
 #endif
 
-namespace ESMEWorkBench
+namespace OneNavyModel
 {
     /// <summary>
     ///   Interaction logic for App.xaml
@@ -21,7 +24,7 @@ namespace ESMEWorkBench
     {
         public static AppEventLog Log { get; private set; }
         public static readonly string Logfile, DumpFile;
-        public const string Name = "ESME WorkBench";
+        public const string Name = "One Navy Model";
 
         static App()
         {
@@ -36,7 +39,7 @@ namespace ESMEWorkBench
 #endif
             if (OSInfo.OperatingSystemName != "XP")
             {
-                DumpFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "esme_crash.mdmp");
+                DumpFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "one_navy_model_crash.mdmp");
                 AppDomain.CurrentDomain.UnhandledException += LastChanceExceptionHandler;
 
             }

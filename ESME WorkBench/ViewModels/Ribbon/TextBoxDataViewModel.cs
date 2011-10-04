@@ -3,7 +3,7 @@ using System.ComponentModel.Composition;
 using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.Ribbon
+namespace OneNavyModel.ViewModels.Ribbon
 {
     [ExportViewModel("TextBoxDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]

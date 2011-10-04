@@ -1,6 +1,6 @@
 ﻿using Cinch;
 
-namespace ESMEWorkBench.Views
+namespace OneNavyModel.Views
 {
     /// <summary>
     ///   Interaction logic for SimulationView.xaml

@@ -28,8 +28,8 @@ namespace ESME.Views.InstallationWizard
                     new WizardPanelInfo
                     {
                             DescriptiveText =
-                                    "Welcome to the ESME Workbench Configuration Wizard.\n\n" +
-                                    "The next several panes of this wizard will help complete the configuration of ESME Workbench.\n\n" +
+                                    "Welcome to the One Navy Model Configuration Wizard.\n\n" +
+                                    "The next several panes of this wizard will help configure the One Navy Model.\n\n" +
                                     "Please press Next to continue, or Cancel to exit without saving changes.",
                             IsFileBrowerEnabled = false,
                             UserResponse = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
@@ -44,7 +44,7 @@ namespace ESME.Views.InstallationWizard
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "Some components of the One Navy Model bundled with ESME Workbench require Java to run.\n\n" +
+                                   "Some components of the One Navy Model require Java to run.\n\n" +
                                    "Please select the installed javaw.exe executable.\n\n" +
                                    "If Java is not installed, the latest Java Runtime Environment (JRE) can be downloaded from http://www.oracle.com/technetwork/java/javase/downloads/index.html",
                                    Hyperlink =
@@ -65,7 +65,7 @@ namespace ESME.Views.InstallationWizard
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "The Naval Underseas Warfare Center (NUWC) provides a collection of java applications necessary for the proper operation of the One Navy Model.\n\n" +
+                                   "The Naval Undersea Warfare Center (NUWC) provides a collection of java applications necessary for the proper operation of the One Navy Model.\n\n" +
                                    "Please select the NUWC Scenario Builder (scenario-builder.jar) that is stored in a directory containing the complete NUWC application collection.",
                                    FieldName = "NUWC Application (*.jar)",
                                    DialogTitle = "Locate the Scenario Builder (scenario-builder.jar)",
@@ -100,7 +100,7 @@ namespace ESME.Views.InstallationWizard
                                    "Please select any .nc file in the directory containing all of the GDEM data.\n\n" +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
                                    Hyperlink = new Uri("http://esme.bu.edu"),
-                                   HyperlinkText = "the ESME Workbench webpage.",
+                                   HyperlinkText = "the One Navy Model webpage.",
                                    FieldName = "GDEM-V",
                                    DialogTitle = "Choose one GDEM database file",
                                    FileNameFilter = "NetCDF files (*.nc)|*.nc|All files (*.*)|*.*",
@@ -117,7 +117,7 @@ namespace ESME.Views.InstallationWizard
                                    "Please select any .stt file a directory tree containing all of the SMGC data.\n\n" +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
                                    Hyperlink = new Uri("http://esme.bu.edu"),
-                                   HyperlinkText = "the ESME Workbench webpage.",
+                                   HyperlinkText = "the One Navy Model webpage.",
                                    FieldName = "SMGC",
                                    DialogTitle = "Choose one SMGC database file (*.stt)",
                                    FileNameFilter = "SMGC files (*.stt)|*.stt|All files (*.*)|*.*",
@@ -134,7 +134,7 @@ namespace ESME.Views.InstallationWizard
                                    "Please select the .h5 file that contains the HFEVA BST database.\n\n" +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
                                    Hyperlink = new Uri("http://esme.bu.edu"),
-                                   HyperlinkText = "the ESME Workbench webpage.",
+                                   HyperlinkText = "the One Navy Model webpage.",
                                    DialogTitle = "Locate the BST HFEVA database file",
                                    FieldName = "BST",
                                    FileNameFilter =
@@ -152,7 +152,7 @@ namespace ESME.Views.InstallationWizard
                                    "Please select the .h5 file that contains the DBDB.\n\n" +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
                                    Hyperlink = new Uri("http://esme.bu.edu"),
-                                   HyperlinkText = "the ESME Workbench webpage.",
+                                   HyperlinkText = "the One Navy Model webpage.",
                                    FieldName = "DBDB",
                                    DialogTitle = "Locate the DBDB database file (dbdbv5_level0c_0.h5)",
                                    FileNameFilter =
@@ -169,7 +169,7 @@ namespace ESME.Views.InstallationWizard
                                    "Please select the DBDB extractor.\n\n" +
                                    "If you do not have this tool, a copy can be downloaded from http://esme.bu.edu",
                                    Hyperlink = new Uri("http://esme.bu.edu"),
-                                   HyperlinkText = "the ESME Workbench webpage.",
+                                   HyperlinkText = "the One Navy Model webpage.",
                                    FieldName = "DBDB Extractor (dbv5_command.exe)",
                                    DialogTitle = "Locate the DBDB Extractor program (dbv5_command.exe)",
                                    FileNameFilter =
@@ -250,7 +250,7 @@ namespace ESME.Views.InstallationWizard
                     Panels.Add(new WizardPanelInfo
                     {
                             DescriptiveText =
-                                       "Some components of the One Navy Model bundled with ESME Workbench require Python to run.\n\n" +
+                                       "Some components of the One Navy Model bundled with One Navy Model require Python to run.\n\n" +
                                        "Please select the installed pythonw.exe executable.\n\n" +
                                        "If Python is not installed, the latest version can be downloaded from www.python.org/download/releases/2.7.2/\n\n",
                             DialogTitle = "Locate the Python Executable",
@@ -278,7 +278,7 @@ namespace ESME.Views.InstallationWizard
             Panels.Add(new WizardPanelInfo
             {
                 DescriptiveText =
-                           "The wizard has successfully configured all necessary parameters.\n\nPlease press the Finish button to complete configuration and launch ESME Workbench, or Cancel to exit without saving changes.",
+                           "The wizard has successfully configured all necessary parameters.\n\nPlease press the Finish button to complete configuration and launch One Navy Model, or Cancel to exit without saving changes.",
                 IsFileBrowerEnabled = false,
                 UserResponse = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                 //will always be a valid location; "next" button always lit.

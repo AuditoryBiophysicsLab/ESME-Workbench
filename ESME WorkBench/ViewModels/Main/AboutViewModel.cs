@@ -1,39 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Windows;
-using System.Windows.Threading;
 using Cinch;
 using ESME.Views.Misc;
+using ESMEWorkBench;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace OneNavyModel.ViewModels.Main
 {
     public class AboutViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
-        readonly string _assemblyDescription;
-        readonly AssemblyName _assemblyName;
-        readonly string _assemblyTitle;
-        Dispatcher _dispatcher;
-        IViewAwareStatus _viewAwareStatus;
-
         public AboutViewModel()
         {
             RegisterMediator();
-            Assembly assembly = Assembly.GetAssembly(typeof (AboutViewModel));
-            _assemblyName = assembly.GetName();
-            // assembly description attribute
-            _assemblyDescription = ((AssemblyDescriptionAttribute) assembly.GetCustomAttributes(typeof (AssemblyDescriptionAttribute), false)[0]).Description;
-            // assembly title attribute
-            _assemblyTitle = ((AssemblyTitleAttribute) assembly.GetCustomAttributes(typeof (AssemblyTitleAttribute), false)[0]).Title;
-            WorkbenchModuleBuildInfo = new ModuleBuildInfoViewModel("ESME WorkBench", BuildInformation.BuildDateTime, BuildInformation.BuildEngineer, BuildInformation.SVNVersion);
+            WorkbenchModuleBuildInfo = new ModuleBuildInfoViewModel("One Navy Model", BuildInformation.BuildDateTime, BuildInformation.BuildEngineer, BuildInformation.SVNVersion);
             ESMEModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.dll", ESME.BuildInformation.BuildDateTime, ESME.BuildInformation.BuildEngineer, ESME.BuildInformation.SVNVersion);
             HRCModuleBuildInfo = new ModuleBuildInfoViewModel("HRC.dll", HRC.BuildInformation.BuildDateTime, HRC.BuildInformation.BuildEngineer, HRC.BuildInformation.SVNVersion);
             ViewsModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.Views.dll", ESME.Views.BuildInformation.BuildDateTime, ESME.Views.BuildInformation.BuildEngineer, ESME.Views.BuildInformation.SVNVersion);
-            string appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (string.IsNullOrEmpty(appDir)) return;
             MapDllVersion = Assembly.LoadFile(Path.Combine(appDir, "WpfDesktopEdition.dll")).GetName().Version.ToString();
             MapCoreVersion = Assembly.LoadFile(Path.Combine(appDir, "MapSuiteCore.dll")).GetName().Version.ToString();
@@ -78,7 +65,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                    HRCModuleBuildInfo,
                                                                                                                    ViewsModuleBuildInfo
                                                                                                                };
-                                                                                                   string result = ConcatenatedBuildInfo(infos);
+                                                                                                   var result = ConcatenatedBuildInfo(infos);
                                                                                                    Clipboard.SetText(result);
                                                                                                }));
             }
@@ -100,14 +87,11 @@ namespace ESMEWorkBench.ViewModels.Main
         #region IViewStatusAwareInjectionAware Members
 
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
-        {
-            _viewAwareStatus = viewAwareStatusService;
-            _dispatcher = ((Window) _viewAwareStatus.View).Dispatcher;
-        }
+        { }
 
         #endregion
 
-        string ConcatenatedBuildInfo(List<ModuleBuildInfoViewModel> modules)
+        static string ConcatenatedBuildInfo(IEnumerable<ModuleBuildInfoViewModel> modules)
         {
             var sb = new StringBuilder();
             sb.AppendLine("----- Component Version Info -----");

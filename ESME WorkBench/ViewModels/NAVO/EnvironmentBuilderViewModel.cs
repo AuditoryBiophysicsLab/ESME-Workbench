@@ -17,7 +17,6 @@ using ESME.Data;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.TransmissionLoss.CASS;
-using ESMEWorkBench.Data;
 using HRC.Navigation;
 using HRC.Utility;
 

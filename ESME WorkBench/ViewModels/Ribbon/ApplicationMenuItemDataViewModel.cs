@@ -1,6 +1,6 @@
-﻿using ESMEWorkBench.ViewModels.RecentFiles;
+﻿using OneNavyModel.ViewModels.RecentFiles;
 
-namespace ESMEWorkBench.ViewModels.Ribbon
+namespace OneNavyModel.ViewModels.Ribbon
 {
     public class ApplicationMenuItemDataViewModel : MenuItemDataViewModel
     {

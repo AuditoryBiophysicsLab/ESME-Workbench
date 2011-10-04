@@ -56,7 +56,7 @@ namespace ESME.Validation
         }
 
         /// <summary>
-        /// Ensure that all Transmission Loss Job files correspond to extant Analysis Points.  This routine must be called from within ESME WorkBench
+        /// Ensure that all Transmission Loss Job files correspond to extant Analysis Points.  This routine must be called from within the One Navy Model
         /// </summary>
         /// <param name="transmissionLossJobRoot"></param>
         /// <param name="analysisPoints"></param>

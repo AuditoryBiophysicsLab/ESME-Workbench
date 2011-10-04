@@ -7,7 +7,7 @@ using ESME;
 using ESME.Data;
 using HRC.Services;
 
-namespace ESMEWorkBench
+namespace OneNavyModel
 {
     public static class Globals
     {

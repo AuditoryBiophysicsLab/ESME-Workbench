@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Cinch;
 using ESME.Data;
 using ESME.NEMO;
+using ESMEWorkBench;
 
-namespace ESMEWorkBench.ViewModels.NAVO
+namespace OneNavyModel.ViewModels.NAVO
 {
     public class ScenarioSimulatorOptionsViewModel : ViewModelBase
     {

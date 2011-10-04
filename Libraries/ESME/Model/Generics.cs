@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 
 namespace ESME.Model
 {
@@ -57,8 +56,8 @@ namespace ESME.Model
     }
 
     public class UniqueAutoIncrementList<T> : AutoIncrementList<T>
-        where T : IHasIDField, IEquatable<T>
+        where T : class, IHasIDField, IEquatable<T>
     {
-        new void Add(T item) { if (this.Find(s => s.Equals(item)) == null) base.Add(item); }
+        new void Add(T item) { if (Find(s => s.Equals(item)) == null) base.Add(item); }
     }
 }

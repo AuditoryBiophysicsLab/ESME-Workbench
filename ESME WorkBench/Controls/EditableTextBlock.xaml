@@ -1,8 +1,7 @@
-﻿<UserControl x:Class="ESMEWorkBench.Controls.EditableTextBlock"
+﻿<UserControl x:Class="OneNavyModel.Controls.EditableTextBlock"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:Controls="clr-namespace:ESMEWorkBench.Controls"
-             x:Name="mainControl">
+             xmlns:Controls="clr-namespace:OneNavyModel.Controls" x:Name="mainControl">
 	<UserControl.Resources>
 
 		<DataTemplate x:Key="EditModeTemplate">

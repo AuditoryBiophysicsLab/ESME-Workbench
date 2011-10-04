@@ -1,4 +1,4 @@
-﻿namespace ESMEWorkBench.Views
+﻿namespace OneNavyModel.Views
 {
     /// <summary>
     ///   Interaction logic for ScenarioSimulatorUserControlView.xaml

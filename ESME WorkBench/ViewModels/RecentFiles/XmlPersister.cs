@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 
-namespace ESMEWorkBench.ViewModels.RecentFiles
+namespace OneNavyModel.ViewModels.RecentFiles
 {
     class XmlPersister : IPersist
     {

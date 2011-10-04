@@ -13,9 +13,6 @@ using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Mapping;
-using ESMEWorkBench.Data;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.RecentFiles;
 using HRC.Navigation;
 using HRC.Services;
 using HRC.Utility;
@@ -23,8 +20,11 @@ using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ESME.Views.AcousticBuilder;
 using ESME.Environment.Descriptors;
+using OneNavyModel.Data;
+using OneNavyModel.Properties;
+using OneNavyModel.ViewModels.RecentFiles;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace OneNavyModel.ViewModels.Main
 {
     [ExportViewModel("MainViewModel")]
     public partial class MainViewModel : ViewModelBase

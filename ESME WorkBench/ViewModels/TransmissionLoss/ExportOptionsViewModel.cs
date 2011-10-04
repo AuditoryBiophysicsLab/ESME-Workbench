@@ -9,7 +9,7 @@ using ESME.Environment.NAVO;
 using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace OneNavyModel.ViewModels.TransmissionLoss
 {
     [ExportViewModel("EnvironmentBuilderViewModel")]
     class ExportOptionsViewModel : ViewModelBase

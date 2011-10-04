@@ -16,11 +16,6 @@ namespace ESME
             Configuration = new Configuration();
         }
 
-        public static string UserFolder
-        {
-            get { return Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "ESME WorkBench"); }
-        }
-
         public static string Filter(this string s, Func<char, bool> trueIfKeep)
         {
             if (!string.IsNullOrEmpty(s))

@@ -131,7 +131,6 @@
     <Compile Include="Collections\TraversalMethods.cs" />
     <Compile Include="Converters.cs" />
     <Compile Include="Database\MySqlWrapper.cs" />
-    <Compile Include="Globals.cs" />
     <Compile Include="Interactivity\CommandAction.cs" />
     <Compile Include="Interactivity\DragBehavior.cs" />
     <Compile Include="Interactivity\HyperlinkAction.cs" />

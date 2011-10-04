@@ -18,8 +18,9 @@ using ESME.Views.Locations;
 using ESME.Views.InstallationWizard;
 using HRC.Navigation;
 using ThinkGeo.MapSuite.Core;
+using Globals = OneNavyModel.Globals;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace OneNavyModel.ViewModels.Main
 {
     public partial class MainViewModel
     {
@@ -42,7 +43,7 @@ namespace ESMEWorkBench.ViewModels.Main
             if (Globals.AppSettings != null && Globals.AppSettings.ScenarioDataDirectory != null && File.Exists(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv")))
                 InitializeEnvironmentManager();
             else
-                _messageBoxService.ShowError("ESME Workbench is not fully configured, and may not function properly.  Please complete the configuration wizard or fill in the proper configuration details in the Application Options Configuration dialog.");
+                _messageBoxService.ShowError("The One Navy Model is not fully configured, and may not function properly.  Please complete the configuration wizard or fill in the proper configuration details in the Application Options Configuration dialog.");
 
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             AreAllViewModelsReady = true;

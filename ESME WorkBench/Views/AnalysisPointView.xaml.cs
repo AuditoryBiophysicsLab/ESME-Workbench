@@ -1,7 +1,4 @@
-﻿#if true
-
-
-namespace ESMEWorkBench.Views
+﻿namespace OneNavyModel.Views
 {
     /// <summary>
     /// Interaction logic for AnalysisPointView.xaml
@@ -11,4 +8,3 @@ namespace ESMEWorkBench.Views
         public AnalysisPointView() { InitializeComponent(); }
     }
 }
-#endif

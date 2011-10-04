@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using Cinch;
 
-namespace ESMEWorkBench.Views
+namespace OneNavyModel.Views
 {
     /// <summary>
     /// Interaction logic for ScenarioSimulatorOptionsView.xaml

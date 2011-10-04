@@ -17,11 +17,11 @@ using ESME.TransmissionLoss.CASS;
 using ESME.TransmissionLoss.REFMS;
 using ESME.Views.AcousticBuilder;
 using ESME.Views.TransmissionLoss;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.NAVO;
 using ESME.Views.TransmissionLossViewer;
+using OneNavyModel.Properties;
+using OneNavyModel.ViewModels.NAVO;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace OneNavyModel.ViewModels.Main
 {
     public partial class MainViewModel
     {

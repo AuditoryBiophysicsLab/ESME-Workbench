@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace ESMEWorkBench
+namespace OneNavyModel
 {
     public class UserCanceledOperationException : Exception
     {

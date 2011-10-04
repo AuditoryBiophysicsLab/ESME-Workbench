@@ -5,7 +5,7 @@ using System.Windows;
 using Cinch;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace OneNavyModel.ViewModels.Main
 {
     public class MenuItemViewModel : ViewModelBase
     {

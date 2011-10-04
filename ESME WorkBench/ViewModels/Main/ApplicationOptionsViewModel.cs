@@ -3,8 +3,9 @@ using System.ComponentModel;
 using Cinch;
 using ESME.Data;
 using ESME.Environment.NAVO;
+using ESMEWorkBench;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace OneNavyModel.ViewModels.Main
 {
     public class ApplicationOptionsViewModel : ViewModelBase
     {

@@ -1,4 +1,4 @@
-﻿<Window x:Class="ESMEWorkBench.Views.AboutView"
+﻿<Window x:Class="OneNavyModel.Views.AboutView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Misc="clr-namespace:ESME.Views.Misc;assembly=ESME.Views"

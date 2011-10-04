@@ -24,11 +24,13 @@ using ESME.Mapping;
 using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
+using ESMEWorkBench;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
+using Globals = OneNavyModel.Globals;
 
-namespace ESMEWorkBench.Data
+namespace OneNavyModel.Data
 {
     [Serializable]
     public partial class Experiment : PropertyChangedBase
@@ -672,7 +674,7 @@ namespace ESMEWorkBench.Data
                 if (!Directory.Exists(localStorageRoot))
                 {
                     Directory.CreateDirectory(localStorageRoot);
-                    File.WriteAllText(Path.Combine(localStorageRoot, "_README.TXT"), "This directory and all its contents are managed by the ESME WorkBench.\r\n\r\nMoving, deleting, renaming or otherwise changing the contents of this directory or any subdirectory WILL cause the ESME WorkBench to function improperly and/or to give invalid results.\r\n\r\nYOU HAVE BEEN WARNED!");
+                    File.WriteAllText(Path.Combine(localStorageRoot, "_README.TXT"), "This directory and all its contents are managed by the One Navy Model.\r\n\r\nMoving, deleting, renaming or otherwise changing the contents of this directory or any subdirectory WILL cause the One Navy Model to function improperly and/or to give invalid results.\r\n\r\nYOU HAVE BEEN WARNED!");
                 }
 
                 return localStorageRoot;

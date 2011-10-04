@@ -1,4 +1,4 @@
-﻿namespace ESMEWorkBench.ViewModels.Ribbon
+﻿namespace OneNavyModel.ViewModels.Ribbon
 {
     public class ComboBoxDataViewModel : MenuButtonDataViewModel {}
 }

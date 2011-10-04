@@ -1,11 +1,10 @@
 ﻿
-    <UserControl x:Class="ESMEWorkBench.Views.TransmissionLossRadialView"
+    <UserControl x:Class="OneNavyModel.Views.TransmissionLossRadialView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:controls="clr-namespace:ESMEWorkBench.Controls"
-             xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
+                 xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
              mef:ViewModelLocator.ViewModel="TransmissionLossRadialViewModel"

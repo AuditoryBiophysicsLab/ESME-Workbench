@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Serialization;
 using ESME.Model;
+using ESME.TransmissionLoss;
 using HRC.Utility;
 
 namespace ESME.NEMO

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Xml.Serialization;
 using ESME.NEMO;
-using ESME.TransmissionLoss;
 
-namespace ESME.Model
+namespace ESME.TransmissionLoss
 {
     [Serializable]
     public class AcousticProperties : IEquatable<AcousticProperties>, IEquatable<TransmissionLossField>, IEquatable<NemoMode>

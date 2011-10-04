@@ -35,7 +35,7 @@ namespace DavesWPFTester
             _openFileService = openFileService;
             _saveFileService = saveFileService;
             _visualizerService = visualizerService;
-            string settings = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME WorkBench"), "settings.xml");
+            string settings = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "One Navy Model"), "settings.xml");
             Globals.AppSettings = AppSettings.Load(settings);
             Initialize();
         }

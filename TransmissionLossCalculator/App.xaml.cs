@@ -19,7 +19,7 @@ namespace TransmissionLossCalculator
     {
         public static AppEventLog Log { get; private set; }
         public static readonly string Logfile, DumpFile;
-        public const string Name = "ESME WorkBench";
+        public const string Name = "One Navy Model";
         static App()
         {
             WorkDirectories.ApplicationName = Name;

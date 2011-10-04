@@ -1,7 +1,6 @@
-﻿using System.Windows;
-using Cinch;
+﻿using Cinch;
 
-namespace ESMEWorkBench.Views
+namespace OneNavyModel.Views
 {
     /// <summary>
     /// Interaction logic for ScenarioSimulatorLogView.xaml

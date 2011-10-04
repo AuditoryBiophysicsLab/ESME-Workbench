@@ -4,7 +4,7 @@ using Cinch;
 using ESME;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.Ribbon
+namespace OneNavyModel.ViewModels.Ribbon
 {
     [ExportViewModel("TabDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]

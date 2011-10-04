@@ -1,20 +1,14 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Windows;
-using System.Windows.Input;
 using Cinch;
 using ESME;
-using ESME.Model;
 using ESME.TransmissionLoss;
-using ESMEWorkBench.Data;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
-using ESME.Views.AcousticBuilder;
-using ESME.Views.TransmissionLossViewer;
+using OneNavyModel.Data;
+using OneNavyModel.Properties;
+using OneNavyModel.ViewModels.TransmissionLoss;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace OneNavyModel.ViewModels.Main
 {
     public partial class MainViewModel
     {

@@ -1,13 +1,14 @@
-﻿<!-- deprecated -->
-    <Window x:Class="ESMEWorkBench.Views.ScenarioSimulatorLogView"
+﻿    <Window x:Class="OneNavyModel.Views.ScenarioSimulatorLogView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
-        xmlns:Properties="clr-namespace:ESMEWorkBench.Properties" 
-        xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views" xmlns:app="clr-namespace:ESMEWorkBench" xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC" Title="Text file browser" 
-        Top="{Binding Source={x:Static Properties:Settings.Default}, Path=LogViewTop, Mode=TwoWay}"
-        Left="{Binding Source={x:Static Properties:Settings.Default}, Path=LogViewLeft, Mode=TwoWay}"
-        Height="{Binding Source={x:Static Properties:Settings.Default}, Path=LogViewHeight, Mode=TwoWay}"
-        Width="{Binding Source={x:Static Properties:Settings.Default}, Path=LogViewWidth, Mode=TwoWay}">
+        xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views" 
+            xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+            xmlns:p="clr-namespace:OneNavyModel.Properties"
+        Title="Text file browser" 
+        Top="{Binding Source={x:Static p:Settings.Default}, Path=LogViewTop, Mode=TwoWay}"
+        Left="{Binding Source={x:Static p:Settings.Default}, Path=LogViewLeft, Mode=TwoWay}"
+        Height="{Binding Source={x:Static p:Settings.Default}, Path=LogViewHeight, Mode=TwoWay}"
+        Width="{Binding Source={x:Static p:Settings.Default}, Path=LogViewWidth, Mode=TwoWay}">
     <Window.Resources>
         <WPF:GridLengthConverter x:Key="GridLengthConverter"/>
     </Window.Resources>
@@ -22,7 +23,7 @@
         </StackPanel>
         <Grid DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="{Binding Source={x:Static Properties:Settings.Default}, Path=LogListWidth, Converter={StaticResource GridLengthConverter}, Mode=TwoWay}" MinWidth="200"/>
+                <ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Path=LogListWidth, Converter={StaticResource GridLengthConverter}, Mode=TwoWay}" MinWidth="200"/>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" MinWidth="500" />
             </Grid.ColumnDefinitions>

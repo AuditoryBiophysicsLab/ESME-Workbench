@@ -304,28 +304,16 @@
   <ItemGroup>
     <Compile Include="Animats\AnimatLocationFile.cs" />
     <Compile Include="Interfaces.cs" />
-    <Compile Include="Model\AcousticProperties.cs" />
+    <Compile Include="TransmissionLoss\AcousticProperties.cs" />
     <Compile Include="Animats\Animat.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopRunFile.cs" />
-    <Compile Include="Model\DisplayLayers.cs" />
     <Compile Include="Model\EnvironmentInformation.cs" />
     <Compile Include="Model\Exceptions.cs" />
-    <Compile Include="Model\ExperimentInformation.cs" />
     <Compile Include="Model\SourceRecieverLevelBins.cs" />
-    <Compile Include="Model\FixedSource.cs" />
     <Compile Include="Model\Generics.cs" />
-    <Compile Include="Model\Globals.cs" />
     <Compile Include="Model\ProgressTracking.cs" />
     <Compile Include="Model\SedimentType.cs" />
-    <Compile Include="Model\SoundSpeedField.cs" />
-    <Compile Include="Model\SoundSpeedProfile.cs" />
     <Compile Include="Model\Species.cs" />
-    <Compile Include="Model\Strings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Model\Tester.cs" />
     <Compile Include="NEMO\NemoBase.cs" />
     <Compile Include="NEMO\NemoFile.cs" />
     <Compile Include="NEMO\NemoPSM.cs" />
@@ -336,11 +324,6 @@
     <Compile Include="TransmissionLoss\TransmissionLossFieldCache.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Model\Strings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <None Include="Resources\Strings.resx">
       <SubType>Designer</SubType>
     </None>
