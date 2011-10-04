@@ -45,7 +45,7 @@ namespace BellhopNL
 
             //todo: make a refms-like file from this data.
             var records = Transform(result, data);
-            var effects = EffectsFile.Write(outFile, records);
+            EffectsFile.Write(outFile, records);
 
         }
 

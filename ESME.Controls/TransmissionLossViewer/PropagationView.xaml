@@ -4,7 +4,8 @@
         xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"        
         xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
-        xmlns:TransmissionLoss="clr-namespace:ESME.Views.TransmissionLoss"
+        xmlns:TransmissionLoss="clr-namespace:ESME.Views.TransmissionLoss"       
+        WindowStyle="ToolWindow"        
         Icon="{Binding Icon}">
     <Window.InputBindings>
         <KeyBinding Command="{Binding SaveAsCommand}"
