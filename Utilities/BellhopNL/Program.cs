@@ -20,13 +20,16 @@ namespace BellhopNL
         static void Main(string[] args)
         {
             var data = new DataBlob();
-            
+            var outFile = "";
             for (var i = 0; i < args.Length; i++)
             {
                 switch (args[i])
                 {
                     case "-data":
                         data = DataBlob.Load(args[++i]);
+                        break;
+                    case "-out":
+                        outFile = args[++i];
                         break;
                     default:
                         Useage();
@@ -42,6 +45,8 @@ namespace BellhopNL
 
             //todo: make a refms-like file from this data.
             var records = Transform(result, data);
+            var effects = EffectsFile.Write(outFile, records);
+
         }
 
         static List<EffectsRecord> Transform(double[,,] waveforms, DataBlob data)

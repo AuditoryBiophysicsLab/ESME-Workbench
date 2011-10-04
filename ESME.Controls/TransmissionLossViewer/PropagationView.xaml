@@ -50,10 +50,7 @@
                 <MenuItem Header="Exit"
 				          Command="{Binding CloseWindowCommand}"
 				          InputGestureText="Ctrl+W" />
-            </MenuItem>
-            <MenuItem Header=" _Help"
-			          HorizontalAlignment="Right"
-			          IsEnabled="False" />
+            </MenuItem>            
         </Menu>
         <TransmissionLoss:TransmissionLossMetadataView DataContext="{Binding CASSOutput}"/>
         <TransmissionLossViewer:TransmissionLossFieldView DockPanel.Dock="Bottom" />

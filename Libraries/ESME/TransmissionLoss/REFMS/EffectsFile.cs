@@ -76,6 +76,8 @@ namespace ESME.TransmissionLoss.REFMS
             }
             return result;
         }
+
+        public static string Write(string fileName, List<EffectsRecord> records) { throw new NotImplementedException(); }
     }
 
     public class EffectsRecord
