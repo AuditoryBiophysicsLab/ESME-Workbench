@@ -550,6 +550,8 @@
     <Content Include="External References\System.Data.SQLite.dll" />
     <Content Include="External References\System.Data.SQLite.Linq.dll" />
     <Content Include="External References\System.Threading.Tasks.Dataflow.dll" />
+    <Resource Include="Images\LargeIcons\update.png" />
+    <Resource Include="Images\SmallIcons\update.png" />
     <Resource Include="Images\One Navy Model Public Splash Screen.png" />
     <SplashScreen Include="Images\One Navy Model Splash Screen.png" />
     <Resource Include="Images\SmallIcons\chart_curve_edit.png" />

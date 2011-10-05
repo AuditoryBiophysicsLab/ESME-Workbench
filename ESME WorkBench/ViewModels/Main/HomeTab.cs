@@ -217,6 +217,20 @@ namespace OneNavyModel.ViewModels.Main
 
         #endregion
 
+        #region ReverifyAcousticModelsCommand
+        public SimpleCommand<object, object> ReverifyAcousticModelsCommand
+        {
+            get { return _reverifyAcousticModels ?? (_reverifyAcousticModels = new SimpleCommand<object, object>(delegate { return IsScenarioLoaded; }, delegate { ReverifyAcousticModelsHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _reverifyAcousticModels;
+
+        void ReverifyAcousticModelsHandler()
+        {
+            if (ScenarioMetadata != null) ScenarioMetadata.ReverifyAcousticModels();
+        }
+        #endregion
+
         #region ExportAnalysisPointsCommand
         public SimpleCommand<object, object> ExportAnalysisPointsCommand
         {

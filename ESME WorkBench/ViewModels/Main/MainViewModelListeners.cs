@@ -24,8 +24,6 @@ namespace OneNavyModel.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.CreateMMMBSBathymetryFileCommand)]
         void CreateMMMBSBathymetryFile(bool dummy)
         {
-            
-//            if ((_experiment == null) || (_experiment.Bathymetry == null)) return;
             _saveFileService.Filter = "MMMBS bathymetry files (*.bth)|*.bth|All files (*.*)|*.*";
             _saveFileService.OverwritePrompt = true;
             _saveFileService.InitialDirectory = Settings.Default.LastBathymetryFileDirectory;
@@ -38,7 +36,6 @@ namespace OneNavyModel.ViewModels.Main
             //_rangeComplexDescriptors[""]
             //RangeComplexes["Jacksonville"]["OpArea"]["0.50min"]
             //RangeComplexes["Jacksonville"].Temperature[NAVOTimePeriod.January]
-            
         }
 
         [MediatorMessageSink(MediatorMessage.AddAnimatPopulationFileCommand)]

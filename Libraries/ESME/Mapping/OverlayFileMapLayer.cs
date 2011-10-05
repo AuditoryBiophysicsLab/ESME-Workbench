@@ -113,6 +113,7 @@ namespace ESME.Mapping
 
             _layer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
             LayerOverlay.Layers.Add(_layer);
+            MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
         }
 
         [XmlIgnore]

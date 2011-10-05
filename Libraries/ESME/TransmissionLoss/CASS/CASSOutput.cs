@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -742,13 +741,14 @@ namespace ESME.TransmissionLoss.CASS
 
     }
 
-    public class CASSOutputs : ObservableList<CASSOutput>
+    public class CASSOutputs : ObservableList<CASSOutput>, IDisposable
     {
         public CASSOutputs(string directoryToScan, string filePattern, NotifyCollectionChangedEventHandler collectionChangedHandler = null, List<AcousticProperties> propertiesToMatch = null)
         {
             _directory = directoryToScan;
             _pattern = filePattern;
             _propertiesToMatch = propertiesToMatch;
+
             if (collectionChangedHandler != null)
             {
                 CollectionChanged += collectionChangedHandler;
@@ -769,8 +769,6 @@ namespace ESME.TransmissionLoss.CASS
         readonly string _pattern;
         readonly List<AcousticProperties> _propertiesToMatch;
         readonly object _lockObject = new object();
-
-        public void RefreshInBackground() { Task.Factory.StartNew(Refresh); }
 
         public void Refresh()
         {
@@ -795,11 +793,11 @@ namespace ESME.TransmissionLoss.CASS
 
         void Add(string fileName)
         {
+            var target = Find(item => item.Filename == fileName);
+            if (target != null) return;
+            target = CASSOutput.FromBinaryFile(fileName, true);
             lock (_lockObject)
             {
-                var target = Find(item => item.Filename == fileName);
-                if (target != null) return;
-                target = CASSOutput.FromBinaryFile(fileName, true);
                 if (_propertiesToMatch == null)
                 {
                     Add(target);
@@ -837,6 +835,35 @@ namespace ESME.TransmissionLoss.CASS
                 case WatcherChangeTypes.Deleted:
                     Task.Factory.StartNew(() => Remove(e.FullPath));
                     break;
+            }
+        }
+
+        bool _disposed;
+        public void Dispose() 
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this); 
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            // If you need thread safety, use a lock around these 
+            // operations, as well as in your methods that use the resource.
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    if (_dirWatcher != null)
+                    {
+                        _dirWatcher.EnableRaisingEvents = false;
+                        _dirWatcher.Dispose();
+                    }
+                    ClearCollectionChangedHandlers();
+                }
+
+                // Indicate that the instance has been disposed.
+                _dirWatcher = null;
+                _disposed = true;
             }
         }
     }

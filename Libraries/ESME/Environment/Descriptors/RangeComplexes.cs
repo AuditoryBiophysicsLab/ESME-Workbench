@@ -261,7 +261,6 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
-
         #region public NAVOTimePeriod SelectedTimePeriod { get; set; }
 
         public NAVOTimePeriod SelectedTimePeriod
@@ -297,7 +296,6 @@ namespace ESME.Environment.Descriptors
         int _selectedTimePeriodIndex = -1;
 
         #endregion
-
 
         #region public RangeComplexArea SelectedArea { get; set; }
 
@@ -427,92 +425,6 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
-
-#if false
-        #region public WindFile SelectedWind { get; set; }
-
-        public WindFile SelectedWind
-        {
-            get { return _selectedWind; }
-            set
-            {
-                if (_selectedWind == value) return;
-                _selectedWind = value;
-                NotifyPropertyChanged(SelectedWindChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedWindChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedWind);
-        WindFile _selectedWind;
-
-        #endregion
-
-        #region public BottomLossFile SelectedBottomLoss { get; set; }
-
-        public BottomLossFile SelectedBottomLoss
-        {
-            get { return _selectedBottomLoss; }
-            set
-            {
-                if (_selectedBottomLoss == value) return;
-                _selectedBottomLoss = value;
-                NotifyPropertyChanged(SelectedBottomLossChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedBottomLossChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedBottomLoss);
-        BottomLossFile _selectedBottomLoss;
-
-        #endregion
-
-        #region public SedimentFile SelectedSediment { get; set; }
-
-        public SedimentFile SelectedSediment
-        {
-            get { return _selectedSediment; }
-            set
-            {
-                if (_selectedSediment == value) return;
-                _selectedSediment = value;
-                NotifyPropertyChanged(SelectedSedimentChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedSedimentChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedSediment);
-        SedimentFile _selectedSediment;
-
-        #endregion
-
-        #region public SoundSpeedFile SelectedSoundSpeed { get; set; }
-
-        public SoundSpeedFile SelectedSoundSpeed
-        {
-            get { return _selectedSoundSpeed; }
-            set
-            {
-                if (_selectedSoundSpeed == value) return;
-                _selectedSoundSpeed = value;
-                NotifyPropertyChanged(SelectedSoundSpeedChangedEventArgs);
-            }
-        }
-
-        void CheckSoundSpeed()
-        {
-            if (IsEnvironmentFullySpecified && SelectedBathymetry.IsCached)
-            {
-                SelectedSoundSpeed = (SoundSpeedFile)SelectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", SelectedTimePeriod)];
-                SelectedSoundSpeed.RangeComplexToken = SelectedRangeComplex.EnvironmentFiles;
-                SelectedSoundSpeed.SelectedBathymetry = _selectedBathymetry;
-                SelectedSoundSpeed.Reset();
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedSoundSpeedChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedSoundSpeed);
-        SoundSpeedFile _selectedSoundSpeed;
-
-        #endregion
-#endif
-
         #region public bool IsEnvironmentFullySpecified { get; private set; }
 
         public bool IsEnvironmentFullySpecified
@@ -520,9 +432,9 @@ namespace ESME.Environment.Descriptors
             get { return _isEnvironmentFullySpecified; }
             private set
             {
-                if (_isEnvironmentFullySpecified == value) return;
                 _isEnvironmentFullySpecified = value;
                 NotifyPropertyChanged(IsEnvironmentFullySpecifiedChangedEventArgs);
+                Debug.WriteLine("{0} Environment {1} fully specified", DateTime.Now, _isEnvironmentFullySpecified ? "IS" : "IS NOT");
             }
         }
 
@@ -538,9 +450,9 @@ namespace ESME.Environment.Descriptors
             get { return _isEnvironmentLoading; }
             set
             {
-                if (_isEnvironmentLoading == value) return;
                 _isEnvironmentLoading = value;
                 NotifyPropertyChanged(IsEnvironmentLoadingChangedEventArgs);
+                Debug.WriteLine("{0} Environment {1} loading", DateTime.Now, _isEnvironmentLoading ? "IS" : "IS NOT");
             }
         }
 
@@ -556,9 +468,9 @@ namespace ESME.Environment.Descriptors
             get { return _isEnvironmentLoaded; }
             set
             {
-                if (_isEnvironmentLoaded == value) return;
                 _isEnvironmentLoaded = value;
                 NotifyPropertyChanged(IsEnvironmentLoadedChangedEventArgs);
+                Debug.WriteLine("{0} Environment {1} loaded", DateTime.Now, _isEnvironmentLoaded ? "IS" : "IS NOT");
             }
         }
 
@@ -613,7 +525,7 @@ namespace ESME.Environment.Descriptors
             IsEnvironmentFullySpecified = false;
         }
 
-        public void LoadEnvironment()
+        void LoadEnvironment()
         {
             if (!IsEnvironmentFullySpecified) return;
             IsEnvironmentLoading = true;

@@ -146,11 +146,15 @@
                                 ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                                 ToolTipDescription="Add a new analysis point to the experiment" IsEnabled="{Binding CanPlaceAnalysisPoint}"
                                 IsChecked="{Binding IsInAnalysisPointMode}" />
-          <r:RibbonButton Label="Models" SmallImageSource="..\Images\SmallIcons\chart_curve_edit.png"
+                    <r:RibbonButton Label="Models" SmallImageSource="..\Images\SmallIcons\chart_curve_edit.png"
                           ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                           ToolTipDescription="Choose an acoustic model for each distinct mode in the scenario"
                           IsEnabled="{Binding IsScenarioLoaded}" Command="{Binding ConfigureAcousticModelsCommand}" />
-        </r:RibbonGroup>
+                    <r:RibbonButton Label="Re-verify" SmallImageSource="..\Images\SmallIcons\update.png"
+                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                          ToolTipDescription="Force reverification of acoustic fields in this scenario"
+                          IsEnabled="{Binding IsScenarioLoaded}" Command="{Binding ReverifyAcousticModelsCommand}" />
+                </r:RibbonGroup>
       </r:RibbonTab>
       <r:RibbonTab KeyTip="V" Header="Environment">
         <r:RibbonGroup Header="Map">

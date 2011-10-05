@@ -77,33 +77,6 @@ namespace OneNavyModel.Data
             }
         }
 
-        [MediatorMessageSink(MediatorMessage.AddAnalysisPoint)]
-        void AddAnalysisPoint(AnalysisPoint analysisPoint)
-        {
-            if (AnalysisPoints == null) AnalysisPoints = new ObservableCollection<AnalysisPoint>();
-            AnalysisPoints.Add(analysisPoint);
-            Globals.AppSettings.AddExperiment(FileName);
-        }
-
-        [MediatorMessageSink(MediatorMessage.EditAnalysisPoint)]
-        void EditAnalysisPoint(AnalysisPoint analysisPoint)
-        {
-            var analysisPointPropertiesViewModel = new AnalysisPointPropertiesViewModel(analysisPoint);
-            var settingsResult = VisualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointPropertiesViewModel);
-            if (settingsResult.HasValue && settingsResult.Value)
-            {
-            }
-            DisplayAnalysisPoint(analysisPoint);
-            if (analysisPointPropertiesViewModel.AnalysisPointIsChanged) IsChanged = true;
-            analysisPoint.Validate();
-        }
-
-        [MediatorMessageSink(MediatorMessage.RemoveAnalysisPoint)]
-        void RemoveAnalysisPoint(AnalysisPoint analysisPoint)
-        {
-            AnalysisPoints.Remove(analysisPoint);
-        }
-
         OverlayShapeMapLayer FindOverlayShapeMapLayer(LayerType layerType, string layerName) { return (OverlayShapeMapLayer)MapLayers.Where(layer => layer.LayerType == layerType).Where(layer => layer.Name == layerName).FirstOrDefault(); }
 
         [MediatorMessageSink(MediatorMessage.AddScenarioFileCommand)]

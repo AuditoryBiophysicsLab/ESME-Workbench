@@ -98,13 +98,13 @@ namespace HRC.Utility
 
         public new void Clear()
         {
-            List<T> items;
+            //List<T> items;
             lock (_lockObject)
             {
-                items = GetRange(0, Count);
+                //items = GetRange(0, Count);
                 base.Clear();
             }
-            OnCollectionChangedMultiItem(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, items));
+            //OnCollectionChangedMultiItem(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, items));
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
@@ -222,6 +222,13 @@ namespace HRC.Utility
             remove { CollectionChangedEvent -= value; }
         }
         event NotifyCollectionChangedEventHandler CollectionChangedEvent;
+
+        protected void ClearCollectionChangedHandlers()
+        {
+            var handlers = CollectionChangedEvent;
+            if (handlers == null) return;
+            foreach (NotifyCollectionChangedEventHandler handler in handlers.GetInvocationList()) CollectionChanged -= handler;
+        }
 
         protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {

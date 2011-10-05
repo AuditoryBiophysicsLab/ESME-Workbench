@@ -88,6 +88,12 @@ namespace ESME.Metadata
             serializer.Save(filename, ReferencedTypes);
         }
 
+        public void ReverifyAcousticModels()
+        {
+            if (CASSOutputs != null)
+                foreach (var output in CASSOutputs) _inputQueue.Post(output);
+        }
+
         void RangeComplexesPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             switch (args.PropertyName)
@@ -107,7 +113,7 @@ namespace ESME.Metadata
                     Task.Factory.StartNew(() =>
                     {
                         SetBathymetryAndValidate();
-                        ProcessCassOutputs(Dispatcher);
+                        ProcessCassOutputs();
                     });
                     break;
                 case "SelectedArea":
@@ -217,11 +223,12 @@ namespace ESME.Metadata
                     foreach (CASSOutput oldItem in args.OldItems)
                     {
                         Debug.WriteLine("Removed CASSOutput: {0}|{1}|{2}", oldItem.PlatformName, oldItem.SourceName, oldItem.ModeName);
-                        Dispatcher.InvokeIfRequired(() => CurrentMapLayers.RemovePropagationPoint(oldItem));
+                        Dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.RemovePropagationPoint(oldItem));
                     }
                     break;
                 case NotifyCollectionChangedAction.Reset:
                     Debug.WriteLine("CASSOutputs has been cleared");
+                    Dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.RemoveAll(layer => layer.LayerType == LayerType.Propagation));
                     break;
             }
         }
@@ -240,8 +247,16 @@ namespace ESME.Metadata
                 if (_nemoFile != null)
                 {
                     var scenarioPath = Path.GetDirectoryName(_nemoFile.FileName);
+                    if (_propagationPath != null && _propagationPath != Path.Combine(scenarioPath, "Propagation", _nemoFile.Scenario.TimeFrame) ||
+                        (_pressurePath != null && _pressurePath != Path.Combine(scenarioPath, "Pressure", _nemoFile.Scenario.TimeFrame)))
+                    {
+                        RemoveScenarioDisplay();
+                        if (CASSOutputs != null) CASSOutputs.Dispose();
+                        CASSOutputs = null;
+                    }
                     _propagationPath = Path.Combine(scenarioPath, "Propagation", _nemoFile.Scenario.TimeFrame);
                     _pressurePath = Path.Combine(scenarioPath, "Pressure", _nemoFile.Scenario.TimeFrame);
+
                     if (_nemoFile.Scenario.DistinctModes != null)
                     {
                         _distinctModeProperties = new List<AcousticProperties>();
@@ -252,6 +267,8 @@ namespace ESME.Metadata
                     UpdateScenarioTreeRoot();
                     UpdateAnimalsTreeRoot();
                     UpdateEnvironmentTreeRoot();
+
+                    DisplayScenario();
 
                     // Display any animal layers on the map asynchronously
                     if (_nemoFile.Scenario.Animals != null)
@@ -272,8 +289,6 @@ namespace ESME.Metadata
                                 }
                             }
 
-                    DisplayScenario();
-
                     if (!RangeComplexes.RangeComplexCollection.ContainsKey(_nemoFile.Scenario.SimAreaName))
                         throw new ApplicationException(
                                 string.Format("The range complex specified by this scenario ({0}) was not found",
@@ -288,7 +303,11 @@ namespace ESME.Metadata
                     else SelectedAreaName = null;
 
                     if ((SelectedBathymetryName != null) && (RangeComplexes.SelectedArea.BathymetryFiles[SelectedBathymetryName] != null))
-                        RangeComplexes.SelectedBathymetry = RangeComplexes.SelectedArea.BathymetryFiles[SelectedBathymetryName];
+                    {
+                        if (RangeComplexes.SelectedBathymetry != RangeComplexes.SelectedArea.BathymetryFiles[SelectedBathymetryName])
+                            RangeComplexes.SelectedBathymetry = RangeComplexes.SelectedArea.BathymetryFiles[SelectedBathymetryName];
+                        else RangeComplexes.CheckEnvironment();
+                    }
                     else SelectedBathymetryName = null;
 
                     if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
@@ -305,7 +324,7 @@ namespace ESME.Metadata
             }
         }
 
-        void ProcessCassOutputs(Dispatcher dispatcher)
+        void ProcessCassOutputs()
         {
             if (_maxRadiusCalculator == null)
             {
@@ -334,19 +353,12 @@ namespace ESME.Metadata
 
                 _outputQueue = new BufferBlock<CASSOutput>();
 
-                dispatcher.InvokeIfRequired(() =>
+                _uiUpdater = new ActionBlock<CASSOutput>(newItem => Dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayPropagationPoint(newItem)),
+                new ExecutionDataflowBlockOptions
                 {
-                    _uiUpdater = new ActionBlock<CASSOutput>(newItem =>
-                    {
-                        CurrentMapLayers.DisplayPropagationPoint(newItem);
-                        newItem.Validate();
-                    },
-                    new ExecutionDataflowBlockOptions
-                    {
-                        TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext(),
-                        BoundedCapacity = 1,
-                        MaxDegreeOfParallelism = 1,
-                    });
+                    TaskScheduler = TaskScheduler.Default,
+                    BoundedCapacity = -1,
+                    MaxDegreeOfParallelism = -1,
                 });
 
                 _inputQueue.LinkTo(_maxRadiusCalculator);
@@ -355,7 +367,7 @@ namespace ESME.Metadata
                 AwaitCassOutputProcessorCompletion();
             }
             if (CASSOutputs == null) CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
-            else CASSOutputs.RefreshInBackground();
+            else foreach (var output in CASSOutputs) _inputQueue.Post(output);
         }
 
         async void AwaitCassOutputProcessorCompletion()
@@ -412,7 +424,14 @@ namespace ESME.Metadata
 
         public void RemoveScenarioDisplay()
         {
-            CurrentMapLayers.RemoveAll(layer => layer.Name != "Base Map");
+            CurrentMapLayers.RemoveAll(layer => layer.LayerType == LayerType.AnalysisPoint);
+            CurrentMapLayers.RemoveAll(layer => layer.LayerType == LayerType.Animal);
+            CurrentMapLayers.RemoveAll(layer => layer.LayerType == LayerType.ExplosivePoint);
+            CurrentMapLayers.RemoveAll(layer => layer.LayerType == LayerType.OpArea);
+            CurrentMapLayers.RemoveAll(layer => layer.LayerType == LayerType.Pressure);
+            CurrentMapLayers.RemoveAll(layer => layer.LayerType == LayerType.Propagation);
+            CurrentMapLayers.RemoveAll(layer => layer.LayerType == LayerType.SimArea);
+            CurrentMapLayers.RemoveAll(layer => layer.LayerType == LayerType.Track);
             _scenarioBounds = RangeComplexes.SelectedArea == null ? null : RangeComplexes.SelectedArea.GeoRect;
         }
 

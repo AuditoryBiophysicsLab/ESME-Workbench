@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{939BCFE6-6EB1-4C69-AE35-267863882AAF}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{426FE9B9-11A0-4693-A699-FBCB7D0AD2E1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME", "Libraries\ESME\ESME.csproj", "{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}"
