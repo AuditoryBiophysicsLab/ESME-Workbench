@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
+using System.Windows.Threading;
 using System.Xml.Serialization;
+using Cinch;
 
 namespace HRC.Navigation
 {
     [Serializable]
-    public class Geo : EqualityComparer<Geo>, IEquatable<Geo>
+    public class Geo : EqualityComparer<Geo>, IEquatable<Geo>, INotifyPropertyChanged, IDeserializationCallback
     {
         const double Flattening = 1.0 / 298.257223563;
         const double FlatteningC = (1.0 - Flattening) * (1.0 - Flattening);
@@ -79,14 +84,8 @@ namespace HRC.Navigation
 
         public Geo(double lat, double lon, bool isDegrees)
         {
-            if (isDegrees)
-            {
-                Initialize(lat, lon);
-            }
-            else
-            {
-                InitializeRadians(lat, lon);
-            }
+            if (isDegrees) Initialize(lat, lon);
+            else InitializeRadians(lat, lon);
         }
 
         /** Construct a Geo from its parts. */
@@ -96,6 +95,7 @@ namespace HRC.Navigation
             X = x;
             Y = y;
             Z = z;
+            UpdateLatitudeLongitude();
         }
 
         /** Construct a Geo from another Geo. */
@@ -128,6 +128,7 @@ namespace HRC.Navigation
             X = g.X;
             Y = g.Y;
             Z = g.Z;
+            UpdateLatitudeLongitude();
         }
 
         /**
@@ -143,6 +144,7 @@ namespace HRC.Navigation
             X = x;
             Y = y;
             Z = z;
+            UpdateLatitudeLongitude();
         }
 
         /**
@@ -167,7 +169,26 @@ namespace HRC.Navigation
             X = c * Math.Cos(lon);
             Y = c * Math.Sin(lon);
             Z = Math.Sin(rlat);
+            UpdateLatitudeLongitude();
         }
+
+        protected void UpdateLatitudeLongitude()
+        {
+            _latitudeRadians = GeographicLatitude(Math.Atan2(Z, Math.Sqrt(X * X + Y * Y)));
+            _latitudeDegrees = RadiansToDegrees(_latitudeRadians);
+            _longitudeRadians = Math.Atan2(Y, X);
+            _longitudeDegrees = RadiansToDegrees(_longitudeRadians);
+            NotifyPropertyChanged(LatitudeChangedEventArgs);
+            NotifyPropertyChanged(LongitudeChangedEventArgs);
+            NotifyPropertyChanged(LatitudeRadiansChangedEventArgs);
+            NotifyPropertyChanged(LongitudeRadiansChangedEventArgs);
+        }
+        [NonSerialized, XmlIgnore]
+        double _latitudeDegrees, _latitudeRadians, _longitudeDegrees, _longitudeRadians;
+        static readonly PropertyChangedEventArgs LatitudeChangedEventArgs = ObservableHelper.CreateArgs<Geo>(x => x.Latitude);
+        static readonly PropertyChangedEventArgs LongitudeChangedEventArgs = ObservableHelper.CreateArgs<Geo>(x => x.Longitude);
+        static readonly PropertyChangedEventArgs LatitudeRadiansChangedEventArgs = ObservableHelper.CreateArgs<Geo>(x => x.LatitudeRadians);
+        static readonly PropertyChangedEventArgs LongitudeRadiansChangedEventArgs = ObservableHelper.CreateArgs<Geo>(x => x.LongitudeRadians);
 
         /**
      * Find the midpoint Geo between this one and another on a Great Circle line
@@ -192,13 +213,14 @@ namespace HRC.Navigation
         public Geo Interpolate(Geo g2, double x) { return Scale(x).Add(g2.Scale(1 - x)).Normalize(); }
 
         public new String ToString() { return "Geo[" + Latitude + "," + Longitude + "]"; }
+        public void OnDeserialization(object sender) { UpdateLatitudeLongitude(); }
 
         /// <summary>
         ///   Latitude, in degrees
         /// </summary>
         public double Latitude
         {
-            get { return RadiansToDegrees(GeographicLatitude(Math.Atan2(Z, Math.Sqrt(X * X + Y * Y)))); }
+            get { return _latitudeDegrees; }
             set { InitializeRadians(DegreesToRadians(value), LongitudeRadians); }
         }
 
@@ -208,7 +230,7 @@ namespace HRC.Navigation
         [XmlIgnore]
         public double LatitudeRadians
         {
-            get { return GeographicLatitude(Math.Atan2(Z, Math.Sqrt(X * X + Y * Y))); }
+            get { return _latitudeRadians; }
             set { InitializeRadians(value, LongitudeRadians); }
         }
 
@@ -217,7 +239,7 @@ namespace HRC.Navigation
         /// </summary>
         public double Longitude
         {
-            get { return RadiansToDegrees(Math.Atan2(Y, X)); }
+            get { return _longitudeDegrees; }
             set { InitializeRadians(LatitudeRadians, DegreesToRadians(value)); }
         }
 
@@ -227,10 +249,9 @@ namespace HRC.Navigation
         [XmlIgnore]
         public double LongitudeRadians
         {
-            get { return Math.Atan2(Y, X); }
+            get { return _longitudeRadians; }
             set { InitializeRadians(LatitudeRadians, value); }
         }
-
 
         /// <summary>
         ///   X, in internal axis representation (positive to the right side of screen).
@@ -432,7 +453,7 @@ namespace HRC.Navigation
         public static double DistanceNauticalMiles(double lat1, double lon1, double lat2, double lon2) { return DistanceNauticalMiles(new Geo(lat1, lon1), new Geo(lat2, lon2)); }
 
         /// <summary>
-        /// Azimuth in radians from this to v2
+        ///   Azimuth in radians from this to v2
         /// </summary>
         /// <param name = "v2"></param>
         /// <returns></returns>
@@ -530,7 +551,6 @@ namespace HRC.Navigation
         /** Returns the point opposite this point on the earth. */
         public Geo Antipode() { return Scale(-1.0); }
 
-
         /**
      * Find the intersection of the great circle between this and q and the
      * great circle normal to r.
@@ -572,7 +592,7 @@ namespace HRC.Navigation
         }
 
         /// <summary>
-        /// Compute a polygonal approximation of an arc centered at pc, beginning at p0 and ending at p1, going clockwise and including the two end points.
+        ///   Compute a polygonal approximation of an arc centered at pc, beginning at p0 and ending at p1, going clockwise and including the two end points.
         /// </summary>
         /// <param name = "pc">center point</param>
         /// <param name = "p0">starting point</param>
@@ -584,14 +604,12 @@ namespace HRC.Navigation
             var theta = AngleRadians(p0, pc, p1);
             // if the rest of the code is undefined in this situation, just skip it.
             if (Double.IsNaN(theta))
-            {
                 return new[]
-                       {
-                           p0, p1
-                       };
-            }
+                {
+                    p0, p1
+                };
 
-            var n = (int) (2.0 + Math.Abs(theta / err)); // number of points
+            var n = (int)(2.0 + Math.Abs(theta / err)); // number of points
             // (counting the end
             // points)
             var result = new Geo[n];
@@ -1060,7 +1078,33 @@ namespace HRC.Navigation
 
         #region Overrides of EqualityComparer<Geo>
         public override bool Equals(Geo x, Geo y) { return (x.DistanceKilometers(y) < 0.01); }
-        public override int GetHashCode(Geo obj) { if (obj == null) return 0; return (int)Math.Round(obj.X * 1e6, 0) ^ (int)Math.Round(obj.Y * 1e6, 0) ^ (int)Math.Round(obj.Z * 1e6, 0); }
+
+        public override int GetHashCode(Geo obj)
+        {
+            if (obj == null) return 0;
+            return (int)Math.Round(obj.X * 1e6, 0) ^ (int)Math.Round(obj.Y * 1e6, 0) ^ (int)Math.Round(obj.Z * 1e6, 0);
+        }
+        #endregion
+
+        #region INotifyPropertyChanged Members
+        [NonSerialized, XmlIgnore] PropertyChangedEventHandler _propertyChanged;
+
+        public event PropertyChangedEventHandler PropertyChanged
+        {
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            add { _propertyChanged = (PropertyChangedEventHandler)Delegate.Combine(_propertyChanged, value); }
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            remove { _propertyChanged = (PropertyChangedEventHandler)Delegate.Remove(_propertyChanged, value); }
+        }
+
+        protected void NotifyPropertyChanged(PropertyChangedEventArgs e)
+        {
+            var handlers = _propertyChanged;
+            if (handlers == null) return;
+            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
+                if (handler.Target is DispatcherObject) ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => handler(this, e));
+                else handler(this, e);
+        }
         #endregion
     }
 }

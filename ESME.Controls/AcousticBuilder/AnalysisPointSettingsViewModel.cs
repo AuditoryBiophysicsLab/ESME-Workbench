@@ -92,7 +92,6 @@ namespace ESME.Views.AcousticBuilder
                 AvailableModes.Clear();
                 foreach (var soundSource in _analysisPoint.SoundSources) AvailableModes.Add(soundSource);
                 NotifyPropertyChanged(AnalysisPointChangedEventArgs);
-                if (_analysisPoint != null) _analysisPoint.Validate();
             }
         }
 
@@ -190,7 +189,6 @@ namespace ESME.Views.AcousticBuilder
                                              {
                                                  AnalysisPoint.Latitude = Latitude;
                                                  AnalysisPoint.Longitude = Longitude;
-                                                 if (AnalysisPoint != null) AnalysisPoint.Validate();
                                                  CloseActivePopUpCommand.Execute(true);
                                              }));
             }

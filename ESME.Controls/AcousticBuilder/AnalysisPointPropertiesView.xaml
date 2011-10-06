@@ -60,7 +60,8 @@
 					<ColumnDefinition Width="*" />
 					<ColumnDefinition Width="10" />
 				</Grid.ColumnDefinitions>
-				<CheckBox Focusable="False"
+				<CheckBox x:Name="CheckBox" 
+                          Focusable="False"
 				          Grid.Column="0"
 				          IsChecked="{Binding ShouldBeCalculated}"
 				          VerticalAlignment="Center" />
@@ -78,12 +79,12 @@
                 </DataTrigger>
                 <DataTrigger Binding="{Binding ShouldBeCalculated}" Value="False">
                     <DataTrigger.Setters>
-                        <Setter TargetName="ModeName" Property="ToolTip" Value="This mode will NOT be exported for calculation (unchecked)"/>
+                        <Setter TargetName="CheckBox" Property="ToolTip" Value="This mode will NOT be exported for calculation (unchecked)"/>
                     </DataTrigger.Setters>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding ShouldBeCalculated}" Value="True">
                     <DataTrigger.Setters>
-                        <Setter TargetName="ModeName" Property="ToolTip" Value="This mode WILL be exported for calculation (checked)"/>
+                        <Setter TargetName="CheckBox" Property="ToolTip" Value="This mode WILL be exported for calculation (checked)"/>
                     </DataTrigger.Setters>
                 </DataTrigger>
             </DataTemplate.Triggers>

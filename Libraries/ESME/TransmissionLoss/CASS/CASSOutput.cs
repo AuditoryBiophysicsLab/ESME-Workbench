@@ -731,14 +731,6 @@ namespace ESME.TransmissionLoss.CASS
                 Pressures.Add(pressure);
             }
         }
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
-
-        #endregion
-
     }
 
     public class CASSOutputs : ObservableList<CASSOutput>, IDisposable

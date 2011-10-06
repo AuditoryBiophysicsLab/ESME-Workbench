@@ -316,8 +316,5 @@ namespace ESME.TransmissionLoss
             }
             ValidationErrorText = null;
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
     }
 }

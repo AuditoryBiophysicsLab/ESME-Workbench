@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
@@ -38,6 +37,21 @@ namespace ESME.TransmissionLoss.REFMS
             LowFrequency = mode.LowFrequency;
             HighFrequency = mode.HighFrequency;
             ModeName = mode.Name;
+            PropertyChanged += (s, e) =>
+            {
+                var ap = (AnalysisPoint)s;
+                switch (e.PropertyName)
+                {
+                    case "Latitude":
+                        foreach (var source in SoundSources) source.Latitude = ap.Latitude;
+                        Validate();
+                        break;
+                    case "Longitude":
+                        foreach (var source in SoundSources) source.Longitude = ap.Longitude;
+                        Validate();
+                        break;
+                }
+            };
         }
 
         #region public string OutputPath { get; set; }
@@ -235,24 +249,6 @@ namespace ESME.TransmissionLoss.REFMS
 
         static readonly PropertyChangedEventArgs BottomExponentialEnabledChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.BottomExponentialEnabled);
         bool _bottomExponentialEnabled;
-
-        #endregion
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs e)
-        {
-            var handlers = PropertyChanged;
-            if (handlers == null) return;
-            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
-            {
-                if (handler.Target is DispatcherObject)
-                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => handler(this, e));
-                else
-                    handler(this, e);
-            }
-        }
 
         #endregion
 

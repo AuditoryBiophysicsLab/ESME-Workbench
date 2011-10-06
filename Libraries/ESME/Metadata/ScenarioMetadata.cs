@@ -112,7 +112,7 @@ namespace ESME.Metadata
                     }
                     Task.Factory.StartNew(() =>
                     {
-                        SetBathymetryAndValidate();
+                        SetBathymetry();
                         ProcessCassOutputs();
                     });
                     break;
@@ -709,28 +709,18 @@ namespace ESME.Metadata
                     _analysisPoints.CollectionChanged += AnalysisPointsCollectionChanged;
                 }
                 NotifyPropertyChanged(AnalysisPointsChangedEventArgs);
-                SetBathymetryAndValidate();
+                SetBathymetry();
             }
         }
 
-        void SetBathymetryAndValidate()
+        void SetBathymetry()
         {
             if ((AnalysisPoints != null) && (AnalysisPoints.Count != 0) && (RangeComplexes.IsEnvironmentLoaded))
-            {
                 foreach (var analysisPoint in AnalysisPoints)
-                {
                     analysisPoint.Bathymetry = _bathymetry;
-                    analysisPoint.Validate();
-                }
-            }
             if ((ExplosivePoints != null) && (ExplosivePoints.Count != 0) && (RangeComplexes.IsEnvironmentLoaded))
-            {
                 foreach (var explosivePoint in ExplosivePoints)
-                {
                     explosivePoint.EnvironmentData = RangeComplexes.EnvironmentData;
-                    explosivePoint.Validate();
-                }
-            }
         }
 
         void DisplayExistingAnalysisPoints()
@@ -742,25 +732,26 @@ namespace ESME.Metadata
             foreach (var analysisPoint in AnalysisPoints) CurrentMapLayers.DisplayAnalysisPoint(analysisPoint);
         }
 
-        void AnalysisPointsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        void AnalysisPointsCollectionChanged(object sender, NotifyCollectionChangedEventArgs eventArgs)
         {
             NotifyPropertyChanged(AnalysisPointsChangedEventArgs);
-            switch (e.Action)
+            switch (eventArgs.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    if (e.NewItems != null)
+                    if (eventArgs.NewItems != null)
                     {
-                        foreach (var newPoint in e.NewItems)
+                        foreach (AnalysisPoint newPoint in eventArgs.NewItems)
                         {
-                            if (CurrentMapLayers != null) CurrentMapLayers.DisplayAnalysisPoint((AnalysisPoint)newPoint);
-                            ((AnalysisPoint)newPoint).Bathymetry = _bathymetry;
+                            if (CurrentMapLayers != null) CurrentMapLayers.DisplayAnalysisPoint(newPoint);
+                            newPoint.Bathymetry = _bathymetry;
+                            newPoint.Validate();
                         }
                     }
                     break;
                 case NotifyCollectionChangedAction.Move:
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    if (e.OldItems != null) { }
+                    if (eventArgs.OldItems != null) { }
                     break;
                 case NotifyCollectionChangedAction.Replace:
                     break;

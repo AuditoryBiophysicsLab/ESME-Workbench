@@ -419,7 +419,6 @@ namespace OneNavyModel.ViewModels.Main
                 ScenarioMetadata.CurrentMapLayers.DisplayAnalysisPoint(analysisPoint);
                 MediatorMessage.Send(MediatorMessage.RefreshMap, true);
             }
-            analysisPoint.Validate();
         }
 
         [MediatorMessageSink(MediatorMessage.RemoveAnalysisPoint)]
@@ -439,7 +438,6 @@ namespace OneNavyModel.ViewModels.Main
                 ScenarioMetadata.CurrentMapLayers.DisplayExplosivePoint(explosivePoint);
                 MediatorMessage.Send(MediatorMessage.RefreshMap, true);
             }
-            explosivePoint.Validate();
         }
 
         [MediatorMessageSink(MediatorMessage.RemoveExplosivePoint)]

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
 using Cinch;
@@ -24,6 +25,21 @@ namespace ESME.TransmissionLoss
             SoundSources = new List<SoundSource>();
             AnalysisPointID = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
             OldLocation = null;
+            PropertyChanged += (s, e) =>
+            {
+                var ap = (AnalysisPoint)s;
+                switch (e.PropertyName)
+                {
+                    case "Latitude":
+                        foreach (var source in SoundSources) source.Latitude = ap.Latitude;
+                        Validate();
+                        break;
+                    case "Longitude":
+                        foreach (var source in SoundSources) source.Longitude = ap.Longitude;
+                        Validate();
+                        break;
+                }
+            };
         }
 
         public AnalysisPoint(Geo location) : this()
@@ -104,9 +120,7 @@ namespace ESME.TransmissionLoss
         {
             if (!Equals(other)) return false;
             if (SoundSources.Count != other.SoundSources.Count) return false;
-            for (var sourceIndex = 0; sourceIndex < SoundSources.Count; sourceIndex++) 
-                if (!SoundSources[sourceIndex].Equals(other.SoundSources[sourceIndex])) return false;
-            return true;
+            return !SoundSources.Where((t, sourceIndex) => !t.Equals(other.SoundSources[sourceIndex])).Any();
         }
 
         #endregion
@@ -195,13 +209,5 @@ namespace ESME.TransmissionLoss
                     break;
             }
         }
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
-
-        #endregion
-
     }
 }
