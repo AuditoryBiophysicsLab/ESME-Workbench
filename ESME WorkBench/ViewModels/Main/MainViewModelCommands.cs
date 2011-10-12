@@ -41,7 +41,7 @@ namespace OneNavyModel.ViewModels.Main
                     ESME.Globals.AppSettings = Globals.AppSettings;
                     if (Globals.AppSettings != null && Globals.AppSettings.ScenarioDataDirectory != null &&
                         File.Exists(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"))) 
-                        RangeComplexes.ReadRangeComplexFileAsync(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+                        InitializeEnvironmentManager();
                 }));
             }
         }

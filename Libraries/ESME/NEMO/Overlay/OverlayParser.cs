@@ -126,6 +126,30 @@ namespace ESME.NEMO.Overlay
                             case OverlayKeywords.Point:
                                 tokenizer.DiscardNext();
                                 break;
+                            case OverlayKeywords.Red:
+                                curColor = Colors.Red;
+                                break;
+                            case OverlayKeywords.Green:
+                                curColor = Colors.Green;
+                                break;
+                            case OverlayKeywords.Purple:
+                                curColor = Colors.Purple;
+                                break;
+                            case OverlayKeywords.Yellow:
+                                curColor = Colors.Yellow;
+                                break;
+                            case OverlayKeywords.White:
+                                curColor = Colors.White;
+                                break;
+                            case OverlayKeywords.Orange:
+                                curColor = Colors.Orange;
+                                break;
+                            case OverlayKeywords.Blue:
+                                curColor = Colors.Blue;
+                                break;
+                            case OverlayKeywords.Cyan:
+                                curColor = Colors.Cyan;
+                                break;
                             default:
                                 throw new FormatException("OverlayParser: Unknown token at line " + curToken.LineNumber + ": " + curToken.Value);
                         } //Initialization Switch(curToken)
@@ -175,6 +199,53 @@ namespace ESME.NEMO.Overlay
                             case OverlayKeywords.Label:
                                 //shapes.Add(new OverlayLabel(lastPoint, curColor, tokenizer.NextToken().Value as string));
                                 tokenizer.NextToken();
+                                break;
+                            case OverlayKeywords.Red:
+                                curColor = Colors.Red;
+                                break;
+                            case OverlayKeywords.Green:
+                                curColor = Colors.Green;
+                                break;
+                            case OverlayKeywords.Purple:
+                                curColor = Colors.Purple;
+                                break;
+                            case OverlayKeywords.Yellow:
+                                curColor = Colors.Yellow;
+                                break;
+                            case OverlayKeywords.White:
+                                curColor = Colors.White;
+                                break;
+                            case OverlayKeywords.Orange:
+                                curColor = Colors.Orange;
+                                break;
+                            case OverlayKeywords.Blue:
+                                curColor = Colors.Blue;
+                                break;
+                            case OverlayKeywords.Cyan:
+                                curColor = Colors.Cyan;
+                                break;
+                            case OverlayKeywords.Comment:
+                            case OverlayKeywords.Origin:
+                                break;
+                            case OverlayKeywords.Solid:
+                                curStyle = LineStyle.Solid;
+                                break;
+                            case OverlayKeywords.Dash:
+                                curStyle = LineStyle.Dash;
+                                break;
+                            case OverlayKeywords.DashDot:
+                                curStyle = LineStyle.DashDot;
+                                break;
+                            case OverlayKeywords.Dot:
+                                curStyle = LineStyle.Dot;
+                                break;
+                            case OverlayKeywords.Color:
+                                if (tokenizer.Count < 3) throw new ApplicationException("OverlayParser.Parse: Not all color information are found\n");
+                                var red = tokenizer.NextToken().Value as float?;
+                                var green = tokenizer.NextToken().Value as float?;
+                                var blue = tokenizer.NextToken().Value as float?;
+                                if ((red == null) || (green == null) || (blue == null)) throw new ApplicationException("OverlayParser: Invalid color definition at line " + curToken.LineNumber);
+                                curColor = Color.FromArgb(255, (byte)red, (byte)green, (byte)blue);
                                 break;
                             default:
                                 throw new FormatException("OverlayParser: Unknown token at line " + curToken.LineNumber + ": " + curToken.Value);

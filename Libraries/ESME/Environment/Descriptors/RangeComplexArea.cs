@@ -10,6 +10,7 @@ using ESME.NEMO.Overlay;
 using HRC;
 using HRC.Navigation;
 using HRC.Utility;
+using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.Environment.Descriptors
 {
@@ -96,6 +97,8 @@ namespace ESME.Environment.Descriptors
         {
             var areaPath = Path.Combine(rangeComplex.AreasPath, areaName + ".ovr");
             var overlay = new OverlayFile(areaPath);
+            if (overlay.Shapes.Length > 1) throw new FileFormatException(string.Format("Error loading area {0}: This area contains multiple shapes, which is not supported for areas within a range complex", areaName));
+            if (!overlay.Shapes[0].IsUsableAsPerimeter) throw new FileFormatException(string.Format("Error loading area {0}: This area is not suitable for use as a perimeter.  An area within a range complex must be a simple, closed shape without crossing segments", areaName));
             return new RangeComplexArea(rangeComplex, areaName, overlay.Shapes[0]);
         }
 

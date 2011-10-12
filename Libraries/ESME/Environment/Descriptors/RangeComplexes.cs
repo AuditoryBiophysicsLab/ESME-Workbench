@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Windows.Threading;
@@ -38,13 +39,11 @@ namespace ESME.Environment.Descriptors
 
         public ObservableList<NewRangeComplex> RangeComplexList { get; private set; }
 
-        public Task ReadRangeComplexFileAsync(string fileName)
+        public Task<bool> ReadRangeComplexFileAsync(string fileName)
         {
             IsEnabled = false;
             _rangeComplexFile = fileName;
-            var result = InitializeAsync(_rangeComplexFile);
-            result.ContinueWith(_=> IsEnabled = true);
-            return result;
+            return InitializeAsync(_rangeComplexFile);
         }
 
         #region public bool IsEnabled { get; set; }
@@ -67,16 +66,23 @@ namespace ESME.Environment.Descriptors
 
         string _rangeComplexFile;
 
-        Task InitializeAsync(string simAreaFile)
+        async Task<bool> InitializeAsync(string simAreaFile)
         {
             if (!File.Exists(simAreaFile)) throw new FileNotFoundException("Error reading sim area file", simAreaFile);
             SimAreaPath = Path.GetDirectoryName(simAreaFile);
             var actionBlock = new ActionBlock<RangeComplexMetadata>(
-		        info => _dispatcher.InvokeInBackgroundIfRequired(() =>
+		        info =>
 		        {
-		            var rangeComplex = NewRangeComplex.Load(SimAreaPath, info, _dispatcher);
-		            RangeComplexCollection.Add(rangeComplex.Name, rangeComplex);
-		        }),
+		            try
+		            {
+                        var rangeComplex = NewRangeComplex.Load(SimAreaPath, info, _dispatcher);
+                        _dispatcher.InvokeInBackgroundIfRequired(() => RangeComplexCollection.Add(rangeComplex.Name, rangeComplex));
+		            }
+		            catch (Exception e)
+		            {
+		                throw new ApplicationException(string.Format("Error loading range complex {0}", info.Name), e);
+		            }
+		        },
 		        new ExecutionDataflowBlockOptions
 		        {
 		            TaskScheduler = TaskScheduler.Default,
@@ -110,7 +116,25 @@ namespace ESME.Environment.Descriptors
                 actionBlock.Post(new RangeComplexMetadata(rangeComplexName, height, latitude, longitude, geoid, opsLimitFile, simLimitFile));
             }
             actionBlock.Complete();
-            return actionBlock.Completion;
+            try
+            {
+                await actionBlock.Completion;
+                IsEnabled = true;
+                return true;
+            }
+            catch
+            {
+                var sb = new StringBuilder();
+                foreach (var ex in actionBlock.Completion.Exception.InnerExceptions) sb.AppendLine(FormatExceptionMessage(ex, 0) + "\r\n");
+                throw new ApplicationException("Error loading range complexes:\r\n" + sb);
+            }
+        }
+
+        public string FormatExceptionMessage(Exception exception, int indentLevel)
+        {
+            return new string(' ', 2 * indentLevel) + ((exception.InnerException == null)
+                                                           ? exception.Message
+                                                           : exception.Message + "\r\n" + FormatExceptionMessage(exception.InnerException, indentLevel + 1));
         }
 
         public string SimAreaPath { get; private set; }

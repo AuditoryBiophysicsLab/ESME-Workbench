@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -210,7 +211,20 @@ namespace OneNavyModel.ViewModels.Main
             ImportProgressCollection = ImportProgressCollection.Singleton;
             try
             {
-                await RangeComplexes.ReadRangeComplexFileAsync(Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+                try
+                {
+                    await RangeComplexes.ReadRangeComplexFileAsync(Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+                }
+                catch (AggregateException ae)
+                {
+                    var sb = new StringBuilder();
+                    foreach (var e in ae.InnerExceptions) sb.AppendLine(e.Message);
+                    _messageBoxService.ShowError("Error loading range complexes:\n" + sb);
+                }
+                catch (Exception e)
+                {
+                    _messageBoxService.ShowError(e.Message);
+                }
                 RangeComplexes.PropertyChanged += (s, e) =>
                 {
                     switch (e.PropertyName)

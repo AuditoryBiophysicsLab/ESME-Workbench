@@ -136,7 +136,8 @@ namespace ESME.Environment.Descriptors
             foreach (var areaFile in Directory.EnumerateFiles(AreasPath, "*.ovr"))
             {
                 var areaName = Path.GetFileNameWithoutExtension(areaFile);
-                _dispatcher.InvokeInBackgroundIfRequired(() => AreaCollection.Add(areaName, RangeComplexArea.Read(this, areaName)));
+                var area = RangeComplexArea.Read(this, areaName);
+                _dispatcher.InvokeInBackgroundIfRequired(() => AreaCollection.Add(areaName, area));
             }
             GeoRect = GeoRect.Union(AreaCollection.Values.Select(area => area.GeoRect).ToArray());
             EnvironmentFiles.GeoRect = GeoRect;

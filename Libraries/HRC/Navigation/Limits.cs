@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace HRC.Navigation
@@ -167,6 +169,7 @@ namespace HRC.Navigation
         public Limits CreateExpandedLimit(double rangeOutKm)
         {
             var result = new Limits();
+            var geoList = new List<Geo>();
 
             if (Geos == null || Geos.Count == 0)
             {
@@ -188,11 +191,10 @@ namespace HRC.Navigation
 
                 Geo lastEndPt = null;
                 var segIt = _region.Segments;
-                GeoSegment seg;
                 List<Geo> segPts = null;
                 while (segIt.MoveNext())
                 {
-                    seg = segIt.Current;
+                    var seg = segIt.Current;
                     segPts = seg.Segments;
 
                     var lineCourse = segPts[0].Azimuth(segPts[1]);
@@ -213,54 +215,41 @@ namespace HRC.Navigation
 
                         var arc = Geo.ApproximateArc(segPts[0], left, right, Geo.DegreesToRadians(5.0));
                         var arcList = new List<Geo>(arc.Length);
-                        foreach (var a in arc)
+                        for (var i = 1; i < arc.Length - 1; i++)
                         {
-                            if (_isClockWise)
-                            {
-                                arcList.Add(a);
-                            }
-                            else
-                            {
-                                arcList.Insert(0, a);
-                            }
+                            var a = arc[i];
+                            if (_isClockWise) arcList.Add(a);
+                            else arcList.Insert(0, a);
                         }
-
-                        foreach (var a in arcList)
-                        {
-                            result.Geos.Add(a);
-                        }
+                        geoList.AddRange(arcList);
                     }
-                    result.Geos.Add(newPt0);
-                    result.Geos.Add(newPt1);
+                    geoList.Add(newPt0);
+                    geoList.Add(newPt1);
+                    for (var i = 0; i < geoList.Count - 1; i++)
+                        if ((Math.Abs(geoList[i].Latitude - geoList[i + 1].Latitude) < .000001) && (Math.Abs(geoList[i].Longitude - geoList[i + 1].Longitude) < .000001)) Debugger.Break();
 
                     lastEndPt = newPt1;
                 }
 
                 if (lastEndPt != null)
                 {
-                    var left = (_isClockWise ? lastEndPt : result.Geos[0]);
-                    var right = (_isClockWise ? result.Geos[0] : lastEndPt);
+                    var left = (_isClockWise ? lastEndPt : geoList[0]);
+                    var right = (_isClockWise ? geoList[0] : lastEndPt);
                     var arc = Geo.ApproximateArc(segPts[1], left, right, Geo.DegreesToRadians(5.0));
 
                     var arcList = new List<Geo>(arc.Length);
-                    foreach (var a in arc)
+                    for (var i = 1; i < arc.Length; i++)
                     {
-                        if (_isClockWise)
-                        {
-                            arcList.Add(a);
-                        }
-                        else
-                        {
-                            arcList.Insert(0, a);
-                        }
+                        var a = arc[i];
+                        if (_isClockWise) arcList.Add(a);
+                        else arcList.Insert(0, a);
                     }
 
-                    foreach (var a in arcList)
-                    {
-                        result.Geos.Add(a);
-                    }
+                    geoList.AddRange(arcList);
                 }
-
+                for (var i = 0; i < geoList.Count - 1; i++)
+                    if ((Math.Abs(geoList[i].Latitude - geoList[i + 1].Latitude) < .000001) && (Math.Abs(geoList[i].Longitude - geoList[i + 1].Longitude) < .000001)) Debugger.Break();
+                result.Geos = geoList;
                 result.Initialize();
             }
 

@@ -128,7 +128,7 @@ namespace ESME.NEMO.Overlay
                 var first = true;
                 foreach (var coordinate in coords)
                 {
-                    writer.WriteLine("{0:0.0000}  {1:0.0000}", coordinate.Latitude, coordinate.Longitude);
+                    writer.WriteLine("{0}  {1}", coordinate.Latitude, coordinate.Longitude);
                     if (first) writer.WriteLine("lines");
                     first = false;
                 }
