@@ -1,6 +1,6 @@
 ﻿using Cinch;
 
-namespace ESME.Views.Misc
+namespace OneNavyModel.Views
 {
     /// <summary>
     /// Interaction logic for PleaseWaitView.xaml

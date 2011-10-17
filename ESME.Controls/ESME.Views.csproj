@@ -162,10 +162,6 @@
     <Compile Include="Misc\ModuleBuildInfoView.xaml.cs">
       <DependentUpon>ModuleBuildInfoView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Misc\PleaseWaitView.xaml.cs">
-      <DependentUpon>PleaseWaitView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Misc\PleaseWaitViewModel.cs" />
     <Compile Include="Misc\ProjectCredits.xaml.cs">
       <DependentUpon>ProjectCredits.xaml</DependentUpon>
     </Compile>
@@ -303,10 +299,6 @@
     <Page Include="Misc\ModuleBuildInfoView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Misc\PleaseWaitView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Misc\ProjectCredits.xaml">
       <SubType>Designer</SubType>

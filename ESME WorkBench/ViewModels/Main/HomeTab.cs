@@ -104,6 +104,7 @@ namespace OneNavyModel.ViewModels.Main
             ScenarioMetadata = null;
             RecentFiles.InsertFile(fileName);
             //NemoScenario.Test(fileName);
+            _pleaseWait.Message = "Loading scenario, please wait...";
             try
             {
                 ScenarioMetadata = ScenarioMetadata.Load(ScenarioMetadata.MetadataFilename(fileName), RangeComplexes);
@@ -126,28 +127,30 @@ namespace OneNavyModel.ViewModels.Main
                 _scenarioFileWatcher.Changed += (s, e) =>
                 {
                     if (_scenarioFileTimer != null) return;
-                    _scenarioFileTimer = new Timer(1000) {AutoReset = false};
+                    _scenarioFileTimer = new Timer(1000) { AutoReset = false };
                     CloseScenarioHandler();
                     _scenarioFileTimer.Start();
                     _scenarioFileTimer.Elapsed += (s1, e1) =>
                     {
+                        _dispatcher.InvokeInBackgroundIfRequired(() => _pleaseWait.Message = "Reloading scenario, please wait...");
                         ScenarioMetadata =
                                 ScenarioMetadata.Load(ScenarioMetadata.MetadataFilename(fileName), RangeComplexes) ??
                                 new ScenarioMetadata
                                 {
-                                        Filename = ScenarioMetadata.MetadataFilename(fileName),
-                                        RangeComplexes = RangeComplexes
+                                    Filename = ScenarioMetadata.MetadataFilename(fileName),
+                                    RangeComplexes = RangeComplexes
                                 };
                         ScenarioMetadata.CurrentMapLayers = CurrentMapLayers;
+                        ScenarioMetadata.ScenarioFilename = fileName;
                         _dispatcher.InvokeIfRequired(() =>
                         {
-                            ScenarioMetadata.ScenarioFilename = fileName;
                             MainWindowTitle = string.Format("One Navy Model{0}: {1} [{2}]",
                                                             Configuration.IsUnclassifiedModel ? " (public)" : "",
                                                             ScenarioMetadata.NemoFile.Scenario.EventName,
                                                             ScenarioMetadata.NemoFile.Scenario.TimeFrame);
                         });
                         _scenarioFileTimer = null;
+                        _dispatcher.InvokeInBackgroundIfRequired(() => _pleaseWait.Hide());
                     };
                 };
                 _scenarioFileWatcher.Deleted += (s, e) =>
@@ -156,8 +159,6 @@ namespace OneNavyModel.ViewModels.Main
                     _messageBoxService.ShowError(string.Format("Scenario file {0} was deleted", fileName));
                 };
                 _scenarioFileWatcher.EnableRaisingEvents = true;
-
-
             }
             catch (Exception ex)
             {
@@ -170,7 +171,12 @@ namespace OneNavyModel.ViewModels.Main
                     inner = inner.InnerException;
                 }
                 _messageBoxService.ShowError("Error opening scenario \"" + Path.GetFileName(fileName) + "\":\n" + sb);
+                if (ScenarioMetadata != null) ScenarioMetadata.RemoveScenarioDisplay();
                 ScenarioMetadata = null;
+            }
+            finally
+            {
+                _pleaseWait.Hide();
             }
         }
         FileSystemWatcher _scenarioFileWatcher;

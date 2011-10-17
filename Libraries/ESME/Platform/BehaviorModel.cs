@@ -21,7 +21,7 @@ namespace ESME.Platform
             }
             catch (Exception e)
             {
-                throw new PlatformBehaviorException("Error initializing platform behavior", e);
+                throw new PlatformBehaviorException(string.Format("Error initializing behavior for {0} id: {1}", nemoPlatform.Name, nemoPlatform.Id), e);
             }
         }
 

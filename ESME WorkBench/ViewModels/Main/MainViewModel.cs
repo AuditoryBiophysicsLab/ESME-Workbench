@@ -43,6 +43,8 @@ namespace OneNavyModel.ViewModels.Main
         //TransmissionLossQueueCalculatorViewModel _bellhopQueueCalculatorViewModel;
         Dispatcher _dispatcher;
         public const bool ExperimentsCurrentlySupported = false;
+
+        readonly PleaseWaitViewModel _pleaseWait;
         #endregion
 
         #region Constructor
@@ -62,12 +64,12 @@ namespace OneNavyModel.ViewModels.Main
             AnalysisPointPropertiesViewModel.MessageBoxService = messageBoxService;
             Experiment.MessageBoxService = messageBoxService;
             Experiment.VisualizerService = visualizerService;
-
             _viewAwareStatus = viewAwareStatus;
             _messageBoxService = messageBoxService;
             _openFileService = openFileService;
             _saveFileService = saveFileService;
             _visualizerService = visualizerService;
+            _pleaseWait = new PleaseWaitViewModel((Window)_viewAwareStatus.View, _visualizerService);
             if (Designer.IsInDesignMode) return;
             _viewAwareStatus.ViewUnloaded += () =>
             {
@@ -155,19 +157,16 @@ namespace OneNavyModel.ViewModels.Main
                     {
                         _bathymetry = new WeakReference<Bathymetry>(((Task<Bathymetry>)RangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).Result);
                     }
-                    //if (_bathymetry != null && _bathymetry.Target != null)
-                    //    return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3} Depth: {4:0.#}m", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest, _bathymetry.Target.Samples[MouseEarthCoordinate].Data);
+                    if (_bathymetry != null && _bathymetry.Target != null && _bathymetry.Target.Samples.GeoRect.Contains(MouseEarthCoordinate)) return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3} Elevation: {4:0.#}m", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest, _bathymetry.Target.Samples[MouseEarthCoordinate].Data);
                 }
                 return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3}", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest);
             }
         }
 
         static readonly PropertyChangedEventArgs MouseLocationInfoChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MouseLocationInfo);
-        string _mouseLocationInfo;
         WeakReference<Bathymetry> _bathymetry;
 
         #endregion
-
 
         #region public float? MouseDepth { get; set; }
 
