@@ -12,67 +12,55 @@ using ESME.TransmissionLoss.BellhopNL;
 using ESME.TransmissionLoss.REFMS;
 using HRC;
 using ESME.TransmissionLoss;
+using BellhopNLLibNative;
 
-namespace BellhopNL
+namespace BellhopNLWrapper
 {
     class Program
     {
         static void Main(string[] args)
         {
-            var data = new DataBlob();
+            var dataFile = new BellhopNLInput();
             var outFile = "";
+            var arrivalsFile = "";
+            var isTest = false;
             for (var i = 0; i < args.Length; i++)
             {
                 switch (args[i])
                 {
-                    case "-data":
-                        data = DataBlob.Load(args[++i]);
+                    case "-dataFile":
+                        dataFile = BellhopNLInput.Load(args[++i]);
                         break;
-                    case "-out":
+                    case "-outFile":
                         outFile = args[++i];
+                        break;
+                    case "-isTest":
+                        isTest = bool.Parse(args[++i]);
+                        break;
+                    case "-arrivalsFile":
+                        arrivalsFile = args[++i];
                         break;
                     default:
                         Useage();
                         return;
                 }
             }
-            var arrivalsFile = ComputeRadial(data);
-            //give NLWrapper the arrivals file. 
-            BellhopNLWrapper.ModelType modelType;
-            var modelOk = Enum.TryParse(data.ModelType, true, out modelType);
-            if (!modelOk) throw new ApplicationException("modelType invalid.  'arons' or 'chapman'.");
-            var result =BellhopNLWrapper.Run(arrivalsFile, data.ChargeDepth, data.ChargeMass, data.OutputFreq, data.OutputTime, modelType).Waveforms;
-
-            //todo: make a refms-like file from this data.
-            var records = Transform(result, data);
-            EffectsFile.Write(outFile, records);
-
+            //make sure we're using a valid model
+            BellhopNLInput.NLModelType modelType;
+            if (!Enum.TryParse(dataFile.ModelType, true, out modelType)) throw new ApplicationException("modelType invalid.  'arons' or 'chapman'.");
+            //run bellhop.(or skip if arrivals file exists
+            if (!isTest) { arrivalsFile = ComputeRadial(dataFile); }
+            
+            //bellhopNL now computes waveforms and saves them to disk. 
+           // new BellhopNLOutput{ Waveforms = BellhopNLWrapper.Run(arrivalsFile, dataFile.ChargeDepth, dataFile.ChargeMass,dataFile.OutputFreq, dataFile.OutputTime, modelType).Waveforms,}.Save(outFile);
+            var foo = BellhopNLWrapper.Run(arrivalsFile, dataFile.ChargeDepth, dataFile.ChargeMass, dataFile.OutputFreq,
+                                           dataFile.OutputTime, modelType);
+            BellhopNLWrapper.Octaves(foo);
         }
 
-        static List<EffectsRecord> Transform(double[,,] waveforms, DataBlob data)
+        static string ComputeRadial(BellhopNLInput bellhopNLInput)
         {
-            var result = new List<EffectsRecord>();
-            for (var i = 0; i < waveforms.GetLength(0); i++)//ranges
-            {
-                for (var j = 0; j < waveforms.GetLength(1); j++)//depths
-                {
-                    var effectsRecord = new EffectsRecord(){Depth = data.Depths[j],Range = data.Ranges[i]};
-                    var maxPa = double.MinValue;
-
-                    for (var k = 0; k < waveforms.GetLength(2); k++)//payload waveform.
-                    {
-                        if (waveforms[i, j, k] > maxPa) maxPa = waveforms[i, j, k];
-                    }
-                    effectsRecord.PeakPressurekPa = maxPa;
-                    result.Add(effectsRecord);
-                }
-            }
-            return result;
-        }
-
-        static string ComputeRadial(DataBlob data)
-        {
-            var envFile = File.ReadAllText(data.EnvFilename);
+            var envFile = File.ReadAllText(bellhopNLInput.EnvFilename);
             string shdfile = null;
             var outputData = new StringBuilder();
             var workingDirectory = CreateTemporaryDirectory();
@@ -80,16 +68,16 @@ namespace BellhopNL
 
             // Write the bottom profile file that will be read by BELLHOP);
             // File.WriteAllText(Path.Combine(workingDirectory, "bellhop.env"), bellhopConfiguration);
-            File.WriteAllText(Path.Combine(workingDirectory, "BTYFIL"), string.Format(@"'L' \n2 \n0 {0} \n{1} {0}\n",data.WaterDepth,data.CalculationRange));
+            File.WriteAllText(Path.Combine(workingDirectory, "BTYFIL"), string.Format(@"'L' \n2 \n0 {0} \n{1} {0}\n",bellhopNLInput.WaterDepth,bellhopNLInput.CalculationRange));
 
             var trcfil = Path.Combine(workingDirectory, "TRCFIL");
-            if (data.TopReflectionCoefficients != null)
+            if (bellhopNLInput.TopReflectionCoefficients != null)
             {
                 using (var writer = new StreamWriter(trcfil, false))
                 {
-                    writer.WriteLine(data.TopReflectionCoefficients.GetLength(0));
-                    for (var rowIndex = 0; rowIndex < data.TopReflectionCoefficients.GetLength(0); rowIndex++)
-                        writer.WriteLine("{0} {1} {2} ", data.TopReflectionCoefficients[rowIndex, 0], data.TopReflectionCoefficients[rowIndex, 1], data.TopReflectionCoefficients[rowIndex, 2]);
+                    writer.WriteLine(bellhopNLInput.TopReflectionCoefficients.GetLength(0));
+                    for (var rowIndex = 0; rowIndex < bellhopNLInput.TopReflectionCoefficients.GetLength(0); rowIndex++)
+                        writer.WriteLine("{0} {1} {2} ", bellhopNLInput.TopReflectionCoefficients[rowIndex, 0], bellhopNLInput.TopReflectionCoefficients[rowIndex, 1], bellhopNLInput.TopReflectionCoefficients[rowIndex, 2]);
                 }
             }
             var bellhopExecutable = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "bellhop.exe");
@@ -137,7 +125,7 @@ namespace BellhopNL
             };
             transmissionLossProcess.Start();
             transmissionLossProcess.PriorityClass = ProcessPriorityClass.Idle;
-            transmissionLossProcess.StandardInput.WriteLine(data.BellhopConfiguration);
+            transmissionLossProcess.StandardInput.WriteLine(bellhopNLInput.BellhopConfiguration);
             transmissionLossProcess.BeginOutputReadLine();
             while (!transmissionLossProcess.HasExited)
             {
@@ -148,7 +136,7 @@ namespace BellhopNL
             }
             
             var errorText = transmissionLossProcess.StandardError.ReadToEnd();
-            Debug.WriteLine("{0}: Bellhop error output for radial bearing {1} deg:\n{2}", DateTime.Now, data.Bearing, errorText);
+            Debug.WriteLine("{0}: Bellhop error output for radial bearing {1} deg:\n{2}", DateTime.Now, bellhopNLInput.Bearing, errorText);
 
             // Convert the Bellhop output file into a Radial binary file
             
@@ -163,12 +151,12 @@ namespace BellhopNL
             if (errorText.Contains("forrtl") || (errorText.Contains("Error")))
             {
                 Console.WriteLine(@"{0}: Bellhop failure: {1}", DateTime.Now, errorText);
-                Console.WriteLine(@"{0}: Bellhop input: {1}", DateTime.Now, data.BellhopConfiguration);
+                Console.WriteLine(@"{0}: Bellhop input: {1}", DateTime.Now, bellhopNLInput.BellhopConfiguration);
                 Console.WriteLine(@"{0}: Bellhop output: {1}", DateTime.Now, outputData);
                 throw new FileIsEmptyException("arrivals file contains errors");
             }
             
-           // if (File.Exists(shdfile)) result = new TransmissionLossRadial(data.Bearing, new BellhopOutput(shdfile));
+           // if (File.Exists(shdfile)) result = new TransmissionLossRadial(BellhopNLInput.Bearing, new BellhopOutput(shdfile));
             
             var tries = 10;
             while (tries > 0)
@@ -198,6 +186,14 @@ namespace BellhopNL
             return workingDirectory;
         }
 
-        static void Useage() { throw new NotImplementedException(); }
+        static void Useage()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("BellhopNL");
+            sb.AppendLine("-dataFile : a path to a file containing a fully populated, serialzed BellhopNLInput object");
+            sb.AppendLine(
+                          "-outFile  : a path to a file which will be created or overwritten, containing a serialized BellhopNLOutput object for postprocessing.");
+            Console.Write(sb.ToString());
+        }
     }
 }

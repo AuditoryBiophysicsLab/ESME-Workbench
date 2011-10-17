@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using BellhopNL;
-using ESME;
-using ESME.Animats;
-using ESME.TransmissionLoss;
+﻿using System.Diagnostics;
 using ESME.TransmissionLoss.BellhopNL;
-using ESME.TransmissionLoss.CASS;
-using HRC;
-using ESME.Model;
-using HRC.Navigation;
+using ESME.TransmissionLoss.REFMS;
 
 namespace grahams_little_sandbox
 {
@@ -40,19 +30,57 @@ namespace grahams_little_sandbox
             var foo = output.AnimatStartPoints;
 #endif
                                             
-            string arrFile = @"C:\Projects\ESME Deliverables\Utilities\bellhopNL\score.arr";
+            string arrFile = @"C:\tests\score.arr";
             var z = 2500 / 3.2808;
             var w = 300 * 0.45359237;
             var fs     = 88200;
             var T      = 0.25;
-            var model = BellhopNLWrapper.ModelType.arons;
-            var blob = new DataBlob
-            {};
+            var model = BellhopNLInput.NLModelType.arons;
 
-            var result = BellhopNLWrapper.Run(arrFile, z, w, fs, T, model);
+           const string infilePath = @"C:\tests\nlinput.bin";
+           const string outfilePath = @"C:\tests\nloutput.bin";
+           const string effectsPath = @"C:\tests\nloutput.effects";
+
+#if false
+           new BellhopNLInput
+              {
+                  ChargeDepth = z,
+                  ChargeMass = w,
+                  OutputFreq = fs,
+                  OutputTime = T,
+                  ModelType = model.ToString(),
+                  // Bearing = 180,
+                  //BellhopConfiguration = "",
+                  //BottomProfile = "",
+                  //CalculationRange = 1000,
+                  //Depths = "",
+                  //EnvFilename = "",
+                  //Ranges = "",
+                  //TopReflectionCoefficients = "",
+                  //WaterDepth = (float)z+500,
+              }.Save(infilePath); 
+#endif
+
+#if false
+           var process = Process.Start(new ProcessStartInfo()
+      {
+          FileName = @"C:\Projects\ESME Deliverables\Utilities\BellhopNL\bin\Debug\BellhopNL.exe",
+          Arguments = string.Format("-dataFile {0} -outFile {1} -isTest true -arrivalsFile {2} ", infilePath, outfilePath, arrFile)
+      });
+           process.WaitForExit(); 
+#endif
+
+            var nlOutput = BellhopNLOutput.Load(outfilePath);
+            
+            var effectsRecords = BellhopNL.Transform(nlOutput);
+            
+            EffectsFile.Write(effectsPath,effectsRecords,nlOutput);
 
 
 
-                                        }
+
+
+
+        }
     }
 }

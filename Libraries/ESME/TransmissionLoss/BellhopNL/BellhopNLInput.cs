@@ -1,11 +1,13 @@
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using ESME.Environment.NAVO;
+using HRC.Navigation;
 
 namespace ESME.TransmissionLoss.BellhopNL
 {
     [Serializable]
-    public class DataBlob
+    public class BellhopNLInput
     {
         //bellhopNL members
         public double ChargeDepth { get;set; }
@@ -13,6 +15,7 @@ namespace ESME.TransmissionLoss.BellhopNL
         public double OutputFreq { get; set; }
         public double OutputTime { get; set; }
         public string ModelType { get; set; }
+        public enum NLModelType { arons, chapman }
 
         //bellhop members
         public float WaterDepth { get; set; }
@@ -25,10 +28,10 @@ namespace ESME.TransmissionLoss.BellhopNL
         public double[] Depths { get; set; }
         public double[] Ranges { get; set; }
 
-        public static DataBlob Load(string filename)
+        public static BellhopNLInput Load(string filename)
         {
             var formatter = new BinaryFormatter();
-            using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read)) return (DataBlob)formatter.Deserialize(stream);
+            using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read)) return (BellhopNLInput)formatter.Deserialize(stream);
         }
         public void Save(string filename)
         {

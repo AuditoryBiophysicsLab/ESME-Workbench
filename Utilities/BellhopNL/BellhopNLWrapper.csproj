@@ -31,11 +31,11 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BellhopNL">
-      <HintPath>..\bellhopNL-matlab\BellhopNL\distrib\BellhopNL.dll</HintPath>
+    <Reference Include="BellhopNLLib, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\bellhopNL-matlab\BellhopNLLib\BellhopNLLib.dll</HintPath>
     </Reference>
-    <Reference Include="BellhopNLNative">
-      <HintPath>..\bellhopNL-matlab\BellhopNL\distrib\BellhopNLNative.dll</HintPath>
+    <Reference Include="BellhopNLLibNative, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\bellhopNL-matlab\BellhopNLLib\BellhopNLLibNative.dll</HintPath>
     </Reference>
     <Reference Include="MWArray, Version=2.11.0.0, Culture=neutral, PublicKeyToken=e1d84a0da19db86f, processorArchitecture=AMD64" />
     <Reference Include="System" />

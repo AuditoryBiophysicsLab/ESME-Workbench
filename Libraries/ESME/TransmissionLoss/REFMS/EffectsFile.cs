@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using ESME.TransmissionLoss.BellhopNL;
+using HRC.Navigation;
 
 namespace ESME.TransmissionLoss.REFMS
 {
@@ -80,26 +82,27 @@ namespace ESME.TransmissionLoss.REFMS
             return result;
         }
 
-        public static void Write(string fileName, List<EffectsRecord> records)
+        public static void Write(string fileName, List<EffectsRecord> records, BellhopNLOutput nlOutput)
         {
             var sortedRecords = from record in records
-                                orderby record.Depth, record.Range
+                                orderby record.Depth , record.Range
                                 select record;
             var sb = new StringBuilder();
             //header
-            sb.AppendLine("#head=");
-            sb.AppendLine("#tstamp=" + DateTime.Now.ToString());
-            sb.AppendLine("#sysver=");
-            sb.AppendLine("#title=");
-            sb.AppendLine("#mode=");
-            sb.AppendLine("#bin=");
-            sb.AppendLine("#season=");
-            sb.AppendLine("#info=");
-            sb.AppendLine("#location=");
-            sb.AppendLine("#splineloc=");
-            sb.AppendLine("#units=meters");
+            sb.AppendLine("#head=");//todo
+            sb.AppendLine("#tstamp=" + DateTime.Now);
+            sb.AppendLine(string.Format("#sysver={0}|{1}|{2}|{3}|null", System.Environment.UserName,System.Environment.OSVersion.VersionString,System.Environment.OSVersion.ServicePack,System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE")));
+            sb.AppendLine("#title=Explosives Test, EC_SimArea"); //todo
+            sb.AppendLine(string.Format("#mode={0}", nlOutput.ModeName));
+            sb.AppendLine("#bin=E12"); //todo
+            sb.AppendLine("#season=" + nlOutput.TimePeriod);
+            sb.AppendLine(string.Format("#info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}", nlOutput.ChargeDepth, "null", nlOutput.OutputTime, "null", -20, -15));//todo
+            sb.AppendLine(string.Format("#location={0:0.000000} {1:0.000000}", nlOutput.Location.Latitude, nlOutput.Location.Longitude));
+            sb.AppendLine(string.Format("#splineloc={0:0.000000} {1:0.000000}", nlOutput.SVPLocation.Latitude, nlOutput.SVPLocation.Longitude));
+            sb.AppendLine("#units=meters");//todo
             //pressure data
-            sb.AppendLine("   Depth(m)     Range(m)   PeakPr(kPa)  PeakPr(200dB)  Impulse(P-s)    TEnergy(164dB) TEnergy(1/3oct,dB) MidFreq(1/3oct,Hz) PEnergy(1/3oct,dB)");
+            sb.AppendLine(
+                          "   Depth(m)     Range(m)   PeakPr(kPa)  PeakPr(200dB)  Impulse(P-s)    TEnergy(164dB) TEnergy(1/3oct,dB) MidFreq(1/3oct,Hz) PEnergy(1/3oct,dB)");
             foreach (var e in sortedRecords)
                 sb.AppendLine(string.Format("{0,10}{1,13}{2,13}{3,14}{4,14}{5,17}{6,17}{7,19}{8,19}",
                                             e.Depth, e.Range,
@@ -107,18 +110,21 @@ namespace ESME.TransmissionLoss.REFMS
                                             e.EnergyThirdOct,
                                             e.MidFreq, e.PeakEnergy));
             //SPEC?
-            sb.AppendLine("# SPEC:");
-            sb.AppendLine("FOR: LOC_");
+            sb.AppendLine("# SPEC:");//todo
+            sb.AppendLine("FOR: LOC_");//todo
             foreach (var e in sortedRecords)
             {
-                int numFreqBands=0;
-                sb.AppendLine(string.Format("{0,12}{1,12}{2,12}", e.Depth, e.Range, numFreqBands));
+                sb.AppendLine(string.Format("{0,12}{1,12}{2,12}", e.Depth, e.Range, e.ThirdOctaveBandPressures.Count));
+                foreach (var t in e.ThirdOctaveBandPressures) sb.AppendLine(string.Format("{0,12}{1,12}", t.Item1,t.Item2));
             }
+
+            File.WriteAllText(fileName,sb.ToString());
         }
     }
 
     public class EffectsRecord
     {
+        //REFMS properties
         public double Depth { get; set; }
         public double Range { get; set; }
         public double PeakPressurekPa { get; set; }
@@ -129,6 +135,14 @@ namespace ESME.TransmissionLoss.REFMS
         public double MidFreq { get; set; }
         public double PeakEnergy { get; set; }
 
+        //additional BellhopNL properties
+        public List<Tuple<double, double>> ThirdOctaveBandPressures { get; set; }
+
+        /// <summary>
+        /// Returns an EffectsRecord given a line of a REFMS-generated Effects File. Does NOT include BellhopNL-related properties.
+        /// </summary>
+        /// <param name="sourceLine"></param>
+        /// <returns></returns>
         public static EffectsRecord Parse(string sourceLine)
         {
             var fields = sourceLine.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);

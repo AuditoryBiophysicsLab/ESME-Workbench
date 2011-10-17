@@ -240,7 +240,9 @@
     <Compile Include="Platform\Exceptions.cs" />
     <Compile Include="Platform\PlatformState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TransmissionLoss\BellhopNL\DataBlob.cs" />
+    <Compile Include="TransmissionLoss\BellhopNL\BellhopNL.cs" />
+    <Compile Include="TransmissionLoss\BellhopNL\BellhopNLInput.cs" />
+    <Compile Include="TransmissionLoss\BellhopNL\BellhopNLOutput.cs" />
     <Compile Include="TransmissionLoss\CASS\CASSBackgroundExporter.cs" />
     <Compile Include="TransmissionLoss\CASS\NAEMOEnvironmentFile.cs" />
     <Compile Include="TransmissionLoss\CASS\CASSOutput.cs" />
