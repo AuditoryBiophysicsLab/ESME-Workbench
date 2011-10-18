@@ -18,5 +18,20 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
 		</WpfDesktopEdition:WpfMap>
-	</DockPanel>
+<!--
+        <controls:DataAxis AxisLocation="Left"
+					                   DockPanel.Dock="Right"
+					                   AxisLabel="Transmission Loss (dB)"
+					                   StartValue="{Binding ColorMapViewModel.MaxValue}"
+					                   EndValue="{Binding ColorMapViewModel.MinValue}"
+					                   TickValueFormat="0.#" />
+        <controls:ColorBarView ColorBarImage="{Binding ColorMapViewModel.ColorBitmap}"
+					                       Maximum="{Binding ColorMapViewModel.MaxValue}"
+					                       Minimum="{Binding ColorMapViewModel.MinValue}"
+					                       CurrentMaximum="{Binding ColorMapViewModel.CurMaxValue}"
+					                       CurrentMinimum="{Binding ColorMapViewModel.CurMinValue}"
+					                       DockPanel.Dock="Right"
+					                       MinWidth="50" />
+        -->
+    </DockPanel>
 </UserControl>
