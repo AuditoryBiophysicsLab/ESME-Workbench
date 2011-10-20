@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using ESME.Environment.NAVO;
 using ESME.TransmissionLoss.BellhopNL;
 using HRC.Navigation;
 
@@ -82,7 +83,7 @@ namespace ESME.TransmissionLoss.REFMS
             return result;
         }
 
-        public static void Write(string fileName, List<EffectsRecord> records, BellhopNLOutput nlOutput)
+        public static void Write(string fileName, List<EffectsRecord> records, string modeName, double chargeDepth, double outputTime, NAVOTimePeriod timePeriod)
         {
             var sortedRecords = from record in records
                                 orderby record.Depth , record.Range
@@ -93,18 +94,18 @@ namespace ESME.TransmissionLoss.REFMS
             sb.AppendLine("#tstamp=" + DateTime.Now);
             sb.AppendLine(string.Format("#sysver={0}|{1}|{2}|{3}|null", System.Environment.UserName,System.Environment.OSVersion.VersionString,System.Environment.OSVersion.ServicePack,System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE")));
             sb.AppendLine("#title=Explosives Test, EC_SimArea"); //todo
-            sb.AppendLine(string.Format("#mode={0}", nlOutput.ModeName));
+            sb.AppendLine(string.Format("#mode={0}", modeName));
             sb.AppendLine("#bin=E12"); //todo
-            sb.AppendLine("#season=" + nlOutput.TimePeriod);
-            sb.AppendLine(string.Format("#info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}", nlOutput.ChargeDepth, "null", nlOutput.OutputTime, "null", -20, -15));//todo
-            sb.AppendLine(string.Format("#location={0:0.000000} {1:0.000000}", nlOutput.Location.Latitude, nlOutput.Location.Longitude));
-            sb.AppendLine(string.Format("#splineloc={0:0.000000} {1:0.000000}", nlOutput.SVPLocation.Latitude, nlOutput.SVPLocation.Longitude));
+            sb.AppendLine("#season=" + timePeriod);
+            sb.AppendLine(string.Format("#info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}", chargeDepth, "null", outputTime, "null", -20, -15));//todo
+           // sb.AppendLine(string.Format("#location={0:0.000000} {1:0.000000}", nlOutput.Location.Latitude, nlOutput.Location.Longitude));
+            //sb.AppendLine(string.Format("#splineloc={0:0.000000} {1:0.000000}", nlOutput.SVPLocation.Latitude, nlOutput.SVPLocation.Longitude));
             sb.AppendLine("#units=meters");//todo
             //pressure data
             sb.AppendLine(
                           "   Depth(m)     Range(m)   PeakPr(kPa)  PeakPr(200dB)  Impulse(P-s)    TEnergy(164dB) TEnergy(1/3oct,dB) MidFreq(1/3oct,Hz) PEnergy(1/3oct,dB)");
             foreach (var e in sortedRecords)
-                sb.AppendLine(string.Format("{0,10}{1,13}{2,13}{3,14}{4,14}{5,17}{6,17}{7,19}{8,19}",
+                sb.AppendLine(string.Format("{0,10:0.000}{1,13:0.000}{2,13:0.000}{3,14:0.000}{4,14:0.000}{5,17:0.000}{6,17:0.000}{7,19:0.000}{8,19:0.000}",
                                             e.Depth, e.Range,
                                             e.PeakPressurekPa, e.PeakPressure200dB, e.Impulse, e.Energy164dB,
                                             e.EnergyThirdOct,
@@ -114,8 +115,8 @@ namespace ESME.TransmissionLoss.REFMS
             sb.AppendLine("FOR: LOC_");//todo
             foreach (var e in sortedRecords)
             {
-                sb.AppendLine(string.Format("{0,12}{1,12}{2,12}", e.Depth, e.Range, e.ThirdOctaveBandPressures.Count));
-                foreach (var t in e.ThirdOctaveBandPressures) sb.AppendLine(string.Format("{0,12}{1,12}", t.Item1,t.Item2));
+                sb.AppendLine(string.Format("{0,12:0.0000E+00}{1,12:0.0000E+00}{2,12:##}", e.Depth, e.Range, e.ThirdOctaveBandPressures.Count));
+                foreach (var t in e.ThirdOctaveBandPressures) sb.AppendLine(string.Format("{0,12:0.0000E+00}{1,12:0.0000E+00}", t.Item1, t.Item2));
             }
 
             File.WriteAllText(fileName,sb.ToString());

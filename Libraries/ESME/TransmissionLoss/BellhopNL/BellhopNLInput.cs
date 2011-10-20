@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using ESME.Environment.NAVO;
+using ESME.TransmissionLoss.Bellhop;
 using HRC.Navigation;
 
 namespace ESME.TransmissionLoss.BellhopNL
@@ -27,6 +28,11 @@ namespace ESME.TransmissionLoss.BellhopNL
         public float Bearing { get; set; }
         public double[] Depths { get; set; }
         public double[] Ranges { get; set; }
+
+        //refms-mimic members
+        public EarthCoordinate Location { get; set; }
+        public Geo SVPLocation { get; set;}
+        public string ModeName { get; set; }
 
         public static BellhopNLInput Load(string filename)
         {

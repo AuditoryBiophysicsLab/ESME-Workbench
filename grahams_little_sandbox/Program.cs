@@ -1,6 +1,11 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using ESME.Data;
+using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.BellhopNL;
 using ESME.TransmissionLoss.REFMS;
+using HRC.Navigation;
 
 namespace grahams_little_sandbox
 {
@@ -41,7 +46,24 @@ namespace grahams_little_sandbox
            const string outfilePath = @"C:\tests\nloutput.bin";
            const string effectsPath = @"C:\tests\nloutput.effects";
 
-#if false
+#if true
+           var bellhopInput = new BellhopRunFile
+           {
+               BathymetryName = "",
+               BellhopSettings = new BellhopSettings() { },
+               TransmissionLossAlgorithm = TransmissionLossAlgorithm.Bellhop,
+               EnvironmentName = "",
+               Filename = "",
+               Metadata = "",
+               RangeComplexName = "",
+               RangeDistanceIncrement = 0,
+               ReferenceLocation = new EarthCoordinate(),
+               ScenarioDataDirectory = "",
+               TransmissionLossJob = new TransmissionLossJob() { ModeName = ""},
+               TransmissionLossRunFileRadials = new List<TransmissionLossRunFileRadial>(),
+               
+              
+           };
            new BellhopNLInput
               {
                   ChargeDepth = z,
@@ -58,6 +80,8 @@ namespace grahams_little_sandbox
                   //Ranges = "",
                   //TopReflectionCoefficients = "",
                   //WaterDepth = (float)z+500,
+                  
+                  
               }.Save(infilePath); 
 #endif
 
@@ -69,18 +93,11 @@ namespace grahams_little_sandbox
       });
            process.WaitForExit(); 
 #endif
-
             var nlOutput = BellhopNLOutput.Load(outfilePath);
             
             var effectsRecords = BellhopNL.Transform(nlOutput);
-            
-            EffectsFile.Write(effectsPath,effectsRecords,nlOutput);
-
-
-
-
-
-
+        
+            EffectsFile.Write(effectsPath,effectsRecords,nlOutput.ModeName,nlOutput.ChargeDepth,nlOutput.OutputTime,nlOutput.TimePeriod);
         }
     }
 }

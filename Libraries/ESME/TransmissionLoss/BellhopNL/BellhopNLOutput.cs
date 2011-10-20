@@ -14,6 +14,7 @@ namespace ESME.TransmissionLoss.BellhopNL
         public double[] Ranges { get; set; }
         public double[] Depths { get; set; }
 
+
         //REFMS-mimic members.
         public EarthCoordinate Location { get; set; }
         public string ModeName { get; set; }
@@ -21,6 +22,10 @@ namespace ESME.TransmissionLoss.BellhopNL
         public Geo SVPLocation { get; set; }
         public double ChargeDepth { get; set; }
         public double OutputTime { get; set; }
+        public double PeakEnergy { get;  set; }
+        public double MaxEnergy { get;  set; }
+        public double[] EFD { get;  set; }
+        public double[] ThirdOctaveCenterFrequencies { get;  set; }
        
         public void Save(string filename)
         {

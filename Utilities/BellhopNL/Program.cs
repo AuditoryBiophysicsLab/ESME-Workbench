@@ -52,10 +52,24 @@ namespace BellhopNLWrapper
             if (!isTest) { arrivalsFile = ComputeRadial(dataFile); }
             
             //bellhopNL now computes waveforms and saves them to disk. 
-           // new BellhopNLOutput{ Waveforms = BellhopNLWrapper.Run(arrivalsFile, dataFile.ChargeDepth, dataFile.ChargeMass,dataFile.OutputFreq, dataFile.OutputTime, modelType).Waveforms,}.Save(outFile);
-            var foo = BellhopNLWrapper.Run(arrivalsFile, dataFile.ChargeDepth, dataFile.ChargeMass, dataFile.OutputFreq,
-                                           dataFile.OutputTime, modelType);
-            BellhopNLWrapper.Octaves(foo);
+            var result = BellhopNLWrapper.Run(arrivalsFile, dataFile.ChargeDepth, dataFile.ChargeMass,
+                                              dataFile.OutputFreq, dataFile.OutputTime, modelType);
+            
+            BellhopNLWrapper.ComputeThirdOctaves(result); // technically, we don't need to do this in other cases. 
+            
+            new BellhopNLOutput
+            {
+                    Waveforms = result.Waveforms,
+                    Ranges = result.Ranges,
+                    Depths = result.Depths,
+                    ChargeDepth = result.ChargeDepth,
+                    PeakEnergy = result.PeakEnergy,
+                    EFD = result.EFD,
+                    MaxEnergy = result.MaxEnergy,
+                    ThirdOctaveCenterFrequencies = result.ThirdOctaveCenterFrequencies,
+                    OutputTime = dataFile.OutputTime,
+            }.Save(outFile);
+            
         }
 
         static string ComputeRadial(BellhopNLInput bellhopNLInput)
@@ -178,6 +192,8 @@ namespace BellhopNLWrapper
             transmissionLossProcess.ProgressPercent = 100;
             return shdfile;
         }
+
+
 
         protected static string CreateTemporaryDirectory()
         {
