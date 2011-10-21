@@ -599,7 +599,14 @@ namespace ESME.Environment.Descriptors
 
         public void HookEnvironment<T>(EnvironmentDataType dataType, Action<T> action)
         {
-            if (EnvironmentData[dataType] != null) ((Task<T>)EnvironmentData[dataType]).ContinueWith(task => action(task.Result));
+            try
+            {
+                if (EnvironmentData[dataType] != null) ((Task<T>)EnvironmentData[dataType]).ContinueWith(task => action(task.Result));
+            }
+            catch (AggregateException ae)
+            {
+                foreach (var e in ae.InnerExceptions) Debug.WriteLine("{0}: Error hooking {0}: {1}", DateTime.Now, dataType, e.Message);
+            }
         }
     }
 }

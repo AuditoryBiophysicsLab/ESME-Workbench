@@ -224,7 +224,7 @@ namespace HRC.Utility
         }
 
         // data[lats,lons]
-        public uint[,] ToPixelValues(float[,] data, float minValue, float maxValue)
+        public uint[,] ToPixelValues(float[,] data, float minValue, float maxValue, Color aboveThresholdColor = default(Color))
         {
             if (data == null) throw new ApplicationException("ToBitmap: data cannot be null");
 
@@ -239,7 +239,7 @@ namespace HRC.Utility
                     var curValue = data[x, height - 1 - y];
                     var curColor = curValue <= Threshold
                                        ? BelowThresholdColormap.Lookup(curValue, minValue, Threshold, Threshold - minValue)
-                                       : AboveThresholdColormap.Lookup(curValue, Threshold, maxValue, maxValue - Threshold);
+                                       : aboveThresholdColor == default(Color) ? AboveThresholdColormap.Lookup(curValue, Threshold, maxValue, maxValue - Threshold) : aboveThresholdColor;
                     // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
                     // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
                     pixelValues[x, y] = (uint)((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));

@@ -8,7 +8,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:Main="clr-namespace:OneNavyModel.ViewModels.Main" xmlns:Views="clr-namespace:OneNavyModel.Views"
-        mc:Ignorable="d" 
+        xmlns:ESME="clr-namespace:ESME;assembly=ESME" mc:Ignorable="d" 
         d:DataContext="{d:DesignInstance Type=Main:ApplicationOptionsViewModel}">
     <DockPanel LastChildFill="True">
         <DockPanel LastChildFill="False"
@@ -177,7 +177,9 @@
                 </StackPanel>
             </TabItem>
             <TabItem Header="Misc">
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Vertical">
+                    <GroupBox Header="Propagation files" >
+                <StackPanel Orientation="Horizontal" Margin="5">
                     <CheckBox Content="Display threshold contour of " 
                               IsChecked="{Binding AppSettings.DisplayContoursOnTransmissionLoss}"
                               VerticalAlignment="Center"/>
@@ -185,6 +187,19 @@
                              Width="30"
                              VerticalAlignment="Center" />  
                     <TextBlock Text=" dB on transmission loss points" VerticalAlignment="Center"/>
+                </StackPanel>
+                    </GroupBox>
+                    <GroupBox Header="Environment data export" 
+                              Visibility="{Binding ESME:Configuration.IsClassifiedModel, Converter={StaticResource TrueVisibleFalseCollapsed}}">
+                        <StackPanel Orientation="Vertical">
+                            <CheckBox Content="Export environment files when all data are available" 
+                              IsChecked="{Binding AppSettings.DisplayContoursOnTransmissionLoss}"
+                              VerticalAlignment="Center" Margin="5"/>
+                            <CheckBox Content="Export bathymetry files when all data are available" 
+                              IsChecked="{Binding AppSettings.DisplayContoursOnTransmissionLoss}"
+                              VerticalAlignment="Center" Margin="5 0 5 5"/>
+                    </StackPanel>
+                    </GroupBox>
                 </StackPanel>
             </TabItem>
         </TabControl>

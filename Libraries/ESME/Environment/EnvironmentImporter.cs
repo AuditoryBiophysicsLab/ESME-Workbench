@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Environment.Descriptors;
@@ -226,7 +227,7 @@ namespace ESME.Environment
                         
                     var bitmapData = new float[displayValues.Longitudes.Length, displayValues.Latitudes.Length];
                     for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
-                    var displayData = colormap.ToPixelValues(bitmapData, bathymetry.Minimum.Data, bathymetry.Maximum.Data < 0 ? bathymetry.Maximum.Data : 8000);
+                    var displayData = colormap.ToPixelValues(bitmapData, bathymetry.Minimum.Data, bathymetry.Maximum.Data < 0 ? bathymetry.Maximum.Data : 8000, Colors.Black);
                     BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
 
                     var sb = new StringBuilder();

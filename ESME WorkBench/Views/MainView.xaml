@@ -1,29 +1,21 @@
-﻿<r:RibbonWindow x:Class="OneNavyModel.Views.MainView"
-                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<r:RibbonWindow x:Class="OneNavyModel.Views.MainView" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                 xmlns:r="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
-                xmlns:mef="http:\\www.codeplex.com\MEFedMVVM" 
-                xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
+                xmlns:mef="http:\\www.codeplex.com\MEFedMVVM" xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-                xmlns:ia="http://schemas.microsoft.com/expression/2010/interactions"
-                xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+                xmlns:ia="http://schemas.microsoft.com/expression/2010/interactions" xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
                 xmlns:EnvironmentBuilder="clr-namespace:ESME.Views.EnvironmentBuilder;assembly=ESME.Views"
-                xmlns:NAVO="clr-namespace:ESME.Environment.NAVO;assembly=ESME"
-                xmlns:Utility="clr-namespace:HRC.Utility;assembly=HRC"
-                xmlns:Main="clr-namespace:OneNavyModel.ViewModels.Main"
-                xmlns:LocalControls="clr-namespace:OneNavyModel.Controls"
-                xmlns:p="clr-namespace:OneNavyModel.Properties" 
-                mef:ViewModelLocator.ViewModel="MainViewModel" SnapsToDevicePixels="True" Title="{Binding MainWindowTitle}"
-                Icon="..\Wave.ico" Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
+                xmlns:NAVO="clr-namespace:ESME.Environment.NAVO;assembly=ESME" xmlns:Utility="clr-namespace:HRC.Utility;assembly=HRC"
+                xmlns:Main="clr-namespace:OneNavyModel.ViewModels.Main" xmlns:LocalControls="clr-namespace:OneNavyModel.Controls"
+                xmlns:p="clr-namespace:OneNavyModel.Properties" mef:ViewModelLocator.ViewModel="MainViewModel"
+                SnapsToDevicePixels="True" Title="{Binding MainWindowTitle}" Icon="..\Wave.ico"
+                Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
                 Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
                 Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
-                Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}" 
-                d:DesignWidth="1400"
-                d:DesignHeight="800" 
-                mc:Ignorable="d" 
-                d:DataContext="{d:DesignInstance Type=Main:MainViewModel}">
+                Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}" d:DesignWidth="1400"
+                d:DesignHeight="800" mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=Main:MainViewModel}">
   <r:RibbonWindow.Resources>
     <WPF:GridLengthConverter x:Key="GridLengthConverter" />
     <Utility:NotNullConverter x:Key="NotNull" />
@@ -47,13 +39,11 @@
   <DockPanel LastChildFill="True">
     <StatusBar DockPanel.Dock="Bottom">
       <StatusBarItem HorizontalAlignment="Left">
-                <TextBlock Text="{Binding MouseLocationInfo}" />
+        <TextBlock Text="{Binding MouseLocationInfo}" />
       </StatusBarItem>
     </StatusBar>
-        <!-- SelectedIndex="{Binding Source={x:Static p:Settings.Default}, Path=SelectedRibbonTabIndex, Mode=TwoWay}" -->
-    <r:Ribbon x:Name="Ribbon"
-              SelectedIndex="{Binding SelectedRibbonTabIndex}"
-              DockPanel.Dock="Top">
+    <!-- SelectedIndex="{Binding Source={x:Static p:Settings.Default}, Path=SelectedRibbonTabIndex, Mode=TwoWay}" -->
+    <r:Ribbon x:Name="Ribbon" SelectedIndex="{Binding SelectedRibbonTabIndex}" DockPanel.Dock="Top">
       <r:Ribbon.ApplicationMenu>
         <r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
           <r:RibbonApplicationMenuItem Header="Open Scenario" InputGestureText="Ctrl+O"
@@ -146,26 +136,27 @@
                                 ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                                 ToolTipDescription="Add a new analysis point to the experiment" IsEnabled="{Binding CanPlaceAnalysisPoint}"
                                 IsChecked="{Binding IsInAnalysisPointMode}" />
-                    <r:RibbonButton Label="Models" SmallImageSource="..\Images\SmallIcons\chart_curve_edit.png"
+          <r:RibbonButton Label="Models" SmallImageSource="..\Images\SmallIcons\chart_curve_edit.png"
                           ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                           ToolTipDescription="Choose an acoustic model for each distinct mode in the scenario"
                           IsEnabled="{Binding IsScenarioLoaded}" Command="{Binding ConfigureAcousticModelsCommand}" />
-                    <r:RibbonButton Label="Re-verify" SmallImageSource="..\Images\SmallIcons\update.png"
+          <r:RibbonButton Label="Re-verify" SmallImageSource="..\Images\SmallIcons\update.png"
                           ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Force reverification of acoustic fields in this scenario"
-                          IsEnabled="{Binding IsScenarioLoaded}" Command="{Binding ReverifyAcousticModelsCommand}" />
-                </r:RibbonGroup>
+                          ToolTipDescription="Force reverification of acoustic fields in this scenario" IsEnabled="{Binding IsScenarioLoaded}"
+                          Command="{Binding ReverifyAcousticModelsCommand}" />
+        </r:RibbonGroup>
       </r:RibbonTab>
       <r:RibbonTab KeyTip="V" Header="Environment">
         <r:RibbonGroup Header="Map">
           <r:RibbonButton Label="World Map" LargeImageSource="..\Images\LargeIcons\globe-icon.png"
                           SmallImageSource="..\Images\SmallIcons\globe-icon.png" Command="{Binding ZoomToWorldMapCommand}" />
         </r:RibbonGroup>
-                <r:RibbonGroup Header="Range Complex" ToolTip="{Binding ScenarioLoadedToolTip}">
-                    <ListView Width="150" Height="66" ItemsSource="{Binding RangeComplexes.RangeComplexList}" 
-                              IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}" 
-                    SelectedItem="{Binding RangeComplexes.SelectedRangeComplex}" SelectedIndex="{Binding RangeComplexes.SelectedRangeComplexIndex}"
-                    DisplayMemberPath="Name" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionMode="Single">
+        <r:RibbonGroup Header="Range Complex" ToolTip="{Binding ScenarioLoadedToolTip}">
+          <ListView Width="150" Height="66" ItemsSource="{Binding RangeComplexes.RangeComplexList}"
+                    IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}"
+                    SelectedItem="{Binding RangeComplexes.SelectedRangeComplex}"
+                    SelectedIndex="{Binding RangeComplexes.SelectedRangeComplexIndex}" DisplayMemberPath="Name"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionMode="Single">
             <ListView.ItemsPanel>
               <ItemsPanelTemplate>
                 <StackPanel />
@@ -173,23 +164,28 @@
             </ListView.ItemsPanel>
           </ListView>
           <r:RibbonButton Label="New" LargeImageSource="..\Images\LargeIcons\world_add.png"
-                          SmallImageSource="..\Images\SmallIcons\world_add.png" IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" ToolTipDescription="Define a new range complex"
-                          Command="{Binding NewRangeComplexCommand}" />
-          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\world_go.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}"
+                          SmallImageSource="..\Images\SmallIcons\world_add.png"
+                          IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}" ToolTipTitle="New range complex"
+                          ToolTipDescription="Define a new range complex" Command="{Binding NewRangeComplexCommand}" />
+          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\world_go.png" ToolTipTitle="Show range complex"
+                          IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}"
                           ToolTipDescription="Show the selected range complex on the map" Command="{Binding ZoomToRangeComplexCommand}" />
-          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\world_delete.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}"
+          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\world_delete.png" ToolTipTitle="Delete range complex"
+                          IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}"
                           ToolTipDescription="Delete the selected range complex, and all data within it"
                           Command="{Binding DeleteRangeComplexCommand}" />
-          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_undo.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}"
+          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_undo.png" ToolTipTitle="Clear selection"
+                          IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}"
                           ToolTipDescription="Clear the currently selected range complex" Command="{Binding ClearRangeComplexSelectionCommand}" />
+          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_refresh.png"
+                          ToolTipTitle="Re-import range complex"
+                          IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}"
+                          ToolTipDescription="Re-import all environment data for the current range complex"
+                          Command="{Binding ReimportRangeComplexCommand}" />
         </r:RibbonGroup>
-                <r:RibbonGroup Header="Time Period" ToolTip="{Binding ScenarioLoadedToolTip}">
-          <ListView Width="80" Height="66" ItemsSource="{x:Static NAVO:NAVOConfiguration.AllTimePeriods}" 
-                    IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}" 
+        <r:RibbonGroup Header="Time Period" ToolTip="{Binding ScenarioLoadedToolTip}">
+          <ListView Width="80" Height="66" ItemsSource="{x:Static NAVO:NAVOConfiguration.AllTimePeriods}"
+                    IsEnabled="{Binding IsScenarioLoaded, Converter={StaticResource NegatingConverter}}"
                     SelectedItem="{Binding RangeComplexes.SelectedTimePeriod}"
                     SelectedIndex="{Binding RangeComplexes.SelectedTimePeriodIndex}" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                     SelectionMode="Single">
@@ -201,8 +197,8 @@
           </ListView>
         </r:RibbonGroup>
         <r:RibbonGroup Header="Area">
-          <ListView Width="200" Height="66"
-                    ItemsSource="{Binding RangeComplexes.SelectedRangeComplex.AreaList}" IsEnabled="{Binding RangeComplexes.SelectedRangeComplex, Converter={StaticResource NotNull}}"
+          <ListView Width="200" Height="66" ItemsSource="{Binding RangeComplexes.SelectedRangeComplex.AreaList}"
+                    IsEnabled="{Binding RangeComplexes.SelectedRangeComplex, Converter={StaticResource NotNull}}"
                     SelectedItem="{Binding RangeComplexes.SelectedArea}" SelectedIndex="{Binding RangeComplexes.SelectedAreaIndex}"
                     DisplayMemberPath="Name" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ToolTip="Select a simulation area"
                     SelectionMode="Single">
@@ -213,40 +209,35 @@
             </ListView.ItemsPanel>
           </ListView>
           <r:RibbonButton Label="Expand" LargeImageSource="..\Images\LargeIcons\canvas_size.png"
-                          SmallImageSource="..\Images\SmallIcons\canvas_size.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                          SmallImageSource="..\Images\SmallIcons\canvas_size.png" ToolTipTitle="Expand area"
                           ToolTipDescription="Create a new overlay by expanding the selected overlay"
                           ToolTipFooterDescription="Note: You cannot expand an overlay that was previously created by expanding another overlay"
                           Command="{Binding ExpandOverlayCommand}" />
-          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\overlay-new.png" ToolTipTitle="New Overlay"
-                          ToolTipDescription="Create a new overlay" Command="{Binding NewOverlayCommand}" />
-          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\Button-Close-icon.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Delete the selected overlay, and all overlays, bathymetry and environment data that depends on it."
+          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\overlay-new.png" ToolTipTitle="New Area"
+                          ToolTipDescription="Create a new area in the current range complex" Command="{Binding NewOverlayCommand}" />
+          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\Button-Close-icon.png" ToolTipTitle="Delete area"
+                          ToolTipDescription="Delete the selected area from the current range complex"
                           ToolTipFooterDescription="Note: Operational and simulation limit overlays for the currently selected range complex cannot be deleted."
                           IsEnabled="{Binding RangeComplexes.SelectedArea.CanBeDeleted}" Command="{Binding DeleteOverlayCommand}" />
           <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_undo.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Clear the currently selected area" Command="{Binding ClearAreaSelectionCommand}" />
+                          ToolTipTitle="Clear the currently selected area" ToolTipDescription="Clear the currently selected area"
+                          Command="{Binding ClearAreaSelectionCommand}" />
         </r:RibbonGroup>
         <r:RibbonGroup Header="Bathymetry">
           <ListView Width="75" Height="66" ItemContainerStyle="{StaticResource DataCachedDisplayStyle}"
-                    IsEnabled="{Binding RangeComplexes.SelectedRangeComplex, Converter={StaticResource NotNull}}" 
+                    IsEnabled="{Binding RangeComplexes.SelectedRangeComplex, Converter={StaticResource NotNull}}"
                     ItemsSource="{Binding RangeComplexes.SelectedArea.BathymetryList}"
-                    SelectedItem="{Binding RangeComplexes.SelectedBathymetry}" SelectedIndex="{Binding RangeComplexes.SelectedBathymetryIndex}"
-                    DisplayMemberPath="Name" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ToolTip="Select a simulation area"
-                    SelectionMode="Single" />
+                    SelectedItem="{Binding RangeComplexes.SelectedBathymetry}"
+                    SelectedIndex="{Binding RangeComplexes.SelectedBathymetryIndex}" DisplayMemberPath="Name"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled" ToolTip="Select a simulation area" SelectionMode="Single" />
           <r:RibbonButton Label="Add" LargeImageSource="..\Images\LargeIcons\map_add.png"
                           SmallImageSource="..\Images\SmallIcons\map_add.png" ToolTipTitle="New Bathymetry"
                           ToolTipDescription="Extract a new bathymetry dataset" Command="{Binding AddBathymetryCommand}" />
-          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\map_delete.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\map_delete.png" ToolTipTitle="Delete bathymetry"
                           ToolTipDescription="Delete the selected bathymetry dataset" Command="{Binding RemoveBathymetryCommand}" />
-          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_refresh.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_refresh.png" ToolTipTitle="Re-import bathymetry"
                           ToolTipDescription="Re-import the selected bathymetry dataset" Command="{Binding ReloadBathymetryCommand}" />
-          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_undo.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_undo.png" ToolTipTitle="Clear selection"
                           ToolTipDescription="Clear the currently selected bathymetry" Command="{Binding ClearBathymetrySelectionCommand}" />
         </r:RibbonGroup>
       </r:RibbonTab>
@@ -297,7 +288,8 @@
     </r:Ribbon>
     <Grid>
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Path=LayersWidth, Mode=TwoWay, Converter={StaticResource GridLengthConverter}}" />
+        <ColumnDefinition
+Width="{Binding Source={x:Static p:Settings.Default}, Path=LayersWidth, Mode=TwoWay, Converter={StaticResource GridLengthConverter}}" />
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" MinWidth="500" />
       </Grid.ColumnDefinitions>
@@ -305,10 +297,12 @@
         <TabItem Header="Map Layers">
           <LocalControls:LayerListView />
         </TabItem>
-                <TabItem Header="Scenario View" Visibility="{Binding IsScenarioLoaded, Converter={StaticResource TrueVisibleFalseCollapsed}}">
+        <TabItem Header="Scenario View"
+                 Visibility="{Binding IsScenarioLoaded, Converter={StaticResource TrueVisibleFalseCollapsed}}">
           <LocalControls:LayerTreeView />
         </TabItem>
-        <TabItem Header="Environment Explorer" Visibility="{Binding IsEnvironmentTabSelected, Converter={StaticResource TrueVisibleFalseCollapsed}}">
+        <TabItem Header="Environment Explorer"
+                 Visibility="{Binding IsEnvironmentTabSelected, Converter={StaticResource TrueVisibleFalseCollapsed}}">
           <DockPanel LastChildFill="True">
             <GroupBox Header="Import status" Margin="5" DockPanel.Dock="Bottom">
               <EnvironmentBuilder:ImportProgressListView ItemsSource="{Binding ImportProgressCollection}" />

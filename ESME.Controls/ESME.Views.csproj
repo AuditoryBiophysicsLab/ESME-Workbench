@@ -168,6 +168,10 @@
     <Compile Include="Misc\BasicPropertiesView.xaml.cs">
       <DependentUpon>BasicPropertiesView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Misc\UtilitiesView.xaml.cs">
+      <DependentUpon>UtilitiesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Misc\UtilitiesViewModel.cs" />
     <Compile Include="Services\ViewParameterService.cs" />
     <Compile Include="TestView.xaml.cs">
       <DependentUpon>TestView.xaml</DependentUpon>
@@ -305,6 +309,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Misc\BasicPropertiesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Misc\UtilitiesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
