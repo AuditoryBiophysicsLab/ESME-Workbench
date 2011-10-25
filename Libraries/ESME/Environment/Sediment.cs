@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
@@ -22,13 +21,16 @@ namespace ESME.Environment
             return TaskEx.Run(() => Load(filename));
         }
 
-        public static Sediment Load(string filename)
+        public static Sediment Load(string filename, GeoRect areaOfInterest = null)
         {
             //return new Sediment { Samples = XmlSerializer<EnvironmentData<SedimentSample>>.Load(filename, ReferencedTypes) };
             var formatter = new BinaryFormatter();
             using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return new Sediment { Samples = (EnvironmentData<SedimentSample>)formatter.Deserialize(stream) };
+                var result = new Sediment { Samples = (EnvironmentData<SedimentSample>)formatter.Deserialize(stream) };
+                if (areaOfInterest == null) return result;
+                result.Samples.TrimToNearestPoints(areaOfInterest, 9.3); // 9.3km is approximately 5 nautical miles, which is approximately 5 minutes of longitude (the resolution of the sediment data) at the equator
+                return result;
             }
         }
 

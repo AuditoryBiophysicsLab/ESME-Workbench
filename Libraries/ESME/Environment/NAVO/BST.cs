@@ -53,9 +53,11 @@ namespace ESME.Environment.NAVO
             var progressStep = 100f / (((north - south) * (east - west)) + 3);
             var totalProgress = 0f;
 
+            H5GroupId highResGroup, lowResGroup;
             var fileId = H5F.open(Globals.AppSettings.NAVOConfiguration.BSTDirectory, H5F.OpenMode.ACC_RDONLY);
-            var highResGroup = H5G.open(fileId, "0.10000/G/UNCLASSIFIED/");
-            var lowResGroup = H5G.open(fileId, "5.00000/G/UNCLASSIFIED/");
+            //highResGroup = H5G.open(fileId, "0.10000/G/UNCLASSIFIED/");
+            highResGroup = null;
+            lowResGroup = H5G.open(fileId, "5.00000/G/UNCLASSIFIED/");
             var dedupeList = new HashedArrayList<SedimentSample>();
             if (currentState != null) lock (currentState) currentState.Report("Reading sediment database");
             for (var lat = south; lat < north; lat++)
@@ -72,8 +74,8 @@ namespace ESME.Environment.NAVO
             sediment.Samples.Sort();
             if (currentState != null) lock (currentState) currentState.Report("Trimming excess data");
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-            H5G.close(lowResGroup);
-            H5G.close(highResGroup);
+            if (lowResGroup != null) H5G.close(lowResGroup);
+            if (highResGroup != null) H5G.close(highResGroup);
             H5F.close(fileId);
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             return sediment;
@@ -81,9 +83,11 @@ namespace ESME.Environment.NAVO
 
         static IEnumerable<SedimentSample> ReadDataset(H5FileOrGroupId highResGroup, H5FileOrGroupId lowResGroup, int latitude, int longitude)
         {
-            var result = ReadDataset(highResGroup, latitude, longitude);
+            short[,] result = null;
             double resolutionStep;
-            var sampleStepSize = 1;
+            var sampleStepSize = 0;
+
+            if (highResGroup != null) result = ReadDataset(highResGroup, latitude, longitude);
             if (result != null)
             {
                 resolutionStep = 6.0 / 3600.0;
@@ -91,11 +95,13 @@ namespace ESME.Environment.NAVO
             }
             else
             {
-                result = ReadDataset(lowResGroup, latitude, longitude);
+                if (lowResGroup != null) result = ReadDataset(lowResGroup, latitude, longitude);
                 //if (result == null) throw new KeyNotFoundException(string.Format("Unable to locate sediment data for lat: {0}, lon: {1}", latitude, longitude));
                 if (result == null) return null;
                 resolutionStep = 5.0 / 60.0;
+                sampleStepSize = 1;
             }
+
             var sedimentList = new HashedArrayList<SedimentSample>();
             for (var i = 0; i < result.GetLength(0); i += sampleStepSize)
                 for (var j = 0; j < result.GetLength(1); j += sampleStepSize)

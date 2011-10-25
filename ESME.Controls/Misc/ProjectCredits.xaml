@@ -10,9 +10,11 @@
 					            Margin="2 5 5 5"
 					            HorizontalAlignment="Stretch">
                     <TextBlock Text="Dave Mountain" />
-                    <TextBlock Text="Linda Petitpas" />
+                    <TextBlock Text="Karen Shearman" />
+                    <TextBlock Text="Heather Havens" />
                     <TextBlock Text="Bob Gisiner" />
                     <TextBlock Text="Mike Weise" />
+                    <TextBlock Text="Linda Petitpas" />
                 </StackPanel>
             </GroupBox>
             <GroupBox Header="Developers">
