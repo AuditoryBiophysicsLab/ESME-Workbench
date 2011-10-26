@@ -36,10 +36,10 @@ namespace ESME.Environment
         [MethodImpl(MethodImplOptions.Synchronized)]
         public static void Log(string format, params object[] args)
         {
-            Console.WriteLine("{0} {1}", DateTime.Now, string.Format(format, args));
-            if (_writer == null) return;
-            _writer.WriteLine("{0} {1}", DateTime.Now, string.Format(format, args));
-            _writer.Flush();
+            //Console.WriteLine("{0} {1}", DateTime.Now, string.Format(format, args));
+            //if (_writer == null) return;
+            //_writer.WriteLine("{0} {1}", DateTime.Now, string.Format(format, args));
+            //_writer.Flush();
         }
 
         public static void Stop()
