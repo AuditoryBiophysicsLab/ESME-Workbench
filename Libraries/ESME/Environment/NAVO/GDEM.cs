@@ -19,6 +19,8 @@ namespace ESME.Environment.NAVO
             Temperature = 0x01,
             Salinity = 0x02,
         }
+
+#if false
         public static Task ImportByMonthAsync(string outputPath, bool temperature, bool salinity, ICollection<NAVOTimePeriod> months, GeoRect geoRect, IProgress<string> currentState = null, IProgress<float> progress = null)
         {
             var multiplier = 0;
@@ -56,6 +58,7 @@ namespace ESME.Environment.NAVO
             actionBlock.Complete();
             return actionBlock.Completion;
         }
+#endif
 
         public async static Task<List<SoundSpeedField>> CalculateSoundSpeedFieldsAsync(List<SoundSpeedField> temperatureFields, List<SoundSpeedField> salinityFields, Bathymetry bathymetry = null, IProgress<string> currentState = null, IProgress<float> progress = null)
         {
@@ -135,15 +138,23 @@ namespace ESME.Environment.NAVO
         public static SoundSpeedField ReadFile(string fileName, string dataVarName, NAVOTimePeriod month, GeoRect region)
         {
             var myFile = new NetCDF(fileName);
-            var lats = ((NcVarDouble)myFile.Variables.Find(var => var.Name == "lat")).ToArray();
-            var lons = ((NcVarDouble)myFile.Variables.Find(var => var.Name == "lon")).ToArray();
-            var depths = ((NcVarDouble)myFile.Variables.Find(var => var.Name == "depth")).ToArray();
-            var data = (NcVarShort)myFile.Variables.Find(var => var.Name == dataVarName);
-            var missingValue = ((NcAttShort)data.Attributes.Find(att => att.Name == "missing_value"))[0];
-            var scaleFactor = ((NcAttFloat)data.Attributes.Find(att => att.Name == "scale_factor"))[0];
-            var addOffset = ((NcAttFloat)data.Attributes.Find(att => att.Name == "add_offset"))[0];
+            Logger.Log("in ReadFile: 0.1");
+            var lats = ((NcVarDouble)myFile.Variables.Single(var => var.Name == "lat")).ToArray();
+            Logger.Log("in ReadFile: 0.2");
+            var lons = ((NcVarDouble)myFile.Variables.Single(var => var.Name == "lon")).ToArray();
+            Logger.Log("in ReadFile: 0.3");
+            var depths = ((NcVarDouble)myFile.Variables.Single(var => var.Name == "depth")).ToArray();
+            Logger.Log("in ReadFile: 0.4");
+            var data = (NcVarShort)myFile.Variables.Single(var => var.Name == dataVarName);
+            data.Filename = fileName;
+            Logger.Log("in ReadFile: 0.5");
+            var missingValue = ((NcAttShort)data.Attributes.Single(att => att.Name == "missing_value"))[0];
+            Logger.Log("in ReadFile: 0.6");
+            var scaleFactor = ((NcAttFloat)data.Attributes.Single(att => att.Name == "scale_factor"))[0];
+            Logger.Log("in ReadFile: 0.7");
+            var addOffset = ((NcAttFloat)data.Attributes.Single(att => att.Name == "add_offset"))[0];
+            Logger.Log("in ReadFile: 0.8");
             
-
             var north = region.North;
             var south = region.South;
             var east = region.East;
@@ -166,6 +177,8 @@ namespace ESME.Environment.NAVO
 
             int lastLatIndex = -1, lastLonIndex = -1, lastDepthIndex = -1;
             var newFieldEnvironmentData = new List<SoundSpeedProfile>();
+            Logger.Log("in ReadFile: 1");
+
             for (var lonIndex = 0; lonIndex < lonCount; lonIndex++)
             {
                 lastLonIndex = lonIndex;
@@ -173,18 +186,23 @@ namespace ESME.Environment.NAVO
                 var wrappedLon = lon;
                 while (wrappedLon > 180) wrappedLon -= 360;
                 while (wrappedLon < -180) wrappedLon += 360;
+                Logger.Log("in ReadFile: 2");
 
                 var lonSourceIndex = lonMap[lonIndex].Index;
                 for (var latIndex = 0; latIndex < latCount; latIndex++)
                 {
+                    Logger.Log("in ReadFile: 3");
                     lastLatIndex = latIndex;
                     var lat = latMap[latIndex].Value;
                     var latSourceIndex = latMap[latIndex].Index;
                     var newProfile = new SoundSpeedProfile(new EarthCoordinate(lat, wrappedLon));
                     for (var depthIndex = 0; depthIndex < depths.Length; depthIndex++)
                     {
+                        Logger.Log("in ReadFile: 4");
                         lastDepthIndex = depthIndex;
+                        Logger.Log("in ReadFile: 5");
                         var curValue = data[(uint)depthIndex, (uint)latSourceIndex, (uint)lonSourceIndex];
+                        Logger.Log("in ReadFile: 6");
                         if (curValue == missingValue) break;
                         newProfile.Data.Add(new DepthValuePair<float>((float)depths[depthIndex], ((curValue) * scaleFactor) + addOffset));
                     }

@@ -7,10 +7,15 @@ namespace HRC.NetCDF
 {
     public class NetCDF : IDisposable
     {
+        public static Action<string> Logger { get; set; }
+
+        readonly string _fileName;
         readonly BinaryReader _reader;
 
         public NetCDF(string fileName)
         {
+            _fileName = fileName;
+            if (Logger != null) Logger(string.Format("Opening NetCDF file {0}", _fileName));
             var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
             _reader = new BinaryReader(stream);
             var magic = _reader.ReadBytes(3);
@@ -24,9 +29,23 @@ namespace HRC.NetCDF
             //_buffer[0] = 1;
         }
 
-        public void Close() {_reader.Close();}
-        public void Dispose() {Close();}
-        ~NetCDF(){Close();}
+        public void Close()
+        {
+            if (Logger != null) Logger(string.Format("Closing NetCDF file {0}", _fileName));
+            _reader.Close();
+        }
+
+        public void Dispose()
+        {
+            if (Logger != null) Logger(string.Format("Disposing NetCDF file {0}", _fileName));
+            Close();
+        }
+
+        ~NetCDF()
+        {
+            if (Logger != null) Logger(string.Format("Destructing NetCDF file {0}", _fileName));
+            Close();
+        }
         //private readonly int[] _buffer = new int[100000];
 
         public byte Version { get; private set; }
@@ -62,7 +81,6 @@ namespace HRC.NetCDF
             }
             return sb.ToString();
         }
-
     }
 
     public static class NetCDFReaders

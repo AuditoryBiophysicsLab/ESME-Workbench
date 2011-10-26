@@ -92,7 +92,8 @@ namespace HRC.NetCDF
 
     public abstract class NcVar<T> : NcVar, IEnumerable<T> where T : struct
     {
-        public static Action<string> Logger;
+        protected Action<string> Logger { get; set; }
+        public string Filename { get; set; }
 
         protected NcVar()
         {
@@ -105,6 +106,8 @@ namespace HRC.NetCDF
             get
             {
                 if (indices.Length != Dimensions.Count) throw new ArrayTypeMismatchException(string.Format("This variable requires {0} dimensions, you provided {1}", Dimensions.Count, indices.Length));
+                var title = string.Format("{0}: NcVar<T>.this[{1}, {2}, {3}]", Filename ?? "(null)", indices[0], indices[1], indices[2]);
+                if (Logger != null) Logger(title);
                 long requestedDataOffset = 0;
                 for (var i = 0; i < indices.Length; i++)
                 {
@@ -112,10 +115,13 @@ namespace HRC.NetCDF
                     if (index >= Dimensions[i].Length) throw new IndexOutOfRangeException(string.Format("Dimension {0} out of bounds.  You requested {1}, max value is {2}", i, index, Dimensions[i].Length));
                     requestedDataOffset += Strides[i] * index;
                 }
+                if (Logger != null) Logger(string.Format("{0}: offset = {1}.  _values {2}", title, requestedDataOffset, _values == null ? "is NULL" : "is NOT null"));
                 if (_values != null) return _values[requestedDataOffset];
+                if (Logger != null) Logger(string.Format("{0}: Seeking to = {1}", title, Offset + (requestedDataOffset * UnitSize)));
                 Reader.BaseStream.Seek(Offset + (requestedDataOffset * UnitSize), SeekOrigin.Begin);
                 try
                 {
+                    if (Logger != null) Logger(string.Format("{0}: Reading data from file", title));
                     return Read();
                 }
                 catch (Exception e)
@@ -154,6 +160,10 @@ namespace HRC.NetCDF
 
     public class NcVarByte : NcVar<byte>
     {
+        public new static Action<string> Logger { get; set; }
+
+        public NcVarByte() { base.Logger = Logger; }
+
         protected override byte Read()
         {
             try
@@ -175,10 +185,15 @@ namespace HRC.NetCDF
 
     public class NcVarShort : NcVar<short>
     {
+        public new static Action<string> Logger { get; set; }
+
+        public NcVarShort() { base.Logger = Logger; }
+
         protected override short Read()
         {
             try
             {
+                if (Logger != null) Logger("NcVarShort.Read()");
                 return Reader.ReadNetCDFShort();
             }
             catch (Exception e)
@@ -196,6 +211,10 @@ namespace HRC.NetCDF
 
     public class NcVarInt : NcVar<int>
     {
+        public new static Action<string> Logger { get; set; }
+
+        public NcVarInt() { base.Logger = Logger; }
+
         protected override int Read()
         {
             try
@@ -217,6 +236,10 @@ namespace HRC.NetCDF
 
     public class NcVarFloat : NcVar<float>
     {
+        public new static Action<string> Logger { get; set; }
+
+        public NcVarFloat() { base.Logger = Logger; }
+
         protected override float Read()
         {
             try
@@ -238,6 +261,10 @@ namespace HRC.NetCDF
 
     public class NcVarDouble : NcVar<double>
     {
+        public new static Action<string> Logger { get; set; }
+
+        public NcVarDouble() { base.Logger = Logger; }
+
         protected override double Read()
         {
             try

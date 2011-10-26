@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ using Cinch;
 using ESME.Environment.Descriptors;
 using HRC.Navigation;
 using ESME.Environment.NAVO;
+using HRC.NetCDF;
 using HRC.Utility;
 
 namespace ESME.Environment
@@ -31,6 +33,7 @@ namespace ESME.Environment
         public static void LogString(string message) { Log(message); }
 
         static StreamWriter _writer;
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public static void Log(string format, params object[] args)
         {
             Console.WriteLine("{0} {1}", DateTime.Now, string.Format(format, args));
@@ -64,10 +67,11 @@ namespace ESME.Environment
 
         static NAVOImporter()
         {
-            //NcVarInt.Logger = Logger.LogString;
+            NcVarShort.Logger = Logger.LogString;
+            NetCDF.Logger = Logger.LogString;
             //NetCDFReaders.Logger = Logger.LogString;
-            //Logger.Start(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "esme.log"));
-            //Logger.Log("About to create temperature worker");
+            Logger.Start(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "esme.log"));
+            Logger.Log("About to create temperature worker");
             if (TemperatureWorker == null) TemperatureWorker = new ActionBlock<ImportJobDescriptor>(async job =>
             {
                 //Logger.Log("Temperature worker starting job");
@@ -75,12 +79,28 @@ namespace ESME.Environment
                 if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                 {
                     //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
-                    //Logger.Log("Temperature worker about to call GDEM.ReadFile");
-                    var temperatureField = GDEM.ReadFile(GDEM.FindTemperatureFile(job.TimePeriod), "water_temp", job.TimePeriod, job.GeoRect);
-                    //Logger.Log("Temperature worker back from GDEM.ReadFile");
+                    Logger.Log("Temperature worker about to call GDEM.ReadFile");
+                    SoundSpeedField temperatureField = null;
+                    try
+                    {
+                        temperatureField = GDEM.ReadFile(GDEM.FindTemperatureFile(job.TimePeriod), "water_temp", job.TimePeriod, job.GeoRect);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log("Caught exception from GDEM.ReadFile: {0}\r\nStack trace:\r\n{1}", e.Message, e.StackTrace);
+                    }
+                    Logger.Log("Temperature worker back from GDEM.ReadFile");
                     var temperature = new SoundSpeed();
-                    temperature.SoundSpeedFields.Add(temperatureField);
-                    //Logger.Log("Temperature worker added to sound speed field");
+                    try
+                    {
+                        temperature.SoundSpeedFields.Add(temperatureField);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log("Caught exception from SoundSpeedFields.Add: {0}", e.Message);
+                    }
+
+                    Logger.Log("Temperature worker added to sound speed field");
                     if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                     {
                         temperature.Save(job.DestinationFilename);
