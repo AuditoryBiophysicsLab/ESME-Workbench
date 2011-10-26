@@ -121,7 +121,7 @@ namespace OneNavyModel.ViewModels.Main
         {
             RangeComplexes.HookEnvironment<Sediment>(EnvironmentDataType.Sediment, data =>
             {
-                var result = data.Samples.GroupBy(sample => sample.Data.SampleValue);
+                var result = data.Samples.GroupBy(sample => sample == null ? 0 : sample.Data.SampleValue);
                 foreach (var sedimentType in result)
                 {
                     if (sedimentType.Key == 0) continue;
@@ -137,20 +137,24 @@ namespace OneNavyModel.ViewModels.Main
                                                                                                                              false)));
                 }
             });
-            RangeComplexes.HookEnvironment<BottomLoss>(EnvironmentDataType.BottomLoss, data =>
+            if (Configuration.IsClassifiedModel)
             {
-                var samplePoints = data.Samples.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
-                _dispatcher.InvokeInBackgroundIfRequired(() => EnvironmentLayers[EnvironmentDataType.BottomLoss] =
-                                                                CurrentMapLayers.DisplayOverlayShapes("Bottom Loss",
-                                                                                                        LayerType.BottomType,
-                                                                                                        Colors.Transparent,
-                                                                                                        samplePoints,
-                                                                                                        0,
-                                                                                                        PointSymbolType.Diamond,
-                                                                                                        false,
-                                                                                                        null,
-                                                                                                        false));
-            });
+                RangeComplexes.HookEnvironment<BottomLoss>(EnvironmentDataType.BottomLoss,
+                                                           data =>
+                                                           {
+                                                               var samplePoints = data.Samples.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
+                                                               _dispatcher.InvokeInBackgroundIfRequired(() => EnvironmentLayers[EnvironmentDataType.BottomLoss] =
+                                                                                                              CurrentMapLayers.DisplayOverlayShapes("Bottom Loss",
+                                                                                                                                                    LayerType.BottomType,
+                                                                                                                                                    Colors.Transparent,
+                                                                                                                                                    samplePoints,
+                                                                                                                                                    0,
+                                                                                                                                                    PointSymbolType.Diamond,
+                                                                                                                                                    false,
+                                                                                                                                                    null,
+                                                                                                                                                    false));
+                                                           });
+            }
             RangeComplexes.HookEnvironment<Wind>(EnvironmentDataType.Wind, data =>
             {
                 if (RangeComplexes.SelectedTimePeriod == NAVOTimePeriod.Invalid) return;

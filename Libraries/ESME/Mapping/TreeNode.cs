@@ -332,7 +332,7 @@ namespace ESME.Mapping
 
         protected override bool MapLayerMatchesMe(MapLayerViewModel mapLayer) { return new Regex(string.Format(@"{0} [\s\S]+$", Name)).IsMatch(mapLayer.Name); }
 
-        public override string Name { get { return string.Format("Platform: {0}", WrappedObject.Name); } }
+        public override string Name { get { return string.Format("Platform: {0}[{1}]", WrappedObject.Name, WrappedObject.Id); } }
     }
 
     public class SourceNode : TreeNodeWrapper<NemoSource>

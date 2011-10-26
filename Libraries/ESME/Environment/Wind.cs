@@ -49,19 +49,13 @@ namespace ESME.Environment
         /// Get the data from the specified time period, if available.  If no data are available, NULL is returned.
         /// </summary>
         /// <param name="timePeriod"></param>
-        /// <param name="areaOfInterest"></param>
         /// <returns></returns>
-        public TimePeriodEnvironmentData<WindSample> this[NAVOTimePeriod timePeriod, GeoRect areaOfInterest = null]
+        public TimePeriodEnvironmentData<WindSample> this[NAVOTimePeriod timePeriod]
         {
             get
             {
                 var result = TimePeriods.Find(t => t.TimePeriod == timePeriod);
-                if (result != null)
-                {
-                    if (areaOfInterest != null)
-                        result.EnvironmentData.TrimToNearestPoints(areaOfInterest, 111.2);
-                    return result;
-                }
+                if (result != null) return result;
 
                 var allMonths = new List<NAVOTimePeriod>(NAVOConfiguration.AllMonths);
                 // If the data is for a month, we can't synthesize it if we don't already have it available

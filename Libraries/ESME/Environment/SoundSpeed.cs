@@ -38,7 +38,13 @@ namespace ESME.Environment
         /// </summary>
         /// <param name="timePeriod"></param>
         /// <returns></returns>
-        public SoundSpeedField this[NAVOTimePeriod timePeriod] { get { return SoundSpeedFields.Find(t => t.TimePeriod == timePeriod); } }
+        public SoundSpeedField this[NAVOTimePeriod timePeriod]
+        {
+            get
+            {
+                return SoundSpeedFields.Find(t => t.TimePeriod == timePeriod);
+            }
+        }
 
         public void Add(SoundSpeed newData)
         {

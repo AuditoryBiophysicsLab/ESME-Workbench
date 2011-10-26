@@ -88,8 +88,7 @@ namespace ESME.Environment
                         job.SampleCount = (uint)temperatureField.EnvironmentData.Count;
                         //job.CompletionAction(job);
                         job.CompletionTask.Start();
-                        await
-                        job.CompletionTask;
+                        await job.CompletionTask;
                     }
                 }
                 //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
@@ -120,8 +119,7 @@ namespace ESME.Environment
                         job.SampleCount = (uint)salinityField.EnvironmentData.Count;
                         //job.CompletionAction(job);
                         job.CompletionTask.Start();
-                        await
-                        job.CompletionTask;
+                        await job.CompletionTask;
                     }
                 }
                 //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
@@ -181,8 +179,7 @@ namespace ESME.Environment
                         job.Resolution = 60;
                         //job.CompletionAction(job);
                         job.CompletionTask.Start();
-                        await
-                        job.CompletionTask;
+                        await job.CompletionTask;
                     }
                 }
                 //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
@@ -257,8 +254,7 @@ namespace ESME.Environment
                 if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                 {
                     //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
-                    var bottomLoss = await
-                    BottomLossDatabase.ExtractAsync(job.GeoRect);
+                    var bottomLoss = await BottomLossDatabase.ExtractAsync(job.GeoRect);
                     if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                     {
                         bottomLoss.Save(job.DestinationFilename);
@@ -266,8 +262,7 @@ namespace ESME.Environment
                         job.Resolution = 15;
                         //job.CompletionAction(job);
                         job.CompletionTask.Start();
-                        await
-                        job.CompletionTask;
+                        await job.CompletionTask;
                     }
                 }
                 //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);

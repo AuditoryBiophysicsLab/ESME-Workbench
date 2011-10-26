@@ -302,7 +302,7 @@ namespace ESME.Metadata
                         RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.AreaCollection[SelectedAreaName];
                     else SelectedAreaName = null;
 
-                    if ((SelectedBathymetryName != null) && (RangeComplexes.SelectedArea.BathymetryFiles[SelectedBathymetryName] != null))
+                    if (SelectedBathymetryName != null && RangeComplexes != null && RangeComplexes.SelectedArea != null && RangeComplexes.SelectedArea.BathymetryFiles[SelectedBathymetryName] != null)
                     {
                         if (RangeComplexes.SelectedBathymetry != RangeComplexes.SelectedArea.BathymetryFiles[SelectedBathymetryName])
                             RangeComplexes.SelectedBathymetry = RangeComplexes.SelectedArea.BathymetryFiles[SelectedBathymetryName];
@@ -448,8 +448,11 @@ namespace ESME.Metadata
                 _scenarioFilename = value;
                 NotifyPropertyChanged(ScenarioFilenameChangedEventArgs);
                 NemoFile = _scenarioFilename != null ? new NemoFile(_scenarioFilename, Globals.AppSettings.ScenarioDataDirectory) : null;
-                DisplayExistingAnalysisPoints();
-                DisplayExistingExplosivePoints();
+                Dispatcher.InvokeAsynchronouslyInBackground(() =>
+                {
+                    DisplayExistingAnalysisPoints();
+                    DisplayExistingExplosivePoints();
+                });
             }
         }
 
