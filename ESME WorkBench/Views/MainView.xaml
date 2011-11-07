@@ -240,7 +240,11 @@
           <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_undo.png" ToolTipTitle="Clear selection"
                           ToolTipDescription="Clear the currently selected bathymetry" Command="{Binding ClearBathymetrySelectionCommand}" />
         </r:RibbonGroup>
-      </r:RibbonTab>
+        <r:RibbonGroup Header="Export">
+          <r:RibbonButton Label="Export" LargeImageSource="..\Images\LargeIcons\export-icon.png" ToolTipTitle="Export"
+                          ToolTipDescription="Write the currently selected environmental data to disk." Command="{Binding ExportAllEnvironmentalDataCommand}" />
+        </r:RibbonGroup>
+            </r:RibbonTab>
 
       <r:RibbonTab KeyTip="S" Header="Simulation">
         <r:RibbonGroup Header="Simulators">
@@ -281,7 +285,7 @@
                           IsEnabled="{Binding IsScenarioLoaded}" Command="{Binding LaunchMMMBSCommand}" />
           <r:RibbonButton Label="Export Bathymetry File" SmallImageSource="..\Images\SmallIcons\export-icon.png"
                           ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Create a bathymetry file that will be loaded by MMMBS" IsEnabled="{Binding IsScenarioLoaded}"
+                          ToolTipDescription="Create a bathymetry file that will be loaded by MMMBS" 
                           Command="{Binding CreateMMMBSBathymetryFileCommand}" />
         </r:RibbonGroup>
       </r:RibbonTab>

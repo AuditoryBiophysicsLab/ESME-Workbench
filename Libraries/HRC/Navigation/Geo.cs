@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
+using NUnit.Framework;
 
 namespace HRC.Navigation
 {
@@ -1106,5 +1107,15 @@ namespace HRC.Navigation
                 else handler(this, e);
         }
         #endregion
+    }
+
+    [TestFixture]
+    public class GeoTest
+    {
+        [Test]
+        public void DefaultTest()
+        {
+        
+        }
     }
 }

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Cinch;
@@ -14,6 +15,7 @@ using ESME.Environment.NAVO;
 using ESME.Mapping;
 using ESME.Model;
 using ESME.NEMO.Overlay;
+using ESME.TransmissionLoss.CASS;
 using ESME.Views.Locations;
 using ESME.Views.InstallationWizard;
 using HRC.Navigation;
@@ -467,6 +469,54 @@ namespace OneNavyModel.ViewModels.Main
         }
 
         SimpleCommand<object, object> _clearBathymetrySelectionCommand;
+        #endregion
+
+        #region ExportAllEnvironmentalDataCommand
+        public SimpleCommand<object, object> ExportAllEnvironmentalDataCommand
+        {
+            get
+            {
+                return _exportAllEnvironmentalData ??
+                       (_exportAllEnvironmentalData =
+                        new SimpleCommand<object, object>(delegate { return IsExportAllEnvironmentalDataCommandEnabled; },
+                                                          delegate { ExportAllEnvironmentalDataHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _exportAllEnvironmentalData;
+
+        bool IsExportAllEnvironmentalDataCommandEnabled
+        {
+            get { return _rangeComplexes != null && _rangeComplexes.SelectedRangeComplex != null && _rangeComplexes.SelectedArea != null && _rangeComplexes.SelectedBathymetry != null; }
+        }
+
+        void ExportAllEnvironmentalDataHandler()
+        {
+#if false
+            var rangeComplex = _rangeComplexes.SelectedRangeComplex;
+            
+            var bathymetry = ((Task<Bathymetry>)environmentTasks[EnvironmentDataType.Bathymetry]).Result;
+            var sediment = ((Task<Sediment>)environmentTasks[EnvironmentDataType.Sediment]).Result;
+            var bottomLossSamples = ((Task<BottomLoss>)environmentTasks[EnvironmentDataType.BottomLoss]).Result.Samples;
+            var cassBathymetryFileName = Path.Combine(_rangeComplexes.SelectedRangeComplex.BathymetryPath, string.Format("{0}_{1}_bathy.txt", _rangeComplexes.SelectedArea.Name, _rangeComplexes.SelectedBathymetry.Name));
+            if (!File.Exists(cassBathymetryFileName)) bathymetry.ToYXZ(cassBathymetryFileName, -1);
+            foreach (var timePeriod in timePeriods)
+            {
+                var cassEnvironmentFileName = Path.Combine(_rangeComplexes.SelectedRangeComplex.EnvironmentPath,
+                                                           string.Format("{0}_{1}_env_{2}",
+                                                                         _rangeComplexes.SelectedArea.Name,
+                                                                         _rangeComplexes.SelectedBathymetry.Name,
+                                                                         timePeriod));
+                var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), timePeriod, true);
+                var soundspeedField =
+                        ((Task<SoundSpeed>)environmentTasks[EnvironmentDataType.SoundSpeed]).Result[curTimePeriod];
+                var wind = ((Task<Wind>)environmentTasks[EnvironmentDataType.Wind]).Result[curTimePeriod];
+                WriteEnvironmentFiles(cassEnvironmentFileName, bathymetry.Samples.GeoRect, sediment, soundspeedField,
+                                      wind, cassBathymetryFileName, _rangeComplexes.SelectedArea.Name + ".ovr",
+                                      bottomLossSamples);
+            } 
+#endif
+        }
         #endregion
 
         #region public string ScenarioLoadedToolTip { get; set; }

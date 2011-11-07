@@ -99,8 +99,7 @@ namespace ESME.Views.InstallationWizard
                                    "The Generalized Digital Environmental Model (GDEM) is a required OAML database organized as a collection of NetCDF files.\n\n" +
                                    "Please select any .nc file in the directory containing all of the GDEM data.\n\n" +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
-                                   Hyperlink = new Uri("http://esme.bu.edu"),
-                                   HyperlinkText = "the One Navy Model webpage.",
+                                   
                                    FieldName = "GDEM-V",
                                    DialogTitle = "Choose one GDEM database file",
                                    FileNameFilter = "NetCDF files (*.nc)|*.nc|All files (*.*)|*.*",
@@ -116,8 +115,7 @@ namespace ESME.Views.InstallationWizard
                                    "The Surface Marine Gridded Climatological (SMGC) database is a required OAML database organized as a collection of 64,800 .stt files\n\n " +
                                    "Please select any .stt file a directory tree containing all of the SMGC data.\n\n" +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
-                                   Hyperlink = new Uri("http://esme.bu.edu"),
-                                   HyperlinkText = "the One Navy Model webpage.",
+                                   
                                    FieldName = "SMGC",
                                    DialogTitle = "Choose one SMGC database file (*.stt)",
                                    FileNameFilter = "SMGC files (*.stt)|*.stt|All files (*.*)|*.*",
@@ -133,8 +131,7 @@ namespace ESME.Views.InstallationWizard
                                    "The High-Frequency Environment Acoustic (HFEVA) Bottom Sediment Type (BST) database is a required OAML database packaged as a standalone HDF5 file.\n\n" +
                                    "Please select the .h5 file that contains the HFEVA BST database.\n\n" +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
-                                   Hyperlink = new Uri("http://esme.bu.edu"),
-                                   HyperlinkText = "the One Navy Model webpage.",
+                                   
                                    DialogTitle = "Locate the BST HFEVA database file",
                                    FieldName = "BST",
                                    FileNameFilter =
@@ -151,8 +148,7 @@ namespace ESME.Views.InstallationWizard
                                    "The Digital Bathymetric DataBase (DBDB) is a required OAML database packaged as a standalone HDF5 file.\n\n" +
                                    "Please select the .h5 file that contains the DBDB.\n\n" +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
-                                   Hyperlink = new Uri("http://esme.bu.edu"),
-                                   HyperlinkText = "the One Navy Model webpage.",
+                                   
                                    FieldName = "DBDB",
                                    DialogTitle = "Locate the DBDB database file (dbdbv5_level0c_0.h5)",
                                    FileNameFilter =
@@ -168,8 +164,7 @@ namespace ESME.Views.InstallationWizard
                                    "The Digital Bathymetric DataBase (DBDB) requires a seperate extraction tool for use.\n\n" +
                                    "Please select the DBDB extractor.\n\n" +
                                    "If you do not have this tool, a copy can be downloaded from http://esme.bu.edu",
-                                   Hyperlink = new Uri("http://esme.bu.edu"),
-                                   HyperlinkText = "the One Navy Model webpage.",
+                                   
                                    FieldName = "DBDB Extractor (dbv5_command.exe)",
                                    DialogTitle = "Locate the DBDB Extractor program (dbv5_command.exe)",
                                    FileNameFilter =

@@ -1,7 +1,10 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using Cinch;
 using ESME;
+using ESME.Environment;
+using ESME.Environment.Descriptors;
 using ESME.TransmissionLoss;
 using HRC.Navigation;
 using OneNavyModel.Data;
@@ -21,22 +24,7 @@ namespace OneNavyModel.ViewModels.Main
 
         }
 
-        [MediatorMessageSink(MediatorMessage.CreateMMMBSBathymetryFileCommand)]
-        void CreateMMMBSBathymetryFile(bool dummy)
-        {
-            _saveFileService.Filter = "MMMBS bathymetry files (*.bth)|*.bth|All files (*.*)|*.*";
-            _saveFileService.OverwritePrompt = true;
-            _saveFileService.InitialDirectory = Settings.Default.LastBathymetryFileDirectory;
-            _saveFileService.FileName = null;
-            var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
-            if ((!result.HasValue) || (!result.Value)) return;
-            Settings.Default.LastBathymetryFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-            //_experiment.Bathymetry.ToYXZ(_saveFileService.FileName, 1);
-            //_selectedBathymetryDescriptor.Data.ToYXZ(_saveFileService.FileName,1);
-            //_rangeComplexDescriptors[""]
-            //RangeComplexes["Jacksonville"]["OpArea"]["0.50min"]
-            //RangeComplexes["Jacksonville"].Temperature[NAVOTimePeriod.January]
-        }
+        
 
         [MediatorMessageSink(MediatorMessage.AddAnimatPopulationFileCommand)]
         void AddAnimatPopulationFile(bool dummy)
