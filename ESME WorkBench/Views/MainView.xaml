@@ -282,7 +282,7 @@
           <r:RibbonButton Label="MMMBS" ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                           ToolTipDescription="Launch the Marine Mammal Movement and Behavior Simulator to define animat populations."
                           SmallImageSource="..\Images\3mbNewIcon.ico" LargeImageSource="..\Images\3mbNewIcon.ico"
-                          IsEnabled="{Binding IsScenarioLoaded}" Command="{Binding LaunchMMMBSCommand}" />
+                          Command="{Binding LaunchMMMBSCommand}" />
           <r:RibbonButton Label="Export Bathymetry File" SmallImageSource="..\Images\SmallIcons\export-icon.png"
                           ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                           ToolTipDescription="Create a bathymetry file that will be loaded by MMMBS" 

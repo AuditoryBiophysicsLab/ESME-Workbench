@@ -24,8 +24,6 @@ namespace OneNavyModel.ViewModels.Main
 
         }
 
-        
-
         [MediatorMessageSink(MediatorMessage.AddAnimatPopulationFileCommand)]
         void AddAnimatPopulationFile(bool dummy)
         {

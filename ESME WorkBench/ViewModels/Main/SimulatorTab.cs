@@ -101,7 +101,7 @@ namespace OneNavyModel.ViewModels.Main
 
         bool IsCreateMMMBSBathymetryFileCommandEnabled
         {
-            get { return (_rangeComplexes != null) && (_rangeComplexes.IsEnvironmentFullySpecified && _rangeComplexes.IsEnvironmentLoaded); }
+            get { return (_rangeComplexes != null) && (_rangeComplexes.IsEnvironmentFullySpecified); }
         }
 
         void CreateMMMBSBathymetryFileHandler()
@@ -109,13 +109,17 @@ namespace OneNavyModel.ViewModels.Main
             _saveFileService.Filter = "MMMBS bathymetry files (*.bth)|*.bth|All files (*.*)|*.*";
             _saveFileService.OverwritePrompt = true;
             _saveFileService.InitialDirectory = Settings.Default.LastBathymetryFileDirectory;
-            _saveFileService.FileName = null;
+            _saveFileService.FileName = _rangeComplexes.SelectedArea.Name +".bth";
             var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
             if ((!result.HasValue) || (!result.Value)) return;
             Settings.Default.LastBathymetryFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
             if (_rangeComplexes.IsEnvironmentLoaded)
             {
                 ((Task<Bathymetry>)_rangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).Result.ToYXZ(_saveFileService.FileName,-1);
+            }
+            else
+            {
+                ((Task<Bathymetry>)_rangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).ContinueWith(task=>task.Result.ToYXZ(_saveFileService.FileName, -1));
             }
         }
         #endregion

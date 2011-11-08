@@ -381,9 +381,7 @@ namespace OneNavyModel.ViewModels.Main
         SimpleCommand<object, object> _quickLookPoint;
 #endif
         #endregion
-
         
-
         #region RunExperimentCommand
 #if EXPERIMENTS_SUPPORTED
 
