@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using C5;
@@ -39,7 +40,7 @@ namespace ESME.Environment
                         nearestCandidates.Add(returnValue);
                     }
                 });
-                return FindNearestInSublist(location, nearestCandidates, 0, nearestCandidates.Count - 1);
+                return FindNearestInSublist(location, nearestCandidates, 0, nearestCandidates.Count);
             }
         }
 
@@ -55,6 +56,7 @@ namespace ESME.Environment
                 minDistance = curDistance;
                 closestSample = item;
             }
+            if (closestSample == null) Debugger.Break();
             return closestSample;
         }
 

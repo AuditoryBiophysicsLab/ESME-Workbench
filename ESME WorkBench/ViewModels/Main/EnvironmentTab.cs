@@ -487,35 +487,74 @@ namespace OneNavyModel.ViewModels.Main
 
         bool IsExportAllEnvironmentalDataCommandEnabled
         {
-            get { return _rangeComplexes != null && _rangeComplexes.SelectedRangeComplex != null && _rangeComplexes.SelectedArea != null && _rangeComplexes.SelectedBathymetry != null; }
+            get { return _rangeComplexes != null; }
         }
 
         void ExportAllEnvironmentalDataHandler()
         {
-#if false
             var rangeComplex = _rangeComplexes.SelectedRangeComplex;
-            
-            var bathymetry = ((Task<Bathymetry>)environmentTasks[EnvironmentDataType.Bathymetry]).Result;
-            var sediment = ((Task<Sediment>)environmentTasks[EnvironmentDataType.Sediment]).Result;
-            var bottomLossSamples = ((Task<BottomLoss>)environmentTasks[EnvironmentDataType.BottomLoss]).Result.Samples;
-            var cassBathymetryFileName = Path.Combine(_rangeComplexes.SelectedRangeComplex.BathymetryPath, string.Format("{0}_{1}_bathy.txt", _rangeComplexes.SelectedArea.Name, _rangeComplexes.SelectedBathymetry.Name));
-            if (!File.Exists(cassBathymetryFileName)) bathymetry.ToYXZ(cassBathymetryFileName, -1);
-            foreach (var timePeriod in timePeriods)
+            //for each op area 
+            foreach (var area in rangeComplex.AreaList)
             {
-                var cassEnvironmentFileName = Path.Combine(_rangeComplexes.SelectedRangeComplex.EnvironmentPath,
-                                                           string.Format("{0}_{1}_env_{2}",
-                                                                         _rangeComplexes.SelectedArea.Name,
-                                                                         _rangeComplexes.SelectedBathymetry.Name,
-                                                                         timePeriod));
-                var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), timePeriod, true);
-                var soundspeedField =
-                        ((Task<SoundSpeed>)environmentTasks[EnvironmentDataType.SoundSpeed]).Result[curTimePeriod];
-                var wind = ((Task<Wind>)environmentTasks[EnvironmentDataType.Wind]).Result[curTimePeriod];
-                WriteEnvironmentFiles(cassEnvironmentFileName, bathymetry.Samples.GeoRect, sediment, soundspeedField,
-                                      wind, cassBathymetryFileName, _rangeComplexes.SelectedArea.Name + ".ovr",
-                                      bottomLossSamples);
-            } 
-#endif
+                foreach (var resolution in area.BathymetryList)
+                {
+                    if (resolution.IsCached)
+                    {
+                        var area1 = area;
+                        var resolution1 = resolution;
+                     
+                        //bathymetry
+                        var bathyFileName = Path.Combine(rangeComplex.BathymetryPath, string.Format("{0}_{1}_bathy.txt", area1.Name, resolution1.Name));
+                        var bathyTask = new Task<Bathymetry>(() => Bathymetry.Load(Path.Combine(area1.BathymetryPath, resolution1.FileName)));
+                        bathyTask.Start();
+                        bathyTask.ContinueWith(task =>
+                        {
+                            if (!File.Exists(bathyFileName)) task.Result.ToYXZ(bathyFileName, -1);
+                            var bottomLossTask = new Task<BottomLoss>(() => BottomLoss.Load(Path.Combine(rangeComplex.DataPath, "data.bottomloss")));
+                            var sedimentTask = new Task<Sediment>(() => Sediment.Load(Path.Combine(rangeComplex.DataPath, "data.sediment")));
+                            bottomLossTask.Start();
+                            sedimentTask.Start();
+                            TaskEx.WhenAll(bottomLossTask, sedimentTask).ContinueWith(task1 =>
+                            {
+                                foreach (var timePeriod in NAVOConfiguration.AllTimePeriods)
+                                {
+                                    var period = timePeriod;
+                                    var cassEnvironmentFileName = Path.Combine(rangeComplex.EnvironmentPath, string.Format("{0}_{1}_env_{2}", area1.Name, resolution1.Name, period));
+                                    var windTask = new Task<Wind>(() => Wind.Load(Path.Combine(rangeComplex.DataPath, "data.wind")));
+
+                                    var soundSpeedTask = new Task<SoundSpeed>(() => EnvironmentFile.CalculateSoundSpeed(rangeComplex, period, bathyTask, resolution1.GeoRect));
+                                    windTask.Start();
+                                    soundSpeedTask.Start();
+
+
+                                    TaskEx.WhenAll(windTask, soundSpeedTask).ContinueWith(task2 => CASSFiles.WriteEnvironmentFiles(cassEnvironmentFileName, bathyTask.Result.Samples.GeoRect, sedimentTask.Result, soundSpeedTask.Result[period],
+                                                                                                                                                                          windTask.Result[period], bathyFileName, area1.Name + ".ovr",
+                                                                                                                                                                          bottomLossTask.Result.Samples));
+
+                                }
+                            });
+
+                        });
+                    }
+                }
+            }
+
+        }
+
+        void WriteEnvironmentFile(Task<BottomLoss> bottomLossTask, Task<Sediment> sedimentTask,
+                                  Task<Bathymetry> bathyTask, NAVOTimePeriod timePeriod, NewRangeComplex rangeComplex, RangeComplexArea area1, EnvironmentFile resolution1, string bathyFileName)
+        {
+            var cassEnvironmentFileName = Path.Combine(rangeComplex.EnvironmentPath, string.Format("{0}_{1}_env_{2}", area1.Name, resolution1.Name, timePeriod));
+            var windTask = new Task<Wind>(() => Wind.Load(Path.Combine(rangeComplex.DataPath, "data.wind")));
+
+            var soundSpeedTask = new Task<SoundSpeed>(() => EnvironmentFile.CalculateSoundSpeed(rangeComplex, timePeriod, bathyTask, resolution1.GeoRect));
+            windTask.Start();
+            soundSpeedTask.Start();
+
+
+            TaskEx.WhenAll(bottomLossTask, sedimentTask, windTask, soundSpeedTask).ContinueWith(task => CASSFiles.WriteEnvironmentFiles(cassEnvironmentFileName, bathyTask.Result.Samples.GeoRect, sedimentTask.Result, soundSpeedTask.Result[timePeriod],
+                                                                                                                                                  windTask.Result[timePeriod], bathyFileName, area1.Name + ".ovr",
+                                                                                                                                                  bottomLossTask.Result.Samples));
         }
         #endregion
 
