@@ -23,6 +23,7 @@ namespace ESME.Environment
         {
             get
             {
+                if (_arrayList.Count == 0) throw new IndexOutOfRangeException(string.Format("The data point at {0} was not found because the list is empty", location));
                 if (_arrayList.Count < 10000) return FindNearestInSublist(location, _arrayList, 0, _arrayList.Count);
                 var cpuCount = System.Environment.ProcessorCount;
                 var arraySliceLength = _arrayList.Count / cpuCount;

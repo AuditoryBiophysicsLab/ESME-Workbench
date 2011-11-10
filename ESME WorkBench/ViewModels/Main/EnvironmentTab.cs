@@ -492,6 +492,45 @@ namespace OneNavyModel.ViewModels.Main
 
         void ExportAllEnvironmentalDataHandler()
         {
+#if false
+            var soundSpeedProfiles = new List<SoundSpeedProfile>();
+            var windSamples = new List<WindSample>();
+
+            double lat, lon;
+            for (lon = geoRect.West; lon < geoRect.East; lon += 0.25)
+            {
+                for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
+                {
+                    var curLocation = new Geo(lat, lon);
+                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData[curLocation]);
+                    windSamples.Add((wind.EnvironmentData[curLocation]));
+                    sedimentPoints.Add(sedimentType.Samples[curLocation]);
+                    requestedLocations.Add(curLocation);
+                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples[curLocation]);
+                }
+                if ((lat - geoRect.North) < 0.125)
+                {
+                    var curLocation = new Geo(lat, lon);
+                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData[curLocation]);
+                    windSamples.Add((wind.EnvironmentData[curLocation]));
+                    sedimentPoints.Add(sedimentType.Samples[curLocation]);
+                    requestedLocations.Add(curLocation);
+                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples[curLocation]);
+                }
+            }
+            if ((lon - geoRect.East) < 0.125)
+            {
+                for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
+                {
+                    var curLocation = new Geo(lat, lon);
+                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData[curLocation]);
+                    windSamples.Add((wind.EnvironmentData[curLocation]));
+                    sedimentPoints.Add(sedimentType.Samples[curLocation]);
+                    requestedLocations.Add(curLocation);
+                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples[curLocation]);
+                }
+            }
+#endif
             var rangeComplex = _rangeComplexes.SelectedRangeComplex;
             //for each op area 
             foreach (var area in rangeComplex.AreaList)
@@ -502,7 +541,18 @@ namespace OneNavyModel.ViewModels.Main
                     {
                         var area1 = area;
                         var resolution1 = resolution;
-                     
+                        var requestedLocations = new List<Geo>();
+
+                        double lat, lon;
+                        for (lon = area1.GeoRect.West; lon < area1.GeoRect.East; lon += 0.25)
+                        {
+                            for (lat = area1.GeoRect.South; lat < area1.GeoRect.North; lat += 0.25) requestedLocations.Add(new Geo(lat, lon));
+                            if ((lat - area1.GeoRect.North) < 0.125) requestedLocations.Add(new Geo(lat, lon));
+                        }
+                        if ((lon - area1.GeoRect.East) < 0.125)
+                            for (lat = area1.GeoRect.South; lat < area1.GeoRect.North; lat += 0.25)
+                                requestedLocations.Add(new Geo(lat, lon));
+
                         //bathymetry
                         var bathyFileName = Path.Combine(rangeComplex.BathymetryPath, string.Format("{0}_{1}_bathy.txt", area1.Name, resolution1.Name));
                         var bathyTask = new Task<Bathymetry>(() => Bathymetry.Load(Path.Combine(area1.BathymetryPath, resolution1.FileName)));
@@ -512,10 +562,20 @@ namespace OneNavyModel.ViewModels.Main
                             if (!File.Exists(bathyFileName)) task.Result.ToYXZ(bathyFileName, -1);
                             var bottomLossTask = new Task<BottomLoss>(() => BottomLoss.Load(Path.Combine(rangeComplex.DataPath, "data.bottomloss")));
                             var sedimentTask = new Task<Sediment>(() => Sediment.Load(Path.Combine(rangeComplex.DataPath, "data.sediment")));
+
                             bottomLossTask.Start();
                             sedimentTask.Start();
                             TaskEx.WhenAll(bottomLossTask, sedimentTask).ContinueWith(task1 =>
                             {
+                                var sedimentPoints = new List<SedimentSample>();
+                                var bottomLossPoints = new List<BottomLossSample>();
+
+                                foreach (var location in requestedLocations)
+                                {
+                                    sedimentPoints.Add(sedimentTask.Result.Samples[location]);
+                                    if (bottomLossTask.Result != null && bottomLossTask.Result.Samples != null && bottomLossTask.Result.Samples.Count > 0) bottomLossPoints.Add(bottomLossTask.Result.Samples[location]);
+                                }
+
                                 foreach (var timePeriod in NAVOConfiguration.AllTimePeriods)
                                 {
                                     var period = timePeriod;
@@ -526,11 +586,18 @@ namespace OneNavyModel.ViewModels.Main
                                     windTask.Start();
                                     soundSpeedTask.Start();
 
-
-                                    TaskEx.WhenAll(windTask, soundSpeedTask).ContinueWith(task2 => CASSFiles.WriteEnvironmentFiles(cassEnvironmentFileName, bathyTask.Result.Samples.GeoRect, sedimentTask.Result, soundSpeedTask.Result[period],
-                                                                                                                                                                          windTask.Result[period], bathyFileName, area1.Name + ".ovr",
-                                                                                                                                                                          bottomLossTask.Result.Samples));
-
+                                    var period1 = timePeriod;
+                                    TaskEx.WhenAll(windTask, soundSpeedTask).ContinueWith(task2 =>
+                                    {
+                                        var soundSpeedProfiles = new List<SoundSpeedProfile>();
+                                        var windSamples = new List<WindSample>();
+                                        foreach (var location in requestedLocations)
+                                        {
+                                            soundSpeedProfiles.Add(soundSpeedTask.Result[period1].EnvironmentData[location]);
+                                            windSamples.Add((windTask.Result[period1].EnvironmentData[location]));
+                                        }
+                                        CASSFiles.WriteEnvironmentFiles(period1, requestedLocations, cassEnvironmentFileName, sedimentPoints, soundSpeedProfiles, windSamples, bathyFileName, area1.Name + ".ovr", bottomLossPoints);
+                                    });
                                 }
                             });
 
