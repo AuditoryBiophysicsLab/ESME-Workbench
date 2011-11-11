@@ -19,6 +19,7 @@ using ESME.TransmissionLoss.CASS;
 using ESME.Views.Locations;
 using ESME.Views.InstallationWizard;
 using HRC.Navigation;
+using OneNavyModel.ViewModels.NAVO;
 using ThinkGeo.MapSuite.Core;
 using Globals = OneNavyModel.Globals;
 
@@ -492,45 +493,13 @@ namespace OneNavyModel.ViewModels.Main
 
         void ExportAllEnvironmentalDataHandler()
         {
-#if false
-            var soundSpeedProfiles = new List<SoundSpeedProfile>();
-            var windSamples = new List<WindSample>();
+            var vm = new ExportAllEnvironmentalDataProgressViewModel();
+            var result = _visualizerService.ShowDialog("ExportAllEnvironmentalDataProgressView", vm);
+            if (result.HasValue && result.Value)
+            {
+                
+            }
 
-            double lat, lon;
-            for (lon = geoRect.West; lon < geoRect.East; lon += 0.25)
-            {
-                for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
-                {
-                    var curLocation = new Geo(lat, lon);
-                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData[curLocation]);
-                    windSamples.Add((wind.EnvironmentData[curLocation]));
-                    sedimentPoints.Add(sedimentType.Samples[curLocation]);
-                    requestedLocations.Add(curLocation);
-                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples[curLocation]);
-                }
-                if ((lat - geoRect.North) < 0.125)
-                {
-                    var curLocation = new Geo(lat, lon);
-                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData[curLocation]);
-                    windSamples.Add((wind.EnvironmentData[curLocation]));
-                    sedimentPoints.Add(sedimentType.Samples[curLocation]);
-                    requestedLocations.Add(curLocation);
-                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples[curLocation]);
-                }
-            }
-            if ((lon - geoRect.East) < 0.125)
-            {
-                for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
-                {
-                    var curLocation = new Geo(lat, lon);
-                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData[curLocation]);
-                    windSamples.Add((wind.EnvironmentData[curLocation]));
-                    sedimentPoints.Add(sedimentType.Samples[curLocation]);
-                    requestedLocations.Add(curLocation);
-                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples[curLocation]);
-                }
-            }
-#endif
             var rangeComplex = _rangeComplexes.SelectedRangeComplex;
             //for each op area 
             foreach (var area in rangeComplex.AreaList)
@@ -608,21 +577,7 @@ namespace OneNavyModel.ViewModels.Main
 
         }
 
-        void WriteEnvironmentFile(Task<BottomLoss> bottomLossTask, Task<Sediment> sedimentTask,
-                                  Task<Bathymetry> bathyTask, NAVOTimePeriod timePeriod, NewRangeComplex rangeComplex, RangeComplexArea area1, EnvironmentFile resolution1, string bathyFileName)
-        {
-            var cassEnvironmentFileName = Path.Combine(rangeComplex.EnvironmentPath, string.Format("{0}_{1}_env_{2}", area1.Name, resolution1.Name, timePeriod));
-            var windTask = new Task<Wind>(() => Wind.Load(Path.Combine(rangeComplex.DataPath, "data.wind")));
-
-            var soundSpeedTask = new Task<SoundSpeed>(() => EnvironmentFile.CalculateSoundSpeed(rangeComplex, timePeriod, bathyTask, resolution1.GeoRect));
-            windTask.Start();
-            soundSpeedTask.Start();
-
-
-            TaskEx.WhenAll(bottomLossTask, sedimentTask, windTask, soundSpeedTask).ContinueWith(task => CASSFiles.WriteEnvironmentFiles(cassEnvironmentFileName, bathyTask.Result.Samples.GeoRect, sedimentTask.Result, soundSpeedTask.Result[timePeriod],
-                                                                                                                                                  windTask.Result[timePeriod], bathyFileName, area1.Name + ".ovr",
-                                                                                                                                                  bottomLossTask.Result.Samples));
-        }
+       
         #endregion
 
         #region public string ScenarioLoadedToolTip { get; set; }
