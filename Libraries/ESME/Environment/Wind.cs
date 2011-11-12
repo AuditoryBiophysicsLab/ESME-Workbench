@@ -97,7 +97,6 @@ namespace ESME.Environment
             // Set each data point in the result set to the average of each corresponding non-null point in the source data
             foreach (var location in result.EnvironmentData)
                 location.Data = (from source in requiredSources
-                                 where source.EnvironmentData.Count > 0
                                  where source.EnvironmentData[location] != null
                                  select source.EnvironmentData[location].Data).Average();
             return result;

@@ -59,13 +59,14 @@ namespace ESME.Environment.NAVO
             if (currentState != null) lock (currentState) currentState.Report("Creating monthly data collection");
             foreach (var curMonth in NAVOConfiguration.AllMonths)
             {
-                var curMonthData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = curMonth };
+                var month = curMonth;
+                var curMonthData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = month };
                 curMonthData.EnvironmentData.AddRange(from selectedFile in selectedFiles
-                                                      where (selectedFile.Months != null) && (selectedFile[curMonth] != null)
-                                                      select new WindSample(selectedFile.EarthCoordinate, selectedFile[curMonth].MeanWindSpeed));
+                                                      where (selectedFile.Months != null) && (selectedFile[month] != null)
+                                                      select new WindSample(selectedFile.EarthCoordinate, selectedFile[month].MeanWindSpeed));
                 var wind = new Wind();
                 wind.TimePeriods.Add(curMonthData);
-                wind.Save(Path.Combine(outputPath, string.Format("{0}.wind", curMonth.ToString().ToLower())));
+                wind.Save(Path.Combine(outputPath, string.Format("{0}.wind", month.ToString().ToLower())));
                 if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             }
             if (currentState != null) lock (currentState) currentState.Report("Saving");
@@ -121,6 +122,7 @@ namespace ESME.Environment.NAVO
             foreach (var curMonth in NAVOConfiguration.AllMonths)
             {
                 var curMonthData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = curMonth };
+                if (curMonth == NAVOTimePeriod.December) Debugger.Break();
                 curMonthData.EnvironmentData.AddRange(from selectedFile in selectedFiles
                                                       where (selectedFile.Months != null) && (selectedFile[curMonth] != null)
                                                       select new WindSample(selectedFile.EarthCoordinate, selectedFile[curMonth].MeanWindSpeed));
@@ -134,6 +136,7 @@ namespace ESME.Environment.NAVO
 
             foreach (var period in NAVOConfiguration.AllTimePeriods)
             {
+                if (wind[period].EnvironmentData.Count == 0) Debugger.Break();
                 foreach (var sample in wind[period].EnvironmentData)
                 {
                     if (float.IsNaN(sample.Data)) Debugger.Break();
@@ -219,8 +222,6 @@ namespace ESME.Environment.NAVO
 
                     Months = new List<SMGCMonth>();
                     var curMonth = SMGCMonth.Read(NAVOTimePeriod.January, reader);
-                    if (curMonth != null) Months.Add(curMonth);
-                    curMonth = SMGCMonth.Read(NAVOTimePeriod.February, reader);
                     if (curMonth != null) Months.Add(curMonth);
                     curMonth = SMGCMonth.Read(NAVOTimePeriod.February, reader);
                     if (curMonth != null) Months.Add(curMonth);

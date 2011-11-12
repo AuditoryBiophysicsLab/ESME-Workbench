@@ -5,7 +5,7 @@
         WindowStyle="ToolWindow" ResizeMode="NoResize" SizeToContent="WidthAndHeight">
     <DockPanel LastChildFill="True">        
         <StackPanel DockPanel.Dock="Bottom" Margin="5">
-            <Button Content="Cancel" IsCancel="True"/>
+            <Button Content="Cancel" Command="{Binding CancelCommand}"/>
         </StackPanel>        
         <ProgressBar Margin="5" DockPanel.Dock="Top" Value="{Binding CurFileNumber}" Maximum="{Binding MaxFileCount}" Height="22"/>
         <TextBlock Text="{Binding Message}" Margin="5"/>
