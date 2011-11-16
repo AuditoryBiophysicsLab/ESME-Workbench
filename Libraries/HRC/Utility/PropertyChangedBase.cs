@@ -38,6 +38,18 @@ namespace HRC.Utility
                     handler(this, e);
             }
         }
+        protected void NotifyPropertyChanged(string propertyName)
+        {
+            var handlers = _propertyChanged;
+            if (handlers == null) return;
+            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => handler(this, new PropertyChangedEventArgs(propertyName)));
+                else
+                    handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
 
         #endregion
     }

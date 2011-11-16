@@ -204,6 +204,7 @@
     <Compile Include="Utility\NotifyIcon.cs" />
     <Compile Include="Utility\NotifyIcon.Interop.cs" />
     <Compile Include="Utility\OSInfo.cs" />
+    <Compile Include="Utility\ProgressInfo.cs" />
     <Compile Include="Utility\PropertyChangedBase.cs" />
     <Compile Include="Utility\TriggerTracing.cs" />
     <Compile Include="Utility\XmlSerializer.cs" />

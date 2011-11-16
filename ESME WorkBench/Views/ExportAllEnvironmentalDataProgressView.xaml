@@ -1,13 +1,24 @@
 ﻿<Window x:Class="OneNavyModel.Views.ExportAllEnvironmentalDataProgressView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Exporting All Environmental Data"
-        WindowStyle="ToolWindow" ResizeMode="NoResize" SizeToContent="WidthAndHeight">
-    <DockPanel LastChildFill="True">        
-        <StackPanel DockPanel.Dock="Bottom" Margin="5">
-            <Button Content="Cancel" Command="{Binding CancelCommand}"/>
-        </StackPanel>        
-        <ProgressBar Margin="5" DockPanel.Dock="Top" Value="{Binding CurFileNumber}" Maximum="{Binding MaxFileCount}" Height="22"/>
-        <TextBlock Text="{Binding Message}" Margin="5"/>
-    </DockPanel>
+        Title="Environment Export"
+        WindowStyle="ToolWindow" 
+        ResizeMode="NoResize" 
+        SizeToContent="WidthAndHeight">
+    <StackPanel>
+        <GroupBox Header="Bathymetry files">
+            <Grid>
+                <ProgressBar Value="{Binding BathymetryProgress.CurrentValue}" Maximum="{Binding BathymetryProgress.MaximumValue}" Height="16" />
+                <TextBlock Text="{Binding BathymetryProgress.Status}" TextAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Header="Environment files">
+            <Grid>
+                <ProgressBar Value="{Binding EnvironmentProgress.CurrentValue}" Maximum="{Binding EnvironmentProgress.MaximumValue}" Height="16" />
+                <TextBlock Text="{Binding EnvironmentProgress.Status}" TextAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+        </GroupBox>
+        <Button Content="Cancel" Command="{Binding CancelCommand}" Margin="5"/>
+    </StackPanel>
 </Window>
