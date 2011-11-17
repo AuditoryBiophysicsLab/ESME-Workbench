@@ -159,19 +159,15 @@ namespace ESME.Environment
                 if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                 {
                     //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
-                    Dispatcher.InvokeInBackgroundIfRequired(async () =>
+                    var sediment = BST.Extract(job.GeoRect);
+                    if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                     {
-                        var sediment = BST.Extract(job.GeoRect);
-                        if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
-                        {
-                            sediment.Save(job.DestinationFilename);
-                            job.SampleCount = (uint)sediment.Samples.Count;
-                            job.Resolution = 5;
-                            //job.CompletionAction(job);
-                            job.CompletionTask.Start();
-                            await job.CompletionTask;
-                        }
-                    });
+                        sediment.Save(job.DestinationFilename);
+                        job.SampleCount = (uint)sediment.Samples.Count;
+                        job.Resolution = 5;
+                        //job.CompletionAction(job);
+                        job.CompletionTask.Start();
+                    }
                 }
                 //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
                SedimentProgress.JobCompleted(job);
