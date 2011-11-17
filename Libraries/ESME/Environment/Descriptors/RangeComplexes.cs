@@ -168,7 +168,7 @@ namespace ESME.Environment.Descriptors
                     if (needsExtraNewline) writer.WriteLine();
                     writer.WriteLine("{0},{1:0.0###},{2:0.0###},{3:0.0###},{4:0.0###},{5},{6}", rangeComplexName.Trim(),
                                      latitude, longitude, height, geoid,
-                                     Path.GetFileName(result.OpArea.Name).Trim(), Path.GetFileName(result.SimArea.Name).Trim());
+                                     Path.GetFileName(result.OpArea.Name).Trim() + ".ovr", Path.GetFileName(result.SimArea.Name).Trim() + ".ovr");
                 }
             }
             RangeComplexCollection.Add(result.Name, result);
