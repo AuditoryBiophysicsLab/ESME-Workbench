@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using C5;
@@ -15,6 +16,21 @@ namespace ESME.Environment
     [Serializable]
     public class EnvironmentData<T> : System.Collections.Generic.IList<T> where T : EarthCoordinate, new()
     {
+        public static EnvironmentData<T> Deserialize(BinaryReader reader, Func<BinaryReader, T> readFunc)
+        {
+            var result = new EnvironmentData<T>();
+            var itemCount = reader.ReadInt32();
+            for (var i = 0; i < itemCount; i++) result._arrayList.Add(readFunc(reader));
+            result.ClearHelperIndices();
+            return result;
+        }
+
+        public virtual void Serialize(BinaryWriter writer)
+        {
+            writer.Write(Count);
+            foreach (var item in _arrayList) item.Serialize(writer);
+        }
+
         readonly List<T> _arrayList = new List<T>();
 
         public T this[int index] { get { return _arrayList[index]; } }
@@ -405,5 +421,21 @@ namespace ESME.Environment
 
         public NAVOTimePeriod TimePeriod { get; set; }
         public EnvironmentData<T> EnvironmentData { get; set; }
+
+        public static TimePeriodEnvironmentData<T> Deserialize(BinaryReader reader, Func<BinaryReader, T> readFunc)
+        {
+            var result = new TimePeriodEnvironmentData<T>
+            {
+                TimePeriod = (NAVOTimePeriod)reader.ReadInt32(),
+                EnvironmentData = EnvironmentData<T>.Deserialize(reader, readFunc),
+            };
+            return result;
+        }
+
+        public void Serialize(BinaryWriter writer)
+        {
+            writer.Write((int)TimePeriod);
+            //base.Serialize(writer);
+        }
     }
 }

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml.Serialization;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
@@ -98,7 +101,16 @@ namespace ESME.Environment
             var salinityField = new SoundSpeedField { EnvironmentData = salinityData };
 
             VerifyThatProfilePointsMatch(temperatureField, salinityField);
-            var environmentData = temperatureField.EnvironmentData.Select(temperatureProfile => ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]));
+            var environmentData = new List<SoundSpeedProfile>();
+            //var sb = new StringBuilder();
+            foreach (var temperatureProfile in temperatureField.EnvironmentData)
+            {
+                var profile = ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]);
+                environmentData.Add(profile);
+                if (profile.Messages.Count > 0) foreach (var message in profile.Messages)
+                        Debug.WriteLine("[{0}, {1}] ({2}): {3}", temperatureProfile.Latitude, temperatureProfile.Longitude, sourceTemperatureField.TimePeriod, message);
+            }
+            //var environmentData = temperatureField.EnvironmentData.Select(temperatureProfile => ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]));
             var soundSpeedData = new SoundSpeedField { TimePeriod = temperatureField.TimePeriod };
             soundSpeedData.EnvironmentData.AddRange(environmentData);
 
@@ -152,6 +164,16 @@ namespace ESME.Environment
         {
             foreach (var point1 in profile1.EnvironmentData.Where(point1 => !profile2.EnvironmentData.Any(point1.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at ({0:0.0000}, {1:0.0000}), the other does not", point1.Latitude, point1.Longitude));
             foreach (var point2 in profile2.EnvironmentData.Where(point2 => !profile1.EnvironmentData.Any(point2.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at ({0:0.0000}, {1:0.0000}), the other does not", point2.Latitude, point2.Longitude));
+        }
+
+        public static SoundSpeedField Deserialize(BinaryReader reader)
+        {
+            return (SoundSpeedField)Deserialize(reader, SoundSpeedProfile.Deserialize);
+        }
+
+        public void Serialize(BinaryWriter writer)
+        {
+            base.Serialize(writer);
         }
     }
 }

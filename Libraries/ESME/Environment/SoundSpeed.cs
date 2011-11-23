@@ -134,6 +134,21 @@ namespace ESME.Environment
             foreach (var field2 in data2.SoundSpeedFields.Where(field2 => data1[field2.TimePeriod] == null)) throw new DataException(string.Format("SoundSpeeds do not contain the same time periods. Data 2 has time period {0}, data 1 does not", field2.TimePeriod));
         }
 
+        public static SoundSpeed Deserialize(BinaryReader reader)
+        {
+            var result = new SoundSpeed();
+            var fieldCount = reader.ReadInt32();
+            for (var i = 0; i < fieldCount; i++)
+                result.SoundSpeedFields.Add(SoundSpeedField.Deserialize(reader));
+            return result;
+        }
+
+        public void Serialize(BinaryWriter writer)
+        {
+            writer.Write(SoundSpeedFields.Count);
+            foreach (var item in SoundSpeedFields) item.Serialize(writer);
+        }
+
         #region IExtensibleDataObject
         public virtual ExtensionDataObject ExtensionData { get; set; }
         #endregion

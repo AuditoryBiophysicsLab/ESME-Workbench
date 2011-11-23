@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Windows.Threading;
@@ -215,6 +216,21 @@ namespace HRC.Navigation
 
         public new String ToString() { return "Geo[" + Latitude + "," + Longitude + "]"; }
         public void OnDeserialization(object sender) { UpdateLatitudeLongitude(); }
+
+        public static Geo Deserialize(BinaryReader reader)
+        {
+            var x = reader.ReadDouble();
+            var y = reader.ReadDouble();
+            var z = reader.ReadDouble();
+            return new Geo(x, y, z);
+        }
+
+        public void Serialize(BinaryWriter writer)
+        {
+            writer.Write(X);
+            writer.Write(Y);
+            writer.Write(Z);
+        }
 
         /// <summary>
         ///   Latitude, in degrees

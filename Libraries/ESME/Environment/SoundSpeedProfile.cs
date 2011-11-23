@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
-using System.Xml.Serialization;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using Cinch;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
 
@@ -78,8 +82,28 @@ namespace ESME.Environment
     [Serializable]
     public class SoundSpeedProfile : EarthCoordinate<DepthValuePairs<float>>
     {
-        public SoundSpeedProfile() { Data = new DepthValuePairs<float>(); }
+        public SoundSpeedProfile()
+        {
+            Data = new DepthValuePairs<float>();
+            Messages = new List<string>();
+        }
         public SoundSpeedProfile(Geo location) : base(location) { Data = new DepthValuePairs<float>(); }
+        #region public List<string> Messages { get; set; }
+
+        public List<string> Messages
+        {
+            get { return _messages; }
+            set
+            {
+                if (_messages == value) return;
+                _messages = value;
+            }
+        }
+
+        [NonSerialized]
+        List<string> _messages;
+
+        #endregion
 
         /// <summary>
         /// Extrapolates the current sound speed profile to the given depth, in one step, using the provided temperature and salinity profile
@@ -146,6 +170,22 @@ namespace ESME.Environment
             }
             //System.Diagnostics.Debug.WriteLine("  New SSP depth vector length: {0}", Depths.Length);
         }
+
+        public static new SoundSpeedProfile Deserialize(BinaryReader reader)
+        {
+            var result = new SoundSpeedProfile(Geo.Deserialize(reader))
+            {
+                Data = DepthValuePairs<float>.Deserialize(reader, r => r.ReadSingle())
+            };
+            return result;
+        }
+
+        public new void Serialize(BinaryWriter writer)
+        {
+            base.Serialize(writer);
+            Data.Serialize(writer, (w, v) => w.Write(v));
+        }
+
     }
 
     [Serializable]
@@ -153,14 +193,10 @@ namespace ESME.Environment
     {
         public DepthValuePairs() { }
         
-        [XmlIgnore]
         public DepthValuePair<T> this[float depth] { get { return Find(d => d.Depth == depth); } }
         new public DepthValuePair<T> this[int depthIndex] { get { return base[depthIndex]; } }
-        [XmlIgnore]
         public IEnumerable<float> Depths { get { return this.Select(pair => pair.Depth); } }
-        [XmlIgnore]
         public IEnumerable<T> Values { get { return this.Select(pair => pair.Value); } }
-        [XmlIgnore]
         public double MaxDepth { get { return Depths.Last(); } }
 
         new public void Add(DepthValuePair<T> item)
@@ -174,30 +210,56 @@ namespace ESME.Environment
             base.AddRange(collection);
             Sort();
         }
+
+        public static DepthValuePairs<T> Deserialize(BinaryReader reader, Func<BinaryReader, T> readFunc)
+        {
+            var result = new DepthValuePairs<T>();
+            var itemCount = reader.ReadInt32();
+            for (var i = 0; i < itemCount; i++)
+                result.Add(DepthValuePair<T>.Deserialize(reader, readFunc));
+            return result;
+        }
+
+        public void Serialize(BinaryWriter writer, Action<BinaryWriter, T> writeAction)
+        {
+            writer.Write(Count);
+            foreach(var item in this) item.Serialize(writer, writeAction);
+        }
     }
 
     [Serializable]
-    public class DepthValuePair<TValue> : IComparable<DepthValuePair<TValue>>, IComparer<DepthValuePair<TValue>>
+    public class DepthValuePair<T> : IComparable<DepthValuePair<T>>, IComparer<DepthValuePair<T>>
     {
         public DepthValuePair() { }
 
-        public DepthValuePair(float depth, TValue value)
+        public DepthValuePair(float depth, T value)
         {
             Depth = depth;
             Value = value;
         }
 
         public float Depth { get; set; }
-        public TValue Value { get; set; }
+        public T Value { get; set; }
 
-        public int CompareTo(DepthValuePair<TValue> other)
+        public int CompareTo(DepthValuePair<T> other)
         {
             return Depth.CompareTo(other.Depth);
         }
 
-        public int Compare(DepthValuePair<TValue> x, DepthValuePair<TValue> y)
+        public int Compare(DepthValuePair<T> x, DepthValuePair<T> y)
         {
             return x.CompareTo(y);
+        }
+
+        public static DepthValuePair<T> Deserialize(BinaryReader reader, Func<BinaryReader, T> readFunc)
+        {
+            return new DepthValuePair<T>(reader.ReadSingle(), readFunc(reader));
+        }
+
+        public void Serialize(BinaryWriter writer, Action<BinaryWriter, T> writeAction)
+        {
+            writer.Write(Depth);
+            writeAction(writer, Value);
         }
     }
 }

@@ -87,13 +87,25 @@ namespace ESME.Environment.NAVO
 
         public static SoundSpeedProfile SoundSpeed(SoundSpeedProfile temperatureProfile, SoundSpeedProfile salinityProfile)
         {
-            if (temperatureProfile.Data.Count != salinityProfile.Data.Count) throw new ApplicationException("ChenMilleroLi.SoundSpeed: Unable to calculate sound speed if temperature and salinity profiles are of unequal length");
             var results = new SoundSpeedProfile(temperatureProfile);
-            for (var index = 0; index < temperatureProfile.Data.Count; index++)
+            if (temperatureProfile.Data.Count != salinityProfile.Data.Count)
+            {
+                results.Messages.Add(string.Format("ChenMilleroLi.SoundSpeed: Temperature/salinity vector length mismatch.  Temperature vector length: {0}, Salinity vector length: {1}", temperatureProfile.Data.Count, salinityProfile.Data.Count));
+                results.Messages.Add("ChenMilleroLi.SoundSpeed: Sound speed will only be calculated to the depth of the shorter of the two vectors");
+                //throw new ApplicationException("ChenMilleroLi.SoundSpeed: Unable to calculate sound speed if temperature and salinity profiles are of unequal length");
+            }
+            var vectorLength = Math.Min(temperatureProfile.Data.Count, salinityProfile.Data.Count);
+            for (var index = 0; index < vectorLength; index++)
             {
                 var temperature = temperatureProfile.Data[index];
                 var salinity = salinityProfile.Data[index];
-                if (temperature.Depth != salinity.Depth) throw new ApplicationException("ChenMilleroLi.SoundSpeed: Unable to calculate sound speed if temperature and salinity depths do not match");
+                if (temperature.Depth != salinity.Depth)
+                {
+                    results.Messages.Add(string.Format("ChenMilleroLi.SoundSpeed: Temperature/salinity depth mismatch at depth index {0}.  Temperature depth: {1}, Salinity depth: {2}", index, temperature.Depth, salinity.Depth));
+                    results.Messages.Add("ChenMilleroLi.SoundSpeed: Terminating the sound speed profile at the last depth that was calculated successfully");
+                    //throw new ApplicationException("ChenMilleroLi.SoundSpeed: Unable to calculate sound speed if temperature and salinity depths do not match");
+                    break;
+                }
                 results.Data.Add(new DepthValuePair<float>(temperature.Depth, SoundSpeed(temperatureProfile, (float)temperature.Depth, temperature.Value, salinity.Value)));
             }
             return results;
