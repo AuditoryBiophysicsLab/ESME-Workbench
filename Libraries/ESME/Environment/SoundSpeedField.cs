@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using System.Xml.Serialization;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
@@ -64,7 +66,7 @@ namespace ESME.Environment
             }
         }
 
-        public void ExtendProfiles(TimePeriodEnvironmentData<SoundSpeedProfile> temperatureData, TimePeriodEnvironmentData<SoundSpeedProfile> salinityData)
+        public async void ExtendProfilesAsync(TimePeriodEnvironmentData<SoundSpeedProfile> temperatureData, TimePeriodEnvironmentData<SoundSpeedProfile> salinityData)
         {
             if (DeepestPoint == null) throw new ApplicationException("SoundSpeedField: Unable to extend to max bathymetry depth. Deepest point is not set.");
 
@@ -74,8 +76,19 @@ namespace ESME.Environment
             if (DeepestPoint.Data > DeepestSSP.Data.MaxDepth)
                 DeepestSSP.Extend(DeepestPoint.Data, temperatureData.EnvironmentData[DeepestSSP], salinityData.EnvironmentData[DeepestSSP]);
 
-            foreach (var profile in EnvironmentData.Where(profile => profile != DeepestSSP))
-                profile.Extend(DeepestSSP);
+            var extendBlock = new ActionBlock<SoundSpeedProfile>(ssp => ssp.Extend(DeepestSSP), new ExecutionDataflowBlockOptions
+            {
+                MaxDegreeOfParallelism = -1,
+                BoundedCapacity = -1,
+                TaskScheduler = TaskScheduler.Default,
+            });
+            var extendBuffer = new BufferBlock<SoundSpeedProfile>();
+            extendBuffer.LinkTo(extendBlock);
+            extendBuffer.Completion.ContinueWith(task => extendBlock.Complete());
+
+            foreach (var profile in EnvironmentData.Where(profile => profile != DeepestSSP)) extendBuffer.Post(profile);
+            extendBuffer.Complete();
+            await extendBlock.Completion;
         }
 
         public static SoundSpeedField Create(SoundSpeedField temperatureField, SoundSpeedField salinityField)
@@ -88,7 +101,7 @@ namespace ESME.Environment
             return result;
         }
 
-        public static SoundSpeedField Create(SoundSpeedField sourceTemperatureField, SoundSpeedField sourceSalinityField, EarthCoordinate<float> deepestPoint = null, GeoRect areaOfInterest = null)
+        public static async Task<SoundSpeedField> CreateAsync(SoundSpeedField sourceTemperatureField, SoundSpeedField sourceSalinityField, EarthCoordinate<float> deepestPoint = null, GeoRect areaOfInterest = null)
         {
             if (sourceTemperatureField.TimePeriod != sourceSalinityField.TimePeriod)
                 throw new DataException("");
@@ -103,13 +116,27 @@ namespace ESME.Environment
             VerifyThatProfilePointsMatch(temperatureField, salinityField);
             var environmentData = new List<SoundSpeedProfile>();
             //var sb = new StringBuilder();
-            foreach (var temperatureProfile in temperatureField.EnvironmentData)
+            var sspBlock = new ActionBlock<SoundSpeedProfile>(temperatureProfile =>
             {
-                var profile = ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]);
+                var salinityProfile = salinityField.EnvironmentData[temperatureProfile];
+                var profile = ChenMilleroLi.SoundSpeed(temperatureProfile, salinityProfile);
                 environmentData.Add(profile);
-                if (profile.Messages.Count > 0) foreach (var message in profile.Messages)
-                        Debug.WriteLine("[{0}, {1}] ({2}): {3}", temperatureProfile.Latitude, temperatureProfile.Longitude, sourceTemperatureField.TimePeriod, message);
-            }
+                //if (profile != null && profile.Messages != null && profile.Messages.Count > 0) foreach (var message in profile.Messages)
+                //        Debug.WriteLine("[{0}, {1}] ({2}): {3}", temperatureProfile.Latitude, temperatureProfile.Longitude, sourceTemperatureField.TimePeriod, message);
+            }, new ExecutionDataflowBlockOptions
+            {
+                MaxDegreeOfParallelism = -1,
+                BoundedCapacity = -1,
+                TaskScheduler = TaskScheduler.Default,
+            });
+            var sspBuffer = new BufferBlock<SoundSpeedProfile>();
+            sspBuffer.LinkTo(sspBlock);
+            sspBuffer.Completion.ContinueWith(task => sspBlock.Complete());
+
+            foreach (var temperatureProfile in temperatureField.EnvironmentData) sspBuffer.Post(temperatureProfile);
+            sspBuffer.Complete();
+            await sspBlock.Completion;
+
             //var environmentData = temperatureField.EnvironmentData.Select(temperatureProfile => ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]));
             var soundSpeedData = new SoundSpeedField { TimePeriod = temperatureField.TimePeriod };
             soundSpeedData.EnvironmentData.AddRange(environmentData);
@@ -123,10 +150,10 @@ namespace ESME.Environment
                 DeepestPoint = deepestPoint,
                 TimePeriod = soundSpeedData.TimePeriod
             };
-            VerifyThatProfilePointsMatch(temperatureField, salinityField);
-            VerifyThatProfilePointsMatch(temperatureField, soundSpeedField);
+            //VerifyThatProfilePointsMatch(temperatureField, salinityField);
+            //VerifyThatProfilePointsMatch(temperatureField, soundSpeedField);
 
-            soundSpeedField.ExtendProfiles(temperatureField, salinityField);
+            soundSpeedField.ExtendProfilesAsync(temperatureField, salinityField);
             soundSpeedField.TimePeriod = sourceTemperatureField.TimePeriod;
             return soundSpeedField;
         }
@@ -155,7 +182,7 @@ namespace ESME.Environment
             VerifyThatProfilePointsMatch(temperatureField, salinityField);
             VerifyThatProfilePointsMatch(temperatureField, soundSpeedField);
 
-            soundSpeedField.ExtendProfiles(temperatureField, salinityField);
+            soundSpeedField.ExtendProfilesAsync(temperatureField, salinityField);
             soundSpeedField.TimePeriod = sourceTemperatureField.TimePeriod;
             return soundSpeedField;
         }
@@ -168,12 +195,22 @@ namespace ESME.Environment
 
         public static SoundSpeedField Deserialize(BinaryReader reader)
         {
-            return (SoundSpeedField)Deserialize(reader, SoundSpeedProfile.Deserialize);
+            var result = new SoundSpeedField
+            {
+                TimePeriod = (NAVOTimePeriod)reader.ReadInt32(),
+            };
+            var itemCount = reader.ReadInt32();
+            for (var i = 0; i < itemCount; i++ )
+                result.EnvironmentData.Add(SoundSpeedProfile.Deserialize(reader));
+            return result;
         }
 
         public void Serialize(BinaryWriter writer)
         {
-            base.Serialize(writer);
+            writer.Write((int)TimePeriod);
+            writer.Write(EnvironmentData.Count);
+            foreach (var item in EnvironmentData)
+                item.Serialize(writer);
         }
     }
 }

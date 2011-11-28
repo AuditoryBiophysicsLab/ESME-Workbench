@@ -87,7 +87,12 @@ namespace ESME.Environment
             Data = new DepthValuePairs<float>();
             Messages = new List<string>();
         }
-        public SoundSpeedProfile(Geo location) : base(location) { Data = new DepthValuePairs<float>(); }
+        public SoundSpeedProfile(Geo location) : base(location)
+        {
+            Data = new DepthValuePairs<float>();
+            Messages = new List<string>();
+        }
+
         #region public List<string> Messages { get; set; }
 
         public List<string> Messages
@@ -173,17 +178,22 @@ namespace ESME.Environment
 
         public static new SoundSpeedProfile Deserialize(BinaryReader reader)
         {
-            var result = new SoundSpeedProfile(Geo.Deserialize(reader))
-            {
-                Data = DepthValuePairs<float>.Deserialize(reader, r => r.ReadSingle())
-            };
+            var result = new SoundSpeedProfile(Geo.Deserialize(reader));
+            var itemCount = reader.ReadInt32();
+            for (var i = 0; i < itemCount; i++)
+                result.Data.Add(new DepthValuePair<float>(reader.ReadSingle(), reader.ReadSingle()));
             return result;
         }
 
         public new void Serialize(BinaryWriter writer)
         {
             base.Serialize(writer);
-            Data.Serialize(writer, (w, v) => w.Write(v));
+            writer.Write(Data.Count);
+            foreach (var item in Data)
+            {
+                writer.Write(item.Depth);
+                writer.Write(item.Value);
+            }
         }
 
     }
@@ -209,21 +219,6 @@ namespace ESME.Environment
         {
             base.AddRange(collection);
             Sort();
-        }
-
-        public static DepthValuePairs<T> Deserialize(BinaryReader reader, Func<BinaryReader, T> readFunc)
-        {
-            var result = new DepthValuePairs<T>();
-            var itemCount = reader.ReadInt32();
-            for (var i = 0; i < itemCount; i++)
-                result.Add(DepthValuePair<T>.Deserialize(reader, readFunc));
-            return result;
-        }
-
-        public void Serialize(BinaryWriter writer, Action<BinaryWriter, T> writeAction)
-        {
-            writer.Write(Count);
-            foreach(var item in this) item.Serialize(writer, writeAction);
         }
     }
 
@@ -254,12 +249,6 @@ namespace ESME.Environment
         public static DepthValuePair<T> Deserialize(BinaryReader reader, Func<BinaryReader, T> readFunc)
         {
             return new DepthValuePair<T>(reader.ReadSingle(), readFunc(reader));
-        }
-
-        public void Serialize(BinaryWriter writer, Action<BinaryWriter, T> writeAction)
-        {
-            writer.Write(Depth);
-            writeAction(writer, Value);
         }
     }
 }

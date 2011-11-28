@@ -269,11 +269,12 @@ namespace ESME.Environment.Descriptors
                                         select new
                                         {
                                             Month = month,
-                                            SoundSpeedField = SoundSpeedField.Create(sources[month].TemperatureTask.Result[month],
+                                            SoundSpeedField = SoundSpeedField.CreateAsync(sources[month].TemperatureTask.Result[month],
                                                                                      sources[month].SalinityTask.Result[month],
                                                                                      bathymetryTask.Result.DeepestPoint,
-                                                                                     bathymetryBounds),
+                                                                                     bathymetryBounds).Result,
                                         }).ToDictionary(item => item.Month);
+                Debug.WriteLine("{0} SSP: Monthly sound speeds fields computed", DateTime.Now);
                 var monthlySoundSpeeds = new SoundSpeed();
                 foreach (var month in months)
                 {

@@ -101,15 +101,15 @@ namespace ESME.Environment
                     }
 
                     Logger.Log("Temperature worker added to sound speed field");
-                    if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
-                    {
-                        temperature.Save(job.DestinationFilename);
-                        job.Resolution = 15;
-                        job.SampleCount = (uint)temperatureField.EnvironmentData.Count;
-                        //job.CompletionAction(job);
-                        job.CompletionTask.Start();
-                        await job.CompletionTask;
-                    }
+                    if (!Directory.Exists(Path.GetDirectoryName(job.DestinationFilename))) Directory.CreateDirectory(Path.GetDirectoryName(job.DestinationFilename));
+                    
+                    //temperature.Save(job.DestinationFilename);
+                    temperature.Serialize(job.DestinationFilename);
+                    job.Resolution = 15;
+                    job.SampleCount = (uint)temperatureField.EnvironmentData.Count;
+                    //job.CompletionAction(job);
+                    job.CompletionTask.Start();
+                    await job.CompletionTask;
                 }
                 //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
                 //Logger.Log("Temperature worker job complete", DateTime.Now);
@@ -130,17 +130,16 @@ namespace ESME.Environment
                 {
                     //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
                     var salinityField = GDEM.ReadFile(GDEM.FindSalinityFile(job.TimePeriod), "salinity", job.TimePeriod, job.GeoRect);
-                    if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
-                    {
-                        var salinity = new SoundSpeed();
-                        salinity.SoundSpeedFields.Add(salinityField);
-                        salinity.Save(job.DestinationFilename);
-                        job.Resolution = 15;
-                        job.SampleCount = (uint)salinityField.EnvironmentData.Count;
-                        //job.CompletionAction(job);
-                        job.CompletionTask.Start();
-                        await job.CompletionTask;
-                    }
+                    if (!Directory.Exists(Path.GetDirectoryName(job.DestinationFilename))) Directory.CreateDirectory(Path.GetDirectoryName(job.DestinationFilename));
+                    var salinity = new SoundSpeed();
+                    salinity.SoundSpeedFields.Add(salinityField);
+                    //salinity.Save(job.DestinationFilename);
+                    salinity.Serialize(job.DestinationFilename);
+                    job.Resolution = 15;
+                    job.SampleCount = (uint)salinityField.EnvironmentData.Count;
+                    //job.CompletionAction(job);
+                    job.CompletionTask.Start();
+                    await job.CompletionTask;
                 }
                 //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
                 SalinityProgress.JobCompleted(job);

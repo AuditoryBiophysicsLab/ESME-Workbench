@@ -25,10 +25,11 @@ namespace ESME.Environment
             return result;
         }
 
-        public virtual void Serialize(BinaryWriter writer)
+        public virtual void Serialize(BinaryWriter writer, Action<BinaryWriter, T> writeAction)
         {
             writer.Write(Count);
-            foreach (var item in _arrayList) item.Serialize(writer);
+            foreach (var item in _arrayList)
+                writeAction(writer, item);
         }
 
         readonly List<T> _arrayList = new List<T>();
@@ -421,21 +422,5 @@ namespace ESME.Environment
 
         public NAVOTimePeriod TimePeriod { get; set; }
         public EnvironmentData<T> EnvironmentData { get; set; }
-
-        public static TimePeriodEnvironmentData<T> Deserialize(BinaryReader reader, Func<BinaryReader, T> readFunc)
-        {
-            var result = new TimePeriodEnvironmentData<T>
-            {
-                TimePeriod = (NAVOTimePeriod)reader.ReadInt32(),
-                EnvironmentData = EnvironmentData<T>.Deserialize(reader, readFunc),
-            };
-            return result;
-        }
-
-        public void Serialize(BinaryWriter writer)
-        {
-            writer.Write((int)TimePeriod);
-            //base.Serialize(writer);
-        }
     }
 }

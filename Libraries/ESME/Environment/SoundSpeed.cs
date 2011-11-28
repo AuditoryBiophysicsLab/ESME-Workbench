@@ -63,11 +63,13 @@ namespace ESME.Environment
 
         public static SoundSpeed Load(string filename)
         {
-            var formatter = new BinaryFormatter();
+            //var formatter = new BinaryFormatter();
+            //using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+            //{
+            //    return new SoundSpeed { SoundSpeedFields = (List<SoundSpeedField>)formatter.Deserialize(stream) };
+            //}
             using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                return new SoundSpeed { SoundSpeedFields = (List<SoundSpeedField>)formatter.Deserialize(stream) };
-            }
+            using (var reader = new BinaryReader(stream)) return Deserialize(reader);
         }
 
         public static Task<SoundSpeed> LoadAsync(string filename)
@@ -141,6 +143,13 @@ namespace ESME.Environment
             for (var i = 0; i < fieldCount; i++)
                 result.SoundSpeedFields.Add(SoundSpeedField.Deserialize(reader));
             return result;
+        }
+
+        public void Serialize(string filename)
+        {
+            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var writer = new BinaryWriter(stream))
+                Serialize(writer);
         }
 
         public void Serialize(BinaryWriter writer)
