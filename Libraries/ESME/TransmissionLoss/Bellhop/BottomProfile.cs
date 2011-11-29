@@ -75,11 +75,11 @@ namespace ESME.TransmissionLoss.Bellhop
                 throw new BathymetryOutOfBoundsException("TwoDBilinearApproximation: XCoord and YCoord must be within the provided data set.  This is an interpolation routine not an extrapolation one.");
             var lat = pt.Latitude;
             var lon = pt.Longitude;
-            for (var i = 0; i < bathymetry.Samples.Latitudes.Length - 1; i++)
+            for (var i = 0; i < bathymetry.Samples.Latitudes.Count - 1; i++)
             {
                 // elevations.Latitudes go from south to north, so a southern elevations.Latitudes come before northern ones
                 if ((bathymetry.Samples.Latitudes[i] > lat) || (lat > bathymetry.Samples.Latitudes[i + 1])) continue;
-                for (var j = 0; j < bathymetry.Samples.Longitudes.Length - 1; j++)
+                for (var j = 0; j < bathymetry.Samples.Longitudes.Count - 1; j++)
                 {
                     // elevations.Longitudes go from west to east, so western elevations.Longitudes come before eastern ones
                     if ((bathymetry.Samples.Longitudes[j] > lon) || (lon > bathymetry.Samples.Longitudes[j + 1])) continue;

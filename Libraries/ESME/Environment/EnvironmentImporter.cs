@@ -224,20 +224,20 @@ namespace ESME.Environment
                         await job.CompletionTask;
                     }
                     var colormap = new DualColormap(Colormap.Summer, Colormap.Jet) {Threshold = 0};
-                    var bathysize = Math.Max(bathymetry.Samples.Longitudes.Length, bathymetry.Samples.Latitudes.Length);
+                    var bathysize = Math.Max(bathymetry.Samples.Longitudes.Count, bathymetry.Samples.Latitudes.Count);
                     var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
                     var displayValues = bathymetry.Samples;
                     if (bathysize > screenSize)
                     {
                         var scaleFactor = screenSize / bathysize;
-                        displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples, (int)(bathymetry.Samples.Longitudes.Length * scaleFactor),
-                                                                                            (int)(bathymetry.Samples.Latitudes.Length * scaleFactor));
+                        displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples, (int)(bathymetry.Samples.Longitudes.Count * scaleFactor),
+                                                                                            (int)(bathymetry.Samples.Latitudes.Count * scaleFactor));
                     }
 
                     var imageFilename = Path.GetFileNameWithoutExtension(job.DestinationFilename) + ".bmp";
                     var imagePath = Path.GetDirectoryName(job.DestinationFilename);
-                        
-                    var bitmapData = new float[displayValues.Longitudes.Length, displayValues.Latitudes.Length];
+
+                    var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
                     for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
                     var displayData = colormap.ToPixelValues(bitmapData, bathymetry.Minimum.Data, bathymetry.Maximum.Data < 0 ? bathymetry.Maximum.Data : 8000, Colors.Black);
                     BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);

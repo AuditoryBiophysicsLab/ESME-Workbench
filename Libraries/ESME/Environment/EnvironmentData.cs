@@ -16,6 +16,12 @@ namespace ESME.Environment
     [Serializable]
     public class EnvironmentData<T> : System.Collections.Generic.IList<T> where T : EarthCoordinate, new()
     {
+        public EnvironmentData()
+        {
+            _indexLockObject = new object();
+            _hashLockObject = new object();
+        }
+
         public static EnvironmentData<T> Deserialize(BinaryReader reader, Func<BinaryReader, T> readFunc)
         {
             var result = new EnvironmentData<T>();
@@ -84,7 +90,7 @@ namespace ESME.Environment
         {
             if (IsSorted || _arrayList.GetIsSorted())
             {
-                System.Diagnostics.Debug.WriteLine("{0}: Call to Sort() avoided.  List already sorted.", DateTime.Now);
+                Debug.WriteLine("{0}: Call to Sort() avoided.  List already sorted.", DateTime.Now);
                 IsSorted = true;
                 return;
             }
@@ -98,36 +104,46 @@ namespace ESME.Environment
             IsSorted = true;
         }
 
+        public T this[double longitude, double latitude]
+        {
+            get
+            {
+                if (_latitudes == null || _longitudes == null) CreateLatLonIndices();
+                if (_latitudes == null || _longitudes == null) throw new ApplicationException("_latitudes or _longitudes is null");
+                if (_latitudeHashTable == null || _longitudeHashTable == null) CreateHashTables();
+                if (_latitudeHashTable == null || _longitudeHashTable == null) throw new ApplicationException("One or both hash tables are null");
+                longitude = Math.Round(longitude, 4);
+                latitude = Math.Round(latitude, 4);
+                if (!_longitudeHashTable.Contains(longitude)) return null;
+                if (!_longitudeHashTable[longitude].Contains(latitude)) return null;
+                return _longitudeHashTable[longitude][latitude];
+            }
+        }
+
         public T this[uint lonIndex, uint latIndex]
         {
             get
             {
                 if (_twoDIndex != null) return _twoDIndex[lonIndex, latIndex];
-                System.Diagnostics.Debug.WriteLine("{0}: EnvironmentData: About to calculate 2D index", DateTime.Now);
-                Sort();
-                var arrayHasNoHoles = _arrayList.Count == (Longitudes.Length * Latitudes.Length);
-                var targetIndex = 0;
-                _twoDIndex = new T[Longitudes.Length, Latitudes.Length];
-                for (var latIdx = 0; latIdx < Latitudes.Length; latIdx++)
+                Debug.WriteLine("{0}: EnvironmentData: About to calculate 2D index", DateTime.Now);
+                if (_latitudes == null || _longitudes == null) CreateLatLonIndices();
+                if (_latitudes == null || _longitudes == null) throw new ApplicationException("_latitudes or _longitudes is null");
+                _twoDIndex = new T[_longitudes.Count, _latitudes.Count];
+                if (_latitudeHashTable == null || _longitudeHashTable == null) CreateHashTables();
+                if (_latitudeHashTable == null || _longitudeHashTable == null) throw new ApplicationException("One or both hash tables are null");
+                for (var curLatIndex = 0; curLatIndex < _latitudes.Count; curLatIndex++)
                 {
-                    var lat = Latitudes[latIdx];
-                    for (var lonIdx = 0; lonIdx < Longitudes.Length; lonIdx++)
+                    var lat = _latitudes[curLatIndex];
+                    if (!_latitudeHashTable.Contains(lat)) continue;
+                    var curLatHashBucket = _latitudeHashTable[lat];
+                    for (var curLonIndex = 0; curLonIndex < _longitudes.Count; curLonIndex++)
                     {
-                        var lon = Longitudes[lonIdx];
-                        var target = new T {Latitude = lat, Longitude = lon};
-                        if (arrayHasNoHoles)
-                        {
-                            _twoDIndex[lonIdx, latIdx] = _arrayList[targetIndex++];
-                        }
-                        else
-                        {
-                            targetIndex = _arrayList.BinarySearch(target);
-                            if (targetIndex == -1) throw new IndexOutOfRangeException(string.Format("Could not find item at {0}", target));
-                            _twoDIndex[lonIdx, latIdx] = _arrayList[targetIndex];
-                        }
+                        var lon = _longitudes[curLonIndex];
+                        if (!curLatHashBucket.Contains(lon)) continue;
+                        _twoDIndex[curLonIndex, curLatIndex] = curLatHashBucket[lon];
                     }
                 }
-                System.Diagnostics.Debug.WriteLine("{0}: EnvironmentData: 2D index calculation complete", DateTime.Now);
+                Debug.WriteLine("{0}: EnvironmentData: 2D index calculation complete", DateTime.Now);
                 return _twoDIndex[lonIndex, latIndex];
             }
         }
@@ -135,10 +151,10 @@ namespace ESME.Environment
 
         public static EnvironmentData<T> Decimate(EnvironmentData<T> source, int outputWidth, int outputHeight)
         {
-            if (outputWidth > source.Longitudes.Length || outputHeight > source.Latitudes.Length) throw new DataMisalignedException("Cannot decimate to a larger area.");
+            if (outputWidth > source.Longitudes.Count || outputHeight > source.Latitudes.Count) throw new DataMisalignedException("Cannot decimate to a larger area.");
             var result = new EnvironmentData<T>();
-            var sourceWidth = source.Longitudes.Length;
-            var sourceHeight = source.Latitudes.Length;
+            var sourceWidth = source.Longitudes.Count;
+            var sourceHeight = source.Latitudes.Count;
             var widthStep = (double)sourceWidth / outputWidth;
             var heightStep = (double)sourceHeight / outputHeight;
             var resultList = new List<T>();
@@ -268,51 +284,79 @@ namespace ESME.Environment
         {
             get
             {
-                var lonRes = CalculateResolution(Longitudes);
-                var latRes = CalculateResolution(Latitudes);
+                var lonRes = CalculateResolution(_longitudes);
+                var latRes = CalculateResolution(_latitudes);
                 return Math.Abs(lonRes - latRes) < 0.0001 ? lonRes : double.NaN;
             }
         }
 
-        public double[] Longitudes
+        [NonSerialized] HashDictionary<double, HashDictionary<double, T>> _longitudeHashTable;
+        [NonSerialized] HashDictionary<double, HashDictionary<double, T>> _latitudeHashTable;
+
+        object _hashLockObject;
+        void CreateHashTables()
         {
-            get
+            if (_latitudes == null || _longitudes == null) CreateLatLonIndices();
+            if (_latitudes == null || _longitudes == null) throw new ApplicationException("_latitudes or _longitudes is null");
+            if (_hashLockObject == null) lock (_classLockObject) _hashLockObject = new object();
+            lock (_hashLockObject)
             {
-                if (_longitudes == null) CreateLatLonIndices();
-                return _longitudes;
+                _latitudeHashTable = new HashDictionary<double, HashDictionary<double, T>>();
+                _longitudeHashTable = new HashDictionary<double, HashDictionary<double, T>>();
+                foreach (var lat in _latitudes) _latitudeHashTable[lat] = new HashDictionary<double, T>();
+                foreach (var lon in _longitudes) _longitudeHashTable[lon] = new HashDictionary<double, T>();
+                Debug.WriteLine("{0}: EnvironmentData: About to populate hash table", DateTime.Now);
+                foreach (var item in _arrayList)
+                {
+                    var lat = Math.Round(item.Latitude, 4);
+                    var lon = Math.Round(item.Longitude, 4);
+                    _latitudeHashTable[lat].Add(lon, item);
+                    _longitudeHashTable[lon].Add(lat, item);
+                }
+                Debug.WriteLine("{0}: EnvironmentData: Hash table population complete", DateTime.Now);
             }
         }
 
-        [NonSerialized]
-        double[] _longitudes;
+        object _indexLockObject;
+        static readonly object _classLockObject = new object();
 
-        public double[] Latitudes
+        void CreateLatLonIndices()
+        {
+            if (_indexLockObject == null) lock (_classLockObject) _indexLockObject = new object();
+            lock (_indexLockObject)
+            {
+                _latitudes = new HashedArrayList<double>();
+                _longitudes = new HashedArrayList<double>();
+                foreach (var point in _arrayList)
+                {
+                    _latitudes.Add(Math.Round(point.Latitude, 4));
+                    _longitudes.Add(Math.Round(point.Longitude, 4));
+                }
+                _latitudes.Sort();
+                _longitudes.Sort();
+            }
+        }
+
+        HashedArrayList<double> _latitudes;
+        HashedArrayList<double> _longitudes;
+        public HashedArrayList<double> Latitudes
         {
             get
             {
-                if (_latitudes == null) CreateLatLonIndices();
+                if (_latitudes == null || _longitudes == null) CreateLatLonIndices();
                 return _latitudes;
             }
         }
 
-        [NonSerialized]
-        double[] _latitudes;
-
-        void CreateLatLonIndices()
+        public HashedArrayList<double> Longitudes
         {
-            var latitudeList = new HashedArrayList<double>();
-            var longitudeList = new HashedArrayList<double>();
-            foreach (var point in _arrayList)
+            get
             {
-                latitudeList.Add(Math.Round(point.Latitude, 4));
-                longitudeList.Add(Math.Round(point.Longitude, 4));
+                if (_latitudes == null || _longitudes == null) CreateLatLonIndices();
+                return _longitudes;
             }
-            latitudeList.Sort();
-            longitudeList.Sort();
-            _latitudes = latitudeList.ToArray();
-            _longitudes = longitudeList.ToArray();
         }
-        
+
         /// <summary>
         /// The GeoRect that contains the field data
         /// </summary>
@@ -320,9 +364,9 @@ namespace ESME.Environment
         {
             get
             {
-                var latitudes = Latitudes;
-                var longitudes = Longitudes;
-                return new GeoRect(latitudes.Last(), latitudes.First(), longitudes.Last(), longitudes.First());
+                if (_latitudes == null || _longitudes == null) CreateLatLonIndices();
+                if (_latitudes == null || _longitudes == null) throw new ApplicationException("_latitudes or _longitudes is null");
+                return new GeoRect(_latitudes.Last(), _latitudes.First(), _longitudes.Last(), _longitudes.First());
             }
         }
 
@@ -345,6 +389,12 @@ namespace ESME.Environment
         /// <filterpriority>2</filterpriority>
         IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
         #endregion
+
+        internal class DoubleComparer : IEqualityComparer<double>
+        {
+            public bool Equals(double x, double y) { return x.Equals(y); }
+            public int GetHashCode(double obj) { return obj.GetHashCode(); }
+        }
     }
 #if false
     internal class LatLonKey : IComparer<LatLonKey>, IComparable<LatLonKey>

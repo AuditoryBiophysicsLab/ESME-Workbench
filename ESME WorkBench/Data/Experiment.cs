@@ -1222,15 +1222,15 @@ namespace OneNavyModel.Data
                 {
                     Threshold = 0,
                 };
-                var bathysize = Math.Max(Bathymetry.Samples.Longitudes.Length, Bathymetry.Samples.Latitudes.Length);
+                var bathysize = Math.Max(Bathymetry.Samples.Longitudes.Count, Bathymetry.Samples.Latitudes.Count);
                 var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
                 var displayValues = Bathymetry.Samples;
                 if (bathysize > screenSize)
                 {
                     var scaleFactor = screenSize / bathysize;
-                    displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(Bathymetry.Samples, (int)(Bathymetry.Samples.Longitudes.Length * scaleFactor), (int)(Bathymetry.Samples.Latitudes.Length * scaleFactor));
+                    displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(Bathymetry.Samples, (int)(Bathymetry.Samples.Longitudes.Count * scaleFactor), (int)(Bathymetry.Samples.Latitudes.Count * scaleFactor));
                 }
-                var bitmapData = new float[displayValues.Longitudes.Length, displayValues.Latitudes.Length];
+                var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
                 for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++)
                     for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++)
                         bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;

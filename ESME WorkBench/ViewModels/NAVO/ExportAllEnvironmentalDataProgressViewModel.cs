@@ -203,8 +203,8 @@ namespace OneNavyModel.ViewModels.NAVO
 
                 foreach (var location in requestedLocations)
                 {
-                    sedimentPoints.Add(sedimentTask.Result.Samples[location]);
-                    if (bottomLossTask.Result != null && bottomLossTask.Result.Samples != null && bottomLossTask.Result.Samples.Count > 0) bottomLossPoints.Add(bottomLossTask.Result.Samples[location]);
+                    sedimentPoints.Add(sedimentTask.Result.Samples[location.Longitude, location.Latitude]);
+                    if (bottomLossTask.Result != null && bottomLossTask.Result.Samples != null && bottomLossTask.Result.Samples.Count > 0) bottomLossPoints.Add(bottomLossTask.Result.Samples[location.Longitude, location.Latitude]);
                 }
 
                 foreach (var resolution in area.BathymetryList)

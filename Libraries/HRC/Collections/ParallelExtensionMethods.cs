@@ -12,7 +12,7 @@ namespace HRC.Collections
         public static void ParallelSort<T>(this T[] array, IComparer<T> comparer = null) where T : IComparer<T>
         {
             if (comparer == null) comparer = Comparer<T>.Default;
-            if (array.Length < 10000)
+            if (array.Length < 100000)
             {
                 Sorting.IntroSort(array, 0, array.Length, comparer);
                 return;
