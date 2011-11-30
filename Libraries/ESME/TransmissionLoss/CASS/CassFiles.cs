@@ -287,20 +287,20 @@ namespace ESME.TransmissionLoss.CASS
                 for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
                 {
                     var curLocation = new Geo(lat, lon);
-                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData[curLocation]);
-                    windSamples.Add((wind.EnvironmentData[curLocation]));
-                    sedimentPoints.Add(sedimentType.Samples[curLocation]);
+                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData.Nearest(curLocation));
+                    windSamples.Add((wind.EnvironmentData.Nearest(curLocation)));
+                    sedimentPoints.Add(sedimentType.Samples.Nearest(curLocation));
                     requestedLocations.Add(curLocation);
-                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples[curLocation]);
+                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples.Nearest(curLocation));
                 }
                 if ((lat - geoRect.North) < 0.125)
                 {
                     var curLocation = new Geo(lat, lon);
-                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData[curLocation]);
-                    windSamples.Add((wind.EnvironmentData[curLocation]));
-                    sedimentPoints.Add(sedimentType.Samples[curLocation]);
+                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData.Nearest(curLocation));
+                    windSamples.Add((wind.EnvironmentData.Nearest(curLocation)));
+                    sedimentPoints.Add(sedimentType.Samples.Nearest(curLocation));
                     requestedLocations.Add(curLocation);
-                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples[curLocation]);
+                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples.Nearest(curLocation));
                 }
             }
             if ((lon - geoRect.East) < 0.125)
@@ -308,11 +308,11 @@ namespace ESME.TransmissionLoss.CASS
                 for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
                 {
                     var curLocation = new Geo(lat, lon);
-                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData[curLocation]);
-                    windSamples.Add((wind.EnvironmentData[curLocation]));
-                    sedimentPoints.Add(sedimentType.Samples[curLocation]);
+                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData.Nearest(curLocation));
+                    windSamples.Add((wind.EnvironmentData.Nearest(curLocation)));
+                    sedimentPoints.Add(sedimentType.Samples.Nearest(curLocation));
                     requestedLocations.Add(curLocation);
-                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples[curLocation]);
+                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples.Nearest(curLocation));
                 }
             }
             WriteEnvironmentFiles(soundSpeedField.TimePeriod, requestedLocations, environmentFileName, sedimentPoints, soundSpeedProfiles, windSamples, bathymetryFileName, overlayFileName, bottomLossPoints);
