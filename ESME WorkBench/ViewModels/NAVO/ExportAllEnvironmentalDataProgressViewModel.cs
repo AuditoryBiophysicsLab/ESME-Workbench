@@ -119,7 +119,7 @@ namespace OneNavyModel.ViewModels.NAVO
             }, new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                MaxDegreeOfParallelism = -1,
+                MaxDegreeOfParallelism = -1, 
                 BoundedCapacity = -1,
                 CancellationToken = cancellationToken,
             });
@@ -203,7 +203,7 @@ namespace OneNavyModel.ViewModels.NAVO
 
                 foreach (var location in requestedLocations)
                 {
-                    sedimentPoints.Add(sedimentTask.Result.Samples[location.Longitude, location.Latitude]);
+                    sedimentPoints.Add(sedimentTask.Result.Samples.Nearest(location));
                     if (bottomLossTask.Result != null && bottomLossTask.Result.Samples != null && bottomLossTask.Result.Samples.Count > 0) bottomLossPoints.Add(bottomLossTask.Result.Samples[location.Longitude, location.Latitude]);
                 }
 
@@ -217,7 +217,7 @@ namespace OneNavyModel.ViewModels.NAVO
             }, new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                MaxDegreeOfParallelism = -1,
+                MaxDegreeOfParallelism = 1,
                 BoundedCapacity = -1,
                 CancellationToken = cancellationToken,
             });

@@ -68,6 +68,45 @@ namespace ESME.Environment
             }
         }
 
+        public T Nearest(Geo location)
+        {
+            var targetLat = location.Latitude;
+            var targetLon = location.Longitude;
+            var maxIndexRange = Math.Max(Latitudes.Count, Longitudes.Count);
+            for (var window = 0; window < maxIndexRange; window++)
+            {
+                var latRange = GetSearchRange(_latitudes, targetLat, window);
+                var lonRange = GetSearchRange(_longitudes, targetLon, window);
+                var candidatePoints = latRange.SelectMany(lat => lonRange, (lat, lon) => this[lon, lat]).Where(curPoint => curPoint != null).ToList();
+                if (candidatePoints.Count > 0)
+                    return FindNearestInSublist(location, candidatePoints, 0, candidatePoints.Count);
+            }
+            return null;
+        }
+
+        static IEnumerable<double> GetSearchRange(C5.IList<double> axis, double target, int indexRange = 0)
+        {
+            int startIndex, endIndex;
+            for (startIndex = 0; startIndex < axis.Count; startIndex++)
+                if (axis[startIndex] >= target)
+                {
+                    if (startIndex > 0) startIndex--;
+                    break;
+                }
+            for (endIndex = startIndex; endIndex < axis.Count; endIndex++)
+                if (axis[endIndex] > target) break;
+
+            startIndex = Math.Max(0, startIndex - indexRange);
+            startIndex = Math.Min(axis.Count - 1, startIndex);
+            if (startIndex < 0) Debugger.Break();
+            endIndex = Math.Max(1, endIndex + indexRange);
+            endIndex = Math.Min(axis.Count, endIndex + indexRange);
+            var result = new List<double>();
+            for (var index = startIndex; index < endIndex; index++)
+                result.Add(axis[index]);
+            return result;
+        }
+
         static T FindNearestInSublist(Geo location, System.Collections.Generic.IList<T> list, int startIndex, int itemCount)
         {
             var minDistance = double.MaxValue;
@@ -310,8 +349,8 @@ namespace ESME.Environment
                 {
                     var lat = Math.Round(item.Latitude, 4);
                     var lon = Math.Round(item.Longitude, 4);
-                    _latitudeHashTable[lat].Add(lon, item);
-                    _longitudeHashTable[lon].Add(lat, item);
+                    _latitudeHashTable[lat][lon] = item;
+                    _longitudeHashTable[lon][lat] = item;
                 }
                 Debug.WriteLine("{0}: EnvironmentData: Hash table population complete", DateTime.Now);
             }
