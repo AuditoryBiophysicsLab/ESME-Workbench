@@ -122,7 +122,6 @@ namespace ESME.Environment.NAVO
             foreach (var curMonth in NAVOConfiguration.AllMonths)
             {
                 var curMonthData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = curMonth };
-                if (curMonth == NAVOTimePeriod.December) Debugger.Break();
                 curMonthData.EnvironmentData.AddRange(from selectedFile in selectedFiles
                                                       where (selectedFile.Months != null) && (selectedFile[curMonth] != null)
                                                       select new WindSample(selectedFile.EarthCoordinate, selectedFile[curMonth].MeanWindSpeed));

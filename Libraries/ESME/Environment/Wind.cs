@@ -27,22 +27,61 @@ namespace ESME.Environment
         public static Wind Load(string filename)
         {
             //return new Wind { TimePeriods = XmlSerializer<List<TimePeriodEnvironmentData<WindSample>>>.Load(filename, ReferencedTypes) };
-            var formatter = new BinaryFormatter();
+            //var formatter = new BinaryFormatter();
+            //using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+            //{
+            //    return new Wind { TimePeriods = (List<TimePeriodEnvironmentData<WindSample>>)formatter.Deserialize(stream) };
+            //}
             using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                return new Wind { TimePeriods = (List<TimePeriodEnvironmentData<WindSample>>)formatter.Deserialize(stream) };
-            }
+            using (var reader = new BinaryReader(stream)) return Deserialize(reader);
         }
 
         public void Save(string filename)
         {
             //var serializer = new XmlSerializer<List<TimePeriodEnvironmentData<WindSample>>> { Data = TimePeriods };
             //serializer.Save(filename, ReferencedTypes);
-            var formatter = new BinaryFormatter();
+            //var formatter = new BinaryFormatter();
+            //using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
+            //{
+            //    formatter.Serialize(stream, TimePeriods);
+            //}
+            Serialize(filename);
+        }
+
+        public void Serialize(string filename)
+        {
             using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var writer = new BinaryWriter(stream))
+                Serialize(writer);
+        }
+
+        public void Serialize(BinaryWriter writer)
+        {
+            writer.Write(TimePeriods.Count);
+            foreach (var period in TimePeriods)
             {
-                formatter.Serialize(stream, TimePeriods);
+                writer.Write((int)period.TimePeriod);
+                writer.Write(period.EnvironmentData.Count);
+                foreach (var item in period.EnvironmentData)
+                    item.Serialize(writer);
             }
+        }
+
+        public static Wind Deserialize(BinaryReader reader)
+        {
+            var result = new Wind();
+            var periodCount = reader.ReadInt32();
+            for (var i = 0; i < periodCount; i++)
+            {
+                var curPeriod = new TimePeriodEnvironmentData<WindSample>
+                {
+                    TimePeriod = (NAVOTimePeriod)reader.ReadInt32(),
+                };
+                var sampleCount = reader.ReadInt32();
+                for (var j = 0; j < sampleCount; j++)
+                    curPeriod.EnvironmentData.Add(WindSample.Deserialize(reader));
+            }
+            return result;
         }
 
         /// <summary>
@@ -97,8 +136,8 @@ namespace ESME.Environment
             // Set each data point in the result set to the average of each corresponding non-null point in the source data
             foreach (var location in result.EnvironmentData)
                 location.Data = (from source in requiredSources
-                                 where source.EnvironmentData[location] != null
-                                 select source.EnvironmentData[location].Data).Average();
+                                 where source.EnvironmentData[location.Longitude, location.Latitude] != null
+                                 select source.EnvironmentData[location.Longitude, location.Latitude].Data).Average();
             return result;
         }
 
@@ -110,5 +149,18 @@ namespace ESME.Environment
     {
         public WindSample() {  }
         public WindSample(Geo location, float sample) : base(location.Latitude, location.Longitude, sample) {  }
+
+        public new void Serialize(BinaryWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write(Data);
+        }
+
+        public new static WindSample Deserialize(BinaryReader reader)
+        {
+            var result = (WindSample)Geo.Deserialize(reader);
+            result.Data = reader.ReadSingle();
+            return result;
+        }
     }
 }
