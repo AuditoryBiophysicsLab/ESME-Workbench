@@ -84,9 +84,7 @@ namespace ESME.Environment
 
         public new static BottomLossSample Deserialize(BinaryReader reader)
         {
-            var result = (BottomLossSample)Geo.Deserialize(reader);
-            result.Data = BottomLossData.Deserialize(reader);
-            return result;
+            return new BottomLossSample(Geo.Deserialize(reader), BottomLossData.Deserialize(reader));
         }
     }
 

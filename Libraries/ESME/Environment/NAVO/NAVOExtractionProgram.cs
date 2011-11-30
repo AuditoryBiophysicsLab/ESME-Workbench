@@ -27,12 +27,12 @@ namespace ESME.Environment.NAVO
             process.Start();
             if (process.HasExited)
             {
-                Debug.WriteLine("{0} {1} has completed early", DateTime.Now, Path.GetFileNameWithoutExtension(extractionProgramPath));
+                //Debug.WriteLine("{0}: {1} has completed early", DateTime.Now, Path.GetFileNameWithoutExtension(extractionProgramPath));
                 return process.StandardOutput.ReadToEnd();
             }
             try { process.PriorityClass = ProcessPriorityClass.Idle; } catch {}
             while (!process.HasExited) await TaskEx.Delay(50);
-            Debug.WriteLine("{0} {1} has completed", DateTime.Now, Path.GetFileNameWithoutExtension(extractionProgramPath));
+            //Debug.WriteLine("{0}: {1} has completed", DateTime.Now, Path.GetFileNameWithoutExtension(extractionProgramPath));
             return process.StandardOutput.ReadToEnd();
         }
     }

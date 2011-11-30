@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using ESME.NEMO;
@@ -37,7 +38,8 @@ namespace ESME.Environment.NAVO
             var totalProgress = 0f;
             var useLFBL = !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath);
             var useHFBL = !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath);
-
+            var totalPointsRequested = 0;
+            var totalPointsProcessed = 0;
             var transformBlock = new TransformBlock<EarthCoordinate, BottomLossSample>(async location =>
                 {
                     BottomLossSample curPoint = null;
@@ -81,6 +83,8 @@ namespace ESME.Environment.NAVO
                         curPoint = ParseHighFrequencyOutput(process.StandardOutput, curPoint);
                         //Debug.WriteLine(string.Format("High frequency output: {0}", process.StandardOutput.ReadToEnd()));
                     }
+                    Interlocked.Increment(ref totalPointsProcessed);
+                    if (totalPointsProcessed % 1000 == 0) Debug.WriteLine("{0} BottomLossDatabase: {1:0.0}% complete", DateTime.Now, ((float)totalPointsProcessed / (float) totalPointsRequested) * 100);
                     return curPoint;
                 },
                 new ExecutionDataflowBlockOptions
@@ -91,7 +95,10 @@ namespace ESME.Environment.NAVO
 
             var bottomLoss = new BottomLoss();
             foreach (var location in locations)
+            {
                 transformBlock.Post(location);
+                totalPointsRequested++;
+            }
 
             var batchBlock = new BatchBlock<BottomLossSample>(locations.Count);
             transformBlock.LinkTo(batchBlock);

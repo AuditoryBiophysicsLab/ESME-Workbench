@@ -80,6 +80,7 @@ namespace ESME.Environment
                 var sampleCount = reader.ReadInt32();
                 for (var j = 0; j < sampleCount; j++)
                     curPeriod.EnvironmentData.Add(WindSample.Deserialize(reader));
+                result.TimePeriods.Add(curPeriod);
             }
             return result;
         }
@@ -158,9 +159,7 @@ namespace ESME.Environment
 
         public new static WindSample Deserialize(BinaryReader reader)
         {
-            var result = (WindSample)Geo.Deserialize(reader);
-            result.Data = reader.ReadSingle();
-            return result;
+            return new WindSample(Geo.Deserialize(reader), reader.ReadSingle());
         }
     }
 }

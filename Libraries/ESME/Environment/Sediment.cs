@@ -94,9 +94,7 @@ namespace ESME.Environment
 
         public new static SedimentSample Deserialize(BinaryReader reader)
         {
-            var result = (SedimentSample)Geo.Deserialize(reader);
-            result.Data = SedimentSampleBase.Deserialize(reader);
-            return result;
+            return new SedimentSample(Geo.Deserialize(reader), SedimentSampleBase.Deserialize(reader));
         }
     }
 
