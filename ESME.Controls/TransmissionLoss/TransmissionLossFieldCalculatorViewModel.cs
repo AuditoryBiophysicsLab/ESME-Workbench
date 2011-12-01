@@ -155,7 +155,7 @@ namespace ESME.Views.TransmissionLoss
         {
             var rangeComplexes = RangeComplexes.Singleton;
             var result = rangeComplexes.ReadRangeComplexFileAsync(Path.Combine(TransmissionLossRunFile.ScenarioDataDirectory, "SimAreas.csv")).Result;
-            if (result) throw new ApplicationException("Error loading range complexes");
+            if (!result) throw new ApplicationException("Error loading range complexes");
             var rangeComplex = rangeComplexes[TransmissionLossRunFile.RangeComplexName];
             var selectedArea = rangeComplex[TransmissionLossRunFile.AreaName];
             var selectedBathymetry = selectedArea[TransmissionLossRunFile.BathymetryResolution];

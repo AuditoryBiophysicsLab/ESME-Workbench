@@ -11,7 +11,8 @@ using System.Timers;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
-using ESME.Data;    
+using ESME.Data;
+using ESME.Environment.Descriptors;
 using ESME.Views.TransmissionLoss;
 using HRC.Utility;
 using MEFedMVVM.Common;
@@ -34,6 +35,8 @@ namespace TransmissionLossCalculator
             WorkDirectories.ApplicationName = App.Name;
             ESME.Globals.AppSettings = AppSettings.Load(AppSettings.AppSettingsFile);
             ESME.Globals.AppSettings.SetDefaults();
+            var rangeComplexes = RangeComplexes.Singleton;
+            rangeComplexes.Dispatcher = Dispatcher.CurrentDispatcher;
 
             _messageBoxService = messageBoxService;
             _cpuInfo = new CpuInfo();

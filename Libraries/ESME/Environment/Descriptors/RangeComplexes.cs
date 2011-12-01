@@ -31,8 +31,26 @@ namespace ESME.Environment.Descriptors
 
         #region Private fields
         readonly object _lockObject = new object();
-        readonly Dispatcher _dispatcher;
         #endregion
+
+        #region public Dispatcher Dispatcher { get; set; }
+
+        public Dispatcher Dispatcher
+        {
+            get { return _dispatcher; }
+            set
+            {
+                if (_dispatcher == value) return;
+                _dispatcher = value;
+                NotifyPropertyChanged(DispatcherChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DispatcherChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.Dispatcher);
+        Dispatcher _dispatcher;
+
+        #endregion
+
 
         [NotNull]
         public ObservableConcurrentDictionary<string, NewRangeComplex> RangeComplexCollection { get; private set; }
