@@ -826,7 +826,7 @@ namespace ESME.Metadata
         public void ExportAnalysisPoints()
         {
             Directory.CreateDirectory(_propagationPath);
-            if (AnalysisPoints != null && AnalysisPoints.Count() > 0)
+            if (AnalysisPoints != null && AnalysisPoints.Any())
             {
                 try
                 {

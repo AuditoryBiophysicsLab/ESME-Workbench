@@ -551,29 +551,36 @@ namespace ESME.Environment.Descriptors
 
         void LoadEnvironment()
         {
+            LoadTask = null;
             if (!IsEnvironmentFullySpecified) return;
-            IsEnvironmentLoading = true;
-            var tasks = new List<Task>();
-            EnvironmentData[EnvironmentDataType.BottomLoss].Start();
-            tasks.Add(EnvironmentData[EnvironmentDataType.BottomLoss]);
-            EnvironmentData[EnvironmentDataType.Sediment].Start();
-            tasks.Add(EnvironmentData[EnvironmentDataType.Sediment]);
-            EnvironmentData[EnvironmentDataType.Wind].Start();
-            tasks.Add(EnvironmentData[EnvironmentDataType.Wind]);
-            EnvironmentData[EnvironmentDataType.Bathymetry].Start();
-            tasks.Add(EnvironmentData[EnvironmentDataType.Bathymetry]);
-            EnvironmentData[EnvironmentDataType.Salinity].Start();
-            tasks.Add(EnvironmentData[EnvironmentDataType.Salinity]);
-            EnvironmentData[EnvironmentDataType.Temperature].Start();
-            tasks.Add(EnvironmentData[EnvironmentDataType.Temperature]);
-            EnvironmentData[EnvironmentDataType.SoundSpeed].Start();
-            tasks.Add(EnvironmentData[EnvironmentDataType.SoundSpeed]);
-            TaskEx.WhenAll(tasks).ContinueWith(task =>
+            LoadTask = new Task(() =>
             {
-                IsEnvironmentLoading = false;
-                IsEnvironmentLoaded = true;
+                IsEnvironmentLoading = true;
+                var tasks = new List<Task>();
+                EnvironmentData[EnvironmentDataType.BottomLoss].Start();
+                tasks.Add(EnvironmentData[EnvironmentDataType.BottomLoss]);
+                EnvironmentData[EnvironmentDataType.Sediment].Start();
+                tasks.Add(EnvironmentData[EnvironmentDataType.Sediment]);
+                EnvironmentData[EnvironmentDataType.Wind].Start();
+                tasks.Add(EnvironmentData[EnvironmentDataType.Wind]);
+                EnvironmentData[EnvironmentDataType.Bathymetry].Start();
+                tasks.Add(EnvironmentData[EnvironmentDataType.Bathymetry]);
+                EnvironmentData[EnvironmentDataType.Salinity].Start();
+                tasks.Add(EnvironmentData[EnvironmentDataType.Salinity]);
+                EnvironmentData[EnvironmentDataType.Temperature].Start();
+                tasks.Add(EnvironmentData[EnvironmentDataType.Temperature]);
+                EnvironmentData[EnvironmentDataType.SoundSpeed].Start();
+                tasks.Add(EnvironmentData[EnvironmentDataType.SoundSpeed]);
+                TaskEx.WhenAll(tasks).ContinueWith(task =>
+                {
+                    IsEnvironmentLoading = false;
+                    IsEnvironmentLoaded = true;
+                });
             });
+            LoadTask.Start();
         }
+
+        public Task LoadTask { get; private set; }
 
         public void ClearEnvironment()
         {

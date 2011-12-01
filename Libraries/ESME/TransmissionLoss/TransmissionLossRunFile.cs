@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Xml.Serialization;
 using ESME.Environment.Descriptors;
+using ESME.Environment.NAVO;
 using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.RAM;
@@ -22,7 +23,7 @@ namespace ESME.TransmissionLoss
             TransmissionLossRunFileRadials = new List<TransmissionLossRunFileRadial>();
         }
 
-        public static TransmissionLossRunFile Create(TransmissionLossAlgorithm algorithm, SoundSource soundSource, string rangeComplexName, string bathymetryName, string environmentName, string platformName, string sourceName, string modeName, string timePeriodName, NewRangeComplex rangeComplex)
+        public static TransmissionLossRunFile Create(TransmissionLossAlgorithm algorithm, SoundSource soundSource, string rangeComplexName, RangeComplexes rangeComplexes, string platformName, string sourceName, string modeName, string timePeriodName, NewRangeComplex rangeComplex)
         {
             TransmissionLossRunFile result = null;
             string fileType = null;
@@ -62,9 +63,10 @@ namespace ESME.TransmissionLoss
                 ModeName = modeName,
                 TimePeriodName = timePeriodName,
             };
-            result.RangeComplexName = rangeComplexName;
-            result.BathymetryName = bathymetryName;
-            result.EnvironmentName = environmentName;
+            result.RangeComplexName = rangeComplexes.SelectedRangeComplex.Name;
+            result.TimePeriod = rangeComplexes.SelectedTimePeriod;
+            result.AreaName = rangeComplexes.SelectedArea.Name;
+            result.BathymetryResolution = rangeComplexes.SelectedBathymetry.Name;
             result.ReferenceLocation = new EarthCoordinate(rangeComplex.RangeComplexMetadata.Latitude, rangeComplex.RangeComplexMetadata.Longitude);
             var lat = soundSource.Latitude;
             var lon = soundSource.Longitude;
@@ -98,8 +100,9 @@ namespace ESME.TransmissionLoss
 
         public string ScenarioDataDirectory { get; set; }
         public string RangeComplexName { get; set; }
-        public string BathymetryName { get; set; }
-        public string EnvironmentName { get; set; }
+        public string AreaName { get; set; }
+        public string BathymetryResolution { get; set; }
+        public NAVOTimePeriod TimePeriod { get; set; }
         public TransmissionLossAlgorithm TransmissionLossAlgorithm { get; set; }
         public float WaterDepthIncrement { get; set; }
         public float RangeDistanceIncrement { get; set; }

@@ -8,6 +8,7 @@ using System.Windows.Input;
 using Cinch;
 using ESME.Data;
 using ESME.Environment;
+using ESME.Environment.Descriptors;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.CASS;
@@ -152,10 +153,17 @@ namespace ESME.Views.TransmissionLoss
 
         void LoadEnvironment()
         {
-            var bathymetryPath = Path.Combine(TransmissionLossRunFile.ScenarioDataDirectory, TransmissionLossRunFile.RangeComplexName, "Bathymetry", TransmissionLossRunFile.BathymetryName + ".txt");
-            var environmentPath = Path.Combine(TransmissionLossRunFile.ScenarioDataDirectory, TransmissionLossRunFile.RangeComplexName, "Environment", TransmissionLossRunFile.EnvironmentName + ".dat");
-            _environment = NAEMOEnvironmentFile.Load(environmentPath);
-            _environment.EnvironmentInformation.Bathymetry = Bathymetry.FromYXZ(bathymetryPath, -1);
+            var rangeComplexes = RangeComplexes.Singleton;
+            var result = rangeComplexes.ReadRangeComplexFileAsync(Path.Combine(TransmissionLossRunFile.ScenarioDataDirectory, "SimAreas.csv")).Result;
+            if (result) throw new ApplicationException("Error loading range complexes");
+            var rangeComplex = rangeComplexes[TransmissionLossRunFile.RangeComplexName];
+            var selectedArea = rangeComplex[TransmissionLossRunFile.AreaName];
+            var selectedBathymetry = selectedArea[TransmissionLossRunFile.BathymetryResolution];
+            rangeComplexes.SelectedRangeComplex = rangeComplex;
+            rangeComplexes.SelectedTimePeriod = TransmissionLossRunFile.TimePeriod;
+            rangeComplexes.SelectedArea = selectedArea;
+            rangeComplexes.SelectedBathymetry = selectedBathymetry;
+            rangeComplexes.LoadTask.Wait();
         }
 
         void SetupRadialViewModels()

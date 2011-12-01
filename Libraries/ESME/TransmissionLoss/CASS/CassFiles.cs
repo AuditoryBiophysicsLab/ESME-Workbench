@@ -76,8 +76,7 @@ namespace ESME.TransmissionLoss.CASS
                                         {
                                             var runFile = TransmissionLossRunFile.Create(thisModel, curSource,
                                                                                          nemoFile.Scenario.SimAreaName,
-                                                                                         Path.GetFileNameWithoutExtension(cassBathymetryFileName),
-                                                                                         Path.GetFileNameWithoutExtension(cassEnvironmentFileName),
+                                                                                         rangeComplexes,
                                                                                          platform.Name, source.Name, mode.Name,
                                                                                          timePeriod, rangeComplex);
                                             var runFileName = Path.Combine(curTimePeriodPath, runFile.Filename);

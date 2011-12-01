@@ -30,6 +30,11 @@ namespace TransmissionLossCalculator
         [ImportingConstructor]
         public TransmissionLossQueueViewModel(IMessageBoxService messageBoxService)
         {
+            AppSettings.ApplicationName = App.Name;
+            WorkDirectories.ApplicationName = App.Name;
+            ESME.Globals.AppSettings = AppSettings.Load(AppSettings.AppSettingsFile);
+            ESME.Globals.AppSettings.SetDefaults();
+
             _messageBoxService = messageBoxService;
             _cpuInfo = new CpuInfo();
             QueueViewModel = new TransmissionLossQueueCalculatorViewModel
@@ -44,9 +49,9 @@ namespace TransmissionLossCalculator
             DirectoryScanners = new WorkDirectoryScanners(WorkItems);
             _dispatcher = Dispatcher.CurrentDispatcher;
             if (Designer.IsInDesignMode) return;
-            WorkDirectories = WorkDirectories.Load(true);
-            WorkDirectories.ReloadOnFileChange = true;
-            WorkDirectories.CollectionChanged += (s, e) =>
+            ESME.Globals.WorkDirectories = WorkDirectories.Load(true);
+            ESME.Globals.WorkDirectories.ReloadOnFileChange = true;
+            ESME.Globals.WorkDirectories.CollectionChanged += (s, e) =>
             {
                 switch (e.Action)
                 {
@@ -66,11 +71,11 @@ namespace TransmissionLossCalculator
                         break;
                     case NotifyCollectionChangedAction.Reset:
                         ClearWorkDirectories();
-                        AddWorkDirectories(WorkDirectories);
+                        AddWorkDirectories(ESME.Globals.WorkDirectories);
                         break;
                 }
             };
-            AddWorkDirectories(WorkDirectories);
+            AddWorkDirectories(ESME.Globals.WorkDirectories);
             _timer = new Timer {Interval = 1000, Enabled = true, AutoReset = true};
             _timer.Elapsed += (s, e) =>
             {
@@ -101,7 +106,6 @@ namespace TransmissionLossCalculator
             NotifyPropertyChanged(CpuUtilizationChangedEventArgs);
         }
 
-        WorkDirectories WorkDirectories { get; set; }
         WorkDirectoryScanners DirectoryScanners { get; set; }
         readonly Dispatcher _dispatcher;
 
@@ -111,8 +115,8 @@ namespace TransmissionLossCalculator
             DirectoryScanners.Add(workDirectory, "*.bellhop");
             //DirectoryScanners.Add(workDirectory, "*.ramgeo");
         }
-        
-        void ClearWorkDirectories() { RemoveWorkDirectories(WorkDirectories); }
+
+        void ClearWorkDirectories() { RemoveWorkDirectories(ESME.Globals.WorkDirectories); }
         void RemoveWorkDirectories(IEnumerable<string> workDirectories) { foreach (var directory in workDirectories) RemoveWorkDirectory(directory); }
         void RemoveWorkDirectory(string workDirectory)
         {

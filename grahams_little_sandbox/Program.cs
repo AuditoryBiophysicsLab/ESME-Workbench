@@ -49,10 +49,7 @@ namespace grahams_little_sandbox
 #if true
            var bellhopInput = new BellhopRunFile
            {
-               BathymetryName = "",
-               BellhopSettings = new BellhopSettings() { },
                TransmissionLossAlgorithm = TransmissionLossAlgorithm.Bellhop,
-               EnvironmentName = "",
                Filename = "",
                Metadata = "",
                RangeComplexName = "",
