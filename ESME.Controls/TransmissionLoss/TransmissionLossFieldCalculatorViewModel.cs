@@ -195,7 +195,8 @@ namespace ESME.Views.TransmissionLoss
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
                 var curTransect = new Transect(null, transmissionLossJob.SoundSource, radialBearing,
                                                transmissionLossJob.SoundSource.Radius);
-                bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, ((Task<Bathymetry>)_rangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).Result);
+                var bathymetry = ((Task<Bathymetry>)_rangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).Result;
+                bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, bathymetry);
                 maxCalculationDepthMeters = Math.Max((float)bottomProfiles[bearingIndex].MaxDepth, maxCalculationDepthMeters);
                 soundSpeedProfiles[bearingIndex] = ((Task<SoundSpeed>)_rangeComplexes.EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[_rangeComplexes.SelectedTimePeriod].EnvironmentData[curTransect.MidPoint];
                 windSpeeds[bearingIndex] = ((Task<Wind>)_rangeComplexes.EnvironmentData[EnvironmentDataType.Wind]).Result[_rangeComplexes.SelectedTimePeriod].EnvironmentData[curTransect.MidPoint].Data;

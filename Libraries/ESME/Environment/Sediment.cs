@@ -62,7 +62,10 @@ namespace ESME.Environment
             var result = new Sediment();
             var itemCount = reader.ReadInt32();
             for (var i = 0; i < itemCount; i++)
-                result.Samples.Add(SedimentSample.Deserialize(reader));
+            {
+                var curSample = SedimentSample.Deserialize(reader);
+                if (curSample != null) result.Samples.Add(SedimentSample.Deserialize(reader));
+            }
             return result;
         }
 
@@ -94,7 +97,9 @@ namespace ESME.Environment
 
         public new static SedimentSample Deserialize(BinaryReader reader)
         {
-            return new SedimentSample(Geo.Deserialize(reader), SedimentSampleBase.Deserialize(reader));
+            var location = Geo.Deserialize(reader);
+            var sampleBase = SedimentSampleBase.Deserialize(reader);
+            return sampleBase.SampleValue == 0 ? null : new SedimentSample(location, sampleBase);
         }
     }
 

@@ -71,7 +71,8 @@ namespace ESME.TransmissionLoss.Bellhop
 
         public static double TwoDBilinearApproximation(Bathymetry bathymetry, EarthCoordinate pt)
         {
-            if (!bathymetry.Samples.GeoRect.Contains(pt)) 
+            var bounds = GeoRect.Inflate(bathymetry.Samples.GeoRect, 0.01);
+            if (!bounds.Contains(pt)) 
                 throw new BathymetryOutOfBoundsException("TwoDBilinearApproximation: XCoord and YCoord must be within the provided data set.  This is an interpolation routine not an extrapolation one.");
             var lat = pt.Latitude;
             var lon = pt.Longitude;
