@@ -6,12 +6,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Cinch;
-using ESME.Data;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
-using ESME.TransmissionLoss.CASS;
 using ESME.TransmissionLoss.RAM;
 using HRC.Utility;
 
@@ -149,39 +147,38 @@ namespace ESME.Views.TransmissionLoss
 
         static readonly PropertyChangedEventArgs TransmissionLossRunFileChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldCalculatorViewModel>(x => x.TransmissionLossRunFile);
         TransmissionLossRunFile _runFile;
-        NAEMOEnvironmentFile _environment;
 
         void LoadEnvironment()
         {
-            var rangeComplexes = RangeComplexes.Singleton;
-            var result = rangeComplexes.ReadRangeComplexFileAsync(Path.Combine(TransmissionLossRunFile.ScenarioDataDirectory, "SimAreas.csv")).Result;
+            _rangeComplexes = RangeComplexes.Singleton;
+            var result = _rangeComplexes.ReadRangeComplexFileAsync(Path.Combine(TransmissionLossRunFile.ScenarioDataDirectory, "SimAreas.csv")).Result;
             if (!result) throw new ApplicationException("Error loading range complexes");
-            var rangeComplex = rangeComplexes[TransmissionLossRunFile.RangeComplexName];
+            var rangeComplex = _rangeComplexes[TransmissionLossRunFile.RangeComplexName];
             var selectedArea = rangeComplex[TransmissionLossRunFile.AreaName];
-            var selectedBathymetry = selectedArea[TransmissionLossRunFile.BathymetryResolution];
-            rangeComplexes.SelectedRangeComplex = rangeComplex;
-            rangeComplexes.SelectedTimePeriod = TransmissionLossRunFile.TimePeriod;
-            rangeComplexes.SelectedArea = selectedArea;
-            rangeComplexes.SelectedBathymetry = selectedBathymetry;
-            rangeComplexes.LoadTask.Wait();
+            var selectedBathymetry = selectedArea[TransmissionLossRunFile.BathymetryResolution + ".bathymetry"];
+            _rangeComplexes.SelectedRangeComplex = rangeComplex;
+            _rangeComplexes.SelectedTimePeriod = TransmissionLossRunFile.TimePeriod;
+            _rangeComplexes.SelectedArea = selectedArea;
+            _rangeComplexes.SelectedBathymetry = selectedBathymetry;
+            while (!_rangeComplexes.IsEnvironmentLoaded) Thread.Sleep(500);
         }
+
+        RangeComplexes _rangeComplexes;
 
         void SetupRadialViewModels()
         {
             var rangeCellCount = 0;
-            BellhopSettings bellhopSettings;
-            RAMSettings ramSettings;
             var transmissionLossJob = TransmissionLossRunFile.TransmissionLossJob;
             float depthCellSize = 0;
             switch (TransmissionLossRunFile.TransmissionLossAlgorithm)
             {
                 case TransmissionLossAlgorithm.Bellhop:
-                    bellhopSettings = ((BellhopRunFile)TransmissionLossRunFile).BellhopSettings;
+                    var bellhopSettings = ((BellhopRunFile)TransmissionLossRunFile).BellhopSettings;
                     depthCellSize = bellhopSettings.DepthCellSize;
                     rangeCellCount = (int)Math.Round((transmissionLossJob.SoundSource.Radius / bellhopSettings.RangeCellSize)) + 1;
                     break;
                 case TransmissionLossAlgorithm.RAMGEO:
-                    ramSettings = ((RamRunFile)TransmissionLossRunFile).RAMSettings;
+                    var ramSettings = ((RamRunFile)TransmissionLossRunFile).RAMSettings;
                     depthCellSize = ramSettings.DepthStepSize;
                     break;
                 default:
@@ -198,10 +195,10 @@ namespace ESME.Views.TransmissionLoss
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
                 var curTransect = new Transect(null, transmissionLossJob.SoundSource, radialBearing,
                                                transmissionLossJob.SoundSource.Radius);
-                bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, _environment.EnvironmentInformation.Bathymetry);
+                bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, ((Task<Bathymetry>)_rangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).Result);
                 maxCalculationDepthMeters = Math.Max((float)bottomProfiles[bearingIndex].MaxDepth, maxCalculationDepthMeters);
-                soundSpeedProfiles[bearingIndex] = _environment.EnvironmentInformation.SoundSpeedField.EnvironmentData[curTransect.MidPoint];
-                windSpeeds[bearingIndex] = _environment.EnvironmentInformation.Wind.TimePeriods[0].EnvironmentData[curTransect.MidPoint].Data;
+                soundSpeedProfiles[bearingIndex] = ((Task<SoundSpeed>)_rangeComplexes.EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[_rangeComplexes.SelectedTimePeriod].EnvironmentData[curTransect.MidPoint];
+                windSpeeds[bearingIndex] = ((Task<Wind>)_rangeComplexes.EnvironmentData[EnvironmentDataType.Wind]).Result[_rangeComplexes.SelectedTimePeriod].EnvironmentData[curTransect.MidPoint].Data;
             }
             maxCalculationDepthMeters *= 1.1f;
             //maxCalculationDepthMeters = 2000;
@@ -209,7 +206,7 @@ namespace ESME.Views.TransmissionLoss
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
-                var sedimentType = _environment.EnvironmentInformation.Sediment.Samples[transmissionLossJob.SoundSource];
+                var sedimentType = ((Task<Sediment>)_rangeComplexes.EnvironmentData[EnvironmentDataType.Sediment]).Result.Samples[transmissionLossJob.SoundSource];
                 TransmissionLossRadialCalculatorViewModel radialViewModel;
                 double[,] topReflectionCoefficient = null;
                 if (!float.IsNaN(windSpeeds[bearingIndex])) topReflectionCoefficient = Bellhop.GenerateReflectionCoefficients(windSpeeds[bearingIndex], transmissionLossJob.SoundSource.AcousticProperties.Frequency);
@@ -280,7 +277,6 @@ namespace ESME.Views.TransmissionLoss
                         break;
                 }
             }
-            _environment = null;
         }
 
         #endregion

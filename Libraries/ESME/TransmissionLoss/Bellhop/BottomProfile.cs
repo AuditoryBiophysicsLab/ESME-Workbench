@@ -103,35 +103,31 @@ namespace ESME.TransmissionLoss.Bellhop
 
         static double BilinearRecursive(Geo pointToInterpolate, EarthCoordinate<float> northEast, EarthCoordinate<float> northWest, EarthCoordinate<float> southEast, EarthCoordinate<float> southWest)
         {
-            var zList = new List<double>();
+            var bounds = GeoRect.Inflate(new GeoRect(northEast.Latitude, southWest.Latitude, northEast.Longitude, southWest.Longitude), 0.01);
+            if (!bounds.Contains((EarthCoordinate)pointToInterpolate)) 
+                throw new ApplicationException("BilinearRecursive: PointToInterpolate is not within the southeast to northwest region");
 
-            if ((pointToInterpolate.Latitude < southEast.Latitude) || (northWest.Latitude < pointToInterpolate.Latitude) || (pointToInterpolate.Longitude < northWest.Longitude) || (southEast.Longitude < pointToInterpolate.Longitude)) throw new ApplicationException("BilinearRecursive: PointToInterpolate is not within the southeast to northwest region");
-            zList.Add(northEast.Data);
-            zList.Add(northWest.Data);
-            zList.Add(southEast.Data);
-            zList.Add(southWest.Data);
-            zList.Sort();
-            var zMin = zList[0];
-            var zMax = zList[3];
+            var zList = new List<double> { northEast.Data, northWest.Data, southEast.Data, southWest.Data };
+            var zMin = zList.Min();
+            var zMax = zList.Max();
 
             if ((zMax - zMin) < 1) return (zMax + zMin) / 2;
 
-            var east = new EarthCoordinate<float>((northEast + southEast) / 2, (northEast.Data + southEast.Data) / 2);
-            var west = new EarthCoordinate<float>((northWest + southWest) / 2, (northWest.Data + southWest.Data) / 2);
-            var north = new EarthCoordinate<float>((northEast + northWest) / 2, (northEast.Data + northWest.Data) / 2);
-            var south = new EarthCoordinate<float>((southEast + southWest) / 2, (southEast.Data + southWest.Data) / 2);
-            var middle = new EarthCoordinate<float>((north + south) / 2, (north.Data + south.Data) / 2);
+            var east = new EarthCoordinate<float>(northEast.MidPoint(southEast), (northEast.Data + southEast.Data) / 2);
+            var west = new EarthCoordinate<float>(northWest.MidPoint(southWest), (northWest.Data + southWest.Data) / 2);
+            var north = new EarthCoordinate<float>(northEast.MidPoint(northWest), (northEast.Data + northWest.Data) / 2);
+            var south = new EarthCoordinate<float>(southEast.MidPoint(southWest), (southEast.Data + southWest.Data) / 2);
+            var middle = new EarthCoordinate<float>(north.MidPoint(south), (north.Data + south.Data) / 2);
 
-            // if the latitude is less than or equal to the middle latitude, then the point is in the south half
-            // if the longitude is less than or equal to the middle longitude, then the point is in the southwest quadrant
-            // if the longitude is greater than the middle longitude, then the point is in the southeast quadrant
-            if (pointToInterpolate.Latitude <= middle.Latitude)
-                return pointToInterpolate.Longitude <= middle.Longitude ? BilinearRecursive(pointToInterpolate, middle, west, south, southWest) : BilinearRecursive(pointToInterpolate, east, middle, southEast, south);
+            if (pointToInterpolate.Latitude <= middle.Latitude)   // If the point's latitude is less than or equal to the middle latitude, it's in the southern half of the current region
+                return pointToInterpolate.Longitude <= middle.Longitude ? // If the point's longitude is is less than or equal to the middle longitude, it's in the western half of the current region
+                    BilinearRecursive(pointToInterpolate, middle, west, south, southWest) : // Return the southwest quadrant
+                    BilinearRecursive(pointToInterpolate, east, middle, southEast, south);  // Return the southeast quadrant
 
-            // if the latitude is greater than the middle latitude, then the point is in the north half
-            // if the longitude is less than or equal to the middle longitude, then the point is in the northwest quadrant
-            // if the longitude is greater than the middle longitude, then the point is in the northeast quadrant
-            return pointToInterpolate.Longitude <= middle.Longitude ? BilinearRecursive(pointToInterpolate, north, northWest, middle, west) : BilinearRecursive(pointToInterpolate, northEast, north, east, middle);
+            // If we get here, the point is in the northern half of the current region 
+            return pointToInterpolate.Longitude <= middle.Longitude ? // If the point's longitude is is less than or equal to the middle longitude, it's in the western half of the current region
+                BilinearRecursive(pointToInterpolate, north, northWest, middle, west) : // Return the northwest quadrant
+                BilinearRecursive(pointToInterpolate, northEast, north, east, middle);  // Return the northeast quadrant
         }
     }
 

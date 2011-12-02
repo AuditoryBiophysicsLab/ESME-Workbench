@@ -571,7 +571,7 @@ namespace ESME.Environment.Descriptors
         {
             LoadTask = null;
             if (!IsEnvironmentFullySpecified) return;
-            LoadTask = new Task(() =>
+            LoadTask = new Task(async () =>
             {
                 IsEnvironmentLoading = true;
                 var tasks = new List<Task>();
@@ -589,7 +589,7 @@ namespace ESME.Environment.Descriptors
                 tasks.Add(EnvironmentData[EnvironmentDataType.Temperature]);
                 EnvironmentData[EnvironmentDataType.SoundSpeed].Start();
                 tasks.Add(EnvironmentData[EnvironmentDataType.SoundSpeed]);
-                TaskEx.WhenAll(tasks).ContinueWith(task =>
+                await TaskEx.WhenAll(tasks).ContinueWith(task =>
                 {
                     IsEnvironmentLoading = false;
                     IsEnvironmentLoaded = true;

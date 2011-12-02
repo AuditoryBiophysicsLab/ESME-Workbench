@@ -20,6 +20,7 @@ namespace HRC.Utility
 
         public static double DivideBy(this TimeSpan numerator, TimeSpan denominator) { return numerator.TotalSeconds / denominator.TotalSeconds; }
 
+#if false
         /// <summary>
         ///   Draw a circle with the CENTER at the specified EarthCoordinate, with the radius given in pixels
         /// </summary>
@@ -47,6 +48,7 @@ namespace HRC.Utility
                 g.FillEllipse(brush, bounds);
             }
         }
+#endif
 
         /// <summary>
         ///   Set georeferenced coordinates for the current graphics object
@@ -74,6 +76,7 @@ namespace HRC.Utility
             g.Transform = mm;
         }
 
+#if false
         /// <summary>
         ///   Draw a square with the CENTER at the specified EarthCoordinate, with the radius given in pixels
         /// </summary>
@@ -108,6 +111,7 @@ namespace HRC.Utility
                 g.FillPolygon(brush, points);
             }
         }
+#endif
 
         public static void Lines(this Graphics g, EarthCoordinate[] points, float width, Color color)
         {
