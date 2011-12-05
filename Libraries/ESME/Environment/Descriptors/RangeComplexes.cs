@@ -529,11 +529,17 @@ namespace ESME.Environment.Descriptors
             const string windFilename = "data.wind";
             if (SelectedRangeComplex != null)
             {
-                SelectedEnvironment[EnvironmentDataType.BottomLoss] = SelectedRangeComplex.EnvironmentFiles[bottomLossFilename];
-                EnvironmentData[EnvironmentDataType.BottomLoss] = new Task<BottomLoss>(() => BottomLoss.Load(Path.Combine(SelectedRangeComplex.DataPath, bottomLossFilename)));
-                SelectedEnvironment[EnvironmentDataType.Sediment] = SelectedRangeComplex.EnvironmentFiles[sedimentFilename];
-                EnvironmentData[EnvironmentDataType.Sediment] = new Task<Sediment>(() => Sediment.Load(Path.Combine(SelectedRangeComplex.DataPath, sedimentFilename)));
-                if (SelectedTimePeriod != NAVOTimePeriod.Invalid)
+                if (File.Exists(Path.Combine(SelectedRangeComplex.DataPath, bottomLossFilename)))
+                {
+                    SelectedEnvironment[EnvironmentDataType.BottomLoss] = SelectedRangeComplex.EnvironmentFiles[bottomLossFilename];
+                    EnvironmentData[EnvironmentDataType.BottomLoss] = new Task<BottomLoss>(() => BottomLoss.Load(Path.Combine(SelectedRangeComplex.DataPath, bottomLossFilename)));
+                }
+                if (File.Exists(Path.Combine(SelectedRangeComplex.DataPath, sedimentFilename)))
+                {
+                    SelectedEnvironment[EnvironmentDataType.Sediment] = SelectedRangeComplex.EnvironmentFiles[sedimentFilename];
+                    EnvironmentData[EnvironmentDataType.Sediment] = new Task<Sediment>(() => Sediment.Load(Path.Combine(SelectedRangeComplex.DataPath, sedimentFilename)));
+                }
+                if (SelectedEnvironment[EnvironmentDataType.BottomLoss] != null && SelectedEnvironment[EnvironmentDataType.Sediment] != null && SelectedTimePeriod != NAVOTimePeriod.Invalid)
                 {
                     SelectedEnvironment[EnvironmentDataType.Wind] = SelectedRangeComplex.EnvironmentFiles[windFilename];
                     EnvironmentData[EnvironmentDataType.Wind] =

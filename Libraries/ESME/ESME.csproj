@@ -149,7 +149,7 @@
     <Compile Include="Environment\EnvironmentData.cs" />
     <Compile Include="Environment\EnvironmentImporter.cs" />
     <Compile Include="Environment\EnvironmentMetadata.cs" />
-    <Compile Include="Environment\NAVO\Deprecated\BottomLossDatabase.cs" />
+    <Compile Include="Environment\NAVO\BottomLossDatabase.cs" />
     <Compile Include="Environment\NAVO\Deprecated\BottomSedimentTypeDatabase.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeTable.cs" />
     <Compile Include="Environment\NAVO\Deprecated\BSTBackgroundExtractor.cs" />

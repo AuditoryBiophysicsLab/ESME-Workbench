@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using ESME.Model;
 using HRC.Navigation;
@@ -64,7 +63,7 @@ namespace ESME.Environment
             for (var i = 0; i < itemCount; i++)
             {
                 var curSample = SedimentSample.Deserialize(reader);
-                if (curSample != null) result.Samples.Add(SedimentSample.Deserialize(reader));
+                if (curSample != null) result.Samples.Add(curSample);
             }
             return result;
         }

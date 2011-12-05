@@ -53,17 +53,15 @@ namespace ESME.Environment.NAVO
             var progressStep = 100f / (((north - south) * (east - west)) + 3);
             var totalProgress = 0f;
 
-            H5GroupId highResGroup, lowResGroup;
             var fileId = H5F.open(Globals.AppSettings.NAVOConfiguration.BSTDirectory, H5F.OpenMode.ACC_RDONLY);
-            //highResGroup = H5G.open(fileId, "0.10000/G/UNCLASSIFIED/");
-            highResGroup = null;
-            lowResGroup = H5G.open(fileId, "5.00000/G/UNCLASSIFIED/");
+            //var highResGroup = H5G.open(fileId, "0.10000/G/UNCLASSIFIED/");
+            var lowResGroup = H5G.open(fileId, "5.00000/G/UNCLASSIFIED/");
             var dedupeList = new HashedArrayList<SedimentSample>();
             if (currentState != null) lock (currentState) currentState.Report("Reading sediment database");
             for (var lat = south; lat < north; lat++)
                 for (var lon = west; lon < east; lon++)
                 {
-                    var data = ReadDataset(highResGroup, lowResGroup, (int)lat, (int)lon);
+                    var data = ReadDataset(null /* highResGroup */, lowResGroup, (int)lat, (int)lon);
                     if (data != null) dedupeList.AddAll(data);
                     if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
                 }
@@ -75,7 +73,7 @@ namespace ESME.Environment.NAVO
             if (currentState != null) lock (currentState) currentState.Report("Trimming excess data");
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             if (lowResGroup != null) H5G.close(lowResGroup);
-            if (highResGroup != null) H5G.close(highResGroup);
+            //if (highResGroup != null) H5G.close(highResGroup);
             H5F.close(fileId);
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             return sediment;
@@ -105,7 +103,7 @@ namespace ESME.Environment.NAVO
             var sedimentList = new HashedArrayList<SedimentSample>();
             for (var i = 0; i < result.GetLength(0); i += sampleStepSize)
                 for (var j = 0; j < result.GetLength(1); j += sampleStepSize)
-                    sedimentList.Add(new SedimentSample(latitude + (i * resolutionStep), longitude + (j * resolutionStep), new SedimentSampleBase {SampleValue = result[i, j]}));
+                    if (result[i, j] > 0) sedimentList.Add(new SedimentSample(latitude + (i * resolutionStep), longitude + (j * resolutionStep), new SedimentSampleBase {SampleValue = result[i, j]}));
             return sedimentList;
         }
 
