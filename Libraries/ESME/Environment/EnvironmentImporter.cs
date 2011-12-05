@@ -210,49 +210,58 @@ namespace ESME.Environment
 
             if (BathymetryWorker == null) BathymetryWorker = new ActionBlock<ImportJobDescriptor>(async job =>
             {
-                BathymetryProgress.JobStarting(job);
-                if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                try
                 {
-                    //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(job.DestinationFilename)), Path.GetFileNameWithoutExtension(job.DestinationFilename), job.DataType);
-                    var bathymetry = DBDB.Extract(job.Resolution, job.GeoRect);
+                    BathymetryProgress.JobStarting(job);
                     if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                     {
-                        bathymetry.Save(job.DestinationFilename);
-                        job.SampleCount = (uint)bathymetry.Samples.Count;
-                        //job.CompletionAction(job);
-                        job.CompletionTask.Start();
-                        await job.CompletionTask;
+                        //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(job.DestinationFilename)), Path.GetFileNameWithoutExtension(job.DestinationFilename), job.DataType);
+                        var bathymetry = DBDB.Extract(job.Resolution, job.GeoRect);
+                        if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                        {
+                            bathymetry.Save(job.DestinationFilename);
+                            job.SampleCount = (uint)bathymetry.Samples.Count;
+                            //job.CompletionAction(job);
+                            job.CompletionTask.Start();
+                            await job.CompletionTask;
+                        }
+                        var colormap = new DualColormap(Colormap.Summer, Colormap.Jet) { Threshold = 0 };
+                        var bathysize = Math.Max(bathymetry.Samples.Longitudes.Count, bathymetry.Samples.Latitudes.Count);
+                        var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
+                        var displayValues = bathymetry.Samples;
+                        if (bathysize > screenSize)
+                        {
+                            var scaleFactor = screenSize / bathysize;
+                            displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples,
+                                                                                             (int)(bathymetry.Samples.Longitudes.Count * scaleFactor),
+                                                                                             (int)(bathymetry.Samples.Latitudes.Count * scaleFactor));
+                        }
+
+                        var imageFilename = Path.GetFileNameWithoutExtension(job.DestinationFilename) + ".bmp";
+                        var imagePath = Path.GetDirectoryName(job.DestinationFilename);
+
+                        var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
+                        for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
+                        var displayData = colormap.ToPixelValues(bitmapData, bathymetry.Minimum.Data, bathymetry.Maximum.Data < 0 ? bathymetry.Maximum.Data : 8000, Colors.Black);
+                        BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
+
+                        var sb = new StringBuilder();
+                        sb.AppendLine(job.Resolution.ToString());
+                        sb.AppendLine("0.0");
+                        sb.AppendLine("0.0");
+                        sb.AppendLine(job.Resolution.ToString());
+                        sb.AppendLine(bathymetry.Samples.GeoRect.West.ToString());
+                        sb.AppendLine(bathymetry.Samples.GeoRect.North.ToString());
+                        using (var writer = new StreamWriter(Path.Combine(imagePath, Path.GetFileNameWithoutExtension(imageFilename) + ".bpw"), false)) writer.Write(sb.ToString());
                     }
-                    var colormap = new DualColormap(Colormap.Summer, Colormap.Jet) {Threshold = 0};
-                    var bathysize = Math.Max(bathymetry.Samples.Longitudes.Count, bathymetry.Samples.Latitudes.Count);
-                    var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
-                    var displayValues = bathymetry.Samples;
-                    if (bathysize > screenSize)
-                    {
-                        var scaleFactor = screenSize / bathysize;
-                        displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples, (int)(bathymetry.Samples.Longitudes.Count * scaleFactor),
-                                                                                            (int)(bathymetry.Samples.Latitudes.Count * scaleFactor));
-                    }
-
-                    var imageFilename = Path.GetFileNameWithoutExtension(job.DestinationFilename) + ".bmp";
-                    var imagePath = Path.GetDirectoryName(job.DestinationFilename);
-
-                    var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
-                    for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
-                    var displayData = colormap.ToPixelValues(bitmapData, bathymetry.Minimum.Data, bathymetry.Maximum.Data < 0 ? bathymetry.Maximum.Data : 8000, Colors.Black);
-                    BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
-
-                    var sb = new StringBuilder();
-                    sb.AppendLine(job.Resolution.ToString());
-                    sb.AppendLine("0.0");
-                    sb.AppendLine("0.0");
-                    sb.AppendLine(job.Resolution.ToString());
-                    sb.AppendLine(bathymetry.Samples.GeoRect.West.ToString());
-                    sb.AppendLine(bathymetry.Samples.GeoRect.North.ToString());
-                    using (var writer = new StreamWriter(Path.Combine(imagePath, Path.GetFileNameWithoutExtension(imageFilename) + ".bpw"), false)) writer.Write(sb.ToString());
+                    //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(job.DestinationFilename)), Path.GetFileNameWithoutExtension(job.DestinationFilename), job.DataType);
+                    BathymetryProgress.JobCompleted(job);
                 }
-                //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(job.DestinationFilename)), Path.GetFileNameWithoutExtension(job.DestinationFilename), job.DataType);
-                BathymetryProgress.JobCompleted(job);
+                catch (Exception e)
+                {
+                    Debug.WriteLine("Bathymetry extraction caught exception: {0}", e.Message);
+                    throw;
+                }
             },
             new ExecutionDataflowBlockOptions
             {
