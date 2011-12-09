@@ -171,6 +171,7 @@
     <Compile Include="Navigation\Planet.cs" />
     <Compile Include="Navigation\Rotation.cs" />
     <Compile Include="Navigation\TrackPoint.cs" />
+    <Compile Include="Navigation\UTM.cs" />
     <Compile Include="NetCDF\NetCDF.cs" />
     <Compile Include="NetCDF\NcAtt.cs" />
     <Compile Include="NetCDF\NetCDFConstants.cs" />

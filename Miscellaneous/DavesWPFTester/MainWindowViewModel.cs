@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Cinch;
-using ESME;
-using ESME.Data;
-using ESME.Environment;
-using ESME.Environment.Descriptors;
-using ESME.Views.EnvironmentBuilder;
 using HRC.Navigation;
 using HRC.Services;
+using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
-using Environment = System.Environment;
 
 namespace DavesWPFTester
 {
@@ -29,450 +29,240 @@ namespace DavesWPFTester
         public MainWindowViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService,
                                    IUIVisualizerService visualizerService)
         {
-            System.Diagnostics.Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.BelowNormal;
-            _viewAwareStatus = viewAwareStatus;
-            _messageBoxService = messageBoxService;
-            _openFileService = openFileService;
-            _saveFileService = saveFileService;
-            _visualizerService = visualizerService;
-            string settings = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "One Navy Model"), "settings.xml");
-            Globals.AppSettings = AppSettings.Load(settings);
-            Initialize();
+            var leftCenter = new Geo(42.3463356, -71.0976282);
+            var rightCenter = new Geo(leftCenter.Offset(Geo.KilometersToRadians(0.03), Geo.DegreesToRadians(90)));
+            LeftMap = new GoogleMap(leftCenter, 21);
+            LeftMap.DownloadCompleted += DownloadCompleted;
+            RightMap = new GoogleMap(rightCenter, 21);
+            RightMap.DownloadCompleted += DownloadCompleted;
+            var test = new RequestValidationServiceService();
+            //test.processAOI()
         }
 
-        //public RangeComplexesViewModel RangeComplexesViewModel { get; private set; }
-        public ImportProgressCollection ImportProgressCollection { get; private set; }
-        public RangeComplexes RangeComplexes { get; set; }
-
-        #region CreateManyRangeComplexesCommand
-        SimpleCommand<object, object> _createManyTestRangeComplexes;
-
-        public SimpleCommand<object, object> CreateManyRangeComplexesCommand
+        void DownloadCompleted(object sender, EventArgs args)
         {
-            get
+            if (LeftMap.IsDownloading || RightMap.IsDownloading) return;
+            var rightPixels = new uint[RightMap.Image.PixelHeight];
+            var leftPixels = new uint[LeftMap.Image.PixelHeight];
+            Color[] leftColors, rightColors;
+            RightMap.Image.CopyPixels(new Int32Rect(0, 0, 1, RightMap.Image.PixelHeight), rightPixels, 4, 0);
+            rightColors = ToColorArray(rightPixels);
+            for (var offset = 0; offset < LeftMap.Image.PixelWidth; offset++)
             {
-                return _createManyTestRangeComplexes ??
-                       (_createManyTestRangeComplexes =
-                        new SimpleCommand<object, object>(delegate { CreateManyRangeComplexesHandler(); }));
-            }
-        }
-
-        async void CreateManyRangeComplexesHandler()
-        {
-            var coordinates = new List<Geo>
+                LeftMap.Image.CopyPixels(new Int32Rect(LeftMap.Image.PixelWidth - 1 - offset, 0, 1, LeftMap.Image.PixelHeight), leftPixels, 4, 0);
+                leftColors = ToColorArray(leftPixels);
+                var isMatch = true;
+                for (var i = 0; i < rightPixels.Length; i++)
                 {
-                    new Geo(29.3590, -79.2195),
-                    new Geo(31.1627, -79.2195),
-                    new Geo(31.1627, -81.2789),
-                    new Geo(30.1627, -81.2789),
-                    new Geo(29.3590, -80.8789),
-                    new Geo(29.3590, -79.2195),
-                };
-
-            await TaskEx.Run(async () =>
-            {
-                for (var i = 0; i < 50; i++)
-                {
-                    try
+                    if (rightPixels[i] != leftPixels[i])
                     {
-                        while (!RangeComplexes.IsEnabled) await
-                        TaskEx.Delay(10);
-                        RangeComplexes.CreateRangeComplex(string.Format("Test {0:00}", i), 0, 29.3590, -79.2195, 0, coordinates, coordinates);
-                    }
-                    catch (Exception e)
-                    {
-                        _messageBoxService.ShowError(e.Message);
+                        isMatch = false;
+                        break;
                     }
                 }
-            });
-        }
-        #endregion
-
-        #region DeleteManyRangeComplexesCommand
-        SimpleCommand<object, object> _deleteManyRangeComplexes;
-
-        public SimpleCommand<object, object> DeleteManyRangeComplexesCommand
-        {
-            get
-            {
-                return _deleteManyRangeComplexes ??
-                       (_deleteManyRangeComplexes =
-                        new SimpleCommand<object, object>(delegate { DeleteManyRangeComplexesHandler(); }));
+                if (isMatch) Debugger.Break();
             }
         }
 
-        async void DeleteManyRangeComplexesHandler()
+        Color[] ToColorArray(IList<uint> pixelValues)
         {
-            await TaskEx.Run(async () =>
+            var result = new Color[pixelValues.Count];
+            for (var i = 0; i < pixelValues.Count; i++)
             {
-                for (var i = 0; i < 50; i++)
+                var a = (byte)(pixelValues[i] >> 24);
+                var r = (byte)(pixelValues[i] >> 16);
+                var g = (byte)(pixelValues[i] >> 8);
+                var b = (byte)pixelValues[i];
+                result[i] = Color.FromArgb(a, r, g, b);
+            }
+            return result;
+        }
+
+        #region public GoogleMap LeftMap { get; set; }
+
+        public GoogleMap LeftMap
+        {
+            get { return _leftMap; }
+            set
+            {
+                if (_leftMap == value) return;
+                _leftMap = value;
+                NotifyPropertyChanged(LeftMapChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LeftMapChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.LeftMap);
+        GoogleMap _leftMap;
+
+        #endregion
+
+        #region public GoogleMap RightMap { get; set; }
+
+        public GoogleMap RightMap
+        {
+            get { return _rightMap; }
+            set
+            {
+                if (_rightMap == value) return;
+                _rightMap = value;
+                NotifyPropertyChanged(RightMapChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RightMapChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.RightMap);
+        GoogleMap _rightMap;
+
+        #endregion
+    }
+
+    public class GoogleMap : PropertyChangedBase
+    {
+        const int MaxImageSize = 640;
+        const int TrimHeight = 30;  // Trim off the Google logo at the bottom to allow edge matching to have a fighting chance to work
+
+        const int PixelWidth = MaxImageSize - 1;
+        const int PixelHeight = MaxImageSize - 1;
+
+        public GoogleMap(Geo center, int zoomLevel) 
+        {
+            Location = center;
+            ZoomLevel = zoomLevel;
+            var rawImage = new BitmapImage(new Uri(string.Format(@"http://maps.googleapis.com/maps/api/staticmap?center={0:0.000000},{1:0.000000}&zoom={2}&size=639x639&maptype=hybrid&format=png32&feature:all%7Clement:labels%7Cvisibility:off&sensor=false", Location.Latitude, Location.Longitude, ZoomLevel)));
+            IsDownloading = true;
+            rawImage.DownloadCompleted += (s, e) =>
+            {
+                Image = new CroppedBitmap(rawImage, new Int32Rect(0, 0, PixelWidth, PixelHeight - TrimHeight));
+                LocationX = MaxImageSize / 2;
+                LocationY = (MaxImageSize - TrimHeight) / 2;
+                IsDownloading = false;
+                OnDownloadCompleted();
+#if true
+                using (var fileStream = new FileStream(string.Format("image{0:0.000000}_{1:0.000000}.jpg", center.Latitude, center.Longitude), FileMode.Create))
                 {
-                    try
-                    {
-                        while (!RangeComplexes.IsEnabled) await
-                        TaskEx.Delay(10);
-                        RangeComplexes.RemoveRangeComplex(string.Format("Test {0:00}", i));
-                    }
-                    catch (ArgumentException) { }
-                    catch (KeyNotFoundException) { }
-                    catch (Exception e)
-                    {
-                        _messageBoxService.ShowError(e.Message);
-                    }
+                    var encoder = new JpegBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(Image));
+                    encoder.QualityLevel = 100;
+                    encoder.Save(fileStream);
                 }
-            });
-        }
-        #endregion
-
-        #region CreateManyAreasCommand
-        SimpleCommand<object, object> _createManyAreas;
-
-        public SimpleCommand<object, object> CreateManyAreasCommand
-        {
-            get
-            {
-                return _createManyAreas ??
-                       (_createManyAreas =
-                        new SimpleCommand<object, object>(delegate { CreateManyAreasHandler(); }));
-            }
-        }
-
-        async void CreateManyAreasHandler()
-        {
-            var coordinates = new List<Geo>
-                {
-                    new Geo(29.3590, -79.2195),
-                    new Geo(31.1627, -79.2195),
-                    new Geo(31.1627, -81.2789),
-                    new Geo(30.1627, -81.2789),
-                    new Geo(29.3590, -80.8789),
-                    new Geo(29.3590, -79.2195),
-                };
-
-            for (var i = 0; i < 50; i++)
-            {
-                try
-                {
-                    var newAreaName = string.Format("Test {0:00}", i);
-                    while (!RangeComplexes.IsEnabled) await TaskEx.Delay(10);
-                    RangeComplexes[newAreaName].CreateArea(newAreaName, coordinates);
-                } catch {}
-            }
-        }
-        #endregion
-
-        #region RemoveManyAreasCommand
-        public SimpleCommand<object, object> RemoveManyAreasCommand
-        {
-            get { return _removeManyAreas ?? (_removeManyAreas = new SimpleCommand<object, object>(delegate { return IsRemoveManyAreasCommandEnabled; }, delegate { RemoveManyAreasHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _removeManyAreas;
-
-        bool IsRemoveManyAreasCommandEnabled
-        {
-            get { return true; }
-        }
-
-        async void RemoveManyAreasHandler()
-        {
-            for (var i = 0; i < 50; i++)
-            {
-                try
-                {
-                    var oldAreaName = string.Format("Test {0:00}", i);
-                    while (!RangeComplexes.IsEnabled) await TaskEx.Delay(10);
-                    RangeComplexes[oldAreaName].RemoveArea(oldAreaName);
-                }
-                catch { }
-            }
-
-        }
-        #endregion
-
-        #region CreateTestRangeComplexCommand
-        SimpleCommand<object, object> _addDave;
-
-        public SimpleCommand<object, object> CreateTestRangeComplexCommand
-        {
-            get { return _addDave ?? (_addDave = new SimpleCommand<object, object>(delegate { CreateTestRangeComplexHandler(); })); }
-        }
-
-        async void CreateTestRangeComplexHandler()
-        {
-            var coordinates = new List<Geo>
-            {
-                new Geo(29.3590, -79.2195),
-                new Geo(31.1627, -79.2195),
-                new Geo(31.1627, -81.2789),
-                new Geo(30.1627, -81.2789),
-                new Geo(29.3590, -80.8789),
-                new Geo(29.3590, -79.2195),
+#endif
             };
-            try
+        }
+
+        #region public Geo Location { get; set; }
+
+        public Geo Location
+        {
+            get { return _location; }
+            private set
             {
-                while (!RangeComplexes.IsEnabled) await TaskEx.Delay(10);
-                RangeComplexes.CreateRangeComplex("Test", 0, 29.3590, -79.2195, 0, coordinates, coordinates);
-            }
-            catch (Exception e)
-            {
-                _messageBoxService.ShowError(e.Message);
+                if (_location == value) return;
+                _location = value;
+                NotifyPropertyChanged(CenterChangedEventArgs);
             }
         }
+
+        static readonly PropertyChangedEventArgs CenterChangedEventArgs = ObservableHelper.CreateArgs<GoogleMap>(x => x.Location);
+        Geo _location;
+
         #endregion
 
-        #region RemoveTestRangeComplexCommand
-        SimpleCommand<object, object> _removeTestRangeComplex;
+        #region public int LocationX { get; set; }
 
-        public SimpleCommand<object, object> RemoveTestRangeComplexCommand
+        public int LocationX
         {
-            get { return _removeTestRangeComplex ?? (_removeTestRangeComplex = new SimpleCommand<object, object>(delegate { RemoveTestRangeComplexHandler(); })); }
-        }
-
-        async void RemoveTestRangeComplexHandler()
-        {
-            try
+            get { return _locationX; }
+            set
             {
-                while (!RangeComplexes.IsEnabled) await TaskEx.Delay(10);
-                RangeComplexes.RemoveRangeComplex("Test");
-            }
-            catch (KeyNotFoundException) { }
-            catch (Exception e)
-            {
-                _messageBoxService.ShowError(e.Message);
+                if (_locationX == value) return;
+                _locationX = value;
+                NotifyPropertyChanged(LocationXChangedEventArgs);
             }
         }
+
+        static readonly PropertyChangedEventArgs LocationXChangedEventArgs = ObservableHelper.CreateArgs<GoogleMap>(x => x.LocationX);
+        int _locationX;
+
         #endregion
 
-        #region CreateTestAreaCommand
-        SimpleCommand<object, object> _addTestArea;
+        #region public int LocationY { get; set; }
 
-        public SimpleCommand<object, object> CreateTestAreaCommand
+        public int LocationY
         {
-            get { return _addTestArea ?? (_addTestArea = new SimpleCommand<object, object>(delegate { AddTestAreaHandler(); })); }
-        }
-
-        async void AddTestAreaHandler()
-        {
-            var coordinates = new List<Geo>
+            get { return _locationY; }
+            set
             {
-                new Geo(29.3590, -79.2195),
-                new Geo(31.1627, -79.2195),
-                new Geo(31.1627, -81.2789),
-                new Geo(30.1627, -81.2789),
-                new Geo(29.3590, -80.8789),
-                new Geo(29.3590, -79.2195),
-            };
-            try
-            {
-                while (RangeComplexes.RangeComplexCollection["Test"].IsLoading) await TaskEx.Delay(10);
-                RangeComplexes.RangeComplexCollection["Test"].CreateArea("Test", coordinates);
-            }
-            catch (Exception e)
-            {
-                _messageBoxService.ShowError(e.Message);
+                if (_locationY == value) return;
+                _locationY = value;
+                NotifyPropertyChanged(LocationYChangedEventArgs);
             }
         }
+
+        static readonly PropertyChangedEventArgs LocationYChangedEventArgs = ObservableHelper.CreateArgs<GoogleMap>(x => x.LocationY);
+        int _locationY;
+
         #endregion
 
-        #region RemoveTestAreaCommand
-        SimpleCommand<object, object> _removeTestArea;
+        #region public int ZoomLevel { get; set; }
 
-        public SimpleCommand<object, object> RemoveTestAreaCommand
+        public int ZoomLevel
         {
-            get { return _removeTestArea ?? (_removeTestArea = new SimpleCommand<object, object>(delegate { RemoveTestAreaHandler(); })); }
-        }
-
-        async void RemoveTestAreaHandler()
-        {
-            try
+            get { return _zoomLevel; }
+            private set
             {
-                while (RangeComplexes.RangeComplexCollection["Test"].IsLoading) await TaskEx.Delay(10);
-                RangeComplexes.RangeComplexCollection["Test"].RemoveArea("Test");
-            }
-            catch (Exception e)
-            {
-                _messageBoxService.ShowError(e.Message);
+                if (_zoomLevel == value) return;
+                _zoomLevel = value;
+                NotifyPropertyChanged(ZoomLevelChangedEventArgs);
             }
         }
+
+        static readonly PropertyChangedEventArgs ZoomLevelChangedEventArgs = ObservableHelper.CreateArgs<GoogleMap>(x => x.ZoomLevel);
+        int _zoomLevel;
+
         #endregion
 
-        #region DumpTestAreaCommand
-        SimpleCommand<object, object> _dumpTestArea;
+        #region public CroppedBitmap Image { get; set; }
 
-        public SimpleCommand<object, object> DumpTestAreaCommand
+        public CroppedBitmap Image
         {
-            get { return _dumpTestArea ?? (_dumpTestArea = new SimpleCommand<object, object>(delegate { DumpTestAreaHandler(); })); }
-        }
-
-        void DumpTestAreaHandler()
-        {
-            try
+            get { return _image; }
+            set
             {
-                RangeComplexes.Dump();
-            }
-            catch (Exception e)
-            {
-                _messageBoxService.ShowError(e.Message);
+                if (_image == value) return;
+                _image = value;
+                NotifyPropertyChanged(CroppedImageChangedEventArgs);
             }
         }
+
+        static readonly PropertyChangedEventArgs CroppedImageChangedEventArgs = ObservableHelper.CreateArgs<GoogleMap>(x => x.Image);
+        CroppedBitmap _image;
+
         #endregion
 
-        #region ImportTestBathymetryCommand
-        public SimpleCommand<object, object> ImportTestBathymetryCommand
-        {
-            get { return _importTestBathymetry ?? (_importTestBathymetry = new SimpleCommand<object, object>(delegate { return IsImportTestBathymetryCommandEnabled; }, delegate { ImportTestBathymetryHandler(); })); }
-        }
+        #region public bool IsDownloading { get; set; }
 
-        SimpleCommand<object, object> _importTestBathymetry;
-
-        bool IsImportTestBathymetryCommandEnabled
+        public bool IsDownloading
         {
-            get { return true; }
-        }
-
-        void ImportTestBathymetryHandler()
-        {
-            try
+            get { return _isDownloading; }
+            private set
             {
-                RangeComplexes["Jacksonville"].AreaCollection["Jax_Ops_Area"].ImportBathymetry(RangeComplexes["Jacksonville"].AreaCollection["Jax_Ops_Area"]["0.50min.bathymetry"]);
-            }
-            catch (Exception e)
-            {
-                _messageBoxService.ShowError(e.Message);
+                if (_isDownloading == value) return;
+                _isDownloading = value;
+                NotifyPropertyChanged(IsDownloadingChangedEventArgs);
             }
         }
+
+        static readonly PropertyChangedEventArgs IsDownloadingChangedEventArgs = ObservableHelper.CreateArgs<GoogleMap>(x => x.IsDownloading);
+        bool _isDownloading;
+
         #endregion
 
-        #region RemoveTestBathymetryCommand
-        public SimpleCommand<object, object> RemoveTestBathymetryCommand
+
+        public event EventHandler DownloadCompleted;
+        protected virtual void OnDownloadCompleted()
         {
-            get { return _removeTestBathymetry ?? (_removeTestBathymetry = new SimpleCommand<object, object>(delegate { return IsRemoveTestBathymetryCommandEnabled; }, delegate { RemoveTestBathymetryHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _removeTestBathymetry;
-
-        bool IsRemoveTestBathymetryCommandEnabled
-        {
-            get { return true; }
-        }
-
-        void RemoveTestBathymetryHandler()
-        {
-            try
-            {
-                RangeComplexes["Jacksonville"].AreaCollection["Jax_Ops_Area"].RemoveBathymetry(RangeComplexes["Jacksonville"].AreaCollection["Jax_Ops_Area"]["0.50min.bathymetry"]);
-            }
-            catch (Exception e)
-            {
-                _messageBoxService.ShowError(e.Message);
-            }
-        }
-        #endregion
-
-        #region LoadTestBathymetryCommand
-        public SimpleCommand<object, object> LoadTestBathymetryCommand
-        {
-            get { return _loadTestBathymetry ?? (_loadTestBathymetry = new SimpleCommand<object, object>(delegate { return IsLoadTestBathymetryCommandEnabled; }, delegate { LoadTestBathymetryHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _loadTestBathymetry;
-
-        bool IsLoadTestBathymetryCommandEnabled
-        {
-            get { return true; }
-        }
-
-        void LoadTestBathymetryHandler()
-        {
-            try
-            {
-                RangeComplexes["Jacksonville"].AreaCollection["Jax_Ops_Area"]["0.50min.bathymetry"].GetMyDataAsync();
-            }
-            catch (Exception e)
-            {
-                _messageBoxService.ShowError(e.Message);
-            }
-        }
-        #endregion
-
-        #region ClearTestBathymetryCommand
-        public SimpleCommand<object, object> ClearTestBathymetryCommand
-        {
-            get { return _clearTestBathymetry ?? (_clearTestBathymetry = new SimpleCommand<object, object>(delegate { return IsClearTestBathymetryCommandEnabled; }, delegate { ClearTestBathymetryHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _clearTestBathymetry;
-
-        bool IsClearTestBathymetryCommandEnabled
-        {
-            get { return true; }
-        }
-
-        void ClearTestBathymetryHandler()
-        {
-            RangeComplexes["Jacksonville"].AreaCollection["Jax_Ops_Area"]["0.50min.bathymetry"].Reset();
-        }
-        #endregion
-
-        #region LoadEnvironmentCommand
-        public SimpleCommand<object, object> LoadEnvironmentCommand
-        {
-            get { return _loadEnvironment ?? (_loadEnvironment = new SimpleCommand<object, object>(delegate { return IsLoadEnvironmentCommandEnabled; }, delegate { LoadEnvironmentHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _loadEnvironment;
-
-        bool IsLoadEnvironmentCommandEnabled
-        {
-            get { return true; }
-        }
-
-        void LoadEnvironmentHandler()
-        {
-            if (RangeComplexes.SelectedBathymetry != BathymetryFile.None) RangeComplexes.SelectedBathymetry.GetMyDataAsync();
-            if (RangeComplexes.SelectedWind != WindFile.None) RangeComplexes.SelectedWind.GetMyDataAsync();
-            if (RangeComplexes.SelectedBottomLoss != BottomLossFile.None) RangeComplexes.SelectedBottomLoss.GetMyDataAsync();
-            if (RangeComplexes.SelectedSediment != SedimentFile.None) RangeComplexes.SelectedSediment.GetMyDataAsync();
-            if (RangeComplexes.SelectedSoundSpeed != SoundSpeedFile.None) RangeComplexes.SelectedSoundSpeed.GetMyDataAsync();
-        }
-        #endregion
-
-        #region ClearEnvironmentCommand
-        public SimpleCommand<object, object> ClearEnvironmentCommand
-        {
-            get { return _clearEnvironment ?? (_clearEnvironment = new SimpleCommand<object, object>(delegate { return IsClearEnvironmentCommandEnabled; }, delegate { ClearEnvironmentHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _clearEnvironment;
-
-        bool IsClearEnvironmentCommandEnabled
-        {
-            get { return true; }
-        }
-
-        void ClearEnvironmentHandler()
-        {
-            if (RangeComplexes.SelectedBathymetry != BathymetryFile.None) RangeComplexes.SelectedBathymetry.Reset();
-            if (RangeComplexes.SelectedWind != WindFile.None) RangeComplexes.SelectedWind.Reset();
-            if (RangeComplexes.SelectedBottomLoss != BottomLossFile.None) RangeComplexes.SelectedBottomLoss.Reset();
-            if (RangeComplexes.SelectedSediment != SedimentFile.None) RangeComplexes.SelectedSediment.Reset();
-            if (RangeComplexes.SelectedSoundSpeed != SoundSpeedFile.None) RangeComplexes.SelectedSoundSpeed.Reset();
-        }
-        #endregion
-        async void Initialize()
-        {
-            RangeComplexes = RangeComplexes.Singleton;
-            //RangeComplexesViewModel = new RangeComplexesViewModel(RangeComplexes.Singleton);
-            ImportProgressCollection = ImportProgressCollection.Singleton;
-            try
-            {
-                await RangeComplexes.ReadRangeComplexFileAsync(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
-            }
-            catch (Exception e)
-            {
-                _messageBoxService.ShowError(e.Message);
-            }
+            if (DownloadCompleted != null)
+                DownloadCompleted(this, new EventArgs());
         }
     }
+
 }
