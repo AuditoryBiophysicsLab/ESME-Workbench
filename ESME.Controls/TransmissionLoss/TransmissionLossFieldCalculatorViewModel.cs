@@ -5,23 +5,28 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Cinch;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.RAM;
+using HRC.Collections;
 using HRC.Utility;
 
 namespace ESME.Views.TransmissionLoss
 {
     public class TransmissionLossFieldCalculatorViewModel : ViewModelBase
     {
+        Dispatcher _dispatcher;
+
         #region public constructor
 
-        public TransmissionLossFieldCalculatorViewModel(string runfileName)
+        public TransmissionLossFieldCalculatorViewModel(string runfileName, Dispatcher dispatcher)
         {
             Status = "Loading";
+            _dispatcher = dispatcher;
             RunfileName = runfileName;
             TransmissionLossRunFile = TransmissionLossRunFile.Load(RunfileName);
             Status = "Waiting";
@@ -150,20 +155,16 @@ namespace ESME.Views.TransmissionLoss
 
         void LoadEnvironment()
         {
-            _rangeComplexes = RangeComplexes.Singleton;
-            var result = _rangeComplexes.ReadRangeComplexFileAsync(Path.Combine(TransmissionLossRunFile.ScenarioDataDirectory, "SimAreas.csv")).Result;
-            if (!result) throw new ApplicationException("Error loading range complexes");
-            var rangeComplex = _rangeComplexes[TransmissionLossRunFile.RangeComplexName];
-            var selectedArea = rangeComplex[TransmissionLossRunFile.AreaName];
-            var selectedBathymetry = selectedArea[TransmissionLossRunFile.BathymetryResolution + ".bathymetry"];
-            _rangeComplexes.SelectedRangeComplex = rangeComplex;
-            _rangeComplexes.SelectedTimePeriod = TransmissionLossRunFile.TimePeriod;
-            _rangeComplexes.SelectedArea = selectedArea;
-            _rangeComplexes.SelectedBathymetry = selectedBathymetry;
-            while (!_rangeComplexes.IsEnvironmentLoaded) Thread.Sleep(500);
+            _environmentData = RangeComplexes.GetEnvironment(_dispatcher,
+                                                             TransmissionLossRunFile.ScenarioDataDirectory,
+                                                             TransmissionLossRunFile.RangeComplexName,
+                                                             TransmissionLossRunFile.TimePeriod,
+                                                             TransmissionLossRunFile.AreaName,
+                                                             TransmissionLossRunFile.BathymetryResolution + ".bathymetry");
+            TaskEx.WhenAll(_environmentData.Values).Wait();
         }
 
-        RangeComplexes _rangeComplexes;
+        ObservableConcurrentDictionary<EnvironmentDataType, Task> _environmentData;
 
         void SetupRadialViewModels()
         {
@@ -195,11 +196,11 @@ namespace ESME.Views.TransmissionLoss
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
                 var curTransect = new Transect(null, transmissionLossJob.SoundSource, radialBearing,
                                                transmissionLossJob.SoundSource.Radius);
-                var bathymetry = ((Task<Bathymetry>)_rangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).Result;
+                var bathymetry = ((Task<Bathymetry>)_environmentData[EnvironmentDataType.Bathymetry]).Result;
                 bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, bathymetry);
                 maxCalculationDepthMeters = Math.Max((float)bottomProfiles[bearingIndex].MaxDepth, maxCalculationDepthMeters);
-                soundSpeedProfiles[bearingIndex] = ((Task<SoundSpeed>)_rangeComplexes.EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[_rangeComplexes.SelectedTimePeriod].EnvironmentData[curTransect.MidPoint];
-                windSpeeds[bearingIndex] = ((Task<Wind>)_rangeComplexes.EnvironmentData[EnvironmentDataType.Wind]).Result[_rangeComplexes.SelectedTimePeriod].EnvironmentData[curTransect.MidPoint].Data;
+                soundSpeedProfiles[bearingIndex] = ((Task<SoundSpeed>)_environmentData[EnvironmentDataType.SoundSpeed]).Result[TransmissionLossRunFile.TimePeriod].EnvironmentData[curTransect.MidPoint];
+                windSpeeds[bearingIndex] = ((Task<Wind>)_environmentData[EnvironmentDataType.Wind]).Result[TransmissionLossRunFile.TimePeriod].EnvironmentData[curTransect.MidPoint].Data;
             }
             maxCalculationDepthMeters *= 1.1f;
             //maxCalculationDepthMeters = 2000;
@@ -207,7 +208,7 @@ namespace ESME.Views.TransmissionLoss
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
-                var sedimentType = ((Task<Sediment>)_rangeComplexes.EnvironmentData[EnvironmentDataType.Sediment]).Result.Samples[transmissionLossJob.SoundSource];
+                var sedimentType = ((Task<Sediment>)_environmentData[EnvironmentDataType.Sediment]).Result.Samples[transmissionLossJob.SoundSource];
                 TransmissionLossRadialCalculatorViewModel radialViewModel;
                 double[,] topReflectionCoefficient = null;
                 if (!float.IsNaN(windSpeeds[bearingIndex])) topReflectionCoefficient = Bellhop.GenerateReflectionCoefficients(windSpeeds[bearingIndex], transmissionLossJob.SoundSource.AcousticProperties.Frequency);

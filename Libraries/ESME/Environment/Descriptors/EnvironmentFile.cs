@@ -284,7 +284,9 @@ namespace ESME.Environment.Descriptors
                     monthlySoundSpeeds.Add(soundSpeedFields[month].SoundSpeedField);
                 }
                 Debug.WriteLine("{0} SSP: Computing average sound speed for {1}", DateTime.Now, timePeriod);
-                return SoundSpeed.Average(monthlySoundSpeeds, new List<NAVOTimePeriod> { timePeriod });
+                var result = SoundSpeed.Average(monthlySoundSpeeds, new List<NAVOTimePeriod> { timePeriod });
+                Debug.WriteLine("{0} SSP: Returning average sound speed for {1}", DateTime.Now, timePeriod);
+                return result;
             });
             return continuation.Result;            
         }

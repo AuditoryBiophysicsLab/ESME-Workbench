@@ -35,8 +35,6 @@ namespace TransmissionLossCalculator
             WorkDirectories.ApplicationName = App.Name;
             ESME.Globals.AppSettings = AppSettings.Load(AppSettings.AppSettingsFile);
             ESME.Globals.AppSettings.SetDefaults();
-            var rangeComplexes = RangeComplexes.Singleton;
-            rangeComplexes.Dispatcher = Dispatcher.CurrentDispatcher;
 
             _messageBoxService = messageBoxService;
             _cpuInfo = new CpuInfo();
@@ -174,7 +172,7 @@ namespace TransmissionLossCalculator
                             if (QueueViewModel.FieldCalculatorViewModels.Any(curJob => curJob.TransmissionLossRunFile.Filename == runFileName))
                                 doCalculation = false;
                             if (!doCalculation) continue;
-                            QueueViewModel.FieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(runFileName));
+                            QueueViewModel.FieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(runFileName, _dispatcher));
                         }
                     break;
                 case NotifyCollectionChangedAction.Move:

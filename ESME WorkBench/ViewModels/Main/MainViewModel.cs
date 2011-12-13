@@ -212,7 +212,7 @@ namespace OneNavyModel.ViewModels.Main
             {
                 try
                 {
-                    await RangeComplexes.ReadRangeComplexFileAsync(Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+                    await RangeComplexes.ReadRangeComplexFile(Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
                 }
                 catch (AggregateException ae)
                 {

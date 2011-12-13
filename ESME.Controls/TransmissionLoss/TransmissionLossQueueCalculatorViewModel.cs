@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss.CASS;
 using HRC.Utility;

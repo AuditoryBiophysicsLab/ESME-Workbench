@@ -22,9 +22,10 @@ namespace ESME.Environment.Descriptors
 {
     public class RangeComplexes : ViewModelBase, IEnumerable<KeyValuePair<string, NewRangeComplex>>, INotifyCollectionChanged
     {
-        RangeComplexes()
+        RangeComplexes(Dispatcher dispatcher = null)
         {
-            _dispatcher = Dispatcher.CurrentDispatcher;
+            _dispatcher = dispatcher ?? Dispatcher.CurrentDispatcher;
+
             RangeComplexCollection = new ObservableConcurrentDictionary<string, NewRangeComplex>();
             RangeComplexList = ObservableList<NewRangeComplex>.FromObservableConcurrentDictionary(RangeComplexCollection, kvp => kvp.Value, (kvp, rc) => kvp.Value == rc);
         }
@@ -57,7 +58,7 @@ namespace ESME.Environment.Descriptors
 
         public ObservableList<NewRangeComplex> RangeComplexList { get; private set; }
 
-        public Task<bool> ReadRangeComplexFileAsync(string fileName)
+        public Task<bool> ReadRangeComplexFile(string fileName)
         {
             IsEnabled = false;
             _rangeComplexFile = fileName;
@@ -638,6 +639,61 @@ namespace ESME.Environment.Descriptors
             {
                 foreach (var e in ae.InnerExceptions) Debug.WriteLine("{0}: Error hooking {0}: {1}", DateTime.Now, dataType, e.Message);
             }
+        }
+
+        public static ObservableConcurrentDictionary<EnvironmentDataType, Task> GetEnvironment(Dispatcher dispatcher, string simAreaPath, string rangeComplexName, NAVOTimePeriod timePeriod, string areaName, string bathymetryResolution)
+        {
+            var rangeComplexes = new RangeComplexes(dispatcher);
+            var rangeComplexFile = Path.Combine(simAreaPath, "SimAreas.csv");
+            var readResult = rangeComplexes.ReadRangeComplexFile(rangeComplexFile).Result;
+            if (!readResult) throw new ApplicationException(string.Format("Error reading range complex file {0}", rangeComplexFile));
+
+            if (string.IsNullOrEmpty(rangeComplexName)) throw new ApplicationException("Range complex name cannot be null or empty");
+            if (string.IsNullOrEmpty(areaName)) throw new ApplicationException("Area name cannot be null or empty");
+            if (string.IsNullOrEmpty(bathymetryResolution)) throw new ApplicationException("Bathymetry resolution string cannot be null or empty");
+            if (timePeriod < NAVOTimePeriod.January || timePeriod > NAVOTimePeriod.Cold) throw new ApplicationException("Time period is invalid");
+            if (!rangeComplexes.RangeComplexCollection.ContainsKey(rangeComplexName)) throw new ApplicationException(string.Format("Specified range complex {0} does not exist", rangeComplexName));
+            var rangeComplex = rangeComplexes.RangeComplexCollection[rangeComplexName];
+            if (!rangeComplex.AreaCollection.ContainsKey(areaName)) throw new ApplicationException(string.Format("Specified range complex {0} does not contain an area named {1}", rangeComplexName, areaName));
+            var area = rangeComplex[areaName];
+            if (area[bathymetryResolution] == null) throw new ApplicationException(string.Format("Specified range complex {0} area {1} does not contain bathymetry data at resolution {2}", rangeComplexName, areaName, bathymetryResolution));
+            if (!area[bathymetryResolution].IsCached) throw new ApplicationException(string.Format("Specified range complex {0} area {1}: bathymetry data at resolution {2} is available but has not been extracted", rangeComplexName, areaName, bathymetryResolution));
+
+            const string bottomLossFilename = "data.bottomloss";
+            const string sedimentFilename = "data.sediment";
+            const string windFilename = "data.wind";
+
+            var result = new ObservableConcurrentDictionary<EnvironmentDataType, Task>();
+            
+            if ((Configuration.IsClassifiedModel) && File.Exists(Path.Combine(rangeComplex.DataPath, bottomLossFilename)))
+                result[EnvironmentDataType.BottomLoss] = new Task<BottomLoss>(() => BottomLoss.Load(Path.Combine(rangeComplex.DataPath, bottomLossFilename)));
+            else 
+                throw new ApplicationException(string.Format("Specified range complex {0} does not contain bottom loss data", rangeComplexName));
+
+            if (File.Exists(Path.Combine(rangeComplex.DataPath, sedimentFilename)))
+                result[EnvironmentDataType.Sediment] = new Task<Sediment>(() => Sediment.Load(Path.Combine(rangeComplex.DataPath, sedimentFilename)));
+            else
+                throw new ApplicationException(string.Format("Specified range complex {0} does not contain sediment data", rangeComplexName));
+
+            if (File.Exists(Path.Combine(rangeComplex.DataPath, windFilename)))
+                result[EnvironmentDataType.Wind] = new Task<Wind>(() => Wind.Load(Path.Combine(rangeComplex.DataPath, windFilename)));
+            else
+                throw new ApplicationException(string.Format("Specified range complex {0} does not contain wind data", rangeComplexName));
+
+            result[EnvironmentDataType.Salinity] = new Task<SoundSpeed>(() => EnvironmentFile.SeasonalAverage(rangeComplex, timePeriod, EnvironmentDataType.Salinity));
+            result[EnvironmentDataType.Temperature] = new Task<SoundSpeed>(() => EnvironmentFile.SeasonalAverage(rangeComplex, timePeriod,EnvironmentDataType.Temperature));
+            Task<Bathymetry> bathyTask;
+            result[EnvironmentDataType.Bathymetry] = bathyTask = new Task<Bathymetry>(() => Bathymetry.Load(Path.Combine(area.BathymetryPath, area[bathymetryResolution].FileName)));
+            result[EnvironmentDataType.SoundSpeed] = new Task<SoundSpeed>(() => EnvironmentFile.CalculateSoundSpeed(rangeComplex, timePeriod, bathyTask, area[bathymetryResolution].GeoRect));
+
+            if (Configuration.IsClassifiedModel) result[EnvironmentDataType.BottomLoss].Start();
+            result[EnvironmentDataType.Sediment].Start();
+            result[EnvironmentDataType.Wind].Start();
+            result[EnvironmentDataType.Salinity].Start();
+            result[EnvironmentDataType.Temperature].Start();
+            result[EnvironmentDataType.Bathymetry].Start();
+            result[EnvironmentDataType.SoundSpeed].Start();
+            return result;
         }
     }
 }
