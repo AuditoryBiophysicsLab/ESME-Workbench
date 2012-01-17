@@ -56,6 +56,8 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "One Navy Model Setup", "One
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HRC.Tests", "Libraries\HRC.Tests\HRC.Tests.csproj", "{5A858CD7-E722-4153-BA0B-BAD75EF957A5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreateBellhopEnvironmentFiles", "Utilities\CreateBellhopEnvironmentFiles\CreateBellhopEnvironmentFiles.csproj", "{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -277,6 +279,20 @@ Global
 		{5A858CD7-E722-4153-BA0B-BAD75EF957A5}.Release|Win32.ActiveCfg = Release|Any CPU
 		{5A858CD7-E722-4153-BA0B-BAD75EF957A5}.Release|x64.ActiveCfg = Release|Any CPU
 		{5A858CD7-E722-4153-BA0B-BAD75EF957A5}.Release|x86.ActiveCfg = Release|Any CPU
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Release|Win32.ActiveCfg = Release|Any CPU
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Release|x64.ActiveCfg = Release|Any CPU
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -292,5 +308,6 @@ Global
 		{3E89C807-7BD7-46E7-9734-2C469D515BE9} = {FA61527E-40F8-4E12-A80C-DDAECCBBE94A}
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6} = {19195DC2-8069-491E-BCDE-B290D1C4B22C}
 		{9E8EBE97-1F78-4613-9204-B69ADC3869E8} = {19195DC2-8069-491E-BCDE-B290D1C4B22C}
+		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7} = {19195DC2-8069-491E-BCDE-B290D1C4B22C}
 	EndGlobalSection
 EndGlobal

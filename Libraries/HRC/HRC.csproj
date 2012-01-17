@@ -164,7 +164,6 @@
     <Compile Include="Navigation\GeoSegment.cs" />
     <Compile Include="Navigation\IGeoExtent.cs" />
     <Compile Include="Navigation\GeoRect.cs" />
-    <Compile Include="Navigation\GeoReferencedField.cs" />
     <Compile Include="Navigation\Intersection.cs" />
     <Compile Include="Navigation\Length.cs" />
     <Compile Include="Navigation\Limits.cs" />
