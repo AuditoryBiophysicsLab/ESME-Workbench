@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace OneNavyModel.ViewModels.RecentFiles
+namespace ESMEWorkBench.ViewModels.RecentFiles
 {
     static class ApplicationAttributes
     {

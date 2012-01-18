@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using ThinkGeo.MapSuite.Core;
 
-namespace OneNavyModel.ViewModels.Layers
+namespace ESMEWorkBench.ViewModels.Layers
 {
     //this class inherits from AdornmentLayer. 
     internal class MyGraticuleAdornmentLayer : AdornmentLayer

@@ -18,10 +18,10 @@ using ESME.TransmissionLoss.REFMS;
 using ESME.Views.AcousticBuilder;
 using ESME.Views.TransmissionLoss;
 using ESME.Views.TransmissionLossViewer;
-using OneNavyModel.Properties;
-using OneNavyModel.ViewModels.NAVO;
+using ESMEWorkBench.Properties;
+using ESMEWorkBench.ViewModels.NAVO;
 
-namespace OneNavyModel.ViewModels.Main
+namespace ESMEWorkBench.ViewModels.Main
 {
     public partial class MainViewModel
     {
@@ -71,7 +71,7 @@ namespace OneNavyModel.ViewModels.Main
                 _isScenarioLoaded = value;
                 NotifyPropertyChanged(IsScenarioLoadedChangedEventArgs);
                 CommandManager.InvalidateRequerySuggested();
-                if (!_isScenarioLoaded) MainWindowTitle = "One Navy Model: <No scenario loaded>";
+                if (!_isScenarioLoaded) MainWindowTitle = "ESME Workbench: <No scenario loaded>";
             }
         }
 
@@ -113,7 +113,7 @@ namespace OneNavyModel.ViewModels.Main
                 _dispatcher.InvokeIfRequired(() =>
                 {
                     ScenarioMetadata.ScenarioFilename = fileName;
-                    MainWindowTitle = string.Format("One Navy Model{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", ScenarioMetadata.NemoFile.Scenario.EventName, ScenarioMetadata.NemoFile.Scenario.TimeFrame);
+                    MainWindowTitle = string.Format("ESME Workbench{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", ScenarioMetadata.NemoFile.Scenario.EventName, ScenarioMetadata.NemoFile.Scenario.TimeFrame);
                 });
                 if (_scenarioFileWatcher != null)
                 {
@@ -144,7 +144,7 @@ namespace OneNavyModel.ViewModels.Main
                         ScenarioMetadata.ScenarioFilename = fileName;
                         _dispatcher.InvokeIfRequired(() =>
                         {
-                            MainWindowTitle = string.Format("One Navy Model{0}: {1} [{2}]",
+                            MainWindowTitle = string.Format("ESME Workbench{0}: {1} [{2}]",
                                                             Configuration.IsUnclassifiedModel ? " (public)" : "",
                                                             ScenarioMetadata.NemoFile.Scenario.EventName,
                                                             ScenarioMetadata.NemoFile.Scenario.TimeFrame);
@@ -284,7 +284,7 @@ namespace OneNavyModel.ViewModels.Main
         {
             var vm = new ScenarioSimulatorOptionsViewModel
             {
-                ScenarioSimulatorSettings = Globals.AppSettings.ScenarioSimulatorSettings,
+                ScenarioSimulatorSettings = ESME.Globals.AppSettings.ScenarioSimulatorSettings,
                 NemoFile = ScenarioMetadata.NemoFile,
             };
 
@@ -311,10 +311,10 @@ namespace OneNavyModel.ViewModels.Main
         {
             get
             {
-                return ((Globals.AppSettings.NAEMOTools.ScenarioExecutablePath != null)
-                      && File.Exists(Globals.AppSettings.NAEMOTools.ScenarioExecutablePath)
-                      && (Globals.AppSettings.NAEMOTools.JavaExecutablePath != null)
-                      && File.Exists(Globals.AppSettings.NAEMOTools.JavaExecutablePath) && IsScenarioLoaded);
+                return ((ESME.Globals.AppSettings.NAEMOTools.ScenarioExecutablePath != null)
+                      && File.Exists(ESME.Globals.AppSettings.NAEMOTools.ScenarioExecutablePath)
+                      && (ESME.Globals.AppSettings.NAEMOTools.JavaExecutablePath != null)
+                      && File.Exists(ESME.Globals.AppSettings.NAEMOTools.JavaExecutablePath) && IsScenarioLoaded);
             }
         }
 
@@ -325,8 +325,8 @@ namespace OneNavyModel.ViewModels.Main
             {
                 StartInfo =
                 {
-                    WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAEMOTools.ScenarioExecutablePath),
-                    FileName = Globals.AppSettings.NAEMOTools.JavaExecutablePath,
+                    WorkingDirectory = Path.GetDirectoryName(ESME.Globals.AppSettings.NAEMOTools.ScenarioExecutablePath),
+                    FileName = ESME.Globals.AppSettings.NAEMOTools.JavaExecutablePath,
                     Arguments = commandArgs,
 
                 },
@@ -337,7 +337,7 @@ namespace OneNavyModel.ViewModels.Main
             get
             {
                 var sb = new StringBuilder();
-                sb.Append(string.Format("-jar \"{0}\" ", Globals.AppSettings.NAEMOTools.ScenarioExecutablePath));
+                sb.Append(string.Format("-jar \"{0}\" ", ESME.Globals.AppSettings.NAEMOTools.ScenarioExecutablePath));
                 sb.Append(string.Format("-s \"{0}\" ", ScenarioMetadata.NemoFile));
                 return sb.ToString();
             }
@@ -366,7 +366,7 @@ namespace OneNavyModel.ViewModels.Main
         }
 
         static readonly PropertyChangedEventArgs MainWindowTitleChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MainWindowTitle);
-        string _mainWindowTitle = Configuration.IsUnclassifiedModel ? "One Navy Model (public): <No scenario loaded>" : "One Navy Model: <No scenario loaded>";
+        string _mainWindowTitle = "ESME Workbench: <No scenario loaded>";
 
         #endregion
 
@@ -384,8 +384,8 @@ namespace OneNavyModel.ViewModels.Main
             {
                 StartInfo =
                 {
-                    FileName = Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath,
-                    WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath),
+                    FileName = ESME.Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath,
+                    WorkingDirectory = Path.GetDirectoryName(ESME.Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath),
                 }
             }.Start();
         }

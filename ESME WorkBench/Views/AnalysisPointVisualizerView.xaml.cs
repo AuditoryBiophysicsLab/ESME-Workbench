@@ -2,7 +2,7 @@
 
 using Cinch;
 
-namespace OneNavyModel.Views
+namespace ESMEWorkBench.Views
 {
     /// <summary>
     ///   Interaction logic for AnalysisPointVisualizerView.xaml

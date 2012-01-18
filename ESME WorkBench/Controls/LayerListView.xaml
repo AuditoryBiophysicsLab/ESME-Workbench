@@ -1,125 +1,112 @@
-﻿<UserControl x:Class="OneNavyModel.Controls.LayerListView"
+﻿<UserControl x:Class="ESMEWorkBench.Controls.LayerListView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:Mapping="clr-namespace:ESME.Mapping;assembly=ESME"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-             xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views" 
-             xmlns:Mapping="clr-namespace:ESME.Mapping;assembly=ESME" 
-             mef:ViewModelLocator.ViewModel="LayerListViewModel"
-             mc:Ignorable="d"
+             xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views"
              d:DesignHeight="300"
-             d:DesignWidth="300">
-	<UserControl.Resources>
-		<Style x:Key="ContextMenuItemStyle">
-			<Setter Property="MenuItem.Header"
-			        Value="{Binding Header}" />
-			<Setter Property="MenuItem.ItemsSource"
-			        Value="{Binding Children}" />
-			<Setter Property="MenuItem.Command"
-			        Value="{Binding Command}" />
-			<Setter Property="MenuItem.Icon"
-			        Value="{Binding Icon}" />
-			<Setter Property="MenuItem.IsCheckable"
-			        Value="{Binding IsCheckable}" />
-            <Setter Property="MenuItem.IsChecked"
-			        Value="{Binding IsChecked}" />
-            <Setter Property="MenuItem.Visibility"
-			        Value="{Binding Visibility}" />
-            <Setter Property="MenuItem.CommandParameter"
-			        Value="{Binding}" />
-		</Style>
+             d:DesignWidth="300"
+             mef:ViewModelLocator.ViewModel="LayerListViewModel"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style x:Key="ContextMenuItemStyle">
+            <Setter Property="MenuItem.Header" Value="{Binding Header}" />
+            <Setter Property="MenuItem.ItemsSource" Value="{Binding Children}" />
+            <Setter Property="MenuItem.Command" Value="{Binding Command}" />
+            <Setter Property="MenuItem.Icon" Value="{Binding Icon}" />
+            <Setter Property="MenuItem.IsCheckable" Value="{Binding IsCheckable}" />
+            <Setter Property="MenuItem.IsChecked" Value="{Binding IsChecked}" />
+            <Setter Property="MenuItem.Visibility" Value="{Binding Visibility}" />
+            <Setter Property="MenuItem.CommandParameter" Value="{Binding}" />
+        </Style>
 
-		<Style x:Key="LayersViewItemStyle"
-		       TargetType="ListViewItem">
-			<Setter Property="KeyboardNavigation.AcceptsReturn"
-			        Value="True" />
-			<Setter Property="views:VirtualToggleButton.IsVirtualToggleButton"
-			        Value="True" />
-			<Setter Property="views:VirtualToggleButton.IsChecked"
-			        Value="{Binding IsChecked}" />
+        <Style x:Key="LayersViewItemStyle" TargetType="ListViewItem">
+            <Setter Property="KeyboardNavigation.AcceptsReturn" Value="True" />
+            <Setter Property="views:VirtualToggleButton.IsVirtualToggleButton" Value="True" />
+            <Setter Property="views:VirtualToggleButton.IsChecked" Value="{Binding IsChecked}" />
             <Setter Property="ToolTip" Value="{Binding ToolTip}" />
-			<Style.Triggers>
-				<Trigger Property="IsSelected"
-				         Value="True">
-					<Setter Property="FontWeight"
-					        Value="Bold" />
-				</Trigger>
-			</Style.Triggers>
-		</Style>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="FontWeight" Value="Bold" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
 
-		<DataTemplate x:Key="CheckBoxItemTemplate">
-			<Grid Width="{Binding ElementName=ListBox, Path=ActualWidth}" Visibility="{Binding IsEnabled, Converter={StaticResource TrueVisibleFalseCollapsed}}">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="16" />
+        <DataTemplate x:Key="CheckBoxItemTemplate">
+            <Grid Width="{Binding ElementName=ListBox, Path=ActualWidth}" Visibility="{Binding IsEnabled, Converter={StaticResource TrueVisibleFalseCollapsed}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="16" />
                     <ColumnDefinition Width="16" />
                     <ColumnDefinition Width="*" />
-                    <!--<ColumnDefinition Width="16" />-->
-				</Grid.ColumnDefinitions>
-				<CheckBox Focusable="False"
-				          Grid.Column="0"
-				          IsChecked="{Binding IsChecked}"
-				          VerticalAlignment="Center" />
+                    <!--  <ColumnDefinition Width="16" />  -->
+                </Grid.ColumnDefinitions>
+                <CheckBox Grid.Column="0"
+                          VerticalAlignment="Center"
+                          Focusable="False"
+                          IsChecked="{Binding IsChecked}" />
 
-                <Rectangle Width="12"
-				           RadiusX="3"
-				           RadiusY="3"
-				           Grid.Column="1"
-				           Height="12"
-				           Fill="{Binding LineColorBrush}"
-				           Visibility="{Binding IsLineColorVisible}"
-				           VerticalAlignment="Center"
-				           ToolTip="{Binding PointLineTooltip}">
+                <Rectangle Grid.Column="1"
+                           Width="12"
+                           Height="12"
+                           VerticalAlignment="Center"
+                           Fill="{Binding LineColorBrush}"
+                           RadiusX="3"
+                           RadiusY="3"
+                           ToolTip="{Binding PointLineTooltip}"
+                           Visibility="{Binding IsLineColorVisible}">
                     <Rectangle.ContextMenu>
-                        <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
-						             ItemsSource="{Binding LineOrPointPickerMenu}" />
+                        <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}" ItemsSource="{Binding LineOrPointPickerMenu}" />
 
                     </Rectangle.ContextMenu>
                 </Rectangle>
-                
-                <TextBlock Text="{Binding Name, Mode=OneTime}"
-                           x:Name="LayerName"
-				           Grid.Column="2"
-    				       Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
+
+                <TextBlock x:Name="LayerName"
+                           Grid.Column="2"
+                           Width="{Binding RelativeSource={RelativeSource FindAncestor,
+                                                                          AncestorType={x:Type ListBox}},
+                                           Path=Width}"
+                           Text="{Binding Name,
+                                          Mode=OneTime}" />
 
                 <!--
-                <Rectangle Width="12"
-				           RadiusX="3"
-				           RadiusY="3"
-				           Grid.Column="2"
-				           Height="12"
-				           Fill="{Binding AreaColorBrush}"
-				           Visibility="{Binding IsAreaColorVisible}"
-				           VerticalAlignment="Center"
-				           ToolTip="Area color: Right click to change"
-				           Name="LineColor">
+                    <Rectangle Width="12"
+                    RadiusX="3"
+                    RadiusY="3"
+                    Grid.Column="2"
+                    Height="12"
+                    Fill="{Binding AreaColorBrush}"
+                    Visibility="{Binding IsAreaColorVisible}"
+                    VerticalAlignment="Center"
+                    ToolTip="Area color: Right click to change"
+                    Name="LineColor">
                     <Rectangle.ContextMenu>
-                        <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
-						             ItemsSource="{Binding AreaColorPickerMenu}" />
-
+                    <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+                    ItemsSource="{Binding AreaColorPickerMenu}" />
+                    
                     </Rectangle.ContextMenu>
-                </Rectangle>
+                    </Rectangle>
                 -->
 
                 <Grid.ContextMenu>
-					<ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
-					             ItemsSource="{Binding ContextMenu}" />
-				</Grid.ContextMenu>
-			</Grid>
+                    <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}" ItemsSource="{Binding ContextMenu}" />
+                </Grid.ContextMenu>
+            </Grid>
             <DataTemplate.Triggers>
                 <DataTrigger Binding="{Binding IsValid}" Value="False">
                     <DataTrigger.Setters>
-                        <Setter TargetName="LayerName" Property="Foreground" Value="Red"/>
+                        <Setter TargetName="LayerName" Property="Foreground" Value="Red" />
                         <Setter TargetName="LayerName" Property="ToolTip" Value="{Binding ValidationErrorText}" />
                     </DataTrigger.Setters>
                 </DataTrigger>
             </DataTemplate.Triggers>
-		</DataTemplate>
-	</UserControl.Resources>
-	<ListView DockPanel.Dock="Top"
-	          x:Name="ListBox"
+        </DataTemplate>
+    </UserControl.Resources>
+    <ListView x:Name="ListBox"
+              DockPanel.Dock="Top"
               Grid.IsSharedSizeScope="True"
-	          ItemsSource="{Binding MapLayers}">
+              ItemsSource="{Binding MapLayers}">
         <ListView.Resources>
             <DataTemplate DataType="{x:Type Mapping:MapLayerViewModel}">
                 <DockPanel LastChildFill="True">
@@ -127,57 +114,56 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="16" />
                             <ColumnDefinition Width="16" />
-                            <!--<ColumnDefinition Width="16" />-->
+                            <!--  <ColumnDefinition Width="16" />  -->
                             <ColumnDefinition Width="*" SharedSizeGroup="LayerName" />
                         </Grid.ColumnDefinitions>
-                        <CheckBox Focusable="False"
-				              Grid.Column="0"
-				              IsChecked="{Binding IsChecked}"
-				              VerticalAlignment="Center" />
-                        <Rectangle Width="12"
-				               RadiusX="3"
-				               RadiusY="3"
-				               Grid.Column="1"
-				               Height="12"
-				               Fill="{Binding LineColorBrush}"
-				               Visibility="{Binding IsLineColorVisible}"
-				               VerticalAlignment="Center"
-				               ToolTip="{Binding PointLineTooltip}">
+                        <CheckBox Grid.Column="0"
+                                  VerticalAlignment="Center"
+                                  Focusable="False"
+                                  IsChecked="{Binding IsChecked}" />
+                        <Rectangle Grid.Column="1"
+                                   Width="12"
+                                   Height="12"
+                                   VerticalAlignment="Center"
+                                   Fill="{Binding LineColorBrush}"
+                                   RadiusX="3"
+                                   RadiusY="3"
+                                   ToolTip="{Binding PointLineTooltip}"
+                                   Visibility="{Binding IsLineColorVisible}">
                             <Rectangle.ContextMenu>
-                                <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
-						             ItemsSource="{Binding LineOrPointPickerMenu}" />
+                                <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}" ItemsSource="{Binding LineOrPointPickerMenu}" />
                             </Rectangle.ContextMenu>
                         </Rectangle>
                         <!--
-                        <Rectangle Width="12"
-				               RadiusX="3"
-				               RadiusY="3"
-				               Grid.Column="2"
-				               Height="12"
-				               Fill="{Binding AreaColorBrush}"
-				               Visibility="{Binding IsAreaColorVisible}"
-				               VerticalAlignment="Center"
-				               ToolTip="Area color: Right click to change"
-				               Name="LineColor">
+                            <Rectangle Width="12"
+                            RadiusX="3"
+                            RadiusY="3"
+                            Grid.Column="2"
+                            Height="12"
+                            Fill="{Binding AreaColorBrush}"
+                            Visibility="{Binding IsAreaColorVisible}"
+                            VerticalAlignment="Center"
+                            ToolTip="Area color: Right click to change"
+                            Name="LineColor">
                             <Rectangle.ContextMenu>
-                                <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
-						             ItemsSource="{Binding AreaColorPickerMenu}" />
-                            </Rectangle.ContextMenu>
-                        </Rectangle>
-                        -->
-                        <TextBlock Text="{Binding Name, Mode=OneTime}"
-                               x:Name="LayerName"
-				               Grid.Column="2"/>
-                        <Grid.ContextMenu>
                             <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
-					             ItemsSource="{Binding ContextMenu}" />
+                            ItemsSource="{Binding AreaColorPickerMenu}" />
+                            </Rectangle.ContextMenu>
+                            </Rectangle>
+                        -->
+                        <TextBlock x:Name="LayerName"
+                                   Grid.Column="2"
+                                   Text="{Binding Name,
+                                                  Mode=OneTime}" />
+                        <Grid.ContextMenu>
+                            <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}" ItemsSource="{Binding ContextMenu}" />
                         </Grid.ContextMenu>
                     </Grid>
                 </DockPanel>
                 <DataTemplate.Triggers>
                     <DataTrigger Binding="{Binding IsValid}" Value="False">
                         <DataTrigger.Setters>
-                            <Setter TargetName="LayerName" Property="Foreground" Value="Red"/>
+                            <Setter TargetName="LayerName" Property="Foreground" Value="Red" />
                             <Setter TargetName="LayerName" Property="ToolTip" Value="{Binding ValidationErrorText}" />
                         </DataTrigger.Setters>
                     </DataTrigger>

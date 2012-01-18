@@ -3,7 +3,7 @@ using System.ComponentModel.Composition;
 using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
-namespace OneNavyModel.ViewModels.Ribbon
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
     [ExportViewModel("ToggleButtonDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]

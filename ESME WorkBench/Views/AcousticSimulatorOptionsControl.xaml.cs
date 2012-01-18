@@ -1,4 +1,4 @@
-﻿namespace OneNavyModel.Views
+﻿namespace ESMEWorkBench.Views
 {
     /// <summary>
     /// Interaction logic for AcousticSimulatorOptionsControl.xaml

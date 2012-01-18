@@ -5,7 +5,7 @@ using System.Linq;
 using Cinch;
 using ESME.TransmissionLoss;
 
-namespace OneNavyModel.ViewModels.TransmissionLoss
+namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
     class AnalysisPointCalculationPreviewViewModel : ViewModelBase
     {

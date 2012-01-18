@@ -9,12 +9,11 @@ using ESME;
 using ESME.Data;
 using ESME.Mapping;
 using ESME.Views.LogFileViewer;
-using OneNavyModel.Properties;
-using OneNavyModel.ViewModels.NAVO;
-using OneNavyModel.ViewModels.TransmissionLoss;
-using Globals = OneNavyModel.Globals;
+using ESMEWorkBench.Properties;
+using ESMEWorkBench.ViewModels.NAVO;
+using ESMEWorkBench.ViewModels.TransmissionLoss;
 
-namespace OneNavyModel.ViewModels.Main
+namespace ESMEWorkBench.ViewModels.Main
 {
     public partial class MainViewModel
     {
@@ -36,11 +35,11 @@ namespace OneNavyModel.ViewModels.Main
                     };
                     var programOptionsViewModel = new ApplicationOptionsViewModel(_messageBoxService);
                     var result = _visualizerService.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
-                    if ((result.HasValue) && (result.Value)) Globals.AppSettings.Save(extraTypes);
-                    Globals.AppSettings = AppSettings.Load(extraTypes);
-                    ESME.Globals.AppSettings = Globals.AppSettings;
-                    if (Globals.AppSettings != null && Globals.AppSettings.ScenarioDataDirectory != null &&
-                        File.Exists(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"))) 
+                    if ((result.HasValue) && (result.Value)) ESME.Globals.AppSettings.Save(extraTypes);
+                    ESME.Globals.AppSettings = AppSettings.Load(extraTypes);
+                    ESME.Globals.AppSettings = ESME.Globals.AppSettings;
+                    if (ESME.Globals.AppSettings != null && ESME.Globals.AppSettings.ScenarioDataDirectory != null &&
+                        File.Exists(Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"))) 
                         InitializeEnvironmentManager();
                 }));
             }
@@ -58,7 +57,7 @@ namespace OneNavyModel.ViewModels.Main
                 return _launchScenarioEditor ??
                        (_launchScenarioEditor =
                         new SimpleCommand<object, object>(
-                                arg => (Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath != null) && (File.Exists(Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath)), obj =>
+                                arg => (ESME.Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath != null) && (File.Exists(ESME.Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath)), obj =>
                                 {
                                     string arguments;
 
@@ -68,8 +67,8 @@ namespace OneNavyModel.ViewModels.Main
                                     {
                                             StartInfo =
                                                     {
-                                                            FileName = Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath,
-                                                            WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath),
+                                                            FileName = ESME.Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath,
+                                                            WorkingDirectory = Path.GetDirectoryName(ESME.Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath),
                                                             Arguments = arguments,
                                                     }
                                     }.Start();
@@ -89,7 +88,7 @@ namespace OneNavyModel.ViewModels.Main
                 return _launchEnvironmentBuilder ?? (_launchEnvironmentBuilder = new SimpleCommand<object, object>(arg =>
                 {
                     var environmentBuilder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "EnvironmentBuilder.exe");
-                    return (File.Exists(environmentBuilder) && ((Globals.AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(Globals.AppSettings.EnvironmentDatabaseDirectory))));
+                    return (File.Exists(environmentBuilder) && ((ESME.Globals.AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(ESME.Globals.AppSettings.EnvironmentDatabaseDirectory))));
                 }, obj =>
                 {
                     var environmentBuilder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "EnvironmentBuilder.exe");
@@ -98,7 +97,7 @@ namespace OneNavyModel.ViewModels.Main
                             StartInfo =
                                     {
                                             FileName = environmentBuilder,
-                                            Arguments = string.Format("\"{0}\"", Globals.AppSettings.EnvironmentDatabaseDirectory),
+                                            Arguments = string.Format("\"{0}\"", ESME.Globals.AppSettings.EnvironmentDatabaseDirectory),
                                     }
                     }.Start();
                 }));
@@ -117,8 +116,8 @@ namespace OneNavyModel.ViewModels.Main
                 return _launchScenarioSimulator ?? (_launchScenarioSimulator = new SimpleCommand<object, object>(
                                                                                        delegate
                                                                                        {
-                                                                                           return ((Globals.AppSettings.NAEMOTools.ScenarioExecutablePath != null)
-                                                                                                   && File.Exists(Globals.AppSettings.NAEMOTools.ScenarioExecutablePath)
+                                                                                           return ((ESME.Globals.AppSettings.NAEMOTools.ScenarioExecutablePath != null)
+                                                                                                   && File.Exists(ESME.Globals.AppSettings.NAEMOTools.ScenarioExecutablePath)
                                                                                                    && _experiment != null && _experiment.NemoFile != null && _experiment.Bathymetry != null);
                                                                                        }, // todo && _experiment.AnalysisPoints != null && species are defined. 
                                                                                        delegate
@@ -126,7 +125,7 @@ namespace OneNavyModel.ViewModels.Main
                                                                                            var vm = new ScenarioSimulatorOptionsViewModel
                                                                                            {
                                                                                                    ScenarioSimulatorSettings =
-                                                                                                           _experiment.ScenarioSimulatorSettings ?? Globals.AppSettings.ScenarioSimulatorSettings,
+                                                                                                           _experiment.ScenarioSimulatorSettings ?? ESME.Globals.AppSettings.ScenarioSimulatorSettings,
                                                                                                    NemoFile = _experiment.NemoFile,
                                                                                            };
 
@@ -170,7 +169,7 @@ namespace OneNavyModel.ViewModels.Main
 
         void HelpHandler()
         {
-            var userManual = Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "One Navy Model*Manual*.pdf");
+            var userManual = Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ESME Workbench*Manual*.pdf");
             if (userManual.Length == 0)
             {
                 _messageBoxService.ShowError("The user manual was not found!");
@@ -214,8 +213,8 @@ namespace OneNavyModel.ViewModels.Main
                 return _launchNUWCReportGenerator ?? (_launchNUWCReportGenerator = new SimpleCommand<object, object>(
                                                                                            delegate
                                                                                            {
-                                                                                               return (Globals.AppSettings.NAEMOTools.ReportGeneratorExecutablePath != null &&
-                                                                                                       File.Exists(Globals.AppSettings.NAEMOTools.ReportGeneratorExecutablePath));
+                                                                                               return (ESME.Globals.AppSettings.NAEMOTools.ReportGeneratorExecutablePath != null &&
+                                                                                                       File.Exists(ESME.Globals.AppSettings.NAEMOTools.ReportGeneratorExecutablePath));
                                                                                            },
                                                                                            delegate
                                                                                            {
@@ -223,7 +222,7 @@ namespace OneNavyModel.ViewModels.Main
                                                                                                {
                                                                                                        StartInfo =
                                                                                                                {
-                                                                                                                       FileName = Globals.AppSettings.NAEMOTools.ReportGeneratorExecutablePath,
+                                                                                                                       FileName = ESME.Globals.AppSettings.NAEMOTools.ReportGeneratorExecutablePath,
                                                                                                                },
                                                                                                }.Start();
                                                                                            }));
@@ -241,8 +240,8 @@ namespace OneNavyModel.ViewModels.Main
                 return _launchExposureReportGenerator ?? (_launchExposureReportGenerator = new SimpleCommand<object, object>(
                                                                                                    delegate
                                                                                                    {
-                                                                                                       return (Globals.AppSettings.NAEMOTools.ExposureReportGeneratorExecutablePath != null &&
-                                                                                                               File.Exists((Globals.AppSettings.NAEMOTools.ExposureReportGeneratorExecutablePath)));
+                                                                                                       return (ESME.Globals.AppSettings.NAEMOTools.ExposureReportGeneratorExecutablePath != null &&
+                                                                                                               File.Exists((ESME.Globals.AppSettings.NAEMOTools.ExposureReportGeneratorExecutablePath)));
                                                                                                    },
                                                                                                    delegate
                                                                                                    {
@@ -251,7 +250,7 @@ namespace OneNavyModel.ViewModels.Main
                                                                                                                StartInfo =
                                                                                                                        {
                                                                                                                                FileName =
-                                                                                                                                       Globals.AppSettings.NAEMOTools.
+                                                                                                                                       ESME.Globals.AppSettings.NAEMOTools.
                                                                                                                                                ExposureReportGeneratorExecutablePath,
                                                                                                                        },
                                                                                                        }.Start();
@@ -291,7 +290,7 @@ namespace OneNavyModel.ViewModels.Main
                 {
                     var ea = (CancelEventArgs)vcArgs.EventArgs;
                     //ScenarioMetadata = null;
-                    Globals.AppSettings.Save();
+                    ESME.Globals.AppSettings.Save();
                 }));
             }
         }
@@ -461,8 +460,8 @@ namespace OneNavyModel.ViewModels.Main
                     };
                     var viewModel = new AcousticSimulatorOptionsViewModel();
                     var result = _visualizerService.ShowDialog("AcousticSimulatorOptionsView", viewModel);
-                    if ((result.HasValue) && (result.Value)) Globals.AppSettings.Save(extraTypes);
-                    else Globals.AppSettings = AppSettings.Load(extraTypes);
+                    if ((result.HasValue) && (result.Value)) ESME.Globals.AppSettings.Save(extraTypes);
+                    else ESME.Globals.AppSettings = AppSettings.Load(extraTypes);
                 }));
             }
         }

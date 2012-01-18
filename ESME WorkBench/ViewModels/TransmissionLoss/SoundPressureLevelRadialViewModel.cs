@@ -2,7 +2,7 @@
 using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
-namespace OneNavyModel.ViewModels.TransmissionLoss
+namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
     [ExportViewModel("SoundPressureLevelRadialViewModel")]
     class SoundPressureLevelRadialViewModel : ViewModelBase

@@ -1,83 +1,74 @@
-﻿<Window x:Class="OneNavyModel.Views.AboutView"
+﻿<Window x:Class="ESMEWorkBench.Views.AboutView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Misc="clr-namespace:ESME.Views.Misc;assembly=ESME.Views"
-        Title="About One Navy Model"
+        Title="About ESME Workbench"
         ResizeMode="NoResize"
-        SizeToContent="WidthAndHeight" 
+        SizeToContent="WidthAndHeight"
         WindowStyle="ToolWindow">
     <DockPanel>
         <Grid DockPanel.Dock="Top">
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition SharedSizeGroup="Left" />
-			<ColumnDefinition SharedSizeGroup="Right" />
-		</Grid.ColumnDefinitions>
-        <Misc:ProjectCredits Grid.Column="0"/>
-		<GroupBox Grid.Column="1"
-		          Header="Components">
-			<StackPanel Grid.Column="1"
-			            Orientation="Vertical"
-			            Margin="2 5 5 5"
-			            HorizontalAlignment="Stretch">
-				<Misc:ModuleBuildInfoView DataContext="{Binding WorkbenchModuleBuildInfo}" />
-				<Misc:ModuleBuildInfoView DataContext="{Binding ESMEModuleBuildInfo}" />
-				<Misc:ModuleBuildInfoView DataContext="{Binding HRCModuleBuildInfo}" />
-				<Misc:ModuleBuildInfoView DataContext="{Binding ViewsModuleBuildInfo}" />
-				<GroupBox Header="Mapping components">
-					<Grid>
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition SharedSizeGroup="one" />
-							<ColumnDefinition SharedSizeGroup="two" />
-						</Grid.ColumnDefinitions>
-						<StackPanel Grid.Column="0"
-						            Orientation="Vertical"
-						            Margin="5 5 2 5"
-						            HorizontalAlignment="Stretch">
-							<TextBlock Text="WpfDesktopEdition.dll:"
-							           TextAlignment="Right" />
-							<TextBlock Text="MapSuiteCore.dll:"
-							           TextAlignment="Right" />
-							<TextBlock Text="NetTopologySuite.dll:"
-							           TextAlignment="Right" />
-							<TextBlock Text="GeoAPI.dll:"
-							           TextAlignment="Right" />
-						</StackPanel>
-						<StackPanel Grid.Column="1"
-						            Orientation="Vertical"
-						            Margin="2 5 5 5"
-						            HorizontalAlignment="Stretch">
-							<TextBlock Text="{Binding MapDllVersion}"
-							           TextAlignment="Left" />
-							<TextBlock Text="{Binding MapCoreVersion}"
-							           TextAlignment="Left" />
-							<TextBlock Text="{Binding NetTopologyVersion}"
-							           TextAlignment="Left" />
-							<TextBlock Text="{Binding GeoAPIVersion}"
-							           TextAlignment="Left" />
-						</StackPanel>
-					</Grid>
-				</GroupBox>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition SharedSizeGroup="Left" />
+                <ColumnDefinition SharedSizeGroup="Right" />
+            </Grid.ColumnDefinitions>
+            <Misc:ProjectCredits Grid.Column="0" />
+            <GroupBox Grid.Column="1" Header="Components">
+                <StackPanel Grid.Column="1"
+                            Margin="2 5 5 5"
+                            HorizontalAlignment="Stretch"
+                            Orientation="Vertical">
+                    <Misc:ModuleBuildInfoView DataContext="{Binding WorkbenchModuleBuildInfo}" />
+                    <Misc:ModuleBuildInfoView DataContext="{Binding ESMEModuleBuildInfo}" />
+                    <Misc:ModuleBuildInfoView DataContext="{Binding HRCModuleBuildInfo}" />
+                    <Misc:ModuleBuildInfoView DataContext="{Binding ViewsModuleBuildInfo}" />
+                    <GroupBox Header="Mapping components">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="one" />
+                                <ColumnDefinition SharedSizeGroup="two" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0"
+                                        Margin="5 5 2 5"
+                                        HorizontalAlignment="Stretch"
+                                        Orientation="Vertical">
+                                <TextBlock Text="WpfDesktopEdition.dll:" TextAlignment="Right" />
+                                <TextBlock Text="MapSuiteCore.dll:" TextAlignment="Right" />
+                                <TextBlock Text="NetTopologySuite.dll:" TextAlignment="Right" />
+                                <TextBlock Text="GeoAPI.dll:" TextAlignment="Right" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1"
+                                        Margin="2 5 5 5"
+                                        HorizontalAlignment="Stretch"
+                                        Orientation="Vertical">
+                                <TextBlock Text="{Binding MapDllVersion}" TextAlignment="Left" />
+                                <TextBlock Text="{Binding MapCoreVersion}" TextAlignment="Left" />
+                                <TextBlock Text="{Binding NetTopologyVersion}" TextAlignment="Left" />
+                                <TextBlock Text="{Binding GeoAPIVersion}" TextAlignment="Left" />
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
 
-			</StackPanel>
-		</GroupBox>
+                </StackPanel>
+            </GroupBox>
         </Grid>
         <DockPanel DockPanel.Dock="Bottom">
-            <Button Content="OK" 
+            <Button Width="75"
+                    Margin="5"
                     Command="{Binding OkCommand}"
-                    IsDefault="True"
-                    Margin="5"
-                    Width="75"
-                    DockPanel.Dock="Right"/>
-            <Button Content="Copy to Clipboard" 
+                    Content="OK"
+                    DockPanel.Dock="Right"
+                    IsDefault="True" />
+            <Button Margin="5"
                     Command="{Binding HelpfulBugInfoCommand}"
+                    Content="Copy to Clipboard"
+                    DockPanel.Dock="Left" />
+            <Button Width="75"
                     Margin="5"
-                    DockPanel.Dock="Left"/>
-            <Button Content="Report Bug"
                     Command="{Binding ReportBugCommand}"
-                    Margin="5"
-                    Width="75"
-                    DockPanel.Dock="Left"/>         
-       
+                    Content="Report Bug"
+                    DockPanel.Dock="Left" />
+
         </DockPanel>
     </DockPanel>
 </Window>

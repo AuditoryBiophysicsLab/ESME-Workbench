@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace OneNavyModel.ViewModels.RecentFiles
+namespace ESMEWorkBench.ViewModels.RecentFiles
 {
     public interface IPersist
     {

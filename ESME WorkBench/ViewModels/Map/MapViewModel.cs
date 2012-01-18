@@ -14,18 +14,17 @@ using System.Xml.Serialization;
 using Cinch;
 using ESME;
 using ESME.Mapping;
+using ESMEWorkBench.Controls;
+using ESMEWorkBench.Properties;
+using ESMEWorkBench.ViewModels.Layers;
 using HRC.Navigation;
 using HRC.Services;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
-using OneNavyModel.Controls;
-using OneNavyModel.Properties;
-using OneNavyModel.ViewModels.Layers;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
-using Globals = OneNavyModel.Globals;
 
-namespace OneNavyModel.ViewModels.Map
+namespace ESMEWorkBench.ViewModels.Map
 {
     [ExportViewModel("MapViewModel")]
     [Serializable]

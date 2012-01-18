@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using Cinch;
 
-namespace OneNavyModel.ViewModels.Main
+namespace ESMEWorkBench.ViewModels.Main
 {
     class EditableLabelListViewModel:ViewModelBase
     {

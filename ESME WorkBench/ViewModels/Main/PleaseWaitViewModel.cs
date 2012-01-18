@@ -2,7 +2,7 @@
 using System.Windows;
 using Cinch;
 
-namespace OneNavyModel.ViewModels.Main
+namespace ESMEWorkBench.ViewModels.Main
 {
     public class PleaseWaitViewModel : ViewModelBase
     {

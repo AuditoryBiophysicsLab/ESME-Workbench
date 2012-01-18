@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using Cinch;
 
-namespace OneNavyModel.ViewModels.Ribbon
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
     public class GalleryDataViewModel<T> : ControlDataViewModel
     {

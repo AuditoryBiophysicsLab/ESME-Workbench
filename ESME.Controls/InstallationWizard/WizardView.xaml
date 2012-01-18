@@ -2,56 +2,59 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Controls="clr-namespace:ESME.Views.Controls"
-        Title="One Navy Model Configuration Wizard"
+        Title="ESME Workbench Configuration Wizard"
         Width="509"
         Height="398"
+        Icon="..\Wave.ico"
         ResizeMode="NoResize"
-        WindowStyle="ToolWindow"
-        Icon="..\Wave.ico">
+        WindowStyle="ToolWindow">
 
-  <DockPanel LastChildFill="True">
-    <Border DockPanel.Dock="Bottom"
-            Background="Gainsboro"
-            BorderThickness="0">
-      <StackPanel Orientation="Horizontal"
-                  HorizontalAlignment="Right"
-                  Margin="10">
-        <Button Content="Back"
-                Command="{Binding BackCommand}"
-                Margin="0 0 5 0"
-                Width="75" />
-        <Button Content="{Binding NextButtonString}"
-                Command="{Binding NextCommand}"
-                Margin="0 0 40 0"
-                Width="75"
-                IsDefault="True" />
-        <Button Content="Cancel"
-                IsCancel="True"
-                Width="75" />
-      </StackPanel>
-    </Border>
-    <StackPanel Orientation="Vertical"
-                DockPanel.Dock="Top">
+    <DockPanel LastChildFill="True">
+        <Border Background="Gainsboro"
+                BorderThickness="0"
+                DockPanel.Dock="Bottom">
+            <StackPanel Margin="10"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                <Button Width="75"
+                        Margin="0 0 5 0"
+                        Command="{Binding BackCommand}"
+                        Content="Back" />
+                <Button Width="75"
+                        Margin="0 0 40 0"
+                        Command="{Binding NextCommand}"
+                        Content="{Binding NextButtonString}"
+                        IsDefault="True" />
+                <Button Width="75"
+                        Content="Cancel"
+                        IsCancel="True" />
+            </StackPanel>
+        </Border>
+        <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
             <StackPanel.Background>
-                <ImageBrush ImageSource="dlgbmp.bmp"/>
+                <ImageBrush ImageSource="dlgbmp.bmp" />
             </StackPanel.Background>
             <TextBlock Margin="175 15 15 15">
-                <TextBlock Text="{Binding SelectedPanel.DescriptiveText}" TextWrapping="Wrap"/>
-                
-                    <Hyperlink NavigateUri="{Binding SelectedPanel.Hyperlink}">
-                        <TextBlock Text="{Binding SelectedPanel.HyperlinkText}"  TextWrapping="Wrap"/>
-                    </Hyperlink>
-                
+                <TextBlock Text="{Binding SelectedPanel.DescriptiveText}" TextWrapping="Wrap" />
+
+                <Hyperlink NavigateUri="{Binding SelectedPanel.Hyperlink}">
+                    <TextBlock Text="{Binding SelectedPanel.HyperlinkText}" TextWrapping="Wrap" />
+                </Hyperlink>
+
             </TextBlock>
-      <Controls:FileOrDirectorySetting
-Visibility="{Binding SelectedPanel.IsFileBrowerEnabled, Converter={StaticResource TrueVisibleFalseCollapsed}}"
-Caption="{Binding SelectedPanel.FieldName}"
-DialogTitle="{Binding SelectedPanel.DialogTitle}"
-FileNameFilter="{Binding SelectedPanel.FileNameFilter}"
-Margin="175 15 15 15"
-IsDirectoryBrowser="False"
-FileName="{Binding SelectedPanel.UserResponse, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}"
-Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
-    </StackPanel>
-  </DockPanel>
+            <Controls:FileOrDirectorySetting Margin="175 15 15 15"
+                                             Caption="{Binding SelectedPanel.FieldName}"
+                                             DialogTitle="{Binding SelectedPanel.DialogTitle}"
+                                             FileName="{Binding SelectedPanel.UserResponse,
+                                                                ValidatesOnDataErrors=True,
+                                                                ValidatesOnExceptions=True,
+                                                                UpdateSourceTrigger=PropertyChanged,
+                                                                NotifyOnValidationError=True}"
+                                             FileNameFilter="{Binding SelectedPanel.FileNameFilter}"
+                                             IsDirectoryBrowser="False"
+                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"
+                                             Visibility="{Binding SelectedPanel.IsFileBrowerEnabled,
+                                                                  Converter={StaticResource TrueVisibleFalseCollapsed}}" />
+        </StackPanel>
+    </DockPanel>
 </Window>

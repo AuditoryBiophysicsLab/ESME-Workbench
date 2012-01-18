@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace OneNavyModel.Controls
+namespace ESMEWorkBench.Controls
 {
     /// <summary>
     /// Interaction logic for ProgressMarker.xaml

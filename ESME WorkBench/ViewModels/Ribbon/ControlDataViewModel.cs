@@ -6,7 +6,7 @@ using Cinch;
 using ESME;
 using MEFedMVVM.ViewModelLocator;
 
-namespace OneNavyModel.ViewModels.Ribbon
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
     [ExportViewModel("ControlDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]

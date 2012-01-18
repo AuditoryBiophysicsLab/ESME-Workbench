@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
-using OneNavyModel.Properties;
+using ESMEWorkBench.Properties;
 
-namespace OneNavyModel.ViewModels.Main
+namespace ESMEWorkBench.ViewModels.Main
 {
     public partial class MainViewModel
     {

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace OneNavyModel.Properties {
+namespace ESMEWorkBench.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -325,18 +325,6 @@ namespace OneNavyModel.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
-        public int SelectedRibbonTabIndex {
-            get {
-                return ((int)(this["SelectedRibbonTabIndex"]));
-            }
-            set {
-                this["SelectedRibbonTabIndex"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public double LogViewTop {
             get {
@@ -404,6 +392,18 @@ namespace OneNavyModel.Properties {
             }
             set {
                 this["LogListWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SelectedRibbonTabIndex {
+            get {
+                return ((int)(this["SelectedRibbonTabIndex"]));
+            }
+            set {
+                this["SelectedRibbonTabIndex"] = value;
             }
         }
     }

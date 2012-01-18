@@ -25,10 +25,10 @@ namespace ESME.Views.Misc
         {
             string message;
             if (ResetConfigurationDataRequested && !ReimportEnvironmentDataRequested)
-                message = "When One Navy Model restarts, you will be required to complete the Configuration Wizard.\r\n\r\nContinue with restart?";
+                message = "When ESME Workbench restarts, you will be required to complete the Configuration Wizard.\r\n\r\nContinue with restart?";
             else if (!ResetConfigurationDataRequested && ReimportEnvironmentDataRequested)
-                message = "When One Navy Model restarts, all range complexes will have their environment data caches rebuilt.\r\nThis requires all other users of One Navy Model who are sharing the same range complex data folders to exit One Navy Model and not re-enter the program until the caches are rebuilt. Failure to do this may result in application crashes or invalid data being provided to simulation engines.\r\n\r\nContinue with restart?";
-            else message = "When One Navy Model restarts, you will be required to complete the Configuration Wizard, and all range complexes will have their environment data caches rebuilt.\r\nThis requires all other users of One Navy Model who are sharing the same range complex data folders to exit One Navy Model and not re-enter the program until the caches are rebuilt. Failure to do this may result in application crashes or invalid data being provided to simulation engines.\r\n\r\nContinue with restart?";
+                message = "When ESME Workbench restarts, all range complexes will have their environment data caches rebuilt.\r\nThis requires all other users of One Navy Model who are sharing the same range complex data folders to exit One Navy Model and not re-enter the program until the caches are rebuilt. Failure to do this may result in application crashes or invalid data being provided to simulation engines.\r\n\r\nContinue with restart?";
+            else message = "When ESME Workbench restarts, you will be required to complete the Configuration Wizard, and all range complexes will have their environment data caches rebuilt.\r\nThis requires all other users of One Navy Model who are sharing the same range complex data folders to exit One Navy Model and not re-enter the program until the caches are rebuilt. Failure to do this may result in application crashes or invalid data being provided to simulation engines.\r\n\r\nContinue with restart?";
             var result = _messageBoxService.ShowYesNo(message, CustomDialogIcons.Exclamation);
             if (result == CustomDialogResults.No) return;
         }

@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using HRC.Utility;
 
-namespace OneNavyModel.ViewModels.Ribbon
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
     public class ContextualTabGroupData : PropertyChangedBase
     {

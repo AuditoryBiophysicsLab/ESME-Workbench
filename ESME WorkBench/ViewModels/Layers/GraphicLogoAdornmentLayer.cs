@@ -4,7 +4,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using ThinkGeo.MapSuite.Core;
 
-namespace OneNavyModel.ViewModels.Layers
+namespace ESMEWorkBench.ViewModels.Layers
 {
     internal class GraphicLogoAdornmentLayer : AdornmentLayer
     {

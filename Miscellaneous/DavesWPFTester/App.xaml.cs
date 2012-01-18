@@ -15,7 +15,7 @@ namespace DavesWPFTester
     public partial class App
     {
         public static readonly string Logfile, DumpFile;
-        public const string Name = "One Navy Model";
+        public const string Name = "ESME Workbench";
 
         static App()
         {

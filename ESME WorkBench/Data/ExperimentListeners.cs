@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -14,11 +13,9 @@ using ESME.Mapping;
 using ESME.Model;
 using ESME.TransmissionLoss;
 using ThinkGeo.MapSuite.Core;
-using ESME.Views.AcousticBuilder;
 using BehaviorModel = ESME.Platform.BehaviorModel;
-using Globals = OneNavyModel.Globals;
 
-namespace OneNavyModel.Data
+namespace ESMEWorkBench.Data
 {
     public partial class Experiment
     {
@@ -228,7 +225,7 @@ namespace OneNavyModel.Data
                                               Metadata = metadata,
                                               Filename = soundSource.SoundSourceID,
                                               AnalysisPointID = analysisPoint.AnalysisPointID,
-                                              MaxDepth = (int) Globals.AppSettings.CASSSettings.MaximumDepth,
+                                              MaxDepth = (int) ESME.Globals.AppSettings.CASSSettings.MaximumDepth,
                                           };
                                 // Create the job
                                 //var runfile = TransmissionLossRunFile.Create(algorithm, job, environmentInfo, Globals.AppSettings);

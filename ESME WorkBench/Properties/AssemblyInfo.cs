@@ -7,12 +7,12 @@ using System.Resources;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("One Navy Model")]
-[assembly: AssemblyDescription("One Navy Model")]
+[assembly: AssemblyTitle("ESME Workbench")]
+[assembly: AssemblyDescription("ESME Workbench")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Boston University")]
-[assembly: AssemblyProduct("One Navy Model")]
-[assembly: AssemblyCopyright("© Boston University 2009-2011")]
+[assembly: AssemblyProduct("ESME Workbench")]
+[assembly: AssemblyCopyright("© Boston University 2009-2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <?define ProductName = "One Navy Model" ?>
+  <?define ProductName = "ESME Workbench" ?>
   <?define ProductVersion = "1.0" ?>
   <?define ProductFullVersion = "1.0.0.0" ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
@@ -104,14 +104,14 @@
                   Name="HRC.dll"
                   Source="$(var.ESMEPath)\HRC.dll" />
             <File Id="ReleaseNotes"
-                  Name="One Navy Model Release Notes.pdf"
-                  Source="$(var.ReleaseNotesPath)\One Navy Model Release Notes.pdf" />
+                  Name="ESME Workbench Release Notes.pdf"
+                  Source="$(var.ReleaseNotesPath)\ESME Workbench Notes.pdf" />
             <File Id="UserManual"
-                  Name="One Navy Model User Manual V1.pdf"
-                  Source="$(var.ReleaseNotesPath)\One Navy Model User Manual V1.pdf" />
+                  Name="ESME Workbench User Manual V1.pdf"
+                  Source="$(var.ReleaseNotesPath)\ESME Workbench User Manual V1.pdf" />
             <File Id="UserGuide"
-                  Name="One Navy Model User Guide.pdf"
-                  Source="$(var.ReleaseNotesPath)\One Navy Model User Guide.pdf" />
+                  Name="ESME Workbench User Guide.pdf"
+                  Source="$(var.ReleaseNotesPath)\ESME Workbench User Guide.pdf" />
             <File Id="ReadMe"
                   Name="Read Me.pdf"
                   Source="$(var.ReleaseNotesPath)\Read Me.pdf" />
@@ -263,19 +263,19 @@
                       Directory="ProgramMenuDir"
                       Name="Release Notes"
                       WorkingDirectory="APPLICATIONFOLDER"
-                      Target="[APPLICATIONFOLDER]One Navy Model Release Notes.pdf"
+                      Target="[APPLICATIONFOLDER]ESME Workbench Release Notes.pdf"
                       Advertise="no" />
             <Shortcut Id="UserGuide_Shortcut"
                       Directory="ProgramMenuDir"
                       Name="User Guide"
                       WorkingDirectory="APPLICATIONFOLDER"
-                      Target="[APPLICATIONFOLDER]One Navy Model User Guide.pdf"
+                      Target="[APPLICATIONFOLDER]ESME Workbench User Guide.pdf"
                       Advertise="no" />
             <Shortcut Id="UserManual_Shortcut"
                       Directory="ProgramMenuDir"
                       Name="User Manual"
                       WorkingDirectory="APPLICATIONFOLDER"
-                      Target="[APPLICATIONFOLDER]One Navy Model User Manual V1.pdf"
+                      Target="[APPLICATIONFOLDER]ESME Workbench User Manual V1.pdf"
                       Advertise="no" />
             <Shortcut Id="ReadMe_Shortcut"
                       Directory="ProgramMenuDir"
@@ -285,7 +285,7 @@
                       Advertise="no" />
             <Shortcut Id="WebLink_Shortcut"
                       Directory="ProgramMenuDir"
-                      Name="Visit the One Navy Model Website to download environmental data"
+                      Name="Visit the ESME Workbench Website to download environmental data"
                       WorkingDirectory="APPLICATIONFOLDER"
                       Target="[APPLICATIONFOLDER]ESME.url"
                       Advertise="no" />
@@ -336,7 +336,7 @@
         <Directory Id="ProgramMenuDir" Name="$(var.ProductName)"/>
       </Directory>
     </Directory>
-    <Feature Id="ProductFeature" Title="One Navy Model" Level="1" ConfigurableDirectory="TARGETDIR">
+    <Feature Id="ProductFeature" Title="ESME Workbench" Level="1" ConfigurableDirectory="TARGETDIR">
       <ComponentRef Id="OneNavyModel" />
       <MergeRef Id="vc100"/>
       <ComponentRef Id="GISFiles" />

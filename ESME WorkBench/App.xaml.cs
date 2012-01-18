@@ -7,15 +7,14 @@ using System.Windows;
 using Cinch;
 using ESME.Views;
 using HRC.Utility;
-using OneNavyModel.Properties;
 
 #if DEBUG
 using System.Security.Principal;
-using OneNavyModel.Properties;
+using ESMEWorkBench.Properties;
 
 #endif
 
-namespace OneNavyModel
+namespace ESMEWorkBench
 {
     /// <summary>
     ///   Interaction logic for App.xaml
@@ -24,7 +23,7 @@ namespace OneNavyModel
     {
         public static AppEventLog Log { get; private set; }
         public static readonly string Logfile, DumpFile;
-        public const string Name = "One Navy Model";
+        public const string Name = "ESME Workbench";
 
         static App()
         {
@@ -39,7 +38,7 @@ namespace OneNavyModel
 #endif
             if (OSInfo.OperatingSystemName != "XP")
             {
-                DumpFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "one_navy_model_crash.mdmp");
+                DumpFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "esme_workbench_crash.mdmp");
                 AppDomain.CurrentDomain.UnhandledException += LastChanceExceptionHandler;
 
             }
@@ -58,6 +57,9 @@ namespace OneNavyModel
         {
             // You must close or flush the trace to empty the output buffer.
             Trace.WriteLine(Name + " starting up");
+
+            if (Globals.AppSettings == null) 
+                Debugger.Break();
 
             if (OSInfo.OperatingSystemName == "XP")
             {

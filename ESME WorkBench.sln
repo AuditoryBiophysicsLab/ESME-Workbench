@@ -40,7 +40,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DavesWPFTester", "Miscellan
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BellhopNLWrapper", "Utilities\BellhopNL\BellhopNLWrapper.csproj", "{9E8EBE97-1F78-4613-9204-B69ADC3869E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "One Navy Model", "ESME WorkBench\One Navy Model.csproj", "{A80510EA-31DD-41C4-B3BC-0C7DCB966F3B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME Workbench", "ESME WorkBench\ESME Workbench.csproj", "{A80510EA-31DD-41C4-B3BC-0C7DCB966F3B}"
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "One Navy Model Setup", "One Navy Model Setup\One Navy Model Setup.wixproj", "{198766F8-F78F-48A1-9F64-846B1B448B34}"
 	ProjectSection(ProjectDependencies) = postProject

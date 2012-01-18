@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Cinch;
@@ -15,15 +14,13 @@ using ESME.Environment.NAVO;
 using ESME.Mapping;
 using ESME.Model;
 using ESME.NEMO.Overlay;
-using ESME.TransmissionLoss.CASS;
 using ESME.Views.Locations;
 using ESME.Views.InstallationWizard;
+using ESMEWorkBench.ViewModels.NAVO;
 using HRC.Navigation;
-using OneNavyModel.ViewModels.NAVO;
 using ThinkGeo.MapSuite.Core;
-using Globals = OneNavyModel.Globals;
 
-namespace OneNavyModel.ViewModels.Main
+namespace ESMEWorkBench.ViewModels.Main
 {
     public partial class MainViewModel
     {
@@ -43,10 +40,10 @@ namespace OneNavyModel.ViewModels.Main
             Console.WriteLine("All view models are ready!");
             WizardViewModel.LaunchWizardIfNeeded(_visualizerService);
 
-            if (Globals.AppSettings != null && Globals.AppSettings.ScenarioDataDirectory != null && File.Exists(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv")))
+            if (ESME.Globals.AppSettings != null && ESME.Globals.AppSettings.ScenarioDataDirectory != null && File.Exists(Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv")))
                 InitializeEnvironmentManager();
             else
-                _messageBoxService.ShowError("The One Navy Model is not fully configured, and may not function properly.  Please complete the configuration wizard or fill in the proper configuration details in the Application Options Configuration dialog.");
+                _messageBoxService.ShowError("The ESME Workbench is not fully configured, and may not function properly.  Please complete the configuration wizard or fill in the proper configuration details in the Application Options Configuration dialog.");
 
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             AreAllViewModelsReady = true;
@@ -208,7 +205,7 @@ namespace OneNavyModel.ViewModels.Main
         {
             try
             {
-                var vm = new NewRangeComplexViewModel(Globals.AppSettings);
+                var vm = new NewRangeComplexViewModel(ESME.Globals.AppSettings);
                 var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
                 if ((result.HasValue) && (result.Value))
                 {
@@ -300,7 +297,7 @@ namespace OneNavyModel.ViewModels.Main
         {
             try
             {
-                var vm = new NewOverlayViewModel(Globals.AppSettings, RangeComplexes.SelectedRangeComplex.Name);
+                var vm = new NewOverlayViewModel(ESME.Globals.AppSettings, RangeComplexes.SelectedRangeComplex.Name);
                 var result = _visualizerService.ShowDialog("NewOverlayView", vm);
                 if ((!result.HasValue) || (!result.Value)) return;
                 RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.CreateArea(vm.OverlayName, vm.OverlayGeos);

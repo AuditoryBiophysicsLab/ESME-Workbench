@@ -1,17 +1,14 @@
 ﻿using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 using Cinch;
 using ESME;
-using ESME.Environment;
-using ESME.Environment.Descriptors;
 using ESME.TransmissionLoss;
+using ESMEWorkBench.Data;
+using ESMEWorkBench.Properties;
+using ESMEWorkBench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
-using OneNavyModel.Data;
-using OneNavyModel.Properties;
-using OneNavyModel.ViewModels.TransmissionLoss;
 
-namespace OneNavyModel.ViewModels.Main
+namespace ESMEWorkBench.ViewModels.Main
 {
     public partial class MainViewModel
     {

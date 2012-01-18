@@ -5,9 +5,8 @@ using System.Text;
 using Cinch;
 using ESME.Data;
 using ESME.NEMO;
-using ESMEWorkBench;
 
-namespace OneNavyModel.ViewModels.NAVO
+namespace ESMEWorkBench.ViewModels.NAVO
 {
     public class ScenarioSimulatorOptionsViewModel : ViewModelBase
     {

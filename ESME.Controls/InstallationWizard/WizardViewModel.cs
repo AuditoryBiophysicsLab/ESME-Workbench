@@ -28,8 +28,8 @@ namespace ESME.Views.InstallationWizard
                     new WizardPanelInfo
                     {
                             DescriptiveText =
-                                    "Welcome to the One Navy Model Configuration Wizard.\n\n" +
-                                    "The next several panes of this wizard will help configure the One Navy Model.\n\n" +
+                                    "Welcome to the ESME Workbench Configuration Wizard.\n\n" +
+                                    "The next several panes of this wizard will help configure ESME Workbench.\n\n" +
                                     "Please press Next to continue, or Cancel to exit without saving changes.",
                             IsFileBrowerEnabled = false,
                             UserResponse = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
@@ -44,7 +44,7 @@ namespace ESME.Views.InstallationWizard
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "Some components of the One Navy Model require Java to run.\n\n" +
+                                   "Some components of ESME Workbench require Java to run.\n\n" +
                                    "Please select the installed javaw.exe executable.\n\n" +
                                    "If Java is not installed, the latest Java Runtime Environment (JRE) can be downloaded from http://www.oracle.com/technetwork/java/javase/downloads/index.html",
                                    Hyperlink =
@@ -65,7 +65,7 @@ namespace ESME.Views.InstallationWizard
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "The Naval Undersea Warfare Center (NUWC) provides a collection of java applications necessary for the proper operation of the One Navy Model.\n\n" +
+                                   "The Naval Undersea Warfare Center (NUWC) provides a collection of java applications necessary for the proper operation of ESME Workbench.\n\n" +
                                    "Please select the NUWC Scenario Builder (scenario-builder.jar) that is stored in a directory containing the complete NUWC application collection.",
                                    FieldName = "NUWC Application (*.jar)",
                                    DialogTitle = "Locate the Scenario Builder (scenario-builder.jar)",
@@ -181,7 +181,7 @@ namespace ESME.Views.InstallationWizard
                                new WizardPanelInfo
                                {
                                        DescriptiveText =
-                                       "The High Frequency Bottom Loss (HFBL) database requires a seperate extraction tool for use.\n\n" +
+                                       "The High Frequency Bottom Loss (HFBL) database requires a separate extraction tool for use.\n\n" +
                                        "Please select the HFBL database extractor.\n\n",
                                        DialogTitle = "Locate the High Frequency Bottom Loss Database Extractor program",
                                        FieldName = "HFBL Extractor",
@@ -195,7 +195,7 @@ namespace ESME.Views.InstallationWizard
                                new WizardPanelInfo
                                {
                                        DescriptiveText =
-                                       "The Low Frequency Bottom Loss (LFBL) databases require a seperate extraction tool for use.\n\n" +
+                                       "The Low Frequency Bottom Loss (LFBL) databases require a separate extraction tool for use.\n\n" +
                                        "Please select the LFBL database extractor.\n\n",
                                        DialogTitle = "Locate the Low Frequency Bottom Loss Database Extractor program",
                                        FieldName = "LFBL Extractor",
@@ -231,7 +231,7 @@ namespace ESME.Views.InstallationWizard
                     {
                             DescriptiveText =
                                        "The Comprehensive Acoustic System Simulation (CASS) is a computer program that is designed to investigate the effects of the ocean’s variability on acoustic propagation and underwater acoustic systems." +
-                                       "CASS is required for use of the One Navy Model.\n\n" +
+                                       "CASS is required for use of ESME Workbench.\n\n" +
                                        "Please select the CASS executable.\n\n",
                             DialogTitle = "Locate the CASS Executable",
                             FieldName = "CASS Executable",
@@ -245,7 +245,7 @@ namespace ESME.Views.InstallationWizard
                     Panels.Add(new WizardPanelInfo
                     {
                             DescriptiveText =
-                                       "Some components of the One Navy Model bundled with One Navy Model require Python to run.\n\n" +
+                                       "Some components of ESME Workbench bundled with One Navy Model require Python to run.\n\n" +
                                        "Please select the installed pythonw.exe executable.\n\n" +
                                        "If Python is not installed, the latest version can be downloaded from www.python.org/download/releases/2.7.2/\n\n",
                             DialogTitle = "Locate the Python Executable",
@@ -260,7 +260,7 @@ namespace ESME.Views.InstallationWizard
                     Panels.Add(new WizardPanelInfo
                     {
                             DescriptiveText =
-                                       "The Comprehensive Acoustic System Simulation (CASS) requires a Python script to integrate with the One Navy Model.\n\n",
+                                       "The Comprehensive Acoustic System Simulation (CASS) requires a Python script to integrate with ESME Workbench.\n\n",
                             DialogTitle = "Locate the CASS Python script",
                             FieldName = "Python script",
                             FileNameFilter =
@@ -273,7 +273,7 @@ namespace ESME.Views.InstallationWizard
             Panels.Add(new WizardPanelInfo
             {
                 DescriptiveText =
-                           "The wizard has successfully configured all necessary parameters.\n\nPlease press the Finish button to complete configuration and launch One Navy Model, or Cancel to exit without saving changes.",
+                           "The wizard has successfully configured all necessary parameters.\n\nPlease press the Finish button to complete configuration and launch ESME Workbench, or Cancel to exit without saving changes.",
                 IsFileBrowerEnabled = false,
                 UserResponse = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                 //will always be a valid location; "next" button always lit.

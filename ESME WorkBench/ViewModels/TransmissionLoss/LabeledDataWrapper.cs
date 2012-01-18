@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using Cinch;
 
-namespace OneNavyModel.ViewModels.TransmissionLoss
+namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
     public class LabeledDataWrapper<T> : DataWrapper<T>
     {

@@ -1,59 +1,44 @@
-﻿<UserControl x:Class="OneNavyModel.Controls.LayerTreeView"
+﻿<UserControl x:Class="ESMEWorkBench.Controls.LayerTreeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-             xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views" 
-             xmlns:esme="clr-namespace:ESME.Mapping;assembly=ESME" 
+             xmlns:esme="clr-namespace:ESME.Mapping;assembly=ESME"
              xmlns:hrc="clr-namespace:HRC.WPF;assembly=HRC"
-             mef:ViewModelLocator.ViewModel="LayerListViewModel"
-             mc:Ignorable="d"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
+             xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views"
              d:DesignHeight="300"
-             d:DesignWidth="300">
-	<UserControl.Resources>
-		<Style x:Key="ContextMenuItemStyle">
-			<Setter Property="MenuItem.Header"
-			        Value="{Binding Header}" />
-			<Setter Property="MenuItem.ItemsSource"
-			        Value="{Binding Children}" />
-			<Setter Property="MenuItem.Command"
-			        Value="{Binding Command}" />
-			<Setter Property="MenuItem.Icon"
-			        Value="{Binding Icon}" />
-			<Setter Property="MenuItem.IsCheckable"
-			        Value="{Binding IsCheckable}" />
-            <Setter Property="MenuItem.IsChecked"
-			        Value="{Binding IsChecked}" />
-            <Setter Property="MenuItem.Visibility"
-			        Value="{Binding Visibility}" />
-            <Setter Property="MenuItem.CommandParameter"
-			        Value="{Binding}" />
-		</Style>
+             d:DesignWidth="300"
+             mef:ViewModelLocator.ViewModel="LayerListViewModel"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style x:Key="ContextMenuItemStyle">
+            <Setter Property="MenuItem.Header" Value="{Binding Header}" />
+            <Setter Property="MenuItem.ItemsSource" Value="{Binding Children}" />
+            <Setter Property="MenuItem.Command" Value="{Binding Command}" />
+            <Setter Property="MenuItem.Icon" Value="{Binding Icon}" />
+            <Setter Property="MenuItem.IsCheckable" Value="{Binding IsCheckable}" />
+            <Setter Property="MenuItem.IsChecked" Value="{Binding IsChecked}" />
+            <Setter Property="MenuItem.Visibility" Value="{Binding Visibility}" />
+            <Setter Property="MenuItem.CommandParameter" Value="{Binding}" />
+        </Style>
 
-		<Style x:Key="LayersViewItemStyle"
-		       TargetType="TreeViewItem">
-			<Setter Property="KeyboardNavigation.AcceptsReturn"
-			        Value="True" />
-			<Setter Property="views:VirtualToggleButton.IsVirtualToggleButton"
-			        Value="True" />
-			<Setter Property="views:VirtualToggleButton.IsChecked"
-			        Value="{Binding IsChecked}" />
+        <Style x:Key="LayersViewItemStyle" TargetType="TreeViewItem">
+            <Setter Property="KeyboardNavigation.AcceptsReturn" Value="True" />
+            <Setter Property="views:VirtualToggleButton.IsVirtualToggleButton" Value="True" />
+            <Setter Property="views:VirtualToggleButton.IsChecked" Value="{Binding IsChecked}" />
             <Setter Property="ToolTip" Value="{Binding ToolTip}" />
-			<Style.Triggers>
-				<Trigger Property="IsSelected"
-				         Value="True">
-					<Setter Property="FontWeight"
-					        Value="Bold" />
-				</Trigger>
-			</Style.Triggers>
-		</Style>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="FontWeight" Value="Bold" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
         <Style x:Key="ToolTipStyle" TargetType="Control">
             <Setter Property="Background" Value="Gainsboro" />
             <Setter Property="Foreground" Value="Black" />
         </Style>
-        <Style x:Key="ToolTipLefthandListViewStyle" 
-               TargetType="TextBlock">
+        <Style x:Key="ToolTipLefthandListViewStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="TextAlignment" Value="Right" />
             <Setter Property="Margin" Value="5 2 5 0" />
@@ -80,46 +65,46 @@
     </UserControl.Resources>
     <TreeView DockPanel.Dock="Top"
               Grid.IsSharedSizeScope="True"
- 	          ItemsSource="{Binding TreeViewRootNodes}">
+              ItemsSource="{Binding TreeViewRootNodes}">
         <TreeView.Resources>
-            <HierarchicalDataTemplate DataType="{x:Type esme:TreeNode}"
-                                      ItemsSource="{Binding Children}">
-                <TextBlock x:Name="TextBlock" Text="{Binding Name}" ContextMenuService.IsEnabled="{Binding HasContextMenu}">
+            <HierarchicalDataTemplate DataType="{x:Type esme:TreeNode}" ItemsSource="{Binding Children}">
+                <TextBlock x:Name="TextBlock"
+                           ContextMenuService.IsEnabled="{Binding HasContextMenu}"
+                           Text="{Binding Name}">
                     <TextBlock.ContextMenu>
-                        <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
-					                 ItemsSource="{Binding ContextMenu}" />
+                        <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}" ItemsSource="{Binding ContextMenu}" />
                     </TextBlock.ContextMenu>
                     <!--
-                    <TextBlock.ToolTip>
+                        <TextBlock.ToolTip>
                         <ToolTip DataContext="{Binding Path=DataContext, RelativeSource={RelativeSource TemplatedParent}}"
-                                 Style="{StaticResource ToolTipStyle}">
-                            <StackPanel HorizontalAlignment="Stretch" 
-                                        Orientation="Vertical">
-                                <TextBlock Style="{StaticResource ToolTipHeaderStyle}"
-                                           Text="{Binding Name}" />
-                                <Border BorderThickness="1" />
-                                <ListView ItemsSource="{Binding WrappedObject.Properties}" Style="{StaticResource ToolTipListViewStyle}"
-                                          HorizontalContentAlignment="Stretch" Grid.IsSharedSizeScope="True">
-                                    <ListView.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition SharedSizeGroup="Left"/>
-                                                    <ColumnDefinition SharedSizeGroup="Right"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" 
-                                                           Style="{StaticResource ToolTipLefthandListViewStyle}"
-                                                           Text="{Binding Key}" />
-                                                <TextBlock Grid.Column="1" 
-                                                           Style="{StaticResource ToolTipRighthandListViewStyle}"
-                                                           Text="{Binding Value}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListView.ItemTemplate>
-                                </ListView>
-                            </StackPanel>
+                        Style="{StaticResource ToolTipStyle}">
+                        <StackPanel HorizontalAlignment="Stretch"
+                        Orientation="Vertical">
+                        <TextBlock Style="{StaticResource ToolTipHeaderStyle}"
+                        Text="{Binding Name}" />
+                        <Border BorderThickness="1" />
+                        <ListView ItemsSource="{Binding WrappedObject.Properties}" Style="{StaticResource ToolTipListViewStyle}"
+                        HorizontalContentAlignment="Stretch" Grid.IsSharedSizeScope="True">
+                        <ListView.ItemTemplate>
+                        <DataTemplate>
+                        <Grid>
+                        <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="Left"/>
+                        <ColumnDefinition SharedSizeGroup="Right"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                        Style="{StaticResource ToolTipLefthandListViewStyle}"
+                        Text="{Binding Key}" />
+                        <TextBlock Grid.Column="1"
+                        Style="{StaticResource ToolTipRighthandListViewStyle}"
+                        Text="{Binding Value}" />
+                        </Grid>
+                        </DataTemplate>
+                        </ListView.ItemTemplate>
+                        </ListView>
+                        </StackPanel>
                         </ToolTip>
-                    </TextBlock.ToolTip>
+                        </TextBlock.ToolTip>
                     -->
                 </TextBlock>
             </HierarchicalDataTemplate>
@@ -129,57 +114,56 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="16" />
                             <ColumnDefinition Width="16" />
-                            <!--<ColumnDefinition Width="16" />-->
+                            <!--  <ColumnDefinition Width="16" />  -->
                             <ColumnDefinition Width="*" SharedSizeGroup="LayerName" />
                         </Grid.ColumnDefinitions>
-                        <CheckBox Focusable="False"
-				              Grid.Column="0"
-				              IsChecked="{Binding IsChecked}"
-				              VerticalAlignment="Center" />
-                        <Rectangle Width="12"
-				               RadiusX="3"
-				               RadiusY="3"
-				               Grid.Column="1"
-				               Height="12"
-				               Fill="{Binding LineColorBrush}"
-				               Visibility="{Binding IsLineColorVisible}"
-				               VerticalAlignment="Center"
-				               ToolTip="{Binding PointLineTooltip}">
+                        <CheckBox Grid.Column="0"
+                                  VerticalAlignment="Center"
+                                  Focusable="False"
+                                  IsChecked="{Binding IsChecked}" />
+                        <Rectangle Grid.Column="1"
+                                   Width="12"
+                                   Height="12"
+                                   VerticalAlignment="Center"
+                                   Fill="{Binding LineColorBrush}"
+                                   RadiusX="3"
+                                   RadiusY="3"
+                                   ToolTip="{Binding PointLineTooltip}"
+                                   Visibility="{Binding IsLineColorVisible}">
                             <Rectangle.ContextMenu>
-                                <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
-						             ItemsSource="{Binding LineOrPointPickerMenu}" />
+                                <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}" ItemsSource="{Binding LineOrPointPickerMenu}" />
                             </Rectangle.ContextMenu>
                         </Rectangle>
                         <!--
-                        <Rectangle Width="12"
-				               RadiusX="3"
-				               RadiusY="3"
-				               Grid.Column="2"
-				               Height="12"
-				               Fill="{Binding AreaColorBrush}"
-				               Visibility="{Binding IsAreaColorVisible}"
-				               VerticalAlignment="Center"
-				               ToolTip="Area color: Right click to change"
-				               Name="LineColor">
+                            <Rectangle Width="12"
+                            RadiusX="3"
+                            RadiusY="3"
+                            Grid.Column="2"
+                            Height="12"
+                            Fill="{Binding AreaColorBrush}"
+                            Visibility="{Binding IsAreaColorVisible}"
+                            VerticalAlignment="Center"
+                            ToolTip="Area color: Right click to change"
+                            Name="LineColor">
                             <Rectangle.ContextMenu>
-                                <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
-						             ItemsSource="{Binding AreaColorPickerMenu}" />
-                            </Rectangle.ContextMenu>
-                        </Rectangle>
-                        -->
-                        <TextBlock Text="{Binding Name, Mode=OneTime}"
-                               x:Name="LayerName"
-				               Grid.Column="2"/>
-                        <Grid.ContextMenu>
                             <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
-					             ItemsSource="{Binding ContextMenu}" />
+                            ItemsSource="{Binding AreaColorPickerMenu}" />
+                            </Rectangle.ContextMenu>
+                            </Rectangle>
+                        -->
+                        <TextBlock x:Name="LayerName"
+                                   Grid.Column="2"
+                                   Text="{Binding Name,
+                                                  Mode=OneTime}" />
+                        <Grid.ContextMenu>
+                            <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}" ItemsSource="{Binding ContextMenu}" />
                         </Grid.ContextMenu>
                     </Grid>
                 </DockPanel>
                 <DataTemplate.Triggers>
                     <DataTrigger Binding="{Binding IsValid}" Value="False">
                         <DataTrigger.Setters>
-                            <Setter TargetName="LayerName" Property="Foreground" Value="Red"/>
+                            <Setter TargetName="LayerName" Property="Foreground" Value="Red" />
                             <Setter TargetName="LayerName" Property="ToolTip" Value="{Binding ValidationErrorText}" />
                         </DataTrigger.Setters>
                     </DataTrigger>
@@ -188,8 +172,7 @@
         </TreeView.Resources>
         <hrc:ViewPropertyBinding.ViewPropertyBindings>
             <hrc:ViewPropertyCollection>
-                <hrc:ViewProperty Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type TreeView}}, Path=ActualWidth}"
-                                  Target="{Binding Path=TreeViewWidth, Mode=OneWayToSource}" />
+                <hrc:ViewProperty Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type TreeView}}, Path=ActualWidth}" Target="{Binding Path=TreeViewWidth, Mode=OneWayToSource}" />
             </hrc:ViewPropertyCollection>
         </hrc:ViewPropertyBinding.ViewPropertyBindings>
     </TreeView>

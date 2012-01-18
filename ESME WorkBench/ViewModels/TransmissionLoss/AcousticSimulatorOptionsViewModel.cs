@@ -1,8 +1,7 @@
 ﻿using Cinch;
 using ESME.Data;
-using ESMEWorkBench;
 
-namespace OneNavyModel.ViewModels.TransmissionLoss
+namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
     public class AcousticSimulatorOptionsViewModel : ViewModelBase
     {

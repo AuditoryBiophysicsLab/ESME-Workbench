@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Win32;
 
-namespace OneNavyModel.ViewModels.RecentFiles
+namespace ESMEWorkBench.ViewModels.RecentFiles
 {
     class RegistryPersister : IPersist
     {

@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using Cinch;
 
-namespace OneNavyModel.ViewModels.RecentFiles
+namespace ESMEWorkBench.ViewModels.RecentFiles
 {
     public class RecentFileList : ViewModelBase
     {

@@ -14,7 +14,7 @@ using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
 using HRC.Utility;
 
-namespace OneNavyModel.ViewModels.NAVO
+namespace ESMEWorkBench.ViewModels.NAVO
 {
     public class ExportAllEnvironmentalDataProgressViewModel:ViewModelBase
     {

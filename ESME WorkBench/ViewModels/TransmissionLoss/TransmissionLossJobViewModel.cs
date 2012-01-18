@@ -7,7 +7,7 @@ using ESME.NEMO;
 using ESME.TransmissionLoss;
 using HRC.Navigation;
 
-namespace OneNavyModel.ViewModels.TransmissionLoss
+namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
     public class TransmissionLossJobViewModel : EditableValidatingViewModelBase, IHasIDField
     {

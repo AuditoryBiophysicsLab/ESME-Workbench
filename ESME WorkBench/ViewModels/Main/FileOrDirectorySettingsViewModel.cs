@@ -2,7 +2,7 @@
 using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
-namespace OneNavyModel.ViewModels.Main
+namespace ESMEWorkBench.ViewModels.Main
 {
     [ExportViewModel("FileOrDirectorySettingsViewModel")]
     internal class FileOrDirectorySettingsViewModel : ViewModelBase
