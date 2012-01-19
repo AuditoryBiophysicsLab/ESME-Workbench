@@ -222,7 +222,6 @@
     <Compile Include="NEMO\NemoSource.cs" />
     <Compile Include="NEMO\NemoSpecies.cs" />
     <Compile Include="NEMO\NemoTrackdef.cs" />
-    <Compile Include="NewNEMO\NemoScenario.cs" />
     <Compile Include="Platform\ActiveMode.cs" />
     <Compile Include="NEMO\ActiveTimeStep.cs" />
     <Compile Include="Platform\BehaviorModel.cs" />
@@ -233,6 +232,7 @@
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNL.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLInput.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLOutput.cs" />
+    <Compile Include="TransmissionLoss\Calculator\TransmissionLossQueue.cs" />
     <Compile Include="TransmissionLoss\CASS\CASSBackgroundExporter.cs" />
     <Compile Include="TransmissionLoss\CASS\NAEMOEnvironmentFile.cs" />
     <Compile Include="TransmissionLoss\CASS\CASSOutput.cs" />
