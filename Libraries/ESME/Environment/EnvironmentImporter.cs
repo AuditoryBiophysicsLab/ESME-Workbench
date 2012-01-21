@@ -266,8 +266,8 @@ namespace ESME.Environment
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = 4,
-                MaxDegreeOfParallelism = 4,
+                BoundedCapacity = 1,
+                MaxDegreeOfParallelism = 1,
             });
             BathymetryProgress = new ImportProgressViewModel("Bathymetry", BathymetryWorker);
 

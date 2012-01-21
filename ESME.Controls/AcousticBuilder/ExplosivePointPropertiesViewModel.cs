@@ -397,14 +397,14 @@ namespace ESME.Views.AcousticBuilder
         public void UpdateEnvironmentData()
         {
             var curLocation = new Geo(Latitude, Longitude);
-            var tempData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[ExplosivePoint.TimePeriod].EnvironmentData[curLocation];
-            var salData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[ExplosivePoint.TimePeriod].EnvironmentData[curLocation];
-            var sspData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[ExplosivePoint.TimePeriod].EnvironmentData[curLocation];
+            var tempData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[ExplosivePoint.TimePeriod].EnvironmentData.GetNearestPoint(curLocation);
+            var salData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[ExplosivePoint.TimePeriod].EnvironmentData.GetNearestPoint(curLocation);
+            var sspData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[ExplosivePoint.TimePeriod].EnvironmentData.GetNearestPoint(curLocation);
             SVPLocation = new Geo(sspData);
             NotifyPropertyChanged(SVPFilenameChangedEventArgs);
-            var bottomLossData = ((Task<BottomLoss>)EnvironmentData[EnvironmentDataType.BottomLoss]).Result.Samples[curLocation].Data;
-            DepthLimit = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples[curLocation].Data);
-            SVPWaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples[SVPLocation].Data);
+            var bottomLossData = ((Task<BottomLoss>)EnvironmentData[EnvironmentDataType.BottomLoss]).Result.Samples.GetNearestPoint(curLocation).Data;
+            DepthLimit = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GetNearestPoint(curLocation).Data);
+            SVPWaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GetNearestPoint(SVPLocation).Data);
 
             var temperatureData = new double[tempData.Data.Count];
             var depthData = new double[tempData.Data.Count];

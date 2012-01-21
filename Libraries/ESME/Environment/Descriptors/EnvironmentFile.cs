@@ -234,7 +234,7 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
-        public static SoundSpeed CalculateSoundSpeed(NewRangeComplex rangeComplex, NAVOTimePeriod timePeriod, Task<Bathymetry> bathymetryTask, GeoRect bathymetryBounds)
+        public static SoundSpeed CalculateSoundSpeed(RangeComplex rangeComplex, NAVOTimePeriod timePeriod, Task<Bathymetry> bathymetryTask, GeoRect bathymetryBounds)
         {
             if (rangeComplex == null) throw new ArgumentException("rangeComplex");
             if (timePeriod == NAVOTimePeriod.Invalid) throw new ArgumentException("timePeriod");
@@ -291,7 +291,7 @@ namespace ESME.Environment.Descriptors
             return continuation.Result;            
         }
 
-        public static SoundSpeed SeasonalAverage(NewRangeComplex rangeComplex, NAVOTimePeriod timePeriod, EnvironmentDataType dataType)
+        public static SoundSpeed SeasonalAverage(RangeComplex rangeComplex, NAVOTimePeriod timePeriod, EnvironmentDataType dataType)
         {
             if (rangeComplex == null) throw new ArgumentException("rangeComplex");
             if (timePeriod == NAVOTimePeriod.Invalid) throw new ArgumentException("timePeriod");

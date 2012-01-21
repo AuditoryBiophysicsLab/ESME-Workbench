@@ -20,14 +20,14 @@ using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
-    public class RangeComplexes : ViewModelBase, IEnumerable<KeyValuePair<string, NewRangeComplex>>, INotifyCollectionChanged
+    public class RangeComplexes : ViewModelBase, IEnumerable<KeyValuePair<string, RangeComplex>>, INotifyCollectionChanged
     {
         RangeComplexes(Dispatcher dispatcher = null)
         {
             _dispatcher = dispatcher ?? Dispatcher.CurrentDispatcher;
 
-            RangeComplexCollection = new ObservableConcurrentDictionary<string, NewRangeComplex>();
-            RangeComplexList = ObservableList<NewRangeComplex>.FromObservableConcurrentDictionary(RangeComplexCollection, kvp => kvp.Value, (kvp, rc) => kvp.Value == rc);
+            RangeComplexCollection = new ObservableConcurrentDictionary<string, RangeComplex>();
+            RangeComplexList = ObservableList<RangeComplex>.FromObservableConcurrentDictionary(RangeComplexCollection, kvp => kvp.Value, (kvp, rc) => kvp.Value == rc);
         }
 
         #region Private fields
@@ -54,9 +54,9 @@ namespace ESME.Environment.Descriptors
 
 
         [NotNull]
-        public ObservableConcurrentDictionary<string, NewRangeComplex> RangeComplexCollection { get; private set; }
+        public ObservableConcurrentDictionary<string, RangeComplex> RangeComplexCollection { get; private set; }
 
-        public ObservableList<NewRangeComplex> RangeComplexList { get; private set; }
+        public ObservableList<RangeComplex> RangeComplexList { get; private set; }
 
         public Task<bool> ReadRangeComplexFile(string fileName)
         {
@@ -94,7 +94,7 @@ namespace ESME.Environment.Descriptors
 		        {
 		            try
 		            {
-                        var rangeComplex = NewRangeComplex.Load(SimAreaPath, info, _dispatcher);
+                        var rangeComplex = RangeComplex.Load(SimAreaPath, info, _dispatcher);
                         _dispatcher.InvokeInBackgroundIfRequired(() => RangeComplexCollection.Add(rangeComplex.Name, rangeComplex));
 		            }
 		            catch (Exception e)
@@ -160,12 +160,12 @@ namespace ESME.Environment.Descriptors
         static RangeComplexes _instance;
         public static RangeComplexes Singleton { get { return _instance ?? (_instance = new RangeComplexes()); } }
 
-        public NewRangeComplex this[string rangeComplexName]
+        public RangeComplex this[string rangeComplexName]
         {
             get { return RangeComplexCollection[rangeComplexName]; }
         }
 
-        public NewRangeComplex CreateRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, ICollection<Geo> opAreaLimits, List<Geo> simAreaLimits)
+        public RangeComplex CreateRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, ICollection<Geo> opAreaLimits, List<Geo> simAreaLimits)
         {
             if (opAreaLimits == null) throw new ArgumentNullException("opAreaLimits");
             if (simAreaLimits == null) throw new ArgumentNullException("simAreaLimits");
@@ -177,7 +177,7 @@ namespace ESME.Environment.Descriptors
 
             if (Directory.Exists(rangeComplexPath)) Directory.Delete(rangeComplexPath, true);
             var rangeComplexMetadata = new RangeComplexMetadata(rangeComplexName, height, latitude, longitude, geoid, rangeComplexName + "_OpArea.ovr", rangeComplexName + "_SimArea.ovr");
-            var result = NewRangeComplex.Create(SimAreaPath, rangeComplexMetadata, opAreaLimits, simAreaLimits, _dispatcher);
+            var result = RangeComplex.Create(SimAreaPath, rangeComplexMetadata, opAreaLimits, simAreaLimits, _dispatcher);
 
             lock (_lockObject)
             {
@@ -227,7 +227,7 @@ namespace ESME.Environment.Descriptors
 
 		//public async Task<RangeComplex> AddAsync(string rangeComplexName, List<Geo> opAreaLimits, List<Geo> simAreaLimits){}
         IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-        public IEnumerator<KeyValuePair<string, NewRangeComplex>> GetEnumerator()
+        public IEnumerator<KeyValuePair<string, RangeComplex>> GetEnumerator()
         {
             return RangeComplexCollection.GetEnumerator();
         }
@@ -267,9 +267,9 @@ namespace ESME.Environment.Descriptors
             }
         }
 
-        #region public NewRangeComplex SelectedRangeComplex { get; set; }
+        #region public RangeComplex SelectedRangeComplex { get; set; }
 
-        public NewRangeComplex SelectedRangeComplex
+        public RangeComplex SelectedRangeComplex
         {
             get { return _selectedRangeComplex; }
             set
@@ -282,7 +282,7 @@ namespace ESME.Environment.Descriptors
         }
 
         static readonly PropertyChangedEventArgs SelectedRangeComplexChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedRangeComplex);
-        NewRangeComplex _selectedRangeComplex;
+        RangeComplex _selectedRangeComplex;
 
         #endregion
 

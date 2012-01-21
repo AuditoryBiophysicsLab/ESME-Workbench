@@ -362,13 +362,13 @@ namespace ESME.TransmissionLoss.REFMS
 
         public void UpdateEnvironmentData()
         {
-            var temperatureData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[TimePeriod].EnvironmentData[this];
-            var salinityData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[TimePeriod].EnvironmentData[this];
-            var soundSpeedData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[TimePeriod].EnvironmentData[this];
+            var temperatureData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[TimePeriod].EnvironmentData.GetNearestPoint(this);
+            var salinityData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[TimePeriod].EnvironmentData.GetNearestPoint(this);
+            var soundSpeedData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[TimePeriod].EnvironmentData.GetNearestPoint(this);
             SVPLocation = new Geo(soundSpeedData);
-            BottomLossData = ((Task<BottomLoss>)EnvironmentData[EnvironmentDataType.BottomLoss]).Result.Samples[this].Data;
-            WaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples[this].Data);
-            SVPWaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples[SVPLocation].Data);
+            BottomLossData = ((Task<BottomLoss>)EnvironmentData[EnvironmentDataType.BottomLoss]).Result.Samples.GetNearestPoint(this).Data;
+            WaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GetNearestPoint(this).Data);
+            SVPWaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GetNearestPoint(SVPLocation).Data);
             GeoRect = ((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GeoRect;
 
             TemperatureData = new double[temperatureData.Data.Count];

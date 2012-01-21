@@ -139,13 +139,12 @@
     <Compile Include="Environment\Descriptors\Deprecated\NAEMOEnvironmentDescriptors.cs" />
     <Compile Include="Environment\Descriptors\Deprecated\NAEMOOverlayDescriptor.cs" />
     <Compile Include="Environment\Descriptors\Deprecated\NAEMOOverlayDescriptors.cs" />
-    <Compile Include="Environment\Descriptors\NewRangeComplex.cs" />
+    <Compile Include="Environment\Descriptors\RangeComplex.cs" />
     <Compile Include="Environment\Descriptors\RangeComplexArea.cs" />
     <Compile Include="Environment\Descriptors\RangeComplexes.cs" />
     <Compile Include="Environment\Descriptors\RangeComplexToken.cs" />
     <Compile Include="Environment\Descriptors\Selector.cs" />
     <Compile Include="Environment\Environment.cs" />
-    <Compile Include="Environment\Environment2DData.cs" />
     <Compile Include="Environment\EnvironmentData.cs" />
     <Compile Include="Environment\EnvironmentImporter.cs" />
     <Compile Include="Environment\EnvironmentMetadata.cs" />

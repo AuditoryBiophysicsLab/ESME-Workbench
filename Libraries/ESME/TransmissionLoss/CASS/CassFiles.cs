@@ -10,6 +10,7 @@ using ESME.Environment.NAVO;
 using ESME.NEMO;
 using HRC.Collections;
 using HRC.Navigation;
+using RangeComplex = ESME.Environment.Descriptors.RangeComplex;
 
 namespace ESME.TransmissionLoss.CASS
 {
@@ -108,7 +109,7 @@ namespace ESME.TransmissionLoss.CASS
                 }
         }
 
-        public static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, TransmissionLossAlgorithm simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName, string cassEnvironmentFileName, NewRangeComplex rangeComplex)
+        public static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, TransmissionLossAlgorithm simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName, string cassEnvironmentFileName, RangeComplex rangeComplex)
         {
             var nemoScenario = nemoFile.Scenario;
 
@@ -286,20 +287,20 @@ namespace ESME.TransmissionLoss.CASS
                 for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
                 {
                     var curLocation = new Geo(lat, lon);
-                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData.Nearest(curLocation));
-                    windSamples.Add((wind.EnvironmentData.Nearest(curLocation)));
-                    sedimentPoints.Add(sedimentType.Samples.Nearest(curLocation));
+                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData.GetNearestPoint(curLocation));
+                    windSamples.Add((wind.EnvironmentData.GetNearestPoint(curLocation)));
+                    sedimentPoints.Add(sedimentType.Samples.GetNearestPoint(curLocation));
                     requestedLocations.Add(curLocation);
-                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples.Nearest(curLocation));
+                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples.GetNearestPoint(curLocation));
                 }
                 if ((lat - geoRect.North) < 0.125)
                 {
                     var curLocation = new Geo(lat, lon);
-                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData.Nearest(curLocation));
-                    windSamples.Add((wind.EnvironmentData.Nearest(curLocation)));
-                    sedimentPoints.Add(sedimentType.Samples.Nearest(curLocation));
+                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData.GetNearestPoint(curLocation));
+                    windSamples.Add((wind.EnvironmentData.GetNearestPoint(curLocation)));
+                    sedimentPoints.Add(sedimentType.Samples.GetNearestPoint(curLocation));
                     requestedLocations.Add(curLocation);
-                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples.Nearest(curLocation));
+                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples.GetNearestPoint(curLocation));
                 }
             }
             if ((lon - geoRect.East) < 0.125)
@@ -307,11 +308,11 @@ namespace ESME.TransmissionLoss.CASS
                 for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
                 {
                     var curLocation = new Geo(lat, lon);
-                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData.Nearest(curLocation));
-                    windSamples.Add((wind.EnvironmentData.Nearest(curLocation)));
-                    sedimentPoints.Add(sedimentType.Samples.Nearest(curLocation));
+                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData.GetNearestPoint(curLocation));
+                    windSamples.Add((wind.EnvironmentData.GetNearestPoint(curLocation)));
+                    sedimentPoints.Add(sedimentType.Samples.GetNearestPoint(curLocation));
                     requestedLocations.Add(curLocation);
-                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples.Nearest(curLocation));
+                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples.GetNearestPoint(curLocation));
                 }
             }
             WriteEnvironmentFiles(soundSpeedField.TimePeriod, requestedLocations, environmentFileName, sedimentPoints, soundSpeedProfiles, windSamples, bathymetryFileName, overlayFileName, bottomLossPoints);

@@ -481,7 +481,7 @@ namespace ESME.Animats
                 curAnimat = AnimatList[i];
                 // Make sure the animat is still contained in the current bathymetry dataset, and if so get the depth at the animat's current position
                 // Update the depth at the animat's current position
-                _mbsBathymetry[i] = Bathymetry.Samples[curAnimat.Location].Data;
+                _mbsBathymetry[i] = Bathymetry.Samples.GetNearestPoint(curAnimat.Location).Data;
             } // for (animats)
             if (mbsRESULT.OK != (result = _mmmbs.SetAnimatBathymetry(_mbsBathymetry)))
             {

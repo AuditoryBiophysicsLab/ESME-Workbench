@@ -13,6 +13,7 @@ using ESME.Environment.NAVO;
 using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
 using HRC.Utility;
+using RangeComplex = ESME.Environment.Descriptors.RangeComplex;
 
 namespace ESMEWorkBench.ViewModels.NAVO
 {
@@ -68,7 +69,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         int _environmentFileCountMultiplier = 1;
 
-        void ExportAll(NewRangeComplex rangeComplex, Dispatcher dispatcher, CancellationToken cancellationToken, IProgress<ProgressInfoInt> bathymetryProgress = null, IProgress<ProgressInfoInt> environmentProgress = null)
+        void ExportAll(RangeComplex rangeComplex, Dispatcher dispatcher, CancellationToken cancellationToken, IProgress<ProgressInfoInt> bathymetryProgress = null, IProgress<ProgressInfoInt> environmentProgress = null)
         {
             var bathymetryMax = 0;
             var bathymetryCount = 0;
@@ -105,8 +106,8 @@ namespace ESMEWorkBench.ViewModels.NAVO
                     var windSamples = new List<WindSample>();
                     foreach (var location in locations)
                     {
-                        soundSpeedProfiles.Add(soundSpeedTask.Result[period].EnvironmentData[location]);
-                        windSamples.Add((windTask.Result[period].EnvironmentData[location]));
+                        soundSpeedProfiles.Add(soundSpeedTask.Result[period].EnvironmentData.GetNearestPoint(location));
+                        windSamples.Add((windTask.Result[period].EnvironmentData.GetNearestPoint(location)));
                     }
                     CASSFiles.WriteEnvironmentFiles(period, locations, cassEnvironmentFileName, sedimentList, soundSpeedProfiles, windSamples, bathyFileName, area.Name + ".ovr", bottomLossList);
                     if (environmentProgress != null) environmentProgress.Report(new ProgressInfoInt
@@ -203,8 +204,10 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
                 foreach (var location in requestedLocations)
                 {
-                    sedimentPoints.Add(sedimentTask.Result.Samples.Nearest(location));
-                    if (bottomLossTask.Result != null && bottomLossTask.Result.Samples != null && bottomLossTask.Result.Samples.Count > 0) bottomLossPoints.Add(bottomLossTask.Result.Samples[location.Longitude, location.Latitude]);
+                    sedimentPoints.Add(sedimentTask.Result.Samples.GetNearestPoint(location));
+                    BottomLossSample sample;
+                    if (bottomLossTask.Result != null && bottomLossTask.Result.Samples != null && bottomLossTask.Result.Samples.Count > 0)
+                        if (bottomLossTask.Result.Samples.TryGetExactPoint(location, out sample)) bottomLossPoints.Add(sample);
                 }
 
                 foreach (var resolution in area.BathymetryList)
@@ -234,7 +237,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
             areaBuffer.Complete();
         }
 
-        public ExportAllEnvironmentalDataProgressViewModel(NewRangeComplex rangeComplex, Dispatcher dispatcher) 
+        public ExportAllEnvironmentalDataProgressViewModel(RangeComplex rangeComplex, Dispatcher dispatcher) 
         {
             BathymetryProgress = new ProgressInfoInt
             {

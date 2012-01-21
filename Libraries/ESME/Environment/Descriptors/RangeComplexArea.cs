@@ -16,7 +16,7 @@ namespace ESME.Environment.Descriptors
 {
     public class RangeComplexArea : ViewModelBase
     {
-        RangeComplexArea(NewRangeComplex rangeComplex, string areaName, OverlayShape overlayShape)
+        RangeComplexArea(RangeComplex rangeComplex, string areaName, OverlayShape overlayShape)
         {
             IsEnabled = false;
             _rangeComplex = rangeComplex;
@@ -83,7 +83,7 @@ namespace ESME.Environment.Descriptors
 
         public bool CanBeDeleted { get { return (_rangeComplex.OpArea.Name != Name) && (_rangeComplex.SimArea.Name != Name); } }
 
-        internal static RangeComplexArea Create(NewRangeComplex rangeComplex, string areaName, IEnumerable<Geo> limits)
+        internal static RangeComplexArea Create(RangeComplex rangeComplex, string areaName, IEnumerable<Geo> limits)
         {
             var areaPath = Path.Combine(rangeComplex.AreasPath, areaName + ".ovr");
             if (File.Exists(areaPath)) throw new InvalidOperationException(string.Format("Area {0} overlay already exists", areaName));
@@ -93,7 +93,7 @@ namespace ESME.Environment.Descriptors
             return new RangeComplexArea(rangeComplex, areaName, overlay.Shapes[0]);
         }
 
-        internal static RangeComplexArea Read(NewRangeComplex rangeComplex, string areaName)
+        internal static RangeComplexArea Read(RangeComplex rangeComplex, string areaName)
         {
             var areaPath = Path.Combine(rangeComplex.AreasPath, areaName + ".ovr");
             var overlay = new OverlayFile(areaPath);
@@ -163,7 +163,7 @@ namespace ESME.Environment.Descriptors
         [NotNull] public OverlayShape OverlayShape { get; private set; }
 
         [NotNull] public RangeComplexToken BathymetryFiles { get; private set; }
-        [NotNull] readonly NewRangeComplex _rangeComplex;
+        [NotNull] readonly RangeComplex _rangeComplex;
 
         static readonly List<uint> AvailableSampleCountsPerDegree = new List<uint> { 30, 60, 120, 600, 1200 };
     }

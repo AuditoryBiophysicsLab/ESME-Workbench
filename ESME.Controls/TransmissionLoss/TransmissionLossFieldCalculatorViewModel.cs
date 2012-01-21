@@ -199,8 +199,8 @@ namespace ESME.Views.TransmissionLoss
                 var bathymetry = ((Task<Bathymetry>)_environmentData[EnvironmentDataType.Bathymetry]).Result;
                 bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, bathymetry);
                 maxCalculationDepthMeters = Math.Max((float)bottomProfiles[bearingIndex].MaxDepth, maxCalculationDepthMeters);
-                soundSpeedProfiles[bearingIndex] = ((Task<SoundSpeed>)_environmentData[EnvironmentDataType.SoundSpeed]).Result[TransmissionLossRunFile.TimePeriod].EnvironmentData[curTransect.MidPoint];
-                windSpeeds[bearingIndex] = ((Task<Wind>)_environmentData[EnvironmentDataType.Wind]).Result[TransmissionLossRunFile.TimePeriod].EnvironmentData[curTransect.MidPoint].Data;
+                soundSpeedProfiles[bearingIndex] = ((Task<SoundSpeed>)_environmentData[EnvironmentDataType.SoundSpeed]).Result[TransmissionLossRunFile.TimePeriod].EnvironmentData.GetNearestPoint(curTransect.MidPoint);
+                windSpeeds[bearingIndex] = ((Task<Wind>)_environmentData[EnvironmentDataType.Wind]).Result[TransmissionLossRunFile.TimePeriod].EnvironmentData.GetNearestPoint(curTransect.MidPoint).Data;
             }
             maxCalculationDepthMeters *= 1.1f;
             //maxCalculationDepthMeters = 2000;
@@ -208,7 +208,7 @@ namespace ESME.Views.TransmissionLoss
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
-                var sedimentType = ((Task<Sediment>)_environmentData[EnvironmentDataType.Sediment]).Result.Samples[transmissionLossJob.SoundSource];
+                var sedimentType = ((Task<Sediment>)_environmentData[EnvironmentDataType.Sediment]).Result.Samples.GetNearestPoint(transmissionLossJob.SoundSource);
                 TransmissionLossRadialCalculatorViewModel radialViewModel;
                 double[,] topReflectionCoefficient = null;
                 if (!float.IsNaN(windSpeeds[bearingIndex])) topReflectionCoefficient = Bellhop.GenerateReflectionCoefficients(windSpeeds[bearingIndex], transmissionLossJob.SoundSource.AcousticProperties.Frequency);

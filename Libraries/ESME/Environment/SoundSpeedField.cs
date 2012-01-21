@@ -75,7 +75,7 @@ namespace ESME.Environment
                 throw new ApplicationException("SoundSpeedField: Unable to extend to max bathymetry depth. Temperature and/or salinity data are missing.");
 
             if (DeepestPoint.Data > DeepestSSP.Data.MaxDepth)
-                DeepestSSP.Extend(DeepestPoint.Data, temperatureData.EnvironmentData[DeepestSSP.Longitude, DeepestSSP.Latitude], salinityData.EnvironmentData[DeepestSSP.Longitude, DeepestSSP.Latitude]);
+                DeepestSSP.Extend(DeepestPoint.Data, temperatureData.EnvironmentData.GetExactPoint(DeepestSSP), salinityData.EnvironmentData.GetExactPoint(DeepestSSP));
 
             foreach (var profile in EnvironmentData.Where(profile => profile != DeepestSSP))
                 profile.Extend(DeepestSSP);
@@ -85,7 +85,7 @@ namespace ESME.Environment
         {
             if (temperatureField.TimePeriod != salinityField.TimePeriod) throw new DataException("");
             VerifyThatProfilePointsMatch(temperatureField, salinityField);
-            var environmentData = temperatureField.EnvironmentData.Select(temperatureProfile => ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]));
+            var environmentData = temperatureField.EnvironmentData.Select(temperatureProfile => ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData.GetNearestPoint(temperatureProfile)));
             var result = new SoundSpeedField { TimePeriod = temperatureField.TimePeriod };
             result.EnvironmentData.AddRange(environmentData);
             return result;
@@ -108,7 +108,7 @@ namespace ESME.Environment
             //var sb = new StringBuilder();
             foreach (var temperatureProfile in temperatureField.EnvironmentData)
             {
-                var salinityProfile = salinityField.EnvironmentData[temperatureProfile.Longitude, temperatureProfile.Latitude];
+                var salinityProfile = salinityField.EnvironmentData.GetExactPoint(temperatureProfile);
                 if (salinityProfile == null) continue;
                 var profile = ChenMilleroLi.SoundSpeed(temperatureProfile, salinityProfile);
                 environmentData.Add(profile);

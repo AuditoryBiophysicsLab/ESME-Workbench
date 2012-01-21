@@ -13,10 +13,10 @@ namespace ESME.Views.EnvironmentBuilder
 {
     public class RangeComplexTreeViewModel : RangeComplexTreeItem
     {
-        readonly NewRangeComplex _rangeComplex;
+        readonly RangeComplex _rangeComplex;
         readonly List<RangeComplexTreeItem> _treeItems = new List<RangeComplexTreeItem>();
         bool _once = true;
-        public RangeComplexTreeViewModel(NewRangeComplex rangeComplex) 
+        public RangeComplexTreeViewModel(RangeComplex rangeComplex) 
         {
             _rangeComplex = rangeComplex;
             ResetTree();

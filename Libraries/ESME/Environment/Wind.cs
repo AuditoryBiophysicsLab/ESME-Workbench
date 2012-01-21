@@ -135,10 +135,20 @@ namespace ESME.Environment
                 EnvironmentData = environmentData
             };
             // Set each data point in the result set to the average of each corresponding non-null point in the source data
+            var sourceList = new List<float>();
             foreach (var location in result.EnvironmentData)
-                location.Data = (from source in requiredSources
-                                 where source.EnvironmentData[location.Longitude, location.Latitude] != null
-                                 select source.EnvironmentData[location.Longitude, location.Latitude].Data).Average();
+            {
+                // Clear the list for each location
+                sourceList.Clear();
+                foreach (var source in requiredSources)
+                {
+                    WindSample sample;
+                    // If a given source month contains data for the current location, add the data to the list
+                    if (source.EnvironmentData.TryGetExactPoint(location, out sample)) sourceList.Add(sample.Data);
+                }
+                // Set the resulting data to the average of the sample values that are present for the current location in the specified source months
+                location.Data = sourceList.Average();
+            }
             return result;
         }
 

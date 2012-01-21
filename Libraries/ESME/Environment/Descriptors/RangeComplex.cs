@@ -16,9 +16,9 @@ using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
-    public class NewRangeComplex : ViewModelBase
+    public class RangeComplex : ViewModelBase
     {
-        NewRangeComplex(string simAreaPath, RangeComplexMetadata rangeComplexMetadata, bool isCreate, Dispatcher dispatcher)
+        RangeComplex(string simAreaPath, RangeComplexMetadata rangeComplexMetadata, bool isCreate, Dispatcher dispatcher)
         {
             IsLoading = true;
             _dispatcher = dispatcher;
@@ -242,14 +242,14 @@ namespace ESME.Environment.Descriptors
             }
         }
 
-        static readonly PropertyChangedEventArgs ToolTipChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.ToolTip);
+        static readonly PropertyChangedEventArgs ToolTipChangedEventArgs = ObservableHelper.CreateArgs<RangeComplex>(x => x.ToolTip);
         string _toolTip;
 
         #endregion
 
-        internal static NewRangeComplex Create(string simAreaPath, RangeComplexMetadata rangeComplexMetadata, IEnumerable<Geo> opAreaLimits, IEnumerable<Geo> simAreaLimits, Dispatcher dispatcher)
+        public static RangeComplex Create(string simAreaPath, RangeComplexMetadata rangeComplexMetadata, IEnumerable<Geo> opAreaLimits, IEnumerable<Geo> simAreaLimits, Dispatcher dispatcher)
         {
-            var result = new NewRangeComplex(simAreaPath, rangeComplexMetadata, true, dispatcher);
+            var result = new RangeComplex(simAreaPath, rangeComplexMetadata, true, dispatcher);
             result.OpArea = result.CreateAreaPrivate(String.Format("{0}_OpArea", rangeComplexMetadata.Name), opAreaLimits);
             result.SimArea = result.CreateAreaPrivate(String.Format("{0}_SimArea", rangeComplexMetadata.Name), simAreaLimits);
             result.UpdateAreas();
@@ -257,9 +257,9 @@ namespace ESME.Environment.Descriptors
             return result;
         }
 
-        internal static NewRangeComplex Load(string simAreaPath, RangeComplexMetadata rangeComplexMetadata, Dispatcher dispatcher)
+        public static RangeComplex Load(string simAreaPath, RangeComplexMetadata rangeComplexMetadata, Dispatcher dispatcher)
         {
-            var result = new NewRangeComplex(simAreaPath, rangeComplexMetadata, false, dispatcher);
+            var result = new RangeComplex(simAreaPath, rangeComplexMetadata, false, dispatcher);
             try
             {
                 result.OpArea = result.AreaCollection[Path.GetFileNameWithoutExtension(rangeComplexMetadata.OpsLimitFile)];
@@ -306,7 +306,7 @@ namespace ESME.Environment.Descriptors
             }
         }
 
-        static readonly PropertyChangedEventArgs LoadTaskTotalChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.QueuedJobCount);
+        static readonly PropertyChangedEventArgs LoadTaskTotalChangedEventArgs = ObservableHelper.CreateArgs<RangeComplex>(x => x.QueuedJobCount);
         int _queuedJobCount;
 
         #endregion
@@ -333,7 +333,7 @@ namespace ESME.Environment.Descriptors
             IsLoading = isLoading;
         }
 
-        static readonly PropertyChangedEventArgs LoadTasksCompletedChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.CompletedJobCount);
+        static readonly PropertyChangedEventArgs LoadTasksCompletedChangedEventArgs = ObservableHelper.CreateArgs<RangeComplex>(x => x.CompletedJobCount);
         #endregion
 
         #region public int ImportProgressPercent { get; set; }
@@ -349,7 +349,7 @@ namespace ESME.Environment.Descriptors
             }
         }
 
-        static readonly PropertyChangedEventArgs LoadProgressChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.ImportProgressPercent);
+        static readonly PropertyChangedEventArgs LoadProgressChangedEventArgs = ObservableHelper.CreateArgs<RangeComplex>(x => x.ImportProgressPercent);
         int _importProgressPercent;
 
         #endregion
@@ -367,7 +367,7 @@ namespace ESME.Environment.Descriptors
             }
         }
 
-        static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.IsLoading);
+        static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<RangeComplex>(x => x.IsLoading);
         bool _isLoading;
 
         #endregion

@@ -23,7 +23,7 @@ namespace ESME.TransmissionLoss
             TransmissionLossRunFileRadials = new List<TransmissionLossRunFileRadial>();
         }
 
-        public static TransmissionLossRunFile Create(TransmissionLossAlgorithm algorithm, SoundSource soundSource, string rangeComplexName, RangeComplexes rangeComplexes, string platformName, string sourceName, string modeName, string timePeriodName, NewRangeComplex rangeComplex)
+        public static TransmissionLossRunFile Create(TransmissionLossAlgorithm algorithm, SoundSource soundSource, string rangeComplexName, RangeComplexes rangeComplexes, string platformName, string sourceName, string modeName, string timePeriodName, RangeComplex rangeComplex)
         {
             TransmissionLossRunFile result = null;
             string fileType = null;

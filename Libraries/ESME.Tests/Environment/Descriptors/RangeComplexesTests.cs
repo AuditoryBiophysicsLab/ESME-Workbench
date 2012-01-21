@@ -45,7 +45,7 @@ namespace ESME.Tests.Environment.Descriptors
         [TestFixtureSetUp]
         public void Initialize()
         {
-            var simAreaPath = Path.Combine(_simAreaBase, _simAreaName)
+            var simAreaPath = Path.Combine(_simAreaBase, _simAreaName);
             var areasPath = Path.Combine(_simAreaBase, "Areas");
             var bathymetryPath = Path.Combine(_simAreaBase, "Bathymetry");
             var dataPath = Path.Combine(_simAreaBase, "Data");
