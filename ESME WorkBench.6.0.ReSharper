@@ -11,10 +11,11 @@
       <FormatSettings>
         <ALIGN_FIRST_ARG_BY_PAREN>True</ALIGN_FIRST_ARG_BY_PAREN>
         <ALIGN_MULTILINE_ARRAY_AND_OBJECT_INITIALIZER>False</ALIGN_MULTILINE_ARRAY_AND_OBJECT_INITIALIZER>
+        <ALIGN_MULTLINE_TYPE_PARAMETER_CONSTRAINS>False</ALIGN_MULTLINE_TYPE_PARAMETER_CONSTRAINS>
+        <ALIGN_MULTLINE_TYPE_PARAMETER_LIST>False</ALIGN_MULTLINE_TYPE_PARAMETER_LIST>
         <ANONYMOUS_METHOD_DECLARATION_BRACES>NEXT_LINE</ANONYMOUS_METHOD_DECLARATION_BRACES>
         <BLANK_LINES_INSIDE_REGION>0</BLANK_LINES_INSIDE_REGION>
         <CASE_BLOCK_BRACES>NEXT_LINE</CASE_BLOCK_BRACES>
-        <CONTINUOUS_INDENT_MULTIPLIER>2</CONTINUOUS_INDENT_MULTIPLIER>
         <EMPTY_BLOCK_STYLE>TOGETHER_SAME_LINE</EMPTY_BLOCK_STYLE>
         <EXPLICIT_INTERNAL_MODIFIER>False</EXPLICIT_INTERNAL_MODIFIER>
         <EXPLICIT_PRIVATE_MODIFIER>False</EXPLICIT_PRIVATE_MODIFIER>
@@ -45,12 +46,15 @@
           <Item>unsafe</Item>
           <Item>volatile</Item>
         </MODIFIERS_ORDER>
-        <PLACE_FIELD_ATTRIBUTE_ON_SAME_LINE>False</PLACE_FIELD_ATTRIBUTE_ON_SAME_LINE>
         <PLACE_SIMPLE_METHOD_ON_SINGLE_LINE>True</PLACE_SIMPLE_METHOD_ON_SINGLE_LINE>
         <SIMPLE_EMBEDDED_STATEMENT_STYLE>ON_SINGLE_LINE</SIMPLE_EMBEDDED_STATEMENT_STYLE>
         <SPACE_AFTER_TYPECAST_PARENTHESES>False</SPACE_AFTER_TYPECAST_PARENTHESES>
         <SPACE_AROUND_MULTIPLICATIVE_OP>True</SPACE_AROUND_MULTIPLICATIVE_OP>
         <STICK_COMMENT>False</STICK_COMMENT>
+        <WRAP_ARGUMENTS_STYLE>CHOP_IF_LONG</WRAP_ARGUMENTS_STYLE>
+        <WRAP_EXTENDS_LIST_STYLE>CHOP_IF_LONG</WRAP_EXTENDS_LIST_STYLE>
+        <WRAP_LIMIT>200</WRAP_LIMIT>
+        <WRAP_PARAMETERS_STYLE>CHOP_IF_LONG</WRAP_PARAMETERS_STYLE>
       </FormatSettings>
       <UsingsSettings />
       <Naming2>
@@ -97,7 +101,9 @@
       <Naming2 />
     </Web>
     <XML>
-      <FormatSettings />
+      <FormatSettings>
+        <BlankLineAfterProcessingInstructions>False</BlankLineAfterProcessingInstructions>
+      </FormatSettings>
     </XML>
     <Xaml>
       <Naming2>
@@ -139,11 +145,30 @@
       <Abbreviation Text="GUI" />
       <Abbreviation Text="RAM" />
       <Abbreviation Text="RMS" />
-      <Abbreviation Text="DDB" />
-      <Abbreviation Text="MMMB" />
-      <Abbreviation Text="NL" />
-      <Abbreviation Text="SMGC" />
+      <Abbreviation Text="NAVO" />
+      <Abbreviation Text="HFBL" />
+      <Abbreviation Text="LFBL" />
+      <Abbreviation Text="HFBLEXE" />
+      <Abbreviation Text="EXE" />
+      <Abbreviation Text="LFBLEXE" />
+      <Abbreviation Text="HFEVA" />
+      <Abbreviation Text="LFBLHFB" />
+      <Abbreviation Text="LFBLPE" />
+      <Abbreviation Text="MMMBS" />
+      <Abbreviation Text="REFMS" />
+      <Abbreviation Text="SVP" />
+      <Abbreviation Text="SV" />
+      <Abbreviation Text="SPL" />
+      <Abbreviation Text="GDEM" />
+      <Abbreviation Text="KM" />
+      <Abbreviation Text="API" />
       <Abbreviation Text="DBDB" />
+      <Abbreviation Text="ESME" />
+      <Abbreviation Text="CDF" />
     </Naming2>
   </CodeStyleSettings>
+  <CodeAnnotations>
+    <Namespace>HRC</Namespace>
+    <DefaultNamespace>JetBrains.Annotations</DefaultNamespace>
+  </CodeAnnotations>
 </Configuration>

@@ -78,10 +78,6 @@
       <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
       <Name>HRC</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Libraries\NetCDF\NetCDF_Wrapper.csproj">
-      <Project>{AC11645F-AFD3-4DDE-9E2F-E1F2FEB22A55}</Project>
-      <Name>NetCDF_Wrapper</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
