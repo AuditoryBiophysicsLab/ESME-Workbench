@@ -16,6 +16,7 @@ namespace SoundSpeedProfile
             List<double> temperatures = null;
             List<double> salinities = null;
             string algorithm = null;
+            var isCSV = false;
             if (args.Length == 0)
             {
                 Usage();
@@ -53,6 +54,9 @@ namespace SoundSpeedProfile
                         break;
                     case "-algorithm":
                         algorithm = args[++argIndex];
+                        break;
+                    case "-csv":
+                        isCSV = true;
                         break;
                     default:
                         Usage();
@@ -96,12 +100,12 @@ namespace SoundSpeedProfile
             {
                 var location = new EarthCoordinate(latitude, 0);
                 var curSalinity = 0.0;
-                Console.WriteLine("\"Depth (m)\", \"Sound Speed (m/s)\"");
+                if (isCSV) Console.WriteLine("\"Depth (m)\", \"Sound Speed (m/s)\"");
                 for (var index = 0; index < depths.Count(); index++)
                 {
                     if (salinities != null) curSalinity = salinities[index];
                     var result = ChenMilleroLi.SoundSpeed(location, (float)depths[index], (float)temperatures[index], (float)curSalinity);
-                    Console.WriteLine("{0:0.####}, {1:0.####}", depths[index], result);
+                    Console.WriteLine("{0:0.####}{1}{2:0.####}", depths[index], isCSV ? ", " : " ", result);
                 }
                 return 0;
             }
@@ -119,6 +123,7 @@ namespace SoundSpeedProfile
             Console.WriteLine("                         -temperatures <temperatures>");
             Console.WriteLine("                        [-salinities <salinities>]");
             Console.WriteLine("                        [-algorithm <algorithmSelector>]");
+            Console.WriteLine("                        [-csv]");
             Console.WriteLine();
             Console.WriteLine("Description: Calculate an underwater sound speed profile given a temperature");
             Console.WriteLine("             and optional salinity vector, using a specified algorithm");
@@ -147,6 +152,16 @@ namespace SoundSpeedProfile
             Console.WriteLine("                           this utility.  Currently, the only supported");
             Console.WriteLine("                           algorithm is chen.millero.li, which is also the");
             Console.WriteLine("                           default for this parameter.");
+            Console.WriteLine();
+            Console.WriteLine("       -csv will write the resulting sound speed profile to standard output");
+            Console.WriteLine("            in CSV (comma-separated values) format, with a header for each");
+            Console.WriteLine("            of the two columns of data.  If -csv is not specified, the");
+            Console.WriteLine("            sound speed profile will be written to standard output without");
+            Console.WriteLine("            column headers and spaces between the values in each column.");
+            Console.WriteLine();
+            Console.WriteLine("            In either case, the first column of output is depth in meters");
+            Console.WriteLine("            and the second column is sound speed in meters per second at");
+            Console.WriteLine("            the indicated depth.");
             Console.WriteLine();
             if (additionalErrorInfo != null) Console.WriteLine(additionalErrorInfo);
         }
