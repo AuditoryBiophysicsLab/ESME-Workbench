@@ -66,7 +66,7 @@ namespace SoundSpeedProfile
             if (salinities == null) Usage("-salinities was not specified");
             try
             {
-                CreateBellhopEnvironment(outputDirectory, name, frequency, bathymetryRanges, bathymetryDepths, soundspeedDepths, soundspeedSpeeds, receiverRanges, depths, sedimentType);
+                //CreateBellhopEnvironment(outputDirectory, name, frequency, bathymetryRanges, bathymetryDepths, soundspeedDepths, soundspeedSpeeds, receiverRanges, depths, sedimentType);
             }
             catch (Exception ex)
             {
