@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Text;
+using ESME.Environment.NAVO;
+using HRC.Navigation;
 
 namespace SoundSpeedProfile
 {
@@ -16,7 +18,7 @@ namespace SoundSpeedProfile
             string algorithm = null;
             if (args.Length == 0)
             {
-                Usage("No arguments specified");
+                Usage();
                 return -1;
             }
             for (var argIndex = 0; argIndex < args.Length; argIndex++)
@@ -52,21 +54,56 @@ namespace SoundSpeedProfile
                     case "-algorithm":
                         algorithm = args[++argIndex];
                         break;
-                    case "-?":
-                    case "-help":
                     default:
                         Usage();
                         return -1;
                 }
             }
-            if (double.IsNaN(latitude)) Usage("-latitude was not specified");
-            if (algorithm == null) Usage("-algorithm was not specified");
-            if (depths == null) Usage("-depths was not specified");
-            if (temperatures == null) Usage("-temperatures was not specified");
-            if (salinities == null) Usage("-salinities was not specified");
+            if (double.IsNaN(latitude))
+            {
+                Usage("-latitude was not specified");
+                return -1;
+            }
+
+            if (depths == null)
+            {
+                Usage("-depths was not specified");
+                return -1;
+            }
+            if (temperatures == null)
+            {
+                Usage("-temperatures was not specified");
+                return -1;
+            }
+            if (algorithm != null && string.Compare(algorithm, "chen.millero.li", true, CultureInfo.InvariantCulture) != 0)
+            {
+                Usage("-algorithm was specified and was not 'chen.millero.li', which is currently the only supported algorithm");
+                return -1;
+            }
+
+            if (depths.Count() != temperatures.Count())
+            {
+                Usage("-depths and -temperatures must contain the same number of elements");
+                return -1;
+            }
+            if (salinities != null && depths.Count() != salinities.Count())
+            {
+                Usage("-salinities, when specified, must contain the same number of elements as -depths and -temperatures");
+                return -1;
+            }
+
             try
             {
-                //CreateBellhopEnvironment(outputDirectory, name, frequency, bathymetryRanges, bathymetryDepths, soundspeedDepths, soundspeedSpeeds, receiverRanges, depths, sedimentType);
+                var location = new EarthCoordinate(latitude, 0);
+                var curSalinity = 0.0;
+                Console.WriteLine("\"Depth (m)\", \"Sound Speed (m/s)\"");
+                for (var index = 0; index < depths.Count(); index++)
+                {
+                    if (salinities != null) curSalinity = salinities[index];
+                    var result = ChenMilleroLi.SoundSpeed(location, (float)depths[index], (float)temperatures[index], (float)curSalinity);
+                    Console.WriteLine("{0:0.####}, {1:0.####}", depths[index], result);
+                }
+                return 0;
             }
             catch (Exception ex)
             {
@@ -86,11 +123,11 @@ namespace SoundSpeedProfile
             Console.WriteLine("Description: Calculate an underwater sound speed profile given a temperature");
             Console.WriteLine("             and optional salinity vector, using a specified algorithm");
             Console.WriteLine();
-            Console.WriteLine("Where: <latitude> is the latitude, in degrees, for which the sound speed profile");
-            Console.WriteLine("                  is being calculated. Latitude is needed because the rotational");
-            Console.WriteLine("                  speed of the Earth has a small effect on the the water pressure");
-            Console.WriteLine("                  at a given depth, which is in turn needed to calculate the");
-            Console.WriteLine("                  sound speed profile.");
+            Console.WriteLine("Where: <latitude> is the latitude, in degrees, for which the sound speed");
+            Console.WriteLine("                  profile is being calculated. Latitude is needed because the");
+            Console.WriteLine("                  rotational speed of the Earth has a small effect on the the");
+            Console.WriteLine("                  water pressure at a given depth, which is in turn needed to");
+            Console.WriteLine("                  calculate the sound speed profile.");
             Console.WriteLine();
             Console.WriteLine("       <depths> is a comma-separated list of depths that correspond to the");
             Console.WriteLine("                temperature and (optional) salinity values.  These depths");
@@ -102,13 +139,14 @@ namespace SoundSpeedProfile
             Console.WriteLine("                      Temperature data is specified in degrees C.");
             Console.WriteLine();
             Console.WriteLine("       <salinities> is an optional, comma-separated list of salinity values");
-            Console.WriteLine("                    measured or estimated for each of the depths in the <depths>.");
-            Console.WriteLine("                    list. Salinity data is specified in parts per thousand (ppt).");
+            Console.WriteLine("                    measured or estimated for each of the depths in the");
+            Console.WriteLine("                    <depths> list. Salinity data is specified in parts per");
+            Console.WriteLine("                    thousand (ppt).");
             Console.WriteLine();
-            Console.WriteLine("       <algorithmSelector> is the name of one of the algorithms supported by this");
-            Console.WriteLine("                           utility.  Currently, the only supported algorithm is");
-            Console.WriteLine("                           chen.millero.li, which is also the default for this");
-            Console.WriteLine("                           parameter.");
+            Console.WriteLine("       <algorithmSelector> is the name of one of the algorithms supported by");
+            Console.WriteLine("                           this utility.  Currently, the only supported");
+            Console.WriteLine("                           algorithm is chen.millero.li, which is also the");
+            Console.WriteLine("                           default for this parameter.");
             Console.WriteLine();
             if (additionalErrorInfo != null) Console.WriteLine(additionalErrorInfo);
         }

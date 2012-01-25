@@ -3,7 +3,7 @@ using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
-    internal class ChenMilleroLi
+    public class ChenMilleroLi
     {
         #region Constants
 
