@@ -4,7 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using ESME.Environment;
 using ESME.Model;
+using ESME.NEMO;
+using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.Bellhop;
+using HRC.Navigation;
 
 namespace CreateBellhopEnvironmentFiles
 {
@@ -15,127 +20,225 @@ namespace CreateBellhopEnvironmentFiles
             //var result = GPXLoader.LoadGPXTracks(args[0]);
             //Debug.WriteLine(result);
             string name = null;
+            string sspFile = null;
             string outputDirectory = null;
             var sedimentType = -1;
             var frequency = double.NaN;
+            var sourceDepth = double.NaN;
+            var verticalBeamWidth = double.NaN;
+            var depressionElevationAngle = double.NaN;
+            var beamCount = 1000;
             List<double> bathymetryRanges = null;
             List<double> bathymetryDepths = null;
-            List<double> soundspeedDepths = null;
-            List<double> soundspeedSpeeds = null;
             List<double> receiverRanges = null;
             List<double> receiverDepths = null;
-            if (args.Length == 0)
-            {
-                Usage("No arguments specified");
-                return -1;
-            }
-            for (var argIndex = 0; argIndex < args.Length; argIndex++)
-            {
-                var arg = args[argIndex];
-                string[] elements;
-                switch (arg.ToLower())
-                {
-                    case "-output":
-                        outputDirectory = args[++argIndex];
-                        break;
-                    case "-name":
-                        name = args[++argIndex];
-                        break;
-                    case "-frequency":
-                    case "-freq":
-                        frequency = double.Parse(args[++argIndex]);
-                        break;
-                    case "-bathymetry":
-                    case "-bathy":
-                        elements = args[++argIndex].Split(',');
-                        if (!elements.Any())
-                        {
-                            Usage("Bathymetry data was not specified");
-                            return -1;
-                        }
-                        if ((elements.Count() & 0x1) != 0)
-                        {
-                            Usage("Bathymetry data does not have an even number of elements");
-                            return -1;
-                        }
-                        bathymetryRanges = new List<double>();
-                        bathymetryDepths = new List<double>();
-                        for (var curElement = 0; curElement > elements.Count(); curElement += 2)
-                        {
-                            bathymetryRanges.Add(double.Parse(elements[curElement]));
-                            bathymetryDepths.Add(double.Parse(elements[curElement + 1]));
-                        }
-                        for (var rangeIndex = 0; rangeIndex < bathymetryRanges.Count; rangeIndex++)
-                            if (bathymetryRanges[rangeIndex] >= bathymetryRanges[rangeIndex + 1])
-                            {
-                                Usage("Bathymetry ranges must increase with each range/depth pair");
-                                return -1;
-                            }
-                        break;
-                    case "-soundspeed":
-                    case "-ssp":
-                        elements = args[++argIndex].Split(',');
-                        if (!elements.Any()) Usage("Soundspeed data was not specified");
-                        if ((elements.Count() & 0x1) != 0) Usage("Soundspeed data does not have an even number of elements");
-                        soundspeedDepths = new List<double>();
-                        soundspeedSpeeds = new List<double>();
-                        for (var curElement = 0; curElement > elements.Count(); curElement += 2)
-                        {
-                            soundspeedDepths.Add(double.Parse(elements[curElement]));
-                            soundspeedSpeeds.Add(double.Parse(elements[curElement + 1]));
-                        }
-                        for (var depthIndex = 0; depthIndex < soundspeedDepths.Count; depthIndex++)
-                            if (soundspeedDepths[depthIndex] >= soundspeedDepths[depthIndex + 1])
-                            {
-                                Usage("Soundspeed depths must increase with each depth/speed pair");
-                                return -1;
-                            }
-                        break;
-                    case "-ranges":
-                        elements = args[++argIndex].Split(',');
-                        if (!elements.Any()) Usage("Receiver range data was not specified");
-                        receiverRanges = elements.Select(double.Parse).ToList();
-                        for (var rangeIndex = 0; rangeIndex < receiverRanges.Count; rangeIndex++)
-                            if (receiverRanges[rangeIndex] >= receiverRanges[rangeIndex + 1])
-                            {
-                                Usage("Receiver ranges must increase with each entry");
-                                return -1;
-                            }
-                        break;
-                    case "-depths":
-                        elements = args[++argIndex].Split(',');
-                        if (!elements.Any()) Usage("Receiver range data was not specified");
-                        receiverDepths = elements.Select(double.Parse).ToList();
-                        for (var depthIndex = 0; depthIndex < receiverDepths.Count; depthIndex++)
-                            if (receiverDepths[depthIndex] >= receiverDepths[depthIndex + 1])
-                            {
-                                Usage("Receiver depths must increase with each entry");
-                                return -1;
-                            }
-                        break;
-                    case "-sediment":
-                        sedimentType = int.Parse(args[++argIndex]);
-                        break;
-                    case "-?":
-                    case "-help":
-                    default:
-                        Usage();
-                        return -1;
-                }
-            }
-            if (name == null) Usage("-name was not specified");
-            if (outputDirectory == null) Usage("-output was not specified");
-            if (double.IsNaN(frequency)) Usage("-frequency was not specified");
-            if (frequency <= 0) Usage("Specified -frequency value is not valid");
-            if (bathymetryRanges == null) Usage("-bathymetry was not specified");
-            if (soundspeedDepths == null) Usage("-soundspeed was not specified");
-            if (receiverRanges == null) Usage("-ranges was not specified");
-            if (receiverDepths == null) Usage("-depths was not specified");
-            if (sedimentType == -1) Usage("-sediment was not specified");
-            if (sedimentType < 1 || sedimentType > 23) Usage("-sediment value must be between 1 and 23");
             try
             {
-                CreateBellhopEnvironment(outputDirectory, name, frequency, bathymetryRanges, bathymetryDepths, soundspeedDepths, soundspeedSpeeds, receiverRanges, receiverDepths, sedimentType);
+                if (args.Length == 0)
+                {
+                    Usage("No arguments specified");
+                    return -1;
+                }
+                for (var argIndex = 0; argIndex < args.Length; argIndex++)
+                {
+                    var arg = args[argIndex];
+                    string[] elements;
+                    switch (arg.ToLower())
+                    {
+                        case "-output":
+                            outputDirectory = args[++argIndex];
+                            break;
+                        case "-name":
+                            name = args[++argIndex];
+                            break;
+                        case "-sourcedepth":
+                            sourceDepth = double.Parse(args[++argIndex]);
+                            break;
+                        case "-beamwidth":
+                            verticalBeamWidth = double.Parse(args[++argIndex]);
+                            break;
+                        case "-beamangle":
+                            depressionElevationAngle = double.Parse(args[++argIndex]);
+                            break;
+                        case "-rays":
+                            beamCount = int.Parse(args[++argIndex]);
+                            break;
+                        case "-frequency":
+                        case "-freq":
+                            frequency = double.Parse(args[++argIndex]);
+                            break;
+                        case "-bathymetry":
+                        case "-bathy":
+                            elements = args[++argIndex].Split(',');
+                            if (!elements.Any())
+                            {
+                                Usage("Bathymetry data was not specified");
+                                return -1;
+                            }
+                            if ((elements.Count() & 0x1) != 0)
+                            {
+                                Usage("Bathymetry data does not have an even number of elements");
+                                return -1;
+                            }
+                            bathymetryRanges = new List<double>();
+                            bathymetryDepths = new List<double>();
+                            for (var curElement = 0; curElement > elements.Count(); curElement += 2)
+                            {
+                                bathymetryRanges.Add(double.Parse(elements[curElement]));
+                                bathymetryDepths.Add(double.Parse(elements[curElement + 1]));
+                            }
+                            for (var rangeIndex = 0; rangeIndex < bathymetryRanges.Count; rangeIndex++)
+                                if (bathymetryRanges[rangeIndex] >= bathymetryRanges[rangeIndex + 1])
+                                {
+                                    Usage("Bathymetry ranges must increase with each range/depth pair");
+                                    return -1;
+                                }
+                            break;
+                        case "-soundspeed":
+                        case "-ssp":
+                            sspFile = args[++argIndex];
+                            break;
+                        case "-ranges":
+                            elements = args[++argIndex].Split(',');
+                            if (!elements.Any()) Usage("Receiver range data was not specified");
+                            receiverRanges = elements.Select(double.Parse).ToList();
+                            for (var rangeIndex = 0; rangeIndex < receiverRanges.Count; rangeIndex++)
+                                if (receiverRanges[rangeIndex] >= receiverRanges[rangeIndex + 1])
+                                {
+                                    Usage("Receiver ranges must increase with each entry");
+                                    return -1;
+                                }
+                            break;
+                        case "-depths":
+                            elements = args[++argIndex].Split(',');
+                            if (!elements.Any()) Usage("Receiver range data was not specified");
+                            receiverDepths = elements.Select(double.Parse).ToList();
+                            for (var depthIndex = 0; depthIndex < receiverDepths.Count; depthIndex++)
+                                if (receiverDepths[depthIndex] >= receiverDepths[depthIndex + 1])
+                                {
+                                    Usage("Receiver depths must increase with each entry");
+                                    return -1;
+                                }
+                            break;
+                        case "-sediment":
+                            sedimentType = int.Parse(args[++argIndex]);
+                            break;
+                        case "-?":
+                        case "-help":
+                        default:
+                            Usage();
+                            return -1;
+                    }
+                }
+                if (name == null)
+                {
+                    Usage("-name was not specified");
+                    return -1;
+                }
+                if (outputDirectory == null)
+                {
+                    Usage("-output was not specified");
+                    return -1;
+                }
+                if (double.IsNaN(frequency))
+                {
+                    Usage("-frequency was not specified");
+                    return -1;
+                }
+                if (double.IsNaN(sourceDepth))
+                {
+                    Usage("-sourcedepth was not specified");
+                    return -1;
+                }
+                if (double.IsNaN(verticalBeamWidth))
+                {
+                    Usage("-beamwidth was not specified");
+                    return -1;
+                }
+                if (double.IsNaN(depressionElevationAngle))
+                {
+                    Usage("-beamangle was not specified");
+                    return -1;
+                }
+                if (frequency <= 0)
+                {
+                    Usage("Specified -frequency value is not valid");
+                    return -1;
+                }
+                if (bathymetryRanges == null)
+                {
+                    Usage("-bathymetry was not specified");
+                    return -1;
+                }
+                if (sspFile == null)
+                {
+                    Usage("-soundspeed was not specified");
+                    return -1;
+                }
+                if (receiverRanges == null)
+                {
+                    Usage("-ranges was not specified");
+                    return -1;
+                }
+                if (receiverDepths == null)
+                {
+                    Usage("-depths was not specified");
+                    return -1;
+                }
+                if (beamCount <= 0)
+                {
+                    Usage("-beams must be a positive integer");
+                    return -1;
+                }
+                if (sedimentType == -1)
+                {
+                    Usage("-sediment was not specified");
+                    return -1;
+                }
+                if (sedimentType < 1 || sedimentType > 23)
+                {
+                    Usage("-sediment value must be between 1 and 23");
+                    return -1;
+                }
+
+                if (!Path.IsPathRooted(sspFile)) sspFile = Path.Combine(outputDirectory, sspFile);
+                if (!File.Exists(sspFile))
+                {
+                    Usage("-soundspeed file does not exist");
+                    return -1;
+                }
+
+                // Read in the sound speed profile from the provided file
+                var soundspeedDepths = new List<double>();
+                var soundspeedSpeeds = new List<double>();
+                var sspLines = File.ReadAllLines(sspFile);
+                var separators = new[] {" "};
+                foreach (var line in sspLines)
+                {
+                    var fields = line.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+                    if (fields.Length != 2)
+                    {
+                        Usage("-soundspeed file is not in the expected format");
+                        return -1;
+                    }
+                    soundspeedDepths.Add(double.Parse(fields[0]));
+                    soundspeedSpeeds.Add(double.Parse(fields[1]));
+                }
+
+                CreateBellhopEnvironment(outputDirectory,
+                                         name,
+                                         sourceDepth,
+                                         frequency,
+                                         verticalBeamWidth,
+                                         depressionElevationAngle,
+                                         bathymetryRanges,
+                                         bathymetryDepths,
+                                         soundspeedDepths,
+                                         soundspeedSpeeds,
+                                         receiverRanges,
+                                         receiverDepths,
+                                         sedimentType,
+                                         beamCount);
             }
             catch (Exception ex)
             {
@@ -144,22 +247,62 @@ namespace CreateBellhopEnvironmentFiles
             return 0;
         }
 
-        public static void CreateBellhopEnvironment(string outputDirectory, string name, double frequency, List<double> bathymetryRanges, 
-                                                    List<double> bathymetryDepths, List<double> soundspeedDepths, List<double> soundspeedSpeeds,
-                                                    List<double> receiverRanges, List<double> receiverDepths, int sedimentType)
+        public static void CreateBellhopEnvironment(string outputDirectory, string name, 
+                                                    double sourceDepth, double frequency, double verticalBeamWidth, double depressionElevationAngle, 
+                                                    List<double> bathymetryRanges, List<double> bathymetryDepths, List<double> soundspeedDepths, 
+                                                    List<double> soundspeedSpeeds, List<double> receiverRanges, List<double> receiverDepths, 
+                                                    int sedimentType, int beamCount)
         {
             if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
+
+            // Write the bathymetry file
             var bathymetryFilename = Path.Combine(outputDirectory, name + ".bty");
-            var sediment = SedimentTypes.Find(sedimentType);
+            using (var writer = new StreamWriter(bathymetryFilename))
+            {
+                writer.Write(bathymetryRanges.Count);
+                for (var index = 0; index < bathymetryRanges.Count; index++)
+                    writer.Write("{0} {1}", bathymetryRanges[index], bathymetryDepths[index]);
+            }
+            
+            var transmissionLossJob = new TransmissionLossJob
+            {
+                SoundSource = new SoundSource
+                {
+                    AcousticProperties = new AcousticProperties
+                    {
+                        HighFrequency = (float)frequency,
+                        LowFrequency = (float)frequency,
+                        DepressionElevationAngle = (float)depressionElevationAngle,
+                        SourceDepth = (float)sourceDepth,
+                        VerticalBeamWidth = (float)verticalBeamWidth,
+                    },
+                    Radius = (int)Math.Ceiling(receiverRanges.Last() * 1.01),
+                    // Allow an extra 1% of range so the beams don't run off the end before they hit the last column of receivers
+                },
+            };
+            var sspData = new DepthValuePairs<float>();
+            for (var index = 0; index < soundspeedDepths.Count; index++)
+                sspData.Add(new DepthValuePair<float>((float)soundspeedDepths[index], (float)soundspeedSpeeds[index]));
+            var soundSpeedProfile = new SoundSpeedProfile
+            {
+                Data = sspData
+            };
+            var result = Bellhop.GetRadialConfiguration(transmissionLossJob, soundSpeedProfile, SedimentTypes.Find(sedimentType), 
+                                                        (float)(bathymetryDepths.Max() * 1.01), receiverRanges.Count, receiverDepths.Count, 
+                                                        false, true, true, beamCount);
+            File.WriteAllText(Path.Combine(outputDirectory, name + ".env"), result, new ASCIIEncoding());
         }
 
         public static void Usage(string additionalErrorInfo = null)
         {
             Console.WriteLine("Usage: CreateBellhopEnvironmentFiles -output <outputPath>");
             Console.WriteLine("                                     -name <baseName>");
+            Console.WriteLine("                                     -sourcedepth <sourceDepth>");
             Console.WriteLine("                                     -frequency <frequencyHz>");
+            Console.WriteLine("                                     -beamwidth <beamWidth>");
+            Console.WriteLine("                                     -beamangle <beamAngle>");
             Console.WriteLine("                                     -bathymetry <rangeDepthPairs>");
-            Console.WriteLine("                                     -soundspeed <depthSpeedPairs>");
+            Console.WriteLine("                                     -soundspeed <sspFile>");
             Console.WriteLine("                                     -ranges <rangeList>");
             Console.WriteLine("                                     -depths <depthList>");
             Console.WriteLine("                                     -sediment <sedimentType>");
@@ -174,7 +317,19 @@ namespace CreateBellhopEnvironmentFiles
             Console.WriteLine("                  Output files will be named <baseName>.env, <baseName>.bty,");
             Console.WriteLine("                  etc.");
             Console.WriteLine();
-            Console.WriteLine("       <frequencyHz> is the frequency of the source to be simulated by Bellhop.");
+            Console.WriteLine("       <sourceDepth> is the depth of the acoustic source, in meters.");
+            Console.WriteLine();
+            Console.WriteLine("       <frequencyHz> is the frequency of the acoustic source.");
+            Console.WriteLine();
+            Console.WriteLine("       <beamWidth> is the vertical beam width, in degrees, of the acoustic");
+            Console.WriteLine("                   source.");
+            Console.WriteLine();
+            Console.WriteLine("       <beamAngle> is the vertical beam \"look angle\", in degrees, of the");
+            Console.WriteLine("                   acoustic source. Zero degrees means the acoustic source");
+            Console.WriteLine("                   emits its sound parallel to the surface, while a negative");
+            Console.WriteLine("                   angle means that the acoustic source emits its sound towards");
+            Console.WriteLine("                   the surface.  A positive angle indicates that the acoustic");
+            Console.WriteLine("                   source is oriented towards the bottom.");
             Console.WriteLine();
             Console.WriteLine("       <rangeDepthPairs> is the bathymetry profile along the transect, given as");
             Console.WriteLine("                         a comma-separated list of range/depth value pairs.");
@@ -186,15 +341,12 @@ namespace CreateBellhopEnvironmentFiles
             Console.WriteLine("                         1000m, at 1km the depth is 1100m, at 5.5km the depth");
             Console.WriteLine("                         is 800m, and at at 10km the depth is 2000m.");
             Console.WriteLine();
-            Console.WriteLine("       <depthSpeedPairs> is the sound speed profile to be used for this");
-            Console.WriteLine("                         transect, given as a a comma-separated list of");
-            Console.WriteLine("                         depth/speed pairs.  Depths are specified in meters");
-            Console.WriteLine("                         from the surface, sound speeds are specified in meters");
-            Console.WriteLine("                         per second.");
-            Console.WriteLine();
-            Console.WriteLine("           For example: -soundspeed 1,1500,10,1502.3,20,1500,50,1497,100,1503");
-            Console.WriteLine("                         gives sound speeds for depths of 1m, 10m, 20m, 50m");
-            Console.WriteLine("                         and 100m.");
+            Console.WriteLine("       <sspFile> is the name of the file containing the sound speed profile to");
+            Console.WriteLine("                 be used for this transect.  This filename can either be fully");
+            Console.WriteLine("                 specified or relative to the directory given as <outputPath>.");
+            Console.WriteLine("                 The file should consist of space-separated depth/speed pairs");
+            Console.WriteLine("                 with one pair per line. Depths are specified in meters from");
+            Console.WriteLine("                 the surface, sound speeds are specified in meters per second");
             Console.WriteLine();
             Console.WriteLine("       <rangeList> List of ranges at which receiver data are to be calculated.");
             Console.WriteLine("                   Ranges are specified in kilometers from the sound source");

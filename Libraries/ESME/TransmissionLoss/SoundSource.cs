@@ -16,7 +16,7 @@ namespace ESME.TransmissionLoss
 {
     public class SoundSource : EarthCoordinate, IEquatable<SoundSource>, ISupportValidation
     {
-        protected SoundSource()
+        public SoundSource()
         {
             RadialBearings = new List<float>();
             ShouldBeCalculated = true;
