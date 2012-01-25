@@ -69,6 +69,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME.Tests", "Libraries\ESME.Tests\ESME.Tests.csproj", "{30119915-93B3-4B5F-8678-9FB7B0CF8FC2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundSpeedProfile", "Utilities\SoundSpeedProfile\SoundSpeedProfile.csproj", "{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -335,6 +337,20 @@ Global
 		{30119915-93B3-4B5F-8678-9FB7B0CF8FC2}.Release|Win32.ActiveCfg = Release|Any CPU
 		{30119915-93B3-4B5F-8678-9FB7B0CF8FC2}.Release|x64.ActiveCfg = Release|Any CPU
 		{30119915-93B3-4B5F-8678-9FB7B0CF8FC2}.Release|x86.ActiveCfg = Release|Any CPU
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}.Debug|Win32.ActiveCfg = Debug|x86
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}.Debug|x64.ActiveCfg = Debug|x86
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}.Debug|x86.ActiveCfg = Debug|x86
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}.Debug|x86.Build.0 = Debug|x86
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}.Release|Any CPU.ActiveCfg = Release|x86
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}.Release|Mixed Platforms.Build.0 = Release|x86
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}.Release|Win32.ActiveCfg = Release|x86
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}.Release|x64.ActiveCfg = Release|x86
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}.Release|x86.ActiveCfg = Release|x86
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -352,5 +368,6 @@ Global
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6} = {19195DC2-8069-491E-BCDE-B290D1C4B22C}
 		{9E8EBE97-1F78-4613-9204-B69ADC3869E8} = {19195DC2-8069-491E-BCDE-B290D1C4B22C}
 		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7} = {19195DC2-8069-491E-BCDE-B290D1C4B22C}
+		{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280} = {19195DC2-8069-491E-BCDE-B290D1C4B22C}
 	EndGlobalSection
 EndGlobal

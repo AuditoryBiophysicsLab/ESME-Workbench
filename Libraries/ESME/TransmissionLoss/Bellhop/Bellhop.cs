@@ -87,7 +87,7 @@ namespace ESME.TransmissionLoss.Bellhop
             for (var angleIndex = 0; angleIndex < sampleCount; angleIndex++)
             {
                 result[angleIndex, 0] = angle;
-                result[angleIndex, 1] = Math.Exp(-1.0 * Math.Sin(angle * (Math.PI / 180.0)));
+                result[angleIndex, 1] = Math.Exp(-eta * Math.Sin(angle * (Math.PI / 180.0)));
                 result[angleIndex, 2] = 180;
                 angle += angleStep;
             }

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using ESME.Model;
 
 namespace CreateBellhopEnvironmentFiles
 {
@@ -14,6 +16,7 @@ namespace CreateBellhopEnvironmentFiles
             //Debug.WriteLine(result);
             string name = null;
             string outputDirectory = null;
+            var sedimentType = -1;
             var frequency = double.NaN;
             List<double> bathymetryRanges = null;
             List<double> bathymetryDepths = null;
@@ -21,6 +24,11 @@ namespace CreateBellhopEnvironmentFiles
             List<double> soundspeedSpeeds = null;
             List<double> receiverRanges = null;
             List<double> receiverDepths = null;
+            if (args.Length == 0)
+            {
+                Usage("No arguments specified");
+                return -1;
+            }
             for (var argIndex = 0; argIndex < args.Length; argIndex++)
             {
                 var arg = args[argIndex];
@@ -40,8 +48,16 @@ namespace CreateBellhopEnvironmentFiles
                     case "-bathymetry":
                     case "-bathy":
                         elements = args[++argIndex].Split(',');
-                        if (!elements.Any()) Usage("Bathymetry data was not specified");
-                        if ((elements.Count() & 0x1) != 0) Usage("Bathymetry data does not have an even number of elements");
+                        if (!elements.Any())
+                        {
+                            Usage("Bathymetry data was not specified");
+                            return -1;
+                        }
+                        if ((elements.Count() & 0x1) != 0)
+                        {
+                            Usage("Bathymetry data does not have an even number of elements");
+                            return -1;
+                        }
                         bathymetryRanges = new List<double>();
                         bathymetryDepths = new List<double>();
                         for (var curElement = 0; curElement > elements.Count(); curElement += 2)
@@ -49,6 +65,12 @@ namespace CreateBellhopEnvironmentFiles
                             bathymetryRanges.Add(double.Parse(elements[curElement]));
                             bathymetryDepths.Add(double.Parse(elements[curElement + 1]));
                         }
+                        for (var rangeIndex = 0; rangeIndex < bathymetryRanges.Count; rangeIndex++)
+                            if (bathymetryRanges[rangeIndex] >= bathymetryRanges[rangeIndex + 1])
+                            {
+                                Usage("Bathymetry ranges must increase with each range/depth pair");
+                                return -1;
+                            }
                         break;
                     case "-soundspeed":
                     case "-ssp":
@@ -62,17 +84,40 @@ namespace CreateBellhopEnvironmentFiles
                             soundspeedDepths.Add(double.Parse(elements[curElement]));
                             soundspeedSpeeds.Add(double.Parse(elements[curElement + 1]));
                         }
+                        for (var depthIndex = 0; depthIndex < soundspeedDepths.Count; depthIndex++)
+                            if (soundspeedDepths[depthIndex] >= soundspeedDepths[depthIndex + 1])
+                            {
+                                Usage("Soundspeed depths must increase with each depth/speed pair");
+                                return -1;
+                            }
                         break;
                     case "-ranges":
                         elements = args[++argIndex].Split(',');
                         if (!elements.Any()) Usage("Receiver range data was not specified");
                         receiverRanges = elements.Select(double.Parse).ToList();
+                        for (var rangeIndex = 0; rangeIndex < receiverRanges.Count; rangeIndex++)
+                            if (receiverRanges[rangeIndex] >= receiverRanges[rangeIndex + 1])
+                            {
+                                Usage("Receiver ranges must increase with each entry");
+                                return -1;
+                            }
                         break;
                     case "-depths":
                         elements = args[++argIndex].Split(',');
                         if (!elements.Any()) Usage("Receiver range data was not specified");
                         receiverDepths = elements.Select(double.Parse).ToList();
+                        for (var depthIndex = 0; depthIndex < receiverDepths.Count; depthIndex++)
+                            if (receiverDepths[depthIndex] >= receiverDepths[depthIndex + 1])
+                            {
+                                Usage("Receiver depths must increase with each entry");
+                                return -1;
+                            }
                         break;
+                    case "-sediment":
+                        sedimentType = int.Parse(args[++argIndex]);
+                        break;
+                    case "-?":
+                    case "-help":
                     default:
                         Usage();
                         return -1;
@@ -86,45 +131,101 @@ namespace CreateBellhopEnvironmentFiles
             if (soundspeedDepths == null) Usage("-soundspeed was not specified");
             if (receiverRanges == null) Usage("-ranges was not specified");
             if (receiverDepths == null) Usage("-depths was not specified");
-            CreateBellhopEnvironment(name, frequency, bathymetryRanges, bathymetryDepths, soundspeedDepths, soundspeedSpeeds, receiverRanges, receiverDepths, outputDirectory);
+            if (sedimentType == -1) Usage("-sediment was not specified");
+            if (sedimentType < 1 || sedimentType > 23) Usage("-sediment value must be between 1 and 23");
+            try
+            {
+                CreateBellhopEnvironment(outputDirectory, name, frequency, bathymetryRanges, bathymetryDepths, soundspeedDepths, soundspeedSpeeds, receiverRanges, receiverDepths, sedimentType);
+            }
+            catch (Exception ex)
+            {
+                Usage(ex.Message);
+            }
             return 0;
         }
 
-        public static void CreateBellhopEnvironment(string name, double frequency, List<double> bathymetryRanges, List<double> bathymetryDepths,
-                                                    List<double> soundspeedDepths, List<double> soundspeedSpeeds,
-                                                    List<double> receiverRanges, List<double> receiverDepths, string outputDirectory)
+        public static void CreateBellhopEnvironment(string outputDirectory, string name, double frequency, List<double> bathymetryRanges, 
+                                                    List<double> bathymetryDepths, List<double> soundspeedDepths, List<double> soundspeedSpeeds,
+                                                    List<double> receiverRanges, List<double> receiverDepths, int sedimentType)
         {
-            
+            if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
+            var bathymetryFilename = Path.Combine(outputDirectory, name + ".bty");
+            var sediment = SedimentTypes.Find(sedimentType);
         }
 
         public static void Usage(string additionalErrorInfo = null)
         {
-            Console.WriteLine("Usage: CreateBellhopEnvironmentFiles -output <outputPath> -name <baseName> -frequency <frequencyHz>");
-            Console.WriteLine("                                     -bathymetry <rangeDepthPairs> -soundspeed <depthSpeedPairs>");
-            Console.WriteLine("                                     -ranges <rangeList> -depths <depthList>");
+            Console.WriteLine("Usage: CreateBellhopEnvironmentFiles -output <outputPath>");
+            Console.WriteLine("                                     -name <baseName>");
+            Console.WriteLine("                                     -frequency <frequencyHz>");
+            Console.WriteLine("                                     -bathymetry <rangeDepthPairs>");
+            Console.WriteLine("                                     -soundspeed <depthSpeedPairs>");
+            Console.WriteLine("                                     -ranges <rangeList>");
+            Console.WriteLine("                                     -depths <depthList>");
+            Console.WriteLine("                                     -sediment <sedimentType>");
             Console.WriteLine();
-            Console.WriteLine("Description: Create a set of configuration and data files suitable for running the Bellhop acoustic");
-            Console.WriteLine("             simulator along single transect.");
+            Console.WriteLine("Description: Create a set of configuration and data files suitable for running");
+            Console.WriteLine("             the Bellhop acoustic simulator along a single transect.");
             Console.WriteLine();
-            Console.WriteLine("Where: <outputPath> is the full path of the directory into which the output files will be placed.");
+            Console.WriteLine("Where: <outputPath> is the full path of the directory into which the output");
+            Console.WriteLine("                    files will be placed.");
             Console.WriteLine();
-            Console.WriteLine("       <baseName> base filename that the output files will have.  Output files will be named <baseName>.env,");
-            Console.WriteLine("                  <baseName>.bty, etc.");
+            Console.WriteLine("       <baseName> is the base filename that the output files will have");
+            Console.WriteLine("                  Output files will be named <baseName>.env, <baseName>.bty,");
+            Console.WriteLine("                  etc.");
             Console.WriteLine();
-            Console.WriteLine("       <frequencyHz> The frequency of the source to be simulated by Bellhop");
+            Console.WriteLine("       <frequencyHz> is the frequency of the source to be simulated by Bellhop.");
             Console.WriteLine();
-            Console.WriteLine("       <rangeDepthPairs> Bathymetry along the transect, given as a list of comma-separated range/depth value pairs.");
-            Console.WriteLine("                         Ranges are specified in kilometers from the source, depths are specified in meters");
+            Console.WriteLine("       <rangeDepthPairs> is the bathymetry profile along the transect, given as");
+            Console.WriteLine("                         a comma-separated list of range/depth value pairs.");
+            Console.WriteLine("                         Ranges arespecified in kilometers from the source,");
+            Console.WriteLine("                         depths are specified in meters.");
             Console.WriteLine();
-            Console.WriteLine("       <depthSpeedPairs> Sound speed profile to be used for this transect, given as a list of comma-separated");
-            Console.WriteLine("                         depth/speed pairs.  Depths are specified in meters from the surface, sound speeds are");
-            Console.WriteLine("                         specified in meters per second.");
+            Console.WriteLine("           For example: -bathymetry 0,1000,1,1100,2,1150,5.5,800,10,2000");
+            Console.WriteLine("                         would mean that under the source (0 km) the depth is");
+            Console.WriteLine("                         1000m, at 1km the depth is 1100m, at 5.5km the depth");
+            Console.WriteLine("                         is 800m, and at at 10km the depth is 2000m.");
             Console.WriteLine();
-            Console.WriteLine("       <rangeList> List of ranges at which receiver data are to be calculated. Ranges are specified in kilometers from");
-            Console.WriteLine("                   the sound source");
+            Console.WriteLine("       <depthSpeedPairs> is the sound speed profile to be used for this");
+            Console.WriteLine("                         transect, given as a a comma-separated list of");
+            Console.WriteLine("                         depth/speed pairs.  Depths are specified in meters");
+            Console.WriteLine("                         from the surface, sound speeds are specified in meters");
+            Console.WriteLine("                         per second.");
             Console.WriteLine();
-            Console.WriteLine("       <depthList> List of depths at which receiver data are to be calculated. Depths are specified in meters from");
-            Console.WriteLine("                   the surface.");
+            Console.WriteLine("           For example: -soundspeed 1,1500,10,1502.3,20,1500,50,1497,100,1503");
+            Console.WriteLine("                         gives sound speeds for depths of 1m, 10m, 20m, 50m");
+            Console.WriteLine("                         and 100m.");
+            Console.WriteLine();
+            Console.WriteLine("       <rangeList> List of ranges at which receiver data are to be calculated.");
+            Console.WriteLine("                   Ranges are specified in kilometers from the sound source");
+            Console.WriteLine();
+            Console.WriteLine("       <depthList> List of depths at which receiver data are to be calculated.");
+            Console.WriteLine("                   Depths are specified in meters from the surface.");
+            Console.WriteLine();
+            Console.WriteLine("       <sedimentType is one of the following values:");
+            Console.WriteLine("                     1......Rough Rock");
+            Console.WriteLine("                     2......Rock");
+            Console.WriteLine("                     3......Cobble or Gravel or Pebble");
+            Console.WriteLine("                     4......Sandy Gravel");
+            Console.WriteLine("                     5......Very Coarse Sand");
+            Console.WriteLine("                     6......Muddy Sandy Gravel");
+            Console.WriteLine("                     7......Coarse Sand or Gravelly Sand");
+            Console.WriteLine("                     8......Gravelly Muddy Sand");
+            Console.WriteLine("                     9......Medium Sand or Sand");
+            Console.WriteLine("                    10......Muddy Gravel");
+            Console.WriteLine("                    11......Fine Sand or Silty Sand");
+            Console.WriteLine("                    12......Muddy Sand");
+            Console.WriteLine("                    13......Very Fine Sand");
+            Console.WriteLine("                    14......Clayey Sand");
+            Console.WriteLine("                    15......Coarse Silt");
+            Console.WriteLine("                    16......Gravelly Mud or Sandy Silt");
+            Console.WriteLine("                    17......Medium Silt or Sand-Silt-Clay");
+            Console.WriteLine("                    18......Sandy Mud or Silt");
+            Console.WriteLine("                    19......Fine Silt or Clayey Silt");
+            Console.WriteLine("                    20......Sandy Clay");
+            Console.WriteLine("                    21......Very Fine Silt");
+            Console.WriteLine("                    22......Silty Clay");
+            Console.WriteLine("                    23......Clay");
             Console.WriteLine();
             if (additionalErrorInfo != null) Console.WriteLine(additionalErrorInfo);
         }
