@@ -187,7 +187,7 @@ namespace CreateBellhopEnvironmentFiles
                 }
                 if (beamCount <= 0)
                 {
-                    Usage("-beams must be a positive integer");
+                    Usage("-rays must be a positive integer");
                     return -1;
                 }
                 if (sedimentType == -1)
@@ -263,23 +263,17 @@ namespace CreateBellhopEnvironmentFiles
                 for (var index = 0; index < bathymetryRanges.Count; index++)
                     writer.Write("{0} {1}", bathymetryRanges[index], bathymetryDepths[index]);
             }
-            
-            var transmissionLossJob = new TransmissionLossJob
+
+            var acousticProperties = new AcousticProperties
             {
-                SoundSource = new SoundSource
-                {
-                    AcousticProperties = new AcousticProperties
-                    {
-                        HighFrequency = (float)frequency,
-                        LowFrequency = (float)frequency,
-                        DepressionElevationAngle = (float)depressionElevationAngle,
-                        SourceDepth = (float)sourceDepth,
-                        VerticalBeamWidth = (float)verticalBeamWidth,
-                    },
-                    Radius = (int)Math.Ceiling(receiverRanges.Last() * 1.01),
-                    // Allow an extra 1% of range so the beams don't run off the end before they hit the last column of receivers
-                },
+                HighFrequency = (float)frequency,
+                LowFrequency = (float)frequency,
+                DepressionElevationAngle = (float)depressionElevationAngle,
+                SourceDepth = (float)sourceDepth,
+                VerticalBeamWidth = (float)verticalBeamWidth,
             };
+            var maxRadius = (int)Math.Ceiling(receiverRanges.Last() * 1.01); // Allow an extra 1% of range so the beams don't run off the end before they hit the last column of receivers
+
             var sspData = new DepthValuePairs<float>();
             for (var index = 0; index < soundspeedDepths.Count; index++)
                 sspData.Add(new DepthValuePair<float>((float)soundspeedDepths[index], (float)soundspeedSpeeds[index]));
@@ -287,10 +281,57 @@ namespace CreateBellhopEnvironmentFiles
             {
                 Data = sspData
             };
-            var result = Bellhop.GetRadialConfiguration(transmissionLossJob, soundSpeedProfile, SedimentTypes.Find(sedimentType), 
-                                                        (float)(bathymetryDepths.Max() * 1.01), receiverRanges.Count, receiverDepths.Count, 
+            var result = GetRadialConfiguration(acousticProperties, soundSpeedProfile, SedimentTypes.Find(sedimentType), 
+                                                        (float)(bathymetryDepths.Max() * 1.01), receiverRanges, receiverDepths, 
                                                         false, true, true, beamCount);
             File.WriteAllText(Path.Combine(outputDirectory, name + ".env"), result, new ASCIIEncoding());
+        }
+
+        public static string GetRadialConfiguration(AcousticProperties acousticProperties, SoundSpeedProfile ssp, SedimentType sediment, 
+                                                    float maxCalculationDepthMeters, List<double> ranges, List<double> depths, 
+                                                    bool useSurfaceReflection, bool useVerticalBeamforming, bool generateArrivalsFile, int beamCount)
+        {
+            using (var sw = new StringWriter())
+            {
+                sw.WriteLine("'TL' ! Title");
+                sw.WriteLine("{0} ! Frequency (Hz)", acousticProperties.Frequency);
+                sw.WriteLine("1 ! NMedia"); // was NMEDIA in gui_genbellhopenv.m
+                sw.WriteLine(useSurfaceReflection ? "'CFFT ' ! Top Option" : "'CVFT ' ! Top Option");
+
+                sw.WriteLine("0  0.00 {0} ! N sigma depth", ssp.Data[ssp.Data.Count - 1].Depth);
+
+                // If SSP is shallower than the bathymetry then extrapolate an SSP entry for the deepest part of the water
+                //if (SSP.DepthVector[SSP.DepthVector.Length - 1] < RealBottomDepth_Meters)
+                //    SoundSpeedProfile = ExtrapolateSSP(SoundSpeedProfile, RealBottomDepth_Meters);
+
+                foreach (var depthValuePair in ssp.Data)
+                    sw.WriteLine("{0:0.00} {1:0.00} 0.00 1.00 0.00 0.00 / ! z c cs rho", depthValuePair.Depth, depthValuePair.Value);
+
+                sw.WriteLine("'A~' 0.00 ! Bottom Option, sigma"); // A = Acoustic halfspace, ~ = read bathymetry file, 0.0 = bottom roughness (currently ignored)
+                sw.WriteLine("{0} {1} {2} {3} {4} {5} / ! lower halfspace", maxCalculationDepthMeters, sediment.CompressionWaveSpeed, sediment.ShearWaveSpeed, sediment.Density, sediment.LossParameter, 0);
+                // Source and Receiver Depths and Ranges
+                sw.WriteLine("1"); // Number of Source Depths
+                sw.WriteLine("{0} /", acousticProperties.SourceDepth); // source depth
+                sw.WriteLine("{0}", depths.Count); // Number of Receiver Depths
+                foreach (var depth in depths) sw.Write("{0} ", depth);
+                sw.WriteLine("/ ! Receiver Depths (m)");
+                foreach (var range in ranges) sw.Write("{0} ", range);
+                sw.WriteLine("/ ! Receiver Ranges (km)");
+
+                if (generateArrivalsFile) sw.WriteLine("'AB'");  // aB
+                else sw.WriteLine(useVerticalBeamforming ? "'IG*'" : "'I'");
+                // if useVerticalBeamforming is true, then SBPFIL must be present (Source Beam Pattern file)
+                sw.WriteLine("{0}", beamCount); // Number of beams
+                //sw.WriteLine("0"); // Number of beams
+                var verticalHalfAngle = acousticProperties.VerticalBeamWidth / 2;
+                var angle1 = acousticProperties.DepressionElevationAngle - verticalHalfAngle;
+                var angle2 = acousticProperties.DepressionElevationAngle + verticalHalfAngle;
+                sw.WriteLine("{0} {1} /", angle1, angle2); // Beam fan half-angles (negative angles are toward the surface
+                //sw.WriteLine("-60.00 60.00 /"); // Beam fan half-angles (negative angles are toward the surface
+                //sw.WriteLine("{0:F} {1:F} {2:F} ! step zbox(meters) rbox(km)", experiment.TransmissionLossSettings.DepthCellSize, RealBottomDepth_Meters + 100, (bottomProfile.Length / 1000.0) * 1.01);
+                sw.WriteLine("0.0 {0} {1}", ssp.Data[ssp.Data.Count - 1].Depth * 2, (transmissionLossJob.SoundSource.Radius / 1000.0) * 1.01);
+                return sw.ToString();
+            }
         }
 
         public static void Usage(string additionalErrorInfo = null)
@@ -306,6 +347,7 @@ namespace CreateBellhopEnvironmentFiles
             Console.WriteLine("                                     -ranges <rangeList>");
             Console.WriteLine("                                     -depths <depthList>");
             Console.WriteLine("                                     -sediment <sedimentType>");
+            Console.WriteLine("                                    [-rays <rayCount>]");
             Console.WriteLine();
             Console.WriteLine("Description: Create a set of configuration and data files suitable for running");
             Console.WriteLine("             the Bellhop acoustic simulator along a single transect.");
@@ -353,6 +395,13 @@ namespace CreateBellhopEnvironmentFiles
             Console.WriteLine();
             Console.WriteLine("       <depthList> List of depths at which receiver data are to be calculated.");
             Console.WriteLine("                   Depths are specified in meters from the surface.");
+            Console.WriteLine();
+            Console.WriteLine("       <rayCount> is an optional parameter which specifies the number of rays.");
+            Console.WriteLine("                  that will be launched by Bellhop during its numerical");
+            Console.WriteLine("                  simulation of the acoustic environment.  More rays may");
+            Console.WriteLine("                  yield a more accurate result but at the expense of longer");
+            Console.WriteLine("                  computation time.  The default value for this parameter is");
+            Console.WriteLine("                  100.");
             Console.WriteLine();
             Console.WriteLine("       <sedimentType is one of the following values:");
             Console.WriteLine("                     1......Rough Rock");
