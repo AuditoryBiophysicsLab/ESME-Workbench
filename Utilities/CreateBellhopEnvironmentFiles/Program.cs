@@ -27,7 +27,7 @@ namespace CreateBellhopEnvironmentFiles
             var sourceDepth = double.NaN;
             var verticalBeamWidth = double.NaN;
             var depressionElevationAngle = double.NaN;
-            var beamCount = 1000;
+            var beamCount = 100;
             List<double> bathymetryRanges = null;
             List<double> bathymetryDepths = null;
             List<double> receiverRanges = null;
@@ -82,12 +82,12 @@ namespace CreateBellhopEnvironmentFiles
                             }
                             bathymetryRanges = new List<double>();
                             bathymetryDepths = new List<double>();
-                            for (var curElement = 0; curElement > elements.Count(); curElement += 2)
+                            for (var curElement = 0; curElement < elements.Count() - 1; curElement += 2)
                             {
                                 bathymetryRanges.Add(double.Parse(elements[curElement]));
                                 bathymetryDepths.Add(double.Parse(elements[curElement + 1]));
                             }
-                            for (var rangeIndex = 0; rangeIndex < bathymetryRanges.Count; rangeIndex++)
+                            for (var rangeIndex = 0; rangeIndex < bathymetryRanges.Count - 1; rangeIndex++)
                                 if (bathymetryRanges[rangeIndex] >= bathymetryRanges[rangeIndex + 1])
                                 {
                                     Usage("Bathymetry ranges must increase with each range/depth pair");
@@ -102,7 +102,7 @@ namespace CreateBellhopEnvironmentFiles
                             elements = args[++argIndex].Split(',');
                             if (!elements.Any()) Usage("Receiver range data was not specified");
                             receiverRanges = elements.Select(double.Parse).ToList();
-                            for (var rangeIndex = 0; rangeIndex < receiverRanges.Count; rangeIndex++)
+                            for (var rangeIndex = 0; rangeIndex < receiverRanges.Count - 1; rangeIndex++)
                                 if (receiverRanges[rangeIndex] >= receiverRanges[rangeIndex + 1])
                                 {
                                     Usage("Receiver ranges must increase with each entry");
@@ -113,7 +113,7 @@ namespace CreateBellhopEnvironmentFiles
                             elements = args[++argIndex].Split(',');
                             if (!elements.Any()) Usage("Receiver range data was not specified");
                             receiverDepths = elements.Select(double.Parse).ToList();
-                            for (var depthIndex = 0; depthIndex < receiverDepths.Count; depthIndex++)
+                            for (var depthIndex = 0; depthIndex < receiverDepths.Count - 1; depthIndex++)
                                 if (receiverDepths[depthIndex] >= receiverDepths[depthIndex + 1])
                                 {
                                     Usage("Receiver depths must increase with each entry");
@@ -208,6 +208,7 @@ namespace CreateBellhopEnvironmentFiles
                     return -1;
                 }
 
+
                 // Read in the sound speed profile from the provided file
                 var soundspeedDepths = new List<double>();
                 var soundspeedSpeeds = new List<double>();
@@ -225,6 +226,9 @@ namespace CreateBellhopEnvironmentFiles
                     soundspeedSpeeds.Add(double.Parse(fields[1]));
                 }
 
+                // Make the max depth 10% greater than the deeper of the deepest point of the bathymetry or the deepest receiver depth
+                var maxDepth = Math.Max(bathymetryDepths.Last(), receiverDepths.Max()) * 1.1;
+
                 CreateBellhopEnvironment(outputDirectory,
                                          name,
                                          sourceDepth,
@@ -238,7 +242,8 @@ namespace CreateBellhopEnvironmentFiles
                                          receiverRanges,
                                          receiverDepths,
                                          sedimentType,
-                                         beamCount);
+                                         beamCount,
+                                         maxDepth);
             }
             catch (Exception ex)
             {
@@ -251,7 +256,7 @@ namespace CreateBellhopEnvironmentFiles
                                                     double sourceDepth, double frequency, double verticalBeamWidth, double depressionElevationAngle, 
                                                     List<double> bathymetryRanges, List<double> bathymetryDepths, List<double> soundspeedDepths, 
                                                     List<double> soundspeedSpeeds, List<double> receiverRanges, List<double> receiverDepths, 
-                                                    int sedimentType, int beamCount)
+                                                    int sedimentType, int beamCount, double maxDepth)
         {
             if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
 
@@ -259,9 +264,10 @@ namespace CreateBellhopEnvironmentFiles
             var bathymetryFilename = Path.Combine(outputDirectory, name + ".bty");
             using (var writer = new StreamWriter(bathymetryFilename))
             {
-                writer.Write(bathymetryRanges.Count);
+                writer.WriteLine("'C'");
+                writer.WriteLine(bathymetryRanges.Count);
                 for (var index = 0; index < bathymetryRanges.Count; index++)
-                    writer.Write("{0} {1}", bathymetryRanges[index], bathymetryDepths[index]);
+                    writer.WriteLine("{0} {1}", bathymetryRanges[index], bathymetryDepths[index]);
             }
 
             var acousticProperties = new AcousticProperties
@@ -282,13 +288,13 @@ namespace CreateBellhopEnvironmentFiles
                 Data = sspData
             };
             var result = GetRadialConfiguration(acousticProperties, soundSpeedProfile, SedimentTypes.Find(sedimentType), 
-                                                        (float)(bathymetryDepths.Max() * 1.01), receiverRanges, receiverDepths, 
-                                                        false, true, true, beamCount);
+                                                maxDepth, maxRadius, receiverRanges, receiverDepths, 
+                                                false, true, true, beamCount);
             File.WriteAllText(Path.Combine(outputDirectory, name + ".env"), result, new ASCIIEncoding());
         }
 
         public static string GetRadialConfiguration(AcousticProperties acousticProperties, SoundSpeedProfile ssp, SedimentType sediment, 
-                                                    float maxCalculationDepthMeters, List<double> ranges, List<double> depths, 
+                                                    double maxDepth, double maxRadius, List<double> ranges, List<double> depths, 
                                                     bool useSurfaceReflection, bool useVerticalBeamforming, bool generateArrivalsFile, int beamCount)
         {
             using (var sw = new StringWriter())
@@ -307,14 +313,15 @@ namespace CreateBellhopEnvironmentFiles
                 foreach (var depthValuePair in ssp.Data)
                     sw.WriteLine("{0:0.00} {1:0.00} 0.00 1.00 0.00 0.00 / ! z c cs rho", depthValuePair.Depth, depthValuePair.Value);
 
-                sw.WriteLine("'A~' 0.00 ! Bottom Option, sigma"); // A = Acoustic halfspace, ~ = read bathymetry file, 0.0 = bottom roughness (currently ignored)
-                sw.WriteLine("{0} {1} {2} {3} {4} {5} / ! lower halfspace", maxCalculationDepthMeters, sediment.CompressionWaveSpeed, sediment.ShearWaveSpeed, sediment.Density, sediment.LossParameter, 0);
+                sw.WriteLine("'A*' 0.00 ! Bottom Option, sigma"); // A = Acoustic halfspace, ~ = read bathymetry file, 0.0 = bottom roughness (currently ignored)
+                sw.WriteLine("{0} {1} {2} {3} {4} {5} / ! lower halfspace", maxDepth, sediment.CompressionWaveSpeed, sediment.ShearWaveSpeed, sediment.Density, sediment.LossParameter, 0);
                 // Source and Receiver Depths and Ranges
                 sw.WriteLine("1"); // Number of Source Depths
                 sw.WriteLine("{0} /", acousticProperties.SourceDepth); // source depth
                 sw.WriteLine("{0}", depths.Count); // Number of Receiver Depths
                 foreach (var depth in depths) sw.Write("{0} ", depth);
                 sw.WriteLine("/ ! Receiver Depths (m)");
+                sw.WriteLine("{0}", ranges.Count); // Number of Receiver Ranges
                 foreach (var range in ranges) sw.Write("{0} ", range);
                 sw.WriteLine("/ ! Receiver Ranges (km)");
 
@@ -329,7 +336,7 @@ namespace CreateBellhopEnvironmentFiles
                 sw.WriteLine("{0} {1} /", angle1, angle2); // Beam fan half-angles (negative angles are toward the surface
                 //sw.WriteLine("-60.00 60.00 /"); // Beam fan half-angles (negative angles are toward the surface
                 //sw.WriteLine("{0:F} {1:F} {2:F} ! step zbox(meters) rbox(km)", experiment.TransmissionLossSettings.DepthCellSize, RealBottomDepth_Meters + 100, (bottomProfile.Length / 1000.0) * 1.01);
-                sw.WriteLine("0.0 {0} {1}", ssp.Data[ssp.Data.Count - 1].Depth * 2, (transmissionLossJob.SoundSource.Radius / 1000.0) * 1.01);
+                sw.WriteLine("{0} {1} {2}", (ranges[0] / 2) * 1000, maxDepth, maxRadius);
                 return sw.ToString();
             }
         }
