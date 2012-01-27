@@ -28,6 +28,7 @@ namespace CreateBellhopEnvironmentFiles
             var verticalBeamWidth = double.NaN;
             var depressionElevationAngle = double.NaN;
             var beamCount = 100;
+            var separators = new[] { ",", " " };
             List<double> bathymetryRanges = null;
             List<double> bathymetryDepths = null;
             List<double> receiverRanges = null;
@@ -69,7 +70,7 @@ namespace CreateBellhopEnvironmentFiles
                             break;
                         case "-bathymetry":
                         case "-bathy":
-                            elements = args[++argIndex].Split(',');
+                            elements = args[++argIndex].Split(separators, StringSplitOptions.RemoveEmptyEntries);
                             if (!elements.Any())
                             {
                                 Usage("Bathymetry data was not specified");
@@ -99,7 +100,7 @@ namespace CreateBellhopEnvironmentFiles
                             sspFile = args[++argIndex];
                             break;
                         case "-ranges":
-                            elements = args[++argIndex].Split(',');
+                            elements = args[++argIndex].Split(separators, StringSplitOptions.RemoveEmptyEntries);
                             if (!elements.Any()) Usage("Receiver range data was not specified");
                             receiverRanges = elements.Select(double.Parse).ToList();
                             for (var rangeIndex = 0; rangeIndex < receiverRanges.Count - 1; rangeIndex++)
@@ -110,8 +111,8 @@ namespace CreateBellhopEnvironmentFiles
                                 }
                             break;
                         case "-depths":
-                            elements = args[++argIndex].Split(',');
-                            if (!elements.Any()) Usage("Receiver range data was not specified");
+                            elements = args[++argIndex].Split(separators, StringSplitOptions.RemoveEmptyEntries);
+                            if (!elements.Any()) Usage("Receiver depth data was not specified");
                             receiverDepths = elements.Select(double.Parse).ToList();
                             for (var depthIndex = 0; depthIndex < receiverDepths.Count - 1; depthIndex++)
                                 if (receiverDepths[depthIndex] >= receiverDepths[depthIndex + 1])
@@ -213,10 +214,10 @@ namespace CreateBellhopEnvironmentFiles
                 var soundspeedDepths = new List<double>();
                 var soundspeedSpeeds = new List<double>();
                 var sspLines = File.ReadAllLines(sspFile);
-                var separators = new[] {" "};
+                var spaceSeparators = new[] {" "};
                 foreach (var line in sspLines)
                 {
-                    var fields = line.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+                    var fields = line.Split(spaceSeparators, StringSplitOptions.RemoveEmptyEntries);
                     if (fields.Length != 2)
                     {
                         Usage("-soundspeed file is not in the expected format");

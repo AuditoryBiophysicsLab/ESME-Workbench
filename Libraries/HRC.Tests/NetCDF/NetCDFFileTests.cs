@@ -7,6 +7,7 @@ using HRC.NetCDF;
 
 namespace HRC.Tests.NetCDF
 {
+    [TestFixture]
     public class NetCDFFileTests
     {
         // Note: The test file should be 'sgdemv3s06.nc', which is the January Salinity data file from the GDEM v3 disc from NAVOCEANO
