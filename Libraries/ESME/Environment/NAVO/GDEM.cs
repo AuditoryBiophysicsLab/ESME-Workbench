@@ -137,7 +137,7 @@ namespace ESME.Environment.NAVO
 
         public static SoundSpeedField ReadFile(string fileName, string dataVarName, NAVOTimePeriod month, GeoRect region)
         {
-            var myFile = new NetCDF(fileName);
+            var myFile = NetCDFFile.Open(fileName);
             Logger.Log("in ReadFile: 0.1");
             var lats = ((NcVarDouble)myFile.Variables.Single(var => var.Name == "lat")).ToArray();
             Logger.Log("in ReadFile: 0.2");

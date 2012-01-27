@@ -68,7 +68,7 @@ namespace ESME.Environment
         static NAVOImporter()
         {
             NcVarShort.Logger = Logger.LogString;
-            NetCDF.Logger = Logger.LogString;
+            NetCDFFile.Logger = Logger.LogString;
             //NetCDFReaders.Logger = Logger.LogString;
             Logger.Start(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "esme.log"));
             Logger.Log("About to create temperature worker");

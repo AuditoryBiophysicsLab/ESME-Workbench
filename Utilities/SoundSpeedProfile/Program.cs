@@ -17,6 +17,7 @@ namespace SoundSpeedProfile
             List<double> salinities = null;
             string algorithm = null;
             var isCSV = false;
+            var separators = new[] {",", " "};
             if (args.Length == 0)
             {
                 Usage();
@@ -32,7 +33,7 @@ namespace SoundSpeedProfile
                         latitude = double.Parse(args[++argIndex]);
                         break;
                     case "-depths":
-                        elements = args[++argIndex].Split(',');
+                        elements = args[++argIndex].Split(separators, StringSplitOptions.RemoveEmptyEntries);
                         if (!elements.Any()) Usage("Receiver range data was not specified");
                         depths = elements.Select(double.Parse).ToList();
                         for (var index = 0; index < depths.Count - 1; index++)
@@ -43,12 +44,12 @@ namespace SoundSpeedProfile
                             }
                         break;
                     case "-temperatures":
-                        elements = args[++argIndex].Split(',');
+                        elements = args[++argIndex].Split(separators, StringSplitOptions.RemoveEmptyEntries);
                         if (!elements.Any()) Usage("Receiver range data was not specified");
                         temperatures = elements.Select(double.Parse).ToList();
                         break;
                     case "-salinities":
-                        elements = args[++argIndex].Split(',');
+                        elements = args[++argIndex].Split(separators, StringSplitOptions.RemoveEmptyEntries);
                         if (!elements.Any()) Usage("Receiver range data was not specified");
                         salinities = elements.Select(double.Parse).ToList();
                         break;

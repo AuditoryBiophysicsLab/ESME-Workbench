@@ -7,6 +7,8 @@ namespace HRC.NetCDF
     {
         public string Value { get; set; }
 
+        public static implicit operator string(NcString s) { return s.Value; }
+
         public byte[] Bytes
         {
             get
