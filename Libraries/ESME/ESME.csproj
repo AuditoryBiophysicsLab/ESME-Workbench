@@ -156,6 +156,7 @@
     <Compile Include="Environment\NAVO\Deprecated\BottomLossBackgroundExtractor.cs" />
     <Compile Include="Environment\NAVO\BST.cs" />
     <Compile Include="Environment\NAVO\DBDB.cs" />
+    <Compile Include="Environment\NAVO\EnvironmentImporterNew.cs" />
     <Compile Include="Environment\NAVO\SMGC.cs" />
     <Compile Include="Environment\NAVO\Deprecated\DBDBBackgroundExtractor.cs" />
     <Compile Include="Environment\NAVO\Deprecated\DigitalBathymetricDatabase.cs" />

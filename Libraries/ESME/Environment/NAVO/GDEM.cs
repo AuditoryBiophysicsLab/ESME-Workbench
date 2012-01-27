@@ -58,7 +58,6 @@ namespace ESME.Environment.NAVO
             actionBlock.Complete();
             return actionBlock.Completion;
         }
-#endif
 
         public async static Task<List<SoundSpeedField>> CalculateSoundSpeedFieldsAsync(List<SoundSpeedField> temperatureFields, List<SoundSpeedField> salinityFields, Bathymetry bathymetry = null, IProgress<string> currentState = null, IProgress<float> progress = null)
         {
@@ -107,6 +106,7 @@ namespace ESME.Environment.NAVO
             foreach (var point1 in profile1.EnvironmentData.Where(point1 => !profile2.EnvironmentData.Any(point1.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at {0}, the other does not", point1));
             foreach (var point2 in profile2.EnvironmentData.Where(point2 => !profile1.EnvironmentData.Any(point2.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at {0}, the other does not", point2));
         }
+#endif
 
         public static string FindSalinityFile(NAVOTimePeriod monthIndex)
         {

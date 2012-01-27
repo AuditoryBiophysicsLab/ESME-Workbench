@@ -326,7 +326,7 @@ namespace CreateBellhopEnvironmentFiles
                 foreach (var range in ranges) sw.Write("{0} ", range);
                 sw.WriteLine("/ ! Receiver Ranges (km)");
 
-                if (generateArrivalsFile) sw.WriteLine("'AB'");  // aB
+                if (generateArrivalsFile) sw.WriteLine("'aG'");  // aB
                 else sw.WriteLine(useVerticalBeamforming ? "'IG*'" : "'I'");
                 // if useVerticalBeamforming is true, then SBPFIL must be present (Source Beam Pattern file)
                 sw.WriteLine("{0}", beamCount); // Number of beams
