@@ -60,18 +60,11 @@
     <Reference Include="Cinch.WPF">
       <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
     </Reference>
-    <Reference Include="MapSuiteCore">
-      <HintPath>..\..\ESME WorkBench\External References\MapSuiteCore.dll</HintPath>
-    </Reference>
     <Reference Include="MEFedMVVM.WPF">
       <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\ESME WorkBench\External References\Microsoft.Expression.Interactions.dll</HintPath>
-    </Reference>
-    <Reference Include="MySql.Data, Version=6.1.0.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
     </Reference>
     <Reference Include="PresentationCore">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>

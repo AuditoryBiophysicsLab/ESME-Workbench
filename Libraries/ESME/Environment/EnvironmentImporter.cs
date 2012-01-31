@@ -186,7 +186,7 @@ namespace ESME.Environment
                 if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                 {
                     //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
-                    var wind = await SMGC.NewImportAsync(job.GeoRect);
+                    var wind = await SMGC.ImportAsync(job.GeoRect);
                     if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                     {
                         wind.Save(job.DestinationFilename);

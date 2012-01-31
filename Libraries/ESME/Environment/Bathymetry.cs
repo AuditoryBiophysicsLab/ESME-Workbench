@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using ESME.Environment.NAVO;
+using System.Windows.Media;
 using HRC.Navigation;
+using HRC.Utility;
 using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.Environment
@@ -56,13 +59,13 @@ namespace ESME.Environment
             char[] separators = { ' ' };
             var samples = new List<EarthCoordinate<float>>();
             //System.Diagnostics.Debug.WriteLine("{0}: FromYXZ: About to read bathymetry file {1}", DateTime.Now, Path.GetFileName(fileName));
-            var lineCount = 0;
+            //var lineCount = 0;
             using (var stream = new StreamReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
                 var curLine = stream.ReadLine();
                 while (curLine != null)
                 {
-                    lineCount++;
+                    //lineCount++;
                     var fields = curLine.Split(separators, StringSplitOptions.RemoveEmptyEntries);
                     var latitude = double.Parse(fields[0]);
                     var longitude = double.Parse(fields[1]);
@@ -116,6 +119,58 @@ namespace ESME.Environment
         }
     }
 
+    public static class BathymetryExtensionMethods
+    {
+        public static void CreateBitmap(this Bathymetry bathymetry, DualColormap dualColormap, int maxWidth, int maxHeight, string destinationFilename)
+        {
+            CheckDestinationDirectory(destinationFilename);
+
+            var bathysize = Math.Max(bathymetry.Samples.Longitudes.Count, bathymetry.Samples.Latitudes.Count);
+            var rasterSize = Math.Min(maxWidth, maxHeight);
+            var displayValues = bathymetry.Samples;
+            if (bathysize > rasterSize)
+            {
+                var scaleFactor = rasterSize / bathysize;
+                displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples,
+                                                                                 bathymetry.Samples.Longitudes.Count * scaleFactor,
+                                                                                 bathymetry.Samples.Latitudes.Count * scaleFactor);
+            }
+
+            var imageFilename = Path.GetFileNameWithoutExtension(destinationFilename) + ".bmp";
+            var imagePath = Path.GetDirectoryName(destinationFilename);
+            var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
+            for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
+            var displayData = dualColormap.ToPixelValues(bitmapData, bathymetry.Minimum.Data, bathymetry.Maximum.Data < 0 ? bathymetry.Maximum.Data : 8000, Colors.Black);
+            BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
+        }
+
+        public static void CreateWorldFile(this Bathymetry bathymetry, string destinationFilename)
+        {
+            CheckDestinationDirectory(destinationFilename);
+
+            var imageFilename = Path.GetFileNameWithoutExtension(destinationFilename) + ".bpw";
+            var imagePath = Path.GetDirectoryName(destinationFilename);
+
+            var sb = new StringBuilder();
+            sb.AppendLine(bathymetry.Samples.Resolution.ToString(CultureInfo.InvariantCulture));
+            sb.AppendLine("0.0");
+            sb.AppendLine("0.0");
+            sb.AppendLine(bathymetry.Samples.Resolution.ToString(CultureInfo.InvariantCulture));
+            sb.AppendLine(bathymetry.Samples.GeoRect.West.ToString(CultureInfo.InvariantCulture));
+            sb.AppendLine(bathymetry.Samples.GeoRect.North.ToString(CultureInfo.InvariantCulture));
+            using (var writer = new StreamWriter(Path.Combine(imagePath, imageFilename), false)) writer.Write(sb.ToString());
+        }
+
+        static void CheckDestinationDirectory(string destinationFilename)
+        {
+            if (string.IsNullOrEmpty(destinationFilename)) throw new ArgumentNullException("destinationFilename");
+            var destinationDirectory = Path.GetDirectoryName(destinationFilename);
+            if (string.IsNullOrEmpty(destinationDirectory)) throw new ArgumentException("Destination filename must contain a full path", "destinationFilename");
+            if (!Directory.Exists(destinationDirectory)) Directory.CreateDirectory(destinationDirectory);
+        }
+    }
+
+#if false
     public class AvailableResolution
     {
         public AvailableResolution() { IsAvailable = false; }
@@ -153,7 +208,7 @@ namespace ESME.Environment
             Add(new T {Resolution = 2.00f});
         }
 
-        public T this[float resolution] { get { return Find(t => t.Resolution == resolution); } }
+        public T this[float resolution] { get { return Find(t => Math.Abs(t.Resolution - resolution) < 0.0001f); } }
     }
 
     public class AvailableResolutions : Resolutions<AvailableResolution> { }
@@ -211,4 +266,5 @@ namespace ESME.Environment
 
     public class AvailableTimePeriods : TimePeriods<AvailableTimePeriod> { }
     public class SelectedTimePeriods : TimePeriods<SelectedTimePeriod> { }
+#endif
 }

@@ -12,6 +12,7 @@ namespace ESME.Environment.NAVO
 {
     public static class SMGC
     {
+#if false
         public async static Task ImportAsync(string outputPath, GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
         {
             if (progress != null) lock (progress) progress.Report(0f);
@@ -72,8 +73,14 @@ namespace ESME.Environment.NAVO
             if (currentState != null) lock (currentState) currentState.Report("Saving");
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
         }
+#endif
+        public static Wind Import(GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
+        {
+            var result = ImportAsync(region, currentState, progress);
+            return result.Result;
+        }
 
-        public async static Task<Wind> NewImportAsync(GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
+        public async static Task<Wind> ImportAsync(GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
         {
             if (progress != null) lock (progress) progress.Report(0f);
             if (currentState != null) lock (currentState) currentState.Report("Importing wind data");
@@ -217,7 +224,7 @@ namespace ESME.Environment.NAVO
                     var f99 = reader.ReadSingle();
                     var f380 = reader.ReadSingle();
 
-                    if ((f99 != 99.0f) || (f380 != 380.0f)) throw new ApplicationException("Invalid byte order in file " + fileName);
+                    if ((Math.Abs(f99 - 99.0f) > 0.0001) || (Math.Abs(f380 - 380.0f) > 0.0001)) throw new ApplicationException("Invalid byte order in file " + fileName);
 
                     Months = new List<SMGCMonth>();
                     var curMonth = SMGCMonth.Read(NAVOTimePeriod.January, reader);

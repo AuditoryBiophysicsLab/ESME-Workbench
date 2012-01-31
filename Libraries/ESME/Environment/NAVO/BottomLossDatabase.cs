@@ -13,11 +13,10 @@ namespace ESME.Environment.NAVO
 {
     public static class BottomLossDatabase
     {
-        public async static Task ImportAsync(string outputPath, GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
+        public static BottomLoss Extract(GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
         {
-            var result = await ExtractAsync(region, currentState, progress);
-            if (currentState != null) lock (currentState) currentState.Report("Saving");
-            result.Save(Path.Combine(outputPath, "data.bottomloss"));
+            var result = ExtractAsync(region, currentState, progress);
+            return result.Result;
         }
 
         public async static Task<BottomLoss> ExtractAsync(GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
