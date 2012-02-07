@@ -78,22 +78,22 @@
     <Directory Id="TARGETDIR" Name="SourceDir">
 			<Directory Id="$(var.PlatformProgramFilesFolder)">
 				<Directory Id="APPLICATIONFOLDER" Name="$(var.ProductName)">
-          <Component Id="OneNavyModel" 
+          <Component Id="ESMEWorkbench" 
                      Guid="68DE95CE-83D4-4BC0-8AB9-423655AEC06C"
                      Win64="$(var.Win64)">
-            <ProgId Id="OneNavyModel.binfile" Description="CASS binary output file" Icon="TransmissionLossViewer.exe" IconIndex="1">
+            <ProgId Id="ESMEWorkbench.binfile" Description="CASS binary output file" Icon="TransmissionLossViewer.exe" IconIndex="1">
               <Extension Id="bin" ContentType="application/cass">
                 <Verb Id="open" Command="Open" TargetFile="TransmissionLossViewer.exe" Argument='"%1"'/>
               </Extension>
             </ProgId>
             <!-- Core ESME executables and assemblies -->
-            <File Id="OneNavyModel.exe"
-                  Name="OneNavyModel.exe"
-                  Source="$(var.ESMEPath)\OneNavyModel.exe"
+            <File Id="ESMEWorkBench.exe"
+                  Name="ESMEWorkBench.exe"
+                  Source="$(var.ESMEPath)\ESMEWorkBench.exe"
                   KeyPath="yes"/>
-            <File Id="OneNavyModel.exe.config"
-                  Name="OneNavyModel.exe.config"
-                  Source="$(var.ESMEPath)\OneNavyModel.exe.config" />
+            <File Id="ESMEWorkBench.exe.config"
+                  Name="ESMEWorkBench.exe.config"
+                  Source="$(var.ESMEPath)\ESMEWorkBench.exe.config" />
             <File Id="ESME.dll"
                   Name="ESME.dll"
                   Source="$(var.ESMEPath)\ESME.dll" />
@@ -105,7 +105,7 @@
                   Source="$(var.ESMEPath)\HRC.dll" />
             <File Id="ReleaseNotes"
                   Name="ESME Workbench Release Notes.pdf"
-                  Source="$(var.ReleaseNotesPath)\ESME Workbench Notes.pdf" />
+                  Source="$(var.ReleaseNotesPath)\ESME Workbench Release Notes.pdf" />
             <File Id="UserManual"
                   Name="ESME Workbench User Manual V1.pdf"
                   Source="$(var.ReleaseNotesPath)\ESME Workbench User Manual V1.pdf" />
@@ -241,17 +241,17 @@
           <!-- 32-bit components go here -->
             <Merge Id="vc100" Language="1033" SourceFile="$(var.MergeModulesPath)\Microsoft_VC100_CRT_x86.msm" DiskId="1" />
           <?endif ?>
-          <Component Id="OneNavyModel_Shortcuts" 
+          <Component Id="ESMEWorkbench_Shortcuts" 
                      Guid="C7CC0E54-2890-4685-AC04-815E87C878A8"
                      Win64="$(var.Win64)">
             <RegistryKey Root="HKCU" Key="Software\[Manufacturer]\[ProductName]">
               <RegistryValue Value="Uninstall" Type="string" KeyPath="yes" />
             </RegistryKey>
-            <Shortcut Id="One_Navy_Model_Program_Group_Shortcut"
+            <Shortcut Id="ESMEWorkbench_Program_Group_Shortcut"
                       Directory="ProgramMenuDir"
                       Name="$(var.ProductName)"
                       WorkingDirectory="APPLICATIONFOLDER"
-                      Target="[APPLICATIONFOLDER]OneNavyModel.exe"
+                      Target="[APPLICATIONFOLDER]ESMEWorkBench.exe"
                       Advertise="no" />
             <Shortcut Id="TransmissionLossViewer_Shortcut"
                       Directory="ProgramMenuDir"
@@ -289,11 +289,11 @@
                       WorkingDirectory="APPLICATIONFOLDER"
                       Target="[APPLICATIONFOLDER]ESME.url"
                       Advertise="no" />
-            <Shortcut Id="One_Navy_Model_Desktop_Shortcut"
+            <Shortcut Id="ESMEWorkbench_Desktop_Shortcut"
                       Directory="DesktopFolder"
                       Name="$(var.ProductName)"
                       WorkingDirectory="APPLICATIONFOLDER"
-                      Target="[APPLICATIONFOLDER]OneNavyModel.exe"
+                      Target="[APPLICATIONFOLDER]ESMEWorkBench.exe"
                       Advertise="no" />
             <Shortcut Id="UninstallProduct"
                       Directory="ProgramMenuDir"
@@ -337,10 +337,10 @@
       </Directory>
     </Directory>
     <Feature Id="ProductFeature" Title="ESME Workbench" Level="1" ConfigurableDirectory="TARGETDIR">
-      <ComponentRef Id="OneNavyModel" />
+      <ComponentRef Id="ESMEWorkbench" />
       <MergeRef Id="vc100"/>
       <ComponentRef Id="GISFiles" />
-      <ComponentRef Id="OneNavyModel_Shortcuts"/>
+      <ComponentRef Id="ESMEWorkbench_Shortcuts"/>
     </Feature>
 
     <!-- 

@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Windows;
 using Cinch;
 using ESME.Views;
+using ESMEWorkBench.Properties;
 using HRC.Utility;
 
 #if DEBUG

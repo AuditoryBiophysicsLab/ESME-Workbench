@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Windows;
@@ -63,7 +62,14 @@ namespace ESME.Environment
         public static readonly ImportProgressViewModel WindProgress;
         public static readonly ImportProgressViewModel BathymetryProgress;
         public static readonly ImportProgressViewModel BottomLossProgress;
-        static readonly Dispatcher Dispatcher = Dispatcher.CurrentDispatcher;
+
+        static void CheckDestinationDirectory(string destinationFilename)
+        {
+            if (string.IsNullOrEmpty(destinationFilename)) throw new ArgumentNullException("destinationFilename");
+            var destinationDirectory = Path.GetDirectoryName(destinationFilename);
+            if (string.IsNullOrEmpty(destinationDirectory)) throw new ArgumentException("Destination filename must contain a full path", "destinationFilename");
+            if (!Directory.Exists(destinationDirectory)) Directory.CreateDirectory(destinationDirectory);
+        }
 
         static NAVOImporter()
         {
@@ -74,101 +80,57 @@ namespace ESME.Environment
             Logger.Log("About to create temperature worker");
             if (TemperatureWorker == null) TemperatureWorker = new ActionBlock<ImportJobDescriptor>(async job =>
             {
-                //Logger.Log("Temperature worker starting job");
                 TemperatureProgress.JobStarting(job);
-                if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
-                {
-                    //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
-                    Logger.Log("Temperature worker about to call GDEM.ReadFile");
-                    SoundSpeedField temperatureField = null;
-                    try
-                    {
-                        temperatureField = GDEM.ReadFile(GDEM.FindTemperatureFile(job.TimePeriod), "water_temp", job.TimePeriod, job.GeoRect);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log("Caught exception from GDEM.ReadFile: {0}\r\nStack trace:\r\n{1}", e.Message, e.StackTrace);
-                    }
-                    Logger.Log("Temperature worker back from GDEM.ReadFile");
-                    var temperature = new SoundSpeed();
-                    try
-                    {
-                        temperature.SoundSpeedFields.Add(temperatureField);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log("Caught exception from SoundSpeedFields.Add: {0}", e.Message);
-                    }
-
-                    Logger.Log("Temperature worker added to sound speed field");
-                    if (!Directory.Exists(Path.GetDirectoryName(job.DestinationFilename))) Directory.CreateDirectory(Path.GetDirectoryName(job.DestinationFilename));
-                    
-                    //temperature.Save(job.DestinationFilename);
-                    temperature.Serialize(job.DestinationFilename);
-                    job.Resolution = 15;
-                    job.SampleCount = (uint)temperatureField.EnvironmentData.Count;
-                    //job.CompletionAction(job);
-                    job.CompletionTask.Start();
-                    await job.CompletionTask;
-                }
-                //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
-                //Logger.Log("Temperature worker job complete", DateTime.Now);
+                CheckDestinationDirectory(job.DestinationFilename);
+                var temperatureField = GDEM.ReadFile(GDEM.FindTemperatureFile(job.TimePeriod), "water_temp", job.TimePeriod, job.GeoRect);
+                var temperature = new SoundSpeed();
+                temperature.SoundSpeedFields.Add(temperatureField);
+                temperature.Serialize(job.DestinationFilename);
+                job.Resolution = 15;
+                job.SampleCount = (uint)temperatureField.EnvironmentData.Count;
+                job.CompletionTask.Start();
+                await job.CompletionTask;
                 TemperatureProgress.JobCompleted(job);
             },
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = 4,
-                MaxDegreeOfParallelism = 4,
+                BoundedCapacity = -1,
+                MaxDegreeOfParallelism = -1,
             });
             TemperatureProgress = new ImportProgressViewModel("Temperature", TemperatureWorker);
 
             if (SalinityWorker == null) SalinityWorker = new ActionBlock<ImportJobDescriptor>(async job =>
             {
                 SalinityProgress.JobStarting(job);
-                if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
-                {
-                    //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
-                    var salinityField = GDEM.ReadFile(GDEM.FindSalinityFile(job.TimePeriod), "salinity", job.TimePeriod, job.GeoRect);
-                    if (!Directory.Exists(Path.GetDirectoryName(job.DestinationFilename))) Directory.CreateDirectory(Path.GetDirectoryName(job.DestinationFilename));
-                    var salinity = new SoundSpeed();
-                    salinity.SoundSpeedFields.Add(salinityField);
-                    //salinity.Save(job.DestinationFilename);
-                    salinity.Serialize(job.DestinationFilename);
-                    job.Resolution = 15;
-                    job.SampleCount = (uint)salinityField.EnvironmentData.Count;
-                    //job.CompletionAction(job);
-                    job.CompletionTask.Start();
-                    await job.CompletionTask;
-                }
-                //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
+                CheckDestinationDirectory(job.DestinationFilename);
+                var salinityField = GDEM.ReadFile(GDEM.FindSalinityFile(job.TimePeriod), "salinity", job.TimePeriod, job.GeoRect);
+                var salinity = new SoundSpeed();
+                salinity.SoundSpeedFields.Add(salinityField);
+                salinity.Serialize(job.DestinationFilename);
+                job.Resolution = 15;
+                job.SampleCount = (uint)salinityField.EnvironmentData.Count;
+                job.CompletionTask.Start();
+                await job.CompletionTask;
                 SalinityProgress.JobCompleted(job);
             },
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = 4,
-                MaxDegreeOfParallelism = 4,
+                BoundedCapacity = -1,
+                MaxDegreeOfParallelism = -1,
             });
             SalinityProgress = new ImportProgressViewModel("Salinity", SalinityWorker);
 
             if (SedimentWorker == null) SedimentWorker = new ActionBlock<ImportJobDescriptor>(job =>
             {
                 SedimentProgress.JobStarting(job);
-                if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
-                {
-                    //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
-                    var sediment = BST.Extract(job.GeoRect);
-                    if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
-                    {
-                        sediment.Save(job.DestinationFilename);
-                        job.SampleCount = (uint)sediment.Samples.Count;
-                        job.Resolution = 5;
-                        //job.CompletionAction(job);
-                        job.CompletionTask.Start();
-                    }
-                }
-                //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
+                CheckDestinationDirectory(job.DestinationFilename);
+                var sediment = BST.Extract(job.GeoRect);
+                sediment.Save(job.DestinationFilename);
+                job.SampleCount = (uint)sediment.Samples.Count;
+                job.Resolution = 5;
+                job.CompletionTask.Start();
                SedimentProgress.JobCompleted(job);
             },
             new ExecutionDataflowBlockOptions
@@ -179,32 +141,23 @@ namespace ESME.Environment
             });
             SedimentProgress = new ImportProgressViewModel("Sediment", SedimentWorker);
 
-            if (WindWorker == null) WindWorker = new ActionBlock<ImportJobDescriptor>(async
-            job =>
+            if (WindWorker == null) WindWorker = new ActionBlock<ImportJobDescriptor>(async job =>
             {
                 WindProgress.JobStarting(job);
-                if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
-                {
-                    //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
-                    var wind = await SMGC.ImportAsync(job.GeoRect);
-                    if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
-                    {
-                        wind.Save(job.DestinationFilename);
-                        job.SampleCount = (uint)wind.TimePeriods[0].EnvironmentData.Count;
-                        job.Resolution = 60;
-                        //job.CompletionAction(job);
-                        job.CompletionTask.Start();
-                        await job.CompletionTask;
-                    }
-                }
-                //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
+                CheckDestinationDirectory(job.DestinationFilename);
+                var wind = await SMGC.ImportAsync(job.GeoRect);
+                wind.Save(job.DestinationFilename);
+                job.SampleCount = (uint)wind.TimePeriods[0].EnvironmentData.Count;
+                job.Resolution = 60;
+                job.CompletionTask.Start();
+                await job.CompletionTask;
                 WindProgress.JobCompleted(job);
             },
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = 4,
-                MaxDegreeOfParallelism = 4,
+                BoundedCapacity = -1,
+                MaxDegreeOfParallelism = -1,
             });
             WindProgress = new ImportProgressViewModel("Wind", WindWorker);
 
@@ -213,48 +166,44 @@ namespace ESME.Environment
                 try
                 {
                     BathymetryProgress.JobStarting(job);
-                    if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                    CheckDestinationDirectory(job.DestinationFilename);
+                    var bathymetry = DBDB.Extract(job.Resolution, job.GeoRect);
+                    bathymetry.Save(job.DestinationFilename);
+                    job.SampleCount = (uint)bathymetry.Samples.Count;
+                    job.CompletionTask.Start();
+                    await job.CompletionTask;
+                    var colormap = new DualColormap(Colormap.Summer, Colormap.Jet) { Threshold = 0 };
+                    var bathysize = Math.Max(bathymetry.Samples.Longitudes.Count, bathymetry.Samples.Latitudes.Count);
+                    var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
+                    var displayValues = bathymetry.Samples;
+                    if (bathysize > screenSize)
                     {
-                        //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(job.DestinationFilename)), Path.GetFileNameWithoutExtension(job.DestinationFilename), job.DataType);
-                        var bathymetry = DBDB.Extract(job.Resolution, job.GeoRect);
-                        if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
-                        {
-                            bathymetry.Save(job.DestinationFilename);
-                            job.SampleCount = (uint)bathymetry.Samples.Count;
-                            //job.CompletionAction(job);
-                            job.CompletionTask.Start();
-                            await job.CompletionTask;
-                        }
-                        var colormap = new DualColormap(Colormap.Summer, Colormap.Jet) { Threshold = 0 };
-                        var bathysize = Math.Max(bathymetry.Samples.Longitudes.Count, bathymetry.Samples.Latitudes.Count);
-                        var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
-                        var displayValues = bathymetry.Samples;
-                        if (bathysize > screenSize)
-                        {
-                            var scaleFactor = screenSize / bathysize;
-                            displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples,
-                                                                                             (int)(bathymetry.Samples.Longitudes.Count * scaleFactor),
-                                                                                             (int)(bathymetry.Samples.Latitudes.Count * scaleFactor));
-                        }
-
-                        var imageFilename = Path.GetFileNameWithoutExtension(job.DestinationFilename) + ".bmp";
-                        var imagePath = Path.GetDirectoryName(job.DestinationFilename);
-
-                        var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
-                        for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
-                        var displayData = colormap.ToPixelValues(bitmapData, bathymetry.Minimum.Data, bathymetry.Maximum.Data < 0 ? bathymetry.Maximum.Data : 8000, Colors.Black);
-                        BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
-
-                        var sb = new StringBuilder();
-                        sb.AppendLine(job.Resolution.ToString());
-                        sb.AppendLine("0.0");
-                        sb.AppendLine("0.0");
-                        sb.AppendLine(job.Resolution.ToString());
-                        sb.AppendLine(bathymetry.Samples.GeoRect.West.ToString());
-                        sb.AppendLine(bathymetry.Samples.GeoRect.North.ToString());
-                        using (var writer = new StreamWriter(Path.Combine(imagePath, Path.GetFileNameWithoutExtension(imageFilename) + ".bpw"), false)) writer.Write(sb.ToString());
+                        var scaleFactor = screenSize / bathysize;
+                        displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples,
+                                                                                        (int)(bathymetry.Samples.Longitudes.Count * scaleFactor),
+                                                                                        (int)(bathymetry.Samples.Latitudes.Count * scaleFactor));
                     }
-                    //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(job.DestinationFilename)), Path.GetFileNameWithoutExtension(job.DestinationFilename), job.DataType);
+
+                    var imageFilename = Path.GetFileNameWithoutExtension(job.DestinationFilename) + ".bmp";
+                    var imagePath = Path.GetDirectoryName(job.DestinationFilename);
+
+                    var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
+                    for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) 
+                        for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) 
+                            bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
+
+                    var displayData = colormap.ToPixelValues(bitmapData, bathymetry.Minimum.Data, bathymetry.Maximum.Data < 0 ? 
+                                      bathymetry.Maximum.Data : 8000, Colors.Black);
+                    BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
+
+                    var sb = new StringBuilder();
+                    sb.AppendLine(job.Resolution.ToString(CultureInfo.InvariantCulture));
+                    sb.AppendLine("0.0");
+                    sb.AppendLine("0.0");
+                    sb.AppendLine(job.Resolution.ToString(CultureInfo.InvariantCulture));
+                    sb.AppendLine(bathymetry.Samples.GeoRect.West.ToString(CultureInfo.InvariantCulture));
+                    sb.AppendLine(bathymetry.Samples.GeoRect.North.ToString(CultureInfo.InvariantCulture));
+                    using (var writer = new StreamWriter(Path.Combine(imagePath, Path.GetFileNameWithoutExtension(imageFilename) + ".bpw"), false)) writer.Write(sb.ToString());
                     BathymetryProgress.JobCompleted(job);
                 }
                 catch (Exception e)
@@ -266,8 +215,8 @@ namespace ESME.Environment
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = 1,
-                MaxDegreeOfParallelism = 1,
+                BoundedCapacity = -1,
+                MaxDegreeOfParallelism = -1,
             });
             BathymetryProgress = new ImportProgressViewModel("Bathymetry", BathymetryWorker);
 
@@ -275,21 +224,13 @@ namespace ESME.Environment
             job =>
             {
                 BottomLossProgress.JobStarting(job);
-                if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
-                {
-                    //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
-                    var bottomLoss = await BottomLossDatabase.ExtractAsync(job.GeoRect);
-                    if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
-                    {
-                        bottomLoss.Save(job.DestinationFilename);
-                        job.SampleCount = (uint)bottomLoss.Samples.Count;
-                        job.Resolution = 15;
-                        //job.CompletionAction(job);
-                        job.CompletionTask.Start();
-                        await job.CompletionTask;
-                    }
-                }
-                //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
+                CheckDestinationDirectory(job.DestinationFilename);
+                var bottomLoss = await BottomLossDatabase.ExtractAsync(job.GeoRect);
+                bottomLoss.Save(job.DestinationFilename);
+                job.SampleCount = (uint)bottomLoss.Samples.Count;
+                job.Resolution = 15;
+                job.CompletionTask.Start();
+                await job.CompletionTask;
                 BottomLossProgress.JobCompleted(job);
             },
             new ExecutionDataflowBlockOptions
@@ -394,17 +335,15 @@ namespace ESME.Environment
                     IsCompleted = _importer.Completion.IsCompleted;
                     IsCanceled = _importer.Completion.IsCanceled;
                     IsFaulted = _importer.Completion.IsFaulted;
-                    if (IsFaulted)
-                    {
-                        //Logger.Log("Importer has caught an exception.  Message follows.");
-                        System.Media.SystemSounds.Beep.Play();
-                        Status = "Error";
-                        ToolTip = "";
-                        foreach (var ex in _importer.Completion.Exception.InnerExceptions) ToolTip += FormatExceptionMessage(ex, 0) + "\r\n";
-                        ToolTip.Remove(ToolTip.Length - 2, 2);
-                        ToolTip.Trim();
-                        //Logger.Log("{0}", ToolTip);
-                    }
+                    if (!IsFaulted) return;
+                    //Logger.Log("Importer has caught an exception.  Message follows.");
+                    System.Media.SystemSounds.Beep.Play();
+                    Status = "Error";
+                    ToolTip = "";
+                    if (_importer.Completion.Exception != null)
+                        foreach (var ex in _importer.Completion.Exception.InnerExceptions) 
+                            ToolTip += FormatExceptionMessage(ex, 0) + "\r\n";
+                    ToolTip = ToolTip.Remove(ToolTip.Length - 2, 2).Trim();
                 });
 
             }
@@ -413,8 +352,8 @@ namespace ESME.Environment
         public string FormatExceptionMessage(Exception exception, int indentLevel)
         {
             return new string(' ', 2 * indentLevel) + ((exception.InnerException == null)
-                                                           ? exception.Message
-                                                           : exception.Message + "\r\n" + FormatExceptionMessage(exception.InnerException, indentLevel + 1));
+                                                      ? exception.Message
+                                                      : exception.Message + "\r\n" + FormatExceptionMessage(exception.InnerException, indentLevel + 1));
         }
 
         public void Post(ImportJobDescriptor job)

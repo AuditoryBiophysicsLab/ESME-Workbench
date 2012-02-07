@@ -102,7 +102,8 @@ namespace ESME.Environment.NAVO
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                MaxDegreeOfParallelism = 4,
+                BoundedCapacity = -1,
+                MaxDegreeOfParallelism = -1,
             });
 
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
