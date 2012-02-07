@@ -147,7 +147,7 @@ namespace ESME.Environment
                     if (source.EnvironmentData.TryGetExactPoint(location, out sample)) sourceList.Add(sample.Data);
                 }
                 // Set the resulting data to the average of the sample values that are present for the current location in the specified source months
-                location.Data = sourceList.Average();
+                if (sourceList.Count > 0) location.Data = sourceList.Average();
             }
             return result;
         }

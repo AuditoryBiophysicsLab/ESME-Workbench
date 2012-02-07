@@ -381,6 +381,25 @@ namespace ESME.Data
         float _transmissionLossContourThreshold = 120;
 
         #endregion
+
+        #region public int MaxImportThreadCount { get; set; }
+
+        public int MaxImportThreadCount
+        {
+            get { return _maxImportThreadCount; }
+            set
+            {
+                if (_maxImportThreadCount == value) return;
+                _maxImportThreadCount = value;
+                NotifyPropertyChanged(MaxImportThreadCountChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MaxImportThreadCountChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.MaxImportThreadCount);
+        int _maxImportThreadCount = 4;
+
+        #endregion
+
     }
 
     public sealed class NAEMOTools : ValidatingViewModel

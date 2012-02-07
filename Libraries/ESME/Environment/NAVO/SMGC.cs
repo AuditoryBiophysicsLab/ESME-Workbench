@@ -103,20 +103,23 @@ namespace ESME.Environment.NAVO
             {
                 TaskScheduler = TaskScheduler.Default,
                 BoundedCapacity = -1,
-                MaxDegreeOfParallelism = -1,
+                MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
             });
 
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             // Construct a list of files we will need to read out of the SMGC database
             var selectedLocations = new List<EarthCoordinate>();
+            var allFiles = Directory.GetFiles(Globals.AppSettings.NAVOConfiguration.SMGCDirectory, "*.stt", SearchOption.AllDirectories).ToList();
             for (var lat = south; lat <= north; lat++)
                 for (var lon = west; lon <= east; lon++)
                 {
                     var northSouth = (lat >= 0) ? "n" : "s";
                     var eastWest = (lon >= 0) ? "e" : "w";
                     var curFileName = string.Format("{0}{1:00}{2}{3:000}.stt", northSouth, Math.Abs(lat), eastWest, Math.Abs(lon));
-                    var matchingFiles = Directory.GetFiles(Globals.AppSettings.NAVOConfiguration.SMGCDirectory, curFileName, SearchOption.AllDirectories);
-                    if (matchingFiles.Length == 0) continue;
+                    var matchingFiles = (from curFile in allFiles
+                                         where curFile.EndsWith(curFileName)
+                                         select curFile).ToList();
+                    if (!matchingFiles.Any()) continue;
                     parallelReader.Post(matchingFiles.First());
                     selectedLocations.Add(new EarthCoordinate(lat, lon));
                 }
@@ -124,23 +127,66 @@ namespace ESME.Environment.NAVO
             parallelReader.LinkTo(batchBlock);
             parallelReader.Complete();
             await parallelReader.Completion;
+            allFiles = null;
             IList<SMGCFile> selectedFiles = batchBlock.Receive().ToList();
             if (currentState != null) lock (currentState) currentState.Report("Creating monthly data collection");
+
+            var parallelSelector = new TransformBlock<NAVOTimePeriod, TimePeriodEnvironmentData<WindSample>>(timePeriod =>
+            {
+                var curTimePeriodData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = timePeriod };
+                curTimePeriodData.EnvironmentData.AddRange(from selectedFile in selectedFiles
+                                                      where (selectedFile.Months != null) && (selectedFile[timePeriod] != null)
+                                                      select new WindSample(selectedFile.EarthCoordinate, selectedFile[timePeriod].MeanWindSpeed));
+                return curTimePeriodData;
+            },
+            new ExecutionDataflowBlockOptions
+            {
+                TaskScheduler = TaskScheduler.Default,
+                BoundedCapacity = -1,
+                MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
+            });
+
             var wind = new Wind();
             foreach (var curMonth in NAVOConfiguration.AllMonths)
             {
+#if false
                 var curMonthData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = curMonth };
                 curMonthData.EnvironmentData.AddRange(from selectedFile in selectedFiles
                                                       where (selectedFile.Months != null) && (selectedFile[curMonth] != null)
                                                       select new WindSample(selectedFile.EarthCoordinate, selectedFile[curMonth].MeanWindSpeed));
                 wind.TimePeriods.Add(curMonthData);
                 if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+#endif
+                parallelSelector.Post(curMonth);
             }
-            foreach (var curSeason in NAVOConfiguration.AllSeasons)
-                wind.TimePeriods.Add(wind.SeasonalAverage(curSeason));
+            var selectorBlock = new BatchBlock<TimePeriodEnvironmentData<WindSample>>(NAVOConfiguration.AllMonths.Count());
+            parallelSelector.LinkTo(selectorBlock);
+            parallelSelector.Complete();
+            await parallelSelector.Completion;
+            wind.TimePeriods.AddRange(selectorBlock.Receive());
+            //////////////////////////////////////////////////////////
+            var parallelAverager = new TransformBlock<NAVOTimePeriod, TimePeriodEnvironmentData<WindSample>>(timePeriod => wind.SeasonalAverage(timePeriod),
+            new ExecutionDataflowBlockOptions
+            {
+                TaskScheduler = TaskScheduler.Default,
+                BoundedCapacity = -1,
+                MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
+            });
+
+            foreach (var curSeason in NAVOConfiguration.AllSeasons) parallelAverager.Post(curSeason);
+
+            var averagerBlock = new BatchBlock<TimePeriodEnvironmentData<WindSample>>(NAVOConfiguration.AllSeasons.Count());
+            parallelAverager.LinkTo(averagerBlock);
+            parallelAverager.Complete();
+            await parallelAverager.Completion;
+            wind.TimePeriods.AddRange(averagerBlock.Receive());
+            
+            //////////////////////////////////////////////////////////
+            //foreach (var curSeason in NAVOConfiguration.AllSeasons)
+            //    wind.TimePeriods.Add(wind.SeasonalAverage(curSeason));
             if (currentState != null) lock (currentState) currentState.Report("Saving");
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-
+#if false
             foreach (var period in NAVOConfiguration.AllTimePeriods)
             {
                 if (wind[period].EnvironmentData.Count == 0) Debugger.Break();
@@ -149,7 +195,7 @@ namespace ESME.Environment.NAVO
                     if (float.IsNaN(sample.Data)) Debugger.Break();
                 }
             }
-
+#endif
             return wind;
         }
 

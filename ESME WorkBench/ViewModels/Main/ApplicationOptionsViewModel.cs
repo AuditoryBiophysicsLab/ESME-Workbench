@@ -108,6 +108,28 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public Dictionary<string, int> MaxImportThreadCountChoices { get; set; }
+
+        public Dictionary<string, int> MaxImportThreadCountChoices
+        {
+            get
+            {
+                return _maxImportThreadCountChoices ?? (_maxImportThreadCountChoices = new Dictionary<string, int>
+                {
+                    {"1", 1},
+                    {"2", 2},
+                    {"4", 4},
+                    {"6", 6},
+                    {"8", 8},
+                    {"As many as possible", -1},
+                });
+            }
+        }
+
+        Dictionary<string, int> _maxImportThreadCountChoices;
+
+        #endregion
+
         #region public string GDEMDirectory { get; set; }
 
         public string GDEMDirectory
