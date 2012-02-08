@@ -171,6 +171,7 @@
     <Compile Include="NetCDF\NcString.cs" />
     <Compile Include="NetCDF\NcVar.cs" />
     <Compile Include="NetCDF\NetCDFReaders.cs" />
+    <Compile Include="Plugins\PluginManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Navigation\EarthCoordinateTypeConverter.cs" />
     <Compile Include="Services\HRCColorPickerService.cs" />

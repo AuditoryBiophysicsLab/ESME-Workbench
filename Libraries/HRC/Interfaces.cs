@@ -7,4 +7,10 @@ namespace HRC
         void Serialize(BinaryWriter writer);
         void Deserialize(BinaryReader reader);
     }
+
+    public interface IHRCPlugin
+    {
+        string PluginName { get; }
+        string PluginDescription { get; }
+    }
 }
