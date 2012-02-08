@@ -172,6 +172,7 @@
     <Compile Include="Environment\NAVO\Deprecated\SoundSpeedBackgroundAverager.cs" />
     <Compile Include="Environment\NAVO\Deprecated\TemperatureAndSalinityFileWriter.cs" />
     <Compile Include="Environment\Descriptors\Deprecated\RangeComplexDescriptor.cs" />
+    <Compile Include="Environment\IEnvironmentalDataSource.cs" />
     <Compile Include="Mapping\CustomStartEndLineStyle.cs" />
     <Compile Include="Mapping\LayerListViewModel.cs" />
     <Compile Include="Mapping\LayerType.cs" />
