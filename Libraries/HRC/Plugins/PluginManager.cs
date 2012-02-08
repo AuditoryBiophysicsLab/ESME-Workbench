@@ -38,4 +38,5 @@ namespace HRC.Plugins
             return result;
         }
     }
+    PluginManager.FindPlugins<IHRCPlugin>("foo\bar\baz")
 }

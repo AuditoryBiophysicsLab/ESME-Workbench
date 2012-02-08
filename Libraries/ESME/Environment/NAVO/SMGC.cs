@@ -165,6 +165,7 @@ namespace ESME.Environment.NAVO
             await parallelSelector.Completion;
             wind.TimePeriods.AddRange(selectorBlock.Receive());
             //////////////////////////////////////////////////////////
+#if false
             var parallelAverager = new TransformBlock<NAVOTimePeriod, TimePeriodEnvironmentData<WindSample>>(timePeriod => wind.SeasonalAverage(timePeriod),
             new ExecutionDataflowBlockOptions
             {
@@ -180,12 +181,12 @@ namespace ESME.Environment.NAVO
             parallelAverager.Complete();
             await parallelAverager.Completion;
             wind.TimePeriods.AddRange(averagerBlock.Receive());
-            
+#endif
             //////////////////////////////////////////////////////////
             //foreach (var curSeason in NAVOConfiguration.AllSeasons)
             //    wind.TimePeriods.Add(wind.SeasonalAverage(curSeason));
-            if (currentState != null) lock (currentState) currentState.Report("Saving");
-            if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+            //if (currentState != null) lock (currentState) currentState.Report("Saving");
+            //if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
 #if false
             foreach (var period in NAVOConfiguration.AllTimePeriods)
             {
