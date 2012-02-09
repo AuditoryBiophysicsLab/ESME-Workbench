@@ -47,20 +47,22 @@ namespace grahams_little_sandbox
            const string effectsPath = @"C:\tests\nloutput.effects";
 
 #if true
+#if false
            var bellhopInput = new BellhopRunFile
-           {
-               TransmissionLossAlgorithm = TransmissionLossAlgorithm.Bellhop,
-               Filename = "",
-               Metadata = "",
-               RangeComplexName = "",
-               RangeDistanceIncrement = 0,
-               ReferenceLocation = new EarthCoordinate(),
-               ScenarioDataDirectory = "",
-               TransmissionLossJob = new TransmissionLossJob() { ModeName = ""},
-               TransmissionLossRunFileRadials = new List<TransmissionLossRunFileRadial>(),
-               
-              
-           };
+              {
+                  TransmissionLossAlgorithm = TransmissionLossAlgorithm.Bellhop,
+                  Filename = "",
+                  Metadata = "",
+                  RangeComplexName = "",
+                  RangeDistanceIncrement = 0,
+                  ReferenceLocation = new EarthCoordinate(),
+                  ScenarioDataDirectory = "",
+                  TransmissionLossJob = new TransmissionLossJob() { ModeName = "" },
+                  TransmissionLossRunFileRadials = new List<TransmissionLossRunFileRadial>(),
+
+
+              }; 
+#endif
            new BellhopNLInput
               {
                   ChargeDepth = z,
