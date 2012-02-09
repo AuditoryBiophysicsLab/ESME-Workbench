@@ -1,5 +1,4 @@
 ﻿using ESME.Environment.NAVO;
-using HRC;
 using HRC.Navigation;
 
 namespace ESME.Environment
@@ -13,11 +12,10 @@ namespace ESME.Environment
         T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod);
     }
 
-    public interface IGDEM3DataSource : IEnvironmentalDataSource<SoundSpeedField>
+    public interface IGDEM3DataSource<out T> : IEnvironmentalDataSource<T>
     {
-        SoundSpeedField ExtractTemperature(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod);
-        SoundSpeedField ExtractSalinity(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod);
-        new SoundSpeedField Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod);
+        T ExtractTemperature(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod);
+        T ExtractSalinity(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod);
     }
 
     public interface ISoundSpeedFieldExtender

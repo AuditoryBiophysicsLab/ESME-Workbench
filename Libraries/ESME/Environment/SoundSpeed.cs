@@ -12,7 +12,7 @@ using HRC.Navigation;
 namespace ESME.Environment
 {
     [Serializable]
-    public class SoundSpeed : IExtensibleDataObject, ICanSave
+    public class SoundSpeed : EnvironmentDataSetBase
     {
         public List<SoundSpeedField> SoundSpeedFields { get; set; }
 
@@ -21,7 +21,7 @@ namespace ESME.Environment
             SoundSpeedFields = new List<SoundSpeedField>();
         }
 
-        public void Save(string filename)
+        public override void Save(string filename)
         {
             //var serializer = new XmlSerializer<List<SoundSpeedField>> { Data = SoundSpeedFields };
             //serializer.Save(filename, ReferencedTypes);

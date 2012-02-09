@@ -12,7 +12,7 @@ using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.Environment
 {
-    public class Bathymetry
+    public class Bathymetry : EnvironmentDataSetBase
     {
         public EnvironmentData<EarthCoordinate<float>> Samples { get; private set; }
 
@@ -23,7 +23,7 @@ namespace ESME.Environment
             return TaskEx.Run(() => Load(filename));
         }
 
-        public void Save(string filename)
+        public override void Save(string filename)
         {
             using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
             using (var writer = new BinaryWriter(stream))

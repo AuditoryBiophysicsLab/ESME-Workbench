@@ -56,10 +56,12 @@ namespace ESME
     public interface IESMEPlugin : IHRCPlugin
     {
         PluginType PluginType { get; }
+        bool HasConfigurationControl { get; }
     }
 
     public enum PluginType
     {
+        Unknown = 0,
         EnvironmentalDataSource = 1,
         TransmissionLossCalculator = 2,
         DataVisualizer = 3,

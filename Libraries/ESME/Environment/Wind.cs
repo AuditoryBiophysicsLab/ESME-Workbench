@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
@@ -10,7 +9,7 @@ using HRC.Navigation;
 namespace ESME.Environment
 {
     [Serializable]
-    public class Wind
+    public class Wind : EnvironmentDataSetBase
     {
         public List<TimePeriodEnvironmentData<WindSample>> TimePeriods { get; set; }
 
@@ -36,7 +35,7 @@ namespace ESME.Environment
             using (var reader = new BinaryReader(stream)) return Deserialize(reader);
         }
 
-        public void Save(string filename)
+        public override void Save(string filename)
         {
             //var serializer = new XmlSerializer<List<TimePeriodEnvironmentData<WindSample>>> { Data = TimePeriods };
             //serializer.Save(filename, ReferencedTypes);

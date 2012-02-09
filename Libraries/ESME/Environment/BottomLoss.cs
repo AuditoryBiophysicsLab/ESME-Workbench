@@ -1,12 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using HRC.Navigation;
 
 namespace ESME.Environment
 {
-    public class BottomLoss
+    public class BottomLoss : EnvironmentDataSetBase
     {
         public EnvironmentData<BottomLossSample> Samples { get; private set; }
 
@@ -32,7 +31,7 @@ namespace ESME.Environment
             using (var reader = new BinaryReader(stream)) return Deserialize(reader);
         }
 
-        public void Save(string filename)
+        public override void Save(string filename)
         {
             //var serializer = new XmlSerializer<EnvironmentData<BottomLossSample>> { Data = Samples };
             //serializer.Save(filename, ReferencedTypes);

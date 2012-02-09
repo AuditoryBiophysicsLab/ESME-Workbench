@@ -3,18 +3,17 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Windows.Controls;
 using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
+using ESME.Plugins;
 using HRC.Navigation;
 using HRC.Validation;
-using ValidationRule = HRC.Validation.ValidationRule;
 
-namespace GDEMv3
+namespace NAVO
 {
-    public sealed class GDEM3 : ValidatingViewModel, IGDEM3DataSource
+    public sealed class GDEM3 : EnvironmentalDataSourcePluginBase<SoundSpeed>, IGDEM3DataSource<SoundSpeed>
     {
         static readonly string[] RequiredGDEMFilenames = 
         { "sgdemv3s01.nc", "sgdemv3s02.nc", "sgdemv3s03.nc", "sgdemv3s04.nc", "sgdemv3s05.nc", "sgdemv3s06.nc", 
@@ -30,6 +29,7 @@ namespace GDEMv3
             DataLocationHelp = "A directory containing the 24 GDEMv3 NetCDF files (sgdemv3s01.nc for example)";
             ConfigurationControl = new ConfigurationControl {DataContext = this};
             PluginType = PluginType.EnvironmentalDataSource;
+            Resolutions = new float[] { 4 };
 
             ValidationRules.AddRange(new List<ValidationRule>
             {
@@ -42,19 +42,9 @@ namespace GDEMv3
             });
         }
 
-        public string PluginName { get; private set; }
-        public string PluginDescription { get; private set; }
-        public string DataLocationHelp { get; private set; }
-        public Control ConfigurationControl { get; private set; }
-        public PluginType PluginType { get; private set; }
-        /// <summary>
-        /// An array of available resolutions in samples per degree
-        /// </summary>
-        public float[] Resolutions { get { return new float[] { 4 }; } }
-
         #region public string DataLocation { get; set; }
 
-        public string DataLocation
+        public override string DataLocation
         {
             get { return _dataLocation; }
             set
@@ -91,8 +81,8 @@ namespace GDEMv3
 
         #endregion
 
-        public SoundSpeedField ExtractTemperature(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod) { throw new NotImplementedException(); }
-        public SoundSpeedField ExtractSalinity(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod) { throw new NotImplementedException(); }
-        public SoundSpeedField Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod) { throw new NotImplementedException(); }
+        public SoundSpeed ExtractTemperature(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod) { throw new NotImplementedException(); }
+        public SoundSpeed ExtractSalinity(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod) { throw new NotImplementedException(); }
+        public override SoundSpeed Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod) { throw new NotImplementedException(); }
     }
 }

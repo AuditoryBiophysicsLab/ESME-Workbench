@@ -23,12 +23,12 @@ namespace DavesWPFTester
     {
         public MainWindowViewModel() 
         {
-            AllPlugins = PluginManager.FindPlugins<IGDEM3DataSource>(@"C:\Projects\ESME Deliverables\Plugins\NAVO\GDEMv3\bin\Debug");
+            AllPlugins = PluginManager.FindPlugins<IGDEM3DataSource<SoundSpeed>>(@"C:\Projects\ESME Deliverables\Plugins\Environmental Data Sources\NAVO\bin\Debug");
         }
 
-        #region public Dictionary<string, IGDEM3DataSource> AllPlugins { get; set; }
+        #region public Dictionary<string, IGDEM3DataSource<SoundSpeed>> AllPlugins { get; set; }
 
-        public Dictionary<string, IGDEM3DataSource> AllPlugins
+        public Dictionary<string, IGDEM3DataSource<SoundSpeed>> AllPlugins
         {
             get { return _allPlugins; }
             set
@@ -40,7 +40,7 @@ namespace DavesWPFTester
         }
 
         static readonly PropertyChangedEventArgs AllPluginsChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.AllPlugins);
-        Dictionary<string, IGDEM3DataSource> _allPlugins;
+        Dictionary<string, IGDEM3DataSource<SoundSpeed>> _allPlugins;
 
         #endregion
 

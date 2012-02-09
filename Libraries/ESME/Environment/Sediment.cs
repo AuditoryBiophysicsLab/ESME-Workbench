@@ -6,7 +6,7 @@ using HRC.Navigation;
 
 namespace ESME.Environment
 {
-    public class Sediment
+    public class Sediment : EnvironmentDataSetBase
     {
         public EnvironmentData<SedimentSample> Samples { get; set; }
 
@@ -30,7 +30,7 @@ namespace ESME.Environment
             using (var reader = new BinaryReader(stream)) return Deserialize(reader);
         }
 
-        public void Save(string filename)
+        public override void Save(string filename)
         {
             //var serializer = new XmlSerializer<EnvironmentData<SedimentSample>> { Data = Samples };
             //serializer.Save(filename, ReferencedTypes);
