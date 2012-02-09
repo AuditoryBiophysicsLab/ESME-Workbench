@@ -4,7 +4,7 @@ using HRC.Navigation;
 
 namespace ESME.Environment
 {
-    public interface IEnvironmentalDataSource<out T> : IHRCPlugin
+    public interface IEnvironmentalDataSource<out T> : IESMEPlugin
     {
         float[] Resolutions { get; }
         string DataLocation { get; set; }

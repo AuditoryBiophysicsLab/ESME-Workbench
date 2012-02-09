@@ -27,8 +27,13 @@
                             <ColumnDefinition SharedSizeGroup="TypeName" />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding Key}" Margin="0 0 10 0"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Value.PluginName}" />
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Key}" Margin="0 0 10 0"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Value.PluginName}" />
+                        <ContentControl Grid.Row="1" Content="{Binding Value.ConfigurationControl}" />
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>

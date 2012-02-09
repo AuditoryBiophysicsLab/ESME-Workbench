@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using HRC;
 
 namespace ESME
 {
@@ -51,4 +52,16 @@ namespace ESME
 
     public interface IEnvironmentFile<out T> : ICanSave, ICanLoad<T>
     { }
+
+    public interface IESMEPlugin : IHRCPlugin
+    {
+        PluginType PluginType { get; }
+    }
+
+    public enum PluginType
+    {
+        EnvironmentalDataSource = 1,
+        TransmissionLossCalculator = 2,
+        DataVisualizer = 3,
+    }
 }

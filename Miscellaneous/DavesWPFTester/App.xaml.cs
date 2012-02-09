@@ -19,11 +19,11 @@ namespace DavesWPFTester
 
         static App()
         {
-            Logfile = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Name), "app.log");
-            if (File.Exists(Logfile)) File.Delete(Logfile);
-            Trace.Listeners.Add(new TextWriterTraceListener(Logfile, "logfile") { TraceOutputOptions = TraceOptions.None });
-            Trace.AutoFlush = true;
-            Trace.WriteLine(Name + " initializing");
+            //Logfile = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Name), "app.log");
+            //if (File.Exists(Logfile)) File.Delete(Logfile);
+            //Trace.Listeners.Add(new TextWriterTraceListener(Logfile, "logfile") { TraceOutputOptions = TraceOptions.None });
+            //Trace.AutoFlush = true;
+            //Trace.WriteLine(Name + " initializing");
         }
 
         #region Initialization

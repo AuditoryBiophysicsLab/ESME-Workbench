@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Windows.Controls;
 
 namespace HRC
 {
@@ -12,5 +13,6 @@ namespace HRC
     {
         string PluginName { get; }
         string PluginDescription { get; }
+        Control ConfigurationControl { get; }
     }
 }
