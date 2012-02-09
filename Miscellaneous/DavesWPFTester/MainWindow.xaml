@@ -1,24 +1,37 @@
-﻿<Window x:Class="DavesWPFTester.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-        mef:ViewModelLocator.ViewModel="MainWindowViewModel" SnapsToDevicePixels="True" Title="WPF Google Maps Test"
-        SizeToContent="WidthAndHeight" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:app="clr-namespace:DavesWPFTester" mc:Ignorable="d"
-        d:DataContext="{d:DesignInstance app:MainWindowViewModel}">
-  <Window.Resources>
-      
-  </Window.Resources>
-  <Grid>
+﻿<Window x:Class="DavesWPFTester.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:app="clr-namespace:DavesWPFTester"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
+        Title="Plugin tester"
+        d:DataContext="{d:DesignInstance app:MainWindowViewModel}"
+        mef:ViewModelLocator.ViewModel="MainWindowViewModel"
+        SizeToContent="WidthAndHeight"
+        SnapsToDevicePixels="True"
+        mc:Ignorable="d">
+    <Window.Resources />
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
-        <Image Grid.Column="0"
-               Source="{Binding LeftMap.Image}" 
-               Width="{Binding LeftMap.Image.Width}" 
-               Height="{Binding LeftMap.Image.Height}"/>
-        <Image Grid.Column="1"
-               Source="{Binding RightMap.Image}" 
-               Width="{Binding RightMap.Image.Width}" 
-               Height="{Binding RightMap.Image.Height}"/>
+        <ListBox Grid.Column="0"
+                 Grid.IsSharedSizeScope="True"
+                 ItemsSource="{Binding AllPlugins}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="TypeName" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding Key}" Margin="0 0 10 0"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Value.PluginName}" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
     </Grid>
 </Window>

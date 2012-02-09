@@ -9,13 +9,44 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Cinch;
+using ESME.Environment;
 using HRC.Navigation;
+using HRC.Plugins;
 using HRC.Services;
 using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
 
 namespace DavesWPFTester
 {
+    [ExportViewModel("MainWindowViewModel")]
+    public class MainWindowViewModel : ViewModelBase
+    {
+        public MainWindowViewModel() 
+        {
+            AllPlugins = PluginManager.FindPlugins<IGDEM3DataSource>(@"C:\Projects\ESME Deliverables\Plugins\NAVO\GDEMv3\bin\Debug");
+        }
+
+        #region public Dictionary<string, IGDEM3DataSource> AllPlugins { get; set; }
+
+        public Dictionary<string, IGDEM3DataSource> AllPlugins
+        {
+            get { return _allPlugins; }
+            set
+            {
+                if (_allPlugins == value) return;
+                _allPlugins = value;
+                NotifyPropertyChanged(AllPluginsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs AllPluginsChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.AllPlugins);
+        Dictionary<string, IGDEM3DataSource> _allPlugins;
+
+        #endregion
+
+    }
+
+#if false
     [ExportViewModel("MainWindowViewModel")]
     public class MainWindowViewModel : ViewModelBase
     {
@@ -264,5 +295,5 @@ namespace DavesWPFTester
                 DownloadCompleted(this, new EventArgs());
         }
     }
-
+#endif
 }
