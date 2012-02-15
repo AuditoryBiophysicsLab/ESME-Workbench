@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ESME;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
 
@@ -26,7 +21,7 @@ namespace SMGCImporter
                 for (var argIndex = 0; argIndex < args.Length; argIndex++)
                 {
                     var arg = args[argIndex];
-                    switch (arg.ToLower())
+                    switch (arg)
                     {
                         case "-inputDirectory":
                             location = args[++argIndex];
@@ -36,9 +31,11 @@ namespace SMGCImporter
                             break;
                     }
                 }
-                if(filename == null) Usage("output file name not set!");
-                if (location == null) Usage("SMGC databse location not set!");
-                var result = SMGC.Import(new GeoRect(90, -90, 180, -180));
+                if (string.IsNullOrEmpty(filename)) Usage("output file name not set!");
+                if (string.IsNullOrEmpty(location)) Usage("SMGC databse location not set!");
+                var result = SMGC.Import(new GeoRect(90, -90, 180, -180), location);
+                foreach (var timePeriod in result.TimePeriods)
+                    timePeriod.EnvironmentData.Sort();
                 result.Save(filename);
             }  
             catch (Exception ex)

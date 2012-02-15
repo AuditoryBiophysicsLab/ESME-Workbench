@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define ProductName = "SMGC for ESME Workbench (Minimal)" ?>
+  <?define ProductVersion = "2.0" ?>
+  <?define ProductFullVersion = "2.0.0.0" ?>
+  <?define ProductAuthor = "Hearing Research Center" ?>
+  <?define Manufacturer="Boston University"?>
+  <?define ProductAppFolder = "InstallLocation" ?>
+  <?define OAMLRoot="S:\OAML Data Sources"?>
+  <?define SMGCPath="$(var.OAMLRoot)\SMGC_Minimal"?>
+  <?define ProductDisplayName = "$(var.ProductName)" ?>
+  <?define ProductId = "E82D4565-C1A2-49B3-9D1A-F9422705FCDF" ?>
+  <?define ProductUpgradeCode = "DF0D9256-2D98-4FA9-AAB5-139697537F2F" ?>
+  <Product Id="$(var.ProductId)"
+           Name="$(var.ProductDisplayName) (v$(var.ProductVersion))"
+           Language="1033"
+           Version="$(var.ProductFullVersion)"
+           Manufacturer="$(var.Manufacturer)"
+           UpgradeCode="$(var.ProductUpgradeCode)">
+    <Package InstallerVersion="300"
+             Compressed="yes"
+             InstallScope="perMachine"
+             Manufacturer="$(var.ProductAuthor)"/>
+
+    <Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="CommonAppDataFolder">
+        <Directory Id="BostonUniversity" Name="Boston University">
+          <Directory Id="ESMEWorkbench" Name="ESME Workbench">
+            <Directory Id="EnvironmentalDatabases" Name="Environmental Databases">
+              <Directory Id="INSTALLLOCATION" Name="SMGC 2.0 Minimal">
+                <Component Id="SMGCFiles" Guid="1FBCC9C5-8A3D-4CA2-82F1-D0C2A0E1947C">
+                  <File Id="smgc.wind"
+                        Name="smgc.wind"
+                        Source="$(var.SMGCPath)\smgc.wind"
+                        KeyPath="yes" />
+                </Component>
+              </Directory>
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+
+    <DirectoryRef Id="TARGETDIR">
+      <Component Id="RegistryEntries" Guid="431DB363-2B7A-436C-82F3-56F0D8F80131">
+        <RegistryKey Root="HKLM"
+                     Key="Software\Boston University\ESME Workbench\Data Sources\SMGC 2.0 Minimal"
+              Action="createAndRemoveOnUninstall">
+          <RegistryValue Type="string" Value="[INSTALLLOCATION]"/>
+        </RegistryKey>
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="ProductFeature" Title="$(var.ProductName)" Level="1">
+      <ComponentRef Id="SMGCFiles" />
+      <ComponentRef Id="RegistryEntries" />
+    </Feature>
+  </Product>
+</Wix>

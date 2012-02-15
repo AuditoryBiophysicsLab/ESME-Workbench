@@ -144,7 +144,6 @@
     <Compile Include="Environment\Descriptors\RangeComplexes.cs" />
     <Compile Include="Environment\Descriptors\RangeComplexToken.cs" />
     <Compile Include="Environment\Descriptors\Selector.cs" />
-    <Compile Include="Environment\Environment.cs" />
     <Compile Include="Environment\EnvironmentData.cs" />
     <Compile Include="Environment\EnvironmentDataSetBase.cs" />
     <Compile Include="Environment\EnvironmentImporter.cs" />
@@ -167,7 +166,6 @@
     <Compile Include="Environment\NAVO\Deprecated\NAVOBackgroundExtractor.cs" />
     <Compile Include="Environment\NAVO\NAVOConfiguration.cs" />
     <Compile Include="Environment\NAVO\NAVOExtractionProgram.cs" />
-    <Compile Include="Environment\NAVO\NAVODataSources.cs" />
     <Compile Include="Environment\NAVO\NAVOTimePeriod.cs" />
     <Compile Include="Environment\NAVO\Deprecated\SMGCBackgroundExtractor.cs" />
     <Compile Include="Environment\NAVO\Deprecated\SoundSpeedBackgroundAverager.cs" />

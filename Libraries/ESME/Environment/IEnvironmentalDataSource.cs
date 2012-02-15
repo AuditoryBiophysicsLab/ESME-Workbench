@@ -1,4 +1,5 @@
-﻿using ESME.Environment.NAVO;
+﻿using System;
+using ESME.Environment.NAVO;
 using HRC.Navigation;
 
 namespace ESME.Environment
@@ -9,17 +10,14 @@ namespace ESME.Environment
         string DataLocation { get; set; }
         string DataLocationHelp { get; }
         bool IsDataLocationValid { get; }
-        T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod);
+        T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, IProgress<float> progress = null);
     }
 
     public interface IGDEM3DataSource<out T> : IEnvironmentalDataSource<T>
     {
-        T ExtractTemperature(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod);
-        T ExtractSalinity(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod);
-    }
-
-    public interface ISoundSpeedFieldExtender
-    {
-        SoundSpeedField Extend(SoundSpeedField temperatureField, SoundSpeedField salinityField, EarthCoordinate<float> deepestPoint = null);
+        T ExtractTemperature(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, IProgress<float> progress = null);
+        T ExtractSalinity(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, IProgress<float> progress = null);
+        T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, EarthCoordinate<float> deepestPoint, IProgress<float> progress = null);
+        T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, Bathymetry bathymetry, IProgress<float> progress = null);
     }
 }

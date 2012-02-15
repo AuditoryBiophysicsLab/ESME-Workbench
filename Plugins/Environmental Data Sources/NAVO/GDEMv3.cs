@@ -10,6 +10,7 @@ using ESME.Environment.NAVO;
 using ESME.Plugins;
 using HRC.Navigation;
 using HRC.Validation;
+using NAVO.Controls;
 
 namespace NAVO
 {
@@ -19,15 +20,15 @@ namespace NAVO
         { "sgdemv3s01.nc", "sgdemv3s02.nc", "sgdemv3s03.nc", "sgdemv3s04.nc", "sgdemv3s05.nc", "sgdemv3s06.nc", 
           "sgdemv3s07.nc", "sgdemv3s08.nc", "sgdemv3s09.nc", "sgdemv3s10.nc", "sgdemv3s11.nc", "sgdemv3s12.nc",
           "tgdemv3s01.nc", "tgdemv3s02.nc", "tgdemv3s03.nc", "tgdemv3s04.nc", "tgdemv3s05.nc", "tgdemv3s06.nc",
-          "tgdemv3s07.nc", "tgdemv3s08.nc", "tgdemv3s09.nc", "tgdemv3s10.nc", "tgdemv3s11.nc", "tgdemv3s12.nc",
+          "tgdemv3s07.nc", "tgdemv3s08.nc", "tgdemv3s09.nc", "tgdemv3s10.nc", "tgdemv3s11.nc", "tgdemv3s12.nc"
         };
 
-        public GDEM3() 
+        public GDEM3()
         {
             PluginName = "GDEM v3";
             PluginDescription = "Generalized Digital Environment Model v3, from US Navy/NAVOCEANO";
-            DataLocationHelp = "A directory containing the 24 GDEMv3 NetCDF files (sgdemv3s01.nc for example)";
-            ConfigurationControl = new ConfigurationControl {DataContext = this};
+            DataLocationHelp = "A directory containing the 24 GDEM3Configuration NetCDF files (sgdemv3s01.nc for example)";
+            ConfigurationControl = new GDEM3Configuration {DataContext = this};
             PluginType = PluginType.EnvironmentalDataSource;
             Resolutions = new float[] { 4 };
 
@@ -64,25 +65,53 @@ namespace NAVO
         string _dataLocation;
         #endregion
 
-        #region public bool IsDataLocationValid { get; set; }
-
-        public bool IsDataLocationValid
+        public SoundSpeed ExtractTemperature(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, IProgress<float> progress = null)
         {
-            get { return _isDataLocationValid; }
-            set
-            {
-                _isDataLocationValid = value;
-                NotifyPropertyChanged(IsDataLocationValidChangedEventArgs);
-            }
+            if (progress != null) lock (progress) progress.Report(0f);
+            var temperatureField = GDEM.ReadFile(GDEM.FindTemperatureFile(timePeriod), "water_temp", timePeriod, geoRect);
+            if (progress != null) lock (progress) progress.Report(50f);
+            var temperature = new SoundSpeed();
+            temperature.SoundSpeedFields.Add(temperatureField);
+            if (progress != null) lock (progress) progress.Report(100f);
+            return temperature;
         }
 
-        static readonly PropertyChangedEventArgs IsDataLocationValidChangedEventArgs = ObservableHelper.CreateArgs<GDEM3>(x => x.IsDataLocationValid);
-        bool _isDataLocationValid;
+        public SoundSpeed ExtractSalinity(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, IProgress<float> progress = null)
+        {
+            if (progress != null) lock (progress) progress.Report(0f);
+            var salinityField = GDEM.ReadFile(GDEM.FindSalinityFile(timePeriod), "salinity", timePeriod, geoRect);
+            if (progress != null) lock (progress) progress.Report(50f);
+            var salinity = new SoundSpeed();
+            salinity.SoundSpeedFields.Add(salinityField);
+            if (progress != null) lock (progress) progress.Report(100f);
+            return salinity;
+        }
 
-        #endregion
+        public override SoundSpeed Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, IProgress<float> progress = null)
+        {
+            throw new NotImplementedException("GDEM v3 extraction routine requires either deepest point OR bathymetry argument");
+        }
 
-        public SoundSpeed ExtractTemperature(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod) { throw new NotImplementedException(); }
-        public SoundSpeed ExtractSalinity(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod) { throw new NotImplementedException(); }
-        public override SoundSpeed Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod) { throw new NotImplementedException(); }
+        public SoundSpeed Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, EarthCoordinate<float> deepestPoint, IProgress<float> progress = null)
+        {
+            if (progress != null) lock (progress) progress.Report(0);
+            var curProgressStep = 0f;
+            var intermediateProgress = new Progress<float>(prog =>
+            {
+                if (progress != null) lock (progress) progress.Report(curProgressStep + (prog / 3));
+            });
+            var temperatureData = ExtractTemperature(geoRect, resolution, timePeriod, intermediateProgress);
+            curProgressStep = 33f;
+            var salinityData = ExtractSalinity(geoRect, resolution, timePeriod, intermediateProgress);
+            curProgressStep = 66f;
+            var result = SoundSpeed.Create(temperatureData, salinityData, deepestPoint, intermediateProgress);
+            if (progress != null) lock (progress) progress.Report(100f);
+            return result;
+        }
+
+        public SoundSpeed Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, Bathymetry bathymetry, IProgress<float> progress = null) 
+        {
+            return Extract(geoRect, resolution, timePeriod, bathymetry.DeepestPoint);
+        }
     }
 }

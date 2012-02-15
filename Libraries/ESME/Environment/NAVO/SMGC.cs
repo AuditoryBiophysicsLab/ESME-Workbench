@@ -74,16 +74,18 @@ namespace ESME.Environment.NAVO
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
         }
 #endif
-        public static Wind Import(GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
+        public static Wind Import(GeoRect region, string smgcDirectory = null, IProgress<float> progress = null)
         {
-            var result = ImportAsync(region, currentState, progress);
+            var result = ImportAsync(region, smgcDirectory, progress);
             return result.Result;
         }
 
-        public async static Task<Wind> ImportAsync(GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
+        public async static Task<Wind> ImportAsync(GeoRect region, string smgcDirectory = null, IProgress<float> progress = null)
         {
+            smgcDirectory = smgcDirectory ?? Globals.AppSettings.NAVOConfiguration.SMGCDirectory;
+            var maxDegreeOfParallelism = -1;
+            if (Globals.AppSettings != null) maxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount;
             if (progress != null) lock (progress) progress.Report(0f);
-            if (currentState != null) lock (currentState) currentState.Report("Importing wind data");
 
             var north = (float)Math.Ceiling(region.North);
             var south = (float)Math.Floor(region.South);
@@ -103,14 +105,21 @@ namespace ESME.Environment.NAVO
             {
                 TaskScheduler = TaskScheduler.Default,
                 BoundedCapacity = -1,
-                MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
+                MaxDegreeOfParallelism = maxDegreeOfParallelism,
             });
 
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             // Construct a list of files we will need to read out of the SMGC database
             var selectedLocations = new List<EarthCoordinate>();
-            var allFiles = Directory.GetFiles(Globals.AppSettings.NAVOConfiguration.SMGCDirectory, "*.stt", SearchOption.AllDirectories).ToList();
+            var allFiles = Directory.GetFiles(smgcDirectory, "*.stt", SearchOption.AllDirectories).ToList();
+#if false
+            // This chunk of code is ONLY for the SMGC importer and should only be compiled when running that utility
+            foreach (var file in allFiles) parallelReader.Post(file);
+            var batchBlock = new BatchBlock<SMGCFile>(allFiles.Count);
+#else
             for (var lat = south; lat <= north; lat++)
+            {
+                Console.WriteLine("{0}: Processing latitude {1}", DateTime.Now, lat);
                 for (var lon = west; lon <= east; lon++)
                 {
                     var northSouth = (lat >= 0) ? "n" : "s";
@@ -123,13 +132,14 @@ namespace ESME.Environment.NAVO
                     parallelReader.Post(matchingFiles.First());
                     selectedLocations.Add(new EarthCoordinate(lat, lon));
                 }
+            }
             var batchBlock = new BatchBlock<SMGCFile>(selectedLocations.Count);
+#endif
             parallelReader.LinkTo(batchBlock);
             parallelReader.Complete();
             await parallelReader.Completion;
             allFiles = null;
             IList<SMGCFile> selectedFiles = batchBlock.Receive().ToList();
-            if (currentState != null) lock (currentState) currentState.Report("Creating monthly data collection");
 
             var parallelSelector = new TransformBlock<NAVOTimePeriod, TimePeriodEnvironmentData<WindSample>>(timePeriod =>
             {
@@ -143,7 +153,7 @@ namespace ESME.Environment.NAVO
             {
                 TaskScheduler = TaskScheduler.Default,
                 BoundedCapacity = -1,
-                MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
+                MaxDegreeOfParallelism = maxDegreeOfParallelism,
             });
 
             var wind = new Wind();

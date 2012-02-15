@@ -99,13 +99,27 @@ namespace ESME.Environment
                 soundSpeedField.Extend(temperatureData[soundSpeedField.TimePeriod], salinityData[soundSpeedField.TimePeriod], deepestPoint, areaOfInterest);
         }
 
-        public static SoundSpeed Create(SoundSpeed temperatureData, SoundSpeed salinityData)
+        public static SoundSpeed Create(SoundSpeed temperatureData, SoundSpeed salinityData, EarthCoordinate<float> deepestPoint = null, IProgress<float> progress = null)
         {
+            var curProgress = 0f;
+            if (progress != null) lock (progress) progress.Report(curProgress);
             VerifyThatTimePeriodsMatch(temperatureData, salinityData);
-
+            curProgress += 10f;
+            if (progress != null) lock (progress) progress.Report(curProgress);
+            var progressStep = 30f / temperatureData.SoundSpeedFields.Count;
             var soundSpeedFile = new SoundSpeed();
             foreach (var temperatureField in temperatureData.SoundSpeedFields)
-                soundSpeedFile.SoundSpeedFields.Add(SoundSpeedField.Create(temperatureField, salinityData[temperatureField.TimePeriod]));
+            {
+                var curField = SoundSpeedField.Create(temperatureField, salinityData[temperatureField.TimePeriod]);
+                curProgress += progressStep;
+                if (progress != null) lock (progress) progress.Report(curProgress);
+                if (deepestPoint != null) curField.Extend(temperatureField, salinityData[temperatureField.TimePeriod], deepestPoint);
+                curProgress += progressStep;
+                if (progress != null) lock (progress) progress.Report(curProgress);
+                soundSpeedFile.SoundSpeedFields.Add(curField);
+                curProgress += progressStep;
+                if (progress != null) lock (progress) progress.Report(curProgress);
+            }
             return soundSpeedFile;
         }
 

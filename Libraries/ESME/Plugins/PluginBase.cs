@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Windows.Controls;
 using Cinch;
 using ESME.Environment;
@@ -59,8 +60,24 @@ namespace ESME.Plugins
         public float[] Resolutions { get; protected set; }
         public virtual string DataLocation { get; set; }
         public string DataLocationHelp { get; protected set; }
-        public bool IsDataLocationValid { get; protected set; }
+        #region public bool IsDataLocationValid { get; protected set; }
 
-        public abstract T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod);
+        public bool IsDataLocationValid
+        {
+            get { return _isDataLocationValid; }
+            protected set
+            {
+                _isDataLocationValid = value;
+                NotifyPropertyChanged(IsDataLocationValidChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsDataLocationValidChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentalDataSourcePluginBase<T>>(x => x.IsDataLocationValid);
+        bool _isDataLocationValid;
+
+        #endregion
+
+
+        public abstract T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, IProgress<float> progress = null);
     }
 }
