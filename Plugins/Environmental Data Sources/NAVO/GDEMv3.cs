@@ -25,7 +25,7 @@ namespace NAVO
 
         public GDEM3()
         {
-            PluginName = "GDEM v3";
+            PluginName = "GDEM-V 3.0";
             PluginDescription = "Generalized Digital Environment Model v3, from US Navy/NAVOCEANO";
             DataLocationHelp = "A directory containing the GDEM-V 3.0 NetCDF files with temperature and salinity data (tgdemv3s01.nc for example)";
             PluginType = PluginType.EnvironmentalDataSource;
