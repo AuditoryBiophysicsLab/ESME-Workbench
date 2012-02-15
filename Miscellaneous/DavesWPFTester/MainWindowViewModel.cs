@@ -1,19 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.Composition;
-using System.Diagnostics;
-using System.IO;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using Cinch;
 using ESME.Environment;
-using HRC.Navigation;
 using HRC.Plugins;
-using HRC.Services;
-using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
 
 namespace DavesWPFTester

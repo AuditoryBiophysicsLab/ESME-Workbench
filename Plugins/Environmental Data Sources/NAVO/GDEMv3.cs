@@ -10,7 +10,7 @@ using ESME.Environment.NAVO;
 using ESME.Plugins;
 using HRC.Navigation;
 using HRC.Validation;
-using NAVO.Controls;
+using Microsoft.Win32;
 
 namespace NAVO
 {
@@ -27,10 +27,14 @@ namespace NAVO
         {
             PluginName = "GDEM v3";
             PluginDescription = "Generalized Digital Environment Model v3, from US Navy/NAVOCEANO";
-            DataLocationHelp = "A directory containing the 24 GDEM3Configuration NetCDF files (sgdemv3s01.nc for example)";
-            ConfigurationControl = new GDEM3Configuration {DataContext = this};
+            DataLocationHelp = "A directory containing the GDEM-V 3.0 NetCDF files with temperature and salinity data (tgdemv3s01.nc for example)";
             PluginType = PluginType.EnvironmentalDataSource;
             Resolutions = new float[] { 4 };
+            var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\GDEM-V 3.0");
+            if (regKey != null) DataLocation = (string)regKey.GetValue("");
+            else DataLocation = null;
+
+            IsAvailable = DataLocation != null;
 
             ValidationRules.AddRange(new List<ValidationRule>
             {

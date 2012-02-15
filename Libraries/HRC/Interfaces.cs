@@ -14,5 +14,6 @@ namespace HRC
         string PluginName { get; }
         string PluginDescription { get; }
         Control ConfigurationControl { get; }
+        bool IsAvailable { get; }
     }
 }

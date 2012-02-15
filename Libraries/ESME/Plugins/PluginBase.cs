@@ -22,6 +22,7 @@ namespace ESME.Plugins
         public string PluginName { get; protected set; }
         public string PluginDescription { get; protected set; }
         public PluginType PluginType { get; protected set; }
+
         #region public Control ConfigurationControl { get; protected set; }
 
         public Control ConfigurationControl
@@ -50,6 +51,24 @@ namespace ESME.Plugins
         static readonly PropertyChangedEventArgs HasConfigurationControlChangedEventArgs = ObservableHelper.CreateArgs<PluginBase>(x => x.HasConfigurationControl);
 
         #endregion
+        #region public bool IsAvailable { get; protected set; }
+
+        public bool IsAvailable
+        {
+            get { return _isAvailable; }
+            protected set
+            {
+                if (_isAvailable == value) return;
+                _isAvailable = value;
+                NotifyPropertyChanged(IsAvailableChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsAvailableChangedEventArgs = ObservableHelper.CreateArgs<PluginBase>(x => x.IsAvailable);
+        bool _isAvailable;
+
+        #endregion
+
     }
 
     public abstract class EnvironmentalDataSourcePluginBase<T> : PluginBase, IEnvironmentalDataSource<T>

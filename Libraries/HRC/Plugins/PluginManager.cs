@@ -27,11 +27,15 @@ namespace HRC.Plugins
                                         where interfaces.Contains(typeof (T))
                                         select type;
                     foreach (var curType in matchingTypes)
-                        result.Add(file, (T)Activator.CreateInstance(curType));
+                    {
+                        var instance = (T)Activator.CreateInstance(curType);
+                        if (instance.IsAvailable) result.Add(file, instance);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine("{0}: PluginManager.FindPlugins({1}) caught exception: {2}", DateTime.Now, folder, ex.Message);
+                    Debug.WriteLine("{0}: PluginManager.FindPlugins({1}) caught exception in file: {2}", DateTime.Now, folder, file);
+                    Debug.WriteLine("{0}:     Exception: {1}", DateTime.Now, ex.Message);
                 }
             }
 
