@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <?define ProductName = "OAML Data Sources for ESME Workbench" ?>
+  <?define ProductName = "Naval Oceanographic Office Data Sources for ESME Workbench" ?>
   <?define ProductVersion = "1.0" ?>
   <?define ProductFullVersion = "1.0.0.0" ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
