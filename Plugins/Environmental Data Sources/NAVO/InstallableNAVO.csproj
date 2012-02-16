@@ -8,8 +8,8 @@
     <ProjectGuid>{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NAVO</RootNamespace>
-    <AssemblyName>NAVO</AssemblyName>
+    <RootNamespace>InstallableNAVO</RootNamespace>
+    <AssemblyName>InstallableNAVO</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
