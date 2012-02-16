@@ -2,138 +2,66 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
 using HRC.NetCDF;
 
-namespace NAVO.Databases
+namespace InstallableNAVO.Databases
 {
     public static class GDEM
     {
-        [Flags]
-        public enum GDEMFlags
+        public static string FindSalinityFile(NAVOTimePeriod monthIndex, string gdemDirectory)
         {
-            None = 0x0,
-            Temperature = 0x01,
-            Salinity = 0x02,
-        }
-
-#if false
-        public static Task ImportByMonthAsync(string outputPath, bool temperature, bool salinity, ICollection<NAVOTimePeriod> months, GeoRect geoRect, IProgress<string> currentState = null, IProgress<float> progress = null)
-        {
-            var multiplier = 0;
-            if (temperature) multiplier++;
-            if (salinity) multiplier++;
-            if (multiplier == 0) throw new ApplicationException("one or both of temperature and salinity must be true");
-            var progressStep = 100f / (months.Count * multiplier);
-            var totalProgress = 0f;
-            var actionBlock = new ActionBlock<NAVOTimePeriod>(month =>
-                {
-                    var monthName = month.ToString().ToLower();
-                    var speed = new SoundSpeed();
-                    if (temperature)
-                    {
-                        if (currentState != null) lock (currentState) currentState.Report(string.Format("Importing {0} temperature", monthName));
-                        if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-                        speed.SoundSpeedFields.Add(ReadFile(FindTemperatureFile(month), "water_temp", month, geoRect));
-                        speed.Save(Path.Combine(outputPath, string.Format("{0}.{1}", monthName, "temperature")));
-                    }
-                    if (salinity)
-                    {
-                        speed = new SoundSpeed();
-                        if (currentState != null) lock (currentState) currentState.Report(string.Format("Importing {0} salinity", monthName));
-                        if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-                        speed.SoundSpeedFields.Add(ReadFile(FindSalinityFile(month), "salinity", month, geoRect));
-                        speed.Save(Path.Combine(outputPath, string.Format("{0}.{1}", monthName, "salinity")));
-                    }
-                },
-                new ExecutionDataflowBlockOptions
-                {
-                    TaskScheduler = TaskScheduler.Default,
-                    MaxDegreeOfParallelism = 1,
-                });
-            foreach (var month in months) actionBlock.Post(month);
-            actionBlock.Complete();
-            return actionBlock.Completion;
-        }
-
-        public async static Task<List<SoundSpeedField>> CalculateSoundSpeedFieldsAsync(List<SoundSpeedField> temperatureFields, List<SoundSpeedField> salinityFields, Bathymetry bathymetry = null, IProgress<string> currentState = null, IProgress<float> progress = null)
-        {
-            var temperaturePeriods = temperatureFields.Select(field => field.TimePeriod).ToList();
-            var salinityPeriods = salinityFields.Select(field => field.TimePeriod).ToList();
-            temperaturePeriods.Sort();
-            salinityPeriods.Sort();
-            if ((temperaturePeriods.Count != salinityPeriods.Count) || (temperaturePeriods.Where((t, i) => t != salinityPeriods[i]).Any()))
-                throw new ArgumentException("temperature and salinity contain data for different time periods");
-            var progressStep = 100f / temperaturePeriods.Count;
-            var totalProgress = 0f;
-            var transformBlock = new TransformBlock<NAVOTimePeriod, SoundSpeedField>(month =>
-                {
-                    var monthName = month.ToString().ToLower();
-                    if (currentState != null) lock (currentState) currentState.Report(string.Format("Calculating {0} soundspeed", monthName));
-                    if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-                    return CalculateSoundSpeedField(temperatureFields.Find(field => field.TimePeriod == month), salinityFields.Find(field => field.TimePeriod == month), bathymetry);
-                },
-                new ExecutionDataflowBlockOptions
-                {
-                    TaskScheduler = TaskScheduler.Default,
-                    MaxDegreeOfParallelism = 1,
-                });
-            var batchBlock = new BatchBlock<SoundSpeedField>(temperaturePeriods.Count);
-            transformBlock.LinkTo(batchBlock);
-            transformBlock.Completion.ContinueWith(task => batchBlock.Complete());
-            foreach (var month in temperaturePeriods) transformBlock.Post(month);
-            transformBlock.Complete();
-            await batchBlock.Completion;
-            return batchBlock.Receive().ToList();
-        }
-
-        public static SoundSpeedField CalculateSoundSpeedField(SoundSpeedField temperatureField, SoundSpeedField salinityField, Bathymetry bathymetry = null)
-        {
-            var soundspeed = SoundSpeedField.Create(temperatureField, salinityField);
-            if (bathymetry != null)
-            {
-                var deepestPoint = new EarthCoordinate<float>(bathymetry.Minimum, Math.Abs(bathymetry.Minimum.Data));
-                soundspeed = soundspeed.Extend(temperatureField, salinityField, deepestPoint);
-            }
-            return soundspeed;
-        }
-
-        static void VerifyThatProfilePointsMatch(TimePeriodEnvironmentData<SoundSpeedProfile> profile1, TimePeriodEnvironmentData<SoundSpeedProfile> profile2)
-        {
-            foreach (var point1 in profile1.EnvironmentData.Where(point1 => !profile2.EnvironmentData.Any(point1.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at {0}, the other does not", point1));
-            foreach (var point2 in profile2.EnvironmentData.Where(point2 => !profile1.EnvironmentData.Any(point2.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at {0}, the other does not", point2));
-        }
-#endif
-
-        public static string FindSalinityFile(NAVOTimePeriod monthIndex)
-        {
-            var gdemRootDirectory = Globals.AppSettings.NAVOConfiguration.GDEMDirectory;
-            var files = Directory.GetFiles(gdemRootDirectory, GDEMSalinityFileName(monthIndex), SearchOption.AllDirectories);
+            var files = Directory.GetFiles(gdemDirectory, GDEMSalinityFileName(monthIndex), SearchOption.AllDirectories);
             if (files.Length > 0) return files[0];
-            files = Directory.GetFiles(gdemRootDirectory, NUWCSalinityFileName(monthIndex), SearchOption.AllDirectories);
+            files = Directory.GetFiles(gdemDirectory, NUWCSalinityFileName(monthIndex), SearchOption.AllDirectories);
             if (files.Length > 0) return files[0];
             throw new FileNotFoundException(string.Format("Could not find requested salinity file, tried {0} and {1}", GDEMSalinityFileName(monthIndex), NUWCSalinityFileName(monthIndex)));
         }
 
-        public static string FindTemperatureFile(NAVOTimePeriod monthIndex)
+        public static string FindTemperatureFile(NAVOTimePeriod monthIndex, string gdemDirectory)
         {
-            var gdemRootDirectory = Globals.AppSettings.NAVOConfiguration.GDEMDirectory;
-            var files = Directory.GetFiles(gdemRootDirectory, GDEMTemperatureFileName(monthIndex), SearchOption.AllDirectories);
+            var files = Directory.GetFiles(gdemDirectory, GDEMTemperatureFileName(monthIndex), SearchOption.AllDirectories);
             if (files.Length > 0) return files[0];
-            files = Directory.GetFiles(gdemRootDirectory, NUWCTemperatureFileName(monthIndex), SearchOption.AllDirectories);
+            files = Directory.GetFiles(gdemDirectory, NUWCTemperatureFileName(monthIndex), SearchOption.AllDirectories);
             if (files.Length > 0) return files[0];
             throw new FileNotFoundException(string.Format("Could not find requested temperature file, tried {0} and {1}", GDEMTemperatureFileName(monthIndex), NUWCTemperatureFileName(monthIndex)));
         }
 
         static string GDEMTemperatureFileName(NAVOTimePeriod monthIndex) { return "t" + BaseGDEMFileName(monthIndex); }
         static string GDEMSalinityFileName(NAVOTimePeriod monthIndex) { return "s" + BaseGDEMFileName(monthIndex); }
-        static string BaseGDEMFileName(NAVOTimePeriod monthIndex) { return "gdemv3s" + string.Format("{0:00}", (int)monthIndex) + ".nc"; }
+        static string BaseGDEMFileName(NAVOTimePeriod monthIndex)
+        {
+            if ((int)monthIndex < 1 || (int)monthIndex > 12) throw new ArgumentOutOfRangeException("monthIndex", "must be between 1 and 12, inclusive");
+            return "gdemv3s" + string.Format("{0:00}", (int)monthIndex) + ".nc";
+        }
         static string NUWCTemperatureFileName(NAVOTimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_t.nc"; }
         static string NUWCSalinityFileName(NAVOTimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_s.nc"; }
         static readonly string[] ShortMonthNames = new[] { "noneuary", "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
+
+        /// <summary>
+        /// Returns true if the directory exists and contains some combination of valid GDEM and/or NUWC file names
+        /// </summary>
+        /// <param name="gdemDirectory"></param>
+        /// <returns></returns>
+        public static bool IsDirectoryValid(string gdemDirectory)
+        {
+            if (!Directory.Exists(gdemDirectory)) return false;
+            try
+            {
+                for (var month = (int)NAVOTimePeriod.January; month <= (int)NAVOTimePeriod.December; month++)
+                {
+                    FindTemperatureFile((NAVOTimePeriod)month, gdemDirectory);
+                    FindSalinityFile((NAVOTimePeriod)month, gdemDirectory);
+                }
+                return true;
+            }
+            catch (FileFormatException)
+            {
+                return false;
+            }
+        }
 
         public static SoundSpeedField ReadFile(string fileName, string dataVarName, NAVOTimePeriod month, GeoRect region)
         {

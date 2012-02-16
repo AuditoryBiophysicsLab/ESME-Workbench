@@ -56,7 +56,6 @@ namespace ESME
     public interface IESMEPlugin : IHRCPlugin
     {
         PluginType PluginType { get; }
-        bool HasConfigurationControl { get; }
     }
 
     public enum PluginType

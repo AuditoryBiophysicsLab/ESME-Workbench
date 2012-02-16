@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using Cinch;
-using ESME.Environment;
+using ESME;
 using HRC.Plugins;
 using MEFedMVVM.ViewModelLocator;
 
@@ -12,12 +13,12 @@ namespace DavesWPFTester
     {
         public MainWindowViewModel() 
         {
-            AllPlugins = PluginManager.FindPlugins<IGDEM3DataSource<SoundSpeed>>(@"C:\Projects\ESME Deliverables\Plugins\Environmental Data Sources\NAVO\bin\Debug");
+            AllPlugins = PluginManager.FindPlugins<IESMEPlugin>(@"C:\Projects\ESME Deliverables\Plugins\Environmental Data Sources\InstallableNAVO\bin\Debug", p => (p.PluginType == PluginType.EnvironmentalDataSource) && p.IsSelectable);
         }
 
-        #region public Dictionary<string, IGDEM3DataSource<SoundSpeed>> AllPlugins { get; set; }
+        #region public Dictionary<Type, IESMEPlugin> AllPlugins { get; set; }
 
-        public Dictionary<string, IGDEM3DataSource<SoundSpeed>> AllPlugins
+        public Dictionary<Type, IESMEPlugin> AllPlugins
         {
             get { return _allPlugins; }
             set
@@ -29,10 +30,9 @@ namespace DavesWPFTester
         }
 
         static readonly PropertyChangedEventArgs AllPluginsChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.AllPlugins);
-        Dictionary<string, IGDEM3DataSource<SoundSpeed>> _allPlugins;
+        Dictionary<Type, IESMEPlugin> _allPlugins;
 
         #endregion
-
     }
 
 #if false

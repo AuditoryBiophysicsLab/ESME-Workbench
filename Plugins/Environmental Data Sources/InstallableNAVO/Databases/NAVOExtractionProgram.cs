@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace NAVO.Databases
+namespace InstallableNAVO.Databases
 {
     public static class NAVOExtractionProgram
     {

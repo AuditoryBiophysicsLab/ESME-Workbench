@@ -69,6 +69,7 @@
     <Compile Include="GDEMv3.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Databases\SMGC.cs" />
+    <Compile Include="SMGC20Minimal.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\ESME.Controls\ESME.Views.csproj">

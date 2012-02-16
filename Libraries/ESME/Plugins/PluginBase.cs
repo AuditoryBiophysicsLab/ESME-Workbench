@@ -17,11 +17,13 @@ namespace ESME.Plugins
             PluginDescription = "Not set!";
             ConfigurationControl = null;
             PluginType = PluginType.Unknown;
+            PropertyChanged += (s, e) => { if (e.PropertyName == "IsValid") IsConfigured = IsValid; };
         }
 
         public string PluginName { get; protected set; }
         public string PluginDescription { get; protected set; }
         public PluginType PluginType { get; protected set; }
+        public string DLLPath { get; set; }
 
         #region public Control ConfigurationControl { get; protected set; }
 
@@ -41,62 +43,61 @@ namespace ESME.Plugins
         Control _configurationControl;
 
         #endregion
-        #region public bool HasConfigurationControl { get; set; }
+        #region public bool IsConfigurable { get; }
 
-        public bool HasConfigurationControl
+        public bool IsConfigurable
         {
             get { return ConfigurationControl != null; }
         }
 
-        static readonly PropertyChangedEventArgs HasConfigurationControlChangedEventArgs = ObservableHelper.CreateArgs<PluginBase>(x => x.HasConfigurationControl);
+        static readonly PropertyChangedEventArgs HasConfigurationControlChangedEventArgs = ObservableHelper.CreateArgs<PluginBase>(x => x.IsConfigurable);
 
         #endregion
-        #region public bool IsAvailable { get; protected set; }
+        #region public bool IsSelectable { get; protected set; }
 
-        public bool IsAvailable
+        public bool IsSelectable
         {
-            get { return _isAvailable; }
+            get { return _isSelectable; }
             protected set
             {
-                if (_isAvailable == value) return;
-                _isAvailable = value;
+                if (_isSelectable == value) return;
+                _isSelectable = value;
                 NotifyPropertyChanged(IsAvailableChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs IsAvailableChangedEventArgs = ObservableHelper.CreateArgs<PluginBase>(x => x.IsAvailable);
-        bool _isAvailable;
+        static readonly PropertyChangedEventArgs IsAvailableChangedEventArgs = ObservableHelper.CreateArgs<PluginBase>(x => x.IsSelectable);
+        bool _isSelectable;
 
         #endregion
+        #region public bool IsConfigured { get; protected set; }
 
+        public bool IsConfigured
+        {
+            get { return _isConfigured; }
+            protected set
+            {
+                if (_isConfigured == value) return;
+                _isConfigured = value;
+                NotifyPropertyChanged(IsConfiguredChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsConfiguredChangedEventArgs = ObservableHelper.CreateArgs<PluginBase>(x => x.IsConfigured);
+        bool _isConfigured;
+
+        #endregion
     }
 
     public abstract class EnvironmentalDataSourcePluginBase<T> : PluginBase, IEnvironmentalDataSource<T>
     {
         /// <summary>
-        /// An array of available resolutions in samples per degree
+        /// An array of available resolutions, expressed in arc-minutes per sample
         /// </summary>
         public float[] Resolutions { get; protected set; }
         public virtual string DataLocation { get; set; }
         public string DataLocationHelp { get; protected set; }
-        #region public bool IsDataLocationValid { get; protected set; }
 
-        public bool IsDataLocationValid
-        {
-            get { return _isDataLocationValid; }
-            protected set
-            {
-                _isDataLocationValid = value;
-                NotifyPropertyChanged(IsDataLocationValidChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsDataLocationValidChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentalDataSourcePluginBase<T>>(x => x.IsDataLocationValid);
-        bool _isDataLocationValid;
-
-        #endregion
-
-
-        public abstract T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, IProgress<float> progress = null);
+        public abstract T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, NAVOConfiguration navoConfiguration = null, IProgress<float> progress = null);
     }
 }

@@ -9,15 +9,14 @@ namespace ESME.Environment
         float[] Resolutions { get; }
         string DataLocation { get; set; }
         string DataLocationHelp { get; }
-        bool IsDataLocationValid { get; }
-        T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, IProgress<float> progress = null);
+        T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, NAVOConfiguration navoConfiguration = null, IProgress<float> progress = null);
     }
 
     public interface IGDEM3DataSource<out T> : IEnvironmentalDataSource<T>
     {
-        T ExtractTemperature(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, IProgress<float> progress = null);
-        T ExtractSalinity(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, IProgress<float> progress = null);
-        T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, EarthCoordinate<float> deepestPoint, IProgress<float> progress = null);
-        T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, Bathymetry bathymetry, IProgress<float> progress = null);
+        T ExtractTemperature(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, NAVOConfiguration navoConfiguration = null, IProgress<float> progress = null);
+        T ExtractSalinity(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, NAVOConfiguration navoConfiguration = null, IProgress<float> progress = null);
+        T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, EarthCoordinate<float> deepestPoint, NAVOConfiguration navoConfiguration = null, IProgress<float> progress = null);
+        T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, Bathymetry bathymetry, NAVOConfiguration navoConfiguration = null, IProgress<float> progress = null);
     }
 }

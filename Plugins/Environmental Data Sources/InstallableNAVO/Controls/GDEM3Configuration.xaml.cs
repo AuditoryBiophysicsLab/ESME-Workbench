@@ -1,4 +1,4 @@
-﻿namespace NAVO.Controls
+﻿namespace InstallableNAVO.Controls
 {
     /// <summary>
     /// Interaction logic for ConfigurationControl.xaml

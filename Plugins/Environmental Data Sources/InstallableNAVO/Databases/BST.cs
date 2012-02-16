@@ -10,7 +10,7 @@ using HDF5DotNet;
 using HRC.Navigation;
 using System.Diagnostics;
 
-namespace NAVO.Databases
+namespace InstallableNAVO.Databases
 {
     public static class BST
     {

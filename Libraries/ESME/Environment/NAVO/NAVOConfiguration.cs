@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
@@ -516,6 +515,8 @@ namespace ESME.Environment.NAVO
 
         public IEnumerable<NAVOTimePeriod> MonthsInTimePeriod(NAVOTimePeriod timePeriod)
         {
+            if (SpringStartMonth == NAVOTimePeriod.Invalid || SummerStartMonth == NAVOTimePeriod.Invalid || FallStartMonth == NAVOTimePeriod.Invalid || WinterStartMonth == NAVOTimePeriod.Invalid || WarmSeasonStartMonth == NAVOTimePeriod.Invalid || ColdSeasonStartMonth == NAVOTimePeriod.Invalid)
+                throw new InvalidOperationException("NAVOConfiguration: Season configuration is invalid.  One or more start months have not been set.");
             switch (timePeriod)
             {
                 case NAVOTimePeriod.January:

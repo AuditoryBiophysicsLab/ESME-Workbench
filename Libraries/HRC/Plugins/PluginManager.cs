@@ -9,18 +9,17 @@ namespace HRC.Plugins
 {
     public static class PluginManager
     {
-        public static Dictionary<string, T> FindPlugins<T>(string folder) where T: IHRCPlugin
+        public static Dictionary<Type, T> FindPlugins<T>(string folder, Func<T, bool> filter = null) where T: IHRCPlugin
         {
             Debug.Assert(typeof(T).IsInterface);
 
             var files = Directory.GetFiles(folder, "*.dll");
-            var result = new Dictionary<string, T>();
-
+            var result = new Dictionary<Type, T>();
             foreach (var file in files)
             {
                 try
                 {
-                    var assembly = Assembly.LoadFile(file);
+                    var assembly = Assembly.Load(File.ReadAllBytes(file));
                     var matchingTypes = from type in assembly.GetTypes()
                                         where type.IsClass && !type.IsNotPublic
                                         let interfaces = type.GetInterfaces()
@@ -29,7 +28,8 @@ namespace HRC.Plugins
                     foreach (var curType in matchingTypes)
                     {
                         var instance = (T)Activator.CreateInstance(curType);
-                        if (instance.IsAvailable) result.Add(file, instance);
+                        instance.DLLPath = file;
+                        if ((filter == null) || filter(instance)) result.Add(curType, instance);
                     }
                 }
                 catch (Exception ex)

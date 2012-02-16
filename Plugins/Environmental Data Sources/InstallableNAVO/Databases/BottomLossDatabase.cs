@@ -11,7 +11,7 @@ using ESME.Environment;
 using ESME.NEMO;
 using HRC.Navigation;
 
-namespace NAVO.Databases
+namespace InstallableNAVO.Databases
 {
     public static class BottomLossDatabase
     {

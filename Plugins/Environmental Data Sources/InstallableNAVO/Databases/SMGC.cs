@@ -11,7 +11,7 @@ using ESME.Environment;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
 
-namespace NAVO.Databases
+namespace InstallableNAVO.Databases
 {
     public static class SMGC
     {
@@ -77,16 +77,15 @@ namespace NAVO.Databases
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
         }
 #endif
-        public static Wind Import(GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
+        public static Wind Import(GeoRect region, IProgress<float> progress = null)
         {
-            var result = ImportAsync(region, currentState, progress);
+            var result = ImportAsync(region, progress);
             return result.Result;
         }
 
-        public async static Task<Wind> ImportAsync(GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
+        public async static Task<Wind> ImportAsync(GeoRect region, IProgress<float> progress = null)
         {
             if (progress != null) lock (progress) progress.Report(0f);
-            if (currentState != null) lock (currentState) currentState.Report("Importing wind data");
 
             var north = (float)Math.Ceiling(region.North);
             var south = (float)Math.Floor(region.South);
@@ -132,7 +131,6 @@ namespace NAVO.Databases
             await parallelReader.Completion;
             allFiles = null;
             IList<SMGCFile> selectedFiles = batchBlock.Receive().ToList();
-            if (currentState != null) lock (currentState) currentState.Report("Creating monthly data collection");
 
             var parallelSelector = new TransformBlock<NAVOTimePeriod, TimePeriodEnvironmentData<WindSample>>(timePeriod =>
             {

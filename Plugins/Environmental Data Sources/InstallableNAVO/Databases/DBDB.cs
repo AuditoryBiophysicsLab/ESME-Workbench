@@ -4,10 +4,9 @@ using System.IO;
 using System.Threading.Tasks;
 using ESME;
 using ESME.Environment;
-using ESME.Environment.NAVO;
 using HRC.Navigation;
 
-namespace NAVO.Databases
+namespace InstallableNAVO.Databases
 {
     public static class DBDB
     {
