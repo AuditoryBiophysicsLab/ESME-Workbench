@@ -157,13 +157,13 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             RangeComplexes.HookEnvironment<Wind>(EnvironmentDataType.Wind, data =>
             {
-                if (RangeComplexes.SelectedTimePeriod == NAVOTimePeriod.Invalid) return;
+                if (RangeComplexes.SelectedTimePeriod == TimePeriod.Invalid) return;
                 var samplePoints = data[RangeComplexes.SelectedTimePeriod].EnvironmentData.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
                 _dispatcher.InvokeInBackgroundIfRequired(() => EnvironmentLayers[EnvironmentDataType.Wind] = CurrentMapLayers.DisplayOverlayShapes("Wind", LayerType.WindSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false));
             });
             RangeComplexes.HookEnvironment<SoundSpeed>(EnvironmentDataType.SoundSpeed, data =>
             {
-                if (RangeComplexes.SelectedTimePeriod == NAVOTimePeriod.Invalid) return;
+                if (RangeComplexes.SelectedTimePeriod == TimePeriod.Invalid) return;
                 var samplePoints = data[RangeComplexes.SelectedTimePeriod].EnvironmentData.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
                 _dispatcher.InvokeInBackgroundIfRequired(
                                                          () =>

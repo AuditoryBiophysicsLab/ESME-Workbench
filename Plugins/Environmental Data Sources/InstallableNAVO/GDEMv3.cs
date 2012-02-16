@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using ESME;
 using ESME.Environment;
-using ESME.Environment.NAVO;
 using ESME.Plugins;
 using HRC.Navigation;
 using Microsoft.Win32;
@@ -39,53 +41,76 @@ namespace InstallableNAVO
 #endif
         }
 
-        public SoundSpeed ExtractTemperature(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, NAVOConfiguration navoConfiguration = null, IProgress<float> progress = null)
+        public SoundSpeed ExtractTemperature(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null)
         {
-            if (progress != null) lock (progress) progress.Report(0f);
-            var temperatureField = GDEM.ReadFile(GDEM.FindTemperatureFile(timePeriod, DataLocation), "water_temp", timePeriod, geoRect);
-            if (progress != null) lock (progress) progress.Report(50f);
-            var temperature = new SoundSpeed();
-            temperature.SoundSpeedFields.Add(temperatureField);
-            if (progress != null) lock (progress) progress.Report(100f);
-            return temperature;
+            return ExtractVariable(GDEM.FindTemperatureFile, "water_temp", geoRect, timePeriod, seasonConfiguration);
         }
 
-        public SoundSpeed ExtractSalinity(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, NAVOConfiguration navoConfiguration = null, IProgress<float> progress = null)
+        public SoundSpeed ExtractSalinity(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null)
         {
-            if (progress != null) lock (progress) progress.Report(0f);
-            var salinityField = GDEM.ReadFile(GDEM.FindSalinityFile(timePeriod, DataLocation), "salinity", timePeriod, geoRect);
-            if (progress != null) lock (progress) progress.Report(50f);
-            var salinity = new SoundSpeed();
-            salinity.SoundSpeedFields.Add(salinityField);
-            if (progress != null) lock (progress) progress.Report(100f);
-            return salinity;
+            return ExtractVariable(GDEM.FindTemperatureFile, "salinity", geoRect, timePeriod, seasonConfiguration);
         }
 
-        public override SoundSpeed Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, NAVOConfiguration navoConfiguration = null, IProgress<float> progress = null)
+        SoundSpeed ExtractVariable(Func<TimePeriod, string, string> fileNameFunc, string variableName, GeoRect geoRect, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration)
+        {
+            var months = seasonConfiguration.MonthsInTimePeriod(timePeriod).ToList();
+            var sources = (from month in months
+                           select new
+                           {
+                               Month = month,
+                               DataTask = new Task<SoundSpeedField>(() => GDEM.ReadFile(fileNameFunc(month, DataLocation), variableName, month, geoRect)),
+                           }).ToDictionary(item => item.Month);
+            var sourceTasks = new List<Task>();
+            foreach (var month in months)
+            {
+                sources[month].DataTask.Start();
+                sourceTasks.Add(sources[month].DataTask);
+            }
+            var continuation = TaskEx.WhenAll(sourceTasks).ContinueWith(task =>
+            {
+                var result = new SoundSpeed();
+                foreach (var month in months) result.Add(sources[month].DataTask.Result);
+                return result;
+            });
+            return continuation.Result;
+        }
+
+        public override SoundSpeed Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration = null, IProgress<float> progress = null)
         {
             throw new NotImplementedException(string.Format("{0} extraction routine requires either deepest point OR bathymetry argument", PluginName));
         }
 
-        public SoundSpeed Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, EarthCoordinate<float> deepestPoint, NAVOConfiguration navoConfiguration = null, IProgress<float> progress = null)
+        public SoundSpeed Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, EarthCoordinate<float> deepestPoint, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null)
         {
-            if (progress != null) lock (progress) progress.Report(0);
-            var curProgressStep = 0f;
-            var intermediateProgress = new Progress<float>(prog =>
+            var temperatureTask = new Task<SoundSpeed>(() => ExtractTemperature(geoRect, resolution, timePeriod, seasonConfiguration, progress));
+            var salinityTask = new Task<SoundSpeed>(() => ExtractSalinity(geoRect, resolution, timePeriod, seasonConfiguration, progress));
+            temperatureTask.Start();
+            salinityTask.Start();
+            var continuation = TaskEx.WhenAll(temperatureTask, salinityTask).ContinueWith(task =>
             {
-                if (progress != null) lock (progress) progress.Report(curProgressStep + (prog / 3));
+                var months = seasonConfiguration.MonthsInTimePeriod(timePeriod).ToList();
+                var soundSpeedFields = (from month in months
+                                        select new
+                                        {
+                                            Month = month,
+                                            SoundSpeedField = SoundSpeedField.Create(temperatureTask.Result[month],
+                                                                                     salinityTask.Result[month],
+                                                                                     deepestPoint,
+                                                                                     geoRect),
+                                        }).ToDictionary(item => item.Month);
+                temperatureTask.Dispose();
+                salinityTask.Dispose();
+                var monthlySoundSpeeds = new SoundSpeed();
+                foreach (var month in months) monthlySoundSpeeds.Add(soundSpeedFields[month].SoundSpeedField);
+                var result = SoundSpeed.Average(monthlySoundSpeeds, new List<TimePeriod> { timePeriod });
+                return result;
             });
-            var temperatureData = ExtractTemperature(geoRect, resolution, timePeriod, navoConfiguration, intermediateProgress);
-            curProgressStep = 33f;
-            var salinityData = ExtractSalinity(geoRect, resolution, timePeriod, navoConfiguration, intermediateProgress);
-            curProgressStep = 66f;
-            var result = SoundSpeed.Create(temperatureData, salinityData, deepestPoint, intermediateProgress);
-            if (progress != null) lock (progress) progress.Report(100f);
-            return result;
+            return continuation.Result;        
         }
 
-        public SoundSpeed Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, Bathymetry bathymetry, NAVOConfiguration navoConfiguration = null, IProgress<float> progress = null) 
+        public SoundSpeed Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, Bathymetry bathymetry, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null) 
         {
-            return Extract(geoRect, resolution, timePeriod, bathymetry.DeepestPoint, navoConfiguration, progress);
+            return Extract(geoRect, resolution, timePeriod, bathymetry.DeepestPoint, seasonConfiguration, progress);
         }
     }
 }

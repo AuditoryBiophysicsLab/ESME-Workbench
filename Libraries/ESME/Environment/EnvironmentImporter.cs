@@ -282,7 +282,7 @@ namespace ESME.Environment
     {
         public EnvironmentDataType DataType { get; set; }
         public GeoRect GeoRect { get; set; }
-        public NAVOTimePeriod TimePeriod { get; set; }
+        public TimePeriod TimePeriod { get; set; }
         public float Resolution { get; set; }
         public string DestinationFilename { get; set; }
         public uint SampleCount { get; set; }

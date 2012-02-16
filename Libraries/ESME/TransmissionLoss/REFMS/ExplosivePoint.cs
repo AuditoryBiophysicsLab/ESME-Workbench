@@ -21,7 +21,7 @@ namespace ESME.TransmissionLoss.REFMS
     {
         public ExplosivePoint() { }
 
-        public ExplosivePoint(string outputPath, Geo location, NemoPlatform platform, NemoMode mode, NAVOTimePeriod timePeriod, float delta = 1) : base(location)
+        public ExplosivePoint(string outputPath, Geo location, NemoPlatform platform, NemoMode mode, TimePeriod timePeriod, float delta = 1) : base(location)
         {
             TimePeriod = timePeriod;
             OutputPath = outputPath;
@@ -252,9 +252,9 @@ namespace ESME.TransmissionLoss.REFMS
 
         #endregion
 
-        #region public NAVOTimePeriod TimePeriod { get; set; }
+        #region public TimePeriod TimePeriod { get; set; }
 
-        public NAVOTimePeriod TimePeriod
+        public TimePeriod TimePeriod
         {
             get { return _timePeriod; }
             set
@@ -266,7 +266,7 @@ namespace ESME.TransmissionLoss.REFMS
         }
 
         static readonly PropertyChangedEventArgs TimePeriodChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePoint>(x => x.TimePeriod);
-        NAVOTimePeriod _timePeriod;
+        TimePeriod _timePeriod;
 
         #endregion
 

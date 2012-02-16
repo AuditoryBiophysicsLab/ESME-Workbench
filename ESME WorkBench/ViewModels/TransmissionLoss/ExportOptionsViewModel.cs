@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Controls;
 using Cinch;
-using ESME.Environment.NAVO;
+using ESME.Environment;
 using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
 
@@ -14,7 +14,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
     [ExportViewModel("EnvironmentBuilderViewModel")]
     class ExportOptionsViewModel : ViewModelBase
     {
-        public ExportOptionsViewModel(List<NAVOTimePeriod> timePeriods)
+        public ExportOptionsViewModel(List<TimePeriod> timePeriods)
         {
             AvailableClimatologyData = new ObservableCollection<CheckBox>();
             foreach (var timePeriod in timePeriods)

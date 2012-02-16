@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Input;
 using Cinch;
-using ESME.Environment.NAVO;
+using ESME.Environment;
 
 namespace ESME.Views.EnvironmentBuilder
 {
@@ -203,51 +203,51 @@ namespace ESME.Views.EnvironmentBuilder
         {
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.January
+                        TimePeriod = TimePeriod.January
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.February
+                        TimePeriod = TimePeriod.February
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.March
+                        TimePeriod = TimePeriod.March
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.April
+                        TimePeriod = TimePeriod.April
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.May
+                        TimePeriod = TimePeriod.May
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.June
+                        TimePeriod = TimePeriod.June
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.July
+                        TimePeriod = TimePeriod.July
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.August
+                        TimePeriod = TimePeriod.August
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.September
+                        TimePeriod = TimePeriod.September
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.October
+                        TimePeriod = TimePeriod.October
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.November
+                        TimePeriod = TimePeriod.November
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.December
+                        TimePeriod = TimePeriod.December
                 },
         };
 
@@ -274,27 +274,27 @@ namespace ESME.Views.EnvironmentBuilder
         {
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.Spring
+                        TimePeriod = TimePeriod.Spring
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.Summer
+                        TimePeriod = TimePeriod.Summer
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.Fall
+                        TimePeriod = TimePeriod.Fall
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.Winter
+                        TimePeriod = TimePeriod.Winter
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.Warm
+                        TimePeriod = TimePeriod.Warm
                 },
                 new CheckboxSetting
                 {
-                        TimePeriod = NAVOTimePeriod.Cold
+                        TimePeriod = TimePeriod.Cold
                 },
         };
 
@@ -393,7 +393,7 @@ namespace ESME.Views.EnvironmentBuilder
     {
         public string EnvironmentName { get; set; }
         public string SedimentDatabaseName { get; set; }
-        public NAVOTimePeriod TimePeriod { get; set; }
+        public TimePeriod TimePeriod { get; set; }
     }
 
     public class CheckboxSettings : ObservableCollection<CheckboxSetting>
@@ -410,7 +410,7 @@ namespace ESME.Views.EnvironmentBuilder
 
         public bool IsAtLeastOneChecked { get { return this.Aggregate(false, (current, setting) => current | setting.IsChecked); } }
 
-        public IEnumerable<NAVOTimePeriod> SelectedTimePeriods
+        public IEnumerable<TimePeriod> SelectedTimePeriods
         {
             get { return this.Where(setting => setting.IsChecked).Select(setting => setting.TimePeriod); }
         }
@@ -429,7 +429,7 @@ namespace ESME.Views.EnvironmentBuilder
 
         #endregion
 
-        public NAVOTimePeriod TimePeriod { get; set; }
+        public TimePeriod TimePeriod { get; set; }
 
         #region public bool IsChecked { get; set; }
 

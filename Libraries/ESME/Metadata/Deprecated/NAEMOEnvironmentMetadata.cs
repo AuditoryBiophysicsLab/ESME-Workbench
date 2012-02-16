@@ -69,7 +69,7 @@ namespace ESME.Metadata
 
         #endregion
 
-        #region public NAVOTimePeriod TimePeriod { get; set; }
+        #region public TimePeriod TimePeriod { get; set; }
 
         public NAVOTimePeriod TimePeriod
         {

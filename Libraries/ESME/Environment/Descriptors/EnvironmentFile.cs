@@ -24,7 +24,7 @@ namespace ESME.Environment.Descriptors
     {
         protected EnvironmentFile() { }
 
-        public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
+        public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, TimePeriod timePeriod, float resolution)
         {
             Resolution = resolution;
             FileName = fileName;
@@ -199,7 +199,7 @@ namespace ESME.Environment.Descriptors
         #endregion
 
         public EnvironmentDataType DataType { get; protected set; }
-        public NAVOTimePeriod TimePeriod { get; private set; }
+        public TimePeriod TimePeriod { get; private set; }
         public List<EnvironmentFile> RequiredFiles { get; internal set; }
 
         #region INotifyPropertyChanged Members
@@ -234,10 +234,10 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
-        public static SoundSpeed CalculateSoundSpeed(RangeComplex rangeComplex, NAVOTimePeriod timePeriod, Task<Bathymetry> bathymetryTask, GeoRect bathymetryBounds)
+        public static SoundSpeed CalculateSoundSpeed(RangeComplex rangeComplex, TimePeriod timePeriod, Task<Bathymetry> bathymetryTask, GeoRect bathymetryBounds)
         {
             if (rangeComplex == null) throw new ArgumentException("rangeComplex");
-            if (timePeriod == NAVOTimePeriod.Invalid) throw new ArgumentException("timePeriod");
+            if (timePeriod == TimePeriod.Invalid) throw new ArgumentException("timePeriod");
             if (bathymetryTask == null) throw new ArgumentNullException("bathymetryTask");
             if (bathymetryBounds == null) throw new ArgumentNullException("bathymetryBounds");
 
@@ -284,17 +284,17 @@ namespace ESME.Environment.Descriptors
                     monthlySoundSpeeds.Add(soundSpeedFields[month].SoundSpeedField);
                 }
                 Debug.WriteLine("{0} SSP: Computing average sound speed for {1}", DateTime.Now, timePeriod);
-                var result = SoundSpeed.Average(monthlySoundSpeeds, new List<NAVOTimePeriod> { timePeriod });
+                var result = SoundSpeed.Average(monthlySoundSpeeds, new List<TimePeriod> { timePeriod });
                 Debug.WriteLine("{0} SSP: Returning average sound speed for {1}", DateTime.Now, timePeriod);
                 return result;
             });
             return continuation.Result;            
         }
 
-        public static SoundSpeed SeasonalAverage(RangeComplex rangeComplex, NAVOTimePeriod timePeriod, EnvironmentDataType dataType)
+        public static SoundSpeed SeasonalAverage(RangeComplex rangeComplex, TimePeriod timePeriod, EnvironmentDataType dataType)
         {
             if (rangeComplex == null) throw new ArgumentException("rangeComplex");
-            if (timePeriod == NAVOTimePeriod.Invalid) throw new ArgumentException("timePeriod");
+            if (timePeriod == TimePeriod.Invalid) throw new ArgumentException("timePeriod");
             string fileType;
             switch (dataType)
             {

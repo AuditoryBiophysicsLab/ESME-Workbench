@@ -32,7 +32,7 @@ namespace ESME.TransmissionLoss.CASS
             foreach (var timePeriod in timePeriods)
             {
                 var cassEnvironmentFileName = Path.Combine(rangeComplexes.SelectedRangeComplex.EnvironmentPath, string.Format("{0}_{1}_env_{2}", rangeComplexes.SelectedArea.Name, rangeComplexes.SelectedBathymetry.Name, timePeriod));
-                var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof (NAVOTimePeriod), timePeriod, true);
+                var curTimePeriod = (TimePeriod)Enum.Parse(typeof (TimePeriod), timePeriod, true);
                 var soundspeedField = ((Task<SoundSpeed>)environmentTasks[EnvironmentDataType.SoundSpeed]).Result[curTimePeriod];
                 var wind = ((Task<Wind>)environmentTasks[EnvironmentDataType.Wind]).Result[curTimePeriod];
                 WriteEnvironmentFiles(cassEnvironmentFileName, bathymetry.Samples.GeoRect, sediment, soundspeedField,
@@ -318,7 +318,7 @@ namespace ESME.TransmissionLoss.CASS
             WriteEnvironmentFiles(soundSpeedField.TimePeriod, requestedLocations, environmentFileName, sedimentPoints, soundSpeedProfiles, windSamples, bathymetryFileName, overlayFileName, bottomLossPoints);
         }
 
-        public static void WriteEnvironmentFiles(NAVOTimePeriod timePeriod, IList<Geo> requestedLocations, string environmentFileName, IList<SedimentSample> sedimentPoints,
+        public static void WriteEnvironmentFiles(TimePeriod timePeriod, IList<Geo> requestedLocations, string environmentFileName, IList<SedimentSample> sedimentPoints,
                                                  IList<SoundSpeedProfile> soundSpeedProfiles, IList<WindSample> windSamples, string bathymetryFileName,
                                                  string overlayFileName, IList<BottomLossSample> bottomLossPoints)
         {
@@ -329,7 +329,7 @@ namespace ESME.TransmissionLoss.CASS
             WriteEnvironmentFileHeader(timePeriod, requestedLocations, environmentFileName + "-lfbl-pe", sedimentPoints, soundSpeedProfiles, windSamples, bathymetryFileName, overlayFileName, "LFBL_PE", bottomLossPoints);
         }
 
-        static void WriteEnvironmentFileHeader(NAVOTimePeriod timePeriod, IList<Geo> requestedLocations, string environmentFileName, IList<SedimentSample> sedimentList,
+        static void WriteEnvironmentFileHeader(TimePeriod timePeriod, IList<Geo> requestedLocations, string environmentFileName, IList<SedimentSample> sedimentList,
                                          IList<SoundSpeedProfile> soundSpeedList, IList<WindSample> windList, string bathymetryFileName,
                                          string overlayFileName, string model, IList<BottomLossSample> bottomLossList)
         {

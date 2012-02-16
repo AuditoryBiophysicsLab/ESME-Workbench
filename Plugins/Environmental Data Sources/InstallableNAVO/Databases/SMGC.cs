@@ -132,7 +132,7 @@ namespace InstallableNAVO.Databases
             allFiles = null;
             IList<SMGCFile> selectedFiles = batchBlock.Receive().ToList();
 
-            var parallelSelector = new TransformBlock<NAVOTimePeriod, TimePeriodEnvironmentData<WindSample>>(timePeriod =>
+            var parallelSelector = new TransformBlock<TimePeriod, TimePeriodEnvironmentData<WindSample>>(timePeriod =>
             {
                 var curTimePeriodData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = timePeriod };
                 curTimePeriodData.EnvironmentData.AddRange(from selectedFile in selectedFiles
@@ -206,11 +206,11 @@ namespace InstallableNAVO.Databases
             public List<SMGCMonth> Months { get; private set; }
             public EarthCoordinate EarthCoordinate { get; private set; }
 
-            public SMGCMonth this[NAVOTimePeriod navoTimePeriod]
+            public SMGCMonth this[TimePeriod timePeriod]
             {
                 get
                 {
-                    return Months == null ? null : Months.Find(x => x.NAVOTimePeriod == navoTimePeriod);
+                    return Months == null ? null : Months.Find(x => x.TimePeriod == timePeriod);
                 }
             }
 
@@ -218,7 +218,7 @@ namespace InstallableNAVO.Databases
             {
                 get
                 {
-                    return Months == null ? null : Months.Find(x => x.NAVOTimePeriod == (NAVOTimePeriod)monthNumber);
+                    return Months == null ? null : Months.Find(x => x.TimePeriod == (TimePeriod)monthNumber);
                 }
             }
 
@@ -276,29 +276,29 @@ namespace InstallableNAVO.Databases
                     if ((Math.Abs(f99 - 99.0f) > 0.0001) || (Math.Abs(f380 - 380.0f) > 0.0001)) throw new ApplicationException("Invalid byte order in file " + fileName);
 
                     Months = new List<SMGCMonth>();
-                    var curMonth = SMGCMonth.Read(NAVOTimePeriod.January, reader);
+                    var curMonth = SMGCMonth.Read(TimePeriod.January, reader);
                     if (curMonth != null) Months.Add(curMonth);
-                    curMonth = SMGCMonth.Read(NAVOTimePeriod.February, reader);
+                    curMonth = SMGCMonth.Read(TimePeriod.February, reader);
                     if (curMonth != null) Months.Add(curMonth);
-                    curMonth = SMGCMonth.Read(NAVOTimePeriod.March, reader);
+                    curMonth = SMGCMonth.Read(TimePeriod.March, reader);
                     if (curMonth != null) Months.Add(curMonth);
-                    curMonth = SMGCMonth.Read(NAVOTimePeriod.April, reader);
+                    curMonth = SMGCMonth.Read(TimePeriod.April, reader);
                     if (curMonth != null) Months.Add(curMonth);
-                    curMonth = SMGCMonth.Read(NAVOTimePeriod.May, reader);
+                    curMonth = SMGCMonth.Read(TimePeriod.May, reader);
                     if (curMonth != null) Months.Add(curMonth);
-                    curMonth = SMGCMonth.Read(NAVOTimePeriod.June, reader);
+                    curMonth = SMGCMonth.Read(TimePeriod.June, reader);
                     if (curMonth != null) Months.Add(curMonth);
-                    curMonth = SMGCMonth.Read(NAVOTimePeriod.July, reader);
+                    curMonth = SMGCMonth.Read(TimePeriod.July, reader);
                     if (curMonth != null) Months.Add(curMonth);
-                    curMonth = SMGCMonth.Read(NAVOTimePeriod.August, reader);
+                    curMonth = SMGCMonth.Read(TimePeriod.August, reader);
                     if (curMonth != null) Months.Add(curMonth);
-                    curMonth = SMGCMonth.Read(NAVOTimePeriod.September, reader);
+                    curMonth = SMGCMonth.Read(TimePeriod.September, reader);
                     if (curMonth != null) Months.Add(curMonth);
-                    curMonth = SMGCMonth.Read(NAVOTimePeriod.October, reader);
+                    curMonth = SMGCMonth.Read(TimePeriod.October, reader);
                     if (curMonth != null) Months.Add(curMonth);
-                    curMonth = SMGCMonth.Read(NAVOTimePeriod.November, reader);
+                    curMonth = SMGCMonth.Read(TimePeriod.November, reader);
                     if (curMonth != null) Months.Add(curMonth);
-                    curMonth = SMGCMonth.Read(NAVOTimePeriod.December, reader);
+                    curMonth = SMGCMonth.Read(TimePeriod.December, reader);
                     if (curMonth != null) Months.Add(curMonth);
                 }
             }
@@ -308,11 +308,11 @@ namespace InstallableNAVO.Databases
         {
             public float MeanWindSpeed { get; private set; }
             public float MeanWaveHeight { get; private set; }
-            public NAVOTimePeriod NAVOTimePeriod { get; private set; }
+            public TimePeriod TimePeriod { get; private set; }
 
-            SMGCMonth(NAVOTimePeriod timePeriod, BinaryReader reader)
+            SMGCMonth(TimePeriod timePeriod, BinaryReader reader)
             {
-                NAVOTimePeriod = timePeriod;
+                TimePeriod = timePeriod;
 
                 MeanWaveHeight = MeanWindSpeed = float.NaN;
                 for (var i = 0; i <= 12; i++) SkipRecord(reader);
@@ -340,7 +340,7 @@ namespace InstallableNAVO.Databases
                 for (var i = 0; i < 4; i++) SkipRecord(reader);
             }
 
-            public static SMGCMonth Read(NAVOTimePeriod timePeriod, BinaryReader reader)
+            public static SMGCMonth Read(TimePeriod timePeriod, BinaryReader reader)
             {
                 try
                 {
@@ -350,7 +350,7 @@ namespace InstallableNAVO.Databases
                 } catch { return null; }
             }
 
-            public override string ToString() { return string.Format("Mean Wind speed [{0}]: {1} m/s\n", NAVOTimePeriod, MeanWindSpeed); }
+            public override string ToString() { return string.Format("Mean Wind speed [{0}]: {1} m/s\n", TimePeriod, MeanWindSpeed); }
         }
 
         internal class SMGCRecordTypeA : SMGCRecord

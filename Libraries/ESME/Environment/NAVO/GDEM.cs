@@ -104,7 +104,7 @@ namespace ESME.Environment.NAVO
         }
 #endif
 
-        public static string FindSalinityFile(NAVOTimePeriod monthIndex)
+        public static string FindSalinityFile(TimePeriod monthIndex)
         {
             var gdemRootDirectory = Globals.AppSettings.NAVOConfiguration.GDEMDirectory;
             var files = Directory.GetFiles(gdemRootDirectory, GDEMSalinityFileName(monthIndex), SearchOption.AllDirectories);
@@ -114,7 +114,7 @@ namespace ESME.Environment.NAVO
             throw new FileNotFoundException(string.Format("Could not find requested salinity file, tried {0} and {1}", GDEMSalinityFileName(monthIndex), NUWCSalinityFileName(monthIndex)));
         }
 
-        public static string FindTemperatureFile(NAVOTimePeriod monthIndex)
+        public static string FindTemperatureFile(TimePeriod monthIndex)
         {
             var gdemRootDirectory = Globals.AppSettings.NAVOConfiguration.GDEMDirectory;
             var files = Directory.GetFiles(gdemRootDirectory, GDEMTemperatureFileName(monthIndex), SearchOption.AllDirectories);
@@ -124,14 +124,14 @@ namespace ESME.Environment.NAVO
             throw new FileNotFoundException(string.Format("Could not find requested temperature file, tried {0} and {1}", GDEMTemperatureFileName(monthIndex), NUWCTemperatureFileName(monthIndex)));
         }
 
-        static string GDEMTemperatureFileName(NAVOTimePeriod monthIndex) { return "t" + BaseGDEMFileName(monthIndex); }
-        static string GDEMSalinityFileName(NAVOTimePeriod monthIndex) { return "s" + BaseGDEMFileName(monthIndex); }
-        static string BaseGDEMFileName(NAVOTimePeriod monthIndex) { return "gdemv3s" + string.Format("{0:00}", (int)monthIndex) + ".nc"; }
-        static string NUWCTemperatureFileName(NAVOTimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_t.nc"; }
-        static string NUWCSalinityFileName(NAVOTimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_s.nc"; }
+        static string GDEMTemperatureFileName(TimePeriod monthIndex) { return "t" + BaseGDEMFileName(monthIndex); }
+        static string GDEMSalinityFileName(TimePeriod monthIndex) { return "s" + BaseGDEMFileName(monthIndex); }
+        static string BaseGDEMFileName(TimePeriod monthIndex) { return "gdemv3s" + string.Format("{0:00}", (int)monthIndex) + ".nc"; }
+        static string NUWCTemperatureFileName(TimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_t.nc"; }
+        static string NUWCSalinityFileName(TimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_s.nc"; }
         static readonly string[] ShortMonthNames = new[] { "noneuary", "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
 
-        public static SoundSpeedField ReadFile(string fileName, string dataVarName, NAVOTimePeriod month, GeoRect region)
+        public static SoundSpeedField ReadFile(string fileName, string dataVarName, TimePeriod month, GeoRect region)
         {
             var myFile = NetCDFFile.Open(fileName);
             //Logger.Log("in ReadFile: 0.1");

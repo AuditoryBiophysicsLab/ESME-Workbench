@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using ESME.Environment.NAVO;
+using ESME.Environment;
 using HRC.Navigation;
 
 namespace ESME.TransmissionLoss.BellhopNL
@@ -18,7 +18,7 @@ namespace ESME.TransmissionLoss.BellhopNL
         //REFMS-mimic members.
         public EarthCoordinate Location { get; set; }
         public string ModeName { get; set; }
-        public NAVOTimePeriod TimePeriod { get; set; }
+        public TimePeriod TimePeriod { get; set; }
         public Geo SVPLocation { get; set; }
         public double ChargeDepth { get; set; }
         public double OutputTime { get; set; }

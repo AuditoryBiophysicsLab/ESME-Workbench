@@ -28,7 +28,7 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        #region public List<NAVOTimePeriod> SelectedTimePeriods { get; set; }
+        #region public List<TimePeriod> SelectedTimePeriods { get; set; }
 
         public List<NAVOTimePeriod> SelectedTimePeriods
         {
@@ -72,7 +72,7 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        #region public NAVOTimePeriod TimePeriod { get; set; }
+        #region public TimePeriod TimePeriod { get; set; }
 
         public NAVOTimePeriod TimePeriod
         {
@@ -95,7 +95,7 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        #region public List<NAVOTimePeriod> UniqueMonths { get; set; }
+        #region public List<TimePeriod> UniqueMonths { get; set; }
 
         public List<NAVOTimePeriod> UniqueMonths
         {

@@ -304,9 +304,9 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
-        #region public NAVOTimePeriod SelectedTimePeriod { get; set; }
+        #region public TimePeriod SelectedTimePeriod { get; set; }
 
-        public NAVOTimePeriod SelectedTimePeriod
+        public TimePeriod SelectedTimePeriod
         {
             get { return _selectedTimePeriod; }
             set
@@ -318,7 +318,7 @@ namespace ESME.Environment.Descriptors
         }
 
         static readonly PropertyChangedEventArgs SelectedTimePeriodChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedTimePeriod);
-        NAVOTimePeriod _selectedTimePeriod = NAVOTimePeriod.Invalid;
+        TimePeriod _selectedTimePeriod = TimePeriod.Invalid;
 
         #endregion
 
@@ -540,7 +540,7 @@ namespace ESME.Environment.Descriptors
                     SelectedEnvironment[EnvironmentDataType.Sediment] = SelectedRangeComplex.EnvironmentFiles[sedimentFilename];
                     EnvironmentData[EnvironmentDataType.Sediment] = new Task<Sediment>(() => Sediment.Load(Path.Combine(SelectedRangeComplex.DataPath, sedimentFilename)));
                 }
-                if (SelectedEnvironment[EnvironmentDataType.BottomLoss] != null && SelectedEnvironment[EnvironmentDataType.Sediment] != null && SelectedTimePeriod != NAVOTimePeriod.Invalid)
+                if (SelectedEnvironment[EnvironmentDataType.BottomLoss] != null && SelectedEnvironment[EnvironmentDataType.Sediment] != null && SelectedTimePeriod != TimePeriod.Invalid)
                 {
                     SelectedEnvironment[EnvironmentDataType.Wind] = SelectedRangeComplex.EnvironmentFiles[windFilename];
                     EnvironmentData[EnvironmentDataType.Wind] =
@@ -610,7 +610,7 @@ namespace ESME.Environment.Descriptors
         public void ClearEnvironment()
         {
             IsEnvironmentLoaded = false;
-            SelectedTimePeriod = NAVOTimePeriod.Invalid;
+            SelectedTimePeriod = TimePeriod.Invalid;
             SelectedArea = null;
             SelectedBathymetry = null;
             ClearEnvironment(EnvironmentDataType.BottomLoss);
@@ -641,7 +641,7 @@ namespace ESME.Environment.Descriptors
             }
         }
 
-        public static ObservableConcurrentDictionary<EnvironmentDataType, Task> GetEnvironment(Dispatcher dispatcher, string simAreaPath, string rangeComplexName, NAVOTimePeriod timePeriod, string areaName, string bathymetryResolution)
+        public static ObservableConcurrentDictionary<EnvironmentDataType, Task> GetEnvironment(Dispatcher dispatcher, string simAreaPath, string rangeComplexName, TimePeriod timePeriod, string areaName, string bathymetryResolution)
         {
             var rangeComplexes = new RangeComplexes(dispatcher);
             var rangeComplexFile = Path.Combine(simAreaPath, "SimAreas.csv");
@@ -651,7 +651,7 @@ namespace ESME.Environment.Descriptors
             if (string.IsNullOrEmpty(rangeComplexName)) throw new ApplicationException("Range complex name cannot be null or empty");
             if (string.IsNullOrEmpty(areaName)) throw new ApplicationException("Area name cannot be null or empty");
             if (string.IsNullOrEmpty(bathymetryResolution)) throw new ApplicationException("Bathymetry resolution string cannot be null or empty");
-            if (timePeriod < NAVOTimePeriod.January || timePeriod > NAVOTimePeriod.Cold) throw new ApplicationException("Time period is invalid");
+            if (timePeriod < TimePeriod.January || timePeriod > TimePeriod.Cold) throw new ApplicationException("Time period is invalid");
             if (!rangeComplexes.RangeComplexCollection.ContainsKey(rangeComplexName)) throw new ApplicationException(string.Format("Specified range complex {0} does not exist", rangeComplexName));
             var rangeComplex = rangeComplexes.RangeComplexCollection[rangeComplexName];
             if (!rangeComplex.AreaCollection.ContainsKey(areaName)) throw new ApplicationException(string.Format("Specified range complex {0} does not contain an area named {1}", rangeComplexName, areaName));

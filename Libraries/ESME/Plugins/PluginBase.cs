@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Windows.Controls;
 using Cinch;
 using ESME.Environment;
-using ESME.Environment.NAVO;
 using HRC.Navigation;
 using HRC.Validation;
 
@@ -98,6 +97,6 @@ namespace ESME.Plugins
         public virtual string DataLocation { get; set; }
         public string DataLocationHelp { get; protected set; }
 
-        public abstract T Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, NAVOConfiguration navoConfiguration = null, IProgress<float> progress = null);
+        public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration = null, IProgress<float> progress = null);
     }
 }

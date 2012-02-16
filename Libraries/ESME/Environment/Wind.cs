@@ -74,7 +74,7 @@ namespace ESME.Environment
             {
                 var curPeriod = new TimePeriodEnvironmentData<WindSample>
                 {
-                    TimePeriod = (NAVOTimePeriod)reader.ReadInt32(),
+                    TimePeriod = (TimePeriod)reader.ReadInt32(),
                 };
                 var sampleCount = reader.ReadInt32();
                 for (var j = 0; j < sampleCount; j++)
@@ -89,14 +89,14 @@ namespace ESME.Environment
         /// </summary>
         /// <param name="timePeriod"></param>
         /// <returns></returns>
-        public TimePeriodEnvironmentData<WindSample> this[NAVOTimePeriod timePeriod]
+        public TimePeriodEnvironmentData<WindSample> this[TimePeriod timePeriod]
         {
             get
             {
                 var result = TimePeriods.Find(t => t.TimePeriod == timePeriod);
                 if (result != null) return result;
 
-                var allMonths = new List<NAVOTimePeriod>(NAVOConfiguration.AllMonths);
+                var allMonths = new List<TimePeriod>(NAVOConfiguration.AllMonths);
                 // If the data is for a month, we can't synthesize it if we don't already have it available
                 if (allMonths.Contains(timePeriod)) throw new IndexOutOfRangeException(string.Format("Wind data for the requested time period {0} is not available", timePeriod));
                 var requestedData = SeasonalAverage(timePeriod);
@@ -105,7 +105,7 @@ namespace ESME.Environment
             }
         }
 
-        public TimePeriodEnvironmentData<WindSample> SeasonalAverage(NAVOTimePeriod season)
+        public TimePeriodEnvironmentData<WindSample> SeasonalAverage(TimePeriod season)
         {
             // Make sure the requested time period is, in fact, a season.
             if (!NAVOConfiguration.AllSeasons.Contains(season)) throw new ArgumentException(season + " is not a season", "season");

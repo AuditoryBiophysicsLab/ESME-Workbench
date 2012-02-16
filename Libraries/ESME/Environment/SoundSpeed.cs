@@ -38,7 +38,7 @@ namespace ESME.Environment
         /// </summary>
         /// <param name="timePeriod"></param>
         /// <returns></returns>
-        public SoundSpeedField this[NAVOTimePeriod timePeriod]
+        public SoundSpeedField this[TimePeriod timePeriod]
         {
             get
             {
@@ -123,7 +123,7 @@ namespace ESME.Environment
             return soundSpeedFile;
         }
 
-        public static SoundSpeed Average(SoundSpeed monthlySoundSpeeds, List<NAVOTimePeriod> timePeriods)
+        public static SoundSpeed Average(SoundSpeed monthlySoundSpeeds, List<TimePeriod> timePeriods)
         {
             var result = new SoundSpeed();
             foreach (var timePeriod in timePeriods)
@@ -136,7 +136,7 @@ namespace ESME.Environment
             return result;
         }
 
-        public static SoundSpeedField Average(SoundSpeed monthlySoundSpeeds, NAVOTimePeriod timePeriod)
+        public static SoundSpeedField Average(SoundSpeed monthlySoundSpeeds, TimePeriod timePeriod)
         {
             var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod).ToList();
             var accumulator = new SoundSpeedFieldAverager { TimePeriod = timePeriod };

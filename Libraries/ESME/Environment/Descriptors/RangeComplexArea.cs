@@ -55,7 +55,7 @@ namespace ESME.Environment.Descriptors
                     (fileInfo.LastWriteTime != BathymetryFiles[fileName].LastWriteTime))
                 {
                     var bathymetryFile = new EnvironmentFile(BathymetryPath, fileName, sampleCount, GeoRect,
-                                                                   EnvironmentDataType.Bathymetry, NAVOTimePeriod.Invalid, resolution);
+                                                                   EnvironmentDataType.Bathymetry, TimePeriod.Invalid, resolution);
                     BathymetryFiles[fileName] = bathymetryFile;
                     if (sampleCount <= 512000)
                         ImportBathymetry(bathymetryFile);

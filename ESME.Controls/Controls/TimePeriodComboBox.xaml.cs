@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using ESME.Environment.NAVO;
+using ESME.Environment;
 
 namespace ESME.Views.Controls
 {
@@ -13,31 +13,31 @@ namespace ESME.Views.Controls
             InitializeComponent();
         }
 
-        public List<NAVOTimePeriod> ListItems
+        public List<TimePeriod> ListItems
         {
-            get { return _listItems ?? (_listItems = new List<NAVOTimePeriod>
+            get { return _listItems ?? (_listItems = new List<TimePeriod>
                                                          {
-                                                             NAVOTimePeriod.January,
-                                                             NAVOTimePeriod.February,
-                                                             NAVOTimePeriod.March,
-                                                             NAVOTimePeriod.April,
-                                                             NAVOTimePeriod.May,
-                                                             NAVOTimePeriod.June,
-                                                             NAVOTimePeriod.July,
-                                                             NAVOTimePeriod.August,
-                                                             NAVOTimePeriod.September,
-                                                             NAVOTimePeriod.October,
-                                                             NAVOTimePeriod.November,
-                                                             NAVOTimePeriod.December,
-                                                             NAVOTimePeriod.Spring,
-                                                             NAVOTimePeriod.Summer,
-                                                             NAVOTimePeriod.Fall,
-                                                             NAVOTimePeriod.Winter,
-                                                             NAVOTimePeriod.Cold,
-                                                             NAVOTimePeriod.Warm,
+                                                             TimePeriod.January,
+                                                             TimePeriod.February,
+                                                             TimePeriod.March,
+                                                             TimePeriod.April,
+                                                             TimePeriod.May,
+                                                             TimePeriod.June,
+                                                             TimePeriod.July,
+                                                             TimePeriod.August,
+                                                             TimePeriod.September,
+                                                             TimePeriod.October,
+                                                             TimePeriod.November,
+                                                             TimePeriod.December,
+                                                             TimePeriod.Spring,
+                                                             TimePeriod.Summer,
+                                                             TimePeriod.Fall,
+                                                             TimePeriod.Winter,
+                                                             TimePeriod.Cold,
+                                                             TimePeriod.Warm,
                                                          }); }
         }
 
-        private static List<NAVOTimePeriod> _listItems;
+        private static List<TimePeriod> _listItems;
     }
 }

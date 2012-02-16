@@ -52,9 +52,9 @@ namespace ESME.TransmissionLoss.CASS
 
         #endregion
 
-        #region public NAVOTimePeriod TimePeriod { get; set; }
+        #region public TimePeriod TimePeriod { get; set; }
 
-        public NAVOTimePeriod TimePeriod
+        public TimePeriod TimePeriod
         {
             get { return _timePeriod; }
             set
@@ -66,7 +66,7 @@ namespace ESME.TransmissionLoss.CASS
         }
 
         static readonly PropertyChangedEventArgs TimePeriodChangedEventArgs = ObservableHelper.CreateArgs<NAEMOEnvironmentFile>(x => x.TimePeriod);
-        NAVOTimePeriod _timePeriod;
+        TimePeriod _timePeriod;
 
         #endregion
 
@@ -141,7 +141,7 @@ namespace ESME.TransmissionLoss.CASS
                     {
                         if (thisline.StartsWith("limitName") && thisline.Contains("=")) result.OverlayFileName = Path.GetFileName(ParseKeyValuePair(thisline).Value);
                         if (thisline.StartsWith("bathName") && thisline.Contains("=")) result.BathymetryFilename = Path.GetFileName(ParseKeyValuePair(thisline).Value);
-                        if (thisline.StartsWith("timeFrame") && thisline.Contains("=")) result.TimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), Path.GetFileName(ParseKeyValuePair(thisline).Value), true);
+                        if (thisline.StartsWith("timeFrame") && thisline.Contains("=")) result.TimePeriod = (TimePeriod)Enum.Parse(typeof(TimePeriod), Path.GetFileName(ParseKeyValuePair(thisline).Value), true);
                         thisline = resarray[curLineIndex++].Trim();
                     }
                 }

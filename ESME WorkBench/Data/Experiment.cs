@@ -583,7 +583,7 @@ namespace ESMEWorkBench.Data
                 typeof (SoundSource),
                 typeof (GeoRect),
                 typeof (NemoModeToAcousticModelNameMap),
-                typeof (NAVOTimePeriod),
+                typeof (TimePeriod),
         };
 
         [XmlIgnore]
@@ -741,9 +741,9 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
-        #region public List<NAVOTimePeriod> AvailableTimePeriods { get; set; }
+        #region public List<TimePeriod> AvailableTimePeriods { get; set; }
 
-        public List<NAVOTimePeriod> AvailableTimePeriods
+        public List<TimePeriod> AvailableTimePeriods
         {
             get { return _availableTimePeriods; }
             set
@@ -755,7 +755,7 @@ namespace ESMEWorkBench.Data
         }
 
         static readonly PropertyChangedEventArgs AvailableTimePeriodsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.AvailableTimePeriods);
-        List<NAVOTimePeriod> _availableTimePeriods;
+        List<TimePeriod> _availableTimePeriods;
 
         #endregion
 

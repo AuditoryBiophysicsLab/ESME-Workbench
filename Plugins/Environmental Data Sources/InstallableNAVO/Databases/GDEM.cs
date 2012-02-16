@@ -11,7 +11,7 @@ namespace InstallableNAVO.Databases
 {
     public static class GDEM
     {
-        public static string FindSalinityFile(NAVOTimePeriod monthIndex, string gdemDirectory)
+        public static string FindSalinityFile(TimePeriod monthIndex, string gdemDirectory)
         {
             var files = Directory.GetFiles(gdemDirectory, GDEMSalinityFileName(monthIndex), SearchOption.AllDirectories);
             if (files.Length > 0) return files[0];
@@ -20,7 +20,7 @@ namespace InstallableNAVO.Databases
             throw new FileNotFoundException(string.Format("Could not find requested salinity file, tried {0} and {1}", GDEMSalinityFileName(monthIndex), NUWCSalinityFileName(monthIndex)));
         }
 
-        public static string FindTemperatureFile(NAVOTimePeriod monthIndex, string gdemDirectory)
+        public static string FindTemperatureFile(TimePeriod monthIndex, string gdemDirectory)
         {
             var files = Directory.GetFiles(gdemDirectory, GDEMTemperatureFileName(monthIndex), SearchOption.AllDirectories);
             if (files.Length > 0) return files[0];
@@ -29,15 +29,15 @@ namespace InstallableNAVO.Databases
             throw new FileNotFoundException(string.Format("Could not find requested temperature file, tried {0} and {1}", GDEMTemperatureFileName(monthIndex), NUWCTemperatureFileName(monthIndex)));
         }
 
-        static string GDEMTemperatureFileName(NAVOTimePeriod monthIndex) { return "t" + BaseGDEMFileName(monthIndex); }
-        static string GDEMSalinityFileName(NAVOTimePeriod monthIndex) { return "s" + BaseGDEMFileName(monthIndex); }
-        static string BaseGDEMFileName(NAVOTimePeriod monthIndex)
+        static string GDEMTemperatureFileName(TimePeriod monthIndex) { return "t" + BaseGDEMFileName(monthIndex); }
+        static string GDEMSalinityFileName(TimePeriod monthIndex) { return "s" + BaseGDEMFileName(monthIndex); }
+        static string BaseGDEMFileName(TimePeriod monthIndex)
         {
             if ((int)monthIndex < 1 || (int)monthIndex > 12) throw new ArgumentOutOfRangeException("monthIndex", "must be between 1 and 12, inclusive");
             return "gdemv3s" + string.Format("{0:00}", (int)monthIndex) + ".nc";
         }
-        static string NUWCTemperatureFileName(NAVOTimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_t.nc"; }
-        static string NUWCSalinityFileName(NAVOTimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_s.nc"; }
+        static string NUWCTemperatureFileName(TimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_t.nc"; }
+        static string NUWCSalinityFileName(TimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_s.nc"; }
         static readonly string[] ShortMonthNames = new[] { "noneuary", "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
 
         /// <summary>
@@ -50,10 +50,10 @@ namespace InstallableNAVO.Databases
             if (!Directory.Exists(gdemDirectory)) return false;
             try
             {
-                for (var month = (int)NAVOTimePeriod.January; month <= (int)NAVOTimePeriod.December; month++)
+                for (var month = (int)TimePeriod.January; month <= (int)TimePeriod.December; month++)
                 {
-                    FindTemperatureFile((NAVOTimePeriod)month, gdemDirectory);
-                    FindSalinityFile((NAVOTimePeriod)month, gdemDirectory);
+                    FindTemperatureFile((TimePeriod)month, gdemDirectory);
+                    FindSalinityFile((TimePeriod)month, gdemDirectory);
                 }
                 return true;
             }
@@ -63,7 +63,7 @@ namespace InstallableNAVO.Databases
             }
         }
 
-        public static SoundSpeedField ReadFile(string fileName, string dataVarName, NAVOTimePeriod month, GeoRect region)
+        public static SoundSpeedField ReadFile(string fileName, string dataVarName, TimePeriod month, GeoRect region)
         {
             var myFile = NetCDFFile.Open(fileName);
             Logger.Log("in ReadFile: 0.1");

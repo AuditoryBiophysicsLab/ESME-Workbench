@@ -81,7 +81,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
             var sedimentTask = new Task<Sediment>(() => Sediment.Load(Path.Combine(rangeComplex.DataPath, "data.sediment")));
             bottomLossTask.Start();
             sedimentTask.Start();
-            var envBlock = new ActionBlock<Tuple<RangeComplexArea, EnvironmentFile, List<Geo>, List<SedimentSample>, List<BottomLossSample>, Task<Bathymetry>, NAVOTimePeriod>>(stuff =>
+            var envBlock = new ActionBlock<Tuple<RangeComplexArea, EnvironmentFile, List<Geo>, List<SedimentSample>, List<BottomLossSample>, Task<Bathymetry>, TimePeriod>>(stuff =>
             {
                 var area = stuff.Item1;
                 var resolution = stuff.Item2;
@@ -124,7 +124,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 BoundedCapacity = -1,
                 CancellationToken = cancellationToken,
             });
-            var envBuffer = new BufferBlock<Tuple<RangeComplexArea, EnvironmentFile, List<Geo>, List<SedimentSample>, List<BottomLossSample>, Task<Bathymetry>, NAVOTimePeriod>>();
+            var envBuffer = new BufferBlock<Tuple<RangeComplexArea, EnvironmentFile, List<Geo>, List<SedimentSample>, List<BottomLossSample>, Task<Bathymetry>, TimePeriod>>();
             envBuffer.LinkTo(envBlock);
             envBuffer.Completion.ContinueWith(task => envBlock.Complete());
             envBlock.Completion.ContinueWith(task =>

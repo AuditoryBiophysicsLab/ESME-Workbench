@@ -2,7 +2,6 @@
 using System.IO;
 using ESME;
 using ESME.Environment;
-using ESME.Environment.NAVO;
 using ESME.Plugins;
 using HRC.Navigation;
 using Microsoft.Win32;
@@ -41,7 +40,7 @@ namespace InstallableNAVO
 #endif
         }
 
-        public override Wind Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, NAVOConfiguration navoConfiguration = null, IProgress<float> progress = null)
+        public override Wind Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration = null, IProgress<float> progress = null)
         {
             var globalDataset = Wind.Load(Path.Combine(DataLocation, RequiredSMGCFilename));
             var result = new Wind();

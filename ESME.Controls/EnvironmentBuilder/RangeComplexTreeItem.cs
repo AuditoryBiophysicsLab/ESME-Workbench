@@ -2,8 +2,8 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using Cinch;
+using ESME.Environment;
 using ESME.Environment.Descriptors;
-using ESME.Environment.NAVO;
 using HRC.Navigation;
 using HRC.Utility;
 
@@ -200,9 +200,9 @@ namespace ESME.Views.EnvironmentBuilder
 
     public class TimePeriodEnvironmentFileTreeItem : EnvironmentFileTreeItem
     {
-        #region public NAVOTimePeriod TimePeriod { get; set; }
+        #region public TimePeriod TimePeriod { get; set; }
 
-        public NAVOTimePeriod TimePeriod
+        public TimePeriod TimePeriod
         {
             get { return _timePeriod; }
             set
@@ -214,7 +214,7 @@ namespace ESME.Views.EnvironmentBuilder
         }
 
         static readonly PropertyChangedEventArgs TimePeriodChangedEventArgs = ObservableHelper.CreateArgs<TimePeriodEnvironmentFileTreeItem>(x => x.TimePeriod);
-        NAVOTimePeriod _timePeriod;
+        TimePeriod _timePeriod;
 
         #endregion
     }

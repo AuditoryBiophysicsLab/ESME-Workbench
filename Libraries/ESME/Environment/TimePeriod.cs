@@ -1,6 +1,6 @@
-﻿namespace ESME.Environment.NAVO
+﻿namespace ESME.Environment
 {
-    public enum NAVOTimePeriod
+    public enum TimePeriod
     {
         Invalid = 0,
         January = 1,

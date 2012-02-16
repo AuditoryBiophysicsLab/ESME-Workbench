@@ -169,10 +169,10 @@ namespace ESME.Environment.Descriptors
             }
         }
         
-        Tuple<EnvironmentFile, ImportJobDescriptor> CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType dataType, float resolution, bool createJobIfRequired, NAVOTimePeriod timePeriod = NAVOTimePeriod.Invalid)
+        Tuple<EnvironmentFile, ImportJobDescriptor> CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType dataType, float resolution, bool createJobIfRequired, TimePeriod timePeriod = TimePeriod.Invalid)
         {
             var samplesPerDegree = 60.0f / resolution;
-            var fileName = string.Format("{0}.{1}", timePeriod == NAVOTimePeriod.Invalid ? "data" : timePeriod.ToString(), dataType.ToString().ToLower());
+            var fileName = string.Format("{0}.{1}", timePeriod == TimePeriod.Invalid ? "data" : timePeriod.ToString(), dataType.ToString().ToLower());
             var north = Math.Round(GeoRect.North * samplesPerDegree) / samplesPerDegree;
             var south = Math.Round(GeoRect.South * samplesPerDegree) / samplesPerDegree;
             var east = Math.Round(GeoRect.East * samplesPerDegree) / samplesPerDegree;

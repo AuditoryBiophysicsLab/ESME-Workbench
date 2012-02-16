@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Xml.Serialization;
+using ESME.Environment;
 using ESME.Environment.Descriptors;
-using ESME.Environment.NAVO;
-using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.RAM;
 using HRC.Navigation;
 using HRC.Utility;
 using FileFormatException = System.IO.FileFormatException;
+using RangeComplex = ESME.Environment.Descriptors.RangeComplex;
 
 namespace ESME.TransmissionLoss
 {
@@ -102,7 +102,7 @@ namespace ESME.TransmissionLoss
         public string RangeComplexName { get; set; }
         public string AreaName { get; set; }
         public string BathymetryResolution { get; set; }
-        public NAVOTimePeriod TimePeriod { get; set; }
+        public TimePeriod TimePeriod { get; set; }
         public TransmissionLossAlgorithm TransmissionLossAlgorithm { get; set; }
         public float WaterDepthIncrement { get; set; }
         public float RangeDistanceIncrement { get; set; }

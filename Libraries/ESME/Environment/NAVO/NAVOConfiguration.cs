@@ -99,9 +99,9 @@ namespace ESME.Environment.NAVO
             if (string.IsNullOrEmpty(DBDBEXEPath)) DBDBEXEPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "dbv5_command.exe");
         }
 
-        #region public NAVOTimePeriod SpringStartMonth { get; set; }
+        #region public TimePeriod SpringStartMonth { get; set; }
 
-        public NAVOTimePeriod SpringStartMonth
+        public TimePeriod SpringStartMonth
         {
             get { return _springStartMonth; }
             set
@@ -113,13 +113,13 @@ namespace ESME.Environment.NAVO
         }
 
         static readonly PropertyChangedEventArgs SpringStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.SpringStartMonth);
-        NAVOTimePeriod _springStartMonth = NAVOTimePeriod.March;
+        TimePeriod _springStartMonth = TimePeriod.March;
 
         #endregion
 
-        #region public NAVOTimePeriod SummerStartMonth { get; set; }
+        #region public TimePeriod SummerStartMonth { get; set; }
 
-        public NAVOTimePeriod SummerStartMonth
+        public TimePeriod SummerStartMonth
         {
             get { return _summerStartMonth; }
             set
@@ -131,13 +131,13 @@ namespace ESME.Environment.NAVO
         }
 
         static readonly PropertyChangedEventArgs SummerStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.SummerStartMonth);
-        NAVOTimePeriod _summerStartMonth = NAVOTimePeriod.June;
+        TimePeriod _summerStartMonth = TimePeriod.June;
 
         #endregion
 
-        #region public NAVOTimePeriod FallStartMonth { get; set; }
+        #region public TimePeriod FallStartMonth { get; set; }
 
-        public NAVOTimePeriod FallStartMonth
+        public TimePeriod FallStartMonth
         {
             get { return _fallStartMonth; }
             set
@@ -149,13 +149,13 @@ namespace ESME.Environment.NAVO
         }
 
         static readonly PropertyChangedEventArgs FallStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.FallStartMonth);
-        NAVOTimePeriod _fallStartMonth = NAVOTimePeriod.September;
+        TimePeriod _fallStartMonth = TimePeriod.September;
 
         #endregion
 
-        #region public NAVOTimePeriod WinterStartMonth { get; set; }
+        #region public TimePeriod WinterStartMonth { get; set; }
 
-        public NAVOTimePeriod WinterStartMonth
+        public TimePeriod WinterStartMonth
         {
             get { return _winterStartMonth; }
             set
@@ -167,13 +167,13 @@ namespace ESME.Environment.NAVO
         }
 
         static readonly PropertyChangedEventArgs WinterStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.WinterStartMonth);
-        NAVOTimePeriod _winterStartMonth = NAVOTimePeriod.December;
+        TimePeriod _winterStartMonth = TimePeriod.December;
 
         #endregion
 
-        #region public NAVOTimePeriod ColdSeasonStartMonth { get; set; }
+        #region public TimePeriod ColdSeasonStartMonth { get; set; }
 
-        public NAVOTimePeriod ColdSeasonStartMonth
+        public TimePeriod ColdSeasonStartMonth
         {
             get { return _coldSeasonStartMonth; }
             set
@@ -185,13 +185,13 @@ namespace ESME.Environment.NAVO
         }
 
         static readonly PropertyChangedEventArgs ColdSeasonStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.ColdSeasonStartMonth);
-        NAVOTimePeriod _coldSeasonStartMonth = NAVOTimePeriod.December;
+        TimePeriod _coldSeasonStartMonth = TimePeriod.December;
 
         #endregion
 
-        #region public NAVOTimePeriod WarmSeasonStartMonth { get; set; }
+        #region public TimePeriod WarmSeasonStartMonth { get; set; }
 
-        public NAVOTimePeriod WarmSeasonStartMonth
+        public TimePeriod WarmSeasonStartMonth
         {
             get { return _warmSeasonStartMonth; }
             set
@@ -203,7 +203,7 @@ namespace ESME.Environment.NAVO
         }
 
         static readonly PropertyChangedEventArgs WarmSeasonStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.WarmSeasonStartMonth);
-        NAVOTimePeriod _warmSeasonStartMonth = NAVOTimePeriod.June;
+        TimePeriod _warmSeasonStartMonth = TimePeriod.June;
 
         #endregion
 
@@ -433,127 +433,127 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        static readonly NAVOTimePeriod[] MonthMap = new[]
+        static readonly TimePeriod[] MonthMap = new[]
         {
-                (NAVOTimePeriod)0,
-                NAVOTimePeriod.January,
-                NAVOTimePeriod.February,
-                NAVOTimePeriod.March,
-                NAVOTimePeriod.April,
-                NAVOTimePeriod.May,
-                NAVOTimePeriod.June,
-                NAVOTimePeriod.July,
-                NAVOTimePeriod.August,
-                NAVOTimePeriod.September,
-                NAVOTimePeriod.October,
-                NAVOTimePeriod.November,
-                NAVOTimePeriod.December,
-                NAVOTimePeriod.January,
-                NAVOTimePeriod.February,
-                NAVOTimePeriod.March,
-                NAVOTimePeriod.April,
-                NAVOTimePeriod.May,
-                NAVOTimePeriod.June,
+                (TimePeriod)0,
+                TimePeriod.January,
+                TimePeriod.February,
+                TimePeriod.March,
+                TimePeriod.April,
+                TimePeriod.May,
+                TimePeriod.June,
+                TimePeriod.July,
+                TimePeriod.August,
+                TimePeriod.September,
+                TimePeriod.October,
+                TimePeriod.November,
+                TimePeriod.December,
+                TimePeriod.January,
+                TimePeriod.February,
+                TimePeriod.March,
+                TimePeriod.April,
+                TimePeriod.May,
+                TimePeriod.June,
         };
 
-        public static IEnumerable<NAVOTimePeriod> AllMonths
+        public static IEnumerable<TimePeriod> AllMonths
         {
             get
             {
-                yield return NAVOTimePeriod.January;
-                yield return NAVOTimePeriod.February;
-                yield return NAVOTimePeriod.March;
-                yield return NAVOTimePeriod.April;
-                yield return NAVOTimePeriod.May;
-                yield return NAVOTimePeriod.June;
-                yield return NAVOTimePeriod.July;
-                yield return NAVOTimePeriod.August;
-                yield return NAVOTimePeriod.September;
-                yield return NAVOTimePeriod.October;
-                yield return NAVOTimePeriod.November;
-                yield return NAVOTimePeriod.December;
+                yield return TimePeriod.January;
+                yield return TimePeriod.February;
+                yield return TimePeriod.March;
+                yield return TimePeriod.April;
+                yield return TimePeriod.May;
+                yield return TimePeriod.June;
+                yield return TimePeriod.July;
+                yield return TimePeriod.August;
+                yield return TimePeriod.September;
+                yield return TimePeriod.October;
+                yield return TimePeriod.November;
+                yield return TimePeriod.December;
             }
         }
 
-        public static IEnumerable<NAVOTimePeriod> AllSeasons
+        public static IEnumerable<TimePeriod> AllSeasons
         {
             get
             {
-                yield return NAVOTimePeriod.Spring;
-                yield return NAVOTimePeriod.Summer;
-                yield return NAVOTimePeriod.Fall;
-                yield return NAVOTimePeriod.Winter;
-                yield return NAVOTimePeriod.Warm;
-                yield return NAVOTimePeriod.Cold;
+                yield return TimePeriod.Spring;
+                yield return TimePeriod.Summer;
+                yield return TimePeriod.Fall;
+                yield return TimePeriod.Winter;
+                yield return TimePeriod.Warm;
+                yield return TimePeriod.Cold;
             }
         }
 
-        public static IEnumerable<NAVOTimePeriod> AllTimePeriods
+        public static IEnumerable<TimePeriod> AllTimePeriods
         {
             get
             {
-                yield return NAVOTimePeriod.January;
-                yield return NAVOTimePeriod.February;
-                yield return NAVOTimePeriod.March;
-                yield return NAVOTimePeriod.April;
-                yield return NAVOTimePeriod.May;
-                yield return NAVOTimePeriod.June;
-                yield return NAVOTimePeriod.July;
-                yield return NAVOTimePeriod.August;
-                yield return NAVOTimePeriod.September;
-                yield return NAVOTimePeriod.October;
-                yield return NAVOTimePeriod.November;
-                yield return NAVOTimePeriod.December;
-                yield return NAVOTimePeriod.Spring;
-                yield return NAVOTimePeriod.Summer;
-                yield return NAVOTimePeriod.Fall;
-                yield return NAVOTimePeriod.Winter;
-                yield return NAVOTimePeriod.Warm;
-                yield return NAVOTimePeriod.Cold;
+                yield return TimePeriod.January;
+                yield return TimePeriod.February;
+                yield return TimePeriod.March;
+                yield return TimePeriod.April;
+                yield return TimePeriod.May;
+                yield return TimePeriod.June;
+                yield return TimePeriod.July;
+                yield return TimePeriod.August;
+                yield return TimePeriod.September;
+                yield return TimePeriod.October;
+                yield return TimePeriod.November;
+                yield return TimePeriod.December;
+                yield return TimePeriod.Spring;
+                yield return TimePeriod.Summer;
+                yield return TimePeriod.Fall;
+                yield return TimePeriod.Winter;
+                yield return TimePeriod.Warm;
+                yield return TimePeriod.Cold;
             }
         }
 
-        public IEnumerable<NAVOTimePeriod> MonthsInTimePeriod(NAVOTimePeriod timePeriod)
+        public IEnumerable<TimePeriod> MonthsInTimePeriod(TimePeriod timePeriod)
         {
-            if (SpringStartMonth == NAVOTimePeriod.Invalid || SummerStartMonth == NAVOTimePeriod.Invalid || FallStartMonth == NAVOTimePeriod.Invalid || WinterStartMonth == NAVOTimePeriod.Invalid || WarmSeasonStartMonth == NAVOTimePeriod.Invalid || ColdSeasonStartMonth == NAVOTimePeriod.Invalid)
+            if (SpringStartMonth == TimePeriod.Invalid || SummerStartMonth == TimePeriod.Invalid || FallStartMonth == TimePeriod.Invalid || WinterStartMonth == TimePeriod.Invalid || WarmSeasonStartMonth == TimePeriod.Invalid || ColdSeasonStartMonth == TimePeriod.Invalid)
                 throw new InvalidOperationException("NAVOConfiguration: Season configuration is invalid.  One or more start months have not been set.");
             switch (timePeriod)
             {
-                case NAVOTimePeriod.January:
-                case NAVOTimePeriod.February:
-                case NAVOTimePeriod.March:
-                case NAVOTimePeriod.April:
-                case NAVOTimePeriod.May:
-                case NAVOTimePeriod.June:
-                case NAVOTimePeriod.July:
-                case NAVOTimePeriod.August:
-                case NAVOTimePeriod.September:
-                case NAVOTimePeriod.October:
-                case NAVOTimePeriod.November:
-                case NAVOTimePeriod.December:
+                case TimePeriod.January:
+                case TimePeriod.February:
+                case TimePeriod.March:
+                case TimePeriod.April:
+                case TimePeriod.May:
+                case TimePeriod.June:
+                case TimePeriod.July:
+                case TimePeriod.August:
+                case TimePeriod.September:
+                case TimePeriod.October:
+                case TimePeriod.November:
+                case TimePeriod.December:
                     yield return timePeriod;
                     yield break;
-                case NAVOTimePeriod.Spring:
+                case TimePeriod.Spring:
                     yield return MonthMap[(int)SpringStartMonth];
                     yield return MonthMap[(int)SpringStartMonth + 1];
                     yield return MonthMap[(int)SpringStartMonth + 2];
                     yield break;
-                case NAVOTimePeriod.Summer:
+                case TimePeriod.Summer:
                     yield return MonthMap[(int)SummerStartMonth];
                     yield return MonthMap[(int)SummerStartMonth + 1];
                     yield return MonthMap[(int)SummerStartMonth + 2];
                     yield break;
-                case NAVOTimePeriod.Fall:
+                case TimePeriod.Fall:
                     yield return MonthMap[(int)FallStartMonth];
                     yield return MonthMap[(int)FallStartMonth + 1];
                     yield return MonthMap[(int)FallStartMonth + 2];
                     yield break;
-                case NAVOTimePeriod.Winter:
+                case TimePeriod.Winter:
                     yield return MonthMap[(int)WinterStartMonth];
                     yield return MonthMap[(int)WinterStartMonth + 1];
                     yield return MonthMap[(int)WinterStartMonth + 2];
                     yield break;
-                case NAVOTimePeriod.Cold:
+                case TimePeriod.Cold:
                     yield return MonthMap[(int)ColdSeasonStartMonth];
                     yield return MonthMap[(int)ColdSeasonStartMonth + 1];
                     yield return MonthMap[(int)ColdSeasonStartMonth + 2];
@@ -561,7 +561,7 @@ namespace ESME.Environment.NAVO
                     yield return MonthMap[(int)ColdSeasonStartMonth + 4];
                     yield return MonthMap[(int)ColdSeasonStartMonth + 5];
                     yield break;
-                case NAVOTimePeriod.Warm:
+                case TimePeriod.Warm:
                     yield return MonthMap[(int)WarmSeasonStartMonth];
                     yield return MonthMap[(int)WarmSeasonStartMonth + 1];
                     yield return MonthMap[(int)WarmSeasonStartMonth + 2];

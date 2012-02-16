@@ -175,7 +175,7 @@ namespace ESME.Environment
         {
             var result = new SoundSpeedField
             {
-                TimePeriod = (NAVOTimePeriod)reader.ReadInt32(),
+                TimePeriod = (TimePeriod)reader.ReadInt32(),
             };
             var itemCount = reader.ReadInt32();
             for (var i = 0; i < itemCount; i++ )

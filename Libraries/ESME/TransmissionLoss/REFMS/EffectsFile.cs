@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using ESME.Environment.NAVO;
-using ESME.TransmissionLoss.BellhopNL;
-using HRC.Navigation;
+using ESME.Environment;
 
 namespace ESME.TransmissionLoss.REFMS
 {
@@ -83,7 +81,7 @@ namespace ESME.TransmissionLoss.REFMS
             return result;
         }
 
-        public static void Write(string fileName, List<EffectsRecord> records, string modeName, double chargeDepth, double outputTime, NAVOTimePeriod timePeriod)
+        public static void Write(string fileName, List<EffectsRecord> records, string modeName, double chargeDepth, double outputTime, TimePeriod timePeriod)
         {
             var sortedRecords = from record in records
                                 orderby record.Depth , record.Range

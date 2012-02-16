@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using Cinch;
 using ESME.Data;
-using ESME.Environment.NAVO;
+using ESME.Environment;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -80,31 +80,31 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region public List<NAVOTimePeriod> Months { get; set; }
+        #region public List<TimePeriod> Months { get; set; }
 
-        public List<NAVOTimePeriod> Months
+        public List<TimePeriod> Months
         {
             get
             {
-                return _months ?? (_months = new List<NAVOTimePeriod>
+                return _months ?? (_months = new List<TimePeriod>
                                              {
-                                                 NAVOTimePeriod.January,
-                                                 NAVOTimePeriod.February,
-                                                 NAVOTimePeriod.March,
-                                                 NAVOTimePeriod.April,
-                                                 NAVOTimePeriod.May,
-                                                 NAVOTimePeriod.June,
-                                                 NAVOTimePeriod.July,
-                                                 NAVOTimePeriod.August,
-                                                 NAVOTimePeriod.September,
-                                                 NAVOTimePeriod.October,
-                                                 NAVOTimePeriod.November,
-                                                 NAVOTimePeriod.December,
+                                                 TimePeriod.January,
+                                                 TimePeriod.February,
+                                                 TimePeriod.March,
+                                                 TimePeriod.April,
+                                                 TimePeriod.May,
+                                                 TimePeriod.June,
+                                                 TimePeriod.July,
+                                                 TimePeriod.August,
+                                                 TimePeriod.September,
+                                                 TimePeriod.October,
+                                                 TimePeriod.November,
+                                                 TimePeriod.December,
                                              });
             }
         }
 
-        List<NAVOTimePeriod> _months;
+        List<TimePeriod> _months;
 
         #endregion
 

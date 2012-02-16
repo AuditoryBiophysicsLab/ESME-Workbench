@@ -56,39 +56,39 @@ namespace ESME.Tests.Environment.NAVO
             temperatureWorker.Post(new ImportJobDescriptor
             {
                 GeoRect = geoRect,
-                TimePeriod = NAVOTimePeriod.January,
+                TimePeriod = TimePeriod.January,
                 DestinationFilename = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\NBOA\Data\january.temperature",
                 DataType = EnvironmentDataType.Temperature,
             });
             temperatureWorker.Post(new ImportJobDescriptor
             {
                 GeoRect = geoRect,
-                TimePeriod = NAVOTimePeriod.January,
+                TimePeriod = TimePeriod.January,
                 DestinationFilename = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\NBOA\Data\january.salinity",
                 DataType = EnvironmentDataType.Salinity,
             });
             temperatureWorker.Post(new ImportJobDescriptor
             {
                 GeoRect = geoRect,
-                TimePeriod = NAVOTimePeriod.February,
+                TimePeriod = TimePeriod.February,
                 DestinationFilename = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\NBOA\Data\february.temperature",
                 DataType = EnvironmentDataType.Temperature,
             });
             temperatureWorker.Post(new ImportJobDescriptor
             {
                 GeoRect = geoRect,
-                TimePeriod = NAVOTimePeriod.February,
+                TimePeriod = TimePeriod.February,
                 DestinationFilename = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\NBOA\Data\february.salinity",
                 DataType = EnvironmentDataType.Salinity,
             });
         }
 
-        ImportJobDescriptor NewImportJobDescriptor(EnvironmentDataType dataType, GeoRect geoRect, NAVOTimePeriod timePeriod, string destinationDirectory)
+        ImportJobDescriptor NewImportJobDescriptor(EnvironmentDataType dataType, GeoRect geoRect, TimePeriod timePeriod, string destinationDirectory)
         {
             return new ImportJobDescriptor
             {
                 GeoRect = geoRect,
-                TimePeriod = NAVOTimePeriod.February,
+                TimePeriod = TimePeriod.February,
                 DestinationFilename = Path.Combine(destinationDirectory, timePeriod.ToString().ToLower() + "." + dataType.ToString().ToLower()),
                 DataType = dataType,
             };

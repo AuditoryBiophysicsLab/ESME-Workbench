@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using C5;
-using ESME.Environment.NAVO;
 using HRC.Collections;
 using HRC.LinqStatistics;
 using HRC.Navigation;
@@ -610,81 +609,13 @@ namespace ESME.Environment
             public int GetHashCode(double obj) { return obj.GetHashCode(); }
         }
     }
-#if false
-    internal class LatLonKey : IComparer<LatLonKey>, IComparable<LatLonKey>
-    {
-        public LatLonKey(Geo geo)
-        {
-            var lat = (int)Math.Round(geo.Latitude * 10000);
-            var lon = (int)Math.Round(geo.Longitude * 10000);
-            _key = (lat * 100000000) + lon;
-        }
-
-        public LatLonKey(double latitude, double longitude)
-        {
-            var lat = (int)Math.Round(latitude * 10000);
-            var lon = (int)Math.Round(longitude * 10000);
-            _key = (lat * 100000000) + lon;
-        }
-
-        readonly long _key;
-
-        /// <summary>
-        /// Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.
-        /// </summary>
-        /// <returns>
-        /// A signed integer that indicates the relative values of <paramref name="e1"/> and <paramref name="e2"/>, 
-        /// as shown in the following table.
-        /// Value Meaning 
-        /// Return value of less than zero means that <paramref name="e1"/> is less than <paramref name="e2"/>.
-        /// Return value of zero means that <paramref name="e1"/> equals <paramref name="e2"/>.
-        /// Return value of greater than zero means that <paramref name="e1"/> is greater than <paramref name="e2"/>.
-        /// </returns>
-        /// <param name="e1">The first object to compare.</param>
-        /// <param name="e2">The second object to compare.</param>
-        public static int Compare(LatLonKey e1, LatLonKey e2)
-        {
-            if (e1._key < e2._key) return -1;
-            return e1._key > e2._key ? 1 : 0;
-        }
-
-        /// <summary>
-        /// Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.
-        /// </summary>
-        /// <returns>
-        /// A signed integer that indicates the relative values of <paramref name="x"/> and <paramref name="y"/>, as shown in the following table.Value Meaning Less than zero<paramref name="x"/> is less than <paramref name="y"/>.Zero<paramref name="x"/> equals <paramref name="y"/>.Greater than zero<paramref name="x"/> is greater than <paramref name="y"/>.
-        /// </returns>
-        /// <param name="x">The first object to compare.</param><param name="y">The second object to compare.</param>
-        int IComparer<LatLonKey>.Compare(LatLonKey x, LatLonKey y)
-        {
-            if (x._key < y._key) return -1;
-            return x._key > y._key ? 1 : 0;
-        }
-
-        /// <summary>
-        /// Compares the current object with another object of the same type.
-        /// </summary>
-        /// <returns>
-        /// A value that indicates the relative order of the objects being compared. The return value has the following meanings: Value Meaning Less than zero This object is less than the <paramref name="other"/> parameter.Zero This object is equal to <paramref name="other"/>. Greater than zero This object is greater than <paramref name="other"/>. 
-        /// </returns>
-        /// <param name="other">An object to compare with this object.</param>
-        public int CompareTo(LatLonKey other)
-        {
-            if (_key < other._key) return -1;
-            return _key > other._key ? 1 : 0;
-        }
-
-        public override string ToString() { return _key.ToString(); }
-        public override int GetHashCode() { return ToString().GetHashCode(); }
-    }
-#endif
 
     [Serializable]
     public class TimePeriodEnvironmentData<T> where T : EarthCoordinate, new()
     {
         public TimePeriodEnvironmentData() { EnvironmentData = new EnvironmentData<T>(); }
 
-        public NAVOTimePeriod TimePeriod { get; set; }
+        public TimePeriod TimePeriod { get; set; }
         public EnvironmentData<T> EnvironmentData { get; set; }
     }
 }

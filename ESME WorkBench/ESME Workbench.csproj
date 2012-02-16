@@ -132,7 +132,6 @@
     <Compile Include="ViewModels\Main\PleaseWaitViewModel.cs" />
     <Compile Include="ViewModels\Main\SimulationViewModel.cs" />
     <Compile Include="ViewModels\Main\SimulatorTab.cs" />
-    <Compile Include="ViewModels\NAVO\EnvironmentBuilderViewModel.cs" />
     <Compile Include="ViewModels\NAVO\ExportAllEnvironmentalDataProgressViewModel.cs" />
     <Compile Include="ViewModels\NAVO\ScenarioSimulatorLogViewModel.cs" />
     <Compile Include="ViewModels\NAVO\ScenarioSimulatorOptionsViewModel.cs" />

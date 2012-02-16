@@ -34,7 +34,7 @@ namespace ESME.Metadata
     [Serializable]
     public class ScenarioMetadata : PropertyChangedBase
     {
-        protected static readonly List<Type> ReferencedTypes = new List<Type> { typeof(string), typeof(DateTime), typeof(NAVOTimePeriod), typeof(NAEMOEnvironmentLocation), typeof(NAEMOEnvironmentFile), typeof(NemoModeToAcousticModelNameMap) };
+        protected static readonly List<Type> ReferencedTypes = new List<Type> { typeof(string), typeof(DateTime), typeof(TimePeriod), typeof(NAEMOEnvironmentLocation), typeof(NAEMOEnvironmentFile), typeof(NemoModeToAcousticModelNameMap) };
 
         public ScenarioMetadata()
         {
@@ -296,7 +296,7 @@ namespace ESME.Metadata
                         
                     // Set the selected range complex
                     RangeComplexes.SelectedRangeComplex = RangeComplexes.RangeComplexCollection[_nemoFile.Scenario.SimAreaName];
-                    RangeComplexes.SelectedTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), _nemoFile.Scenario.TimeFrame);
+                    RangeComplexes.SelectedTimePeriod = (TimePeriod)Enum.Parse(typeof(TimePeriod), _nemoFile.Scenario.TimeFrame);
                     
                     if ((SelectedAreaName != null) && (RangeComplexes.SelectedRangeComplex.AreaCollection.ContainsKey(SelectedAreaName)))
                         RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.AreaCollection[SelectedAreaName];

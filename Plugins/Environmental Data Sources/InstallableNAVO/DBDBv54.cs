@@ -41,7 +41,7 @@ namespace InstallableNAVO
 #endif
         }
 
-        public override Bathymetry Extract(GeoRect geoRect, float resolution, NAVOTimePeriod timePeriod, NAVOConfiguration navoConfiguration = null, IProgress<float> progress = null)
+        public override Bathymetry Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration = null, IProgress<float> progress = null)
         {
             return DBDB.Extract(resolution, geoRect, progress);
         }

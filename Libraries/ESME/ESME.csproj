@@ -156,7 +156,6 @@
     <Compile Include="Environment\NAVO\Deprecated\BottomLossBackgroundExtractor.cs" />
     <Compile Include="Environment\NAVO\BST.cs" />
     <Compile Include="Environment\NAVO\DBDB.cs" />
-    <Compile Include="Environment\NAVO\NAVODatabases.cs" />
     <Compile Include="Environment\NAVO\SMGC.cs" />
     <Compile Include="Environment\NAVO\Deprecated\DBDBBackgroundExtractor.cs" />
     <Compile Include="Environment\NAVO\Deprecated\DigitalBathymetricDatabase.cs" />
@@ -166,7 +165,8 @@
     <Compile Include="Environment\NAVO\Deprecated\NAVOBackgroundExtractor.cs" />
     <Compile Include="Environment\NAVO\NAVOConfiguration.cs" />
     <Compile Include="Environment\NAVO\NAVOExtractionProgram.cs" />
-    <Compile Include="Environment\NAVO\NAVOTimePeriod.cs" />
+    <Compile Include="Environment\SeasonConfiguration.cs" />
+    <Compile Include="Environment\TimePeriod.cs" />
     <Compile Include="Environment\NAVO\Deprecated\SMGCBackgroundExtractor.cs" />
     <Compile Include="Environment\NAVO\Deprecated\SoundSpeedBackgroundAverager.cs" />
     <Compile Include="Environment\NAVO\Deprecated\TemperatureAndSalinityFileWriter.cs" />
