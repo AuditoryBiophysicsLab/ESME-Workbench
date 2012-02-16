@@ -77,8 +77,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EnvironmentalDataSources", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMGCImporter", "SMGCImporter\SMGCImporter.csproj", "{C1E6E949-DB4B-49D1-BE17-BBCF845E6749}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstallableNAVO", "Plugins\Environmental Data Sources\NAVO\InstallableNAVO.csproj", "{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}"
-EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "NAVODataSources", "Installers\NAVODataSources\NAVODataSources.wixproj", "{04B9F977-A7F6-4C7F-ADAD-92FE690C6811}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Installers", "Installers", "{7D724624-B5C7-4796-ADDC-4DF20828EF2D}"
@@ -94,6 +92,8 @@ EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SMGC_2.0_Minimal", "Installers\SMGC_2.0_Minimal\SMGC_2.0_Minimal.wixproj", "{96313F30-2679-49F9-ADA7-2D486D6EBFF9}"
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SMGC_2.0_Full", "Installers\SMGC_2.0_Full\SMGC_2.0_Full.wixproj", "{0BAD8C1B-AA80-466F-8CBE-78381761EDD5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstallableNAVO", "Plugins\Environmental Data Sources\InstallableNAVO\InstallableNAVO.csproj", "{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}"
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
@@ -671,34 +671,6 @@ Global
 		{C1E6E949-DB4B-49D1-BE17-BBCF845E6749}.Release|x64.ActiveCfg = Release|x86
 		{C1E6E949-DB4B-49D1-BE17-BBCF845E6749}.Release|x86.ActiveCfg = Release|x86
 		{C1E6E949-DB4B-49D1-BE17-BBCF845E6749}.Release|x86.Build.0 = Release|x86
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|Any CPU.ActiveCfg = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|Any CPU.Build.0 = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|Mixed Platforms.Build.0 = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|Win32.ActiveCfg = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|x64.ActiveCfg = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|x86.ActiveCfg = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release (x64)|Any CPU.ActiveCfg = Release|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release (x64)|Any CPU.Build.0 = Release|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release (x64)|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release (x64)|Mixed Platforms.Build.0 = Release|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release (x64)|Win32.ActiveCfg = Release|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release (x64)|x64.ActiveCfg = Release|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release (x64)|x86.ActiveCfg = Release|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release|Win32.ActiveCfg = Release|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release|x64.ActiveCfg = Release|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release|x86.ActiveCfg = Release|Any CPU
 		{04B9F977-A7F6-4C7F-ADAD-92FE690C6811}.Debug (x64)|Any CPU.ActiveCfg = Release (x64)|x64
 		{04B9F977-A7F6-4C7F-ADAD-92FE690C6811}.Debug (x64)|Mixed Platforms.ActiveCfg = Release (x64)|x64
 		{04B9F977-A7F6-4C7F-ADAD-92FE690C6811}.Debug (x64)|Mixed Platforms.Build.0 = Release (x64)|x64
@@ -861,6 +833,34 @@ Global
 		{0BAD8C1B-AA80-466F-8CBE-78381761EDD5}.Release|x64.ActiveCfg = Release (x64)|x64
 		{0BAD8C1B-AA80-466F-8CBE-78381761EDD5}.Release|x64.Build.0 = Release (x64)|x64
 		{0BAD8C1B-AA80-466F-8CBE-78381761EDD5}.Release|x86.ActiveCfg = Release (x64)|x64
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|Any CPU.Build.0 = Debug|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|Mixed Platforms.Build.0 = Debug|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|Win32.ActiveCfg = Debug|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|x64.ActiveCfg = Debug|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|x86.ActiveCfg = Debug|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release (x64)|Any CPU.ActiveCfg = Release|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release (x64)|Any CPU.Build.0 = Release|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release (x64)|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release (x64)|Mixed Platforms.Build.0 = Release|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release (x64)|Win32.ActiveCfg = Release|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release (x64)|x64.ActiveCfg = Release|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release (x64)|x86.ActiveCfg = Release|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release|Win32.ActiveCfg = Release|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release|x64.ActiveCfg = Release|Any CPU
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
