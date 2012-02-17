@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using ESME;
 using ESME.Environment;
@@ -48,12 +49,15 @@ namespace InstallableNAVO
 
         public SoundSpeed ExtractSalinity(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null)
         {
-            return ExtractVariable(GDEM.FindTemperatureFile, "salinity", geoRect, timePeriod, seasonConfiguration);
+            return ExtractVariable(GDEM.FindSalinityFile, "salinity", geoRect, timePeriod, seasonConfiguration);
         }
 
-        SoundSpeed ExtractVariable(Func<TimePeriod, string, string> fileNameFunc, string variableName, GeoRect geoRect, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration)
+        SoundSpeed ExtractVariable(Func<TimePeriod, string, string> fileNameFunc, string variableName, GeoRect geoRect, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null)
         {
             var months = seasonConfiguration.MonthsInTimePeriod(timePeriod).ToList();
+            var curProgress = 0f;
+            var progressStep = 100f / months.Count;
+            if (progress != null) lock (progress) progress.Report(curProgress);
             var sources = (from month in months
                            select new
                            {
@@ -63,13 +67,25 @@ namespace InstallableNAVO
             var sourceTasks = new List<Task>();
             foreach (var month in months)
             {
+                sources[month].DataTask.ContinueWith(t =>
+                {
+                    if (progress != null) lock (progress)
+                    {
+                        curProgress += progressStep;
+                        progress.Report(curProgress);
+                    }
+                });
                 sources[month].DataTask.Start();
                 sourceTasks.Add(sources[month].DataTask);
             }
             var continuation = TaskEx.WhenAll(sourceTasks).ContinueWith(task =>
             {
                 var result = new SoundSpeed();
-                foreach (var month in months) result.Add(sources[month].DataTask.Result);
+                foreach (var month in months)
+                {
+                    sources[month].DataTask.Result.EnvironmentData.Sort();
+                    result.Add(sources[month].DataTask.Result);
+                }
                 return result;
             });
             return continuation.Result;
