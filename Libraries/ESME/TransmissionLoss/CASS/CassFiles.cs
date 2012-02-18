@@ -33,7 +33,7 @@ namespace ESME.TransmissionLoss.CASS
             {
                 var cassEnvironmentFileName = Path.Combine(rangeComplexes.SelectedRangeComplex.EnvironmentPath, string.Format("{0}_{1}_env_{2}", rangeComplexes.SelectedArea.Name, rangeComplexes.SelectedBathymetry.Name, timePeriod));
                 var curTimePeriod = (TimePeriod)Enum.Parse(typeof (TimePeriod), timePeriod, true);
-                var soundspeedField = ((Task<SoundSpeed>)environmentTasks[EnvironmentDataType.SoundSpeed]).Result[curTimePeriod];
+                var soundspeedField = ((Task<SoundSpeed<SoundSpeedSample>>)environmentTasks[EnvironmentDataType.SoundSpeed]).Result[curTimePeriod];
                 var wind = ((Task<Wind>)environmentTasks[EnvironmentDataType.Wind]).Result[curTimePeriod];
                 WriteEnvironmentFiles(cassEnvironmentFileName, bathymetry.Samples.GeoRect, sediment, soundspeedField,
                                       wind, cassBathymetryFileName, rangeComplexes.SelectedArea.Name + ".ovr",

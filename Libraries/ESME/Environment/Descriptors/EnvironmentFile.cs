@@ -6,16 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Media;
 using System.Windows.Threading;
 using Cinch;
-using ESME.Environment.NAVO;
-using ESME.NEMO;
-using HRC.Collections;
 using HRC.Navigation;
-using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
@@ -37,10 +31,7 @@ namespace ESME.Environment.Descriptors
             RequiredFiles = new List<EnvironmentFile>();
         }
 
-        void IDeserializationCallback.OnDeserialization(object sender)
-        {
-            RequiredFiles = new List<EnvironmentFile>();
-        }
+        void IDeserializationCallback.OnDeserialization(object sender) { RequiredFiles = new List<EnvironmentFile>(); }
 
         public void UpdateFileInfo()
         {
@@ -63,9 +54,14 @@ namespace ESME.Environment.Descriptors
                 UpdateFileInfo();
             }
         }
+
         [NonSerialized] string _dataPath;
 
-        public string Name { get { return _name ?? (_name = Path.GetFileNameWithoutExtension(FileName)); } }
+        public string Name
+        {
+            get { return _name ?? (_name = Path.GetFileNameWithoutExtension(FileName)); }
+        }
+
         [NonSerialized] string _name;
 
         public bool IsValid
@@ -95,6 +91,7 @@ namespace ESME.Environment.Descriptors
         bool _isCached;
 
         #endregion
+
         #region public string FileName { get; private set; }
 
         public string FileName
@@ -112,6 +109,7 @@ namespace ESME.Environment.Descriptors
         string _fileName;
 
         #endregion
+
         #region public long FileSize { get; private set; }
 
         public long FileSize
@@ -129,6 +127,7 @@ namespace ESME.Environment.Descriptors
         long _fileSize;
 
         #endregion
+
         #region public DateTime LastWriteTime { get; private set; }
 
         public DateTime LastWriteTime
@@ -146,6 +145,7 @@ namespace ESME.Environment.Descriptors
         DateTime _lastWriteTime;
 
         #endregion
+
         #region public uint SampleCount { get; internal set; }
 
         public uint SampleCount
@@ -163,6 +163,7 @@ namespace ESME.Environment.Descriptors
         uint _sampleCount;
 
         #endregion
+
         #region public GeoRect GeoRect { get; set; }
 
         public GeoRect GeoRect
@@ -180,6 +181,7 @@ namespace ESME.Environment.Descriptors
         GeoRect _geoRect;
 
         #endregion
+
         #region public float Resolution { get; private set; }
 
         public float Resolution
@@ -204,37 +206,31 @@ namespace ESME.Environment.Descriptors
 
         #region INotifyPropertyChanged Members
 
-        [NonSerialized]
-        private PropertyChangedEventHandler _propertyChanged;
+        [NonSerialized] PropertyChangedEventHandler _propertyChanged;
+
         public event PropertyChangedEventHandler PropertyChanged
         {
             [MethodImpl(MethodImplOptions.Synchronized)]
-            add
-            {
-                _propertyChanged = (PropertyChangedEventHandler)Delegate.Combine(_propertyChanged, value);
-            }
+            add { _propertyChanged = (PropertyChangedEventHandler)Delegate.Combine(_propertyChanged, value); }
             [MethodImpl(MethodImplOptions.Synchronized)]
-            remove
-            {
-                _propertyChanged = (PropertyChangedEventHandler)Delegate.Remove(_propertyChanged, value);
-            }
+            remove { _propertyChanged = (PropertyChangedEventHandler)Delegate.Remove(_propertyChanged, value); }
         }
+
         protected void NotifyPropertyChanged(PropertyChangedEventArgs e)
         {
             var handlers = _propertyChanged;
             if (handlers == null) return;
             foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
             {
-                if (handler.Target is DispatcherObject)
-                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => handler(this, e));
-                else
-                    handler(this, e);
+                if (handler.Target is DispatcherObject) ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => handler(this, e));
+                else handler(this, e);
             }
         }
 
         #endregion
 
-        public static SoundSpeed CalculateSoundSpeed(RangeComplex rangeComplex, TimePeriod timePeriod, Task<Bathymetry> bathymetryTask, GeoRect bathymetryBounds)
+        public static SoundSpeed<SoundSpeedSample> CalculateSoundSpeed<T>(RangeComplex rangeComplex, TimePeriod timePeriod, Task<Bathymetry> bathymetryTask, GeoRect bathymetryBounds)
+            where T : SoundSpeedSample, new()
         {
             if (rangeComplex == null) throw new ArgumentException("rangeComplex");
             if (timePeriod == TimePeriod.Invalid) throw new ArgumentException("timePeriod");
@@ -249,49 +245,31 @@ namespace ESME.Environment.Descriptors
                            select new
                            {
                                Month = month,
-                               TemperatureTask = new Task<SoundSpeed>(() => SoundSpeed.Load(Path.Combine(rangeComplex.DataPath, string.Format("{0}.temperature", month)))),
-                               SalinityTask = new Task<SoundSpeed>(() => SoundSpeed.Load(Path.Combine(rangeComplex.DataPath, string.Format("{0}.salinity", month)))),
+                               MonthlySoundSpeedTask = new Task<SoundSpeed<T>>(() => SoundSpeed<T>.Load(Path.Combine(rangeComplex.DataPath, string.Format("{0}.soundspeed", month)))),
                            }).ToDictionary(item => item.Month);
             var sourceTasks = new List<Task>();
             foreach (var month in months)
             {
-                Debug.WriteLine("{0} SSP: Loading temperature and salinity data for {1}", DateTime.Now, month);
-                sources[month].TemperatureTask.Start();
-                sources[month].SalinityTask.Start();
-                sourceTasks.Add(sources[month].TemperatureTask);
-                sourceTasks.Add(sources[month].SalinityTask);
+                Debug.WriteLine("{0} SSP: Loading sound speed data for {1}", DateTime.Now, month);
+                sources[month].MonthlySoundSpeedTask.Start();
+                sourceTasks.Add(sources[month].MonthlySoundSpeedTask);
             }
             sourceTasks.Add(bathymetryTask);
             var continuation = TaskEx.WhenAll(sourceTasks).ContinueWith(task =>
             {
-                Debug.WriteLine("{0} SSP: Required data loaded.  Computing monthly sound speeds fields", DateTime.Now);
-                var soundSpeedFields = (from month in months
-                                        select new
-                                        {
-                                            Month = month,
-                                            SoundSpeedField = SoundSpeedField.Create(sources[month].TemperatureTask.Result[month],
-                                                                                     sources[month].SalinityTask.Result[month],
-                                                                                     bathymetryTask.Result.DeepestPoint,
-                                                                                     bathymetryBounds),
-                                        }).ToDictionary(item => item.Month);
-                Debug.WriteLine("{0} SSP: Monthly sound speeds fields computed", DateTime.Now);
-                var monthlySoundSpeeds = new SoundSpeed();
-                foreach (var month in months)
-                {
-                    Debug.WriteLine("{0} SSP: Releasing temperature and salinity data for {1}", DateTime.Now, month);
-                    sources[month].TemperatureTask.Dispose();
-                    sources[month].SalinityTask.Dispose();
-                    monthlySoundSpeeds.Add(soundSpeedFields[month].SoundSpeedField);
-                }
+                Debug.WriteLine("{0} SSP: Monthly sound speeds fields loaded", DateTime.Now);
+                var monthlySoundSpeeds = new SoundSpeed<T>();
+                foreach (var month in months) monthlySoundSpeeds.Add(sources[month].MonthlySoundSpeedTask.Result[month]);
                 Debug.WriteLine("{0} SSP: Computing average sound speed for {1}", DateTime.Now, timePeriod);
-                var result = SoundSpeed.Average(monthlySoundSpeeds, new List<TimePeriod> { timePeriod });
+                var result = SoundSpeed<T>.Average(monthlySoundSpeeds, new List<TimePeriod> {timePeriod});
                 Debug.WriteLine("{0} SSP: Returning average sound speed for {1}", DateTime.Now, timePeriod);
                 return result;
             });
-            return continuation.Result;            
+            return continuation.Result;
         }
 
-        public static SoundSpeed SeasonalAverage(RangeComplex rangeComplex, TimePeriod timePeriod, EnvironmentDataType dataType)
+#if false
+        public static SoundSpeed<SoundSpeedSample> SeasonalAverage<T>(RangeComplex rangeComplex, TimePeriod timePeriod, EnvironmentDataType dataType) where T : SoundSpeedSample, new()
         {
             if (rangeComplex == null) throw new ArgumentException("rangeComplex");
             if (timePeriod == TimePeriod.Invalid) throw new ArgumentException("timePeriod");
@@ -343,13 +321,11 @@ namespace ESME.Environment.Descriptors
             });
             return continuation.Result;
         }
+#endif
     }
-
 
     public enum EnvironmentDataType
     {
-        Temperature,
-        Salinity,
         Sediment,
         Wind,
         Bathymetry,

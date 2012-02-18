@@ -6,9 +6,11 @@ using HRC.Navigation;
 
 namespace ESME.Environment
 {
-    public class SoundSpeedProfileAverager : SoundSpeedProfile<AverageSoundSpeedSample>
+    public class SoundSpeedProfileAverager<T> : SoundSpeedProfile<AverageSoundSpeedSample> where T: SoundSpeedSample
     {
-        public SoundSpeedProfileAverager(Geo<List<SoundSpeedSample>> profile) : base(profile)
+        public SoundSpeedProfileAverager() {}
+
+        public SoundSpeedProfileAverager(Geo<List<T>> profile) : base(profile)
         {
             if (profile.Data.Count == 0)
                 foreach (var datum in profile.Data) Add(new AverageSoundSpeedSample(datum));
@@ -61,6 +63,7 @@ namespace ESME.Environment
     [Serializable]
     public class SoundSpeedProfile<T> : Geo<List<T>> where T: SoundSpeedSample, new()
     {
+        public SoundSpeedProfile() {}
         public SoundSpeedProfile(Geo location) : base(location) { Data = new List<T>(); }
 
         #region public List<string> Messages { get; set; }

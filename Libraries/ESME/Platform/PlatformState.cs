@@ -12,7 +12,7 @@ namespace ESME.Platform
         /// <summary>
         /// The location of the platform at the specified time
         /// </summary>
-        public EarthCoordinate3D Location { get; internal set; }
+        public Geo Location { get; internal set; }
 
         /// <summary>
         /// Current course, in degrees from true north (clockwise = positive)

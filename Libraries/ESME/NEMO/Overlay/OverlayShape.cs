@@ -9,7 +9,8 @@ namespace ESME.NEMO.Overlay
 {
     public abstract class OverlayShape
     {
-        protected List<EarthCoordinate> _earthCoordinates;
+        protected List<Geo> _geos;
+
         protected string MyWellKnownText;
 
         protected OverlayShape()
@@ -32,11 +33,9 @@ namespace ESME.NEMO.Overlay
             Color = color;
             Width = width;
             LineStyle = lineStyle;
-            _earthCoordinates = new List<EarthCoordinate>();
         }
 
-        public virtual List<EarthCoordinate> EarthCoordinates { get { return new List<EarthCoordinate>(_earthCoordinates); } }
-        public virtual List<Geo> Geos { get { return new List<Geo>(_earthCoordinates); } }
+        public virtual List<Geo> Geos { get { return new List<Geo>(_geos); } }
 
         public virtual bool IsClosed
         {
@@ -53,8 +52,8 @@ namespace ESME.NEMO.Overlay
             get { throw new NotImplementedException(); }
             protected set {throw new NotImplementedException(); }
         }
-        public virtual bool Contains(EarthCoordinate location) { throw new NotImplementedException(); }
-        public virtual EarthCoordinate Bounce(EarthCoordinate startLocation, EarthCoordinate proposedEndLocation) { throw new NotImplementedException(); }
+        public virtual bool Contains(Geo location) { throw new NotImplementedException(); }
+        public virtual Geo Bounce(Geo startLocation, Geo proposedEndLocation) { throw new NotImplementedException(); }
         public abstract string WellKnownText { get; }
         public Rect BoundingBox { get; private set; }
         public Color Color { get; set; }
@@ -63,9 +62,9 @@ namespace ESME.NEMO.Overlay
 
         public LineStyle LineStyle { get; set; }
 
-        public EarthCoordinate Location
+        public Geo Location
         {
-            get { return _earthCoordinates[0]; }
+            get { return _geos[0]; }
             //set { Move(value); }
         }
 
@@ -74,55 +73,49 @@ namespace ESME.NEMO.Overlay
         // It's possible to re-expose this in the future, but more work needs to be done to make sure the derived classes
         // will do the right thing when moved.
 
-        protected EarthCoordinate this[int index]
+        protected Geo this[int index]
         {
-            get { return _earthCoordinates[index]; }
-            set { _earthCoordinates[index] = value; }
+            get { return _geos[index]; }
+            set { _geos[index] = value; }
         }
 
         protected int Length
         {
-            get { return _earthCoordinates.Count(); }
+            get { return _geos.Count(); }
         }
-
-        private void Move(EarthCoordinate newLocation)
+#if false
+        private void Move(Geo newLocation)
         {
-            var bearingDegrees = _earthCoordinates[0].BearingTo(newLocation);
-            var distanceMeters = _earthCoordinates[0].DistanceTo(newLocation);
+            _geos[0].Offset(_geos[0].DistanceRadians(newLocation), _geos[0].Azimuth(newLocation));
+            var bearingDegrees = _geos[0].BearingTo(newLocation);
+            var distanceMeters = _geos[0].DistanceTo(newLocation);
 
             Move(bearingDegrees, distanceMeters);
         }
 
         private void Move(double bearingDegrees, double distanceMeters)
         {
-            foreach (var cur in _earthCoordinates)
+            foreach (var cur in _geos)
                 cur.Move(bearingDegrees, distanceMeters);
         }
+#endif
 
-        protected void Add(EarthCoordinate newPoint)
+        protected void Add(Geo newPoint)
         {
-            _earthCoordinates.Add(newPoint);
-            if (_earthCoordinates.Count > 1)
+            _geos.Add(newPoint);
+            if (_geos.Count > 1)
                 CalculateBoundingBox();
         }
 
-        protected void Add(EarthCoordinate[] newPoints)
+        protected void Add(Geo[] newPoints)
         {
-            _earthCoordinates.AddRange(newPoints);
-            CalculateBoundingBox();
-        }
-
-        protected void Add(IEnumerable<EarthCoordinate> newPoints)
-        {
-            _earthCoordinates.AddRange(newPoints);
+            _geos.AddRange(newPoints);
             CalculateBoundingBox();
         }
 
         protected void Add(IEnumerable<Geo> newPoints)
         {
-            var result = from point in newPoints
-                         select new EarthCoordinate(point);
-            _earthCoordinates.AddRange(result);
+            _geos.AddRange(newPoints);
             CalculateBoundingBox();
         }
 
@@ -132,7 +125,7 @@ namespace ESME.NEMO.Overlay
             var south = 90.0;
             var east = -180.0;
             var west = 180.0;
-            foreach (var curPoint in _earthCoordinates)
+            foreach (var curPoint in _geos)
             {
                 north = Math.Max(curPoint.Latitude, north);
                 south = Math.Min(curPoint.Latitude, south);

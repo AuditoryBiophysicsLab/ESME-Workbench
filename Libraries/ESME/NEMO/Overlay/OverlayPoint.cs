@@ -7,8 +7,15 @@ namespace ESME.NEMO.Overlay
     public class OverlayPoint : OverlayShape
     {
         public OverlayPoint(EarthCoordinate point) : this(point, Colors.Black, 1) { }
+        public OverlayPoint(Geo point) : this(point, Colors.Black, 1) { }
 
         public OverlayPoint(EarthCoordinate point, Color color, float width)
+            : base(color, width)
+        {
+            Add(point);
+        }
+
+        public OverlayPoint(Geo point, Color color, float width)
             : base(color, width)
         {
             Add(point);
@@ -22,7 +29,7 @@ namespace ESME.NEMO.Overlay
                 {
                     var retval = new StringBuilder();
                     retval.Append("POINT(");
-                    foreach (var coord in _earthCoordinates)
+                    foreach (var coord in _geos)
                         if (coord != null) retval.Append(string.Format("{0} {1}, ", coord.Longitude, coord.Latitude));
                     retval.Remove(retval.Length - 2, 2); // Lose the last comma and space
                     retval.Append(")");

@@ -226,7 +226,7 @@ namespace ESME.TransmissionLoss
 
         public bool Equals(SoundSource other)
         {
-            if (!base.Equals(other)) return false; // Compare as an EarthCoordinate first
+            if (!base.Equals(other)) return false; // Compare as an Geo first
             if (!AcousticProperties.Equals(other.AcousticProperties)) return false;
             if (RadialBearings.Count != other.RadialBearings.Count) return false;
             return !RadialBearings.Where((t, bearingIndex) => t != other.RadialBearings[bearingIndex]).Any();

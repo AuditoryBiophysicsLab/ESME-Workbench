@@ -119,7 +119,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region public EarthCoordinate MouseEarthCoordinate { get; set; }
+        #region public Geo MouseEarthCoordinate { get; set; }
 
         public EarthCoordinate MouseEarthCoordinate
         {

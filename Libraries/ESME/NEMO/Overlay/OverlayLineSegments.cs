@@ -143,10 +143,10 @@ namespace ESME.NEMO.Overlay
         /// <param name="proposedEndLocation">End location for the current proposed move</param>
         /// <returns>Actual end location that remains inside the figure, which may be reflected from the
         /// proposed end location provided if the proposed end location lies outside the figure</returns>
-        public override EarthCoordinate Bounce(EarthCoordinate startLocation, EarthCoordinate proposedEndLocation)
+        public override Geo Bounce(Geo startLocation, Geo proposedEndLocation)
         {
-            //EarthCoordinate start = new EarthCoordinate(StartLocation);
-            //EarthCoordinate end = new EarthCoordinate(ProposedEndLocation);
+            //Geo start = new Geo(StartLocation);
+            //Geo end = new Geo(ProposedEndLocation);
 #if MATLAB_DEBUG_OUTPUT
             MatlabDumpVertices();
 #endif
@@ -171,8 +171,8 @@ namespace ESME.NEMO.Overlay
                 if (intersect == null) continue;
                 if (!proposedCourseSegment.Contains(intersect) || !Segments[i].Contains(intersect)) continue;
                 proposedCourse.Reflect(Normals[i]);
-                var result = new EarthCoordinate(startLocation);
-                result.Move(proposedCourse, proposedEndLocation.DistanceTo(startLocation));
+                var distance = startLocation.DistanceKilometers(proposedEndLocation);
+                var result = startLocation.Offset(Geo.KilometersToRadians(distance), proposedCourse.Radians);
                 return result;
             }
 #if MATLAB_DEBUG_OUTPUT
@@ -232,16 +232,16 @@ namespace ESME.NEMO.Overlay
             IsClosed = false;
 
             // If we have less than four points, it's not possible for this shape to be closed
-            if (_earthCoordinates.Count < 4)
+            if (_geos.Count < 4)
                 return;
 
             // If the first point and the last point are identical, then this shape IS closed
-            if ((_earthCoordinates[0].Longitude == _earthCoordinates[_earthCoordinates.Count - 1].Longitude) &&
-                (_earthCoordinates[0].Latitude == _earthCoordinates[_earthCoordinates.Count - 1].Latitude))
+            if ((_geos[0].Longitude == _geos[_geos.Count - 1].Longitude) &&
+                (_geos[0].Latitude == _geos[_geos.Count - 1].Latitude))
                 IsClosed = true;
         }
 
-        public override bool Contains(EarthCoordinate coordinate)
+        public override bool Contains(Geo coordinate)
         {
             if (!IsClosed)
                 return false;
@@ -252,23 +252,23 @@ namespace ESME.NEMO.Overlay
 
             //% loop through all edges of the polygon
             //for i=1:n % edge from V(i) to V(i+1)
-            for (var i = 0; i < (_earthCoordinates.Count - 1); i++)
+            for (var i = 0; i < (_geos.Count - 1); i++)
             {
                 // if (((V(i).y <= P.y) && (V(i+1).y > P.y)) ||    % an upward crossing
                 //     ((V(i).y > P.y) && (V(i+1).y <= P.y)))      % a downward crossing
                 //     vt = (P.y - V(i).y) / (V(i+1).y - V(i).y);  % compute the actual edge-ray intersect x-coordinate
-                if (((_earthCoordinates[i].Latitude <= coordinate.Latitude) &&
-                     (_earthCoordinates[i + 1].Latitude > coordinate.Latitude)) ||
-                    ((_earthCoordinates[i].Latitude > coordinate.Latitude) &&
-                     (_earthCoordinates[i + 1].Latitude <= coordinate.Latitude)))
+                if (((_geos[i].Latitude <= coordinate.Latitude) &&
+                     (_geos[i + 1].Latitude > coordinate.Latitude)) ||
+                    ((_geos[i].Latitude > coordinate.Latitude) &&
+                     (_geos[i + 1].Latitude <= coordinate.Latitude)))
                 {
-                    var vt = (coordinate.Latitude - _earthCoordinates[i].Latitude) /
-                                (_earthCoordinates[i + 1].Latitude - _earthCoordinates[i].Latitude);
+                    var vt = (coordinate.Latitude - _geos[i].Latitude) /
+                                (_geos[i + 1].Latitude - _geos[i].Latitude);
                     // if (P.x < (V(i).x + vt * (V(i+1).x - V(i).x))) % P.x < intersect
                     //     cn = cn + 1;   % a valid crossing of y=P.y right of P.x
                     if (coordinate.Longitude <
-                        (_earthCoordinates[i].Longitude +
-                         (vt * (_earthCoordinates[i + 1].Longitude - _earthCoordinates[i].Longitude))))
+                        (_geos[i].Longitude +
+                         (vt * (_geos[i + 1].Longitude - _geos[i].Longitude))))
                         crossingNumber++;
                 }
             }
@@ -282,12 +282,12 @@ namespace ESME.NEMO.Overlay
         {
             get
             {
-                if (_earthCoordinates.Count < 2) return null;
+                if (_geos.Count < 2) return null;
                 if (MyWellKnownText == null)
                 {
                     var retval = new StringBuilder();
                     retval.Append("LINESTRING(");
-                    foreach (var coord in _earthCoordinates)
+                    foreach (var coord in _geos)
                         retval.Append(string.Format("{0} {1}, ", coord.Longitude, coord.Latitude));
                     retval.Remove(retval.Length - 2, 2); // Lose the last comma and space
                     retval.Append(")");

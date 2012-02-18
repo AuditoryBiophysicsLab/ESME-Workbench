@@ -12,7 +12,7 @@ using HRC.Navigation;
 namespace ESME.Environment
 {
     [Serializable]
-    public class EnvironmentData<T> : System.Collections.Generic.IList<T> where T : EarthCoordinate, new()
+    public class EnvironmentData<T> : System.Collections.Generic.IList<T> where T : Geo, new()
     {
         /// <summary>
         /// Construct an EnvironmentData object
@@ -611,7 +611,7 @@ namespace ESME.Environment
     }
 
     [Serializable]
-    public class TimePeriodEnvironmentData<T> where T : EarthCoordinate, new()
+    public class TimePeriodEnvironmentData<T> where T : Geo, new()
     {
         public TimePeriodEnvironmentData() { EnvironmentData = new EnvironmentData<T>(); }
 

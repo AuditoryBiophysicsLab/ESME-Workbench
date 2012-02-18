@@ -51,11 +51,10 @@ namespace ESME.Platform
             var currentTime = NemoPlatform.NemoScenario.StartTime;
             PlatformStates = new PlatformStates();
             NemoTrackdef curTrackdef = null;
-            var curLocation = new EarthCoordinate3D(0, 0, 0);
-            EarthCoordinate3D proposedLocation;
+            var curLocation = new Geo();
             double curCourseDegrees = 0;
             double curSpeedMetersPerSecond = 0;
-            var overlayPoints = new List<EarthCoordinate>();
+            var overlayPoints = new List<Geo>();
             OverlayShape curTrackBoundingRegion = null;
             
             CourseChangePoints = new List<CourseChangeDatum>();
@@ -124,21 +123,24 @@ namespace ESME.Platform
                             break;
                         case "straight_line":
                             // straight line navigation code
-                            curLocation.Move(curCourseDegrees, curSpeedMetersPerSecond*NemoBase.SimulationStepTime.TotalSeconds);
+                            curLocation = curLocation.Offset(Geo.KilometersToRadians((curSpeedMetersPerSecond * NemoBase.SimulationStepTime.TotalSeconds) / 1000),
+                                                             curCourseDegrees * (Math.PI / 180));
                             break;
                         case "perimeter_bounce":
                             // perimeter bounce navigation code here
-                            proposedLocation = new EarthCoordinate3D(curLocation);
-                            proposedLocation.Move(curCourseDegrees, curSpeedMetersPerSecond*NemoBase.SimulationStepTime.TotalSeconds);
+                            var proposedLocation = curLocation.Offset(Geo.KilometersToRadians((curSpeedMetersPerSecond * NemoBase.SimulationStepTime.TotalSeconds) / 1000),
+                                                                      curCourseDegrees * (Math.PI / 180));
+                            //proposedLocation = new EarthCoordinate3D(curLocation);
+                            //proposedLocation.Move(curCourseDegrees, curSpeedMetersPerSecond*NemoBase.SimulationStepTime.TotalSeconds);
                             if (curTrackBoundingRegion == null) throw new PlatformBehaviorException("Platform behavior is specified as Perimeter Bounce, but no bounding shape was specified");
                             if (curTrackBoundingRegion.Contains(proposedLocation)) curLocation = proposedLocation;
                             else
                             {
                                 //curLocation.Compare(proposedLocation);
-                                proposedLocation = new EarthCoordinate3D(curTrackBoundingRegion.Bounce(curLocation, proposedLocation));
+                                proposedLocation = new Geo(curTrackBoundingRegion.Bounce(curLocation, proposedLocation));
                                 if (!curTrackBoundingRegion.Contains(proposedLocation))
                                 {
-                                    proposedLocation = new EarthCoordinate3D(curTrackBoundingRegion.Bounce(curLocation, proposedLocation));
+                                    proposedLocation = new Geo(curTrackBoundingRegion.Bounce(curLocation, proposedLocation));
                                     if (!curTrackBoundingRegion.Contains(proposedLocation)) throw new PlatformMovementException("Two reflections failed to keep the platform inside the bounding region.  Please check the bounding region closely for small pockets or other irregularities");
                                 }
 
@@ -151,11 +153,10 @@ namespace ESME.Platform
                                 });
 
                                 //curLocation.Compare(proposedLocation);
-                                proposedLocation.Elevation = curLocation.Elevation;
                                 curCourseDegrees = newCourseDegrees;
-                                curLocation = new EarthCoordinate3D(proposedLocation);
+                                curLocation = new Geo(proposedLocation);
                                 if (!curTrackBoundingRegion.Contains(curLocation)) throw new PlatformMovementException("Reflected position is outside the bounding region");
-                                overlayPoints.Add(new EarthCoordinate(curLocation));
+                                overlayPoints.Add(curLocation);
                             }
                             break;
                     }
@@ -202,7 +203,7 @@ namespace ESME.Platform
 
         #endregion
 
-        public EarthCoordinate Location { get; internal set; }
+        public Geo Location { get; internal set; }
         public double OldCourse { get; internal set; }
         public double NewCourse { get; internal set; }
         public bool IsStart { get; internal set; }

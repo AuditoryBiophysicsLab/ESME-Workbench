@@ -336,8 +336,8 @@ namespace ESME.TransmissionLoss.REFMS
 
         #endregion
 
-        public double[] TemperatureData { get; set; }
-        public double[] SalinityData { get; set; }
+        //public double[] TemperatureData { get; set; }
+        //public double[] SalinityData { get; set; }
         public double[] SoundSpeedData { get; set; }
         public double[] DepthData { get; set; }
         public double WaterDepth { get; set; }
@@ -362,29 +362,29 @@ namespace ESME.TransmissionLoss.REFMS
 
         public void UpdateEnvironmentData()
         {
-            var temperatureData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[TimePeriod].EnvironmentData.GetNearestPoint(this);
-            var salinityData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[TimePeriod].EnvironmentData.GetNearestPoint(this);
-            var soundSpeedData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[TimePeriod].EnvironmentData.GetNearestPoint(this);
+            //var temperatureData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[TimePeriod].EnvironmentData.GetNearestPoint(this);
+            //var salinityData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[TimePeriod].EnvironmentData.GetNearestPoint(this);
+            var soundSpeedData = ((Task<SoundSpeed<GDEMSoundSpeedSample>>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[TimePeriod].EnvironmentData.GetNearestPoint(this);
             SVPLocation = new Geo(soundSpeedData);
             BottomLossData = ((Task<BottomLoss>)EnvironmentData[EnvironmentDataType.BottomLoss]).Result.Samples.GetNearestPoint(this).Data;
             WaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GetNearestPoint(this).Data);
             SVPWaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GetNearestPoint(SVPLocation).Data);
             GeoRect = ((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GeoRect;
 
-            TemperatureData = new double[temperatureData.Data.Count];
-            DepthData = new double[temperatureData.Data.Count];
-            SalinityData = new double[temperatureData.Data.Count];
-            SoundSpeedData = new double[temperatureData.Data.Count];
-            for (var i = 0; i < temperatureData.Data.Count; i++)
+            //TemperatureData = new double[soundSpeedData.Data.Count];
+            DepthData = new double[soundSpeedData.Data.Count];
+            //SalinityData = new double[soundSpeedData.Data.Count];
+            SoundSpeedData = new double[soundSpeedData.Data.Count];
+            for (var i = 0; i < soundSpeedData.Data.Count; i++)
             {
-                TemperatureData[i] = temperatureData.Data[i].Value;
-                DepthData[i] = temperatureData.Data[i].Depth;
-                SalinityData[i] = salinityData.Data[i].Value;
-                SoundSpeedData[i] = soundSpeedData.Data[i].Value;
+                //TemperatureData[i] = soundSpeedData.Data[i].Temperature;
+                DepthData[i] = soundSpeedData.Data[i].Depth;
+                //SalinityData[i] = soundSpeedData.Data[i].Salinity;
+                SoundSpeedData[i] = soundSpeedData.Data[i].SoundSpeed;
             }
-            ProfileDepth = temperatureData.Data.Last().Depth;
+            ProfileDepth = soundSpeedData.Data.Last().Depth;
 
-            _svpFile = SVPFile.Create(SVPLocation, DepthData, TemperatureData, SalinityData, SoundSpeedData, BottomLossData, Delta);
+            _svpFile = SVPFile.Create(SVPLocation, DepthData, soundSpeedData, BottomLossData, Delta);
         }
 
         public void Validate()
@@ -648,8 +648,11 @@ namespace ESME.TransmissionLoss.REFMS
         public List<SVPLayer> Layers { get; private set; }
         public double Delta { get; private set; }
 
-        public static SVPFile Create(Geo geo, double[] depths, double[] temps, double[] salinities, double[] soundspeeds, BottomLossData bottomLossData, double delta)
+        public static SVPFile Create(Geo geo, double[] depths, SoundSpeedProfile<GDEMSoundSpeedSample> soundSpeedProfile, BottomLossData bottomLossData, double delta)
         {
+            var temps = (from sample in soundSpeedProfile.Data select (double)sample.Temperature).ToArray();
+            var salinities = (from sample in soundSpeedProfile.Data select (double)sample.Salinity).ToArray();
+            var soundspeeds = (from sample in soundSpeedProfile.Data select (double)sample.SoundSpeed).ToArray();
             var maxDepth = depths.Last();
             // this creates the depth increments
             var nodes = (int)Math.Floor(maxDepth);

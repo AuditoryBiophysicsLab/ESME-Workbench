@@ -88,7 +88,7 @@ namespace ESME.TransmissionLoss.CASS
 
         #endregion
 
-        #region public Dictionary<string, List<EarthCoordinate>> SedimentTypes { get; set; }
+        #region public Dictionary<string, List<Geo>> SedimentTypes { get; set; }
         [XmlIgnore]
         public Dictionary<string, List<EarthCoordinate>> SedimentTypes
         {
@@ -218,7 +218,7 @@ namespace ESME.TransmissionLoss.CASS
             result.EnvironmentInformation = new EnvironmentInformation
             {
                 Wind = new Wind(),
-                SoundSpeedField = new SoundSpeedField {TimePeriod = result.TimePeriod},
+                SoundSpeedField = new SoundSpeedField<SoundSpeedSample> {TimePeriod = result.TimePeriod},
                 Sediment = new Sediment(),
             };
             var windData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = result.TimePeriod };
@@ -234,10 +234,8 @@ namespace ESME.TransmissionLoss.CASS
                                                                        SampleValue = (short)Model.SedimentTypes.Find(bottomType).HFEVACategory
                                                                    }));
                 }
-                var profileData = new DepthValuePairs<float>();
-                for (var depthIndex = 0; depthIndex < location.Depths.Count; depthIndex++)
-                    profileData.Add(new DepthValuePair<float>((float)location.Depths[depthIndex], (float)location.Soundspeeds[depthIndex]));
-                result.EnvironmentInformation.SoundSpeedField.EnvironmentData.Add(new SoundSpeedProfile(location) { Data = profileData });
+                var profileData = location.Depths.Select((t, depthIndex) => new SoundSpeedSample((float)t, (float)location.Soundspeeds[depthIndex])).ToList();
+                result.EnvironmentInformation.SoundSpeedField.EnvironmentData.Add(new SoundSpeedProfile<SoundSpeedSample>(location){ Data = profileData});
             }
             result.EnvironmentInformation.Wind.TimePeriods.Add(windData); 
             return result;

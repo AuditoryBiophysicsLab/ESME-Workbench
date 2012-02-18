@@ -397,28 +397,28 @@ namespace ESME.Views.AcousticBuilder
         public void UpdateEnvironmentData()
         {
             var curLocation = new Geo(Latitude, Longitude);
-            var tempData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[ExplosivePoint.TimePeriod].EnvironmentData.GetNearestPoint(curLocation);
-            var salData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[ExplosivePoint.TimePeriod].EnvironmentData.GetNearestPoint(curLocation);
-            var sspData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[ExplosivePoint.TimePeriod].EnvironmentData.GetNearestPoint(curLocation);
+            //var tempData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[ExplosivePoint.TimePeriod].EnvironmentData.GetNearestPoint(curLocation);
+            //var salData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[ExplosivePoint.TimePeriod].EnvironmentData.GetNearestPoint(curLocation);
+            var sspData = ((Task<SoundSpeed<GDEMSoundSpeedSample>>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[ExplosivePoint.TimePeriod].EnvironmentData.GetNearestPoint(curLocation);
             SVPLocation = new Geo(sspData);
             NotifyPropertyChanged(SVPFilenameChangedEventArgs);
             var bottomLossData = ((Task<BottomLoss>)EnvironmentData[EnvironmentDataType.BottomLoss]).Result.Samples.GetNearestPoint(curLocation).Data;
             DepthLimit = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GetNearestPoint(curLocation).Data);
             SVPWaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GetNearestPoint(SVPLocation).Data);
 
-            var temperatureData = new double[tempData.Data.Count];
-            var depthData = new double[tempData.Data.Count];
-            var salinityData = new double[tempData.Data.Count];
-            var soundSpeedData = new double[tempData.Data.Count];
-            for (var i = 0; i < tempData.Data.Count; i++)
+            //var temperatureData = new double[tempData.Data.Count];
+            var depthData = new double[sspData.Data.Count];
+            //var salinityData = new double[sspData.Data.Count];
+            var soundSpeedData = new double[sspData.Data.Count];
+            for (var i = 0; i < sspData.Data.Count; i++)
             {
-                temperatureData[i] = tempData.Data[i].Value;
-                depthData[i] = tempData.Data[i].Depth;
-                salinityData[i] = salData.Data[i].Value;
-                soundSpeedData[i] = sspData.Data[i].Value;
+                //temperatureData[i] = tempData.Data[i].Value;
+                depthData[i] = sspData.Data[i].Depth;
+                //salinityData[i] = salData.Data[i].Value;
+                soundSpeedData[i] = sspData.Data[i].SoundSpeed;
             }
-            ProfileDepth = tempData.Data.Last().Depth;
-            SVPFile = SVPFile.Create(SVPLocation, depthData, temperatureData, salinityData, soundSpeedData, bottomLossData, Delta);
+            ProfileDepth = sspData.Data.Last().Depth;
+            SVPFile = SVPFile.Create(SVPLocation, depthData, sspData, bottomLossData, Delta);
         }
 
         public string SVPFilename

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Windows;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
@@ -11,7 +12,7 @@ using Cinch;
 namespace HRC.Navigation
 {
     [Serializable]
-    public class Geo : EqualityComparer<Geo>, IEquatable<Geo>, INotifyPropertyChanged, IDeserializationCallback
+    public class Geo : EqualityComparer<Geo>, IEquatable<Geo>, IComparable<Geo>, IComparer<Geo>, INotifyPropertyChanged, IDeserializationCallback
     {
         const double Flattening = 1.0 / 298.257223563;
         const double FlatteningC = (1.0 - Flattening) * (1.0 - Flattening);
@@ -485,6 +486,8 @@ namespace HRC.Navigation
             return (az > 0.0) ? az : 2.0 * Math.PI + az;
         }
 
+        public double AzimuthDegrees(Geo v2) { return Azimuth(v2) * (180.0 / Math.PI); }
+
         /// <summary>
         ///   Given 3 points on a sphere, p0, p1, p2, return the angle between them in radians.
         /// </summary>
@@ -674,6 +677,8 @@ namespace HRC.Navigation
         /// <param name = "azimuth">Direction of target point from origin, in radians, clockwise from north.</param>
         /// <returns></returns>
         public static Geo Offset(Geo origin, double distance, double azimuth) { return origin.Offset(distance, azimuth); }
+
+        public static implicit operator Point(Geo e) { return new Point(e.Longitude, e.Latitude); }
 
 #if false
     /**
@@ -1122,10 +1127,44 @@ namespace HRC.Navigation
                 else handler(this, e);
         }
         #endregion
+
+        public int CompareTo(Geo other) { return Compare(this, other); }
+        int IComparer<Geo>.Compare(Geo e1, Geo e2) { return e1.Compare(e2); }
+        public static int Compare(Geo e1, Geo e2) { return e1.Compare(e2); }
+        public int Compare(Geo e2)
+        {
+            var latCompare = LatKey.CompareTo(e2.LatKey);
+            return latCompare != 0 ? latCompare : LonKey.CompareTo(e2.LonKey);
+        }
+        [XmlIgnore]
+        int _latKey = int.MinValue;
+        [XmlIgnore]
+        int LatKey
+        {
+            get
+            {
+                if (_latKey != int.MinValue) return _latKey;
+                _latKey = (int)Math.Round(Latitude * 10000);
+                return _latKey;
+            }
+        }
+        [XmlIgnore]
+        int _lonKey = int.MinValue;
+        [XmlIgnore]
+        int LonKey
+        {
+            get
+            {
+                if (_lonKey != int.MinValue) return _lonKey;
+                _lonKey = (int)Math.Round(Longitude * 10000);
+                return _lonKey;
+            }
+        }
     }
 
     public class Geo<T> : Geo
     {
+        public Geo() {}
         public Geo(double lat, double lon) : base(lat, lon) { }
         public Geo(double lat, double lon, bool isDegrees) : base(lat, lon, isDegrees) { }
         public Geo(double x, double y, double z) : base(x, y, z) { }

@@ -300,8 +300,8 @@ namespace ESMEWorkBench.ViewModels.Main
                                 // Loop through each animat and expose it if necessary
                                 foreach (var animat in animats)
                                 {
-                                    var animatRange = (float)(platformLocation.DistanceTo(animat.Location));
-                                    var animatBearing = (float)(platformLocation.BearingTo(animat.Location));
+                                    var animatRange = (float)(platformLocation.DistanceKilometers(animat.Location) * 1000);
+                                    var animatBearing = (float)(platformLocation.AzimuthDegrees(animat.Location));
                                     // If the animat is not within the radius, skip it.
                                     if ((animatRange <= beamRadius) && (horizontalBeamLimits.Contains(animatBearing)))
                                     {

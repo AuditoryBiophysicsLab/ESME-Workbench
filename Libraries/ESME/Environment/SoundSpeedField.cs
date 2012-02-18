@@ -1,36 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Xml.Serialization;
-using ESME.Environment.NAVO;
 using HRC.Navigation;
 
 namespace ESME.Environment
 {
-    public class SoundSpeedFieldAverager : TimePeriodEnvironmentData<SoundSpeedProfileAverager>
+    public class SoundSpeedFieldAverager<T> : TimePeriodEnvironmentData<SoundSpeedProfileAverager<T>> where T: SoundSpeedSample, new()
     {
-        public void Add(SoundSpeedField sourceField)
+        public void Add(SoundSpeedField<T> sourceField)
         {
             var environmentDataList = EnvironmentData.ToList();
-            var itemsToAdd = new List<SoundSpeedProfileAverager>();
+            var itemsToAdd = new List<SoundSpeedProfileAverager<T>>();
             foreach (var sourceProfile in sourceField.EnvironmentData)
             {
                 var profile = environmentDataList.Find(p => p.Equals(sourceProfile));
-                if (profile == null) itemsToAdd.Add(new SoundSpeedProfileAverager(sourceProfile));
+                if (profile == null) itemsToAdd.Add(new SoundSpeedProfileAverager<T>(sourceProfile));
                 else profile.Add(sourceProfile);
             }
             EnvironmentData.AddRange(itemsToAdd);
         }
 
-        public SoundSpeedField Average
+        public SoundSpeedField<SoundSpeedSample> Average
         {
             get
             {
                 var environmentData = EnvironmentData.Select(averageProfile => averageProfile.Average);
-                var result = new SoundSpeedField { TimePeriod = TimePeriod };
+                var result = new SoundSpeedField<SoundSpeedSample> { TimePeriod = TimePeriod };
                 result.EnvironmentData.AddRange(environmentData);
                 return result;
             }
@@ -40,48 +36,31 @@ namespace ESME.Environment
     [Serializable]
     public class SoundSpeedField<T> : TimePeriodEnvironmentData<SoundSpeedProfile<T>> where T : SoundSpeedSample, new()
     {
-        public SoundSpeedField() { DeepestPoint = null; }
-
-        [XmlIgnore]
-        public EarthCoordinate<float> DeepestPoint { get; set; }
-
-        [XmlIgnore]
-        public SoundSpeedProfile DeepestSSP
+        public SoundSpeedProfile<T> GetDeepestSSP(Geo<float> deepestPoint)
         {
-            get
-            {
-                if (_deepestSSP != null) return _deepestSSP;
-
-                var step1 = from ssp in EnvironmentData
-                            orderby ssp.Data.Count
-                            select ssp;
-                var maxCount = step1.Last().Data.Count;
-                var step2 = from ssp in step1
-                            where ssp.Data.Count == maxCount
-                            orderby ssp.DistanceTo(DeepestPoint)
-                            select ssp;
-                _deepestSSP = step2.First();
-                return _deepestSSP;
-            }
+            var step1 = from ssp in EnvironmentData
+                        orderby ssp.Data.Count
+                        select ssp;
+            var maxCount = step1.Last().Data.Count;
+            var step2 = from ssp in step1
+                        where ssp.Data.Count == maxCount
+                        orderby ssp.DistanceKilometers(deepestPoint)
+                        select ssp;
+            return step2.First();
         }
 
-        SoundSpeedProfile _deepestSSP;
-
-        public void ExtendProfiles(TimePeriodEnvironmentData<SoundSpeedProfile> temperatureData, TimePeriodEnvironmentData<SoundSpeedProfile> salinityData)
+        public void ExtendProfiles(Geo<float> deepestPoint)
         {
-            if (DeepestPoint == null) throw new ApplicationException("SoundSpeedField: Unable to extend to max bathymetry depth. Deepest point is not set.");
+            if (deepestPoint == null) throw new ArgumentNullException("deepestPoint", "SoundSpeedField: Unable to extend to max bathymetry depth. deepestPoint is null.");
+            var deepestSSP = GetDeepestSSP(deepestPoint);
+            if (deepestPoint.Data > deepestSSP.MaxDepth)
+                deepestSSP.Extend(deepestPoint.Data);
 
-            if ((temperatureData == null) || (salinityData == null))
-                throw new ApplicationException("SoundSpeedField: Unable to extend to max bathymetry depth. Temperature and/or salinity data are missing.");
-
-            if (DeepestPoint.Data > DeepestSSP.Data.MaxDepth)
-                DeepestSSP.Extend(DeepestPoint.Data, temperatureData.EnvironmentData.GetExactPoint(DeepestSSP), salinityData.EnvironmentData.GetExactPoint(DeepestSSP));
-
-            foreach (var profile in EnvironmentData.Where(profile => profile != DeepestSSP))
-                profile.Extend(DeepestSSP);
+            foreach (var profile in EnvironmentData.Where(profile => profile != deepestSSP))
+                profile.Extend(deepestSSP);
         }
-
-        public static SoundSpeedField Create(SoundSpeedField temperatureField, SoundSpeedField salinityField)
+#if false
+        public static SoundSpeedField<T> Create(SoundSpeedField<T> temperatureField, SoundSpeedField<T> salinityField)
         {
             if (temperatureField.TimePeriod != salinityField.TimePeriod) throw new DataException("");
             VerifyThatProfilePointsMatch(temperatureField, salinityField);
@@ -91,20 +70,20 @@ namespace ESME.Environment
             return result;
         }
 
-        public static SoundSpeedField Create(SoundSpeedField sourceTemperatureField, SoundSpeedField sourceSalinityField, EarthCoordinate<float> deepestPoint, GeoRect areaOfInterest = null)
+        public static SoundSpeedField<T> Create(SoundSpeedField<T> sourceTemperatureField, SoundSpeedField<T> sourceSalinityField, EarthCoordinate<float> deepestPoint, GeoRect areaOfInterest = null)
         {
             if (sourceTemperatureField.TimePeriod != sourceSalinityField.TimePeriod)
                 throw new DataException("");
             var temperatureData = sourceTemperatureField.EnvironmentData;
             if (areaOfInterest != null) temperatureData.TrimToNearestPoints(areaOfInterest);
-            var temperatureField = new SoundSpeedField { EnvironmentData = temperatureData };
+            var temperatureField = new SoundSpeedField<T> { EnvironmentData = temperatureData };
 
             var salinityData = sourceSalinityField.EnvironmentData;
             if (areaOfInterest != null) salinityData.TrimToNearestPoints(areaOfInterest);
-            var salinityField = new SoundSpeedField { EnvironmentData = salinityData };
+            var salinityField = new SoundSpeedField<T> { EnvironmentData = salinityData };
 
             //VerifyThatProfilePointsMatch(temperatureField, salinityField);
-            var environmentData = new List<SoundSpeedProfile>();
+            var environmentData = new List<SoundSpeedProfile<T>();
             //var sb = new StringBuilder();
             foreach (var temperatureProfile in temperatureField.EnvironmentData)
             {
@@ -116,13 +95,13 @@ namespace ESME.Environment
                         Debug.WriteLine("[{0}, {1}] ({2}): {3}", temperatureProfile.Latitude, temperatureProfile.Longitude, sourceTemperatureField.TimePeriod, message);
             }
             //var environmentData = temperatureField.EnvironmentData.Select(temperatureProfile => ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]));
-            var soundSpeedData = new SoundSpeedField { TimePeriod = temperatureField.TimePeriod };
+            var soundSpeedData = new SoundSpeedField<T> { TimePeriod = temperatureField.TimePeriod };
             soundSpeedData.EnvironmentData.AddRange(environmentData);
 
             if (deepestPoint == null) return soundSpeedData;
 
             if (areaOfInterest != null) soundSpeedData.EnvironmentData.TrimToNearestPoints(areaOfInterest);
-            var soundSpeedField = new SoundSpeedField
+            var soundSpeedField = new SoundSpeedField<T>
             {
                 EnvironmentData = soundSpeedData.EnvironmentData,
                 DeepestPoint = deepestPoint,
@@ -136,21 +115,21 @@ namespace ESME.Environment
             return soundSpeedField;
         }
 
-        public SoundSpeedField Extend(SoundSpeedField sourceTemperatureField, SoundSpeedField sourceSalinityField, EarthCoordinate<float> deepestPoint, GeoRect areaOfInterest = null)
+        public SoundSpeedField<T> Extend(SoundSpeedField<T> sourceTemperatureField, SoundSpeedField<T> sourceSalinityField, EarthCoordinate<float> deepestPoint, GeoRect areaOfInterest = null)
         {
             if ((TimePeriod != sourceTemperatureField.TimePeriod) || (TimePeriod != sourceSalinityField.TimePeriod))
                 throw new DataException("");
             var temperatureData = sourceTemperatureField.EnvironmentData;
             if (areaOfInterest != null) temperatureData.TrimToNearestPoints(areaOfInterest);
-            var temperatureField = new SoundSpeedField { EnvironmentData = temperatureData };
+            var temperatureField = new SoundSpeedField<T> { EnvironmentData = temperatureData };
 
             var salinityData = sourceSalinityField.EnvironmentData;
             if (areaOfInterest != null) salinityData.TrimToNearestPoints(areaOfInterest);
-            var salinityField = new SoundSpeedField { EnvironmentData = salinityData };
+            var salinityField = new SoundSpeedField<T> { EnvironmentData = salinityData };
 
             var soundSpeedData = EnvironmentData;
             if (areaOfInterest != null) soundSpeedData.TrimToNearestPoints(areaOfInterest);
-            var soundSpeedField = new SoundSpeedField
+            var soundSpeedField = new SoundSpeedField<T>
             {
                 EnvironmentData = soundSpeedData,
                 DeepestPoint = deepestPoint,
@@ -165,21 +144,22 @@ namespace ESME.Environment
             return soundSpeedField;
         }
 
-        internal static void VerifyThatProfilePointsMatch(TimePeriodEnvironmentData<SoundSpeedProfile> profile1, TimePeriodEnvironmentData<SoundSpeedProfile> profile2)
+        internal static void VerifyThatProfilePointsMatch(TimePeriodEnvironmentData<SoundSpeedProfile<T>> profile1, TimePeriodEnvironmentData<SoundSpeedProfile<T>> profile2)
         {
             foreach (var point1 in profile1.EnvironmentData.Where(point1 => !profile2.EnvironmentData.Any(point1.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at ({0:0.0000}, {1:0.0000}), the other does not", point1.Latitude, point1.Longitude));
             foreach (var point2 in profile2.EnvironmentData.Where(point2 => !profile1.EnvironmentData.Any(point2.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at ({0:0.0000}, {1:0.0000}), the other does not", point2.Latitude, point2.Longitude));
         }
+#endif
 
-        public static SoundSpeedField Deserialize(BinaryReader reader)
+        public static SoundSpeedField<T> Deserialize(BinaryReader reader)
         {
-            var result = new SoundSpeedField
+            var result = new SoundSpeedField<T>
             {
                 TimePeriod = (TimePeriod)reader.ReadInt32(),
             };
             var itemCount = reader.ReadInt32();
             for (var i = 0; i < itemCount; i++ )
-                result.EnvironmentData.Add(SoundSpeedProfile.Deserialize(reader));
+                result.EnvironmentData.Add(SoundSpeedProfile<T>.Deserialize(reader));
             return result;
         }
 

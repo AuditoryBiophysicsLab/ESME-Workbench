@@ -433,9 +433,9 @@ namespace ESME.Environment.Descriptors
             {EnvironmentDataType.Bathymetry, null},
             {EnvironmentDataType.BottomLoss, null},
             {EnvironmentDataType.Sediment, null},
-            {EnvironmentDataType.Salinity, null},
+            //{EnvironmentDataType.Salinity, null},
             {EnvironmentDataType.SoundSpeed, null},
-            {EnvironmentDataType.Temperature, null},
+            //{EnvironmentDataType.Temperature, null},
             {EnvironmentDataType.Wind, null},
         };
 
@@ -460,9 +460,9 @@ namespace ESME.Environment.Descriptors
             {EnvironmentDataType.Bathymetry, null},
             {EnvironmentDataType.BottomLoss, null},
             {EnvironmentDataType.Sediment, null},
-            {EnvironmentDataType.Salinity, null},
+            //{EnvironmentDataType.Salinity, null},
             {EnvironmentDataType.SoundSpeed, null},
-            {EnvironmentDataType.Temperature, null},
+            //{EnvironmentDataType.Temperature, null},
             {EnvironmentDataType.Wind, null},
         };
 
@@ -545,6 +545,7 @@ namespace ESME.Environment.Descriptors
                     SelectedEnvironment[EnvironmentDataType.Wind] = SelectedRangeComplex.EnvironmentFiles[windFilename];
                     EnvironmentData[EnvironmentDataType.Wind] =
                             new Task<Wind>(() => Wind.Load(Path.Combine(SelectedRangeComplex.DataPath, windFilename)));
+#if false
                     EnvironmentData[EnvironmentDataType.Salinity] =
                             new Task<SoundSpeed>(
                                     () =>
@@ -554,6 +555,7 @@ namespace ESME.Environment.Descriptors
                             new Task<SoundSpeed>(
                                     () => EnvironmentFile.SeasonalAverage(SelectedRangeComplex, SelectedTimePeriod,
                                                                           EnvironmentDataType.Temperature));
+#endif
                     if (SelectedArea != null)
                     {
                         if (SelectedBathymetry != null && SelectedBathymetry.IsCached)
@@ -562,8 +564,7 @@ namespace ESME.Environment.Descriptors
                             Task<Bathymetry> bathyTask;
                             EnvironmentData[EnvironmentDataType.Bathymetry] = bathyTask = new Task<Bathymetry>(() => Bathymetry.Load(Path.Combine(SelectedArea.BathymetryPath, SelectedBathymetry.FileName)));
                             SelectedEnvironment[EnvironmentDataType.SoundSpeed] = SelectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", SelectedTimePeriod)];
-                            EnvironmentData[EnvironmentDataType.SoundSpeed] =
-                                new Task<SoundSpeed>(() => EnvironmentFile.CalculateSoundSpeed(SelectedRangeComplex, SelectedTimePeriod, bathyTask, SelectedBathymetry.GeoRect));
+                            EnvironmentData[EnvironmentDataType.SoundSpeed] = new Task<SoundSpeed<SoundSpeedSample>>(() => EnvironmentFile.CalculateSoundSpeed<GDEMSoundSpeedSample>(SelectedRangeComplex, SelectedTimePeriod, bathyTask, SelectedBathymetry.GeoRect));
                             IsEnvironmentFullySpecified = true;
                             LoadEnvironment();
                             return;
@@ -590,10 +591,10 @@ namespace ESME.Environment.Descriptors
                 tasks.Add(EnvironmentData[EnvironmentDataType.Wind]);
                 EnvironmentData[EnvironmentDataType.Bathymetry].Start();
                 tasks.Add(EnvironmentData[EnvironmentDataType.Bathymetry]);
-                EnvironmentData[EnvironmentDataType.Salinity].Start();
-                tasks.Add(EnvironmentData[EnvironmentDataType.Salinity]);
-                EnvironmentData[EnvironmentDataType.Temperature].Start();
-                tasks.Add(EnvironmentData[EnvironmentDataType.Temperature]);
+                //EnvironmentData[EnvironmentDataType.Salinity].Start();
+                //tasks.Add(EnvironmentData[EnvironmentDataType.Salinity]);
+                //EnvironmentData[EnvironmentDataType.Temperature].Start();
+                //tasks.Add(EnvironmentData[EnvironmentDataType.Temperature]);
                 EnvironmentData[EnvironmentDataType.SoundSpeed].Start();
                 tasks.Add(EnvironmentData[EnvironmentDataType.SoundSpeed]);
                 await TaskEx.WhenAll(tasks).ContinueWith(task =>
@@ -617,8 +618,8 @@ namespace ESME.Environment.Descriptors
             ClearEnvironment(EnvironmentDataType.Sediment);
             ClearEnvironment(EnvironmentDataType.Wind);
             ClearEnvironment(EnvironmentDataType.Bathymetry);
-            ClearEnvironment(EnvironmentDataType.Salinity);
-            ClearEnvironment(EnvironmentDataType.Temperature);
+            //ClearEnvironment(EnvironmentDataType.Salinity);
+            //ClearEnvironment(EnvironmentDataType.Temperature);
             ClearEnvironment(EnvironmentDataType.SoundSpeed);
         }
 
@@ -680,17 +681,17 @@ namespace ESME.Environment.Descriptors
             else
                 throw new ApplicationException(string.Format("Specified range complex {0} does not contain wind data", rangeComplexName));
 
-            result[EnvironmentDataType.Salinity] = new Task<SoundSpeed>(() => EnvironmentFile.SeasonalAverage(rangeComplex, timePeriod, EnvironmentDataType.Salinity));
-            result[EnvironmentDataType.Temperature] = new Task<SoundSpeed>(() => EnvironmentFile.SeasonalAverage(rangeComplex, timePeriod,EnvironmentDataType.Temperature));
+            //result[EnvironmentDataType.Salinity] = new Task<SoundSpeed>(() => EnvironmentFile.SeasonalAverage(rangeComplex, timePeriod, EnvironmentDataType.Salinity));
+            //result[EnvironmentDataType.Temperature] = new Task<SoundSpeed>(() => EnvironmentFile.SeasonalAverage(rangeComplex, timePeriod,EnvironmentDataType.Temperature));
             Task<Bathymetry> bathyTask;
             result[EnvironmentDataType.Bathymetry] = bathyTask = new Task<Bathymetry>(() => Bathymetry.Load(Path.Combine(area.BathymetryPath, area[bathymetryResolution].FileName)));
-            result[EnvironmentDataType.SoundSpeed] = new Task<SoundSpeed>(() => EnvironmentFile.CalculateSoundSpeed(rangeComplex, timePeriod, bathyTask, area[bathymetryResolution].GeoRect));
+            result[EnvironmentDataType.SoundSpeed] = new Task<SoundSpeed<SoundSpeedSample>>(() => EnvironmentFile.CalculateSoundSpeed<GDEMSoundSpeedSample>(rangeComplex, timePeriod, bathyTask, area[bathymetryResolution].GeoRect));
 
             if (Configuration.IsClassifiedModel) result[EnvironmentDataType.BottomLoss].Start();
             result[EnvironmentDataType.Sediment].Start();
             result[EnvironmentDataType.Wind].Start();
-            result[EnvironmentDataType.Salinity].Start();
-            result[EnvironmentDataType.Temperature].Start();
+            //result[EnvironmentDataType.Salinity].Start();
+            //result[EnvironmentDataType.Temperature].Start();
             result[EnvironmentDataType.Bathymetry].Start();
             result[EnvironmentDataType.SoundSpeed].Start();
             return result;

@@ -296,7 +296,7 @@ namespace ESME.NEMO.Overlay
 
         static EarthCoordinate GetValueInDegrees(Tokenizer tokenizer)
         {
-            //Dave will tell me to do this with EarthCoordinate Class
+            //Dave will tell me to do this with Geo Class
             var x = tokenizer.NextToken();
             while (!x.IsNumeric) x = tokenizer.NextToken();
             var y = tokenizer.NextToken();

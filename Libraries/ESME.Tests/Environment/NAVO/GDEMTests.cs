@@ -12,6 +12,7 @@ namespace ESME.Tests.Environment.NAVO
 {
     public class GDEMTests
     {
+#if false
         [Test]
         public void AsyncDataflowImportTest()
         {
@@ -93,5 +94,6 @@ namespace ESME.Tests.Environment.NAVO
                 DataType = dataType,
             };
         }
+#endif
     }
 }

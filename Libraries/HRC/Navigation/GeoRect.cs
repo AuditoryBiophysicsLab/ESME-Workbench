@@ -184,7 +184,14 @@ namespace HRC.Navigation
         /// </summary>
         /// <param name = "earthCoordinate"></param>
         /// <returns></returns>
-        public bool Contains(EarthCoordinate earthCoordinate) { return ((Rect) this).Contains(earthCoordinate); }
+        public bool Contains(EarthCoordinate earthCoordinate) { return ((Rect)this).Contains(earthCoordinate); }
+
+        /// <summary>
+        ///   Indicates whether the GeoRect contains the specified Geo.
+        /// </summary>
+        /// <param name = "geo"></param>
+        /// <returns></returns>
+        public bool Contains(Geo geo) { return ((Rect)this).Contains(geo); }
 
         /// <summary>
         ///   Indicates whether the GeoRect contains the specified GeoRect.

@@ -161,7 +161,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 var samplePoints = data[RangeComplexes.SelectedTimePeriod].EnvironmentData.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
                 _dispatcher.InvokeInBackgroundIfRequired(() => EnvironmentLayers[EnvironmentDataType.Wind] = CurrentMapLayers.DisplayOverlayShapes("Wind", LayerType.WindSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false));
             });
-            RangeComplexes.HookEnvironment<SoundSpeed>(EnvironmentDataType.SoundSpeed, data =>
+            RangeComplexes.HookEnvironment<SoundSpeed<SoundSpeedSample>>(EnvironmentDataType.SoundSpeed, data =>
             {
                 if (RangeComplexes.SelectedTimePeriod == TimePeriod.Invalid) return;
                 var samplePoints = data[RangeComplexes.SelectedTimePeriod].EnvironmentData.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
@@ -333,7 +333,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if ((!result.HasValue) || (!result.Value)) return;
 
                 var curOverlay = RangeComplexes.SelectedArea.OverlayShape;
-                var limits = new Limits(ConvexHull.Create(curOverlay.EarthCoordinates.Cast<Geo>().ToList(), true));
+                var limits = new Limits(ConvexHull.Create(curOverlay.Geos, true));
                 var expandedLimits = limits.CreateExpandedLimit(vm.BufferSize);  //in km.
                 var coordinateList = expandedLimits.Geos;
                 var testShape = new OverlayLineSegments(coordinateList, Colors.Black);
