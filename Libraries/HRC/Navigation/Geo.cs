@@ -1123,4 +1123,14 @@ namespace HRC.Navigation
         }
         #endregion
     }
+
+    public class Geo<T> : Geo
+    {
+        public Geo(double lat, double lon) : base(lat, lon) { }
+        public Geo(double lat, double lon, bool isDegrees) : base(lat, lon, isDegrees) { }
+        public Geo(double x, double y, double z) : base(x, y, z) { }
+        public Geo(Geo geo) : base(geo) { }
+
+        public T Data { get; set; }
+    }
 }

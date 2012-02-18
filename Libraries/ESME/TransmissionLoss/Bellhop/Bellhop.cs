@@ -10,7 +10,7 @@ namespace ESME.TransmissionLoss.Bellhop
         //public static string GenerateBellhopRunInfo(SoundSource soundSource, bool SurfaceReflection, 
         //    bool UseVerticalBeamforming, bool GenerateArrivalsFile, double DepthCellSize_meters, 
         //    SedimentProperties Sediment, BottomProfile bottomProfile, SoundSpeedProfileProperties SSP, int NumRangeCells, int NumDepthCells, int NumBeams)
-        public static string GetRadialConfiguration(TransmissionLossJob transmissionLossJob, SoundSpeedProfile ssp, SedimentType sediment, float maxCalculationDepthMeters, int rangeCellCount, int depthCellCount, bool useSurfaceReflection, bool useVerticalBeamforming, bool generateArrivalsFile, int beamCount)
+        public static string GetRadialConfiguration(TransmissionLossJob transmissionLossJob, SoundSpeedProfile<SoundSpeedSample> ssp, SedimentType sediment, float maxCalculationDepthMeters, int rangeCellCount, int depthCellCount, bool useSurfaceReflection, bool useVerticalBeamforming, bool generateArrivalsFile, int beamCount)
         {
             using (var sw = new StringWriter())
             {
@@ -27,8 +27,8 @@ namespace ESME.TransmissionLoss.Bellhop
                 //if (SSP.DepthVector[SSP.DepthVector.Length - 1] < RealBottomDepth_Meters)
                 //    SoundSpeedProfile = ExtrapolateSSP(SoundSpeedProfile, RealBottomDepth_Meters);
 
-                foreach (var depthValuePair in ssp.Data)
-                    sw.WriteLine("{0} {1} 0.0 1.0 0.0 0.0", depthValuePair.Depth, depthValuePair.Value);
+                foreach (var soundSpeedSample in ssp.Data)
+                    sw.WriteLine("{0} {1} 0.0 1.0 0.0 0.0", soundSpeedSample.Depth, soundSpeedSample.SoundSpeed);
 
                 //sw.WriteLine("'V*', 0.0"); // A = Acoustic halfspace, * = read bathymetry file 'BTYFIL', 0.0 = bottom roughness (currently ignored)
                 sw.WriteLine("'A*' 0.0"); // A = Acoustic halfspace, * = read bathymetry file 'BTYFIL', 0.0 = bottom roughness (currently ignored)

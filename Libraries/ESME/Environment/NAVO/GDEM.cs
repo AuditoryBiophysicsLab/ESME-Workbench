@@ -131,7 +131,7 @@ namespace ESME.Environment.NAVO
         static string NUWCSalinityFileName(TimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_s.nc"; }
         static readonly string[] ShortMonthNames = new[] { "noneuary", "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
 
-        public static SoundSpeedField ReadFile(string fileName, string dataVarName, TimePeriod month, GeoRect region)
+        public static SoundSpeedField<GDEMSoundSpeedSample> ReadFile(string fileName, string dataVarName, TimePeriod month, GeoRect region)
         {
             var myFile = NetCDFFile.Open(fileName);
             //Logger.Log("in ReadFile: 0.1");

@@ -103,10 +103,7 @@ namespace ESME.TransmissionLoss.CASS
                 {
                     File.Delete(matchingFile);
                 }
-                catch (Exception)
-                {
-                    continue;
-                }
+                catch (Exception) {}
         }
 
         public static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, TransmissionLossAlgorithm simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName, string cassEnvironmentFileName, RangeComplex rangeComplex)
@@ -196,7 +193,7 @@ namespace ESME.TransmissionLoss.CASS
                         stepCount = appSettings.RAMSettings.MaximumDepth / appSettings.RAMSettings.DepthStepSize;
                         if (stepCount > 19) stepSize = appSettings.RAMSettings.MaximumDepth / 19;
                         else stepSize = appSettings.RAMSettings.DepthStepSize;
-                        if (Math.Floor(stepSize) != stepSize) stepSize = (float)Math.Ceiling(stepSize);
+                        if (Math.Abs(Math.Floor(stepSize) - stepSize) > 0.0001) stepSize = (float)Math.Ceiling(stepSize);
                         writer.WriteLine("Water Depth                             ,0 M, {0} M, {1} M", appSettings.RAMSettings.MaximumDepth, stepSize);
                         break;
                     //case TransmissionLossAlgorithm.CASS:
@@ -205,7 +202,7 @@ namespace ESME.TransmissionLoss.CASS
                         stepCount = appSettings.CASSSettings.MaximumDepth / appSettings.CASSSettings.DepthStepSize;
                         if (stepCount > 1024) stepSize = appSettings.CASSSettings.MaximumDepth / 1024;
                         else stepSize = appSettings.CASSSettings.DepthStepSize;
-                        if (Math.Floor(stepSize) != stepSize) stepSize = (float)Math.Ceiling(stepSize);
+                        if (Math.Abs(Math.Floor(stepSize) - stepSize) > 0.0001) stepSize = (float)Math.Ceiling(stepSize);
                         writer.WriteLine("Water Depth                             ,0 M, {0} M, {1} M", appSettings.CASSSettings.MaximumDepth, stepSize);
                         break;
                 }
@@ -233,7 +230,7 @@ namespace ESME.TransmissionLoss.CASS
                         stepCount = mode.Radius / appSettings.RAMSettings.RangeStepSize;
                         if (stepCount > 999) stepSize = mode.Radius / 999;
                         else stepSize = appSettings.RAMSettings.RangeStepSize;
-                        if (Math.Floor(stepSize) != stepSize) stepSize = (float)Math.Ceiling(stepSize);
+                        if (Math.Abs(Math.Floor(stepSize) - stepSize) > 0.0001) stepSize = (float)Math.Ceiling(stepSize);
                         writer.WriteLine("Range Distance                          ,{0} M, {1} M, {0} M", stepSize, mode.Radius);
                         break;
                     //case TransmissionLossAlgorithm.CASS:
@@ -242,7 +239,7 @@ namespace ESME.TransmissionLoss.CASS
                         stepCount = mode.Radius / appSettings.CASSSettings.RangeStepSize;
                         if (stepCount > 1024) stepSize = mode.Radius / 1024;
                         else stepSize = appSettings.CASSSettings.RangeStepSize;
-                        if (Math.Floor(stepSize) != stepSize) stepSize = (float)Math.Ceiling(stepSize);
+                        if (Math.Abs(Math.Floor(stepSize) - stepSize) > 0.0001) stepSize = (float)Math.Ceiling(stepSize);
                         writer.WriteLine("Range Distance                          ,{0} M, {1} M, {0} M", stepSize, mode.Radius);
                         break;
                 }
@@ -272,10 +269,10 @@ namespace ESME.TransmissionLoss.CASS
         }
 
         public static void WriteEnvironmentFiles(string environmentFileName, GeoRect geoRect, Sediment sedimentType,
-                                                 SoundSpeedField soundSpeedField, TimePeriodEnvironmentData<WindSample> wind, string bathymetryFileName,
+                                                 SoundSpeedField<SoundSpeedSample> soundSpeedField, TimePeriodEnvironmentData<WindSample> wind, string bathymetryFileName,
                                                  string overlayFileName, EnvironmentData<BottomLossSample> bottomLossSamples)
         {
-            var soundSpeedProfiles = new List<SoundSpeedProfile>();
+            var soundSpeedProfiles = new List<SoundSpeedProfile<SoundSpeedSample>>();
             var windSamples = new List<WindSample>();
             var sedimentPoints = new List<SedimentSample>();
             var bottomLossPoints = new List<BottomLossSample>();
@@ -319,7 +316,7 @@ namespace ESME.TransmissionLoss.CASS
         }
 
         public static void WriteEnvironmentFiles(TimePeriod timePeriod, IList<Geo> requestedLocations, string environmentFileName, IList<SedimentSample> sedimentPoints,
-                                                 IList<SoundSpeedProfile> soundSpeedProfiles, IList<WindSample> windSamples, string bathymetryFileName,
+                                                 IList<SoundSpeedProfile<SoundSpeedSample>> soundSpeedProfiles, IList<WindSample> windSamples, string bathymetryFileName,
                                                  string overlayFileName, IList<BottomLossSample> bottomLossPoints)
         {
             WriteEnvironmentFileHeader(timePeriod, requestedLocations, environmentFileName, sedimentPoints, soundSpeedProfiles, windSamples, bathymetryFileName, overlayFileName, "HFEVA", bottomLossPoints);
@@ -330,7 +327,7 @@ namespace ESME.TransmissionLoss.CASS
         }
 
         static void WriteEnvironmentFileHeader(TimePeriod timePeriod, IList<Geo> requestedLocations, string environmentFileName, IList<SedimentSample> sedimentList,
-                                         IList<SoundSpeedProfile> soundSpeedList, IList<WindSample> windList, string bathymetryFileName,
+                                         IList<SoundSpeedProfile<SoundSpeedSample>> soundSpeedList, IList<WindSample> windList, string bathymetryFileName,
                                          string overlayFileName, string model, IList<BottomLossSample> bottomLossList)
         {
             if (File.Exists(environmentFileName + ".dat")) return;
@@ -352,7 +349,7 @@ namespace ESME.TransmissionLoss.CASS
             }
         }
 
-        static void WriteEnvironmentFileRecord(TextWriter envFile, EarthCoordinate<SedimentSampleBase> sedimentSample, EarthCoordinate<DepthValuePairs<float>> soundSpeedProfile, 
+        static void WriteEnvironmentFileRecord(TextWriter envFile, EarthCoordinate<SedimentSampleBase> sedimentSample, Geo<List<SoundSpeedSample>> soundSpeedProfile, 
                                          EarthCoordinate<float> windSample, Geo requestedLocation, ref bool isFirstPoint,
                                          string model, EarthCoordinate<BottomLossData> bottomLossSample)
         {
@@ -377,7 +374,7 @@ namespace ESME.TransmissionLoss.CASS
             envFile.WriteLine("OCEAN SOUND SPEED TABLE");
             envFile.WriteLine("M         M/S       ");
             foreach (var datum in soundSpeedProfile.Data)
-                if (!float.IsNaN(datum.Value)) envFile.WriteLine("{0,-10:0.000}{1,-10:0.000}", datum.Depth, datum.Value);
+                if (!float.IsNaN(datum.SoundSpeed)) envFile.WriteLine("{0,-10:0.000}{1,-10:0.000}", datum.Depth, datum.SoundSpeed);
                 else break;
             envFile.WriteLine("EOT");
             model = model.ToUpper();

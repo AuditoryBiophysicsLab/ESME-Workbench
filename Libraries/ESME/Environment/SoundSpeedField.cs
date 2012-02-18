@@ -38,7 +38,7 @@ namespace ESME.Environment
     }
 
     [Serializable]
-    public class SoundSpeedField : TimePeriodEnvironmentData<SoundSpeedProfile>
+    public class SoundSpeedField<T> : TimePeriodEnvironmentData<SoundSpeedProfile<T>> where T : SoundSpeedSample, new()
     {
         public SoundSpeedField() { DeepestPoint = null; }
 

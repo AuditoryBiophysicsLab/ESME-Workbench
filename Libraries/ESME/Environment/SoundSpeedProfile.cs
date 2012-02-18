@@ -1,57 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using Cinch;
-using ESME.Environment.NAVO;
 using HRC.Navigation;
 
 namespace ESME.Environment
 {
-    public class SoundSpeedProfileAverager : EarthCoordinate<DepthValuePairs<AverageDatum>>
+    public class SoundSpeedProfileAverager : SoundSpeedProfile<AverageSoundSpeedSample>
     {
-        public SoundSpeedProfileAverager()
+        public SoundSpeedProfileAverager(Geo<List<SoundSpeedSample>> profile) : base(profile)
         {
-            Data = new DepthValuePairs<AverageDatum>();
-        }
-
-        public SoundSpeedProfileAverager(SoundSpeedProfile profile) : base(profile)
-        {
-            Data = new DepthValuePairs<AverageDatum>();
-            Add(profile);
-        }
-
-        public void Add(SoundSpeedProfile profile)
-        {
-            if (Data.Count == 0)
-                foreach (var datum in profile.Data)
-                { 
-                    Data.Add(new DepthValuePair<AverageDatum>(datum.Depth, new AverageDatum(datum.Value)));
-                }
+            if (profile.Data.Count == 0)
+                foreach (var datum in profile.Data) Add(new AverageSoundSpeedSample(datum));
             else
                 foreach (var datum in profile.Data)
                 {
-                    var averagerAtDepth = Data[datum.Depth];
-                    if (averagerAtDepth != null) averagerAtDepth.Value.Add(datum.Value);
-                    else Data.Add(new DepthValuePair<AverageDatum>(datum.Depth, new AverageDatum(datum.Value)));
+                    var averagerAtDepth = this[datum.Depth];
+                    if (averagerAtDepth != null) averagerAtDepth.Add(datum);
+                    else Add(new AverageSoundSpeedSample(datum));
                 }
         }
 
-        public SoundSpeedProfile Average 
+        public SoundSpeedProfile<SoundSpeedSample> Average 
         {
             get
             {
-                var result = new SoundSpeedProfile(this);
-                foreach (var datum in Data)
-                    result.Data.Add(new DepthValuePair<float>(datum.Depth, datum.Value.Average));
+                var result = new SoundSpeedProfile<SoundSpeedSample>(this);
+                foreach (var datum in Data) result.Add(new SoundSpeedSample(datum.Depth, datum.SoundSpeed));
                 return result;
             }
         }
     }
-
 
     public class AverageDatum
     {
@@ -80,18 +59,9 @@ namespace ESME.Environment
     }
 
     [Serializable]
-    public class SoundSpeedProfile : EarthCoordinate<DepthValuePairs<float>>
+    public class SoundSpeedProfile<T> : Geo<List<T>> where T: SoundSpeedSample, new()
     {
-        public SoundSpeedProfile()
-        {
-            Data = new DepthValuePairs<float>();
-            Messages = new List<string>();
-        }
-        public SoundSpeedProfile(Geo location) : base(location)
-        {
-            Data = new DepthValuePairs<float>();
-            Messages = new List<string>();
-        }
+        public SoundSpeedProfile(Geo location) : base(location) { Data = new List<T>(); }
 
         #region public List<string> Messages { get; set; }
 
@@ -106,33 +76,40 @@ namespace ESME.Environment
         }
 
         [NonSerialized]
-        List<string> _messages;
+        List<string> _messages = new List<string>();
 
         #endregion
+
+        public T this[float depth] { get { return Data.Single(sample => (sample.Depth - depth) < 0.0001); } }
+
+        public void Add(T soundSpeedSample)
+        {
+            soundSpeedSample.Calculate(this);
+            Data.Add(soundSpeedSample);
+            //Data.Sort();
+        }
+
+        public void AddRange(IEnumerable<T> sampleRange)
+        {
+            foreach (var sample in sampleRange) Add(sample);
+            //Data.Sort();
+        }
+
+        public float MaxDepth { get { return Data.Max(sample => sample.Depth); } }
 
         /// <summary>
         /// Extrapolates the current sound speed profile to the given depth, in one step, using the provided temperature and salinity profile
         /// </summary>
         /// <param name="newMaxDepth"></param>
-        /// <param name="temperatureProfile"></param>
-        /// <param name="salinityProfile"></param>
-        public void Extend(float newMaxDepth, SoundSpeedProfile temperatureProfile, SoundSpeedProfile salinityProfile)
+        public void Extend(float newMaxDepth)
         {
-            if (newMaxDepth < Data.MaxDepth) throw new ApplicationException(string.Format("SoundSpeedProfile.Extend: Given depth {0} is less than current maximum depth {1}", newMaxDepth, Data.MaxDepth));
+            if (newMaxDepth < MaxDepth) throw new ApplicationException(string.Format("SoundSpeedProfile.Extend: Given depth {0} is less than current maximum depth {1}", newMaxDepth, MaxDepth));
 
             //System.Diagnostics.Debug.WriteLine("Extrapolating SSP {0} from data depth of {1}m to bathymetry depth of {2}m", this, MaxDepth, newMaxDepth);
             //System.Diagnostics.Debug.WriteLine("  Initial depth vector length: {0}", Depths.Length);
 
-            var tempDataCount = temperatureProfile.Data.Count;
-            var tempD = temperatureProfile.Data[tempDataCount - 1].Value;
-            var tempD1 = temperatureProfile.Data[tempDataCount - 2].Value;
-
-            var salinity = salinityProfile.Data.Last().Value;
-
-            var tempDiff = tempD1 - tempD;
-            var newTemp = tempD - tempDiff;
-            var soundSpeed = ChenMilleroLi.SoundSpeed(this, newMaxDepth, newTemp, salinity);
-            Data.Add(new DepthValuePair<float>(newMaxDepth, soundSpeed));
+            var dummy = new T();
+            Add((T)dummy.Extend(Data[Data.Count - 2], newMaxDepth));
         }
 
         /// <summary>
@@ -140,25 +117,25 @@ namespace ESME.Environment
         /// smooth curve in the profile
         /// </summary>
         /// <param name="templateSSP"></param>
-        public void Extend(SoundSpeedProfile templateSSP)
+        public void Extend(SoundSpeedProfile<T> templateSSP)
         {
             //System.Diagnostics.Debug.WriteLine("Extending SSP {0} to new depth {1}", this, templateSSP.MaxDepth);
 
-            if (templateSSP.Data.MaxDepth > Data.MaxDepth)
+            if (templateSSP.MaxDepth > MaxDepth)
             {
                 if (Data.Count == 0)
                 {
                     //System.Diagnostics.Debug.WriteLine("  Original SSP is zero length, copying templateSSP.");
-                    Data.AddRange(templateSSP.Data);
+                    AddRange(templateSSP.Data);
                 }
                 else
                 {
                     //System.Diagnostics.Debug.WriteLine("  Original SSP depth vector length: {0} ({1}m)", Depths.Length, MaxDepth);
-                    if (Data.Count > templateSSP.Data.Count) System.Diagnostics.Debugger.Break();
+                    //if (Data.Count > templateSSP.Data.Count) System.Diagnostics.Debugger.Break();
                     var myProfileLength = Data.Count;
                     var templateProfileLength = templateSSP.Data.Count;
-                    var shallowSpeed = Data.Last().Value;
-                    var deepSpeedAtSameDepth = templateSSP.Data[myProfileLength - 1].Value;
+                    var shallowSpeed = Data.Last().SoundSpeed;
+                    var deepSpeedAtSameDepth = templateSSP.Data[myProfileLength - 1].SoundSpeed;
                     //System.Diagnostics.Debug.WriteLine("  Original soundspeed at {0}m: {1}", MaxDepth, shallowSpeed);
                     //System.Diagnostics.Debug.WriteLine("  Template soundspeed at {0}m: {1}", MaxDepth, deepSpeedAtSameDepth);
 
@@ -167,33 +144,36 @@ namespace ESME.Environment
 
                     for (var speedIndex = myProfileLength; speedIndex < templateProfileLength; speedIndex++)
                     {
-                        var newSpeed = templateSSP.Data[speedIndex].Value - ssDiff;
+                        var newSpeed = templateSSP.Data[speedIndex].SoundSpeed - ssDiff;
                         //System.Diagnostics.Debug.WriteLine("    Template soundspeed at {0}m: Original: {1} Adjusted: {2}", templateSSP.Depths[speedIndex], templateSSP.SoundSpeeds[speedIndex], newSpeed);
-                        Data.Add(new DepthValuePair<float>(templateSSP.Data[speedIndex].Depth, newSpeed));
+                        Add(new T {Depth = templateSSP.Data[speedIndex].Depth, SoundSpeed = newSpeed});
                     }
                 }
             }
             //System.Diagnostics.Debug.WriteLine("  New SSP depth vector length: {0}", Depths.Length);
         }
 
-        public static new SoundSpeedProfile Deserialize(BinaryReader reader)
+        public static new SoundSpeedProfile<T> Deserialize(BinaryReader reader)
         {
-            var result = new SoundSpeedProfile(Geo.Deserialize(reader));
+            // Note: I stipulate this is as ugly as hell but I'm not currently aware of any OTHER way to call the static Deserialize method
+            //       in whatever subclass of SoundSpeedSample that T is in the current context.
+            //var genericDeserializer = typeof(T).GetMethod("Deserialize", BindingFlags.Static | BindingFlags.Public);
+            var dummy = new T();
+
+            var result = new SoundSpeedProfile<T>(Geo.Deserialize(reader));
             var itemCount = reader.ReadInt32();
-            for (var i = 0; i < itemCount; i++)
-                result.Data.Add(new DepthValuePair<float>(reader.ReadSingle(), reader.ReadSingle()));
+            //for (var i = 0; i < itemCount; i++) result.Add((T)genericDeserializer.Invoke(null, new object[] { reader }));
+            for (var i = 0; i < itemCount; i++) result.Add((T)dummy.Deserialize(reader));
             return result;
         }
 
         public new void Serialize(BinaryWriter writer)
         {
+            Data.Sort();
             base.Serialize(writer);
             writer.Write(Data.Count);
             foreach (var item in Data)
-            {
-                writer.Write(item.Depth);
-                writer.Write(item.Value);
-            }
+                item.Serialize(writer);
         }
 
     }
@@ -201,9 +181,7 @@ namespace ESME.Environment
     [Serializable]
     public class DepthValuePairs<T> : List<DepthValuePair<T>>
     {
-        public DepthValuePairs() { }
-        
-        public DepthValuePair<T> this[float depth] { get { return Find(d => d.Depth == depth); } }
+        public DepthValuePair<T> this[float depth] { get { return Find(d => Math.Abs(d.Depth - depth) < 0.0001); } }
         new public DepthValuePair<T> this[int depthIndex] { get { return base[depthIndex]; } }
         public IEnumerable<float> Depths { get { return this.Select(pair => pair.Depth); } }
         public IEnumerable<T> Values { get { return this.Select(pair => pair.Value); } }
