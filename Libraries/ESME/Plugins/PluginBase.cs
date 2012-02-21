@@ -1,8 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Controls;
 using Cinch;
 using ESME.Environment;
+using ESME.NEMO;
 using HRC.Navigation;
 using HRC.Validation;
 
@@ -93,11 +95,16 @@ namespace ESME.Plugins
         /// <summary>
         /// An array of available resolutions, expressed in arc-minutes per sample
         /// </summary>
-        public float[] Resolutions { get; protected set; }
+        public float[] AvailableResolutions { get; protected set; }
         public virtual string DataLocation { get; set; }
         public string DataLocationHelp { get; protected set; }
         public bool IsTimeVariantData { get; protected set; }
         public TimePeriod[] AvailableTimePeriods { get; protected set; }
-        public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, IProgress<float> progress = null);
+        public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null);
+        protected void CheckResolutionAndTimePeriod(float resolution, TimePeriod timePeriod)
+        {
+            if (!AvailableTimePeriods.Contains(timePeriod)) throw new ParameterOutOfRangeException(string.Format("Specified timePeriod is not available in the {0} data set", PluginName));
+            if (!AvailableResolutions.Contains(resolution)) throw new ParameterOutOfRangeException(string.Format("Specified resolution is not available in the {0} data set", PluginName));
+        }
     }
 }

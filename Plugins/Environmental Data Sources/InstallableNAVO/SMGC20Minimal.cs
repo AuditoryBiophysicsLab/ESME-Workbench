@@ -4,7 +4,6 @@ using System.Linq;
 using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
-using ESME.NEMO;
 using ESME.Plugins;
 using HRC.Navigation;
 using Microsoft.Win32;
@@ -24,7 +23,7 @@ namespace InstallableNAVO
             IsTimeVariantData = true;
             AvailableTimePeriods = NAVOConfiguration.AllMonths.ToArray();
             PluginType = PluginType.EnvironmentalDataSource;
-            Resolutions = new[] { 60f };
+            AvailableResolutions = new[] { 60f };
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\SMGC 2.0 Minimal");
             if (regKey != null) DataLocation = (string)regKey.GetValue("");
 
@@ -66,10 +65,10 @@ namespace InstallableNAVO
         #endregion
 
 
-        public override Wind Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, IProgress<float> progress = null)
+        public override Wind Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
         {
-            if (!AvailableTimePeriods.Contains(timePeriod)) throw new ParameterOutOfRangeException(string.Format("Specified timePeriod is not available in the {0} data set", PluginName));
-            var timePeriodData = new TimePeriodEnvironmentData<WindSample> {TimePeriod = timePeriod};
+            CheckResolutionAndTimePeriod(resolution, timePeriod);
+            var timePeriodData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = timePeriod };
             timePeriodData.EnvironmentData.AddRange(GlobalDataset[timePeriod].EnvironmentData);
             timePeriodData.EnvironmentData.TrimToNearestPoints(geoRect);
             var result = new Wind();

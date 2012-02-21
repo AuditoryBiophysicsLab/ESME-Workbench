@@ -4,11 +4,9 @@ using System.Linq;
 using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
-using ESME.NEMO;
 using ESME.Plugins;
 using HRC.Navigation;
 using Microsoft.Win32;
-using GDEM = InstallableNAVO.Databases.GDEM;
 
 namespace InstallableNAVO
 {
@@ -22,14 +20,14 @@ namespace InstallableNAVO
             IsTimeVariantData = true;
             AvailableTimePeriods = NAVOConfiguration.AllMonths.ToArray();
             PluginType = PluginType.EnvironmentalDataSource;
-            Resolutions = new float[] { 15 };
+            AvailableResolutions = new float[] { 15 };
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\GDEM-V 3.0");
             if (regKey != null) DataLocation = (string)regKey.GetValue("");
 
             IsSelectable = DataLocation != null;
             IsConfigured = DataLocation != null &&
                            Directory.Exists(DataLocation) &&
-                           GDEM.IsDirectoryValid(DataLocation);
+                           Databases.GDEM.IsDirectoryValid(DataLocation);
 #if false
             ValidationRules.AddRange(new List<ValidationRule>
             {
@@ -43,11 +41,11 @@ namespace InstallableNAVO
 #endif
         }
 
-        public override SoundSpeed Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, IProgress<float> progress = null)
+        public override SoundSpeed Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
         {
-            if (!AvailableTimePeriods.Contains(timePeriod)) throw new ParameterOutOfRangeException(string.Format("Specified timePeriod is not available in the {0} data set", PluginName));
+            CheckResolutionAndTimePeriod(resolution, timePeriod);
             var result = new SoundSpeed();
-            result.Add(GDEM.ReadFile(DataLocation, timePeriod, geoRect));
+            result.Add(Databases.GDEM.ReadFile(DataLocation, timePeriod, geoRect));
             return result;
         }
     }

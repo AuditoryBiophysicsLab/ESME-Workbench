@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using ESME;
 using ESME.Environment;
@@ -8,28 +8,28 @@ using Microsoft.Win32;
 
 namespace InstallableNAVO
 {
-    public sealed class DBDB54 : EnvironmentalDataSourcePluginBase<Bathymetry>
+    public sealed class BST20 : EnvironmentalDataSourcePluginBase<Sediment>
     {
-        const string RequiredDBDBFilename = "dbdbv5_level0c_0.h5";
+        const string RequiredBSTFilename = "hfevav2.h5";
 
-        public DBDB54()
+        public BST20()
         {
-            PluginName = "DBDB-V 5.4";
-            PluginDescription = "Digital Bathymetric Data Base - Variable Resolution v5.4, from US Navy/NAVOCEANO";
-            DataLocationHelp = "A file called dbdbv5_level0c_0.h5";
+            PluginName = "BST 2.0";
+            PluginDescription = "Bottom Sediments Type Database Version 2.0 Repacked , from US Navy/NAVOCEANO";
+            DataLocationHelp = "A file called hfevav2.h5";
             //ConfigurationControl = new GDEM3Configuration { DataContext = this };
             PluginType = PluginType.EnvironmentalDataSource;
-            AvailableResolutions = new[] { 2, 1, 0.5f, 0.1f, 0.05f };
+            AvailableResolutions = new[] { 5f };
             IsTimeVariantData = false;
             AvailableTimePeriods = new[] { TimePeriod.Invalid };
 
-            var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\DBDB-V 5.4");
+            var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\BST 2.0");
             if (regKey != null) DataLocation = (string)regKey.GetValue("");
 
             IsSelectable = DataLocation != null;
             IsConfigured = DataLocation != null &&
                            Directory.Exists(DataLocation) &&
-                           File.Exists(Path.Combine(DataLocation, RequiredDBDBFilename));
+                           File.Exists(Path.Combine(DataLocation, RequiredBSTFilename));
 #if false
             ValidationRules.AddRange(new List<ValidationRule>
             {
@@ -43,10 +43,10 @@ namespace InstallableNAVO
 #endif
         }
 
-        public override Bathymetry Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
+        public override Sediment Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
         {
             CheckResolutionAndTimePeriod(resolution, timePeriod);
-            return Databases.DBDB.Extract(DataLocation, resolution, geoRect, progress);
+            return Databases.BST.Extract(DataLocation, geoRect, resolution, progress);
         }
     }
 }

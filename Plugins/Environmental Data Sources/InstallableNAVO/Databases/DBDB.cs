@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.IO;
-using System.Threading.Tasks;
-using ESME;
 using ESME.Environment;
 using HRC.Navigation;
 
@@ -10,12 +8,7 @@ namespace InstallableNAVO.Databases
 {
     public static class DBDB
     {
-        public static Task<Bathymetry> ExtractAsync(float selectedResolution, GeoRect region, IProgress<float> progress = null)
-        {
-            return TaskEx.Run(() => Extract(selectedResolution, region, progress));
-        }
-
-        public static Bathymetry Extract(float selectedResolution, GeoRect region, IProgress<float> progress = null)
+        public static Bathymetry Extract(string dataDirectory, float selectedResolution, GeoRect region, IProgress<float> progress = null)
         {
             if (progress != null) lock(progress) progress.Report(0f);
 
@@ -26,12 +19,13 @@ namespace InstallableNAVO.Databases
             outputPath = outputPath.Remove(outputPath.Length - 4, 4);
 
             var outputDirectory = Path.GetDirectoryName(outputPath);
-            var commandArgs = string.Format(" area \"{0}\" 0.05min 2.00min nearest 0 meters G {1} {2} {3} {4} {5:0.0##} YXZ=\"{6}\"", Globals.AppSettings.NAVOConfiguration.DBDBDirectory, region.South, region.West, region.North, region.East, selectedResolution, string.Format("{0}.yxz", Path.GetFileName(outputPath)));
+            var commandArgs = string.Format(" area \"{0}\" 0.05min 2.00min nearest 0 meters G {1} {2} {3} {4} {5:0.0##} YXZ=\"{6}\"", 
+                dataDirectory, region.South, region.West, region.North, region.East, selectedResolution, string.Format("{0}.yxz", Path.GetFileName(outputPath)));
             //extract the area and look for success or failure in the output string.
 
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
 
-            var result = NAVOExtractionProgram.Execute(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath, commandArgs, outputDirectory).Result;
+            var result = NAVOExtractionProgram.Execute(dataDirectory, commandArgs, outputDirectory).Result;
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DigitalBathymetricDatabase: Error extracting requested area: " + line);
 
