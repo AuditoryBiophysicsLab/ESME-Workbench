@@ -58,7 +58,7 @@ namespace ESME.TransmissionLoss.RAM
         /// <param name="rangeCellCount"></param>
         /// <param name="depthCellCount"></param>
         /// <returns></returns>
-        public static string GetRadialConfiguration(TransmissionLossJob transmissionLossJob, SoundSpeedProfile<SoundSpeedSample> ssp, BottomProfile bottomProfile, SedimentType sediment, float maxCalculationDepthMeters, int rangeCellCount, int depthCellCount)
+        public static string GetRadialConfiguration(TransmissionLossJob transmissionLossJob, SoundSpeedProfile ssp, BottomProfile bottomProfile, SedimentType sediment, float maxCalculationDepthMeters, int rangeCellCount, int depthCellCount)
         {
             const float c0 = 1500f;
             var lambda = c0 / transmissionLossJob.SoundSource.AcousticProperties.HighFrequency;
