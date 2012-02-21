@@ -56,6 +56,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Interactivity">
       <HintPath>..\ESME WorkBench\External References\System.Windows.Interactivity.dll</HintPath>
     </Reference>

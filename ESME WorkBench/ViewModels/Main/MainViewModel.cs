@@ -119,22 +119,22 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region public Geo MouseEarthCoordinate { get; set; }
+        #region public Geo MouseGeo { get; set; }
 
-        public EarthCoordinate MouseEarthCoordinate
+        public Geo MouseGeo
         {
-            get { return _mouseEarthCoordinate; }
+            get { return _mouseGeo; }
             set
             {
-                if (_mouseEarthCoordinate == value) return;
-                _mouseEarthCoordinate = value;
+                if (_mouseGeo == value) return;
+                _mouseGeo = value;
                 NotifyPropertyChanged(MouseEarthCoordinateChangedEventArgs);
                 NotifyPropertyChanged(MouseLocationInfoChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs MouseEarthCoordinateChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MouseEarthCoordinate);
-        EarthCoordinate _mouseEarthCoordinate;
+        static readonly PropertyChangedEventArgs MouseEarthCoordinateChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MouseGeo);
+        Geo _mouseGeo;
 
         #endregion
 
@@ -144,9 +144,9 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                if (MouseEarthCoordinate == null) return null;
-                var lat = MouseEarthCoordinate.Latitude;
-                var lon = MouseEarthCoordinate.Longitude;
+                if (MouseGeo == null) return null;
+                var lat = MouseGeo.Latitude;
+                var lon = MouseGeo.Longitude;
                 if (-90 > lat || lat > 90) return null;
                 if (-180 > lon || lon > 180) return null;
                 var northSouth = lat >= 0 ? "N" : "S";
@@ -157,7 +157,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     {
                         _bathymetry = new WeakReference<Bathymetry>(((Task<Bathymetry>)RangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).Result);
                     }
-                    if (_bathymetry != null && _bathymetry.Target != null && _bathymetry.Target.Samples.GeoRect.Contains(MouseEarthCoordinate)) return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3} Elevation: {4:0.#}m", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest, _bathymetry.Target.Samples.GetNearestPoint(MouseEarthCoordinate).Data);
+                    if (_bathymetry != null && _bathymetry.Target != null && _bathymetry.Target.Samples.GeoRect.Contains(MouseGeo)) return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3} Elevation: {4:0.#}m", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest, _bathymetry.Target.Samples.GetNearestPoint(MouseGeo).Data);
                 }
                 return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3}", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest);
             }

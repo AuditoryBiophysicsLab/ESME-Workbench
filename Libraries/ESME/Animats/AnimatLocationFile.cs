@@ -107,7 +107,7 @@ namespace ESME.Animats
         /// </summary>
         /// <param name="timeIndex"></param>
         /// <returns>array of Earthcoordinate3Ds from all animats at a given time</returns>      
-        public EarthCoordinate3D[] this[long timeIndex]
+        public Geo<float>[] this[long timeIndex]
         {
             get
             {
@@ -115,14 +115,14 @@ namespace ESME.Animats
                 if (timeIndex >= _totalTimeRecords)
                     throw new IndexOutOfRangeException("Index exceeds animat bounds");
                 //calculate file position
-                long timeRecordLength = _totalAnimatCount * EarthCoordinate3D.Size;
+                long timeRecordLength = _totalAnimatCount * 20;
                 var filePosition = (timeRecordLength * timeIndex) + _sizeOfHeader;
                 //skip to that position
                 _reader.BaseStream.Position = filePosition;
                 //go get it.
-                var retval = new EarthCoordinate3D[_totalAnimatCount];
+                var retval = new Geo<float>[_totalAnimatCount];
                 for (var i = 0; i < _totalAnimatCount; i++)
-                    retval[i] = new EarthCoordinate3D(_reader.ReadDouble(), _reader.ReadDouble(), _reader.ReadDouble());
+                    retval[i] = new Geo<float>(_reader.ReadDouble(), _reader.ReadDouble(), _reader.ReadSingle());
                 return retval;
             }
         }
@@ -132,7 +132,7 @@ namespace ESME.Animats
         /// </summary>
         /// <param name="time"></param>
         /// <returns>array of Earthcoordinate3Ds from all animats at a given time</returns>
-        public EarthCoordinate3D[] this[TimeSpan time]
+        public Geo<float>[] this[TimeSpan time]
         {
             get { return this[time.Ticks / _timeStepLength.Ticks]; }
         }
@@ -142,7 +142,7 @@ namespace ESME.Animats
         /// </summary>
         /// <param name="speciesName">The name of the species</param>
         /// <returns>Enumerable list of EarthCoordinate3D[], intended for use in a foreach statement</returns>
-        public IEnumerable<EarthCoordinate3D[]> this[string speciesName]
+        public IEnumerable<Geo<float>[]> this[string speciesName]
         {
             get
             {
@@ -163,8 +163,8 @@ namespace ESME.Animats
                     }
                     speciesStartIndex += species.AnimatCount;
                 }
-                var startOffset = speciesStartIndex * EarthCoordinate3D.Size;
-                var endOffset = (_totalAnimatCount - speciesEndIndex) * EarthCoordinate3D.Size;
+                var startOffset = speciesStartIndex * 20;
+                var endOffset = (_totalAnimatCount - speciesEndIndex) * 20;
 
                 // number of species in the list prior to target species * number of animats per species
                 _reader.BaseStream.Position = _sizeOfHeader;
@@ -172,10 +172,9 @@ namespace ESME.Animats
                 for (long i = 0; i < _totalTimeRecords; i++)
                 {
                     _reader.BaseStream.Seek(startOffset, SeekOrigin.Current);
-                    var retval = new EarthCoordinate3D[speciesCount];
+                    var retval = new Geo<float>[speciesCount];
                     for (var j = 0; j < speciesCount; j++) //read only the given species' positions, skip the others.
-                        retval[j] = new EarthCoordinate3D(_reader.ReadDouble(), _reader.ReadDouble(),
-                                                          _reader.ReadDouble());
+                        retval[j] = new Geo<float>(_reader.ReadDouble(), _reader.ReadDouble(), _reader.ReadSingle());
                     //...and skip through the rest of the species for this time.
                     _reader.BaseStream.Seek(endOffset, SeekOrigin.Current);
                     yield return retval;
@@ -183,7 +182,7 @@ namespace ESME.Animats
             }
         }
 
-        public IEnumerable<EarthCoordinate3D> AnimatTrackBySpecies(string speciesName, int animatIndexInSpecies)
+        public IEnumerable<Geo<float>> AnimatTrackBySpecies(string speciesName, int animatIndexInSpecies)
         {
             var thisSpecies = this[speciesName];
             return thisSpecies.Select(timelocation => timelocation[animatIndexInSpecies]);
@@ -192,14 +191,14 @@ namespace ESME.Animats
         public IEnumerable<OverlayLineSegments> GetAnimatTracks(int[] animatIDs, TimeSpan startTime, TimeSpan duration)
         {
 
-            var trackpoints = new List<EarthCoordinate3D>[animatIDs.Length];
+            var trackpoints = new List<Geo<float>>[animatIDs.Length];
 
             foreach (var curTimeRecord in AllRecordsBetween(startTime, startTime + duration))
             {
                 for (var i = 0; i < animatIDs.Length; i++)
                 {
                     if (trackpoints[i] == null)
-                        trackpoints[i] = new List<EarthCoordinate3D>();
+                        trackpoints[i] = new List<Geo<float>>();
                     trackpoints[i].Add(curTimeRecord[animatIDs[i]]);
                 }
             }
@@ -209,14 +208,14 @@ namespace ESME.Animats
         /// Get position information about all animats at all times.
         /// </summary>
         /// <returns>Enumerable list of EarthCoordinate3D[], indended for use in a foreach.</returns>
-        public IEnumerable<EarthCoordinate3D[]> AllRecordsBetween(TimeSpan startTime, TimeSpan endTime)
+        public IEnumerable<Geo<float>[]> AllRecordsBetween(TimeSpan startTime, TimeSpan endTime)
         {
             CheckCanRead();
             for (var now = startTime; now < endTime; now += _timeStepLength)
                 yield return this[now];
         }
 
-        public IEnumerable<EarthCoordinate3D[]> AllRecords
+        public IEnumerable<Geo<float>[]> AllRecords
         {
             get
             {
@@ -229,7 +228,7 @@ namespace ESME.Animats
         /// adds an array of animatlocations of type earthcoordinate3D to the current animat location file.
         /// </summary>
         /// <param name="animatLocations"></param>
-        public void AddTimeRecord(EarthCoordinate3D[] animatLocations)
+        public void AddTimeRecord(Geo<float>[] animatLocations)
         {
             CheckCanWrite();
 
@@ -242,7 +241,7 @@ namespace ESME.Animats
             {
                 _writer.Write(location.Latitude);
                 _writer.Write(location.Longitude);
-                _writer.Write(location.Elevation);
+                _writer.Write(location.Data);
             }
         }
 

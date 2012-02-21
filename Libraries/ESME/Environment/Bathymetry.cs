@@ -14,9 +14,9 @@ namespace ESME.Environment
 {
     public class Bathymetry : EnvironmentDataSetBase
     {
-        public EnvironmentData<EarthCoordinate<float>> Samples { get; private set; }
+        public EnvironmentData<Geo<float>> Samples { get; private set; }
 
-        public Bathymetry() { Samples = new EnvironmentData<EarthCoordinate<float>>(); }
+        public Bathymetry() { Samples = new EnvironmentData<Geo<float>>(); }
 
         public static Task<Bathymetry> LoadAsync(string filename)
         {
@@ -49,7 +49,7 @@ namespace ESME.Environment
                 var result = new Bathymetry();
                 var count = reader.ReadInt32();
                 for (var i = 0; i < count; i++)
-                    result.Samples.Add(new EarthCoordinate<float>(reader.ReadDouble(), reader.ReadDouble(), reader.ReadSingle()));
+                    result.Samples.Add(new Geo<float>(reader.ReadDouble(), reader.ReadDouble(), reader.ReadSingle()));
                 return result;
             }
         }
@@ -57,7 +57,7 @@ namespace ESME.Environment
         public static Bathymetry FromYXZ(string fileName, float scaleFactor)
         {
             char[] separators = { ' ' };
-            var samples = new List<EarthCoordinate<float>>();
+            var samples = new List<Geo<float>>();
             //System.Diagnostics.Debug.WriteLine("{0}: FromYXZ: About to read bathymetry file {1}", DateTime.Now, Path.GetFileName(fileName));
             //var lineCount = 0;
             using (var stream = new StreamReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
@@ -70,7 +70,7 @@ namespace ESME.Environment
                     var latitude = double.Parse(fields[0]);
                     var longitude = double.Parse(fields[1]);
                     var depth = float.Parse(fields[2]) * scaleFactor;
-                    samples.Add(new EarthCoordinate<float>(latitude, longitude, depth));
+                    samples.Add(new Geo<float>(latitude, longitude, depth));
                     curLine = stream.ReadLine();
                 }
             }
@@ -82,14 +82,14 @@ namespace ESME.Environment
 
         public void ToYXZ(string fileName, float scaleFactor)
         {
-            using (var stream = new StreamWriter(fileName, false, System.Text.Encoding.ASCII))
+            using (var stream = new StreamWriter(fileName, false, Encoding.ASCII))
             {
                 foreach (var sample in Samples)
                     stream.WriteLine("{0:0.0000} {1:0.0000} {2:0.00}", sample.Latitude, sample.Longitude, sample.Data * scaleFactor);
             }
         }
 
-        public EarthCoordinate<float> Minimum
+        public Geo<float> Minimum
         {
             get
             {
@@ -99,7 +99,7 @@ namespace ESME.Environment
             }
         }
 
-        public EarthCoordinate<float> Maximum
+        public Geo<float> Maximum
         {
             get
             {
@@ -109,12 +109,12 @@ namespace ESME.Environment
             }
         }
 
-        public EarthCoordinate<float> DeepestPoint
+        public Geo<float> DeepestPoint
         {
             get
             {
                 var minimum = Minimum;
-                return new EarthCoordinate<float>(minimum, Math.Abs(minimum.Data));
+                return new Geo<float>(minimum.Data, Math.Abs(minimum.Data));
             }
         }
     }
@@ -131,9 +131,9 @@ namespace ESME.Environment
             if (bathysize > rasterSize)
             {
                 var scaleFactor = rasterSize / bathysize;
-                displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples,
-                                                                                 bathymetry.Samples.Longitudes.Count * scaleFactor,
-                                                                                 bathymetry.Samples.Latitudes.Count * scaleFactor);
+                displayValues = EnvironmentData<Geo<float>>.Decimate(bathymetry.Samples,
+                                                                     bathymetry.Samples.Longitudes.Count * scaleFactor,
+                                                                     bathymetry.Samples.Latitudes.Count * scaleFactor);
             }
 
             var imageFilename = Path.GetFileNameWithoutExtension(destinationFilename) + ".bmp";

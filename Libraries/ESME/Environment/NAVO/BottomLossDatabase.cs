@@ -24,7 +24,7 @@ namespace ESME.Environment.NAVO
             if (progress != null) lock (progress) progress.Report(0f);
             if (currentState != null) lock (currentState) currentState.Report("Importing bottom loss data");
 
-            var locations = new List<EarthCoordinate>();
+            var locations = new List<Geo>();
             var north = (float)Math.Ceiling(region.North);
             var south = (float)Math.Floor(region.South);
             var east = (float)Math.Ceiling(region.East);
@@ -32,14 +32,14 @@ namespace ESME.Environment.NAVO
 
             for (var lat = south; lat < north; lat += 0.25f)
                 for (var lon = west; lon < east; lon += 0.25f)
-                    locations.Add(new EarthCoordinate(lat, lon));
+                    locations.Add(new Geo(lat, lon));
             var progressStep = 100f / ((locations.Count * 2) + 1);
             var totalProgress = 0f;
             var useLFBL = !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath);
             var useHFBL = !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath);
             var totalPointsRequested = 0;
             var totalPointsProcessed = 0;
-            var transformBlock = new TransformBlock<EarthCoordinate, BottomLossSample>(async location =>
+            var transformBlock = new TransformBlock<Geo, BottomLossSample>(async location =>
                 {
                     BottomLossSample curPoint = null;
                     if (useLFBL)

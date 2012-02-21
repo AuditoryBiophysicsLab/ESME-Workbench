@@ -4,28 +4,28 @@ using HRC.Navigation;
 namespace ESME.Environment
 {
     [Serializable]
-    public class Transect : EarthCoordinate
+    public class Transect : Geo
     {
-        readonly EarthCoordinate _endPoint;
-        readonly EarthCoordinate _midPoint;
+        readonly Geo _endPoint;
+        readonly Geo _midPoint;
 
-        public Transect(string name, EarthCoordinate startPoint, EarthCoordinate endPoint) : base(startPoint)
+        public Transect(string name, Geo startPoint, Geo endPoint)
+            : base(startPoint)
         {
             Name = name;
             _endPoint = endPoint;
-            Length = DistanceTo(_endPoint);
-            Bearing = BearingTo(_endPoint);
-            _midPoint = new EarthCoordinate(startPoint);
-            _midPoint.Move(Bearing, Length / 2);
+            Length = DistanceMeters(_endPoint);
+            Bearing = AzimuthDegrees(_endPoint);
+            _midPoint = startPoint.Move(Bearing, Length / 2);
         }
 
-        public Transect(string name, EarthCoordinate startPoint, double bearing, double length) : base(startPoint)
+        public Transect(string name, Geo startPoint, double bearing, double length) : base(startPoint)
         {
             Name = name;
-            _endPoint = new EarthCoordinate(this, bearing, length);
+            _endPoint = new Geo(this, bearing, length);
             Length = length;
             Bearing = bearing;
-            _midPoint = new EarthCoordinate(startPoint);
+            _midPoint = new Geo(startPoint);
             _midPoint.Move(Bearing, Length / 2);
         }
 
@@ -47,16 +47,16 @@ namespace ESME.Environment
         /// <summary>
         /// Start point of the transect
         /// </summary>
-        public EarthCoordinate StartPoint { get { return new EarthCoordinate(this); } }
+        public Geo StartPoint { get { return new Geo(this); } }
 
         /// <summary>
         /// End point of the transect
         /// </summary>
-        public EarthCoordinate EndPoint { get { return new EarthCoordinate(_endPoint); } }
+        public Geo EndPoint { get { return new Geo(_endPoint); } }
 
         /// <summary>
         /// Mid point of the transect
         /// </summary>
-        public new EarthCoordinate MidPoint { get { return new EarthCoordinate(_midPoint); } }
+        public new Geo MidPoint { get { return new Geo(_midPoint); } }
     }
 }

@@ -66,7 +66,7 @@ namespace ESMEWorkBench.ViewModels.Map
                                                                                  var e = (MouseEventArgs) arg.EventArgs;
                                                                                  var point = e.MouseDevice.GetPosition(_wpfMap);
                                                                                  var pointShape = ExtentHelper.ToWorldCoordinate(_wpfMap.CurrentExtent, (float) point.X, (float) point.Y, (float) _wpfMap.ActualWidth, (float) _wpfMap.ActualHeight);
-                                                                                 MediatorMessage.Send(MediatorMessage.SetMouseEarthCoordinate, new EarthCoordinate(pointShape.Y, pointShape.X));
+                                                                                 MediatorMessage.Send(MediatorMessage.SetMouseEarthCoordinate, new Geo(pointShape.Y, pointShape.X));
                                                                              });
 
             MouseLeftButtonUpCommand = new SimpleCommand<object, object>(delegate

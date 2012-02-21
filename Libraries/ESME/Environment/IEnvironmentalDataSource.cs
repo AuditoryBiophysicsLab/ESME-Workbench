@@ -13,7 +13,7 @@ namespace ESME.Environment
 
     public interface IGDEM3DataSource<out T> : IEnvironmentalDataSource<T>
     {
-        T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, EarthCoordinate<float> deepestPoint, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null);
+        T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, Geo<float> deepestPoint, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null);
         T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, Bathymetry bathymetry, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null);
     }
 }

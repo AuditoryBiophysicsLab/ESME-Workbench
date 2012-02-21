@@ -56,7 +56,7 @@ namespace HRC.Utility
         /// <param name = "g"></param>
         /// <param name = "p1">One of the corners of the current drawable area</param>
         /// <param name = "p2">Another corner of the current drawable area</param>
-        public static void SetGeoCoordinates(this Graphics g, EarthCoordinate p1, EarthCoordinate p2)
+        public static void SetGeoCoordinates(this Graphics g, Geo p1, Geo p2)
         {
             var north = Math.Max(p1.Latitude, p2.Latitude);
             var south = Math.Min(p1.Latitude, p2.Latitude);
@@ -113,12 +113,12 @@ namespace HRC.Utility
         }
 #endif
 
-        public static void Lines(this Graphics g, EarthCoordinate[] points, float width, Color color)
+        public static void Lines(this Graphics g, Geo[] points, float width, Color color)
         {
             var unitsPerPixelX = g.GetUnitsPerPixelX();
             var unitsPerPixelY = g.GetUnitsPerPixelY();
             var pen = new Pen(color, (width * Math.Max(unitsPerPixelX, unitsPerPixelY)));
-            for (var i = 0; i < points.Length - 1; i++) g.DrawLine(pen, (PointF) points[i], (PointF) points[i + 1]);
+            for (var i = 0; i < points.Length - 1; i++) g.DrawLine(pen, points[i], points[i + 1]);
         }
 
         /// <summary>
@@ -129,10 +129,10 @@ namespace HRC.Utility
         /// <param name = "width">Width of the perimeter line, in pixels</param>
         /// <param name = "lineColor">Color of the perimeter of the square</param>
         /// <param name = "fillColor">Color to fill the square with, or null if an unfilled square is desired</param>
-        public static void Polygon(this Graphics g, EarthCoordinate[] points, float width, Color? lineColor, Color? fillColor)
+        public static void Polygon(this Graphics g, Geo[] points, float width, Color? lineColor, Color? fillColor)
         {
             var pointFs = new PointF[points.Length];
-            for (var i = 0; i < points.Length; i++) pointFs[i] = (PointF) points[i];
+            for (var i = 0; i < points.Length; i++) pointFs[i] = points[i];
             var unitsPerPixelX = g.GetUnitsPerPixelX();
             var unitsPerPixelY = g.GetUnitsPerPixelY();
             if (lineColor != null)
@@ -153,12 +153,12 @@ namespace HRC.Utility
         /// <param name = "end">EarthCoordinate to stop drawing</param>
         /// <param name = "width">Width of the line, in pixels</param>
         /// <param name = "color">Color of the line</param>
-        public static void Line(this Graphics g, EarthCoordinate start, EarthCoordinate end, float width, Color color)
+        public static void Line(this Graphics g, Geo start, Geo end, float width, Color color)
         {
             var unitsPerPixelX = g.GetUnitsPerPixelX();
             var unitsPerPixelY = g.GetUnitsPerPixelY();
             var pen = new Pen(color, (width * Math.Max(unitsPerPixelX, unitsPerPixelY)));
-            g.DrawLine(pen, (PointF) start, (PointF) end);
+            g.DrawLine(pen, start, end);
         }
 
         /// <summary>

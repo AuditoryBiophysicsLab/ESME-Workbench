@@ -129,7 +129,7 @@ namespace ESME.Views.Controls
         private readonly IViewAwareStatus _viewAwareStatus;
         private bool _iAmInitialized;
         private bool _isRendered;
-        private EarthCoordinate _location;
+        private Geo _location;
         private TransmissionLossRadial _tempRadial;
         private WriteableBitmap _writeableBitmap;
 

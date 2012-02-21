@@ -16,7 +16,7 @@ using HRC.Utility;
 namespace ESME.TransmissionLoss
 {
     [Serializable]
-    public class AnalysisPoint : EarthCoordinate, IEquatable<AnalysisPoint>, ISupportValidation
+    public class AnalysisPoint : Geo, IEquatable<AnalysisPoint>, ISupportValidation
     {
         private AnalysisPoint()
         {
@@ -56,7 +56,7 @@ namespace ESME.TransmissionLoss
         public List<SoundSource> SoundSources { get; set; }
 
         [XmlIgnore]
-        public EarthCoordinate OldLocation { get; set; }
+        public Geo OldLocation { get; set; }
 
         #region public WeakReference<Bathymetry> Bathymetry { get; set; }
 

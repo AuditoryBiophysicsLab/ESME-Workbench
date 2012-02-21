@@ -110,7 +110,7 @@ namespace ESME.Environment.NAVO
 
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             // Construct a list of files we will need to read out of the SMGC database
-            var selectedLocations = new List<EarthCoordinate>();
+            var selectedLocations = new List<Geo>();
             var allFiles = Directory.GetFiles(smgcDirectory, "*.stt", SearchOption.AllDirectories).ToList();
 #if false
             // This chunk of code is ONLY for the SMGC importer and should only be compiled when running that utility
@@ -130,7 +130,7 @@ namespace ESME.Environment.NAVO
                                          select curFile).ToList();
                     if (!matchingFiles.Any()) continue;
                     parallelReader.Post(matchingFiles.First());
-                    selectedLocations.Add(new EarthCoordinate(lat, lon));
+                    selectedLocations.Add(new Geo(lat, lon));
                 }
             }
             var batchBlock = new BatchBlock<SMGCFile>(selectedLocations.Count);
@@ -146,7 +146,7 @@ namespace ESME.Environment.NAVO
                 var curTimePeriodData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = timePeriod };
                 curTimePeriodData.EnvironmentData.AddRange(from selectedFile in selectedFiles
                                                       where (selectedFile.Months != null) && (selectedFile[timePeriod] != null)
-                                                      select new WindSample(selectedFile.EarthCoordinate, selectedFile[timePeriod].MeanWindSpeed));
+                                                      select new WindSample(selectedFile.Geo, selectedFile[timePeriod].MeanWindSpeed));
                 return curTimePeriodData;
             },
             new ExecutionDataflowBlockOptions
@@ -213,7 +213,7 @@ namespace ESME.Environment.NAVO
         internal class SMGCFile
         {
             public List<SMGCMonth> Months { get; private set; }
-            public EarthCoordinate EarthCoordinate { get; private set; }
+            public Geo Geo { get; private set; }
 
             public SMGCMonth this[TimePeriod timePeriod]
             {
@@ -271,7 +271,7 @@ namespace ESME.Environment.NAVO
                     default:
                         throw new ApplicationException("FileName: Fourth char MUST be 'e' or 'w'. File: " + fileName);
                 }
-                EarthCoordinate = new EarthCoordinate(lat, lon);
+                Geo = new Geo(lat, lon);
 
                 var info = new FileInfo(fileName);
                 if (info.Length == 0) return;

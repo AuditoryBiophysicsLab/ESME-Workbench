@@ -17,9 +17,7 @@ using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
-using ESME.Environment.NAVO;
 using ESME.Mapping;
-using ESME.Model;
 using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
@@ -605,7 +603,7 @@ namespace ESME.Metadata
 
         #endregion
 
-        public void PlaceAnalysisPoint(EarthCoordinate location)
+        public void PlaceAnalysisPoint(Geo location)
         {
             if (AnalysisPoints == null) AnalysisPoints = new ObservableCollection<AnalysisPoint>();
             if (ExplosivePoints == null) ExplosivePoints = new ObservableCollection<ExplosivePoint>();

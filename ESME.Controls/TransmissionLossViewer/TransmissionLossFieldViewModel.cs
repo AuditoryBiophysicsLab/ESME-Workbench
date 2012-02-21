@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Text;
-using System.Windows;
 using System.Windows.Forms;
 using Cinch;
 using ESME.TransmissionLoss;
@@ -60,7 +58,7 @@ namespace ESME.Views.TransmissionLossViewer
                                                                            SystemInformation.PrimaryMonitorSize.Width), nativesize));
 
                 DepthSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo,
-                                                            TransmissionLossFieldSlice.SliceType.Depth, 0);//or SelectedDepth
+                                                            TransmissionLossFieldSlice.SliceType.Depth);//or SelectedDepth
                 MinSlice = new TransmissionLossFieldSlice(_transmissionLossField,LookupInfo,TransmissionLossFieldSlice.SliceType.Minimum);
                 MaxSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo, TransmissionLossFieldSlice.SliceType.Maximum);
                 MeanSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo, TransmissionLossFieldSlice.SliceType.Mean);
@@ -112,7 +110,7 @@ namespace ESME.Views.TransmissionLossViewer
             get { return _selectedRadialBearing; }
             set
             {
-                if (_selectedRadialBearing == value) return;
+                if (Math.Abs(_selectedRadialBearing - value) < 0.0001) return;
                 _selectedRadialBearing = value;
                 NotifyPropertyChanged(SelectedRadialBearingChangedEventArgs);
                 NotifyPropertyChanged(SelectedBearingGeometryChangedEventArgs);
@@ -164,7 +162,7 @@ namespace ESME.Views.TransmissionLossViewer
                 _selectedRadial = value;
                 NotifyPropertyChanged(SelectedRadialChangedEventArgs);
 
-                MediatorMessage.Send(MediatorMessage.TransmissionLossRadialEarthCoordinate, new EarthCoordinate(_transmissionLossField.Latitude,_transmissionLossField.Longitude));
+                MediatorMessage.Send(MediatorMessage.TransmissionLossRadialEarthCoordinate, new Geo(_transmissionLossField.Latitude,_transmissionLossField.Longitude));
                 MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, TransmissionLossField.Radials[_selectedRadial - 1]);
                 MediatorMessage.Send(MediatorMessage.SetSelectedRadialBearing, TransmissionLossField.Radials[_selectedRadial - 1].BearingFromSource);
                 

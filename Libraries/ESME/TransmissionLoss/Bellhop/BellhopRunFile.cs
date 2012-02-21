@@ -28,7 +28,7 @@ namespace ESME.TransmissionLoss.Bellhop
 
             var radialCount = transmissionLossJob.SoundSource.RadialBearings.Count;
             var bottomProfiles = new BottomProfile[radialCount];
-            var soundSpeedProfiles = new SoundSpeedProfile<SoundSpeedSample>[radialCount];
+            var soundSpeedProfiles = new SoundSpeedProfileGeneric<SoundSpeedSample>[radialCount];
             var maxCalculationDepthMeters = float.MinValue;
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {

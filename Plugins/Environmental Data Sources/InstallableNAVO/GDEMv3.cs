@@ -45,7 +45,7 @@ namespace InstallableNAVO
             throw new NotImplementedException(string.Format("{0} extraction routine requires either deepest point OR bathymetry argument", PluginName));
         }
 
-        public SoundSpeed Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, EarthCoordinate<float> deepestPoint, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null)
+        public SoundSpeed Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, Geo<float> deepestPoint, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null)
         {
             var months = seasonConfiguration.MonthsInTimePeriod(timePeriod).ToList();
             var monthlySoundSpeeds = (from month in months

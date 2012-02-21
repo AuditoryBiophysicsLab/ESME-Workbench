@@ -118,7 +118,7 @@ namespace InstallableNAVO.Databases
                 {
                     var lat = latMap[latIndex].Value;
                     var latSourceIndex = latMap[latIndex].Index;
-                    var newProfile = new SoundSpeedProfile(new EarthCoordinate(lat, wrappedLon));
+                    var newProfile = new SoundSpeedProfile(new Geo(lat, wrappedLon));
                     for (var depthIndex = 0; depthIndex < temperatureDepths.Length; depthIndex++)
                     {
                         var temperatureValue = temperatureData[(uint)depthIndex, (uint)latSourceIndex, (uint)lonSourceIndex];

@@ -34,24 +34,12 @@ namespace ESME.NEMO.Overlay
             CheckCrossingSegments();
         }
 
-        public OverlayLineSegments(EarthCoordinate[] points, Color color, float size = 1f, LineStyle lineStyle = LineStyle.Solid)
+        public OverlayLineSegments(Geo[] points, Color color, float size = 1f, LineStyle lineStyle = LineStyle.Solid)
             : base(color, size, lineStyle)
         {
             Segments = new List<OverlayLineSegment>();
             Add(points);
             if (points.Length < 2) return;
-            CreateSegments();
-            ComputeBoundingBox();
-            CheckForClosure();
-            CheckCrossingSegments();
-        }
-
-        public OverlayLineSegments(ICollection<EarthCoordinate> points, Color color, float size = 1f, LineStyle lineStyle = LineStyle.Solid)
-            : base(color, size, lineStyle)
-        {
-            Segments = new List<OverlayLineSegment>();
-            Add(points);
-            if (points.Count < 2) return;
             CreateSegments();
             ComputeBoundingBox();
             CheckForClosure();
@@ -109,7 +97,7 @@ namespace ESME.NEMO.Overlay
                         var edgeNormalCourse = new Course(this[i], this[i + 1]);
                         var trialCw = Segments[i].Midpoint;
                         edgeNormalCourse.Degrees += 90;
-                        trialCw.Move(edgeNormalCourse.Degrees, 100);
+                        trialCw = trialCw.Move(edgeNormalCourse.Degrees, 100);
                         if (Contains(trialCw))
                             Normals[i] = new Course(edgeNormalCourse.Degrees);
                         else

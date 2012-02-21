@@ -305,7 +305,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                     // If the animat is not within the radius, skip it.
                                     if ((animatRange <= beamRadius) && (horizontalBeamLimits.Contains(animatBearing)))
                                     {
-                                        var transmissionLoss = transmissionLossField.Lookup(animatBearing, animatRange, (float) animat.Location.Elevation);
+                                        var transmissionLoss = transmissionLossField.Lookup(animatBearing, animatRange, (float) animat.Location.Data);
                                         var soundPressureLevel = mode.SourceLevel - transmissionLoss;
                                         animat.CreateLevelBins(modeCount, 120, 6, 15);
                                         animat.RecordExposure(mode.PSMName, mode.ModeID, soundPressureLevel);

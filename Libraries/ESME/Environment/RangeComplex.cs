@@ -4,7 +4,7 @@ using HRC.Navigation;
 namespace ESME.Environment
 {
     [Serializable]
-    public class RangeComplex : EarthCoordinate
+    public class RangeComplex : Geo
     {
         public RangeComplex() { }
 

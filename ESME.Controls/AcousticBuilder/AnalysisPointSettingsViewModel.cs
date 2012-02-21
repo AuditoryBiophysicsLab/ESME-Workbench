@@ -25,7 +25,7 @@ namespace ESME.Views.AcousticBuilder
             IsItemSelected = false;
             Latitude = AnalysisPoint.Latitude;
             Longitude = AnalysisPoint.Longitude;
-            AnalysisPoint.OldLocation = new EarthCoordinate(AnalysisPoint);
+            AnalysisPoint.OldLocation = new Geo(AnalysisPoint);
             
             ValidationRules.AddRange(new List<ValidationRule>
             {

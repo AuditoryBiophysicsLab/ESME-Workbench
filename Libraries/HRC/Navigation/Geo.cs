@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using System.Windows;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
+using Point = System.Windows.Point;
 
 namespace HRC.Navigation
 {
@@ -103,6 +104,15 @@ namespace HRC.Navigation
         /** Construct a Geo from another Geo. */
         public Geo(Geo geo) : this(geo.X, geo.Y, geo.Z) { }
 
+        public Geo(Geo geo, double azimuthDegrees, double distanceMeters)
+        {
+            var result = geo.Offset(KilometersToRadians(distanceMeters / 1000), DegreesToRadians(azimuthDegrees));
+            X = result.X;
+            Y = result.Y;
+            Z = result.Z;
+            UpdateLatitudeLongitude();
+        }
+
         public static Geo FromRadians(double latr, double lonr)
         {
             var rlat = GeocentricLatitude(latr);
@@ -115,6 +125,16 @@ namespace HRC.Navigation
         public static Geo FromXYZ(double x, double y, double z) { return new Geo(x, y, z); }
 
         public static Geo FromGeo(Geo p) { return new Geo(p.X, p.Y, p.Z); }
+
+        public static Geo Move(Geo geo, double azimuthDegrees, double distanceMeters)
+        {
+            return geo.Offset(KilometersToRadians(distanceMeters / 1000), DegreesToRadians(azimuthDegrees));
+        }
+
+        public Geo Move(double azimuthDegrees, double distanceMeters)
+        {
+            return Offset(KilometersToRadians(distanceMeters / 1000), DegreesToRadians(azimuthDegrees));
+        }
 
         //public static implicit operator Geo(EarthCoordinate earthCoordinate) { return FromDegrees(earthCoordinate.Latitude, earthCoordinate.Longitude); }
         //public static explicit operator Geo(EarthCoordinate earthCoordinate) { return FromDegrees(earthCoordinate.Latitude, earthCoordinate.Longitude); }
@@ -445,6 +465,31 @@ namespace HRC.Navigation
         public static double DistanceKilometers(double lat1, double lon1, double lat2, double lon2) { return DistanceKilometers(new Geo(lat1, lon1), new Geo(lat2, lon2)); }
 
         /// <summary>
+        ///   Distance in meters from this to v2
+        /// </summary>
+        /// <param name = "v2"></param>
+        /// <returns></returns>
+        public double DistanceMeters(Geo v2) { return RadiansToKilometers(DistanceRadians(v2)) * 1000; }
+
+        /// <summary>
+        ///   Distance in meters from v1 to v2
+        /// </summary>
+        /// <param name = "v1"></param>
+        /// <param name = "v2"></param>
+        /// <returns></returns>
+        public static double DistanceMeters(Geo v1, Geo v2) { return v1.DistanceKilometers(v2) * 1000; }
+
+        /// <summary>
+        ///   Distance in meters between the two lat lon points
+        /// </summary>
+        /// <param name = "lat1"></param>
+        /// <param name = "lon1"></param>
+        /// <param name = "lat2"></param>
+        /// <param name = "lon2"></param>
+        /// <returns></returns>
+        public static double DistanceMeters(double lat1, double lon1, double lat2, double lon2) { return DistanceKilometers(new Geo(lat1, lon1), new Geo(lat2, lon2)) * 1000; }
+
+        /// <summary>
         ///   Distance in nautical miles from this to v2
         /// </summary>
         /// <param name = "v2"></param>
@@ -679,6 +724,7 @@ namespace HRC.Navigation
         public static Geo Offset(Geo origin, double distance, double azimuth) { return origin.Offset(distance, azimuth); }
 
         public static implicit operator Point(Geo e) { return new Point(e.Longitude, e.Latitude); }
+        public static implicit operator PointF(Geo e) { return new PointF((float)e.Longitude, (float)e.Latitude); }
 
 #if false
     /**
@@ -1167,8 +1213,10 @@ namespace HRC.Navigation
         public Geo() {}
         public Geo(double lat, double lon) : base(lat, lon) { }
         public Geo(double lat, double lon, bool isDegrees) : base(lat, lon, isDegrees) { }
+        public Geo(double lat, double lon, T data) : base(lat, lon) { Data = data; }
         public Geo(double x, double y, double z) : base(x, y, z) { }
         public Geo(Geo geo) : base(geo) { }
+        public Geo(Geo geo, T data) : base(geo) { Data = data; }
 
         public T Data { get; set; }
     }

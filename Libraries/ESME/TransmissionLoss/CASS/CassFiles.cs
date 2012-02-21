@@ -346,9 +346,9 @@ namespace ESME.TransmissionLoss.CASS
             }
         }
 
-        static void WriteEnvironmentFileRecord(TextWriter envFile, EarthCoordinate<SedimentSampleBase> sedimentSample, Geo<List<SoundSpeedSample>> soundSpeedProfile, 
-                                         EarthCoordinate<float> windSample, Geo requestedLocation, ref bool isFirstPoint,
-                                         string model, EarthCoordinate<BottomLossData> bottomLossSample)
+        static void WriteEnvironmentFileRecord(TextWriter envFile, Geo<SedimentSampleBase> sedimentSample, Geo<List<SoundSpeedSample>> soundSpeedProfile,
+                                         Geo<float> windSample, Geo requestedLocation, ref bool isFirstPoint,
+                                         string model, Geo<BottomLossData> bottomLossSample)
         {
             // ssp is the nearest actual soundspeed profile to the point that's been requested.  The actual profiles are not laid out
             // in a grid, rather they are placed at quarter-degree grid points where there is water.  So grid points on land typically won't

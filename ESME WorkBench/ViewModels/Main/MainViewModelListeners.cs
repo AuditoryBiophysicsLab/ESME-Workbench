@@ -13,7 +13,7 @@ namespace ESMEWorkBench.ViewModels.Main
     public partial class MainViewModel
     {
         [MediatorMessageSink(MediatorMessage.SetMouseEarthCoordinate)]
-        void SetMouseEarthCoordinate(EarthCoordinate mouseEarthCoordinate) { MouseEarthCoordinate = mouseEarthCoordinate; }
+        void SetMouseEarthCoordinate(Geo mouseEarthCoordinate) { MouseGeo = mouseEarthCoordinate; }
 
         [MediatorMessageSink(MediatorMessage.SetupAndRunQuickLookPoint)]
         void SetupAndRunQuickLookPoint(bool dummy)

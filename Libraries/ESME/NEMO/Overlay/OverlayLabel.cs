@@ -6,7 +6,7 @@ namespace ESME.NEMO.Overlay
 {
     public class OverlayLabel : OverlayShape
     {
-        public OverlayLabel(EarthCoordinate point, Color color, string label)
+        public OverlayLabel(Geo point, Color color, string label)
             : base(color)
         {
             Add(point);

@@ -71,7 +71,7 @@ namespace ESME.Environment
     }
 
     [Serializable]
-    public class SedimentSample : EarthCoordinate<SedimentSampleBase>, IComparable<SedimentSample>
+    public class SedimentSample : Geo<SedimentSampleBase>, IComparable<SedimentSample>
     {
         public SedimentSample() { }
 

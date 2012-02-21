@@ -18,8 +18,7 @@ namespace ESME.NEMO.Overlay
             var shapes = new List<OverlayShape>();
             var locationMode = OverlayLocationMode.LatLong;
             var curState = OverlayParseState.Initialization;
-            EarthCoordinate[] curPoints;
-            EarthCoordinate lastPoint = null;
+            Geo lastPoint = null;
             var curStyle = LineStyle.Solid;
             var reader = new LineReader();
             var tokenizer = new Tokenizer {CommentIndicators = new[] {"#"}};
@@ -31,6 +30,7 @@ namespace ESME.NEMO.Overlay
 
             while ((curToken = tokenizer.NextToken()) != null)
             {
+                Geo[] curPoints;
                 switch (curState)
                 {
                     case OverlayParseState.Initialization:
@@ -258,15 +258,15 @@ namespace ESME.NEMO.Overlay
             return shapes.ToArray();
         }
 
-        static EarthCoordinate[] GetPoints(Tokenizer tokenizer, OverlayLocationMode locationMode, EarthCoordinate lastPoint)
+        static Geo[] GetPoints(Tokenizer tokenizer, OverlayLocationMode locationMode, Geo lastPoint)
         {
-            var resultPoints = new List<EarthCoordinate>();
+            var resultPoints = new List<Geo>();
 
             if (lastPoint != null) resultPoints.Add(lastPoint);
 
             while ((tokenizer.Peek() != null) && (tokenizer.Peek().Value is float))
             {
-                EarthCoordinate curPoint;
+                Geo curPoint;
                 switch (locationMode)
                 {
                     case OverlayLocationMode.XYPair:
@@ -284,7 +284,7 @@ namespace ESME.NEMO.Overlay
                     case OverlayLocationMode.DegreesMinutesSeconds:
                         if (tokenizer.Count < 2) throw new ApplicationException("OverlayParser.getInitialPoint: missing information for coordinates\n");
 
-                        curPoint = new EarthCoordinate(DecodeDegreesMinutesSeconds(tokenizer), DecodeDegreesMinutesSeconds(tokenizer));
+                        curPoint = new Geo(DecodeDegreesMinutesSeconds(tokenizer), DecodeDegreesMinutesSeconds(tokenizer));
                         resultPoints.Add(curPoint);
                         break;
                     default:
@@ -294,23 +294,23 @@ namespace ESME.NEMO.Overlay
             return resultPoints.ToArray();
         }
 
-        static EarthCoordinate GetValueInDegrees(Tokenizer tokenizer)
+        static Geo GetValueInDegrees(Tokenizer tokenizer)
         {
             //Dave will tell me to do this with Geo Class
             var x = tokenizer.NextToken();
             while (!x.IsNumeric) x = tokenizer.NextToken();
             var y = tokenizer.NextToken();
             if ((x.Value == null) || (y.Value == null)) throw new ApplicationException("OverlayParser.GetValueInDegrees: Values for Latitude or Longitude is not present in Overlay File " + x.LineReader.FileName + " at line " + x.LineNumber);
-            return new EarthCoordinate(0, 0);
+            return new Geo(0, 0);
         }
 
-        static EarthCoordinate GetPoint(Tokenizer tokenizer)
+        static Geo GetPoint(Tokenizer tokenizer)
         {
             var x = tokenizer.NextToken();
             while (!x.IsNumeric) x = tokenizer.NextToken();
             var y = tokenizer.NextToken();
             if ((x.Value == null) || (y.Value == null)) throw new ApplicationException("OverlayParser.GetPoint: Values for Latitude or Longitude is not present in Overlay File " + x.LineReader.FileName + " at line " + x.LineNumber);
-            return new EarthCoordinate((double)((float?)x.Value), (double)((float?)y.Value));
+            return new Geo((double)((float?)x.Value), (double)((float?)y.Value));
         }
 
         static float DecodeDegreesMinutesSeconds(Tokenizer tokenizer)

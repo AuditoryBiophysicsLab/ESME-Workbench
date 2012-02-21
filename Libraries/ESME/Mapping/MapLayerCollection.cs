@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Linq;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Media;
 using ESME.Animats;
-using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
@@ -40,7 +38,7 @@ namespace ESME.Mapping
 
         public static IEnumerable<T> Find<T>(this IEnumerable<T> source, LayerType layerType, string layerName) where T : MapLayerViewModel
         {
-            return source.Find<T>(layerType).Find<T>(layerName);
+            return source.Find(layerType).Find(layerName);
         }
 
         public static IEnumerable<T> Find<T>(this IEnumerable<T> source, LayerType layerType, Regex nameRegex) where T : MapLayerViewModel
@@ -96,7 +94,7 @@ namespace ESME.Mapping
         public T Find<T>(LayerType layerType, string layerName) where T : MapLayerViewModel
         {
             if (Count == 0) return null;
-            return this.Where(layer => layer.LayerType == layerType).Where(layer => layer.Name == layerName).FirstOrDefault() as T;
+            return this.Where(layer => layer.LayerType == layerType).FirstOrDefault(layer => layer.Name == layerName) as T;
         }
 
         public T Find<T>(LayerType layerType, Func<MapLayerViewModel, bool> predicate) where T : MapLayerViewModel
@@ -160,7 +158,7 @@ namespace ESME.Mapping
                 MapLayers = this,
             };
             if (lineColor != Colors.Transparent) overlayShapeLayer.LineColor = lineColor;
-            if (lineWidth != 0f) overlayShapeLayer.LineWidth = lineWidth;
+            if (Math.Abs(lineWidth - 0f) > 0.0001) overlayShapeLayer.LineWidth = lineWidth;
             if (customLineStyle == null) overlayShapeLayer.PointSymbolType = pointSymbolType;
             else overlayShapeLayer.CustomLineStyle = customLineStyle;
             overlayShapeLayer.IsEnabled = true;
@@ -234,18 +232,18 @@ namespace ESME.Mapping
             analysisPointLayer.Clear();
             foreach (var soundSource in curPoint.SoundSources)
             {
-                var sourcePoints = new List<EarthCoordinate>();
-                var circlePoints = new List<EarthCoordinate>();
+                var sourcePoints = new List<Geo>();
+                var circlePoints = new List<Geo>();
                 if (!soundSource.ShouldBeCalculated) continue;
                 sourcePoints.Add(curPoint);
                 foreach (var radialBearing in soundSource.RadialBearings)
                 {
-                    sourcePoints.Add(EarthCoordinate.Move(curPoint, radialBearing, soundSource.Radius));
+                    sourcePoints.Add(Geo.Move(curPoint, radialBearing, soundSource.Radius));
                     sourcePoints.Add(curPoint);
                 }
 
                 for (var angle = 0; angle <= 360; angle++)
-                    circlePoints.Add(EarthCoordinate.Move(curPoint, angle, soundSource.Radius));
+                    circlePoints.Add(Geo.Move(curPoint, angle, soundSource.Radius));
 
                 analysisPointLayer.Add(new OverlayLineSegments(sourcePoints.ToArray(), Colors.Red, 5));
                 analysisPointLayer.Add(new OverlayLineSegments(circlePoints.ToArray(), Colors.Red, 5));
@@ -289,14 +287,14 @@ namespace ESME.Mapping
             explosivePointLayer.Clear();
             foreach (var soundSource in curPoint.SoundSources)
             {
-                var sourcePoints = new List<EarthCoordinate>();
+                var sourcePoints = new List<Geo>();
                 if (!soundSource.ShouldBeCalculated) continue;
                 for (var i = 0; i < 8; i++)
                 {
                     sourcePoints.Add(curPoint);
-                    sourcePoints.Add(EarthCoordinate.Move(curPoint, i * 45f, soundSource.Radius));
-                    sourcePoints.Add(EarthCoordinate.Move(curPoint, (i * 45) + 22.5f, soundSource.Radius / 2f));
-                    sourcePoints.Add(EarthCoordinate.Move(curPoint, (i + 1) * 45f, soundSource.Radius));
+                    sourcePoints.Add(Geo.Move(curPoint, i * 45f, soundSource.Radius));
+                    sourcePoints.Add(Geo.Move(curPoint, (i * 45) + 22.5f, soundSource.Radius / 2f));
+                    sourcePoints.Add(Geo.Move(curPoint, (i + 1) * 45f, soundSource.Radius));
                 }
                 explosivePointLayer.Add(new OverlayLineSegments(sourcePoints.ToArray(), Colors.Red, 5));
             }
@@ -335,8 +333,8 @@ namespace ESME.Mapping
             propagationPointLayer.Validate();
 
             propagationPointLayer.Clear();
-            var displayPoints = new List<EarthCoordinate>();
-            var circlePoints = new List<EarthCoordinate>();
+            var displayPoints = new List<Geo>();
+            var circlePoints = new List<Geo>();
             var radialCount = curPoint.RadialBearings.Count();
             for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
             {
@@ -345,14 +343,14 @@ namespace ESME.Mapping
                 var curRadialBearing = curPoint.RadialBearings[radialIndex];
                 // Line from center to radius
                 displayPoints.Add(curPoint);
-                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing, curPoint.MaxRangeDistance));
+                displayPoints.Add(Geo.Move(curPoint, curRadialBearing, curPoint.MaxRangeDistance));
                 propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
                 displayPoints.Clear();
 
                 // arrow at end of radial
-                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing + 5, curPoint.MaxRangeDistance * .9));
-                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing, curPoint.MaxRangeDistance));
-                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing - 5, curPoint.MaxRangeDistance * .9));
+                displayPoints.Add(Geo.Move(curPoint, curRadialBearing + 5, curPoint.MaxRangeDistance * .9));
+                displayPoints.Add(Geo.Move(curPoint, curRadialBearing, curPoint.MaxRangeDistance));
+                displayPoints.Add(Geo.Move(curPoint, curRadialBearing - 5, curPoint.MaxRangeDistance * .9));
                 propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
                 displayPoints.Clear();
             }
@@ -362,7 +360,7 @@ namespace ESME.Mapping
                 for (var radialIndex = 0; radialIndex <= radialCount; radialIndex++)
                 {
                     var curRadialBearing = curPoint.RadialBearings[radialIndex % radialCount];
-                    displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing,
+                    displayPoints.Add(Geo.Move(curPoint, curRadialBearing,
                                                            curPoint.ThresholdRadii[radialIndex % radialCount]));
                 }
                 propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
@@ -372,7 +370,7 @@ namespace ESME.Mapping
             if (!float.IsNaN(curPoint.ThresholdRadius))
             {
                 // Display circle at maximum threshold radius
-                for (var angle = 0; angle <= 360; angle++) circlePoints.Add(EarthCoordinate.Move(curPoint, angle, curPoint.ThresholdRadius));
+                for (var angle = 0; angle <= 360; angle++) circlePoints.Add(Geo.Move(curPoint, angle, curPoint.ThresholdRadius));
                 propagationPointLayer.Add(new OverlayLineSegments(circlePoints.ToArray(), Colors.Red, 5));
             }
             propagationPointLayer.Done();

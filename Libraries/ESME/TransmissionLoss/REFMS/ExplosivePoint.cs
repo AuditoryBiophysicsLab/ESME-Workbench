@@ -16,7 +16,7 @@ using HRC.Navigation;
 
 namespace ESME.TransmissionLoss.REFMS
 {
-    public class ExplosivePoint : EarthCoordinate, ISupportValidation
+    public class ExplosivePoint : Geo, ISupportValidation
     {
         public ExplosivePoint() { }
 
@@ -642,7 +642,7 @@ namespace ESME.TransmissionLoss.REFMS
         }
     }
 
-    public class SVPFile : EarthCoordinate
+    public class SVPFile : Geo
     {
         public List<SVPLayer> Layers { get; private set; }
         public double Delta { get; private set; }

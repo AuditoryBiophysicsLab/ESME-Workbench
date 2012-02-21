@@ -110,7 +110,7 @@ namespace InstallableNAVO.Databases
 
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             // Construct a list of files we will need to read out of the SMGC database
-            var selectedLocations = new List<EarthCoordinate>();
+            var selectedLocations = new List<Geo>();
             var allFiles = Directory.GetFiles(Globals.AppSettings.NAVOConfiguration.SMGCDirectory, "*.stt", SearchOption.AllDirectories).ToList();
             for (var lat = south; lat <= north; lat++)
                 for (var lon = west; lon <= east; lon++)
@@ -123,7 +123,7 @@ namespace InstallableNAVO.Databases
                                          select curFile).ToList();
                     if (!matchingFiles.Any()) continue;
                     parallelReader.Post(matchingFiles.First());
-                    selectedLocations.Add(new EarthCoordinate(lat, lon));
+                    selectedLocations.Add(new Geo(lat, lon));
                 }
             var batchBlock = new BatchBlock<SMGCFile>(selectedLocations.Count);
             parallelReader.LinkTo(batchBlock);
@@ -137,7 +137,7 @@ namespace InstallableNAVO.Databases
                 var curTimePeriodData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = timePeriod };
                 curTimePeriodData.EnvironmentData.AddRange(from selectedFile in selectedFiles
                                                       where (selectedFile.Months != null) && (selectedFile[timePeriod] != null)
-                                                      select new WindSample(selectedFile.EarthCoordinate, selectedFile[timePeriod].MeanWindSpeed));
+                                                      select new WindSample(selectedFile.Geo, selectedFile[timePeriod].MeanWindSpeed));
                 return curTimePeriodData;
             },
             new ExecutionDataflowBlockOptions
@@ -204,7 +204,7 @@ namespace InstallableNAVO.Databases
         internal class SMGCFile
         {
             public List<SMGCMonth> Months { get; private set; }
-            public EarthCoordinate EarthCoordinate { get; private set; }
+            public Geo Geo { get; private set; }
 
             public SMGCMonth this[TimePeriod timePeriod]
             {
@@ -262,7 +262,7 @@ namespace InstallableNAVO.Databases
                     default:
                         throw new ApplicationException("FileName: Fourth char MUST be 'e' or 'w'. File: " + fileName);
                 }
-                EarthCoordinate = new EarthCoordinate(lat, lon);
+                Geo = new Geo(lat, lon);
 
                 var info = new FileInfo(fileName);
                 if (info.Length == 0) return;

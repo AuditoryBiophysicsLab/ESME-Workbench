@@ -59,7 +59,7 @@ namespace ESME.Platform
             
             CourseChangePoints = new List<CourseChangeDatum>();
 
-            overlayPoints.Add(new EarthCoordinate(NemoPlatform.Trackdefs[0].InitialLocation));
+            overlayPoints.Add(new Geo(NemoPlatform.Trackdefs[0].InitialLocation));
             // Put trackdefs in ascending start-time order, if they weren't already
             NemoPlatform.Trackdefs.Sort();
 
@@ -174,7 +174,7 @@ namespace ESME.Platform
                                        SimulationTime = currentTime
                                    });
             }
-            overlayPoints.Add(new EarthCoordinate(curLocation));
+            overlayPoints.Add(new Geo(curLocation));
             CourseOverlay = new OverlayLineSegments(overlayPoints.ToArray(), Colors.Orange, 1, LineStyle.Dot);
             CourseEnd = new OverlayPoint(curLocation, Colors.Red, 2);
             CourseChangePoints.Add(new CourseChangeDatum

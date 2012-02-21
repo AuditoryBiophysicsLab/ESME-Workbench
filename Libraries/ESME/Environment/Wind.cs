@@ -155,7 +155,7 @@ namespace ESME.Environment
     }
 
     [Serializable]
-    public class WindSample : EarthCoordinate<float>
+    public class WindSample : Geo<float>
     {
         public WindSample() {  }
         public WindSample(Geo location, float sample) : base(location.Latitude, location.Longitude, sample) {  }

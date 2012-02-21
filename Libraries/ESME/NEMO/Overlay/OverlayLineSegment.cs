@@ -69,11 +69,11 @@ namespace ESME.NEMO.Overlay
         /// <summary>
         /// Returns the midpoint of the segment
         /// </summary>
-        internal EarthCoordinate Midpoint
+        internal Geo Midpoint
         {
             get
             {
-                return new EarthCoordinate(
+                return new Geo(
                     (this[0].Latitude + this[1].Latitude)/2.0,
                     (this[0].Longitude + this[1].Longitude)/2.0);
             }
@@ -152,12 +152,12 @@ namespace ESME.NEMO.Overlay
         {
             if (IsVertical && that.IsVertical)
             {
-                if (_geos[0].Longitude == that._geos[0].Longitude)
+                if (Math.Abs(_geos[0].Longitude - that._geos[0].Longitude) < 0.0001)
                     return true;
             }
             if (IsParallelTo(that))
             {
-                if (_b == that._b)
+                if (Math.Abs(_b - that._b) < 0.0001)
                     return true;
             }
             return false;
@@ -172,7 +172,7 @@ namespace ESME.NEMO.Overlay
         {
             if (IsVertical && that.IsVertical)
                 return true;
-            if (_m == that._m)
+            if (Math.Abs(_m - that._m) < 0.0001)
                 return true;
             return false;
         }
@@ -190,7 +190,7 @@ namespace ESME.NEMO.Overlay
             IsVertical = IsHorizontal = false;
 
             // If both X values are NOT the same
-            if (this[0].Longitude != this[1].Longitude)
+            if (Math.Abs(this[0].Longitude - this[1].Longitude) > 0.0001)
             {
                 // Classic linear equation:
                 // y = m * x + b
@@ -203,7 +203,7 @@ namespace ESME.NEMO.Overlay
                 // and its' y-intercept
                 _b = this[0].Latitude - (_m*this[0].Longitude);
 
-                if (_m == 0.0)
+                if (Math.Abs(_m - 0.0) < 0.0001)
                     IsHorizontal = true;
             }
             else
@@ -258,9 +258,9 @@ namespace ESME.NEMO.Overlay
             // Now we will figure out exactly where.
 
             if (IsVertical)
-                return new EarthCoordinate(that.Y(this[0].Longitude), this[0].Longitude);
+                return new Geo(that.Y(this[0].Longitude), this[0].Longitude);
             if (that.IsVertical)
-                return new EarthCoordinate(Y(that[0].Longitude), that[0].Longitude);
+                return new Geo(Y(that[0].Longitude), that[0].Longitude);
             //if (this.IsHorizontal)
             //    return new PointF(that.X(this.Points[0].Y), this.Points[0].Y);
 
@@ -279,7 +279,7 @@ namespace ESME.NEMO.Overlay
             // either one of our line equations.  Arbitrarily, we'll pick the first one.
             var yIntersect = Y(xIntersect);
 
-            return new EarthCoordinate(yIntersect, xIntersect);
+            return new Geo(yIntersect, xIntersect);
 
             //return new PointF((float)xIntersect, (float)yIntersect);
         }

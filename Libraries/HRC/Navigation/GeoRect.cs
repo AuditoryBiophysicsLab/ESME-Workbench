@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
@@ -51,7 +50,7 @@ namespace HRC.Navigation
             get { return _north; }
             set
             {
-                if (_north == value) return;
+                if (Math.Abs(_north - value) < 0.0001) return;
                 _north = value;
                 NotifyPropertyChanged(NorthChangedEventArgs);
             }
@@ -72,7 +71,7 @@ namespace HRC.Navigation
             get { return _south; }
             set
             {
-                if (_south == value) return;
+                if (Math.Abs(_south - value) < 0.0001) return;
                 _south = value;
                 NotifyPropertyChanged(SouthChangedEventArgs);
             }
@@ -93,7 +92,7 @@ namespace HRC.Navigation
             get { return _east; }
             set
             {
-                if (_east == value) return;
+                if (Math.Abs(_east - value) < 0.0001) return;
                 _east = value;
                 NotifyPropertyChanged(EastChangedEventArgs);
             }
@@ -114,7 +113,7 @@ namespace HRC.Navigation
             get { return _west; }
             set
             {
-                if (_west == value) return;
+                if (Math.Abs(_west - value) < 0.0001) return;
                 _west = value;
                 NotifyPropertyChanged(WestChangedEventArgs);
             }
@@ -140,14 +139,14 @@ namespace HRC.Navigation
         /// <summary>
         ///   Expands the current GeoRect exactly enough to contain the specified EarthCoordinate.
         /// </summary>
-        /// <param name = "earthCoordinate"></param>
-        public void Union(EarthCoordinate earthCoordinate) { FromRect(Rect.Union(this, earthCoordinate)); }
+        /// <param name = "geo"></param>
+        public void Union(Geo geo) { FromRect(Rect.Union(this, geo)); }
 
         /// <summary>
         /// Returns an enumerable that will result in a closed, clockwise polygon
         /// NorthWest, NorthEast, SouthEast, SouthWest, NorthWest
         /// </summary>
-        public IEnumerable<EarthCoordinate> ClosedBoundaryCoordinates
+        public IEnumerable<Geo> ClosedBoundaryCoordinates
         {
             get
             {
@@ -175,16 +174,9 @@ namespace HRC.Navigation
         ///   Creates a GeoRect that is exactly large enough to include the specified GeoRect and the specified EarthCoordinate.
         /// </summary>
         /// <param name = "geoRect"></param>
-        /// <param name = "earthCoordinate"></param>
+        /// <param name = "geo"></param>
         /// <returns></returns>
-        public static GeoRect Union(GeoRect geoRect, EarthCoordinate earthCoordinate) { return new GeoRect(Rect.Union(geoRect, earthCoordinate)); }
-
-        /// <summary>
-        ///   Indicates whether the GeoRect contains the specified EarthCoordinate.
-        /// </summary>
-        /// <param name = "earthCoordinate"></param>
-        /// <returns></returns>
-        public bool Contains(EarthCoordinate earthCoordinate) { return ((Rect)this).Contains(earthCoordinate); }
+        public static GeoRect Union(GeoRect geoRect, Geo geo) { return new GeoRect(Rect.Union(geoRect, geo)); }
 
         /// <summary>
         ///   Indicates whether the GeoRect contains the specified Geo.
@@ -232,11 +224,11 @@ namespace HRC.Navigation
         /// <returns></returns>
         public static GeoRect Inflate(GeoRect geoRect, double width, double height)
         {
-            var newNorthWest = new EarthCoordinate(geoRect.NorthWest);
+            var newNorthWest = new Geo(geoRect.NorthWest);
             newNorthWest.Move(0, height);
             newNorthWest.Move(270, width);
 
-            var newSouthEast = new EarthCoordinate(geoRect.SouthEast);
+            var newSouthEast = new Geo(geoRect.SouthEast);
             newSouthEast.Move(180, height);
             newSouthEast.Move(90, width);
 
@@ -251,33 +243,33 @@ namespace HRC.Navigation
         }
 
         [XmlIgnore]
-        public EarthCoordinate NorthWest
+        public Geo NorthWest
         {
-            get { return new EarthCoordinate(North, West); }
+            get { return new Geo(North, West); }
         }
 
         [XmlIgnore]
-        public EarthCoordinate NorthEast
+        public Geo NorthEast
         {
-            get { return new EarthCoordinate(North, East); }
+            get { return new Geo(North, East); }
         }
 
         [XmlIgnore]
-        public EarthCoordinate SouthWest
+        public Geo SouthWest
         {
-            get { return new EarthCoordinate(South, West); }
+            get { return new Geo(South, West); }
         }
 
         [XmlIgnore]
-        public EarthCoordinate SouthEast
+        public Geo SouthEast
         {
-            get { return new EarthCoordinate(South, East); }
+            get { return new Geo(South, East); }
         }
 
         [XmlIgnore]
-        public EarthCoordinate Center
+        public Geo Center
         {
-            get { return new EarthCoordinate((North + South) / 2, (East + West) / 2); }
+            get { return new Geo((North + South) / 2, (East + West) / 2); }
         }
 
         [XmlIgnore]

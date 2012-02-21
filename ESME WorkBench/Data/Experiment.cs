@@ -1012,7 +1012,7 @@ namespace ESMEWorkBench.Data
             speciesLayer.Done();
         }
 
-        void DisplayEnvironmentData<T>(ICollection<T> environmentData, string layerName, LayerType layerType, float defaultLineWidth) where T : EarthCoordinate
+        void DisplayEnvironmentData<T>(ICollection<T> environmentData, string layerName, LayerType layerType, float defaultLineWidth) where T : Geo
         {
             var dataLayer = (OverlayShapeMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == layerName);
             if (dataLayer == null)
@@ -1061,15 +1061,14 @@ namespace ESMEWorkBench.Data
             analysisPointLayer.AnalysisPoint = curPoint;
             analysisPointLayer.Validate();
 
-            var sourcePoints = new List<EarthCoordinate>();
+            var sourcePoints = new List<Geo>();
             foreach (var soundSource in curPoint.SoundSources)
             {
                 if (!soundSource.ShouldBeCalculated) continue;
                 sourcePoints.Add(curPoint);
                 foreach (var radialBearing in soundSource.RadialBearings)
                 {
-                    var endPoint = new EarthCoordinate(curPoint);
-                    endPoint.Move(radialBearing, soundSource.Radius);
+                    var endPoint = curPoint.Move(radialBearing, soundSource.Radius);
                     sourcePoints.Add(endPoint);
                     sourcePoints.Add(curPoint);
                 }
@@ -1226,7 +1225,7 @@ namespace ESMEWorkBench.Data
                 if (bathysize > screenSize)
                 {
                     var scaleFactor = screenSize / bathysize;
-                    displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(Bathymetry.Samples, (int)(Bathymetry.Samples.Longitudes.Count * scaleFactor), (int)(Bathymetry.Samples.Latitudes.Count * scaleFactor));
+                    displayValues = EnvironmentData<Geo<float>>.Decimate(Bathymetry.Samples, (int)(Bathymetry.Samples.Longitudes.Count * scaleFactor), (int)(Bathymetry.Samples.Latitudes.Count * scaleFactor));
                 }
                 var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
                 for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++)

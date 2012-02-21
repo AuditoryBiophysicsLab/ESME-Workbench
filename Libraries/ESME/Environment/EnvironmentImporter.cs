@@ -155,7 +155,7 @@ namespace ESME.Environment
                     if (bathysize > screenSize)
                     {
                         var scaleFactor = screenSize / bathysize;
-                        displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples,
+                        displayValues = EnvironmentData<Geo<float>>.Decimate(bathymetry.Samples,
                                                                                         (int)(bathymetry.Samples.Longitudes.Count * scaleFactor),
                                                                                         (int)(bathymetry.Samples.Latitudes.Count * scaleFactor));
                     }

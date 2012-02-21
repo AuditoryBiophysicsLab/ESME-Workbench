@@ -41,7 +41,7 @@ namespace ESME.Mapping
 
         #endregion
 
-        public Marker AddMarker(EarthCoordinate location, object tag)
+        public Marker AddMarker(Geo location, object tag)
         {
             var newMarker = new Marker(location.Longitude, location.Latitude)
                             {

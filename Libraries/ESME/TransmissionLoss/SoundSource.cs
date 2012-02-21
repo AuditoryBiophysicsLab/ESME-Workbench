@@ -14,7 +14,7 @@ using HRC.Utility;
 
 namespace ESME.TransmissionLoss
 {
-    public class SoundSource : EarthCoordinate, IEquatable<SoundSource>, ISupportValidation
+    public class SoundSource : Geo, IEquatable<SoundSource>, ISupportValidation
     {
         public SoundSource()
         {
@@ -112,7 +112,7 @@ namespace ESME.TransmissionLoss
                     return;
                 }
                 var items = _bearingsString.Split(new[] {',', ' '}, StringSplitOptions.RemoveEmptyEntries);
-                if (items.Count() == 0)
+                if (!items.Any())
                 {
                     NotifyPropertyChanged(BearingsStringIsValidChangedEventArgs);
                     return;
@@ -152,7 +152,7 @@ namespace ESME.TransmissionLoss
             if (string.IsNullOrEmpty(bearingString)) return false;
             if (string.IsNullOrEmpty(bearingString.Trim())) return false;
             var items = bearingString.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            if (items.Count() == 0) return false;
+            if (!items.Any()) return false;
             foreach (var item in items)
             {
                 float curBearing;
@@ -229,7 +229,7 @@ namespace ESME.TransmissionLoss
             if (!base.Equals(other)) return false; // Compare as an Geo first
             if (!AcousticProperties.Equals(other.AcousticProperties)) return false;
             if (RadialBearings.Count != other.RadialBearings.Count) return false;
-            return !RadialBearings.Where((t, bearingIndex) => t != other.RadialBearings[bearingIndex]).Any();
+            return !RadialBearings.Where((t, bearingIndex) => Math.Abs(t - other.RadialBearings[bearingIndex]) > 0.0001).Any();
         }
 
         #endregion
@@ -302,7 +302,7 @@ namespace ESME.TransmissionLoss
             //Console.WriteLine("Validate: Bathymetry bounds: North {0} South {1} East {2} West {3}", bathymetry.GeoRect.North, bathymetry.GeoRect.South, bathymetry.GeoRect.East, bathymetry.GeoRect.West);
             foreach (var radialBearing in RadialBearings)
             {
-                var radialEndPoint = new EarthCoordinate(this, radialBearing, Radius);
+                var radialEndPoint = new Geo(this, radialBearing, Radius);
                 if (!bathymetry.Samples.GeoRect.Contains(radialEndPoint))
                 {
                     //Console.WriteLine("Source name {0} location ({1}, {2}) bearing {3} endpoint ({4}, {5}) outside of bathymetry", Name, Latitude, Longitude, radialBearing, radialEndPoint.Latitude, radialEndPoint.Longitude);

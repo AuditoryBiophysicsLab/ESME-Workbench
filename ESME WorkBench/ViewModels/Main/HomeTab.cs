@@ -412,7 +412,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             if (MouseDepth > 0) throw new AnalysisPointLocationException("Analysis Points cannot be placed on land.");
             if (ScenarioMetadata == null) return;
-            ScenarioMetadata.PlaceAnalysisPoint(MouseEarthCoordinate);
+            ScenarioMetadata.PlaceAnalysisPoint(MouseGeo);
         }
 
         [MediatorMessageSink(MediatorMessage.EditAnalysisPoint)]
@@ -1073,7 +1073,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             if (MouseDepth > 0) throw new AnalysisPointLocationException("Analysis Points cannot be placed on land.");
             if (ScenarioMetadata == null) return;
-            //ScenarioMetadata.PlaceAnalysisPoint(MouseEarthCoordinate);
+            //ScenarioMetadata.PlaceAnalysisPoint(MouseGeo);
             throw new NotImplementedException();
         }
 
