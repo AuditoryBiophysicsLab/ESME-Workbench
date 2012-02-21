@@ -96,13 +96,13 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 var cassEnvironmentFileName = Path.Combine(rangeComplex.EnvironmentPath, string.Format("{0}_{1}_env_{2}", area.Name, resolution.Name, period));
                 var windTask = new Task<Wind>(() => Wind.Load(Path.Combine(rangeComplex.DataPath, "data.wind")));
 
-                var soundSpeedTask = new Task<SoundSpeed<SoundSpeedSample>>(() => EnvironmentFile.CalculateSoundSpeed<SoundSpeedSample>(rangeComplex, period, bathyTask, resolution.GeoRect));
+                var soundSpeedTask = new Task<SoundSpeed>(() => EnvironmentFile.CalculateSoundSpeed(rangeComplex, period, bathyTask, resolution.GeoRect));
                 windTask.Start();
                 soundSpeedTask.Start();
 
                 TaskEx.WhenAll(windTask, soundSpeedTask).ContinueWith(task2 =>
                 {
-                    var soundSpeedProfiles = new List<SoundSpeedProfile<SoundSpeedSample>>();
+                    var soundSpeedProfiles = new List<SoundSpeedProfileGeneric<SoundSpeedSample>>();
                     var windSamples = new List<WindSample>();
                     foreach (var location in locations)
                     {

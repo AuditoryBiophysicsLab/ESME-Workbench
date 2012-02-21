@@ -284,7 +284,7 @@ namespace CreateBellhopEnvironmentFiles
             var sspData = new DepthValuePairs<float>();
             for (var index = 0; index < soundspeedDepths.Count; index++)
                 sspData.Add(new DepthValuePair<float>((float)soundspeedDepths[index], (float)soundspeedSpeeds[index]));
-            var soundSpeedProfile = new SoundSpeedProfile
+            var soundSpeedProfile = new SoundSpeedProfileGeneric
             {
                 Data = sspData
             };
@@ -294,7 +294,7 @@ namespace CreateBellhopEnvironmentFiles
             File.WriteAllText(Path.Combine(outputDirectory, name + ".env"), result, new ASCIIEncoding());
         }
 
-        public static string GetRadialConfiguration(AcousticProperties acousticProperties, SoundSpeedProfile ssp, SedimentType sediment, 
+        public static string GetRadialConfiguration(AcousticProperties acousticProperties, SoundSpeedProfileGeneric ssp, SedimentType sediment, 
                                                     double maxDepth, double maxRadius, List<double> ranges, List<double> depths, 
                                                     bool useSurfaceReflection, bool useVerticalBeamforming, bool generateArrivalsFile, int beamCount)
         {

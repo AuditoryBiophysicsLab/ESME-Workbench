@@ -189,7 +189,7 @@ namespace ESME.Views.TransmissionLoss
             var maxCalculationDepthMeters = float.MinValue;
             var radialCount = transmissionLossJob.SoundSource.RadialBearings.Count;
             var bottomProfiles = new BottomProfile[radialCount];
-            var soundSpeedProfiles = new SoundSpeedProfile<SoundSpeedSample>[radialCount];
+            var soundSpeedProfiles = new SoundSpeedProfile[radialCount];
             var windSpeeds = new float[radialCount];
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
@@ -199,7 +199,7 @@ namespace ESME.Views.TransmissionLoss
                 var bathymetry = ((Task<Bathymetry>)_environmentData[EnvironmentDataType.Bathymetry]).Result;
                 bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, bathymetry);
                 maxCalculationDepthMeters = Math.Max((float)bottomProfiles[bearingIndex].MaxDepth, maxCalculationDepthMeters);
-                soundSpeedProfiles[bearingIndex] = ((Task<SoundSpeed<SoundSpeedSample>>)_environmentData[EnvironmentDataType.SoundSpeed]).Result[TransmissionLossRunFile.TimePeriod].EnvironmentData.GetNearestPoint(curTransect.MidPoint);
+                soundSpeedProfiles[bearingIndex] = ((Task<SoundSpeed>)_environmentData[EnvironmentDataType.SoundSpeed]).Result[TransmissionLossRunFile.TimePeriod].EnvironmentData.GetNearestPoint(curTransect.MidPoint);
                 windSpeeds[bearingIndex] = ((Task<Wind>)_environmentData[EnvironmentDataType.Wind]).Result[TransmissionLossRunFile.TimePeriod].EnvironmentData.GetNearestPoint(curTransect.MidPoint).Data;
             }
             maxCalculationDepthMeters *= 1.1f;

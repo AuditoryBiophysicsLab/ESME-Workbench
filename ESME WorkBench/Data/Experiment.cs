@@ -602,7 +602,7 @@ namespace ESMEWorkBench.Data
         public Wind WindSpeed { get; private set; }
 
         [XmlIgnore]
-        public SoundSpeedField<SoundSpeedSample> SoundSpeedField { get; private set; }
+        public SoundSpeedField SoundSpeedField { get; private set; }
 
         [XmlIgnore]
         public Sediment Sediment { get; private set; }

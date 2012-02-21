@@ -11,7 +11,7 @@ using GDEM = InstallableNAVO.Databases.GDEM;
 
 namespace InstallableNAVO
 {
-    public sealed class GDEM3 : EnvironmentalDataSourcePluginBase<SoundSpeed<GDEMSoundSpeedSample>>, IGDEM3DataSource<SoundSpeed<GDEMSoundSpeedSample>>
+    public sealed class GDEM3 : EnvironmentalDataSourcePluginBase<SoundSpeed>, IGDEM3DataSource<SoundSpeed>
     {
         public GDEM3()
         {
@@ -40,27 +40,27 @@ namespace InstallableNAVO
 #endif
         }
 
-        public override SoundSpeed<GDEMSoundSpeedSample> Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration = null, IProgress<float> progress = null)
+        public override SoundSpeed Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration = null, IProgress<float> progress = null)
         {
             throw new NotImplementedException(string.Format("{0} extraction routine requires either deepest point OR bathymetry argument", PluginName));
         }
 
-        public SoundSpeed<GDEMSoundSpeedSample> Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, EarthCoordinate<float> deepestPoint, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null)
+        public SoundSpeed Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, EarthCoordinate<float> deepestPoint, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null)
         {
             var months = seasonConfiguration.MonthsInTimePeriod(timePeriod).ToList();
             var monthlySoundSpeeds = (from month in months
                                       select new
                                       {
                                           Month = month,
-                                          SoundSpeedTask = new Task<SoundSpeedField<GDEMSoundSpeedSample>>(() => GDEM.ReadFile(DataLocation, month, geoRect))
+                                          SoundSpeedTask = new Task<SoundSpeedField>(() => GDEM.ReadFile(DataLocation, month, geoRect))
                                       }).ToDictionary(item => item.Month);
-            var averageSoundSpeeds = new SoundSpeed<GDEMSoundSpeedSample>();
+            var averageSoundSpeeds = new SoundSpeed();
             foreach (var month in months) averageSoundSpeeds.Add(monthlySoundSpeeds[month].SoundSpeedTask.Result);
             //return SoundSpeed<GDEMSoundSpeedSample>.Average(averageSoundSpeeds, new List<TimePeriod> { timePeriod });
             return null;
         }
 
-        public SoundSpeed<GDEMSoundSpeedSample> Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, Bathymetry bathymetry, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null) 
+        public SoundSpeed Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, Bathymetry bathymetry, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null) 
         {
             return Extract(geoRect, resolution, timePeriod, bathymetry.DeepestPoint, seasonConfiguration, progress);
         }

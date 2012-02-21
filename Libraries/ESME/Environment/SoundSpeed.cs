@@ -11,13 +11,13 @@ using HRC.Navigation;
 namespace ESME.Environment
 {
     [Serializable]
-    public class SoundSpeed<T> : EnvironmentDataSetBase where T : SoundSpeedSample, new()
+    public class SoundSpeed : EnvironmentDataSetBase
     {
-        public List<SoundSpeedField<T>> SoundSpeedFields { get; set; }
+        public List<SoundSpeedField> SoundSpeedFields { get; set; }
 
         public SoundSpeed()
         {
-            SoundSpeedFields = new List<SoundSpeedField<T>>();
+            SoundSpeedFields = new List<SoundSpeedField>();
         }
 
         public override void Save(string filename)
@@ -37,7 +37,7 @@ namespace ESME.Environment
         /// </summary>
         /// <param name="timePeriod"></param>
         /// <returns></returns>
-        public SoundSpeedField<T> this[TimePeriod timePeriod]
+        public SoundSpeedField this[TimePeriod timePeriod]
         {
             get
             {
@@ -45,7 +45,7 @@ namespace ESME.Environment
             }
         }
 
-        public void Add(SoundSpeed<T> newData)
+        public void Add(SoundSpeed newData)
         {
             foreach (var soundSpeedField in newData.SoundSpeedFields)
             {
@@ -54,13 +54,13 @@ namespace ESME.Environment
             }
         }
 
-        public void Add(SoundSpeedField<T> newField)
+        public void Add(SoundSpeedField newField)
         {
             if (this[newField.TimePeriod] != null) throw new DataException(string.Format("Unable to add SoundSpeedField for {0}. Data already present.", newField.TimePeriod));
             SoundSpeedFields.Add(newField);
         }
 
-        public static SoundSpeed<T> Load(string filename)
+        public static SoundSpeed Load(string filename)
         {
             //var formatter = new BinaryFormatter();
             //using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -71,7 +71,7 @@ namespace ESME.Environment
             using (var reader = new BinaryReader(stream)) return Deserialize(reader);
         }
 
-        public static Task<SoundSpeed<T>> LoadAsync(string filename)
+        public static Task<SoundSpeed> LoadAsync(string filename)
         {
             return TaskEx.Run(() => Load(filename));
         }
@@ -121,39 +121,39 @@ namespace ESME.Environment
                 soundSpeedField.ExtendProfiles(deepestPoint);
         }
 
-        public static SoundSpeed<SoundSpeedSample> Average(SoundSpeed<T> monthlySoundSpeeds, List<TimePeriod> timePeriods)
+        public static SoundSpeed Average(SoundSpeed monthlySoundSpeeds, List<TimePeriod> timePeriods)
         {
-            var result = new SoundSpeed<SoundSpeedSample>();
+            var result = new SoundSpeed();
             foreach (var timePeriod in timePeriods)
             {
                 var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod);
-                var accumulator = new SoundSpeedFieldAverager<T> { TimePeriod = timePeriod };
+                var accumulator = new SoundSpeedFieldAverager { TimePeriod = timePeriod };
                 foreach (var month in months) accumulator.Add(monthlySoundSpeeds[month]);
                 result.SoundSpeedFields.Add(accumulator.Average);
             }
             return result;
         }
 
-        public static SoundSpeedField<SoundSpeedSample> Average(SoundSpeed<T> monthlySoundSpeeds, TimePeriod timePeriod)
+        public static SoundSpeedField Average(SoundSpeed monthlySoundSpeeds, TimePeriod timePeriod)
         {
             var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod).ToList();
-            var accumulator = new SoundSpeedFieldAverager<T> { TimePeriod = timePeriod };
+            var accumulator = new SoundSpeedFieldAverager { TimePeriod = timePeriod };
             foreach (var month in months) accumulator.Add(monthlySoundSpeeds[month]);
             return accumulator.Average;
         }
 
-        internal static void VerifyThatTimePeriodsMatch(SoundSpeed<T> data1, SoundSpeed<T> data2)
+        internal static void VerifyThatTimePeriodsMatch(SoundSpeed data1, SoundSpeed data2)
         {
             foreach (var field1 in data1.SoundSpeedFields.Where(field1 => data2[field1.TimePeriod] == null)) throw new DataException(string.Format("SoundSpeeds do not contain the same time periods. Data 1 has time period {0}, data 2 does not", field1.TimePeriod));
             foreach (var field2 in data2.SoundSpeedFields.Where(field2 => data1[field2.TimePeriod] == null)) throw new DataException(string.Format("SoundSpeeds do not contain the same time periods. Data 2 has time period {0}, data 1 does not", field2.TimePeriod));
         }
 
-        public static SoundSpeed<T> Deserialize(BinaryReader reader)
+        public static SoundSpeed Deserialize(BinaryReader reader)
         {
-            var result = new SoundSpeed<T>();
+            var result = new SoundSpeed();
             var fieldCount = reader.ReadInt32();
             for (var i = 0; i < fieldCount; i++)
-                result.SoundSpeedFields.Add(SoundSpeedField<T>.Deserialize(reader));
+                result.SoundSpeedFields.Add(SoundSpeedField.Deserialize(reader));
             return result;
         }
 

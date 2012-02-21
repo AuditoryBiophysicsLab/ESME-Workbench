@@ -218,7 +218,7 @@ namespace ESME.TransmissionLoss.CASS
             result.EnvironmentInformation = new EnvironmentInformation
             {
                 Wind = new Wind(),
-                SoundSpeedField = new SoundSpeedField<SoundSpeedSample> {TimePeriod = result.TimePeriod},
+                SoundSpeedField = new SoundSpeedField {TimePeriod = result.TimePeriod},
                 Sediment = new Sediment(),
             };
             var windData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = result.TimePeriod };
@@ -235,7 +235,7 @@ namespace ESME.TransmissionLoss.CASS
                                                                    }));
                 }
                 var profileData = location.Depths.Select((t, depthIndex) => new SoundSpeedSample((float)t, (float)location.Soundspeeds[depthIndex])).ToList();
-                result.EnvironmentInformation.SoundSpeedField.EnvironmentData.Add(new SoundSpeedProfile<SoundSpeedSample>(location){ Data = profileData});
+                result.EnvironmentInformation.SoundSpeedField.EnvironmentData.Add(new SoundSpeedProfile(location){ Data = profileData});
             }
             result.EnvironmentInformation.Wind.TimePeriods.Add(windData); 
             return result;

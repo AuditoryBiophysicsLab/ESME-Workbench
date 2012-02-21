@@ -564,7 +564,7 @@ namespace ESME.Environment.Descriptors
                             Task<Bathymetry> bathyTask;
                             EnvironmentData[EnvironmentDataType.Bathymetry] = bathyTask = new Task<Bathymetry>(() => Bathymetry.Load(Path.Combine(SelectedArea.BathymetryPath, SelectedBathymetry.FileName)));
                             SelectedEnvironment[EnvironmentDataType.SoundSpeed] = SelectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", SelectedTimePeriod)];
-                            EnvironmentData[EnvironmentDataType.SoundSpeed] = new Task<SoundSpeed<SoundSpeedSample>>(() => EnvironmentFile.CalculateSoundSpeed<GDEMSoundSpeedSample>(SelectedRangeComplex, SelectedTimePeriod, bathyTask, SelectedBathymetry.GeoRect));
+                            EnvironmentData[EnvironmentDataType.SoundSpeed] = new Task<SoundSpeed>(() => EnvironmentFile.CalculateSoundSpeed(SelectedRangeComplex, SelectedTimePeriod, bathyTask, SelectedBathymetry.GeoRect));
                             IsEnvironmentFullySpecified = true;
                             LoadEnvironment();
                             return;
@@ -685,7 +685,7 @@ namespace ESME.Environment.Descriptors
             //result[EnvironmentDataType.Temperature] = new Task<SoundSpeed>(() => EnvironmentFile.SeasonalAverage(rangeComplex, timePeriod,EnvironmentDataType.Temperature));
             Task<Bathymetry> bathyTask;
             result[EnvironmentDataType.Bathymetry] = bathyTask = new Task<Bathymetry>(() => Bathymetry.Load(Path.Combine(area.BathymetryPath, area[bathymetryResolution].FileName)));
-            result[EnvironmentDataType.SoundSpeed] = new Task<SoundSpeed<SoundSpeedSample>>(() => EnvironmentFile.CalculateSoundSpeed<GDEMSoundSpeedSample>(rangeComplex, timePeriod, bathyTask, area[bathymetryResolution].GeoRect));
+            result[EnvironmentDataType.SoundSpeed] = new Task<SoundSpeed>(() => EnvironmentFile.CalculateSoundSpeed(rangeComplex, timePeriod, bathyTask, area[bathymetryResolution].GeoRect));
 
             if (Configuration.IsClassifiedModel) result[EnvironmentDataType.BottomLoss].Start();
             result[EnvironmentDataType.Sediment].Start();

@@ -6,11 +6,11 @@ using HRC.Navigation;
 
 namespace ESME.Environment
 {
-    public class SoundSpeedProfileAverager<T> : SoundSpeedProfile<AverageSoundSpeedSample> where T: SoundSpeedSample
+    public class SoundSpeedProfileAverager : SoundSpeedProfileGeneric<AverageSoundSpeedSample>
     {
         public SoundSpeedProfileAverager() {}
 
-        public SoundSpeedProfileAverager(Geo<List<T>> profile) : base(profile)
+        public SoundSpeedProfileAverager(SoundSpeedProfile profile) : base(profile)
         {
             if (profile.Data.Count == 0)
                 foreach (var datum in profile.Data) Add(new AverageSoundSpeedSample(datum));
@@ -23,11 +23,11 @@ namespace ESME.Environment
                 }
         }
 
-        public SoundSpeedProfile<SoundSpeedSample> Average 
+        public SoundSpeedProfile Average 
         {
             get
             {
-                var result = new SoundSpeedProfile<SoundSpeedSample>(this);
+                var result = new SoundSpeedProfile(this);
                 foreach (var datum in Data) result.Add(new SoundSpeedSample(datum.Depth, datum.SoundSpeed));
                 return result;
             }
@@ -60,11 +60,39 @@ namespace ESME.Environment
         public float Average { get { return Value / Count; } }
     }
 
-    [Serializable]
-    public class SoundSpeedProfile<T> : Geo<List<T>> where T: SoundSpeedSample, new()
+    public class SoundSpeedProfile : SoundSpeedProfileGeneric<SoundSpeedSample>
     {
-        public SoundSpeedProfile() {}
-        public SoundSpeedProfile(Geo location) : base(location) { Data = new List<T>(); }
+        public SoundSpeedProfile() {        }
+        public SoundSpeedProfile(Geo location) : base(location) { }
+
+        /// <summary>
+        /// Extrapolates the current sound speed profile to the given depth, in one step, using the provided temperature and salinity profile
+        /// </summary>
+        /// <param name="newMaxDepth"></param>
+        public void Extend(float newMaxDepth)
+        {
+            if (newMaxDepth < MaxDepth) throw new ApplicationException(string.Format("SoundSpeedProfile.Extend: Given depth {0} is less than current maximum depth {1}", newMaxDepth, MaxDepth));
+
+            //System.Diagnostics.Debug.WriteLine("Extrapolating SSP {0} from data depth of {1}m to bathymetry depth of {2}m", this, MaxDepth, newMaxDepth);
+            //System.Diagnostics.Debug.WriteLine("  Initial depth vector length: {0}", Depths.Length);
+            Add(SoundSpeedSample.Extend(Data[Data.Count - 1], Data[Data.Count - 2], newMaxDepth));
+        }
+
+        public static new SoundSpeedProfile Deserialize(BinaryReader reader)
+        {
+            var result = new SoundSpeedProfile(Geo.Deserialize(reader));
+            var itemCount = reader.ReadInt32();
+            //for (var i = 0; i < itemCount; i++) result.Add((T)genericDeserializer.Invoke(null, new object[] { reader }));
+            for (var i = 0; i < itemCount; i++) result.Add(SoundSpeedSample.Deserialize(reader));
+            return result;
+        }
+    }
+
+    [Serializable]
+    public class SoundSpeedProfileGeneric<T> : Geo<List<T>> where T: SoundSpeedSample, new()
+    {
+        public SoundSpeedProfileGeneric() {}
+        public SoundSpeedProfileGeneric(Geo location) : base(location) { Data = new List<T>(); }
 
         #region public List<string> Messages { get; set; }
 
@@ -101,73 +129,42 @@ namespace ESME.Environment
         public float MaxDepth { get { return Data.Max(sample => sample.Depth); } }
 
         /// <summary>
-        /// Extrapolates the current sound speed profile to the given depth, in one step, using the provided temperature and salinity profile
-        /// </summary>
-        /// <param name="newMaxDepth"></param>
-        public void Extend(float newMaxDepth)
-        {
-            if (newMaxDepth < MaxDepth) throw new ApplicationException(string.Format("SoundSpeedProfile.Extend: Given depth {0} is less than current maximum depth {1}", newMaxDepth, MaxDepth));
-
-            //System.Diagnostics.Debug.WriteLine("Extrapolating SSP {0} from data depth of {1}m to bathymetry depth of {2}m", this, MaxDepth, newMaxDepth);
-            //System.Diagnostics.Debug.WriteLine("  Initial depth vector length: {0}", Depths.Length);
-
-            var dummy = new T();
-            Add((T)dummy.Extend(Data[Data.Count - 2], newMaxDepth));
-        }
-
-        /// <summary>
         /// Extends the current sound speed profile to the same depth as a given template, adjusting the copied template values to ensure a
         /// smooth curve in the profile
         /// </summary>
         /// <param name="templateSSP"></param>
-        public void Extend(SoundSpeedProfile<T> templateSSP)
+        public void Extend(SoundSpeedProfileGeneric<T> templateSSP)
         {
             //System.Diagnostics.Debug.WriteLine("Extending SSP {0} to new depth {1}", this, templateSSP.MaxDepth);
 
-            if (templateSSP.MaxDepth > MaxDepth)
+            if (templateSSP.MaxDepth <= MaxDepth) return;
+            if (Data.Count == 0)
             {
-                if (Data.Count == 0)
-                {
-                    //System.Diagnostics.Debug.WriteLine("  Original SSP is zero length, copying templateSSP.");
-                    AddRange(templateSSP.Data);
-                }
-                else
-                {
-                    //System.Diagnostics.Debug.WriteLine("  Original SSP depth vector length: {0} ({1}m)", Depths.Length, MaxDepth);
-                    //if (Data.Count > templateSSP.Data.Count) System.Diagnostics.Debugger.Break();
-                    var myProfileLength = Data.Count;
-                    var templateProfileLength = templateSSP.Data.Count;
-                    var shallowSpeed = Data.Last().SoundSpeed;
-                    var deepSpeedAtSameDepth = templateSSP.Data[myProfileLength - 1].SoundSpeed;
-                    //System.Diagnostics.Debug.WriteLine("  Original soundspeed at {0}m: {1}", MaxDepth, shallowSpeed);
-                    //System.Diagnostics.Debug.WriteLine("  Template soundspeed at {0}m: {1}", MaxDepth, deepSpeedAtSameDepth);
+                //System.Diagnostics.Debug.WriteLine("  Original SSP is zero length, copying templateSSP.");
+                AddRange(templateSSP.Data);
+            }
+            else
+            {
+                //System.Diagnostics.Debug.WriteLine("  Original SSP depth vector length: {0} ({1}m)", Depths.Length, MaxDepth);
+                //if (Data.Count > templateSSP.Data.Count) System.Diagnostics.Debugger.Break();
+                var myProfileLength = Data.Count;
+                var templateProfileLength = templateSSP.Data.Count;
+                var shallowSpeed = Data.Last().SoundSpeed;
+                var deepSpeedAtSameDepth = templateSSP.Data[myProfileLength - 1].SoundSpeed;
+                //System.Diagnostics.Debug.WriteLine("  Original soundspeed at {0}m: {1}", MaxDepth, shallowSpeed);
+                //System.Diagnostics.Debug.WriteLine("  Template soundspeed at {0}m: {1}", MaxDepth, deepSpeedAtSameDepth);
 
-                    var ssDiff = deepSpeedAtSameDepth - shallowSpeed;
-                    //System.Diagnostics.Debug.WriteLine("  Delta    soundspeed at {0}m: {1}", MaxDepth, ssDiff);
+                var ssDiff = deepSpeedAtSameDepth - shallowSpeed;
+                //System.Diagnostics.Debug.WriteLine("  Delta    soundspeed at {0}m: {1}", MaxDepth, ssDiff);
 
-                    for (var speedIndex = myProfileLength; speedIndex < templateProfileLength; speedIndex++)
-                    {
-                        var newSpeed = templateSSP.Data[speedIndex].SoundSpeed - ssDiff;
-                        //System.Diagnostics.Debug.WriteLine("    Template soundspeed at {0}m: Original: {1} Adjusted: {2}", templateSSP.Depths[speedIndex], templateSSP.SoundSpeeds[speedIndex], newSpeed);
-                        Add(new T {Depth = templateSSP.Data[speedIndex].Depth, SoundSpeed = newSpeed});
-                    }
+                for (var speedIndex = myProfileLength; speedIndex < templateProfileLength; speedIndex++)
+                {
+                    var newSpeed = templateSSP.Data[speedIndex].SoundSpeed - ssDiff;
+                    //System.Diagnostics.Debug.WriteLine("    Template soundspeed at {0}m: Original: {1} Adjusted: {2}", templateSSP.Depths[speedIndex], templateSSP.SoundSpeeds[speedIndex], newSpeed);
+                    Add(new T {Depth = templateSSP.Data[speedIndex].Depth, SoundSpeed = newSpeed});
                 }
             }
             //System.Diagnostics.Debug.WriteLine("  New SSP depth vector length: {0}", Depths.Length);
-        }
-
-        public static new SoundSpeedProfile<T> Deserialize(BinaryReader reader)
-        {
-            // Note: I stipulate this is as ugly as hell but I'm not currently aware of any OTHER way to call the static Deserialize method
-            //       in whatever subclass of SoundSpeedSample that T is in the current context.
-            //var genericDeserializer = typeof(T).GetMethod("Deserialize", BindingFlags.Static | BindingFlags.Public);
-            var dummy = new T();
-
-            var result = new SoundSpeedProfile<T>(Geo.Deserialize(reader));
-            var itemCount = reader.ReadInt32();
-            //for (var i = 0; i < itemCount; i++) result.Add((T)genericDeserializer.Invoke(null, new object[] { reader }));
-            for (var i = 0; i < itemCount; i++) result.Add((T)dummy.Deserialize(reader));
-            return result;
         }
 
         public new void Serialize(BinaryWriter writer)

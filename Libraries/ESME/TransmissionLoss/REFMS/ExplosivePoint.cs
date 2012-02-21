@@ -9,7 +9,6 @@ using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
-using ESME.Environment.NAVO;
 using ESME.Model;
 using ESME.NEMO;
 using HRC.Collections;
@@ -97,7 +96,7 @@ namespace ESME.TransmissionLoss.REFMS
             get { return _explosionDepth; }
             set
             {
-                if (_explosionDepth == value) return;
+                if (Math.Abs(_explosionDepth - value) < 0.001) return;
                 _explosionDepth = value;
                 NotifyPropertyChanged(ExplosionDepthChangedEventArgs);
             }
@@ -151,7 +150,7 @@ namespace ESME.TransmissionLoss.REFMS
             get { return _delta; }
             set
             {
-                if (_delta == value) return;
+                if (Math.Abs(_delta - value) < 0.0001) return;
                 _delta = value;
                 NotifyPropertyChanged(DeltaChangedEventArgs);
             }
@@ -187,7 +186,7 @@ namespace ESME.TransmissionLoss.REFMS
             get { return _depthLimit; }
             set
             {
-                if (_depthLimit == value) return;
+                if (Math.Abs(_depthLimit - value) < 0.0001) return;
                 _depthLimit = value;
                 NotifyPropertyChanged(DepthLimitChangedEventArgs);
             }
@@ -364,7 +363,7 @@ namespace ESME.TransmissionLoss.REFMS
         {
             //var temperatureData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[TimePeriod].EnvironmentData.GetNearestPoint(this);
             //var salinityData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[TimePeriod].EnvironmentData.GetNearestPoint(this);
-            var soundSpeedData = ((Task<SoundSpeed<GDEMSoundSpeedSample>>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[TimePeriod].EnvironmentData.GetNearestPoint(this);
+            var soundSpeedData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[TimePeriod].EnvironmentData.GetNearestPoint(this);
             SVPLocation = new Geo(soundSpeedData);
             BottomLossData = ((Task<BottomLoss>)EnvironmentData[EnvironmentDataType.BottomLoss]).Result.Samples.GetNearestPoint(this).Data;
             WaterDepth = Math.Abs(((Task<Bathymetry>)EnvironmentData[EnvironmentDataType.Bathymetry]).Result.Samples.GetNearestPoint(this).Data);
@@ -648,7 +647,7 @@ namespace ESME.TransmissionLoss.REFMS
         public List<SVPLayer> Layers { get; private set; }
         public double Delta { get; private set; }
 
-        public static SVPFile Create(Geo geo, double[] depths, SoundSpeedProfile<GDEMSoundSpeedSample> soundSpeedProfile, BottomLossData bottomLossData, double delta)
+        public static SVPFile Create(Geo geo, double[] depths, SoundSpeedProfile soundSpeedProfile, BottomLossData bottomLossData, double delta)
         {
             var temps = (from sample in soundSpeedProfile.Data select (double)sample.Temperature).ToArray();
             var salinities = (from sample in soundSpeedProfile.Data select (double)sample.Salinity).ToArray();

@@ -161,7 +161,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 var samplePoints = data[RangeComplexes.SelectedTimePeriod].EnvironmentData.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
                 _dispatcher.InvokeInBackgroundIfRequired(() => EnvironmentLayers[EnvironmentDataType.Wind] = CurrentMapLayers.DisplayOverlayShapes("Wind", LayerType.WindSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false));
             });
-            RangeComplexes.HookEnvironment<SoundSpeed<SoundSpeedSample>>(EnvironmentDataType.SoundSpeed, data =>
+            RangeComplexes.HookEnvironment<SoundSpeed>(EnvironmentDataType.SoundSpeed, data =>
             {
                 if (RangeComplexes.SelectedTimePeriod == TimePeriod.Invalid) return;
                 var samplePoints = data[RangeComplexes.SelectedTimePeriod].EnvironmentData.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();

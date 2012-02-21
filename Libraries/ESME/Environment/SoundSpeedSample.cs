@@ -1,15 +1,10 @@
 ﻿using System;
 using System.IO;
-using ESME.Environment.NAVO;
 using HRC.Navigation;
 
 namespace ESME.Environment
 {
-    public interface ISoundSpeedSample<T>
-    {
-        T Extend(T shallowerSample, float extendedSampleDepth);
-        T Deserialize(BinaryReader reader);
-    }
+    //public delegate SoundSpeedSample SoundSpeedSampleExtender(SoundSpeedSample shallowerSample, SoundSpeedSample deeperSample, float extendedSampleDepth);
     public class SoundSpeedSample : IComparable<SoundSpeedSample>
     {
         /// <summary>
@@ -21,6 +16,18 @@ namespace ESME.Environment
         {
             Depth = depth;
             SoundSpeed = soundSpeed;
+        }
+
+        public SoundSpeedSample(float depth, float temperature, float salinity) : this(depth, float.NaN)
+        {
+            Temperature = temperature;
+            Salinity = salinity;
+        }
+
+        public SoundSpeedSample(float depth, float temperature, float salinity, float soundSpeed) : this(depth, soundSpeed)
+        {
+            Temperature = temperature;
+            Salinity = salinity;
         }
 
         public SoundSpeedSample() 
@@ -35,6 +42,16 @@ namespace ESME.Environment
         public float Depth { get; set; }
 
         /// <summary>
+        /// Temperature, in Celsius
+        /// </summary>
+        public float Temperature { get; set; }
+
+        /// <summary>
+        /// Salinity, in parts per thousand (PPT)
+        /// </summary>
+        public float Salinity { get; set; }
+
+        /// <summary>
         /// Sound speed, in meters per second
         /// </summary>
         public float SoundSpeed { get; set; }
@@ -44,8 +61,10 @@ namespace ESME.Environment
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>
-        public static SoundSpeedSample DeserializeStatic(BinaryReader reader) { return new SoundSpeedSample(reader.ReadSingle(), reader.ReadSingle()); }
-        public SoundSpeedSample Deserialize(BinaryReader reader) { return DeserializeStatic(reader); }
+        public static SoundSpeedSample Deserialize(BinaryReader reader)
+        {
+            return new SoundSpeedSample(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        }
 
         /// <summary>
         /// Write a SoundSpeedSample to a BinaryWriter
@@ -54,6 +73,8 @@ namespace ESME.Environment
         public void Serialize(BinaryWriter writer)
         {
             writer.Write(Depth);
+            writer.Write(Temperature);
+            writer.Write(Salinity);
             writer.Write(SoundSpeed);
         }
 
@@ -61,16 +82,14 @@ namespace ESME.Environment
 
         public int CompareTo(SoundSpeedSample other) { return Depth.CompareTo(other.Depth); }
 
-        public static SoundSpeedSample ExtendStatic(SoundSpeedSample shallowerSample, SoundSpeedSample deeperSample, float extendedSampleDepth)
+        //public static SoundSpeedSampleExtender Extender;
+
+        public static SoundSpeedSample Extend(SoundSpeedSample shallowerSample, SoundSpeedSample deeperSample, float extendedSampleDepth)
         {
             if (deeperSample.Depth <= shallowerSample.Depth) throw new ArgumentException("shallowerSample must be at a shallower (lower) depth than deeperSample", "shallowerSample");
             if (extendedSampleDepth <= deeperSample.Depth) throw new ArgumentException("deeperSample must be at a shallower (lower) depth than extendedSampleDepth", "deeperSample");
-            return new SoundSpeedSample(extendedSampleDepth, deeperSample.SoundSpeed);
-        }
 
-        public SoundSpeedSample Extend(SoundSpeedSample shallowerSample, float extendedSampleDepth)
-        {
-            return ExtendStatic(shallowerSample, this, extendedSampleDepth);
+            return new SoundSpeedSample(extendedSampleDepth, deeperSample.Temperature - (shallowerSample.Temperature - deeperSample.Temperature), deeperSample.Salinity);
         }
     }
 
@@ -84,6 +103,7 @@ namespace ESME.Environment
 
         public AverageSoundSpeedSample(SoundSpeedSample sample)
         {
+            Depth = sample.Depth;
             Value = sample.SoundSpeed;
             Count = 1;
         }
@@ -103,7 +123,7 @@ namespace ESME.Environment
             set { throw new InvalidOperationException("Cannot set SoundSpeed in an AverageSoundSpeed object"); }
         }
     }
-
+#if false
     public class GDEMSoundSpeedSample : SoundSpeedSample
     {
         public GDEMSoundSpeedSample() 
@@ -169,4 +189,5 @@ namespace ESME.Environment
 
         public GDEMSoundSpeedSample Extend(GDEMSoundSpeedSample shallowerSample, float extendedSampleDepth) { return ExtendStatic(shallowerSample, this, extendedSampleDepth); }
     }
+#endif
 }

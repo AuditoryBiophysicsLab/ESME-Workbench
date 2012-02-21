@@ -232,7 +232,7 @@ namespace InstallableNAVO.Databases
             public SMGCFile(string fileName)
             {
                 Months = null;
-                // Parse the filename to generate the EarthCoordinate for the current data point
+                // Parse the filename to generate the Geo for the current data point
                 var file = Path.GetFileName(fileName);
                 if (file == null) throw new ApplicationException("SMGCFile: Could not get filename from path");
                 var latStr = file.Substring(1, 2);

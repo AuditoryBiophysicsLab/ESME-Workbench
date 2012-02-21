@@ -229,8 +229,7 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
-        public static SoundSpeed<SoundSpeedSample> CalculateSoundSpeed<T>(RangeComplex rangeComplex, TimePeriod timePeriod, Task<Bathymetry> bathymetryTask, GeoRect bathymetryBounds)
-            where T : SoundSpeedSample, new()
+        public static SoundSpeed CalculateSoundSpeed(RangeComplex rangeComplex, TimePeriod timePeriod, Task<Bathymetry> bathymetryTask, GeoRect bathymetryBounds)
         {
             if (rangeComplex == null) throw new ArgumentException("rangeComplex");
             if (timePeriod == TimePeriod.Invalid) throw new ArgumentException("timePeriod");
@@ -245,7 +244,7 @@ namespace ESME.Environment.Descriptors
                            select new
                            {
                                Month = month,
-                               MonthlySoundSpeedTask = new Task<SoundSpeed<T>>(() => SoundSpeed<T>.Load(Path.Combine(rangeComplex.DataPath, string.Format("{0}.soundspeed", month)))),
+                               MonthlySoundSpeedTask = new Task<SoundSpeed>(() => SoundSpeed.Load(Path.Combine(rangeComplex.DataPath, string.Format("{0}.soundspeed", month)))),
                            }).ToDictionary(item => item.Month);
             var sourceTasks = new List<Task>();
             foreach (var month in months)
@@ -258,10 +257,10 @@ namespace ESME.Environment.Descriptors
             var continuation = TaskEx.WhenAll(sourceTasks).ContinueWith(task =>
             {
                 Debug.WriteLine("{0} SSP: Monthly sound speeds fields loaded", DateTime.Now);
-                var monthlySoundSpeeds = new SoundSpeed<T>();
+                var monthlySoundSpeeds = new SoundSpeed();
                 foreach (var month in months) monthlySoundSpeeds.Add(sources[month].MonthlySoundSpeedTask.Result[month]);
                 Debug.WriteLine("{0} SSP: Computing average sound speed for {1}", DateTime.Now, timePeriod);
-                var result = SoundSpeed<T>.Average(monthlySoundSpeeds, new List<TimePeriod> {timePeriod});
+                var result = SoundSpeed.Average(monthlySoundSpeeds, new List<TimePeriod> {timePeriod});
                 Debug.WriteLine("{0} SSP: Returning average sound speed for {1}", DateTime.Now, timePeriod);
                 return result;
             });

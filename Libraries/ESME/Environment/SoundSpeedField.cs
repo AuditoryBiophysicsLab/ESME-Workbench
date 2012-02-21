@@ -6,27 +6,27 @@ using HRC.Navigation;
 
 namespace ESME.Environment
 {
-    public class SoundSpeedFieldAverager<T> : TimePeriodEnvironmentData<SoundSpeedProfileAverager<T>> where T: SoundSpeedSample, new()
+    public class SoundSpeedFieldAverager : TimePeriodEnvironmentData<SoundSpeedProfileAverager>
     {
-        public void Add(SoundSpeedField<T> sourceField)
+        public void Add(SoundSpeedField sourceField)
         {
             var environmentDataList = EnvironmentData.ToList();
-            var itemsToAdd = new List<SoundSpeedProfileAverager<T>>();
+            var itemsToAdd = new List<SoundSpeedProfileAverager>();
             foreach (var sourceProfile in sourceField.EnvironmentData)
             {
                 var profile = environmentDataList.Find(p => p.Equals(sourceProfile));
-                if (profile == null) itemsToAdd.Add(new SoundSpeedProfileAverager<T>(sourceProfile));
+                if (profile == null) itemsToAdd.Add(new SoundSpeedProfileAverager(sourceProfile));
                 else profile.Add(sourceProfile);
             }
             EnvironmentData.AddRange(itemsToAdd);
         }
 
-        public SoundSpeedField<SoundSpeedSample> Average
+        public SoundSpeedField Average
         {
             get
             {
                 var environmentData = EnvironmentData.Select(averageProfile => averageProfile.Average);
-                var result = new SoundSpeedField<SoundSpeedSample> { TimePeriod = TimePeriod };
+                var result = new SoundSpeedField { TimePeriod = TimePeriod };
                 result.EnvironmentData.AddRange(environmentData);
                 return result;
             }
@@ -34,9 +34,9 @@ namespace ESME.Environment
     }
 
     [Serializable]
-    public class SoundSpeedField<T> : TimePeriodEnvironmentData<SoundSpeedProfile<T>> where T : SoundSpeedSample, new()
+    public class SoundSpeedField : TimePeriodEnvironmentData<SoundSpeedProfile>
     {
-        public SoundSpeedProfile<T> GetDeepestSSP(Geo<float> deepestPoint)
+        public SoundSpeedProfile GetDeepestSSP(Geo<float> deepestPoint)
         {
             var step1 = from ssp in EnvironmentData
                         orderby ssp.Data.Count
@@ -151,15 +151,15 @@ namespace ESME.Environment
         }
 #endif
 
-        public static SoundSpeedField<T> Deserialize(BinaryReader reader)
+        public static SoundSpeedField Deserialize(BinaryReader reader)
         {
-            var result = new SoundSpeedField<T>
+            var result = new SoundSpeedField
             {
                 TimePeriod = (TimePeriod)reader.ReadInt32(),
             };
             var itemCount = reader.ReadInt32();
             for (var i = 0; i < itemCount; i++ )
-                result.EnvironmentData.Add(SoundSpeedProfile<T>.Deserialize(reader));
+                result.EnvironmentData.Add(SoundSpeedProfile.Deserialize(reader));
             return result;
         }
 

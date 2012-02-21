@@ -81,7 +81,7 @@ namespace ESME.Environment
                 SoundSpeedProgress.JobStarting(job);
                 CheckDestinationDirectory(job.DestinationFilename);
                 var temperatureField = GDEM.ReadFile(job.TimePeriod, job.GeoRect);
-                var temperature = new SoundSpeed<GDEMSoundSpeedSample>();
+                var temperature = new SoundSpeed();
                 temperature.SoundSpeedFields.Add(temperatureField);
                 temperature.Serialize(job.DestinationFilename);
                 job.Resolution = 15;

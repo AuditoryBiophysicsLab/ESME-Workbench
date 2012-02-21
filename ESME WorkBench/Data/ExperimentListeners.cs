@@ -198,7 +198,7 @@ namespace ESMEWorkBench.Data
                 var navoTimePeriod = (TimePeriod) Enum.Parse(typeof (TimePeriod), timePeriod);
                 var soundSpeedFile = Path.Combine(EnvironmentRoot, string.Format("{0}-soundspeed.xml", timePeriod));
                 //var windSpeedFile = Path.Combine(EnvironmentRoot, string.Format("{0}-wind.txt", timePeriod));
-                var soundSpeedField = SoundSpeed<SoundSpeedSample>.Load(soundSpeedFile)[navoTimePeriod];
+                var soundSpeedField = SoundSpeed.Load(soundSpeedFile)[navoTimePeriod];
                 var windSpeedField = wind[navoTimePeriod];
                 var environmentInfo = new EnvironmentInformation
                                       {

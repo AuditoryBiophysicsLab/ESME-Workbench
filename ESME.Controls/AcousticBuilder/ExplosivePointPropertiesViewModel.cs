@@ -399,7 +399,7 @@ namespace ESME.Views.AcousticBuilder
             var curLocation = new Geo(Latitude, Longitude);
             //var tempData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Temperature]).Result[ExplosivePoint.TimePeriod].EnvironmentData.GetNearestPoint(curLocation);
             //var salData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.Salinity]).Result[ExplosivePoint.TimePeriod].EnvironmentData.GetNearestPoint(curLocation);
-            var sspData = ((Task<SoundSpeed<GDEMSoundSpeedSample>>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[ExplosivePoint.TimePeriod].EnvironmentData.GetNearestPoint(curLocation);
+            var sspData = ((Task<SoundSpeed>)EnvironmentData[EnvironmentDataType.SoundSpeed]).Result[ExplosivePoint.TimePeriod].EnvironmentData.GetNearestPoint(curLocation);
             SVPLocation = new Geo(sspData);
             NotifyPropertyChanged(SVPFilenameChangedEventArgs);
             var bottomLossData = ((Task<BottomLoss>)EnvironmentData[EnvironmentDataType.BottomLoss]).Result.Samples.GetNearestPoint(curLocation).Data;

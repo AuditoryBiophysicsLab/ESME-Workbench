@@ -62,7 +62,7 @@ namespace InstallableNAVO.Databases
             }
         }
 
-        public static SoundSpeedField<GDEMSoundSpeedSample> ReadFile(string gdemDirectory, TimePeriod month, GeoRect region)
+        public static SoundSpeedField ReadFile(string gdemDirectory, TimePeriod month, GeoRect region)
         {
             var temperatureFile = NetCDFFile.Open(FindTemperatureFile(month, gdemDirectory));
             var temperatureLatitudes = ((NcVarDouble)temperatureFile.Variables.Single(var => var.Name == "lat")).ToArray();
@@ -104,7 +104,7 @@ namespace InstallableNAVO.Databases
             var latCount = selectedLats.Length;
             var lonCount = selectedLons.Length;
 
-            var newFieldEnvironmentData = new List<SoundSpeedProfile<GDEMSoundSpeedSample>>();
+            var newFieldEnvironmentData = new List<SoundSpeedProfile>();
 
             for (var lonIndex = 0; lonIndex < lonCount; lonIndex++)
             {
@@ -118,20 +118,20 @@ namespace InstallableNAVO.Databases
                 {
                     var lat = latMap[latIndex].Value;
                     var latSourceIndex = latMap[latIndex].Index;
-                    var newProfile = new SoundSpeedProfile<GDEMSoundSpeedSample>(new EarthCoordinate(lat, wrappedLon));
+                    var newProfile = new SoundSpeedProfile(new EarthCoordinate(lat, wrappedLon));
                     for (var depthIndex = 0; depthIndex < temperatureDepths.Length; depthIndex++)
                     {
                         var temperatureValue = temperatureData[(uint)depthIndex, (uint)latSourceIndex, (uint)lonSourceIndex];
                         var salinityValue = salinityData[(uint)depthIndex, (uint)latSourceIndex, (uint)lonSourceIndex];
                         if ((Math.Abs(temperatureValue - temperatureMissingValue) < 0.0001) || (Math.Abs(salinityValue - salinityMissingValue) < 0.0001)) break;
-                        newProfile.Add(new GDEMSoundSpeedSample((float)temperatureDepths[depthIndex],
-                                                                (float)((temperatureValue * temperatureScaleFactor) + temperatureAddOffset),
-                                                                (float)((salinityValue * salinityScaleFactor) + salinityAddOffset)));
+                        newProfile.Add(new SoundSpeedSample((float)temperatureDepths[depthIndex],
+                                                            (float)((temperatureValue * temperatureScaleFactor) + temperatureAddOffset),
+                                                            (float)((salinityValue * salinityScaleFactor) + salinityAddOffset)));
                     }
                     if (newProfile.Data.Count > 0) newFieldEnvironmentData.Add(newProfile);
                 }
             }
-            var newField = new SoundSpeedField<GDEMSoundSpeedSample> { TimePeriod = month };
+            var newField = new SoundSpeedField { TimePeriod = month };
             newField.EnvironmentData.AddRange(newFieldEnvironmentData);
             newField.EnvironmentData.Sort();
             return newField;
