@@ -99,7 +99,7 @@ namespace SoundSpeedProfile
 
             try
             {
-                var location = new EarthCoordinate(latitude, 0);
+                var location = new Geo(latitude, 0);
                 var curSalinity = 0.0;
                 if (isCSV) Console.WriteLine("\"Depth (m)\", \"Sound Speed (m/s)\"");
                 for (var index = 0; index < depths.Count(); index++)

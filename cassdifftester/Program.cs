@@ -159,7 +159,7 @@ namespace cassdifftester
                     //if ((1 - (Math.Min(esmespeed, NEMOspeed) / Math.Max(esmespeed, NEMOspeed))) > 0.005)
                     if (Math.Abs(esmespeed - nemospeed) > maxDiff)
                     {
-                        outFile.AppendLine(string.Format("{0,-18} {1,5:0.0} {2,9:0.000} {3,9:0.000} {4,8:0.000} {5,8:0.00000}", result.esme.Location, result.esme.Depths[i], esmespeed, nemospeed, diff, pct));
+                        outFile.AppendLine(string.Format("{0,-18} {1,5:0.0} {2,9:0.000} {3,9:0.000} {4,8:0.000} {5,8:0.00000}", result.esme, result.esme.Depths[i], esmespeed, nemospeed, diff, pct));
                         soundspeedcounter++;
                         break;
                     }
@@ -172,7 +172,7 @@ namespace cassdifftester
             outFile.AppendLine("Wind Speed Differences");
             outFile.AppendLine("Lat/Lon               ESME    NEMO");
             outFile.AppendLine("------------------ ------- -------");
-            foreach (var result in esmeMatchesNemo.Where(result => (result.nemo.WindSpeed != result.esme.WindSpeed) && (result.esme.Equals(result.nemo))))
+            foreach (var result in esmeMatchesNemo.Where(result => (Math.Abs(result.nemo.WindSpeed - result.esme.WindSpeed) > 0.0001) && (result.esme.Equals(result.nemo))))
             {
                 //outFile.AppendLine(string.Format("{0}: esme bottom type is {1} but NEMO is {2}", result.esme.Location, result.esme.Depths.Count, result.NEMO.Depths.Count));
                 outFile.AppendLine(string.Format("{0,-18} {1,7} {2,7}", result.esme, result.esme.WindSpeed, result.nemo.WindSpeed));
