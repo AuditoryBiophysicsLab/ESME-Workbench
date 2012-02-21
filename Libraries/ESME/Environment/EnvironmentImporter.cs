@@ -82,12 +82,12 @@ namespace ESME.Environment
             {
                 SoundSpeedProgress.JobStarting(job);
                 CheckDestinationDirectory(job.DestinationFilename);
-                var temperatureField = GDEM.ReadFile(job.TimePeriod, job.GeoRect);
-                var temperature = new SoundSpeed();
-                temperature.SoundSpeedFields.Add(temperatureField);
-                temperature.Serialize(job.DestinationFilename);
+                var soundSpeedField = GDEM.ReadFile(job.TimePeriod, job.GeoRect);
+                var soundSpeed = new SoundSpeed();
+                soundSpeed.SoundSpeedFields.Add(soundSpeedField);
+                soundSpeed.Serialize(job.DestinationFilename);
                 job.Resolution = 15;
-                job.SampleCount = (uint)temperatureField.EnvironmentData.Count;
+                job.SampleCount = (uint)soundSpeedField.EnvironmentData.Count;
                 job.CompletionTask.Start();
                 await job.CompletionTask;
                 SoundSpeedProgress.JobCompleted(job);
@@ -251,6 +251,9 @@ namespace ESME.Environment
                     //Logger.Log("Temperature job after post");
                     break;
 #endif
+                case EnvironmentDataType.SoundSpeed:
+                    SoundSpeedProgress.Post(jobDescriptor);
+                    break;
                 case EnvironmentDataType.Sediment:
                     SedimentProgress.Post(jobDescriptor);
                     break;

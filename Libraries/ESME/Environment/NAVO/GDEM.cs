@@ -138,7 +138,7 @@ namespace ESME.Environment.NAVO
             var temperatureLatitudes = ((NcVarDouble)temperatureFile.Variables.Single(var => var.Name == "lat")).ToArray();
             var temperatureLongitudes = ((NcVarDouble)temperatureFile.Variables.Single(var => var.Name == "lon")).ToArray();
             var temperatureDepths = ((NcVarDouble)temperatureFile.Variables.Single(var => var.Name == "depth")).ToArray();
-            var temperatureData = ((NcVarDouble)temperatureFile.Variables.Single(var => var.Name == "water_temp"));
+            var temperatureData = ((NcVarShort)temperatureFile.Variables.Single(var => var.Name == "water_temp"));
             var temperatureMissingValue = ((NcAttShort)temperatureData.Attributes.Single(att => att.Name == "missing_value"))[0];
             var temperatureScaleFactor = ((NcAttFloat)temperatureData.Attributes.Single(att => att.Name == "scale_factor"))[0];
             var temperatureAddOffset = ((NcAttFloat)temperatureData.Attributes.Single(att => att.Name == "add_offset"))[0];
@@ -148,7 +148,7 @@ namespace ESME.Environment.NAVO
             //var salinityLatitudes = ((NcVarDouble)salinityFile.Variables.Single(var => var.Name == "lat")).ToArray();
             //var salinityLongitudes = ((NcVarDouble)salinityFile.Variables.Single(var => var.Name == "lon")).ToArray();
             //var salinityDepths = ((NcVarDouble)salinityFile.Variables.Single(var => var.Name == "depth")).ToArray();
-            var salinityData = ((NcVarDouble)salinityFile.Variables.Single(var => var.Name == "salinity"));
+            var salinityData = ((NcVarShort)salinityFile.Variables.Single(var => var.Name == "salinity"));
             var salinityMissingValue = ((NcAttShort)salinityData.Attributes.Single(att => att.Name == "missing_value"))[0];
             var salinityScaleFactor = ((NcAttFloat)salinityData.Attributes.Single(att => att.Name == "scale_factor"))[0];
             var salinityAddOffset = ((NcAttFloat)salinityData.Attributes.Single(att => att.Name == "add_offset"))[0];

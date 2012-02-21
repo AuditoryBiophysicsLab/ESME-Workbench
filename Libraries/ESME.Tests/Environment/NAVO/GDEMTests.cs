@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using ESME.Data;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
@@ -12,6 +13,15 @@ namespace ESME.Tests.Environment.NAVO
 {
     public class GDEMTests
     {
+        [Test]
+        public void ImportTest()
+        {
+            Globals.AppSettings = new AppSettings {NAVOConfiguration = {GDEMDirectory = @"H:\OAML\GDEM"}};
+            var soundSpeedField = GDEM.ReadFile(TimePeriod.January, new GeoRect(31.1627, 29.3590, -79.2195, -81.2789));
+            var soundSpeed = new SoundSpeed();
+            soundSpeed.SoundSpeedFields.Add(soundSpeedField);
+            //soundSpeed.Serialize(job.DestinationFilename);
+        }
 #if false
         [Test]
         public void AsyncDataflowImportTest()

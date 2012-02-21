@@ -160,8 +160,10 @@ namespace ESME.Environment.Descriptors
                 //if (result != null) QueueImportJob(result.Item2);
                 //result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Salinity, 15, true, month);
                 //if (result != null) QueueImportJob(result.Item2);
-                CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.SoundSpeed, 15, false, month);
+                result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.SoundSpeed, 15, true, month);
+                if (result != null) QueueImportJob(result.Item2);
                 //LinkToSourceMonths(result.Item1, month, EnvironmentDataType.Temperature);
+                //LinkToSourceMonths(result.Item1, month, EnvironmentDataType.Salinity);
                 //LinkToSourceMonths(result.Item1, month, EnvironmentDataType.Salinity);
             }
             foreach (var season in NAVOConfiguration.AllSeasons)
