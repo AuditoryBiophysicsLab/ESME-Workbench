@@ -21,6 +21,7 @@ namespace InstallableNAVO
             //ConfigurationControl = new GDEM3Configuration { DataContext = this };
             PluginType = PluginType.EnvironmentalDataSource;
             Resolutions = new[] { 2, 1, 0.5f, 0.1f, 0.05f };
+            IsTimeVariantData = false;
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\DBDB-V 5.4");
             if (regKey != null) DataLocation = (string)regKey.GetValue("");
 
@@ -41,7 +42,7 @@ namespace InstallableNAVO
 #endif
         }
 
-        public override Bathymetry Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration = null, IProgress<float> progress = null)
+        public override Bathymetry Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, IProgress<float> progress = null) 
         {
             return DBDB.Extract(resolution, geoRect, progress);
         }

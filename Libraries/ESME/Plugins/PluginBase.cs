@@ -96,7 +96,8 @@ namespace ESME.Plugins
         public float[] Resolutions { get; protected set; }
         public virtual string DataLocation { get; set; }
         public string DataLocationHelp { get; protected set; }
-
-        public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration = null, IProgress<float> progress = null);
+        public bool IsTimeVariantData { get; protected set; }
+        public TimePeriod[] AvailableTimePeriods { get; protected set; }
+        public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, IProgress<float> progress = null);
     }
 }

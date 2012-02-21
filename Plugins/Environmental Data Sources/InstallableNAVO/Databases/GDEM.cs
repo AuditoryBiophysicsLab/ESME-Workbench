@@ -68,7 +68,7 @@ namespace InstallableNAVO.Databases
             var temperatureLatitudes = ((NcVarDouble)temperatureFile.Variables.Single(var => var.Name == "lat")).ToArray();
             var temperatureLongitudes = ((NcVarDouble)temperatureFile.Variables.Single(var => var.Name == "lon")).ToArray();
             var temperatureDepths = ((NcVarDouble)temperatureFile.Variables.Single(var => var.Name == "depth")).ToArray();
-            var temperatureData = ((NcVarDouble)temperatureFile.Variables.Single(var => var.Name == "water_temp"));
+            var temperatureData = ((NcVarShort)temperatureFile.Variables.Single(var => var.Name == "water_temp"));
             var temperatureMissingValue = ((NcAttShort)temperatureData.Attributes.Single(att => att.Name == "missing_value"))[0];
             var temperatureScaleFactor = ((NcAttFloat)temperatureData.Attributes.Single(att => att.Name == "scale_factor"))[0];
             var temperatureAddOffset = ((NcAttFloat)temperatureData.Attributes.Single(att => att.Name == "add_offset"))[0];
@@ -78,7 +78,7 @@ namespace InstallableNAVO.Databases
             //var salinityLatitudes = ((NcVarDouble)salinityFile.Variables.Single(var => var.Name == "lat")).ToArray();
             //var salinityLongitudes = ((NcVarDouble)salinityFile.Variables.Single(var => var.Name == "lon")).ToArray();
             //var salinityDepths = ((NcVarDouble)salinityFile.Variables.Single(var => var.Name == "depth")).ToArray();
-            var salinityData = ((NcVarDouble)salinityFile.Variables.Single(var => var.Name == "salinity"));
+            var salinityData = ((NcVarShort)salinityFile.Variables.Single(var => var.Name == "salinity"));
             var salinityMissingValue = ((NcAttShort)salinityData.Attributes.Single(att => att.Name == "missing_value"))[0];
             var salinityScaleFactor = ((NcAttFloat)salinityData.Attributes.Single(att => att.Name == "scale_factor"))[0];
             var salinityAddOffset = ((NcAttFloat)salinityData.Attributes.Single(att => att.Name == "add_offset"))[0];
@@ -125,8 +125,8 @@ namespace InstallableNAVO.Databases
                         var salinityValue = salinityData[(uint)depthIndex, (uint)latSourceIndex, (uint)lonSourceIndex];
                         if ((Math.Abs(temperatureValue - temperatureMissingValue) < 0.0001) || (Math.Abs(salinityValue - salinityMissingValue) < 0.0001)) break;
                         newProfile.Add(new SoundSpeedSample((float)temperatureDepths[depthIndex],
-                                                            (float)((temperatureValue * temperatureScaleFactor) + temperatureAddOffset),
-                                                            (float)((salinityValue * salinityScaleFactor) + salinityAddOffset)));
+                                                            (temperatureValue * temperatureScaleFactor) + temperatureAddOffset,
+                                                            (salinityValue * salinityScaleFactor) + salinityAddOffset));
                     }
                     if (newProfile.Data.Count > 0) newFieldEnvironmentData.Add(newProfile);
                 }

@@ -52,7 +52,7 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        #region public EarthCoordinate<float> MaxDepth { get; set; }
+        #region public Geo<float> MaxDepth { get; set; }
 
         public EarthCoordinate<float> MaxDepth
         {

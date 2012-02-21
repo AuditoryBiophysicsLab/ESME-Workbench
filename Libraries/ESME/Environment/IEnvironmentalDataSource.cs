@@ -8,12 +8,8 @@ namespace ESME.Environment
         float[] Resolutions { get; }
         string DataLocation { get; set; }
         string DataLocationHelp { get; }
-        T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration = null, IProgress<float> progress = null);
-    }
-
-    public interface IGDEM3DataSource<out T> : IEnvironmentalDataSource<T>
-    {
-        T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, Geo<float> deepestPoint, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null);
-        T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, Bathymetry bathymetry, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null);
+        bool IsTimeVariantData { get; }
+        TimePeriod[] AvailableTimePeriods { get; }
+        T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, IProgress<float> progress = null);
     }
 }

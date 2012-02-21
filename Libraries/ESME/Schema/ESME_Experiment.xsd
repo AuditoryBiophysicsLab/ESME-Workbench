@@ -6,8 +6,8 @@
            xmlns:mstns="http://esme.bu.edu/support/schemas/ESME_Experiment"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            version="1.0">
-  <xs:include schemaLocation="EarthCoordinate.xsd"
-              id="EarthCoordinateSchema"/>
+  <xs:include schemaLocation="Geo.xsd"
+              id="GeoSchema"/>
   <xs:include schemaLocation="AnalysisPoint.xsd"
               id="AnalysisPointSchema"/>
   <xs:include schemaLocation="TransmissionLossField.xsd"
@@ -160,7 +160,7 @@
                 <xs:complexType>
                   <xs:sequence>
                     <xs:element name="Location"
-                                type="EarthCoordinate3D"
+                                type="Geo3D"
                                 maxOccurs="1"
                                 minOccurs="1" />
                     <xs:element name="SpeciesID"

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using ESME;
 using ESME.Environment;
+using ESME.Environment.NAVO;
+using ESME.NEMO;
 using ESME.Plugins;
 using HRC.Navigation;
 using Microsoft.Win32;
@@ -18,6 +21,8 @@ namespace InstallableNAVO
             PluginDescription = "Surface Marine Gridded Climatology Database v2.0, from US Navy/NAVOCEANO";
             DataLocationHelp = "A file called smgc.wind";
             //ConfigurationControl = new GDEM3Configuration { DataContext = this };
+            IsTimeVariantData = true;
+            AvailableTimePeriods = NAVOConfiguration.AllMonths.ToArray();
             PluginType = PluginType.EnvironmentalDataSource;
             Resolutions = new[] { 60f };
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\SMGC 2.0 Minimal");
@@ -40,10 +45,35 @@ namespace InstallableNAVO
 #endif
         }
 
-        public override Wind Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration = null, IProgress<float> progress = null)
+        #region Wind GlobalDataset { get; }
+
+        Wind GlobalDataset
         {
-            var globalDataset = Wind.Load(Path.Combine(DataLocation, RequiredSMGCFilename));
+            get
+            {
+                if (_globalDataset != null) return _globalDataset;
+                lock (_lockObject)
+                {
+                    _globalDataset = Wind.Load(Path.Combine(DataLocation, RequiredSMGCFilename));
+                    return _globalDataset;
+                }
+            }
+        }
+
+        Wind _globalDataset;
+        readonly object _lockObject = new object();
+
+        #endregion
+
+
+        public override Wind Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, IProgress<float> progress = null)
+        {
+            if (!AvailableTimePeriods.Contains(timePeriod)) throw new ParameterOutOfRangeException(string.Format("Specified timePeriod is not available in the {0} data set", PluginName));
+            var timePeriodData = new TimePeriodEnvironmentData<WindSample> {TimePeriod = timePeriod};
+            timePeriodData.EnvironmentData.AddRange(GlobalDataset[timePeriod].EnvironmentData);
+            timePeriodData.EnvironmentData.TrimToNearestPoints(geoRect);
             var result = new Wind();
+            result.TimePeriods.Add(timePeriodData);
             return result;
         }
     }
