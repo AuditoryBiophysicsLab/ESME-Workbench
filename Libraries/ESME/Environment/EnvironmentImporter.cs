@@ -54,12 +54,14 @@ namespace ESME.Environment
         static readonly ActionBlock<ImportJobDescriptor> SedimentWorker;
         static readonly ActionBlock<ImportJobDescriptor> WindWorker;
         static readonly ActionBlock<ImportJobDescriptor> BathymetryWorker;
+#if IS_CLASSIFIED_MODEL
         static readonly ActionBlock<ImportJobDescriptor> BottomLossWorker;
+        public static readonly ImportProgressViewModel BottomLossProgress;
+#endif
         public static readonly ImportProgressViewModel SoundSpeedProgress;
         public static readonly ImportProgressViewModel SedimentProgress;
         public static readonly ImportProgressViewModel WindProgress;
         public static readonly ImportProgressViewModel BathymetryProgress;
-        public static readonly ImportProgressViewModel BottomLossProgress;
 
         static void CheckDestinationDirectory(string destinationFilename)
         {
@@ -96,7 +98,7 @@ namespace ESME.Environment
                 BoundedCapacity = Globals.AppSettings.MaxImportThreadCount,
                 MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
             });
-            SoundSpeedProgress = new ImportProgressViewModel("Temperature", SoundSpeedWorker);
+            SoundSpeedProgress = new ImportProgressViewModel("Sound Speed", SoundSpeedWorker);
 
             if (SedimentWorker == null) SedimentWorker = new ActionBlock<ImportJobDescriptor>(job =>
             {
@@ -195,7 +197,7 @@ namespace ESME.Environment
                 MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
             });
             BathymetryProgress = new ImportProgressViewModel("Bathymetry", BathymetryWorker);
-
+#if IS_CLASSIFIED_MODEL
             if (BottomLossWorker == null) BottomLossWorker = new ActionBlock<ImportJobDescriptor>(async
             job =>
             {
@@ -216,6 +218,7 @@ namespace ESME.Environment
                 MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
             });
             BottomLossProgress = new ImportProgressViewModel("Bottom Loss", BottomLossWorker);
+#endif
         }
 
         public static void Import(IEnumerable<ImportJobDescriptor> jobDescriptors)
@@ -233,9 +236,11 @@ namespace ESME.Environment
                 case EnvironmentDataType.Bathymetry:
                     BathymetryProgress.Post(jobDescriptor);
                     break;
+#if IS_CLASSIFIED_MODEL
                 case EnvironmentDataType.BottomLoss:
                     BottomLossProgress.Post(jobDescriptor);
                     break;
+#endif
 #if false
                 case EnvironmentDataType.Salinity:
                     SalinityProgress.Post(jobDescriptor);
@@ -276,7 +281,9 @@ namespace ESME.Environment
             {
                 NAVOImporter.SoundSpeedProgress,
                 NAVOImporter.BathymetryProgress,
+#if IS_CLASSIFIED_MODEL
                 NAVOImporter.BottomLossProgress,
+#endif
                 NAVOImporter.SedimentProgress,
                 NAVOImporter.WindProgress,
             });

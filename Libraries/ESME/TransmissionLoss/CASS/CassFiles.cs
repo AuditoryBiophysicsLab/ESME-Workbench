@@ -14,6 +14,7 @@ using RangeComplex = ESME.Environment.Descriptors.RangeComplex;
 
 namespace ESME.TransmissionLoss.CASS
 {
+#if IS_CLASSIFIED_MODEL
     public static class CASSFiles
     {
         public static void WriteAcousticSimulatorFiles(AppSettings appSettings, IEnumerable<string> timePeriods, 
@@ -410,4 +411,5 @@ namespace ESME.TransmissionLoss.CASS
             isFirstPoint = false;
         }
     }
+#endif
 }

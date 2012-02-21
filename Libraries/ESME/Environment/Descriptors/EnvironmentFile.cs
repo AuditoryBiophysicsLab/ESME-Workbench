@@ -328,7 +328,9 @@ namespace ESME.Environment.Descriptors
         Sediment,
         Wind,
         Bathymetry,
-        BottomLoss,
         SoundSpeed,
+#if IS_CLASSIFIED_MODEL
+        BottomLoss,
+#endif
     }
 }

@@ -14,7 +14,6 @@ using ESME.Metadata;
 using ESME.Model;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
-using ESME.TransmissionLoss.REFMS;
 using ESME.Views.AcousticBuilder;
 using ESME.Views.TransmissionLoss;
 using ESME.Views.TransmissionLossViewer;
@@ -246,8 +245,12 @@ namespace ESMEWorkBench.ViewModels.Main
                        (_exportAnalysisPoints =
                         new SimpleCommand<object, object>(delegate
                         {
+#if IS_CLASSIFIED_MODEL
                             return (ScenarioMetadata != null && ScenarioMetadata.AnalysisPoints != null && ScenarioMetadata.AnalysisPoints.Count > 0) ||
                                    (ScenarioMetadata != null && ScenarioMetadata.ExplosivePoints != null && ScenarioMetadata.ExplosivePoints.Count > 0);
+#else
+                            return (ScenarioMetadata != null && ScenarioMetadata.AnalysisPoints != null && ScenarioMetadata.AnalysisPoints.Count > 0);
+#endif
                         },
                         delegate { ExportAnalysisPointsHandler(); }));
             }
@@ -434,6 +437,7 @@ namespace ESMEWorkBench.ViewModels.Main
             ScenarioMetadata.Save();
         }
 
+#if IS_CLASSIFIED_MODEL
         [MediatorMessageSink(MediatorMessage.EditExplosivePoint)]
         public void EditExplosivePoint(ExplosivePoint explosivePoint)
         {
@@ -452,7 +456,7 @@ namespace ESMEWorkBench.ViewModels.Main
             ScenarioMetadata.ExplosivePoints.Remove(explosivePoint);
             ScenarioMetadata.Save();
         }
-
+#endif
         [MediatorMessageSink(MediatorMessage.ViewPropagation)]
         public void ViewPropagation(CASSOutput cassOutput)
         {

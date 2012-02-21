@@ -238,7 +238,6 @@
     <Compile Include="TransmissionLoss\CASS\CASSBackgroundExporter.cs" />
     <Compile Include="TransmissionLoss\CASS\NAEMOEnvironmentFile.cs" />
     <Compile Include="TransmissionLoss\CASS\CASSOutput.cs" />
-    <Compile Include="Environment\RangeComplex.cs" />
     <Compile Include="TransmissionLoss\NemoModeToAcousticModelNameMap.cs" />
     <Compile Include="TransmissionLoss\RAM\RamOutput.cs" />
     <Compile Include="TransmissionLoss\REFMS\EffectsFile.cs" />

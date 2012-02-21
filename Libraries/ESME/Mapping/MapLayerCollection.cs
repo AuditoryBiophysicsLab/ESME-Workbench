@@ -250,7 +250,7 @@ namespace ESME.Mapping
             }
             analysisPointLayer.Done();
         }
-
+#if IS_CLASSIFIED_MODEL
         public void DisplayExplosivePoint(ExplosivePoint curPoint)
         {
             var oldIndex = -1;
@@ -300,6 +300,7 @@ namespace ESME.Mapping
             }
             explosivePointLayer.Done();
         }
+#endif
 
         public void RemovePropagationPoint(CASSOutput curPoint)
         {

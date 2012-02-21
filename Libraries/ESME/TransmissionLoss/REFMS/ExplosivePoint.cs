@@ -16,6 +16,7 @@ using HRC.Navigation;
 
 namespace ESME.TransmissionLoss.REFMS
 {
+#if IS_CLASSIFIED_MODEL
     public class ExplosivePoint : Geo, ISupportValidation
     {
         public ExplosivePoint() { }
@@ -744,4 +745,5 @@ namespace ESME.TransmissionLoss.REFMS
             return result;
         }
     }
+#endif
 }

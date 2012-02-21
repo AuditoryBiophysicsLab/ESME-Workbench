@@ -33,6 +33,7 @@ namespace ESME.NEMO.Overlay
             Color = color;
             Width = width;
             LineStyle = lineStyle;
+            _geos = new List<Geo>();
         }
 
         public virtual List<Geo> Geos { get { return new List<Geo>(_geos); } }

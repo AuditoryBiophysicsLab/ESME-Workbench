@@ -17,6 +17,7 @@ using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Views.AcousticBuilder
 {
+#if IS_CLASSIFIED_MODEL
     [ExportViewModel("ExplosivePointPropertiesViewModel")]
     public sealed class ExplosivePointPropertiesViewModel : ValidatingViewModel
     {
@@ -218,24 +219,6 @@ namespace ESME.Views.AcousticBuilder
 
         #endregion
 
-        #region public SVPFile SVPFile { get; set; }
-
-        public SVPFile SVPFile
-        {
-            get { return _svpFile; }
-            set
-            {
-                if (_svpFile == value) return;
-                _svpFile = value;
-                NotifyPropertyChanged(SVPFileChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SVPFileChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.SVPFile);
-        SVPFile _svpFile;
-
-        #endregion
-
         #region public double ProfileDepth { get; set; }
 
         public double ProfileDepth
@@ -251,6 +234,24 @@ namespace ESME.Views.AcousticBuilder
 
         static readonly PropertyChangedEventArgs ProfileDepthChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.ProfileDepth);
         double _profileDepth;
+
+        #endregion
+
+        #region public SVPFile SVPFile { get; set; }
+
+        public SVPFile SVPFile
+        {
+            get { return _svpFile; }
+            set
+            {
+                if (_svpFile == value) return;
+                _svpFile = value;
+                NotifyPropertyChanged(SVPFileChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SVPFileChangedEventArgs = ObservableHelper.CreateArgs<ExplosivePointPropertiesViewModel>(x => x.SVPFile);
+        SVPFile _svpFile;
 
         #endregion
 
@@ -441,4 +442,5 @@ namespace ESME.Views.AcousticBuilder
             return string.Format("{0}{1:00}", degrees, minutes);
         }
     }
+#endif
 }

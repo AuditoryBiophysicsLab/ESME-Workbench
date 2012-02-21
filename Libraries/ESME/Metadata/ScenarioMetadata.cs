@@ -22,7 +22,6 @@ using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
-using ESME.TransmissionLoss.REFMS;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
@@ -449,7 +448,9 @@ namespace ESME.Metadata
                 Dispatcher.InvokeAsynchronouslyInBackground(() =>
                 {
                     DisplayExistingAnalysisPoints();
+#if IS_CLASSIFIED_MODEL
                     DisplayExistingExplosivePoints();
+#endif
                 });
             }
         }
@@ -606,8 +607,9 @@ namespace ESME.Metadata
         public void PlaceAnalysisPoint(Geo location)
         {
             if (AnalysisPoints == null) AnalysisPoints = new ObservableCollection<AnalysisPoint>();
+#if IS_CLASSIFIED_MODEL
             if (ExplosivePoints == null) ExplosivePoints = new ObservableCollection<ExplosivePoint>();
-
+#endif
             var analysisPoint = new AnalysisPoint(location);
             var distinctModes = (from platform in NemoFile.Scenario.Platforms
                                  from source in platform.Sources
@@ -621,13 +623,16 @@ namespace ESME.Metadata
             foreach (var mode in distinctModes)
             {
                 if (mode.Mode.Name.ToLower() != "explosive") analysisPoint.SoundSources.Add(new SoundSource(analysisPoint, mode.Mode, 16));
+#if IS_CLASSIFIED_MODEL
                 else ExplosivePoints.Add(new ExplosivePoint(_pressurePath, location, mode.Platform, mode.Mode,
                                                             RangeComplexes.SelectedTimePeriod, 0.5f));
+#endif
             }
             if (analysisPoint.SoundSources.Count > 0) AnalysisPoints.Add(analysisPoint);
             Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));
         }
 
+#if IS_CLASSIFIED_MODEL
         #region public ObservableCollection<ExplosivePoint> ExplosivePoints { get; set; }
 
         public ObservableCollection<ExplosivePoint> ExplosivePoints
@@ -690,7 +695,7 @@ namespace ESME.Metadata
         ObservableCollection<ExplosivePoint> _explosivePoints;
 
         #endregion
-
+#endif
         #region public ObservableCollection<AnalysisPoint> AnalysisPoints { get; set; }
 
         public ObservableCollection<AnalysisPoint> AnalysisPoints
@@ -719,9 +724,11 @@ namespace ESME.Metadata
             if ((AnalysisPoints != null) && (AnalysisPoints.Count != 0) && (RangeComplexes.IsEnvironmentLoaded))
                 foreach (var analysisPoint in AnalysisPoints)
                     analysisPoint.Bathymetry = _bathymetry;
+#if IS_CLASSIFIED_MODEL
             if ((ExplosivePoints != null) && (ExplosivePoints.Count != 0) && (RangeComplexes.IsEnvironmentLoaded))
                 foreach (var explosivePoint in ExplosivePoints)
                     explosivePoint.EnvironmentData = RangeComplexes.EnvironmentData;
+#endif
         }
 
         void DisplayExistingAnalysisPoints()
@@ -828,11 +835,13 @@ namespace ESME.Metadata
             {
                 try
                 {
+#if IS_CLASSIFIED_MODEL
                     CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings,
                                                           new List<string> { NemoFile.Scenario.TimeFrame },
                                                           AnalysisPoints, NemoFile,
                                                           NemoModeToAcousticModelNameMap,
                                                           RangeComplexes.EnvironmentData, RangeComplexes);
+#endif
                 }
                 catch (Exception e)
                 {
@@ -841,11 +850,13 @@ namespace ESME.Metadata
             }
             else
             {
+#if IS_CLASSIFIED_MODEL
                 foreach (var point in ExplosivePoints)
                 {
                     point.OutputPath = _pressurePath;
                     point.Write();
                 }
+#endif
             }
             Globals.WorkDirectories.Add(_propagationPath, true);
         }

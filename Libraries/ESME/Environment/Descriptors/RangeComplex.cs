@@ -148,8 +148,10 @@ namespace ESME.Environment.Descriptors
         {
             var result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Sediment, 5, true);
             if (result != null) QueueImportJob(result.Item2);
+#if IS_CLASSIFIED_MODEL
             result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.BottomLoss, 15, true);
             if (result != null) QueueImportJob(result.Item2);
+#endif
             result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Wind, 60, true);
             if (result != null) QueueImportJob(result.Item2);
             foreach (var month in NAVOConfiguration.AllMonths)

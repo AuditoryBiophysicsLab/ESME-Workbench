@@ -33,7 +33,9 @@ namespace ESMEWorkBench.ViewModels.Main
             EnvironmentLayers = new Dictionary<EnvironmentDataType, MapLayerViewModel>
             {
                 {EnvironmentDataType.Bathymetry, null}, 
+#if IS_CLASSIFIED_MODEL
                 {EnvironmentDataType.BottomLoss, null}, 
+#endif
                 {EnvironmentDataType.SoundSpeed, null}, 
                 {EnvironmentDataType.Wind, null}
             };
@@ -137,24 +139,23 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                              false)));
                 }
             });
-            if (Configuration.IsClassifiedModel)
-            {
-                RangeComplexes.HookEnvironment<BottomLoss>(EnvironmentDataType.BottomLoss,
-                                                           data =>
-                                                           {
-                                                               var samplePoints = data.Samples.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
-                                                               _dispatcher.InvokeInBackgroundIfRequired(() => EnvironmentLayers[EnvironmentDataType.BottomLoss] =
-                                                                                                              CurrentMapLayers.DisplayOverlayShapes("Bottom Loss",
-                                                                                                                                                    LayerType.BottomType,
-                                                                                                                                                    Colors.Transparent,
-                                                                                                                                                    samplePoints,
-                                                                                                                                                    0,
-                                                                                                                                                    PointSymbolType.Diamond,
-                                                                                                                                                    false,
-                                                                                                                                                    null,
-                                                                                                                                                    false));
-                                                           });
-            }
+#if IS_CLASSIFIED_MODEL
+            RangeComplexes.HookEnvironment<BottomLoss>(EnvironmentDataType.BottomLoss,
+                                                        data =>
+                                                        {
+                                                            var samplePoints = data.Samples.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
+                                                            _dispatcher.InvokeInBackgroundIfRequired(() => EnvironmentLayers[EnvironmentDataType.BottomLoss] =
+                                                                                                            CurrentMapLayers.DisplayOverlayShapes("Bottom Loss",
+                                                                                                                                                LayerType.BottomType,
+                                                                                                                                                Colors.Transparent,
+                                                                                                                                                samplePoints,
+                                                                                                                                                0,
+                                                                                                                                                PointSymbolType.Diamond,
+                                                                                                                                                false,
+                                                                                                                                                null,
+                                                                                                                                                false));
+                                                        });
+#endif
             RangeComplexes.HookEnvironment<Wind>(EnvironmentDataType.Wind, data =>
             {
                 if (RangeComplexes.SelectedTimePeriod == TimePeriod.Invalid) return;
@@ -183,7 +184,9 @@ namespace ESMEWorkBench.ViewModels.Main
         public void ClearLayerData()
         {
             CurrentMapLayers.RemoveAll(layer => (layer.LayerType == LayerType.BottomType) && (layer.Name.StartsWith("Sediment: ")));
+#if IS_CLASSIFIED_MODEL
             if (EnvironmentLayers[EnvironmentDataType.BottomLoss] != null) EnvironmentLayers[EnvironmentDataType.BottomLoss].IsEnabled = false;
+#endif
             if (EnvironmentLayers[EnvironmentDataType.Wind] != null) EnvironmentLayers[EnvironmentDataType.Wind].IsEnabled = false;
             if (EnvironmentLayers[EnvironmentDataType.SoundSpeed] != null) EnvironmentLayers[EnvironmentDataType.SoundSpeed].IsEnabled = false;
         }
