@@ -9,12 +9,12 @@ namespace HRC.Plugins
 {
     public static class PluginManager
     {
-        public static Dictionary<Type, T> FindPlugins<T>(string folder, Func<T, bool> filter = null) where T: IHRCPlugin
+        public static Dictionary<string, Dictionary<string, T>> FindPlugins<T>(string folder, Func<T, bool> filter = null, Func<T, string> keySelector = null) where T: IHRCPlugin
         {
             Debug.Assert(typeof(T).IsInterface);
 
             var files = Directory.GetFiles(folder, "*.dll");
-            var result = new Dictionary<Type, T>();
+            var result = new Dictionary<string, Dictionary<string, T>>();
             foreach (var file in files)
             {
                 try
@@ -29,7 +29,10 @@ namespace HRC.Plugins
                     {
                         var instance = (T)Activator.CreateInstance(curType);
                         instance.DLLPath = file;
-                        if ((filter == null) || filter(instance)) result.Add(curType, instance);
+                        if ((filter != null) && !filter(instance)) continue;
+                        var keyName = keySelector != null ? keySelector(instance) : typeof (T).ToString();
+                        if (!result.ContainsKey(keyName)) result.Add(keyName, new Dictionary<string, T>());
+                        result[keyName].Add(file, instance);
                     }
                 }
                 catch (Exception ex)

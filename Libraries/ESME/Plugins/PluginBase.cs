@@ -25,6 +25,7 @@ namespace ESME.Plugins
         public string PluginDescription { get; protected set; }
         public PluginType PluginType { get; protected set; }
         public string DLLPath { get; set; }
+        public string Subtype { get; protected set; }
 
         #region public Control ConfigurationControl { get; protected set; }
 

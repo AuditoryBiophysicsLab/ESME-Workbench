@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using Cinch;
 using ESME;
@@ -13,12 +12,13 @@ namespace DavesWPFTester
     {
         public MainWindowViewModel() 
         {
-            AllPlugins = PluginManager.FindPlugins<IESMEPlugin>(@"C:\Projects\ESME Deliverables\Plugins\Environmental Data Sources\InstallableNAVO\bin\Debug", p => (p.PluginType == PluginType.EnvironmentalDataSource) && p.IsSelectable);
+            AllPlugins = PluginManager.FindPlugins<IESMEPlugin>(@"C:\Projects\ESME Deliverables\Plugins\Environmental Data Sources\InstallableNAVO\bin\Debug", 
+                p => (p.PluginType == PluginType.EnvironmentalDataSource) && p.IsSelectable, k => k.Subtype);
         }
 
-        #region public Dictionary<Type, IESMEPlugin> AllPlugins { get; set; }
+        #region public Dictionary<string, Dictionary<string, IESMEPlugin>> AllPlugins { get; set; }
 
-        public Dictionary<Type, IESMEPlugin> AllPlugins
+        public Dictionary<string, Dictionary<string, IESMEPlugin>> AllPlugins
         {
             get { return _allPlugins; }
             set
@@ -30,7 +30,7 @@ namespace DavesWPFTester
         }
 
         static readonly PropertyChangedEventArgs AllPluginsChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.AllPlugins);
-        Dictionary<Type, IESMEPlugin> _allPlugins;
+        Dictionary<string, Dictionary<string, IESMEPlugin>> _allPlugins;
 
         #endregion
     }

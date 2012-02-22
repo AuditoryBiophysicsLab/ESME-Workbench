@@ -21,6 +21,7 @@ namespace InstallableNAVO
             AvailableTimePeriods = NAVOConfiguration.AllMonths.ToArray();
             PluginType = PluginType.EnvironmentalDataSource;
             AvailableResolutions = new float[] { 15 };
+            Subtype = "Sound Speed";
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\GDEM-V 3.0");
             if (regKey != null) DataLocation = (string)regKey.GetValue("");
 

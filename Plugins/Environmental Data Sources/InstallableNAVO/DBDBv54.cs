@@ -22,6 +22,7 @@ namespace InstallableNAVO
             AvailableResolutions = new[] { 2, 1, 0.5f, 0.1f, 0.05f };
             IsTimeVariantData = false;
             AvailableTimePeriods = new[] { TimePeriod.Invalid };
+            Subtype = "Bathymetry";
 
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\DBDB-V 5.4");
             if (regKey != null) DataLocation = (string)regKey.GetValue("");

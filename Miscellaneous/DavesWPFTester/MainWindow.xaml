@@ -13,10 +13,6 @@
         mc:Ignorable="d">
     <Window.Resources />
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
         <ListBox Grid.Column="0"
                  Grid.IsSharedSizeScope="True"
                  ItemsSource="{Binding AllPlugins}">
@@ -24,21 +20,19 @@
                 <DataTemplate>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition SharedSizeGroup="TypeName" />
-                            <ColumnDefinition />
+                            <ColumnDefinition SharedSizeGroup="PluginType" />
+                            <ColumnDefinition SharedSizeGroup="PluginName" />
                         </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0"
-                                   Grid.Column="0"
-                                   Margin="0 0 10 0"
-                                   Text="{Binding Value.DLLPath}" />
-                        <TextBlock Grid.Row="0"
-                                   Grid.Column="1"
-                                   Text="{Binding Value.PluginName}" />
-                        <ContentControl Grid.Row="1" Content="{Binding Value.ConfigurationControl}" />
+                        <TextBlock Grid.Column="0" Text="{Binding Key}" />
+                        <ComboBox Grid.Column="1" 
+                                  ItemsSource="{Binding Value}" 
+                                  DisplayMemberPath="Value.PluginName" >
+                            <ComboBox.Style>
+                                <Style TargetType="{x:Type ComboBox}">
+                                    <Setter Property="SelectedIndex" Value="0" />
+                                </Style>
+                            </ComboBox.Style>
+                        </ComboBox>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>

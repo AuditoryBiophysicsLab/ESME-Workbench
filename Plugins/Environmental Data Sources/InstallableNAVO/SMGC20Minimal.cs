@@ -24,6 +24,7 @@ namespace InstallableNAVO
             AvailableTimePeriods = NAVOConfiguration.AllMonths.ToArray();
             PluginType = PluginType.EnvironmentalDataSource;
             AvailableResolutions = new[] { 60f };
+            Subtype = "Wind";
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\SMGC 2.0 Minimal");
             if (regKey != null) DataLocation = (string)regKey.GetValue("");
 
