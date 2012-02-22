@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using Cinch;
 using ESME;
+using HRC.Collections;
 using HRC.Plugins;
 using MEFedMVVM.ViewModelLocator;
 
@@ -16,9 +17,9 @@ namespace DavesWPFTester
                 p => (p.PluginType == PluginType.EnvironmentalDataSource) && p.IsSelectable, k => k.Subtype);
         }
 
-        #region public Dictionary<string, Dictionary<string, IESMEPlugin>> AllPlugins { get; set; }
+        #region public ObservableConcurrentDictionary<string, Dictionary<string, IESMEPlugin>> AllPlugins { get; set; }
 
-        public Dictionary<string, Dictionary<string, IESMEPlugin>> AllPlugins
+        public ObservableConcurrentDictionary<string, Dictionary<string, IESMEPlugin>> AllPlugins
         {
             get { return _allPlugins; }
             set
@@ -38,7 +39,7 @@ namespace DavesWPFTester
         }
 
         static readonly PropertyChangedEventArgs AllPluginsChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.AllPlugins);
-        Dictionary<string, Dictionary<string, IESMEPlugin>> _allPlugins;
+        ObservableConcurrentDictionary<string, Dictionary<string, IESMEPlugin>> _allPlugins;
 
         #endregion
 

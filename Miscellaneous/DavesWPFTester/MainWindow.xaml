@@ -54,9 +54,10 @@
                 <ColumnDefinition SharedSizeGroup="PluginType" />
                 <ColumnDefinition SharedSizeGroup="PluginName" />
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Grid.Row="0" Text="Wind" TextAlignment="Right" Margin="0 0 10 0"/>
-            <TextBox Grid.Column="1" Grid.Row="0" IsEnabled="False" Text="None available" />
+            <TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Text="Wind" TextAlignment="Right" Margin="0 0 10 0"/>
+            <TextBox Grid.Column="1" Grid.Row="0" VerticalAlignment="Center" IsEnabled="False" Text="None available" />
             <ComboBox Grid.Column="1" Grid.Row="0"
+                      VerticalAlignment="Center"
                       ItemsSource="{Binding WindPlugins}" 
                       Visibility="{Binding WindPlugins,  Converter={StaticResource objectToVisibilityConverter}}"
                       DisplayMemberPath="Value.PluginName" >
@@ -66,9 +67,10 @@
                     </Style>
                 </ComboBox.Style>
             </ComboBox>
-            <TextBlock Grid.Column="0" Grid.Row="1" Text="Sound Speed" TextAlignment="Right" Margin="0 0 10 0"/>
-            <TextBox Grid.Column="1" Grid.Row="1" IsEnabled="False" Text="None available" />
+            <TextBlock Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" Text="Sound Speed" TextAlignment="Right" Margin="0 0 10 0"/>
+            <TextBox Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" IsEnabled="False" Text="None available" />
             <ComboBox Grid.Column="1" Grid.Row="1"
+                      VerticalAlignment="Center" 
                       ItemsSource="{Binding SoundSpeedPlugins}" 
                       Visibility="{Binding SoundSpeedPlugins,  Converter={StaticResource objectToVisibilityConverter}}"
                       DisplayMemberPath="Value.PluginName" >
@@ -78,9 +80,10 @@
                     </Style>
                 </ComboBox.Style>
             </ComboBox>
-            <TextBlock Grid.Column="0" Grid.Row="2" Text="Sediment" TextAlignment="Right" Margin="0 0 10 0"/>
-            <TextBox Grid.Column="1" Grid.Row="2" IsEnabled="False" Text="None available" />
+            <TextBlock Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" Text="Sediment" TextAlignment="Right" Margin="0 0 10 0"/>
+            <TextBox Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" IsEnabled="False" Text="None available" />
             <ComboBox Grid.Column="1" Grid.Row="2"
+                      VerticalAlignment="Center" 
                       ItemsSource="{Binding SedimentPlugins}" 
                       Visibility="{Binding SedimentPlugins,  Converter={StaticResource objectToVisibilityConverter}}"
                       DisplayMemberPath="Value.PluginName" >
@@ -90,9 +93,10 @@
                     </Style>
                 </ComboBox.Style>
             </ComboBox>
-            <TextBlock Grid.Column="0" Grid.Row="3" Text="Bathymetry" TextAlignment="Right" Margin="0 0 10 0"/>
-            <TextBox Grid.Column="1" Grid.Row="3" IsEnabled="False" Text="None available" />
+            <TextBlock Grid.Column="0" Grid.Row="3" VerticalAlignment="Center" Text="Bathymetry" TextAlignment="Right" Margin="0 0 10 0"/>
+            <TextBox Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" IsEnabled="False" Text="None available" />
             <ComboBox Grid.Column="1" Grid.Row="3"
+                      VerticalAlignment="Center" 
                       ItemsSource="{Binding BathymetryPlugins}" 
                       Visibility="{Binding BathymetryPlugins,  Converter={StaticResource objectToVisibilityConverter}}"
                       DisplayMemberPath="Value.PluginName" >

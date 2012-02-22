@@ -4,17 +4,18 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using HRC.Collections;
 
 namespace HRC.Plugins
 {
     public static class PluginManager
     {
-        public static Dictionary<string, Dictionary<string, T>> FindPlugins<T>(string folder, Func<T, bool> filter = null, Func<T, string> keySelector = null) where T: IHRCPlugin
+        public static ObservableConcurrentDictionary<string, Dictionary<string, T>> FindPlugins<T>(string folder, Func<T, bool> filter = null, Func<T, string> keySelector = null) where T: IHRCPlugin
         {
             Debug.Assert(typeof(T).IsInterface);
 
             var files = Directory.GetFiles(folder, "*.dll");
-            var result = new Dictionary<string, Dictionary<string, T>>();
+            var result = new ObservableConcurrentDictionary<string, Dictionary<string, T>>();
             foreach (var file in files)
             {
                 try
