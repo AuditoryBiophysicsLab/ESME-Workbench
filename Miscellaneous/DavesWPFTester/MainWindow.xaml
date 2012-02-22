@@ -23,7 +23,7 @@
                             <ColumnDefinition SharedSizeGroup="PluginType" />
                             <ColumnDefinition SharedSizeGroup="PluginName" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding Key}" />
+                        <TextBlock Grid.Column="0" Text="{Binding Key}" TextAlignment="Right" Margin="0 0 10 0"/>
                         <ComboBox Grid.Column="1" 
                                   ItemsSource="{Binding Value}" 
                                   DisplayMemberPath="Value.PluginName" >
