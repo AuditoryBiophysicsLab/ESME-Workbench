@@ -4,17 +4,23 @@
         xmlns:app="clr-namespace:DavesWPFTester"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
+        xmlns:mef="http:\\www.codeplex.com\MEFedMVVM" xmlns:wpf="clr-namespace:HRC.WPF;assembly=HRC"
         Title="Plugin tester"
         d:DataContext="{d:DesignInstance app:MainWindowViewModel}"
         mef:ViewModelLocator.ViewModel="MainWindowViewModel"
         SizeToContent="WidthAndHeight"
         SnapsToDevicePixels="True"
         mc:Ignorable="d">
-    <Window.Resources />
-    <Grid>
-        <ListBox Grid.Column="0"
-                 Grid.IsSharedSizeScope="True"
+    <Window.Resources>
+        <wpf:ObjectToBooleanConverter x:Key="objectToBooleanConverter"/>
+        <wpf:ObjectToVisibilityConverter x:Key="objectToVisibilityConverter"/>
+    </Window.Resources>
+    <Grid Grid.IsSharedSizeScope="True">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <ListBox Grid.Row="0"
                  ItemsSource="{Binding AllPlugins}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -37,5 +43,65 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition SharedSizeGroup="PluginType" />
+                <ColumnDefinition SharedSizeGroup="PluginName" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Grid.Row="0" Text="Wind" TextAlignment="Right" Margin="0 0 10 0"/>
+            <TextBox Grid.Column="1" Grid.Row="0" IsEnabled="False" Text="None available" />
+            <ComboBox Grid.Column="1" Grid.Row="0"
+                      ItemsSource="{Binding WindPlugins}" 
+                      Visibility="{Binding WindPlugins,  Converter={StaticResource objectToVisibilityConverter}}"
+                      DisplayMemberPath="Value.PluginName" >
+                <ComboBox.Style>
+                    <Style TargetType="{x:Type ComboBox}">
+                        <Setter Property="SelectedIndex" Value="0" />
+                    </Style>
+                </ComboBox.Style>
+            </ComboBox>
+            <TextBlock Grid.Column="0" Grid.Row="1" Text="Sound Speed" TextAlignment="Right" Margin="0 0 10 0"/>
+            <TextBox Grid.Column="1" Grid.Row="1" IsEnabled="False" Text="None available" />
+            <ComboBox Grid.Column="1" Grid.Row="1"
+                      ItemsSource="{Binding SoundSpeedPlugins}" 
+                      Visibility="{Binding SoundSpeedPlugins,  Converter={StaticResource objectToVisibilityConverter}}"
+                      DisplayMemberPath="Value.PluginName" >
+                <ComboBox.Style>
+                    <Style TargetType="{x:Type ComboBox}">
+                        <Setter Property="SelectedIndex" Value="0" />
+                    </Style>
+                </ComboBox.Style>
+            </ComboBox>
+            <TextBlock Grid.Column="0" Grid.Row="2" Text="Sediment" TextAlignment="Right" Margin="0 0 10 0"/>
+            <TextBox Grid.Column="1" Grid.Row="2" IsEnabled="False" Text="None available" />
+            <ComboBox Grid.Column="1" Grid.Row="2"
+                      ItemsSource="{Binding SedimentPlugins}" 
+                      Visibility="{Binding SedimentPlugins,  Converter={StaticResource objectToVisibilityConverter}}"
+                      DisplayMemberPath="Value.PluginName" >
+                <ComboBox.Style>
+                    <Style TargetType="{x:Type ComboBox}">
+                        <Setter Property="SelectedIndex" Value="0" />
+                    </Style>
+                </ComboBox.Style>
+            </ComboBox>
+            <TextBlock Grid.Column="0" Grid.Row="3" Text="Bathymetry" TextAlignment="Right" Margin="0 0 10 0"/>
+            <TextBox Grid.Column="1" Grid.Row="3" IsEnabled="False" Text="None available" />
+            <ComboBox Grid.Column="1" Grid.Row="3"
+                      ItemsSource="{Binding BathymetryPlugins}" 
+                      Visibility="{Binding BathymetryPlugins,  Converter={StaticResource objectToVisibilityConverter}}"
+                      DisplayMemberPath="Value.PluginName" >
+                <ComboBox.Style>
+                    <Style TargetType="{x:Type ComboBox}">
+                        <Setter Property="SelectedIndex" Value="0" />
+                    </Style>
+                </ComboBox.Style>
+            </ComboBox>
+        </Grid>
     </Grid>
 </Window>

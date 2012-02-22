@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -22,6 +23,84 @@ namespace HRC.WPF
             return result;
         }
     }
+
+    public class NullToBooleanConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return false;
+            var propertyInfo = value.GetType().GetProperty("Count");
+            if (propertyInfo != null)
+            {
+                var count = (int)propertyInfo.GetValue(value, null);
+                return count > 0;
+            }
+            if (!(value is bool)) return true;
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+    }
+
+    public class ObjectToBooleanConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return false;
+            try
+            {
+                var propertyInfo = value.GetType().GetProperty("Count");
+                if (propertyInfo != null)
+                {
+                    var count = (int)propertyInfo.GetValue(value, null);
+                    return count > 0;
+                }
+                if (!(value is bool)) return true;
+                return value;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+    }
+
+    public class ObjectToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return Visibility.Hidden;
+            try
+            {
+                var propertyInfo = value.GetType().GetProperty("Count");
+                if (propertyInfo != null)
+                {
+                    var count = (int)propertyInfo.GetValue(value, null);
+                    return count > 0 ? Visibility.Visible : Visibility.Hidden;
+                }
+                if (!(value is bool)) return Visibility.Visible;
+                return (bool)value ? Visibility.Visible : Visibility.Hidden;
+            }
+            catch (Exception)
+            {
+                return Visibility.Hidden;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+    }
+
 
     public class ProgressBarBrushConverter : IMultiValueConverter
     {

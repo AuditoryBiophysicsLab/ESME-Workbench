@@ -26,6 +26,14 @@ namespace DavesWPFTester
                 if (_allPlugins == value) return;
                 _allPlugins = value;
                 NotifyPropertyChanged(AllPluginsChangedEventArgs);
+                NotifyPropertyChanged(BathymetryPluginsChangedEventArgs);
+                NotifyPropertyChanged(IsBathymetryPluginPresentChangedEventArgs);
+                NotifyPropertyChanged(SedimentPluginsChangedEventArgs);
+                NotifyPropertyChanged(IsSedimentPluginPresentChangedEventArgs);
+                NotifyPropertyChanged(SoundSpeedPluginsChangedEventArgs);
+                NotifyPropertyChanged(IsSoundSpeedPluginPresentChangedEventArgs);
+                NotifyPropertyChanged(WindPluginsChangedEventArgs);
+                NotifyPropertyChanged(IsWindPluginPresentChangedEventArgs);
             }
         }
 
@@ -33,6 +41,42 @@ namespace DavesWPFTester
         Dictionary<string, Dictionary<string, IESMEPlugin>> _allPlugins;
 
         #endregion
+
+        public Dictionary<string, IESMEPlugin> BathymetryPlugins
+        {
+            get { return AllPlugins.ContainsKey("Bathymetry") ? AllPlugins["Bathymetry"] : null; }
+        }
+        static readonly PropertyChangedEventArgs BathymetryPluginsChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.BathymetryPlugins);
+
+        public bool IsBathymetryPluginPresent { get { return BathymetryPlugins != null; } }
+        static readonly PropertyChangedEventArgs IsBathymetryPluginPresentChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.IsBathymetryPluginPresent);
+
+        public Dictionary<string, IESMEPlugin> SedimentPlugins
+        {
+            get { return AllPlugins.ContainsKey("Sediment") ? AllPlugins["Sediment"] : null; }
+        }
+        static readonly PropertyChangedEventArgs SedimentPluginsChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.SedimentPlugins);
+
+        public bool IsSedimentPluginPresent { get { return SedimentPlugins != null; } }
+        static readonly PropertyChangedEventArgs IsSedimentPluginPresentChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.IsSedimentPluginPresent);
+
+        public Dictionary<string, IESMEPlugin> SoundSpeedPlugins
+        {
+            get { return AllPlugins.ContainsKey("Sound Speed") ? AllPlugins["Sound Speed"] : null; }
+        }
+        static readonly PropertyChangedEventArgs SoundSpeedPluginsChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.SoundSpeedPlugins);
+
+        public bool IsSoundSpeedPluginPresent { get { return SoundSpeedPlugins != null; } }
+        static readonly PropertyChangedEventArgs IsSoundSpeedPluginPresentChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.IsSoundSpeedPluginPresent);
+
+        public Dictionary<string, IESMEPlugin> WindPlugins
+        {
+            get { return AllPlugins.ContainsKey("Wind") ? AllPlugins["Wind"] : null; }
+        }
+        static readonly PropertyChangedEventArgs WindPluginsChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.WindPlugins);
+
+        public bool IsWindPluginPresent { get { return WindPlugins != null; } }
+        static readonly PropertyChangedEventArgs IsWindPluginPresentChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.IsWindPluginPresent);
     }
 
 #if false
