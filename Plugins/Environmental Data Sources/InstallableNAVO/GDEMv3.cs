@@ -6,6 +6,7 @@ using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
 using HRC.Navigation;
+using InstallableNAVO.Controls;
 using Microsoft.Win32;
 
 namespace InstallableNAVO
@@ -24,6 +25,7 @@ namespace InstallableNAVO
             Subtype = "Sound Speed";
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\GDEM-V 3.0");
             if (regKey != null) DataLocation = (string)regKey.GetValue("");
+            ConfigurationControl = new GDEM3Configuration();
 
             IsSelectable = DataLocation != null;
             IsConfigured = DataLocation != null &&

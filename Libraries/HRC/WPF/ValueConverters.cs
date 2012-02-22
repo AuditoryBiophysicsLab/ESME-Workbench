@@ -49,27 +49,12 @@ namespace HRC.WPF
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return false;
-            try
-            {
-                var propertyInfo = value.GetType().GetProperty("Count");
-                if (propertyInfo != null)
-                {
-                    var count = (int)propertyInfo.GetValue(value, null);
-                    return count > 0;
-                }
-                if (!(value is bool)) return true;
-                return value;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return value != null;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value;
+            throw new NotImplementedException();
         }
     }
 
@@ -77,27 +62,12 @@ namespace HRC.WPF
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return Visibility.Hidden;
-            try
-            {
-                var propertyInfo = value.GetType().GetProperty("Count");
-                if (propertyInfo != null)
-                {
-                    var count = (int)propertyInfo.GetValue(value, null);
-                    return count > 0 ? Visibility.Visible : Visibility.Hidden;
-                }
-                if (!(value is bool)) return Visibility.Visible;
-                return (bool)value ? Visibility.Visible : Visibility.Hidden;
-            }
-            catch (Exception)
-            {
-                return Visibility.Hidden;
-            }
+            return value == null ? Visibility.Hidden : Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value;
+            throw new NotImplementedException();
         }
     }
 

@@ -77,6 +77,7 @@ namespace DavesWPFTester
         static readonly PropertyChangedEventArgs WindPluginsChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.WindPlugins);
 
         public bool IsWindPluginPresent { get { return WindPlugins != null; } }
+
         static readonly PropertyChangedEventArgs IsWindPluginPresentChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.IsWindPluginPresent);
     }
 

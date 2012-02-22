@@ -5,7 +5,7 @@ namespace ESME.Environment
 {
     public interface IEnvironmentalDataSource<out T> : IESMEPlugin
     {
-        float[] Resolutions { get; }
+        float[] AvailableResolutions { get; }
         string DataLocation { get; set; }
         string DataLocationHelp { get; }
         bool IsTimeVariantData { get; }
