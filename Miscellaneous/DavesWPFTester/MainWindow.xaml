@@ -21,15 +21,15 @@
         <controls:PluginSelector Grid.Row="0"
                                  ItemsSource="{Binding WindPlugins}"
                                  PluginTypeName="Wind" />
-        <Border Margin="0 5 0 10" BorderThickness="0 2 0 0" />
+        <Separator Margin="0 5 0 10" />
         <controls:PluginSelector Grid.Row="1"
                                  ItemsSource="{Binding SoundSpeedPlugins}"
                                  PluginTypeName="Sound Speed" />
-        <Border Margin="0 5 0 10" BorderThickness="0 2 0 0" />
+        <Separator Margin="0 5 0 10" />
         <controls:PluginSelector Grid.Row="2"
                                  ItemsSource="{Binding SedimentPlugins}"
                                  PluginTypeName="Sediment" />
-        <Border Margin="0 5 0 10" BorderThickness="0 2 0 0" />
+        <Separator Margin="0 5 0 10"  />
         <controls:PluginSelector Grid.Row="3"
                                  ItemsSource="{Binding BathymetryPlugins}"
                                  PluginTypeName="Bathymetry" />
