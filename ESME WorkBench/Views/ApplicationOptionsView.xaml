@@ -29,9 +29,7 @@
                     IsDefault="True" />
         </DockPanel>
         <TabControl>
-            <TabItem HorizontalContentAlignment="Stretch"
-                     VerticalContentAlignment="Stretch"
-                     Header="NAEMO">
+            <TabItem Header="NAEMO">
                 <StackPanel Width="Auto"
                             Height="Auto"
                             Orientation="Vertical">
@@ -75,9 +73,7 @@
                     </GroupBox>
                 </StackPanel>
             </TabItem>
-            <TabItem HorizontalContentAlignment="Stretch"
-                     VerticalContentAlignment="Stretch"
-                     Header="Environment">
+            <TabItem Header="Environment" Visibility="Collapsed">
                 <StackPanel Orientation="Vertical">
                     <GroupBox Margin="5 10 5 5"
                               Header="Database Locations"
@@ -164,6 +160,25 @@
                         </StackPanel>
 
                     </GroupBox>
+                </StackPanel>
+            </TabItem>
+            <TabItem Grid.IsSharedSizeScope="True" Header="Environment Data">
+                <StackPanel Margin="5" Orientation="Vertical">
+                    <Controls:PluginSelector Grid.Row="0"
+                                             ItemsSource="{Binding WindPlugins}"
+                                             PluginTypeName="Wind" />
+                    <Separator Margin="0 5 0 10" />
+                    <Controls:PluginSelector Grid.Row="1"
+                                             ItemsSource="{Binding SoundSpeedPlugins}"
+                                             PluginTypeName="Sound Speed" />
+                    <Separator Margin="0 5 0 10" />
+                    <Controls:PluginSelector Grid.Row="2"
+                                             ItemsSource="{Binding SedimentPlugins}"
+                                             PluginTypeName="Sediment" />
+                    <Separator Margin="0 5 0 10" />
+                    <Controls:PluginSelector Grid.Row="3"
+                                             ItemsSource="{Binding BathymetryPlugins}"
+                                             PluginTypeName="Bathymetry" />
                 </StackPanel>
             </TabItem>
             <TabItem Header="Acoustic Simulators">
