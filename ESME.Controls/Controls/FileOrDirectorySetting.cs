@@ -1,16 +1,65 @@
-﻿using System.IO;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
+using Path = System.IO.Path;
 
 namespace ESME.Views.Controls
 {
-    public partial class FileOrDirectorySetting
+    /// <summary>
+    /// Follow steps 1a or 1b and then 2 to use this custom control in a XAML file.
+    ///
+    /// Step 1a) Using this custom control in a XAML file that exists in the current project.
+    /// Add this XmlNamespace attribute to the root element of the markup file where it is 
+    /// to be used:
+    ///
+    ///     xmlns:MyNamespace="clr-namespace:ESME.Views.Controls"
+    ///
+    ///
+    /// Step 1b) Using this custom control in a XAML file that exists in a different project.
+    /// Add this XmlNamespace attribute to the root element of the markup file where it is 
+    /// to be used:
+    ///
+    ///     xmlns:MyNamespace="clr-namespace:ESME.Views.Controls;assembly=ESME.Views.Controls"
+    ///
+    /// You will also need to add a project reference from the project where the XAML file lives
+    /// to this project and Rebuild to avoid compilation errors:
+    ///
+    ///     Right click on the target project in the Solution Explorer and
+    ///     "Add Reference"->"Projects"->[Browse to and select this project]
+    ///
+    ///
+    /// Step 2)
+    /// Go ahead and use your control in the XAML file.
+    ///
+    ///     <MyNamespace:FileOrDirectorySetting/>
+    ///
+    /// </summary>
+    public class FileOrDirectorySetting : Control
     {
+        static FileOrDirectorySetting()
+        {
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(FileOrDirectorySetting), new FrameworkPropertyMetadata(typeof(FileOrDirectorySetting)));
+        }
+
         public FileOrDirectorySetting()
         {
-            InitializeComponent();
+            BrowserButton = new Button { Content = "..." };
+            BrowserButton.Click += OpenFileClick;
         }
+
+        #region dependency property Button BrowserButton
+
+        public static DependencyProperty BrowserButtonProperty = DependencyProperty.Register("BrowserButton",
+                                                                                 typeof(Button),
+                                                                                 typeof(FileOrDirectorySetting));
+
+        public Button BrowserButton
+        {
+            get { return (Button)GetValue(BrowserButtonProperty); }
+            set { SetValue(BrowserButtonProperty, value); }
+        }
+
+        #endregion
 
         public static DependencyProperty CaptionProperty = DependencyProperty.Register("Caption", typeof(string), typeof(FileOrDirectorySetting), new FrameworkPropertyMetadata("Caption", FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
@@ -19,7 +68,7 @@ namespace ESME.Views.Controls
             get { return (string)GetValue(CaptionProperty); }
             set { SetValue(CaptionProperty, value); }
         }
-        
+
         public static DependencyProperty DialogTitleProperty = DependencyProperty.Register("DialogTitle", typeof(string), typeof(FileOrDirectorySetting), new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         public string DialogTitle
@@ -32,7 +81,7 @@ namespace ESME.Views.Controls
 
         public string FileName
         {
-            get { return (string) GetValue(FileNameProperty); }
+            get { return (string)GetValue(FileNameProperty); }
             set { SetValue(FileNameProperty, value); }
         }
 
@@ -40,7 +89,7 @@ namespace ESME.Views.Controls
 
         public string FileNameFilter
         {
-            get { return (string) GetValue(FileNameFilterProperty); }
+            get { return (string)GetValue(FileNameFilterProperty); }
             set { SetValue(FileNameFilterProperty, value); }
         }
 
@@ -49,8 +98,8 @@ namespace ESME.Views.Controls
         public bool IsDirectoryBrowser
         {
             get { return (bool)GetValue(IsDirectoryBrowserProperty); }
-            set 
-            { 
+            set
+            {
                 SetValue(IsDirectoryBrowserProperty, value);
                 FileNameProperty.DefaultMetadata.DefaultValue = IsDirectoryBrowser ? "DirectoryName" : "FileName";
             }
@@ -77,10 +126,10 @@ namespace ESME.Views.Controls
             if (IsDirectoryBrowser)
             {
                 var folderDialog = new System.Windows.Forms.FolderBrowserDialog
-                                   {
-                                       SelectedPath = FileName,
-                                       ShowNewFolderButton = ShowNewFolderButton,
-                                   };
+                {
+                    SelectedPath = FileName,
+                    ShowNewFolderButton = ShowNewFolderButton,
+                };
                 var folderResult = folderDialog.ShowDialog();
                 if (folderResult == System.Windows.Forms.DialogResult.OK) FileName = folderDialog.SelectedPath;
             }
@@ -90,12 +139,12 @@ namespace ESME.Views.Controls
                 {
                     // Create OpenFileDialog, and set filter for file extension and default file extension
                     var fileDialog = new SaveFileDialog
-                                     {
-                                         InitialDirectory = string.IsNullOrEmpty(FileName) ? null : Path.GetDirectoryName(FileName),
-                                         FileName = string.IsNullOrEmpty(FileName) ? null : Path.GetFileName(FileName),
-                                         Filter = FileNameFilter,
-                                         Title = string.IsNullOrEmpty(DialogTitle) ? "Save" : DialogTitle,
-                                     };
+                    {
+                        InitialDirectory = string.IsNullOrEmpty(FileName) ? null : Path.GetDirectoryName(FileName),
+                        FileName = string.IsNullOrEmpty(FileName) ? null : Path.GetFileName(FileName),
+                        Filter = FileNameFilter,
+                        Title = string.IsNullOrEmpty(DialogTitle) ? "Save" : DialogTitle,
+                    };
 
                     // Display OpenFileDialog by calling ShowDialog method
                     var fileResult = fileDialog.ShowDialog();
@@ -111,18 +160,18 @@ namespace ESME.Views.Controls
                 {
                     // Create OpenFileDialog, and set filter for file extension and default file extension
                     var fileDialog = new OpenFileDialog
-                                     {
-                                         InitialDirectory = string.IsNullOrEmpty(FileName) ? null : Path.GetDirectoryName(FileName),
-                                         FileName = string.IsNullOrEmpty(FileName) ? null : Path.GetFileName(FileName),
-                                         Filter = FileNameFilter,
-                                         Title = string.IsNullOrEmpty(DialogTitle) ? "Open" : DialogTitle,
-                                     };
+                    {
+                        InitialDirectory = string.IsNullOrEmpty(FileName) ? null : Path.GetDirectoryName(FileName),
+                        FileName = string.IsNullOrEmpty(FileName) ? null : Path.GetFileName(FileName),
+                        Filter = FileNameFilter,
+                        Title = string.IsNullOrEmpty(DialogTitle) ? "Open" : DialogTitle,
+                    };
 
                     // Display OpenFileDialog by calling ShowDialog method
                     var fileResult = fileDialog.ShowDialog();
 
                     // Set FileName to the selected FileName
-                    if ((bool) fileResult)
+                    if ((bool)fileResult)
                     {
                         // Open document
                         FileName = fileDialog.FileName;

@@ -62,4 +62,29 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <Style TargetType="{x:Type Controls:FileOrDirectorySetting}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Controls:FileOrDirectorySetting}">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="{TemplateBinding Caption}" />
+                            <DockPanel LastChildFill="True">
+                                <ContentPresenter MinWidth="30"
+                                                  Margin=" 5 0 0 0"
+                                                  Content="{TemplateBinding BrowserButton}"
+                                                  DockPanel.Dock="Right" />
+                                <TextBox x:Name="FileOrDirectoryName"
+                                         DockPanel.Dock="Left"
+                                         Text="{TemplateBinding FileName}"
+                                         ToolTip="{TemplateBinding FileName}" />
+                            </DockPanel>
+                        </StackPanel>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

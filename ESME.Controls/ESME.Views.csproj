@@ -97,9 +97,7 @@
       <DependentUpon>DataAxisControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\DataAxisControlViewModel.cs" />
-    <Compile Include="Controls\FileOrDirectorySetting.xaml.cs">
-      <DependentUpon>FileOrDirectorySetting.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="Controls\FileOrDirectorySetting.cs" />
     <Compile Include="Controls\HeaderedPropertyDisplayPopup.xaml.cs">
       <DependentUpon>HeaderedPropertyDisplayPopup.xaml</DependentUpon>
     </Compile>
@@ -237,10 +235,6 @@
     <Page Include="Controls\DataAxisControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\FileOrDirectorySetting.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\HeaderedPropertyDisplayPopup.xaml">
       <SubType>Designer</SubType>
