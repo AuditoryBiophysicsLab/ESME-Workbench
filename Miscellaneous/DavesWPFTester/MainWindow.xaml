@@ -16,78 +16,20 @@
     <Window.Resources>
         <wpf:ObjectToBooleanConverter x:Key="objectToBooleanConverter" />
         <wpf:ObjectToVisibilityConverter x:Key="objectToVisibilityConverter" />
-        <Style TargetType="{x:Type controls:PluginSelector}">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type controls:PluginSelector}">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
-                            <StackPanel Orientation="Vertical">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition SharedSizeGroup="PluginTypeName" />
-                                        <ColumnDefinition SharedSizeGroup="PluginComboSelector" />
-                                    </Grid.ColumnDefinitions>
-                                    <ContentPresenter Grid.Row="0"
-                                                      Grid.Column="0"
-                                                      Margin="0 0 5 0"
-                                                      HorizontalAlignment="Right"
-                                                      VerticalAlignment="Center"
-                                                      Content="{TemplateBinding PluginTypeName}" />
-                                    <TextBox Grid.Row="0"
-                                             Grid.Column="1"
-                                             VerticalAlignment="Center"
-                                             IsEnabled="False"
-                                             Text="None available" />
-                                    <ComboBox x:Name="AvailablePlugins"
-                                              Grid.Row="0"
-                                              Grid.Column="1"
-                                              VerticalAlignment="Center"
-                                              DisplayMemberPath="Value.PluginName"
-                                              ItemsSource="{Binding Path=ItemsSource,
-                                                                    RelativeSource={RelativeSource TemplatedParent}}"
-                                              SelectedItem="{Binding Path=SelectedItem,
-                                                                     RelativeSource={RelativeSource TemplatedParent}}" />
-                                </Grid>
-                                <Expander x:Name="Configuration">
-                                    <Expander.Header>
-                                        <TextBlock x:Name="ConfigurationHeader" Text="{Binding Path=SelectedPlugin.PluginName, RelativeSource={RelativeSource TemplatedParent}, StringFormat={}{0} configuration}" />
-                                    </Expander.Header>
-                                    <ContentPresenter Content="{Binding Path=SelectedPlugin.ConfigurationControl, RelativeSource={RelativeSource TemplatedParent}}" />
-                                </Expander>
-                            </StackPanel>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <DataTrigger Binding="{Binding Path=SelectedPlugin, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
-                                <Setter TargetName="ConfigurationHeader" Property="Text" Value="{Binding Path=PluginTypeName, RelativeSource={RelativeSource TemplatedParent}, StringFormat={}{0} configuration}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Path=SelectedPlugin.ConfigurationControl, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
-                                <Setter TargetName="ConfigurationHeader" Property="Text" Value="{Binding Path=PluginTypeName, RelativeSource={RelativeSource TemplatedParent}, StringFormat={}{0} configuration}" />
-                                <Setter TargetName="Configuration" Property="IsEnabled" Value="False" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Path=ItemsSource, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
-                                <Setter TargetName="AvailablePlugins" Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
-    <StackPanel Orientation="Vertical" Grid.IsSharedSizeScope="True">
+    <StackPanel Grid.IsSharedSizeScope="True" Orientation="Vertical">
         <controls:PluginSelector Grid.Row="0"
                                  ItemsSource="{Binding WindPlugins}"
                                  PluginTypeName="Wind" />
+        <Border Margin="0 5 0 10" BorderThickness="0 2 0 0" />
         <controls:PluginSelector Grid.Row="1"
                                  ItemsSource="{Binding SoundSpeedPlugins}"
                                  PluginTypeName="Sound Speed" />
+        <Border Margin="0 5 0 10" BorderThickness="0 2 0 0" />
         <controls:PluginSelector Grid.Row="2"
                                  ItemsSource="{Binding SedimentPlugins}"
                                  PluginTypeName="Sediment" />
+        <Border Margin="0 5 0 10" BorderThickness="0 2 0 0" />
         <controls:PluginSelector Grid.Row="3"
                                  ItemsSource="{Binding BathymetryPlugins}"
                                  PluginTypeName="Bathymetry" />

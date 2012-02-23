@@ -7,6 +7,10 @@ namespace ESME.Views.Controls
 {
     public class PluginSelector : Control
     {
+        static PluginSelector()
+        {
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(PluginSelector), new FrameworkPropertyMetadata(typeof(PluginSelector)));
+        }
         #region dependency property string PluginTypeName
 
         public static DependencyProperty PluginTypeNameProperty = DependencyProperty.Register("PluginTypeName",
