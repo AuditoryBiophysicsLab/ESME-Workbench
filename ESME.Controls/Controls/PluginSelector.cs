@@ -21,6 +21,21 @@ namespace ESME.Views.Controls
 
         #endregion
 
+        #region dependency property IESMEPlugin SelectedPlugin
+
+        public static DependencyProperty SelectedPluginProperty = DependencyProperty.Register("SelectedPlugin",
+                                                                                 typeof (IESMEPlugin),
+                                                                                 typeof (PluginSelector),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.NotDataBindable));
+
+        public IESMEPlugin SelectedPlugin
+        {
+            get { return (IESMEPlugin)GetValue(SelectedPluginProperty); }
+            set { SetValue(SelectedPluginProperty, value); }
+        }
+
+        #endregion
+
         #region dependency property IEnumerable ItemsSource
 
         public static DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource",
@@ -51,21 +66,7 @@ namespace ESME.Views.Controls
         static void OnSelectedItemChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var pluginSelector = (PluginSelector)d;
-            pluginSelector.ConfigurationControl = ((KeyValuePair<string, IESMEPlugin>)e.NewValue).Value.ConfigurationControl;
-        }
-
-        #endregion
-
-        #region dependency property object ConfigurationControl
-
-        public static DependencyProperty ConfigurationControlProperty = DependencyProperty.Register("ConfigurationControl",
-                                                                                                    typeof(Control),
-                                                                                                    typeof(PluginSelector));
-
-        public Control ConfigurationControl
-        {
-            get { return (Control)GetValue(ConfigurationControlProperty); }
-            set { SetValue(ConfigurationControlProperty, value); }
+            pluginSelector.SelectedPlugin = e.NewValue == null ? null : ((KeyValuePair<string, IESMEPlugin>)e.NewValue).Value;
         }
         #endregion
     }

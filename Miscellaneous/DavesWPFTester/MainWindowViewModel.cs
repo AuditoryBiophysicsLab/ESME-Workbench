@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.ComponentModel;
 using Cinch;
 using ESME;
 using HRC.Collections;
 using HRC.Plugins;
 using MEFedMVVM.ViewModelLocator;
+using MainContext;
 
 namespace DavesWPFTester
 {
@@ -15,6 +18,15 @@ namespace DavesWPFTester
         {
             AllPlugins = PluginManager.FindPlugins<IESMEPlugin>(@"C:\Projects\ESME Deliverables\Plugins\Environmental Data Sources\InstallableNAVO\bin\Debug", 
                 p => (p.PluginType == PluginType.EnvironmentalDataSource) && p.IsSelectable, k => k.Subtype);
+            var context = new MainDataContext();
+            var query = from it in context.Companies
+                        orderby it.CompanyID
+                        select it;
+
+            foreach (Company comp in query)
+                Console.WriteLine("{0} | {1} | {2}", comp.CompanyID, comp.CompanyName, comp.AddressCountry);
+
+            Console.ReadLine();
         }
 
         #region public ObservableConcurrentDictionary<string, Dictionary<string, IESMEPlugin>> AllPlugins { get; set; }

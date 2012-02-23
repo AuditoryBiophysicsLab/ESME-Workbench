@@ -4,7 +4,6 @@
         xmlns:app="clr-namespace:DavesWPFTester"
         xmlns:controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
         xmlns:wpf="clr-namespace:HRC.WPF;assembly=HRC"
@@ -49,18 +48,26 @@
                                               Grid.Column="1"
                                               VerticalAlignment="Center"
                                               DisplayMemberPath="Value.PluginName"
-                                              ItemsSource="{TemplateBinding ItemsSource}"
+                                              ItemsSource="{Binding Path=ItemsSource,
+                                                                    RelativeSource={RelativeSource TemplatedParent}}"
                                               SelectedItem="{Binding Path=SelectedItem,
                                                                      RelativeSource={RelativeSource TemplatedParent}}" />
                                 </Grid>
-                                <GroupBox x:Name="ConfigurationGroupBox" Header="Configuration">
-                                    <ContentPresenter Content="{Binding Path=ConfigurationControl, RelativeSource={RelativeSource TemplatedParent}}" />
-                                </GroupBox>
+                                <Expander x:Name="Configuration">
+                                    <Expander.Header>
+                                        <TextBlock x:Name="ConfigurationHeader" Text="{Binding Path=SelectedPlugin.PluginName, RelativeSource={RelativeSource TemplatedParent}, StringFormat={}{0} configuration}" />
+                                    </Expander.Header>
+                                    <ContentPresenter Content="{Binding Path=SelectedPlugin.ConfigurationControl, RelativeSource={RelativeSource TemplatedParent}}" />
+                                </Expander>
                             </StackPanel>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <DataTrigger Binding="{Binding Path=ConfigurationControl, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
-                                <Setter TargetName="ConfigurationGroupBox" Property="Visibility" Value="Collapsed" />
+                            <DataTrigger Binding="{Binding Path=SelectedPlugin, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                                <Setter TargetName="ConfigurationHeader" Property="Text" Value="{Binding Path=PluginTypeName, RelativeSource={RelativeSource TemplatedParent}, StringFormat={}{0} configuration}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=SelectedPlugin.ConfigurationControl, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                                <Setter TargetName="ConfigurationHeader" Property="Text" Value="{Binding Path=PluginTypeName, RelativeSource={RelativeSource TemplatedParent}, StringFormat={}{0} configuration}" />
+                                <Setter TargetName="Configuration" Property="IsEnabled" Value="False" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Path=ItemsSource, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
                                 <Setter TargetName="AvailablePlugins" Property="Visibility" Value="Collapsed" />
@@ -71,164 +78,18 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Grid Grid.IsSharedSizeScope="True">
-        <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <ListBox Grid.Row="0" ItemsSource="{Binding AllPlugins}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition SharedSizeGroup="PluginType" />
-                            <ColumnDefinition SharedSizeGroup="PluginName" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                                   Margin="0 0 10 0"
-                                   Text="{Binding Key}"
-                                   TextAlignment="Right" />
-                        <ComboBox Grid.Column="1"
-                                  DisplayMemberPath="Value.PluginName"
-                                  ItemsSource="{Binding Value}">
-                            <ComboBox.Style>
-                                <Style TargetType="{x:Type ComboBox}">
-                                    <Setter Property="SelectedIndex" Value="0" />
-                                </Style>
-                            </ComboBox.Style>
-                        </ComboBox>
-                    </Grid>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition SharedSizeGroup="PluginType" />
-                <ColumnDefinition SharedSizeGroup="PluginName" />
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Row="0"
-                       Grid.Column="0"
-                       Margin="0 0 10 0"
-                       VerticalAlignment="Center"
-                       Text="Wind"
-                       TextAlignment="Right" />
-            <TextBox Grid.Row="0"
-                     Grid.Column="1"
-                     VerticalAlignment="Center"
-                     IsEnabled="False"
-                     Text="None available" />
-            <ComboBox Grid.Row="0"
-                      Grid.Column="1"
-                      VerticalAlignment="Center"
-                      DisplayMemberPath="Value.PluginName"
-                      ItemsSource="{Binding WindPlugins}"
-                      Visibility="{Binding WindPlugins,
-                                           Converter={StaticResource objectToVisibilityConverter}}">
-                <ComboBox.Style>
-                    <Style TargetType="{x:Type ComboBox}">
-                        <Setter Property="SelectedIndex" Value="0" />
-                    </Style>
-                </ComboBox.Style>
-            </ComboBox>
-            <TextBlock Grid.Row="1"
-                       Grid.Column="0"
-                       Margin="0 0 10 0"
-                       VerticalAlignment="Center"
-                       Text="Sound Speed"
-                       TextAlignment="Right" />
-            <TextBox Grid.Row="1"
-                     Grid.Column="1"
-                     VerticalAlignment="Center"
-                     IsEnabled="False"
-                     Text="None available" />
-            <ComboBox Grid.Row="1"
-                      Grid.Column="1"
-                      VerticalAlignment="Center"
-                      DisplayMemberPath="Value.PluginName"
-                      ItemsSource="{Binding SoundSpeedPlugins}"
-                      Visibility="{Binding SoundSpeedPlugins,
-                                           Converter={StaticResource objectToVisibilityConverter}}">
-                <ComboBox.Style>
-                    <Style TargetType="{x:Type ComboBox}">
-                        <Setter Property="SelectedIndex" Value="0" />
-                    </Style>
-                </ComboBox.Style>
-            </ComboBox>
-            <TextBlock Grid.Row="2"
-                       Grid.Column="0"
-                       Margin="0 0 10 0"
-                       VerticalAlignment="Center"
-                       Text="Sediment"
-                       TextAlignment="Right" />
-            <TextBox Grid.Row="2"
-                     Grid.Column="1"
-                     VerticalAlignment="Center"
-                     IsEnabled="False"
-                     Text="None available" />
-            <ComboBox Grid.Row="2"
-                      Grid.Column="1"
-                      VerticalAlignment="Center"
-                      DisplayMemberPath="Value.PluginName"
-                      ItemsSource="{Binding SedimentPlugins}"
-                      Visibility="{Binding SedimentPlugins,
-                                           Converter={StaticResource objectToVisibilityConverter}}">
-                <ComboBox.Style>
-                    <Style TargetType="{x:Type ComboBox}">
-                        <Setter Property="SelectedIndex" Value="0" />
-                    </Style>
-                </ComboBox.Style>
-            </ComboBox>
-            <TextBlock Grid.Row="3"
-                       Grid.Column="0"
-                       Margin="0 0 10 0"
-                       VerticalAlignment="Center"
-                       Text="Bathymetry"
-                       TextAlignment="Right" />
-            <TextBox Grid.Row="3"
-                     Grid.Column="1"
-                     VerticalAlignment="Center"
-                     IsEnabled="False"
-                     Text="None available" />
-            <ComboBox Grid.Row="3"
-                      Grid.Column="1"
-                      VerticalAlignment="Center"
-                      DisplayMemberPath="Value.PluginName"
-                      ItemsSource="{Binding BathymetryPlugins}"
-                      Visibility="{Binding BathymetryPlugins,
-                                           Converter={StaticResource objectToVisibilityConverter}}">
-                <ComboBox.Style>
-                    <Style TargetType="{x:Type ComboBox}">
-                        <Setter Property="SelectedIndex" Value="0" />
-                    </Style>
-                </ComboBox.Style>
-            </ComboBox>
-        </Grid>
-        <Grid Grid.Row="2" Grid.IsSharedSizeScope="True">
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <controls:PluginSelector Grid.Row="0"
-                                     ItemsSource="{Binding WindPlugins}"
-                                     PluginTypeName="Wind" />
-            <controls:PluginSelector Grid.Row="1"
-                                     ItemsSource="{Binding SoundSpeedPlugins}"
-                                     PluginTypeName="Sound Speed" />
-            <controls:PluginSelector Grid.Row="2"
-                                     ItemsSource="{Binding SedimentPlugins}"
-                                     PluginTypeName="Sediment" />
-            <controls:PluginSelector Grid.Row="3"
-                                     ItemsSource="{Binding BathymetryPlugins}"
-                                     PluginTypeName="Bathymetry" />
-        </Grid>
-    </Grid>
+    <StackPanel Orientation="Vertical" Grid.IsSharedSizeScope="True">
+        <controls:PluginSelector Grid.Row="0"
+                                 ItemsSource="{Binding WindPlugins}"
+                                 PluginTypeName="Wind" />
+        <controls:PluginSelector Grid.Row="1"
+                                 ItemsSource="{Binding SoundSpeedPlugins}"
+                                 PluginTypeName="Sound Speed" />
+        <controls:PluginSelector Grid.Row="2"
+                                 ItemsSource="{Binding SedimentPlugins}"
+                                 PluginTypeName="Sediment" />
+        <controls:PluginSelector Grid.Row="3"
+                                 ItemsSource="{Binding BathymetryPlugins}"
+                                 PluginTypeName="Bathymetry" />
+    </StackPanel>
 </Window>
