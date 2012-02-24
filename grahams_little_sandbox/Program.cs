@@ -108,7 +108,7 @@ namespace grahams_little_sandbox
             
             Console.WriteLine("populating database...");
             using (var psm = new PSMContext(new DropCreateDatabaseAlways<PSMContext>()))
-                PSM2SQLite(@"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Sim Areas\PSM.csv", psm);
+                PSM2SQLite(@"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\PSM.csv", psm);
             Console.WriteLine("dumping database...");
             using(var psm2 = new PSMContext(new CreateDatabaseIfNotExists<PSMContext>()))
                 PSMDump(psm2);
