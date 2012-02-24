@@ -308,7 +308,6 @@ namespace grahams_little_sandbox
 
     public class Platform
     {
-
         public int PlatformID { get; set; }
         public string PlatformName { get; set; }
         public string PlatformType { get; set; }
