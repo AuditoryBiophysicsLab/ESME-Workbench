@@ -1,5 +1,5 @@
 ﻿using System.Drawing;
-using System.Windows.Controls;
+using ESME.Plugins;
 using HRC;
 
 namespace ESME
@@ -58,6 +58,7 @@ namespace ESME
     {
         PluginType PluginType { get; }
         string Subtype { get; }
+        PluginConfiguration PluginConfiguration { get; set; }
     }
 
     public enum PluginType

@@ -230,6 +230,7 @@
     <Compile Include="Platform\Exceptions.cs" />
     <Compile Include="Platform\PlatformState.cs" />
     <Compile Include="Plugins\PluginBase.cs" />
+    <Compile Include="Plugins\PluginConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNL.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLInput.cs" />

@@ -1,9 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
+using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Plugins;
+using HRC;
 using HRC.Navigation;
+using HRC.Validation;
+using InstallableNAVO.Controls;
 using Microsoft.Win32;
 
 namespace InstallableNAVO
@@ -16,7 +22,6 @@ namespace InstallableNAVO
         {
             PluginName = "DBDB-V 5.4";
             PluginDescription = "Digital Bathymetric Data Base - Variable Resolution v5.4, from US Navy/NAVOCEANO";
-            DataLocationHelp = "A file called dbdbv5_level0c_0.h5";
             //ConfigurationControl = new GDEM3Configuration { DataContext = this };
             PluginType = PluginType.EnvironmentalDataSource;
             AvailableResolutions = new[] { 2, 1, 0.5f, 0.1f, 0.05f };
@@ -25,29 +30,67 @@ namespace InstallableNAVO
             Subtype = "Bathymetry";
 
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\DBDB-V 5.4");
-            if (regKey != null) DataLocation = (string)regKey.GetValue("");
+            if (regKey != null) _dataDirectory = (string)regKey.GetValue("");
 
-            IsSelectable = DataLocation != null;
-            IsConfigured = DataLocation != null &&
-                           Directory.Exists(DataLocation) &&
-                           File.Exists(Path.Combine(DataLocation, RequiredDBDBFilename));
-#if false
+            IsSelectable = _dataDirectory != null;
+            IsConfigured = _dataDirectory != null &&
+                           Directory.Exists(_dataDirectory) &&
+                           File.Exists(Path.Combine(_dataDirectory, RequiredDBDBFilename));
+            PluginConfiguration = new DBDB54Configuration(this);
+            ConfigurationControl = new GDEM3ConfigurationControl { DataContext = this };
+        }
+
+        readonly string _dataDirectory;
+
+        public override Bathymetry Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
+        {
+            CheckResolutionAndTimePeriod(resolution, timePeriod);
+            return Databases.DBDB.Extract(_dataDirectory, resolution, geoRect, progress);
+        }
+    }
+    [Serializable]
+    public sealed class DBDB54Configuration : PluginConfiguration
+    {
+        public DBDB54Configuration(IHRCPlugin plugin)
+        {
+            PluginType = plugin.GetType();
+            PluginName = plugin.PluginName;
             ValidationRules.AddRange(new List<ValidationRule>
             {
                 new ValidationRule
                 {
                     PropertyName = "DataLocation",
-                    Description = "File must exist and be named dbdbv5_level0c_0.h5",
-                    RuleDelegate = (o, r) => ((DBDB54)o).DataLocation != null && Directory.Exists(((DBDB54)o).DataLocation) && File.Exists(Path.Combine(DataLocation, RequiredDBDBFilename)),
+                    Description = "Directory must exist and contain 24 appropriate GDEM NetCDF files (names like [t|s]gdemv3s[01-12].nc)",
+                    RuleDelegate = (o, r) => ((DBDB54Configuration)o).DataLocation != null && IsDirectoryValid(((DBDB54Configuration)o).DataLocation),
                 },
             });
-#endif
         }
 
-        public override Bathymetry Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
+        #region public string DataLocation { get; set; }
+
+        public string DataLocation
         {
-            CheckResolutionAndTimePeriod(resolution, timePeriod);
-            return Databases.DBDB.Extract(DataLocation, resolution, geoRect, progress);
+            get { return _dataLocation; }
+            set
+            {
+                if (_dataLocation == value) return;
+                _dataLocation = value;
+                NotifyPropertyChanged(DataLocationChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DataLocationChangedEventArgs = ObservableHelper.CreateArgs<DBDB54Configuration>(x => x.DataLocation);
+        string _dataLocation = "DBDB54";
+
+        #endregion
+
+        public const string DataLocationHelp = "A file called dbdbv5_level0c_0.h5";
+
+        static bool IsDirectoryValid(string directoryPath)
+        {
+            if (!Directory.Exists(directoryPath)) return false;
+            var requiredFiles = new[] { "", "" };
+            return true;
         }
     }
 }

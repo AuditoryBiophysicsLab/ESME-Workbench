@@ -26,6 +26,7 @@ namespace ESME.Plugins
         public PluginType PluginType { get; protected set; }
         public string DLLPath { get; set; }
         public string Subtype { get; protected set; }
+        public virtual PluginConfiguration PluginConfiguration { get; set; }
 
         #region public Control ConfigurationControl { get; protected set; }
 
@@ -97,8 +98,6 @@ namespace ESME.Plugins
         /// An array of available resolutions, expressed in arc-minutes per sample
         /// </summary>
         public float[] AvailableResolutions { get; protected set; }
-        public virtual string DataLocation { get; set; }
-        public string DataLocationHelp { get; protected set; }
         public bool IsTimeVariantData { get; protected set; }
         public TimePeriod[] AvailableTimePeriods { get; protected set; }
         public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null);

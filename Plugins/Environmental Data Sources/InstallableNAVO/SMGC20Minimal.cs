@@ -18,7 +18,7 @@ namespace InstallableNAVO
         {
             PluginName = "SMGC 2.0 Minimal";
             PluginDescription = "Surface Marine Gridded Climatology Database v2.0, from US Navy/NAVOCEANO";
-            DataLocationHelp = "A file called smgc.wind";
+            //DataLocationHelp = "A file called smgc.wind";
             //ConfigurationControl = new GDEM3Configuration { DataContext = this };
             IsTimeVariantData = true;
             AvailableTimePeriods = NAVOConfiguration.AllMonths.ToArray();
@@ -26,12 +26,12 @@ namespace InstallableNAVO
             AvailableResolutions = new[] { 60f };
             Subtype = "Wind";
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\SMGC 2.0 Minimal");
-            if (regKey != null) DataLocation = (string)regKey.GetValue("");
+            if (regKey != null) _dataDirectory = (string)regKey.GetValue("");
 
-            IsSelectable = DataLocation != null;
-            IsConfigured = DataLocation != null &&
-                           Directory.Exists(DataLocation) &&
-                           File.Exists(Path.Combine(DataLocation, RequiredSMGCFilename));
+            IsSelectable = _dataDirectory != null;
+            IsConfigured = _dataDirectory != null &&
+                           Directory.Exists(_dataDirectory) &&
+                           File.Exists(Path.Combine(_dataDirectory, RequiredSMGCFilename));
 #if false
             ValidationRules.AddRange(new List<ValidationRule>
             {
@@ -45,6 +45,8 @@ namespace InstallableNAVO
 #endif
         }
 
+        readonly string _dataDirectory;
+
         #region Wind GlobalDataset { get; }
 
         Wind GlobalDataset
@@ -54,7 +56,7 @@ namespace InstallableNAVO
                 if (_globalDataset != null) return _globalDataset;
                 lock (_lockObject)
                 {
-                    _globalDataset = Wind.Load(Path.Combine(DataLocation, RequiredSMGCFilename));
+                    _globalDataset = Wind.Load(Path.Combine(_dataDirectory, RequiredSMGCFilename));
                     return _globalDataset;
                 }
             }
@@ -64,7 +66,6 @@ namespace InstallableNAVO
         readonly object _lockObject = new object();
 
         #endregion
-
 
         public override Wind Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
         {

@@ -162,22 +162,23 @@
                     </GroupBox>
                 </StackPanel>
             </TabItem>
-            <TabItem Grid.IsSharedSizeScope="True" Header="Environment Data">
+            <TabItem Grid.IsSharedSizeScope="True" Header="Environment Data Sources">
                 <StackPanel Margin="5" Orientation="Vertical">
                     <Controls:PluginSelector Grid.Row="0"
-                                             ItemsSource="{Binding WindPlugins}"
+                                             ItemsSource="{Binding AllPlugins[Wind]}"
+                                             SelectedItem="{Binding AppSettings.EnvironmentDataSources.DefaultPlugins[Wind]}"
                                              PluginTypeName="Wind" />
                     <Separator Margin="0 5 0 10" />
                     <Controls:PluginSelector Grid.Row="1"
-                                             ItemsSource="{Binding SoundSpeedPlugins}"
+                                             ItemsSource="{Binding AllPlugins[Sound Speed]}"
                                              PluginTypeName="Sound Speed" />
                     <Separator Margin="0 5 0 10" />
                     <Controls:PluginSelector Grid.Row="2"
-                                             ItemsSource="{Binding SedimentPlugins}"
+                                             ItemsSource="{Binding AllPlugins[Sediment]}"
                                              PluginTypeName="Sediment" />
                     <Separator Margin="0 5 0 10" />
                     <Controls:PluginSelector Grid.Row="3"
-                                             ItemsSource="{Binding BathymetryPlugins}"
+                                             ItemsSource="{Binding AllPlugins[Bathymetry]}"
                                              PluginTypeName="Bathymetry" />
                 </StackPanel>
             </TabItem>

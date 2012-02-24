@@ -16,7 +16,7 @@ namespace InstallableNAVO
         {
             PluginName = "BST 2.0";
             PluginDescription = "Bottom Sediments Type Database Version 2.0 Repacked , from US Navy/NAVOCEANO";
-            DataLocationHelp = "A file called hfevav2.h5";
+            //DataLocationHelp = "A file called hfevav2.h5";
             //ConfigurationControl = new GDEM3Configuration { DataContext = this };
             PluginType = PluginType.EnvironmentalDataSource;
             AvailableResolutions = new[] { 5f };
@@ -25,12 +25,12 @@ namespace InstallableNAVO
             Subtype = "Sediment";
 
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\BST 2.0");
-            if (regKey != null) DataLocation = (string)regKey.GetValue("");
+            if (regKey != null) _dataDirectory = (string)regKey.GetValue("");
 
-            IsSelectable = DataLocation != null;
-            IsConfigured = DataLocation != null &&
-                           Directory.Exists(DataLocation) &&
-                           File.Exists(Path.Combine(DataLocation, RequiredBSTFilename));
+            IsSelectable = _dataDirectory != null;
+            IsConfigured = _dataDirectory != null &&
+                           Directory.Exists(_dataDirectory) &&
+                           File.Exists(Path.Combine(_dataDirectory, RequiredBSTFilename));
 #if false
             ValidationRules.AddRange(new List<ValidationRule>
             {
@@ -44,10 +44,12 @@ namespace InstallableNAVO
 #endif
         }
 
+        readonly string _dataDirectory;
+
         public override Sediment Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
         {
             CheckResolutionAndTimePeriod(resolution, timePeriod);
-            return Databases.BST.Extract(DataLocation, geoRect, resolution, progress);
+            return Databases.BST.Extract(_dataDirectory, geoRect, resolution, progress);
         }
     }
 }

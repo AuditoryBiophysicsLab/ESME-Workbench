@@ -400,6 +400,24 @@ namespace ESME.Data
 
         #endregion
 
+        #region public EnvironmentDataSourceSettings EnvironmentDataSourceSettings { get; set; }
+
+        public EnvironmentDataSourceSettings EnvironmentDataSourceSettings
+        {
+            get { return _environmentDataSourceSettings ?? (_environmentDataSourceSettings = new EnvironmentDataSourceSettings()); }
+            set
+            {
+                if (_environmentDataSourceSettings == value) return;
+                _environmentDataSourceSettings = value;
+                NotifyPropertyChanged(EnvironmentDataSourceSettingsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs EnvironmentDataSourceSettingsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.EnvironmentDataSourceSettings);
+        EnvironmentDataSourceSettings _environmentDataSourceSettings;
+
+        #endregion
+
     }
 
     public sealed class NAEMOTools : ValidatingViewModel
@@ -1658,5 +1676,10 @@ namespace ESME.Data
         float _depthCellSize = 5;
 
         #endregion
+    }
+
+    public sealed class EnvironmentDataSourceSettings : ValidatingViewModel
+    {
+        
     }
 }
