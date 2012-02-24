@@ -69,7 +69,7 @@ namespace ImportPSM
             }
             
             Console.WriteLine("populating database...");
-            ImportPSM(sourceFile, connection);
+            Import(sourceFile, connection);
             Console.WriteLine("done.");
         }
 
@@ -96,7 +96,7 @@ namespace ImportPSM
             }
         }
 
-        static void ImportPSM(string csvFilePath, DbConnection connection)
+        static void Import(string csvFilePath, DbConnection connection)
         {
             var psm = new PSMContext(connection, false, new DropCreateDatabaseAlways<PSMContext>());
             var engine = new FileHelperEngine(typeof(PSM));
@@ -170,6 +170,5 @@ namespace ImportPSM
                 }
             }
         }
-       
     }
 }
