@@ -101,22 +101,30 @@ namespace grahams_little_sandbox
 #endif
             const string graham = @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Sim Areas\PSM.csv";
             const string dave = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\PSM.csv";
-            string sourceFile = null;
+            string sourceFile;
             if (File.Exists(graham)) sourceFile = graham;
             else if (File.Exists(dave)) sourceFile = dave;
             else throw new FileNotFoundException("Input file not found!");
 
-            const string destinationFile = "psm.db";
-            var dbConnection = new System.Data.SqlServerCe.SqlCeConnection(string.Format("Data Source={0}", destinationFile));
-            Console.WriteLine("populating database...");
-            using (var psm = new PSMContext(dbConnection, false, new DropCreateDatabaseAlways<PSMContext>())) ImportPSM(sourceFile, psm);
-            Console.WriteLine("dumping database...");
-            using (var psm2 = new PSMContext(dbConnection, true, new CreateDatabaseIfNotExists<PSMContext>())) Dump(psm2);
+            var sqlce = new System.Data.SqlServerCe.SqlCeConnection(string.Format("Data Source={0}", "psm.sqlce"));
+            Console.WriteLine("populating database (sql ce)...");
+            ImportPSM(sourceFile, sqlce);
+            Console.WriteLine("dumping database (sql ce)...");
+            Dump(sqlce);
+
+            Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
+            var sqlite = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source={0};FailIfMissing=False", "psm.sqlite"));
+            Console.WriteLine("populating database (sqlite)...");
+            ImportPSM(sourceFile, sqlite);
+            Console.WriteLine("dumping database (sqlite)...");
+            Dump(sqlite);
+
             Console.ReadLine();
         }
 
-        static void Dump(PSMContext psm)
+        static void Dump(DbConnection connection)
         {
+            var psm = new PSMContext(connection, true, new CreateDatabaseIfNotExists<PSMContext>());
             foreach (var platform in psm.Platforms)
             {
                 foreach (var source in platform.Sources)
@@ -129,11 +137,11 @@ namespace grahams_little_sandbox
             }
         }
 
-        static void ImportPSM(string csvFilePath, PSMContext psm)
+        static void ImportPSM(string csvFilePath, DbConnection connection)
         {
+            var psm = new PSMContext(connection, false, new DropCreateDatabaseAlways<PSMContext>());
             var engine = new FileHelperEngine(typeof (PSM));
             var entries = (PSM[])engine.ReadFile(csvFilePath);
-
 
             foreach (var entry in entries)
             {
