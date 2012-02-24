@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+using System.Data.Common;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using FileHelpers;
-
-
 
 namespace grahams_little_sandbox
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
 #if false
 #if false
@@ -100,89 +99,90 @@ namespace grahams_little_sandbox
 
             EffectsFile.Write(effectsPath, effectsRecords, nlOutput.ModeName, nlOutput.ChargeDepth, nlOutput.OutputTime, nlOutput.TimePeriod); 
 #endif
-           // var monitor = new SQLiteMonitor() { IsActive = true };
-            //var config = Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance;
-            //config.Workarounds.IgnoreSchemaName = true;
-            //Database.DefaultConnectionFactory = new SQLiteConnectionFactory(@"C:\Projects\ESME Deliverables\ESME WorkBench\Databases\", "FailIfMissing=False");
-            
-            
+            const string graham = @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Sim Areas\PSM.csv";
+            const string dave = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\PSM.csv";
+            string sourceFile = null;
+            if (File.Exists(graham)) sourceFile = graham;
+            else if (File.Exists(dave)) sourceFile = dave;
+            else throw new FileNotFoundException("Input file not found!");
+
+            const string destinationFile = "psm.db";
+            var dbConnection = new System.Data.SqlServerCe.SqlCeConnection(string.Format("Data Source={0}", destinationFile));
             Console.WriteLine("populating database...");
-            using (var psm = new PSMContext(new DropCreateDatabaseAlways<PSMContext>()))
-                PSM2SQLite(@"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\PSM.csv", psm);
+            using (var psm = new PSMContext(dbConnection, false, new DropCreateDatabaseAlways<PSMContext>())) ImportPSM(sourceFile, psm);
             Console.WriteLine("dumping database...");
-            using(var psm2 = new PSMContext(new CreateDatabaseIfNotExists<PSMContext>()))
-                PSMDump(psm2);
+            using (var psm2 = new PSMContext(dbConnection, true, new CreateDatabaseIfNotExists<PSMContext>())) Dump(psm2);
             Console.ReadLine();
         }
 
-        static void PSMDump(PSMContext psm)
+        static void Dump(PSMContext psm)
         {
-            foreach (var platform in psm.EFPlatforms)
+            foreach (var platform in psm.Platforms)
             {
-                foreach (var source in platform.EFSources)
+                foreach (var source in platform.Sources)
                 {
-                    foreach (var mode in source.EFModes)
+                    foreach (var mode in source.Modes)
                     {
-                        Console.WriteLine("{0} {1} {2} {3} {4} {5}",platform.PlatformName,platform.PlatformType,source.SourceName,source.SourceType,mode.ModeName,mode.ModeType);
+                        Console.WriteLine("{0} {1} {2} {3} {4} {5}", platform.PlatformName, platform.PlatformType, source.SourceName, source.SourceType, mode.ModeName, mode.ModeType);
                     }
                 }
             }
         }
 
-        static void PSM2SQLite(string csvFilePath, PSMContext psm)
+        static void ImportPSM(string csvFilePath, PSMContext psm)
         {
-            var engine = new FileHelperEngine(typeof(PSM));
+            var engine = new FileHelperEngine(typeof (PSM));
             var entries = (PSM[])engine.ReadFile(csvFilePath);
-            
+
 
             foreach (var entry in entries)
             {
-                var platform = (from p in psm.EFPlatforms
+                var platform = (from p in psm.Platforms
                                 where p.PlatformName == entry.PlatformName
                                 select p).FirstOrDefault();
                 if (platform == null)
                 {
-                    platform = new EFPlatform
+                    platform = new Platform
                     {
                         PlatformName = entry.PlatformName,
                         PlatformType = entry.PlatformType,
                     };
-                    psm.EFPlatforms.Add(platform);
+                    psm.Platforms.Add(platform);
                     psm.SaveChanges();
                 }
-                EFSource source = null;
-                if (platform.EFSources != null)
+                Source source = null;
+                if (platform.Sources != null)
                 {
-                    source = (from s in platform.EFSources
+                    source = (from s in platform.Sources
                               where s.SourceName == entry.SourceName
                               select s).FirstOrDefault();
 
                 }
                 if (source == null)
                 {
-                    source = new EFSource
+                    source = new Source
                     {
                         SourceName = entry.SourceName,
                         SourceType = entry.SourceType,
-                        
-                        EFPlatform = platform,
+
+                        Platform = platform,
                     };
-                    psm.EFSources.Add(source);
+                    psm.Sources.Add(source);
                     psm.SaveChanges();
                 }
 
-                EFMode mode = null;
-                if (source.EFModes != null)
+                Mode mode = null;
+                if (source.Modes != null)
                 {
-                    mode = (from m in source.EFModes
+                    mode = (from m in source.Modes
                             where m.ModeName == entry.ModeName && m.ModeType == entry.ModeType
                             select m).FirstOrDefault();
                 }
                 if (mode == null)
                 {
-                    mode = new EFMode
+                    mode = new Mode
                     {
-                        EFSource = source,
+                        Source = source,
                         ActiveTime = entry.ActiveTime,
                         Depth = entry.Depth,
                         SourceLevel = entry.SourceLevel,
@@ -198,14 +198,10 @@ namespace grahams_little_sandbox
                         ModeName = entry.ModeName,
                         ModeType = entry.ModeType,
                     };
-                    psm.EFModes.Add(mode);
+                    psm.Modes.Add(mode);
                     psm.SaveChanges();
                 }
             }
-
-
-
-
 #if false
             foreach (var entry in entries)
             {
@@ -302,30 +298,28 @@ namespace grahams_little_sandbox
         public float MaxPropagationRadius;
     }
 
-
-    public class EFPlatform
+    public class Platform
     {
-  
-        public int EFPlatformID { get; set; }
+
+        public int PlatformID { get; set; }
         public string PlatformName { get; set; }
         public string PlatformType { get; set; }
-        public virtual ICollection<EFSource> EFSources { get; set; }
+        public virtual ICollection<Source> Sources { get; set; }
     }
 
-
-    public class EFSource
+    public class Source
     {
-      
-        public int EFSourceID { get; set; }
+
+        public int SourceID { get; set; }
         public string SourceName { get; set; }
         public string SourceType { get; set; }
-        public virtual EFPlatform EFPlatform { get; set; }
-        public virtual ICollection<EFMode> EFModes { get; set; }
+        public virtual Platform Platform { get; set; }
+        public virtual ICollection<Mode> Modes { get; set; }
     }
- 
-  public class EFMode
+
+    public class Mode
     {
-        public int EFModeID { get; set; }
+        public int ModeID { get; set; }
         public string ModeName { get; set; }
         public string ModeType { get; set; }
         public float? ActiveTime { get; set; }
@@ -340,18 +334,19 @@ namespace grahams_little_sandbox
         public float DepressionElevationAngle { get; set; }
         public float RelativeBeamAngle { get; set; }
         public float MaxPropagationRadius { get; set; }
-        public virtual EFSource EFSource { get; set; }
+        public virtual Source Source { get; set; }
     }
 
     public class PSMContext : DbContext
     {
-        public PSMContext(IDatabaseInitializer<PSMContext> initializer)
+        public PSMContext(DbConnection connection, bool contextOwnsConnection, IDatabaseInitializer<PSMContext> initializer)
+            : base(connection, contextOwnsConnection)
         {
             Database.SetInitializer(initializer);
         }
 
-        public DbSet<EFPlatform> EFPlatforms { get; set; }
-        public DbSet<EFSource> EFSources { get; set; }
-        public DbSet<EFMode> EFModes { get; set; }
+        public DbSet<Platform> Platforms { get; set; }
+        public DbSet<Source> Sources { get; set; }
+        public DbSet<Mode> Modes { get; set; }
     }
 }
