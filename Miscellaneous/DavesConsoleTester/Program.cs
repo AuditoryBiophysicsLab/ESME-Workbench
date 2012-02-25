@@ -36,16 +36,15 @@ namespace DavesConsoleTester
                     var context = new SoundSpeedContext(connection, false, new CreateDatabaseIfNotExists<SoundSpeedContext>());
                     var newField = ImportField(curField, context);
                     var batchSize = curField.EnvironmentData.Count;
-                    using (var scope = new TransactionScope())
-                    {
-
+                    //using (var scope = new TransactionScope())
+                    //{
                         for (var batchIndex = 0; batchIndex < curField.EnvironmentData.Count; batchIndex++)
                         {
                             Console.Write("    Importing {0} of {1}          \r", batchIndex, batchSize);
                             ImportProfile(newField, curField.EnvironmentData[batchIndex], context);
                         }
-                        scope.Complete();
-                    }
+                    //    scope.Complete();
+                    //}
                     context.SaveChanges();
                 }
             }
