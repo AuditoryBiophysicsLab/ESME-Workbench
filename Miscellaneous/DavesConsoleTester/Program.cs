@@ -51,16 +51,14 @@ namespace DavesConsoleTester
                     Console.WriteLine("{0}: Imported {1} ({2} elapsed)", DateTime.Now, sourceFile, DateTime.Now - fieldStartTime);
                 }
             }
-            var endTime = DateTime.Now;
-            Console.WriteLine("Finished import test at {0}.  Elapsed time: {1}", endTime, endTime - startTime);
+            Console.WriteLine("{0}: Finished import test. Elapsed time: {1}", DateTime.Now, DateTime.Now - startTime);
 #if sqlite
-            Console.WriteLine("Compacting database...");
+            Console.WriteLine("{0}: Compacting database...", DateTime.Now);
             // Reclaim any extra space in the database file
             using (var context = new SoundSpeedContext(connection, true, new CreateDatabaseIfNotExists<SoundSpeedContext>())) 
                 context.Database.ExecuteSqlCommand("VACUUM;");
+            Console.WriteLine("{0}: Exiting", DateTime.Now);
 #endif
-            Console.WriteLine("Press any key to exit..");
-            Console.ReadKey();
         }
 
         static void ImportSoundSpeed(SoundSpeed soundSpeed, SoundSpeedContext context)
