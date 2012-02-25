@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.Entity;
 using System.IO;
@@ -21,6 +22,7 @@ namespace ImportPSM
             string output = null;
             DatabaseType type = DatabaseType.Error;
             DbConnection connection = null;
+            bool dump = false;
             try
             {
                 if (args.Length == 0)
@@ -43,6 +45,9 @@ namespace ImportPSM
                             break;
                         case "-output":
                             output = args[++i];
+                            break;
+                        case "-dump":
+                            dump = true;
                             break;
                         default :
                             Usage("Incorrect option specified.");
@@ -70,6 +75,11 @@ namespace ImportPSM
             
             Console.WriteLine("populating database...");
             Import(sourceFile, connection);
+            if (dump)
+            {
+                Console.WriteLine("displaying PSM names...");
+                Dump(connection);
+            }
             Console.WriteLine("done.");
         }
 
