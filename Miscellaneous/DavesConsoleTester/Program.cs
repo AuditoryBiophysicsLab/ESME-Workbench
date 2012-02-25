@@ -5,8 +5,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
 using System.IO;
+using System.Transactions;
 using ESME.Environment;
 using System.Linq;
+using HRC.Navigation;
 
 namespace DavesConsoleTester
 {
@@ -28,8 +30,24 @@ namespace DavesConsoleTester
             foreach (var file in files)
             {
                 Console.WriteLine("  Importing {0}                       ", Path.GetFileName(file));
-                using (var context = new SoundSpeedContext(connection, false, new CreateDatabaseIfNotExists<SoundSpeedContext>()))
-                    ImportSoundSpeed(SoundSpeed.Load(file), context);
+                var soundSpeed = SoundSpeed.Load(file);
+                foreach (var curField in soundSpeed.SoundSpeedFields)
+                {
+                    var context = new SoundSpeedContext(connection, false, new CreateDatabaseIfNotExists<SoundSpeedContext>());
+                    var newField = ImportField(curField, context);
+                    var batchSize = curField.EnvironmentData.Count;
+                    using (var scope = new TransactionScope())
+                    {
+
+                        for (var batchIndex = 0; batchIndex < curField.EnvironmentData.Count; batchIndex++)
+                        {
+                            Console.Write("    Importing {0} of {1}          \r", batchIndex, batchSize);
+                            ImportProfile(newField, curField.EnvironmentData[batchIndex], context);
+                        }
+                        scope.Complete();
+                    }
+                    context.SaveChanges();
+                }
             }
             var endTime = DateTime.Now;
             Console.WriteLine("Finished import test at {0}.  Elapsed time: {1}", endTime, endTime - startTime);
@@ -47,49 +65,54 @@ namespace DavesConsoleTester
         {
             foreach (var curField in soundSpeed.SoundSpeedFields)
             {
-                var existingField = (from f in context.NewSoundSpeedFields 
-                                     where f.TimePeriod == (int)curField.TimePeriod 
-                                     select f).FirstOrDefault();
-#if sqlite
-                context.Database.ExecuteSqlCommand("CREATE INDEX IF NOT EXISTS LatitudeIndex ON NewSoundSpeedProfiles(Latitude);");
-                context.Database.ExecuteSqlCommand("CREATE INDEX IF NOT EXISTS LongitudeIndex ON NewSoundSpeedProfiles(Longitude);");
-#endif
-                if (existingField != null) continue;
-                var newField = new NewSoundSpeedField { TimePeriod = (int)curField.TimePeriod };
-                context.NewSoundSpeedFields.Add(newField);
-                var profileCount = curField.EnvironmentData.Count;
-                foreach (var curProfile in curField.EnvironmentData)
-                {
-                    var curProfileIndex = (float)(curField.EnvironmentData.IndexOf(curProfile) + 1);
-                    Console.Write("    Importing SoundSpeedProfile {0} of {1} ({2:###}%)         \r", curProfileIndex, profileCount, (curProfileIndex / profileCount) * 100);
-                    var newProfile = new NewSoundSpeedProfile
-                    {
-                        Latitude = curProfile.Latitude,
-                        Longitude = curProfile.Longitude,
-                        NewSoundSpeedField = newField,
-                    };
-                    if (curProfile.Data.Count > 0)
-                    {
-                        using (var ms = new MemoryStream())
-                        {
-                            using (var bw = new BinaryWriter(ms))
-                            {
-                                bw.Write(curProfile.Data.Count);
-                                foreach (var curSample in curProfile.Data)
-                                {
-                                    bw.Write(curSample.Depth);
-                                    bw.Write(curSample.Temperature);
-                                    bw.Write(curSample.Salinity);
-                                    bw.Write(curSample.Salinity);
-                                }
-                            }
-                            newProfile.Blob = ms.GetBuffer();
-                        }
-                    }
-                    context.NewSoundSpeedProfiles.Add(newProfile);
-                }
+                var newField = ImportField(curField, context);
+                if (newField != null) foreach (var curProfile in curField.EnvironmentData) ImportProfile(newField, curProfile, context);
             }
             context.SaveChanges();
+        }
+
+        static NewSoundSpeedField ImportField(TimePeriodEnvironmentData<SoundSpeedProfile> curField, SoundSpeedContext context)
+        {
+            var existingField = (from f in context.NewSoundSpeedFields
+                                 where f.TimePeriod == (int)curField.TimePeriod
+                                 select f).FirstOrDefault();
+#if sqlite
+            context.Database.ExecuteSqlCommand("CREATE INDEX IF NOT EXISTS LatitudeIndex ON NewSoundSpeedProfiles(Latitude);");
+            context.Database.ExecuteSqlCommand("CREATE INDEX IF NOT EXISTS LongitudeIndex ON NewSoundSpeedProfiles(Longitude);");
+#endif
+            if (existingField != null) return null;
+            var newField = new NewSoundSpeedField { TimePeriod = (int)curField.TimePeriod };
+            context.NewSoundSpeedFields.Add(newField);
+            return newField;
+        }
+
+        static void ImportProfile(NewSoundSpeedField field, Geo<List<SoundSpeedSample>> curProfile, SoundSpeedContext context)
+        {
+            var newProfile = new NewSoundSpeedProfile
+            {
+                Latitude = curProfile.Latitude,
+                Longitude = curProfile.Longitude,
+                NewSoundSpeedField = field,
+            };
+            if (curProfile.Data.Count > 0)
+            {
+                using (var ms = new MemoryStream())
+                {
+                    using (var bw = new BinaryWriter(ms))
+                    {
+                        bw.Write(curProfile.Data.Count);
+                        foreach (var curSample in curProfile.Data)
+                        {
+                            bw.Write(curSample.Depth);
+                            bw.Write(curSample.Temperature);
+                            bw.Write(curSample.Salinity);
+                            bw.Write(curSample.Salinity);
+                        }
+                    }
+                    newProfile.Blob = ms.GetBuffer();
+                }
+            }
+            context.NewSoundSpeedProfiles.Add(newProfile);
         }
     }
 

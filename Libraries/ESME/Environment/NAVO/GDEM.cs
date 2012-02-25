@@ -191,13 +191,15 @@ namespace ESME.Environment.NAVO
                     var newProfile = new SoundSpeedProfile(new Geo(lat, wrappedLon));
                     for (var depthIndex = 0; depthIndex < temperatureDepths.Length; depthIndex++)
                     {
+                        var salinitySample = float.NaN;
+                        var temperatureSample = float.NaN;
                         var temperatureValue = temperatureData[(uint)depthIndex, (uint)latSourceIndex, (uint)lonSourceIndex];
                         var salinityValue = salinityData[(uint)depthIndex, (uint)latSourceIndex, (uint)lonSourceIndex];
-                        if ((Math.Abs(temperatureValue - temperatureMissingValue) < 0.0001) || (Math.Abs(salinityValue - salinityMissingValue) < 0.0001)) break;
-                        newProfile.Add(new SoundSpeedSample((float)temperatureDepths[depthIndex],
-                                                            (temperatureValue * temperatureScaleFactor) + temperatureAddOffset,
-                                                            (salinityValue * salinityScaleFactor) + salinityAddOffset));
+                        if (temperatureValue != temperatureMissingValue) temperatureSample = (temperatureValue * temperatureScaleFactor) + temperatureAddOffset;
+                        if (salinityValue != salinityMissingValue) salinitySample = (salinityValue * salinityScaleFactor) + salinityAddOffset;
+                        newProfile.Add(new SoundSpeedSample((float)temperatureDepths[depthIndex], temperatureSample, salinitySample));
                     }
+                    newProfile.Data.RemoveAll(sample => float.IsNaN(sample.Temperature) && float.IsNaN(sample.Salinity));
                     if (newProfile.Data.Count > 0) newFieldEnvironmentData.Add(newProfile);
                 }
             }
