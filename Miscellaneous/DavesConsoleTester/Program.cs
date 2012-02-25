@@ -29,7 +29,8 @@ namespace DavesConsoleTester
             Console.WriteLine("Starting import test at {0}", startTime);
             foreach (var file in files)
             {
-                Console.WriteLine("  Importing {0}                       ", Path.GetFileName(file));
+                var sourceFile = Path.GetFileName(file);
+                //Console.WriteLine("  Importing {0}                       ", );
                 var soundSpeed = SoundSpeed.Load(file);
                 foreach (var curField in soundSpeed.SoundSpeedFields)
                 {
@@ -40,12 +41,13 @@ namespace DavesConsoleTester
                     //{
                         for (var batchIndex = 0; batchIndex < curField.EnvironmentData.Count; batchIndex++)
                         {
-                            Console.Write("    Importing {0} of {1}          \r", batchIndex, batchSize);
+                            Console.Write("    Importing {0} profile {1} of {2} ({3:0.00%})         \r", sourceFile, batchIndex, batchSize, ((float)batchIndex / batchSize));
                             ImportProfile(newField, curField.EnvironmentData[batchIndex], context);
                         }
                     //    scope.Complete();
                     //}
                     context.SaveChanges();
+                    Console.WriteLine("Completed importing {0} at {1} ({2} elapsed)                                    ", sourceFile, DateTime.Now, DateTime.Now - startTime);
                 }
             }
             var endTime = DateTime.Now;
