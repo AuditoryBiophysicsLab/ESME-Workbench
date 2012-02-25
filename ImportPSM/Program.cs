@@ -33,11 +33,11 @@ namespace ImportPSM
                     var arg = args[i];
                     switch (arg.ToLower())
                     {
-                        case "-sourceFile":
+                        case "-sourcefile":
                             sourceFile = args[++i];
                             if(!File.Exists(sourceFile)) Usage("source PSM file does not exist or is an invalid path.");
                             break;
-                        case "-databaseType":
+                        case "-databasetype":
                             var res = args[++i];
                             if(!Enum.TryParse(res, true, out type)) Usage("Invalid/unsupported database type");
                             break;
