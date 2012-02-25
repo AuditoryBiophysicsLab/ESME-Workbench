@@ -26,7 +26,7 @@ namespace DavesConsoleTester
 #endif
             var files = Directory.GetFiles(args[0], "*.soundspeed");
             var startTime = DateTime.Now;
-            Console.WriteLine("Starting import test at {0}", startTime);
+            Console.WriteLine("{0}: Starting import test", startTime);
             foreach (var file in files)
             {
                 var sourceFile = Path.GetFileName(file);
@@ -37,17 +37,18 @@ namespace DavesConsoleTester
                     var context = new SoundSpeedContext(connection, false, new CreateDatabaseIfNotExists<SoundSpeedContext>());
                     var newField = ImportField(curField, context);
                     var batchSize = curField.EnvironmentData.Count;
+                    var fieldStartTime = DateTime.Now;
                     //using (var scope = new TransactionScope())
                     //{
-                        for (var batchIndex = 0; batchIndex < curField.EnvironmentData.Count; batchIndex++)
-                        {
-                            Console.Write("    Importing {0} profile {1} of {2} ({3:0.00%})         \r", sourceFile, batchIndex, batchSize, ((float)batchIndex / batchSize));
-                            ImportProfile(newField, curField.EnvironmentData[batchIndex], context);
-                        }
+                    for (var batchIndex = 0; batchIndex < curField.EnvironmentData.Count; batchIndex++)
+                    {
+                        Console.Write("    Importing {0} profile {1} of {2} ({3:0.00%})\r", sourceFile, batchIndex, batchSize, ((float)batchIndex / batchSize));
+                        ImportProfile(newField, curField.EnvironmentData[batchIndex], context);
+                    }
                     //    scope.Complete();
                     //}
                     context.SaveChanges();
-                    Console.WriteLine("Completed importing {0} at {1} ({2} elapsed)                                    ", sourceFile, DateTime.Now, DateTime.Now - startTime);
+                    Console.WriteLine("{0}: Imported {1} ({2} elapsed)", DateTime.Now, sourceFile, DateTime.Now - fieldStartTime);
                 }
             }
             var endTime = DateTime.Now;
