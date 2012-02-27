@@ -1,7 +1,7 @@
 using System.Data.Common;
 using System.Data.Entity;
 
-namespace ImportPSM
+namespace ESME.Databases
 {
     public class PSMContext : DbContext
     {

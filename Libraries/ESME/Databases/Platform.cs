@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace ImportPSM
+namespace ESME.Databases
 {
     public class Platform
     {

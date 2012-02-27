@@ -5,10 +5,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
 using System.IO;
-using System.Transactions;
 using ESME.Environment;
 using System.Linq;
 using HRC.Navigation;
+using ESME.Databases;
 
 namespace DavesConsoleTester
 {
@@ -161,5 +161,29 @@ namespace DavesConsoleTester
 
         //[ForeignKey("NewSoundSpeedProfileID")]
         public virtual NewSoundSpeedProfile NewSoundSpeedProfile { get; set; }
+    }
+
+    public class TimeStep
+    {
+        public long TimeStepID { get; set; }
+        public TimeSpan SimulationTime { get; set; }
+
+        public virtual ICollection<PlatformLocation> PlatformLocations { get; set; }
+    }
+
+    public class PlatformLocation
+    {
+        public long PlatformLocationID { get; set; }
+        public float Latitude { get; set; }
+        public float Longitude { get; set; }
+        public float Depth { get; set; }
+
+        public virtual TimeStep TimeStep { get; set; }
+        public virtual Platform Platform { get; set; }
+    }
+
+    public class ActiveMode
+    {
+        public long ActiveModeID { get; set; }
     }
 }

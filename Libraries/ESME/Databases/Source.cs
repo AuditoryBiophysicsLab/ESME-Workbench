@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 
-namespace ImportPSM
+namespace ESME.Databases
 {
     public class Source
     {
-
         public int SourceID { get; set; }
         public string SourceName { get; set; }
         public string SourceType { get; set; }

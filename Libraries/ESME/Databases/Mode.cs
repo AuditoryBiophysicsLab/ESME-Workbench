@@ -1,4 +1,4 @@
-namespace ImportPSM
+namespace ESME.Databases
 {
     public class Mode
     {

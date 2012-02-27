@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using FileHelpers;
+using ESME.Databases;
 
 namespace ImportPSM
 {
@@ -20,9 +20,9 @@ namespace ImportPSM
         {
             string sourceFile = null;
             string output = null;
-            DatabaseType type = DatabaseType.Error;
-            DbConnection connection = null;
-            bool dump = false;
+            var type = DatabaseType.Error;
+            DbConnection connection;
+            var dump = false;
             try
             {
                 if (args.Length == 0)
