@@ -109,8 +109,8 @@ namespace ImportPSM
         static void Import(string csvFilePath, DbConnection connection)
         {
             var psm = new PSMContext(connection, false, new DropCreateDatabaseAlways<PSMContext>());
-            var engine = new FileHelperEngine(typeof(PSM));
-            var entries = (PSM[])engine.ReadFile(csvFilePath);
+            var engine = new FileHelperEngine(typeof(PSMFileRecord));
+            var entries = (PSMFileRecord[])engine.ReadFile(csvFilePath);
 
             foreach (var entry in entries)
             {

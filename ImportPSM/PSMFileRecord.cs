@@ -11,7 +11,7 @@ namespace ImportPSM
     /// </summary>
     [DelimitedRecord(",")]
     [IgnoreFirst(3)]
-    public class PSM
+    public class PSMFileRecord
     {
         public string PlatformType;
         public string PlatformName;
