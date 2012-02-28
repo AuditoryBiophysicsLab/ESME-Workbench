@@ -146,6 +146,7 @@
     <Compile Include="Databases\Mode.cs" />
     <Compile Include="Databases\Platform.cs" />
     <Compile Include="Databases\PSMContext.cs" />
+    <Compile Include="Databases\Simulation.cs" />
     <Compile Include="Databases\Source.cs" />
     <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Data\CASSTemplate.cs" />

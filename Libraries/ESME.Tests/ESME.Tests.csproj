@@ -76,6 +76,7 @@
     <Compile Include="TransmissionLoss\TransmissionLossRunFileTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Databases\" />
     <Folder Include="TransmissionLoss\Calculator\" />
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,4 @@
-﻿#define sqlite
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
@@ -17,13 +16,9 @@ namespace DavesConsoleTester
         static void Main(string[] args)
         {
             if (args.Length != 1) throw new InvalidOperationException("Must pass a directory on the command line");
-#if sqlite
             File.Delete("soundspeed.sqlite");
             Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
             var connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source={0};FailIfMissing=False", "soundspeed.sqlite"));
-#else
-            var connection = new System.Data.SqlServerCe.SqlCeConnection(string.Format("Data Source={0}", "soundspeed.sqlce"));
-#endif
             var files = Directory.GetFiles(args[0], "*.soundspeed");
             var startTime = DateTime.Now;
             Console.WriteLine("{0}: Starting import test", startTime);
@@ -52,13 +47,11 @@ namespace DavesConsoleTester
                 }
             }
             Console.WriteLine("{0}: Finished import test. Elapsed time: {1}", DateTime.Now, DateTime.Now - startTime);
-#if sqlite
             Console.WriteLine("{0}: Compacting database...", DateTime.Now);
             // Reclaim any extra space in the database file
             using (var context = new SoundSpeedContext(connection, true, new CreateDatabaseIfNotExists<SoundSpeedContext>())) 
                 context.Database.ExecuteSqlCommand("VACUUM;");
             Console.WriteLine("{0}: Exiting", DateTime.Now);
-#endif
         }
 
         static void ImportSoundSpeed(SoundSpeed soundSpeed, SoundSpeedContext context)
@@ -116,6 +109,12 @@ namespace DavesConsoleTester
         }
     }
 
+    public class SimulationContext : DbContext
+    {
+        public SimulationContext(DbConnection connection, bool contextOwnsConnection, IDatabaseInitializer<SoundSpeedContext> initializer)
+            : base(connection, contextOwnsConnection) { Database.SetInitializer(initializer); }
+    }
+
     public class SoundSpeedContext : DbContext
     {
         public SoundSpeedContext(DbConnection connection, bool contextOwnsConnection, IDatabaseInitializer<SoundSpeedContext> initializer)
@@ -161,29 +160,5 @@ namespace DavesConsoleTester
 
         //[ForeignKey("NewSoundSpeedProfileID")]
         public virtual NewSoundSpeedProfile NewSoundSpeedProfile { get; set; }
-    }
-
-    public class TimeStep
-    {
-        public long TimeStepID { get; set; }
-        public TimeSpan SimulationTime { get; set; }
-
-        public virtual ICollection<PlatformLocation> PlatformLocations { get; set; }
-    }
-
-    public class PlatformLocation
-    {
-        public long PlatformLocationID { get; set; }
-        public float Latitude { get; set; }
-        public float Longitude { get; set; }
-        public float Depth { get; set; }
-
-        public virtual TimeStep TimeStep { get; set; }
-        public virtual Platform Platform { get; set; }
-    }
-
-    public class ActiveMode
-    {
-        public long ActiveModeID { get; set; }
     }
 }
