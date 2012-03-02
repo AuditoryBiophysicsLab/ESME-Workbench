@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Xml;
 using ESME.Platform;
 
@@ -47,7 +48,7 @@ namespace ESME.NEMO
                 yield return new KeyValuePair<string, string>("Description", Description);
                 yield return new KeyValuePair<string, string>("Launcher", Launcher);
                 yield return new KeyValuePair<string, string>("Towwer", Towwer);
-                yield return new KeyValuePair<string, string>("Repeat Count", RepeatCount.ToString());
+                yield return new KeyValuePair<string, string>("Repeat Count", RepeatCount.ToString(CultureInfo.InvariantCulture));
             }
         }
 

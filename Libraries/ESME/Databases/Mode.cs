@@ -10,7 +10,13 @@ namespace ESME.Databases
         public float SourceLevel { get; set; }
         public float LowFrequency { get; set; }
         public float HighFrequency { get; set; }
+        /// <summary>
+        /// In seconds
+        /// </summary>
         public float PulseInterval { get; set; }
+        /// <summary>
+        /// In milliseconds
+        /// </summary>
         public float PulseLength { get; set; }
         public float HorizontalBeamWidth { get; set; }
         public float VerticalBeamWidth { get; set; }

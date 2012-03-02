@@ -16,11 +16,128 @@ namespace DavesConsoleTester
     {
         static void Main(string[] args)
         {
-            if (args.Length != 1) throw new InvalidOperationException("Must pass a nemo file on the command line");
-            File.Delete("scenario.sqlite");
+            if (args.Length != 1) throw new InvalidOperationException("Must pass a file name on the command line");
+            if (!File.Exists(args[0])) throw new InvalidOperationException("Must pass an existing NEMO file on the command line");
+            //File.Delete("scenario.sqlite");
             Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
             var connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source={0};FailIfMissing=False", "scenario.sqlite"));
-            var file = new NemoFile()
+            var context = new ScenarioContext(connection, false, new DropCreateDatabaseAlways<ScenarioContext>());
+            var nemoFile = new NemoFile(args[0], @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas");
+            var scenario = new Scenario
+            {
+                BuilderVersion = nemoFile.Scenario.BuilderVersion,
+                AnalystName = nemoFile.Scenario.AnalystName,
+                CreationTime = nemoFile.Scenario.CreationTime,
+                Description = nemoFile.Scenario.Description,
+                Duration = nemoFile.Scenario.Duration,
+                EventName = nemoFile.Scenario.EventName,
+                SimAreaName = nemoFile.Scenario.SimAreaName,
+                StartTime = nemoFile.Scenario.StartTime.TimeOfDay,
+                TimeFrame = nemoFile.Scenario.TimeFrame,
+            };
+            context.Scenarios.Add(scenario);
+            context.SaveChanges();
+            foreach (var nemoPlatform in nemoFile.Scenario.Platforms)
+            {
+                var platform = new ScenarioPlatform
+                {
+                    PlatformID = int.Parse(nemoPlatform.Id),
+                    PlatformName = nemoPlatform.Name,
+                    Description = nemoPlatform.Description,
+                    Launches = false,
+                    Tows = false,
+                    Scenario = scenario,
+                };
+                context.ScenarioPlatforms.Add(platform);
+                context.SaveChanges();
+                if (nemoPlatform.Trackdefs.Count > 0)
+                {
+                    var trackType = TrackType.Stationary;
+                    switch (nemoPlatform.Trackdefs[0].TrackType.ToLower())
+                    {
+                        case "perimeter_bounce":
+                            trackType = TrackType.PerimeterBounce;
+                            break;
+                        case "stationary":
+                            trackType = TrackType.Stationary;
+                            break;
+                        case "straight_line":
+                            trackType = TrackType.StraightLine;
+                            break;
+                    }
+                    var trackDefinition = new TrackDefinition
+                    {
+                        Duration = nemoPlatform.Trackdefs[0].Duration,
+                        InitialCourse = nemoPlatform.Trackdefs[0].InitialCourse,
+                        InitialDepth = -1 * nemoPlatform.Trackdefs[0].InitialHeight,
+                        InitialLatitude = nemoPlatform.Trackdefs[0].InitialLatitude,
+                        InitialLongitude = nemoPlatform.Trackdefs[0].InitialLongitude,
+                        InitialSpeed = nemoPlatform.Trackdefs[0].InitialSpeed,
+                        LimitFileName = nemoPlatform.Trackdefs[0].LimitFileName,
+                        OpsBounds = nemoPlatform.Trackdefs[0].OpsBounds,
+                        OpsTimes = nemoPlatform.Trackdefs[0].OpsTimes,
+                        Random = nemoPlatform.Trackdefs[0].Random,
+                        StartTime = nemoPlatform.Trackdefs[0].StartTime.TimeOfDay,
+                        TrackType = (int)trackType,
+                    };
+                    context.TrackDefinitions.Add(trackDefinition);
+                    platform.TrackDefinition = trackDefinition;
+                    context.SaveChanges();
+                }
+                foreach (var nemoSource in nemoPlatform.Sources)
+                {
+                    var source = new ScenarioSource
+                    {
+                        SourceID = int.Parse(nemoSource.Id),
+                        SourceName = nemoSource.Name,
+                        Description = nemoSource.Description,
+                        Platform = platform,
+                    };
+                    context.ScenarioSources.Add(source);
+                    context.SaveChanges();
+                    foreach (var nemoMode in nemoSource.Modes)
+                    {
+                        var mode = new ScenarioMode
+                        {
+                            //ModeID = int.Parse(nemoMode.Id),
+                            ActiveTime = nemoMode.ActiveTime,
+                            ClusterCount = nemoMode.ClusterCount,
+                            DepressionElevationAngle = nemoMode.DepressionElevationAngle,
+                            Depth = nemoMode.DepthOffset,
+                            HighFrequency = nemoMode.HighFrequency,
+                            LowFrequency = nemoMode.LowFrequency,
+                            HorizontalBeamWidth = nemoMode.HorizontalBeamWidth,
+                            Linked = nemoMode.Linked,
+                            MaxPropagationRadius = nemoMode.Radius,
+                            ModeName = nemoMode.Name,
+                            PulseInterval = (float)nemoMode.PulseInterval.TotalSeconds,
+                            PulseLength = (float)nemoMode.PulseLength.TotalSeconds * 1000,
+                            RelativeBeamAngle = nemoMode.RelativeBeamAngle,
+                            SourceLevel = nemoMode.SourceLevel,
+                            State = nemoMode.State,
+                            VerticalBeamWidth = nemoMode.VerticalBeamWidth,
+                            Source = source,
+                        };
+                        context.ScenarioModes.Add(mode);
+                        context.SaveChanges();
+                    }
+                }
+            }
+            foreach (var nemoAnimals in nemoFile.Scenario.Animals)
+            {
+                foreach (var nemoSpecies in nemoAnimals.Species)
+                {
+                    var species = new ScenarioSpecies
+                    {
+                        Name = nemoSpecies.SpeciesName,
+                        SpeciesFile = nemoSpecies.SpeciesFile,
+                    };
+                    context.ScenarioSpecies.Add(species);
+                    context.SaveChanges();
+                }
+            }
+            context.Database.ExecuteSqlCommand("VACUUM;");
+#if false
             var files = Directory.GetFiles(args[0], "*.soundspeed");
             var startTime = DateTime.Now;
             Console.WriteLine("{0}: Starting import test", startTime);
@@ -31,7 +148,7 @@ namespace DavesConsoleTester
                 var soundSpeed = SoundSpeed.Load(file);
                 foreach (var curField in soundSpeed.SoundSpeedFields)
                 {
-                    var context = new SoundSpeedContext(connection, false, new CreateDatabaseIfNotExists<SoundSpeedContext>());
+                    //var context = new SoundSpeedContext(connection, false, new CreateDatabaseIfNotExists<SoundSpeedContext>());
                     var newField = ImportField(curField, context);
                     var batchSize = curField.EnvironmentData.Count;
                     var fieldStartTime = DateTime.Now;
@@ -51,9 +168,11 @@ namespace DavesConsoleTester
             Console.WriteLine("{0}: Finished import test. Elapsed time: {1}", DateTime.Now, DateTime.Now - startTime);
             Console.WriteLine("{0}: Compacting database...", DateTime.Now);
             // Reclaim any extra space in the database file
-            using (var context = new SoundSpeedContext(connection, true, new CreateDatabaseIfNotExists<SoundSpeedContext>())) 
-                context.Database.ExecuteSqlCommand("VACUUM;");
+            //using (var context = new SoundSpeedContext(connection, true, new CreateDatabaseIfNotExists<SoundSpeedContext>())) 
+            //    context.Database.ExecuteSqlCommand("VACUUM;");
             Console.WriteLine("{0}: Exiting", DateTime.Now);
+#endif
+
         }
 
         static void ImportSoundSpeed(SoundSpeed soundSpeed, SoundSpeedContext context)
@@ -109,12 +228,6 @@ namespace DavesConsoleTester
             }
             context.NewSoundSpeedProfiles.Add(newProfile);
         }
-    }
-    public class ScenarioContext : DbContext
-    {
-        public ScenarioContext(DbConnection connection, bool contextOwnsConnection, IDatabaseInitializer<SoundSpeedContext> initializer)
-            : base(connection, contextOwnsConnection) { Database.SetInitializer(initializer); }
-        
     }
 
     public class SimulationContext : DbContext

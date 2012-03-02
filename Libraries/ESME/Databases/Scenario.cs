@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
+using HRC.Navigation;
 
 namespace ESME.Databases
 {
@@ -16,8 +18,93 @@ namespace ESME.Databases
         public DbSet<ScenarioMode> ScenarioModes { get; set; }
         public DbSet<Perimeter> Perimeters { get; set; }
         public DbSet<PerimeterCoordinate> PerimeterCoordinates { get; set; }
-        public DbSet<Trackdef> Trackdefs { get; set; }
+        public DbSet<TrackDefinition> TrackDefinitions { get; set; }
         public DbSet<ScenarioSpecies> ScenarioSpecies { get; set; }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            DatabaseDateTime.ModelInitialization(modelBuilder);
+            DatabaseTimeSpan.ModelInitialization(modelBuilder);
+            DatabaseGeo.ModelInitialization(modelBuilder);
+        }
+    }
+
+    [ComplexType]
+    public class DatabaseDateTime
+    {
+        public DatabaseDateTime(DateTime dateTime) { Ticks = dateTime.Ticks; }
+        public static implicit operator DatabaseDateTime(DateTime dateTime) { return new DatabaseDateTime(dateTime); }
+        public static implicit operator DateTime(DatabaseDateTime databaseDateTime) { return new DateTime(databaseDateTime.Ticks); }
+        public long Ticks { get; set; }
+
+        public DateTime DateTime
+        {
+            get { return new DateTime(Ticks); }
+            set { Ticks = value.Ticks; }
+        }
+
+        internal static void ModelInitialization(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.ComplexType<DatabaseDateTime>()
+                .Ignore(p => p.DateTime);
+        }
+    }
+
+    [ComplexType]
+    public class DatabaseTimeSpan
+    {
+        public DatabaseTimeSpan(DateTime dateTime) { Ticks = dateTime.Ticks; }
+        public DatabaseTimeSpan(TimeSpan timeSpan) { Ticks = timeSpan.Ticks; }
+        public static implicit operator DatabaseTimeSpan(TimeSpan timeSpan) { return new DatabaseTimeSpan(timeSpan); }
+        public static implicit operator TimeSpan(DatabaseTimeSpan databaseTimeSpan) { return new TimeSpan(databaseTimeSpan.Ticks); }
+        public long Ticks { get; set; }
+
+        public TimeSpan TimeSpan
+        {
+            get { return new TimeSpan(Ticks); }
+            set { Ticks = value.Ticks; }
+        }
+
+        internal static void ModelInitialization(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.ComplexType<DatabaseTimeSpan>()
+                .Ignore(p => p.TimeSpan);
+        }
+    }
+
+    [ComplexType]
+    public class DatabaseGeo
+    {
+        public DatabaseGeo(Geo geo) { _geo = new Geo(geo); }
+
+        public static implicit operator DatabaseGeo(Geo geo) { return new DatabaseGeo(geo); }
+        public static implicit operator Geo(DatabaseGeo databaseGeo) { return new Geo(databaseGeo._geo); }
+
+        public double X { get { return _geo.X; } }
+        public double Y { get { return _geo.Y; } }
+        public double Z { get { return _geo.Z; } }
+
+        readonly Geo _geo = new Geo();
+
+        public double Latitude
+        {
+            get { return _geo.Latitude; }
+            set { _geo.Latitude = value; }
+        }
+        public double Longitude
+        {
+            get { return _geo.Longitude; }
+            set { _geo.Longitude = value; }
+        }
+        internal static void ModelInitialization(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.ComplexType<DatabaseGeo>()
+                .Ignore(p => p.X);
+            modelBuilder.ComplexType<DatabaseGeo>()
+                .Ignore(p => p.Y);
+            modelBuilder.ComplexType<DatabaseGeo>()
+                .Ignore(p => p.Z);
+        }
     }
 
     public class Scenario
@@ -25,11 +112,11 @@ namespace ESME.Databases
         public int ScenarioID { get; set; }
         public string BuilderVersion { get; set; }
         public string EventName { get; set; }
-        public DateTime CreationTime { get; set; }
+        public DatabaseDateTime CreationTime { get; set; }
         public string Description { get; set; }
         public string AnalystName { get; set; }
-        public DateTime StartTime { get; set; }
-        public TimeSpan Duration { get; set; }
+        public DatabaseTimeSpan StartTime { get; set; }
+        public DatabaseTimeSpan Duration { get; set; }
         public string SimAreaName { get; set; }
         public string TimeFrame { get; set; }
         public virtual ICollection<ScenarioPlatform> ScenarioPlatforms { get; set; }
@@ -43,6 +130,8 @@ namespace ESME.Databases
         public bool Launches { get; set; }
         public bool Tows { get; set; }
         public int RepeatCount { get; set; }
+        public virtual Scenario Scenario { get; set; }
+        public virtual TrackDefinition TrackDefinition { get; set; }
         public virtual ICollection<ScenarioSource> ScenarioSources { get; set; }
     }
 
@@ -80,18 +169,17 @@ namespace ESME.Databases
     public class PerimeterCoordinate
     {
         public int PerimeterCoordinateID { get; set; }
-        public float Latitude { get; set; }
-        public float Longitude { get; set; }
+        public DatabaseGeo Geo { get; set; }
 
         public virtual Perimeter Perimeter { get; set; }
     }
 
-    public class Trackdef
+    public class TrackDefinition
     {
-        public int TrackdefID { get; set; }
+        public int TrackDefinitionID { get; set; }
         public int TrackType { get; set; }
-        public TimeSpan StartTime { get; set; }
-        public TimeSpan Duration { get; set; }
+        public DatabaseTimeSpan StartTime { get; set; }
+        public DatabaseTimeSpan Duration { get; set; }
         public bool Random { get; set; }
         public bool OpsBounds { get; set; }
         public bool OpsTimes { get; set; }
