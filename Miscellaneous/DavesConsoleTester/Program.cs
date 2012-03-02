@@ -6,6 +6,7 @@ using System.Data.Entity;
 using System.IO;
 using ESME.Environment;
 using System.Linq;
+using ESME.NEMO;
 using HRC.Navigation;
 using ESME.Databases;
 
@@ -15,10 +16,11 @@ namespace DavesConsoleTester
     {
         static void Main(string[] args)
         {
-            if (args.Length != 1) throw new InvalidOperationException("Must pass a directory on the command line");
-            File.Delete("soundspeed.sqlite");
+            if (args.Length != 1) throw new InvalidOperationException("Must pass a nemo file on the command line");
+            File.Delete("scenario.sqlite");
             Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
-            var connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source={0};FailIfMissing=False", "soundspeed.sqlite"));
+            var connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source={0};FailIfMissing=False", "scenario.sqlite"));
+            var file = new NemoFile()
             var files = Directory.GetFiles(args[0], "*.soundspeed");
             var startTime = DateTime.Now;
             Console.WriteLine("{0}: Starting import test", startTime);
@@ -107,6 +109,12 @@ namespace DavesConsoleTester
             }
             context.NewSoundSpeedProfiles.Add(newProfile);
         }
+    }
+    public class ScenarioContext : DbContext
+    {
+        public ScenarioContext(DbConnection connection, bool contextOwnsConnection, IDatabaseInitializer<SoundSpeedContext> initializer)
+            : base(connection, contextOwnsConnection) { Database.SetInitializer(initializer); }
+        
     }
 
     public class SimulationContext : DbContext
