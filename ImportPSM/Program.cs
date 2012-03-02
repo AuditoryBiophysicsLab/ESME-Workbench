@@ -10,17 +10,10 @@ namespace ImportPSM
 {
     class Program
     {
-        public enum DatabaseType
-        {
-            SQLite,
-            SQLCE4,
-            Error,
-        }
         static void Main(string[] args)
         {
             string sourceFile = null;
             string output = null;
-            var type = DatabaseType.Error;
             DbConnection connection;
             var dump = false;
             try
@@ -39,10 +32,6 @@ namespace ImportPSM
                             sourceFile = args[++i];
                             if(!File.Exists(sourceFile)) Usage("source PSM file does not exist or is an invalid path.");
                             break;
-                        case "-databasetype":
-                            var res = args[++i];
-                            if(!Enum.TryParse(res, true, out type)) Usage("Invalid/unsupported database type");
-                            break;
                         case "-output":
                             output = args[++i];
                             break;
@@ -60,18 +49,8 @@ namespace ImportPSM
                 Usage(ex.Message);
             }
             
-            switch (type)
-            {
-                case DatabaseType.SQLite:
-                    Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
-                    connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source='{0}';FailIfMissing=False", output));
-                    break;
-                case DatabaseType.SQLCE4:
-                    connection = new System.Data.SqlServerCe.SqlCeConnection(string.Format("Data Source='{0}'", output));
-                    break;
-                default:
-                    throw new ApplicationException();
-            }
+            Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
+            connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source='{0}';FailIfMissing=False", output));
             
             Console.WriteLine("populating database...");
             Import(sourceFile, connection);
@@ -86,7 +65,6 @@ namespace ImportPSM
         static void Usage(string message = null)
         { 
             Console.WriteLine("Usage");
-            Console.WriteLine("Valid database types are SQLite or SQLCE4");
             if (message != null) Console.WriteLine(message);
         
         }
