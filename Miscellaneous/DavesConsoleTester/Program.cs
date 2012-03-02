@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Data.Common;
 using System.Data.Entity;
 using System.IO;
+using System.Threading.Tasks;
+using System.Transactions;
 using ESME.Environment;
 using System.Linq;
 using ESME.NEMO;
@@ -18,11 +21,12 @@ namespace DavesConsoleTester
         {
             if (args.Length != 1) throw new InvalidOperationException("Must pass a file name on the command line");
             if (!File.Exists(args[0])) throw new InvalidOperationException("Must pass an existing NEMO file on the command line");
-            //File.Delete("scenario.sqlite");
+            File.Delete("scenario.sqlite");
             Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
             var connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source={0};FailIfMissing=False", "scenario.sqlite"));
             var context = new ScenarioContext(connection, false, new DropCreateDatabaseAlways<ScenarioContext>());
-            var nemoFile = new NemoFile(args[0], @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas");
+            const string simAreaDirectory = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas";
+            var nemoFile = new NemoFile(args[0], simAreaDirectory);
             var scenario = new Scenario
             {
                 BuilderVersion = nemoFile.Scenario.BuilderVersion,
@@ -83,6 +87,30 @@ namespace DavesConsoleTester
                     context.TrackDefinitions.Add(trackDefinition);
                     platform.TrackDefinition = trackDefinition;
                     context.SaveChanges();
+                    if (trackDefinition.LimitFileName != null)
+                    {
+                        var perimeterName = Path.GetFileNameWithoutExtension(trackDefinition.LimitFileName);
+                        var existingPerimeter = (from perimeter in context.Perimeters
+                                                 where perimeter.Name == perimeterName
+                                                 select perimeter).FirstOrDefault();
+                        // If there is no perimeter with the current filename that already exists
+                        if (existingPerimeter == null)
+                        {
+                            var perimeter = new Perimeter
+                            {
+                                Name = Path.GetFileNameWithoutExtension(trackDefinition.LimitFileName),
+                            };
+                            context.Perimeters.Add(perimeter);
+                            context.SaveChanges();
+                            foreach (var geo in nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos)
+                                context.PerimeterCoordinates.Add(new PerimeterCoordinate
+                                {
+                                    Geo = geo,
+                                    Perimeter = perimeter,
+                                });
+                            context.SaveChanges();
+                        }
+                    }
                 }
                 foreach (var nemoSource in nemoPlatform.Sources)
                 {
@@ -129,11 +157,32 @@ namespace DavesConsoleTester
                 {
                     var species = new ScenarioSpecies
                     {
-                        Name = nemoSpecies.SpeciesName,
-                        SpeciesFile = nemoSpecies.SpeciesFile,
+                        Scenario = scenario,
                     };
                     context.ScenarioSpecies.Add(species);
                     context.SaveChanges();
+                    using (var transaction = new TransactionScope())
+                    {
+                        nemoSpecies.AnimatDataTask.Start();
+                        TaskEx.WhenAll(nemoSpecies.AnimatDataTask).Wait();
+                        var result = nemoSpecies.AnimatDataTask.Result;
+                        species.Name = result.LatinName;
+                        var locationIndex = 1;
+                        foreach (var location in result.AnimatStartPoints)
+                        {
+                            locationIndex++;
+                            Console.Write("{0} Adding animat {1} of {2}\r", species.Name, locationIndex, result.AnimatStartPoints.Count);
+                            context.AnimatLocations.Add(new AnimatLocation
+                            {
+                                Geo = new Geo(location.Latitude, location.Longitude),
+                                Depth = location.Data,
+                                ScenarioSpecies = species,
+                            });
+                        }
+                        context.Entry(species).State = EntityState.Modified;
+                        context.SaveChanges();
+                        transaction.Complete();
+                    }
                 }
             }
             context.Database.ExecuteSqlCommand("VACUUM;");

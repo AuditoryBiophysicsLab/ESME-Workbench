@@ -6,6 +6,7 @@ using HRC.Navigation;
 
 namespace ESME.Databases
 {
+#if false
     public class Simulation
     {
         public int SimulationID { get; set; }
@@ -98,5 +99,5 @@ namespace ESME.Databases
         public float Frequency { get; set; }
         public float Value { get; set; }
     }
-
+#endif
 }

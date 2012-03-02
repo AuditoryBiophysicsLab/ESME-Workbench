@@ -10,7 +10,14 @@ namespace ESME.Databases
     public class ScenarioContext : DbContext
     {
         public ScenarioContext(DbConnection connection, bool contextOwnsConnection, IDatabaseInitializer<ScenarioContext> initializer)
-            : base(connection, contextOwnsConnection) { Database.SetInitializer(initializer); }
+            : base(connection, contextOwnsConnection)
+        {
+            Configuration.AutoDetectChangesEnabled = false;
+            Configuration.ProxyCreationEnabled = false;
+            Configuration.LazyLoadingEnabled = true;
+            Configuration.ValidateOnSaveEnabled = true;
+            Database.SetInitializer(initializer);
+        }
 
         public DbSet<Scenario> Scenarios { get; set; }
         public DbSet<ScenarioPlatform> ScenarioPlatforms { get; set; }
@@ -20,6 +27,7 @@ namespace ESME.Databases
         public DbSet<PerimeterCoordinate> PerimeterCoordinates { get; set; }
         public DbSet<TrackDefinition> TrackDefinitions { get; set; }
         public DbSet<ScenarioSpecies> ScenarioSpecies { get; set; }
+        public DbSet<AnimatLocation> AnimatLocations { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -119,6 +127,7 @@ namespace ESME.Databases
         public DatabaseTimeSpan Duration { get; set; }
         public string SimAreaName { get; set; }
         public string TimeFrame { get; set; }
+
         public virtual ICollection<ScenarioPlatform> ScenarioPlatforms { get; set; }
         public virtual ICollection<ScenarioSpecies> ScenarioSpecies { get; set; }
     }
@@ -162,7 +171,7 @@ namespace ESME.Databases
     public class Perimeter
     {
         public int PerimeterID { get; set; }
-        public int Name { get; set; }
+        public string Name { get; set; }
         public virtual ICollection<PerimeterCoordinate> PerimeterCoordinates { get; set; }
     }
 
@@ -198,5 +207,17 @@ namespace ESME.Databases
         public int ScenarioSpeciesID { get; set; }
         public string SpeciesFile { get; set; }
         public string Name { get; set; }
+
+        public virtual Scenario Scenario { get; set; }
+        public virtual ICollection<AnimatLocation> AnimatLocations { get; set; }
+    }
+
+    public class AnimatLocation
+    {
+        public int AnimatLocationID { get; set; }
+        public DatabaseGeo Geo { get; set; }
+        public float Depth { get; set; }
+
+        public virtual ScenarioSpecies ScenarioSpecies { get; set; }
     }
 }

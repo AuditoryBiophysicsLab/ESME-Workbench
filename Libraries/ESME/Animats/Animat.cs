@@ -289,7 +289,7 @@ namespace ESME.Animats
     {
         public string Filename { get; internal set; }
         public string LatinName { get; internal set; }
-        public List<Geo> AnimatStartPoints { get; internal set; }
+        public List<Geo<float>> AnimatStartPoints { get; internal set; }
         public int TotalAnimats { get; internal set; }
         public static AnimatFile Load(string fileName, out string speciesName)
         {
@@ -426,7 +426,8 @@ namespace ESME.Animats
 
                     //  this.population = reader.ReadInt32();
                     result.ActualMammalPopulation = reader.ReadInt32();
-                    result.LatinName = reader.ReadString().TrimEnd('\0').Trim();
+                    result.LatinName = Encoding.ASCII.GetString(reader.ReadBytes(32)).TrimEnd('\0').Trim();
+                    //result.LatinName = reader.ReadString().TrimEnd('\0').Trim();
 
                     //  this.speciesName = new String(specName).trim();
 
@@ -606,7 +607,7 @@ namespace ESME.Animats
         private void ReadStartPositions(BinaryReader reader)
         {
             reader.BaseStream.Seek(1040, SeekOrigin.Begin); // skip the .ddb header
-            AnimatStartPoints = new List<Geo>();
+            AnimatStartPoints = new List<Geo<float>>();
             var datasize = GetSize(MbOutputConfiguration);
             for (var i = 0; i < TotalAnimats; i++)
             {
@@ -615,13 +616,14 @@ namespace ESME.Animats
                 reader.BaseStream.Seek(8, SeekOrigin.Current); //skip id and time
                 var lat = reader.ReadSingle();
                 var lon = reader.ReadSingle();
-                AnimatStartPoints.Add(new Geo(lat, lon));
                 //AnimatStartPoints.Add(new Geo(reader.ReadSingle(), reader.ReadSingle()));
                 //adds lat and lon.
-                reader.BaseStream.Seek(8 + datasize, SeekOrigin.Current);
-                    // skip depth, packedData, and the data itself.
+                //reader.BaseStream.Seek(8 + datasize, SeekOrigin.Current);
 
-                //var depth = reader.ReadSingle();
+                var depth = reader.ReadSingle();
+                AnimatStartPoints.Add(new Geo<float>(lat, lon, depth));
+                reader.BaseStream.Seek(4 + datasize, SeekOrigin.Current);
+                // skip packedData, and the data itself.
                 //var packedData = reader.ReadSingle();
                 //reader.BaseStream.Seek(datasize, SeekOrigin.Current);
 
@@ -842,11 +844,11 @@ namespace ESME.Animats
         {
             //skip to where animat state data is
             reader.BaseStream.Seek((long)AnimatsState, SeekOrigin.Begin);
-            AnimatStartPoints = new List<Geo>();
+            AnimatStartPoints = new List<Geo<float>>();
             //uint datasize = GetSize(OutputConfiguration);   
             for (var i = 0; i < TotalAnimats; i++) AnimatStartPoints.Add(ReadAnimat(reader));
         }
-        private Geo ReadAnimat(BinaryReader reader)
+        private Geo<float> ReadAnimat(BinaryReader reader)
         {
             var lat = float.MinValue;
             var lon = float.MinValue;
@@ -923,7 +925,7 @@ namespace ESME.Animats
             {
                 Debug.WriteLine("calculated depth: {0}", reader.ReadSingle());
             }
-            return new Geo(lat, lon);
+            return new Geo<float>(lat, lon, 0);
         }
 #if false
         /// <summary>
