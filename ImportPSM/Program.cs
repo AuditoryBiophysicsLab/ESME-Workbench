@@ -63,8 +63,11 @@ namespace ImportPSM
         }
 
         static void Usage(string message = null)
-        { 
-            Console.WriteLine("Usage");
+        {
+            Console.WriteLine("ImportPSM         - import tool for NUWC PSM.csv files.");
+            Console.WriteLine("     -sourceFile  <sourceFile.csv>    : the path to a valid SimAreas.csv file");
+            Console.WriteLine("     -output      <outputFile.sqlite> : the path to the target location of the normalized sqlite database output.");
+            Console.WriteLine("     (-dump)                          : if specified, basic database contents will be displayed.");
             if (message != null) Console.WriteLine(message);
         
         }
