@@ -12,17 +12,10 @@ namespace ImportSimAreas
 {
     class Program
     {
-        public enum DatabaseType
-        {
-            SQLite,
-            SQLCE4,
-            Error,
-        }
         static void Main(string[] args)
         {
             string sourceFile = null;
             string output = null;
-            DatabaseType type = DatabaseType.Error;
             DbConnection connection = null;
             bool dump = false;
             try
@@ -41,10 +34,6 @@ namespace ImportSimAreas
                             sourceFile = args[++i];
                             if (!File.Exists(sourceFile)) Usage("source file does not exist or is an invalid path.");
                             break;
-                        case "-databasetype":
-                            var res = args[++i];
-                            if (!Enum.TryParse(res, true, out type)) Usage("Invalid/unsupported database type");
-                            break;
                         case "-output":
                             output = args[++i];
                             break;
@@ -62,19 +51,9 @@ namespace ImportSimAreas
                 Usage(ex.Message);
             }
 
-            switch (type)
-            {
-                case DatabaseType.SQLite:
-                    Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
-                    connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source='{0}';FailIfMissing=False", output));
-                    break;
-                case DatabaseType.SQLCE4:
-                    connection = new System.Data.SqlServerCe.SqlCeConnection(string.Format("Data Source='{0}'", output));
-                    break;
-                default:
-                    throw new ApplicationException();
-            }
-
+            Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
+            connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source='{0}';FailIfMissing=False", output));
+            
             Console.WriteLine("populating database...");
             Import(sourceFile, connection);
             if (dump)
@@ -85,7 +64,10 @@ namespace ImportSimAreas
             Console.WriteLine("done.");
         }
 
-        static void Usage(string message) { throw new NotImplementedException(); }
+        static void Usage(string message)
+        {
+            if (message != null) Console.WriteLine(message);
+        }
 
         static void Import(string simAreasPath, DbConnection connection)
         {
