@@ -5,7 +5,7 @@ using System.Data.Common;
 using System.Data.Entity;
 using HRC.Navigation;
 
-namespace ESME.Databases
+namespace ESME.Database
 {
     public class ScenarioContext : DbContext
     {
@@ -16,7 +16,7 @@ namespace ESME.Databases
             Configuration.ProxyCreationEnabled = false;
             Configuration.LazyLoadingEnabled = true;
             Configuration.ValidateOnSaveEnabled = true;
-            Database.SetInitializer(initializer);
+            System.Data.Entity.Database.SetInitializer(initializer);
         }
 
         public DbSet<Scenario> Scenarios { get; set; }

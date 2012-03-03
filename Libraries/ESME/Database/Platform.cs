@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace ESME.Databases
+namespace ESME.Database
 {
     public class Platform
     {

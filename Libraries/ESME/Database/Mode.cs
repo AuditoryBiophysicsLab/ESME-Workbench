@@ -1,4 +1,4 @@
-namespace ESME.Databases
+namespace ESME.Database
 {
     public class Mode
     {

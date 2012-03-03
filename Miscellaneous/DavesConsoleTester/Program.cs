@@ -1,17 +1,16 @@
-﻿using System;
+﻿//#define USE_BLOB
+using System;
 using System.Collections.Generic;
+#if USE_BLOB
 using System.ComponentModel.DataAnnotations;
-using System.Data;
+#endif
 using System.Data.Common;
 using System.Data.Entity;
 using System.IO;
-using System.Threading.Tasks;
 using System.Transactions;
 using ESME.Environment;
 using System.Linq;
-using ESME.NEMO;
 using HRC.Navigation;
-using ESME.Databases;
 
 namespace DavesConsoleTester
 {
@@ -20,177 +19,25 @@ namespace DavesConsoleTester
         static void Main(string[] args)
         {
             if (args.Length != 1) throw new InvalidOperationException("Must pass a file name on the command line");
+#if false
             if (!File.Exists(args[0])) throw new InvalidOperationException("Must pass an existing NEMO file on the command line");
             File.Delete("scenario.sqlite");
             Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
             var connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source={0};FailIfMissing=False", "scenario.sqlite"));
             var context = new ScenarioContext(connection, false, new DropCreateDatabaseAlways<ScenarioContext>());
-            const string simAreaDirectory = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas";
-            var nemoFile = new NemoFile(args[0], simAreaDirectory);
-            var scenario = new Scenario
-            {
-                BuilderVersion = nemoFile.Scenario.BuilderVersion,
-                AnalystName = nemoFile.Scenario.AnalystName,
-                CreationTime = nemoFile.Scenario.CreationTime,
-                Description = nemoFile.Scenario.Description,
-                Duration = nemoFile.Scenario.Duration,
-                EventName = nemoFile.Scenario.EventName,
-                SimAreaName = nemoFile.Scenario.SimAreaName,
-                StartTime = nemoFile.Scenario.StartTime.TimeOfDay,
-                TimeFrame = nemoFile.Scenario.TimeFrame,
-            };
-            context.Scenarios.Add(scenario);
-            context.SaveChanges();
-            foreach (var nemoPlatform in nemoFile.Scenario.Platforms)
-            {
-                var platform = new ScenarioPlatform
-                {
-                    PlatformID = int.Parse(nemoPlatform.Id),
-                    PlatformName = nemoPlatform.Name,
-                    Description = nemoPlatform.Description,
-                    Launches = false,
-                    Tows = false,
-                    Scenario = scenario,
-                };
-                context.ScenarioPlatforms.Add(platform);
-                context.SaveChanges();
-                if (nemoPlatform.Trackdefs.Count > 0)
-                {
-                    var trackType = TrackType.Stationary;
-                    switch (nemoPlatform.Trackdefs[0].TrackType.ToLower())
-                    {
-                        case "perimeter_bounce":
-                            trackType = TrackType.PerimeterBounce;
-                            break;
-                        case "stationary":
-                            trackType = TrackType.Stationary;
-                            break;
-                        case "straight_line":
-                            trackType = TrackType.StraightLine;
-                            break;
-                    }
-                    var trackDefinition = new TrackDefinition
-                    {
-                        Duration = nemoPlatform.Trackdefs[0].Duration,
-                        InitialCourse = nemoPlatform.Trackdefs[0].InitialCourse,
-                        InitialDepth = -1 * nemoPlatform.Trackdefs[0].InitialHeight,
-                        InitialLatitude = nemoPlatform.Trackdefs[0].InitialLatitude,
-                        InitialLongitude = nemoPlatform.Trackdefs[0].InitialLongitude,
-                        InitialSpeed = nemoPlatform.Trackdefs[0].InitialSpeed,
-                        LimitFileName = nemoPlatform.Trackdefs[0].LimitFileName,
-                        OpsBounds = nemoPlatform.Trackdefs[0].OpsBounds,
-                        OpsTimes = nemoPlatform.Trackdefs[0].OpsTimes,
-                        Random = nemoPlatform.Trackdefs[0].Random,
-                        StartTime = nemoPlatform.Trackdefs[0].StartTime.TimeOfDay,
-                        TrackType = (int)trackType,
-                    };
-                    context.TrackDefinitions.Add(trackDefinition);
-                    platform.TrackDefinition = trackDefinition;
-                    context.SaveChanges();
-                    if (trackDefinition.LimitFileName != null)
-                    {
-                        var perimeterName = Path.GetFileNameWithoutExtension(trackDefinition.LimitFileName);
-                        var existingPerimeter = (from perimeter in context.Perimeters
-                                                 where perimeter.Name == perimeterName
-                                                 select perimeter).FirstOrDefault();
-                        // If there is no perimeter with the current filename that already exists
-                        if (existingPerimeter == null)
-                        {
-                            var perimeter = new Perimeter
-                            {
-                                Name = Path.GetFileNameWithoutExtension(trackDefinition.LimitFileName),
-                            };
-                            context.Perimeters.Add(perimeter);
-                            context.SaveChanges();
-                            foreach (var geo in nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos)
-                                context.PerimeterCoordinates.Add(new PerimeterCoordinate
-                                {
-                                    Geo = geo,
-                                    Perimeter = perimeter,
-                                });
-                            context.SaveChanges();
-                        }
-                    }
-                }
-                foreach (var nemoSource in nemoPlatform.Sources)
-                {
-                    var source = new ScenarioSource
-                    {
-                        SourceID = int.Parse(nemoSource.Id),
-                        SourceName = nemoSource.Name,
-                        Description = nemoSource.Description,
-                        Platform = platform,
-                    };
-                    context.ScenarioSources.Add(source);
-                    context.SaveChanges();
-                    foreach (var nemoMode in nemoSource.Modes)
-                    {
-                        var mode = new ScenarioMode
-                        {
-                            //ModeID = int.Parse(nemoMode.Id),
-                            ActiveTime = nemoMode.ActiveTime,
-                            ClusterCount = nemoMode.ClusterCount,
-                            DepressionElevationAngle = nemoMode.DepressionElevationAngle,
-                            Depth = nemoMode.DepthOffset,
-                            HighFrequency = nemoMode.HighFrequency,
-                            LowFrequency = nemoMode.LowFrequency,
-                            HorizontalBeamWidth = nemoMode.HorizontalBeamWidth,
-                            Linked = nemoMode.Linked,
-                            MaxPropagationRadius = nemoMode.Radius,
-                            ModeName = nemoMode.Name,
-                            PulseInterval = (float)nemoMode.PulseInterval.TotalSeconds,
-                            PulseLength = (float)nemoMode.PulseLength.TotalSeconds * 1000,
-                            RelativeBeamAngle = nemoMode.RelativeBeamAngle,
-                            SourceLevel = nemoMode.SourceLevel,
-                            State = nemoMode.State,
-                            VerticalBeamWidth = nemoMode.VerticalBeamWidth,
-                            Source = source,
-                        };
-                        context.ScenarioModes.Add(mode);
-                        context.SaveChanges();
-                    }
-                }
-            }
-            foreach (var nemoAnimals in nemoFile.Scenario.Animals)
-            {
-                foreach (var nemoSpecies in nemoAnimals.Species)
-                {
-                    var species = new ScenarioSpecies
-                    {
-                        Scenario = scenario,
-                    };
-                    context.ScenarioSpecies.Add(species);
-                    context.SaveChanges();
-                    using (var transaction = new TransactionScope())
-                    {
-                        nemoSpecies.AnimatDataTask.Start();
-                        TaskEx.WhenAll(nemoSpecies.AnimatDataTask).Wait();
-                        var result = nemoSpecies.AnimatDataTask.Result;
-                        species.Name = result.LatinName;
-                        var locationIndex = 1;
-                        foreach (var location in result.AnimatStartPoints)
-                        {
-                            locationIndex++;
-                            Console.Write("{0} Adding animat {1} of {2}\r", species.Name, locationIndex, result.AnimatStartPoints.Count);
-                            context.AnimatLocations.Add(new AnimatLocation
-                            {
-                                Geo = new Geo(location.Latitude, location.Longitude),
-                                Depth = location.Data,
-                                ScenarioSpecies = species,
-                            });
-                        }
-                        context.Entry(species).State = EntityState.Modified;
-                        context.SaveChanges();
-                        transaction.Complete();
-                    }
-                }
-            }
-            context.Database.ExecuteSqlCommand("VACUUM;");
-#if false
+            const string scenarioDataDirectory = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas";
+            ESME.Database.Importers.NemoFile.Import(args[0], scenarioDataDirectory, context);
+#endif
+#if true
+            File.Delete("soundspeed.sqlite");
+            Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
+            var connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source={0};FailIfMissing=False", "soundspeed.sqlite"));
+            var context = new SoundSpeedContext(connection, false, new DropCreateDatabaseAlways<SoundSpeedContext>());
             var files = Directory.GetFiles(args[0], "*.soundspeed");
+            var oneFile = new[] {files[0]};
             var startTime = DateTime.Now;
             Console.WriteLine("{0}: Starting import test", startTime);
-            foreach (var file in files)
+            foreach (var file in oneFile)
             {
                 var sourceFile = Path.GetFileName(file);
                 //Console.WriteLine("  Importing {0}                       ", );
@@ -201,16 +48,16 @@ namespace DavesConsoleTester
                     var newField = ImportField(curField, context);
                     var batchSize = curField.EnvironmentData.Count;
                     var fieldStartTime = DateTime.Now;
-                    //using (var scope = new TransactionScope())
-                    //{
-                    for (var batchIndex = 0; batchIndex < curField.EnvironmentData.Count; batchIndex++)
+                    using (var scope = new TransactionScope(TransactionScopeOption.Required, new TimeSpan(0, 1, 0, 0)))
                     {
-                        Console.Write("    Importing {0} profile {1} of {2} ({3:0.00%})\r", sourceFile, batchIndex, batchSize, ((float)batchIndex / batchSize));
-                        ImportProfile(newField, curField.EnvironmentData[batchIndex], context);
+                        for (var batchIndex = 0; batchIndex < curField.EnvironmentData.Count; batchIndex++)
+                        {
+                            Console.Write("    Importing {0} profile {1} of {2} ({3:0.00%})\r", sourceFile, batchIndex, batchSize, ((float)batchIndex / batchSize));
+                            ImportProfile(newField, curField.EnvironmentData[batchIndex], context);
+                        }
+                        context.SaveChanges();
+                        scope.Complete();
                     }
-                    //    scope.Complete();
-                    //}
-                    context.SaveChanges();
                     Console.WriteLine("{0}: Imported {1} ({2} elapsed)", DateTime.Now, sourceFile, DateTime.Now - fieldStartTime);
                 }
             }
@@ -224,25 +71,13 @@ namespace DavesConsoleTester
 
         }
 
-        static void ImportSoundSpeed(SoundSpeed soundSpeed, SoundSpeedContext context)
-        {
-            foreach (var curField in soundSpeed.SoundSpeedFields)
-            {
-                var newField = ImportField(curField, context);
-                if (newField != null) foreach (var curProfile in curField.EnvironmentData) ImportProfile(newField, curProfile, context);
-            }
-            context.SaveChanges();
-        }
-
         static NewSoundSpeedField ImportField(TimePeriodEnvironmentData<SoundSpeedProfile> curField, SoundSpeedContext context)
         {
             var existingField = (from f in context.NewSoundSpeedFields
                                  where f.TimePeriod == (int)curField.TimePeriod
                                  select f).FirstOrDefault();
-#if sqlite
             context.Database.ExecuteSqlCommand("CREATE INDEX IF NOT EXISTS LatitudeIndex ON NewSoundSpeedProfiles(Latitude);");
             context.Database.ExecuteSqlCommand("CREATE INDEX IF NOT EXISTS LongitudeIndex ON NewSoundSpeedProfiles(Longitude);");
-#endif
             if (existingField != null) return null;
             var newField = new NewSoundSpeedField { TimePeriod = (int)curField.TimePeriod };
             context.NewSoundSpeedFields.Add(newField);
@@ -259,6 +94,7 @@ namespace DavesConsoleTester
             };
             if (curProfile.Data.Count > 0)
             {
+#if USE_BLOB
                 using (var ms = new MemoryStream())
                 {
                     using (var bw = new BinaryWriter(ms))
@@ -274,6 +110,19 @@ namespace DavesConsoleTester
                     }
                     newProfile.Blob = ms.GetBuffer();
                 }
+#else
+                foreach (var curSample in curProfile.Data)
+                {
+                    context.NewSoundSpeedSamples.Add(new NewSoundSpeedSample
+                    {
+                        Depth = curSample.Depth,
+                        Temperature = curSample.Temperature,
+                        Salinity = curSample.Salinity,
+                        SoundSpeed = float.IsNaN(curSample.SoundSpeed) ? (float?)null : curSample.SoundSpeed,
+                        NewSoundSpeedProfile = newProfile,
+                    });
+                }
+#endif
             }
             context.NewSoundSpeedProfiles.Add(newProfile);
         }
@@ -288,11 +137,20 @@ namespace DavesConsoleTester
     public class SoundSpeedContext : DbContext
     {
         public SoundSpeedContext(DbConnection connection, bool contextOwnsConnection, IDatabaseInitializer<SoundSpeedContext> initializer)
-            : base(connection, contextOwnsConnection) { Database.SetInitializer(initializer); }
+            : base(connection, contextOwnsConnection)
+        {
+            Configuration.AutoDetectChangesEnabled = false;
+            Configuration.ProxyCreationEnabled = false;
+            Configuration.LazyLoadingEnabled = true;
+            Configuration.ValidateOnSaveEnabled = true;
+            Database.SetInitializer(initializer);
+        }
 
         public DbSet<NewSoundSpeedField> NewSoundSpeedFields { get; set; }
         public DbSet<NewSoundSpeedProfile> NewSoundSpeedProfiles { get; set; }
+#if !USE_BLOB
         public DbSet<NewSoundSpeedSample> NewSoundSpeedSamples { get; set; }
+#endif
     }
 
     public class NewSoundSpeedField
@@ -308,18 +166,18 @@ namespace DavesConsoleTester
         public long NewSoundSpeedProfileID { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
-#if sqlite
+#if USE_BLOB
         [Column(TypeName = "BLOB")]
-#else
-        [Column(TypeName = "image")]
-#endif
         public byte[] Blob { get; set; }
+#endif
 
-        //[ForeignKey("NewSoundSpeedFieldID")]
         public virtual NewSoundSpeedField NewSoundSpeedField { get; set; }
+#if !USE_BLOB
         public virtual ICollection<NewSoundSpeedSample> NewSoundSpeedSamples { get; set; }
+#endif
     }
 
+#if !USE_BLOB
     public class NewSoundSpeedSample
     {
         public long NewSoundSpeedSampleID { get; set; }
@@ -328,7 +186,7 @@ namespace DavesConsoleTester
         public float Salinity { get; set; }
         public float? SoundSpeed { get; set; }
 
-        //[ForeignKey("NewSoundSpeedProfileID")]
         public virtual NewSoundSpeedProfile NewSoundSpeedProfile { get; set; }
     }
+#endif
 }

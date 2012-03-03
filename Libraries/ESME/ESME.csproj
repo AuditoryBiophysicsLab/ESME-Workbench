@@ -83,6 +83,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\ESME WorkBench\External References\EntityFramework.dll</HintPath>
     </Reference>
+    <Reference Include="FileHelpers">
+      <HintPath>..\..\ESME WorkBench\External References\FileHelpers.dll</HintPath>
+    </Reference>
     <Reference Include="GeoAPI">
       <HintPath>..\..\ESME WorkBench\External References\GeoAPI.dll</HintPath>
     </Reference>
@@ -123,6 +126,7 @@
     <Reference Include="System.Threading.Tasks.Dataflow, Version=0.0.4098.29463, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\ESME WorkBench\External References\System.Threading.Tasks.Dataflow.dll</HintPath>
     </Reference>
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq">
@@ -143,12 +147,15 @@
   <ItemGroup>
     <Compile Include="BuildInformation.cs" />
     <Compile Include="Configuration.cs" />
-    <Compile Include="Databases\Mode.cs" />
-    <Compile Include="Databases\Platform.cs" />
-    <Compile Include="Databases\PSMContext.cs" />
-    <Compile Include="Databases\Scenario.cs" />
-    <Compile Include="Databases\Simulation.cs" />
-    <Compile Include="Databases\Source.cs" />
+    <Compile Include="Database\Importers\NemoFile.cs" />
+    <Compile Include="Database\Importers\PSMFile.cs" />
+    <Compile Include="Database\Importers\PSMFileRecord.cs" />
+    <Compile Include="Database\Mode.cs" />
+    <Compile Include="Database\Platform.cs" />
+    <Compile Include="Database\PSMContext.cs" />
+    <Compile Include="Database\Scenario.cs" />
+    <Compile Include="Database\Simulation.cs" />
+    <Compile Include="Database\Source.cs" />
     <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Data\CASSTemplate.cs" />
     <Compile Include="Data\WorkDirectories.cs" />

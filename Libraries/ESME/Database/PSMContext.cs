@@ -1,14 +1,14 @@
 using System.Data.Common;
 using System.Data.Entity;
 
-namespace ESME.Databases
+namespace ESME.Database
 {
     public class PSMContext : DbContext
     {
         public PSMContext(DbConnection connection, bool contextOwnsConnection, IDatabaseInitializer<PSMContext> initializer)
                 : base(connection, contextOwnsConnection)
         {
-            Database.SetInitializer(initializer);
+            System.Data.Entity.Database.SetInitializer(initializer);
         }
 
         public DbSet<Platform> Platforms { get; set; }
