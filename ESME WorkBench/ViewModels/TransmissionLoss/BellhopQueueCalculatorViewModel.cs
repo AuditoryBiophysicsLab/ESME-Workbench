@@ -11,7 +11,7 @@ using Cinch;
 using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {
 #if false
     internal class BellhopQueueCalculatorViewModel : ViewModelBase, IViewStatusAwareInjectionAware

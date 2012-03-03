@@ -9,11 +9,11 @@ using Cinch;
 using ESME;
 using ESME.TransmissionLoss;
 using ESME.Views.TransmissionLossViewer;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.Views;
+using ESMEWorkbench.Properties;
+using ESMEWorkbench.Views;
 using HRC.Services;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {
     internal class AnalysisPointVisualizerViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {

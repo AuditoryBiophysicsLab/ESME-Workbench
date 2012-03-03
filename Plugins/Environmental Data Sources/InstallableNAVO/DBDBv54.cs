@@ -36,7 +36,6 @@ namespace InstallableNAVO
             IsConfigured = _dataDirectory != null &&
                            Directory.Exists(_dataDirectory) &&
                            File.Exists(Path.Combine(_dataDirectory, RequiredDBDBFilename));
-            ConfigurationControl = new GDEM3ConfigurationControl { DataContext = this };
         }
 
         readonly string _dataDirectory;

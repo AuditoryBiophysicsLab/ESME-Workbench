@@ -15,7 +15,7 @@ using HRC.Navigation;
 using HRC.Utility;
 using RangeComplex = ESME.Environment.Descriptors.RangeComplex;
 
-namespace ESMEWorkBench.ViewModels.NAVO
+namespace ESMEWorkbench.ViewModels.NAVO
 {
     public class ExportAllEnvironmentalDataProgressViewModel:ViewModelBase
     {

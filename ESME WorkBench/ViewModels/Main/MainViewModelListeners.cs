@@ -3,12 +3,12 @@ using System.Windows;
 using Cinch;
 using ESME;
 using ESME.TransmissionLoss;
-using ESMEWorkBench.Data;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.TransmissionLoss;
+using ESMEWorkbench.Data;
+using ESMEWorkbench.Properties;
+using ESMEWorkbench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {

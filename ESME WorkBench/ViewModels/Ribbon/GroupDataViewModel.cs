@@ -3,7 +3,7 @@ using System.ComponentModel.Composition;
 using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.Ribbon
+namespace ESMEWorkbench.ViewModels.Ribbon
 {
     [ExportViewModel("GroupDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]

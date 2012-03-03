@@ -5,9 +5,9 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using Cinch;
 using ESME.TransmissionLoss;
-using ESMEWorkBench.ViewModels.Main;
+using ESMEWorkbench.ViewModels.Main;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {
     internal class TransmissionLossFieldListItemViewModel : ViewModelBase
     {

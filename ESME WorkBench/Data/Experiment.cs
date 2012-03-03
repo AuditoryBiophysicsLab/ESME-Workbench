@@ -28,7 +28,7 @@ using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMEWorkBench.Data
+namespace ESMEWorkbench.Data
 {
     [Serializable]
     public partial class Experiment : PropertyChangedBase

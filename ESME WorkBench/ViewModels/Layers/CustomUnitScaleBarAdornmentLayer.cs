@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMEWorkBench.ViewModels.Layers
+namespace ESMEWorkbench.ViewModels.Layers
 {
     internal class CustomUnitScaleBarAdornmentLayer : AdornmentLayer
     {

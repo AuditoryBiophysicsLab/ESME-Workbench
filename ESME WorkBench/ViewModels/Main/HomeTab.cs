@@ -17,10 +17,10 @@ using ESME.TransmissionLoss.CASS;
 using ESME.Views.AcousticBuilder;
 using ESME.Views.TransmissionLoss;
 using ESME.Views.TransmissionLossViewer;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.NAVO;
+using ESMEWorkbench.Properties;
+using ESMEWorkbench.ViewModels.NAVO;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {
@@ -495,13 +495,13 @@ using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.AcousticBuilder;
 using ESME.Views.TransmissionLoss;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.NAVO;
+using ESMEWorkbench.Properties;
+using ESMEWorkbench.ViewModels.NAVO;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {
@@ -700,7 +700,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(IsScenarioLoadedChangedEventArgs);
                 NotifyPropertyChanged(IsScenarioNotLoadedChangedEventArgs);
 
-                MainWindowTitle = _nemoFile != null ? string.Format("ESME WorkBench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", NemoFile.Scenario.EventName, NemoFile.Scenario.TimeFrame) : string.Format("ESME WorkBench 2011{0}: <No scenario loaded>", Configuration.IsUnclassifiedModel ? " (public)" : "");
+                MainWindowTitle = _nemoFile != null ? string.Format("ESME Workbench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", NemoFile.Scenario.EventName, NemoFile.Scenario.TimeFrame) : string.Format("ESME Workbench 2011{0}: <No scenario loaded>", Configuration.IsUnclassifiedModel ? " (public)" : "");
                 if (_nemoFile == null)
                 {
                     ScenarioLoadedToolTip = null;
@@ -993,7 +993,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         static readonly PropertyChangedEventArgs MainWindowTitleChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MainWindowTitle);
-        string _mainWindowTitle = Configuration.IsUnclassifiedModel ? "ESME WorkBench 2011 (public): <No scenario loaded>" : "ESME WorkBench 2011: <No scenario loaded>";
+        string _mainWindowTitle = Configuration.IsUnclassifiedModel ? "ESME Workbench 2011 (public): <No scenario loaded>" : "ESME Workbench 2011: <No scenario loaded>";
 
         #endregion
 

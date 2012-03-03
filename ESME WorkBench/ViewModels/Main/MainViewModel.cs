@@ -14,9 +14,9 @@ using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Mapping;
-using ESMEWorkBench.Data;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.RecentFiles;
+using ESMEWorkbench.Data;
+using ESMEWorkbench.Properties;
+using ESMEWorkbench.ViewModels.RecentFiles;
 using HRC.Navigation;
 using HRC.Services;
 using HRC.Utility;
@@ -25,7 +25,7 @@ using MEFedMVVM.ViewModelLocator;
 using ESME.Views.AcousticBuilder;
 using ESME.Environment.Descriptors;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     [ExportViewModel("MainViewModel")]
     public partial class MainViewModel : ViewModelBase

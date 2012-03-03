@@ -10,7 +10,7 @@ using Cinch;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {
 #if false
     public class TransmissionLossFieldCalculatorViewModel : ViewModelBase, IViewStatusAwareInjectionAware

@@ -1,4 +1,4 @@
-﻿<Window x:Class="ESMEWorkBench.Views.SimulationView"
+﻿<Window x:Class="ESMEWorkbench.Views.SimulationView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"

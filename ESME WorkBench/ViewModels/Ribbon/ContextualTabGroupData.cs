@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using HRC.Utility;
 
-namespace ESMEWorkBench.ViewModels.Ribbon
+namespace ESMEWorkbench.ViewModels.Ribbon
 {
     public class ContextualTabGroupData : PropertyChangedBase
     {

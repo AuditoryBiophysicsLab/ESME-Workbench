@@ -7,11 +7,11 @@ using System.Windows;
 using System.Windows.Threading;
 using Cinch;
 using ESME.NEMO;
-using ESMEWorkBench.Data;
-using ESMEWorkBench.ViewModels.TransmissionLoss;
+using ESMEWorkbench.Data;
+using ESMEWorkbench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     internal class SimulationViewModel : EditableValidatingViewModelBase, IViewStatusAwareInjectionAware
     {

@@ -9,11 +9,11 @@ using ESME;
 using ESME.Data;
 using ESME.Mapping;
 using ESME.Views.LogFileViewer;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.NAVO;
-using ESMEWorkBench.ViewModels.TransmissionLoss;
+using ESMEWorkbench.Properties;
+using ESMEWorkbench.ViewModels.NAVO;
+using ESMEWorkbench.ViewModels.TransmissionLoss;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {

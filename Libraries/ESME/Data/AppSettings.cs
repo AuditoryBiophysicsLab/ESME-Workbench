@@ -307,7 +307,7 @@ namespace ESME.Data
 
         #endregion
 
-        // This list is maintained by the ESME WorkBench.  When a new experiment is saved, the path to the experiment directory is added to this list
+        // This list is maintained by the ESME Workbench.  When a new experiment is saved, the path to the experiment directory is added to this list
         // Periodically, the VerifyExperimentsStillExist() method is called, which will prune directories that no longer exist.
         #region public List<string> ExperimentFiles { get; set; }
 

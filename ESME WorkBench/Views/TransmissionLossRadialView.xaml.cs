@@ -2,7 +2,7 @@
 
 using Cinch;
 
-namespace ESMEWorkBench.Views
+namespace ESMEWorkbench.Views
 {
     /// <summary>
     /// Interaction logic for TransmissionLossRadialView.xaml

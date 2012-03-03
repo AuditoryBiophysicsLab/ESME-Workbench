@@ -4,7 +4,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMEWorkBench.ViewModels.Layers
+namespace ESMEWorkbench.ViewModels.Layers
 {
     internal class GraphicLogoAdornmentLayer : AdornmentLayer
     {

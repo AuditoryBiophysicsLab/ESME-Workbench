@@ -11,13 +11,13 @@ using System.Windows.Threading;
 using Cinch;
 using ESME;
 using ESME.TransmissionLoss;
-using ESMEWorkBench.Views;
+using ESMEWorkbench.Views;
 using HRC.Services;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ESME.Views.TransmissionLossViewer;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {
     [ExportViewModel("AnalysisPointViewModel")]
     internal class AnalysisPointViewModel : ViewModelBase

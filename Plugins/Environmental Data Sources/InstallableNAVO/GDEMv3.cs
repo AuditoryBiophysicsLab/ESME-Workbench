@@ -34,7 +34,6 @@ namespace InstallableNAVO
             IsConfigured = _dataDirectory != null &&
                            Directory.Exists(_dataDirectory) &&
                            Databases.GDEM.IsDirectoryValid(_dataDirectory);
-            ConfigurationControl = new GDEM3ConfigurationControl { DataContext = this };
         }
 
         readonly string _dataDirectory;

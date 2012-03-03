@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ESMEWorkBench.Controls
+namespace ESMEWorkbench.Controls
 {
     /// <summary>
     /// Interaction logic for ScatterPlot.xaml

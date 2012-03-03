@@ -16,11 +16,11 @@ using ESME.Model;
 using ESME.NEMO.Overlay;
 using ESME.Views.Locations;
 using ESME.Views.InstallationWizard;
-using ESMEWorkBench.ViewModels.NAVO;
+using ESMEWorkbench.ViewModels.NAVO;
 using HRC.Navigation;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {

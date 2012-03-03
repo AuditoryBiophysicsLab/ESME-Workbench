@@ -5,7 +5,7 @@ using System.Linq;
 using Cinch;
 using ESME.TransmissionLoss;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {
     class AnalysisPointCalculationPreviewViewModel : ViewModelBase
     {

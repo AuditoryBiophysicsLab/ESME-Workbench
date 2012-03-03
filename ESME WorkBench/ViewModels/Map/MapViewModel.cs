@@ -14,9 +14,9 @@ using System.Xml.Serialization;
 using Cinch;
 using ESME;
 using ESME.Mapping;
-using ESMEWorkBench.Controls;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.Layers;
+using ESMEWorkbench.Controls;
+using ESMEWorkbench.Properties;
+using ESMEWorkbench.ViewModels.Layers;
 using HRC.Navigation;
 using HRC.Services;
 using MEFedMVVM.Common;
@@ -24,7 +24,7 @@ using MEFedMVVM.ViewModelLocator;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 
-namespace ESMEWorkBench.ViewModels.Map
+namespace ESMEWorkbench.ViewModels.Map
 {
     [ExportViewModel("MapViewModel")]
     [Serializable]

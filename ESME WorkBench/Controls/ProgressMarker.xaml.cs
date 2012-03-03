@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace ESMEWorkBench.Controls
+namespace ESMEWorkbench.Controls
 {
     /// <summary>
     /// Interaction logic for ProgressMarker.xaml

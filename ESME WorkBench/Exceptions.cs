@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace ESMEWorkBench
+namespace ESMEWorkbench
 {
     public class UserCanceledOperationException : Exception
     {

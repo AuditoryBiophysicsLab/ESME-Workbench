@@ -4,7 +4,7 @@ using Cinch;
 using ESME.Data;
 using ESME.Environment;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     public class ApplicationOptionsViewModel : ViewModelBase
     {

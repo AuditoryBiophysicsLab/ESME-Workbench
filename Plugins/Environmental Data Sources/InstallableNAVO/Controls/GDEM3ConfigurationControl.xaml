@@ -17,7 +17,6 @@
                                                         NotifyOnValidationError=True,
                                                         UpdateSourceTrigger=PropertyChanged}"
                                      FileNameFilter="NetCDF files (*.nc)|*.nc|All files (*.*)|*.*"
-                                     IsDirectoryBrowser="False"
-                                     ToolTip="{x:Static InstallableNAVO:GDEM3Configuration.DataLocationHelp}" />
+                                     IsDirectoryBrowser="False" />
 
 </UserControl>
