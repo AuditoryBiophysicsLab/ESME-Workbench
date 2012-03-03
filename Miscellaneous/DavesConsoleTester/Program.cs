@@ -53,7 +53,8 @@ namespace DavesConsoleTester
                         for (var batchIndex = 0; batchIndex < curField.EnvironmentData.Count; batchIndex++)
                         {
                             Console.Write("    Importing {0} profile {1} of {2} ({3:0.00%})\r", sourceFile, batchIndex, batchSize, ((float)batchIndex / batchSize));
-                            ImportProfile(newField, curField.EnvironmentData[batchIndex], context);
+                            if (curField.EnvironmentData[batchIndex].Data.Count > 0)
+                                ImportProfile(newField, curField.EnvironmentData[batchIndex], context);
                         }
                         context.SaveChanges();
                         scope.Complete();
