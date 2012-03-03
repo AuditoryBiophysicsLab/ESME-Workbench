@@ -2,9 +2,7 @@
 using System.Data.Common;
 using System.Data.Entity;
 using System.IO;
-using System.Linq;
-using FileHelpers;
-using ESME.Databases;
+using ESME.Database;
 
 namespace ImportPSM
 {
@@ -14,8 +12,6 @@ namespace ImportPSM
         {
             string sourceFile = null;
             string output = null;
-            DbConnection connection;
-            var dump = false;
             try
             {
                 if (args.Length == 0)
@@ -35,9 +31,6 @@ namespace ImportPSM
                         case "-output":
                             output = args[++i];
                             break;
-                        case "-dump":
-                            dump = true;
-                            break;
                         default :
                             Usage("Incorrect option specified.");
                             return;
@@ -50,15 +43,11 @@ namespace ImportPSM
             }
             
             Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
-            connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source='{0}';FailIfMissing=False", output));
-            
+            DbConnection connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source='{0}';FailIfMissing=False", output));
+            var psm = new PSMContext(connection, false, new DropCreateDatabaseAlways<PSMContext>());
+
             Console.WriteLine("populating database...");
-            Import(sourceFile, connection);
-            if (dump)
-            {
-                Console.WriteLine("displaying PSM names...");
-                Dump(connection);
-            }
+            ESME.Database.Importers.PSMFile.Import(sourceFile, psm);
             Console.WriteLine("done.");
         }
 
@@ -67,99 +56,8 @@ namespace ImportPSM
             Console.WriteLine("ImportPSM         - import tool for NUWC PSM.csv files.");
             Console.WriteLine("     -sourceFile  <sourceFile.csv>    : the path to a valid SimAreas.csv file");
             Console.WriteLine("     -output      <outputFile.sqlite> : the path to the target location of the normalized sqlite database output.");
-            Console.WriteLine("     (-dump)                          : if specified, basic database contents will be displayed.");
             if (message != null) Console.WriteLine(message);
         
-        }
-
-        static void Dump(DbConnection connection)
-        {
-            var psm = new PSMContext(connection, true, new CreateDatabaseIfNotExists<PSMContext>());
-            foreach (var platform in psm.Platforms)
-            {
-                foreach (var source in platform.Sources)
-                {
-                    foreach (var mode in source.Modes)
-                    {
-                        Console.WriteLine("{0} {1} {2} {3} {4} {5}", platform.PlatformName, platform.PlatformType, source.SourceName, source.SourceType, mode.ModeName, mode.ModeType);
-                    }
-                }
-            }
-        }
-
-        static void Import(string csvFilePath, DbConnection connection)
-        {
-            var psm = new PSMContext(connection, false, new DropCreateDatabaseAlways<PSMContext>());
-            var engine = new FileHelperEngine(typeof(PSMFileRecord));
-            var entries = (PSMFileRecord[])engine.ReadFile(csvFilePath);
-
-            foreach (var entry in entries)
-            {
-                var platform = (from p in psm.Platforms
-                                where p.PlatformName == entry.PlatformName
-                                select p).FirstOrDefault();
-                if (platform == null)
-                {
-                    platform = new Platform
-                    {
-                        PlatformName = entry.PlatformName,
-                        PlatformType = entry.PlatformType,
-                    };
-                    psm.Platforms.Add(platform);
-                    psm.SaveChanges();
-                }
-                Source source = null;
-                if (platform.Sources != null)
-                {
-                    source = (from s in platform.Sources
-                              where s.SourceName == entry.SourceName
-                              select s).FirstOrDefault();
-
-                }
-                if (source == null)
-                {
-                    source = new Source
-                    {
-                        SourceName = entry.SourceName,
-                        SourceType = entry.SourceType,
-
-                        Platform = platform,
-                    };
-                    psm.Sources.Add(source);
-                    psm.SaveChanges();
-                }
-
-                Mode mode = null;
-                if (source.Modes != null)
-                {
-                    mode = (from m in source.Modes
-                            where m.ModeName == entry.ModeName && m.ModeType == entry.ModeType
-                            select m).FirstOrDefault();
-                }
-                if (mode == null)
-                {
-                    mode = new Mode
-                    {
-                        Source = source,
-                        ActiveTime = entry.ActiveTime,
-                        Depth = entry.Depth,
-                        SourceLevel = entry.SourceLevel,
-                        LowFrequency = entry.LowFrequency,
-                        HighFrequency = entry.HighFrequency,
-                        PulseInterval = entry.PulseInterval,
-                        PulseLength = entry.PulseLength,
-                        HorizontalBeamWidth = entry.HorizontalBeamwidth,
-                        VerticalBeamWidth = entry.VerticalBeamwidth,
-                        DepressionElevationAngle = entry.DepressionElevationAngle,
-                        RelativeBeamAngle = entry.RelativeBeamAngle,
-                        MaxPropagationRadius = entry.MaxPropagationRadius,
-                        ModeName = entry.ModeName,
-                        ModeType = entry.ModeType,
-                    };
-                    psm.Modes.Add(mode);
-                    psm.SaveChanges();
-                }
-            }
         }
     }
 }

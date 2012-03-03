@@ -1,4 +1,4 @@
-﻿//#define USE_BLOB
+﻿#define USE_BLOB
 using System;
 using System.Collections.Generic;
 #if USE_BLOB
