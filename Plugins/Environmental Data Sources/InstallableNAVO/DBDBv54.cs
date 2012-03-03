@@ -36,7 +36,6 @@ namespace InstallableNAVO
             IsConfigured = _dataDirectory != null &&
                            Directory.Exists(_dataDirectory) &&
                            File.Exists(Path.Combine(_dataDirectory, RequiredDBDBFilename));
-            PluginConfiguration = new DBDB54Configuration(this);
             ConfigurationControl = new GDEM3ConfigurationControl { DataContext = this };
         }
 
@@ -48,6 +47,7 @@ namespace InstallableNAVO
             return Databases.DBDB.Extract(_dataDirectory, resolution, geoRect, progress);
         }
     }
+#if false
     [Serializable]
     public sealed class DBDB54Configuration : PluginConfiguration
     {
@@ -93,4 +93,5 @@ namespace InstallableNAVO
             return true;
         }
     }
+#endif
 }

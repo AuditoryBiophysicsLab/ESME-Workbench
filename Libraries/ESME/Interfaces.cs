@@ -58,7 +58,6 @@ namespace ESME
     {
         PluginType PluginType { get; }
         string Subtype { get; }
-        PluginConfiguration PluginConfiguration { get; set; }
     }
 
     public enum PluginType

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Windows.Controls;
 using Cinch;
@@ -19,6 +20,8 @@ namespace ESME.Plugins
             ConfigurationControl = null;
             PluginType = PluginType.Unknown;
             PropertyChanged += (s, e) => { if (e.PropertyName == "IsValid") IsConfigured = IsValid; };
+            ConfigurationDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Plugins");
+            if (!Directory.Exists(ConfigurationDirectory)) Directory.CreateDirectory(ConfigurationDirectory);
         }
 
         public string PluginName { get; protected set; }
@@ -26,7 +29,8 @@ namespace ESME.Plugins
         public PluginType PluginType { get; protected set; }
         public string DLLPath { get; set; }
         public string Subtype { get; protected set; }
-        public virtual PluginConfiguration PluginConfiguration { get; set; }
+        protected string ConfigurationDirectory { get; set; }
+        protected virtual string ConfigurationFile { get { return Path.Combine(ConfigurationDirectory, PluginName + ".xml"); } }
 
         #region public Control ConfigurationControl { get; protected set; }
 

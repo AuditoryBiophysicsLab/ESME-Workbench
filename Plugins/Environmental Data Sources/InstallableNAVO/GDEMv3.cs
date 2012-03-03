@@ -34,7 +34,6 @@ namespace InstallableNAVO
             IsConfigured = _dataDirectory != null &&
                            Directory.Exists(_dataDirectory) &&
                            Databases.GDEM.IsDirectoryValid(_dataDirectory);
-            PluginConfiguration = new GDEM3Configuration(this);
             ConfigurationControl = new GDEM3ConfigurationControl { DataContext = this };
         }
 
@@ -48,7 +47,7 @@ namespace InstallableNAVO
             return result;
         }
     }
-
+#if false
     [Serializable]
     public sealed class GDEM3Configuration : PluginConfiguration
     {
@@ -94,4 +93,5 @@ namespace InstallableNAVO
             return true;
         }
     }
+#endif
 }
