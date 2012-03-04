@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:InstallableNAVO="clr-namespace:InstallableNAVO"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             d:DataContext="{d:DesignInstance InstallableNAVO:GDEM3}"
+             d:DataContext="{d:DesignInstance InstallableNAVO:GDEM3ForESME}"
              mc:Ignorable="d">
     <Controls:FileOrDirectorySetting Margin="0 5"
                                      Caption="{Binding PluginName,

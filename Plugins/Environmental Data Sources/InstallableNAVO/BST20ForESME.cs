@@ -11,13 +11,13 @@ namespace InstallableNAVO
 
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
                 Subtype = "Sediment",
-                Name = "BST 2.0 (installed)",
+                Name = "BST 2.0 for ESME Workbench",
                 Description = "Bottom Sediments Type Database Version 2.0 Repacked , from US Navy/NAVOCEANO")]
-    public sealed class BST20 : EnvironmentalDataSourcePluginBase<Sediment>
+    public sealed class BST20ForESME : EnvironmentalDataSourcePluginBase<Sediment>
     {
         const string RequiredBSTFilename = "hfevav2.h5";
 
-        public BST20()
+        public BST20ForESME()
         {
             SetPropertiesFromAttributes(GetType());
             //DataLocationHelp = "A file called hfevav2.h5";

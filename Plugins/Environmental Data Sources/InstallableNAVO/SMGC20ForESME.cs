@@ -14,13 +14,13 @@ namespace InstallableNAVO
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
                 Subtype = "Wind",
-                Name = "SMGC 2.0 (installed)",
+                Name = "SMGC 2.0 for ESME Workbench",
                 Description = "Surface Marine Gridded Climatology Database v2.0, from US Navy/NAVOCEANO")]
-    public sealed class SMGC20Minimal : EnvironmentalDataSourcePluginBase<Wind>
+    public sealed class SMGC20ForESME : EnvironmentalDataSourcePluginBase<Wind>
     {
         const string RequiredSMGCFilename = "smgc.wind";
 
-        public SMGC20Minimal()
+        public SMGC20ForESME()
         {
             SetPropertiesFromAttributes(GetType());
             //DataLocationHelp = "A file called smgc.wind";

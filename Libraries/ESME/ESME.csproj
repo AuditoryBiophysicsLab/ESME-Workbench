@@ -244,6 +244,7 @@
     <Compile Include="Platform\BehaviorModelTest.cs" />
     <Compile Include="Platform\Exceptions.cs" />
     <Compile Include="Platform\PlatformState.cs" />
+    <Compile Include="Plugins\DefaultEnvironmentalDataSources.cs" />
     <Compile Include="Plugins\PluginManagerService.cs" />
     <Compile Include="Plugins\PluginBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

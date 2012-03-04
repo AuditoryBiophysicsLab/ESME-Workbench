@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using ESME;
@@ -13,11 +12,11 @@ namespace InstallableNAVO
 {
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
                 Subtype = "Sound Speed",
-                Name = "GDEM-V 3.0 (installed)",
+                Name = "GDEM-V 3.0 for ESME Workbench",
                 Description = "Generalized Digital Environment Model, Variable Resolution, version 3.0, from US Navy/NAVOCEANO")]
-    public sealed class GDEM3 : EnvironmentalDataSourcePluginBase<SoundSpeed>
+    public sealed class GDEM3ForESME : EnvironmentalDataSourcePluginBase<SoundSpeed>
     {
-        public GDEM3()
+        public GDEM3ForESME()
         {
             SetPropertiesFromAttributes(GetType());
             IsTimeVariantData = true;
@@ -42,52 +41,4 @@ namespace InstallableNAVO
             return result;
         }
     }
-
-#if false
-    [Serializable]
-    public sealed class GDEM3Configuration : PluginConfiguration
-    {
-        public GDEM3Configuration(IHRCPlugin plugin)
-        {
-            PluginType = plugin.GetType();
-            PluginName = plugin.PluginName;
-            ValidationRules.AddRange(new List<ValidationRule>
-            {
-                new ValidationRule
-                {
-                    PropertyName = "DataLocation",
-                    Description = "Directory must exist and contain 24 appropriate GDEM NetCDF files (names like [t|s]gdemv3s[01-12].nc)",
-                    RuleDelegate = (o, r) => ((GDEM3Configuration)o).DataLocation != null && IsDirectoryValid(((GDEM3Configuration)o).DataLocation),
-                },
-            });
-        }
-
-        #region public string DataLocation { get; set; }
-
-        public string DataLocation
-        {
-            get { return _dataLocation; }
-            set
-            {
-                if (_dataLocation == value) return;
-                _dataLocation = value;
-                NotifyPropertyChanged(DataLocationChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs DataLocationChangedEventArgs = ObservableHelper.CreateArgs<GDEM3Configuration>(x => x.DataLocation);
-        string _dataLocation = "GDEM3";
-
-        #endregion
-
-        public const string DataLocationHelp = "A directory containing the expected 24 GDEM-V 3.0 NetCDF files with temperature and salinity data (tgdemv3s01.nc for example)";
-
-        static bool IsDirectoryValid(string directoryPath)
-        {
-            if (!Directory.Exists(directoryPath)) return false;
-            var requiredFiles = new[] {"", ""};
-            return true;
-        }
-    }
-#endif
 }

@@ -10,14 +10,14 @@ namespace InstallableNAVO
 {
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
                 Subtype = "Bathymetry",
-                Name = "DBDB-V 5.4 (installed)",
+                Name = "DBDB-V 5.4 for ESME Workbench",
                 Description = "Digital Bathymetric Data Base - Variable Resolution v5.4, from US Navy/NAVOCEANO")]
-    public sealed class DBDB54 : EnvironmentalDataSourcePluginBase<Bathymetry>
+    public sealed class DBDB54ForESME : EnvironmentalDataSourcePluginBase<Bathymetry>
     {
         const string RequiredDBDBFilename = "dbdbv5_level0c_0.h5";
         const string RequiredDBDBExtractionProgram = "dbv5_command.exe";
 
-        public DBDB54()
+        public DBDB54ForESME()
         {
             SetPropertiesFromAttributes(GetType());
             //ConfigurationControl = new GDEM3Configuration { DataContext = this };
@@ -44,51 +44,4 @@ namespace InstallableNAVO
             return Databases.DBDB.Extract(_dataDirectory, RequiredDBDBFilename, RequiredDBDBExtractionProgram, resolution, geoRect, progress);
         }
     }
-#if false
-    [Serializable]
-    public sealed class DBDB54Configuration : PluginConfiguration
-    {
-        public DBDB54Configuration(IHRCPlugin plugin)
-        {
-            PluginType = plugin.GetType();
-            PluginName = plugin.PluginName;
-            ValidationRules.AddRange(new List<ValidationRule>
-            {
-                new ValidationRule
-                {
-                    PropertyName = "DataLocation",
-                    Description = "Directory must exist and contain 24 appropriate GDEM NetCDF files (names like [t|s]gdemv3s[01-12].nc)",
-                    RuleDelegate = (o, r) => ((DBDB54Configuration)o).DataLocation != null && IsDirectoryValid(((DBDB54Configuration)o).DataLocation),
-                },
-            });
-        }
-
-        #region public string DataLocation { get; set; }
-
-        public string DataLocation
-        {
-            get { return _dataLocation; }
-            set
-            {
-                if (_dataLocation == value) return;
-                _dataLocation = value;
-                NotifyPropertyChanged(DataLocationChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs DataLocationChangedEventArgs = ObservableHelper.CreateArgs<DBDB54Configuration>(x => x.DataLocation);
-        string _dataLocation = "DBDB54";
-
-        #endregion
-
-        public const string DataLocationHelp = "A file called dbdbv5_level0c_0.h5";
-
-        static bool IsDirectoryValid(string directoryPath)
-        {
-            if (!Directory.Exists(directoryPath)) return false;
-            var requiredFiles = new[] { "", "" };
-            return true;
-        }
-    }
-#endif
 }
