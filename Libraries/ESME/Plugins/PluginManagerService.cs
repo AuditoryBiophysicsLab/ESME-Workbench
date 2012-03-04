@@ -5,6 +5,7 @@ using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Linq;
+using ESME.Environment;
 using HRC;
 using HRC.Collections;
 using HRC.Composition;
@@ -15,6 +16,11 @@ namespace ESME.Plugins
     public interface IPluginManagerService
     {
         ESMEPluginDictionary ESMEPluginDictionary { get; }
+        List<DefaultPluginConfiguration> DefaultPluginConfigurations { get; set; }
+        EnvironmentalDataSourcePluginBase<Wind> WindSource { get; }
+        EnvironmentalDataSourcePluginBase<SoundSpeed> SoundSpeedSource { get; }
+        EnvironmentalDataSourcePluginBase<Sediment> SedimentSource { get; }
+        EnvironmentalDataSourcePluginBase<Bathymetry> BathymetrySource { get; }
     }
 
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -46,6 +52,54 @@ namespace ESME.Plugins
         [ImportMany, UsedImplicitly] ICollection<IESMEPlugin> _esmePlugins;
 
         public ESMEPluginDictionary ESMEPluginDictionary { get; private set; }
+        public List<DefaultPluginConfiguration> DefaultPluginConfigurations
+        {
+            get
+            {
+                return new List<DefaultPluginConfiguration>(from pluginType in ESMEPluginDictionary.Keys
+                                                            from subtype in ESMEPluginDictionary[pluginType].Keys
+                                                            where ESMEPluginDictionary[pluginType][subtype].DefaultPlugin != null
+                                                            select new DefaultPluginConfiguration
+                                                            {
+                                                                PluginType = pluginType,
+                                                                Subtype = subtype,
+                                                                Type = ESMEPluginDictionary[pluginType][subtype].DefaultPlugin.GetType().ToString(),
+                                                            });
+            }
+            set
+            {
+                value.ForEach(configuration => ESMEPluginDictionary.DefaultPluginConfiguration = configuration);
+            }
+        }
+
+        IESMEPlugin this[PluginType pluginType, string subType]
+        {
+            get
+            {
+                if (!ESMEPluginDictionary.ContainsKey(pluginType)) return null;
+                return !ESMEPluginDictionary[pluginType].ContainsKey(subType) ? null : ESMEPluginDictionary[pluginType][subType].DefaultPlugin;
+            }
+        }
+
+        public EnvironmentalDataSourcePluginBase<Wind> WindSource
+        {
+            get { return (EnvironmentalDataSourcePluginBase<Wind>)this[PluginType.EnvironmentalDataSource, "Wind"]; }
+        }
+
+        public EnvironmentalDataSourcePluginBase<SoundSpeed> SoundSpeedSource
+        {
+            get { return (EnvironmentalDataSourcePluginBase<SoundSpeed>)this[PluginType.EnvironmentalDataSource, "Sound Speed"]; }
+        }
+
+        public EnvironmentalDataSourcePluginBase<Sediment> SedimentSource
+        {
+            get { return (EnvironmentalDataSourcePluginBase<Sediment>)this[PluginType.EnvironmentalDataSource, "Sediment"]; }
+        }
+
+        public EnvironmentalDataSourcePluginBase<Bathymetry> BathymetrySource
+        {
+            get { return (EnvironmentalDataSourcePluginBase<Bathymetry>)this[PluginType.EnvironmentalDataSource, "Bathymetry"]; }
+        }
     }
 
     public class PluginSubtypeDictionary : ObservableConcurrentDictionary<string, IESMEPlugin>
@@ -55,32 +109,15 @@ namespace ESME.Plugins
     public class PluginTypeDictionary : ObservableConcurrentDictionary<string, PluginSubtypeDictionary> {}
     public class ESMEPluginDictionary : ObservableConcurrentDictionary<PluginType, PluginTypeDictionary>
     {
-        public bool SetDefaultPluginConfiguration(DefaultPluginConfiguration configuration)
+        public DefaultPluginConfiguration DefaultPluginConfiguration
         {
-            if (!ContainsKey(configuration.PluginType)) return false;
-            if (!this[configuration.PluginType].ContainsKey(configuration.Subtype)) return false;
-            if (!this[configuration.PluginType][configuration.Subtype].ContainsKey(configuration.Type)) return false;
-            this[configuration.PluginType][configuration.Subtype].DefaultPlugin = this[configuration.PluginType][configuration.Subtype][configuration.Type];
-            return true;
-        }
-        
-        public void SetDefaultPluginConfigurations(IList<DefaultPluginConfiguration> configurations)
-        {
-            var rejects = configurations.Where(configuration => !SetDefaultPluginConfiguration(configuration)).ToList();
-            foreach (var reject in rejects) configurations.Remove(reject);
-        }
-
-        public List<DefaultPluginConfiguration> GetDefaultPluginConfigurations()
-        {
-            return new List<DefaultPluginConfiguration>(from pluginType in Keys
-                                                        from subtype in this[pluginType].Keys
-                                                        where this[pluginType][subtype].DefaultPlugin != null
-                                                        select new DefaultPluginConfiguration
-                                                        {
-                                                            PluginType = pluginType,
-                                                            Subtype = subtype,
-                                                            Type = this[pluginType][subtype].DefaultPlugin.GetType().ToString(),
-                                                        });
+            set
+            {
+                if (!ContainsKey(value.PluginType)) return;
+                if (!this[value.PluginType].ContainsKey(value.Subtype)) return;
+                if (!this[value.PluginType][value.Subtype].ContainsKey(value.Type)) return;
+                this[value.PluginType][value.Subtype].DefaultPlugin = this[value.PluginType][value.Subtype][value.Type];
+            }
         }
     }
 

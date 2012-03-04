@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Environment.Descriptors;
+using ESME.Plugins;
 using HRC.Navigation;
 using ESME.Environment.NAVO;
 using HRC.NetCDF;
@@ -63,6 +64,8 @@ namespace ESME.Environment
         public static readonly ImportProgressViewModel WindProgress;
         public static readonly ImportProgressViewModel BathymetryProgress;
 
+        public static IPluginManagerService PluginManagerService { get; set; }
+
         static void CheckDestinationDirectory(string destinationFilename)
         {
             if (string.IsNullOrEmpty(destinationFilename)) throw new ArgumentNullException("destinationFilename");
@@ -82,12 +85,20 @@ namespace ESME.Environment
             {
                 SoundSpeedProgress.JobStarting(job);
                 CheckDestinationDirectory(job.DestinationFilename);
+                if (PluginManagerService != null)
+                {
+                    var soundSpeed = PluginManagerService.SoundSpeedSource.Extract(job.GeoRect, 15, job.TimePeriod);
+                    soundSpeed.Serialize(job.DestinationFilename);
+                    job.SampleCount = (uint)soundSpeed[job.TimePeriod].EnvironmentData.Count;
+                }
+#if false
                 var soundSpeedField = GDEM.ReadFile(job.TimePeriod, job.GeoRect);
                 var soundSpeed = new SoundSpeed();
                 soundSpeed.SoundSpeedFields.Add(soundSpeedField);
                 soundSpeed.Serialize(job.DestinationFilename);
-                job.Resolution = 15;
                 job.SampleCount = (uint)soundSpeedField.EnvironmentData.Count;
+#endif
+                job.Resolution = 15;
                 job.CompletionTask.Start();
                 await job.CompletionTask;
                 SoundSpeedProgress.JobCompleted(job);
