@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Xml.Serialization;
 using Cinch;
 using ESME;
+using ESME.Data;
 using ESME.Environment;
 using ESME.Plugins;
 using HRC.Navigation;
+using HRC.Utility;
 using HRC.Validation;
 using InstallableNAVO.Controls;
 using Microsoft.Win32;
@@ -49,6 +52,7 @@ namespace InstallableNAVO
         }
     }
 
+    [Serializable]
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
                 Subtype = "Sediment",
                 Name = "BST 2.0 for NAVO",
@@ -60,7 +64,7 @@ namespace InstallableNAVO
         public BST20ForNAVO()
         {
             SetPropertiesFromAttributes(GetType());
-            DataLocationHelp = "A file called hfevav2.h5";
+            DataLocationHelp = "The BST Database file 'hfevav2.h5'";
             DialogTitle = "Please locate the BST database 'hfeva2.h5'";
             FilenameFilter = "HDF5 (*.h5)|*.h5|All files (*.*)|*.*";
             IsDirectoryBrowser = false;
@@ -85,10 +89,22 @@ namespace InstallableNAVO
             });
         }
 
-        public string DialogTitle { get; set; }
-        public string FilenameFilter { get; set; }
-        public bool IsDirectoryBrowser { get; set; }
-        public string DataLocationHelp { get; set; }
+        protected override void Save()
+        {
+            var serializer = new XmlSerializer<BST20ForNAVO> { Data = this };
+            serializer.Save(ConfigurationFile, null);
+        }
+
+        public override void LoadSettings()
+        {
+            var settings = XmlSerializer<BST20ForNAVO>.Load(ConfigurationFile, null);
+            DataLocation = settings.DataLocation;
+        }
+        
+        [XmlIgnore] public string DialogTitle { get; set; }
+        [XmlIgnore] public string FilenameFilter { get; set; }
+        [XmlIgnore] public bool IsDirectoryBrowser { get; set; }
+        [XmlIgnore] public string DataLocationHelp { get; set; }
         #region public string DataLocation { get; set; }
 
         public string DataLocation

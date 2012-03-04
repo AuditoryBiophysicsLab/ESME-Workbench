@@ -47,6 +47,7 @@ namespace ESME.Plugins
                 if (!ESMEPluginDictionary.ContainsKey(plugin.PluginType)) ESMEPluginDictionary.Add(plugin.PluginType, new PluginTypeDictionary());
                 if (!ESMEPluginDictionary[plugin.PluginType].ContainsKey(plugin.Subtype)) ESMEPluginDictionary[plugin.PluginType].Add(plugin.Subtype, new PluginSubtypeDictionary());
                 ESMEPluginDictionary[plugin.PluginType][plugin.Subtype][plugin.GetType().ToString()] = plugin;
+                plugin.LoadSettings();
             }
         }
         [ImportMany, UsedImplicitly] ICollection<IESMEPlugin> _esmePlugins;
