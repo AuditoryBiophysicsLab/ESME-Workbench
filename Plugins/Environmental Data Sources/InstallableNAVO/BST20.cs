@@ -51,7 +51,7 @@ namespace InstallableNAVO
         public override Sediment Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
         {
             CheckResolutionAndTimePeriod(resolution, timePeriod);
-            return Databases.BST.Extract(_dataDirectory, geoRect, resolution, progress);
+            return Databases.BST.Extract(Path.Combine(_dataDirectory, RequiredBSTFilename), geoRect, resolution, progress);
         }
     }
 }

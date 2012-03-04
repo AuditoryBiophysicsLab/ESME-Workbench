@@ -15,6 +15,7 @@ namespace InstallableNAVO
     public sealed class DBDB54 : EnvironmentalDataSourcePluginBase<Bathymetry>
     {
         const string RequiredDBDBFilename = "dbdbv5_level0c_0.h5";
+        const string RequiredDBDBExtractionProgram = "dbv5_command.exe";
 
         public DBDB54()
         {
@@ -31,7 +32,8 @@ namespace InstallableNAVO
             IsSelectable = _dataDirectory != null;
             IsConfigured = _dataDirectory != null &&
                            Directory.Exists(_dataDirectory) &&
-                           File.Exists(Path.Combine(_dataDirectory, RequiredDBDBFilename));
+                           File.Exists(Path.Combine(_dataDirectory, RequiredDBDBFilename)) && 
+                           File.Exists(Path.Combine(_dataDirectory, RequiredDBDBExtractionProgram));
         }
 
         readonly string _dataDirectory;
@@ -39,7 +41,7 @@ namespace InstallableNAVO
         public override Bathymetry Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
         {
             CheckResolutionAndTimePeriod(resolution, timePeriod);
-            return Databases.DBDB.Extract(_dataDirectory, resolution, geoRect, progress);
+            return Databases.DBDB.Extract(_dataDirectory, RequiredDBDBFilename, RequiredDBDBExtractionProgram, resolution, geoRect, progress);
         }
     }
 #if false
