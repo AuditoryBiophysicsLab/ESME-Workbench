@@ -77,14 +77,17 @@ namespace InstallableNAVO.Databases
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
         }
 #endif
-        public static Wind Import(GeoRect region, IProgress<float> progress = null)
+        public static Wind Import(GeoRect region, string smgcDirectory = null, IProgress<float> progress = null)
         {
-            var result = ImportAsync(region, progress);
+            var result = ImportAsync(region, smgcDirectory, progress);
             return result.Result;
         }
 
-        public async static Task<Wind> ImportAsync(GeoRect region, IProgress<float> progress = null)
+        public async static Task<Wind> ImportAsync(GeoRect region, string smgcDirectory = null, IProgress<float> progress = null)
         {
+            smgcDirectory = smgcDirectory ?? Globals.AppSettings.NAVOConfiguration.SMGCDirectory;
+            var maxDegreeOfParallelism = -1;
+            if (Globals.AppSettings != null) maxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount;
             if (progress != null) lock (progress) progress.Report(0f);
 
             var north = (float)Math.Ceiling(region.North);
@@ -105,14 +108,21 @@ namespace InstallableNAVO.Databases
             {
                 TaskScheduler = TaskScheduler.Default,
                 BoundedCapacity = -1,
-                MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
+                MaxDegreeOfParallelism = maxDegreeOfParallelism,
             });
 
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             // Construct a list of files we will need to read out of the SMGC database
             var selectedLocations = new List<Geo>();
-            var allFiles = Directory.GetFiles(Globals.AppSettings.NAVOConfiguration.SMGCDirectory, "*.stt", SearchOption.AllDirectories).ToList();
+            var allFiles = Directory.GetFiles(smgcDirectory, "*.stt", SearchOption.AllDirectories).ToList();
+#if false
+            // This chunk of code is ONLY for the SMGC importer and should only be compiled when running that utility
+            foreach (var file in allFiles) parallelReader.Post(file);
+            var batchBlock = new BatchBlock<SMGCFile>(allFiles.Count);
+#else
             for (var lat = south; lat <= north; lat++)
+            {
+                Console.WriteLine("{0}: Processing latitude {1}", DateTime.Now, lat);
                 for (var lon = west; lon <= east; lon++)
                 {
                     var northSouth = (lat >= 0) ? "n" : "s";
@@ -125,7 +135,9 @@ namespace InstallableNAVO.Databases
                     parallelReader.Post(matchingFiles.First());
                     selectedLocations.Add(new Geo(lat, lon));
                 }
+            }
             var batchBlock = new BatchBlock<SMGCFile>(selectedLocations.Count);
+#endif
             parallelReader.LinkTo(batchBlock);
             parallelReader.Complete();
             await parallelReader.Completion;
@@ -136,15 +148,15 @@ namespace InstallableNAVO.Databases
             {
                 var curTimePeriodData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = timePeriod };
                 curTimePeriodData.EnvironmentData.AddRange(from selectedFile in selectedFiles
-                                                      where (selectedFile.Months != null) && (selectedFile[timePeriod] != null)
-                                                      select new WindSample(selectedFile.Geo, selectedFile[timePeriod].MeanWindSpeed));
+                                                           where (selectedFile.Months != null) && (selectedFile[timePeriod] != null)
+                                                           select new WindSample(selectedFile.Geo, selectedFile[timePeriod].MeanWindSpeed));
                 return curTimePeriodData;
             },
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
                 BoundedCapacity = -1,
-                MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
+                MaxDegreeOfParallelism = maxDegreeOfParallelism,
             });
 
             var wind = new Wind();

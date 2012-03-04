@@ -81,6 +81,10 @@
       <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
       <Name>HRC</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Plugins\Environmental Data Sources\InstallableNAVO\InstallableNAVO.csproj">
+      <Project>{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}</Project>
+      <Name>InstallableNAVO</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
