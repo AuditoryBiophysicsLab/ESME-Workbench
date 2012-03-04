@@ -29,6 +29,7 @@ namespace ESME.Plugins
                 if (e.PropertyName != "IsValid") return;
                 var sender = ((PluginBase)s);
                 if (sender.IsValid && IsConfigurable) sender.Save();
+                NotifyPropertyChanged(IsConfiguredChangedEventArgs);
             };
         }
 
@@ -87,7 +88,7 @@ namespace ESME.Plugins
         #endregion
         #region public bool IsConfigured { get; protected set; }
         [XmlIgnore] 
-        public bool IsConfigured
+        public virtual bool IsConfigured
         {
             get { return _isConfigured; }
             protected set

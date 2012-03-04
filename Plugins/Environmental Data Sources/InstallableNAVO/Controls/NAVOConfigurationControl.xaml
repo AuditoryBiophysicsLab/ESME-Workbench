@@ -8,7 +8,7 @@
              d:DataContext="{d:DesignInstance InstallableNAVO:BST20ForNAVO}"
              mc:Ignorable="d">
     <Controls:FileOrDirectorySetting Margin="0 5"
-                                     Caption="{Binding PluginName, Mode=OneTime}"
+                                     Caption="{Binding ControlCaption}"
                                      DialogTitle="{Binding DialogTitle}"
                                      FileName="{Binding DataLocation,
                                                         ValidatesOnDataErrors=True,
@@ -16,7 +16,7 @@
                                                         NotifyOnValidationError=True,
                                                         UpdateSourceTrigger=PropertyChanged}"
                                      FileNameFilter="{Binding FilenameFilter}"
-                                     ToolTip="{Binding DataLocationHelp}"
-                                     IsDirectoryBrowser="{Binding IsDirectoryBrowser}" />
+                                     IsDirectoryBrowser="False"
+                                     ToolTip="{Binding DataLocationHelp}" />
 
 </UserControl>

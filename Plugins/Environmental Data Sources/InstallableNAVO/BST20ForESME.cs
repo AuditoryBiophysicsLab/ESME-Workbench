@@ -5,7 +5,6 @@ using System.IO;
 using System.Xml.Serialization;
 using Cinch;
 using ESME;
-using ESME.Data;
 using ESME.Environment;
 using ESME.Plugins;
 using HRC.Navigation;
@@ -28,8 +27,6 @@ namespace InstallableNAVO
         public BST20ForESME()
         {
             SetPropertiesFromAttributes(GetType());
-            //DataLocationHelp = "A file called hfevav2.h5";
-            //ConfigurationControl = new GDEM3Configuration { DataContext = this };
             AvailableResolutions = new[] { 5f };
             IsTimeVariantData = false;
             AvailableTimePeriods = new[] { TimePeriod.Invalid };
@@ -64,29 +61,36 @@ namespace InstallableNAVO
         public BST20ForNAVO()
         {
             SetPropertiesFromAttributes(GetType());
-            DataLocationHelp = "The BST Database file 'hfevav2.h5'";
+            DataLocationHelp = "The BST database file 'hfevav2.h5'";
+            ControlCaption = "BST database file";
             DialogTitle = "Please locate the BST database 'hfeva2.h5'";
-            FilenameFilter = "HDF5 (*.h5)|*.h5|All files (*.*)|*.*";
-            IsDirectoryBrowser = false;
+            FilenameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*";
 
             ConfigurationControl = new NAVOConfigurationControl { DataContext = this };
             AvailableResolutions = new[] { 5f };
             IsTimeVariantData = false;
             AvailableTimePeriods = new[] { TimePeriod.Invalid };
 
-            IsSelectable = DataLocation != null;
-            IsConfigured = DataLocation != null &&
-                           Directory.Exists(DataLocation) &&
-                           File.Exists(Path.Combine(DataLocation, RequiredBSTFilename));
+            IsSelectable = true;
             ValidationRules.AddRange(new List<ValidationRule>
             {
                 new ValidationRule
                 {
                     PropertyName = "DataLocation",
                     Description = "File must exist and be named hfevav2.h5",
-                    RuleDelegate = (o, r) => ((BST20ForNAVO)o).DataLocation != null && File.Exists(((BST20ForNAVO)o).DataLocation) && Path.GetFileName(DataLocation) == RequiredBSTFilename,
+                    RuleDelegate = (o, r) => ((BST20ForNAVO)o).IsConfigured,
                 },
             });
+        }
+
+        public override bool IsConfigured
+        {
+            get
+            {
+                return DataLocation != null &&
+                       Directory.Exists(DataLocation) &&
+                       File.Exists(Path.Combine(DataLocation, RequiredBSTFilename));
+            }
         }
 
         protected override void Save()
@@ -100,10 +104,10 @@ namespace InstallableNAVO
             var settings = XmlSerializer<BST20ForNAVO>.Load(ConfigurationFile, null);
             DataLocation = settings.DataLocation;
         }
-        
+
+        [XmlIgnore] public string ControlCaption { get; set; }
         [XmlIgnore] public string DialogTitle { get; set; }
         [XmlIgnore] public string FilenameFilter { get; set; }
-        [XmlIgnore] public bool IsDirectoryBrowser { get; set; }
         [XmlIgnore] public string DataLocationHelp { get; set; }
         #region public string DataLocation { get; set; }
 
