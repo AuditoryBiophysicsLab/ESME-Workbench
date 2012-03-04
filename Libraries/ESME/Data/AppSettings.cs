@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment.NAVO;
+using ESME.Plugins;
 using HRC.Collections;
 using HRC.Utility;
 using HRC.Validation;
@@ -417,98 +418,14 @@ namespace ESME.Data
 
         #endregion
 
-        [XmlIgnore]
-        #region public ObservableConcurrentDictionary<string, IESMEPlugin> DefaultPlugins { get; set; }
-
-        public ObservableConcurrentDictionary<string, IESMEPlugin> DefaultPlugins
+        #region public List<DefaultPluginConfiguration> DefaultPluginConfigurations { get; set; }
+        public List<DefaultPluginConfiguration> DefaultPluginConfigurations
         {
-            get { return _defaultPlugins ?? (_defaultPlugins = new ObservableConcurrentDictionary<string, IESMEPlugin>()); }
+            get { return _defaultPluginConfigurations ?? (_defaultPluginConfigurations = new List<DefaultPluginConfiguration>()); }
+            set { _defaultPluginConfigurations = value; }
         }
-
-        ObservableConcurrentDictionary<string, IESMEPlugin> _defaultPlugins;
-        public void InitializeDefaultPlugins(ObservableConcurrentDictionary<string, IESMEPlugin> allPlugins)
-        {
-            if (DefaultPluginSelections.Count == 0) return;
-            foreach (var key in DefaultPluginSelections.Keys)
-            {
-                var curKey = key;
-                var curDefault = DefaultPluginSelections[curKey];
-                var selectedPlugin = (from plugin in allPlugins.Values
-                                      where plugin.Subtype == curKey &&
-                                            plugin.GetType().ToString() == curDefault.ClassName &&
-                                            plugin.DLLPath == curDefault.DllFilename
-                                      select plugin).FirstOrDefault();
-                DefaultPlugins[curKey] = selectedPlugin;
-                Debug.WriteLine("Default plugin for [{0}] is type {1} from {2}{3}",
-                                curKey,
-                                curDefault.ClassName,
-                                curDefault.DllFilename,
-                                selectedPlugin != null ? "" : ", but the requested plugin was not found");
-            }
-            foreach (var plugin in allPlugins.Values)
-            {
-                if (!DefaultPlugins.ContainsKey(plugin.Subtype)) DefaultPlugins.Add(plugin.Subtype, null);
-                if (!DefaultPluginSelections.ContainsKey(plugin.Subtype)) DefaultPluginSelections.Add(plugin.Subtype, null);
-            }
-            DefaultPlugins.CollectionChanged += (s, e) =>
-            {
-                // todo: make sure the new default plugin gets updated properly
-                switch (e.Action)
-                {
-                    case NotifyCollectionChangedAction.Add:
-                        foreach (IESMEPlugin newItem in e.NewItems)
-                            DefaultPluginSelections.Add(newItem.Subtype,
-                                                        new PluginSelection
-                                                        {
-                                                            ClassName = newItem.GetType().ToString(),
-                                                            DllFilename = newItem.DLLPath,
-                                                        });
-                        break;
-                    case NotifyCollectionChangedAction.Remove:
-                        foreach (IESMEPlugin newItem in e.NewItems) DefaultPluginSelections.Remove(newItem.Subtype);
-                        break;
-                    case NotifyCollectionChangedAction.Replace:
-                        for (var index = 0; index < e.OldItems.Count; index++)
-                        {
-                            var oldItem = (IESMEPlugin)e.OldItems[index];
-                            var newItem = (IESMEPlugin)e.NewItems[index];
-                            DefaultPluginSelections[oldItem.Subtype] = new PluginSelection
-                            {
-                                ClassName = newItem.GetType().ToString(),
-                                DllFilename = newItem.DLLPath,
-                            };
-                        }
-                        break;
-                    case NotifyCollectionChangedAction.Reset:
-                        DefaultPluginSelections.Clear();
-                        foreach (var key in _defaultPlugins.Keys)
-                            DefaultPluginSelections.Add(key,
-                                                        new PluginSelection
-                                                        {
-                                                            ClassName = _defaultPlugins[key].GetType().ToString(),
-                                                            DllFilename = _defaultPlugins[key].DLLPath,
-                                                        });
-                        break;
-                    case NotifyCollectionChangedAction.Move:
-                        throw new NotImplementedException();
-                }
-            };
-        }
-
+        List<DefaultPluginConfiguration> _defaultPluginConfigurations;
         #endregion
-
-        #region public ObservableConcurrentDictionary<string, PluginSelection> DefaultPluginSelections { get; set; }
-
-        public ObservableConcurrentDictionary<string, PluginSelection> DefaultPluginSelections
-        {
-            get { return _defaultPluginSelections ?? (_defaultPluginSelections = new ObservableConcurrentDictionary<string, PluginSelection>()); }
-            set { _defaultPluginSelections = value; }
-        }
-
-        ObservableConcurrentDictionary<string, PluginSelection> _defaultPluginSelections;
-
-        #endregion
-
     }
 
     public sealed class PluginSelection : ValidatingViewModel

@@ -165,24 +165,24 @@
             <TabItem Grid.IsSharedSizeScope="True" Header="Environment Data Sources">
                 <StackPanel Margin="5" Orientation="Vertical">
                     <Controls:PluginSelector Grid.Row="0"
-                                             ItemsSource="{Binding AllPlugins[Wind]}"
-                                             SelectedItem="{Binding AppSettings.DefaultPlugins[Wind]}"
-                                             PluginTypeName="Wind" />
+                                 ItemsSource="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Wind].Values}"
+                                 SelectedItem="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Wind].DefaultPlugin}"
+                                 PluginTypeName="Wind" />
                     <Separator Margin="0 5 0 10" />
                     <Controls:PluginSelector Grid.Row="1"
-                                             ItemsSource="{Binding AllPlugins[Sound Speed]}"
-                                             SelectedItem="{Binding AppSettings.DefaultPlugins[Sound Speed]}"
-                                             PluginTypeName="Sound Speed" />
+                                 ItemsSource="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Sound Speed].Values}"
+                                 SelectedItem="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Sound Speed].DefaultPlugin}"
+                                 PluginTypeName="Sound Speed" />
                     <Separator Margin="0 5 0 10" />
                     <Controls:PluginSelector Grid.Row="2"
-                                             ItemsSource="{Binding AllPlugins[Sediment]}"
-                                             SelectedItem="{Binding AppSettings.DefaultPlugins[Sediment]}"
-                                             PluginTypeName="Sediment" />
+                                 ItemsSource="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Sediment].Values}"
+                                 SelectedItem="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Sediment].DefaultPlugin}"
+                                 PluginTypeName="Sediment" />
                     <Separator Margin="0 5 0 10" />
                     <Controls:PluginSelector Grid.Row="3"
-                                             ItemsSource="{Binding AllPlugins[Bathymetry]}"
-                                             SelectedItem="{Binding AppSettings.DefaultPlugins[Bathymetry]}"
-                                             PluginTypeName="Bathymetry" />
+                                 ItemsSource="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Bathymetry].Values}"
+                                 SelectedItem="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Bathymetry].DefaultPlugin}"
+                                 PluginTypeName="Bathymetry" />
                 </StackPanel>
             </TabItem>
             <TabItem Header="Acoustic Simulators">

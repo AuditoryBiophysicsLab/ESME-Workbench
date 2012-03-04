@@ -14,6 +14,7 @@ using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Mapping;
+using ESME.Plugins;
 using ESMEWorkbench.Data;
 using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.RecentFiles;
@@ -37,6 +38,7 @@ namespace ESMEWorkbench.ViewModels.Main
         readonly IHRCSaveFileService _saveFileService;
         readonly IViewAwareStatus _viewAwareStatus;
         readonly IUIVisualizerService _visualizerService;
+        readonly IPluginManagerService _pluginManagerService;
 #if EXPERIMENTS_SUPPORTED
         Experiment _experiment;
 #endif
@@ -49,7 +51,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #region Constructor
         [ImportingConstructor]
-        public MainViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService)
+        public MainViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService, IPluginManagerService pluginManagerService)
         {
             try
             {
@@ -69,6 +71,7 @@ namespace ESMEWorkbench.ViewModels.Main
             _openFileService = openFileService;
             _saveFileService = saveFileService;
             _visualizerService = visualizerService;
+            _pluginManagerService = pluginManagerService;
             _pleaseWait = new PleaseWaitViewModel((Window)_viewAwareStatus.View, _visualizerService);
             if (Designer.IsInDesignMode) return;
             _viewAwareStatus.ViewUnloaded += () =>
@@ -82,6 +85,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 if (Designer.IsInDesignMode) return;
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 MediatorMessage.Send(MediatorMessage.MainViewModelInitialized, _dispatcher);
+                _pluginManagerService.ESMEPluginDictionary.SetDefaultPluginConfigurations(Globals.AppSettings.DefaultPluginConfigurations);
             };
 
             IsLatLonGridVisible = Settings.Default.ShowGrid;

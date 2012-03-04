@@ -1,19 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using Cinch;
-using ESME;
 using ESME.Data;
 using ESME.Environment;
-using HRC.Collections;
+using ESME.Plugins;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
     public class ApplicationOptionsViewModel : ViewModelBase
     {
         readonly IMessageBoxService _messageBoxService;
-        public ApplicationOptionsViewModel(IMessageBoxService messageBoxService)
+        public ApplicationOptionsViewModel(IMessageBoxService messageBoxService, IPluginManagerService pluginManagerService)
         {
             _messageBoxService = messageBoxService;
+            _pluginManagerService = pluginManagerService;
             Globals.AppSettings = AppSettings.Load();
             AppSettings = Globals.AppSettings;
         }
@@ -47,6 +48,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         private void OkHandler()
         {
+            AppSettings.DefaultPluginConfigurations = _pluginManagerService.ESMEPluginDictionary.GetDefaultPluginConfigurations();
             AppSettings.Save(null);
             Globals.AppSettings = AppSettings.Load();
             CloseActivePopUpCommand.Execute(true);
@@ -180,22 +182,10 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #endregion
 
-        #region public ObservableConcurrentDictionary<string, Dictionary<string, IESMEPlugin>> AllPlugins { get; set; }
-
-        public ObservableConcurrentDictionary<string, Dictionary<string, IESMEPlugin>> AllPlugins
+        readonly IPluginManagerService _pluginManagerService;
+        public ESMEPluginDictionary ESMEPluginDictionary
         {
-            get { return _allPlugins; }
-            set
-            {
-                if (_allPlugins == value) return;
-                _allPlugins = value;
-                NotifyPropertyChanged(AllPluginsChangedEventArgs);
-            }
+            get { return _pluginManagerService.ESMEPluginDictionary; }
         }
-
-        static readonly PropertyChangedEventArgs AllPluginsChangedEventArgs = ObservableHelper.CreateArgs<ApplicationOptionsViewModel>(x => x.AllPlugins);
-        ObservableConcurrentDictionary<string, Dictionary<string, IESMEPlugin>> _allPlugins;
-
-        #endregion
     }
 }

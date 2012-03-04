@@ -4,7 +4,6 @@ using Cinch;
 using ESME;
 using HRC.Collections;
 using HRC.Plugins;
-using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
 using System.ComponentModel.Composition;
 
@@ -39,10 +38,6 @@ namespace DavesWPFTester
 
         #endregion
 
-        public ObservableList<IESMEPlugin> ESMEPlugins
-        {
-            get { return _pluginManagerService.ESMEPlugins; }
-        }
         public ESMEPluginDictionary ESMEPluginDictionary
         {
             get { return _pluginManagerService.ESMEPluginDictionary; }
