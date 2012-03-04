@@ -3,9 +3,9 @@
     /// <summary>
     /// Interaction logic for ConfigurationControl.xaml
     /// </summary>
-    public partial class GDEM3ConfigurationControl
+    public partial class NAVOConfigurationControl
     {
-        public GDEM3ConfigurationControl()
+        public NAVOConfigurationControl()
         {
             InitializeComponent();
         }

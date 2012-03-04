@@ -64,8 +64,8 @@
     <Compile Include="BST20ForESME.cs" />
     <Compile Include="Databases\BottomLossDatabase.cs" />
     <Compile Include="Databases\BST.cs" />
-    <Compile Include="Controls\GDEM3ConfigurationControl.xaml.cs">
-      <DependentUpon>GDEM3ConfigurationControl.xaml</DependentUpon>
+    <Compile Include="Controls\NAVOConfigurationControl.xaml.cs">
+      <DependentUpon>NAVOConfigurationControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Databases\DBDB.cs" />
     <Compile Include="Databases\GDEM.cs" />
@@ -95,7 +95,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Controls\GDEM3ConfigurationControl.xaml">
+    <Page Include="Controls\NAVOConfigurationControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
