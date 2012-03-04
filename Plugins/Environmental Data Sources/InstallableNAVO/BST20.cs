@@ -8,21 +8,23 @@ using Microsoft.Win32;
 
 namespace InstallableNAVO
 {
+
+    [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
+                Subtype = "Sediment",
+                Name = "BST 2.0 (installed)",
+                Description = "Bottom Sediments Type Database Version 2.0 Repacked , from US Navy/NAVOCEANO")]
     public sealed class BST20 : EnvironmentalDataSourcePluginBase<Sediment>
     {
         const string RequiredBSTFilename = "hfevav2.h5";
 
         public BST20()
         {
-            PluginName = "BST 2.0";
-            PluginDescription = "Bottom Sediments Type Database Version 2.0 Repacked , from US Navy/NAVOCEANO";
+            SetPropertiesFromAttributes(GetType());
             //DataLocationHelp = "A file called hfevav2.h5";
             //ConfigurationControl = new GDEM3Configuration { DataContext = this };
-            PluginType = PluginType.EnvironmentalDataSource;
             AvailableResolutions = new[] { 5f };
             IsTimeVariantData = false;
             AvailableTimePeriods = new[] { TimePeriod.Invalid };
-            Subtype = "Sediment";
 
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\BST 2.0");
             if (regKey != null) _dataDirectory = (string)regKey.GetValue("");

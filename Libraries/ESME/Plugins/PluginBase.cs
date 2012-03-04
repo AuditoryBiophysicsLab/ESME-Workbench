@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Windows.Controls;
@@ -110,5 +111,27 @@ namespace ESME.Plugins
             if (!AvailableTimePeriods.Contains(timePeriod)) throw new ParameterOutOfRangeException(string.Format("Specified timePeriod is not available in the {0} data set", PluginName));
             if (!AvailableResolutions.Contains(resolution)) throw new ParameterOutOfRangeException(string.Format("Specified resolution is not available in the {0} data set", PluginName));
         }
+
+        protected void SetPropertiesFromAttributes(Type type)
+        {
+            var pluginAttribute = (ESMEPluginAttribute)type.GetCustomAttributes(typeof(ESMEPluginAttribute), false)[0];
+            PluginType = pluginAttribute.PluginType;
+            Subtype = pluginAttribute.Subtype;
+            PluginName = pluginAttribute.Name;
+            PluginDescription = pluginAttribute.Description;
+        }
     }
+
+    [MetadataAttribute]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public class ESMEPluginAttribute : ExportAttribute
+    {
+        public ESMEPluginAttribute() : base(typeof(IESMEPlugin)) { }
+
+        public PluginType PluginType { get; set; }
+        public string Subtype { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+    }
+
 }

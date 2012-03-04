@@ -5,33 +5,32 @@
         xmlns:controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-        xmlns:wpf="clr-namespace:HRC.WPF;assembly=HRC"
+        xmlns:mef="http:\\www.codeplex.com\MEFedMVVM" 
         Title="Plugin tester"
         d:DataContext="{d:DesignInstance app:MainWindowViewModel}"
         mef:ViewModelLocator.ViewModel="MainWindowViewModel"
         SizeToContent="WidthAndHeight"
         SnapsToDevicePixels="True"
         mc:Ignorable="d">
-    <Window.Resources>
-        <wpf:ObjectToBooleanConverter x:Key="objectToBooleanConverter" />
-        <wpf:ObjectToVisibilityConverter x:Key="objectToVisibilityConverter" />
-    </Window.Resources>
     <StackPanel Grid.IsSharedSizeScope="True" Orientation="Vertical">
         <controls:PluginSelector Grid.Row="0"
-                                 ItemsSource="{Binding AllPlugins[Wind]}"
+                                 ItemsSource="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Wind].Values}"
+                                 SelectedItem="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Wind].DefaultPlugin}"
                                  PluginTypeName="Wind" />
         <Separator Margin="0 5 0 10" />
         <controls:PluginSelector Grid.Row="1"
-                                 ItemsSource="{Binding AllPlugins[Sound Speed]}"
+                                 ItemsSource="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Sound Speed].Values}"
+                                 SelectedItem="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Sound Speed].DefaultPlugin}"
                                  PluginTypeName="Sound Speed" />
         <Separator Margin="0 5 0 10" />
         <controls:PluginSelector Grid.Row="2"
-                                 ItemsSource="{Binding AllPlugins[Sediment]}"
+                                 ItemsSource="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Sediment].Values}"
+                                 SelectedItem="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Sediment].DefaultPlugin}"
                                  PluginTypeName="Sediment" />
         <Separator Margin="0 5 0 10" />
         <controls:PluginSelector Grid.Row="3"
-                                 ItemsSource="{Binding AllPlugins[Bathymetry]}"
+                                 ItemsSource="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Bathymetry].Values}"
+                                 SelectedItem="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Bathymetry].DefaultPlugin}"
                                  PluginTypeName="Bathymetry" />
     </StackPanel>
 </Window>

@@ -33,7 +33,7 @@
                                           Grid.Row="0"
                                           Grid.Column="1"
                                           VerticalAlignment="Center"
-                                          DisplayMemberPath="Value.PluginName"
+                                          DisplayMemberPath="PluginName"
                                           ItemsSource="{Binding Path=ItemsSource,
                                                                 RelativeSource={RelativeSource TemplatedParent}}"
                                           SelectedItem="{Binding Path=SelectedItem,

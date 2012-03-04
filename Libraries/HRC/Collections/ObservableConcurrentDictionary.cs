@@ -17,19 +17,22 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Windows.Threading;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 using Cinch;
 
 namespace HRC.Collections
 {
     /// <summary>
-    ///   Provides a thread-safe dictionary for use with data binding.
+    ///   Provides a thread-safe dictionary for use with data binding.  
+    ///   Now XML Serializable, thanks to http://weblogs.asp.net/pwelter34/archive/2006/05/03/444961.aspx
     /// </summary>
     /// <typeparam name = "TKey">Specifies the type of the keys in this collection.</typeparam>
     /// <typeparam name = "TValue">Specifies the type of the values in this collection.</typeparam>
-    [DebuggerDisplay("Count={Count}")]
-    [Serializable]
+    [DebuggerDisplay("Count={Count}"), Serializable]
     public class ObservableConcurrentDictionary<TKey, TValue> : IDictionary<TKey, TValue>, INotifyCollectionChanged,
-                                                                INotifyPropertyChanged, IDeserializationCallback
+                                                                INotifyPropertyChanged, IDeserializationCallback, IXmlSerializable
     {
         [NonSerialized] SynchronizationContext _context;
         readonly ConcurrentDictionary<TKey, TValue> _dictionary;
@@ -98,7 +101,9 @@ namespace HRC.Collections
                             if (handler.Target is DispatcherObject) ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, e));
                             else handler(this, e);
                         }
+// ReSharper disable EmptyGeneralCatchClause
                         catch (Exception) {}
+// ReSharper restore EmptyGeneralCatchClause
                     }
                 }
                 if (_propertyChanged == null) return;
@@ -116,7 +121,6 @@ namespace HRC.Collections
         void TryAddWithNotification(KeyValuePair<TKey, TValue> item)
         {
             TryAddWithNotification(item.Key, item.Value);
-            return;
         }
 
         /// <summary>
@@ -129,7 +133,6 @@ namespace HRC.Collections
         {
             var result = _dictionary.TryAdd(key, value);
             if (result) OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new KeyValuePair<TKey, TValue>(key, value)));
-            return;
         }
 
         /// <summary>
@@ -229,5 +232,58 @@ namespace HRC.Collections
             set { UpdateWithNotification(key, value); }
         }
         #endregion
+
+        public XmlSchema GetSchema() { return null; }
+        public void ReadXml(XmlReader reader)
+        {
+            var keySerializer = new XmlSerializer(typeof(TKey));
+            var valueSerializer = new XmlSerializer(typeof(TValue));
+
+            var wasEmpty = reader.IsEmptyElement;
+            reader.Read();
+
+            if (wasEmpty)
+                return;
+
+            while (reader.NodeType != XmlNodeType.EndElement)
+            {
+                reader.ReadStartElement("item");
+
+                reader.ReadStartElement("key");
+                var key = (TKey)keySerializer.Deserialize(reader);
+                reader.ReadEndElement();
+
+                reader.ReadStartElement("value");
+                var value = (TValue)valueSerializer.Deserialize(reader);
+                reader.ReadEndElement();
+
+                Add(key, value);
+
+                reader.ReadEndElement();
+                reader.MoveToContent();
+            }
+            reader.ReadEndElement();
+        }
+        public void WriteXml(XmlWriter writer) 
+        {
+            var keySerializer = new XmlSerializer(typeof(TKey));
+            var valueSerializer = new XmlSerializer(typeof(TValue));
+
+            foreach (var key in _dictionary.Keys)
+            {
+                writer.WriteStartElement("item");
+
+                writer.WriteStartElement("key");
+                keySerializer.Serialize(writer, key);
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("value");
+                var value = this[key];
+                valueSerializer.Serialize(writer, value);
+                writer.WriteEndElement();
+
+                writer.WriteEndElement();
+            }
+        }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -28,9 +27,9 @@ namespace ESME.Views.Controls
         #region dependency property IESMEPlugin SelectedPlugin
 
         public static DependencyProperty SelectedPluginProperty = DependencyProperty.Register("SelectedPlugin",
-                                                                                 typeof (IESMEPlugin),
-                                                                                 typeof (PluginSelector),
-                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.NotDataBindable));
+                                                                                              typeof (IESMEPlugin),
+                                                                                              typeof (PluginSelector),
+                                                                                              new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.NotDataBindable));
 
         public IESMEPlugin SelectedPlugin
         {
@@ -70,7 +69,7 @@ namespace ESME.Views.Controls
         static void OnSelectedItemChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var pluginSelector = (PluginSelector)d;
-            pluginSelector.SelectedPlugin = e.NewValue == null ? null : ((KeyValuePair<string, IESMEPlugin>)e.NewValue).Value;
+            pluginSelector.SelectedPlugin = e.NewValue == null ? null : (IESMEPlugin)e.NewValue;
         }
         #endregion
     }

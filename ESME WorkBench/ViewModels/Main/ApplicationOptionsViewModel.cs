@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using Cinch;
+using ESME;
 using ESME.Data;
 using ESME.Environment;
+using HRC.Collections;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
@@ -178,5 +180,22 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #endregion
 
+        #region public ObservableConcurrentDictionary<string, Dictionary<string, IESMEPlugin>> AllPlugins { get; set; }
+
+        public ObservableConcurrentDictionary<string, Dictionary<string, IESMEPlugin>> AllPlugins
+        {
+            get { return _allPlugins; }
+            set
+            {
+                if (_allPlugins == value) return;
+                _allPlugins = value;
+                NotifyPropertyChanged(AllPluginsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs AllPluginsChangedEventArgs = ObservableHelper.CreateArgs<ApplicationOptionsViewModel>(x => x.AllPlugins);
+        ObservableConcurrentDictionary<string, Dictionary<string, IESMEPlugin>> _allPlugins;
+
+        #endregion
     }
 }

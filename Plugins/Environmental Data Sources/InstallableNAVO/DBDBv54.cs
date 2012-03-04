@@ -1,33 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Plugins;
-using HRC;
 using HRC.Navigation;
-using HRC.Validation;
-using InstallableNAVO.Controls;
 using Microsoft.Win32;
 
 namespace InstallableNAVO
 {
+    [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
+                Subtype = "Bathymetry",
+                Name = "DBDB-V 5.4 (installed)",
+                Description = "Digital Bathymetric Data Base - Variable Resolution v5.4, from US Navy/NAVOCEANO")]
     public sealed class DBDB54 : EnvironmentalDataSourcePluginBase<Bathymetry>
     {
         const string RequiredDBDBFilename = "dbdbv5_level0c_0.h5";
 
         public DBDB54()
         {
-            PluginName = "DBDB-V 5.4";
-            PluginDescription = "Digital Bathymetric Data Base - Variable Resolution v5.4, from US Navy/NAVOCEANO";
+            SetPropertiesFromAttributes(GetType());
             //ConfigurationControl = new GDEM3Configuration { DataContext = this };
             PluginType = PluginType.EnvironmentalDataSource;
             AvailableResolutions = new[] { 2, 1, 0.5f, 0.1f, 0.05f };
             IsTimeVariantData = false;
             AvailableTimePeriods = new[] { TimePeriod.Invalid };
-            Subtype = "Bathymetry";
 
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\DBDB-V 5.4");
             if (regKey != null) _dataDirectory = (string)regKey.GetValue("");

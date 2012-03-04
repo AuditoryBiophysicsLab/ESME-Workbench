@@ -10,4 +10,9 @@ namespace ESME.Environment
         TimePeriod[] AvailableTimePeriods { get; }
         T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, IProgress<float> progress = null);
     }
+
+    public interface IWindDataSource : IEnvironmentalDataSource<Wind> { }
+    public interface ISoundSpeedDataSource : IEnvironmentalDataSource<SoundSpeed> { }
+    public interface ISedimentDataSource : IEnvironmentalDataSource<Sediment> { }
+    public interface IBathymetryDataSource : IEnvironmentalDataSource<Bathymetry> { }
 }

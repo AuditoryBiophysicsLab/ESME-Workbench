@@ -1,32 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
-using HRC;
 using HRC.Navigation;
-using HRC.Validation;
-using InstallableNAVO.Controls;
 using Microsoft.Win32;
 
 namespace InstallableNAVO
 {
+    [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
+                Subtype = "Sound Speed",
+                Name = "GDEM-V 3.0 (installed)",
+                Description = "Generalized Digital Environment Model, Variable Resolution, version 3.0, from US Navy/NAVOCEANO")]
     public sealed class GDEM3 : EnvironmentalDataSourcePluginBase<SoundSpeed>
     {
         public GDEM3()
         {
-            PluginName = "GDEM-V 3.0";
-            PluginDescription = "Generalized Digital Environment Model, Variable Resolution, version 3.0, from US Navy/NAVOCEANO";
+            SetPropertiesFromAttributes(GetType());
             IsTimeVariantData = true;
             AvailableTimePeriods = NAVOConfiguration.AllMonths.ToArray();
-            PluginType = PluginType.EnvironmentalDataSource;
             AvailableResolutions = new float[] { 15 };
-            Subtype = "Sound Speed";
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\GDEM-V 3.0");
             if (regKey != null) _dataDirectory = (string)regKey.GetValue("");
 
@@ -46,6 +42,7 @@ namespace InstallableNAVO
             return result;
         }
     }
+
 #if false
     [Serializable]
     public sealed class GDEM3Configuration : PluginConfiguration

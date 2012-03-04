@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using ESME;
@@ -10,21 +11,23 @@ using Microsoft.Win32;
 
 namespace InstallableNAVO
 {
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
+                Subtype = "Wind",
+                Name = "SMGC 2.0 (installed)",
+                Description = "Surface Marine Gridded Climatology Database v2.0, from US Navy/NAVOCEANO")]
     public sealed class SMGC20Minimal : EnvironmentalDataSourcePluginBase<Wind>
     {
         const string RequiredSMGCFilename = "smgc.wind";
 
         public SMGC20Minimal()
         {
-            PluginName = "SMGC 2.0 Minimal";
-            PluginDescription = "Surface Marine Gridded Climatology Database v2.0, from US Navy/NAVOCEANO";
+            SetPropertiesFromAttributes(GetType());
             //DataLocationHelp = "A file called smgc.wind";
             //ConfigurationControl = new GDEM3Configuration { DataContext = this };
             IsTimeVariantData = true;
             AvailableTimePeriods = NAVOConfiguration.AllMonths.ToArray();
-            PluginType = PluginType.EnvironmentalDataSource;
             AvailableResolutions = new[] { 60f };
-            Subtype = "Wind";
             var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\SMGC 2.0 Minimal");
             if (regKey != null) _dataDirectory = (string)regKey.GetValue("");
 
