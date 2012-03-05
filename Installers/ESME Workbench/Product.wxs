@@ -1,22 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
-  <?if $(var.Platform) = x64 ?>
-  <?define ProductName = "One Navy Model (64 bit)"?>
-  <?define Win64="yes"?>
-  <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
-  <?else ?>
-  <?define ProductName = "One Navy Model (32 bit)"?>
-  <?define Win64="no"?>
-  <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
-  <?endif ?>
-  <?define OldProductVersion="2.1.1.0" ?>
-  <?define ProductVersion="2.1.2.0" ?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define ProductName = "ESME Workbench" ?>
+  <?define ProductVersion = "1.0" ?>
+  <?define ProductFullVersion = "1.0.0.0" ?>
+  <?define ProductAuthor = "Hearing Research Center" ?>
   <?define Manufacturer="Boston University"?>
-  <?define ProductCode="{C2113C4A-86D3-4BA8-AED4-30976D5539A6}"?>
-  <?define UpgradeCode="{f82eae19-b38d-47f9-bed7-33454e612509}"?>
+  <?define ProductAppFolder = "InstallLocation" ?>
   <?define ESMERoot="C:\Projects\ESME Deliverables"?>
-  <?define ESMEPath="$(var.ESMERoot)\ESME WorkBench\bin\Release"?>
+  <?define ESMEPath="$(var.ESMERoot)\ESME Workbench\bin\Release"?>
   <?define HDFPath="$(var.ESMERoot)\Libraries\ESME\External References"?>
   <?define ESMEViewsPath="$(var.ESMERoot)\ESME.Controls\bin\Release"?>
   <?define BellhopPath="$(var.ESMERoot)\Utilities\bellhop"?>
@@ -25,63 +16,84 @@
   <?define ReleaseNotesPath="$(var.ESMERoot)\Release Notes"?>
   <?define TransmissionLossViewerPath="$(var.ESMERoot)\TransmissionLossViewer\bin\Release"?>
   <?define TransmissionLossCalculatorPath="$(var.ESMERoot)\TransmissionLossCalculator\bin\Release"?>
-  <Product Id="$(var.ProductCode)" 
-           Name="$(var.ProductName)" 
-           Version="$(var.ProductVersion)" 
-           Manufacturer="$(var.Manufacturer)" 
-           UpgradeCode="$(var.UpgradeCode)"
-           Language="1033" 
-           Codepage="1252">
-    <Package Description="$(var.ProductName)"
-             Manufacturer="$(var.Manufacturer)" 
-             InstallerVersion="300" 
-             Languages="1033" 
-             SummaryCodepage="1252"
-             Compressed="yes" 
-             AdminImage="no"
-             ReadOnly="yes"
-             ShortNames="no"
-             InstallScope="perMachine"
-             Keywords="Installer,OneNavyModel,One,Navy,Model"/>
 
-    <Media Id="1" Cabinet="OneNavyModel.cab" EmbedCab="yes" />
+  <?if $(var.Platform) = x64 ?>
+  <?define ProductDisplayName = "$(var.ProductName) 64-bit" ?>
+  <?define ProductId = "ECB254FD-4DD4-444B-8630-544A7DD71C56" ?>
+  <?define ProductUpgradeCode = "88D30D04-AD51-4627-98E8-A54D82F8D4FC" ?>
+  <?define Win64 = "yes" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?else ?>
+  <?define ProductDisplayName = "$(var.ProductName)" ?>
+  <?define ProductId = "62F4B20F-2E08-4EA1-A688-BDE8FE8653DB" ?>
+  <?define ProductUpgradeCode = "12E20F8D-0C6D-47C9-98A1-D4920B755766" ?>
+  <?define Win64 = "no" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+  <?endif ?>	
+  <Product Id="$(var.ProductId)"
+           Name="$(var.ProductDisplayName) (v$(var.ProductVersion))"
+           Language="1033"
+           Version="$(var.ProductFullVersion)"
+           Manufacturer="$(var.Manufacturer)"
+           UpgradeCode="$(var.ProductUpgradeCode)">
+    <Package InstallerVersion="300"
+             Compressed="yes"
+             InstallScope="perMachine"
+             Manufacturer="$(var.ProductAuthor)"
+             Platform="$(var.Platform)" />
+
+    <Media Id="1"
+           Cabinet="media.cab"
+           EmbedCab="yes" />
 
     <WixVariable Id="WixUIBannerBmp" Value="Bitmaps\bannrbmp.bmp" />
     <WixVariable Id="WixUIDialogBmp" Value="Bitmaps\dlgbmp.bmp" />
-    <!--<WixVariable Id="WixUILicenseRtf" Value="$(var.ESMERoot)\license.rtf" />-->
 
-    <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
-    <Upgrade Id="$(var.UpgradeCode)">
-      <UpgradeVersion Minimum="$(var.ProductVersion)"
-                      IncludeMinimum="no"
-                      OnlyDetect="yes"
-                      Language="1033"
-                      Property="NEWPRODUCTFOUND" />
-      <UpgradeVersion Minimum="$(var.OldProductVersion)"
-                      IncludeMinimum="yes"
-                      Maximum="$(var.ProductVersion)"
-                      IncludeMaximum="no"
-                      Language="1033"
-                      Property="UPGRADEFOUND" />
-    </Upgrade>
-    
+    <MajorUpgrade AllowDowngrades="no"
+                  AllowSameVersionUpgrades="yes"
+                  Schedule="afterInstallFinalize"
+                  MigrateFeatures="yes"
+                  DowngradeErrorMessage="A later or current version of [ProductName] is already installed. To install this version, uninstall the installed version first." />
+
+    <!-- Property gets value from registry to set up installation folder for upgrades -->
+    <Property Id="APPLICATIONFOLDER" Secure="yes">
+      <RegistrySearch Id='AppFolderRegistrySearch'
+                      Type='raw'
+                      Root='HKLM'
+                      Key='Software\Microsoft\Windows\CurrentVersion\Uninstall\[WIX_UPGRADE_DETECTED]'
+                      Name='$(var.ProductAppFolder)'
+                      Win64='$(var.Win64)' />
+    </Property>
+
+    <!-- Define destination folder (name of app folder only) -->
+    <Property Id="ApplicationFolderName" Value="$(var.ProductName)" />
+
+    <!-- Default to per-machine installation -->
+    <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
+
+    <!-- To disable per-user installation scope, uncomment this section
+	  <WixVariable Id="WixUISupportPerUser" Value="0" />
+  	-->
+
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="$(var.PlatformProgramFilesFolder)">
-        <Directory Id="INSTALLLOCATION" Name="$(var.ProductName)">
-          <Component Id="One_Navy_Model" Guid="68DE95CE-83D4-4BC0-8AB9-423655AEC06C">
-            <ProgId Id="OneNavyModel.binfile" Description="CASS binary output file" Icon="TransmissionLossViewer.exe" IconIndex="1">
+			<Directory Id="$(var.PlatformProgramFilesFolder)">
+				<Directory Id="APPLICATIONFOLDER" Name="$(var.ProductName)">
+          <Component Id="ESMEWorkbench" 
+                     Guid="68DE95CE-83D4-4BC0-8AB9-423655AEC06C"
+                     Win64="$(var.Win64)">
+            <ProgId Id="ESMEWorkbench.binfile" Description="CASS binary output file" Icon="TransmissionLossViewer.exe" IconIndex="1">
               <Extension Id="bin" ContentType="application/cass">
                 <Verb Id="open" Command="Open" TargetFile="TransmissionLossViewer.exe" Argument='"%1"'/>
               </Extension>
             </ProgId>
             <!-- Core ESME executables and assemblies -->
-            <File Id="OneNavyModel.exe" 
-                  Name="OneNavyModel.exe" 
-                  Source="$(var.ESMEPath)\OneNavyModel.exe" 
+            <File Id="ESMEWorkbench.exe"
+                  Name="ESMEWorkbench.exe"
+                  Source="$(var.ESMEPath)\ESMEWorkbench.exe"
                   KeyPath="yes"/>
-            <File Id="OneNavyModel.exe.config" 
-                  Name="OneNavyModel.exe.config" 
-                  Source="$(var.ESMEPath)\OneNavyModel.exe.config" />
+            <File Id="ESMEWorkbench.exe.config"
+                  Name="ESMEWorkbench.exe.config"
+                  Source="$(var.ESMEPath)\ESMEWorkbench.exe.config" />
             <File Id="ESME.dll"
                   Name="ESME.dll"
                   Source="$(var.ESMEPath)\ESME.dll" />
@@ -92,14 +104,14 @@
                   Name="HRC.dll"
                   Source="$(var.ESMEPath)\HRC.dll" />
             <File Id="ReleaseNotes"
-                  Name="One Navy Model Release Notes.pdf"
-                  Source="$(var.ReleaseNotesPath)\One Navy Model Release Notes.pdf" />
+                  Name="ESME Workbench Release Notes.pdf"
+                  Source="$(var.ReleaseNotesPath)\ESME Workbench Release Notes.pdf" />
             <File Id="UserManual"
-                  Name="One Navy Model User Manual V1.pdf"
-                  Source="$(var.ReleaseNotesPath)\One Navy Model User Manual V1.pdf" />
+                  Name="ESME Workbench User Manual V1.pdf"
+                  Source="$(var.ReleaseNotesPath)\ESME Workbench User Manual V1.pdf" />
             <File Id="UserGuide"
-                  Name="One Navy Model User Guide.pdf"
-                  Source="$(var.ReleaseNotesPath)\One Navy Model User Guide.pdf" />
+                  Name="ESME Workbench User Guide.pdf"
+                  Source="$(var.ReleaseNotesPath)\ESME Workbench User Guide.pdf" />
             <File Id="ReadMe"
                   Name="Read Me.pdf"
                   Source="$(var.ReleaseNotesPath)\Read Me.pdf" />
@@ -112,23 +124,6 @@
             <File Id="WebsiteLink"
                   Name="ESME.url"
                   Source="$(var.ESMERoot)\ESME.url" />
-
-            <!-- External executables -->
-
-            <!-- OAML extraction programs -->
-            <!-- GDEM Database Extractor (NetCDF format) -->
-            <!--
-            <File Id="ImportGDEM.exe"
-                  Name="ImportGDEM.exe"
-                  Source="$(var.ESMEPath)\ImportGDEM.exe" />
-            <File Id="netcdf.dll"
-                  Name="netcdf.dll"
-                  Source="$(var.ESMEPath)\netcdf.dll" />
-            <File Id="NetCDF_Wrapper.dll"
-                  Name="NetCDF_Wrapper.dll"
-                  Source="$(var.ESMEPath)\NetCDF_Wrapper.dll" />
-                                              -->
-            <!-- End OAML extraction programs -->
 
             <!-- Bellhop acoustic simulator -->
             <File Id="cyggcc_s1.dll"
@@ -146,17 +141,17 @@
             <!-- End external executables -->
 
             <!-- ThinkGeo GIS assemblies -->
-            <File Id="MapSuiteCore.dll" 
-                  Name="MapSuiteCore.dll" 
+            <File Id="MapSuiteCore.dll"
+                  Name="MapSuiteCore.dll"
                   Source="$(var.ESMEPath)\MapSuiteCore.dll" />
-            <File Id="NetTopologySuite.dll" 
-                  Name="NetTopologySuite.dll" 
+            <File Id="NetTopologySuite.dll"
+                  Name="NetTopologySuite.dll"
                   Source="$(var.ESMEPath)\NetTopologySuite.dll" />
-            <File Id="GeoAPI.dll" 
-                  Name="GeoAPI.dll" 
+            <File Id="GeoAPI.dll"
+                  Name="GeoAPI.dll"
                   Source="$(var.ESMEPath)\GeoAPI.dll" />
-            <File Id="WpfDesktopEdition.dll" 
-                  Name="WpfDesktopEdition.dll" 
+            <File Id="WpfDesktopEdition.dll"
+                  Name="WpfDesktopEdition.dll"
                   Source="$(var.ESMEPath)\WpfDesktopEdition.dll" />
 
             <!-- HDF5 assemblies and other DLLs -->
@@ -224,14 +219,14 @@
                   Source="$(var.MMMBSPath)\3mbSpeciesBuilder.exe" />
 
             <!-- Miscellaneous Microsoft assemblies -->
-            <File Id="Microsoft.Expression.InteractionsDLL" 
-                  Name="Microsoft.Expression.Interactions.dll" 
+            <File Id="Microsoft.Expression.InteractionsDLL"
+                  Name="Microsoft.Expression.Interactions.dll"
                   Source="$(var.ESMEPath)\Microsoft.Expression.Interactions.dll" />
-            <File Id="System.Windows.Interactivity.dll" 
-                  Name="System.Windows.Interactivity.dll" 
+            <File Id="System.Windows.Interactivity.dll"
+                  Name="System.Windows.Interactivity.dll"
                   Source="$(var.ESMEPath)\System.Windows.Interactivity.dll" />
-            <File Id="Microsoft.Windows.Shell.dll" 
-                  Name="Microsoft.Windows.Shell.dll" 
+            <File Id="Microsoft.Windows.Shell.dll"
+                  Name="Microsoft.Windows.Shell.dll"
                   Source="$(var.ESMEPath)\Microsoft.Windows.Shell.dll" />
 
             <!-- Microsoft Ribbon assembly -->
@@ -239,60 +234,66 @@
                   Name="RibbonControlsLibrary.dll"
                   Source="$(var.ESMEPath)\RibbonControlsLibrary.dll" />
           </Component>
-          
-          <Merge Id="vc100" Language="1033" SourceFile="$(var.MergeModulesPath)\Microsoft_VC100_CRT_x86.msm" DiskId="1" />
-          
-          <Component Id="OneNavyModel_Shortcuts" Guid="C7CC0E54-2890-4685-AC04-815E87C878A8">
+          <?if $(var.Platform) = x64 ?>
+          <!-- 64-bit components go here -->
+            <Merge Id="vc100" Language="1033" SourceFile="$(var.MergeModulesPath)\Microsoft_VC100_CRT_x64.msm" DiskId="1" />
+          <?else ?>
+          <!-- 32-bit components go here -->
+            <Merge Id="vc100" Language="1033" SourceFile="$(var.MergeModulesPath)\Microsoft_VC100_CRT_x86.msm" DiskId="1" />
+          <?endif ?>
+          <Component Id="ESMEWorkbench_Shortcuts" 
+                     Guid="C7CC0E54-2890-4685-AC04-815E87C878A8"
+                     Win64="$(var.Win64)">
             <RegistryKey Root="HKCU" Key="Software\[Manufacturer]\[ProductName]">
               <RegistryValue Value="Uninstall" Type="string" KeyPath="yes" />
             </RegistryKey>
-            <Shortcut Id="One_Navy_Model_Program_Group_Shortcut"
+            <Shortcut Id="ESMEWorkbench_Program_Group_Shortcut"
                       Directory="ProgramMenuDir"
                       Name="$(var.ProductName)"
-                      WorkingDirectory="INSTALLLOCATION"
-                      Target="[INSTALLLOCATION]OneNavyModel.exe"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]ESMEWorkbench.exe"
                       Advertise="no" />
             <Shortcut Id="TransmissionLossViewer_Shortcut"
                       Directory="ProgramMenuDir"
                       Name="Transmission Loss Viewer"
-                      WorkingDirectory="INSTALLLOCATION"
-                      Target="[INSTALLLOCATION]TransmissionLossViewer.exe"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]TransmissionLossViewer.exe"
                       Advertise="no" />
             <Shortcut Id="ReleaseNotes_Shortcut"
                       Directory="ProgramMenuDir"
                       Name="Release Notes"
-                      WorkingDirectory="INSTALLLOCATION"
-                      Target="[INSTALLLOCATION]One Navy Model Release Notes.pdf"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]ESME Workbench Release Notes.pdf"
                       Advertise="no" />
             <Shortcut Id="UserGuide_Shortcut"
                       Directory="ProgramMenuDir"
                       Name="User Guide"
-                      WorkingDirectory="INSTALLLOCATION"
-                      Target="[INSTALLLOCATION]One Navy Model User Guide.pdf"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]ESME Workbench User Guide.pdf"
                       Advertise="no" />
             <Shortcut Id="UserManual_Shortcut"
                       Directory="ProgramMenuDir"
                       Name="User Manual"
-                      WorkingDirectory="INSTALLLOCATION"
-                      Target="[INSTALLLOCATION]One Navy Model User Manual V1.pdf"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]ESME Workbench User Manual V1.pdf"
                       Advertise="no" />
             <Shortcut Id="ReadMe_Shortcut"
                       Directory="ProgramMenuDir"
                       Name="Read Me"
-                      WorkingDirectory="INSTALLLOCATION"
-                      Target="[INSTALLLOCATION]Read Me.pdf"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]Read Me.pdf"
                       Advertise="no" />
             <Shortcut Id="WebLink_Shortcut"
                       Directory="ProgramMenuDir"
-                      Name="Visit the One Navy Model Website to download environmental data"
-                      WorkingDirectory="INSTALLLOCATION"
-                      Target="[INSTALLLOCATION]ESME.url"
+                      Name="Visit the ESME Workbench Website to download environmental data"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]ESME.url"
                       Advertise="no" />
-            <Shortcut Id="One_Navy_Model_Desktop_Shortcut"
+            <Shortcut Id="ESMEWorkbench_Desktop_Shortcut"
                       Directory="DesktopFolder"
                       Name="$(var.ProductName)"
-                      WorkingDirectory="INSTALLLOCATION"
-                      Target="[INSTALLLOCATION]OneNavyModel.exe"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]ESMEWorkbench.exe"
                       Advertise="no" />
             <Shortcut Id="UninstallProduct"
                       Directory="ProgramMenuDir"
@@ -306,77 +307,82 @@
                           Directory="ProgramMenuDir"
                           On="uninstall" />
           </Component>
-
           <Directory Id="GISDataFolder" Name="Sample GIS Data">
-            <Component Id="GISFiles" Guid="22C39901-AC58-4461-8BAF-15616C48649D">
-              <File Id="Countries02.shx" 
-                    Name="Countries02.shx" 
-                    Source="$(var.ESMEPath)\Sample GIS Data\Countries02.shx" 
+            <Component Id="GISFiles" 
+                       Guid="22C39901-AC58-4461-8BAF-15616C48649D"
+                       Win64="$(var.Win64)">
+              <File Id="Countries02.shx"
+                    Name="Countries02.shx"
+                    Source="$(var.ESMEPath)\Sample GIS Data\Countries02.shx"
                     KeyPath="yes" />
-              <File Id="Countries02.dbf" 
-                    Name="Countries02.dbf" 
+              <File Id="Countries02.dbf"
+                    Name="Countries02.dbf"
                     Source="$(var.ESMEPath)\Sample GIS Data\Countries02.dbf" />
-              <File Id="Countries02.ids" 
+              <File Id="Countries02.ids"
                     Name="Countries02.ids"
                     Source="$(var.ESMEPath)\Sample GIS Data\Countries02.ids" />
-              <File Id="Countries02.idx" 
+              <File Id="Countries02.idx"
                     Name="Countries02.idx"
                     Source="$(var.ESMEPath)\Sample GIS Data\Countries02.idx" />
-              <File Id="Countries02.shp" 
-                    Name="Countries02.shp" 
+              <File Id="Countries02.shp"
+                    Name="Countries02.shp"
                     Source="$(var.ESMEPath)\Sample GIS Data\Countries02.shp" />
             </Component>
           </Directory>
         </Directory>
-      </Directory>
+			</Directory>
       <Directory Id="DesktopFolder" Name="Desktop" />
       <Directory Id="ProgramMenuFolder" Name="Programs">
         <Directory Id="ProgramMenuDir" Name="$(var.ProductName)"/>
       </Directory>
     </Directory>
-
-    <Feature Id="ProductFeature" Title="One Navy Model" Level="1" ConfigurableDirectory="INSTALLLOCATION">
-      <!-- TODO: Remove the comments around this ComponentRef element and the Component above in order to add resources to this installer. -->
-      <ComponentRef Id="One_Navy_Model" />
+    <Feature Id="ProductFeature" Title="ESME Workbench" Level="1" ConfigurableDirectory="TARGETDIR">
+      <ComponentRef Id="ESMEWorkbench" />
       <MergeRef Id="vc100"/>
       <ComponentRef Id="GISFiles" />
-      <ComponentRef Id="OneNavyModel_Shortcuts"/>
+      <ComponentRef Id="ESMEWorkbench_Shortcuts"/>
     </Feature>
 
-    <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
-    <CustomAction Id='IsPrivileged' Error='You must be an administrator to install this product' />
-    <InstallExecuteSequence>
-      <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWPRODUCTFOUND</Custom>
-      <Custom Action='IsPrivileged' Before='LaunchConditions'>NOTPRIVILEGED</Custom>
-      <RemoveExistingProducts After="InstallFinalize" />
-    </InstallExecuteSequence>
+    <!-- 
+		Set default destination folder (full path) unless it comes from registry 
+		SetDirectory schedules the action prior to WixSetDefaultPerMachineFolder;
+		code updated for manually scheduled elements to schedule between 
+		WixSetDefaultPerMachineFolder and WixSetPerMachineFolder.
+	-->
+    <SetDirectory
+      Id="APPLICATIONFOLDER"
+      Value="[$(var.PlatformProgramFilesFolder)][ApplicationFolderName]">APPLICATIONFOLDER=""</SetDirectory>
+
+    <CustomAction
+        Id="OverwriteWixSetDefaultPerMachineFolder"
+        Property="WixPerMachineFolder"
+        Value="[APPLICATIONFOLDER]"
+        Execute="immediate"
+	/>
+
+    <!-- Save destination folder in Add/Remove programs (ARP) registry key -->
+    <SetProperty
+      Id="ARPINSTALLLOCATION"
+      Value="[APPLICATIONFOLDER]"
+      After="CostFinalize"
+	/>
 
     <InstallUISequence>
-      <Custom Action='IsPrivileged' Before='LaunchConditions'>NOTPRIVILEGED</Custom>
-      <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWPRODUCTFOUND</Custom>
+      <!-- Corrects WixUI_Advanced bug (http://bit.ly/hrbM7Y) -->
+      <Custom Action="OverwriteWixSetDefaultPerMachineFolder" After="WixSetDefaultPerMachineFolder" />
     </InstallUISequence>
 
-    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLLOCATION" />
-    <UIRef Id="WixUI_InstallDir" />
-    <UIRef Id="WixUI_ErrorProgressText" />
-    <!--
-    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="View README.TXT file when setup exits" />
-    <Property Id="WIXUI_INSTALLDIR" Value="TARGETDIR" />
-    <UI>
-      <UIRef Id="WixUI_InstallDir" />
-      <UIRef Id="WixUI_ErrorProgressText" />
-      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="ViewReadmeOnExit">
-        WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT = 1 and NOT Installed
-      </Publish>
+    <InstallExecuteSequence>
+      <!-- Corrects WixUI_Advanced bug (http://bit.ly/hrbM7Y) -->
+      <Custom Action="OverwriteWixSetDefaultPerMachineFolder" After="WixSetDefaultPerMachineFolder" />
+
+      <!-- Do not delete Windows service configuration on upgrade -->
+      <DeleteServices>NOT UPGRADINGPRODUCTCODE</DeleteServices>
+    </InstallExecuteSequence>
+
+    <!-- Setup wizard sequence -->
+    <UI Id="UISequence">
+      <UIRef Id="WixUI_Advanced"/>
     </UI>
-    <Property Id="WixShellExecTarget" Value="[#ReadMe.txt]" />
-    <CustomAction Id="ViewReadmeOnExit" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
-
-    <PropertyRef Id="NETFRAMEWORK40FULL"/>
-    <Condition Message="The .NET Framework 4.0 full version must be installed before installing One Navy Model">
-      <![CDATA[Installed OR NETFRAMEWORK40]]>
-    </Condition>
-    -->
-
   </Product>
 </Wix>
