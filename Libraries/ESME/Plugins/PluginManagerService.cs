@@ -33,7 +33,7 @@ namespace ESME.Plugins
         {
             _esmePlugins = new List<IESMEPlugin>();
             ESMEPluginDictionary = new ESMEPluginDictionary();
-            var catalog = new ESMEPluginCatalog(new DirectoryCatalog(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location)));
+            var catalog = new ESMEPluginCatalog(new DirectoryCatalog(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)));
             var container = new CompositionContainer(catalog, true);
             try
             {
