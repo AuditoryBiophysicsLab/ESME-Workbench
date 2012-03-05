@@ -30,6 +30,13 @@
       <Name>WixBalExtension</Name>
     </WixExtension>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="GPLv3.docx" />
+    <Content Include="GPLv3.rtf" />
+    <Content Include="License.docx" />
+    <Content Include="License.rtf" />
+    <Content Include="Wave.png" />
+  </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.
