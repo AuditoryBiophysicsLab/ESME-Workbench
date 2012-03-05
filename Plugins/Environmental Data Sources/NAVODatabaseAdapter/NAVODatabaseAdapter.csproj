@@ -33,12 +33,27 @@
   <ItemGroup>
     <Reference Include="AsyncCtpLibrary">
       <HintPath>..\..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="C5">
+      <HintPath>..\..\..\Libraries\C5\bin\Release\C5.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Cinch.WPF">
       <HintPath>..\..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ESME">
+      <HintPath>..\..\..\Libraries\ESME\bin\Release\ESME.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="HDF5DotNet">
       <HintPath>..\..\..\ESME WorkBench\External References\HDF5DotNet.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="HRC">
+      <HintPath>..\..\..\Libraries\HRC\bin\Release\HRC.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -59,20 +74,6 @@
     <Compile Include="NAVOExtractionProgram.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SMGC.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\Libraries\C5\C5.csproj">
-      <Project>{7029F5D5-ABBB-4564-B170-39802AD65C62}</Project>
-      <Name>C5</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Libraries\ESME\ESME.csproj">
-      <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
-      <Name>ESME</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\Libraries\HRC\HRC.csproj">
-      <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
-      <Name>HRC</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
