@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "NAVODataSources", "..\..\Installers\Installable NAVO Databases\NAVODataSources\NAVODataSources.wixproj", "{04B9F977-A7F6-4C7F-ADAD-92FE690C6811}"
+EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "BST_2.0", "..\..\Installers\Installable NAVO Databases\BST_2.0\BST_2.0.wixproj", "{3A89EB48-3E51-48D9-83C6-5B09CBF8D90E}"
+EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "DBDB-V_5.4", "..\..\Installers\Installable NAVO Databases\DBDB-V_5.4\DBDB-V_5.4.wixproj", "{BB748504-D401-4415-9F4B-A0A4AAE27791}"
+EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "GDEM-V_3.0", "..\..\Installers\Installable NAVO Databases\GDEM-V_3.0\GDEM-V_3.0.wixproj", "{DD9116C2-7823-4687-80C6-D229641C613D}"
+EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SMGC_2.0_Full", "..\..\Installers\Installable NAVO Databases\SMGC_2.0_Full\SMGC_2.0_Full.wixproj", "{0BAD8C1B-AA80-466F-8CBE-78381761EDD5}"
+EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SMGC_2.0_Minimal", "..\..\Installers\Installable NAVO Databases\SMGC_2.0_Minimal\SMGC_2.0_Minimal.wixproj", "{96313F30-2679-49F9-ADA7-2D486D6EBFF9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Release (x64)|x64 = Release (x64)|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{04B9F977-A7F6-4C7F-ADAD-92FE690C6811}.Release (x64)|x64.ActiveCfg = Release (x64)|x64
+		{04B9F977-A7F6-4C7F-ADAD-92FE690C6811}.Release (x64)|x64.Build.0 = Release (x64)|x64
+		{3A89EB48-3E51-48D9-83C6-5B09CBF8D90E}.Release (x64)|x64.ActiveCfg = Release (x64)|x64
+		{3A89EB48-3E51-48D9-83C6-5B09CBF8D90E}.Release (x64)|x64.Build.0 = Release (x64)|x64
+		{BB748504-D401-4415-9F4B-A0A4AAE27791}.Release (x64)|x64.ActiveCfg = Release (x64)|x64
+		{BB748504-D401-4415-9F4B-A0A4AAE27791}.Release (x64)|x64.Build.0 = Release (x64)|x64
+		{DD9116C2-7823-4687-80C6-D229641C613D}.Release (x64)|x64.ActiveCfg = Release (x64)|x64
+		{DD9116C2-7823-4687-80C6-D229641C613D}.Release (x64)|x64.Build.0 = Release (x64)|x64
+		{0BAD8C1B-AA80-466F-8CBE-78381761EDD5}.Release (x64)|x64.ActiveCfg = Release (x64)|x64
+		{0BAD8C1B-AA80-466F-8CBE-78381761EDD5}.Release (x64)|x64.Build.0 = Release (x64)|x64
+		{96313F30-2679-49F9-ADA7-2D486D6EBFF9}.Release (x64)|x64.ActiveCfg = Release (x64)|x64
+		{96313F30-2679-49F9-ADA7-2D486D6EBFF9}.Release (x64)|x64.Build.0 = Release (x64)|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

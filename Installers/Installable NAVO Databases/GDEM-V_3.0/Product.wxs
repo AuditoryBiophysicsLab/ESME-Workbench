@@ -140,8 +140,7 @@
     <DirectoryRef Id="TARGETDIR">
       <Component Id="RegistryEntries" Guid="9892BF56-DEE1-4759-B851-196620878162">
         <RegistryKey Root="HKLM"
-                     Key="Software\Boston University\ESME Workbench\Data Sources\GDEM-V 3.0"
-              Action="createAndRemoveOnUninstall">
+                     Key="Software\Boston University\ESME Workbench\Data Sources\GDEM-V 3.0">
           <RegistryValue Type="string" Value="[INSTALLLOCATION]"/>
         </RegistryKey>
       </Component>

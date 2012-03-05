@@ -51,8 +51,7 @@
     <DirectoryRef Id="TARGETDIR">
       <Component Id="RegistryEntries" Guid="E5E28DC2-A5A8-4434-855C-93BE9C37CDBA">
         <RegistryKey Root="HKLM"
-                     Key="Software\Boston University\ESME Workbench\Data Sources\DBDB-V 5.4"
-              Action="createAndRemoveOnUninstall">
+                     Key="Software\Boston University\ESME Workbench\Data Sources\DBDB-V 5.4">
           <RegistryValue Type="string" Value="[INSTALLLOCATION]"/>
         </RegistryKey>
       </Component>

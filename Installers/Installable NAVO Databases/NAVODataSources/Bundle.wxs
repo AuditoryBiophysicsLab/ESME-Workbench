@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <?define ProductName = "Naval Oceanographic Office Data Sources for ESME Workbench" ?>
+  <?define ProductName = "Environmental databases for ESME Workbench" ?>
   <?define ProductVersion = "1.0" ?>
   <?define ProductFullVersion = "1.0.0.0" ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
-  <?define InstallersRoot="C:\Projects\ESME Deliverables\Installers"?>
+  <?define InstallersRoot="C:\Projects\ESME Deliverables\Installers\Installable NAVO Databases"?>
   <Bundle Name="$(var.ProductName)" Version="1.0.0.0" Manufacturer="Boston University" UpgradeCode="88B26169-9067-4371-B043-358D191E9001">
     <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense" />
-    <WixVariable Id="WixStdbaLicenseRtf" Value="license.rtf" />
-    <WixVariable Id="WixStdbaLogo" Value="NAVO_logo.png" />
+    <WixVariable Id="WixStdbaLicenseRtf" Value="License.rtf" />
+    <WixVariable Id="WixStdbaLogo" Value="Wave.png" />
     <Chain>
       <!-- TODO: Define the list of chained packages. -->
       <MsiPackage DownloadUrl="http://esme.bu.edu/data/SMGC_2.0_Minimal.msi"

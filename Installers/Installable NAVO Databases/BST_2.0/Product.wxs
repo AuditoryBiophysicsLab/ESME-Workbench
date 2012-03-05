@@ -47,8 +47,7 @@
     <DirectoryRef Id="TARGETDIR">
       <Component Id="RegistryEntries" Guid="3DD1ADD6-A852-409F-BEC7-C3745B061F04">
         <RegistryKey Root="HKLM"
-                     Key="Software\Boston University\ESME Workbench\Data Sources\BST 2.0"
-              Action="createAndRemoveOnUninstall">
+                     Key="Software\Boston University\ESME Workbench\Data Sources\BST 2.0">
           <RegistryValue Type="string" Value="[INSTALLLOCATION]"/>
         </RegistryKey>
       </Component>

@@ -41,8 +41,7 @@
     <DirectoryRef Id="TARGETDIR">
       <Component Id="RegistryEntries" Guid="0F7F1D32-F072-48AD-95D6-9E364085199E">
         <RegistryKey Root="HKLM"
-                     Key="Software\Boston University\ESME Workbench\Data Sources\SMGC 2.0"
-              Action="createAndRemoveOnUninstall">
+                     Key="Software\Boston University\ESME Workbench\Data Sources\SMGC 2.0">
           <RegistryValue Type="string" Value="[INSTALLLOCATION]"/>
         </RegistryKey>
       </Component>
