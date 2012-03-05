@@ -54,8 +54,7 @@ namespace StandaloneNAVO
             get
             {
                 return DataLocation != null &&
-                       Directory.Exists(DataLocation) &&
-                       File.Exists(Path.Combine(DataLocation, RequiredBSTFilename));
+                       File.Exists(DataLocation);
             }
         }
 
