@@ -16,7 +16,7 @@ namespace ESME.TransmissionLoss.BellhopNL
 
 
         //REFMS-mimic members.
-        public EarthCoordinate Location { get; set; }
+        public Geo Location { get; set; }
         public string ModeName { get; set; }
         public TimePeriod TimePeriod { get; set; }
         public Geo SVPLocation { get; set; }

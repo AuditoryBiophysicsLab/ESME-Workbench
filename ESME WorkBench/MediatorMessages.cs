@@ -3,7 +3,7 @@
 using System;
 using Cinch;
 
-namespace ESMEWorkBench
+namespace ESMEWorkbench
 {
     internal static class MediatorMessage
     {

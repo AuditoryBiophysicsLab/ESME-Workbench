@@ -65,6 +65,7 @@ namespace ESME.Environment.NAVO
 
         #region Sound Speed calculation
 
+#if false
         /// <summary>
         ///   Calculates the OAML Navy sound speed profile for a given location
         ///   Forumula ported from ChenMilleroLiAlgorithm.java by Dave Anderson on 22 Feb 2010
@@ -110,8 +111,8 @@ namespace ESME.Environment.NAVO
             }
             return results;
         }
-
-        public static float SoundSpeed(EarthCoordinate location, float depth, float temperature, float salinity)
+#endif
+        public static float SoundSpeed(Geo location, float depth, float temperature, float salinity)
         {
             var tempSq = temperature * temperature;
             var tempCu = tempSq * temperature;

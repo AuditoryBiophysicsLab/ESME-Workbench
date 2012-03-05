@@ -1,22 +1,18 @@
 ﻿using System;
-using ESME.Environment.NAVO;
 using HRC.Navigation;
 
 namespace ESME.Environment
 {
     public interface IEnvironmentalDataSource<out T> : IESMEPlugin
     {
-        float[] Resolutions { get; }
-        string DataLocation { get; set; }
-        string DataLocationHelp { get; }
-        T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration = null, IProgress<float> progress = null);
+        float[] AvailableResolutions { get; }
+        bool IsTimeVariantData { get; }
+        TimePeriod[] AvailableTimePeriods { get; }
+        T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, IProgress<float> progress = null);
     }
 
-    public interface IGDEM3DataSource<out T> : IEnvironmentalDataSource<T>
-    {
-        T ExtractTemperature(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null);
-        T ExtractSalinity(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null);
-        T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, EarthCoordinate<float> deepestPoint, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null);
-        T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, Bathymetry bathymetry, SeasonConfiguration seasonConfiguration, IProgress<float> progress = null);
-    }
+    public interface IWindDataSource : IEnvironmentalDataSource<Wind> { }
+    public interface ISoundSpeedDataSource : IEnvironmentalDataSource<SoundSpeed> { }
+    public interface ISedimentDataSource : IEnvironmentalDataSource<Sediment> { }
+    public interface IBathymetryDataSource : IEnvironmentalDataSource<Bathymetry> { }
 }

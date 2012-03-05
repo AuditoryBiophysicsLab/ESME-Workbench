@@ -6,7 +6,7 @@ using Cinch;
 using ESME.Data;
 using ESME.NEMO;
 
-namespace ESMEWorkBench.ViewModels.NAVO
+namespace ESMEWorkbench.ViewModels.NAVO
 {
     public class ScenarioSimulatorOptionsViewModel : ViewModelBase
     {

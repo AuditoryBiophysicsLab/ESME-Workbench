@@ -1,19 +1,31 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
+using System.Windows.Data;
+using System.Windows.Input;
 using Cinch;
+using ESME;
 using ESME.Data;
 using ESME.Environment;
+using ESME.Plugins;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     public class ApplicationOptionsViewModel : ViewModelBase
     {
         readonly IMessageBoxService _messageBoxService;
-        public ApplicationOptionsViewModel(IMessageBoxService messageBoxService)
+        public ApplicationOptionsViewModel(IMessageBoxService messageBoxService, IPluginManagerService pluginManagerService)
         {
             _messageBoxService = messageBoxService;
+            _pluginManagerService = pluginManagerService;
             Globals.AppSettings = AppSettings.Load();
             AppSettings = Globals.AppSettings;
+            AppSettings.SetDefaults();
+            AddEnvironmentDataSourceView("Wind");
+            AddEnvironmentDataSourceView("Sound Speed");
+            AddEnvironmentDataSourceView("Sediment");
+            AddEnvironmentDataSourceView("Bathymetry");
         }
 
         public void DesignTimeInitialization() { AppSettings = AppSettings.Load(); }
@@ -45,6 +57,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
         private void OkHandler()
         {
+            AppSettings.DefaultPluginConfigurations.Clear();
+            AppSettings.DefaultPluginConfigurations.AddRange(_pluginManagerService.DefaultPluginConfigurations);
             AppSettings.Save(null);
             Globals.AppSettings = AppSettings.Load();
             CloseActivePopUpCommand.Execute(true);
@@ -178,5 +192,21 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        readonly IPluginManagerService _pluginManagerService;
+        public IPluginManagerService PluginManager
+        {
+            get { return _pluginManagerService; }
+        }
+
+        public Dictionary<string, ICollectionView> EnvironmentDataSourceViews { get; set; }
+
+        void AddEnvironmentDataSourceView(string dataType)
+        {
+            var curView = CollectionViewSource.GetDefaultView(PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][dataType].Values);
+            ((ListCollectionView)curView).SortDescriptions.Add(new SortDescription("PluginName", ListSortDirection.Ascending));
+            ((ListCollectionView)curView).Filter = p => ((IESMEPlugin)p).IsSelectable;
+            if (EnvironmentDataSourceViews == null) EnvironmentDataSourceViews = new Dictionary<string, ICollectionView>();
+            EnvironmentDataSourceViews.Add(dataType, curView);
+        }
     }
 }

@@ -11,7 +11,7 @@ using System.Windows.Threading;
 using Cinch;
 using HRC.Validation;
 
-namespace ESMEWorkBench.ViewModels.NAVO
+namespace ESMEWorkbench.ViewModels.NAVO
 {
     sealed class ScenarioSimulatorLogViewModel : ValidatingViewModel
     {

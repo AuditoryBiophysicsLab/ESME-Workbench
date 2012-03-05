@@ -6,7 +6,7 @@ using Cinch;
 using ESME;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.Ribbon
+namespace ESMEWorkbench.ViewModels.Ribbon
 {
     [ExportViewModel("ControlDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]

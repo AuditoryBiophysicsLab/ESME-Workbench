@@ -6,7 +6,6 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
-using ESME.Environment.NAVO;
 using HRC.Navigation;
 
 namespace ESME.Environment
@@ -76,8 +75,8 @@ namespace ESME.Environment
         {
             return TaskEx.Run(() => Load(filename));
         }
-
-        public static SoundSpeed Load(string temperatureFilename, string salinityFilename, EarthCoordinate<float> deepestPoint = null, GeoRect areaOfInterest = null)
+#if false
+        public static SoundSpeed<T> Load(string temperatureFilename, string salinityFilename, EarthCoordinate<float> deepestPoint = null, GeoRect areaOfInterest = null)
         {
             var temperatureData = Load(temperatureFilename);
             var salinityData = Load(salinityFilename);
@@ -86,17 +85,8 @@ namespace ESME.Environment
             if (deepestPoint == null) return soundSpeed;
             soundSpeed.Extend(temperatureData, salinityData, deepestPoint, areaOfInterest);
             foreach (var soundSpeedField in soundSpeed.SoundSpeedFields)
-                soundSpeedField.Extend(temperatureData[soundSpeedField.TimePeriod], salinityData[soundSpeedField.TimePeriod], deepestPoint, areaOfInterest);
+                soundSpeedField.Extend(deepestPoint);
             return soundSpeed;
-        }
-
-        public void Extend(SoundSpeed temperatureData, SoundSpeed salinityData, EarthCoordinate<float> deepestPoint, GeoRect areaOfInterest)
-        {
-            VerifyThatTimePeriodsMatch(this, temperatureData);
-            VerifyThatTimePeriodsMatch(temperatureData, salinityData);
-
-            foreach (var soundSpeedField in SoundSpeedFields)
-                soundSpeedField.Extend(temperatureData[soundSpeedField.TimePeriod], salinityData[soundSpeedField.TimePeriod], deepestPoint, areaOfInterest);
         }
 
         public static SoundSpeed Create(SoundSpeed temperatureData, SoundSpeed salinityData, EarthCoordinate<float> deepestPoint = null, IProgress<float> progress = null)
@@ -121,6 +111,14 @@ namespace ESME.Environment
                 if (progress != null) lock (progress) progress.Report(curProgress);
             }
             return soundSpeedFile;
+        }
+
+#endif
+
+        public void Extend(Geo<float> deepestPoint)
+        {
+            foreach (var soundSpeedField in SoundSpeedFields)
+                soundSpeedField.ExtendProfiles(deepestPoint);
         }
 
         public static SoundSpeed Average(SoundSpeed monthlySoundSpeeds, List<TimePeriod> timePeriods)

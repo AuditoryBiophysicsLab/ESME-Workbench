@@ -14,9 +14,9 @@ using System.Xml.Serialization;
 using Cinch;
 using ESME;
 using ESME.Mapping;
-using ESMEWorkBench.Controls;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.Layers;
+using ESMEWorkbench.Controls;
+using ESMEWorkbench.Properties;
+using ESMEWorkbench.ViewModels.Layers;
 using HRC.Navigation;
 using HRC.Services;
 using MEFedMVVM.Common;
@@ -24,7 +24,7 @@ using MEFedMVVM.ViewModelLocator;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 
-namespace ESMEWorkBench.ViewModels.Map
+namespace ESMEWorkbench.ViewModels.Map
 {
     [ExportViewModel("MapViewModel")]
     [Serializable]
@@ -66,7 +66,7 @@ namespace ESMEWorkBench.ViewModels.Map
                                                                                  var e = (MouseEventArgs) arg.EventArgs;
                                                                                  var point = e.MouseDevice.GetPosition(_wpfMap);
                                                                                  var pointShape = ExtentHelper.ToWorldCoordinate(_wpfMap.CurrentExtent, (float) point.X, (float) point.Y, (float) _wpfMap.ActualWidth, (float) _wpfMap.ActualHeight);
-                                                                                 MediatorMessage.Send(MediatorMessage.SetMouseEarthCoordinate, new EarthCoordinate(pointShape.Y, pointShape.X));
+                                                                                 MediatorMessage.Send(MediatorMessage.SetMouseEarthCoordinate, new Geo(pointShape.Y, pointShape.X));
                                                                              });
 
             MouseLeftButtonUpCommand = new SimpleCommand<object, object>(delegate

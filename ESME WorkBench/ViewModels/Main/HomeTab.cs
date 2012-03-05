@@ -14,14 +14,13 @@ using ESME.Metadata;
 using ESME.Model;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
-using ESME.TransmissionLoss.REFMS;
 using ESME.Views.AcousticBuilder;
 using ESME.Views.TransmissionLoss;
 using ESME.Views.TransmissionLossViewer;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.NAVO;
+using ESMEWorkbench.Properties;
+using ESMEWorkbench.ViewModels.NAVO;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {
@@ -246,8 +245,12 @@ namespace ESMEWorkBench.ViewModels.Main
                        (_exportAnalysisPoints =
                         new SimpleCommand<object, object>(delegate
                         {
+#if IS_CLASSIFIED_MODEL
                             return (ScenarioMetadata != null && ScenarioMetadata.AnalysisPoints != null && ScenarioMetadata.AnalysisPoints.Count > 0) ||
                                    (ScenarioMetadata != null && ScenarioMetadata.ExplosivePoints != null && ScenarioMetadata.ExplosivePoints.Count > 0);
+#else
+                            return (ScenarioMetadata != null && ScenarioMetadata.AnalysisPoints != null && ScenarioMetadata.AnalysisPoints.Count > 0);
+#endif
                         },
                         delegate { ExportAnalysisPointsHandler(); }));
             }
@@ -412,7 +415,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             if (MouseDepth > 0) throw new AnalysisPointLocationException("Analysis Points cannot be placed on land.");
             if (ScenarioMetadata == null) return;
-            ScenarioMetadata.PlaceAnalysisPoint(MouseEarthCoordinate);
+            ScenarioMetadata.PlaceAnalysisPoint(MouseGeo);
         }
 
         [MediatorMessageSink(MediatorMessage.EditAnalysisPoint)]
@@ -434,6 +437,7 @@ namespace ESMEWorkBench.ViewModels.Main
             ScenarioMetadata.Save();
         }
 
+#if IS_CLASSIFIED_MODEL
         [MediatorMessageSink(MediatorMessage.EditExplosivePoint)]
         public void EditExplosivePoint(ExplosivePoint explosivePoint)
         {
@@ -452,7 +456,7 @@ namespace ESMEWorkBench.ViewModels.Main
             ScenarioMetadata.ExplosivePoints.Remove(explosivePoint);
             ScenarioMetadata.Save();
         }
-
+#endif
         [MediatorMessageSink(MediatorMessage.ViewPropagation)]
         public void ViewPropagation(CASSOutput cassOutput)
         {
@@ -491,13 +495,13 @@ using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.AcousticBuilder;
 using ESME.Views.TransmissionLoss;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.NAVO;
+using ESMEWorkbench.Properties;
+using ESMEWorkbench.ViewModels.NAVO;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {
@@ -696,7 +700,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(IsScenarioLoadedChangedEventArgs);
                 NotifyPropertyChanged(IsScenarioNotLoadedChangedEventArgs);
 
-                MainWindowTitle = _nemoFile != null ? string.Format("ESME WorkBench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", NemoFile.Scenario.EventName, NemoFile.Scenario.TimeFrame) : string.Format("ESME WorkBench 2011{0}: <No scenario loaded>", Configuration.IsUnclassifiedModel ? " (public)" : "");
+                MainWindowTitle = _nemoFile != null ? string.Format("ESME Workbench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", NemoFile.Scenario.EventName, NemoFile.Scenario.TimeFrame) : string.Format("ESME Workbench 2011{0}: <No scenario loaded>", Configuration.IsUnclassifiedModel ? " (public)" : "");
                 if (_nemoFile == null)
                 {
                     ScenarioLoadedToolTip = null;
@@ -989,7 +993,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         static readonly PropertyChangedEventArgs MainWindowTitleChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MainWindowTitle);
-        string _mainWindowTitle = Configuration.IsUnclassifiedModel ? "ESME WorkBench 2011 (public): <No scenario loaded>" : "ESME WorkBench 2011: <No scenario loaded>";
+        string _mainWindowTitle = Configuration.IsUnclassifiedModel ? "ESME Workbench 2011 (public): <No scenario loaded>" : "ESME Workbench 2011: <No scenario loaded>";
 
         #endregion
 
@@ -1073,7 +1077,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             if (MouseDepth > 0) throw new AnalysisPointLocationException("Analysis Points cannot be placed on land.");
             if (ScenarioMetadata == null) return;
-            //ScenarioMetadata.PlaceAnalysisPoint(MouseEarthCoordinate);
+            //ScenarioMetadata.PlaceAnalysisPoint(MouseGeo);
             throw new NotImplementedException();
         }
 

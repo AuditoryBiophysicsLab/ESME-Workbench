@@ -1,8 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
+using System.IO;
+using System.Linq;
 using System.Windows.Controls;
+using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
+using ESME.NEMO;
 using HRC.Navigation;
 using HRC.Validation;
 
@@ -17,15 +22,27 @@ namespace ESME.Plugins
             ConfigurationControl = null;
             PluginType = PluginType.Unknown;
             PropertyChanged += (s, e) => { if (e.PropertyName == "IsValid") IsConfigured = IsValid; };
+            ConfigurationDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME Workbench\\Plugins");
+            if (!Directory.Exists(ConfigurationDirectory)) Directory.CreateDirectory(ConfigurationDirectory);
+            PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName != "IsValid") return;
+                var sender = ((PluginBase)s);
+                if (sender.IsValid && IsConfigurable) sender.Save();
+                NotifyPropertyChanged(IsConfiguredChangedEventArgs);
+            };
         }
 
-        public string PluginName { get; protected set; }
-        public string PluginDescription { get; protected set; }
-        public PluginType PluginType { get; protected set; }
-        public string DLLPath { get; set; }
+        [XmlIgnore] public string PluginName { get; protected set; }
+        [XmlIgnore] public string PluginDescription { get; protected set; }
+        [XmlIgnore] public PluginType PluginType { get; protected set; }
+        [XmlIgnore] public string DLLPath { get; set; }
+        [XmlIgnore] public string Subtype { get; protected set; }
+        [XmlIgnore] protected string ConfigurationDirectory { get; set; }
+        [XmlIgnore] protected virtual string ConfigurationFile { get { return Path.Combine(ConfigurationDirectory, PluginName + ".xml"); } }
 
         #region public Control ConfigurationControl { get; protected set; }
-
+        [XmlIgnore]
         public Control ConfigurationControl
         {
             get { return _configurationControl; }
@@ -43,7 +60,7 @@ namespace ESME.Plugins
 
         #endregion
         #region public bool IsConfigurable { get; }
-
+        [XmlIgnore] 
         public bool IsConfigurable
         {
             get { return ConfigurationControl != null; }
@@ -53,7 +70,7 @@ namespace ESME.Plugins
 
         #endregion
         #region public bool IsSelectable { get; protected set; }
-
+        [XmlIgnore] 
         public bool IsSelectable
         {
             get { return _isSelectable; }
@@ -70,8 +87,8 @@ namespace ESME.Plugins
 
         #endregion
         #region public bool IsConfigured { get; protected set; }
-
-        public bool IsConfigured
+        [XmlIgnore] 
+        public virtual bool IsConfigured
         {
             get { return _isConfigured; }
             protected set
@@ -86,6 +103,9 @@ namespace ESME.Plugins
         bool _isConfigured;
 
         #endregion
+
+        protected abstract void Save();
+        public abstract void LoadSettings();
     }
 
     public abstract class EnvironmentalDataSourcePluginBase<T> : PluginBase, IEnvironmentalDataSource<T>
@@ -93,10 +113,38 @@ namespace ESME.Plugins
         /// <summary>
         /// An array of available resolutions, expressed in arc-minutes per sample
         /// </summary>
-        public float[] Resolutions { get; protected set; }
-        public virtual string DataLocation { get; set; }
-        public string DataLocationHelp { get; protected set; }
+        [XmlIgnore] public float[] AvailableResolutions { get; protected set; }
+        [XmlIgnore] public bool IsTimeVariantData { get; protected set; }
+        [XmlIgnore] public TimePeriod[] AvailableTimePeriods { get; protected set; }
+        public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null);
+        protected void CheckResolutionAndTimePeriod(float resolution, TimePeriod timePeriod)
+        {
+            if (!AvailableTimePeriods.Contains(timePeriod)) throw new ParameterOutOfRangeException(string.Format("Specified timePeriod is not available in the {0} data set", PluginName));
+            if (!AvailableResolutions.Contains(resolution)) throw new ParameterOutOfRangeException(string.Format("Specified resolution is not available in the {0} data set", PluginName));
+        }
+        protected override void Save() { }
+        public override void LoadSettings() { }
 
-        public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod, SeasonConfiguration seasonConfiguration = null, IProgress<float> progress = null);
+        protected void SetPropertiesFromAttributes(Type type)
+        {
+            var pluginAttribute = (ESMEPluginAttribute)type.GetCustomAttributes(typeof(ESMEPluginAttribute), false)[0];
+            PluginType = pluginAttribute.PluginType;
+            Subtype = pluginAttribute.Subtype;
+            PluginName = pluginAttribute.Name;
+            PluginDescription = pluginAttribute.Description;
+        }
     }
+
+    [MetadataAttribute]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public class ESMEPluginAttribute : ExportAttribute
+    {
+        public ESMEPluginAttribute() : base(typeof(IESMEPlugin)) { }
+
+        public PluginType PluginType { get; set; }
+        public string Subtype { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+    }
+
 }

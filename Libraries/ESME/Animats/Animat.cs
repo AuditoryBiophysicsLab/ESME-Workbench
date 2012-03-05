@@ -23,7 +23,7 @@ namespace ESME.Animats
         #region Public Properties
 
         [XmlElement]
-        public EarthCoordinate3D Location { get; set; }
+        public Geo<float> Location { get; set; }
 
         [XmlElement]
         public ulong SpeciesID { get; set; }
@@ -61,17 +61,10 @@ namespace ESME.Animats
 
         #region constructors
 
-        public Animat(EarthCoordinate3D location, string speciesName)
+        public Animat(Geo<float> location, string speciesName)
             : this()
         {
             Location = location;
-            SpeciesName = speciesName;
-        }
-
-        public Animat(EarthCoordinate location, string speciesName)
-            : this()
-        {
-            Location = new EarthCoordinate3D(location);
             SpeciesName = speciesName;
         }
 
@@ -86,7 +79,7 @@ namespace ESME.Animats
 
         public Animat(mbsPosition position, Species species)
         {
-            Location = new EarthCoordinate3D(position.latitude, position.longitude, -position.depth);
+            Location = new Geo<float>(position.latitude, position.longitude, (float)(-position.depth));
             Species = species;
         }
 
@@ -110,17 +103,15 @@ namespace ESME.Animats
         public void SummarizeExposureToSpeciesBins()
         {
             if (LevelBins == null) return;
-            for (int source = 0; source < LevelBins.Length; source++)
+            for (var source = 0; source < LevelBins.Length; source++)
             {
-                for (int bin = LevelBins[source].Bins.Length - 1; bin >= 0; bin--)
+                for (var bin = LevelBins[source].Bins.Length - 1; bin >= 0; bin--)
                 {
-                    if (LevelBins[source].Bins[bin] > 0)
-                    {
-                        if (string.IsNullOrEmpty(Species.LevelBins[source].ModeName))
-                            Species.LevelBins[source].ModeName = LevelBins[source].ModeName;
-                        Species.LevelBins[source].Bins[bin]++;
-                        break;
-                    }
+                    if (LevelBins[source].Bins[bin] <= 0) continue;
+                    if (string.IsNullOrEmpty(Species.LevelBins[source].ModeName))
+                        Species.LevelBins[source].ModeName = LevelBins[source].ModeName;
+                    Species.LevelBins[source].Bins[bin]++;
+                    break;
                 }
             }
         }
@@ -130,7 +121,7 @@ namespace ESME.Animats
             Species.CreateLevelBins(sourceCount, lowReceiveLevel, binWidth, binCount);
             if (LevelBins != null) return;
             LevelBins = new SourceRecieverLevelBins[sourceCount];
-            for (int i = 0; i < sourceCount; i++)
+            for (var i = 0; i < sourceCount; i++)
                 LevelBins[i] = new SourceRecieverLevelBins(lowReceiveLevel, binWidth, binCount);
         }
 
@@ -139,7 +130,7 @@ namespace ESME.Animats
             var animat = new XElement("Animat");
             animat.Add(new XElement("AnimatID", AnimatID));
             var sources = new XElement("Sources");
-            for (int sourceID = 0; sourceID < LevelBins.Length; sourceID++)
+            for (var sourceID = 0; sourceID < LevelBins.Length; sourceID++)
             {
                 var source = new XElement("Source");
                 source.Add(new XElement("SourceID", sourceID));
@@ -170,7 +161,7 @@ namespace ESME.Animats
         public AnimatList(string animatScenarioFile)
         {
             mbsRESULT mbsResult;
-            mbsCONFIG config = _mmmbs.GetConfiguration();
+            var config = _mmmbs.GetConfiguration();
 
             //load the .sce file
             if (mbsRESULT.OK != (mbsResult = _mmmbs.LoadScenario(animatScenarioFile)))
@@ -180,11 +171,11 @@ namespace ESME.Animats
             _mmmbs.SetConfiguration(config);
 
             //get species count
-            int speciesCount = _mmmbs.GetSpeciesCount();
+            var speciesCount = _mmmbs.GetSpeciesCount();
 
             //make a species list.
             SpeciesList = new SpeciesList();
-            for (int i = 0; i < speciesCount; i++)
+            for (var i = 0; i < speciesCount; i++)
             {
                 SpeciesList.Add(new Species
                                     {
@@ -193,7 +184,7 @@ namespace ESME.Animats
                                     });
             }
             //set up the position array from the values in the .sce file (not the ones in animatList, which doesn't exist yet..)
-            int animatCount = _mmmbs.GetAnimatCount();
+            var animatCount = _mmmbs.GetAnimatCount();
             var posArray = new mbsPosition[animatCount];
 
             //initialize the run, and wait until it's fully initialized.
@@ -210,12 +201,12 @@ namespace ESME.Animats
                 throw new AnimatMMBSException("Error Fetching Initial Animat Coordinates: " +
                                               _mmmbs.MbsResultToString(mbsResult));
 
-            int speciesIndex = 0;
-            Species curSpecies = SpeciesList[speciesIndex];
-            int nextSpeciesAnimatIndex = curSpecies.ReferenceCount;
+            var speciesIndex = 0;
+            var curSpecies = SpeciesList[speciesIndex];
+            var nextSpeciesAnimatIndex = curSpecies.ReferenceCount;
             //add animats to each species. 
-            int curAnimatCount = 0;
-            for (int i = 0; i < posArray.Length; i++)
+            var curAnimatCount = 0;
+            for (var i = 0; i < posArray.Length; i++)
             {
                 if (i >= nextSpeciesAnimatIndex)
                 {
@@ -224,7 +215,7 @@ namespace ESME.Animats
                     curSpecies = SpeciesList[++speciesIndex];
                     nextSpeciesAnimatIndex += curSpecies.ReferenceCount;
                 }
-                mbsPosition mbsPosition = posArray[i];
+                var mbsPosition = posArray[i];
                 Add(new Animat(mbsPosition, curSpecies)
                         {
                             SpeciesName = curSpecies.SpeciesName,
@@ -240,7 +231,7 @@ namespace ESME.Animats
         public void AddAnimatList(XElement rootElement)
         {
             var animats = new XElement("Animats");
-            foreach (Animat a in this) a.AddAnimatRecord(animats);
+            foreach (var a in this) a.AddAnimatRecord(animats);
             rootElement.Add(animats);
         }
 
@@ -262,19 +253,19 @@ namespace ESME.Animats
         public new void RemoveAt(int index)
         {
             SpeciesList.RemoveReference(this[index].SpeciesName);
-            RemoveAt(index);
+            base.RemoveAt(index);
             Renumber();
         }
 
         public new void Clear()
         {
             SpeciesList.Clear();
-            Clear();
+            base.Clear();
         }
 
         private void Renumber()
         {
-            for (int i = 0; i < this.Count(); i++) this[i].AnimatID = i;
+            for (var i = 0; i < this.Count(); i++) this[i].AnimatID = i;
         }
 
         private new void AddRange(IEnumerable<Animat> collection)
@@ -298,7 +289,7 @@ namespace ESME.Animats
     {
         public string Filename { get; internal set; }
         public string LatinName { get; internal set; }
-        public List<EarthCoordinate> AnimatStartPoints { get; internal set; }
+        public List<Geo<float>> AnimatStartPoints { get; internal set; }
         public int TotalAnimats { get; internal set; }
         public static AnimatFile Load(string fileName, out string speciesName)
         {
@@ -377,8 +368,7 @@ namespace ESME.Animats
         public static DDB Load(string fileName)
         {
             if(Path.GetExtension(fileName) != ".ddb") throw new FileFormatException("only ddb files are supported.");
-            var result = new DDB();
-            result.Filename = fileName;
+            var result = new DDB {Filename = fileName};
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
                 //nuwc tests for header if 3mb here. (16 byte check)
@@ -436,7 +426,8 @@ namespace ESME.Animats
 
                     //  this.population = reader.ReadInt32();
                     result.ActualMammalPopulation = reader.ReadInt32();
-                    result.LatinName = reader.ReadString().TrimEnd('\0').Trim();
+                    result.LatinName = Encoding.ASCII.GetString(reader.ReadBytes(32)).TrimEnd('\0').Trim();
+                    //result.LatinName = reader.ReadString().TrimEnd('\0').Trim();
 
                     //  this.speciesName = new String(specName).trim();
 
@@ -616,22 +607,23 @@ namespace ESME.Animats
         private void ReadStartPositions(BinaryReader reader)
         {
             reader.BaseStream.Seek(1040, SeekOrigin.Begin); // skip the .ddb header
-            AnimatStartPoints = new List<EarthCoordinate>();
-            int datasize = GetSize(MbOutputConfiguration);
-            for (int i = 0; i < TotalAnimats; i++)
+            AnimatStartPoints = new List<Geo<float>>();
+            var datasize = GetSize(MbOutputConfiguration);
+            for (var i = 0; i < TotalAnimats; i++)
             {
                 //var id = reader.ReadSingle();
                 //var time = reader.ReadSingle();
                 reader.BaseStream.Seek(8, SeekOrigin.Current); //skip id and time
-                float lat = reader.ReadSingle();
-                float lon = reader.ReadSingle();
-                AnimatStartPoints.Add(new EarthCoordinate(lat, lon));
-                //AnimatStartPoints.Add(new EarthCoordinate(reader.ReadSingle(), reader.ReadSingle()));
+                var lat = reader.ReadSingle();
+                var lon = reader.ReadSingle();
+                //AnimatStartPoints.Add(new Geo(reader.ReadSingle(), reader.ReadSingle()));
                 //adds lat and lon.
-                reader.BaseStream.Seek(8 + datasize, SeekOrigin.Current);
-                    // skip depth, packedData, and the data itself.
+                //reader.BaseStream.Seek(8 + datasize, SeekOrigin.Current);
 
-                //var depth = reader.ReadSingle();
+                var depth = reader.ReadSingle();
+                AnimatStartPoints.Add(new Geo<float>(lat, lon, depth));
+                reader.BaseStream.Seek(4 + datasize, SeekOrigin.Current);
+                // skip packedData, and the data itself.
                 //var packedData = reader.ReadSingle();
                 //reader.BaseStream.Seek(datasize, SeekOrigin.Current);
 
@@ -646,9 +638,9 @@ namespace ESME.Animats
         /// <returns></returns>
         private static int GetSize(int bitmap)
         {
-            int size = 0;
+            var size = 0;
 
-            for (int i = 5; i < 22; i++)
+            for (var i = 5; i < 22; i++)
             {
                 if ((bitmap & (1 << i)) != 0)
                 {
@@ -688,7 +680,7 @@ namespace ESME.Animats
             internal set
             {
                 _outputConfiguration = value;
-                for (int i = 0; i < _bits.Length; i++)
+                for (var i = 0; i < _bits.Length; i++)
                 {
                     _bits[i] = (_outputConfiguration & (1 << i)) != 0;
                 }
@@ -782,7 +774,7 @@ namespace ESME.Animats
                 #region result.LatinName
                 var buf = reader.ReadBytes(32);
                 var end = false;
-                for (int i = 0; i < buf.Length; i++)
+                for (var i = 0; i < buf.Length; i++)
                 {
                     if (buf[i] == 0) end = true;
                     if (end) buf[i] = 0;
@@ -852,14 +844,14 @@ namespace ESME.Animats
         {
             //skip to where animat state data is
             reader.BaseStream.Seek((long)AnimatsState, SeekOrigin.Begin);
-            AnimatStartPoints = new List<EarthCoordinate>();
+            AnimatStartPoints = new List<Geo<float>>();
             //uint datasize = GetSize(OutputConfiguration);   
             for (var i = 0; i < TotalAnimats; i++) AnimatStartPoints.Add(ReadAnimat(reader));
         }
-        private EarthCoordinate ReadAnimat(BinaryReader reader)
+        private Geo<float> ReadAnimat(BinaryReader reader)
         {
-            float lat = float.MinValue;
-            float lon = float.MinValue;
+            var lat = float.MinValue;
+            var lon = float.MinValue;
             if (_bits[5])
             {
                 var id = reader.ReadSingle();
@@ -933,7 +925,7 @@ namespace ESME.Animats
             {
                 Debug.WriteLine("calculated depth: {0}", reader.ReadSingle());
             }
-            return new EarthCoordinate(lat, lon);
+            return new Geo<float>(lat, lon, 0);
         }
 #if false
         /// <summary>

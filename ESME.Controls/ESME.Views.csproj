@@ -97,12 +97,12 @@
       <DependentUpon>DataAxisControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\DataAxisControlViewModel.cs" />
-    <Compile Include="Controls\FileOrDirectorySetting.xaml.cs">
-      <DependentUpon>FileOrDirectorySetting.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="Controls\FileOrDirectorySetting.cs" />
     <Compile Include="Controls\HeaderedPropertyDisplayPopup.xaml.cs">
       <DependentUpon>HeaderedPropertyDisplayPopup.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\HiddenIfNull.cs" />
+    <Compile Include="Controls\PluginSelector.cs" />
     <Compile Include="Controls\ScatterPlot.xaml.cs">
       <DependentUpon>ScatterPlot.xaml</DependentUpon>
     </Compile>
@@ -236,10 +236,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\FileOrDirectorySetting.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Controls\HeaderedPropertyDisplayPopup.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -317,6 +313,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="TestView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\Generic.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

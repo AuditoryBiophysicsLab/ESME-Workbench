@@ -7,9 +7,9 @@ using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
-using ESMEWorkBench.Properties;
+using ESMEWorkbench.Properties;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {

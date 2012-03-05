@@ -1,10 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Cinch;
-using ESMEWorkBench.Data;
-using ESMEWorkBench.ViewModels.Main;
+using ESMEWorkbench.Data;
+using ESMEWorkbench.ViewModels.Main;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {
     class AcousticEngineParameterViewModel : ViewModelBase  
     {

@@ -3,17 +3,17 @@ using System.Windows;
 using Cinch;
 using ESME;
 using ESME.TransmissionLoss;
-using ESMEWorkBench.Data;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.TransmissionLoss;
+using ESMEWorkbench.Data;
+using ESMEWorkbench.Properties;
+using ESMEWorkbench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {
         [MediatorMessageSink(MediatorMessage.SetMouseEarthCoordinate)]
-        void SetMouseEarthCoordinate(EarthCoordinate mouseEarthCoordinate) { MouseEarthCoordinate = mouseEarthCoordinate; }
+        void SetMouseEarthCoordinate(Geo mouseEarthCoordinate) { MouseGeo = mouseEarthCoordinate; }
 
         [MediatorMessageSink(MediatorMessage.SetupAndRunQuickLookPoint)]
         void SetupAndRunQuickLookPoint(bool dummy)

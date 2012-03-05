@@ -6,11 +6,10 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Windows;
 using System.Xml.Serialization;
-using C5;
 using Cinch;
 using ESME.Environment.NAVO;
+using ESME.Plugins;
 using HRC.Collections;
 using HRC.Utility;
 using HRC.Validation;
@@ -50,6 +49,7 @@ namespace ESME.Data
             if (CASSSettings != null) CASSSettings.SetDefaults();
             if (RAMSettings != null) RAMSettings.SetDefaults();
             if (NAVOConfiguration != null) NAVOConfiguration.SetDefaults();
+            if (DefaultPluginConfigurations == null || DefaultPluginConfigurations.Count == 0) SetDefaultPluginConfiguration();
         }
 
         public void Save()
@@ -307,7 +307,7 @@ namespace ESME.Data
 
         #endregion
 
-        // This list is maintained by the ESME WorkBench.  When a new experiment is saved, the path to the experiment directory is added to this list
+        // This list is maintained by the ESME Workbench.  When a new experiment is saved, the path to the experiment directory is added to this list
         // Periodically, the VerifyExperimentsStillExist() method is called, which will prune directories that no longer exist.
         #region public List<string> ExperimentFiles { get; set; }
 
@@ -400,6 +400,86 @@ namespace ESME.Data
 
         #endregion
 
+        #region public List<DefaultPluginConfiguration> DefaultPluginConfigurations { get; set; }
+        public List<DefaultPluginConfiguration> DefaultPluginConfigurations
+        {
+            get { return _defaultPluginConfigurations; }
+            set { _defaultPluginConfigurations = value; }
+        }
+        List<DefaultPluginConfiguration> _defaultPluginConfigurations;
+
+        void SetDefaultPluginConfiguration()
+        {
+            DefaultPluginConfigurations = new List<DefaultPluginConfiguration>
+            {
+                new DefaultPluginConfiguration
+                {
+                    PluginType = PluginType.EnvironmentalDataSource,
+                    Subtype = "Wind",
+                    Type = typeof (NoWindData).ToString(),
+                },
+                new DefaultPluginConfiguration
+                {
+                    PluginType = PluginType.EnvironmentalDataSource,
+                    Subtype = "Sound Speed",
+                    Type = typeof (NoSoundSpeedData).ToString(),
+                },
+                new DefaultPluginConfiguration
+                {
+                    PluginType = PluginType.EnvironmentalDataSource,
+                    Subtype = "Sediment",
+                    Type = typeof (NoSedimentData).ToString(),
+                },
+                new DefaultPluginConfiguration
+                {
+                    PluginType = PluginType.EnvironmentalDataSource,
+                    Subtype = "Bathymetry",
+                    Type = typeof (NoBathymetryData).ToString(),
+                }
+
+            };
+        }
+        #endregion
+    }
+
+    public sealed class PluginSelection : ValidatingViewModel
+    {
+        #region public string DllFilename { get; set; }
+
+        public string DllFilename
+        {
+            get { return _dllFilename; }
+            set
+            {
+                if (_dllFilename == value) return;
+                _dllFilename = value;
+                NotifyPropertyChanged(DllFilenameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DllFilenameChangedEventArgs = ObservableHelper.CreateArgs<PluginSelection>(x => x.DllFilename);
+        string _dllFilename;
+
+        #endregion
+
+        #region public string ClassName { get; set; }
+
+        public string ClassName
+        {
+            get { return _className; }
+            set
+            {
+                if (_className == value) return;
+                _className = value;
+                NotifyPropertyChanged(ClassNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ClassNameChangedEventArgs = ObservableHelper.CreateArgs<PluginSelection>(x => x.ClassName);
+        string _className;
+
+        #endregion
+
     }
 
     public sealed class NAEMOTools : ValidatingViewModel
@@ -485,17 +565,17 @@ namespace ESME.Data
 
         public string RAMExecutable
         {
-            get { return _rAMExecutable; }
+            get { return _ramExecutable; }
             set
             {
-                if (_rAMExecutable == value) return;
-                _rAMExecutable = value;
+                if (_ramExecutable == value) return;
+                _ramExecutable = value;
                 NotifyPropertyChanged(RAMExecutableChangedEventArgs);
             }
         }
 
         static readonly PropertyChangedEventArgs RAMExecutableChangedEventArgs = ObservableHelper.CreateArgs<NAEMOTools>(x => x.RAMExecutable);
-        string _rAMExecutable;
+        string _ramExecutable;
 
         #endregion
 
@@ -589,21 +669,19 @@ namespace ESME.Data
 
         public void SetDefaults()
         {
-            if (CASSParameterFiles.Count == 0)
+            if (CASSParameterFiles.Count != 0) return;
+            CASSParameterFiles.Add(new CASSTemplate
             {
-                CASSParameterFiles.Add(new CASSTemplate
-                {
-                    FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "base_template.cass"),
-                    IsEnabled = true,
-                    MatchString = "",
-                });
-                CASSParameterFiles.Add(new CASSTemplate
-                {
-                    FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "fathometer_template.cass"),
-                    IsEnabled = true,
-                    MatchString = "Fathometer",
-                });
-            }
+                FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "base_template.cass"),
+                IsEnabled = true,
+                MatchString = "",
+            });
+            CASSParameterFiles.Add(new CASSTemplate
+            {
+                FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "fathometer_template.cass"),
+                IsEnabled = true,
+                MatchString = "Fathometer",
+            });
         }
 
         #region public bool GeneratePlotFiles { get; set; }
@@ -718,17 +796,17 @@ namespace ESME.Data
 
         public string CASSExecutablePath
         {
-            get { return _cASSExecutablePath; }
+            get { return _cassExecutablePath; }
             set
             {
-                if (_cASSExecutablePath == value) return;
-                _cASSExecutablePath = value;
+                if (_cassExecutablePath == value) return;
+                _cassExecutablePath = value;
                 NotifyPropertyChanged(CASSExecutablePathChangedEventArgs);
             }
         }
 
         static readonly PropertyChangedEventArgs CASSExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<CASSSettings>(x => x.CASSExecutablePath);
-        string _cASSExecutablePath;
+        string _cassExecutablePath;
 
         #endregion
 
@@ -739,7 +817,7 @@ namespace ESME.Data
             get { return _maximumDepth; }
             set
             {
-                if (_maximumDepth == value) return;
+                if (Math.Abs(_maximumDepth - value) < 0.0001) return;
                 _maximumDepth = value;
                 NotifyPropertyChanged(MaximumDepthChangedEventArgs);
             }
@@ -757,7 +835,7 @@ namespace ESME.Data
             get { return _depthStepSize; }
             set
             {
-                if (_depthStepSize == value) return;
+                if (Math.Abs(_depthStepSize - value) < 0.0001) return;
                 _depthStepSize = value;
                 NotifyPropertyChanged(DepthStepSizeChangedEventArgs);
             }
@@ -775,7 +853,7 @@ namespace ESME.Data
             get { return _rangeStepSize; }
             set
             {
-                if (_rangeStepSize == value) return;
+                if (Math.Abs(_rangeStepSize - value) < 0.0001) return;
                 _rangeStepSize = value;
                 NotifyPropertyChanged(RangeStepSizeChangedEventArgs);
             }
@@ -811,7 +889,7 @@ namespace ESME.Data
 
         public SimpleCommand<object, object> AddCASSParameterFileCommand
         {
-            get { return _addCASSParameterFile ?? (_addCASSParameterFile = new SimpleCommand<object, object>(delegate { CASSParameterFiles.Add(new CASSTemplate() { }); })); }
+            get { return _addCASSParameterFile ?? (_addCASSParameterFile = new SimpleCommand<object, object>(delegate { CASSParameterFiles.Add(new CASSTemplate()); })); }
         }
 
         SimpleCommand<object, object> _addCASSParameterFile;
@@ -926,7 +1004,7 @@ namespace ESME.Data
             get { return _maximumDepth; }
             set
             {
-                if (_maximumDepth == value) return;
+                if (Math.Abs(_maximumDepth - value) < 0.0001) return;
                 _maximumDepth = value;
                 NotifyPropertyChanged(MaximumDepthChangedEventArgs);
             }
@@ -944,7 +1022,7 @@ namespace ESME.Data
             get { return _depthStepSize; }
             set
             {
-                if (_depthStepSize == value) return;
+                if (Math.Abs(_depthStepSize - value) < 0.0001) return;
                 _depthStepSize = value;
                 NotifyPropertyChanged(DepthCellSizeChangedEventArgs);
             }
@@ -962,7 +1040,7 @@ namespace ESME.Data
             get { return _maximumRange; }
             set
             {
-                if (_maximumRange == value) return;
+                if (Math.Abs(_maximumRange - value) < 0.0001) return;
                 _maximumRange = value;
                 NotifyPropertyChanged(MaximumRangeChangedEventArgs);
             }
@@ -980,7 +1058,7 @@ namespace ESME.Data
             get { return _rangeStepSize; }
             set
             {
-                if (_rangeStepSize == value) return;
+                if (Math.Abs(_rangeStepSize - value) < 0.0001) return;
                 _rangeStepSize = value;
                 NotifyPropertyChanged(RangeCellSizeChangedEventArgs);
             }
@@ -1090,7 +1168,7 @@ namespace ESME.Data
             get { return _defaultMinimumRange; }
             set
             {
-                if (_defaultMinimumRange == value) return;
+                if (Math.Abs(_defaultMinimumRange - value) < 0.0001) return;
                 _defaultMinimumRange = value;
                 NotifyPropertyChanged(DefaultMinimumRangeChangedEventArgs);
                 NotifyPropertyChanged(DefaultMaximumRangeChangedEventArgs);
@@ -1109,7 +1187,7 @@ namespace ESME.Data
             get { return _defaultMaximumRange; }
             set
             {
-                if (_defaultMaximumRange == value) return;
+                if (Math.Abs(_defaultMaximumRange - value) < 0.0001) return;
                 _defaultMaximumRange = value;
                 NotifyPropertyChanged(DefaultMaximumRangeChangedEventArgs);
                 NotifyPropertyChanged(DefaultMinimumRangeChangedEventArgs);
@@ -1146,7 +1224,7 @@ namespace ESME.Data
             get { return _minimumDepth; }
             set
             {
-                if (_minimumDepth == value) return;
+                if (Math.Abs(_minimumDepth - value) < 0.0001) return;
                 _minimumDepth = value;
                 NotifyPropertyChanged(MinimumDepthChangedEventArgs);
             }
@@ -1182,7 +1260,7 @@ namespace ESME.Data
             get { return _splCutoffSingleSource; }
             set
             {
-                if (_splCutoffSingleSource == value) return;
+                if (Math.Abs(_splCutoffSingleSource - value) < 0.0001) return;
                 _splCutoffSingleSource = value;
                 NotifyPropertyChanged(SPLCutoffSingleSourceChangedEventArgs);
             }
@@ -1200,7 +1278,7 @@ namespace ESME.Data
             get { return _splCutoffMultiSource; }
             set
             {
-                if (_splCutoffMultiSource == value) return;
+                if (Math.Abs(_splCutoffMultiSource - value) < 0.0001) return;
                 _splCutoffMultiSource = value;
                 NotifyPropertyChanged(SPLCutoffMultiSourceChangedEventArgs);
             }
@@ -1438,7 +1516,7 @@ namespace ESME.Data
             get { return _decibelCutoff; }
             set
             {
-                if (_decibelCutoff == value) return;
+                if (Math.Abs(_decibelCutoff - value) < 0.0001) return;
                 _decibelCutoff = value;
                 NotifyPropertyChanged(DecibelCutoffChangedEventArgs);
             }
@@ -1507,17 +1585,17 @@ namespace ESME.Data
 
         public int CASSFileSize
         {
-            get { return _cASSFileSize; }
+            get { return _cassFileSize; }
             set
             {
-                if (_cASSFileSize == value) return;
-                _cASSFileSize = value;
+                if (_cassFileSize == value) return;
+                _cassFileSize = value;
                 NotifyPropertyChanged(CASSFileSizeChangedEventArgs);
             }
         }
 
         static readonly PropertyChangedEventArgs CASSFileSizeChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.CASSFileSize);
-        int _cASSFileSize = 1024;
+        int _cassFileSize = 1024;
 
         #endregion
 
@@ -1612,7 +1690,7 @@ namespace ESME.Data
             get { return _maximumDepth; }
             set
             {
-                if (_maximumDepth == value) return;
+                if (Math.Abs(_maximumDepth - value) < 0.0001) return;
                 _maximumDepth = value;
                 NotifyPropertyChanged(MaximumDepthChangedEventArgs);
             }
@@ -1630,7 +1708,7 @@ namespace ESME.Data
             get { return _rangeCellSize; }
             set
             {
-                if (_rangeCellSize == value) return;
+                if (Math.Abs(_rangeCellSize - value) < 0.0001) return;
                 _rangeCellSize = value;
                 NotifyPropertyChanged(RangeCellSizeChangedEventArgs);
             }
@@ -1648,7 +1726,7 @@ namespace ESME.Data
             get { return _depthCellSize; }
             set
             {
-                if (_depthCellSize == value) return;
+                if (Math.Abs(_depthCellSize - value) < 0.0001) return;
                 _depthCellSize = value;
                 NotifyPropertyChanged(DepthCellSizeChangedEventArgs);
             }

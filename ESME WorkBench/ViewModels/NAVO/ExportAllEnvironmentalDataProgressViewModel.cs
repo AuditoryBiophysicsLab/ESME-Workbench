@@ -15,7 +15,7 @@ using HRC.Navigation;
 using HRC.Utility;
 using RangeComplex = ESME.Environment.Descriptors.RangeComplex;
 
-namespace ESMEWorkBench.ViewModels.NAVO
+namespace ESMEWorkbench.ViewModels.NAVO
 {
     public class ExportAllEnvironmentalDataProgressViewModel:ViewModelBase
     {
@@ -102,19 +102,21 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
                 TaskEx.WhenAll(windTask, soundSpeedTask).ContinueWith(task2 =>
                 {
-                    var soundSpeedProfiles = new List<SoundSpeedProfile>();
+                    var soundSpeedProfiles = new List<SoundSpeedProfileGeneric<SoundSpeedSample>>();
                     var windSamples = new List<WindSample>();
                     foreach (var location in locations)
                     {
                         soundSpeedProfiles.Add(soundSpeedTask.Result[period].EnvironmentData.GetNearestPoint(location));
                         windSamples.Add((windTask.Result[period].EnvironmentData.GetNearestPoint(location)));
                     }
+#if IS_CLASSIFIED_MODEL
                     CASSFiles.WriteEnvironmentFiles(period, locations, cassEnvironmentFileName, sedimentList, soundSpeedProfiles, windSamples, bathyFileName, area.Name + ".ovr", bottomLossList);
                     if (environmentProgress != null) environmentProgress.Report(new ProgressInfoInt
                     {
                         MaximumValue = environmentMax,
                         CurrentValue = Interlocked.Add(ref environmentCount, _environmentFileCountMultiplier),
                     });
+#endif
                 });
 
             }, new ExecutionDataflowBlockOptions

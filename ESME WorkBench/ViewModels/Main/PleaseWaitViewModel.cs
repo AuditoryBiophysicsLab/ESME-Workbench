@@ -2,7 +2,7 @@
 using System.Windows;
 using Cinch;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     public class PleaseWaitViewModel : ViewModelBase
     {

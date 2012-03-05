@@ -9,7 +9,7 @@ using ESME.Environment;
 using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {
     [ExportViewModel("EnvironmentBuilderViewModel")]
     class ExportOptionsViewModel : ViewModelBase

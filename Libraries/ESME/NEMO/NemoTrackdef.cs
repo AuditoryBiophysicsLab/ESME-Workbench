@@ -24,7 +24,7 @@ namespace ESME.NEMO
             InitialSpeed = GetFloat("initialSpeed");
             LimitFileName = GetString("limitFileName");
 
-            InitialLocation = new EarthCoordinate3D(InitialLatitude, InitialLongitude, InitialHeight);
+            InitialLocation = new Geo<float>(InitialLatitude, InitialLongitude, InitialHeight);
             EndTime = StartTime + Duration;
             if (!string.IsNullOrEmpty(LimitFileName)) OverlayFile = new OverlayFile(Path.Combine(Path.Combine(scenarioDirectory, "Areas"), LimitFileName));
         }
@@ -61,7 +61,7 @@ namespace ESME.NEMO
         public float InitialSpeed { get; private set; }
         public string LimitFileName { get; private set; }
 
-        public EarthCoordinate3D InitialLocation { get; private set; }
+        public Geo<float> InitialLocation { get; private set; }
         public DateTime EndTime { get; private set; }
         public OverlayFile OverlayFile { get; private set; }
         //public OverlayPoint StartPoint { get; private set; }

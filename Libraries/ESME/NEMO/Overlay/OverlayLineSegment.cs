@@ -7,12 +7,12 @@ namespace ESME.NEMO.Overlay
 {
     public class OverlayLineSegment : OverlayShape
     {
-        public OverlayLineSegment(EarthCoordinate p1, EarthCoordinate p2)
+        public OverlayLineSegment(Geo p1, Geo p2)
             : this(p1, p2, Colors.Black, 1f, LineStyle.Solid)
         {
         }
 
-        public OverlayLineSegment(EarthCoordinate p1, EarthCoordinate p2, Color color, float width, LineStyle lineStyle)
+        public OverlayLineSegment(Geo p1, Geo p2, Color color, float width, LineStyle lineStyle)
             : base(color, width, lineStyle)
         {
             Add(p1);
@@ -26,10 +26,10 @@ namespace ESME.NEMO.Overlay
 
         public override string ToString()
         {
-            return String.Format(" Start: ({0}, {1})\n    End: ({2}, {3})\nLength: {4}m\nCourse: {5}deg",
+            return String.Format(" Start: ({0}, {1})\n    End: ({2}, {3})\nLength: {4}km\nCourse: {5}deg",
                                  this[0].Latitude, this[0].Longitude,
                                  this[1].Latitude, this[1].Longitude,
-                                 this[0].DistanceTo(this[1]),
+                                 this[0].DistanceKilometers(this[1]),
                                  Course.Degrees);
         }
 
@@ -37,14 +37,14 @@ namespace ESME.NEMO.Overlay
         {
             get
             {
-                if (_earthCoordinates.Count < 2) return null;
+                if (_geos.Count < 2) return null;
                 if (MyWellKnownText == null)
                 {
                     var retval = new StringBuilder();
                     retval.Append("LINESTRING(");
-                    foreach (var coord in _earthCoordinates)
+                    foreach (var coord in _geos)
                         retval.Append(string.Format("{0} {1}, ", coord.Latitude, coord.Longitude));
-                    retval.Append(string.Format("{0} {1}, ", _earthCoordinates[0].Latitude, _earthCoordinates[0].Longitude));
+                    retval.Append(string.Format("{0} {1}, ", _geos[0].Latitude, _geos[0].Longitude));
                     retval.Remove(retval.Length - 2, 2); // Lose the last comma and space
                     retval.Append(")");
                     MyWellKnownText = retval.ToString();
@@ -69,11 +69,11 @@ namespace ESME.NEMO.Overlay
         /// <summary>
         /// Returns the midpoint of the segment
         /// </summary>
-        internal EarthCoordinate Midpoint
+        internal Geo Midpoint
         {
             get
             {
-                return new EarthCoordinate(
+                return new Geo(
                     (this[0].Latitude + this[1].Latitude)/2.0,
                     (this[0].Longitude + this[1].Longitude)/2.0);
             }
@@ -127,16 +127,16 @@ namespace ESME.NEMO.Overlay
             if (IsColinearWith(that))
             {
                 // If they are colinear, check if our bounding box contains either of the other segment's endpoints
-                if (BoundingBox.Contains(that._earthCoordinates[0]) ||
-                    (BoundingBox.Contains(that._earthCoordinates[1])))
+                if (BoundingBox.Contains(that._geos[0]) ||
+                    (BoundingBox.Contains(that._geos[1])))
                     // If it does, we overlap the other segment
                     return true;
 
                 // If it doesn't, then check if the other segment overlaps us.  This can happen if the other segment
                 // completely contains us, and is also longer than us. If that turns out to be the case, then one or
                 // both of our endpoints will be contained in the other segment's bounding box.
-                if (that.BoundingBox.Contains(_earthCoordinates[0]) ||
-                    (that.BoundingBox.Contains(_earthCoordinates[1])))
+                if (that.BoundingBox.Contains(_geos[0]) ||
+                    (that.BoundingBox.Contains(_geos[1])))
                     // If it does, we overlap the other segment
                     return true;
             }
@@ -152,12 +152,12 @@ namespace ESME.NEMO.Overlay
         {
             if (IsVertical && that.IsVertical)
             {
-                if (_earthCoordinates[0].Longitude == that._earthCoordinates[0].Longitude)
+                if (Math.Abs(_geos[0].Longitude - that._geos[0].Longitude) < 0.0001)
                     return true;
             }
             if (IsParallelTo(that))
             {
-                if (_b == that._b)
+                if (Math.Abs(_b - that._b) < 0.0001)
                     return true;
             }
             return false;
@@ -172,7 +172,7 @@ namespace ESME.NEMO.Overlay
         {
             if (IsVertical && that.IsVertical)
                 return true;
-            if (_m == that._m)
+            if (Math.Abs(_m - that._m) < 0.0001)
                 return true;
             return false;
         }
@@ -190,7 +190,7 @@ namespace ESME.NEMO.Overlay
             IsVertical = IsHorizontal = false;
 
             // If both X values are NOT the same
-            if (this[0].Longitude != this[1].Longitude)
+            if (Math.Abs(this[0].Longitude - this[1].Longitude) > 0.0001)
             {
                 // Classic linear equation:
                 // y = m * x + b
@@ -203,7 +203,7 @@ namespace ESME.NEMO.Overlay
                 // and its' y-intercept
                 _b = this[0].Latitude - (_m*this[0].Longitude);
 
-                if (_m == 0.0)
+                if (Math.Abs(_m - 0.0) < 0.0001)
                     IsHorizontal = true;
             }
             else
@@ -239,7 +239,7 @@ namespace ESME.NEMO.Overlay
             return (y - _b)/_m;
         }
 
-        public EarthCoordinate IntersectionPoint(OverlayLineSegment that)
+        public Geo IntersectionPoint(OverlayLineSegment that)
         {
             if (IsParallelTo(that))
             {
@@ -258,9 +258,9 @@ namespace ESME.NEMO.Overlay
             // Now we will figure out exactly where.
 
             if (IsVertical)
-                return new EarthCoordinate(that.Y(this[0].Longitude), this[0].Longitude);
+                return new Geo(that.Y(this[0].Longitude), this[0].Longitude);
             if (that.IsVertical)
-                return new EarthCoordinate(Y(that[0].Longitude), that[0].Longitude);
+                return new Geo(Y(that[0].Longitude), that[0].Longitude);
             //if (this.IsHorizontal)
             //    return new PointF(that.X(this.Points[0].Y), this.Points[0].Y);
 
@@ -279,12 +279,12 @@ namespace ESME.NEMO.Overlay
             // either one of our line equations.  Arbitrarily, we'll pick the first one.
             var yIntersect = Y(xIntersect);
 
-            return new EarthCoordinate(yIntersect, xIntersect);
+            return new Geo(yIntersect, xIntersect);
 
             //return new PointF((float)xIntersect, (float)yIntersect);
         }
 
-        public override bool Contains(EarthCoordinate pointToTest)
+        public override bool Contains(Geo pointToTest)
         {
             var verticalMatch = false;
             var horizontalMatch = false;

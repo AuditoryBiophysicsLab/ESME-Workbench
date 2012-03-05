@@ -146,7 +146,7 @@ namespace ESME.Views.TransmissionLossViewer
         bool _isRendered;
         TransmissionLossRadial _tempRadial;
         WriteableBitmap _writeableBitmap;
-        EarthCoordinate _location;
+        Geo _location;
 
 
         [ImportingConstructor]
@@ -187,7 +187,7 @@ namespace ESME.Views.TransmissionLossViewer
         void TransmissionLossRadialColorMapChanged(ColorMapViewModel colorMapViewModel) { ColorMapViewModel = colorMapViewModel; }
 
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialEarthCoordinate)]
-        void TransmissionLossRadialEarthCoordinate(EarthCoordinate location) { _location = location; }
+        void TransmissionLossRadialEarthCoordinate(Geo location) { _location = location; }
 
         [MediatorMessageSink(MediatorMessage.SetTransmissionLossBathymetry)]
         void SetTransmissionLossBathymetry(Bathymetry bathymetry)

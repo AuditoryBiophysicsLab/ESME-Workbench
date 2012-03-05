@@ -7,7 +7,7 @@
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
   <?define ESMERoot="C:\Projects\ESME Deliverables"?>
-  <?define ESMEPath="$(var.ESMERoot)\ESME WorkBench\bin\Release"?>
+  <?define ESMEPath="$(var.ESMERoot)\ESME Workbench\bin\Release"?>
   <?define HDFPath="$(var.ESMERoot)\Libraries\ESME\External References"?>
   <?define ESMEViewsPath="$(var.ESMERoot)\ESME.Controls\bin\Release"?>
   <?define BellhopPath="$(var.ESMERoot)\Utilities\bellhop"?>
@@ -87,13 +87,13 @@
               </Extension>
             </ProgId>
             <!-- Core ESME executables and assemblies -->
-            <File Id="ESMEWorkBench.exe"
-                  Name="ESMEWorkBench.exe"
-                  Source="$(var.ESMEPath)\ESMEWorkBench.exe"
+            <File Id="ESMEWorkbench.exe"
+                  Name="ESMEWorkbench.exe"
+                  Source="$(var.ESMEPath)\ESMEWorkbench.exe"
                   KeyPath="yes"/>
-            <File Id="ESMEWorkBench.exe.config"
-                  Name="ESMEWorkBench.exe.config"
-                  Source="$(var.ESMEPath)\ESMEWorkBench.exe.config" />
+            <File Id="ESMEWorkbench.exe.config"
+                  Name="ESMEWorkbench.exe.config"
+                  Source="$(var.ESMEPath)\ESMEWorkbench.exe.config" />
             <File Id="ESME.dll"
                   Name="ESME.dll"
                   Source="$(var.ESMEPath)\ESME.dll" />
@@ -251,7 +251,7 @@
                       Directory="ProgramMenuDir"
                       Name="$(var.ProductName)"
                       WorkingDirectory="APPLICATIONFOLDER"
-                      Target="[APPLICATIONFOLDER]ESMEWorkBench.exe"
+                      Target="[APPLICATIONFOLDER]ESMEWorkbench.exe"
                       Advertise="no" />
             <Shortcut Id="TransmissionLossViewer_Shortcut"
                       Directory="ProgramMenuDir"
@@ -293,7 +293,7 @@
                       Directory="DesktopFolder"
                       Name="$(var.ProductName)"
                       WorkingDirectory="APPLICATIONFOLDER"
-                      Target="[APPLICATIONFOLDER]ESMEWorkBench.exe"
+                      Target="[APPLICATIONFOLDER]ESMEWorkbench.exe"
                       Advertise="no" />
             <Shortcut Id="UninstallProduct"
                       Directory="ProgramMenuDir"

@@ -7,7 +7,7 @@ using System.Windows.Threading;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {
 #if false
     public class BellhopRadialCalculatorViewModel : TransmissionLossRadialCalculatorViewModel

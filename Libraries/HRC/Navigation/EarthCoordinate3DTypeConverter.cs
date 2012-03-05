@@ -6,6 +6,7 @@ using Point = System.Windows.Point;
 
 namespace HRC.Navigation
 {
+#if false
     public class EarthCoordinate3DTypeConverter : TypeConverter
     {
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -136,4 +137,5 @@ namespace HRC.Navigation
 
         #endregion
     }
+#endif
 }

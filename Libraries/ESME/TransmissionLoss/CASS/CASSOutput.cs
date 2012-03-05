@@ -17,7 +17,7 @@ using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.TransmissionLoss.CASS
 {
-    public class CASSOutput : EarthCoordinate, IEquatable<AcousticProperties>, ISupportValidation
+    public class CASSOutput : Geo, IEquatable<AcousticProperties>, ISupportValidation
     {
         #region Public Properties
 
@@ -244,7 +244,7 @@ namespace ESME.TransmissionLoss.CASS
 
             foreach (var radialBearing in RadialBearings)
             {
-                var radialEndPoint = new EarthCoordinate(this, radialBearing, MaxRangeDistance);
+                var radialEndPoint = new Geo(this, radialBearing, MaxRangeDistance);
                 if (!bathymetry.Samples.GeoRect.Contains(radialEndPoint))
                 {
                     //Console.WriteLine("Source name {0} location ({1}, {2}) bearing {3} endpoint ({4}, {5}) outside of bathymetry", Name, Latitude, Longitude, radialBearing, radialEndPoint.Latitude, radialEndPoint.Longitude);

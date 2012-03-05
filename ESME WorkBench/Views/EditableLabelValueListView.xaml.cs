@@ -1,4 +1,4 @@
-﻿namespace ESMEWorkBench.Views
+﻿namespace ESMEWorkbench.Views
 {
     /// <summary>
     /// Interaction logic for EditableLabelValueListView.xaml

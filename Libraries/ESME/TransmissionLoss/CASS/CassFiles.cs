@@ -14,6 +14,7 @@ using RangeComplex = ESME.Environment.Descriptors.RangeComplex;
 
 namespace ESME.TransmissionLoss.CASS
 {
+#if IS_CLASSIFIED_MODEL
     public static class CASSFiles
     {
         public static void WriteAcousticSimulatorFiles(AppSettings appSettings, IEnumerable<string> timePeriods, 
@@ -61,32 +62,30 @@ namespace ESME.TransmissionLoss.CASS
                                                let soundSourceMode = psmFields[2]
                                                where (platform.Name.ToLower() == soundSourcePlatform.ToLower()) && (source.Name.ToLower() == soundSourceSource.ToLower()) && (mode.Name.ToLower() == soundSourceMode.ToLower()) && (soundSource.ShouldBeCalculated)
                                                select soundSource).ToList();
-                            if (modeSources.Count > 0)
+                            if (modeSources.Count <= 0) continue;
+                            var thisModel = modeToAcousticModelNameMap[modeSources[0].Name];
+                            switch (thisModel)
                             {
-                                var thisModel = modeToAcousticModelNameMap[modeSources[0].Name];
-                                switch (thisModel)
-                                {
-                                    case TransmissionLossAlgorithm.CASS:
-                                    case TransmissionLossAlgorithm.RAM:
+                                case TransmissionLossAlgorithm.CASS:
+                                case TransmissionLossAlgorithm.RAM:
                                     //case TransmissionLossAlgorithm.REFMS:
-                                        WriteAcousticSimulatorFiles(curTimePeriodPath, platform, source, mode, modeSources, thisModel, timePeriod, appSettings, nemoFile, cassBathymetryFileName, cassEnvironmentFileName, rangeComplex);
-                                        break;
-                                    case TransmissionLossAlgorithm.Bellhop:
-                                    case TransmissionLossAlgorithm.RAMGEO:
-                                        foreach (var curSource in modeSources)
-                                        {
-                                            var runFile = TransmissionLossRunFile.Create(thisModel, curSource,
-                                                                                         nemoFile.Scenario.SimAreaName,
-                                                                                         rangeComplexes,
-                                                                                         platform.Name, source.Name, mode.Name,
-                                                                                         timePeriod, rangeComplex);
-                                            var runFileName = Path.Combine(curTimePeriodPath, runFile.Filename);
-                                            // todo: If the file already exists, load it and see if it's the same as the one we just
-                                            // created.  If it is, don't write a new one.
-                                            if (!File.Exists(runFileName)) runFile.Save(runFileName);
-                                        }
-                                        break;
-                                }
+                                    WriteAcousticSimulatorFiles(curTimePeriodPath, platform, source, mode, modeSources, thisModel, timePeriod, appSettings, nemoFile, cassBathymetryFileName, cassEnvironmentFileName, rangeComplex);
+                                    break;
+                                case TransmissionLossAlgorithm.Bellhop:
+                                case TransmissionLossAlgorithm.RAMGEO:
+                                    foreach (var curSource in modeSources)
+                                    {
+                                        var runFile = TransmissionLossRunFile.Create(thisModel, curSource,
+                                                                                     nemoFile.Scenario.SimAreaName,
+                                                                                     rangeComplexes,
+                                                                                     platform.Name, source.Name, mode.Name,
+                                                                                     timePeriod, rangeComplex);
+                                        var runFileName = Path.Combine(curTimePeriodPath, runFile.Filename);
+                                        // todo: If the file already exists, load it and see if it's the same as the one we just
+                                        // created.  If it is, don't write a new one.
+                                        if (!File.Exists(runFileName)) runFile.Save(runFileName);
+                                    }
+                                    break;
                             }
                         }
                     }
@@ -103,10 +102,7 @@ namespace ESME.TransmissionLoss.CASS
                 {
                     File.Delete(matchingFile);
                 }
-                catch (Exception)
-                {
-                    continue;
-                }
+                catch (Exception) {}
         }
 
         public static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, TransmissionLossAlgorithm simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName, string cassEnvironmentFileName, RangeComplex rangeComplex)
@@ -196,7 +192,7 @@ namespace ESME.TransmissionLoss.CASS
                         stepCount = appSettings.RAMSettings.MaximumDepth / appSettings.RAMSettings.DepthStepSize;
                         if (stepCount > 19) stepSize = appSettings.RAMSettings.MaximumDepth / 19;
                         else stepSize = appSettings.RAMSettings.DepthStepSize;
-                        if (Math.Floor(stepSize) != stepSize) stepSize = (float)Math.Ceiling(stepSize);
+                        if (Math.Abs(Math.Floor(stepSize) - stepSize) > 0.0001) stepSize = (float)Math.Ceiling(stepSize);
                         writer.WriteLine("Water Depth                             ,0 M, {0} M, {1} M", appSettings.RAMSettings.MaximumDepth, stepSize);
                         break;
                     //case TransmissionLossAlgorithm.CASS:
@@ -205,7 +201,7 @@ namespace ESME.TransmissionLoss.CASS
                         stepCount = appSettings.CASSSettings.MaximumDepth / appSettings.CASSSettings.DepthStepSize;
                         if (stepCount > 1024) stepSize = appSettings.CASSSettings.MaximumDepth / 1024;
                         else stepSize = appSettings.CASSSettings.DepthStepSize;
-                        if (Math.Floor(stepSize) != stepSize) stepSize = (float)Math.Ceiling(stepSize);
+                        if (Math.Abs(Math.Floor(stepSize) - stepSize) > 0.0001) stepSize = (float)Math.Ceiling(stepSize);
                         writer.WriteLine("Water Depth                             ,0 M, {0} M, {1} M", appSettings.CASSSettings.MaximumDepth, stepSize);
                         break;
                 }
@@ -233,7 +229,7 @@ namespace ESME.TransmissionLoss.CASS
                         stepCount = mode.Radius / appSettings.RAMSettings.RangeStepSize;
                         if (stepCount > 999) stepSize = mode.Radius / 999;
                         else stepSize = appSettings.RAMSettings.RangeStepSize;
-                        if (Math.Floor(stepSize) != stepSize) stepSize = (float)Math.Ceiling(stepSize);
+                        if (Math.Abs(Math.Floor(stepSize) - stepSize) > 0.0001) stepSize = (float)Math.Ceiling(stepSize);
                         writer.WriteLine("Range Distance                          ,{0} M, {1} M, {0} M", stepSize, mode.Radius);
                         break;
                     //case TransmissionLossAlgorithm.CASS:
@@ -242,7 +238,7 @@ namespace ESME.TransmissionLoss.CASS
                         stepCount = mode.Radius / appSettings.CASSSettings.RangeStepSize;
                         if (stepCount > 1024) stepSize = mode.Radius / 1024;
                         else stepSize = appSettings.CASSSettings.RangeStepSize;
-                        if (Math.Floor(stepSize) != stepSize) stepSize = (float)Math.Ceiling(stepSize);
+                        if (Math.Abs(Math.Floor(stepSize) - stepSize) > 0.0001) stepSize = (float)Math.Ceiling(stepSize);
                         writer.WriteLine("Range Distance                          ,{0} M, {1} M, {0} M", stepSize, mode.Radius);
                         break;
                 }
@@ -275,7 +271,7 @@ namespace ESME.TransmissionLoss.CASS
                                                  SoundSpeedField soundSpeedField, TimePeriodEnvironmentData<WindSample> wind, string bathymetryFileName,
                                                  string overlayFileName, EnvironmentData<BottomLossSample> bottomLossSamples)
         {
-            var soundSpeedProfiles = new List<SoundSpeedProfile>();
+            var soundSpeedProfiles = new List<SoundSpeedProfileGeneric<SoundSpeedSample>>();
             var windSamples = new List<WindSample>();
             var sedimentPoints = new List<SedimentSample>();
             var bottomLossPoints = new List<BottomLossSample>();
@@ -284,24 +280,23 @@ namespace ESME.TransmissionLoss.CASS
             double lat, lon;
             for (lon = geoRect.West; lon < geoRect.East; lon += 0.25)
             {
+                Geo curLocation;
                 for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
                 {
-                    var curLocation = new Geo(lat, lon);
+                    curLocation = new Geo(lat, lon);
                     soundSpeedProfiles.Add(soundSpeedField.EnvironmentData.GetNearestPoint(curLocation));
                     windSamples.Add((wind.EnvironmentData.GetNearestPoint(curLocation)));
                     sedimentPoints.Add(sedimentType.Samples.GetNearestPoint(curLocation));
                     requestedLocations.Add(curLocation);
                     if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples.GetNearestPoint(curLocation));
                 }
-                if ((lat - geoRect.North) < 0.125)
-                {
-                    var curLocation = new Geo(lat, lon);
-                    soundSpeedProfiles.Add(soundSpeedField.EnvironmentData.GetNearestPoint(curLocation));
-                    windSamples.Add((wind.EnvironmentData.GetNearestPoint(curLocation)));
-                    sedimentPoints.Add(sedimentType.Samples.GetNearestPoint(curLocation));
-                    requestedLocations.Add(curLocation);
-                    if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples.GetNearestPoint(curLocation));
-                }
+                if ((lat - geoRect.North) >= 0.125) continue;
+                curLocation = new Geo(lat, lon);
+                soundSpeedProfiles.Add(soundSpeedField.EnvironmentData.GetNearestPoint(curLocation));
+                windSamples.Add((wind.EnvironmentData.GetNearestPoint(curLocation)));
+                sedimentPoints.Add(sedimentType.Samples.GetNearestPoint(curLocation));
+                requestedLocations.Add(curLocation);
+                if (bottomLossSamples != null && bottomLossSamples.Count > 0) bottomLossPoints.Add(bottomLossSamples.GetNearestPoint(curLocation));
             }
             if ((lon - geoRect.East) < 0.125)
             {
@@ -319,7 +314,7 @@ namespace ESME.TransmissionLoss.CASS
         }
 
         public static void WriteEnvironmentFiles(TimePeriod timePeriod, IList<Geo> requestedLocations, string environmentFileName, IList<SedimentSample> sedimentPoints,
-                                                 IList<SoundSpeedProfile> soundSpeedProfiles, IList<WindSample> windSamples, string bathymetryFileName,
+                                                 IList<SoundSpeedProfileGeneric<SoundSpeedSample>> soundSpeedProfiles, IList<WindSample> windSamples, string bathymetryFileName,
                                                  string overlayFileName, IList<BottomLossSample> bottomLossPoints)
         {
             WriteEnvironmentFileHeader(timePeriod, requestedLocations, environmentFileName, sedimentPoints, soundSpeedProfiles, windSamples, bathymetryFileName, overlayFileName, "HFEVA", bottomLossPoints);
@@ -330,7 +325,7 @@ namespace ESME.TransmissionLoss.CASS
         }
 
         static void WriteEnvironmentFileHeader(TimePeriod timePeriod, IList<Geo> requestedLocations, string environmentFileName, IList<SedimentSample> sedimentList,
-                                         IList<SoundSpeedProfile> soundSpeedList, IList<WindSample> windList, string bathymetryFileName,
+                                         IList<SoundSpeedProfileGeneric<SoundSpeedSample>> soundSpeedList, IList<WindSample> windList, string bathymetryFileName,
                                          string overlayFileName, string model, IList<BottomLossSample> bottomLossList)
         {
             if (File.Exists(environmentFileName + ".dat")) return;
@@ -352,9 +347,9 @@ namespace ESME.TransmissionLoss.CASS
             }
         }
 
-        static void WriteEnvironmentFileRecord(TextWriter envFile, EarthCoordinate<SedimentSampleBase> sedimentSample, EarthCoordinate<DepthValuePairs<float>> soundSpeedProfile, 
-                                         EarthCoordinate<float> windSample, Geo requestedLocation, ref bool isFirstPoint,
-                                         string model, EarthCoordinate<BottomLossData> bottomLossSample)
+        static void WriteEnvironmentFileRecord(TextWriter envFile, Geo<SedimentSampleBase> sedimentSample, Geo<List<SoundSpeedSample>> soundSpeedProfile,
+                                         Geo<float> windSample, Geo requestedLocation, ref bool isFirstPoint,
+                                         string model, Geo<BottomLossData> bottomLossSample)
         {
             // ssp is the nearest actual soundspeed profile to the point that's been requested.  The actual profiles are not laid out
             // in a grid, rather they are placed at quarter-degree grid points where there is water.  So grid points on land typically won't
@@ -377,7 +372,7 @@ namespace ESME.TransmissionLoss.CASS
             envFile.WriteLine("OCEAN SOUND SPEED TABLE");
             envFile.WriteLine("M         M/S       ");
             foreach (var datum in soundSpeedProfile.Data)
-                if (!float.IsNaN(datum.Value)) envFile.WriteLine("{0,-10:0.000}{1,-10:0.000}", datum.Depth, datum.Value);
+                if (!float.IsNaN(datum.SoundSpeed)) envFile.WriteLine("{0,-10:0.000}{1,-10:0.000}", datum.Depth, datum.SoundSpeed);
                 else break;
             envFile.WriteLine("EOT");
             model = model.ToUpper();
@@ -416,4 +411,5 @@ namespace ESME.TransmissionLoss.CASS
             isFirstPoint = false;
         }
     }
+#endif
 }

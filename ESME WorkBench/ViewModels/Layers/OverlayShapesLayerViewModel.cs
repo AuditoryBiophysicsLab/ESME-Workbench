@@ -8,7 +8,7 @@ using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 using LineStyle = ThinkGeo.MapSuite.Core.LineStyle;
 
-namespace ESMEWorkBench.ViewModels.Layers
+namespace ESMEWorkbench.ViewModels.Layers
 {
 #if false
     public class OverlayShapesLayerViewModel : LayerViewModel

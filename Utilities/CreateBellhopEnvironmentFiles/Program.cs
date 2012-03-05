@@ -6,10 +6,7 @@ using System.Text;
 using System.Xml.Linq;
 using ESME.Environment;
 using ESME.Model;
-using ESME.NEMO;
 using ESME.TransmissionLoss;
-using ESME.TransmissionLoss.Bellhop;
-using HRC.Navigation;
 
 namespace CreateBellhopEnvironmentFiles
 {
@@ -281,9 +278,7 @@ namespace CreateBellhopEnvironmentFiles
             };
             var maxRadius = (int)Math.Ceiling(receiverRanges.Last() * 1.01); // Allow an extra 1% of range so the beams don't run off the end before they hit the last column of receivers
 
-            var sspData = new DepthValuePairs<float>();
-            for (var index = 0; index < soundspeedDepths.Count; index++)
-                sspData.Add(new DepthValuePair<float>((float)soundspeedDepths[index], (float)soundspeedSpeeds[index]));
+            var sspData = soundspeedDepths.Select((t, index) => new SoundSpeedSample((float)t, (float)soundspeedSpeeds[index])).ToList();
             var soundSpeedProfile = new SoundSpeedProfile
             {
                 Data = sspData
@@ -311,8 +306,8 @@ namespace CreateBellhopEnvironmentFiles
                 //if (SSP.DepthVector[SSP.DepthVector.Length - 1] < RealBottomDepth_Meters)
                 //    SoundSpeedProfile = ExtrapolateSSP(SoundSpeedProfile, RealBottomDepth_Meters);
 
-                foreach (var depthValuePair in ssp.Data)
-                    sw.WriteLine("{0:0.00} {1:0.00} 0.00 1.00 0.00 0.00 / ! z c cs rho", depthValuePair.Depth, depthValuePair.Value);
+                foreach (var sample in ssp.Data)
+                    sw.WriteLine("{0:0.00} {1:0.00} 0.00 1.00 0.00 0.00 / ! z c cs rho", sample.Depth, sample.SoundSpeed);
 
                 sw.WriteLine("'A*' 0.00 ! Bottom Option, sigma"); // A = Acoustic halfspace, ~ = read bathymetry file, 0.0 = bottom roughness (currently ignored)
                 sw.WriteLine("{0} {1} {2} {3} {4} {5} / ! lower halfspace", maxDepth, sediment.CompressionWaveSpeed, sediment.ShearWaveSpeed, sediment.Density, sediment.LossParameter, 0);

@@ -30,7 +30,7 @@ namespace ESME.TransmissionLoss.BellhopNL
         public double[] Ranges { get; set; }
 
         //refms-mimic members
-        public EarthCoordinate Location { get; set; }
+        public Geo Location { get; set; }
         public Geo SVPLocation { get; set;}
         public string ModeName { get; set; }
 

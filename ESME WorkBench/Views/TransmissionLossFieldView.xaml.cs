@@ -1,5 +1,5 @@
 ﻿#if false 
-namespace ESMEWorkBench.Views
+namespace ESMEWorkbench.Views
 {
     /// <summary>
     /// Interaction logic for TransmissionLossFieldView.xaml

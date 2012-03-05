@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 
-namespace ESMEWorkBench.ViewModels.Ribbon
+namespace ESMEWorkbench.ViewModels.Ribbon
 {
     public class GalleryCategoryDataViewModel<T> : ControlDataViewModel
     {

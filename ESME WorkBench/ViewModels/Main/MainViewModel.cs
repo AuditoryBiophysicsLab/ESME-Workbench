@@ -14,9 +14,10 @@ using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Mapping;
-using ESMEWorkBench.Data;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.RecentFiles;
+using ESME.Plugins;
+using ESMEWorkbench.Data;
+using ESMEWorkbench.Properties;
+using ESMEWorkbench.ViewModels.RecentFiles;
 using HRC.Navigation;
 using HRC.Services;
 using HRC.Utility;
@@ -25,7 +26,7 @@ using MEFedMVVM.ViewModelLocator;
 using ESME.Views.AcousticBuilder;
 using ESME.Environment.Descriptors;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     [ExportViewModel("MainViewModel")]
     public partial class MainViewModel : ViewModelBase
@@ -37,6 +38,7 @@ namespace ESMEWorkBench.ViewModels.Main
         readonly IHRCSaveFileService _saveFileService;
         readonly IViewAwareStatus _viewAwareStatus;
         readonly IUIVisualizerService _visualizerService;
+        readonly IPluginManagerService _pluginManagerService;
 #if EXPERIMENTS_SUPPORTED
         Experiment _experiment;
 #endif
@@ -49,7 +51,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #region Constructor
         [ImportingConstructor]
-        public MainViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService)
+        public MainViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService, IPluginManagerService pluginManagerService)
         {
             try
             {
@@ -69,6 +71,7 @@ namespace ESMEWorkBench.ViewModels.Main
             _openFileService = openFileService;
             _saveFileService = saveFileService;
             _visualizerService = visualizerService;
+            _pluginManagerService = pluginManagerService;
             _pleaseWait = new PleaseWaitViewModel((Window)_viewAwareStatus.View, _visualizerService);
             if (Designer.IsInDesignMode) return;
             _viewAwareStatus.ViewUnloaded += () =>
@@ -82,6 +85,8 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (Designer.IsInDesignMode) return;
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 MediatorMessage.Send(MediatorMessage.MainViewModelInitialized, _dispatcher);
+                _pluginManagerService.DefaultPluginConfigurations = Globals.AppSettings.DefaultPluginConfigurations;
+                NAVOImporter.PluginManagerService = _pluginManagerService;
             };
 
             IsLatLonGridVisible = Settings.Default.ShowGrid;
@@ -119,22 +124,22 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region public EarthCoordinate MouseEarthCoordinate { get; set; }
+        #region public Geo MouseGeo { get; set; }
 
-        public EarthCoordinate MouseEarthCoordinate
+        public Geo MouseGeo
         {
-            get { return _mouseEarthCoordinate; }
+            get { return _mouseGeo; }
             set
             {
-                if (_mouseEarthCoordinate == value) return;
-                _mouseEarthCoordinate = value;
+                if (_mouseGeo == value) return;
+                _mouseGeo = value;
                 NotifyPropertyChanged(MouseEarthCoordinateChangedEventArgs);
                 NotifyPropertyChanged(MouseLocationInfoChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs MouseEarthCoordinateChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MouseEarthCoordinate);
-        EarthCoordinate _mouseEarthCoordinate;
+        static readonly PropertyChangedEventArgs MouseEarthCoordinateChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MouseGeo);
+        Geo _mouseGeo;
 
         #endregion
 
@@ -144,9 +149,9 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                if (MouseEarthCoordinate == null) return null;
-                var lat = MouseEarthCoordinate.Latitude;
-                var lon = MouseEarthCoordinate.Longitude;
+                if (MouseGeo == null) return null;
+                var lat = MouseGeo.Latitude;
+                var lon = MouseGeo.Longitude;
                 if (-90 > lat || lat > 90) return null;
                 if (-180 > lon || lon > 180) return null;
                 var northSouth = lat >= 0 ? "N" : "S";
@@ -157,7 +162,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     {
                         _bathymetry = new WeakReference<Bathymetry>(((Task<Bathymetry>)RangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).Result);
                     }
-                    if (_bathymetry != null && _bathymetry.Target != null && _bathymetry.Target.Samples.GeoRect.Contains(MouseEarthCoordinate)) return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3} Elevation: {4:0.#}m", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest, _bathymetry.Target.Samples.GetNearestPoint(MouseEarthCoordinate).Data);
+                    if (_bathymetry != null && _bathymetry.Target != null && _bathymetry.Target.Samples.GeoRect.Contains(MouseGeo)) return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3} Elevation: {4:0.#}m", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest, _bathymetry.Target.Samples.GetNearestPoint(MouseGeo).Data);
                 }
                 return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3}", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest);
             }

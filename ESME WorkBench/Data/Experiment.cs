@@ -28,7 +28,7 @@ using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMEWorkBench.Data
+namespace ESMEWorkbench.Data
 {
     [Serializable]
     public partial class Experiment : PropertyChangedBase
@@ -354,7 +354,7 @@ namespace ESMEWorkBench.Data
         }
 #endif
 
-        public TransmissionLossField NearestMatchingTransmissionLoss(NemoMode nemoMode, EarthCoordinate location)
+        public TransmissionLossField NearestMatchingTransmissionLoss(NemoMode nemoMode, Geo location)
         {
             TransmissionLossField nearestMatch = null;
             foreach (var analysisPoint in AnalysisPoints)
@@ -362,7 +362,7 @@ namespace ESMEWorkBench.Data
                     if (transmissionLossField.IsAcousticMatchFor(nemoMode))
                     {
                         if (nearestMatch == null) nearestMatch = transmissionLossField;
-                        else if (location.DistanceTo(nearestMatch.EarthCoordinate) > location.DistanceTo(transmissionLossField.EarthCoordinate)) nearestMatch = transmissionLossField;
+                        else if (location.DistanceKilometers(nearestMatch.Geo) > location.DistanceKilometers(transmissionLossField.Geo)) nearestMatch = transmissionLossField;
                     }
             return nearestMatch;
         }
@@ -1012,7 +1012,7 @@ namespace ESMEWorkBench.Data
             speciesLayer.Done();
         }
 
-        void DisplayEnvironmentData<T>(ICollection<T> environmentData, string layerName, LayerType layerType, float defaultLineWidth) where T : EarthCoordinate
+        void DisplayEnvironmentData<T>(ICollection<T> environmentData, string layerName, LayerType layerType, float defaultLineWidth) where T : Geo
         {
             var dataLayer = (OverlayShapeMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == layerName);
             if (dataLayer == null)
@@ -1061,15 +1061,14 @@ namespace ESMEWorkBench.Data
             analysisPointLayer.AnalysisPoint = curPoint;
             analysisPointLayer.Validate();
 
-            var sourcePoints = new List<EarthCoordinate>();
+            var sourcePoints = new List<Geo>();
             foreach (var soundSource in curPoint.SoundSources)
             {
                 if (!soundSource.ShouldBeCalculated) continue;
                 sourcePoints.Add(curPoint);
                 foreach (var radialBearing in soundSource.RadialBearings)
                 {
-                    var endPoint = new EarthCoordinate(curPoint);
-                    endPoint.Move(radialBearing, soundSource.Radius);
+                    var endPoint = curPoint.Move(radialBearing, soundSource.Radius);
                     sourcePoints.Add(endPoint);
                     sourcePoints.Add(curPoint);
                 }
@@ -1123,7 +1122,7 @@ namespace ESMEWorkBench.Data
 
         void MatchTransmissionLossFieldToAnalysisPoints(TransmissionLossField transmissionLossField)
         {
-            foreach (var analysisPoint in AnalysisPoints.Where(analysisPoint => transmissionLossField.EarthCoordinate.Equals(analysisPoint)))
+            foreach (var analysisPoint in AnalysisPoints.Where(analysisPoint => transmissionLossField.Geo.Equals(analysisPoint)))
             {
                 analysisPoint.TransmissionLossFields.Add(transmissionLossField);
                 Console.WriteLine(string.Format("Matched TL Field @({0}, {1}) to analysis point @({2}, {3})", transmissionLossField.Latitude, transmissionLossField.Longitude, analysisPoint.Latitude, analysisPoint.Longitude));
@@ -1226,7 +1225,7 @@ namespace ESMEWorkBench.Data
                 if (bathysize > screenSize)
                 {
                     var scaleFactor = screenSize / bathysize;
-                    displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(Bathymetry.Samples, (int)(Bathymetry.Samples.Longitudes.Count * scaleFactor), (int)(Bathymetry.Samples.Latitudes.Count * scaleFactor));
+                    displayValues = EnvironmentData<Geo<float>>.Decimate(Bathymetry.Samples, (int)(Bathymetry.Samples.Longitudes.Count * scaleFactor), (int)(Bathymetry.Samples.Latitudes.Count * scaleFactor));
                 }
                 var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
                 for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++)
@@ -1256,20 +1255,21 @@ namespace ESMEWorkBench.Data
                 bathyBitmapLayer.RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp");
                 MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
             }
-
+#if false
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
-                SoundSpeedField = SoundSpeed.Load(SoundSpeedFileName).SoundSpeedFields[0];
+                SoundSpeedField = SoundSpeed<SoundSpeedSample>.Load(SoundSpeedFileName).SoundSpeedFields[0];
             else if ((TemperatureFilename != null) && (SalinityFilename != null) && File.Exists(TemperatureFilename) && File.Exists(SalinityFilename))
             {
                 EarthCoordinate<float> deepestPoint = null;
                 if (Bathymetry != null)
                     deepestPoint = new EarthCoordinate<float>(Bathymetry.Minimum, Math.Abs(Bathymetry.Minimum.Data));
-                SoundSpeedField = SoundSpeed.Load(TemperatureFilename, SalinityFilename, deepestPoint).SoundSpeedFields[0];
+                SoundSpeedField = SoundSpeed<SoundSpeedSample>.Load(TemperatureFilename, SalinityFilename, deepestPoint).SoundSpeedFields[0];
             }
             if (SoundSpeedField != null)
             {
                 DisplayEnvironmentData(SoundSpeedField.EnvironmentData, "Sound Speed", LayerType.SoundSpeed, 3);
             }
+#endif
 
             if ((SedimentFileName != null) && (File.Exists(SedimentFileName)))
                 Sediment = Sediment.Load(SedimentFileName);

@@ -9,7 +9,7 @@ using HRC.Navigation;
 using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {
     [ExportViewModel("TransmissionLossFieldViewModel")]
     public class TransmissionLossFieldViewModel : ViewModelBase

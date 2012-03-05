@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using ESME;
 
-namespace ESMEWorkBench.ViewModels.Ribbon
+namespace ESMEWorkbench.ViewModels.Ribbon
 {
     public class NamedList<T> : List<T> where T : IHaveAName
     {

@@ -63,7 +63,10 @@ namespace HRC.Collections
         /// <summary>
         /// Copies the elements of the <see cref="T:System.Collections.Generic.ICollection`1"/> to an <see cref="T:System.Array"/>, starting at a particular <see cref="T:System.Array"/> index.
         /// </summary>
-        /// <param name="array">The one-dimensional <see cref="T:System.Array"/> that is the destination of the elements copied from <see cref="T:System.Collections.Generic.ICollection`1"/>. The <see cref="T:System.Array"/> must have zero-based indexing.</param><param name="arrayIndex">The zero-based index in <paramref name="array"/> at which copying begins.</param><exception cref="T:System.ArgumentNullException"><paramref name="array"/> is null.</exception><exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arrayIndex"/> is less than 0.</exception><exception cref="T:System.ArgumentException"><paramref name="array"/> is multidimensional.-or-The number of elements in the source <see cref="T:System.Collections.Generic.ICollection`1"/> is greater than the available space from <paramref name="arrayIndex"/> to the end of the destination <paramref name="array"/>.-or-Type <paramref name="T"/> cannot be cast automatically to the type of the destination <paramref name="array"/>.</exception>
+        /// <param name="array">The one-dimensional <see cref="T:System.Array"/> that is the destination of the elements copied from <see cref="T:System.Collections.Generic.ICollection`1"/>. The <see cref="T:System.Array"/> must have zero-based indexing.</param><param name="arrayIndex">The zero-based index in <paramref name="array"/> at which copying begins.</param><exception cref="T:System.ArgumentNullException"><paramref name="array"/> is null.</exception><exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arrayIndex"/> is less than 0.</exception><exception cref="T:System.ArgumentException"><paramref name="array"/> is multidimensional.-or-The number of elements in the source <see cref="T:System.Collections.Generic.ICollection`1"/> is greater than the available space from <paramref name="arrayIndex"/> to the end of the destination <paramref name="array"/>.-or-Type <paramref>
+        ///                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <name>T</name>
+        ///                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      </paramref>
+        ///                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     cannot be cast automatically to the type of the destination <paramref name="array"/>.</exception>
         public void CopyTo(T[] array, int arrayIndex) { throw new NotImplementedException(); }
 
         /// <summary>
@@ -329,13 +332,10 @@ namespace HRC.Collections
                     return;
                 }
 
-                else
-                {
-                    // Pop the most recently stored partition and sort that
-                    startIndex = nStack[nStkPtr, 0];
-                    endIndex = nStack[nStkPtr, 1];
-                    nStkPtr--;
-                }
+                // Pop the most recently stored partition and sort that
+                startIndex = nStack[nStkPtr, 0];
+                endIndex = nStack[nStkPtr, 1];
+                nStkPtr--;
             } while (true);
         }
 
@@ -392,7 +392,7 @@ namespace HRC.Collections
         long Key { get; }
     }
 
-    public class EarthCoordinateWithKey<T> : EarthCoordinate<T>, IHaveKey
+    public class EarthCoordinateWithKey<T> : Geo<T>, IHaveKey
     {
         public long Key
         {
@@ -415,9 +415,8 @@ namespace HRC.Collections
         long _key;
     }
 
-    public class LatitudeFirst : Comparer<EarthCoordinate>
+    public class LatitudeFirst : Comparer<Geo>
     {
-        #region Overrides of Comparer<EarthCoordinate>
         /// <summary>
         /// When overridden in a derived class, performs a comparison of two objects of the same type and returns a value indicating whether one object is less than, equal to, or greater than the other.
         /// </summary>
@@ -425,7 +424,6 @@ namespace HRC.Collections
         /// A signed integer that indicates the relative values of <paramref name="x"/> and <paramref name="y"/>, as shown in the following table.Value Meaning Less than zero <paramref name="x"/> is less than <paramref name="y"/>.Zero <paramref name="x"/> equals <paramref name="y"/>.Greater than zero <paramref name="x"/> is greater than <paramref name="y"/>.
         /// </returns>
         /// <param name="x">The first object to compare.</param><param name="y">The second object to compare.</param><exception cref="T:System.ArgumentException">Type <paramref name="T"/> does not implement either the <see cref="T:System.IComparable`1"/> generic interface or the <see cref="T:System.IComparable"/> interface.</exception>
-        public override int Compare(EarthCoordinate x, EarthCoordinate y) { throw new NotImplementedException(); }
-        #endregion
+        public override int Compare(Geo x, Geo y) { throw new NotImplementedException(); }
     }
 }

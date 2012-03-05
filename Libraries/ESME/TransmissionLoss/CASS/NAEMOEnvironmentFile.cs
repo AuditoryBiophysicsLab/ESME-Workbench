@@ -7,7 +7,6 @@ using System.Linq;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
-using ESME.Environment.NAVO;
 using ESME.Model;
 using HRC.Navigation;
 using HRC.Utility;
@@ -88,23 +87,23 @@ namespace ESME.TransmissionLoss.CASS
 
         #endregion
 
-        #region public Dictionary<string, List<EarthCoordinate>> SedimentTypes { get; set; }
+        #region public Dictionary<string, List<Geo>> SedimentTypes { get; set; }
         [XmlIgnore]
-        public Dictionary<string, List<EarthCoordinate>> SedimentTypes
+        public Dictionary<string, List<Geo>> SedimentTypes
         {
             get { return _sedimentTypes ?? (_sedimentTypes = CreateSedimentDictionary()); }
         }
 
-        Dictionary<string, List<EarthCoordinate>> _sedimentTypes;
+        Dictionary<string, List<Geo>> _sedimentTypes;
 
-        Dictionary<string, List<EarthCoordinate>> CreateSedimentDictionary()
+        Dictionary<string, List<Geo>> CreateSedimentDictionary()
         {
-            var result = new Dictionary<string, List<EarthCoordinate>>();
+            var result = new Dictionary<string, List<Geo>>();
             foreach (var location in Locations)
             {
                 var curSedimentType = location.BottomType;
-                if (!result.ContainsKey(curSedimentType)) result.Add(curSedimentType, new List<EarthCoordinate>());
-                result[curSedimentType].Add(new EarthCoordinate(location));
+                if (!result.ContainsKey(curSedimentType)) result.Add(curSedimentType, new List<Geo>());
+                result[curSedimentType].Add(new Geo(location));
             }
             return result;
         }
@@ -162,7 +161,7 @@ namespace ESME.TransmissionLoss.CASS
                 double lon;
                 if (!double.TryParse(packet[0].Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out lat)) throw new DataMisalignedException("");
                 if (!double.TryParse(packet[1].Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out lon)) throw new DataMisalignedException("");
-                var retpacket = new NAEMOEnvironmentLocation(new EarthCoordinate(lat, lon))
+                var retpacket = new NAEMOEnvironmentLocation(new Geo(lat, lon))
                 {
                         Latitude = lat,
                         Longitude = lon,
@@ -234,10 +233,8 @@ namespace ESME.TransmissionLoss.CASS
                                                                        SampleValue = (short)Model.SedimentTypes.Find(bottomType).HFEVACategory
                                                                    }));
                 }
-                var profileData = new DepthValuePairs<float>();
-                for (var depthIndex = 0; depthIndex < location.Depths.Count; depthIndex++)
-                    profileData.Add(new DepthValuePair<float>((float)location.Depths[depthIndex], (float)location.Soundspeeds[depthIndex]));
-                result.EnvironmentInformation.SoundSpeedField.EnvironmentData.Add(new SoundSpeedProfile(location) { Data = profileData });
+                var profileData = location.Depths.Select((t, depthIndex) => new SoundSpeedSample((float)t, (float)location.Soundspeeds[depthIndex])).ToList();
+                result.EnvironmentInformation.SoundSpeedField.EnvironmentData.Add(new SoundSpeedProfile(location){ Data = profileData});
             }
             result.EnvironmentInformation.Wind.TimePeriods.Add(windData); 
             return result;

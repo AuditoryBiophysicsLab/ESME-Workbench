@@ -8,8 +8,6 @@ namespace ESME.TransmissionLoss.Bellhop
 {
     public class BellhopRunFile : TransmissionLossRunFile
     {
-        public BellhopRunFile() {  }
-        
         public override void Save(string fileName = null)
         {
             if (fileName == null) fileName = Filename;
@@ -30,7 +28,7 @@ namespace ESME.TransmissionLoss.Bellhop
 
             var radialCount = transmissionLossJob.SoundSource.RadialBearings.Count;
             var bottomProfiles = new BottomProfile[radialCount];
-            var soundSpeedProfiles = new SoundSpeedProfile[radialCount];
+            var soundSpeedProfiles = new SoundSpeedProfileGeneric<SoundSpeedSample>[radialCount];
             var maxCalculationDepthMeters = float.MinValue;
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {

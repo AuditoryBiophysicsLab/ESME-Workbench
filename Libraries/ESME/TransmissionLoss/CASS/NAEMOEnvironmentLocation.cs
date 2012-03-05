@@ -4,7 +4,7 @@ using HRC.Navigation;
 
 namespace ESME.TransmissionLoss.CASS
 {
-    public class NAEMOEnvironmentLocation : EarthCoordinate<NAEMOEnvironmentLocation>, IEquatable<NAEMOEnvironmentLocation>
+    public class NAEMOEnvironmentLocation : Geo<NAEMOEnvironmentLocation>, IEquatable<NAEMOEnvironmentLocation>
     {
         public NAEMOEnvironmentLocation() {  }
         public NAEMOEnvironmentLocation(Geo location) : base(location) {  }

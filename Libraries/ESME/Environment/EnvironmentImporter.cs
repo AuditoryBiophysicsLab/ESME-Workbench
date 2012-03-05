@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Environment.Descriptors;
+using ESME.Plugins;
 using HRC.Navigation;
 using ESME.Environment.NAVO;
 using HRC.NetCDF;
@@ -50,18 +51,20 @@ namespace ESME.Environment
 
     public static class NAVOImporter
     {
-        static readonly ActionBlock<ImportJobDescriptor> TemperatureWorker;
-        static readonly ActionBlock<ImportJobDescriptor> SalinityWorker;
+        static readonly ActionBlock<ImportJobDescriptor> SoundSpeedWorker;
         static readonly ActionBlock<ImportJobDescriptor> SedimentWorker;
         static readonly ActionBlock<ImportJobDescriptor> WindWorker;
         static readonly ActionBlock<ImportJobDescriptor> BathymetryWorker;
+#if IS_CLASSIFIED_MODEL
         static readonly ActionBlock<ImportJobDescriptor> BottomLossWorker;
-        public static readonly ImportProgressViewModel TemperatureProgress;
-        public static readonly ImportProgressViewModel SalinityProgress;
+        public static readonly ImportProgressViewModel BottomLossProgress;
+#endif
+        public static readonly ImportProgressViewModel SoundSpeedProgress;
         public static readonly ImportProgressViewModel SedimentProgress;
         public static readonly ImportProgressViewModel WindProgress;
         public static readonly ImportProgressViewModel BathymetryProgress;
-        public static readonly ImportProgressViewModel BottomLossProgress;
+
+        public static IPluginManagerService PluginManagerService { get; set; }
 
         static void CheckDestinationDirectory(string destinationFilename)
         {
@@ -77,20 +80,20 @@ namespace ESME.Environment
             NetCDFFile.Logger = Logger.LogString;
             //NetCDFReaders.Logger = Logger.LogString;
             Logger.Start(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "esme.log"));
-            Logger.Log("About to create temperature worker");
-            if (TemperatureWorker == null) TemperatureWorker = new ActionBlock<ImportJobDescriptor>(async job =>
+            Logger.Log("About to create soundspeed worker");
+            if (SoundSpeedWorker == null) SoundSpeedWorker = new ActionBlock<ImportJobDescriptor>(async job =>
             {
-                TemperatureProgress.JobStarting(job);
+                if (PluginManagerService == null || PluginManagerService.SoundSpeedSource == null) 
+                    throw new InvalidOperationException("Cannot extract sound speed data - no data source is configured");
+                SoundSpeedProgress.JobStarting(job);
                 CheckDestinationDirectory(job.DestinationFilename);
-                var temperatureField = GDEM.ReadFile(GDEM.FindTemperatureFile(job.TimePeriod), "water_temp", job.TimePeriod, job.GeoRect);
-                var temperature = new SoundSpeed();
-                temperature.SoundSpeedFields.Add(temperatureField);
-                temperature.Serialize(job.DestinationFilename);
+                var soundSpeed = PluginManagerService.SoundSpeedSource.Extract(job.GeoRect, 15, job.TimePeriod);
+                soundSpeed.Serialize(job.DestinationFilename);
+                job.SampleCount = (uint)soundSpeed[job.TimePeriod].EnvironmentData.Count;
                 job.Resolution = 15;
-                job.SampleCount = (uint)temperatureField.EnvironmentData.Count;
                 job.CompletionTask.Start();
                 await job.CompletionTask;
-                TemperatureProgress.JobCompleted(job);
+                SoundSpeedProgress.JobCompleted(job);
             },
             new ExecutionDataflowBlockOptions
             {
@@ -98,35 +101,16 @@ namespace ESME.Environment
                 BoundedCapacity = Globals.AppSettings.MaxImportThreadCount,
                 MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
             });
-            TemperatureProgress = new ImportProgressViewModel("Temperature", TemperatureWorker);
-
-            if (SalinityWorker == null) SalinityWorker = new ActionBlock<ImportJobDescriptor>(async job =>
-            {
-                SalinityProgress.JobStarting(job);
-                CheckDestinationDirectory(job.DestinationFilename);
-                var salinityField = GDEM.ReadFile(GDEM.FindSalinityFile(job.TimePeriod), "salinity", job.TimePeriod, job.GeoRect);
-                var salinity = new SoundSpeed();
-                salinity.SoundSpeedFields.Add(salinityField);
-                salinity.Serialize(job.DestinationFilename);
-                job.Resolution = 15;
-                job.SampleCount = (uint)salinityField.EnvironmentData.Count;
-                job.CompletionTask.Start();
-                await job.CompletionTask;
-                SalinityProgress.JobCompleted(job);
-            },
-            new ExecutionDataflowBlockOptions
-            {
-                TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = -1,
-                MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
-            });
-            SalinityProgress = new ImportProgressViewModel("Salinity", SalinityWorker);
+            SoundSpeedProgress = new ImportProgressViewModel("Sound Speed", SoundSpeedWorker);
 
             if (SedimentWorker == null) SedimentWorker = new ActionBlock<ImportJobDescriptor>(job =>
             {
+                if (PluginManagerService == null || PluginManagerService.SedimentSource == null)
+                    throw new InvalidOperationException("Cannot extract sediment data - no data source is configured");
                 SedimentProgress.JobStarting(job);
                 CheckDestinationDirectory(job.DestinationFilename);
-                var sediment = BST.Extract(job.GeoRect);
+                var sediment = PluginManagerService.SedimentSource.Extract(job.GeoRect, job.Resolution);
+                //var sediment = BST.Extract(job.GeoRect);
                 sediment.Save(job.DestinationFilename);
                 job.SampleCount = (uint)sediment.Samples.Count;
                 job.Resolution = 5;
@@ -143,9 +127,17 @@ namespace ESME.Environment
 
             if (WindWorker == null) WindWorker = new ActionBlock<ImportJobDescriptor>(async job =>
             {
+                if (PluginManagerService == null || PluginManagerService.WindSource == null)
+                    throw new InvalidOperationException("Cannot extract wind data - no data source is configured");
                 WindProgress.JobStarting(job);
                 CheckDestinationDirectory(job.DestinationFilename);
-                var wind = await SMGC.ImportAsync(job.GeoRect);
+                var wind = new Wind();
+                foreach (var month in NAVOConfiguration.AllMonths)
+                {
+                    var monthlyWind = PluginManagerService.WindSource.Extract(job.GeoRect, 60, month);
+                    wind.TimePeriods.Add(monthlyWind[month]);
+                }
+                //var wind = await SMGC.ImportAsync(job.GeoRect);
                 wind.Save(job.DestinationFilename);
                 job.SampleCount = (uint)wind.TimePeriods[0].EnvironmentData.Count;
                 job.Resolution = 60;
@@ -165,9 +157,12 @@ namespace ESME.Environment
             {
                 try
                 {
+                    if (PluginManagerService == null || PluginManagerService.BathymetrySource == null)
+                        throw new InvalidOperationException("Cannot extract bathymetry data - no data source is configured");
                     BathymetryProgress.JobStarting(job);
                     CheckDestinationDirectory(job.DestinationFilename);
-                    var bathymetry = DBDB.Extract(job.Resolution, job.GeoRect);
+                    var bathymetry = PluginManagerService.BathymetrySource.Extract(job.GeoRect, job.Resolution);
+                    //var bathymetry = DBDB.Extract(job.Resolution, job.GeoRect);
                     bathymetry.Save(job.DestinationFilename);
                     job.SampleCount = (uint)bathymetry.Samples.Count;
                     job.CompletionTask.Start();
@@ -179,7 +174,7 @@ namespace ESME.Environment
                     if (bathysize > screenSize)
                     {
                         var scaleFactor = screenSize / bathysize;
-                        displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples,
+                        displayValues = EnvironmentData<Geo<float>>.Decimate(bathymetry.Samples,
                                                                                         (int)(bathymetry.Samples.Longitudes.Count * scaleFactor),
                                                                                         (int)(bathymetry.Samples.Latitudes.Count * scaleFactor));
                     }
@@ -219,7 +214,7 @@ namespace ESME.Environment
                 MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
             });
             BathymetryProgress = new ImportProgressViewModel("Bathymetry", BathymetryWorker);
-
+#if IS_CLASSIFIED_MODEL
             if (BottomLossWorker == null) BottomLossWorker = new ActionBlock<ImportJobDescriptor>(async
             job =>
             {
@@ -240,6 +235,7 @@ namespace ESME.Environment
                 MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
             });
             BottomLossProgress = new ImportProgressViewModel("Bottom Loss", BottomLossWorker);
+#endif
         }
 
         public static void Import(IEnumerable<ImportJobDescriptor> jobDescriptors)
@@ -257,19 +253,26 @@ namespace ESME.Environment
                 case EnvironmentDataType.Bathymetry:
                     BathymetryProgress.Post(jobDescriptor);
                     break;
+#if IS_CLASSIFIED_MODEL
                 case EnvironmentDataType.BottomLoss:
                     BottomLossProgress.Post(jobDescriptor);
                     break;
+#endif
+#if false
                 case EnvironmentDataType.Salinity:
                     SalinityProgress.Post(jobDescriptor);
-                    break;
-                case EnvironmentDataType.Sediment:
-                    SedimentProgress.Post(jobDescriptor);
                     break;
                 case EnvironmentDataType.Temperature:
                     //Logger.Log("Temperature job about to post");
                     TemperatureProgress.Post(jobDescriptor);
                     //Logger.Log("Temperature job after post");
+                    break;
+#endif
+                case EnvironmentDataType.SoundSpeed:
+                    SoundSpeedProgress.Post(jobDescriptor);
+                    break;
+                case EnvironmentDataType.Sediment:
+                    SedimentProgress.Post(jobDescriptor);
                     break;
                 case EnvironmentDataType.Wind:
                     WindProgress.Post(jobDescriptor);
@@ -296,10 +299,11 @@ namespace ESME.Environment
         static readonly ObservableCollection<ImportProgressViewModel> Importers = new ObservableCollection<ImportProgressViewModel>(
             new List<ImportProgressViewModel>
             {
-                NAVOImporter.TemperatureProgress,
-                NAVOImporter.SalinityProgress,
+                NAVOImporter.SoundSpeedProgress,
                 NAVOImporter.BathymetryProgress,
+#if IS_CLASSIFIED_MODEL
                 NAVOImporter.BottomLossProgress,
+#endif
                 NAVOImporter.SedimentProgress,
                 NAVOImporter.WindProgress,
             });

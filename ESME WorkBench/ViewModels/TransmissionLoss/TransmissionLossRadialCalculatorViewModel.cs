@@ -8,7 +8,7 @@ using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {
 #if false
     public abstract class TransmissionLossRadialCalculatorViewModel : ViewModelBase

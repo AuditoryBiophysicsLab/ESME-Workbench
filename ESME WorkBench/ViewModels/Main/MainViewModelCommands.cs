@@ -9,11 +9,11 @@ using ESME;
 using ESME.Data;
 using ESME.Mapping;
 using ESME.Views.LogFileViewer;
-using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.NAVO;
-using ESMEWorkBench.ViewModels.TransmissionLoss;
+using ESMEWorkbench.Properties;
+using ESMEWorkbench.ViewModels.NAVO;
+using ESMEWorkbench.ViewModels.TransmissionLoss;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {
@@ -33,7 +33,7 @@ namespace ESMEWorkBench.ViewModels.Main
                             typeof (OverlayShapeMapLayer),
                             typeof (OverlayFileMapLayer)
                     };
-                    var programOptionsViewModel = new ApplicationOptionsViewModel(_messageBoxService);
+                    var programOptionsViewModel = new ApplicationOptionsViewModel(_messageBoxService, _pluginManagerService);
                     var result = _visualizerService.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
                     if ((result.HasValue) && (result.Value)) ESME.Globals.AppSettings.Save(extraTypes);
                     ESME.Globals.AppSettings = AppSettings.Load(extraTypes);

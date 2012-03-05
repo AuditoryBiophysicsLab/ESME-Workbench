@@ -28,7 +28,7 @@ namespace ESME.NEMO
             {
                 if (_simulationStepTime == value) return;
                 if (value.TotalSeconds <= 0.0) throw new ParameterOutOfRangeException(string.Format("SimulationStepTime must be a positive TimeSpan. {0} is an invalid value", _simulationStepTime));
-                if (value.TotalSeconds != Math.Floor(value.TotalSeconds)) throw new ParameterOutOfRangeException(string.Format("SimulationStepTime must specify an integer number of seconds.  {0} is an invalid value", _simulationStepTime));
+                if (Math.Abs(value.TotalSeconds - Math.Floor(value.TotalSeconds)) > 0.0001) throw new ParameterOutOfRangeException(string.Format("SimulationStepTime must specify an integer number of seconds.  {0} is an invalid value", _simulationStepTime));
                 _simulationStepTime = value;
             }
         }
@@ -74,9 +74,9 @@ namespace ESME.NEMO
             throw new FormatException(FormatError(childElementName));
         }
 
-        protected EarthCoordinate GetEarthCoordinate(string latitudeElementName, string longitudeElementName) { return new EarthCoordinate(GetFloat(latitudeElementName), GetFloat(longitudeElementName)); }
+        protected Geo GeoGeo(string latitudeElementName, string longitudeElementName) { return new Geo(GetFloat(latitudeElementName), GetFloat(longitudeElementName)); }
 
-        protected EarthCoordinate3D GetEarthCoordinate3D(string latitudeElementName, string longitudeElementName, string elevationElementName) { return new EarthCoordinate3D(GetFloat(latitudeElementName), GetFloat(longitudeElementName), GetFloat(elevationElementName)); }
+        protected Geo<float> GeoGeo3D(string latitudeElementName, string longitudeElementName, string elevationElementName) { return new Geo<float>(GetFloat(latitudeElementName), GetFloat(longitudeElementName), GetFloat(elevationElementName)); }
 
         protected string GetString(string childElementName) { return GetInnerText(childElementName); }
 

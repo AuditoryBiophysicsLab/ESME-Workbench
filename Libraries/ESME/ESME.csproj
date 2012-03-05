@@ -16,7 +16,8 @@
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation />
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -67,6 +68,25 @@
     <Reference Include="Cinch.WPF">
       <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
     </Reference>
+    <Reference Include="Devart.Data, Version=5.0.401.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
+    <Reference Include="Devart.Data.Linq, Version=3.1.34.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\Program Files (x86)\Devart\dotConnect\Linq\Devart.Data.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="Devart.Data.SQLite, Version=3.70.302.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
+    <Reference Include="Devart.Data.SQLite.Entity, Version=3.70.302.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\Program Files (x86)\Devart\dotConnect\SQLite\Entity\EF1\Devart.Data.SQLite.Entity.dll</HintPath>
+    </Reference>
+    <Reference Include="Devart.Data.SQLite.Entity.Migrations, Version=3.70.302.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
+    <Reference Include="Devart.Data.SQLite.Linq, Version=3.1.34.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\Program Files (x86)\Devart\dotConnect\Linq\Devart.Data.SQLite.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ESME WorkBench\External References\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="FileHelpers">
+      <HintPath>..\..\ESME WorkBench\External References\FileHelpers.dll</HintPath>
+    </Reference>
     <Reference Include="GeoAPI">
       <HintPath>..\..\ESME WorkBench\External References\GeoAPI.dll</HintPath>
     </Reference>
@@ -92,6 +112,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data.Entity" />
     <Reference Include="System.Data.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -102,10 +123,13 @@
       <HintPath>..\..\ESME WorkBench\External References\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.DurableInstancing" />
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Threading.Tasks.Dataflow, Version=0.0.4098.29463, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\ESME WorkBench\External References\System.Threading.Tasks.Dataflow.dll</HintPath>
     </Reference>
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq">
@@ -126,6 +150,19 @@
   <ItemGroup>
     <Compile Include="BuildInformation.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="Database\DbDateTime.cs" />
+    <Compile Include="Database\DbGeo.cs" />
+    <Compile Include="Database\DbTimeSpan.cs" />
+    <Compile Include="Database\Importers\NemoFile.cs" />
+    <Compile Include="Database\Importers\PSMFile.cs" />
+    <Compile Include="Database\Importers\PSMFileRecord.cs" />
+    <Compile Include="Database\Location.cs" />
+    <Compile Include="Database\Mode.cs" />
+    <Compile Include="Database\Platform.cs" />
+    <Compile Include="Database\PSMContext.cs" />
+    <Compile Include="Database\Scenario.cs" />
+    <Compile Include="Database\Simulation.cs" />
+    <Compile Include="Database\Source.cs" />
     <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Data\CASSTemplate.cs" />
     <Compile Include="Data\WorkDirectories.cs" />
@@ -148,28 +185,12 @@
     <Compile Include="Environment\EnvironmentDataSetBase.cs" />
     <Compile Include="Environment\EnvironmentImporter.cs" />
     <Compile Include="Environment\EnvironmentMetadata.cs" />
-    <Compile Include="Environment\NAVO\BottomLossDatabase.cs" />
-    <Compile Include="Environment\NAVO\Deprecated\BottomSedimentTypeDatabase.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeTable.cs" />
-    <Compile Include="Environment\NAVO\Deprecated\BSTBackgroundExtractor.cs" />
     <Compile Include="Environment\NAVO\ChenMilleroLi.cs" />
-    <Compile Include="Environment\NAVO\Deprecated\BottomLossBackgroundExtractor.cs" />
-    <Compile Include="Environment\NAVO\BST.cs" />
-    <Compile Include="Environment\NAVO\DBDB.cs" />
-    <Compile Include="Environment\NAVO\SMGC.cs" />
-    <Compile Include="Environment\NAVO\Deprecated\DBDBBackgroundExtractor.cs" />
-    <Compile Include="Environment\NAVO\Deprecated\DigitalBathymetricDatabase.cs" />
-    <Compile Include="Environment\NAVO\Deprecated\GDEMBackgroundExtractor.cs" />
-    <Compile Include="Environment\NAVO\GDEM.cs" />
-    <Compile Include="Environment\NAVO\Deprecated\GeneralizedDigitalEnvironmentModelDatabase.cs" />
-    <Compile Include="Environment\NAVO\Deprecated\NAVOBackgroundExtractor.cs" />
     <Compile Include="Environment\NAVO\NAVOConfiguration.cs" />
-    <Compile Include="Environment\NAVO\NAVOExtractionProgram.cs" />
     <Compile Include="Environment\SeasonConfiguration.cs" />
+    <Compile Include="Environment\SoundSpeedSample.cs" />
     <Compile Include="Environment\TimePeriod.cs" />
-    <Compile Include="Environment\NAVO\Deprecated\SMGCBackgroundExtractor.cs" />
-    <Compile Include="Environment\NAVO\Deprecated\SoundSpeedBackgroundAverager.cs" />
-    <Compile Include="Environment\NAVO\Deprecated\TemperatureAndSalinityFileWriter.cs" />
     <Compile Include="Environment\Descriptors\Deprecated\RangeComplexDescriptor.cs" />
     <Compile Include="Environment\IEnvironmentalDataSource.cs" />
     <Compile Include="Mapping\CustomStartEndLineStyle.cs" />
@@ -187,10 +208,9 @@
     <Compile Include="Mapping\TreeNode.cs" />
     <Compile Include="Metadata\PropertiesViewModel.cs" />
     <Compile Include="Environment\Sediment.cs" />
-    <Compile Include="Environment\NAVO\Deprecated\SurfaceMarineGriddedClimatologyDatabase.cs" />
     <Compile Include="Environment\SoundSpeed.cs" />
     <Compile Include="Environment\SoundSpeedField.cs" />
-    <Compile Include="Environment\SoundSpeedProfile.cs" />
+    <Compile Include="Environment\SoundSpeedProfileGeneric.cs" />
     <Compile Include="Environment\Transect.cs" />
     <Compile Include="Environment\UNESCO.cs" />
     <Compile Include="Environment\Wind.cs" />
@@ -228,6 +248,8 @@
     <Compile Include="Platform\BehaviorModelTest.cs" />
     <Compile Include="Platform\Exceptions.cs" />
     <Compile Include="Platform\PlatformState.cs" />
+    <Compile Include="Plugins\DefaultEnvironmentalDataSources.cs" />
+    <Compile Include="Plugins\PluginManagerService.cs" />
     <Compile Include="Plugins\PluginBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNL.cs" />
@@ -237,7 +259,6 @@
     <Compile Include="TransmissionLoss\CASS\CASSBackgroundExporter.cs" />
     <Compile Include="TransmissionLoss\CASS\NAEMOEnvironmentFile.cs" />
     <Compile Include="TransmissionLoss\CASS\CASSOutput.cs" />
-    <Compile Include="Environment\RangeComplex.cs" />
     <Compile Include="TransmissionLoss\NemoModeToAcousticModelNameMap.cs" />
     <Compile Include="TransmissionLoss\RAM\RamOutput.cs" />
     <Compile Include="TransmissionLoss\REFMS\EffectsFile.cs" />

@@ -101,8 +101,8 @@ namespace ESME.Views.EnvironmentBuilder
 
         void AddEnvironmentFile(EnvironmentFile envFile)
         {
-            if (Children.Where(item => item.Name == "Areas").Count() == 0) Children.Add(new RangeComplexTreeItem { Name = "Areas" });
-            if (Children.Where(item => item.Name == "Environment").Count() == 0)
+            if (Children.All(item => item.Name != "Areas")) Children.Add(new RangeComplexTreeItem { Name = "Areas" });
+            if (Children.All(item => item.Name != "Environment"))
             {
                 Children.Add(new RangeComplexTreeItem { Name = "Environment" });
                 this["Environment"].Children.Add(new RangeComplexTreeItem { Name = "Salinity" });
@@ -122,7 +122,7 @@ namespace ESME.Views.EnvironmentBuilder
                     };
                     var areaName = Path.GetDirectoryName(envFile.FileName);
                     var areas = this["Areas"];
-                    if (!areas.Children.Any(area => area.Name == areaName))
+                    if (areas.Children.All(area => area.Name != areaName))
                     {
                         areas.Children.Add(new RangeComplexTreeItem { Name = areaName });
                         areas.ToolTip = "{0} areas defined";
@@ -130,6 +130,7 @@ namespace ESME.Views.EnvironmentBuilder
                     areas[areaName].ToolTip = "{0} resolutions available";
                     areas[areaName].Children.Add(newItem);
                     break;
+#if IS_CLASSIFIED_MODEL
                 case EnvironmentDataType.BottomLoss:
                     newItem = new EnvironmentFileTreeItem
                     {
@@ -139,6 +140,21 @@ namespace ESME.Views.EnvironmentBuilder
                         FileSize = envFile.FileSize,
                     };
                     this["Environment"].Children.Add(newItem);
+                    break;
+#endif
+#if false
+                case EnvironmentDataType.Temperature:
+                    newItem = new TimePeriodEnvironmentFileTreeItem
+                    {
+                        Name = envFile.TimePeriod.ToString(),
+                        TimePeriod = envFile.TimePeriod,
+                        SampleCount = envFile.SampleCount,
+                        GeoRect = envFile.GeoRect,
+                        FileSize = envFile.FileSize,
+                    };
+                    var temperatureRoot = this["Environment"]["Temperature"];
+                    temperatureRoot.Children.Add(newItem);
+                    temperatureRoot.ToolTip = "{0} time periods available";
                     break;
                 case EnvironmentDataType.Salinity:
                     newItem = new TimePeriodEnvironmentFileTreeItem
@@ -153,6 +169,7 @@ namespace ESME.Views.EnvironmentBuilder
                     salinityRoot.Children.Add(newItem);
                     salinityRoot.ToolTip = "{0} time periods available";
                     break;
+#endif
                 case EnvironmentDataType.Sediment:
                     newItem = new EnvironmentFileTreeItem
                     {
@@ -162,19 +179,6 @@ namespace ESME.Views.EnvironmentBuilder
                         FileSize = envFile.FileSize,
                     };
                     this["Environment"].Children.Add(newItem);
-                    break;
-                case EnvironmentDataType.Temperature:
-                    newItem = new TimePeriodEnvironmentFileTreeItem
-                    {
-                        Name = envFile.TimePeriod.ToString(),
-                        TimePeriod = envFile.TimePeriod,
-                        SampleCount = envFile.SampleCount,
-                        GeoRect = envFile.GeoRect,
-                        FileSize = envFile.FileSize,
-                    };
-                    var temperatureRoot = this["Environment"]["Temperature"];
-                    temperatureRoot.Children.Add(newItem);
-                    temperatureRoot.ToolTip = "{0} time periods available";
                     break;
                 case EnvironmentDataType.Wind:
                     newItem = new EnvironmentFileTreeItem

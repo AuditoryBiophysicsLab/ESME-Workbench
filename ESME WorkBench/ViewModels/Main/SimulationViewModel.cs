@@ -7,11 +7,11 @@ using System.Windows;
 using System.Windows.Threading;
 using Cinch;
 using ESME.NEMO;
-using ESMEWorkBench.Data;
-using ESMEWorkBench.ViewModels.TransmissionLoss;
+using ESMEWorkbench.Data;
+using ESMEWorkbench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     internal class SimulationViewModel : EditableValidatingViewModelBase, IViewStatusAwareInjectionAware
     {
@@ -300,12 +300,12 @@ namespace ESMEWorkBench.ViewModels.Main
                                 // Loop through each animat and expose it if necessary
                                 foreach (var animat in animats)
                                 {
-                                    var animatRange = (float)(platformLocation.DistanceTo(animat.Location));
-                                    var animatBearing = (float)(platformLocation.BearingTo(animat.Location));
+                                    var animatRange = (float)(platformLocation.DistanceKilometers(animat.Location) * 1000);
+                                    var animatBearing = (float)(platformLocation.AzimuthDegrees(animat.Location));
                                     // If the animat is not within the radius, skip it.
                                     if ((animatRange <= beamRadius) && (horizontalBeamLimits.Contains(animatBearing)))
                                     {
-                                        var transmissionLoss = transmissionLossField.Lookup(animatBearing, animatRange, (float) animat.Location.Elevation);
+                                        var transmissionLoss = transmissionLossField.Lookup(animatBearing, animatRange, (float) animat.Location.Data);
                                         var soundPressureLevel = mode.SourceLevel - transmissionLoss;
                                         animat.CreateLevelBins(modeCount, 120, 6, 15);
                                         animat.RecordExposure(mode.PSMName, mode.ModeID, soundPressureLevel);

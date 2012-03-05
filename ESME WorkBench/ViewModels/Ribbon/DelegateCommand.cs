@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Input;
 using Microsoft.Windows.Input;
 
-namespace ESMEWorkBench.ViewModels.Ribbon
+namespace ESMEWorkbench.ViewModels.Ribbon
 {
     /// <summary>
     ///     This class allows delegating the commanding logic to methods passed as parameters,

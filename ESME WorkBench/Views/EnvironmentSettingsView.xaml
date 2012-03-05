@@ -1,4 +1,4 @@
-﻿<Window x:Class="ESMEWorkBench.Views.EnvironmentSettingsView"
+﻿<Window x:Class="ESMEWorkbench.Views.EnvironmentSettingsView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"

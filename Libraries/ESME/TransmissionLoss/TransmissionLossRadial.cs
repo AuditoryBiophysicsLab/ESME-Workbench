@@ -237,7 +237,7 @@ namespace ESME.TransmissionLoss
                 sw.WriteLine("Low Frequency (Hz)," + transmissionLossField.LowFrequency);
                 sw.WriteLine("Depression/elevation angle (deg)" + transmissionLossField.DepressionElevationAngle);
                 sw.WriteLine("Vertical beam width (deg)" + transmissionLossField.VerticalBeamWidth);
-                var radialEnd = new EarthCoordinate(transmissionLossField.Latitude, transmissionLossField.Longitude);
+                var radialEnd = new Geo(transmissionLossField.Latitude, transmissionLossField.Longitude);
                 radialEnd.Move(BearingFromSource, transmissionLossField.Radius);
                 sw.WriteLine("Receiver Latitude," + radialEnd.Latitude);
                 sw.WriteLine("Receiver Longitude," + radialEnd.Longitude);

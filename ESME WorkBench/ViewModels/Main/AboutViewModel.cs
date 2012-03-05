@@ -9,7 +9,7 @@ using Cinch;
 using ESME;
 using ESME.Views.Misc;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkbench.ViewModels.Main
 {
     public class AboutViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {

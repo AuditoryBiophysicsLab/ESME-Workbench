@@ -7,7 +7,7 @@ using ESME.NEMO;
 using ESME.TransmissionLoss;
 using HRC.Navigation;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {
     public class TransmissionLossJobViewModel : EditableValidatingViewModelBase, IHasIDField
     {
@@ -237,7 +237,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 if (_isEditable == value) return;
                 _isEditable = value;
-                foreach (DataWrapperBase wrapper in _editableFields) wrapper.IsEditable = _isEditable;
+                foreach (var wrapper in _editableFields) wrapper.IsEditable = _isEditable;
                 NotifyPropertyChanged(IsEditableChangedEventArgs);
             }
         }
@@ -302,7 +302,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             get { return _sourceLevel; }
             set
             {
-                if (_sourceLevel == value) return;
+                if (Math.Abs(_sourceLevel - value) < 0.0001) return;
                 _sourceLevel = value;
                 NotifyPropertyChanged(SourceLevelChangedEventArgs);
             }
@@ -311,10 +311,10 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         #endregion
 
         readonly int _maxCalculationDepth;
-        readonly EarthCoordinate _location;
+        readonly Geo _location;
         readonly NemoMode _nemoMode;
         readonly int _radialCount;
-        public TransmissionLossJobViewModel(EarthCoordinate location, NemoMode nemoMode, int radialCount, int maxCalculationDepth)
+        public TransmissionLossJobViewModel(Geo location, NemoMode nemoMode, int radialCount, int maxCalculationDepth)
         {
             #region Create DataWrappers
 

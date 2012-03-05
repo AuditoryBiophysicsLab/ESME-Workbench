@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using ESME.Plugins;
 using HRC;
 
 namespace ESME
@@ -56,6 +57,8 @@ namespace ESME
     public interface IESMEPlugin : IHRCPlugin
     {
         PluginType PluginType { get; }
+        string Subtype { get; }
+        void LoadSettings();
     }
 
     public enum PluginType

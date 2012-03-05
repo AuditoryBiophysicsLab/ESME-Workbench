@@ -1,6 +1,6 @@
 ﻿using System;
-using ESME.Environment.NAVO;
 using HRC.Navigation;
+using NAVODatabaseAdapter;
 
 namespace SMGCImporter
 {
@@ -47,6 +47,6 @@ namespace SMGCImporter
         }
 
        
-        static void Usage(string message) {      }
+        static void Usage(string message) {}
     }
 }

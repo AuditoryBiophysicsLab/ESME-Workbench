@@ -15,7 +15,7 @@ using ESME.TransmissionLoss;
 using ThinkGeo.MapSuite.Core;
 using BehaviorModel = ESME.Platform.BehaviorModel;
 
-namespace ESMEWorkBench.Data
+namespace ESMEWorkbench.Data
 {
     public partial class Experiment
     {

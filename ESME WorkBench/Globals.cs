@@ -7,7 +7,7 @@ using ESME;
 using ESME.Data;
 using HRC.Services;
 
-namespace ESMEWorkBench
+namespace ESMEWorkbench
 {
     public static class Globals
     {
@@ -18,6 +18,7 @@ namespace ESMEWorkBench
             WorkDirectories = WorkDirectories.Load();
             AppSettings = AppSettings.Load(AppSettings.AppSettingsFile);
             AppSettings.SetDefaults();
+            AppSettings.Save();
             ESME.Globals.WorkDirectories = WorkDirectories;
             ESME.Globals.AppSettings = AppSettings;
             Configuration = new Configuration();

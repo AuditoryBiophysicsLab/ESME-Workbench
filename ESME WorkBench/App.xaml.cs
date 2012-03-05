@@ -6,16 +6,16 @@ using System.Reflection;
 using System.Windows;
 using Cinch;
 using ESME.Views;
-using ESMEWorkBench.Properties;
+using ESMEWorkbench.Properties;
 using HRC.Utility;
 
 #if DEBUG
 using System.Security.Principal;
-using ESMEWorkBench.Properties;
+using ESMEWorkbench.Properties;
 
 #endif
 
-namespace ESMEWorkBench
+namespace ESMEWorkbench
 {
     /// <summary>
     ///   Interaction logic for App.xaml

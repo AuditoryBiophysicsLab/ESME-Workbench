@@ -62,6 +62,11 @@ namespace HRC.Utility
             return Deserialize(file, null, referencedTypes);
         }
 
+        public string Xml
+        {
+            get { return Serialize(ReferencedTypes); }
+        }
+
         /// <summary>
         /// Saves the data to a new filename, and that filename is set as the default filename
         /// </summary>

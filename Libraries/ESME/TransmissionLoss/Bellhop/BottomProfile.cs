@@ -15,7 +15,7 @@ namespace ESME.TransmissionLoss.Bellhop
         {
             MaxDepth = double.MinValue;
             Profile = new List<BottomProfilePoint>();
-            Length = EarthCoordinate.DistanceBetween(transect.StartPoint, transect.EndPoint);
+            Length = Geo.DistanceMeters(transect.StartPoint, transect.EndPoint);
             var stepLength = Length / (numberOfPointsInTransect - 1);
             var currentPoint = transect.StartPoint;
             var curRange = 0.0;
@@ -28,7 +28,7 @@ namespace ESME.TransmissionLoss.Bellhop
                     MaxDepth = curDepth;
                     DeepestPoint = currentPoint;
                 }
-                currentPoint = new EarthCoordinate(currentPoint, transect.Bearing, stepLength);
+                currentPoint = new Geo(currentPoint, transect.Bearing, stepLength);
                 curRange += stepLength;
             }
             //Profile = profile.ToList();
@@ -50,7 +50,7 @@ namespace ESME.TransmissionLoss.Bellhop
 
         public double Length { get; private set; }
 
-        public EarthCoordinate DeepestPoint { get; private set; }
+        public Geo DeepestPoint { get; private set; }
 
         public double MaxDepth { get; set; }
 
@@ -69,7 +69,7 @@ namespace ESME.TransmissionLoss.Bellhop
             return sb.ToString();
         }
 
-        public static double TwoDBilinearApproximation(Bathymetry bathymetry, EarthCoordinate pt)
+        public static double TwoDBilinearApproximation(Bathymetry bathymetry, Geo pt)
         {
             var bounds = GeoRect.Inflate(bathymetry.Samples.GeoRect, 0.01);
             if (!bounds.Contains(pt)) 
@@ -102,10 +102,10 @@ namespace ESME.TransmissionLoss.Bellhop
 
         // TwoDBilinearApproximation
 
-        static double BilinearRecursive(Geo pointToInterpolate, EarthCoordinate<float> northEast, EarthCoordinate<float> northWest, EarthCoordinate<float> southEast, EarthCoordinate<float> southWest)
+        static double BilinearRecursive(Geo pointToInterpolate, Geo<float> northEast, Geo<float> northWest, Geo<float> southEast, Geo<float> southWest)
         {
             var bounds = GeoRect.Inflate(new GeoRect(northEast.Latitude, southWest.Latitude, northEast.Longitude, southWest.Longitude), 0.01);
-            if (!bounds.Contains((EarthCoordinate)pointToInterpolate)) 
+            if (!bounds.Contains(pointToInterpolate)) 
                 throw new ApplicationException("BilinearRecursive: PointToInterpolate is not within the southeast to northwest region");
 
             var zList = new List<double> { northEast.Data, northWest.Data, southEast.Data, southWest.Data };
@@ -114,11 +114,11 @@ namespace ESME.TransmissionLoss.Bellhop
 
             if ((zMax - zMin) < 1) return (zMax + zMin) / 2;
 
-            var east = new EarthCoordinate<float>(northEast.MidPoint(southEast), (northEast.Data + southEast.Data) / 2);
-            var west = new EarthCoordinate<float>(northWest.MidPoint(southWest), (northWest.Data + southWest.Data) / 2);
-            var north = new EarthCoordinate<float>(northEast.MidPoint(northWest), (northEast.Data + northWest.Data) / 2);
-            var south = new EarthCoordinate<float>(southEast.MidPoint(southWest), (southEast.Data + southWest.Data) / 2);
-            var middle = new EarthCoordinate<float>(north.MidPoint(south), (north.Data + south.Data) / 2);
+            var east = new Geo<float>(northEast.MidPoint(southEast), (northEast.Data + southEast.Data) / 2);
+            var west = new Geo<float>(northWest.MidPoint(southWest), (northWest.Data + southWest.Data) / 2);
+            var north = new Geo<float>(northEast.MidPoint(northWest), (northEast.Data + northWest.Data) / 2);
+            var south = new Geo<float>(southEast.MidPoint(southWest), (southEast.Data + southWest.Data) / 2);
+            var middle = new Geo<float>(north.MidPoint(south), (north.Data + south.Data) / 2);
 
             if (pointToInterpolate.Latitude <= middle.Latitude)   // If the point's latitude is less than or equal to the middle latitude, it's in the southern half of the current region
                 return pointToInterpolate.Longitude <= middle.Longitude ? // If the point's longitude is is less than or equal to the middle longitude, it's in the western half of the current region

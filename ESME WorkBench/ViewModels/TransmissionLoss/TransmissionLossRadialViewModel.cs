@@ -17,11 +17,11 @@ using Cinch;
 using ESME.Environment;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
-using ESMEWorkBench.Views;
+using ESMEWorkbench.Views;
 using HRC.Navigation;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {
     [ExportViewModel("TransmissionLossRadialViewModel")]
     public class TransmissionLossRadialViewModel : ViewModelBase

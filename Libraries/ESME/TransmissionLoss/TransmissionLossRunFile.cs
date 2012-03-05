@@ -16,7 +16,7 @@ namespace ESME.TransmissionLoss
 {
     public abstract class TransmissionLossRunFile : IEquatable<TransmissionLossField>
     {
-        protected static readonly List<Type> ReferencedTypes = new List<Type> { typeof(TransmissionLossAlgorithm), typeof(EarthCoordinate), typeof(AnalysisPoint), typeof(AcousticProperties), typeof(TransmissionLossRunFile), typeof(Point) };
+        protected static readonly List<Type> ReferencedTypes = new List<Type> { typeof(TransmissionLossAlgorithm), typeof(Geo), typeof(AnalysisPoint), typeof(AcousticProperties), typeof(TransmissionLossRunFile), typeof(Point) };
 
         protected TransmissionLossRunFile()
         {
@@ -67,7 +67,7 @@ namespace ESME.TransmissionLoss
             result.TimePeriod = rangeComplexes.SelectedTimePeriod;
             result.AreaName = rangeComplexes.SelectedArea.Name;
             result.BathymetryResolution = rangeComplexes.SelectedBathymetry.Name;
-            result.ReferenceLocation = new EarthCoordinate(rangeComplex.RangeComplexMetadata.Latitude, rangeComplex.RangeComplexMetadata.Longitude);
+            result.ReferenceLocation = new Geo(rangeComplex.RangeComplexMetadata.Latitude, rangeComplex.RangeComplexMetadata.Longitude);
             var lat = soundSource.Latitude;
             var lon = soundSource.Longitude;
             var locationString = string.Format("{0}{1:0.####}_{2}{3:0.####}",
@@ -106,7 +106,7 @@ namespace ESME.TransmissionLoss
         public TransmissionLossAlgorithm TransmissionLossAlgorithm { get; set; }
         public float WaterDepthIncrement { get; set; }
         public float RangeDistanceIncrement { get; set; }
-        public EarthCoordinate ReferenceLocation { get; set; }
+        public Geo ReferenceLocation { get; set; }
 #if false
         public static TransmissionLossRunFile Create(TransmissionLossAlgorithm transmissionLossAlgorithm, TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, AppSettings appSettings)
         {

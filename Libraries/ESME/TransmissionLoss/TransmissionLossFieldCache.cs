@@ -100,7 +100,7 @@ namespace ESME.TransmissionLoss
             //var Names = Assembly.GetManifestResourceNames();
             var Schema = new StringBuilder();
             string[] SchemaResources = {
-                                           "ESME.Schema.EarthCoordinate.xsd", "ESME.Schema.AnalysisPoint.xsd", "ESME.Schema.AcousticProperties.xsd", "ESME.Schema.TransmissionLossField.xsd",
+                                           "ESME.Schema.Geo.xsd", "ESME.Schema.AnalysisPoint.xsd", "ESME.Schema.AcousticProperties.xsd", "ESME.Schema.TransmissionLossField.xsd",
                                        };
             foreach (string Resource in SchemaResources)
             {

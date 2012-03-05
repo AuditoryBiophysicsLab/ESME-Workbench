@@ -26,7 +26,7 @@ namespace ESME.TransmissionLoss
         public List<float> Ranges { get; set; }
         public List<TransmissionLossRadial> Radials { get; private set; }
         public string Filename { get; set; }
-        public EarthCoordinate EarthCoordinate { get; private set; }
+        public Geo Geo { get; private set; }
         public static TransmissionLossField LoadHeader(string filename)
         {
             return new TransmissionLossField(filename, true);
@@ -96,7 +96,7 @@ namespace ESME.TransmissionLoss
             SourceLevel = runFile.TransmissionLossJob.SoundSource.SourceLevel;
             Latitude = (float)runFile.TransmissionLossJob.SoundSource.Latitude;
             Longitude = (float)runFile.TransmissionLossJob.SoundSource.Longitude;
-            EarthCoordinate = new EarthCoordinate(Latitude, Longitude);
+            Geo = new Geo(Latitude, Longitude);
             SourceDepth = runFile.TransmissionLossJob.SoundSource.AcousticProperties.SourceDepth;
             VerticalBeamWidth = runFile.TransmissionLossJob.SoundSource.AcousticProperties.VerticalBeamWidth;
             DepressionElevationAngle = runFile.TransmissionLossJob.SoundSource.AcousticProperties.DepressionElevationAngle;
@@ -140,7 +140,7 @@ namespace ESME.TransmissionLoss
             result.Ranges = new List<float>(output.RangeCells);
             result.Radials = new List<TransmissionLossRadial>();
             for (var i = 0; i < output.Pressures.Count; i++) result.Radials.Add(new TransmissionLossRadial(output.RadialBearings[i],output.Pressures[i],result.Depths,result.Ranges,output.SourceLevel));
-            result.EarthCoordinate = new EarthCoordinate(result.Latitude,result.Longitude);
+            result.Geo = new Geo(result.Latitude,result.Longitude);
             result._dataIsLoaded = true;
             return result;
         }
@@ -166,7 +166,7 @@ namespace ESME.TransmissionLoss
                 SourceLevel = stream.ReadSingle();
                 Latitude = stream.ReadSingle();
                 Longitude = stream.ReadSingle();
-                EarthCoordinate = new EarthCoordinate(Latitude, Longitude);
+                Geo = new Geo(Latitude, Longitude);
                 SourceDepth = stream.ReadSingle();
                 VerticalBeamWidth = stream.ReadSingle();
                 DepressionElevationAngle = stream.ReadSingle();
@@ -275,7 +275,7 @@ namespace ESME.TransmissionLoss
 
         public bool Equals(SoundSource soundSource)
         {
-            var location = new EarthCoordinate(Latitude, Longitude);
+            var location = new Geo(Latitude, Longitude);
             return (SourceLevel.Equals(soundSource.SourceLevel) && location.Equals(soundSource) && soundSource.AcousticProperties.Equals(this));
         }
     }

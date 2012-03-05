@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -56,7 +55,7 @@ namespace HRC.Utility
             using (var reader = new StreamReader(inputStream))
             {
                 string curLine;
-                int lineNumber = 1;
+                var lineNumber = 1;
                 while ((curLine = reader.ReadLine()) != null)
                 {
                     try
@@ -135,7 +134,7 @@ namespace HRC.Utility
             if (value >= maxValue) return _map.Last();
             if (value <= minValue) return _map.First();
 
-            if (dataRange != 0.0)
+            if (Math.Abs(dataRange - 0.0) > 0.0001)
             {
                 double fraction = (value - minValue) / dataRange;
                 if (IsInverted) fraction = 1.0 - fraction;
@@ -161,7 +160,7 @@ namespace HRC.Utility
 
         // data[lats,lons]
         public Bitmap ToBitmap<T>(T[,] data, float minValue, float maxValue)
-            where T : EarthCoordinate<float>
+            where T : Geo<float>
         {
             if (data == null) throw new ApplicationException("ToBitmap: data cannot be null");
 
@@ -172,14 +171,13 @@ namespace HRC.Utility
             writeableBitmap.Lock();
             unsafe
             {
-                Color curColor;
                 var curOffset = (int)writeableBitmap.BackBuffer;
                 for (var y = 0; y < height; y++)
                 {
                     for (var x = 0; x < width; x++)
                     {
                         var curValue = data[x, height - 1 - y].Data;
-                        curColor = curValue <= Threshold ? BelowThresholdColormap.Lookup(curValue, minValue, Threshold, Threshold - minValue) : AboveThresholdColormap.Lookup(curValue, Threshold, maxValue, maxValue - Threshold);
+                        var curColor = curValue <= Threshold ? BelowThresholdColormap.Lookup(curValue, minValue, Threshold, Threshold - minValue) : AboveThresholdColormap.Lookup(curValue, Threshold, maxValue, maxValue - Threshold);
                         // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
                         // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
                         *((int*)curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
@@ -248,7 +246,7 @@ namespace HRC.Utility
             return pixelValues;
         }
 
-        public Bitmap ToBitmap(EarthCoordinate<float>[,] data)
+        public Bitmap ToBitmap(Geo<float>[,] data)
         {
             if (data == null) throw new ApplicationException("ToBitmap: data cannot be null");
 

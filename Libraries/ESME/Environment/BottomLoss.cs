@@ -68,7 +68,7 @@ namespace ESME.Environment
     }
 
     [Serializable]
-    public class BottomLossSample : EarthCoordinate<BottomLossData>
+    public class BottomLossSample : Geo<BottomLossData>
     {
         public BottomLossSample() { }
 

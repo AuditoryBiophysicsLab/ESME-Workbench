@@ -180,7 +180,7 @@ namespace ESME.Mapping
             ValidationErrorText = AnalysisPoint.ValidationErrorText;
         }
     }
-
+#if IS_CLASSIFIED_MODEL
     [Serializable]
     public class ExplosivePointLayer : OverlayShapeMapLayer
     {
@@ -237,6 +237,7 @@ namespace ESME.Mapping
             ValidationErrorText = ExplosivePoint.ValidationErrorText;
         }
     }
+#endif
 
     [Serializable]
     public class PropagationLayer : OverlayShapeMapLayer

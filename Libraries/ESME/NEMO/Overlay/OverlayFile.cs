@@ -75,7 +75,7 @@ namespace ESME.NEMO.Overlay
                 var coords = line.Split(coordSeparators, StringSplitOptions.RemoveEmptyEntries);
                 double lat, lon;
                 if (coords.Length == 2 && double.TryParse(coords[0], out lat) && (double.TryParse(coords[1], out lon)))
-                    geos.Add(new EarthCoordinate(lat, lon));
+                    geos.Add(new Geo(lat, lon));
                 else
                     errorText += string.Format(overlayName + "Invalid latitude/longitude on line {0}. Please use decimal degrees" + System.Environment.NewLine, lineCount);
             }

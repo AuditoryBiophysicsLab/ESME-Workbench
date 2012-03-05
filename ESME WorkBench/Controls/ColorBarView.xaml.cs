@@ -8,7 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 
-namespace ESMEWorkBench.Controls
+namespace ESMEWorkbench.Controls
 {
     /// <summary>
     /// Interaction logic for ColorBarView.xaml

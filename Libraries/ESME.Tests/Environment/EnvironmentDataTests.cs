@@ -8,12 +8,12 @@ namespace ESME.Tests.Environment
 {
     public class EnvironmentDataTests
     {
-        EnvironmentData<EarthCoordinate> _list;
+        EnvironmentData<Geo> _list;
 
         [SetUp]
         public void Initialize()
         {
-            _list = new EnvironmentData<EarthCoordinate>();
+            _list = new EnvironmentData<Geo>();
         }
 
         [Test]
@@ -22,9 +22,9 @@ namespace ESME.Tests.Environment
             Assert.AreEqual(0, _list.Count);
             Assert.Throws(typeof(ArgumentOutOfRangeException), () => Debug.WriteLine(_list[0]));
             Assert.Throws(typeof(IndexOutOfRangeException), () => Debug.WriteLine(_list[0, 0]));
-            Assert.Throws(typeof(ArgumentOutOfRangeException), () => Debug.WriteLine(_list.GetNearestPoint(new EarthCoordinate(0, 0))));
+            Assert.Throws(typeof(ArgumentOutOfRangeException), () => Debug.WriteLine(_list.GetNearestPoint(new Geo(0, 0))));
             Assert.Throws(typeof(ArgumentOutOfRangeException), () => Debug.WriteLine(_list.GetExactPoint(0, 0)));
-            EarthCoordinate result;
+            Geo result;
             Assert.IsFalse(_list.TryGetExactPoint(0, 0, out result));
             Assert.IsFalse(_list.TryGetNearestPoint(0, 0, out result));
         }
@@ -33,9 +33,9 @@ namespace ESME.Tests.Environment
         [Test]
         public void OneEntry()
         {
-            var zeroZero = new EarthCoordinate(0, 0);
-            var oneOne = new EarthCoordinate(1, 1);
-            EarthCoordinate result;
+            var zeroZero = new Geo(0, 0);
+            var oneOne = new Geo(1, 1);
+            Geo result;
 
             _list.Add(zeroZero);
             Assert.AreEqual(1, _list.Count);
@@ -65,10 +65,10 @@ namespace ESME.Tests.Environment
         [Test]
         public void TwoByTwoSquare()
         {
-            var zeroZero = new EarthCoordinate(0, 0);
-            var zeroOne = new EarthCoordinate(0, 1);
-            var oneZero = new EarthCoordinate(1, 0);
-            var oneOne = new EarthCoordinate(1, 1);
+            var zeroZero = new Geo(0, 0);
+            var zeroOne = new Geo(0, 1);
+            var oneZero = new Geo(1, 0);
+            var oneOne = new Geo(1, 1);
 
             _list.Add(oneOne);
             _list.Add(oneZero);
@@ -124,7 +124,7 @@ namespace ESME.Tests.Environment
         {
             for (var latIndex = 0; latIndex < latStepCount; latIndex++)
                 for (var lonIndex = 0; lonIndex < lonStepCount; lonIndex++)
-                    _list.Add(new EarthCoordinate(minLat + (latIndex * latStep), minLon + (lonIndex * lonStep)));
+                    _list.Add(new Geo(minLat + (latIndex * latStep), minLon + (lonIndex * lonStep)));
             Debug.WriteLine("Number of latitudes is {0}", _list.Latitudes.Count);
             Debug.WriteLine("Number of longitudes is {0}", _list.Longitudes.Count);
             Debug.WriteLine("Number of elements is {0}", _list.Count);
@@ -140,7 +140,7 @@ namespace ESME.Tests.Environment
 
         void TestNearestAndExact(Geo nearest, double latitude, double longitude)
         {
-            EarthCoordinate result;
+            Geo result;
 
             Assert.IsTrue(_list.TryGetNearestPoint(latitude, longitude, out result));
             Assert.AreSame(result, nearest);

@@ -1,4 +1,4 @@
-﻿namespace ESMEWorkBench.Controls
+﻿namespace ESMEWorkbench.Controls
 {
     /// <summary>
     /// Interaction logic for LayerTreeView.xaml

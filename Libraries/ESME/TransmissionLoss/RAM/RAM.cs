@@ -91,8 +91,8 @@ namespace ESME.TransmissionLoss.RAM
                 // If SSP is shallower than the bathymetry then extrapolate an SSP entry for the deepest part of the water
                 //if (SSP.DepthVector[SSP.DepthVector.Length - 1] < RealBottomDepth_Meters)
                 //    SoundSpeedProfile = ExtrapolateSSP(SoundSpeedProfile, RealBottomDepth_Meters);
-                foreach (var depthValuePair in ssp.Data)
-                    sw.WriteLine("{0:F4} {1:F4} /", depthValuePair.Depth, depthValuePair.Value);
+                foreach (var soundSpeedSample in ssp.Data)
+                    sw.WriteLine("{0:F4} {1:F4} /", soundSpeedSample.Depth, soundSpeedSample.SoundSpeed);
                 sw.WriteLine("-1 -1");
 
                 sw.WriteLine("{0:F4} {1:F4}", 0, sediment.CompressionWaveSpeed);
@@ -103,8 +103,8 @@ namespace ESME.TransmissionLoss.RAM
                 sw.WriteLine("-1 -1");
 
                 sw.WriteLine("1000000000000.0000");
-                foreach (var depthValuePair in ssp.Data)
-                    sw.WriteLine("{0:F4} {1:F4} /", depthValuePair.Depth, depthValuePair.Value);
+                foreach (var soundSpeedSample in ssp.Data)
+                    sw.WriteLine("{0:F4} {1:F4} /", soundSpeedSample.Depth, soundSpeedSample.SoundSpeed);
                 sw.WriteLine("-1 -1");
 
                 sw.WriteLine("{0:F4} {1:F4}", 0, sediment.CompressionWaveSpeed);
