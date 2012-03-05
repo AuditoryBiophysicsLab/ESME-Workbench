@@ -34,9 +34,8 @@
     <Reference Include="AsyncCtpLibrary, Version=1.0.4107.18181, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="Cinch.WPF, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
-    <Reference Include="HDF5DotNet, Version=1.8.7.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\..\..\ESME WorkBench\bin\Release\HDF5DotNet.dll</HintPath>
+    <Reference Include="Cinch.WPF">
+      <HintPath>..\..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
