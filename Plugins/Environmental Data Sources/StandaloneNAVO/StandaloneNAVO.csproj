@@ -40,10 +40,35 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BST20ForNAVO.cs" />
+    <Compile Include="Controls\DBDBConfigurationControl.xaml.cs">
+      <DependentUpon>DBDBConfigurationControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\NAVOConfigurationControl.xaml.cs">
+      <DependentUpon>NAVOConfigurationControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DBDB54ForNAVO.cs" />
+    <Compile Include="GDEM3ForNAVO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SMGC20ForNAVO.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Controls\" />
+    <ProjectReference Include="..\..\..\ESME.Controls\ESME.Views.csproj">
+      <Project>{49221733-2EB6-468F-8833-06C0E36B3C83}</Project>
+      <Name>ESME.Views</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="Controls\DBDBConfigurationControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="Controls\NAVOConfigurationControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
