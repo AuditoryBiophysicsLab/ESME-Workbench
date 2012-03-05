@@ -551,29 +551,6 @@ namespace ESME.Metadata
         }
         #endregion
 
-        #region EditScenarioCommand
-        public SimpleCommand<object, object> EditScenarioCommand
-        {
-            get { return _editScenario ?? (_editScenario = new SimpleCommand<object, object>(delegate { EditScenarioHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _editScenario;
-
-        void EditScenarioHandler()
-        {
-            var arguments = "\"" + ScenarioFilename + "\"";
-            new Process
-            {
-                StartInfo =
-                {
-                    FileName = Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath,
-                    WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath),
-                    Arguments = arguments,
-                }
-            }.Start();
-        }
-        #endregion
-
         #region public bool IsInAnalysisPointMode { get; set; }
         [XmlIgnore]
         public bool IsInAnalysisPointMode

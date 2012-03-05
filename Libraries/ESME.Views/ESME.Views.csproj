@@ -121,10 +121,6 @@
     <Compile Include="EnvironmentBuilder\RangeComplexTreeView.xaml.cs">
       <DependentUpon>RangeComplexTreeView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EnvironmentBuilder\EnvironmentExtractionView.xaml.cs">
-      <DependentUpon>EnvironmentExtractionView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="EnvironmentBuilder\EnvironmentExtractionViewModel.cs" />
     <Compile Include="EnvironmentBuilder\EnvironmentBuilderView.xaml.cs">
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
     </Compile>
@@ -263,10 +259,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="EnvironmentBuilder\EnvironmentBuilderView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="EnvironmentBuilder\EnvironmentExtractionView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

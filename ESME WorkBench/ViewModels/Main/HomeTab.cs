@@ -260,92 +260,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         void ExportAnalysisPointsHandler() { ScenarioMetadata.ExportAnalysisPoints(); }
         #endregion
-
-        #region RunScenarioCommand
-        public SimpleCommand<object, object> RunScenarioCommand
-        {
-            get
-            {
-                return _runScenario ??
-                       (_runScenario =
-                        new SimpleCommand<object, object>(delegate { return IsRunScenarioCommandEnabled; },
-                                                          delegate { RunScenarioHandler(); }));
-            }
-        }
-
-        SimpleCommand<object, object> _runScenario;
-
-        bool IsRunScenarioCommandEnabled
-        {
-            get
-            {
-                return IsScenarioLoaded;
-            }
-        }
-
-        void RunScenarioHandler()
-        {
-            var vm = new ScenarioSimulatorOptionsViewModel
-            {
-                ScenarioSimulatorSettings = ESME.Globals.AppSettings.ScenarioSimulatorSettings,
-                NemoFile = ScenarioMetadata.NemoFile,
-            };
-
-            _visualizerService.Show("ScenarioSimulatorOptionsView", vm, true, null);
-
-        }
-        #endregion
-
-        #region RunScenarioGUICommand
-        public SimpleCommand<object, object> RunScenarioGUICommand
-        {
-            get
-            {
-                return _runScenarioGUI ??
-                       (_runScenarioGUI =
-                        new SimpleCommand<object, object>(delegate { return IsRunScenarioGUICommandEnabled; },
-                                                          delegate { RunScenarioGUIHandler(); }));
-            }
-        }
-
-        SimpleCommand<object, object> _runScenarioGUI;
-
-        bool IsRunScenarioGUICommandEnabled
-        {
-            get
-            {
-                return ((ESME.Globals.AppSettings.NAEMOTools.ScenarioExecutablePath != null)
-                      && File.Exists(ESME.Globals.AppSettings.NAEMOTools.ScenarioExecutablePath)
-                      && (ESME.Globals.AppSettings.NAEMOTools.JavaExecutablePath != null)
-                      && File.Exists(ESME.Globals.AppSettings.NAEMOTools.JavaExecutablePath) && IsScenarioLoaded);
-            }
-        }
-
-        void RunScenarioGUIHandler()
-        {
-            var commandArgs = CommandArgs;
-            new Process
-            {
-                StartInfo =
-                {
-                    WorkingDirectory = Path.GetDirectoryName(ESME.Globals.AppSettings.NAEMOTools.ScenarioExecutablePath),
-                    FileName = ESME.Globals.AppSettings.NAEMOTools.JavaExecutablePath,
-                    Arguments = commandArgs,
-
-                },
-            }.Start();
-        }
-        string CommandArgs
-        {
-            get
-            {
-                var sb = new StringBuilder();
-                sb.Append(string.Format("-jar \"{0}\" ", ESME.Globals.AppSettings.NAEMOTools.ScenarioExecutablePath));
-                sb.Append(string.Format("-s \"{0}\" ", ScenarioMetadata.NemoFile));
-                return sb.ToString();
-            }
-        }
-        #endregion
+        
 
         #region public bool CanPlaceAnalysisPoint { get; set; }
 
@@ -373,26 +288,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #endregion
 
-        #region NewScenarioCommand
-        public SimpleCommand<object, object> NewScenarioCommand
-        {
-            get { return _newScenario ?? (_newScenario = new SimpleCommand<object, object>(delegate { NewScenarioHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _newScenario;
-
-        static void NewScenarioHandler()
-        {
-            new Process
-            {
-                StartInfo =
-                {
-                    FileName = ESME.Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath,
-                    WorkingDirectory = Path.GetDirectoryName(ESME.Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath),
-                }
-            }.Start();
-        }
-        #endregion
+        
 
         readonly List<Tuple<IHaveProperties, Window>> _openPropertyWindows = new List<Tuple<IHaveProperties, Window>>();
         [MediatorMessageSink(MediatorMessage.ShowProperties)]

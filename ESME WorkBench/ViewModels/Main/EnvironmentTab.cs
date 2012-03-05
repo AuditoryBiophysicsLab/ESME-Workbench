@@ -10,12 +10,10 @@ using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
-using ESME.Environment.NAVO;
 using ESME.Mapping;
 using ESME.Model;
 using ESME.NEMO.Overlay;
 using ESME.Views.Locations;
-using ESME.Views.InstallationWizard;
 using ESMEWorkbench.ViewModels.NAVO;
 using HRC.Navigation;
 using ThinkGeo.MapSuite.Core;
@@ -40,7 +38,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 {EnvironmentDataType.Wind, null}
             };
             Console.WriteLine("All view models are ready!");
-            WizardViewModel.LaunchWizardIfNeeded(_visualizerService);
+            //WizardViewModel.LaunchWizardIfNeeded(_visualizerService);
 
             if (ESME.Globals.AppSettings != null && ESME.Globals.AppSettings.ScenarioDataDirectory != null && File.Exists(Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv")))
                 InitializeEnvironmentManager();

@@ -225,7 +225,7 @@ namespace ESMEWorkbench.Data
                                               Metadata = metadata,
                                               Filename = soundSource.SoundSourceID,
                                               AnalysisPointID = analysisPoint.AnalysisPointID,
-                                              MaxDepth = (int) ESME.Globals.AppSettings.CASSSettings.MaximumDepth,
+                                             // MaxDepth = (int) ESME.Globals.AppSettings.CASSSettings.MaximumDepth,
                                           };
                                 // Create the job
                                 //var runfile = TransmissionLossRunFile.Create(algorithm, job, environmentInfo, Globals.AppSettings);

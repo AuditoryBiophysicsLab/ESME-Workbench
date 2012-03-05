@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -8,9 +9,11 @@ using HRC.Validation;
 
 namespace ESME.Environment.NAVO
 {
+
     [Serializable]
     public sealed class NAVOConfiguration : ValidatingViewModel
     {
+#if false
         public NAVOConfiguration()
         {
             ValidationRules.AddRange(new List<ValidationRule>
@@ -99,113 +102,7 @@ namespace ESME.Environment.NAVO
             if (string.IsNullOrEmpty(DBDBEXEPath)) DBDBEXEPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "dbv5_command.exe");
         }
 
-        #region public TimePeriod SpringStartMonth { get; set; }
-
-        public TimePeriod SpringStartMonth
-        {
-            get { return _springStartMonth; }
-            set
-            {
-                if (_springStartMonth == value) return;
-                _springStartMonth = value;
-                NotifyPropertyChanged(SpringStartMonthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SpringStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.SpringStartMonth);
-        TimePeriod _springStartMonth = TimePeriod.March;
-
-        #endregion
-
-        #region public TimePeriod SummerStartMonth { get; set; }
-
-        public TimePeriod SummerStartMonth
-        {
-            get { return _summerStartMonth; }
-            set
-            {
-                if (_summerStartMonth == value) return;
-                _summerStartMonth = value;
-                NotifyPropertyChanged(SummerStartMonthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SummerStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.SummerStartMonth);
-        TimePeriod _summerStartMonth = TimePeriod.June;
-
-        #endregion
-
-        #region public TimePeriod FallStartMonth { get; set; }
-
-        public TimePeriod FallStartMonth
-        {
-            get { return _fallStartMonth; }
-            set
-            {
-                if (_fallStartMonth == value) return;
-                _fallStartMonth = value;
-                NotifyPropertyChanged(FallStartMonthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs FallStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.FallStartMonth);
-        TimePeriod _fallStartMonth = TimePeriod.September;
-
-        #endregion
-
-        #region public TimePeriod WinterStartMonth { get; set; }
-
-        public TimePeriod WinterStartMonth
-        {
-            get { return _winterStartMonth; }
-            set
-            {
-                if (_winterStartMonth == value) return;
-                _winterStartMonth = value;
-                NotifyPropertyChanged(WinterStartMonthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs WinterStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.WinterStartMonth);
-        TimePeriod _winterStartMonth = TimePeriod.December;
-
-        #endregion
-
-        #region public TimePeriod ColdSeasonStartMonth { get; set; }
-
-        public TimePeriod ColdSeasonStartMonth
-        {
-            get { return _coldSeasonStartMonth; }
-            set
-            {
-                if (_coldSeasonStartMonth == value) return;
-                _coldSeasonStartMonth = value;
-                NotifyPropertyChanged(ColdSeasonStartMonthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ColdSeasonStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.ColdSeasonStartMonth);
-        TimePeriod _coldSeasonStartMonth = TimePeriod.December;
-
-        #endregion
-
-        #region public TimePeriod WarmSeasonStartMonth { get; set; }
-
-        public TimePeriod WarmSeasonStartMonth
-        {
-            get { return _warmSeasonStartMonth; }
-            set
-            {
-                if (_warmSeasonStartMonth == value) return;
-                _warmSeasonStartMonth = value;
-                NotifyPropertyChanged(WarmSeasonStartMonthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs WarmSeasonStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.WarmSeasonStartMonth);
-        TimePeriod _warmSeasonStartMonth = TimePeriod.June;
-
-        #endregion
+       
 
         #region public string GDEMDirectory { get; set; }
 
@@ -432,7 +329,114 @@ namespace ESME.Environment.NAVO
         string _dBDBSelectedResolution;
 
         #endregion
+#endif
+        #region public TimePeriod SpringStartMonth { get; set; }
 
+        public TimePeriod SpringStartMonth
+        {
+            get { return _springStartMonth; }
+            set
+            {
+                if (_springStartMonth == value) return;
+                _springStartMonth = value;
+                NotifyPropertyChanged(SpringStartMonthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SpringStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.SpringStartMonth);
+        TimePeriod _springStartMonth = TimePeriod.March;
+
+        #endregion
+
+        #region public TimePeriod SummerStartMonth { get; set; }
+
+        public TimePeriod SummerStartMonth
+        {
+            get { return _summerStartMonth; }
+            set
+            {
+                if (_summerStartMonth == value) return;
+                _summerStartMonth = value;
+                NotifyPropertyChanged(SummerStartMonthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SummerStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.SummerStartMonth);
+        TimePeriod _summerStartMonth = TimePeriod.June;
+
+        #endregion
+
+        #region public TimePeriod FallStartMonth { get; set; }
+
+        public TimePeriod FallStartMonth
+        {
+            get { return _fallStartMonth; }
+            set
+            {
+                if (_fallStartMonth == value) return;
+                _fallStartMonth = value;
+                NotifyPropertyChanged(FallStartMonthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs FallStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.FallStartMonth);
+        TimePeriod _fallStartMonth = TimePeriod.September;
+
+        #endregion
+
+        #region public TimePeriod WinterStartMonth { get; set; }
+
+        public TimePeriod WinterStartMonth
+        {
+            get { return _winterStartMonth; }
+            set
+            {
+                if (_winterStartMonth == value) return;
+                _winterStartMonth = value;
+                NotifyPropertyChanged(WinterStartMonthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs WinterStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.WinterStartMonth);
+        TimePeriod _winterStartMonth = TimePeriod.December;
+
+        #endregion
+
+        #region public TimePeriod ColdSeasonStartMonth { get; set; }
+
+        public TimePeriod ColdSeasonStartMonth
+        {
+            get { return _coldSeasonStartMonth; }
+            set
+            {
+                if (_coldSeasonStartMonth == value) return;
+                _coldSeasonStartMonth = value;
+                NotifyPropertyChanged(ColdSeasonStartMonthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ColdSeasonStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.ColdSeasonStartMonth);
+        TimePeriod _coldSeasonStartMonth = TimePeriod.December;
+
+        #endregion
+
+        #region public TimePeriod WarmSeasonStartMonth { get; set; }
+
+        public TimePeriod WarmSeasonStartMonth
+        {
+            get { return _warmSeasonStartMonth; }
+            set
+            {
+                if (_warmSeasonStartMonth == value) return;
+                _warmSeasonStartMonth = value;
+                NotifyPropertyChanged(WarmSeasonStartMonthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs WarmSeasonStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.WarmSeasonStartMonth);
+        TimePeriod _warmSeasonStartMonth = TimePeriod.June;
+
+        #endregion
         static readonly TimePeriod[] MonthMap = new[]
         {
                 (TimePeriod)0,
@@ -570,6 +574,7 @@ namespace ESME.Environment.NAVO
                     yield return MonthMap[(int)WarmSeasonStartMonth + 5];
                     yield break;
             }
-        }
+        } 
     }
 }
+

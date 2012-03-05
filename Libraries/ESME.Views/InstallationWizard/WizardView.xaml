@@ -1,4 +1,4 @@
-﻿<Window x:Class="ESME.Views.InstallationWizard.WizardView"
+﻿ <Window x:Class="ESME.Views.InstallationWizard.WizardView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Controls="clr-namespace:ESME.Views.Controls"
@@ -8,7 +8,7 @@
         Icon="..\Wave.ico"
         ResizeMode="NoResize"
         WindowStyle="ToolWindow">
-
+<!--
     <DockPanel LastChildFill="True">
         <Border Background="Gainsboro"
                 BorderThickness="0"
@@ -56,5 +56,5 @@
                                              Visibility="{Binding SelectedPanel.IsFileBrowerEnabled,
                                                                   Converter={StaticResource TrueVisibleFalseCollapsed}}" />
         </StackPanel>
-    </DockPanel>
+    </DockPanel>-->
 </Window>

@@ -32,138 +32,141 @@
                     IsDefault="True" />
         </DockPanel>
         <TabControl>
-            <TabItem Header="NAEMO">
+            <!--
+                <TabItem Header="NAEMO">
                 <StackPanel Width="Auto"
-                            Height="Auto"
-                            Orientation="Vertical">
-                    <Controls:FileOrDirectorySetting Margin="5"
-                                                     Caption="Java executable (javaw.exe)"
-                                                     DialogTitle="Choose the java executable (javaw.exe)"
-                                                     FileName="{Binding AppSettings.NAEMOTools.JavaExecutablePath,
-                                                                        ValidatesOnDataErrors=True,
-                                                                        ValidatesOnExceptions=True,
-                                                                        NotifyOnValidationError=True,
-                                                                        UpdateSourceTrigger=PropertyChanged}"
-                                                     FileNameFilter="Java executable (javaw.exe)|javaw.exe|All files (*.*)|*.*"
-                                                     IsDirectoryBrowser="False"
-                                                     Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
-                    <Controls:FileOrDirectorySetting Margin="5"
-                                                     Caption="NAEMO Tools directory"
-                                                     FileName="{Binding AppSettings.NAEMOTools.NAEMOToolsDirectory,
-                                                                        ValidatesOnDataErrors=True,
-                                                                        ValidatesOnExceptions=True,
-                                                                        NotifyOnValidationError=True,
-                                                                        UpdateSourceTrigger=PropertyChanged}"
-                                                     IsDirectoryBrowser="True"
-                                                     Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
-
-                    <Controls:FileOrDirectorySetting Margin="5 0"
-                                                     Caption="Scenario data directory"
-                                                     DialogTitle="Locate the range complex definitions file (SimAreas.csv)"
-                                                     FileName="{Binding ScenarioDataDirectory,
-                                                                        ValidatesOnDataErrors=True,
-                                                                        ValidatesOnExceptions=True,
-                                                                        NotifyOnValidationError=True,
-                                                                        UpdateSourceTrigger=PropertyChanged}"
-                                                     FileNameFilter="Range complex definitions (SimAreas.csv)|SimAreas.csv|All files (*.*)|*.*"
-                                                     IsDirectoryBrowser="False"
-                                                     Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
-
-                    <GroupBox Margin="5"
-                              Header="Scenario Simulator Options"
-                              Padding="5">
-                        <Views:ScenarioSimulatorUserControlView DataContext="{Binding AppSettings.ScenarioSimulatorSettings}" />
-                    </GroupBox>
+                Height="Auto"
+                Orientation="Vertical">
+                <Controls:FileOrDirectorySetting Margin="5"
+                Caption="Java executable (javaw.exe)"
+                DialogTitle="Choose the java executable (javaw.exe)"
+                FileName="{Binding AppSettings.NAEMOTools.JavaExecutablePath,
+                ValidatesOnDataErrors=True,
+                ValidatesOnExceptions=True,
+                NotifyOnValidationError=True,
+                UpdateSourceTrigger=PropertyChanged}"
+                FileNameFilter="Java executable (javaw.exe)|javaw.exe|All files (*.*)|*.*"
+                IsDirectoryBrowser="False"
+                Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
+                <Controls:FileOrDirectorySetting Margin="5"
+                Caption="NAEMO Tools directory"
+                FileName="{Binding AppSettings.NAEMOTools.NAEMOToolsDirectory,
+                ValidatesOnDataErrors=True,
+                ValidatesOnExceptions=True,
+                NotifyOnValidationError=True,
+                UpdateSourceTrigger=PropertyChanged}"
+                IsDirectoryBrowser="True"
+                Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
+                
+                <Controls:FileOrDirectorySetting Margin="5 0"
+                Caption="Scenario data directory"
+                DialogTitle="Locate the range complex definitions file (SimAreas.csv)"
+                FileName="{Binding ScenarioDataDirectory,
+                ValidatesOnDataErrors=True,
+                ValidatesOnExceptions=True,
+                NotifyOnValidationError=True,
+                UpdateSourceTrigger=PropertyChanged}"
+                FileNameFilter="Range complex definitions (SimAreas.csv)|SimAreas.csv|All files (*.*)|*.*"
+                IsDirectoryBrowser="False"
+                Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
+                
+                <GroupBox Margin="5"
+                Header="Scenario Simulator Options"
+                Padding="5">
+                <Views:ScenarioSimulatorUserControlView DataContext="{Binding AppSettings.ScenarioSimulatorSettings}" />
+                </GroupBox>
                 </StackPanel>
-            </TabItem>
-            <TabItem Header="Environment" Visibility="Collapsed">
+                </TabItem>
+                
+                <TabItem Header="Environment" Visibility="Collapsed">
                 <StackPanel Orientation="Vertical">
-                    <GroupBox Margin="5 10 5 5"
-                              Header="Database Locations"
-                              Padding="5">
-                        <StackPanel Orientation="Vertical">
-                            <Controls:FileOrDirectorySetting Margin="0 5"
-                                                             Caption="GDEM-V"
-                                                             DialogTitle="Choose one GDEM database file"
-                                                             FileName="{Binding GDEMDirectory,
-                                                                                ValidatesOnDataErrors=True,
-                                                                                ValidatesOnExceptions=True,
-                                                                                NotifyOnValidationError=True,
-                                                                                UpdateSourceTrigger=PropertyChanged}"
-                                                             FileNameFilter="NetCDF files (*.nc)|*.nc|All files (*.*)|*.*"
-                                                             IsDirectoryBrowser="False"
-                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
-                            <Controls:FileOrDirectorySetting Caption="SMGC"
-                                                             DialogTitle="Choose one SMGC database file (*.stt)"
-                                                             FileName="{Binding SMGCDirectory,
-                                                                                ValidatesOnDataErrors=True,
-                                                                                ValidatesOnExceptions=True,
-                                                                                NotifyOnValidationError=True,
-                                                                                UpdateSourceTrigger=PropertyChanged}"
-                                                             FileNameFilter="SMGC files (*.stt)|*.stt|All files (*.*)|*.*"
-                                                             IsDirectoryBrowser="False"
-                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
-                            <Controls:FileOrDirectorySetting Margin="0 5"
-                                                             Caption="BST"
-                                                             DialogTitle="Choose the Bottom Sediment Type database file (usually hfevav2.h5)"
-                                                             FileName="{Binding AppSettings.NAVOConfiguration.BSTDirectory,
-                                                                                ValidatesOnDataErrors=True,
-                                                                                ValidatesOnExceptions=True,
-                                                                                NotifyOnValidationError=True,
-                                                                                UpdateSourceTrigger=PropertyChanged}"
-                                                             FileNameFilter="HDF5 files (*.h5)|*.h5|All files (*.*)|*.*"
-                                                             IsDirectoryBrowser="False"
-                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
-                            <Controls:FileOrDirectorySetting Caption="DBDB"
-                                                             DialogTitle="Choose the Digital Bathymetric Database file"
-                                                             FileName="{Binding AppSettings.NAVOConfiguration.DBDBDirectory,
-                                                                                ValidatesOnDataErrors=True,
-                                                                                ValidatesOnExceptions=True,
-                                                                                NotifyOnValidationError=True,
-                                                                                UpdateSourceTrigger=PropertyChanged}"
-                                                             FileNameFilter="HDF5 files (*.h5)|*.h5|All files (*.*)|*.*"
-                                                             IsDirectoryBrowser="False"
-                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
-                        </StackPanel>
-                    </GroupBox>
-                    <GroupBox Margin="5 0 5 10"
-                              Header="Required Extraction Tools"
-                              Padding="5">
-                        <StackPanel Orientation="Vertical">
-                            <Controls:FileOrDirectorySetting Caption="DBDB Extractor"
-                                                             DialogTitle="Choose the extraction program for DBDB"
-                                                             FileName="{Binding AppSettings.NAVOConfiguration.DBDBEXEPath,
-                                                                                ValidatesOnDataErrors=True,
-                                                                                ValidatesOnExceptions=True,
-                                                                                NotifyOnValidationError=True,
-                                                                                UpdateSourceTrigger=PropertyChanged}"
-                                                             FileNameFilter="Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*"
-                                                             IsDirectoryBrowser="False"
-                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
-                            <Controls:FileOrDirectorySetting Caption="HFBL Extractor"
-                                                             DialogTitle="Choose the extraction program for HFBL"
-                                                             FileName="{Binding AppSettings.NAVOConfiguration.HFBLEXEPath,
-                                                                                ValidatesOnDataErrors=True,
-                                                                                ValidatesOnExceptions=True,
-                                                                                NotifyOnValidationError=True,
-                                                                                UpdateSourceTrigger=PropertyChanged}"
-                                                             FileNameFilter="Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*"
-                                                             IsDirectoryBrowser="False"
-                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
-                            <Controls:FileOrDirectorySetting Caption="LFBL Extractor"
-                                                             DialogTitle="Choose the extraction program for LFBL"
-                                                             FileName="{Binding AppSettings.NAVOConfiguration.LFBLEXEPath,
-                                                                                ValidatesOnDataErrors=True,
-                                                                                ValidatesOnExceptions=True,
-                                                                                NotifyOnValidationError=True,
-                                                                                UpdateSourceTrigger=PropertyChanged}"
-                                                             FileNameFilter="Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*"
-                                                             IsDirectoryBrowser="False"
-                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
-                        </StackPanel>
-                    </GroupBox>
+                <GroupBox Margin="5 10 5 5"
+                Header="Database Locations"
+                Padding="5">
+                <StackPanel Orientation="Vertical">
+                <Controls:FileOrDirectorySetting Margin="0 5"
+                Caption="GDEM-V"
+                DialogTitle="Choose one GDEM database file"
+                FileName="{Binding GDEMDirectory,
+                ValidatesOnDataErrors=True,
+                ValidatesOnExceptions=True,
+                NotifyOnValidationError=True,
+                UpdateSourceTrigger=PropertyChanged}"
+                FileNameFilter="NetCDF files (*.nc)|*.nc|All files (*.*)|*.*"
+                IsDirectoryBrowser="False"
+                Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
+                <Controls:FileOrDirectorySetting Caption="SMGC"
+                DialogTitle="Choose one SMGC database file (*.stt)"
+                FileName="{Binding SMGCDirectory,
+                ValidatesOnDataErrors=True,
+                ValidatesOnExceptions=True,
+                NotifyOnValidationError=True,
+                UpdateSourceTrigger=PropertyChanged}"
+                FileNameFilter="SMGC files (*.stt)|*.stt|All files (*.*)|*.*"
+                IsDirectoryBrowser="False"
+                Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
+                <Controls:FileOrDirectorySetting Margin="0 5"
+                Caption="BST"
+                DialogTitle="Choose the Bottom Sediment Type database file (usually hfevav2.h5)"
+                FileName="{Binding AppSettings.NAVOConfiguration.BSTDirectory,
+                ValidatesOnDataErrors=True,
+                ValidatesOnExceptions=True,
+                NotifyOnValidationError=True,
+                UpdateSourceTrigger=PropertyChanged}"
+                FileNameFilter="HDF5 files (*.h5)|*.h5|All files (*.*)|*.*"
+                IsDirectoryBrowser="False"
+                Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
+                <Controls:FileOrDirectorySetting Caption="DBDB"
+                DialogTitle="Choose the Digital Bathymetric Database file"
+                FileName="{Binding AppSettings.NAVOConfiguration.DBDBDirectory,
+                ValidatesOnDataErrors=True,
+                ValidatesOnExceptions=True,
+                NotifyOnValidationError=True,
+                UpdateSourceTrigger=PropertyChanged}"
+                FileNameFilter="HDF5 files (*.h5)|*.h5|All files (*.*)|*.*"
+                IsDirectoryBrowser="False"
+                Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
                 </StackPanel>
-            </TabItem>
+                </GroupBox>
+                <GroupBox Margin="5 0 5 10"
+                Header="Required Extraction Tools"
+                Padding="5">
+                <StackPanel Orientation="Vertical">
+                <Controls:FileOrDirectorySetting Caption="DBDB Extractor"
+                DialogTitle="Choose the extraction program for DBDB"
+                FileName="{Binding AppSettings.NAVOConfiguration.DBDBEXEPath,
+                ValidatesOnDataErrors=True,
+                ValidatesOnExceptions=True,
+                NotifyOnValidationError=True,
+                UpdateSourceTrigger=PropertyChanged}"
+                FileNameFilter="Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*"
+                IsDirectoryBrowser="False"
+                Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
+                <Controls:FileOrDirectorySetting Caption="HFBL Extractor"
+                DialogTitle="Choose the extraction program for HFBL"
+                FileName="{Binding AppSettings.NAVOConfiguration.HFBLEXEPath,
+                ValidatesOnDataErrors=True,
+                ValidatesOnExceptions=True,
+                NotifyOnValidationError=True,
+                UpdateSourceTrigger=PropertyChanged}"
+                FileNameFilter="Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*"
+                IsDirectoryBrowser="False"
+                Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
+                <Controls:FileOrDirectorySetting Caption="LFBL Extractor"
+                DialogTitle="Choose the extraction program for LFBL"
+                FileName="{Binding AppSettings.NAVOConfiguration.LFBLEXEPath,
+                ValidatesOnDataErrors=True,
+                ValidatesOnExceptions=True,
+                NotifyOnValidationError=True,
+                UpdateSourceTrigger=PropertyChanged}"
+                FileNameFilter="Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*"
+                IsDirectoryBrowser="False"
+                Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
+                </StackPanel>
+                </GroupBox>
+                </StackPanel>
+                </TabItem>
+            -->
             <TabItem Grid.IsSharedSizeScope="True" Header="Environment Data Sources">
                 <StackPanel Margin="5" Orientation="Vertical">
                     <Controls:PluginSelector Grid.Row="0"
@@ -190,50 +193,52 @@
             <TabItem Header="Acoustic Simulators">
                 <Views:AcousticSimulatorOptionsControl DataContext="{Binding AppSettings}" />
             </TabItem>
-            <TabItem Header="Seasons">
+            <!--
+                <TabItem Header="Seasons">
                 <StackPanel Orientation="Vertical">
-                    <StackPanel Margin="5" Orientation="Vertical">
-                        <TextBlock Text="Spring Starts" />
-                        <ComboBox ItemsSource="{Binding Months}"
-                                  SelectedItem="{Binding AppSettings.NAVOConfiguration.SpringStartMonth}"
-                                  ToolTip="The beginning month of a 3-month season" />
-                    </StackPanel>
-                    <StackPanel Margin="5 0" Orientation="Vertical">
-                        <TextBlock Text="Summer Starts" />
-                        <ComboBox ItemsSource="{Binding Months}"
-                                  SelectedItem="{Binding AppSettings.NAVOConfiguration.SummerStartMonth}"
-                                  ToolTip="The beginning month of a 3-month season" />
-                    </StackPanel>
-                    <StackPanel Margin="5" Orientation="Vertical">
-                        <TextBlock Text="Fall Starts" />
-                        <ComboBox ItemsSource="{Binding Months}"
-                                  SelectedItem="{Binding AppSettings.NAVOConfiguration.FallStartMonth}"
-                                  ToolTip="The beginning month of a 3-month season" />
-                    </StackPanel>
-                    <StackPanel Margin="5 0" Orientation="Vertical">
-                        <TextBlock Text="Winter Starts" />
-                        <ComboBox ItemsSource="{Binding Months}"
-                                  SelectedItem="{Binding AppSettings.NAVOConfiguration.WinterStartMonth}"
-                                  ToolTip="The beginning month of a 3-month season" />
-
-                    </StackPanel>
-                    <StackPanel Margin="5" Orientation="Vertical">
-                        <TextBlock Text="Cold Season Starts" />
-                        <ComboBox ItemsSource="{Binding Months}"
-                                  SelectedItem="{Binding AppSettings.NAVOConfiguration.ColdSeasonStartMonth}"
-                                  ToolTip="The beginning month of a 6-month season" />
-
-                    </StackPanel>
-                    <StackPanel Margin="5" Orientation="Vertical">
-                        <TextBlock Text="Warm Season Starts" />
-                        <ComboBox ItemsSource="{Binding Months}"
-                                  SelectedItem="{Binding AppSettings.NAVOConfiguration.WarmSeasonStartMonth}"
-                                  ToolTip="The beginning month of a 6-month season" />
-
-                    </StackPanel>
-
+                <StackPanel Margin="5" Orientation="Vertical">
+                <TextBlock Text="Spring Starts" />
+                <ComboBox ItemsSource="{Binding Months}"
+                SelectedItem="{Binding AppSettings.NAVOConfiguration.SpringStartMonth}"
+                ToolTip="The beginning month of a 3-month season" />
                 </StackPanel>
-            </TabItem>
+                <StackPanel Margin="5 0" Orientation="Vertical">
+                <TextBlock Text="Summer Starts" />
+                <ComboBox ItemsSource="{Binding Months}"
+                SelectedItem="{Binding AppSettings.NAVOConfiguration.SummerStartMonth}"
+                ToolTip="The beginning month of a 3-month season" />
+                </StackPanel>
+                <StackPanel Margin="5" Orientation="Vertical">
+                <TextBlock Text="Fall Starts" />
+                <ComboBox ItemsSource="{Binding Months}"
+                SelectedItem="{Binding AppSettings.NAVOConfiguration.FallStartMonth}"
+                ToolTip="The beginning month of a 3-month season" />
+                </StackPanel>
+                <StackPanel Margin="5 0" Orientation="Vertical">
+                <TextBlock Text="Winter Starts" />
+                <ComboBox ItemsSource="{Binding Months}"
+                SelectedItem="{Binding AppSettings.NAVOConfiguration.WinterStartMonth}"
+                ToolTip="The beginning month of a 3-month season" />
+                
+                </StackPanel>
+                <StackPanel Margin="5" Orientation="Vertical">
+                <TextBlock Text="Cold Season Starts" />
+                <ComboBox ItemsSource="{Binding Months}"
+                SelectedItem="{Binding AppSettings.NAVOConfiguration.ColdSeasonStartMonth}"
+                ToolTip="The beginning month of a 6-month season" />
+                
+                </StackPanel>
+                <StackPanel Margin="5" Orientation="Vertical">
+                <TextBlock Text="Warm Season Starts" />
+                <ComboBox ItemsSource="{Binding Months}"
+                SelectedItem="{Binding AppSettings.NAVOConfiguration.WarmSeasonStartMonth}"
+                ToolTip="The beginning month of a 6-month season" />
+                
+                </StackPanel>
+                
+                </StackPanel>
+                </TabItem>
+            -->
             <TabItem Header="Performance">
                 <GroupBox Header="Database Importing" Padding="5">
                     <StackPanel Orientation="Vertical">

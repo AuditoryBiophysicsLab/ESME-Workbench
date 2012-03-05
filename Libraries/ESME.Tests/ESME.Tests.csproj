@@ -66,9 +66,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
-    <Compile Include="Environment\Descriptors\RangeComplexAreaTests.cs" />
-    <Compile Include="Environment\Descriptors\RangeComplexesTests.cs" />
-    <Compile Include="Environment\Descriptors\RangeComplexTests.cs" />
     <Compile Include="Environment\EnvironmentDataTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossJobTests.cs" />

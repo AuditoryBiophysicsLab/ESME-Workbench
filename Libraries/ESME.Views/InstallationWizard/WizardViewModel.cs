@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if false
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -43,20 +44,20 @@ namespace ESME.Views.InstallationWizard
                 Panels.Add(
                            new WizardPanelInfo
                            {
-                                   DescriptiveText =
-                                   "Some components of ESME Workbench require Java to run.\n\n" +
-                                   "Please select the installed javaw.exe executable.\n\n" +
-                                   "If Java is not installed, the latest Java Runtime Environment (JRE) can be downloaded from http://www.oracle.com/technetwork/java/javase/downloads/index.html",
-                                   Hyperlink =
-                                   new Uri("http://www.oracle.com/technetwork/java/javase/downloads/index.html"),
-                                   HyperlinkText = "the Oracle Java download page.",
-                                   FieldName = "Java Executable (javaw.exe)",
-                                   DialogTitle = "Locate the Java executable",
-                                   UserResponse =
-                                   System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86) +
-                                   @"\Java\",
-                                   FileNameFilter = "Java executable (javaw.exe)|javaw.exe|All files (*.*)|*.*",
-                                   PropertyName = "javaw",
+                               DescriptiveText =
+                               "Some components of ESME Workbench require Java to run.\n\n" +
+                               "Please select the installed javaw.exe executable.\n\n" +
+                               "If Java is not installed, the latest Java Runtime Environment (JRE) can be downloaded from http://www.oracle.com/technetwork/java/javase/downloads/index.html",
+                               Hyperlink =
+                               new Uri("http://www.oracle.com/technetwork/java/javase/downloads/index.html"),
+                               HyperlinkText = "the Oracle Java download page.",
+                               FieldName = "Java Executable (javaw.exe)",
+                               DialogTitle = "Locate the Java executable",
+                               UserResponse =
+                               System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86) +
+                               @"\Java\",
+                               FileNameFilter = "Java executable (javaw.exe)|javaw.exe|All files (*.*)|*.*",
+                               PropertyName = "javaw",
                            });
 
             if (string.IsNullOrEmpty(AppSettings.NAEMOTools.NAEMOToolsDirectory) ||
@@ -64,14 +65,14 @@ namespace ESME.Views.InstallationWizard
                 Panels.Add(
                            new WizardPanelInfo
                            {
-                                   DescriptiveText =
-                                   "The Naval Undersea Warfare Center (NUWC) provides a collection of java applications necessary for the proper operation of ESME Workbench.\n\n" +
-                                   "Please select the NUWC Scenario Builder (scenario-builder.jar) that is stored in a directory containing the complete NUWC application collection.",
-                                   FieldName = "NUWC Application (*.jar)",
-                                   DialogTitle = "Locate the Scenario Builder (scenario-builder.jar)",
-                                   FileNameFilter =
-                                   "NUWC Scenario Builder (scenario-builder.jar)|scenario-builder.jar|Java executables(*.jar)|*.jar|All files(*.*)|(*.*)",
-                                   PropertyName = "NUWCToolsDirectory",
+                               DescriptiveText =
+                               "The Naval Undersea Warfare Center (NUWC) provides a collection of java applications necessary for the proper operation of ESME Workbench.\n\n" +
+                               "Please select the NUWC Scenario Builder (scenario-builder.jar) that is stored in a directory containing the complete NUWC application collection.",
+                               FieldName = "NUWC Application (*.jar)",
+                               DialogTitle = "Locate the Scenario Builder (scenario-builder.jar)",
+                               FileNameFilter =
+                               "NUWC Scenario Builder (scenario-builder.jar)|scenario-builder.jar|Java executables(*.jar)|*.jar|All files(*.*)|(*.*)",
+                               PropertyName = "NUWCToolsDirectory",
                            });
 
             if (string.IsNullOrEmpty(AppSettings.ScenarioDataDirectory) ||
@@ -79,14 +80,14 @@ namespace ESME.Views.InstallationWizard
                 Panels.Add(
                            new WizardPanelInfo
                            {
-                                   DescriptiveText =
-                                   "The Scenario Data Directory is the default location for all experimental data.  It is typically named Sim Areas, and must contain " +
-                                   "the files SimAreas.csv, PSM.csv, and Species.csv.",
-                                   FieldName = "Scenario Data Directory",
-                                   DialogTitle = "Locate the SimAreas.csv file",
-                                   FileNameFilter =
-                                   "Simulation Areas File (SimAreas.csv)|SimAreas.csv|All files (*.*)|*.*",
-                                   PropertyName = "ScenarioDataDirectory",
+                               DescriptiveText =
+                               "The Scenario Data Directory is the default location for all experimental data.  It is typically named Sim Areas, and must contain " +
+                               "the files SimAreas.csv, PSM.csv, and Species.csv.",
+                               FieldName = "Scenario Data Directory",
+                               DialogTitle = "Locate the SimAreas.csv file",
+                               FileNameFilter =
+                               "Simulation Areas File (SimAreas.csv)|SimAreas.csv|All files (*.*)|*.*",
+                               PropertyName = "ScenarioDataDirectory",
                            });
 
             if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.GDEMDirectory) ||
@@ -94,82 +95,82 @@ namespace ESME.Views.InstallationWizard
                 Panels.Add(
                            new WizardPanelInfo
                            {
-                                   DescriptiveText =
-                                   "The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
-                                   "The Generalized Digital Environmental Model (GDEM) is a required OAML database organized as a collection of NetCDF files.\n\n" +
-                                   "Please select any .nc file in the directory containing all of the GDEM data.\n\n" +
-                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
-                                   
-                                   FieldName = "GDEM-V",
-                                   DialogTitle = "Choose one GDEM database file",
-                                   FileNameFilter = "NetCDF files (*.nc)|*.nc|All files (*.*)|*.*",
-                                   PropertyName = "GDEM-V",
+                               DescriptiveText =
+                               "The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
+                               "The Generalized Digital Environmental Model (GDEM) is a required OAML database organized as a collection of NetCDF files.\n\n" +
+                               "Please select any .nc file in the directory containing all of the GDEM data.\n\n" +
+                               "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
+
+                               FieldName = "GDEM-V",
+                               DialogTitle = "Choose one GDEM database file",
+                               FileNameFilter = "NetCDF files (*.nc)|*.nc|All files (*.*)|*.*",
+                               PropertyName = "GDEM-V",
                            });
             if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.SMGCDirectory) ||
                 !Directory.Exists(AppSettings.NAVOConfiguration.SMGCDirectory))
                 Panels.Add(
                            new WizardPanelInfo
                            {
-                                   DescriptiveText =
-                                   "The The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
-                                   "The Surface Marine Gridded Climatological (SMGC) database is a required OAML database organized as a collection of 64,800 .stt files\n\n " +
-                                   "Please select any .stt file a directory tree containing all of the SMGC data.\n\n" +
-                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
-                                   
-                                   FieldName = "SMGC",
-                                   DialogTitle = "Choose one SMGC database file (*.stt)",
-                                   FileNameFilter = "SMGC files (*.stt)|*.stt|All files (*.*)|*.*",
-                                   PropertyName = "SMGC",
+                               DescriptiveText =
+                               "The The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
+                               "The Surface Marine Gridded Climatological (SMGC) database is a required OAML database organized as a collection of 64,800 .stt files\n\n " +
+                               "Please select any .stt file a directory tree containing all of the SMGC data.\n\n" +
+                               "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
+
+                               FieldName = "SMGC",
+                               DialogTitle = "Choose one SMGC database file (*.stt)",
+                               FileNameFilter = "SMGC files (*.stt)|*.stt|All files (*.*)|*.*",
+                               PropertyName = "SMGC",
                            });
             if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.BSTDirectory) ||
                 !File.Exists(AppSettings.NAVOConfiguration.BSTDirectory))
                 Panels.Add(
                            new WizardPanelInfo
                            {
-                                   DescriptiveText =
-                                   "The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
-                                   "The High-Frequency Environment Acoustic (HFEVA) Bottom Sediment Type (BST) database is a required OAML database packaged as a standalone HDF5 file.\n\n" +
-                                   "Please select the .h5 file that contains the HFEVA BST database.\n\n" +
-                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
-                                   
-                                   DialogTitle = "Locate the BST HFEVA database file",
-                                   FieldName = "BST",
-                                   FileNameFilter =
-                                   "BST HFEVA database (hfevav2.h5)|hfevav2.h5|All HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
-                                   PropertyName = "BST",
+                               DescriptiveText =
+                               "The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
+                               "The High-Frequency Environment Acoustic (HFEVA) Bottom Sediment Type (BST) database is a required OAML database packaged as a standalone HDF5 file.\n\n" +
+                               "Please select the .h5 file that contains the HFEVA BST database.\n\n" +
+                               "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
+
+                               DialogTitle = "Locate the BST HFEVA database file",
+                               FieldName = "BST",
+                               FileNameFilter =
+                               "BST HFEVA database (hfevav2.h5)|hfevav2.h5|All HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
+                               PropertyName = "BST",
                            });
             if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.DBDBDirectory) ||
                 !File.Exists(AppSettings.NAVOConfiguration.DBDBDirectory))
                 Panels.Add(
                            new WizardPanelInfo
                            {
-                                   DescriptiveText =
-                                   "The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
-                                   "The Digital Bathymetric DataBase (DBDB) is a required OAML database packaged as a standalone HDF5 file.\n\n" +
-                                   "Please select the .h5 file that contains the DBDB.\n\n" +
-                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
-                                   
-                                   FieldName = "DBDB",
-                                   DialogTitle = "Locate the DBDB database file (dbdbv5_level0c_0.h5)",
-                                   FileNameFilter =
-                                   "DBDB database (dbdbv5_level0c_0.h5)|dbdbv5_level0c_0.h5|All HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
-                                   PropertyName = "DBDB",
+                               DescriptiveText =
+                               "The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
+                               "The Digital Bathymetric DataBase (DBDB) is a required OAML database packaged as a standalone HDF5 file.\n\n" +
+                               "Please select the .h5 file that contains the DBDB.\n\n" +
+                               "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
+
+                               FieldName = "DBDB",
+                               DialogTitle = "Locate the DBDB database file (dbdbv5_level0c_0.h5)",
+                               FileNameFilter =
+                               "DBDB database (dbdbv5_level0c_0.h5)|dbdbv5_level0c_0.h5|All HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
+                               PropertyName = "DBDB",
                            });
             if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.DBDBEXEPath) ||
                 !File.Exists(AppSettings.NAVOConfiguration.DBDBEXEPath))
                 Panels.Add(
                            new WizardPanelInfo
                            {
-                                   DescriptiveText =
-                                   "The Digital Bathymetric DataBase (DBDB) requires a seperate extraction tool for use.\n\n" +
-                                   "Please select the DBDB extractor.\n\n" +
-                                   "If you do not have this tool, a copy can be downloaded from http://esme.bu.edu",
-                                   
-                                   FieldName = "DBDB Extractor (dbv5_command.exe)",
-                                   DialogTitle = "Locate the DBDB Extractor program (dbv5_command.exe)",
-                                   FileNameFilter =
-                                   "DBDB Extractor (dbv5_command.exe)|dbv5_command.exe|Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
-                                   PropertyName = "DBDBExtractor",
+                               DescriptiveText =
+                               "The Digital Bathymetric DataBase (DBDB) requires a seperate extraction tool for use.\n\n" +
+                               "Please select the DBDB extractor.\n\n" +
+                               "If you do not have this tool, a copy can be downloaded from http://esme.bu.edu",
+
+                               FieldName = "DBDB Extractor (dbv5_command.exe)",
+                               DialogTitle = "Locate the DBDB Extractor program (dbv5_command.exe)",
+                               FileNameFilter =
+                               "DBDB Extractor (dbv5_command.exe)|dbv5_command.exe|Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
+                               PropertyName = "DBDBExtractor",
                            });
             #region classified model parameters
             if (Configuration.IsClassifiedModel)
@@ -180,38 +181,38 @@ namespace ESME.Views.InstallationWizard
                     Panels.Add(
                                new WizardPanelInfo
                                {
-                                       DescriptiveText =
-                                       "The High Frequency Bottom Loss (HFBL) database requires a separate extraction tool for use.\n\n" +
-                                       "Please select the HFBL database extractor.\n\n",
-                                       DialogTitle = "Locate the High Frequency Bottom Loss Database Extractor program",
-                                       FieldName = "HFBL Extractor",
-                                       FileNameFilter =
-                                       "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
-                                       PropertyName = "HFBLExtractor",
+                                   DescriptiveText =
+                                   "The High Frequency Bottom Loss (HFBL) database requires a separate extraction tool for use.\n\n" +
+                                   "Please select the HFBL database extractor.\n\n",
+                                   DialogTitle = "Locate the High Frequency Bottom Loss Database Extractor program",
+                                   FieldName = "HFBL Extractor",
+                                   FileNameFilter =
+                                   "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
+                                   PropertyName = "HFBLExtractor",
                                });
                 if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.LFBLEXEPath) ||
                     !File.Exists(AppSettings.NAVOConfiguration.LFBLEXEPath))
                     Panels.Add(
                                new WizardPanelInfo
                                {
-                                       DescriptiveText =
-                                       "The Low Frequency Bottom Loss (LFBL) databases require a separate extraction tool for use.\n\n" +
-                                       "Please select the LFBL database extractor.\n\n",
-                                       DialogTitle = "Locate the Low Frequency Bottom Loss Database Extractor program",
-                                       FieldName = "LFBL Extractor",
-                                       FileNameFilter =
-                                       "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
-                                       PropertyName = "LFBLExtractor",
+                                   DescriptiveText =
+                                   "The Low Frequency Bottom Loss (LFBL) databases require a separate extraction tool for use.\n\n" +
+                                   "Please select the LFBL database extractor.\n\n",
+                                   DialogTitle = "Locate the Low Frequency Bottom Loss Database Extractor program",
+                                   FieldName = "LFBL Extractor",
+                                   FileNameFilter =
+                                   "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
+                                   PropertyName = "LFBLExtractor",
                                });
                 if (string.IsNullOrEmpty(AppSettings.NAEMOTools.RAMExecutable))
                     Panels.Add(
                                new WizardPanelInfo
                                {
                                    DescriptiveText = "Please select the RAM Executable\n\n",
-                                       DialogTitle = "Locate the RAM Executable",
-                                       FieldName = "RAM Executable",
-                                       FileNameFilter = "Executable files (*.exe)|*.exe|All files (*.*)|*.*",
-                                       PropertyName = "RAMExe",
+                                   DialogTitle = "Locate the RAM Executable",
+                                   FieldName = "RAM Executable",
+                                   FileNameFilter = "Executable files (*.exe)|*.exe|All files (*.*)|*.*",
+                                   PropertyName = "RAMExe",
                                });
 
 
@@ -219,53 +220,53 @@ namespace ESME.Views.InstallationWizard
                     Panels.Add(new WizardPanelInfo
                     {
                         DescriptiveText = "Please select the REFMS Executable\n\n",
-                            DialogTitle = "Locate the REFMS Executable",
-                            FieldName = "REFMS Executable",
-                            FileNameFilter = "Executable files (*.exe)|*.exe|All files (*.*)|*.*",
-                            PropertyName = "REFMSExe",
+                        DialogTitle = "Locate the REFMS Executable",
+                        FieldName = "REFMS Executable",
+                        FileNameFilter = "Executable files (*.exe)|*.exe|All files (*.*)|*.*",
+                        PropertyName = "REFMSExe",
                     });
 
                 if (string.IsNullOrEmpty(AppSettings.CASSSettings.CASSExecutablePath) ||
                     !File.Exists(AppSettings.CASSSettings.CASSExecutablePath))
                     Panels.Add(new WizardPanelInfo
                     {
-                            DescriptiveText =
-                                       "The Comprehensive Acoustic System Simulation (CASS) is a computer program that is designed to investigate the effects of the ocean’s variability on acoustic propagation and underwater acoustic systems." +
-                                       "CASS is required for use of ESME Workbench.\n\n" +
-                                       "Please select the CASS executable.\n\n",
-                            DialogTitle = "Locate the CASS Executable",
-                            FieldName = "CASS Executable",
-                            FileNameFilter =
-                                       "CASS (cass_v4.exe)|cass_v4.exe|Executable Files (*.exe)|*.exe|All files (*.*)|*.*",
-                            PropertyName = "CASSExe",
+                        DescriptiveText =
+                                   "The Comprehensive Acoustic System Simulation (CASS) is a computer program that is designed to investigate the effects of the ocean’s variability on acoustic propagation and underwater acoustic systems." +
+                                   "CASS is required for use of ESME Workbench.\n\n" +
+                                   "Please select the CASS executable.\n\n",
+                        DialogTitle = "Locate the CASS Executable",
+                        FieldName = "CASS Executable",
+                        FileNameFilter =
+                                   "CASS (cass_v4.exe)|cass_v4.exe|Executable Files (*.exe)|*.exe|All files (*.*)|*.*",
+                        PropertyName = "CASSExe",
                     });
 
                 if (string.IsNullOrEmpty(AppSettings.CASSSettings.PythonExecutablePath) ||
                     !File.Exists(AppSettings.CASSSettings.PythonExecutablePath))
                     Panels.Add(new WizardPanelInfo
                     {
-                            DescriptiveText =
-                                       "Some components of ESME Workbench bundled with One Navy Model require Python to run.\n\n" +
-                                       "Please select the installed pythonw.exe executable.\n\n" +
-                                       "If Python is not installed, the latest version can be downloaded from www.python.org/download/releases/2.7.2/\n\n",
-                            DialogTitle = "Locate the Python Executable",
-                            FieldName = "Python Executable",
-                            FileNameFilter =
-                                       "Python (pythonw.exe)|pythonw.exe|Executable Files (*.exe)|*.exe|All files (*.*)|*.*",
-                            PropertyName = "PythonExe",
+                        DescriptiveText =
+                                   "Some components of ESME Workbench bundled with One Navy Model require Python to run.\n\n" +
+                                   "Please select the installed pythonw.exe executable.\n\n" +
+                                   "If Python is not installed, the latest version can be downloaded from www.python.org/download/releases/2.7.2/\n\n",
+                        DialogTitle = "Locate the Python Executable",
+                        FieldName = "Python Executable",
+                        FileNameFilter =
+                                   "Python (pythonw.exe)|pythonw.exe|Executable Files (*.exe)|*.exe|All files (*.*)|*.*",
+                        PropertyName = "PythonExe",
                     });
 
                 if (string.IsNullOrEmpty(AppSettings.CASSSettings.PythonScriptPath) ||
                     !File.Exists(AppSettings.CASSSettings.PythonScriptPath))
                     Panels.Add(new WizardPanelInfo
                     {
-                            DescriptiveText =
-                                       "The Comprehensive Acoustic System Simulation (CASS) requires a Python script to integrate with ESME Workbench.\n\n",
-                            DialogTitle = "Locate the CASS Python script",
-                            FieldName = "Python script",
-                            FileNameFilter =
-                                       "Python Script (mmaea_rev10_7.py)|mmaea_rev10_7.py| Python scripts (*.py)|*.py|All files (*.*)|*.*",
-                            PropertyName = "PythonScript",
+                        DescriptiveText =
+                                   "The Comprehensive Acoustic System Simulation (CASS) requires a Python script to integrate with ESME Workbench.\n\n",
+                        DialogTitle = "Locate the CASS Python script",
+                        FieldName = "Python script",
+                        FileNameFilter =
+                                   "Python Script (mmaea_rev10_7.py)|mmaea_rev10_7.py| Python scripts (*.py)|*.py|All files (*.*)|*.*",
+                        PropertyName = "PythonScript",
                     });
             }
             #endregion
@@ -733,4 +734,5 @@ namespace ESME.Views.InstallationWizard
 
         #endregion
     }
-}
+} 
+#endif

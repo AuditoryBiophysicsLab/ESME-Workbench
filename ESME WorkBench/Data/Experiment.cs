@@ -481,24 +481,6 @@ namespace ESMEWorkbench.Data
 
         #endregion
 
-        #region public ScenarioSimulatorSettings ScenarioSimulatorSettings { get; set; }
-
-        public ScenarioSimulatorSettings ScenarioSimulatorSettings
-        {
-            get { return _scenarioSimulatorSettings; }
-            set
-            {
-//                if (_scenarioSimulatorSettings == value) return;
-                _scenarioSimulatorSettings = value;
-                NotifyPropertyChanged(ScenarioSimulatorSettingsChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ScenarioSimulatorSettingsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.ScenarioSimulatorSettings);
-        ScenarioSimulatorSettings _scenarioSimulatorSettings;
-
-        #endregion
-
         #region public ulong NextObjectID { get; set; }
 
         static readonly PropertyChangedEventArgs NextObjectIDChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.NextObjectID);
