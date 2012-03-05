@@ -33,7 +33,9 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Cinch.WPF, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="Cinch.WPF">
+      <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
+    </Reference>
     <Reference Include="Devart.Data, Version=5.0.401.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <HintPath>..\..\..\Program Files (x86)\Devart\dotConnect\SQLite\Devart.Data.dll</HintPath>
     </Reference>
@@ -49,10 +51,10 @@
       <HintPath>..\packages\EntityFramework.4.3.0\lib\net40\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="FileHelpers">
-      <HintPath>..\ESME WorkBench\External References\FileHelpers.dll</HintPath>
+      <HintPath>..\..\ESME WorkBench\External References\FileHelpers.dll</HintPath>
     </Reference>
     <Reference Include="FileHelpers.ExcelStorage">
-      <HintPath>..\ESME WorkBench\External References\FileHelpers.ExcelStorage.dll</HintPath>
+      <HintPath>..\..\ESME WorkBench\External References\FileHelpers.ExcelStorage.dll</HintPath>
     </Reference>
     <Reference Include="sysglobl" />
     <Reference Include="System" />
@@ -75,20 +77,17 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="WebActivator">
-      <HintPath>..\packages\WebActivator.1.0.0.0\lib\WebActivator.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Libraries\ESME\ESME.csproj">
+    <ProjectReference Include="..\..\Libraries\ESME\ESME.csproj">
       <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
       <Name>ESME</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Libraries\HRC\HRC.csproj">
+    <ProjectReference Include="..\..\Libraries\HRC\HRC.csproj">
       <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
       <Name>HRC</Name>
     </ProjectReference>
@@ -101,7 +100,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent></PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

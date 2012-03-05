@@ -60,7 +60,7 @@
     <Compile Include="SMGC20ForNAVO.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ESME.Controls\ESME.Views.csproj">
+    <ProjectReference Include="..\..\..\Libraries\ESME.Views\ESME.Views.csproj">
       <Project>{49221733-2EB6-468F-8833-06C0E36B3C83}</Project>
       <Name>ESME.Views</Name>
     </ProjectReference>

@@ -39,15 +39,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AsyncCtpLibrary">
-      <HintPath>..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
+      <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
     </Reference>
     <Reference Include="Cinch.WPF">
-      <HintPath>..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
+      <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
     </Reference>
     <Reference Include="Kent.Boogaart.Converters">
-      <HintPath>..\ESME WorkBench\External References\Kent.Boogaart.Converters.dll</HintPath>
+      <HintPath>..\..\ESME WorkBench\External References\Kent.Boogaart.Converters.dll</HintPath>
     </Reference>
-    <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3, processorArchitecture=MSIL" />
+    <Reference Include="MEFedMVVM.WPF">
+      <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
@@ -375,11 +377,11 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Libraries\ESME\ESME.csproj">
+    <ProjectReference Include="..\ESME\ESME.csproj">
       <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
       <Name>ESME</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Libraries\HRC\HRC.csproj">
+    <ProjectReference Include="..\HRC\HRC.csproj">
       <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
       <Name>HRC</Name>
     </ProjectReference>
