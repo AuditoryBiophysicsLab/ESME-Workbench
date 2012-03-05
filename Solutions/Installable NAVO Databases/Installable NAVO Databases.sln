@@ -14,6 +14,10 @@ EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SMGC_2.0_Minimal", "..\..\Installers\Installable NAVO Databases\SMGC_2.0_Minimal\SMGC_2.0_Minimal.wixproj", "{96313F30-2679-49F9-ADA7-2D486D6EBFF9}"
 EndProject
 Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release (x64)|x64 = Release (x64)|x64
 	EndGlobalSection
