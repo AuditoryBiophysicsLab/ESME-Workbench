@@ -4,7 +4,9 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using ESME.Environment;
 using HRC;
 using HRC.Collections;
@@ -31,7 +33,7 @@ namespace ESME.Plugins
         {
             _esmePlugins = new List<IESMEPlugin>();
             ESMEPluginDictionary = new ESMEPluginDictionary();
-            var catalog = new ESMEPluginCatalog(new DirectoryCatalog(@"C:\Projects\ESME Deliverables\Plugins\Environmental Data Sources\InstallableNAVO\bin\Debug"));
+            var catalog = new ESMEPluginCatalog(new DirectoryCatalog(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location)));
             var container = new CompositionContainer(catalog, true);
             try
             {
