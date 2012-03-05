@@ -4,8 +4,11 @@
         xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:ESME="clr-namespace:ESME;assembly=ESME"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:Main="clr-namespace:ESMEWorkbench.ViewModels.Main"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:Triggers="clr-namespace:HRC.Triggers;assembly=HRC"
         xmlns:Views="clr-namespace:ESMEWorkbench.Views"
         Title="User Options"
         d:DataContext="{d:DesignInstance Type=Main:ApplicationOptionsViewModel}"
@@ -158,31 +161,30 @@
                                                              IsDirectoryBrowser="False"
                                                              Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
                         </StackPanel>
-
                     </GroupBox>
                 </StackPanel>
             </TabItem>
             <TabItem Grid.IsSharedSizeScope="True" Header="Environment Data Sources">
                 <StackPanel Margin="5" Orientation="Vertical">
                     <Controls:PluginSelector Grid.Row="0"
-                                 ItemsSource="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Wind].Values}"
-                                 SelectedItem="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Wind].DefaultPlugin}"
-                                 PluginTypeName="Wind" />
+                                             ItemsSource="{Binding EnvironmentDataSourceViews[Wind]}"
+                                             PluginTypeName="Wind"
+                                             SelectedItem="{Binding PluginManager[EnvironmentalDataSource][Wind].DefaultPlugin}" />
                     <Separator Margin="0 5 0 10" />
                     <Controls:PluginSelector Grid.Row="1"
-                                 ItemsSource="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Sound Speed].Values}"
-                                 SelectedItem="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Sound Speed].DefaultPlugin}"
-                                 PluginTypeName="Sound Speed" />
+                                             ItemsSource="{Binding EnvironmentDataSourceViews[Sound Speed]}"
+                                             PluginTypeName="Sound Speed"
+                                             SelectedItem="{Binding PluginManager[EnvironmentalDataSource][Sound Speed].DefaultPlugin}" />
                     <Separator Margin="0 5 0 10" />
                     <Controls:PluginSelector Grid.Row="2"
-                                 ItemsSource="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Sediment].Values}"
-                                 SelectedItem="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Sediment].DefaultPlugin}"
-                                 PluginTypeName="Sediment" />
+                                             ItemsSource="{Binding EnvironmentDataSourceViews[Sediment]}"
+                                             PluginTypeName="Sediment"
+                                             SelectedItem="{Binding PluginManager[EnvironmentalDataSource][Sediment].DefaultPlugin}" />
                     <Separator Margin="0 5 0 10" />
                     <Controls:PluginSelector Grid.Row="3"
-                                 ItemsSource="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Bathymetry].Values}"
-                                 SelectedItem="{Binding ESMEPluginDictionary[EnvironmentalDataSource][Bathymetry].DefaultPlugin}"
-                                 PluginTypeName="Bathymetry" />
+                                             ItemsSource="{Binding EnvironmentDataSourceViews[Bathymetry]}"
+                                             PluginTypeName="Bathymetry"
+                                             SelectedItem="{Binding PluginManager[EnvironmentalDataSource][Bathymetry].DefaultPlugin}" />
                 </StackPanel>
             </TabItem>
             <TabItem Header="Acoustic Simulators">

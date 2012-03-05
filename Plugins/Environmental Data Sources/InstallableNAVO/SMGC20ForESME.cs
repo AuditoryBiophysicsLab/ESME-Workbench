@@ -110,7 +110,7 @@ namespace InstallableNAVO
             AvailableTimePeriods = NAVOConfiguration.AllMonths.ToArray();
             AvailableResolutions = new[] { 60f };
 
-            IsSelectable = DataLocation != null;
+            IsSelectable = true;
             ValidationRules.AddRange(new List<ValidationRule>
             {
                 new ValidationRule

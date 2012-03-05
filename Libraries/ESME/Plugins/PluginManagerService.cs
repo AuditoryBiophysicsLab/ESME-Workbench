@@ -73,39 +73,66 @@ namespace ESME.Plugins
             }
         }
 
-        IESMEPlugin this[PluginType pluginType, string subType]
+        public IESMEPlugin this[PluginType pluginType, string subType]
         {
             get
             {
                 if (!ESMEPluginDictionary.ContainsKey(pluginType)) return null;
                 return !ESMEPluginDictionary[pluginType].ContainsKey(subType) ? null : ESMEPluginDictionary[pluginType][subType].DefaultPlugin;
             }
+            set
+            {
+                if (!ESMEPluginDictionary.ContainsKey(pluginType)) ESMEPluginDictionary.Add(pluginType, new PluginTypeDictionary());
+                if (!ESMEPluginDictionary[pluginType].ContainsKey(subType)) ESMEPluginDictionary[pluginType].Add(subType, new PluginSubtypeDictionary());
+                ESMEPluginDictionary[pluginType][subType].DefaultPlugin = value;
+            }
+        }
+
+        public PluginTypeDictionary this[PluginType pluginType]
+        {
+            get
+            {
+                return !ESMEPluginDictionary.ContainsKey(pluginType) ? null : ESMEPluginDictionary[pluginType];
+            }
         }
 
         public EnvironmentalDataSourcePluginBase<Wind> WindSource
         {
             get { return (EnvironmentalDataSourcePluginBase<Wind>)this[PluginType.EnvironmentalDataSource, "Wind"]; }
+            set { this[PluginType.EnvironmentalDataSource, "Wind"] = value; }
         }
 
         public EnvironmentalDataSourcePluginBase<SoundSpeed> SoundSpeedSource
         {
             get { return (EnvironmentalDataSourcePluginBase<SoundSpeed>)this[PluginType.EnvironmentalDataSource, "Sound Speed"]; }
+            set { this[PluginType.EnvironmentalDataSource, "Sound Speed"] = value; }
         }
 
         public EnvironmentalDataSourcePluginBase<Sediment> SedimentSource
         {
             get { return (EnvironmentalDataSourcePluginBase<Sediment>)this[PluginType.EnvironmentalDataSource, "Sediment"]; }
+            set { this[PluginType.EnvironmentalDataSource, "Sediment"] = value; }
         }
 
         public EnvironmentalDataSourcePluginBase<Bathymetry> BathymetrySource
         {
             get { return (EnvironmentalDataSourcePluginBase<Bathymetry>)this[PluginType.EnvironmentalDataSource, "Bathymetry"]; }
+            set { this[PluginType.EnvironmentalDataSource, "Bathymetry"] = value; }
         }
     }
 
     public class PluginSubtypeDictionary : ObservableConcurrentDictionary<string, IESMEPlugin>
     {
-        public IESMEPlugin DefaultPlugin { get; set; }
+        IESMEPlugin _defaultPlugin;
+        public IESMEPlugin DefaultPlugin
+        {
+            get
+            {
+                if (_defaultPlugin != null && _defaultPlugin.IsSelectable) return _defaultPlugin;
+                return (from plugin in Values where plugin.PluginName == "None Selected" select plugin).FirstOrDefault();
+            }
+            set { _defaultPlugin = value; }
+        }
     }
     public class PluginTypeDictionary : ObservableConcurrentDictionary<string, PluginSubtypeDictionary> {}
     public class ESMEPluginDictionary : ObservableConcurrentDictionary<PluginType, PluginTypeDictionary>

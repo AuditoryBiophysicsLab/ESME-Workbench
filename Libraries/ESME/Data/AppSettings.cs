@@ -13,7 +13,6 @@ using ESME.Plugins;
 using HRC.Collections;
 using HRC.Utility;
 using HRC.Validation;
-using System.Diagnostics;
 
 namespace ESME.Data
 {
@@ -50,6 +49,7 @@ namespace ESME.Data
             if (CASSSettings != null) CASSSettings.SetDefaults();
             if (RAMSettings != null) RAMSettings.SetDefaults();
             if (NAVOConfiguration != null) NAVOConfiguration.SetDefaults();
+            if (DefaultPluginConfigurations == null || DefaultPluginConfigurations.Count == 0) SetDefaultPluginConfiguration();
         }
 
         public void Save()
@@ -400,31 +400,45 @@ namespace ESME.Data
 
         #endregion
 
-        #region public EnvironmentDataSourceSettings EnvironmentDataSourceSettings { get; set; }
-
-        public EnvironmentDataSourceSettings EnvironmentDataSourceSettings
-        {
-            get { return _environmentDataSourceSettings ?? (_environmentDataSourceSettings = new EnvironmentDataSourceSettings()); }
-            set
-            {
-                if (_environmentDataSourceSettings == value) return;
-                _environmentDataSourceSettings = value;
-                NotifyPropertyChanged(EnvironmentDataSourceSettingsChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs EnvironmentDataSourceSettingsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.EnvironmentDataSourceSettings);
-        EnvironmentDataSourceSettings _environmentDataSourceSettings;
-
-        #endregion
-
         #region public List<DefaultPluginConfiguration> DefaultPluginConfigurations { get; set; }
         public List<DefaultPluginConfiguration> DefaultPluginConfigurations
         {
-            get { return _defaultPluginConfigurations ?? (_defaultPluginConfigurations = new List<DefaultPluginConfiguration>()); }
+            get { return _defaultPluginConfigurations; }
             set { _defaultPluginConfigurations = value; }
         }
         List<DefaultPluginConfiguration> _defaultPluginConfigurations;
+
+        void SetDefaultPluginConfiguration()
+        {
+            DefaultPluginConfigurations = new List<DefaultPluginConfiguration>
+            {
+                new DefaultPluginConfiguration
+                {
+                    PluginType = PluginType.EnvironmentalDataSource,
+                    Subtype = "Wind",
+                    Type = typeof (NoWindData).ToString(),
+                },
+                new DefaultPluginConfiguration
+                {
+                    PluginType = PluginType.EnvironmentalDataSource,
+                    Subtype = "Sound Speed",
+                    Type = typeof (NoSoundSpeedData).ToString(),
+                },
+                new DefaultPluginConfiguration
+                {
+                    PluginType = PluginType.EnvironmentalDataSource,
+                    Subtype = "Sediment",
+                    Type = typeof (NoSedimentData).ToString(),
+                },
+                new DefaultPluginConfiguration
+                {
+                    PluginType = PluginType.EnvironmentalDataSource,
+                    Subtype = "Bathymetry",
+                    Type = typeof (NoBathymetryData).ToString(),
+                }
+
+            };
+        }
         #endregion
     }
 
@@ -1722,10 +1736,5 @@ namespace ESME.Data
         float _depthCellSize = 5;
 
         #endregion
-    }
-
-    public sealed class EnvironmentDataSourceSettings : ValidatingViewModel
-    {
-        
     }
 }
