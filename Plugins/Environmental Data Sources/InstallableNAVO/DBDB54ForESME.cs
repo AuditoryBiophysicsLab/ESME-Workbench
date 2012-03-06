@@ -7,7 +7,7 @@ using HRC.Navigation;
 using Microsoft.Win32;
 using NAVODatabaseAdapter;
 
-namespace InstallableNAVO
+namespace InstallableNAVOPlugin
 {
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
         Subtype = "Bathymetry",

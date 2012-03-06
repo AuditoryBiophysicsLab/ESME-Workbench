@@ -9,7 +9,7 @@ using ESME.Plugins;
 using HRC.Navigation;
 using Microsoft.Win32;
 
-namespace InstallableNAVO
+namespace InstallableNAVOPlugin
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
