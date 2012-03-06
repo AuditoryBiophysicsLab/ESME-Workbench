@@ -23,8 +23,8 @@ using ManagedBootstrapper;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 
 
-[assembly: AssemblyTitle("WixBA")]
-[assembly: AssemblyDescription("WiX User Experience")]
+[assembly: AssemblyTitle("WixBootstrapperApplication")]
+[assembly: AssemblyDescription("WiX Bootstrapper Application")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 

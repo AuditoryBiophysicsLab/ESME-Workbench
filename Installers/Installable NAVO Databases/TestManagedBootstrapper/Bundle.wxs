@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define ProductName = "Environmental databases for ESME Workbench" ?>
+  <?define ProductVersion = "1.0" ?>
+  <?define ProductFullVersion = "1.0.0.0" ?>
+  <?define ProductAuthor = "Hearing Research Center" ?>
+  <?define Manufacturer="Boston University"?>
+  <?define ProductAppFolder = "InstallLocation" ?>
+  <?define InstallersRoot="C:\Projects\ESME Deliverables\Installers\Installable NAVO Databases"?>
+  <Bundle Name="$(var.ProductName)" Version="$(var.ProductFullVersion)" Manufacturer="$(var.Manufacturer)" 
+          UpgradeCode="88B26169-9067-4371-B043-358D191E9001" IconSourceFile="Wave.ico"
+          SplashScreenSourceFile='ESMELogo.bmp' AboutUrl='http://esme.bu.edu/' UpdateUrl='http://esme.bu.edu'
+          Compressed='no'>
+    <BootstrapperApplicationRef Id='ManagedBootstrapperApplicationHost'>
+      <Payload Name='BootstrapperCore.config' SourceFile='WixBootstrapperApplication.BootstrapperCore.config' />
+      <Payload SourceFile='WixBootstrapperApplication.dll' />
+      <Payload SourceFile='license.htm' />
+      <Payload SourceFile='NetFxLicense.rtf' />
+    </BootstrapperApplicationRef>
+    <Chain>
+      <PackageGroupRef Id='Netfx4Full' />
+
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/SMGC_2.0_Minimal.msi"
+                  SourceFile="$(var.InstallersRoot)\SMGC_2.0_Minimal\bin\Release (x64)\SMGC_2.0_Minimal.msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Vital="no">
+        <MsiProperty Name="INSTALLLOCATION" Value="[InstallFolder]"/>
+      </MsiPackage>
+      <!-- 
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/BST_2.0.msi"
+                  SourceFile="$(var.InstallersRoot)\BST_2.0\bin\Release (x64)\BST_2.0.msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Vital="no">
+        <MsiProperty Name="INSTALLLOCATION" Value="[InstallFolder]"/>
+      </MsiPackage>
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/DBDB-V_5.4.msi"
+                  SourceFile="$(var.InstallersRoot)\DBDB-V_5.4\bin\Release (x64)\DBDB-V_5.4.msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Vital="no">
+        <MsiProperty Name="INSTALLLOCATION" Value="[InstallFolder]"/>
+      </MsiPackage>
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/GDEM-V_3.0.msi"
+                  SourceFile="$(var.InstallersRoot)\GDEM-V_3.0\bin\Release (x64)\GDEM-V_3.0.msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Vital="no">
+        <MsiProperty Name="INSTALLLOCATION" Value="[InstallFolder]"/>
+      </MsiPackage>
+      -->
+    </Chain>
+  </Bundle>
+</Wix>

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Windows.Input;
-using Threading = System.Windows.Threading;
+using System.Windows.Threading;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 
 namespace ManagedBootstrapper
@@ -25,7 +25,7 @@ namespace ManagedBootstrapper
         /// <summary>
         /// Gets the global dispatcher.
         /// </summary>
-        static public Threading.Dispatcher Dispatcher { get; private set; }
+        static public Dispatcher Dispatcher { get; private set; }
 
         /// <summary>
         /// Launches the default web browser to the provided URI.
@@ -56,7 +56,7 @@ namespace ManagedBootstrapper
         {
             Engine.Log(LogLevel.Verbose, "Running the WiX BA.");
             Model = new Model(this);
-            Dispatcher = Threading.Dispatcher.CurrentDispatcher;
+            Dispatcher = Dispatcher.CurrentDispatcher;
             var viewModel = new RootViewModel();
 
             // Populate the view models with the latest data. This is where Detect is called.
@@ -71,7 +71,7 @@ namespace ManagedBootstrapper
                 View.Show();
             }
 
-            Threading.Dispatcher.Run();
+            Dispatcher.Run();
 
             Engine.Quit(0);
         }
