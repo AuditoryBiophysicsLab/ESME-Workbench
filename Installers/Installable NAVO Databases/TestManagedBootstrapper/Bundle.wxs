@@ -12,8 +12,8 @@
           SplashScreenSourceFile='ESMELogo.bmp' AboutUrl='http://esme.bu.edu/' UpdateUrl='http://esme.bu.edu'
           Compressed='no'>
     <BootstrapperApplicationRef Id='ManagedBootstrapperApplicationHost'>
-      <Payload Name='BootstrapperCore.config' SourceFile='WixBootstrapperApplication.BootstrapperCore.config' />
-      <Payload SourceFile='WixBootstrapperApplication.dll' />
+      <Payload Name='BootstrapperCore.config' SourceFile='ESMEBootstrapper.BootstrapperCore.config' />
+      <Payload SourceFile='ESMEBootstrapper.dll' />
       <Payload SourceFile='license.htm' />
       <Payload SourceFile='NetFxLicense.rtf' />
     </BootstrapperApplicationRef>
