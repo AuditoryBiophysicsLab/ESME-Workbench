@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("StandaloneNAVO")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("StandaloneNAVOPlugin")]
+[assembly: AssemblyDescription("Plugin to allow NAVO data sources to be used with ESME Workbench")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("StandaloneNAVO")]
-[assembly: AssemblyCopyright("Copyright ©  2012")]
+[assembly: AssemblyCompany("Boston University")]
+[assembly: AssemblyProduct("ESME Workbench")]
+[assembly: AssemblyCopyright("© Boston University 2009-2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

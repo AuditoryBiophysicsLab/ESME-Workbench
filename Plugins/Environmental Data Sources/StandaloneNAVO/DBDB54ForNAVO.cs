@@ -10,10 +10,10 @@ using HRC.Navigation;
 using HRC.Utility;
 using HRC.Validation;
 using NAVODatabaseAdapter;
-using StandaloneNAVO.Controls;
 using ESME;
+using StandaloneNAVOPlugin.Controls;
 
-namespace StandaloneNAVO
+namespace StandaloneNAVOPlugin
 {
     [Serializable]
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,

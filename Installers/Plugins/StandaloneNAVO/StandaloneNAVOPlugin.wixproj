@@ -4,13 +4,13 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>3.5</ProductVersion>
-    <ProjectGuid>{52fd86b0-7fbd-456b-8b3d-d4c2bc298490}</ProjectGuid>
+    <ProjectGuid>{b4fd457a-2e53-4d3a-8c95-ae8769aa564f}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputName>InstallableNAVOPlugin</OutputName>
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
-    <Name>InstallableNAVOPlugin</Name>
+    <Name>StandaloneNAVOPlugin</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release (x64)|x64' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>

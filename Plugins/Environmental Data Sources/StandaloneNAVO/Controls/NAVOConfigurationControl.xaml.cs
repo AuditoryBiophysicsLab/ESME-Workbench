@@ -1,4 +1,4 @@
-﻿namespace StandaloneNAVO.Controls
+﻿namespace StandaloneNAVOPlugin.Controls
 {
     /// <summary>
     /// Interaction logic for ConfigurationControl.xaml

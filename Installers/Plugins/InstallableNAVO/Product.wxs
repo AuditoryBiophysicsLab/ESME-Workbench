@@ -41,7 +41,7 @@
         <Component Id="PluginDLLs" Guid="957C7013-9881-42EC-B9DD-9D32973F0242">
           <File Id="InstallableNAVO.dll"
                 Name="InstallableNAVO.dll"
-                Source="$(var.PluginDLLPath)\InstallableNAVO.dll"
+                Source="$(var.PluginDLLPath)\InstallableNAVOPlugin.dll"
                 KeyPath="yes" />
           <File Id="NAVODatabaseAdapter.dll"
                 Name="NAVODatabaseAdapter.dll"

@@ -12,10 +12,10 @@ using HRC.Navigation;
 using HRC.Utility;
 using HRC.Validation;
 using NAVODatabaseAdapter;
-using StandaloneNAVO.Controls;
 using ESME;
+using StandaloneNAVOPlugin.Controls;
 
-namespace StandaloneNAVO
+namespace StandaloneNAVOPlugin
 {
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
             Subtype = "Sound Speed",

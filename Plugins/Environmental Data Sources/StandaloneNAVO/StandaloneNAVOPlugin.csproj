@@ -8,8 +8,8 @@
     <ProjectGuid>{DDC1E22A-276A-4910-A934-6F72CD22DE31}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>StandaloneNAVO</RootNamespace>
-    <AssemblyName>StandaloneNAVO</AssemblyName>
+    <RootNamespace>StandaloneNAVOPlugin</RootNamespace>
+    <AssemblyName>StandaloneNAVOPlugin</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

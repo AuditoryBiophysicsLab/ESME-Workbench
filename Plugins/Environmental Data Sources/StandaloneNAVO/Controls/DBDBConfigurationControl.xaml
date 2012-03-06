@@ -1,9 +1,9 @@
-﻿<UserControl x:Class="StandaloneNAVO.Controls.DBDBConfigurationControl"
+﻿<UserControl x:Class="StandaloneNAVOPlugin.Controls.DBDBConfigurationControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:InstallableNAVO="clr-namespace:StandaloneNAVO"
+             xmlns:InstallableNAVO="clr-namespace:StandaloneNAVOPlugin"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DataContext="{d:DesignInstance InstallableNAVO:DBDB54ForNAVO}"
              mc:Ignorable="d">

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <?define ProductName = "Installable NAVO Data Sources for ESME Workbench" ?>
+  <?define ProductName = "Standalone NAVO Data Sources for ESME Workbench" ?>
   <?define ProductVersion = "1.0" ?>
   <?define ProductFullVersion = "1.0.0.0" ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
@@ -9,7 +9,7 @@
   <?define ESMERoot="C:\Projects\ESME Deliverables"?>
   <?define HDFRoot="$(var.ESMERoot)\ESME WorkBench\External References"?>
   <?define PluginRoot="$(var.ESMERoot)\Plugins\Environmental Data Sources"?>
-  <?define PluginDLLPath="$(var.PluginRoot)\InstallableNAVO\bin\Release"?>
+  <?define PluginDLLPath="$(var.PluginRoot)\StandaloneNAVO\bin\Release"?>
   <?define SupportDLLPath="$(var.PluginRoot)\NAVODatabaseAdapter\bin\Release"?>
   <?define ProductDisplayName = "$(var.ProductName)" ?>
   <?define ProductId = "{560A34C4-244A-4379-A818-985A61054A34}" ?>
@@ -41,7 +41,7 @@
         <Component Id="PluginDLLs" Guid="957C7013-9881-42EC-B9DD-9D32973F0242">
           <File Id="InstallableNAVO.dll"
                 Name="InstallableNAVO.dll"
-                Source="$(var.PluginDLLPath)\InstallableNAVO.dll"
+                Source="$(var.PluginDLLPath)\StandaloneNAVOPlugin.dll"
                 KeyPath="yes" />
           <File Id="NAVODatabaseAdapter.dll"
                 Name="NAVODatabaseAdapter.dll"

@@ -21,14 +21,24 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstallableNAVOPlugin", "..
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NAVODatabaseAdapter", "..\..\Plugins\Environmental Data Sources\NAVODatabaseAdapter\NAVODatabaseAdapter.csproj", "{409DC754-EEBD-4E49-8DDF-3960F2FFCE73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandaloneNAVO", "..\..\Plugins\Environmental Data Sources\StandaloneNAVO\StandaloneNAVO.csproj", "{DDC1E22A-276A-4910-A934-6F72CD22DE31}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandaloneNAVOPlugin", "..\..\Plugins\Environmental Data Sources\StandaloneNAVO\StandaloneNAVOPlugin.csproj", "{DDC1E22A-276A-4910-A934-6F72CD22DE31}"
 	ProjectSection(ProjectDependencies) = postProject
 		{409DC754-EEBD-4E49-8DDF-3960F2FFCE73} = {409DC754-EEBD-4E49-8DDF-3960F2FFCE73}
 	EndProjectSection
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "InstallableNAVOPlugin", "..\..\Installers\Plugins\NAVOForESME\InstallableNAVOPlugin.wixproj", "{52FD86B0-7FBD-456B-8B3D-D4C2BC298490}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugin Installers", "Plugin Installers", "{B63FD6E5-3051-4CC0-B4D1-76AF008C8EA9}"
+EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "InstallableNAVOPlugin", "..\..\Installers\Plugins\InstallableNAVO\InstallableNAVOPlugin.wixproj", "{52FD86B0-7FBD-456B-8B3D-D4C2BC298490}"
+	ProjectSection(ProjectDependencies) = postProject
+		{409DC754-EEBD-4E49-8DDF-3960F2FFCE73} = {409DC754-EEBD-4E49-8DDF-3960F2FFCE73}
+		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7} = {1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}
+	EndProjectSection
+EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "StandaloneNAVOPlugin", "..\..\Installers\Plugins\StandaloneNAVO\StandaloneNAVOPlugin.wixproj", "{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DDC1E22A-276A-4910-A934-6F72CD22DE31} = {DDC1E22A-276A-4910-A934-6F72CD22DE31}
+		{409DC754-EEBD-4E49-8DDF-3960F2FFCE73} = {409DC754-EEBD-4E49-8DDF-3960F2FFCE73}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
@@ -353,6 +363,37 @@ Global
 		{52FD86B0-7FBD-456B-8B3D-D4C2BC298490}.Release|x64.ActiveCfg = Release (x64)|x64
 		{52FD86B0-7FBD-456B-8B3D-D4C2BC298490}.Release|x64.Build.0 = Release (x64)|x64
 		{52FD86B0-7FBD-456B-8B3D-D4C2BC298490}.Release|x86.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Debug|Any CPU.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Debug|Mixed Platforms.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Debug|Mixed Platforms.Build.0 = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Debug|x64.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Debug|x64.Build.0 = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Debug|x86.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Plugins-only Debug (x64)|Any CPU.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Plugins-only Debug (x64)|Mixed Platforms.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Plugins-only Debug (x64)|Mixed Platforms.Build.0 = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Plugins-only Debug (x64)|x64.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Plugins-only Debug (x64)|x64.Build.0 = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Plugins-only Debug (x64)|x86.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Plugins-only Release (x64)|Any CPU.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Plugins-only Release (x64)|Mixed Platforms.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Plugins-only Release (x64)|Mixed Platforms.Build.0 = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Plugins-only Release (x64)|x64.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Plugins-only Release (x64)|x64.Build.0 = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Plugins-only Release (x64)|x86.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Release (x64)|Any CPU.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Release (x64)|Mixed Platforms.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Release (x64)|Mixed Platforms.Build.0 = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Release (x64)|x64.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Release (x64)|x64.Build.0 = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Release (x64)|x86.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Release|Any CPU.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Release|Any CPU.Build.0 = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Release|Mixed Platforms.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Release|Mixed Platforms.Build.0 = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Release|x64.ActiveCfg = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Release|x64.Build.0 = Release (x64)|x64
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F}.Release|x86.ActiveCfg = Release (x64)|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -367,5 +408,6 @@ Global
 		{409DC754-EEBD-4E49-8DDF-3960F2FFCE73} = {3C5FD3BC-5069-4453-8468-5105EF6DBF3A}
 		{DDC1E22A-276A-4910-A934-6F72CD22DE31} = {3C5FD3BC-5069-4453-8468-5105EF6DBF3A}
 		{52FD86B0-7FBD-456B-8B3D-D4C2BC298490} = {B63FD6E5-3051-4CC0-B4D1-76AF008C8EA9}
+		{B4FD457A-2E53-4D3A-8C95-AE8769AA564F} = {B63FD6E5-3051-4CC0-B4D1-76AF008C8EA9}
 	EndGlobalSection
 EndGlobal
