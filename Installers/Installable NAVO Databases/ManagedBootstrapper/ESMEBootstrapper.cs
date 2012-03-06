@@ -3,13 +3,9 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 
-namespace ManagedBootstrapper
+namespace WixBootstrapper
 {
-
-    /// <summary>
-    /// The WiX toolset user experience.
-    /// </summary>
-    public class WixBootstrapperApplication : BootstrapperApplication
+    public class ESMEBootstrapper : BootstrapperApplication
     {
         /// <summary>
         /// Gets the global model.
@@ -54,7 +50,7 @@ namespace ManagedBootstrapper
         /// </summary>
         protected override void Run()
         {
-            Engine.Log(LogLevel.Verbose, "Running the WiX BA.");
+            Engine.Log(LogLevel.Verbose, "Running the ESME Bootstrapper.");
             Model = new Model(this);
             Dispatcher = Dispatcher.CurrentDispatcher;
             var viewModel = new RootViewModel();

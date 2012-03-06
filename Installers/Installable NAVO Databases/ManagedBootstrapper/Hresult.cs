@@ -16,7 +16,7 @@
 // </summary>
 //-------------------------------------------------------------------------------------------------
 
-namespace ManagedBootstrapper
+namespace WixBootstrapper
 {
     /// <summary>
     /// Utility class to work with HRESULTs

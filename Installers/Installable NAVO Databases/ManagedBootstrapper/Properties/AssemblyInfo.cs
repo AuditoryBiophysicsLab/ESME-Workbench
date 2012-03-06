@@ -19,9 +19,8 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using ManagedBootstrapper;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
-
+using WixBootstrapper;
 
 [assembly: AssemblyTitle("WixBootstrapperApplication")]
 [assembly: AssemblyDescription("WiX Bootstrapper Application")]
@@ -35,4 +34,4 @@ using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 
 // Identifies the class that derives from UserExperience and is the UX class that gets
 // instantiated by the interop layer
-[assembly: BootstrapperApplication(typeof(WixBootstrapperApplication))]
+[assembly: BootstrapperApplication(typeof(ESMEBootstrapper))]

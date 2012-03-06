@@ -24,7 +24,7 @@ using System.ServiceModel.Syndication;
 using System.Windows.Input;
 using System.Xml;
 
-namespace ManagedBootstrapper
+namespace WixBootstrapper
 {
     /// <summary>
     /// The states of the update view model.
@@ -88,7 +88,7 @@ namespace ManagedBootstrapper
             get {
                 return _launchCommand ??
                        (_launchCommand =
-                        new RelayCommand(param => WixBootstrapperApplication.LaunchUrl(UpdateUrl),
+                        new RelayCommand(param => ESMEBootstrapper.LaunchUrl(UpdateUrl),
                                          param => State == UpdateState.Available && !String.IsNullOrEmpty(UpdateUrl)));
             }
         }
@@ -213,7 +213,7 @@ namespace ManagedBootstrapper
             var succeeded = false;
             try
             {
-                var request = WixBootstrapperApplication.Model.CreateWebRequest("http://wix.sourceforge.net/releases/wix3.6.feed");
+                var request = ESMEBootstrapper.Model.CreateWebRequest("http://wix.sourceforge.net/releases/wix3.6.feed");
                 var response = (HttpWebResponse)request.GetResponse();
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -237,7 +237,7 @@ namespace ManagedBootstrapper
                                               Version = new Version(extension.GetObject<string>())
                                       };
 
-                        var update = updates.Where(u => u.Version > WixBootstrapperApplication.Model.Version).OrderByDescending(u => u.Version).FirstOrDefault();
+                        var update = updates.Where(u => u.Version > ESMEBootstrapper.Model.Version).OrderByDescending(u => u.Version).FirstOrDefault();
                         if (update == null)
                         {
                             UpdateUrl = null;

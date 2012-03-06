@@ -18,7 +18,7 @@
 
 using System;
 
-namespace ManagedBootstrapper
+namespace WixBootstrapper
 {
     /// <summary>
     /// The model for an individual news item.

@@ -21,7 +21,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 
-namespace ManagedBootstrapper
+namespace WixBootstrapper
 {
     /// <summary>
     /// It provides support for property change notifications.

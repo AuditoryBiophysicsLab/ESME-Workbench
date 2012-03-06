@@ -8,8 +8,8 @@
     <ProjectGuid>{BB224728-826D-406D-9A19-3CF4DF2AA68E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ManagedBootstrapper</RootNamespace>
-    <AssemblyName>WixBootstrapperApplication</AssemblyName>
+    <RootNamespace>WixBootstrapper</RootNamespace>
+    <AssemblyName>ESMEBootstrapper</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -73,7 +73,7 @@
     </Compile>
     <Compile Include="RootViewModel.cs" />
     <Compile Include="UpdateViewModel.cs" />
-    <Compile Include="WixBootstrapperApplication.cs" />
+    <Compile Include="ESMEBootstrapper.cs" />
     <Page Include="RootView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -106,7 +106,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-    <None Include="WixBootstrapperApplication.BootstrapperCore.config">
+    <None Include="ESMEBootstrapper.BootstrapperCore.config">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>

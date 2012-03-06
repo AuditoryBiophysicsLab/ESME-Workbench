@@ -18,7 +18,7 @@
 
 using System.Windows.Input;
 
-namespace ManagedBootstrapper
+namespace WixBootstrapper
 {
     /// <summary>
     /// Interaction logic for View.xaml
@@ -33,7 +33,7 @@ namespace ManagedBootstrapper
         {
             DataContext = viewModel;
 
-            Loaded += (sender, e) => WixBootstrapperApplication.Model.Engine.CloseSplashScreen();
+            Loaded += (sender, e) => ESMEBootstrapper.Model.Engine.CloseSplashScreen();
             Closed += (sender, e) => Dispatcher.InvokeShutdown(); // shutdown dispatcher when the window is closed.
 
             InitializeComponent();

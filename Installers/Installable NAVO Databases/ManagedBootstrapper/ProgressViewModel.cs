@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 
-namespace ManagedBootstrapper
+namespace WixBootstrapper
 {
     public class ProgressViewModel : PropertyNotifyBase
     {
@@ -22,13 +22,13 @@ namespace ManagedBootstrapper
 
             _root.PropertyChanged += RootPropertyChanged;
 
-            WixBootstrapperApplication.Model.Bootstrapper.ExecuteMsiMessage += ExecuteMsiMessage;
-            WixBootstrapperApplication.Model.Bootstrapper.ExecuteProgress += ApplyExecuteProgress;
-            WixBootstrapperApplication.Model.Bootstrapper.PlanBegin += PlanBegin;
-            WixBootstrapperApplication.Model.Bootstrapper.PlanPackageComplete += PlanPackageComplete;
-            WixBootstrapperApplication.Model.Bootstrapper.Progress += ApplyProgress;
-            WixBootstrapperApplication.Model.Bootstrapper.CacheAcquireProgress += CacheAcquireProgress;
-            WixBootstrapperApplication.Model.Bootstrapper.CacheComplete += CacheComplete;
+            ESMEBootstrapper.Model.Bootstrapper.ExecuteMsiMessage += ExecuteMsiMessage;
+            ESMEBootstrapper.Model.Bootstrapper.ExecuteProgress += ApplyExecuteProgress;
+            ESMEBootstrapper.Model.Bootstrapper.PlanBegin += PlanBegin;
+            ESMEBootstrapper.Model.Bootstrapper.PlanPackageComplete += PlanPackageComplete;
+            ESMEBootstrapper.Model.Bootstrapper.Progress += ApplyProgress;
+            ESMEBootstrapper.Model.Bootstrapper.CacheAcquireProgress += CacheAcquireProgress;
+            ESMEBootstrapper.Model.Bootstrapper.CacheComplete += CacheComplete;
         }
 
         public bool ProgressEnabled
@@ -142,9 +142,9 @@ namespace ManagedBootstrapper
                 _executeProgress = e.OverallPercentage;
                 Progress = (_cacheProgress + _executeProgress) / 2;
 
-                if (WixBootstrapperApplication.Model.Command.Display == Display.Embedded)
+                if (ESMEBootstrapper.Model.Command.Display == Display.Embedded)
                 {
-                    WixBootstrapperApplication.Model.Engine.SendEmbeddedProgress(e.ProgressPercentage, Progress);
+                    ESMEBootstrapper.Model.Engine.SendEmbeddedProgress(e.ProgressPercentage, Progress);
                 }
 
                 e.Result = _root.Canceled ? Result.Cancel : Result.Ok;

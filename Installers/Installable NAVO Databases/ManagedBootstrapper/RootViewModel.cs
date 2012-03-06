@@ -19,7 +19,7 @@
 using System.Windows;
 using System.Windows.Input;
 
-namespace ManagedBootstrapper
+namespace WixBootstrapper
 {
     /// <summary>
     /// The errors returned from the engine
@@ -61,7 +61,7 @@ namespace ManagedBootstrapper
             {
                 if (this.closeCommand == null)
                 {
-                    this.closeCommand = new RelayCommand(param => WixBootstrapperApplication.View.Close());
+                    this.closeCommand = new RelayCommand(param => ESMEBootstrapper.View.Close());
                 }
 
                 return this.closeCommand;
@@ -91,7 +91,7 @@ namespace ManagedBootstrapper
                     {
                         lock (this)
                         {
-                            this.Canceled = (MessageBoxResult.Yes == MessageBox.Show(WixBootstrapperApplication.View, "Are you sure you want to cancel?", "WiX Toolset", MessageBoxButton.YesNo, MessageBoxImage.Error));
+                            this.Canceled = (MessageBoxResult.Yes == MessageBox.Show(ESMEBootstrapper.View, "Are you sure you want to cancel?", "WiX Toolset", MessageBoxButton.YesNo, MessageBoxImage.Error));
                         }
                     },
                     param => this.State == InstallationState.Applying);

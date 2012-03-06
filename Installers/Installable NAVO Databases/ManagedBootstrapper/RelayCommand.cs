@@ -21,7 +21,7 @@ using System;
 using System.Diagnostics;
 using System.Windows.Input;
 
-namespace ManagedBootstrapper
+namespace WixBootstrapper
 {
     /// <summary>
     /// Base class that implements ICommand interface via delegates.

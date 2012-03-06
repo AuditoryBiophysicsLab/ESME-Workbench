@@ -4,7 +4,7 @@ using System.Net;
 using System.Reflection;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 
-namespace ManagedBootstrapper
+namespace WixBootstrapper
 {
     /// <summary>
     /// The model.
