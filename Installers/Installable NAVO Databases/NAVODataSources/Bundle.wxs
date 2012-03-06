@@ -7,32 +7,41 @@
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
   <?define InstallersRoot="C:\Projects\ESME Deliverables\Installers\Installable NAVO Databases"?>
-  <Bundle Name="$(var.ProductName)" Version="1.0.0.0" Manufacturer="Boston University" UpgradeCode="88B26169-9067-4371-B043-358D191E9001">
-    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense" />
-    <WixVariable Id="WixStdbaLicenseRtf" Value="License.rtf" />
+  <Bundle Name="$(var.ProductName)" Version="$(var.ProductFullVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="88B26169-9067-4371-B043-358D191E9001" IconSourceFile="Wave.ico">
+    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.HyperlinkLicense" />
+    <WixVariable Id="WixStdbaLicenseUrl" Value="http://esme.bu.edu/License.htm" />
     <WixVariable Id="WixStdbaLogo" Value="Wave.png" />
+    <WixVariable Id="InstallFolder" Value="[CommonAppDataFolder]" />
     <Chain>
       <!-- TODO: Define the list of chained packages. -->
       <MsiPackage DownloadUrl="http://esme.bu.edu/data/SMGC_2.0_Minimal.msi"
                   SourceFile="$(var.InstallersRoot)\SMGC_2.0_Minimal\bin\Release (x64)\SMGC_2.0_Minimal.msi"
                   Permanent="no"
                   Compressed="no"
-                  Vital="no"/>
+                  Vital="no">
+        <MsiProperty Name="INSTALLLOCATION" Value="[InstallFolder]"/>
+      </MsiPackage>
       <MsiPackage DownloadUrl="http://esme.bu.edu/data/BST_2.0.msi"
                   SourceFile="$(var.InstallersRoot)\BST_2.0\bin\Release (x64)\BST_2.0.msi"
                   Permanent="no"
                   Compressed="no"
-                  Vital="no"/>
+                  Vital="no">
+        <MsiProperty Name="INSTALLLOCATION" Value="[InstallFolder]"/>
+      </MsiPackage>
       <MsiPackage DownloadUrl="http://esme.bu.edu/data/DBDB-V_5.4.msi"
                   SourceFile="$(var.InstallersRoot)\DBDB-V_5.4\bin\Release (x64)\DBDB-V_5.4.msi"
                   Permanent="no"
                   Compressed="no"
-                  Vital="no"/>
+                  Vital="no">
+        <MsiProperty Name="INSTALLLOCATION" Value="[InstallFolder]"/>
+      </MsiPackage>
       <MsiPackage DownloadUrl="http://esme.bu.edu/data/GDEM-V_3.0.msi"
                   SourceFile="$(var.InstallersRoot)\GDEM-V_3.0\bin\Release (x64)\GDEM-V_3.0.msi"
                   Permanent="no"
                   Compressed="no"
-                  Vital="no"/>
+                  Vital="no">
+        <MsiProperty Name="INSTALLLOCATION" Value="[InstallFolder]"/>
+      </MsiPackage>
       <!-- Note: The following PackageGroupRef is required to pull in generated authoring from project references. -->
       <PackageGroupRef Id="Bundle.Generated.Packages"/>
     </Chain>
