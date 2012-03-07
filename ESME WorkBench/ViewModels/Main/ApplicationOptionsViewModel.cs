@@ -54,8 +54,8 @@ namespace ESMEWorkbench.ViewModels.Main
 
         private void OkHandler()
         {
-            AppSettings.DefaultPluginConfigurations.Clear();
-            AppSettings.DefaultPluginConfigurations.AddRange(_pluginManagerService.DefaultPluginConfigurations);
+            AppSettings.DefaultPluginIdentifiers.Clear();
+            AppSettings.DefaultPluginIdentifiers.AddRange(_pluginManagerService.DefaultPluginConfigurations);
             AppSettings.Save(null);
             Globals.AppSettings = AppSettings.Load();
             CloseActivePopUpCommand.Execute(true);

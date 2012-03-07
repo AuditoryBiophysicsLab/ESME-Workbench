@@ -18,7 +18,7 @@ namespace ESME.Plugins
     public interface IPluginManagerService
     {
         ESMEPluginDictionary ESMEPluginDictionary { get; }
-        List<DefaultPluginConfiguration> DefaultPluginConfigurations { get; set; }
+        List<PluginIdentifier> DefaultPluginConfigurations { get; set; }
         EnvironmentalDataSourcePluginBase<Wind> WindSource { get; }
         EnvironmentalDataSourcePluginBase<SoundSpeed> SoundSpeedSource { get; }
         EnvironmentalDataSourcePluginBase<Sediment> SedimentSource { get; }
@@ -55,14 +55,14 @@ namespace ESME.Plugins
         [ImportMany, UsedImplicitly] ICollection<IESMEPlugin> _esmePlugins;
 
         public ESMEPluginDictionary ESMEPluginDictionary { get; private set; }
-        public List<DefaultPluginConfiguration> DefaultPluginConfigurations
+        public List<PluginIdentifier> DefaultPluginConfigurations
         {
             get
             {
-                return new List<DefaultPluginConfiguration>(from pluginType in ESMEPluginDictionary.Keys
+                return new List<PluginIdentifier>(from pluginType in ESMEPluginDictionary.Keys
                                                             from subtype in ESMEPluginDictionary[pluginType].Keys
                                                             where ESMEPluginDictionary[pluginType][subtype].DefaultPlugin != null
-                                                            select new DefaultPluginConfiguration
+                                                            select new PluginIdentifier
                                                             {
                                                                 PluginType = pluginType,
                                                                 PluginSubtype = subtype,
@@ -71,7 +71,7 @@ namespace ESME.Plugins
             }
             set
             {
-                value.ForEach(configuration => ESMEPluginDictionary.DefaultPluginConfiguration = configuration);
+                value.ForEach(configuration => ESMEPluginDictionary.PluginIdentifier = configuration);
             }
         }
 
@@ -139,7 +139,7 @@ namespace ESME.Plugins
     public class PluginTypeDictionary : ObservableConcurrentDictionary<PluginSubtype, PluginSubtypeDictionary> {}
     public class ESMEPluginDictionary : ObservableConcurrentDictionary<PluginType, PluginTypeDictionary>
     {
-        public DefaultPluginConfiguration DefaultPluginConfiguration
+        public PluginIdentifier PluginIdentifier
         {
             set
             {
@@ -161,14 +161,14 @@ namespace ESME.Plugins
     }
 
     [Serializable]
-    public class DefaultPluginConfiguration
+    public class PluginIdentifier
     {
-        public DefaultPluginConfiguration() {}
-        public DefaultPluginConfiguration(DefaultPluginConfiguration defaultPluginConfiguration) 
+        public PluginIdentifier() {}
+        public PluginIdentifier(PluginIdentifier pluginIdentifier) 
         {
-            PluginType = defaultPluginConfiguration.PluginType;
-            PluginSubtype = defaultPluginConfiguration.PluginSubtype;
-            Type = defaultPluginConfiguration.Type;
+            PluginType = pluginIdentifier.PluginType;
+            PluginSubtype = pluginIdentifier.PluginSubtype;
+            Type = pluginIdentifier.Type;
         }
 
         public PluginType PluginType { get; set; }

@@ -40,6 +40,19 @@ namespace ESME.Plugins
         [XmlIgnore] public PluginSubtype PluginSubtype { get; protected set; }
         [XmlIgnore] protected string ConfigurationDirectory { get; set; }
         [XmlIgnore] protected virtual string ConfigurationFile { get { return Path.Combine(ConfigurationDirectory, PluginName + ".xml"); } }
+        [XmlIgnore]
+        public virtual PluginIdentifier PluginIdentifier
+        {
+            get
+            {
+                return new PluginIdentifier
+                {
+                    PluginType = PluginType,
+                    PluginSubtype = PluginSubtype,
+                    Type = GetType().ToString(),
+                };
+            }
+        }
 
         #region public Control ConfigurationControl { get; protected set; }
         [XmlIgnore]

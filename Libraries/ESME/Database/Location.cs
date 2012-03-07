@@ -56,7 +56,7 @@ namespace ESME.Database
         public int EnvironmentDataSetID { get; set; }
         public EnvironmentDataType EnvironmentDataType { get; set; }
         public string Filename { get; set; }
-        public DbDefaultPluginConfiguration SourcePlugin { get; set; }
+        public DbPluginIdentifier SourcePlugin { get; set; }
         public DbWhoWhenWhere Creator { get; set; }
         public virtual Location Location { get; set; }
     }

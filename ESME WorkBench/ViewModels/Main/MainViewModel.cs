@@ -85,7 +85,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 if (Designer.IsInDesignMode) return;
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 MediatorMessage.Send(MediatorMessage.MainViewModelInitialized, _dispatcher);
-                _pluginManagerService.DefaultPluginConfigurations = Globals.AppSettings.DefaultPluginConfigurations;
+                _pluginManagerService.DefaultPluginConfigurations = Globals.AppSettings.DefaultPluginIdentifiers;
                 NAVOImporter.PluginManagerService = _pluginManagerService;
             };
 

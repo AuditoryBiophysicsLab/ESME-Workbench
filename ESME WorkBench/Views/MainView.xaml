@@ -7,15 +7,16 @@
                 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                 xmlns:ia="http://schemas.microsoft.com/expression/2010/interactions"
                 xmlns:LocalControls="clr-namespace:ESMEWorkbench.Controls"
+                xmlns:Main="clr-namespace:ESMEWorkbench.ViewModels.Main"
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                 xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
                 xmlns:NAVO="clr-namespace:ESME.Environment.NAVO;assembly=ESME"
                 xmlns:p="clr-namespace:ESMEWorkbench.Properties"
+                xmlns:Properties="clr-namespace:ESMEWorkbench.Properties"
                 xmlns:r="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
                 xmlns:Utility="clr-namespace:HRC.Utility;assembly=HRC"
                 xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
-                xmlns:Properties="clr-namespace:ESMEWorkbench.Properties"
-                xmlns:Main="clr-namespace:ESMEWorkbench.ViewModels.Main" Title="{Binding MainWindowTitle}"
+                Title="{Binding MainWindowTitle}"
                 Width="{Binding Source={x:Static Properties:Settings.Default},
                                 Path=WindowWidth,
                                 Mode=TwoWay}"
@@ -233,6 +234,12 @@
                                     LargeImageSource="..\Images\LargeIcons\globe-icon.png"
                                     SmallImageSource="..\Images\SmallIcons\globe-icon.png" />
                 </r:RibbonGroup>
+                <r:RibbonGroup Header="Location">
+                    <r:RibbonButton Command="{Binding NewLocationCommand}"
+                                    Label="New"
+                                    LargeImageSource="..\Images\LargeIcons\map_add.png"
+                                    SmallImageSource="..\Images\SmallIcons\map_add.png" />
+                </r:RibbonGroup>
                 <r:RibbonGroup Header="Range Complex" ToolTip="{Binding ScenarioLoadedToolTip}">
                     <ListView Width="150"
                               Height="66"
@@ -390,9 +397,9 @@
                                     ToolTipDescription="Runs the Acoustic Simulator. The icon will appear in your system tray."
                                     ToolTipTitle="{Binding Label,
                                                            RelativeSource={RelativeSource Self}}" />
-                   
+
                 </r:RibbonGroup>
-             
+
                 <r:RibbonGroup Header="Animals">
                     <r:RibbonButton Command="{Binding LaunchMMMBSCommand}"
                                     Label="MMMBS"

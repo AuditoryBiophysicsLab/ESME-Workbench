@@ -60,6 +60,34 @@ namespace ESMEWorkbench.ViewModels.Main
         public Dictionary<EnvironmentDataType, MapLayerViewModel> EnvironmentLayers { get; private set; }
         readonly List<MapLayerViewModel> _sedimentLayers = new List<MapLayerViewModel>();
 
+        #region NewLocationCommand
+        public SimpleCommand<object, object> NewLocationCommand
+        {
+            get { return _newLocation ?? (_newLocation = new SimpleCommand<object, object>(delegate { return IsNewLocationCommandEnabled; }, delegate { NewLocationHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _newLocation;
+
+        static bool IsNewLocationCommandEnabled
+        {
+            get { return true; }
+        }
+
+        void NewLocationHandler()
+        {
+            try
+            {
+                var vm = new NewLocationViewModel();
+                var result = _visualizerService.ShowDialog("NewLocationView", vm);
+                if ((result.HasValue) && (result.Value))
+                {
+                    
+                }
+            }
+            catch (Exception e) { _messageBoxService.ShowError(e.Message); }
+        }
+        #endregion
+
         #region public bool AreAllViewModelsReady { get; set; }
 
         public bool AreAllViewModelsReady

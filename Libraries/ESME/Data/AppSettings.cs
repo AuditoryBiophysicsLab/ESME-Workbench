@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
@@ -45,7 +41,7 @@ namespace ESME.Data
         public void SetDefaults()
         {
           if (RAMSettings != null) RAMSettings.SetDefaults();
-          if (DefaultPluginConfigurations == null || DefaultPluginConfigurations.Count == 0) SetDefaultPluginConfiguration();
+          if (DefaultPluginIdentifiers == null || DefaultPluginIdentifiers.Count == 0) SetDefaultPluginIdentifiers();
         }
 
         public void Save()
@@ -141,13 +137,7 @@ namespace ESME.Data
             foreach (var file in files)
             {
                 var curFile = Path.GetFileName(file).ToLower();
-                var foundMatch = false;
-                foreach (var standardFile in standardFilenames)
-                    if (curFile == standardFile.ToLower())
-                    {
-                        foundMatch = true;
-                        break;
-                    }
+                var foundMatch = standardFilenames.Any(standardFile => curFile == standardFile.ToLower());
                 if (foundMatch) continue;
                 if (messageBoxService != null) messageBoxService.ShowError(string.Format("Error validating scenario data directory \"{0}\": Expected file(s) not found in this directory", simAreaDirectory));
                 return false;
@@ -198,17 +188,17 @@ namespace ESME.Data
 
         public NAVOConfiguration NAVOConfiguration
         {
-            get { return _nAVOConfiguration ?? (_nAVOConfiguration = new NAVOConfiguration()); }
+            get { return _navoConfiguration ?? (_navoConfiguration = new NAVOConfiguration()); }
             set
             {
-                if (_nAVOConfiguration == value) return;
-                _nAVOConfiguration = value;
+                if (_navoConfiguration == value) return;
+                _navoConfiguration = value;
                 NotifyPropertyChanged(NAVOConfigurationChangedEventArgs);
             }
         }
 
         private static readonly PropertyChangedEventArgs NAVOConfigurationChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.NAVOConfiguration);
-        NAVOConfiguration _nAVOConfiguration;
+        NAVOConfiguration _navoConfiguration;
 
         #endregion
 
@@ -306,37 +296,37 @@ namespace ESME.Data
 
         #endregion
 
-        #region public List<DefaultPluginConfiguration> DefaultPluginConfigurations { get; set; }
-        public List<DefaultPluginConfiguration> DefaultPluginConfigurations
+        #region public List<PluginIdentifier> DefaultPluginIdentifiers { get; set; }
+        public List<PluginIdentifier> DefaultPluginIdentifiers
         {
-            get { return _defaultPluginConfigurations; }
-            set { _defaultPluginConfigurations = value; }
+            get { return _defaultPluginIdentifiers; }
+            set { _defaultPluginIdentifiers = value; }
         }
-        List<DefaultPluginConfiguration> _defaultPluginConfigurations;
+        List<PluginIdentifier> _defaultPluginIdentifiers;
 
-        void SetDefaultPluginConfiguration()
+        void SetDefaultPluginIdentifiers()
         {
-            DefaultPluginConfigurations = new List<DefaultPluginConfiguration>
+            DefaultPluginIdentifiers = new List<PluginIdentifier>
             {
-                new DefaultPluginConfiguration
+                new PluginIdentifier
                 {
                     PluginType = PluginType.EnvironmentalDataSource,
                     PluginSubtype = PluginSubtype.Wind,
                     Type = typeof (NoWindData).ToString(),
                 },
-                new DefaultPluginConfiguration
+                new PluginIdentifier
                 {
                     PluginType = PluginType.EnvironmentalDataSource,
                     PluginSubtype = PluginSubtype.SoundSpeed,
                     Type = typeof (NoSoundSpeedData).ToString(),
                 },
-                new DefaultPluginConfiguration
+                new PluginIdentifier
                 {
                     PluginType = PluginType.EnvironmentalDataSource,
                     PluginSubtype = PluginSubtype.Sediment,
                     Type = typeof (NoSedimentData).ToString(),
                 },
-                new DefaultPluginConfiguration
+                new PluginIdentifier
                 {
                     PluginType = PluginType.EnvironmentalDataSource,
                     PluginSubtype = PluginSubtype.Bathymetry,
@@ -385,7 +375,6 @@ namespace ESME.Data
         string _className;
 
         #endregion
-
     }
 
     public sealed class RAMSettings : ValidatingViewModel
