@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel.Composition;
 using System.IO;
 using ESME.Environment;
+using ESME.Environment.Descriptors;
 using ESME.Plugins;
 using HRC.Navigation;
 using Microsoft.Win32;
@@ -10,10 +11,9 @@ using NAVODatabaseAdapter;
 namespace InstallableNAVOPlugin
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
-    [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
-                PluginSubtype = PluginSubtype.Sediment,
-                Name = "BST 2.0 for ESME Workbench",
-                Description = "Bottom Sediments Type Database Version 2.0 Repacked from US Navy/NAVOCEANO, packaged for ESME Workbench")]
+    [EnvironmentDataSource(EnvironmentDataType = EnvironmentDataType.Sediment,
+                           Name = "BST 2.0 for ESME Workbench",
+                           Description = "Bottom Sediments Type Database Version 2.0 Repacked from US Navy/NAVOCEANO, packaged for ESME Workbench")]
     public sealed class BST20ForESME : EnvironmentalDataSourcePluginBase<Sediment>
     {
         const string RequiredBSTFilename = "hfevav2.h5";

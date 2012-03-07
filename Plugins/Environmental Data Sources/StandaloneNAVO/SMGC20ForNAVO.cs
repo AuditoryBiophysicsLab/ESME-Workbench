@@ -7,6 +7,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
+using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
 using HRC.Navigation;
@@ -19,10 +20,9 @@ namespace StandaloneNAVOPlugin
 {
     [Serializable]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
-                PluginSubtype = PluginSubtype.Wind,
-                Name = "SMGC 2.0 for NAVO",
-                Description = "Surface Marine Gridded Climatology Database v2.0 from US Navy/NAVOCEANO")]
+    [EnvironmentDataSource(EnvironmentDataType = EnvironmentDataType.Wind,
+                           Name = "SMGC 2.0 for NAVO",
+                           Description = "Surface Marine Gridded Climatology Database v2.0 from US Navy/NAVOCEANO")]
     public sealed class SMGC20ForNAVO : EnvironmentalDataSourcePluginBase<Wind>
     {
         public SMGC20ForNAVO()

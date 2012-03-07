@@ -7,6 +7,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
+using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
 using HRC.Navigation;
@@ -19,10 +20,9 @@ namespace StandaloneNAVOPlugin
 {
     [Serializable]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
-                PluginSubtype = PluginSubtype.SoundSpeed,
-                Name = "GDEM-V 3.0 for NAVO",
-                Description = "Generalized Digital Environment Model, Variable Resolution version 3.0 from US Navy/NAVOCEANO")]
+    [EnvironmentDataSource(EnvironmentDataType = EnvironmentDataType.SoundSpeed,
+                           Name = "GDEM-V 3.0 for NAVO",
+                           Description = "Generalized Digital Environment Model, Variable Resolution version 3.0 from US Navy/NAVOCEANO")]
     public sealed class GDEM3ForNAVO : EnvironmentalDataSourcePluginBase<SoundSpeed>
     {
         public GDEM3ForNAVO()

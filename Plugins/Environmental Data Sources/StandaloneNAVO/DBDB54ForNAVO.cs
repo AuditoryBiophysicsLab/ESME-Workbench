@@ -6,6 +6,7 @@ using System.IO;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
+using ESME.Environment.Descriptors;
 using ESME.Plugins;
 using HRC.Navigation;
 using HRC.Utility;
@@ -17,10 +18,9 @@ namespace StandaloneNAVOPlugin
 {
     [Serializable]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
-                PluginSubtype = PluginSubtype.Bathymetry,
-                Name = "DBDB-V 5.4 for NAVO",
-                Description = "Digital Bathymetric Data Base - Variable Resolution v5.4 from US Navy/NAVOCEANO")]
+    [EnvironmentDataSource(EnvironmentDataType = EnvironmentDataType.Bathymetry,
+                           Name = "DBDB-V 5.4 for NAVO",
+                           Description = "Digital Bathymetric Data Base - Variable Resolution v5.4 from US Navy/NAVOCEANO")]
     public sealed class DBDB54ForNAVO : EnvironmentalDataSourcePluginBase<Bathymetry>
     {
         const string RequiredDBDBFilename = "dbdbv5_level0c_0.h5";
