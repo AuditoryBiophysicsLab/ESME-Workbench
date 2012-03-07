@@ -24,32 +24,27 @@
                   SourceFile="$(var.InstallersRoot)\SMGC_2.0_Minimal\bin\Release (x64)\SMGC_2.0_Minimal.msi"
                   Permanent="no"
                   Compressed="no"
-                  Vital="no">
-        <MsiProperty Name="INSTALLLOCATION" Value="[InstallFolder]"/>
-      </MsiPackage>
-      <!-- 
+                  Vital="yes"/>
       <MsiPackage DownloadUrl="http://esme.bu.edu/data/BST_2.0.msi"
                   SourceFile="$(var.InstallersRoot)\BST_2.0\bin\Release (x64)\BST_2.0.msi"
                   Permanent="no"
                   Compressed="no"
-                  Vital="no">
-        <MsiProperty Name="INSTALLLOCATION" Value="[InstallFolder]"/>
-      </MsiPackage>
+                  Vital="yes"/>
       <MsiPackage DownloadUrl="http://esme.bu.edu/data/DBDB-V_5.4.msi"
                   SourceFile="$(var.InstallersRoot)\DBDB-V_5.4\bin\Release (x64)\DBDB-V_5.4.msi"
                   Permanent="no"
                   Compressed="no"
-                  Vital="no">
-        <MsiProperty Name="INSTALLLOCATION" Value="[InstallFolder]"/>
-      </MsiPackage>
+                  Vital="yes"/>
       <MsiPackage DownloadUrl="http://esme.bu.edu/data/GDEM-V_3.0.msi"
                   SourceFile="$(var.InstallersRoot)\GDEM-V_3.0\bin\Release (x64)\GDEM-V_3.0.msi"
                   Permanent="no"
                   Compressed="no"
-                  Vital="no">
-        <MsiProperty Name="INSTALLLOCATION" Value="[InstallFolder]"/>
-      </MsiPackage>
-      -->
+                  Vital="yes"/>
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/InstallableNAVOPlugin.msi"
+                  SourceFile="C:\Projects\ESME Deliverables\Installers\Plugins\InstallableNAVO\bin\Release (x64)\InstallableNAVOPlugin.msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Vital="yes"/>
     </Chain>
   </Bundle>
 </Wix>

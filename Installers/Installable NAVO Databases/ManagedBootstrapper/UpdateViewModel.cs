@@ -23,6 +23,7 @@ using System.Net;
 using System.ServiceModel.Syndication;
 using System.Windows.Input;
 using System.Xml;
+using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 
 namespace WixBootstrapper
 {
@@ -49,7 +50,7 @@ namespace WixBootstrapper
 
         private UpdateState _state;
         private string _updateUrl;
-        private readonly BackgroundWorker _worker;
+        //private readonly BackgroundWorker _worker;
 
         private ICommand _checkCommand;
         private ICommand _launchCommand;
@@ -59,17 +60,15 @@ namespace WixBootstrapper
             _root = root;
             _root.PropertyChanged += RootPropertyChanged;
 
-            _worker = new BackgroundWorker();
-            _worker.DoWork += WorkerDoWork;
+            //_worker = new BackgroundWorker();
+            //_worker.DoWork += WorkerDoWork;
         }
 
         public ICommand CheckCommand
         {
-            get {
-                return _checkCommand ??
-                       (_checkCommand =
-                        new RelayCommand(param => Refresh(),
-                                         param => State == UpdateState.Current || State == UpdateState.Failed));
+            get 
+            {
+                return _checkCommand ?? (_checkCommand = new RelayCommand(param => Refresh(), param => State == UpdateState.Current || State == UpdateState.Failed));
             }
         }
 
@@ -85,11 +84,9 @@ namespace WixBootstrapper
 
         public ICommand LaunchCommand
         {
-            get {
-                return _launchCommand ??
-                       (_launchCommand =
-                        new RelayCommand(param => ESMEBootstrapper.LaunchUrl(UpdateUrl),
-                                         param => State == UpdateState.Available && !String.IsNullOrEmpty(UpdateUrl)));
+            get 
+            {
+                return _launchCommand ?? (_launchCommand = new RelayCommand(param => ESMEBootstrapper.LaunchUrl(UpdateUrl), param => State == UpdateState.Available && !String.IsNullOrEmpty(UpdateUrl)));
             }
         }
 
@@ -108,23 +105,18 @@ namespace WixBootstrapper
         /// </summary>
         public UpdateState State
         {
-            get
-            {
-                return _state;
-            }
+            get { return _state; }
 
             set
             {
-                if (_state != value)
-                {
-                    _state = value;
-                    base.OnPropertyChanged("State");
-                    base.OnPropertyChanged("Title");
-                    base.OnPropertyChanged("CheckVisible");
-                    base.OnPropertyChanged("CheckEnabled");
-                    base.OnPropertyChanged("CheckingEnabled");
-                    base.OnPropertyChanged("LaunchEnabled");
-                }
+                if (_state == value) return;
+                _state = value;
+                base.OnPropertyChanged("State");
+                base.OnPropertyChanged("Title");
+                base.OnPropertyChanged("CheckVisible");
+                base.OnPropertyChanged("CheckEnabled");
+                base.OnPropertyChanged("CheckingEnabled");
+                base.OnPropertyChanged("LaunchEnabled");
             }
         }
 
@@ -163,27 +155,20 @@ namespace WixBootstrapper
         /// </summary>
         public string UpdateUrl
         {
-            get
-            {
-                return _updateUrl;
-            }
+            get { return _updateUrl; }
 
             set
             {
-                if (_updateUrl != value)
-                {
-                    _updateUrl = value;
-                    base.OnPropertyChanged("UpdateUrl");
-                    base.OnPropertyChanged("LaunchEnabled");
-                }
+                if (_updateUrl == value) return;
+                _updateUrl = value;
+                base.OnPropertyChanged("UpdateUrl");
+                base.OnPropertyChanged("LaunchEnabled");
             }
         }
 
         static void RootPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if ("State" == e.PropertyName)
-            {
-            }
+            if ("State" == e.PropertyName) { }
         }
 
         /// <summary>
@@ -191,16 +176,20 @@ namespace WixBootstrapper
         /// </summary>
         public void Refresh()
         {
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering UpdateViewModel.Refresh()");
             // If we're already checking for updates, skip the refresh.
             if (State == UpdateState.Checking)
             {
+                ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting UpdateViewModel.Refresh() at point 1");
                 return;
             }
 
             State = UpdateState.Checking;
             UpdateUrl = null;
 
-            _worker.RunWorkerAsync();
+            //_worker.RunWorkerAsync();
+            State = UpdateState.Available;
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting UpdateViewModel.Refresh() at point 2");
         }
 
         /// <summary>

@@ -44,7 +44,7 @@ namespace WixBootstrapper
     }
 
     /// <summary>
-    /// The model of the installation view in WixBA.
+    /// The model of the installation view in ESMEBootstrapper.
     /// </summary>
     public class InstallationViewModel : PropertyNotifyBase
     {
@@ -52,8 +52,8 @@ namespace WixBootstrapper
 
         private readonly Dictionary<string, int> _downloadRetries;
         private bool _downgrade;
-        const string WixHomePageUrl = "http://wixtoolset.org/";
-        const string WixNewsUrl = "http://wixtoolset.org/news/";
+        const string ESMEHomePageUrl = "http://esme.bu.edu/";
+        const string ESMENewsUrl = "http://esme.bu.edu/news/";
 
         private bool _planAttempted;
         private LaunchAction _plannedAction;
@@ -93,39 +93,28 @@ namespace WixBootstrapper
 
         void RootPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if ("State" == e.PropertyName)
-            {
-                base.OnPropertyChanged("Title");
-                base.OnPropertyChanged("CompleteEnabled");
-                base.OnPropertyChanged("ExitEnabled");
-                base.OnPropertyChanged("RepairEnabled");
-                base.OnPropertyChanged("InstallEnabled");
-                base.OnPropertyChanged("UninstallEnabled");
-            }
+            if ("State" != e.PropertyName) return;
+            base.OnPropertyChanged("Title");
+            base.OnPropertyChanged("CompleteEnabled");
+            base.OnPropertyChanged("ExitEnabled");
+            base.OnPropertyChanged("RepairEnabled");
+            base.OnPropertyChanged("InstallEnabled");
+            base.OnPropertyChanged("UninstallEnabled");
         }
 
         /// <summary>
         /// Gets the title for the application.
         /// </summary>
-        public string Version 
-        {
-            get { return String.Concat("v", ESMEBootstrapper.Model.Version.ToString()); }
-        }
+        public string Version { get { return String.Concat("v", ESMEBootstrapper.Model.Version.ToString()); } }
 
         public string Message
         {
-            get
-            {
-                return _message;
-            }
-
+            get { return _message; }
             set
             {
-                if (_message != value)
-                {
-                    _message = value;
-                    base.OnPropertyChanged("Message");
-                }
+                if (_message == value) return;
+                _message = value;
+                base.OnPropertyChanged("Message");
             }
         }
 
@@ -134,36 +123,28 @@ namespace WixBootstrapper
         /// </summary>
         public bool Downgrade
         {
-            get
-            {
-                return _downgrade;
-            }
-
+            get { return _downgrade; }
             set
             {
-                if (_downgrade != value)
-                {
-                    _downgrade = value;
-                    base.OnPropertyChanged("Downgrade");
-                }
+                if (_downgrade == value) return;
+                _downgrade = value;
+                base.OnPropertyChanged("Downgrade");
             }
         }
 
         public ICommand LaunchHomePageCommand
         {
-            get {
-                return _launchHomePageCommand ??
-                       (_launchHomePageCommand =
-                        new RelayCommand(param => ESMEBootstrapper.LaunchUrl(WixHomePageUrl), param => true));
+            get 
+            {
+                return _launchHomePageCommand ?? (_launchHomePageCommand = new RelayCommand(param => ESMEBootstrapper.LaunchUrl(ESMEHomePageUrl), param => true));
             }
         }
 
         public ICommand LaunchNewsCommand
         {
-            get {
-                return _launchNewsCommand ??
-                       (_launchNewsCommand =
-                        new RelayCommand(param => ESMEBootstrapper.LaunchUrl(WixNewsUrl), param => true));
+            get 
+            {
+                return _launchNewsCommand ?? (_launchNewsCommand = new RelayCommand(param => ESMEBootstrapper.LaunchUrl(ESMENewsUrl), param => true));
             }
         }
 
@@ -189,11 +170,9 @@ namespace WixBootstrapper
 
         public ICommand InstallCommand
         {
-            get {
-                return _installCommand ??
-                       (_installCommand =
-                        new RelayCommand(param => Plan(LaunchAction.Install),
-                                         param => _root.State == InstallationState.DetectedAbsent));
+            get 
+            {
+                return _installCommand ?? (_installCommand = new RelayCommand(param => Plan(LaunchAction.Install), param => _root.State == InstallationState.DetectedAbsent));
             }
         }
 
@@ -204,11 +183,9 @@ namespace WixBootstrapper
 
         public ICommand RepairCommand
         {
-            get {
-                return _repairCommand ??
-                       (_repairCommand =
-                        new RelayCommand(param => Plan(LaunchAction.Repair),
-                                         param => _root.State == InstallationState.DetectedPresent));
+            get 
+            {
+                return _repairCommand ?? (_repairCommand = new RelayCommand(param => Plan(LaunchAction.Repair), param => _root.State == InstallationState.DetectedPresent));
             }
         }
 
@@ -224,11 +201,9 @@ namespace WixBootstrapper
 
         public ICommand UninstallCommand
         {
-            get {
-                return _uninstallCommand ??
-                       (_uninstallCommand =
-                        new RelayCommand(param => Plan(LaunchAction.Uninstall),
-                                         param => _root.State == InstallationState.DetectedPresent));
+            get 
+            {
+                return _uninstallCommand ?? (_uninstallCommand = new RelayCommand(param => Plan(LaunchAction.Uninstall), param => _root.State == InstallationState.DetectedPresent));
             }
         }
 
@@ -239,10 +214,9 @@ namespace WixBootstrapper
 
         public ICommand TryAgainCommand
         {
-            get {
-                return _tryAgainCommand ??
-                       (_tryAgainCommand =
-                        new RelayCommand(param => Plan(_plannedAction), param => _root.State == InstallationState.Failed));
+            get 
+            {
+                return _tryAgainCommand ?? (_tryAgainCommand = new RelayCommand(param => Plan(_plannedAction), param => _root.State == InstallationState.Failed));
             }
         }
 
@@ -336,10 +310,12 @@ namespace WixBootstrapper
         /// </summary>
         public void Refresh()
         {
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel.Refresh()");
             // TODO: verify that the engine is in a state that will allow it to do Detect().
 
             _root.Canceled = false;
             ESMEBootstrapper.Model.Engine.Detect();
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting InstallationViewModel.Refresh()");
         }
 
         /// <summary>
@@ -381,11 +357,11 @@ namespace WixBootstrapper
 
         private void DetectedPackage(object sender, DetectPackageCompleteEventArgs e)
         {
-            if (e.PackageId.Equals("Wix", StringComparison.Ordinal))
-            {
-
-                _root.State = (e.State == PackageState.Present) ? InstallationState.DetectedPresent : InstallationState.DetectedAbsent;
-            }
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel.DetectedPackage()");
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("  e.PackageID = '{0}'", e.PackageId));
+            //if (e.PackageId.Equals("Wix", StringComparison.Ordinal))
+            _root.State = (e.State == PackageState.Present) ? InstallationState.DetectedPresent : InstallationState.DetectedAbsent;
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Leaving InstallationViewModel.DetectedPackage()");
         }
 
         private void DetectComplete(object sender, DetectCompleteEventArgs e)
@@ -419,9 +395,7 @@ namespace WixBootstrapper
         private static void PlanPackageBegin(object sender, PlanPackageBeginEventArgs e)
         {
             if (e.PackageId.Equals(ESMEBootstrapper.Model.Engine.StringVariables["MbaNetfxPackageId"], StringComparison.Ordinal))
-            {
                 e.State = RequestState.None;
-            }
         }
 
         private void PlanComplete(object sender, PlanCompleteEventArgs e)
@@ -433,9 +407,7 @@ namespace WixBootstrapper
                 ESMEBootstrapper.Model.Engine.Apply(_hwnd);
             }
             else
-            {
                 _root.State = InstallationState.Failed;
-            }
         }
 
         private void ApplyBegin(object sender, ApplyBeginEventArgs e)
@@ -451,23 +423,13 @@ namespace WixBootstrapper
                 {
                     // If the error is a cancel coming from the engine during apply we want to go back to the preapply state.
                     if (InstallationState.Applying == _root.State && (int)Error.UserCancelled == e.ErrorCode)
-                    {
                         _root.State = _root.PreApplyState;
-                    }
                     else
                     {
                         Message = e.ErrorMessage;
 
-                        ESMEBootstrapper.View.Dispatcher.Invoke(
-                                                                          (Action)
-                                                                          (() =>
-                                                                           MessageBox.Show(
-                                                                                           ESMEBootstrapper.
-                                                                                                   View,
-                                                                                           e.ErrorMessage,
-                                                                                           "WiX Toolset",
-                                                                                           MessageBoxButton.OK,
-                                                                                           MessageBoxImage.Error)));
+                        ESMEBootstrapper.View.Dispatcher.Invoke((Action)(() => MessageBox.Show(ESMEBootstrapper.View, e.ErrorMessage,
+                                                                                               "ESME Workbench", MessageBoxButton.OK, MessageBoxImage.Error)));
                     }
                 }
 
@@ -497,17 +459,13 @@ namespace WixBootstrapper
                     ESMEBootstrapper.Dispatcher.BeginInvoke((Action)(() => ESMEBootstrapper.View.Close()));
                 }
                 else
-                {
                     ESMEBootstrapper.Dispatcher.InvokeShutdown();
-                }
             }
 
             // Set the state to applied or failed unless the state has already been set back to the preapply state
             // which means we need to show the UI as it was before the apply started.
             if (_root.State != _root.PreApplyState)
-            {
                 _root.State = Hresult.Succeeded(e.Status) ? InstallationState.Applied : InstallationState.Failed;
-            }
         }
     }
 }

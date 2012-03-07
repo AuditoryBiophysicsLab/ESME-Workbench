@@ -18,6 +18,7 @@
 
 using System.Windows;
 using System.Windows.Input;
+using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 
 namespace WixBootstrapper
 {
@@ -34,92 +35,62 @@ namespace WixBootstrapper
     /// </summary>
     public class RootViewModel : PropertyNotifyBase
     {
-        private ICommand cancelCommand;
-        private ICommand closeCommand;
-        private ICommand refreshCommand;
+        ICommand _cancelCommand;
+        ICommand _closeCommand;
+        ICommand _refreshCommand;
 
-        private bool canceled;
-        private InstallationState state;
+        bool _canceled;
+        InstallationState _state;
 
         /// <summary>
         /// Creates a new model of the root view.
         /// </summary>
         public RootViewModel()
         {
-            this.InstallationViewModel = new InstallationViewModel(this);
-            this.ProgressViewModel = new ProgressViewModel(this);
-            this.UpdateViewModel = new UpdateViewModel(this);
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering RootViewModel constructor");
+            InstallationViewModel = new InstallationViewModel(this);
+            ProgressViewModel = new ProgressViewModel(this);
+            UpdateViewModel = new UpdateViewModel(this);
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting RootViewModel constructor");
         }
 
         public InstallationViewModel InstallationViewModel { get; private set; }
         public ProgressViewModel ProgressViewModel { get; private set; }
         public UpdateViewModel UpdateViewModel { get; private set; }
 
-        public ICommand CloseCommand
-        {
-            get
-            {
-                if (this.closeCommand == null)
-                {
-                    this.closeCommand = new RelayCommand(param => ESMEBootstrapper.View.Close());
-                }
+        public ICommand CloseCommand { get { return _closeCommand ?? (_closeCommand = new RelayCommand(param => ESMEBootstrapper.View.Close())); } }
 
-                return this.closeCommand;
-            }
-        }
-
-        public ICommand RefreshCommand
-        {
-            get
-            {
-                if (this.refreshCommand == null)
-                {
-                    this.refreshCommand = new RelayCommand(param => this.Refresh(), param => false); // TODO: enable this command
-                }
-
-                return this.refreshCommand;
-            }
-        }
+        public ICommand RefreshCommand { get { return _refreshCommand ?? (_refreshCommand = new RelayCommand(param => Refresh(), param => false)); } }
 
         public ICommand CancelCommand
         {
             get
             {
-                if (this.cancelCommand == null)
+                return _cancelCommand ?? (_cancelCommand = new RelayCommand(param =>
                 {
-                    this.cancelCommand = new RelayCommand(param =>
-                    {
-                        lock (this)
-                        {
-                            this.Canceled = (MessageBoxResult.Yes == MessageBox.Show(ESMEBootstrapper.View, "Are you sure you want to cancel?", "WiX Toolset", MessageBoxButton.YesNo, MessageBoxImage.Error));
-                        }
-                    },
-                    param => this.State == InstallationState.Applying);
-                }
-
-                return this.cancelCommand;
+                    lock (this) 
+                    { 
+                        Canceled = (MessageBoxResult.Yes == MessageBox.Show(ESMEBootstrapper.View, "Are you sure you want to cancel?", "WiX Toolset", MessageBoxButton.YesNo, MessageBoxImage.Error));
+                    }
+                },
+                param => State == InstallationState.Applying));
             }
         }
 
         public bool CancelEnabled
         {
-            get { return this.CancelCommand.CanExecute(this); }
+            get { return CancelCommand.CanExecute(this); }
         }
 
         public bool Canceled
         {
-            get
-            {
-                return this.canceled;
-            }
+            get { return _canceled; }
 
             set
             {
-                if (this.canceled != value)
-                {
-                    this.canceled = value;
-                    base.OnPropertyChanged("Canceled");
-                }
+                if (_canceled == value) return;
+                _canceled = value;
+                base.OnPropertyChanged("Canceled");
             }
         }
 
@@ -128,21 +99,16 @@ namespace WixBootstrapper
         /// </summary>
         public InstallationState State
         {
-            get
-            {
-                return this.state;
-            }
+            get { return _state; }
 
             set
             {
-                if (this.state != value)
-                {
-                    this.state = value;
+                if (_state == value) return;
+                _state = value;
 
-                    // Notify all the properties derived from the state that the state changed.
-                    base.OnPropertyChanged("State");
-                    base.OnPropertyChanged("CancelEnabled");
-                }
+                // Notify all the properties derived from the state that the state changed.
+                base.OnPropertyChanged("State");
+                base.OnPropertyChanged("CancelEnabled");
             }
         }
 
@@ -158,8 +124,8 @@ namespace WixBootstrapper
         /// </summary>
         public void Refresh()
         {
-            this.InstallationViewModel.Refresh();
-            this.UpdateViewModel.Refresh();
+            InstallationViewModel.Refresh();
+            UpdateViewModel.Refresh();
         }
     }
 }

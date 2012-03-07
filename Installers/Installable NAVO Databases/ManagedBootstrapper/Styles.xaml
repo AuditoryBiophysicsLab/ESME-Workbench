@@ -67,7 +67,7 @@
     <Style TargetType="Button">
         <Setter Property="FontFamily" Value="Segoe UI" />
         <Setter Property="Foreground" Value="White" />
-        <Setter Property="Background" Value="DarkRed" />
+        <Setter Property="Background" Value="LightSeaGreen" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="Template" Value="{StaticResource ButtonTemplateKey}" />
     </Style>
@@ -89,8 +89,8 @@
     </Style>
 
     <Style TargetType="ProgressBar">
-        <Setter Property="Foreground" Value="DarkRed" />
-        <Setter Property="Background" Value="#FFCB0000" />
+        <Setter Property="Foreground" Value="LightSeaGreen" />
+        <Setter Property="Background" Value="#FF008E91" />
         <Setter Property="Template" Value="{StaticResource ProgressBarTemplateKey}" />
     </Style>
 
