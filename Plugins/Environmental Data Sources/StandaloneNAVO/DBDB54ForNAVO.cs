@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Xml.Serialization;
 using Cinch;
@@ -10,14 +11,14 @@ using HRC.Navigation;
 using HRC.Utility;
 using HRC.Validation;
 using NAVODatabaseAdapter;
-using ESME;
 using StandaloneNAVOPlugin.Controls;
 
 namespace StandaloneNAVOPlugin
 {
     [Serializable]
+    [PartCreationPolicy(CreationPolicy.Shared)]
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
-                Subtype = "Bathymetry",
+                PluginSubtype = PluginSubtype.Bathymetry,
                 Name = "DBDB-V 5.4 for NAVO",
                 Description = "Digital Bathymetric Data Base - Variable Resolution v5.4 from US Navy/NAVOCEANO")]
     public sealed class DBDB54ForNAVO : EnvironmentalDataSourcePluginBase<Bathymetry>

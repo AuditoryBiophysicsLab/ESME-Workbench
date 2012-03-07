@@ -13,16 +13,16 @@ using HRC.Navigation;
 using HRC.Utility;
 using HRC.Validation;
 using NAVODatabaseAdapter;
-using ESME;
 using StandaloneNAVOPlugin.Controls;
 
 namespace StandaloneNAVOPlugin
 {
+    [Serializable]
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
-        Subtype = "Wind",
-        Name = "SMGC 2.0 for NAVO",
-        Description = "Surface Marine Gridded Climatology Database v2.0 from US Navy/NAVOCEANO")]
+                PluginSubtype = PluginSubtype.Wind,
+                Name = "SMGC 2.0 for NAVO",
+                Description = "Surface Marine Gridded Climatology Database v2.0 from US Navy/NAVOCEANO")]
     public sealed class SMGC20ForNAVO : EnvironmentalDataSourcePluginBase<Wind>
     {
         public SMGC20ForNAVO()

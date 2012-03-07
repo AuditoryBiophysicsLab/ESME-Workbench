@@ -1,7 +1,7 @@
 using System;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
@@ -11,10 +11,11 @@ using NAVODatabaseAdapter;
 
 namespace InstallableNAVOPlugin
 {
+    [PartCreationPolicy(CreationPolicy.Shared)]
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
-        Subtype = "Sound Speed",
-        Name = "GDEM-V 3.0 for ESME Workbench",
-        Description = "Generalized Digital Environment Model, Variable Resolution version 3.0 from US Navy/NAVOCEANO, packaged for ESME Workbench")]
+                PluginSubtype = PluginSubtype.SoundSpeed,
+                Name = "GDEM-V 3.0 for ESME Workbench",
+                Description = "Generalized Digital Environment Model, Variable Resolution version 3.0 from US Navy/NAVOCEANO, packaged for ESME Workbench")]
     public sealed class GDEM3ForESME : EnvironmentalDataSourcePluginBase<SoundSpeed>
     {
         public GDEM3ForESME()

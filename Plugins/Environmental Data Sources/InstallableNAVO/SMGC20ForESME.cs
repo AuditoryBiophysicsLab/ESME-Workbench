@@ -2,7 +2,6 @@
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
@@ -13,7 +12,7 @@ namespace InstallableNAVOPlugin
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
-                Subtype = "Wind",
+                PluginSubtype = PluginSubtype.Wind,
                 Name = "SMGC 2.0 for ESME Workbench",
                 Description = "Surface Marine Gridded Climatology Database v2.0 from US Navy/NAVOCEANO, packaged for ESME Workbench")]
     public sealed class SMGC20ForESME : EnvironmentalDataSourcePluginBase<Wind>

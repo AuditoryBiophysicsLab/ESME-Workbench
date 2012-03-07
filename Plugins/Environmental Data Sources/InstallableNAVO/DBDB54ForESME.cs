@@ -1,6 +1,6 @@
 using System;
+using System.ComponentModel.Composition;
 using System.IO;
-using ESME;
 using ESME.Environment;
 using ESME.Plugins;
 using HRC.Navigation;
@@ -9,10 +9,11 @@ using NAVODatabaseAdapter;
 
 namespace InstallableNAVOPlugin
 {
+    [PartCreationPolicy(CreationPolicy.Shared)]
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
-        Subtype = "Bathymetry",
-        Name = "DBDB-V 5.4 for ESME Workbench",
-        Description = "Digital Bathymetric Data Base - Variable Resolution v5.4, from US Navy/NAVOCEANO, packaged for ESME Workbench")]
+                PluginSubtype = PluginSubtype.Bathymetry,
+                Name = "DBDB-V 5.4 for ESME Workbench",
+                Description = "Digital Bathymetric Data Base - Variable Resolution v5.4, from US Navy/NAVOCEANO, packaged for ESME Workbench")]
     public sealed class DBDB54ForESME : EnvironmentalDataSourcePluginBase<Bathymetry>
     {
         const string RequiredDBDBFilename = "dbdbv5_level0c_0.h5";

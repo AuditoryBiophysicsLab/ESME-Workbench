@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Xml.Serialization;
 using Cinch;
@@ -10,16 +11,16 @@ using HRC.Navigation;
 using HRC.Utility;
 using HRC.Validation;
 using NAVODatabaseAdapter;
-using ESME;
 using StandaloneNAVOPlugin.Controls;
 
 namespace StandaloneNAVOPlugin
 {
     [Serializable]
+    [PartCreationPolicy(CreationPolicy.Shared)]
     [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource,
-        Subtype = "Sediment",
-        Name = "BST 2.0 for NAVO",
-        Description = "Bottom Sediments Type Database Version 2.0 Repacked from US Navy/NAVOCEANO")]
+                PluginSubtype = PluginSubtype.Sediment,
+                Name = "BST 2.0 for NAVO",
+                Description = "Bottom Sediments Type Database Version 2.0 Repacked from US Navy/NAVOCEANO")]
     public sealed class BST20ForNAVO : EnvironmentalDataSourcePluginBase<Sediment>
     {
         const string RequiredBSTFilename = "hfevav2.h5";
