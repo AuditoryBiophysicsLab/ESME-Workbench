@@ -95,6 +95,8 @@ namespace WixBootstrapper
             get { return LaunchCommand.CanExecute(this); }
         }
 
+        public bool UpdatingEnabled { get { return false; } }
+
         public bool CheckingEnabled
         {
             get { return State == UpdateState.Checking; }

@@ -25,6 +25,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
+using Microsoft.Win32;
 using ErrorEventArgs = Microsoft.Tools.WindowsInstallerXml.Bootstrapper.ErrorEventArgs;
 
 namespace WixBootstrapper
@@ -53,7 +54,7 @@ namespace WixBootstrapper
         private readonly Dictionary<string, int> _downloadRetries;
         private bool _downgrade;
         const string ESMEHomePageUrl = "http://esme.bu.edu/";
-        const string ESMENewsUrl = "http://esme.bu.edu/news/";
+        const string ESMENewsUrl = "http://esme.bu.edu/";
 
         private bool _planAttempted;
         private LaunchAction _plannedAction;
@@ -74,6 +75,7 @@ namespace WixBootstrapper
         /// </summary>
         public InstallationViewModel(RootViewModel root)
         {
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel constructor");
             _root = root;
             _downloadRetries = new Dictionary<string, int>();
 
@@ -89,6 +91,18 @@ namespace WixBootstrapper
             ESMEBootstrapper.Model.Bootstrapper.Error += ExecuteError;
             ESMEBootstrapper.Model.Bootstrapper.ResolveSource += ResolveSource;
             ESMEBootstrapper.Model.Bootstrapper.ApplyComplete += ApplyComplete;
+
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "  Checking ESME installation registry key");
+            var result = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+            var esmeKey = result.OpenSubKey(@"Software\Boston University\ESME Workbench");
+            if (esmeKey != null)
+            {
+                var esmePath = (string)esmeKey.GetValue(null);
+                ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("  ESME registry key value is {0}", esmePath));
+                IsESMEInstalled = !string.IsNullOrEmpty(esmePath) && Directory.Exists(esmePath);
+            }
+            else ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "  ESME registry key not found");
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Leaving InstallationViewModel constructor");
         }
 
         void RootPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -176,10 +190,17 @@ namespace WixBootstrapper
             }
         }
 
+        public bool OptionsEnabled
+        {
+            get { return InstallEnabled || RepairEnabled || UninstallEnabled; }
+        }
+
         public bool InstallEnabled
         {
-            get { return InstallCommand.CanExecute(this); }
+            get { return InstallCommand.CanExecute(this) && IsESMEInstalled; }
         }
+
+        public bool IsESMEInstalled { get; set; }
 
         public ICommand RepairCommand
         {

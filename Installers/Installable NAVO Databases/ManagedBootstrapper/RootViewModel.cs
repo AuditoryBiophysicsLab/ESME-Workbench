@@ -130,5 +130,39 @@ namespace WixBootstrapper
 
         public string ProductShortName { get; set; }
         public string ProductLongName { get; set; }
+
+        #region public Visibility MainPanelVisibility { get; set; }
+
+        public Visibility MainPanelVisibility
+        {
+            get { return _mainPanelVisibility; }
+            set
+            {
+                if (_mainPanelVisibility == value) return;
+                _mainPanelVisibility = value;
+                OnPropertyChanged("MainPanelVisibility");
+            }
+        }
+
+        Visibility _mainPanelVisibility = Visibility.Visible;
+
+        #endregion
+
+        #region public Visibility OptionsPanelVisibility { get; set; }
+
+        public Visibility OptionsPanelVisibility
+        {
+            get { return _optionsPanelVisibility; }
+            set
+            {
+                if (_optionsPanelVisibility == value) return;
+                _optionsPanelVisibility = value;
+                OnPropertyChanged("OptionsPanelVisibility");
+            }
+        }
+
+        Visibility _optionsPanelVisibility = Visibility.Collapsed;
+
+        #endregion
     }
 }

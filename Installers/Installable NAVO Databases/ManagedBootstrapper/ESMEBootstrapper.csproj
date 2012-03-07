@@ -120,6 +120,21 @@
     <Resource Include="Resources\news.png" />
     <Resource Include="Resources\wrench.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\components.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\configuration.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\options.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\option.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\option-grayed.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /y $(TargetFileName) ..\..\..\TestManagedBootstrapper</PostBuildEvent>

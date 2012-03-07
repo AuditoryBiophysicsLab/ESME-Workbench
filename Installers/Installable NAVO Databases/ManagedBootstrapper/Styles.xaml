@@ -89,6 +89,15 @@
         <Setter Property="TextWrapping" Value="WrapWithOverflow" />
     </Style>
 
+    <Style x:Key="TopTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Segoe UI" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Margin" Value="8" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
     <Style TargetType="ProgressBar">
         <Setter Property="Foreground" Value="LightSeaGreen" />
         <Setter Property="Background" Value="#FF008E91" />
