@@ -60,14 +60,9 @@ namespace ESME.Plugins
             get
             {
                 return new List<PluginIdentifier>(from pluginType in ESMEPluginDictionary.Keys
-                                                            from subtype in ESMEPluginDictionary[pluginType].Keys
-                                                            where ESMEPluginDictionary[pluginType][subtype].DefaultPlugin != null
-                                                            select new PluginIdentifier
-                                                            {
-                                                                PluginType = pluginType,
-                                                                PluginSubtype = subtype,
-                                                                Type = ESMEPluginDictionary[pluginType][subtype].DefaultPlugin.GetType().ToString(),
-                                                            });
+                                                  from subtype in ESMEPluginDictionary[pluginType].Keys
+                                                  where ESMEPluginDictionary[pluginType][subtype].DefaultPlugin != null
+                                                  select ESMEPluginDictionary[pluginType][subtype].DefaultPlugin.PluginIdentifier);
             }
             set
             {

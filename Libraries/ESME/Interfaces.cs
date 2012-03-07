@@ -58,6 +58,7 @@ namespace ESME
     {
         PluginType PluginType { get; }
         PluginSubtype PluginSubtype { get; }
+        PluginIdentifier PluginIdentifier { get; }
         void LoadSettings();
     }
 }
