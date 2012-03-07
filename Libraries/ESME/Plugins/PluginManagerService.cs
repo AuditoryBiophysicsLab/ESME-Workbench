@@ -163,6 +163,14 @@ namespace ESME.Plugins
     [Serializable]
     public class DefaultPluginConfiguration
     {
+        public DefaultPluginConfiguration() {}
+        public DefaultPluginConfiguration(DefaultPluginConfiguration defaultPluginConfiguration) 
+        {
+            PluginType = defaultPluginConfiguration.PluginType;
+            PluginSubtype = defaultPluginConfiguration.PluginSubtype;
+            Type = defaultPluginConfiguration.Type;
+        }
+
         public PluginType PluginType { get; set; }
         public PluginSubtype PluginSubtype { get; set; }
         public string Type { get; set; }

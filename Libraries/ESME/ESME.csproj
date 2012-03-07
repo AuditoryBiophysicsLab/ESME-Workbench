@@ -121,7 +121,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildInformation.cs" />
+    <Compile Include="Database\DbWhoWhenWhere.cs" />
     <Compile Include="Database\DbDateTime.cs" />
+    <Compile Include="Database\DbDefaultPluginConfiguration.cs" />
     <Compile Include="Database\DbGeo.cs" />
     <Compile Include="Database\DbGeoRect.cs" />
     <Compile Include="Database\DbTimeSpan.cs" />
