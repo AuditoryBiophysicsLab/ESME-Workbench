@@ -321,25 +321,25 @@ namespace ESME.Data
                 new DefaultPluginConfiguration
                 {
                     PluginType = PluginType.EnvironmentalDataSource,
-                    Subtype = "Wind",
+                    PluginSubtype = PluginSubtype.Wind,
                     Type = typeof (NoWindData).ToString(),
                 },
                 new DefaultPluginConfiguration
                 {
                     PluginType = PluginType.EnvironmentalDataSource,
-                    Subtype = "Sound Speed",
+                    PluginSubtype = PluginSubtype.SoundSpeed,
                     Type = typeof (NoSoundSpeedData).ToString(),
                 },
                 new DefaultPluginConfiguration
                 {
                     PluginType = PluginType.EnvironmentalDataSource,
-                    Subtype = "Sediment",
+                    PluginSubtype = PluginSubtype.Sediment,
                     Type = typeof (NoSedimentData).ToString(),
                 },
                 new DefaultPluginConfiguration
                 {
                     PluginType = PluginType.EnvironmentalDataSource,
-                    Subtype = "Bathymetry",
+                    PluginSubtype = PluginSubtype.Bathymetry,
                     Type = typeof (NoBathymetryData).ToString(),
                 }
 

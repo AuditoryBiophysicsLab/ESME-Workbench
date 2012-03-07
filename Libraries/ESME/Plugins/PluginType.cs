@@ -8,7 +8,7 @@ namespace ESME.Plugins
         DataVisualizer = 3,
     }
 
-    public enum PluginSubType
+    public enum PluginSubtype
     {
         Wind = 100,
         SoundSpeed = 101,

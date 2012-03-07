@@ -37,7 +37,7 @@ namespace ESME.Plugins
         [XmlIgnore] public string PluginDescription { get; protected set; }
         [XmlIgnore] public PluginType PluginType { get; protected set; }
         [XmlIgnore] public string DLLPath { get; set; }
-        [XmlIgnore] public string Subtype { get; protected set; }
+        [XmlIgnore] public PluginSubtype PluginSubtype { get; protected set; }
         [XmlIgnore] protected string ConfigurationDirectory { get; set; }
         [XmlIgnore] protected virtual string ConfigurationFile { get { return Path.Combine(ConfigurationDirectory, PluginName + ".xml"); } }
 
@@ -129,7 +129,7 @@ namespace ESME.Plugins
         {
             var pluginAttribute = (ESMEPluginAttribute)type.GetCustomAttributes(typeof(ESMEPluginAttribute), false)[0];
             PluginType = pluginAttribute.PluginType;
-            Subtype = pluginAttribute.Subtype;
+            PluginSubtype = pluginAttribute.PluginSubtype;
             PluginName = pluginAttribute.Name;
             PluginDescription = pluginAttribute.Description;
         }
@@ -142,7 +142,7 @@ namespace ESME.Plugins
         public ESMEPluginAttribute() : base(typeof(IESMEPlugin)) { }
 
         public PluginType PluginType { get; set; }
-        public string Subtype { get; set; }
+        public PluginSubtype PluginSubtype { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
     }

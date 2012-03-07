@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.Composition;
 using System.Windows.Data;
-using System.Windows.Input;
 using Cinch;
 using ESME;
 using ESME.Data;
@@ -22,10 +19,10 @@ namespace ESMEWorkbench.ViewModels.Main
             Globals.AppSettings = AppSettings.Load();
             AppSettings = Globals.AppSettings;
             AppSettings.SetDefaults();
-            AddEnvironmentDataSourceView("Wind");
-            AddEnvironmentDataSourceView("Sound Speed");
-            AddEnvironmentDataSourceView("Sediment");
-            AddEnvironmentDataSourceView("Bathymetry");
+            AddEnvironmentDataSourceView(PluginSubtype.Wind);
+            AddEnvironmentDataSourceView(PluginSubtype.SoundSpeed);
+            AddEnvironmentDataSourceView(PluginSubtype.Sediment);
+            AddEnvironmentDataSourceView(PluginSubtype.Bathymetry);
         }
 
         public void DesignTimeInitialization() { AppSettings = AppSettings.Load(); }
@@ -166,15 +163,15 @@ namespace ESMEWorkbench.ViewModels.Main
             get { return _pluginManagerService; }
         }
 
-        public Dictionary<string, ICollectionView> EnvironmentDataSourceViews { get; set; }
+        public Dictionary<PluginSubtype, ICollectionView> EnvironmentDataSourceViews { get; set; }
 
-        void AddEnvironmentDataSourceView(string dataType)
+        void AddEnvironmentDataSourceView(PluginSubtype pluginSubtype)
         {
-            var curView = CollectionViewSource.GetDefaultView(PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][dataType].Values);
+            var curView = CollectionViewSource.GetDefaultView(PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][pluginSubtype].Values);
             ((ListCollectionView)curView).SortDescriptions.Add(new SortDescription("PluginName", ListSortDirection.Ascending));
             ((ListCollectionView)curView).Filter = p => ((IESMEPlugin)p).IsSelectable;
-            if (EnvironmentDataSourceViews == null) EnvironmentDataSourceViews = new Dictionary<string, ICollectionView>();
-            EnvironmentDataSourceViews.Add(dataType, curView);
+            if (EnvironmentDataSourceViews == null) EnvironmentDataSourceViews = new Dictionary<PluginSubtype, ICollectionView>();
+            EnvironmentDataSourceViews.Add(pluginSubtype, curView);
         }
     }
 }

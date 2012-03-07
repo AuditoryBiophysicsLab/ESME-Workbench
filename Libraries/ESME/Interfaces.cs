@@ -57,7 +57,7 @@ namespace ESME
     public interface IESMEPlugin : IHRCPlugin
     {
         PluginType PluginType { get; }
-        string Subtype { get; }
+        PluginSubtype PluginSubtype { get; }
         void LoadSettings();
     }
 }
