@@ -227,7 +227,6 @@
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLInput.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLOutput.cs" />
     <Compile Include="TransmissionLoss\Calculator\TransmissionLossQueue.cs" />
-    <Compile Include="TransmissionLoss\CASS\CASSBackgroundExporter.cs" />
     <Compile Include="TransmissionLoss\CASS\NAEMOEnvironmentFile.cs" />
     <Compile Include="TransmissionLoss\CASS\CASSOutput.cs" />
     <Compile Include="TransmissionLoss\NemoModeToAcousticModelNameMap.cs" />
