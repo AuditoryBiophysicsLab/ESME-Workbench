@@ -10,13 +10,16 @@
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
-    <Name>ESME Workbench Setup</Name>
+    <Name>ESME Workbench</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release (x64)|x64' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <SuppressSpecificWarnings>
     </SuppressSpecificWarnings>
+    <DefineConstants>BuildType=$(Configuration)</DefineConstants>
+    <WixVariables>
+    </WixVariables>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Product.wxs" />

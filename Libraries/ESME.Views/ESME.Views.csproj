@@ -40,34 +40,26 @@
   <ItemGroup>
     <Reference Include="AsyncCtpLibrary">
       <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Cinch.WPF">
       <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
-    </Reference>
-    <Reference Include="Kent.Boogaart.Converters">
-      <HintPath>..\..\ESME WorkBench\External References\Kent.Boogaart.Converters.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MEFedMVVM.WPF">
       <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Management" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Threading.Tasks.Dataflow, Version=0.0.4098.29463, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\ESME WorkBench\External References\System.Threading.Tasks.Dataflow.dll</HintPath>
-    </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\ESME WorkBench\External References\System.Windows.Interactivity.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
@@ -372,10 +364,12 @@
     <ProjectReference Include="..\ESME\ESME.csproj">
       <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
       <Name>ESME</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\HRC\HRC.csproj">
       <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
       <Name>HRC</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
