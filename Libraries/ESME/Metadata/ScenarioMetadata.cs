@@ -448,9 +448,6 @@ namespace ESME.Metadata
                 Dispatcher.InvokeAsynchronouslyInBackground(() =>
                 {
                     DisplayExistingAnalysisPoints();
-#if IS_CLASSIFIED_MODEL
-                    DisplayExistingExplosivePoints();
-#endif
                 });
             }
         }
@@ -584,9 +581,6 @@ namespace ESME.Metadata
         public void PlaceAnalysisPoint(Geo location)
         {
             if (AnalysisPoints == null) AnalysisPoints = new ObservableCollection<AnalysisPoint>();
-#if IS_CLASSIFIED_MODEL
-            if (ExplosivePoints == null) ExplosivePoints = new ObservableCollection<ExplosivePoint>();
-#endif
             var analysisPoint = new AnalysisPoint(location);
             var distinctModes = (from platform in NemoFile.Scenario.Platforms
                                  from source in platform.Sources
@@ -600,79 +594,11 @@ namespace ESME.Metadata
             foreach (var mode in distinctModes)
             {
                 if (mode.Mode.Name.ToLower() != "explosive") analysisPoint.SoundSources.Add(new SoundSource(analysisPoint, mode.Mode, 16));
-#if IS_CLASSIFIED_MODEL
-                else ExplosivePoints.Add(new ExplosivePoint(_pressurePath, location, mode.Platform, mode.Mode,
-                                                            RangeComplexes.SelectedTimePeriod, 0.5f));
-#endif
             }
             if (analysisPoint.SoundSources.Count > 0) AnalysisPoints.Add(analysisPoint);
             Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));
         }
 
-#if IS_CLASSIFIED_MODEL
-        #region public ObservableCollection<ExplosivePoint> ExplosivePoints { get; set; }
-
-        public ObservableCollection<ExplosivePoint> ExplosivePoints
-        {
-            get { return _explosivePoints; }
-            set
-            {
-                if (_explosivePoints == value) return;
-                if (_explosivePoints != null)
-                {
-                    _explosivePoints.CollectionChanged -= ExplosivePointsCollectionChanged;
-                    TreeViewRootNodes.RemoveAll(item => item.Name == "Analysis points");
-                }
-                _explosivePoints = value;
-                if (_explosivePoints != null)
-                {
-                    _explosivePoints.CollectionChanged += ExplosivePointsCollectionChanged;
-                }
-                NotifyPropertyChanged(ExplosivePointsChangedEventArgs);
-            }
-        }
-
-        void DisplayExistingExplosivePoints()
-        {
-            if (AnalysisPoints == null || CurrentMapLayers == null) return;
-            foreach (var explosivePoint in ExplosivePoints) CurrentMapLayers.DisplayExplosivePoint(explosivePoint);
-        }
-
-        void ExplosivePointsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            NotifyPropertyChanged(ExplosivePointsChangedEventArgs);
-            switch (e.Action)
-            {
-                case NotifyCollectionChangedAction.Add:
-                    if (e.NewItems != null)
-                    {
-                        foreach (var newPoint in e.NewItems)
-                        {
-                            if (CurrentMapLayers != null) CurrentMapLayers.DisplayExplosivePoint((ExplosivePoint)newPoint);
-                            if (RangeComplexes != null && RangeComplexes.IsEnvironmentLoaded) 
-                                ((ExplosivePoint)newPoint).EnvironmentData = RangeComplexes.EnvironmentData;
-                        }
-                    }
-                    break;
-                case NotifyCollectionChangedAction.Move:
-                    break;
-                case NotifyCollectionChangedAction.Remove:
-                    if (e.OldItems != null) { }
-                    break;
-                case NotifyCollectionChangedAction.Replace:
-                    break;
-                case NotifyCollectionChangedAction.Reset:
-                    break;
-            }
-            if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RefreshMap, true));
-        }
-
-
-        static readonly PropertyChangedEventArgs ExplosivePointsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.ExplosivePoints);
-        ObservableCollection<ExplosivePoint> _explosivePoints;
-
-        #endregion
-#endif
         #region public ObservableCollection<AnalysisPoint> AnalysisPoints { get; set; }
 
         public ObservableCollection<AnalysisPoint> AnalysisPoints

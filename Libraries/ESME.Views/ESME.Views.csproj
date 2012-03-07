@@ -72,10 +72,6 @@
       <DependentUpon>AnalysisPointPropertiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="AcousticBuilder\AnalysisPointSettingsViewModel.cs" />
-    <Compile Include="AcousticBuilder\ExplosivePointPropertiesViewModel.cs" />
-    <Compile Include="AcousticBuilder\ExplosivePointPropertiesView.xaml.cs">
-      <DependentUpon>ExplosivePointPropertiesView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="BuildInformation.cs" />
     <Compile Include="Controls\AutoScrollingTextBlock.xaml.cs">
       <DependentUpon>AutoScrollingTextBlock.xaml</DependentUpon>
@@ -203,10 +199,6 @@
     <Compile Include="ValueConverters.cs" />
     <Compile Include="VirtualToggleButton.cs" />
     <Page Include="AcousticBuilder\AnalysisPointPropertiesView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="AcousticBuilder\ExplosivePointPropertiesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

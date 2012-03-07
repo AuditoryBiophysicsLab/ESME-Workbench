@@ -109,14 +109,6 @@ namespace ESMEWorkbench.ViewModels.NAVO
                         soundSpeedProfiles.Add(soundSpeedTask.Result[period].EnvironmentData.GetNearestPoint(location));
                         windSamples.Add((windTask.Result[period].EnvironmentData.GetNearestPoint(location)));
                     }
-#if IS_CLASSIFIED_MODEL
-                    CASSFiles.WriteEnvironmentFiles(period, locations, cassEnvironmentFileName, sedimentList, soundSpeedProfiles, windSamples, bathyFileName, area.Name + ".ovr", bottomLossList);
-                    if (environmentProgress != null) environmentProgress.Report(new ProgressInfoInt
-                    {
-                        MaximumValue = environmentMax,
-                        CurrentValue = Interlocked.Add(ref environmentCount, _environmentFileCountMultiplier),
-                    });
-#endif
                 });
 
             }, new ExecutionDataflowBlockOptions

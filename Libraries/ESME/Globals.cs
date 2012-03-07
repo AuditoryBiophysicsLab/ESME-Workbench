@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using ESME.Data;
@@ -13,7 +12,6 @@ namespace ESME
     {
         static Globals()
         {
-            Configuration = new Configuration();
         }
 
         public static string Filter(this string s, Func<char, bool> trueIfKeep)
@@ -42,8 +40,6 @@ namespace ESME
 
         public static WorkDirectories WorkDirectories { get; set; }
 
-        public static Configuration Configuration { get; private set; }
-        
         public static List<TransmissionLossAlgorithm> ValidTransmissionLossAlgorithms = new List<TransmissionLossAlgorithm>
         {
             TransmissionLossAlgorithm.CASS,

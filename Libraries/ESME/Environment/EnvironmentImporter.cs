@@ -55,10 +55,6 @@ namespace ESME.Environment
         static readonly ActionBlock<ImportJobDescriptor> SedimentWorker;
         static readonly ActionBlock<ImportJobDescriptor> WindWorker;
         static readonly ActionBlock<ImportJobDescriptor> BathymetryWorker;
-#if IS_CLASSIFIED_MODEL
-        static readonly ActionBlock<ImportJobDescriptor> BottomLossWorker;
-        public static readonly ImportProgressViewModel BottomLossProgress;
-#endif
         public static readonly ImportProgressViewModel SoundSpeedProgress;
         public static readonly ImportProgressViewModel SedimentProgress;
         public static readonly ImportProgressViewModel WindProgress;
@@ -214,28 +210,6 @@ namespace ESME.Environment
                 MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
             });
             BathymetryProgress = new ImportProgressViewModel("Bathymetry", BathymetryWorker);
-#if IS_CLASSIFIED_MODEL
-            if (BottomLossWorker == null) BottomLossWorker = new ActionBlock<ImportJobDescriptor>(async
-            job =>
-            {
-                BottomLossProgress.JobStarting(job);
-                CheckDestinationDirectory(job.DestinationFilename);
-                var bottomLoss = await BottomLossDatabase.ExtractAsync(job.GeoRect);
-                bottomLoss.Save(job.DestinationFilename);
-                job.SampleCount = (uint)bottomLoss.Samples.Count;
-                job.Resolution = 15;
-                job.CompletionTask.Start();
-                await job.CompletionTask;
-                BottomLossProgress.JobCompleted(job);
-            },
-            new ExecutionDataflowBlockOptions
-            {
-                TaskScheduler = TaskScheduler.Default,
-                BoundedCapacity = -1,
-                MaxDegreeOfParallelism = Globals.AppSettings.MaxImportThreadCount,
-            });
-            BottomLossProgress = new ImportProgressViewModel("Bottom Loss", BottomLossWorker);
-#endif
         }
 
         public static void Import(IEnumerable<ImportJobDescriptor> jobDescriptors)
@@ -301,9 +275,6 @@ namespace ESME.Environment
             {
                 NAVOImporter.SoundSpeedProgress,
                 NAVOImporter.BathymetryProgress,
-#if IS_CLASSIFIED_MODEL
-                NAVOImporter.BottomLossProgress,
-#endif
                 NAVOImporter.SedimentProgress,
                 NAVOImporter.WindProgress,
             });

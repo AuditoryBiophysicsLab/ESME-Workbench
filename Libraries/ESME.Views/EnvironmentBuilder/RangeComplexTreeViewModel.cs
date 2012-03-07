@@ -130,18 +130,7 @@ namespace ESME.Views.EnvironmentBuilder
                     areas[areaName].ToolTip = "{0} resolutions available";
                     areas[areaName].Children.Add(newItem);
                     break;
-#if IS_CLASSIFIED_MODEL
-                case EnvironmentDataType.BottomLoss:
-                    newItem = new EnvironmentFileTreeItem
-                    {
-                        Name = "Bottom Loss",
-                        SampleCount = envFile.SampleCount,
-                        GeoRect = envFile.GeoRect,
-                        FileSize = envFile.FileSize,
-                    };
-                    this["Environment"].Children.Add(newItem);
-                    break;
-#endif
+
 #if false
                 case EnvironmentDataType.Temperature:
                     newItem = new TimePeriodEnvironmentFileTreeItem

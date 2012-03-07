@@ -3,7 +3,6 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Text;
 using Cinch;
-using ESME;
 using ESME.Data;
 using HRC.Services;
 
@@ -21,7 +20,6 @@ namespace ESMEWorkbench
             AppSettings.Save();
             ESME.Globals.WorkDirectories = WorkDirectories;
             ESME.Globals.AppSettings = AppSettings;
-            Configuration = new Configuration();
         }
 
         static AppSettings _appSettings;
@@ -39,8 +37,6 @@ namespace ESMEWorkbench
 
         public static WorkDirectories WorkDirectories { get; set; }
 
-        public static Configuration Configuration { get; private set; }
-
         public static void DisplayException(IMessageBoxService messageBoxService, Exception ex, string format, params object[] args)
         {
             var originalException = ex;
@@ -50,7 +46,7 @@ namespace ESMEWorkbench
             {
                 if (ex is CompositionException)
                 {
-                    var compositionException = (CompositionException) ex;
+                    var compositionException = (CompositionException)ex;
                     foreach (var error in compositionException.Errors)
                     {
                         sb.Append(ex.GetType() + ": " + error.Description + "\n");

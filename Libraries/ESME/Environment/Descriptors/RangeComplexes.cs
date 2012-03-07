@@ -89,23 +89,23 @@ namespace ESME.Environment.Descriptors
             if (!File.Exists(simAreaFile)) throw new FileNotFoundException("Error reading sim area file", simAreaFile);
             SimAreaPath = Path.GetDirectoryName(simAreaFile);
             var actionBlock = new ActionBlock<RangeComplexMetadata>(
-		        info =>
-		        {
-		            try
-		            {
+                info =>
+                {
+                    try
+                    {
                         var rangeComplex = RangeComplex.Load(SimAreaPath, info, _dispatcher);
                         _dispatcher.InvokeInBackgroundIfRequired(() => RangeComplexCollection.Add(rangeComplex.Name, rangeComplex));
-		            }
-		            catch (Exception e)
-		            {
-		                throw new ApplicationException(string.Format("Error loading range complex {0}", info.Name), e);
-		            }
-		        },
-		        new ExecutionDataflowBlockOptions
-		        {
-		            TaskScheduler = TaskScheduler.Default,
-		            MaxDegreeOfParallelism = 4,
-		        });
+                    }
+                    catch (Exception e)
+                    {
+                        throw new ApplicationException(string.Format("Error loading range complex {0}", info.Name), e);
+                    }
+                },
+                new ExecutionDataflowBlockOptions
+                {
+                    TaskScheduler = TaskScheduler.Default,
+                    MaxDegreeOfParallelism = 4,
+                });
             var lines = File.ReadAllLines(simAreaFile);
             foreach (var line in lines)
             {
@@ -224,7 +224,7 @@ namespace ESME.Environment.Descriptors
             foreach (var rangeComplex in RangeComplexCollection) rangeComplex.Value.Dump();
         }
 
-		//public async Task<RangeComplex> AddAsync(string rangeComplexName, List<Geo> opAreaLimits, List<Geo> simAreaLimits){}
+        //public async Task<RangeComplex> AddAsync(string rangeComplexName, List<Geo> opAreaLimits, List<Geo> simAreaLimits){}
         IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
         public IEnumerator<KeyValuePair<string, RangeComplex>> GetEnumerator()
         {
@@ -430,9 +430,6 @@ namespace ESME.Environment.Descriptors
         ObservableConcurrentDictionary<EnvironmentDataType, EnvironmentFile> _selectedEnvironment = new ObservableConcurrentDictionary<EnvironmentDataType, EnvironmentFile>
         {
             {EnvironmentDataType.Bathymetry, null},
-#if IS_CLASSIFIED_MODEL
-            {EnvironmentDataType.BottomLoss, null},
-#endif
             {EnvironmentDataType.Sediment, null},
             //{EnvironmentDataType.Salinity, null},
             {EnvironmentDataType.SoundSpeed, null},
@@ -459,9 +456,6 @@ namespace ESME.Environment.Descriptors
         ObservableConcurrentDictionary<EnvironmentDataType, Task> _environmentData = new ObservableConcurrentDictionary<EnvironmentDataType, Task>
         {
             {EnvironmentDataType.Bathymetry, null},
-#if IS_CLASSIFIED_MODEL
-            {EnvironmentDataType.BottomLoss, null},
-#endif
             {EnvironmentDataType.Sediment, null},
             //{EnvironmentDataType.Salinity, null},
             {EnvironmentDataType.SoundSpeed, null},
@@ -528,30 +522,17 @@ namespace ESME.Environment.Descriptors
 
         public void CheckEnvironment()
         {
-#if IS_CLASSIFIED_MODEL
-            const string bottomLossFilename = "data.bottomloss";
-#endif
             const string sedimentFilename = "data.sediment";
             const string windFilename = "data.wind";
             if (SelectedRangeComplex != null)
             {
-#if IS_CLASSIFIED_MODEL
-                if (File.Exists(Path.Combine(SelectedRangeComplex.DataPath, bottomLossFilename)))
-                {
-                    SelectedEnvironment[EnvironmentDataType.BottomLoss] = SelectedRangeComplex.EnvironmentFiles[bottomLossFilename];
-                    EnvironmentData[EnvironmentDataType.BottomLoss] = new Task<BottomLoss>(() => BottomLoss.Load(Path.Combine(SelectedRangeComplex.DataPath, bottomLossFilename)));
-                }
-#endif
                 if (File.Exists(Path.Combine(SelectedRangeComplex.DataPath, sedimentFilename)))
                 {
                     SelectedEnvironment[EnvironmentDataType.Sediment] = SelectedRangeComplex.EnvironmentFiles[sedimentFilename];
                     EnvironmentData[EnvironmentDataType.Sediment] = new Task<Sediment>(() => Sediment.Load(Path.Combine(SelectedRangeComplex.DataPath, sedimentFilename)));
                 }
-#if IS_CLASSIFIED_MODEL
-                if (SelectedEnvironment[EnvironmentDataType.BottomLoss] != null && SelectedEnvironment[EnvironmentDataType.Sediment] != null && SelectedTimePeriod != TimePeriod.Invalid)
-#else
+
                 if (SelectedEnvironment[EnvironmentDataType.Sediment] != null && SelectedTimePeriod != TimePeriod.Invalid)
-#endif
                 {
                     SelectedEnvironment[EnvironmentDataType.Wind] = SelectedRangeComplex.EnvironmentFiles[windFilename];
                     EnvironmentData[EnvironmentDataType.Wind] =
@@ -594,10 +575,6 @@ namespace ESME.Environment.Descriptors
             {
                 IsEnvironmentLoading = true;
                 var tasks = new List<Task>();
-#if IS_CLASSIFIED_MODEL
-                EnvironmentData[EnvironmentDataType.BottomLoss].Start();
-                tasks.Add(EnvironmentData[EnvironmentDataType.BottomLoss]);
-#endif
                 EnvironmentData[EnvironmentDataType.Sediment].Start();
                 tasks.Add(EnvironmentData[EnvironmentDataType.Sediment]);
                 EnvironmentData[EnvironmentDataType.Wind].Start();
@@ -627,9 +604,6 @@ namespace ESME.Environment.Descriptors
             SelectedTimePeriod = TimePeriod.Invalid;
             SelectedArea = null;
             SelectedBathymetry = null;
-#if IS_CLASSIFIED_MODEL
-            ClearEnvironment(EnvironmentDataType.BottomLoss);
-#endif
             ClearEnvironment(EnvironmentDataType.Sediment);
             ClearEnvironment(EnvironmentDataType.Wind);
             ClearEnvironment(EnvironmentDataType.Bathymetry);
@@ -675,20 +649,10 @@ namespace ESME.Environment.Descriptors
             if (area[bathymetryResolution] == null) throw new ApplicationException(string.Format("Specified range complex {0} area {1} does not contain bathymetry data at resolution {2}", rangeComplexName, areaName, bathymetryResolution));
             if (!area[bathymetryResolution].IsCached) throw new ApplicationException(string.Format("Specified range complex {0} area {1}: bathymetry data at resolution {2} is available but has not been extracted", rangeComplexName, areaName, bathymetryResolution));
 
-#if IS_CLASSIFIED_MODEL
-            const string bottomLossFilename = "data.bottomloss";
-#endif
             const string sedimentFilename = "data.sediment";
             const string windFilename = "data.wind";
 
             var result = new ObservableConcurrentDictionary<EnvironmentDataType, Task>();
-            
-#if IS_CLASSIFIED_MODEL
-            if ((Configuration.IsClassifiedModel) && File.Exists(Path.Combine(rangeComplex.DataPath, bottomLossFilename)))
-                result[EnvironmentDataType.BottomLoss] = new Task<BottomLoss>(() => BottomLoss.Load(Path.Combine(rangeComplex.DataPath, bottomLossFilename)));
-            else 
-                throw new ApplicationException(string.Format("Specified range complex {0} does not contain bottom loss data", rangeComplexName));
-#endif
             if (File.Exists(Path.Combine(rangeComplex.DataPath, sedimentFilename)))
                 result[EnvironmentDataType.Sediment] = new Task<Sediment>(() => Sediment.Load(Path.Combine(rangeComplex.DataPath, sedimentFilename)));
             else
@@ -704,10 +668,6 @@ namespace ESME.Environment.Descriptors
             Task<Bathymetry> bathyTask;
             result[EnvironmentDataType.Bathymetry] = bathyTask = new Task<Bathymetry>(() => Bathymetry.Load(Path.Combine(area.BathymetryPath, area[bathymetryResolution].FileName)));
             result[EnvironmentDataType.SoundSpeed] = new Task<SoundSpeed>(() => EnvironmentFile.CalculateSoundSpeed(rangeComplex, timePeriod, bathyTask, area[bathymetryResolution].GeoRect));
-
-#if IS_CLASSIFIED_MODEL
-            result[EnvironmentDataType.BottomLoss].Start();
-#endif
             result[EnvironmentDataType.Sediment].Start();
             result[EnvironmentDataType.Wind].Start();
             //result[EnvironmentDataType.Salinity].Start();

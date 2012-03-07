@@ -121,7 +121,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildInformation.cs" />
-    <Compile Include="Configuration.cs" />
     <Compile Include="Database\DbDateTime.cs" />
     <Compile Include="Database\DbGeo.cs" />
     <Compile Include="Database\DbTimeSpan.cs" />
@@ -234,7 +233,6 @@
     <Compile Include="TransmissionLoss\NemoModeToAcousticModelNameMap.cs" />
     <Compile Include="TransmissionLoss\RAM\RamOutput.cs" />
     <Compile Include="TransmissionLoss\REFMS\EffectsFile.cs" />
-    <Compile Include="TransmissionLoss\REFMS\ExplosivePoint.cs" />
     <Compile Include="TransmissionLoss\REFMS\PiecewiseCubicHermitePolynomialInterpolator.cs" />
     <Compile Include="TransmissionLoss\REFMS\PolynomialFunction.cs" />
     <Compile Include="TransmissionLoss\REFMS\PolynomialSplineFunction.cs" />
@@ -248,7 +246,6 @@
     <Compile Include="TransmissionLoss\Bellhop\BellhopOutput.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
     <Compile Include="TransmissionLoss\Bellhop\TransmissionLossSettings.cs" />
-    <Compile Include="TransmissionLoss\CASS\CassFiles.cs" />
     <Compile Include="TransmissionLoss\CASS\NAEMOEnvironmentLocation.cs" />
     <Compile Include="Environment\Descriptors\Deprecated\RangeComplexDescriptors.cs" />
     <Compile Include="TransmissionLoss\RAM\Ram.cs">

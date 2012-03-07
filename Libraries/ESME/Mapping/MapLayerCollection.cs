@@ -250,57 +250,6 @@ namespace ESME.Mapping
             }
             analysisPointLayer.Done();
         }
-#if IS_CLASSIFIED_MODEL
-        public void DisplayExplosivePoint(ExplosivePoint curPoint)
-        {
-            var oldIndex = -1;
-            if (curPoint.OldLocation != null)
-            {
-                var oldName = string.Format("Explosive Point: [{0:0.###}, {1:0.###}]", curPoint.OldLocation.Latitude, curPoint.OldLocation.Longitude);
-                var oldLayer = Find<ExplosivePointLayer>(LayerType.ExplosivePoint, oldName);
-                oldIndex = IndexOf(oldLayer);
-                //if (oldLayer != null) Remove(oldLayer);
-                //oldIndex--;
-                curPoint.OldLocation = null;
-            }
-            var explosivePointName = string.Format("Explosive Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude, curPoint.Longitude);
-            var explosivePointLayer = Find<ExplosivePointLayer>(LayerType.ExplosivePoint, explosivePointName);
-            if (explosivePointLayer == null)
-            {
-                explosivePointLayer = new ExplosivePointLayer
-                {
-                    Name = explosivePointName,
-                    LineWidth = 1,
-                    CanBeRemoved = true,
-                    CanBeReordered = true,
-                    CanChangeLineColor = true,
-                    CanChangeLineWidth = true,
-                    CanChangeAreaColor = false,
-                };
-                if (oldIndex < 0) Add(explosivePointLayer);
-                else this[oldIndex] = explosivePointLayer;
-            }
-            explosivePointLayer.IsEnabled = true;
-
-            explosivePointLayer.ExplosivePoint = curPoint;
-
-            explosivePointLayer.Clear();
-            foreach (var soundSource in curPoint.SoundSources)
-            {
-                var sourcePoints = new List<Geo>();
-                if (!soundSource.ShouldBeCalculated) continue;
-                for (var i = 0; i < 8; i++)
-                {
-                    sourcePoints.Add(curPoint);
-                    sourcePoints.Add(Geo.Move(curPoint, i * 45f, soundSource.Radius));
-                    sourcePoints.Add(Geo.Move(curPoint, (i * 45) + 22.5f, soundSource.Radius / 2f));
-                    sourcePoints.Add(Geo.Move(curPoint, (i + 1) * 45f, soundSource.Radius));
-                }
-                explosivePointLayer.Add(new OverlayLineSegments(sourcePoints.ToArray(), Colors.Red, 5));
-            }
-            explosivePointLayer.Done();
-        }
-#endif
 
         public void RemovePropagationPoint(CASSOutput curPoint)
         {

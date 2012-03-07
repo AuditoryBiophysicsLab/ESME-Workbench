@@ -180,64 +180,6 @@ namespace ESME.Mapping
             ValidationErrorText = AnalysisPoint.ValidationErrorText;
         }
     }
-#if IS_CLASSIFIED_MODEL
-    [Serializable]
-    public class ExplosivePointLayer : OverlayShapeMapLayer
-    {
-        public ExplosivePointLayer()
-        {
-            ContextMenu.Add(new MenuItemViewModelBase
-            {
-                Header = "Properties...",
-                Command = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.EditExplosivePoint, ExplosivePoint)),
-            });
-            LayerType = LayerType.ExplosivePoint;
-            RemoveMenu.Command = new SimpleCommand<object, object>(obj => CanBeRemoved, obj =>
-            {
-                MediatorMessage.Send(MediatorMessage.RemoveLayer, this);
-                if (ExplosivePoint != null) MediatorMessage.Send(MediatorMessage.RemoveExplosivePoint, ExplosivePoint);
-            });
-
-        }
-
-        static readonly PropertyChangedEventArgs ExplosivePointChangedEventArgs =
-            ObservableHelper.CreateArgs<ExplosivePointLayer>(x => x.ExplosivePoint);
-
-        ExplosivePoint _explosivePoint;
-
-        [XmlIgnore]
-        public ExplosivePoint ExplosivePoint
-        {
-            get { return _explosivePoint; }
-            set
-            {
-                if (_explosivePoint == value) return;
-                if ((value != null) && (_explosivePoint != null)) _explosivePoint.PropertyChanged -= ExplosivePointChanged;
-                _explosivePoint = value;
-                NotifyPropertyChanged(ExplosivePointChangedEventArgs);
-                if (_explosivePoint != null) _explosivePoint.PropertyChanged += ExplosivePointChanged;
-            }
-        }
-
-        void ExplosivePointChanged(object sender, PropertyChangedEventArgs e)
-        {
-            var ep = (ExplosivePoint)sender;
-            ep.Validate();
-            ValidationErrorText = ep.ValidationErrorText;
-        }
-
-        public override void Validate()
-        {
-            if (ExplosivePoint == null)
-            {
-                ValidationErrorText = "Unable to validate - ExplosivePoint is null";
-                return;
-            }
-            ExplosivePoint.Validate();
-            ValidationErrorText = ExplosivePoint.ValidationErrorText;
-        }
-    }
-#endif
 
     [Serializable]
     public class PropagationLayer : OverlayShapeMapLayer
