@@ -6,7 +6,7 @@
     <ProductVersion>3.x</ProductVersion>
     <ProjectGuid>{a10f5a4a-a8fb-4d6f-992b-01d6e2e9dbfa}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>TestManagedBootstrapper</OutputName>
+    <OutputName>InstallableNAVODatabases</OutputName>
     <OutputType>Bundle</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>

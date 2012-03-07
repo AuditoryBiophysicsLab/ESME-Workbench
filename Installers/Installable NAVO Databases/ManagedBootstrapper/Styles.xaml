@@ -86,6 +86,7 @@
         <Setter Property="Foreground" Value="White" />
         <Setter Property="VerticalAlignment" Value="Bottom" />
         <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="TextWrapping" Value="WrapWithOverflow" />
     </Style>
 
     <Style TargetType="ProgressBar">

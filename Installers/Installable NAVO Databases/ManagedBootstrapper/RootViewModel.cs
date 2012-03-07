@@ -127,5 +127,8 @@ namespace WixBootstrapper
             InstallationViewModel.Refresh();
             UpdateViewModel.Refresh();
         }
+
+        public string ProductShortName { get; set; }
+        public string ProductLongName { get; set; }
     }
 }

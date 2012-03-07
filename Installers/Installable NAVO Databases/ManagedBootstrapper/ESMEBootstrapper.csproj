@@ -110,7 +110,9 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Resources\ocean.png" />
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\exit.png" />
     <Resource Include="Resources\gear.png" />

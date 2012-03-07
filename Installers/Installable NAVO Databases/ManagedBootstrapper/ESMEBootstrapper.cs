@@ -53,8 +53,11 @@ namespace WixBootstrapper
             Engine.Log(LogLevel.Verbose, "Running the ESME Bootstrapper.");
             Model = new Model(this);
             Dispatcher = Dispatcher.CurrentDispatcher;
-            var viewModel = new RootViewModel();
-
+            var viewModel = new RootViewModel
+            {
+                ProductLongName = "Environmental Databases",
+                ProductShortName = "ESME"
+            };
             // Populate the view models with the latest data. This is where Detect is called.
             viewModel.Refresh();
 
