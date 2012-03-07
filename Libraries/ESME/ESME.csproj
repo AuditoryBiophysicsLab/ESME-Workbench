@@ -141,12 +141,6 @@
     <Compile Include="Environment\Bathymetry.cs" />
     <Compile Include="Environment\BottomLoss.cs" />
     <Compile Include="Environment\Descriptors\EnvironmentFile.cs" />
-    <Compile Include="Environment\Descriptors\Deprecated\NAEMOBathymetryDescriptor.cs" />
-    <Compile Include="Environment\Descriptors\Deprecated\NAEMOBathymetryDescriptors.cs" />
-    <Compile Include="Environment\Descriptors\Deprecated\NAEMODescriptor.cs" />
-    <Compile Include="Environment\Descriptors\Deprecated\NAEMOEnvironmentDescriptors.cs" />
-    <Compile Include="Environment\Descriptors\Deprecated\NAEMOOverlayDescriptor.cs" />
-    <Compile Include="Environment\Descriptors\Deprecated\NAEMOOverlayDescriptors.cs" />
     <Compile Include="Environment\Descriptors\RangeComplex.cs" />
     <Compile Include="Environment\Descriptors\RangeComplexArea.cs" />
     <Compile Include="Environment\Descriptors\RangeComplexes.cs" />
@@ -162,7 +156,6 @@
     <Compile Include="Environment\SeasonConfiguration.cs" />
     <Compile Include="Environment\SoundSpeedSample.cs" />
     <Compile Include="Environment\TimePeriod.cs" />
-    <Compile Include="Environment\Descriptors\Deprecated\RangeComplexDescriptor.cs" />
     <Compile Include="Environment\IEnvironmentalDataSource.cs" />
     <Compile Include="Mapping\CustomStartEndLineStyle.cs" />
     <Compile Include="Mapping\LayerListViewModel.cs" />
@@ -186,19 +179,12 @@
     <Compile Include="Environment\UNESCO.cs" />
     <Compile Include="Environment\Wind.cs" />
     <Compile Include="MediatorMessages.cs" />
-    <Compile Include="Metadata\Deprecated\NAEMOBathymetryMetadata.cs" />
-    <Compile Include="Metadata\Deprecated\NAEMOEnvironmentMetadata.cs" />
-    <Compile Include="Metadata\Deprecated\NAEMOMetadata.cs" />
-    <Compile Include="Metadata\Deprecated\NAEMOMetadataBase.cs" />
-    <Compile Include="Metadata\Deprecated\NAEMOOverlayMetadata.cs" />
     <Compile Include="Metadata\ScenarioMetadata.cs" />
     <Compile Include="Animats\AnimatInterface.cs" />
     <Compile Include="NEMO\Exceptions.cs" />
     <Compile Include="NEMO\Overlay\Exceptions.cs" />
-    <Compile Include="Environment\Descriptors\Deprecated\NAEMODescriptors.cs" />
     <Compile Include="NEMO\Overlay\OverlayCircle.cs" />
     <Compile Include="NEMO\Overlay\OverlayFile.cs" />
-    <Compile Include="Environment\Descriptors\Deprecated\NAEMOEnvironmentDescriptor.cs" />
     <Compile Include="NEMO\Overlay\OverlayLabel.cs" />
     <Compile Include="NEMO\Overlay\OverlayLineSegments.cs" />
     <Compile Include="NEMO\Overlay\OverlayParser.cs" />
@@ -236,7 +222,6 @@
     <Compile Include="TransmissionLoss\REFMS\PolynomialFunction.cs" />
     <Compile Include="TransmissionLoss\REFMS\PolynomialSplineFunction.cs" />
     <Compile Include="TransmissionLoss\REFMS\Interfaces.cs" />
-    <Compile Include="TransmissionLoss\REFMS\REFMSInputFile.cs" />
     <Compile Include="TransmissionLoss\REFMS\SplineInterpolator.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopRunFileRadial.cs" />
     <Compile Include="TransmissionLoss\Bellhop\FieldCalculator.cs" />
@@ -246,7 +231,6 @@
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
     <Compile Include="TransmissionLoss\Bellhop\TransmissionLossSettings.cs" />
     <Compile Include="TransmissionLoss\CASS\NAEMOEnvironmentLocation.cs" />
-    <Compile Include="Environment\Descriptors\Deprecated\RangeComplexDescriptors.cs" />
     <Compile Include="TransmissionLoss\RAM\Ram.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -268,20 +252,7 @@
     <Compile Include="Validation\TransmissionLossValidator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="TransmissionLoss\Resources\CreateTLDatabase.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="TransmissionLoss\Resources\TLField_Insert.sql" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.config" />
-    <EmbeddedResource Include="Schema\AnalysisPoint.xsd" />
-    <EmbeddedResource Include="Schema\EarthCoordinate.xsd" />
-    <EmbeddedResource Include="Schema\ESME_Experiment.xsd" />
-    <EmbeddedResource Include="Schema\AcousticProperties.xsd" />
-    <EmbeddedResource Include="Schema\SoundSource.xsd" />
-    <EmbeddedResource Include="Schema\TransmissionLossField.xsd" />
-    <EmbeddedResource Include="Schema\BellhopRunfile.xsd" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animats\AnimatLocationFile.cs" />
@@ -304,11 +275,6 @@
     <Compile Include="NEMO\Overlay\Tokenizer.cs" />
     <Compile Include="TransmissionLoss\Bellhop\Bellhop.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossFieldCache.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Strings.resx">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

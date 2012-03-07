@@ -138,14 +138,10 @@
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointCalculationPreviewViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointVisualizerViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\BellhopQueueCalculatorViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\BellhopRadialCalculatorViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\ExportOptionsViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\LabeledDataWrapper.cs" />
     <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelFieldViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelRadialViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldListItemViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossRadialCalculatorViewModel.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>
@@ -205,14 +201,8 @@
     <Compile Include="Views\SimulationView.xaml.cs">
       <DependentUpon>SimulationView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\TransmissionLossFieldView.xaml.cs">
-      <DependentUpon>TransmissionLossFieldView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\TransmissionLossJobView.xaml.cs">
       <DependentUpon>TransmissionLossJobView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\TransmissionLossRadialView.xaml.cs">
-      <DependentUpon>TransmissionLossRadialView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\AnalysisPointVisualizerView.xaml.cs">
       <DependentUpon>AnalysisPointVisualizerView.xaml</DependentUpon>
@@ -255,11 +245,7 @@
     <Compile Include="ViewModels\Ribbon\TabDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\TextBoxDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\ToggleButtonDataViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldCalculatorViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\ColorMapViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossJobViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossRadialViewModel.cs" />
     <Page Include="Controls\LayerListView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -404,15 +390,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\TransmissionLossFieldView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\TransmissionLossJobView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\TransmissionLossRadialView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

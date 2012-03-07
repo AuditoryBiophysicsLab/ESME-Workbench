@@ -227,11 +227,6 @@ namespace ESME.Environment
                 case EnvironmentDataType.Bathymetry:
                     BathymetryProgress.Post(jobDescriptor);
                     break;
-#if IS_CLASSIFIED_MODEL
-                case EnvironmentDataType.BottomLoss:
-                    BottomLossProgress.Post(jobDescriptor);
-                    break;
-#endif
 #if false
                 case EnvironmentDataType.Salinity:
                     SalinityProgress.Post(jobDescriptor);
