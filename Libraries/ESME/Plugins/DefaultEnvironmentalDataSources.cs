@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using ESME.Environment;
+using ESME.Environment.Descriptors;
 using HRC.Navigation;
 
 namespace ESME.Plugins
@@ -17,18 +18,18 @@ namespace ESME.Plugins
     }
 
     [PartCreationPolicy(CreationPolicy.Shared)]
-    [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource, PluginSubtype = PluginSubtype.Wind, Name = "None Selected", Description = "Wind data not available or disabled by user")]
+    [EnvironmentDataSource(EnvironmentDataType = EnvironmentDataType.Wind, Name = "None Selected", Description = "Wind data not available or disabled by user")]
     public sealed class NoWindData : EmptyEnvironmentalDataSource<Wind> { public NoWindData() { SetPropertiesFromAttributes(GetType()); } }
 
     [PartCreationPolicy(CreationPolicy.Shared)]
-    [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource, PluginSubtype = PluginSubtype.SoundSpeed, Name = "None Selected", Description = "Sound speed data not available or disabled by user")]
+    [EnvironmentDataSource(EnvironmentDataType = EnvironmentDataType.SoundSpeed, Name = "None Selected", Description = "Sound speed data not available or disabled by user")]
     public sealed class NoSoundSpeedData : EmptyEnvironmentalDataSource<SoundSpeed> { public NoSoundSpeedData() { SetPropertiesFromAttributes(GetType()); } }
 
     [PartCreationPolicy(CreationPolicy.Shared)]
-    [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource, PluginSubtype = PluginSubtype.Sediment, Name = "None Selected", Description = "Wind data not available or disabled by user")]
+    [EnvironmentDataSource(EnvironmentDataType = EnvironmentDataType.Sediment, Name = "None Selected", Description = "Wind data not available or disabled by user")]
     public sealed class NoSedimentData : EmptyEnvironmentalDataSource<Sediment> { public NoSedimentData() { SetPropertiesFromAttributes(GetType()); } }
 
     [PartCreationPolicy(CreationPolicy.Shared)]
-    [ESMEPlugin(PluginType = PluginType.EnvironmentalDataSource, PluginSubtype = PluginSubtype.Bathymetry, Name = "None Selected", Description = "Wind data not available or disabled by user")]
+    [EnvironmentDataSource(EnvironmentDataType = EnvironmentDataType.Bathymetry, Name = "None Selected", Description = "Wind data not available or disabled by user")]
     public sealed class NoBathymetryData : EmptyEnvironmentalDataSource<Bathymetry> { public NoBathymetryData() { SetPropertiesFromAttributes(GetType()); } }
 }

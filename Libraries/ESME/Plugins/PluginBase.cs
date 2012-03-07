@@ -128,12 +128,26 @@ namespace ESME.Plugins
 
         protected void SetPropertiesFromAttributes(Type type)
         {
-            var pluginAttribute = (ESMEPluginAttribute)type.GetCustomAttributes(typeof(ESMEPluginAttribute), false)[0];
-            PluginType = pluginAttribute.PluginType;
-            PluginSubtype = pluginAttribute.PluginSubtype;
+            var pluginAttribute = (EnvironmentDataSourceAttribute)type.GetCustomAttributes(typeof(ESMEPluginAttribute), false)[0];
+            PluginType = PluginType.EnvironmentalDataSource;
+            EnvironmentDataType = pluginAttribute.EnvironmentDataType;
+            switch (EnvironmentDataType)
+            {
+                case EnvironmentDataType.Wind:
+                    PluginSubtype = PluginSubtype.Wind;
+                    break;
+                case EnvironmentDataType.SoundSpeed:
+                    PluginSubtype = PluginSubtype.SoundSpeed;
+                    break;
+                case EnvironmentDataType.Sediment:
+                    PluginSubtype = PluginSubtype.Sediment;
+                    break;
+                case EnvironmentDataType.Bathymetry:
+                    PluginSubtype = PluginSubtype.Bathymetry;
+                    break;
+            }
             PluginName = pluginAttribute.Name;
             PluginDescription = pluginAttribute.Description;
-            EnvironmentDataType = pluginAttribute.EnvironmentDataType;
         }
     }
 }
