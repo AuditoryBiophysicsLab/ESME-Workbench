@@ -230,7 +230,7 @@
                   Source="$(var.dotConnectPath)\SQLite\Devart.Data.SQLite.dll" />
             <File Id="Devart.Data.SQLite.Entity.dll"
                   Name="Devart.Data.SQLite.Entity.dll"
-                  Source="$(var.dotConnectPath)\SQLite\Entity\EF4\Devart.Data.SQLite.Entity.Migrations.dll" />
+                  Source="$(var.dotConnectPath)\SQLite\Entity\EF4\Devart.Data.SQLite.Entity.dll" />
             <File Id="Devart.Data.SQLite.Entity.Migrations.dll"
                   Name="Devart.Data.SQLite.Entity.Migrations.dll"
                   Source="$(var.dotConnectPath)\SQLite\Entity\EF4\Devart.Data.SQLite.Entity.Migrations.dll" />
