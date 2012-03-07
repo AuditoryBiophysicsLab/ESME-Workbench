@@ -123,6 +123,7 @@
     <Compile Include="BuildInformation.cs" />
     <Compile Include="Database\DbDateTime.cs" />
     <Compile Include="Database\DbGeo.cs" />
+    <Compile Include="Database\DbGeoRect.cs" />
     <Compile Include="Database\DbTimeSpan.cs" />
     <Compile Include="Database\Importers\NemoFile.cs" />
     <Compile Include="Database\Importers\PSMFile.cs" />
@@ -208,6 +209,7 @@
     <Compile Include="Plugins\DefaultEnvironmentalDataSources.cs" />
     <Compile Include="Plugins\PluginManagerService.cs" />
     <Compile Include="Plugins\PluginBase.cs" />
+    <Compile Include="Plugins\PluginType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNL.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLInput.cs" />

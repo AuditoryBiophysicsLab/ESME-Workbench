@@ -36,4 +36,31 @@ namespace ESME.Database
             DbGeo.ModelInitialization(modelBuilder);
         }
     }
+
+    public class Location
+    {
+        public int LocationID { get; set; }
+        public string Name { get; set; }
+        public string Comments { get; set; }
+        public DbGeoRect GeoRect { get; set; }
+        public DbDateTime CreationDate { get; set; }
+        public string CreatorName { get; set; }
+        public string HostName { get; set; }
+
+        public virtual ICollection<LogEntry<Location>> LogEntries { get; set; }
+    }
+
+    public class LogEntry<T>
+    {
+        public string ActivityLogID { get; set; }
+        public string Message { get; set; }
+        public int? OldSourceID { get; set; }
+
+        public virtual T Source { get; set; }
+    }
+
+    public class EnvironmentDataSet
+    {
+        
+    }
 }

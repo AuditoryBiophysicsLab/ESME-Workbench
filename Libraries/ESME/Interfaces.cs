@@ -60,12 +60,4 @@ namespace ESME
         string Subtype { get; }
         void LoadSettings();
     }
-
-    public enum PluginType
-    {
-        Unknown = 0,
-        EnvironmentalDataSource = 1,
-        TransmissionLossCalculator = 2,
-        DataVisualizer = 3,
-    }
 }
