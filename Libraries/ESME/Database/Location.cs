@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Data.Entity;
 using System.Linq;
 using System.Text;
+using ESME.Plugins;
 
 namespace ESME.Database
 {
@@ -53,6 +54,7 @@ namespace ESME.Database
     public class LogEntry<T>
     {
         public string ActivityLogID { get; set; }
+        public DbDateTime Timestamp { get; set; }
         public string Message { get; set; }
         public int? OldSourceID { get; set; }
 
@@ -61,6 +63,7 @@ namespace ESME.Database
 
     public class EnvironmentDataSet
     {
-        
+        public int EnvironmentDataSetID { get; set; }
+        public virtual Location Location { get; set; }
     }
 }

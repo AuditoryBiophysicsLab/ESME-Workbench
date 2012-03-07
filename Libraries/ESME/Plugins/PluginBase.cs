@@ -1,12 +1,12 @@
 ﻿using System;
 using System.ComponentModel;
-using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Windows.Controls;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
+using ESME.Environment.Descriptors;
 using ESME.NEMO;
 using HRC.Navigation;
 using HRC.Validation;
@@ -116,6 +116,7 @@ namespace ESME.Plugins
         [XmlIgnore] public float[] AvailableResolutions { get; protected set; }
         [XmlIgnore] public bool IsTimeVariantData { get; protected set; }
         [XmlIgnore] public TimePeriod[] AvailableTimePeriods { get; protected set; }
+        [XmlIgnore] public EnvironmentDataType EnvironmentDataType { get; protected set; }
         public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null);
         protected void CheckResolutionAndTimePeriod(float resolution, TimePeriod timePeriod)
         {
@@ -132,19 +133,7 @@ namespace ESME.Plugins
             PluginSubtype = pluginAttribute.PluginSubtype;
             PluginName = pluginAttribute.Name;
             PluginDescription = pluginAttribute.Description;
+            EnvironmentDataType = pluginAttribute.EnvironmentDataType;
         }
     }
-
-    [MetadataAttribute]
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public class ESMEPluginAttribute : ExportAttribute
-    {
-        public ESMEPluginAttribute() : base(typeof(IESMEPlugin)) { }
-
-        public PluginType PluginType { get; set; }
-        public PluginSubtype PluginSubtype { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-    }
-
 }

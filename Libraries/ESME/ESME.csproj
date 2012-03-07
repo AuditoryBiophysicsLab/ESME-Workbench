@@ -207,6 +207,7 @@
     <Compile Include="Platform\Exceptions.cs" />
     <Compile Include="Platform\PlatformState.cs" />
     <Compile Include="Plugins\DefaultEnvironmentalDataSources.cs" />
+    <Compile Include="Plugins\ESMEPluginAttribute.cs" />
     <Compile Include="Plugins\PluginManagerService.cs" />
     <Compile Include="Plugins\PluginBase.cs" />
     <Compile Include="Plugins\PluginType.cs" />
