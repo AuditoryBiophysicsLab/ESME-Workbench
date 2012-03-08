@@ -131,6 +131,7 @@
     <Compile Include="Locations\NewLocationView.xaml.cs">
       <DependentUpon>NewLocationView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Locations\NewLocationViewModel.cs" />
     <Compile Include="Locations\NewOverlayViewModel.cs" />
     <Compile Include="Locations\NewOverlayView.xaml.cs">
       <DependentUpon>NewOverlayView.xaml</DependentUpon>

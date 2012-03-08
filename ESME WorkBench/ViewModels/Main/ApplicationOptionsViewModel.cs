@@ -19,10 +19,10 @@ namespace ESMEWorkbench.ViewModels.Main
             Globals.AppSettings = AppSettings.Load();
             AppSettings = Globals.AppSettings;
             AppSettings.SetDefaults();
-            AddEnvironmentDataSourceView(PluginSubtype.Wind);
-            AddEnvironmentDataSourceView(PluginSubtype.SoundSpeed);
-            AddEnvironmentDataSourceView(PluginSubtype.Sediment);
-            AddEnvironmentDataSourceView(PluginSubtype.Bathymetry);
+            AddSelectableEnvironmentDataSourceView(PluginSubtype.Wind);
+            AddSelectableEnvironmentDataSourceView(PluginSubtype.SoundSpeed);
+            AddSelectableEnvironmentDataSourceView(PluginSubtype.Sediment);
+            AddSelectableEnvironmentDataSourceView(PluginSubtype.Bathymetry);
         }
 
         public void DesignTimeInitialization() { AppSettings = AppSettings.Load(); }
@@ -158,14 +158,10 @@ namespace ESMEWorkbench.ViewModels.Main
         #endregion
 
         readonly IPluginManagerService _pluginManagerService;
-        public IPluginManagerService PluginManager
-        {
-            get { return _pluginManagerService; }
-        }
-
+        public IPluginManagerService PluginManager { get { return _pluginManagerService; } }
         public Dictionary<PluginSubtype, ICollectionView> EnvironmentDataSourceViews { get; set; }
 
-        void AddEnvironmentDataSourceView(PluginSubtype pluginSubtype)
+        void AddSelectableEnvironmentDataSourceView(PluginSubtype pluginSubtype)
         {
             var curView = CollectionViewSource.GetDefaultView(PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][pluginSubtype].Values);
             ((ListCollectionView)curView).SortDescriptions.Add(new SortDescription("PluginName", ListSortDirection.Ascending));

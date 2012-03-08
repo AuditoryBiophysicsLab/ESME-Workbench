@@ -71,7 +71,6 @@ namespace StandaloneNAVOPlugin
             get
             {
                 return DatabaseLocation != null &&
-                       Directory.Exists(DatabaseLocation) &&
                        File.Exists(DatabaseLocation) &&
                        File.Exists(ExtractorLocation);
             }
