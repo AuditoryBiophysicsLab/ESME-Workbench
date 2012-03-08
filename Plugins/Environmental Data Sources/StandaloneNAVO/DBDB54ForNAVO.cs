@@ -66,15 +66,7 @@ namespace StandaloneNAVOPlugin
             });
         }
 
-        public override bool IsConfigured
-        {
-            get
-            {
-                return DatabaseLocation != null &&
-                       File.Exists(DatabaseLocation) &&
-                       File.Exists(ExtractorLocation);
-            }
-        }
+        public override bool IsConfigured { get { return DatabaseLocation != null && File.Exists(DatabaseLocation) && File.Exists(ExtractorLocation); } }
 
         protected override void Save()
         {
