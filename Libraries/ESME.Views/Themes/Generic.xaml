@@ -56,16 +56,20 @@
                                            Margin="0 0 5 0"
                                            VerticalAlignment="Center"
                                            IsEnabled="False"
-                                           Text="Resolution"
+                                           Text="Resolution(s)"
                                            TextAlignment="Right" />
-                                <ComboBox x:Name="AvailableResolutions"
-                                          Grid.Row="0"
-                                          Grid.Column="1"
-                                          VerticalAlignment="Center"
-                                          ItemsSource="{Binding Path=SelectedItem.AvailableResolutions,
-                                                                RelativeSource={RelativeSource TemplatedParent}}"
-                                          SelectedItem="{Binding Path=SelectedResolution,
-                                                                 RelativeSource={RelativeSource TemplatedParent}}" />
+                                <ListView Grid.Column="1" ItemsSource="{Binding Path=SelectedPlugin.AvailableResolutions, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <ListView.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel IsItemsHost="True" Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ListView.ItemsPanel>
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding}" />
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
                             </Grid>
                         </StackPanel>
                     </Border>

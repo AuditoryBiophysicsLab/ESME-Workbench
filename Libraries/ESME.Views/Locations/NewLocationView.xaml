@@ -17,25 +17,25 @@
                                      ItemsSource="{Binding ConfiguredEnvironmentDataSourceViews[Wind]}"
                                      PluginTypeName="Wind"
                                      SelectedItem="{Binding SelectedPlugins[Wind]}"
-                                     SelectedResolution="{Binding SelectedPlugins[Wind].LastSelectedResolution}" />
+                                     SelectedResolution="{Binding SelectedPlugins[Wind].SelectedResolution}" />
             <Separator Margin="0 5 0 10" />
             <Controls:PluginSelector Grid.Row="1"
                                      ItemsSource="{Binding ConfiguredEnvironmentDataSourceViews[SoundSpeed]}"
                                      PluginTypeName="Sound Speed"
                                      SelectedItem="{Binding SelectedPlugins[SoundSpeed]}"
-                                     SelectedResolution="{Binding SelectedPlugins[SoundSpeed].LastSelectedResolution}" />
+                                     SelectedResolution="{Binding SelectedPlugins[SoundSpeed].SelectedResolution}" />
             <Separator Margin="0 5 0 10" />
             <Controls:PluginSelector Grid.Row="2"
                                      ItemsSource="{Binding ConfiguredEnvironmentDataSourceViews[Sediment]}"
                                      PluginTypeName="Sediment"
                                      SelectedItem="{Binding SelectedPlugins[Sediment]}"
-                                     SelectedResolution="{Binding SelectedPlugins[Sediment].LastSelectedResolution}" />
+                                     SelectedResolution="{Binding SelectedPlugins[Sediment].SelectedResolution}" />
             <Separator Margin="0 5 0 10" />
             <Controls:PluginSelector Grid.Row="3"
                                      ItemsSource="{Binding ConfiguredEnvironmentDataSourceViews[Bathymetry]}"
                                      PluginTypeName="Bathymetry"
                                      SelectedItem="{Binding SelectedPlugins[Bathymetry]}"
-                                     SelectedResolution="{Binding SelectedPlugins[Bathymetry].LastSelectedResolution}" />
+                                     SelectedResolution="{Binding SelectedPlugins[Bathymetry].SelectedResolution}" />
         </StackPanel>
     </Grid>
 </Window>
