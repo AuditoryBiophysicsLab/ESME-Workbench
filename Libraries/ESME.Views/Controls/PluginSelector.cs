@@ -72,21 +72,5 @@ namespace ESME.Views.Controls
             pluginSelector.SelectedPlugin = e.NewValue == null ? null : (IESMEPlugin)e.NewValue;
         }
         #endregion
-
-        #region dependency property float SelectedResolution
-
-        public static DependencyProperty SelectedResolutionProperty = DependencyProperty.Register("SelectedResolution",
-                                                                                                  typeof (float),
-                                                                                                  typeof (PluginSelector),
-                                                                                                  new FrameworkPropertyMetadata(0f, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-
-        public float SelectedResolution
-        {
-            get { return (float)GetValue(SelectedResolutionProperty); }
-            set { SetValue(SelectedResolutionProperty, value); }
-        }
-
-        #endregion
-
     }
 }
