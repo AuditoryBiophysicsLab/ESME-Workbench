@@ -10,6 +10,7 @@ using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
+using ESME.Views.Locations;
 using HRC.Navigation;
 using HRC.Utility;
 using HRC.Validation;
@@ -28,9 +29,9 @@ namespace StandaloneNAVOPlugin
         public SMGC20ForNAVO()
         {
             SetPropertiesFromAttributes(GetType());
-            DataLocationHelp = "The SMGC data directory, which should contain 64,800 *.stt files";
+            DataLocationHelp = "The SMGC data directory, which should contain many *.stt files";
             ControlCaption = "SMGC data directory";
-            DialogTitle = "Please locate one of the 64,800 SMGC data files, such as 'n00e000.stt'";
+            DialogTitle = "Please locate one of the SMGC data files (*.stt)";
             FilenameFilter = "SMGC data files (*.stt)|*.stt|All files (*.*)|*.*";
             ConfigurationControl = new NAVOConfigurationControl { DataContext = this };
 
@@ -44,18 +45,23 @@ namespace StandaloneNAVOPlugin
                 new ValidationRule
                 {
                     PropertyName = "DataLocation",
-                    Description = "File must exist and be named dbdbv5_level0c_0.h5",
+                    Description = "The directory must exist and contain many files with a .stt extension",
                     RuleDelegate = (o, r) => ((SMGC20ForNAVO)o).IsConfigured,
                 },
             });
+            UsageOptionsControl = new MultipleSelectionsView
+            {
+                DataContext = new MultipleSelectionsViewModel<float>
+                {
+                    UnitName = " min",
+                    AvailableSelections = AvailableResolutions,
+                }
+            };
         }
 
         public override bool IsConfigured
         {
-            get
-            {
-                return IsDirectoryValid(DataLocation);
-            }
+            get { return IsDirectoryValid(DataLocation); }
         }
 
         protected override void Save()
@@ -66,15 +72,16 @@ namespace StandaloneNAVOPlugin
 
         public override void LoadSettings()
         {
-            var settings = XmlSerializer<SMGC20ForNAVO>.Load(ConfigurationFile, null);
+            var settings = XmlSerializer<SMGC20ForNAVO>.LoadExistingFile(ConfigurationFile, null);
+            if (settings == null) return;
             DataLocation = settings.DataLocation;
         }
 
-        bool IsDirectoryValid(string directory)
+        static bool IsDirectoryValid(string directory)
         {
-            if (string.IsNullOrEmpty(directory)) return false;
+            if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory)) return false;
             var files = Directory.GetFiles(directory, "*.stt", SearchOption.AllDirectories);
-            return files.Length >= 64800;
+            return files.Length >= 1000;
         }
 
         [XmlIgnore] public string ControlCaption { get; set; }
@@ -91,16 +98,17 @@ namespace StandaloneNAVOPlugin
                 if (_dataLocation == value) return;
                 _dataLocation = value;
                 if (_dataLocation == null) return;
-                // If the user chose a file, set _dataLocation to the directory that contains the file
-                if ((File.GetAttributes(_dataLocation) & FileAttributes.Directory) != FileAttributes.Directory)
-                    _dataLocation = Path.GetDirectoryName(_dataLocation);
-                // If the directory pointed to by _dataLocation is not valid, make _dataLocation point to the parent directory
-                if (!string.IsNullOrEmpty(_dataLocation) && Directory.Exists(_dataLocation))
-                    if (!IsDirectoryValid(_dataLocation)) _dataLocation = Path.GetDirectoryName(_dataLocation);
-                // If the directory still is not valid, set it back to the user's original choice
-                if (!string.IsNullOrEmpty(_dataLocation) && Directory.Exists(_dataLocation))
-                    if (!IsDirectoryValid(_dataLocation)) _dataLocation = value;
+                if (File.Exists(_dataLocation) || Directory.Exists(_dataLocation))
+                {
+                    // If the user chose a file, set _dataLocation to the directory that contains the file
+                    if ((File.GetAttributes(_dataLocation) & FileAttributes.Directory) != FileAttributes.Directory) _dataLocation = Path.GetDirectoryName(_dataLocation);
+                    // If the directory pointed to by _dataLocation is not valid, make _dataLocation point to the parent directory
+                    if (!string.IsNullOrEmpty(_dataLocation) && Directory.Exists(_dataLocation)) if (!IsDirectoryValid(_dataLocation)) _dataLocation = Path.GetDirectoryName(_dataLocation);
+                    // If the directory still is not valid, set it back to the user's original choice
+                    if (!string.IsNullOrEmpty(_dataLocation) && Directory.Exists(_dataLocation)) if (!IsDirectoryValid(_dataLocation)) _dataLocation = value;
+                }
                 NotifyPropertyChanged(DataLocationChangedEventArgs);
+                Save();
             }
         }
 

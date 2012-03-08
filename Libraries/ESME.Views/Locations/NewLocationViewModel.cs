@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Windows.Data;
 using Cinch;
 using ESME.Plugins;
+using HRC.Collections;
 
 namespace ESME.Views.Locations
 {
@@ -11,13 +12,13 @@ namespace ESME.Views.Locations
         public NewLocationViewModel(IPluginManagerService pluginManagerService)
         {
             _pluginManagerService = pluginManagerService;
-            ConfiguredEnvironmentDataSourceViews = new Dictionary<PluginSubtype, ICollectionView>();
-            SelectedPlugins = new Dictionary<PluginSubtype, EnvironmentalDataSourcePluginBase>();
+            EnvironmentDataSourceViews = new Dictionary<PluginSubtype, ICollectionView>();
+            SelectedPlugins = new ObservableConcurrentDictionary<PluginSubtype, EnvironmentalDataSourcePluginBase>();
 
-            AddConfiguredEnvironmentDataSourceView(PluginSubtype.Wind);
-            AddConfiguredEnvironmentDataSourceView(PluginSubtype.SoundSpeed);
-            AddConfiguredEnvironmentDataSourceView(PluginSubtype.Sediment);
-            AddConfiguredEnvironmentDataSourceView(PluginSubtype.Bathymetry);
+            AddEnvironmentDataSourceView(PluginSubtype.Wind);
+            AddEnvironmentDataSourceView(PluginSubtype.SoundSpeed);
+            AddEnvironmentDataSourceView(PluginSubtype.Sediment);
+            AddEnvironmentDataSourceView(PluginSubtype.Bathymetry);
         }
 
         #region public double North { get; set; }
@@ -87,15 +88,14 @@ namespace ESME.Views.Locations
 
         readonly IPluginManagerService _pluginManagerService;
         public IPluginManagerService PluginManager { get { return _pluginManagerService; } }
-        public Dictionary<PluginSubtype, ICollectionView> ConfiguredEnvironmentDataSourceViews { get; set; }
-        public Dictionary<PluginSubtype, EnvironmentalDataSourcePluginBase> SelectedPlugins { get; set; }
+        public Dictionary<PluginSubtype, ICollectionView> EnvironmentDataSourceViews { get; set; }
+        public ObservableConcurrentDictionary<PluginSubtype, EnvironmentalDataSourcePluginBase> SelectedPlugins { get; set; }
 
-        void AddConfiguredEnvironmentDataSourceView(PluginSubtype pluginSubtype)
+        void AddEnvironmentDataSourceView(PluginSubtype pluginSubtype)
         {
             var curView = CollectionViewSource.GetDefaultView(PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][pluginSubtype].Values);
             ((ListCollectionView)curView).SortDescriptions.Add(new SortDescription("PluginName", ListSortDirection.Ascending));
-            ((ListCollectionView)curView).Filter = p => ((IESMEPlugin)p).IsConfigured;
-            ConfiguredEnvironmentDataSourceViews.Add(pluginSubtype, curView);
+            EnvironmentDataSourceViews.Add(pluginSubtype, curView);
             var defaultPlugin = PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][pluginSubtype].DefaultPlugin;
             if (!defaultPlugin.IsSelectable) defaultPlugin = null;
             SelectedPlugins.Add(pluginSubtype, (EnvironmentalDataSourcePluginBase)defaultPlugin);

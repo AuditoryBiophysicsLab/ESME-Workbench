@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -26,38 +25,32 @@ namespace HRC.Utility
         /// <param name="filename">The name of the file containing the data to be loaded</param>
         /// <param name="referencedTypes">A list of types that are referenced by your class, including any types referenced by members or base classes</param>
         /// <returns></returns>
-        public static T Load(string filename, List<Type> referencedTypes) { return Load(filename, null, referencedTypes); }
+        public static T Load(string filename, List<Type> referencedTypes) { return Load(filename, referencedTypes, false); }
+
+        /// <summary>
+        /// Load the data from a file without validating against an XML schema
+        /// </summary>
+        /// <param name="filename">The name of the file containing the data to be loaded</param>
+        /// <param name="referencedTypes">A list of types that are referenced by your class, including any types referenced by members or base classes</param>
+        /// <returns></returns>
+        public static T LoadExistingFile(string filename, List<Type> referencedTypes) { return Load(filename, referencedTypes, true); }
 
         /// <summary>
         /// Load the data from a file, validating against a list of schema resources
         /// </summary>
         /// <param name="filename">The name of the file containing the data to be loaded</param>
-        /// <param name="schemaResourceNames">An array of resource names containing the schema(s) expected to be found in this file</param>
         /// <param name="referencedTypes"></param>
+        /// <param name="nullIfFileAbsent"> </param>
         /// <returns></returns>
-        public static T Load(string filename, string[] schemaResourceNames, List<Type> referencedTypes)
+        static T Load(string filename, List<Type> referencedTypes, bool nullIfFileAbsent)
         {
-            if (!File.Exists(filename)) return new T();
+            if (!File.Exists(filename)) return nullIfFileAbsent ? null : new T();
 
             String file;
 
             var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
             using (var fileReader = new StreamReader(stream))
                 file = fileReader.ReadToEnd();
-
-            if (schemaResourceNames != null)
-            {
-                var assembly = Assembly.GetExecutingAssembly();
-                var schema = new StringBuilder();
-                foreach (var resourceName in schemaResourceNames)
-                {
-                    // ReSharper disable AssignNullToNotNullAttribute
-                    using (var reader = new StreamReader(assembly.GetManifestResourceStream(resourceName)))
-                        schema.Append(reader.ReadToEnd());
-                    // ReSharper restore AssignNullToNotNullAttribute
-                }
-                return Deserialize(file, schema.ToString(), referencedTypes);
-            }
 
             return Deserialize(file, null, referencedTypes);
         }
@@ -98,7 +91,7 @@ namespace HRC.Utility
                     Thread.Sleep(100);
                 }
             }
-            throw ex;
+            if (ex != null) throw ex;
         }
 
         #endregion

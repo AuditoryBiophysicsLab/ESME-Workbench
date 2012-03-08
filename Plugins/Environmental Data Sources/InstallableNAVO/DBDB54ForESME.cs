@@ -4,6 +4,7 @@ using System.IO;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Plugins;
+using ESME.Views.Locations;
 using HRC.Navigation;
 using Microsoft.Win32;
 using NAVODatabaseAdapter;
@@ -35,6 +36,14 @@ namespace InstallableNAVOPlugin
                            Directory.Exists(_dataDirectory) &&
                            File.Exists(Path.Combine(_dataDirectory, RequiredDBDBFilename)) &&
                            File.Exists(Path.Combine(_dataDirectory, RequiredDBDBExtractionProgram));
+            UsageOptionsControl = new MultipleSelectionsView
+            {
+                DataContext = new MultipleSelectionsViewModel<float>
+                {
+                    UnitName = " min",
+                    AvailableSelections = AvailableResolutions,
+                }
+            };
         }
 
         readonly string _dataDirectory;

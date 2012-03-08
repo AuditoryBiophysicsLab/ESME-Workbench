@@ -124,6 +124,10 @@
     </Compile>
     <Compile Include="InstallationWizard\WizardViewModel.cs" />
     <Compile Include="LabelValuePair.cs" />
+    <Compile Include="Locations\MultipleSelectionsView.xaml.cs">
+      <DependentUpon>MultipleSelectionsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Locations\MultipleSelectionsViewModel.cs" />
     <Compile Include="Locations\MetadataPropertiesView.xaml.cs">
       <DependentUpon>MetadataPropertiesView.xaml</DependentUpon>
     </Compile>
@@ -255,6 +259,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="InstallationWizard\WizardView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Locations\MultipleSelectionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

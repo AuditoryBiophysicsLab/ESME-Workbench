@@ -6,6 +6,7 @@ using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
+using ESME.Views.Locations;
 using HRC.Navigation;
 using Microsoft.Win32;
 
@@ -34,6 +35,14 @@ namespace InstallableNAVOPlugin
             IsConfigured = _dataDirectory != null &&
                            Directory.Exists(_dataDirectory) &&
                            File.Exists(Path.Combine(_dataDirectory, RequiredSMGCFilename));
+            UsageOptionsControl = new MultipleSelectionsView
+            {
+                DataContext = new MultipleSelectionsViewModel<float>
+                {
+                    UnitName = " min",
+                    AvailableSelections = AvailableResolutions,
+                }
+            };
         }
 
         readonly string _dataDirectory;

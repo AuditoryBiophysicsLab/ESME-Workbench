@@ -10,6 +10,7 @@ using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
+using ESME.Views.Locations;
 using HRC.Navigation;
 using HRC.Utility;
 using HRC.Validation;
@@ -32,11 +33,11 @@ namespace StandaloneNAVOPlugin
             ControlCaption = "Directory containing the GDEM database files";
             DialogTitle = "Please locate one GDEM database file, such as 'sgdemv3s01.nc'";
             FilenameFilter = "NetCDF files (*.nc)|*.nc|All files (*.*)|*.*";
-            ConfigurationControl = new NAVOConfigurationControl { DataContext = this };
+            ConfigurationControl = new NAVOConfigurationControl {DataContext = this};
 
             IsTimeVariantData = true;
             AvailableTimePeriods = NAVOConfiguration.AllMonths.ToArray();
-            AvailableResolutions = new float[] { 15 };
+            AvailableResolutions = new float[] {15};
 
             IsSelectable = true;
 
@@ -49,16 +50,19 @@ namespace StandaloneNAVOPlugin
                     RuleDelegate = (o, r) => ((GDEM3ForNAVO)o).IsConfigured,
                 },
             });
+            UsageOptionsControl = new MultipleSelectionsView
+            {
+                DataContext = new MultipleSelectionsViewModel<float>
+                {
+                    UnitName = " min",
+                    AvailableSelections = AvailableResolutions,
+                }
+            };
         }
 
         public override bool IsConfigured
         {
-            get
-            {
-                return DataLocation != null &&
-                       Directory.Exists(DataLocation) &&
-                       GDEM.IsDirectoryValid(DataLocation);
-            }
+            get { return DataLocation != null && Directory.Exists(DataLocation) && GDEM.IsDirectoryValid(DataLocation); }
         }
 
         protected override void Save()
@@ -69,7 +73,8 @@ namespace StandaloneNAVOPlugin
 
         public override void LoadSettings()
         {
-            var settings = XmlSerializer<GDEM3ForNAVO>.Load(ConfigurationFile, null);
+            var settings = XmlSerializer<GDEM3ForNAVO>.LoadExistingFile(ConfigurationFile, null);
+            if (settings == null) return;
             DataLocation = settings.DataLocation;
         }
 
@@ -86,9 +91,10 @@ namespace StandaloneNAVOPlugin
             {
                 if (_dataLocation == value) return;
                 _dataLocation = value;
-                if (_dataLocation != null && (File.GetAttributes(_dataLocation) & FileAttributes.Directory) != FileAttributes.Directory) 
+                if (_dataLocation != null && (File.Exists(_dataLocation) || Directory.Exists(_dataLocation)) && (File.GetAttributes(_dataLocation) & FileAttributes.Directory) != FileAttributes.Directory) 
                     _dataLocation = Path.GetDirectoryName(_dataLocation);
                 NotifyPropertyChanged(DataLocationChangedEventArgs);
+                Save();
             }
         }
 

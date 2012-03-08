@@ -77,12 +77,18 @@ namespace ESME.Views.Controls
             set { SetValue(DialogTitleProperty, value); }
         }
 
-        public static DependencyProperty FileNameProperty = DependencyProperty.Register("FileName", typeof(string), typeof(FileOrDirectorySetting), new FrameworkPropertyMetadata("FileOrDirectorySetting", FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+        public static DependencyProperty FileNameProperty = DependencyProperty.Register("FileName", typeof(string), typeof(FileOrDirectorySetting), new FrameworkPropertyMetadata("FileOrDirectorySetting", FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnFileNameChanged));
 
         public string FileName
         {
             get { return (string)GetValue(FileNameProperty); }
             set { SetValue(FileNameProperty, value); }
+        }
+
+        public static void OnFileNameChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (FileOrDirectorySetting)dependencyObject;
+            var fileName = control.FileName;
         }
 
         public static DependencyProperty FileNameFilterProperty = DependencyProperty.Register("FileNameFilter", typeof(string), typeof(FileOrDirectorySetting), new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));

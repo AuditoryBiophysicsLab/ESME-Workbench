@@ -41,7 +41,7 @@ namespace ESME.Data
         public void SetDefaults()
         {
           if (RAMSettings != null) RAMSettings.SetDefaults();
-          if (DefaultPluginIdentifiers == null || DefaultPluginIdentifiers.Count == 0) SetDefaultPluginIdentifiers();
+          //if (DefaultPluginIdentifiers == null || DefaultPluginIdentifiers.Count == 0) SetDefaultPluginIdentifiers();
         }
 
         public void Save()
@@ -299,13 +299,15 @@ namespace ESME.Data
         #region public List<PluginIdentifier> DefaultPluginIdentifiers { get; set; }
         public List<PluginIdentifier> DefaultPluginIdentifiers
         {
-            get { return _defaultPluginIdentifiers; }
+            get { return _defaultPluginIdentifiers ?? (_defaultPluginIdentifiers = new List<PluginIdentifier>()); }
             set { _defaultPluginIdentifiers = value; }
         }
+
         List<PluginIdentifier> _defaultPluginIdentifiers;
 
         void SetDefaultPluginIdentifiers()
         {
+#if false
             DefaultPluginIdentifiers = new List<PluginIdentifier>
             {
                 new PluginIdentifier
@@ -334,6 +336,7 @@ namespace ESME.Data
                 }
 
             };
+#endif
         }
         #endregion
     }

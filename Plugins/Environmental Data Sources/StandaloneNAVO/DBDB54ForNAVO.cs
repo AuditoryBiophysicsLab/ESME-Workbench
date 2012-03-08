@@ -8,6 +8,7 @@ using Cinch;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Plugins;
+using ESME.Views.Locations;
 using HRC.Navigation;
 using HRC.Utility;
 using HRC.Validation;
@@ -64,6 +65,14 @@ namespace StandaloneNAVOPlugin
                                              Path.GetFileName(ExtractorLocation) == RequiredDBDBExtractionProgram,
                 },
             });
+            UsageOptionsControl = new MultipleSelectionsView
+            {
+                DataContext = new MultipleSelectionsViewModel<float>
+                {
+                    UnitName = " min",
+                    AvailableSelections = AvailableResolutions,
+                }
+            };
         }
 
         public override bool IsConfigured { get { return DatabaseLocation != null && File.Exists(DatabaseLocation) && File.Exists(ExtractorLocation); } }
@@ -76,7 +85,8 @@ namespace StandaloneNAVOPlugin
 
         public override void LoadSettings()
         {
-            var settings = XmlSerializer<DBDB54ForNAVO>.Load(ConfigurationFile, null);
+            var settings = XmlSerializer<DBDB54ForNAVO>.LoadExistingFile(ConfigurationFile, null);
+            if (settings == null) return;
             DatabaseLocation = settings.DatabaseLocation;
             ExtractorLocation = settings.ExtractorLocation;
         }
@@ -99,6 +109,7 @@ namespace StandaloneNAVOPlugin
                 if (_databaseLocation == value) return;
                 _databaseLocation = value;
                 NotifyPropertyChanged(DataLocationChangedEventArgs);
+                Save();
             }
         }
 
@@ -116,6 +127,7 @@ namespace StandaloneNAVOPlugin
                 if (_extractorLocation == value) return;
                 _extractorLocation = value;
                 NotifyPropertyChanged(ExtractionProgramLocationChangedEventArgs);
+                Save();
             }
         }
 

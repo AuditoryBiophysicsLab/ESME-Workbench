@@ -8,6 +8,7 @@ using Cinch;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Plugins;
+using ESME.Views.Locations;
 using HRC.Navigation;
 using HRC.Utility;
 using HRC.Validation;
@@ -46,15 +47,19 @@ namespace StandaloneNAVOPlugin
                     RuleDelegate = (o, r) => ((BST20ForNAVO)o).IsConfigured,
                 },
             });
+            UsageOptionsControl = new MultipleSelectionsView
+            {
+                DataContext = new MultipleSelectionsViewModel<float>
+                {
+                    UnitName = " min",
+                    AvailableSelections = AvailableResolutions,
+                }
+            };
         }
 
         public override bool IsConfigured
         {
-            get
-            {
-                return DataLocation != null &&
-                       File.Exists(DataLocation);
-            }
+            get { return DataLocation != null && File.Exists(DataLocation); }
         }
 
         protected override void Save()
@@ -65,7 +70,8 @@ namespace StandaloneNAVOPlugin
 
         public override void LoadSettings()
         {
-            var settings = XmlSerializer<BST20ForNAVO>.Load(ConfigurationFile, null);
+            var settings = XmlSerializer<BST20ForNAVO>.LoadExistingFile(ConfigurationFile, null);
+            if (settings == null) return;
             DataLocation = settings.DataLocation;
         }
 
@@ -83,6 +89,7 @@ namespace StandaloneNAVOPlugin
                 if (_dataLocation == value) return;
                 _dataLocation = value;
                 NotifyPropertyChanged(DataLocationChangedEventArgs);
+                Save();
             }
         }
 

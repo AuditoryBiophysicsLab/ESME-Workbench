@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if false
+using System;
 using System.ComponentModel.Composition;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
@@ -33,3 +34,4 @@ namespace ESME.Plugins
     [EnvironmentDataSource(EnvironmentDataType = EnvironmentDataType.Bathymetry, Name = "None Selected", Description = "Wind data not available or disabled by user")]
     public sealed class NoBathymetryData : EmptyEnvironmentalDataSource<Bathymetry> { public NoBathymetryData() { SetPropertiesFromAttributes(GetType()); } }
 }
+#endif

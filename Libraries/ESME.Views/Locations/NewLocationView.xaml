@@ -14,24 +14,24 @@
     <Grid>
         <StackPanel Margin="5" Orientation="Vertical">
             <Controls:PluginSelector Grid.Row="0"
-                                     ItemsSource="{Binding ConfiguredEnvironmentDataSourceViews[Wind]}"
+                                     ItemsSource="{Binding EnvironmentDataSourceViews[Wind]}"
                                      PluginTypeName="Wind"
-                                     SelectedItem="{Binding SelectedPlugins[Wind]}"/>
+                                     SelectedItem="{Binding SelectedPlugins[Wind]}" />
             <Separator Margin="0 5 0 10" />
             <Controls:PluginSelector Grid.Row="1"
-                                     ItemsSource="{Binding ConfiguredEnvironmentDataSourceViews[SoundSpeed]}"
+                                     ItemsSource="{Binding EnvironmentDataSourceViews[SoundSpeed]}"
                                      PluginTypeName="Sound Speed"
-                                     SelectedItem="{Binding SelectedPlugins[SoundSpeed]}"/>
+                                     SelectedItem="{Binding SelectedPlugins[SoundSpeed]}" />
             <Separator Margin="0 5 0 10" />
             <Controls:PluginSelector Grid.Row="2"
-                                     ItemsSource="{Binding ConfiguredEnvironmentDataSourceViews[Sediment]}"
+                                     ItemsSource="{Binding EnvironmentDataSourceViews[Sediment]}"
                                      PluginTypeName="Sediment"
-                                     SelectedItem="{Binding SelectedPlugins[Sediment]}"/>
+                                     SelectedItem="{Binding SelectedPlugins[Sediment]}" />
             <Separator Margin="0 5 0 10" />
             <Controls:PluginSelector Grid.Row="3"
-                                     ItemsSource="{Binding ConfiguredEnvironmentDataSourceViews[Bathymetry]}"
+                                     ItemsSource="{Binding EnvironmentDataSourceViews[Bathymetry]}"
                                      PluginTypeName="Bathymetry"
-                                     SelectedItem="{Binding SelectedPlugins[Bathymetry]}"/>
+                                     SelectedItem="{Binding SelectedPlugins[Bathymetry]}" />
         </StackPanel>
     </Grid>
 </Window>

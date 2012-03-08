@@ -9,7 +9,6 @@ using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.NEMO;
 using HRC.Navigation;
-using HRC.Utility;
 using HRC.Validation;
 
 namespace ESME.Plugins
@@ -22,14 +21,18 @@ namespace ESME.Plugins
             PluginDescription = "Not set!";
             ConfigurationControl = null;
             PluginType = PluginType.Unknown;
-            PropertyChanged += (s, e) => { if (e.PropertyName == "IsValid") IsConfigured = IsValid; };
             ConfigurationDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME Workbench\\Plugins");
             if (!Directory.Exists(ConfigurationDirectory)) Directory.CreateDirectory(ConfigurationDirectory);
             PropertyChanged += (s, e) =>
             {
-                if (e.PropertyName != "IsValid") return;
-                var sender = ((PluginBase)s);
-                if (sender.IsValid && IsConfigurable) sender.Save();
+                switch (e.PropertyName)
+                {
+                    case "IsValid":
+                        IsConfigured = IsValid;
+                        return;
+                    case "IsConfigured":
+                        return;
+                }
                 NotifyPropertyChanged(IsConfiguredChangedEventArgs);
             };
         }
@@ -65,7 +68,7 @@ namespace ESME.Plugins
                 if (_configurationControl == value) return;
                 _configurationControl = value;
                 NotifyPropertyChanged(ConfigurationControlChangedEventArgs);
-                NotifyPropertyChanged(HasConfigurationControlChangedEventArgs);
+                NotifyPropertyChanged(IsConfigurableChangedEventArgs);
             }
         }
 
@@ -80,7 +83,7 @@ namespace ESME.Plugins
             get { return ConfigurationControl != null; }
         }
 
-        static readonly PropertyChangedEventArgs HasConfigurationControlChangedEventArgs = ObservableHelper.CreateArgs<PluginBase>(x => x.IsConfigurable);
+        static readonly PropertyChangedEventArgs IsConfigurableChangedEventArgs = ObservableHelper.CreateArgs<PluginBase>(x => x.IsConfigurable);
 
         #endregion
         #region public bool IsSelectable { get; protected set; }
@@ -125,6 +128,7 @@ namespace ESME.Plugins
     [Serializable]
     public class EnvironmentalDataSourcePluginBase : PluginBase
     {
+        public EnvironmentalDataSourcePluginBase() { UsageOptionsControl = null; }
         /// <summary>
         /// An array of available resolutions, expressed in arc-minutes per sample
         /// </summary>
@@ -132,40 +136,20 @@ namespace ESME.Plugins
         [XmlIgnore] public bool IsTimeVariantData { get; protected set; }
         [XmlIgnore] public TimePeriod[] AvailableTimePeriods { get; protected set; }
         [XmlIgnore] public EnvironmentDataType EnvironmentDataType { get; protected set; }
+        [XmlIgnore] public Control UsageOptionsControl { get; protected set; }
+
         protected void CheckResolutionAndTimePeriod(float resolution, TimePeriod timePeriod)
         {
             if (!AvailableTimePeriods.Contains(timePeriod)) throw new ParameterOutOfRangeException(string.Format("Specified timePeriod is not available in the {0} data set", PluginName));
             if (!AvailableResolutions.Contains(resolution)) throw new ParameterOutOfRangeException(string.Format("Specified resolution is not available in the {0} data set", PluginName));
-            if (Math.Abs(LastSelectedResolution - 0f) < 0.0001) LastSelectedResolution = AvailableResolutions[0];
         }
         protected override void Save()
         {
-            var serializer = new XmlSerializer<EnvironmentalDataSourcePluginBase> { Data = this };
-            serializer.Save(ConfigurationFile, null);
         }
 
         public override void LoadSettings()
         {
-            var settings = XmlSerializer<EnvironmentalDataSourcePluginBase>.Load(ConfigurationFile, null);
-            LastSelectedResolution = settings.LastSelectedResolution;
         }
-
-        #region public float LastSelectedResolution { get; set; }
-
-        public float LastSelectedResolution
-        {
-            get { return _lastSelectedResolution; }
-            set
-            {
-                _lastSelectedResolution = value;
-                NotifyPropertyChanged(LastSelectedResolutionChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs LastSelectedResolutionChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentalDataSourcePluginBase>(x => x.LastSelectedResolution);
-        float _lastSelectedResolution;
-
-        #endregion
 
         protected void SetPropertiesFromAttributes(Type type)
         {

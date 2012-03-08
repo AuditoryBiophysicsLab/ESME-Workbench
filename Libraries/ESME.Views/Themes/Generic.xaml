@@ -41,36 +41,13 @@
                                           SelectedItem="{Binding Path=SelectedItem,
                                                                  RelativeSource={RelativeSource TemplatedParent}}" />
                             </Grid>
-                            <Expander x:Name="Configuration" Grid.Row="1">
+                            <ContentPresenter x:Name="UsageOptions" Content="{Binding Path=SelectedPlugin.UsageOptionsControl, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <Expander x:Name="Configuration">
                                 <Expander.Header>
                                     <TextBlock x:Name="ConfigurationHeader" Text="{Binding Path=SelectedPlugin.PluginName, RelativeSource={RelativeSource TemplatedParent}, StringFormat=\{0\} configuration}" />
                                 </Expander.Header>
                                 <ContentPresenter Content="{Binding Path=SelectedPlugin.ConfigurationControl, RelativeSource={RelativeSource TemplatedParent}}" />
                             </Expander>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" SharedSizeGroup="PluginTypeName" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0"
-                                           Margin="0 0 5 0"
-                                           VerticalAlignment="Center"
-                                           IsEnabled="False"
-                                           Text="Resolution(s)"
-                                           TextAlignment="Right" />
-                                <ListView Grid.Column="1" ItemsSource="{Binding Path=SelectedPlugin.AvailableResolutions, RelativeSource={RelativeSource TemplatedParent}}">
-                                    <ListView.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <WrapPanel IsItemsHost="True" Orientation="Horizontal" />
-                                        </ItemsPanelTemplate>
-                                    </ListView.ItemsPanel>
-                                    <ListView.ItemTemplate>
-                                        <DataTemplate>
-                                            <CheckBox Content="{Binding}" />
-                                        </DataTemplate>
-                                    </ListView.ItemTemplate>
-                                </ListView>
-                            </Grid>
                         </StackPanel>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -85,6 +62,12 @@
                         </DataTrigger>
                         <DataTrigger Binding="{Binding Path=SelectedPlugin.ConfigurationControl, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
                             <Setter TargetName="Configuration" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SelectedPlugin.IsConfigured, RelativeSource={RelativeSource Self}}" Value="False">
+                            <Setter TargetName="UsageOptions" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SelectedPlugin.UsageOptionsControl, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                            <Setter TargetName="UsageOptions" Property="Visibility" Value="Collapsed" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding Path=ItemsSource, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
                             <Setter TargetName="AvailablePlugins" Property="Visibility" Value="Collapsed" />
@@ -110,7 +93,12 @@
                                                   DockPanel.Dock="Right" />
                                 <TextBox x:Name="FileOrDirectoryName"
                                          DockPanel.Dock="Left"
-                                         Text="{TemplateBinding FileName}"
+                                         Text="{Binding Path=FileName,
+                                                        RelativeSource={RelativeSource TemplatedParent},
+                                                        ValidatesOnDataErrors=True,
+                                                        ValidatesOnExceptions=True,
+                                                        NotifyOnValidationError=True,
+                                                        UpdateSourceTrigger=PropertyChanged}"
                                          ToolTip="{TemplateBinding FileName}" />
                             </DockPanel>
                         </StackPanel>
