@@ -1,6 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:Controls="clr-namespace:ESME.Views.Controls">
+                    xmlns:Controls="clr-namespace:ESME.Views.Controls"
+                    xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC">
+    <WPF:BooleanInverter x:Key="BooleanInverter" />
     <Style TargetType="{x:Type Controls:PluginSelector}">
         <Setter Property="Template">
             <Setter.Value>
@@ -45,15 +47,40 @@
                                 </Expander.Header>
                                 <ContentPresenter Content="{Binding Path=SelectedPlugin.ConfigurationControl, RelativeSource={RelativeSource TemplatedParent}}" />
                             </Expander>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="PluginTypeName" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Margin="0 0 5 0"
+                                           VerticalAlignment="Center"
+                                           IsEnabled="False"
+                                           Text="Resolution"
+                                           TextAlignment="Right" />
+                                <ComboBox x:Name="AvailableResolutions"
+                                          Grid.Row="0"
+                                          Grid.Column="1"
+                                          VerticalAlignment="Center"
+                                          ItemsSource="{Binding Path=SelectedItem.AvailableResolutions,
+                                                                RelativeSource={RelativeSource TemplatedParent}}"
+                                          SelectedItem="{Binding Path=SelectedResolution,
+                                                                 RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Grid>
                         </StackPanel>
                     </Border>
                     <ControlTemplate.Triggers>
                         <DataTrigger Binding="{Binding Path=SelectedPlugin, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
                             <Setter TargetName="ConfigurationHeader" Property="Text" Value="{Binding Path=PluginTypeName, RelativeSource={RelativeSource TemplatedParent}, StringFormat=\{0\} configuration}" />
                         </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SelectedPlugin.IsConfigured, RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter TargetName="Configuration" Property="IsExpanded" Value="False" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SelectedPlugin.IsConfigured, RelativeSource={RelativeSource Self}}" Value="False">
+                            <Setter TargetName="Configuration" Property="IsExpanded" Value="True" />
+                        </DataTrigger>
                         <DataTrigger Binding="{Binding Path=SelectedPlugin.ConfigurationControl, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
-                            <Setter TargetName="ConfigurationHeader" Property="Text" Value="{Binding Path=PluginTypeName, RelativeSource={RelativeSource TemplatedParent}, StringFormat=\{0\} configuration}" />
-                            <Setter TargetName="Configuration" Property="IsEnabled" Value="False" />
+                            <Setter TargetName="Configuration" Property="Visibility" Value="Collapsed" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding Path=ItemsSource, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
                             <Setter TargetName="AvailablePlugins" Property="Visibility" Value="Collapsed" />

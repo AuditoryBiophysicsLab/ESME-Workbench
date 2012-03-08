@@ -58,6 +58,20 @@ namespace HRC.WPF
         }
     }
 
+    public class BooleanInverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value.GetType() != typeof(bool)) throw new InvalidCastException("Attempt to use a non-bool object as a bool");
+            return !(bool)value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class ObjectToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

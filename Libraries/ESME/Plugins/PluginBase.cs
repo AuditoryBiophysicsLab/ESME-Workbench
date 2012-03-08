@@ -9,6 +9,7 @@ using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.NEMO;
 using HRC.Navigation;
+using HRC.Utility;
 using HRC.Validation;
 
 namespace ESME.Plugins
@@ -121,7 +122,8 @@ namespace ESME.Plugins
         public abstract void LoadSettings();
     }
 
-    public abstract class EnvironmentalDataSourcePluginBase<T> : PluginBase, IEnvironmentalDataSource<T>
+    [Serializable]
+    public class EnvironmentalDataSourcePluginBase : PluginBase
     {
         /// <summary>
         /// An array of available resolutions, expressed in arc-minutes per sample
@@ -130,14 +132,40 @@ namespace ESME.Plugins
         [XmlIgnore] public bool IsTimeVariantData { get; protected set; }
         [XmlIgnore] public TimePeriod[] AvailableTimePeriods { get; protected set; }
         [XmlIgnore] public EnvironmentDataType EnvironmentDataType { get; protected set; }
-        public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null);
         protected void CheckResolutionAndTimePeriod(float resolution, TimePeriod timePeriod)
         {
             if (!AvailableTimePeriods.Contains(timePeriod)) throw new ParameterOutOfRangeException(string.Format("Specified timePeriod is not available in the {0} data set", PluginName));
             if (!AvailableResolutions.Contains(resolution)) throw new ParameterOutOfRangeException(string.Format("Specified resolution is not available in the {0} data set", PluginName));
+            if (Math.Abs(LastSelectedResolution - 0f) < 0.0001) LastSelectedResolution = AvailableResolutions[0];
         }
-        protected override void Save() { }
-        public override void LoadSettings() { }
+        protected override void Save()
+        {
+            var serializer = new XmlSerializer<EnvironmentalDataSourcePluginBase> { Data = this };
+            serializer.Save(ConfigurationFile, null);
+        }
+
+        public override void LoadSettings()
+        {
+            var settings = XmlSerializer<EnvironmentalDataSourcePluginBase>.Load(ConfigurationFile, null);
+            LastSelectedResolution = settings.LastSelectedResolution;
+        }
+
+        #region public float LastSelectedResolution { get; set; }
+
+        public float LastSelectedResolution
+        {
+            get { return _lastSelectedResolution; }
+            set
+            {
+                _lastSelectedResolution = value;
+                NotifyPropertyChanged(LastSelectedResolutionChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LastSelectedResolutionChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentalDataSourcePluginBase>(x => x.LastSelectedResolution);
+        float _lastSelectedResolution;
+
+        #endregion
 
         protected void SetPropertiesFromAttributes(Type type)
         {
@@ -162,5 +190,10 @@ namespace ESME.Plugins
             PluginName = pluginAttribute.Name;
             PluginDescription = pluginAttribute.Description;
         }
+    }
+
+    public abstract class EnvironmentalDataSourcePluginBase<T> : EnvironmentalDataSourcePluginBase, IEnvironmentalDataSource<T>
+    {
+        public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null);
     }
 }

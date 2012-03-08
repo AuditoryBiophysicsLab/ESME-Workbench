@@ -62,6 +62,12 @@
   <ItemGroup>
     <Reference Include="AsyncCtpLibrary, Version=1.0.4107.18181, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Cinch.WPF, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="EntityFramework">
+      <HintPath>External References\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="FileHelpers">
+      <HintPath>External References\FileHelpers.dll</HintPath>
+    </Reference>
     <Reference Include="GeoAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
