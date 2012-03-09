@@ -4,6 +4,7 @@ using System.Windows.Data;
 using Cinch;
 using ESME.Plugins;
 using HRC.Collections;
+using System.Linq;
 
 namespace ESME.Views.Locations
 {
@@ -96,8 +97,8 @@ namespace ESME.Views.Locations
             var curView = CollectionViewSource.GetDefaultView(PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][pluginSubtype].Values);
             ((ListCollectionView)curView).SortDescriptions.Add(new SortDescription("PluginName", ListSortDirection.Ascending));
             EnvironmentDataSourceViews.Add(pluginSubtype, curView);
-            var defaultPlugin = PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][pluginSubtype].DefaultPlugin;
-            if (!defaultPlugin.IsSelectable) defaultPlugin = null;
+            var defaultPlugin = PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][pluginSubtype].DefaultPlugin ??
+                                PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][pluginSubtype].Values.FirstOrDefault(p => p.IsSelectable);
             SelectedPlugins.Add(pluginSubtype, (EnvironmentalDataSourcePluginBase)defaultPlugin);
         }
     }
