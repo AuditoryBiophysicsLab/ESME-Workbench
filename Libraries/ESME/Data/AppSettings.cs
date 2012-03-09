@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
@@ -297,46 +299,38 @@ namespace ESME.Data
         #endregion
 
         #region public List<PluginIdentifier> DefaultPluginIdentifiers { get; set; }
+        // DefaultPluginIdentifiers should always come from the PluginManagerService.DefaultPluginIdentifiers
+        // During application startup (initial deserialization of AppSettings, specificially), PluginManagerService has not yet been set.
+        // Therefore, when PluginManagerService is null, we temporarily store DefaultPluginIdentifiers in _defaultPluginIdentifiers
+        // When PluginManagerService gets set, PluginManagerService.DefaultPluginIdentifiers gets initialized from _defaultPluginIdentifiers
         public List<PluginIdentifier> DefaultPluginIdentifiers
         {
-            get { return _defaultPluginIdentifiers ?? (_defaultPluginIdentifiers = new List<PluginIdentifier>()); }
-            set { _defaultPluginIdentifiers = value; }
+            get
+            {
+                return PluginManagerService == null ? _defaultPluginIdentifiers : PluginManagerService.DefaultPluginIdentifiers;
+            }
+            set
+            {
+                if (PluginManagerService == null) _defaultPluginIdentifiers = value;
+                else PluginManagerService.DefaultPluginIdentifiers = value;
+            }
         }
 
         List<PluginIdentifier> _defaultPluginIdentifiers;
 
-        void SetDefaultPluginIdentifiers()
-        {
-#if false
-            DefaultPluginIdentifiers = new List<PluginIdentifier>
-            {
-                new PluginIdentifier
-                {
-                    PluginType = PluginType.EnvironmentalDataSource,
-                    PluginSubtype = PluginSubtype.Wind,
-                    Type = typeof (NoWindData).ToString(),
-                },
-                new PluginIdentifier
-                {
-                    PluginType = PluginType.EnvironmentalDataSource,
-                    PluginSubtype = PluginSubtype.SoundSpeed,
-                    Type = typeof (NoSoundSpeedData).ToString(),
-                },
-                new PluginIdentifier
-                {
-                    PluginType = PluginType.EnvironmentalDataSource,
-                    PluginSubtype = PluginSubtype.Sediment,
-                    Type = typeof (NoSedimentData).ToString(),
-                },
-                new PluginIdentifier
-                {
-                    PluginType = PluginType.EnvironmentalDataSource,
-                    PluginSubtype = PluginSubtype.Bathymetry,
-                    Type = typeof (NoBathymetryData).ToString(),
-                }
+        IPluginManagerService _pluginManagerService;
 
-            };
-#endif
+        // This is not serialized, but rather is set when the main application starts up (for ESME Workbench, that's in the MainViewModel
+        // constructor).  The collection of default plugin identifiers is cached in _defaultPluginIdentifiers
+        [XmlIgnore]
+        public IPluginManagerService PluginManagerService
+        {
+            get { return _pluginManagerService; }
+            set
+            {
+                _pluginManagerService = value;
+                if (_pluginManagerService != null) _pluginManagerService.DefaultPluginIdentifiers = _defaultPluginIdentifiers;
+            }
         }
         #endregion
     }

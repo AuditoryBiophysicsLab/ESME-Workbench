@@ -18,7 +18,7 @@ namespace ESME.Plugins
     public interface IPluginManagerService
     {
         ESMEPluginDictionary ESMEPluginDictionary { get; }
-        List<PluginIdentifier> DefaultPluginConfigurations { get; set; }
+        List<PluginIdentifier> DefaultPluginIdentifiers { get; set; }
         EnvironmentalDataSourcePluginBase<Wind> WindSource { get; }
         EnvironmentalDataSourcePluginBase<SoundSpeed> SoundSpeedSource { get; }
         EnvironmentalDataSourcePluginBase<Sediment> SedimentSource { get; }
@@ -55,7 +55,7 @@ namespace ESME.Plugins
         [ImportMany, UsedImplicitly] ICollection<IESMEPlugin> _esmePlugins;
 
         public ESMEPluginDictionary ESMEPluginDictionary { get; private set; }
-        public List<PluginIdentifier> DefaultPluginConfigurations
+        public List<PluginIdentifier> DefaultPluginIdentifiers
         {
             get
             {
@@ -125,10 +125,12 @@ namespace ESME.Plugins
         {
             get
             {
-                if (_defaultPlugin != null && _defaultPlugin.IsSelectable) return _defaultPlugin;
-                return (from plugin in Values where plugin.PluginName == "None Selected" select plugin).FirstOrDefault();
+                return _defaultPlugin;
             }
-            set { _defaultPlugin = value; }
+            set
+            {
+                _defaultPlugin = value;
+            }
         }
     }
     public class PluginTypeDictionary : ObservableConcurrentDictionary<PluginSubtype, PluginSubtypeDictionary> {}

@@ -1,28 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows.Data;
 using Cinch;
-using ESME;
 using ESME.Data;
 using ESME.Environment;
-using ESME.Plugins;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
     public class ApplicationOptionsViewModel : ViewModelBase
     {
         readonly IMessageBoxService _messageBoxService;
-        public ApplicationOptionsViewModel(IMessageBoxService messageBoxService, IPluginManagerService pluginManagerService)
+        public ApplicationOptionsViewModel(IMessageBoxService messageBoxService)
         {
             _messageBoxService = messageBoxService;
-            _pluginManagerService = pluginManagerService;
             Globals.AppSettings = AppSettings.Load();
             AppSettings = Globals.AppSettings;
             AppSettings.SetDefaults();
-            AddSelectableEnvironmentDataSourceView(PluginSubtype.Wind);
-            AddSelectableEnvironmentDataSourceView(PluginSubtype.SoundSpeed);
-            AddSelectableEnvironmentDataSourceView(PluginSubtype.Sediment);
-            AddSelectableEnvironmentDataSourceView(PluginSubtype.Bathymetry);
         }
 
         public void DesignTimeInitialization() { AppSettings = AppSettings.Load(); }
@@ -54,8 +46,6 @@ namespace ESMEWorkbench.ViewModels.Main
 
         private void OkHandler()
         {
-            AppSettings.DefaultPluginIdentifiers.Clear();
-            AppSettings.DefaultPluginIdentifiers.AddRange(_pluginManagerService.DefaultPluginConfigurations);
             AppSettings.Save(null);
             Globals.AppSettings = AppSettings.Load();
             CloseActivePopUpCommand.Execute(true);
@@ -156,18 +146,5 @@ namespace ESMEWorkbench.ViewModels.Main
         static readonly PropertyChangedEventArgs ScenarioDataDirectoryChangedEventArgs = ObservableHelper.CreateArgs<ApplicationOptionsViewModel>(x => x.ScenarioDataDirectory);
 
         #endregion
-
-        readonly IPluginManagerService _pluginManagerService;
-        public IPluginManagerService PluginManager { get { return _pluginManagerService; } }
-        public Dictionary<PluginSubtype, ICollectionView> EnvironmentDataSourceViews { get; set; }
-
-        void AddSelectableEnvironmentDataSourceView(PluginSubtype pluginSubtype)
-        {
-            var curView = CollectionViewSource.GetDefaultView(PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][pluginSubtype].Values);
-            ((ListCollectionView)curView).SortDescriptions.Add(new SortDescription("PluginName", ListSortDirection.Ascending));
-            ((ListCollectionView)curView).Filter = p => ((IESMEPlugin)p).IsSelectable;
-            if (EnvironmentDataSourceViews == null) EnvironmentDataSourceViews = new Dictionary<PluginSubtype, ICollectionView>();
-            EnvironmentDataSourceViews.Add(pluginSubtype, curView);
-        }
     }
 }

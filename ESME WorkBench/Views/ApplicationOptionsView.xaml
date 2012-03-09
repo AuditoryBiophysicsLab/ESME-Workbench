@@ -167,29 +167,31 @@
                 </StackPanel>
                 </TabItem>
             -->
-            <TabItem Grid.IsSharedSizeScope="True" Header="Environment Data Sources">
+            <!--
+                <TabItem Grid.IsSharedSizeScope="True" Header="Environment Data Sources">
                 <StackPanel Margin="5" Orientation="Vertical">
-                    <Controls:PluginSelector Grid.Row="0"
-                                             ItemsSource="{Binding EnvironmentDataSourceViews[Wind]}"
-                                             PluginTypeName="Wind"
-                                             SelectedItem="{Binding PluginManager[EnvironmentalDataSource][Wind].DefaultPlugin}" />
-                    <Separator Margin="0 5 0 10" />
-                    <Controls:PluginSelector Grid.Row="1"
-                                             ItemsSource="{Binding EnvironmentDataSourceViews[SoundSpeed]}"
-                                             PluginTypeName="Sound Speed"
-                                             SelectedItem="{Binding PluginManager[EnvironmentalDataSource][SoundSpeed].DefaultPlugin}" />
-                    <Separator Margin="0 5 0 10" />
-                    <Controls:PluginSelector Grid.Row="2"
-                                             ItemsSource="{Binding EnvironmentDataSourceViews[Sediment]}"
-                                             PluginTypeName="Sediment"
-                                             SelectedItem="{Binding PluginManager[EnvironmentalDataSource][Sediment].DefaultPlugin}" />
-                    <Separator Margin="0 5 0 10" />
-                    <Controls:PluginSelector Grid.Row="3"
-                                             ItemsSource="{Binding EnvironmentDataSourceViews[Bathymetry]}"
-                                             PluginTypeName="Bathymetry"
-                                             SelectedItem="{Binding PluginManager[EnvironmentalDataSource][Bathymetry].DefaultPlugin}" />
+                <Controls:PluginSelector Grid.Row="0"
+                ItemsSource="{Binding EnvironmentDataSourceViews[Wind]}"
+                PluginTypeName="Wind"
+                SelectedItem="{Binding PluginManager[EnvironmentalDataSource][Wind].DefaultPlugin}" />
+                <Separator Margin="0 5 0 10" />
+                <Controls:PluginSelector Grid.Row="1"
+                ItemsSource="{Binding EnvironmentDataSourceViews[SoundSpeed]}"
+                PluginTypeName="Sound Speed"
+                SelectedItem="{Binding PluginManager[EnvironmentalDataSource][SoundSpeed].DefaultPlugin}" />
+                <Separator Margin="0 5 0 10" />
+                <Controls:PluginSelector Grid.Row="2"
+                ItemsSource="{Binding EnvironmentDataSourceViews[Sediment]}"
+                PluginTypeName="Sediment"
+                SelectedItem="{Binding PluginManager[EnvironmentalDataSource][Sediment].DefaultPlugin}" />
+                <Separator Margin="0 5 0 10" />
+                <Controls:PluginSelector Grid.Row="3"
+                ItemsSource="{Binding EnvironmentDataSourceViews[Bathymetry]}"
+                PluginTypeName="Bathymetry"
+                SelectedItem="{Binding PluginManager[EnvironmentalDataSource][Bathymetry].DefaultPlugin}" />
                 </StackPanel>
-            </TabItem>
+                </TabItem>
+            -->
             <TabItem Header="Acoustic Simulators">
                 <Views:AcousticSimulatorOptionsControl DataContext="{Binding AppSettings}" />
             </TabItem>

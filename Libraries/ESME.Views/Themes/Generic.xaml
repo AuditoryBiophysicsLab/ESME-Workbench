@@ -16,7 +16,7 @@
                                     <RowDefinition />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" SharedSizeGroup="PluginTypeName" />
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="PluginLabelColumn" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <ContentPresenter Grid.Row="0"
