@@ -36,7 +36,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="C5">
-      <HintPath>..\..\..\Libraries\C5\bin\Release\C5.dll</HintPath>
+      <HintPath>..\..\..\Libraries\C5\bin\Debug\C5.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Cinch.WPF">
@@ -44,7 +44,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="ESME">
-      <HintPath>..\..\..\Libraries\ESME\bin\Release\ESME.dll</HintPath>
+      <HintPath>..\..\..\Libraries\ESME\bin\Debug\ESME.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="HDF5DotNet">
@@ -52,7 +52,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="HRC">
-      <HintPath>..\..\..\Libraries\HRC\bin\Release\HRC.dll</HintPath>
+      <HintPath>..\..\..\Libraries\HRC\bin\Debug\HRC.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
