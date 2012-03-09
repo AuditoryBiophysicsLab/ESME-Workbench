@@ -7,7 +7,7 @@ namespace ESME.Database
 {
     public class LocationContext : DbContext
     {
-        public LocationContext(DbConnection connection, bool contextOwnsConnection, IDatabaseInitializer<ScenarioContext> initializer)
+        public LocationContext(DbConnection connection, bool contextOwnsConnection, IDatabaseInitializer<LocationContext> initializer)
             : base(connection, contextOwnsConnection)
         {
             Configuration.AutoDetectChangesEnabled = false;

@@ -13,6 +13,7 @@ using System.Xml.Serialization;
 using Cinch;
 using ESME;
 using ESME.Environment;
+using ESME.Locations;
 using ESME.Mapping;
 using ESME.Plugins;
 using ESMEWorkbench.Data;
@@ -39,6 +40,7 @@ namespace ESMEWorkbench.ViewModels.Main
         readonly IViewAwareStatus _viewAwareStatus;
         readonly IUIVisualizerService _visualizerService;
         readonly IPluginManagerService _pluginManagerService;
+        [Import] ILocationManagerService _locationManagerService;
 #if EXPERIMENTS_SUPPORTED
         Experiment _experiment;
 #endif
@@ -86,6 +88,11 @@ namespace ESMEWorkbench.ViewModels.Main
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 MediatorMessage.Send(MediatorMessage.MainViewModelInitialized, _dispatcher);
                 Globals.AppSettings.PluginManagerService = _pluginManagerService;
+                if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench\\Locations")))
+                    Directory.CreateDirectory(
+                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                                     "ESME Workbench\\Locations"));
+                _locationManagerService.LocationDirectory = Globals.AppSettings.LocationDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench\\Locations");
                 NAVOImporter.PluginManagerService = _pluginManagerService;
             };
 

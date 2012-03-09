@@ -333,6 +333,25 @@ namespace ESME.Data
             }
         }
         #endregion
+
+        #region public string LocationRootDirectory { get; set; }
+
+        public string LocationDirectory
+        {
+            get { return _locationDirectory; }
+            set
+            {
+                if (_locationDirectory == value) return;
+                _locationDirectory = value;
+                NotifyPropertyChanged(LocationRootDirectoryChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs LocationRootDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.LocationDirectory);
+        string _locationDirectory;
+
+        #endregion
+
     }
 
     public sealed class PluginSelection : ValidatingViewModel
