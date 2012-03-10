@@ -6,6 +6,7 @@ namespace ESME.Database
     [ComplexType]
     public class DbGeoRect
     {
+        public DbGeoRect(){}
         public DbGeoRect(GeoRect geoRect) { _geoRect = new GeoRect(geoRect); }
 
         public static implicit operator DbGeoRect(GeoRect geoRect) { return new DbGeoRect(geoRect); }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
 using ESME.Environment.Descriptors;
@@ -18,7 +19,7 @@ namespace ESME.Database
         }
 
         public DbSet<Location> Locations { get; set; }
-        public DbSet<LogEntry<Location>> LocationLogs { get; set; }
+        public DbSet<LocationLogEntry> LocationLogEntries { get; set; }
         public DbSet<EnvironmentDataSet> EnvironmentDataSets { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -38,17 +39,21 @@ namespace ESME.Database
         public DbWhoWhenWhere Creator { get; set; }
 
         public virtual ICollection<EnvironmentDataSet> EnvironmentDataSets { get; set; }
-        public virtual ICollection<LogEntry<Location>> LogEntries { get; set; }
+        public virtual ICollection<LocationLogEntry> LogEntries { get; set; }
     }
 
-    public class LogEntry<T>
+    [ComplexType]
+    public class LogEntry
     {
-        public string ActivityLogID { get; set; }
         public DbWhoWhenWhere MessageSource { get; set; }
         public string Message { get; set; }
-        public int? OldSourceID { get; set; }
-
-        public virtual T Source { get; set; }
+        public int? OldSourceID { get; set; }        
+    }
+    public class LocationLogEntry
+    {
+        public string LocationLogEntryID { get; set; }
+        public LogEntry LogEntry { get; set; }
+        public virtual Location Source { get; set; }
     }
 
     public class EnvironmentDataSet

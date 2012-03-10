@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows.Data;
 using Cinch;
+using ESME.Locations;
 using ESME.Plugins;
 using HRC.Collections;
 using System.Linq;
@@ -14,9 +15,10 @@ namespace ESME.Views.Locations
     public sealed class NewLocationViewModel : ValidatingViewModel
     {
         #region Constructor
-        public NewLocationViewModel(IPluginManagerService pluginManagerService)
+        public NewLocationViewModel(IPluginManagerService pluginManagerService, ILocationManagerService locationManagerService)
         {
             _pluginManagerService = pluginManagerService;
+            _locationManagerService = locationManagerService;
             EnvironmentDataSourceViews = new Dictionary<PluginSubtype, ICollectionView>();
             SelectedPlugins = new ObservableConcurrentDictionary<PluginSubtype, EnvironmentalDataSourcePluginBase>();
             SelectedPlugins.CollectionChanged += (s, e) =>
@@ -44,6 +46,8 @@ namespace ESME.Views.Locations
             });
 
         }
+
+        private ILocationManagerService _locationManagerService;
         #endregion
         #region PluginManager stuff
         readonly IPluginManagerService _pluginManagerService;
@@ -199,6 +203,7 @@ namespace ESME.Views.Locations
 
         void OkHandler()
         {
+            _locationManagerService.CreateLocation(LocationName, null, North, South, East, West);
             Globals.AppSettings.Save();
             CloseActivePopUpCommand.Execute(true);
         }

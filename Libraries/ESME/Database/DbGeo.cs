@@ -7,6 +7,8 @@ namespace ESME.Database
     [ComplexType]
     public class DbGeo
     {
+
+        public DbGeo(){}
         public DbGeo(Geo geo) { _geo = new Geo(geo); }
 
         public static implicit operator DbGeo(Geo geo) { return new DbGeo(geo); }

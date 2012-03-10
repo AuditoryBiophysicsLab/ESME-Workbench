@@ -17,6 +17,9 @@ namespace ESME.Locations
     {
         string LocationDirectory { get; set; }
         DbSet<Location> Locations { get; }
+        bool LocationExists(string locationName);
+        Location this[string locationName] { get; }
+        Location CreateLocation(string locationName, string comments, double north, double south, double east, double west);
     }
 
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -53,8 +56,8 @@ namespace ESME.Locations
         void Initialize()
         {
             Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
-            DbConnection connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source='{0}';FailIfMissing=False", "locations.db"));
-            _context = new LocationContext(connection, false, new DropCreateDatabaseAlways<LocationContext>());
+            DbConnection connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source='{0}';FailIfMissing=False", Path.Combine(LocationDirectory, "locations.db")));
+            _context = new LocationContext(connection, false, new CreateDatabaseIfNotExists<LocationContext>());
             Locations = _context.Locations;
         }
 
