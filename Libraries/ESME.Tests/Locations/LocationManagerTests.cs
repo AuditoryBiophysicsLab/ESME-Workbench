@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using ESME.Locations;
+using ESME.Plugins;
 using NUnit.Framework;
 
 namespace ESME.Tests.Locations
@@ -25,6 +26,8 @@ namespace ESME.Tests.Locations
             Assert.AreEqual("Created", location.LocationLogEntries.First().LogEntry.Message);
             Assert.Throws(typeof(DuplicateNameException), () => locationService.AddLocation("Location1", "These are some comments", 45, 44, -81, -80));
             Assert.AreEqual(1, locationService.Locations.Count());
+            const string pluginDirectory = @"C:\Projects\ESME Deliverables\Libraries\ESME.Tests\bin\Debug";
+            var pluginManager = new PluginManagerService {PluginDirectory = pluginDirectory};
         }
     }
 }

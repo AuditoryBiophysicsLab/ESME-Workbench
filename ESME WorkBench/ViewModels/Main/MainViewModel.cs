@@ -49,7 +49,7 @@ namespace ESMEWorkbench.ViewModels.Main
         Dispatcher _dispatcher;
         public const bool ExperimentsCurrentlySupported = false;
 
-        //readonly PleaseWaitViewModel _pleaseWait;
+        readonly PleaseWaitViewModel _pleaseWait;
         #endregion
 
         #region Constructor
@@ -67,7 +67,7 @@ namespace ESMEWorkbench.ViewModels.Main
             }
             _viewAwareStatus = viewAwareStatus;
 
-            //_pleaseWait = new PleaseWaitViewModel((Window)_viewAwareStatus.View, _visualizerService);
+            _pleaseWait = new PleaseWaitViewModel((Window)_viewAwareStatus.View, _visualizerService);
             if (Designer.IsInDesignMode) return;
             _viewAwareStatus.ViewUnloaded += () =>
             {
