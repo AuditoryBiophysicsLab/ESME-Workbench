@@ -16,19 +16,22 @@ namespace ESME.Locations
     [ExportService(ServiceType.Both, typeof(EnvironmentalDatabaseImportService))]
     public class EnvironmentalDatabaseImportService
     {
-        public EnvironmentalDatabaseImportService() { ImportActionBlock = CreateImporter(); }
+        public EnvironmentalDatabaseImportService() {}
         public EnvironmentalDatabaseImportService(IPluginManagerService pluginManagerService,
                                                   LocationManagerService locationManagerService)
         {
             _pluginManagerService = pluginManagerService;
             _locationManagerService = locationManagerService;
-            ImportActionBlock = CreateImporter();
         }
 
         [Import] IPluginManagerService _pluginManagerService;
         [Import] LocationManagerService _locationManagerService;
 
-        public void BeginImport(EnvironmentalDataSet dataSet, IProgress<float> progress = null ) { ImportActionBlock.Post(Tuple.Create(dataSet, progress)); }
+        public void BeginImport(EnvironmentalDataSet dataSet, IProgress<float> progress = null )
+        {
+            if (ImportActionBlock == null) ImportActionBlock = CreateImporter();
+            ImportActionBlock.Post(Tuple.Create(dataSet, progress));
+        }
 
         public ActionBlock<Tuple<EnvironmentalDataSet, IProgress<float>>> ImportActionBlock { get; private set; }
         
