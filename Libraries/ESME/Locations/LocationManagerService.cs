@@ -138,10 +138,17 @@ namespace ESME.Locations
                 EnvironmentalDataSetCollection = collection,
             };
             AddEnvironmentDataSetCollectionLogEntry(collection, string.Format("Added new data set. Resolution: {0}{1}", resolution, timePeriod != TimePeriod.Invalid ? string.Format("  TimePeriod: {0}", timePeriod) : ""));
-            collection.EnvironmentalDataSets.Add(environmentalDataSet);
             _context.EnvironmentalDataSets.Add(environmentalDataSet);
             SaveChanges();
             return environmentalDataSet;
+        }
+
+        public void UpdateEnvironmentDataSetPercentCached(EnvironmentalDataSet dataSet, int percentCached)
+        {
+            if (percentCached < 0 || percentCached > 100) throw new ArgumentOutOfRangeException("percentCached", "Must be between 0 and 100, inclusive");
+            if (dataSet.PercentCached >= percentCached) throw new ArgumentOutOfRangeException("percentCached", "Cannot reduce the PercentCached value with this method");
+            dataSet.PercentCached = percentCached;
+            SaveChanges();
         }
 
         #region IDisposable implementation

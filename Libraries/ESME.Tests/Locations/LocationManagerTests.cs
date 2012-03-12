@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using ESME.Database;
 using ESME.Environment;
+using ESME.Environment.NAVO;
 using ESME.Locations;
 using ESME.Plugins;
 using NUnit.Framework;
@@ -33,30 +34,36 @@ namespace ESME.Tests.Locations
             Assert.Throws(typeof(DuplicateNameException), () => locationManager.AddLocation("Mass Bay", "These are some comments", 43, 42, -71, -70));
             Assert.AreEqual(1, locationManager.Locations.Count());
             _pluginManager = _pluginManager ?? new PluginManagerService {PluginDirectory = PluginDirectory};
-            locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            var windCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
             {
                 PluginType = PluginType.EnvironmentalDataSource,
                 PluginSubtype = PluginSubtype.Wind,
                 Type = typeof(InstallableNAVOPlugin.SMGC20ForESME).ToString(),
             });
-            locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            foreach (var month in NAVOConfiguration.AllMonths) locationManager.AddEnvironmentDataSet(windCollection, 60, month);
+            var soundSpeedCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
             {
                 PluginType = PluginType.EnvironmentalDataSource,
                 PluginSubtype = PluginSubtype.SoundSpeed,
                 Type = typeof(InstallableNAVOPlugin.DBDB54ForESME).ToString(),
             });
-            locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            foreach (var month in NAVOConfiguration.AllMonths) locationManager.AddEnvironmentDataSet(soundSpeedCollection, 15, month);
+            var sedimentCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
             {
                 PluginType = PluginType.EnvironmentalDataSource,
                 PluginSubtype = PluginSubtype.Sediment,
                 Type = typeof(InstallableNAVOPlugin.BST20ForESME).ToString(),
             });
-            locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            locationManager.AddEnvironmentDataSet(sedimentCollection, 5f, TimePeriod.Invalid);
+            var bathymetryCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
             {
                 PluginType = PluginType.EnvironmentalDataSource,
                 PluginSubtype = PluginSubtype.Bathymetry,
                 Type = typeof(InstallableNAVOPlugin.DBDB54ForESME).ToString(),
             });
+            locationManager.AddEnvironmentDataSet(bathymetryCollection, 2f, TimePeriod.Invalid);
+            locationManager.AddEnvironmentDataSet(bathymetryCollection, 1f, TimePeriod.Invalid);
+            locationManager.AddEnvironmentDataSet(bathymetryCollection, 0.5f, TimePeriod.Invalid);
             DumpLocationDatabase(locationManager);
         }
 
@@ -73,9 +80,9 @@ namespace ESME.Tests.Locations
             {
                 DumpLocation(location);
                 if (dumpLogs) foreach (var locationLogEntry in location.LocationLogEntries) DumpLocationLogEntry(locationLogEntry);
-                Console.WriteLine();
                 foreach (var collection in location.EnvironmentalDataSetCollections)
                 {
+                    Console.WriteLine();
                     DumpEnvironmentalDataSetCollection(collection);
                     if (collection.EnvironmentalDataSets != null)
                         foreach (var dataSet in collection.EnvironmentalDataSets)
@@ -116,8 +123,9 @@ namespace ESME.Tests.Locations
             Console.WriteLine("            Data set file: {0} ({1} bytes)", dataSet.FileName, dataSet.FileSize);
             Console.WriteLine("               Resolution: {0} ({1} samples)", dataSet.Resolution, dataSet.SampleCount);
             if (dataSet.TimePeriod != TimePeriod.Invalid)
-                Console.WriteLine("              Time period: {0}", dataSet.TimePeriod);
+                Console.WriteLine("              Time period: {0}", (TimePeriod)dataSet.TimePeriod);
             Console.WriteLine("               Created by: {0}", dataSet.CreationInfo);
+            Console.WriteLine("                   Cached: {0}%", dataSet.PercentCached);
         }
 
         public void DumpLocationLogEntry(LocationLogEntry logEntry)

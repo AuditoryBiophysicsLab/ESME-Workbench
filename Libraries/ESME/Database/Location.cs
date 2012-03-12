@@ -66,7 +66,7 @@ namespace ESME.Database
 
     public class EnvironmentalDataSetCollectionLogEntry
     {
-        public string EnvironmentalDataSetCollectionLogEntryID { get; set; }
+        public int EnvironmentalDataSetCollectionLogEntryID { get; set; }
         public LogEntry LogEntry { get; set; }
         public virtual EnvironmentalDataSetCollection EnvironmentalDataSetCollection { get; set; }
     }
@@ -80,6 +80,7 @@ namespace ESME.Database
         public DbTimePeriod TimePeriod { get; set; }
         public string FileName { get; set; }
         public DbWhoWhenWhere CreationInfo { get; set; }
+        public int PercentCached { get; set; }
         public virtual EnvironmentalDataSetCollection EnvironmentalDataSetCollection { get; set; }
     }
 }
