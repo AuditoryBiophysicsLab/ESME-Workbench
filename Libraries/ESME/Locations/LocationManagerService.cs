@@ -1,72 +1,52 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Data;
 using System.Data.Common;
 using System.Data.Entity;
+using System.Data.Entity.Validation;
 using System.IO;
 using System.Linq;
-using Cinch;
 using ESME.Database;
 using ESME.Environment;
+using HRC.Aspects;
 using HRC.Navigation;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Locations
 {
-    public interface ILocationManagerService
-    {
-        string LocationDirectory { get; set; }
-        DbSet<Location> Locations { get; }
-        bool LocationExists(string locationName);
-        Location this[string locationName] { get; }
-        Location CreateLocation(string locationName, string comments, double north, double south, double east, double west);
-        void SaveChanges();
-    }
-
     [PartCreationPolicy(CreationPolicy.Shared)]
-    [ExportService(ServiceType.Both, typeof(ILocationManagerService))]
-    public class LocationManagerService : ViewModelBase, ILocationManagerService
+    [ExportService(ServiceType.Both, typeof(LocationManagerService))]
+    [NotifyPropertyChanged]
+    public class LocationManagerService
     {
-        #region public string LocationRootDirectory { get; set; }
+        string _locationRootDirectory;
 
-        public string LocationDirectory
+        public string LocationRootDirectory
         {
-            get { return _locationDirectory; }
+            get { return _locationRootDirectory; }
             set
             {
-                if (_locationDirectory == value) return;
-                _locationDirectory = value;
-                if (!string.IsNullOrEmpty(_locationDirectory) && !Directory.Exists(_locationDirectory))
-                {
-                    if (_messageBoxService.ShowYesNo(string.Format("The Location Directory '{0}' does not exist.  Create it?", _locationDirectory), CustomDialogIcons.Question) == CustomDialogResults.No)
-                        return;
-                    Directory.CreateDirectory(_locationDirectory);
-                }
+                _locationRootDirectory = value;
                 Initialize();
-                NotifyPropertyChanged(LocationRootDirectoryChangedEventArgs);
             }
         }
 
-        private static readonly PropertyChangedEventArgs LocationRootDirectoryChangedEventArgs = ObservableHelper.CreateArgs<LocationManagerService>(x => x.LocationDirectory);
-        string _locationDirectory;
-
-        #endregion
-
-        [Import] IMessageBoxService _messageBoxService;
         private LocationContext _context;
         void Initialize()
         {
+            if (string.IsNullOrEmpty(LocationRootDirectory)) throw new ApplicationException("LocationRootDirectory cannot be null or empty");
+            if (!Directory.Exists(LocationRootDirectory)) Directory.CreateDirectory(LocationRootDirectory);
             Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
-            DbConnection connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source='{0}';FailIfMissing=False", Path.Combine(LocationDirectory, "locations.db")));
+            DbConnection connection = new Devart.Data.SQLite.SQLiteConnection(string.Format("Data Source='{0}';FailIfMissing=False", Path.Combine(LocationRootDirectory, "locations.db")));
             _context = new LocationContext(connection, false, new CreateDatabaseIfNotExists<LocationContext>());
-            Locations = _context.Locations;
         }
 
-        public DbSet<Location> Locations { get; private set; }
+        public IEnumerable<Location> Locations { get { return _context.Locations; } }
 
         public bool LocationExists(string locationName) { return Locations.FirstOrDefault(l => l.Name == locationName) != null; }
         public Location this[string locationName] { get { return Locations.Single(l => l.Name == locationName); } }
-        public Location CreateLocation(string locationName, string comments, double north, double south, double east, double west)
+        public Location AddLocation(string locationName, string comments, double north, double south, double east, double west)
         {
             if (LocationExists(locationName)) throw new DuplicateNameException(string.Format("A location named {0} already exists, choose another name", locationName));
             var result = new Location
@@ -80,11 +60,27 @@ namespace ESME.Locations
             _context.Locations.Add(result);
             SaveChanges();
             AddLocationLogEntry(result, "Created");
-            Directory.CreateDirectory(Path.Combine(LocationDirectory, result.StorageDirectory));
+            Directory.CreateDirectory(Path.Combine(LocationRootDirectory, result.StorageDirectory));
             return result;
         }
 
-        public void SaveChanges() { lock(_context) _context.SaveChanges(); }
+        public void SaveChanges()
+        {
+            lock (_context)
+            {
+                try
+                {
+                    _context.SaveChanges();
+                }
+                catch (DbEntityValidationException ex)
+                {
+                    Console.WriteLine("SaveChanges caught DbEntityValidationException");
+                    foreach (var innerError in ex.EntityValidationErrors.SelectMany(validationError => validationError.ValidationErrors)) 
+                        Console.WriteLine("  {0}: {1}", innerError.PropertyName, innerError.ErrorMessage);
+                    throw;
+                }
+            }
+        }
 
         void AddLocationLogEntry(Location location, string message)
         {
@@ -97,7 +93,6 @@ namespace ESME.Locations
                     MessageSource = new DbWhoWhenWhere(true),
                 },
             };
-            location.LogEntries.Add(logEntry);
             _context.LocationLogEntries.Add(logEntry);
             SaveChanges();
         }

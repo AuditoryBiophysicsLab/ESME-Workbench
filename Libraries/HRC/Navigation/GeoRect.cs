@@ -23,7 +23,13 @@ namespace HRC.Navigation
 
         public GeoRect(Rect rect) { FromRect(rect); }
 
-        public GeoRect(GeoRect geoRect) { FromRect(geoRect); }
+        public GeoRect(GeoRect geoRect)
+        {
+            North = geoRect.North;
+            South = geoRect.South;
+            East = geoRect.East;
+            West = geoRect.West;
+        }
 
         public GeoRect(IEnumerable<Geo> geoList)
         {

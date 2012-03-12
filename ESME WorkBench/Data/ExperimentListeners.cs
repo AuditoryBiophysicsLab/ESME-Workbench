@@ -70,7 +70,7 @@ namespace ESMEWorkbench.Data
             }
             catch (Exception ex)
             {
-                Globals.DisplayException(MessageBoxService, ex, "Error opening file {0}", fileName);
+                Globals.DisplayException(_messageBoxService, ex, "Error opening file {0}", fileName);
             }
         }
 
@@ -151,7 +151,7 @@ namespace ESMEWorkbench.Data
             }
             catch (Exception e)
             {
-                Globals.DisplayException(MessageBoxService, e, "Error opening scenario file");
+                Globals.DisplayException(_messageBoxService, e, "Error opening scenario file");
                 ScenarioFileName = null;
             }
         }

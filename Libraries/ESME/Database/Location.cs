@@ -36,7 +36,7 @@ namespace ESME.Database
         public string StorageDirectory { get; set; }
 
         public virtual ICollection<EnvironmentalDataSetCollection> EnvironmentalDataSetCollections { get; set; }
-        public virtual ICollection<LocationLogEntry> LogEntries { get; set; }
+        public virtual ICollection<LocationLogEntry> LocationLogEntries { get; set; }
     }
 
     [ComplexType]
@@ -49,7 +49,7 @@ namespace ESME.Database
 
     public class LocationLogEntry
     {
-        public string LocationLogEntryID { get; set; }
+        public int LocationLogEntryID { get; set; }
         public LogEntry LogEntry { get; set; }
         public virtual Location Location { get; set; }
     }

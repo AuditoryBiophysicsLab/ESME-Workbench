@@ -19,7 +19,7 @@ namespace ESME.Locations
         public EnvironmentalDatabaseImportService() { _importer = CreateImporter(); }
 
         [Import] IPluginManagerService _pluginManagerService;
-        [Import] ILocationManagerService _locationManagerService;
+        [Import] LocationManagerService _locationManagerService;
 
         public void BeginImport(EnvironmentalDataSet dataSet, IProgress<float> progress = null ) { _importer.Post(Tuple.Create(dataSet, progress)); }
 
@@ -38,7 +38,7 @@ namespace ESME.Locations
                 var geoRect = dataSet.EnvironmentalDataSetCollection.Location.GeoRect;
                 var resolution = dataSet.Resolution;
                 var timePeriod = dataSet.TimePeriod;
-                var fileName = Path.Combine(_locationManagerService.LocationDirectory, dataSet.EnvironmentalDataSetCollection.Location.StorageDirectory, dataSet.FileName);
+                var fileName = Path.Combine(_locationManagerService.LocationRootDirectory, dataSet.EnvironmentalDataSetCollection.Location.StorageDirectory, dataSet.FileName);
                 switch (sourcePlugin.EnvironmentDataType)
                 {
                     case EnvironmentDataType.Wind:

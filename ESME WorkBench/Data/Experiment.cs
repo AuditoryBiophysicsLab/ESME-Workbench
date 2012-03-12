@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.IO;
@@ -34,7 +35,6 @@ namespace ESMEWorkbench.Data
     public partial class Experiment : PropertyChangedBase
     {
         static readonly PropertyChangedEventArgs TransmissionLossFieldsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.TransmissionLossFields);
-        public static IUIVisualizerService VisualizerService { get; set; }
 
         #region public string Comments { get; set; }
 
@@ -399,7 +399,7 @@ namespace ESMEWorkbench.Data
                             var animatPopulationFile = (string) item;
                             if (!File.Exists(animatPopulationFile))
                             {
-                                var result = MessageBoxService.ShowYesNo("This experiment references an animal population file that cannot be located on this computer.  The file referenced is:\n" + animatPopulationFile + "\nProceed with opening this experiment?  If yes, all existing animal population information will be removed.", CustomDialogIcons.Question);
+                                var result = _messageBoxService.ShowYesNo("This experiment references an animal population file that cannot be located on this computer.  The file referenced is:\n" + animatPopulationFile + "\nProceed with opening this experiment?  If yes, all existing animal population information will be removed.", CustomDialogIcons.Question);
                                 if (result == CustomDialogResults.Yes)
                                 {
                                     _deleteAllSpeciesLayersOnInitialize = true;
@@ -577,8 +577,7 @@ namespace ESMEWorkbench.Data
         [XmlElement]
         public double CurrentScale { get; set; }
 
-        [XmlIgnore]
-        public static IMessageBoxService MessageBoxService { private get; set; }
+        [Import] static IMessageBoxService _messageBoxService;
 
         [XmlIgnore]
         public Wind WindSpeed { get; private set; }

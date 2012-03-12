@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Linq;
 using System.Xml.Serialization;
@@ -44,7 +45,7 @@ namespace ESME.Views.AcousticBuilder
             });
         }
 
-        public static IMessageBoxService MessageBoxService { get; set; }
+        [Import] static IMessageBoxService _messageBoxService;
 
         #region public double Latitude { get; set; }
 
@@ -223,7 +224,7 @@ namespace ESME.Views.AcousticBuilder
                     delegate { return IsItemSelected && AvailableModes.Count > 0 && SelectedMode.BearingsStringIsValid; },
                     delegate
                     {
-                        var result = MessageBoxService.ShowOkCancel("Are you sure you want to use this radial configuration\nfor all modes in this analysis point?", CustomDialogIcons.Question);
+                        var result = _messageBoxService.ShowOkCancel("Are you sure you want to use this radial configuration\nfor all modes in this analysis point?", CustomDialogIcons.Question);
                         if (result == CustomDialogResults.OK)
                         {
                             var tmpRadials = new List<float>(SelectedMode.RadialBearings);

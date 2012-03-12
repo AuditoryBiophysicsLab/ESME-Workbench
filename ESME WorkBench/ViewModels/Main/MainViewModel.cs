@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -19,12 +20,12 @@ using ESME.Plugins;
 using ESMEWorkbench.Data;
 using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.RecentFiles;
+using HRC;
 using HRC.Navigation;
 using HRC.Services;
 using HRC.Utility;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
-using ESME.Views.AcousticBuilder;
 using ESME.Environment.Descriptors;
 
 namespace ESMEWorkbench.ViewModels.Main
@@ -34,13 +35,13 @@ namespace ESMEWorkbench.ViewModels.Main
     {
         #region Private fields
 
-        readonly IMessageBoxService _messageBoxService;
-        readonly IHRCOpenFileService _openFileService;
-        readonly IHRCSaveFileService _saveFileService;
+        [Import] IMessageBoxService _messageBoxService;
+        [Import] IHRCOpenFileService _openFileService;
+        [Import] IHRCSaveFileService _saveFileService;
+        [Import] IUIVisualizerService _visualizerService;
+        [Import] IPluginManagerService _pluginManagerService;
+        [Import] LocationManagerService _locationManagerService;
         readonly IViewAwareStatus _viewAwareStatus;
-        readonly IUIVisualizerService _visualizerService;
-        readonly IPluginManagerService _pluginManagerService;
-        [Import] ILocationManagerService _locationManagerService;
 #if EXPERIMENTS_SUPPORTED
         Experiment _experiment;
 #endif
@@ -48,12 +49,12 @@ namespace ESMEWorkbench.ViewModels.Main
         Dispatcher _dispatcher;
         public const bool ExperimentsCurrentlySupported = false;
 
-        readonly PleaseWaitViewModel _pleaseWait;
+        //readonly PleaseWaitViewModel _pleaseWait;
         #endregion
 
         #region Constructor
         [ImportingConstructor]
-        public MainViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService, IPluginManagerService pluginManagerService)
+        public MainViewModel(IViewAwareStatus viewAwareStatus)
         {
             try
             {
@@ -64,17 +65,9 @@ namespace ESMEWorkbench.ViewModels.Main
                 Debug.WriteLine("***********\nMainViewModel: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
-
-            AnalysisPointPropertiesViewModel.MessageBoxService = messageBoxService;
-            Experiment.MessageBoxService = messageBoxService;
-            Experiment.VisualizerService = visualizerService;
             _viewAwareStatus = viewAwareStatus;
-            _messageBoxService = messageBoxService;
-            _openFileService = openFileService;
-            _saveFileService = saveFileService;
-            _visualizerService = visualizerService;
-            _pluginManagerService = pluginManagerService;
-            _pleaseWait = new PleaseWaitViewModel((Window)_viewAwareStatus.View, _visualizerService);
+
+            //_pleaseWait = new PleaseWaitViewModel((Window)_viewAwareStatus.View, _visualizerService);
             if (Designer.IsInDesignMode) return;
             _viewAwareStatus.ViewUnloaded += () =>
             {
@@ -85,6 +78,12 @@ namespace ESMEWorkbench.ViewModels.Main
             _viewAwareStatus.ViewLoaded += () =>
             {
                 if (Designer.IsInDesignMode) return;
+#if DEBUG
+                _pluginManagerService.PluginDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+#else
+                _pluginManagerService.PluginDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Plugins");
+#endif
+
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 MediatorMessage.Send(MediatorMessage.MainViewModelInitialized, _dispatcher);
                 Globals.AppSettings.PluginManagerService = _pluginManagerService;
@@ -92,7 +91,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     Directory.CreateDirectory(
                         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                                      "ESME Workbench\\Locations"));
-                _locationManagerService.LocationDirectory = Globals.AppSettings.LocationDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench\\Locations");
+                _locationManagerService.LocationRootDirectory = Globals.AppSettings.LocationDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench\\Locations");
                 NAVOImporter.PluginManagerService = _pluginManagerService;
             };
 
@@ -490,7 +489,7 @@ namespace ESMEWorkbench.ViewModels.Main
         static readonly PropertyChangedEventArgs IsInAnalysisPointModeChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsInAnalysisPointMode);
         bool _isInAnalysisPointMode;
 
-        [MediatorMessageSink(MediatorMessage.SetAnalysisPointMode)]
+        [MediatorMessageSink(MediatorMessage.SetAnalysisPointMode), UsedImplicitly]
         void SetAnalysisPointMode(bool mode)
         {
             IsInAnalysisPointMode = mode;
@@ -522,8 +521,6 @@ namespace ESMEWorkbench.ViewModels.Main
                             // Anything else that is to be canceled by the user hitting the ESC key must be put here
                             IsInAnalysisPointMode = false;
                             break;
-                        default:
-                            break;
                     }
                 }));
             }
@@ -551,7 +548,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #endregion
 
-        [MediatorMessageSink(MediatorMessage.MainViewModelInitialized)]
+        [MediatorMessageSink(MediatorMessage.MainViewModelInitialized), UsedImplicitly]
         void MainViewModelInitialized(Dispatcher dispatcher)
         {
             _mainViewModelInitialized = true;
@@ -559,7 +556,7 @@ namespace ESMEWorkbench.ViewModels.Main
         }
         static bool _mainViewModelInitialized;
 
-        [MediatorMessageSink(MediatorMessage.MapViewModelInitialized)]
+        [MediatorMessageSink(MediatorMessage.MapViewModelInitialized), UsedImplicitly]
         void MapViewModelInitialized(bool dummy)
         {
             _mapViewModelInitialized = true;
@@ -567,7 +564,7 @@ namespace ESMEWorkbench.ViewModels.Main
         }
         static bool _mapViewModelInitialized;
 
-        [MediatorMessageSink(MediatorMessage.LayerListViewModelInitialized)]
+        [MediatorMessageSink(MediatorMessage.LayerListViewModelInitialized), UsedImplicitly]
         void LayerListViewModelInitialized(bool dummy)
         {
             _layerListViewModelInitialized = true;
@@ -577,11 +574,9 @@ namespace ESMEWorkbench.ViewModels.Main
 
         static void AllViewModelsAreReady()
         {
-            if (_layerListViewModelInitialized && _mapViewModelInitialized && _mainViewModelInitialized)
-            {
-                _allViewModelsAreReady = true;
-                MediatorMessage.Send(MediatorMessage.AllViewModelsAreReady, true);
-            }
+            if (!_layerListViewModelInitialized || !_mapViewModelInitialized || !_mainViewModelInitialized) return;
+            _allViewModelsAreReady = true;
+            MediatorMessage.Send(MediatorMessage.AllViewModelsAreReady, true);
         }
         static bool _allViewModelsAreReady;
 

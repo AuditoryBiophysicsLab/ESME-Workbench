@@ -15,7 +15,7 @@ namespace ESME.Views.Locations
     public sealed class NewLocationViewModel : ValidatingViewModel
     {
         #region Constructor
-        public NewLocationViewModel(IPluginManagerService pluginManagerService, ILocationManagerService locationManagerService)
+        public NewLocationViewModel(IPluginManagerService pluginManagerService, LocationManagerService locationManagerService)
         {
             _pluginManagerService = pluginManagerService;
             _locationManagerService = locationManagerService;
@@ -29,7 +29,7 @@ namespace ESME.Views.Locations
                         break;
                     case NotifyCollectionChangedAction.Replace:
                         var newItem = (KeyValuePair<PluginSubtype, EnvironmentalDataSourcePluginBase>)e.NewItems[e.NewItems.Count - 1];
-                        PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][newItem.Key].DefaultPlugin = newItem.Value;
+                        PluginManager[PluginType.EnvironmentalDataSource, newItem.Key] = newItem.Value;
                         break;
                     default:
                         throw new NotImplementedException(string.Format("The CollectionChanged action {0} is not implemented here", e.Action));
@@ -47,7 +47,7 @@ namespace ESME.Views.Locations
 
         }
 
-        private ILocationManagerService _locationManagerService;
+        private LocationManagerService _locationManagerService;
         #endregion
         #region PluginManager stuff
         readonly IPluginManagerService _pluginManagerService;
@@ -57,12 +57,12 @@ namespace ESME.Views.Locations
 
         void AddEnvironmentDataSourceView(PluginSubtype pluginSubtype)
         {
-            var curView = CollectionViewSource.GetDefaultView(PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][pluginSubtype].Values);
+            var curView = CollectionViewSource.GetDefaultView(PluginManager[PluginType.EnvironmentalDataSource][pluginSubtype].Values);
             ((ListCollectionView)curView).SortDescriptions.Add(new SortDescription("PluginName", ListSortDirection.Ascending));
             ((ListCollectionView)curView).Filter = p => ((IESMEPlugin)p).IsSelectable;
             EnvironmentDataSourceViews.Add(pluginSubtype, curView);
-            var defaultPlugin = PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][pluginSubtype].DefaultPlugin ??
-                                PluginManager.ESMEPluginDictionary[PluginType.EnvironmentalDataSource][pluginSubtype].Values.FirstOrDefault();
+            var defaultPlugin = PluginManager[PluginType.EnvironmentalDataSource, pluginSubtype] ??
+                                PluginManager[PluginType.EnvironmentalDataSource][pluginSubtype].Values.FirstOrDefault();
             SelectedPlugins.Add(pluginSubtype, (EnvironmentalDataSourcePluginBase)defaultPlugin);
         }
         #endregion
@@ -203,7 +203,7 @@ namespace ESME.Views.Locations
 
         void OkHandler()
         {
-            _locationManagerService.CreateLocation(LocationName, null, North, South, East, West);
+            _locationManagerService.AddLocation(LocationName, null, North, South, East, West);
             Globals.AppSettings.Save();
             CloseActivePopUpCommand.Execute(true);
         }

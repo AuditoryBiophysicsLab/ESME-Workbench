@@ -6,8 +6,6 @@ using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using ESME.Environment;
 using HRC;
 using HRC.Collections;
 using HRC.Composition;
@@ -17,14 +15,11 @@ namespace ESME.Plugins
 {
     public interface IPluginManagerService
     {
-        ESMEPluginDictionary ESMEPluginDictionary { get; }
+        string PluginDirectory { get; set; }
         List<PluginIdentifier> DefaultPluginIdentifiers { get; set; }
-        EnvironmentalDataSourcePluginBase<Wind> WindSource { get; }
-        EnvironmentalDataSourcePluginBase<SoundSpeed> SoundSpeedSource { get; }
-        EnvironmentalDataSourcePluginBase<Sediment> SedimentSource { get; }
-        EnvironmentalDataSourcePluginBase<Bathymetry> BathymetrySource { get; }
-        IESMEPlugin this[PluginIdentifier pluginIdentifier] { get; }
         PluginTypeDictionary this[PluginType pluginType] { get; }
+        IESMEPlugin this[PluginType pluginType, PluginSubtype pluginSubtype] { get; set; }
+        IESMEPlugin this[PluginIdentifier pluginIdentifier] { get; }
     }
 
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -34,42 +29,57 @@ namespace ESME.Plugins
         public PluginManagerService() 
         {
             _esmePlugins = new List<IESMEPlugin>();
-            ESMEPluginDictionary = new ESMEPluginDictionary();
-            var catalog = new ESMEPluginCatalog(new DirectoryCatalog(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)));
-            var container = new CompositionContainer(catalog, true);
-            try
-            {
-                container.ComposeParts(this);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
-            if (_esmePlugins == null || _esmePlugins.Count <= 0) return;
-            foreach (var plugin in _esmePlugins)
-            {
-                if (!ESMEPluginDictionary.ContainsKey(plugin.PluginType)) ESMEPluginDictionary.Add(plugin.PluginType, new PluginTypeDictionary());
-                if (!ESMEPluginDictionary[plugin.PluginType].ContainsKey(plugin.PluginSubtype)) ESMEPluginDictionary[plugin.PluginType].Add(plugin.PluginSubtype, new PluginSubtypeDictionary());
-                ESMEPluginDictionary[plugin.PluginType][plugin.PluginSubtype][plugin.GetType().ToString()] = plugin;
-                plugin.LoadSettings();
-            }
+            _esmePluginDictionary = new ESMEPluginDictionary();
         }
+
         [ImportMany, UsedImplicitly] ICollection<IESMEPlugin> _esmePlugins;
 
-        public ESMEPluginDictionary ESMEPluginDictionary { get; private set; }
+        string _pluginDirectory;
+        public string PluginDirectory
+        {
+            get { return _pluginDirectory; }
+            set
+            {
+                _pluginDirectory = value;
+                if (string.IsNullOrEmpty(_pluginDirectory)) throw new ApplicationException("PluginManager.PluginDirectory cannot be null or empty");
+                if (!Directory.Exists(_pluginDirectory)) throw new ApplicationException(string.Format("PluginManager: Specified plugin directory \"{0}\" does not exist", _pluginDirectory));
+
+                var catalog = new ESMEPluginCatalog(new DirectoryCatalog(_pluginDirectory));
+                var container = new CompositionContainer(catalog, true);
+                try
+                {
+                    container.ComposeParts(this);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                }
+                if (_esmePlugins == null || _esmePlugins.Count <= 0) return;
+                foreach (var plugin in _esmePlugins)
+                {
+                    if (!_esmePluginDictionary.ContainsKey(plugin.PluginType)) _esmePluginDictionary.Add(plugin.PluginType, new PluginTypeDictionary());
+                    if (!_esmePluginDictionary[plugin.PluginType].ContainsKey(plugin.PluginSubtype)) _esmePluginDictionary[plugin.PluginType].Add(plugin.PluginSubtype, new PluginSubtypeDictionary());
+                    _esmePluginDictionary[plugin.PluginType][plugin.PluginSubtype][plugin.GetType().ToString()] = plugin;
+                    plugin.LoadSettings();
+                }
+            }
+        }
+
+        readonly ESMEPluginDictionary _esmePluginDictionary;
+
         public List<PluginIdentifier> DefaultPluginIdentifiers
         {
             get
             {
-                return new List<PluginIdentifier>(from pluginType in ESMEPluginDictionary.Keys
-                                                  from subtype in ESMEPluginDictionary[pluginType].Keys
-                                                  where ESMEPluginDictionary[pluginType][subtype].DefaultPlugin != null
-                                                  select ESMEPluginDictionary[pluginType][subtype].DefaultPlugin.PluginIdentifier);
+                return new List<PluginIdentifier>(from pluginType in _esmePluginDictionary.Keys
+                                                  from subtype in _esmePluginDictionary[pluginType].Keys
+                                                  where _esmePluginDictionary[pluginType][subtype].DefaultPlugin != null
+                                                  select _esmePluginDictionary[pluginType][subtype].DefaultPlugin.PluginIdentifier);
             }
             set
             {
                 if (value == null) return;
-                value.ForEach(configuration => ESMEPluginDictionary.PluginIdentifier = configuration);
+                value.ForEach(configuration => _esmePluginDictionary.PluginIdentifier = configuration);
             }
         }
 
@@ -77,14 +87,14 @@ namespace ESME.Plugins
         {
             get
             {
-                if (!ESMEPluginDictionary.ContainsKey(pluginType)) return null;
-                return !ESMEPluginDictionary[pluginType].ContainsKey(pluginSubtype) ? null : ESMEPluginDictionary[pluginType][pluginSubtype].DefaultPlugin;
+                if (!_esmePluginDictionary.ContainsKey(pluginType)) return null;
+                return !_esmePluginDictionary[pluginType].ContainsKey(pluginSubtype) ? null : _esmePluginDictionary[pluginType][pluginSubtype].DefaultPlugin;
             }
             set
             {
-                if (!ESMEPluginDictionary.ContainsKey(pluginType)) ESMEPluginDictionary.Add(pluginType, new PluginTypeDictionary());
-                if (!ESMEPluginDictionary[pluginType].ContainsKey(pluginSubtype)) ESMEPluginDictionary[pluginType].Add(pluginSubtype, new PluginSubtypeDictionary());
-                ESMEPluginDictionary[pluginType][pluginSubtype].DefaultPlugin = value;
+                if (!_esmePluginDictionary.ContainsKey(pluginType)) _esmePluginDictionary.Add(pluginType, new PluginTypeDictionary());
+                if (!_esmePluginDictionary[pluginType].ContainsKey(pluginSubtype)) _esmePluginDictionary[pluginType].Add(pluginSubtype, new PluginSubtypeDictionary());
+                _esmePluginDictionary[pluginType][pluginSubtype].DefaultPlugin = value;
             }
         }
 
@@ -92,10 +102,10 @@ namespace ESME.Plugins
         {
             get
             {
-                if (!ESMEPluginDictionary.ContainsKey(pluginIdentifier.PluginType)) throw new PluginNotFoundException(string.Format("There are no plugins of type {0}", pluginIdentifier.PluginType));
-                if (!ESMEPluginDictionary[pluginIdentifier.PluginType].ContainsKey(pluginIdentifier.PluginSubtype)) throw new PluginNotFoundException(string.Format("There are no {0} plugins of subtype {1}", pluginIdentifier.PluginType, pluginIdentifier.PluginSubtype));
-                if (!ESMEPluginDictionary[pluginIdentifier.PluginType][pluginIdentifier.PluginSubtype].ContainsKey(pluginIdentifier.Type)) throw new PluginNotFoundException(string.Format("There are no {0}.{1} plugins of type {2}", pluginIdentifier.PluginType, pluginIdentifier.PluginSubtype, pluginIdentifier.Type));
-                return ESMEPluginDictionary[pluginIdentifier.PluginType][pluginIdentifier.PluginSubtype][pluginIdentifier.Type];
+                if (!_esmePluginDictionary.ContainsKey(pluginIdentifier.PluginType)) throw new PluginNotFoundException(string.Format("There are no plugins of type {0}", pluginIdentifier.PluginType));
+                if (!_esmePluginDictionary[pluginIdentifier.PluginType].ContainsKey(pluginIdentifier.PluginSubtype)) throw new PluginNotFoundException(string.Format("There are no {0} plugins of subtype {1}", pluginIdentifier.PluginType, pluginIdentifier.PluginSubtype));
+                if (!_esmePluginDictionary[pluginIdentifier.PluginType][pluginIdentifier.PluginSubtype].ContainsKey(pluginIdentifier.Type)) throw new PluginNotFoundException(string.Format("There are no {0}.{1} plugins of type {2}", pluginIdentifier.PluginType, pluginIdentifier.PluginSubtype, pluginIdentifier.Type));
+                return _esmePluginDictionary[pluginIdentifier.PluginType][pluginIdentifier.PluginSubtype][pluginIdentifier.Type];
             }
         }
 
@@ -103,32 +113,8 @@ namespace ESME.Plugins
         {
             get
             {
-                return !ESMEPluginDictionary.ContainsKey(pluginType) ? null : ESMEPluginDictionary[pluginType];
+                return !_esmePluginDictionary.ContainsKey(pluginType) ? null : _esmePluginDictionary[pluginType];
             }
-        }
-
-        public EnvironmentalDataSourcePluginBase<Wind> WindSource
-        {
-            get { return (EnvironmentalDataSourcePluginBase<Wind>)this[PluginType.EnvironmentalDataSource, PluginSubtype.Wind]; }
-            set { this[PluginType.EnvironmentalDataSource, PluginSubtype.Wind] = value; }
-        }
-
-        public EnvironmentalDataSourcePluginBase<SoundSpeed> SoundSpeedSource
-        {
-            get { return (EnvironmentalDataSourcePluginBase<SoundSpeed>)this[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed]; }
-            set { this[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed] = value; }
-        }
-
-        public EnvironmentalDataSourcePluginBase<Sediment> SedimentSource
-        {
-            get { return (EnvironmentalDataSourcePluginBase<Sediment>)this[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment]; }
-            set { this[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment] = value; }
-        }
-
-        public EnvironmentalDataSourcePluginBase<Bathymetry> BathymetrySource
-        {
-            get { return (EnvironmentalDataSourcePluginBase<Bathymetry>)this[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry]; }
-            set { this[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry] = value; }
         }
     }
 

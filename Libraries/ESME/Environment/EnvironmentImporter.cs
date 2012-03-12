@@ -79,11 +79,11 @@ namespace ESME.Environment
             Logger.Log("About to create soundspeed worker");
             if (SoundSpeedWorker == null) SoundSpeedWorker = new ActionBlock<ImportJobDescriptor>(async job =>
             {
-                if (PluginManagerService == null || PluginManagerService.SoundSpeedSource == null) 
+                if (PluginManagerService[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed] == null) 
                     throw new InvalidOperationException("Cannot extract sound speed data - no data source is configured");
                 SoundSpeedProgress.JobStarting(job);
                 CheckDestinationDirectory(job.DestinationFilename);
-                var soundSpeed = PluginManagerService.SoundSpeedSource.Extract(job.GeoRect, 15, job.TimePeriod);
+                var soundSpeed = ((EnvironmentalDataSourcePluginBase<SoundSpeed>)PluginManagerService[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed]).Extract(job.GeoRect, 15, job.TimePeriod);
                 soundSpeed.Serialize(job.DestinationFilename);
                 job.SampleCount = (uint)soundSpeed[job.TimePeriod].EnvironmentData.Count;
                 job.Resolution = 15;
@@ -101,11 +101,11 @@ namespace ESME.Environment
 
             if (SedimentWorker == null) SedimentWorker = new ActionBlock<ImportJobDescriptor>(job =>
             {
-                if (PluginManagerService == null || PluginManagerService.SedimentSource == null)
+                if (PluginManagerService[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment] == null)
                     throw new InvalidOperationException("Cannot extract sediment data - no data source is configured");
                 SedimentProgress.JobStarting(job);
                 CheckDestinationDirectory(job.DestinationFilename);
-                var sediment = PluginManagerService.SedimentSource.Extract(job.GeoRect, job.Resolution);
+                var sediment = ((EnvironmentalDataSourcePluginBase<Sediment>)PluginManagerService[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment]).Extract(job.GeoRect, job.Resolution);
                 //var sediment = BST.Extract(job.GeoRect);
                 sediment.Save(job.DestinationFilename);
                 job.SampleCount = (uint)sediment.Samples.Count;
@@ -123,14 +123,14 @@ namespace ESME.Environment
 
             if (WindWorker == null) WindWorker = new ActionBlock<ImportJobDescriptor>(async job =>
             {
-                if (PluginManagerService == null || PluginManagerService.WindSource == null)
+                if (PluginManagerService[PluginType.EnvironmentalDataSource, PluginSubtype.Wind] == null)
                     throw new InvalidOperationException("Cannot extract wind data - no data source is configured");
                 WindProgress.JobStarting(job);
                 CheckDestinationDirectory(job.DestinationFilename);
                 var wind = new Wind();
                 foreach (var month in NAVOConfiguration.AllMonths)
                 {
-                    var monthlyWind = PluginManagerService.WindSource.Extract(job.GeoRect, 60, month);
+                    var monthlyWind = ((EnvironmentalDataSourcePluginBase<Wind>)PluginManagerService[PluginType.EnvironmentalDataSource, PluginSubtype.Wind]).Extract(job.GeoRect, 60, month);
                     wind.TimePeriods.Add(monthlyWind[month]);
                 }
                 //var wind = await SMGC.ImportAsync(job.GeoRect);
@@ -153,11 +153,11 @@ namespace ESME.Environment
             {
                 try
                 {
-                    if (PluginManagerService == null || PluginManagerService.BathymetrySource == null)
+                    if (PluginManagerService[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry] == null)
                         throw new InvalidOperationException("Cannot extract bathymetry data - no data source is configured");
                     BathymetryProgress.JobStarting(job);
                     CheckDestinationDirectory(job.DestinationFilename);
-                    var bathymetry = PluginManagerService.BathymetrySource.Extract(job.GeoRect, job.Resolution);
+                    var bathymetry = ((EnvironmentalDataSourcePluginBase<Bathymetry>)PluginManagerService[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry]).Extract(job.GeoRect, job.Resolution);
                     //var bathymetry = DBDB.Extract(job.Resolution, job.GeoRect);
                     bathymetry.Save(job.DestinationFilename);
                     job.SampleCount = (uint)bathymetry.Samples.Count;
