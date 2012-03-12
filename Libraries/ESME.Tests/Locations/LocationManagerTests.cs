@@ -15,7 +15,6 @@ namespace ESME.Tests.Locations
     {
         readonly string _locationRootDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME.LocationService Tests");
         const string PluginDirectory = @"C:\Projects\ESME Deliverables\Libraries\ESME.Tests\bin\Debug";
-        PluginManagerService _pluginManager;
 
         [Test, RequiresSTA]
         public void EmptyDatabase()
@@ -33,14 +32,18 @@ namespace ESME.Tests.Locations
             Assert.AreEqual("Created", location.LocationLogEntries.First().LogEntry.Message);
             Assert.Throws(typeof(DuplicateNameException), () => locationManager.AddLocation("Mass Bay", "These are some comments", 43, 42, -71, -70));
             Assert.AreEqual(1, locationManager.Locations.Count());
-            _pluginManager = _pluginManager ?? new PluginManagerService {PluginDirectory = PluginDirectory};
+            var pluginManager = new PluginManagerService {PluginDirectory = PluginDirectory};
+            var importManager = new EnvironmentalDatabaseImportService(pluginManager, locationManager);
             var windCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
             {
                 PluginType = PluginType.EnvironmentalDataSource,
                 PluginSubtype = PluginSubtype.Wind,
                 Type = typeof(InstallableNAVOPlugin.SMGC20ForESME).ToString(),
             });
-            foreach (var month in NAVOConfiguration.AllMonths) locationManager.AddEnvironmentDataSet(windCollection, 60, month);
+            foreach (var month in NAVOConfiguration.AllMonths)
+            {
+                importManager.BeginImport(locationManager.AddEnvironmentDataSet(windCollection, 60, month));
+            }
             var soundSpeedCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
             {
                 PluginType = PluginType.EnvironmentalDataSource,
