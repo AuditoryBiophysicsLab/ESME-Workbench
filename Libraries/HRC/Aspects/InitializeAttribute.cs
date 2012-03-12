@@ -13,7 +13,11 @@ namespace HRC.Aspects
 
         readonly object _defaultValue;
         bool _firstTime = true;
-        
+        public override void OnSetValue(LocationInterceptionArgs args)
+        {
+            _firstTime = false;
+            args.ProceedSetValue();
+        }
         public override void OnGetValue(LocationInterceptionArgs args)
         {
             if (_firstTime)
