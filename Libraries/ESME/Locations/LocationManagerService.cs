@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using ESME.Database;
 using ESME.Environment;
+using ESME.Plugins;
 using HRC.Aspects;
 using HRC.Navigation;
 using MEFedMVVM.ViewModelLocator;
@@ -18,7 +19,7 @@ namespace ESME.Locations
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ExportService(ServiceType.Both, typeof(LocationManagerService))]
     [NotifyPropertyChanged]
-    public class LocationManagerService
+    public class LocationManagerService : IDisposable
     {
         string _locationRootDirectory;
 
@@ -64,7 +65,7 @@ namespace ESME.Locations
             return result;
         }
 
-        public void SaveChanges()
+        void SaveChanges()
         {
             lock (_context)
             {
@@ -97,7 +98,7 @@ namespace ESME.Locations
             SaveChanges();
         }
 
-        public EnvironmentalDataSetCollection AddEnvironmentDataSetCollection(Location location, DbPluginIdentifier sourcePlugin)
+        public EnvironmentalDataSetCollection AddEnvironmentDataSetCollection(Location location, PluginIdentifier sourcePlugin)
         {
             var environmentalDataSetCollection = new EnvironmentalDataSetCollection
             {
@@ -105,8 +106,7 @@ namespace ESME.Locations
                 SourcePlugin = sourcePlugin,
                 CreationInfo = new DbWhoWhenWhere(true),
             };
-            AddLocationLogEntry(location, string.Format("Added new data set collection. Source plugin: {0} ", sourcePlugin));
-            location.EnvironmentalDataSetCollections.Add(environmentalDataSetCollection);
+            AddLocationLogEntry(location, string.Format("Added new {0} data set collection. Source plugin: {1}", sourcePlugin.PluginSubtype, sourcePlugin.Type));
             _context.EnvironmentalDataSetCollections.Add(environmentalDataSetCollection);
             SaveChanges();
             return environmentalDataSetCollection;
@@ -123,7 +123,6 @@ namespace ESME.Locations
                     MessageSource = new DbWhoWhenWhere(true),
                 },
             };
-            collection.LogEntries.Add(logEntry);
             _context.EnvironmentalDataSetCollectionLogEntries.Add(logEntry);
             SaveChanges();
         }
@@ -144,5 +143,37 @@ namespace ESME.Locations
             SaveChanges();
             return environmentalDataSet;
         }
+
+        #region IDisposable implementation
+        public void Dispose() 
+        { 
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        bool _disposed;
+        // Dispose(bool disposing) executes in two distinct scenarios.
+        // If disposing equals true, the method has been called directly
+        // or indirectly by a user's code. Managed and unmanaged resources
+        // can be disposed.
+        // If disposing equals false, the method has been called by the
+        // runtime from inside the finalizer and you should not reference
+        // other objects. Only unmanaged resources can be disposed.
+        protected virtual void Dispose(bool disposing)
+        {
+            // Check to see if Dispose has already been called.
+            if (_disposed) return;
+            // If disposing equals true, dispose all managed
+            // and unmanaged resources.
+            if (disposing)
+            {
+                // Dispose managed resources.
+                _context.Dispose();
+            }
+
+            // Note disposing has been done.
+            _disposed = true;
+        }
+        ~LocationManagerService() { Dispose(false); }
+        #endregion
     }
 }

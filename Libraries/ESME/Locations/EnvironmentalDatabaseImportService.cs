@@ -65,7 +65,7 @@ namespace ESME.Locations
                         throw new ApplicationException(string.Format("Unknown environmental data type {0}", sourcePlugin.EnvironmentDataType));
                 }
                 dataSet.FileSize = new FileInfo(fileName).Length;
-                _locationManagerService.SaveChanges();
+                //_locationManagerService.SaveChanges();
             }, new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = taskScheduler,

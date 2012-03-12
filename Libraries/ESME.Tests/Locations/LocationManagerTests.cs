@@ -1,6 +1,9 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.IO;
 using System.Linq;
+using ESME.Database;
+using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
 using NUnit.Framework;
@@ -9,25 +12,121 @@ namespace ESME.Tests.Locations
 {
     public class LocationManagerTests
     {
-        [Test]
+        readonly string _locationRootDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME.LocationService Tests");
+        const string PluginDirectory = @"C:\Projects\ESME Deliverables\Libraries\ESME.Tests\bin\Debug";
+        PluginManagerService _pluginManager;
+
+        [Test, RequiresSTA]
         public void EmptyDatabase()
         {
-            var locationRootDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME.LocationService Tests");
-            if (Directory.Exists(locationRootDirectory)) Directory.Delete(locationRootDirectory, true);
-            Assert.IsFalse(Directory.Exists(locationRootDirectory));
-            var locationService = new LocationManagerService { LocationRootDirectory = locationRootDirectory };
-            Assert.IsTrue(Directory.Exists(locationRootDirectory));
-            Assert.AreEqual(0, locationService.Locations.Count());
-            locationService.AddLocation("Location1", "These are some comments", 45, 44, -81, -80);
-            Assert.AreEqual(1, locationService.Locations.Count());
-            var location = locationService.Locations.First();
-            Assert.AreEqual("Location1", location.Name);
+            if (Directory.Exists(_locationRootDirectory)) Directory.Delete(_locationRootDirectory, true);
+            Assert.IsFalse(Directory.Exists(_locationRootDirectory));
+            var locationManager = new LocationManagerService { LocationRootDirectory = _locationRootDirectory };
+            Assert.IsTrue(Directory.Exists(_locationRootDirectory));
+            Assert.AreEqual(0, locationManager.Locations.Count());
+            locationManager.AddLocation("Mass Bay", "These are some comments", 43, 42, -71, -70);
+            Assert.AreEqual(1, locationManager.Locations.Count());
+            var location = locationManager.Locations.First();
+            Assert.AreEqual("Mass Bay", location.Name);
             Assert.AreEqual(1, location.LocationLogEntries.Count);
             Assert.AreEqual("Created", location.LocationLogEntries.First().LogEntry.Message);
-            Assert.Throws(typeof(DuplicateNameException), () => locationService.AddLocation("Location1", "These are some comments", 45, 44, -81, -80));
-            Assert.AreEqual(1, locationService.Locations.Count());
-            const string pluginDirectory = @"C:\Projects\ESME Deliverables\Libraries\ESME.Tests\bin\Debug";
-            var pluginManager = new PluginManagerService {PluginDirectory = pluginDirectory};
+            Assert.Throws(typeof(DuplicateNameException), () => locationManager.AddLocation("Mass Bay", "These are some comments", 43, 42, -71, -70));
+            Assert.AreEqual(1, locationManager.Locations.Count());
+            _pluginManager = _pluginManager ?? new PluginManagerService {PluginDirectory = PluginDirectory};
+            locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            {
+                PluginType = PluginType.EnvironmentalDataSource,
+                PluginSubtype = PluginSubtype.Wind,
+                Type = typeof(InstallableNAVOPlugin.SMGC20ForESME).ToString(),
+            });
+            locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            {
+                PluginType = PluginType.EnvironmentalDataSource,
+                PluginSubtype = PluginSubtype.SoundSpeed,
+                Type = typeof(InstallableNAVOPlugin.DBDB54ForESME).ToString(),
+            });
+            locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            {
+                PluginType = PluginType.EnvironmentalDataSource,
+                PluginSubtype = PluginSubtype.Sediment,
+                Type = typeof(InstallableNAVOPlugin.BST20ForESME).ToString(),
+            });
+            locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            {
+                PluginType = PluginType.EnvironmentalDataSource,
+                PluginSubtype = PluginSubtype.Bathymetry,
+                Type = typeof(InstallableNAVOPlugin.DBDB54ForESME).ToString(),
+            });
+            DumpLocationDatabase(locationManager);
+        }
+
+        [Test]
+        public void DumpDatabase()
+        {
+            using(var locationManager = new LocationManagerService { LocationRootDirectory = _locationRootDirectory })
+                DumpLocationDatabase(locationManager);
+        }
+
+        public void DumpLocationDatabase(LocationManagerService locationService, bool dumpLogs = false)
+        {
+            foreach (var location in locationService.Locations)
+            {
+                DumpLocation(location);
+                if (dumpLogs) foreach (var locationLogEntry in location.LocationLogEntries) DumpLocationLogEntry(locationLogEntry);
+                Console.WriteLine();
+                foreach (var collection in location.EnvironmentalDataSetCollections)
+                {
+                    DumpEnvironmentalDataSetCollection(collection);
+                    if (collection.EnvironmentalDataSets != null)
+                        foreach (var dataSet in collection.EnvironmentalDataSets)
+                            DumpEnvironmentalDataSet(dataSet);
+                }
+            }
+        }
+
+        public void DumpLocation(Location location)
+        {
+            Console.WriteLine("       Location name: {0}", location.Name);
+            //Console.WriteLine("  Location ID: {0}", location.LocationID);
+            Console.WriteLine("            Comments: {0}", location.Comments);
+            Console.WriteLine("          Created by: {0}", location.CreationInfo);
+            Console.WriteLine("               North: {0}", location.GeoRect.North);
+            Console.WriteLine("               South: {0}", location.GeoRect.South);
+            Console.WriteLine("                East: {0}", location.GeoRect.East);
+            Console.WriteLine("                West: {0}", location.GeoRect.West);
+            Console.WriteLine("           Directory: {0}", location.StorageDirectory);
+            if (location.EnvironmentalDataSetCollections == null)
+                Console.WriteLine("Data set collections: (none)");
+            else 
+                Console.WriteLine("Data set collections: {0}", location.EnvironmentalDataSetCollections.Count);
+        }
+
+        public void DumpEnvironmentalDataSetCollection(EnvironmentalDataSetCollection collection)
+        {
+            Console.WriteLine("    Data set collection: {0} from {1}", collection.SourcePlugin.PluginSubtype, collection.SourcePlugin.Type);
+            Console.WriteLine("             Created by: {0}", collection.CreationInfo);
+            if (collection.EnvironmentalDataSets == null)
+                Console.WriteLine("              Data sets: (none)");
+            else
+                Console.WriteLine("              Data sets: {0}", collection.EnvironmentalDataSets.Count);
+        }
+
+        public void DumpEnvironmentalDataSet(EnvironmentalDataSet dataSet)
+        {
+            Console.WriteLine("            Data set file: {0} ({1} bytes)", dataSet.FileName, dataSet.FileSize);
+            Console.WriteLine("               Resolution: {0} ({1} samples)", dataSet.Resolution, dataSet.SampleCount);
+            if (dataSet.TimePeriod != TimePeriod.Invalid)
+                Console.WriteLine("              Time period: {0}", dataSet.TimePeriod);
+            Console.WriteLine("               Created by: {0}", dataSet.CreationInfo);
+        }
+
+        public void DumpLocationLogEntry(LocationLogEntry logEntry)
+        {
+            Console.WriteLine("           Log message: {0}", logEntry.LogEntry.Message);
+            //Console.WriteLine("     Message ID: {0}", logEntry.LocationLogEntryID);
+            Console.WriteLine("             Logged by: {0}", logEntry.LogEntry.MessageSource);
+            if (logEntry.LogEntry.OldSourceID.HasValue)
+                Console.WriteLine("         Old source ID: {0}", logEntry.LogEntry.OldSourceID);
         }
     }
 }

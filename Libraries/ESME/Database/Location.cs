@@ -44,7 +44,7 @@ namespace ESME.Database
     {
         public DbWhoWhenWhere MessageSource { get; set; }
         public string Message { get; set; }
-        public int? OldSourceID { get; set; }        
+        public int? OldSourceID { get; set; }
     }
 
     public class LocationLogEntry
