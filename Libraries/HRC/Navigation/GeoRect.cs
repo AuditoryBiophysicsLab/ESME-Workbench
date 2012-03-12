@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Xml.Serialization;
 using Cinch;
@@ -19,9 +20,14 @@ namespace HRC.Navigation
             South = south;
             East = east;
             West = west;
+            Validate();
         }
 
-        public GeoRect(Rect rect) { FromRect(rect); }
+        public GeoRect(Rect rect)
+        {
+            FromRect(rect);
+            Validate();
+        }
 
         public GeoRect(GeoRect geoRect)
         {
@@ -29,6 +35,7 @@ namespace HRC.Navigation
             South = geoRect.South;
             East = geoRect.East;
             West = geoRect.West;
+            Validate();
         }
 
         public GeoRect(IEnumerable<Geo> geoList)
@@ -44,6 +51,13 @@ namespace HRC.Navigation
                 East = Math.Max(East, geo.Longitude);
                 West = Math.Min(West, geo.Longitude);
             }
+            Validate();
+        }
+
+        void Validate()
+        {
+            if (North >= South && East >= West) return;
+            throw new ApplicationException(string.Format("Poorly-formed GeoRect: North={0} South={1} East={2} West={3}", North, South, East, West));
         }
 
         #region public double North { get; set; }
@@ -140,13 +154,18 @@ namespace HRC.Navigation
             South = Math.Min(South, geoRect.South);
             East = Math.Max(East, geoRect.East);
             West = Math.Min(West, geoRect.West);
+            Validate();
         }
 
         /// <summary>
         ///   Expands the current GeoRect exactly enough to contain the specified rectangle.
         /// </summary>
         /// <param name = "rect"></param>
-        public void Union(Rect rect) { FromRect(Rect.Union(this, rect)); }
+        public void Union(Rect rect)
+        {
+            FromRect(Rect.Union(this, rect));
+            Validate();
+        }
 
         /// <summary>
         ///   Expands the current GeoRect exactly enough to contain the specified EarthCoordinate.
@@ -158,6 +177,7 @@ namespace HRC.Navigation
             South = Math.Min(South, geo.Latitude);
             East = Math.Max(East, geo.Longitude);
             West = Math.Min(West, geo.Longitude);
+            Validate();
         }
 
         /// <summary>
@@ -185,6 +205,7 @@ namespace HRC.Navigation
             if (geoRects.Length == 0) return null;
             var result = new GeoRect(geoRects[0]);
             if (geoRects.Length > 1) for (var i = 1; i < geoRects.Length; i++) result.Union(geoRects[i]);
+            result.Validate();
             return result;
         }
 
@@ -209,7 +230,8 @@ namespace HRC.Navigation
         /// <returns></returns>
         public bool Contains(Geo geo)
         {
-            return North <= geo.Latitude && geo.Latitude <= South && West <= geo.Longitude && geo.Longitude <= East;
+            //if (South <= geo.Latitude && geo.Latitude <= North && West <= geo.Longitude && geo.Longitude <= East) Debugger.Break();
+            return South <= geo.Latitude && geo.Latitude <= North && West <= geo.Longitude && geo.Longitude <= East;
         }
 
         /// <summary>
@@ -331,6 +353,7 @@ namespace HRC.Navigation
             South = rect.Top;
             East = rect.Right;
             West = rect.Left;
+            Validate();
         }
     }
 }

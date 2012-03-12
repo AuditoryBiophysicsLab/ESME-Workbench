@@ -71,8 +71,7 @@ namespace InstallableNAVOPlugin
         {
             CheckResolutionAndTimePeriod(resolution, timePeriod);
             var timePeriodData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = timePeriod };
-            timePeriodData.EnvironmentData.AddRange(GlobalDataset[timePeriod].EnvironmentData);
-            timePeriodData.EnvironmentData.TrimToNearestPoints(geoRect);
+            timePeriodData.EnvironmentData.AddRange(GlobalDataset[timePeriod].EnvironmentData.PointsWithin(geoRect));
             var result = new Wind();
             result.TimePeriods.Add(timePeriodData);
             return result;

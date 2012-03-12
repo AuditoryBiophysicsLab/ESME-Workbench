@@ -2,6 +2,8 @@
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Windows.Threading;
 using ESME.Database;
 using ESME.Environment;
 using ESME.Environment.NAVO;
@@ -17,23 +19,67 @@ namespace ESME.Tests.Locations
         const string PluginDirectory = @"C:\Projects\ESME Deliverables\Libraries\ESME.Tests\bin\Debug";
 
         [Test, RequiresSTA]
-        public void EmptyDatabase()
+        public void DispatcherTest()
         {
             if (Directory.Exists(_locationRootDirectory)) Directory.Delete(_locationRootDirectory, true);
+            for (var i = 0; i < 10; i++ ) if (Directory.Exists(_locationRootDirectory)) Thread.Sleep(100);
             Assert.IsFalse(Directory.Exists(_locationRootDirectory));
             var locationManager = new LocationManagerService { LocationRootDirectory = _locationRootDirectory };
             Assert.IsTrue(Directory.Exists(_locationRootDirectory));
+
+            var dispatcher = Dispatcher.CurrentDispatcher;
+            Assert.NotNull(dispatcher);
+            dispatcher.BeginInvoke(new Action(() =>
+            {
+                var importManager = new EnvironmentalDatabaseImportService(new PluginManagerService {PluginDirectory = PluginDirectory},
+                                                                           locationManager);
+                dispatcher.BeginInvoke(new Action(() => EmptyAndFillDatabase(locationManager, importManager)), DispatcherPriority.Normal);
+            }), DispatcherPriority.Background);
+            dispatcher.ShutdownStarted += (s, e) => Console.WriteLine("Dispatcher shutdown started");
+            dispatcher.ShutdownFinished += (s, e) => Console.WriteLine("Dispatcher shutdown finished");
+            dispatcher.Hooks.DispatcherInactive += (s, e) =>
+            {
+                Console.WriteLine("Dispatcher is now inactive");
+                dispatcher.BeginInvokeShutdown(DispatcherPriority.Background);
+            };
+            while (!dispatcher.HasShutdownFinished) Thread.Sleep(1000);
+        }
+
+        public void EmptyAndFillDatabase(LocationManagerService locationManager, EnvironmentalDatabaseImportService importManager)
+        {
             Assert.AreEqual(0, locationManager.Locations.Count());
-            locationManager.AddLocation("Mass Bay", "These are some comments", 43, 42, -71, -70);
+            locationManager.AddLocation("Mass Bay", "These are some comments", 44, 41, -69, -72);
             Assert.AreEqual(1, locationManager.Locations.Count());
             var location = locationManager.Locations.First();
             Assert.AreEqual("Mass Bay", location.Name);
             Assert.AreEqual(1, location.LocationLogEntries.Count);
             Assert.AreEqual("Created", location.LocationLogEntries.First().LogEntry.Message);
-            Assert.Throws(typeof(DuplicateNameException), () => locationManager.AddLocation("Mass Bay", "These are some comments", 43, 42, -71, -70));
+            Assert.Throws(typeof(DuplicateNameException), () => locationManager.AddLocation("Mass Bay", "These are some comments", 44, 41, -69, -72));
             Assert.AreEqual(1, locationManager.Locations.Count());
-            var pluginManager = new PluginManagerService {PluginDirectory = PluginDirectory};
-            var importManager = new EnvironmentalDatabaseImportService(pluginManager, locationManager);
+            Assert.NotNull(importManager);
+            var soundSpeedCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            {
+                PluginType = PluginType.EnvironmentalDataSource,
+                PluginSubtype = PluginSubtype.SoundSpeed,
+                Type = typeof(InstallableNAVOPlugin.GDEM3ForESME).ToString(),
+            });
+            foreach (var month in NAVOConfiguration.AllMonths) importManager.BeginImport(locationManager.AddEnvironmentDataSet(soundSpeedCollection, 15, month), new TestProgress { DataType = "SoundSpeed", TimePeriod = month, Resolution = 15 });
+            var sedimentCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            {
+                PluginType = PluginType.EnvironmentalDataSource,
+                PluginSubtype = PluginSubtype.Sediment,
+                Type = typeof(InstallableNAVOPlugin.BST20ForESME).ToString(),
+            });
+            importManager.BeginImport(locationManager.AddEnvironmentDataSet(sedimentCollection, 5f, TimePeriod.Invalid), new TestProgress { DataType = "Sediment", Resolution = 5 });
+            var bathymetryCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            {
+                PluginType = PluginType.EnvironmentalDataSource,
+                PluginSubtype = PluginSubtype.Bathymetry,
+                Type = typeof(InstallableNAVOPlugin.DBDB54ForESME).ToString(),
+            });
+            importManager.BeginImport(locationManager.AddEnvironmentDataSet(bathymetryCollection, 2f, TimePeriod.Invalid), new TestProgress { DataType = "Bathymetry", Resolution = 2 });
+            importManager.BeginImport(locationManager.AddEnvironmentDataSet(bathymetryCollection, 1f, TimePeriod.Invalid), new TestProgress { DataType = "Bathymetry", Resolution = 1 });
+            importManager.BeginImport(locationManager.AddEnvironmentDataSet(bathymetryCollection, 0.5f, TimePeriod.Invalid), new TestProgress { DataType = "Bathymetry", Resolution = 0.5f });
             var windCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
             {
                 PluginType = PluginType.EnvironmentalDataSource,
@@ -41,32 +87,12 @@ namespace ESME.Tests.Locations
                 Type = typeof(InstallableNAVOPlugin.SMGC20ForESME).ToString(),
             });
             foreach (var month in NAVOConfiguration.AllMonths)
+                importManager.BeginImport(locationManager.AddEnvironmentDataSet(windCollection, 60, month), new TestProgress { DataType = "Wind", TimePeriod = month, Resolution = 60 });
+            while (importManager.BusyCount > 0)
             {
-                importManager.BeginImport(locationManager.AddEnvironmentDataSet(windCollection, 60, month));
+                Console.WriteLine("Waiting for import manager.  Busy count = {0}", importManager.BusyCount);
+                Thread.Sleep(1000);
             }
-            var soundSpeedCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
-            {
-                PluginType = PluginType.EnvironmentalDataSource,
-                PluginSubtype = PluginSubtype.SoundSpeed,
-                Type = typeof(InstallableNAVOPlugin.DBDB54ForESME).ToString(),
-            });
-            foreach (var month in NAVOConfiguration.AllMonths) locationManager.AddEnvironmentDataSet(soundSpeedCollection, 15, month);
-            var sedimentCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
-            {
-                PluginType = PluginType.EnvironmentalDataSource,
-                PluginSubtype = PluginSubtype.Sediment,
-                Type = typeof(InstallableNAVOPlugin.BST20ForESME).ToString(),
-            });
-            locationManager.AddEnvironmentDataSet(sedimentCollection, 5f, TimePeriod.Invalid);
-            var bathymetryCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
-            {
-                PluginType = PluginType.EnvironmentalDataSource,
-                PluginSubtype = PluginSubtype.Bathymetry,
-                Type = typeof(InstallableNAVOPlugin.DBDB54ForESME).ToString(),
-            });
-            locationManager.AddEnvironmentDataSet(bathymetryCollection, 2f, TimePeriod.Invalid);
-            locationManager.AddEnvironmentDataSet(bathymetryCollection, 1f, TimePeriod.Invalid);
-            locationManager.AddEnvironmentDataSet(bathymetryCollection, 0.5f, TimePeriod.Invalid);
             DumpLocationDatabase(locationManager);
         }
 
@@ -138,6 +164,21 @@ namespace ESME.Tests.Locations
             Console.WriteLine("             Logged by: {0}", logEntry.LogEntry.MessageSource);
             if (logEntry.LogEntry.OldSourceID.HasValue)
                 Console.WriteLine("         Old source ID: {0}", logEntry.LogEntry.OldSourceID);
+        }
+    }
+
+    public class TestProgress : IProgress<float>
+    {
+        public TestProgress() { TimePeriod = TimePeriod.Invalid; }
+        public string DataType { get; set; }
+        public TimePeriod TimePeriod { get; set; }
+        public float Resolution { get; set; }
+        public float PercentComplete { get; private set; }
+
+        public void Report(float value) 
+        { 
+            Console.WriteLine("{0,10}{1,12}[{2,3} min]: {3,3}%", DataType, TimePeriod == TimePeriod.Invalid ? "" : string.Format("({0})", TimePeriod), Resolution, value);
+            PercentComplete = value;
         }
     }
 }

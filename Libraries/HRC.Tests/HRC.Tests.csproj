@@ -82,6 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\TestNotifyPropertyChangedAttribute.cs" />
+    <Compile Include="Navigation\GeoRectTests.cs" />
     <Compile Include="Navigation\GeoTests.cs" />
     <Compile Include="NetCDF\NetCDFFileTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

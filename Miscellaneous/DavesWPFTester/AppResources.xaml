@@ -1,7 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
-                    xmlns:Navigation="clr-namespace:HRC.Navigation;assembly=HRC">
+                    xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC">
 
     <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed"
                                       FalseValue="Collapsed"
@@ -9,30 +8,4 @@
     <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed"
                                       FalseValue="Visible"
                                       TrueValue="Collapsed" />
-    <DataTemplate x:Key="GeoRectTemplate" DataType="{x:Type Navigation:GeoRect}">
-        <TreeViewItem Header="Limits">
-            <StackPanel Orientation="Vertical">
-                <TextBlock>
-                    <Run Text="North: " />
-                    <Run Text="{Binding North, StringFormat={}{0:0.0000}}" />
-                    <Run Text="deg" />
-                </TextBlock>
-                <TextBlock>
-                    <Run Text="South: " />
-                    <Run Text="{Binding South, StringFormat={}{0:0.0000}}" />
-                    <Run Text="deg" />
-                </TextBlock>
-                <TextBlock>
-                    <Run Text="East: " />
-                    <Run Text="{Binding East, StringFormat={}{0:0.0000}}" />
-                    <Run Text="deg" />
-                </TextBlock>
-                <TextBlock>
-                    <Run Text="West: " />
-                    <Run Text="{Binding West, StringFormat={}{0:0.0000}}" />
-                    <Run Text="deg" />
-                </TextBlock>
-            </StackPanel>
-        </TreeViewItem>
-    </DataTemplate>
 </ResourceDictionary>

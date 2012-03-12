@@ -390,6 +390,14 @@ namespace ESME.Environment
             _arrayList.RemoveAll(point => (point != null) && (!trimRect.Contains(point)));
         }
 
+        public EnvironmentData<T> PointsWithin(GeoRect geoRect)
+        {
+            var result = new EnvironmentData<T>();
+            var expandedGeoRect = GeoRect.Inflate(geoRect, 0.01);
+            result.AddRange(this.Where(expandedGeoRect.Contains));
+            return result;
+        }
+
         #region List<T> overrides
         public void Add(T item)
         {

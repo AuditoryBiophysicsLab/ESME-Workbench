@@ -22,7 +22,6 @@ namespace ESME.Locations
     public class LocationManagerService : IDisposable
     {
         string _locationRootDirectory;
-
         public string LocationRootDirectory
         {
             get { return _locationRootDirectory; }
@@ -132,7 +131,7 @@ namespace ESME.Locations
             var environmentalDataSet = new EnvironmentalDataSet
             {
                 CreationInfo = new DbWhoWhenWhere(true),
-                FileName = Path.GetRandomFileName(),
+                FileName = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + "." + collection.SourcePlugin.PluginSubtype.ToString().ToLower(),
                 Resolution = resolution,
                 TimePeriod = timePeriod,
                 EnvironmentalDataSetCollection = collection,

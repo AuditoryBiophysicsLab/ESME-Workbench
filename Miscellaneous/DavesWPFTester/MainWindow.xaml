@@ -2,7 +2,6 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:app="clr-namespace:DavesWPFTester"
-        xmlns:controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
@@ -12,25 +11,7 @@
         SizeToContent="WidthAndHeight"
         SnapsToDevicePixels="True"
         mc:Ignorable="d">
-    <StackPanel Grid.IsSharedSizeScope="True" Orientation="Vertical">
-        <controls:PluginSelector Grid.Row="0"
-                                 ItemsSource="{Binding PluginManager[EnvironmentalDataSource][Wind].Values}"
-                                 PluginTypeName="Wind"
-                                 SelectedItem="{Binding PluginManager[EnvironmentalDataSource][Wind].DefaultPlugin}" />
-        <Separator Margin="0 5 0 10" />
-        <controls:PluginSelector Grid.Row="1"
-                                 ItemsSource="{Binding PluginManager[EnvironmentalDataSource][Sound Speed].Values}"
-                                 PluginTypeName="Sound Speed"
-                                 SelectedItem="{Binding PluginManager[EnvironmentalDataSource][Sound Speed].DefaultPlugin}" />
-        <Separator Margin="0 5 0 10" />
-        <controls:PluginSelector Grid.Row="2"
-                                 ItemsSource="{Binding PluginManager[EnvironmentalDataSource][Sediment].Values}"
-                                 PluginTypeName="Sediment"
-                                 SelectedItem="{Binding PluginManager[EnvironmentalDataSource][Sediment].DefaultPlugin}" />
-        <Separator Margin="0 5 0 10" />
-        <controls:PluginSelector Grid.Row="3"
-                                 ItemsSource="{Binding PluginManager[EnvironmentalDataSource][Bathymetry].Values}"
-                                 PluginTypeName="Bathymetry"
-                                 SelectedItem="{Binding PluginManager[EnvironmentalDataSource][Bathymetry].DefaultPlugin}" />
+    <StackPanel Orientation="Vertical">
+        <Button Command="{Binding FillDatabaseCommand}" Content="Fill database..." />
     </StackPanel>
 </Window>
