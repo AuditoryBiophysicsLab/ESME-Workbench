@@ -1,5 +1,4 @@
-﻿#if false
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -8,7 +7,6 @@ using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
-using HRC.Aspects;
 using HRC.Collections;
 using HRC.Utility;
 using HRC.Validation;
@@ -43,13 +41,13 @@ namespace ESME.Data
 
         public void SetDefaults()
         {
-          if (RAMSettings != null) RAMSettings.SetDefaults();
+          if (OldRAMSettings != null) OldRAMSettings.SetDefaults();
           //if (DefaultPluginIdentifiers == null || DefaultPluginIdentifiers.Count == 0) SetDefaultPluginIdentifiers();
         }
 
         public void Save()
         {
-            var serializer = new XmlSerializer<AppSettings> { Data = this };
+            var serializer = new XmlSerializer<OldAppSettings> { Data = this };
             serializer.Save(AppSettingsFile, ReferencedTypes);
         }
 
@@ -57,7 +55,7 @@ namespace ESME.Data
         {
             if (referencedTypes == null) referencedTypes = ReferencedTypes;
             else referencedTypes.AddRange(ReferencedTypes);
-            var serializer = new XmlSerializer<AppSettings> { Data = this };
+            var serializer = new XmlSerializer<OldAppSettings> { Data = this };
             serializer.Save(AppSettingsFile, referencedTypes);
         }
 
@@ -98,14 +96,14 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs OpenFileServiceDirectoriesChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.OpenFileServiceDirectories);
+        static readonly PropertyChangedEventArgs OpenFileServiceDirectoriesChangedEventArgs = ObservableHelper.CreateArgs<OldAppSettings>(x => x.OpenFileServiceDirectories);
         SerializableDictionary<string, string> _openFileServiceDirectories;
 
         #endregion
 
         #region public string ScenarioDataDirectory { get; set; }
 
-        static readonly PropertyChangedEventArgs ScenarioDataDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioDataDirectory);
+        static readonly PropertyChangedEventArgs ScenarioDataDirectoryChangedEventArgs = ObservableHelper.CreateArgs<OldAppSettings>(x => x.ScenarioDataDirectory);
         string _scenarioDataDirectory;
 
         public string ScenarioDataDirectory
@@ -151,11 +149,11 @@ namespace ESME.Data
 
         #endregion
 
-        #region public BellhopSettings BellhopSettings { get; set; }
+        #region public OldBellhopSettings OldBellhopSettings { get; set; }
 
-        public BellhopSettings BellhopSettings
+        public OldBellhopSettings OldBellhopSettings
         {
-            get { return _bellhopSettings ?? (_bellhopSettings = new BellhopSettings()); }
+            get { return _bellhopSettings ?? (_bellhopSettings = new OldBellhopSettings()); }
             set
             {
                 if (_bellhopSettings == value) return;
@@ -164,16 +162,16 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs BellhopSettingsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.BellhopSettings);
-        BellhopSettings _bellhopSettings;
+        static readonly PropertyChangedEventArgs BellhopSettingsChangedEventArgs = ObservableHelper.CreateArgs<OldAppSettings>(x => x.OldBellhopSettings);
+        OldBellhopSettings _bellhopSettings;
 
         #endregion
 
-        #region public RAMSettings RAMSettings { get; set; }
+        #region public OldRAMSettings OldRAMSettings { get; set; }
 
-        public RAMSettings RAMSettings
+        public OldRAMSettings OldRAMSettings
         {
-            get { return _ramSettings ?? (_ramSettings = new RAMSettings()); }
+            get { return _ramSettings ?? (_ramSettings = new OldRAMSettings()); }
             set
             {
                 if (_ramSettings == value) return;
@@ -182,8 +180,8 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs RamSettingsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.RAMSettings);
-        RAMSettings _ramSettings;
+        static readonly PropertyChangedEventArgs RamSettingsChangedEventArgs = ObservableHelper.CreateArgs<OldAppSettings>(x => x.OldRAMSettings);
+        OldRAMSettings _ramSettings;
 
         #endregion
 
@@ -200,7 +198,7 @@ namespace ESME.Data
             }
         }
 
-        private static readonly PropertyChangedEventArgs NAVOConfigurationChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.NAVOConfiguration);
+        private static readonly PropertyChangedEventArgs NAVOConfigurationChangedEventArgs = ObservableHelper.CreateArgs<OldAppSettings>(x => x.NAVOConfiguration);
         NAVOConfiguration _navoConfiguration;
 
         #endregion
@@ -220,7 +218,7 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs ExperimentDirectoriesChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ExperimentFiles);
+        static readonly PropertyChangedEventArgs ExperimentDirectoriesChangedEventArgs = ObservableHelper.CreateArgs<OldAppSettings>(x => x.ExperimentFiles);
         List<string> _experimentFiles;
 
         /// <summary>
@@ -257,7 +255,7 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs DisplayContoursOnTransmissionLossChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.DisplayContoursOnTransmissionLoss);
+        static readonly PropertyChangedEventArgs DisplayContoursOnTransmissionLossChangedEventArgs = ObservableHelper.CreateArgs<OldAppSettings>(x => x.DisplayContoursOnTransmissionLoss);
         bool _displayContoursOnTransmissionLoss = true;
 
         #endregion
@@ -275,7 +273,7 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs TransmissionLossContourThresholdChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.TransmissionLossContourThreshold);
+        static readonly PropertyChangedEventArgs TransmissionLossContourThresholdChangedEventArgs = ObservableHelper.CreateArgs<OldAppSettings>(x => x.TransmissionLossContourThreshold);
         float _transmissionLossContourThreshold = 120;
 
         #endregion
@@ -293,7 +291,7 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs MaxImportThreadCountChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.MaxImportThreadCount);
+        static readonly PropertyChangedEventArgs MaxImportThreadCountChangedEventArgs = ObservableHelper.CreateArgs<OldAppSettings>(x => x.MaxImportThreadCount);
         int _maxImportThreadCount = 4;
 
         #endregion
@@ -347,13 +345,13 @@ namespace ESME.Data
             }
         }
 
-        private static readonly PropertyChangedEventArgs LocationRootDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.LocationDirectory);
+        private static readonly PropertyChangedEventArgs LocationRootDirectoryChangedEventArgs = ObservableHelper.CreateArgs<OldAppSettings>(x => x.LocationDirectory);
         string _locationDirectory;
 
         #endregion
     }
 
-    public sealed class PluginSelection : ValidatingViewModel
+    public sealed class OldPluginSelection : ValidatingViewModel
     {
         #region public string DllFilename { get; set; }
 
@@ -368,7 +366,7 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs DllFilenameChangedEventArgs = ObservableHelper.CreateArgs<PluginSelection>(x => x.DllFilename);
+        static readonly PropertyChangedEventArgs DllFilenameChangedEventArgs = ObservableHelper.CreateArgs<OldPluginSelection>(x => x.DllFilename);
         string _dllFilename;
 
         #endregion
@@ -386,15 +384,15 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs ClassNameChangedEventArgs = ObservableHelper.CreateArgs<PluginSelection>(x => x.ClassName);
+        static readonly PropertyChangedEventArgs ClassNameChangedEventArgs = ObservableHelper.CreateArgs<OldPluginSelection>(x => x.ClassName);
         string _className;
 
         #endregion
     }
 
-    public sealed class RAMSettings : ValidatingViewModel
+    public sealed class OldRAMSettings : ValidatingViewModel
     {
-        public RAMSettings()
+        public OldRAMSettings()
         {
             ValidationRules.AddRange(new List<ValidationRule>
                                          {
@@ -404,7 +402,7 @@ namespace ESME.Data
                                                      Description = "Must be positive",
                                                      RuleDelegate = (o, r) =>
                                                                         {
-                                                                            var ruleTarget = ((RAMSettings) o).MaximumDepth;
+                                                                            var ruleTarget = ((OldRAMSettings)o).MaximumDepth;
                                                                             return RangeCheck(ruleTarget,0,float.MaxValue,false);
                                                                         },
                                                  },
@@ -414,7 +412,7 @@ namespace ESME.Data
                                                      Description = "Must be positive",
                                                      RuleDelegate = (o, r) =>
                                                                         {
-                                                                            var ruleTarget = ((RAMSettings) o).DepthStepSize;
+                                                                            var ruleTarget = ((OldRAMSettings)o).DepthStepSize;
                                                                             return RangeCheck(ruleTarget, 0,float.MaxValue,false);
                                                                         },
                                                  },
@@ -424,7 +422,7 @@ namespace ESME.Data
                                                      Description = "Must be positive",
                                                      RuleDelegate = (o, r) =>
                                                                         {
-                                                                            var ruleTarget = ((RAMSettings)o).MaximumRange;
+                                                                            var ruleTarget = ((OldRAMSettings)o).MaximumRange;
                                                                             return RangeCheck(ruleTarget,0,float.MaxValue,false);
                                                                         },
                                                  },
@@ -434,7 +432,7 @@ namespace ESME.Data
                                                      Description = "Must be positive",
                                                      RuleDelegate = (o, r) =>
                                                                         {
-                                                                            var ruleTarget = ((RAMSettings) o).RangeStepSize;
+                                                                            var ruleTarget = ((OldRAMSettings)o).RangeStepSize;
                                                                             return RangeCheck(ruleTarget,0,float.MaxValue,false);
                                                                         },
                                                  },
@@ -462,7 +460,7 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs MaximumDepthChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.MaximumDepth);
+        static readonly PropertyChangedEventArgs MaximumDepthChangedEventArgs = ObservableHelper.CreateArgs<OldRAMSettings>(x => x.MaximumDepth);
         float _maximumDepth = 2000;
 
         #endregion
@@ -480,7 +478,7 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs DepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.DepthStepSize);
+        static readonly PropertyChangedEventArgs DepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<OldRAMSettings>(x => x.DepthStepSize);
         float _depthStepSize = 25;
 
         #endregion
@@ -498,7 +496,7 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs MaximumRangeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.MaximumRange);
+        static readonly PropertyChangedEventArgs MaximumRangeChangedEventArgs = ObservableHelper.CreateArgs<OldRAMSettings>(x => x.MaximumRange);
         float _maximumRange;
 
         #endregion
@@ -516,15 +514,15 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs RangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.RangeStepSize);
+        static readonly PropertyChangedEventArgs RangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<OldRAMSettings>(x => x.RangeStepSize);
         float _rangeStepSize = 50;
 
         #endregion
     }
 
-    public sealed class BellhopSettings : ValidatingViewModel
+    public sealed class OldBellhopSettings : ValidatingViewModel
     {
-        public BellhopSettings()
+        public OldBellhopSettings()
         {
             ValidationRules.AddRange(new List<ValidationRule>
                                          {
@@ -534,7 +532,7 @@ namespace ESME.Data
                                                      Description = "Must be positive",
                                                      RuleDelegate = (o, r) =>
                                                                         {
-                                                                            var ruleTarget = ((BellhopSettings)o).MaximumDepth;
+                                                                            var ruleTarget = ((OldBellhopSettings)o).MaximumDepth;
                                                                             return RangeCheck(ruleTarget,0,float.MaxValue,false);
                                                                         },
                                                  },
@@ -545,7 +543,7 @@ namespace ESME.Data
                                                      Description = "Must be positive",
                                                      RuleDelegate = (o, r) =>
                                                                         {
-                                                                            var ruleTarget =((BellhopSettings) o).RangeCellSize;
+                                                                            var ruleTarget = ((OldBellhopSettings)o).RangeCellSize;
                                                                             return RangeCheck(ruleTarget, 0,float.MaxValue, false);
                                                                         },
                                                  },
@@ -555,7 +553,7 @@ namespace ESME.Data
                                                      Description = "Must be positive",
                                                      RuleDelegate = (o, r) =>
                                                                         {
-                                                                            var ruleTarget = ((BellhopSettings) o).DepthCellSize;
+                                                                            var ruleTarget = ((OldBellhopSettings)o).DepthCellSize;
                                                                             return RangeCheck(ruleTarget,0,float.MaxValue,false);
                                                                         },
                                                  },
@@ -577,7 +575,7 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs MaximumDepthChangedEventArgs = ObservableHelper.CreateArgs<BellhopSettings>(x => x.MaximumDepth);
+        static readonly PropertyChangedEventArgs MaximumDepthChangedEventArgs = ObservableHelper.CreateArgs<OldBellhopSettings>(x => x.MaximumDepth);
         float _maximumDepth = 2000;
 
         #endregion
@@ -595,7 +593,7 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs RangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<BellhopSettings>(x => x.RangeCellSize);
+        static readonly PropertyChangedEventArgs RangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<OldBellhopSettings>(x => x.RangeCellSize);
         float _rangeCellSize = 25;
 
         #endregion
@@ -613,10 +611,9 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs DepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<BellhopSettings>(x => x.DepthCellSize);
+        static readonly PropertyChangedEventArgs DepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<OldBellhopSettings>(x => x.DepthCellSize);
         float _depthCellSize = 5;
 
         #endregion
     }
 }
-#endif

@@ -26,17 +26,10 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 return _editOptions ?? (_editOptions = new SimpleCommand<object, object>(obj =>
                 {
-                    var extraTypes = new List<Type>
-                    {
-                            typeof (MapLayerViewModel),
-                            typeof (ShapefileMapLayer),
-                            typeof (OverlayShapeMapLayer),
-                            typeof (OverlayFileMapLayer)
-                    };
                     var programOptionsViewModel = new ApplicationOptionsViewModel(_messageBoxService);
                     var result = _visualizerService.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
-                    if ((result.HasValue) && (result.Value)) ESME.Globals.AppSettings.Save(extraTypes);
-                    ESME.Globals.AppSettings = AppSettings.Load(extraTypes);
+                    if ((result.HasValue) && (result.Value)) ESME.Globals.AppSettings.Save();
+                    ESME.Globals.AppSettings = AppSettings.Load();
                     ESME.Globals.AppSettings = ESME.Globals.AppSettings;
                     if (ESME.Globals.AppSettings != null && ESME.Globals.AppSettings.ScenarioDataDirectory != null &&
                         File.Exists(Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"))) 
@@ -238,17 +231,10 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 return _acousticSimulatorOptions ?? (_acousticSimulatorOptions = new SimpleCommand<object, object>(delegate
                 {
-                    var extraTypes = new List<Type>
-                    {
-                            typeof (MapLayerViewModel),
-                            typeof (ShapefileMapLayer),
-                            typeof (OverlayShapeMapLayer),
-                            typeof (OverlayFileMapLayer)
-                    };
                     var viewModel = new AcousticSimulatorOptionsViewModel();
                     var result = _visualizerService.ShowDialog("AcousticSimulatorOptionsView", viewModel);
-                    if ((result.HasValue) && (result.Value)) ESME.Globals.AppSettings.Save(extraTypes);
-                    else ESME.Globals.AppSettings = AppSettings.Load(extraTypes);
+                    if ((result.HasValue) && (result.Value)) ESME.Globals.AppSettings.Save();
+                    else ESME.Globals.AppSettings = AppSettings.Load();
                 }));
             }
         }

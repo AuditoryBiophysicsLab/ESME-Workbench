@@ -49,7 +49,7 @@ namespace ESME.Settings
                     _typeDictionary.AddType(this, settingType);
                 }
                 if (!_typeDictionary[settingType].ContainsKey(fileName)) return null;
-                return _typeDictionary[settingType][fileName] ?? (_typeDictionary[settingType][fileName] = (ISettingsBase)HRCXmlSerializer.Load(fileName, settingType));
+                return _typeDictionary[settingType][fileName] ?? (_typeDictionary[settingType][fileName] = (ISettingsBase)StaticXmlSerializer.Load(fileName, settingType));
             }
             set
             {

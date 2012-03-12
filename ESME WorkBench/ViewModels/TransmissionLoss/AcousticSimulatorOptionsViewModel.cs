@@ -13,7 +13,7 @@ namespace ESMEWorkbench.ViewModels.TransmissionLoss
             {
                 return _ok ?? (_ok = new SimpleCommand<object, object>(delegate
                 {
-                    Globals.AppSettings.Save(null);
+                    Globals.AppSettings.Save();
                     CloseActivePopUpCommand.Execute(true);
                 }));
             }

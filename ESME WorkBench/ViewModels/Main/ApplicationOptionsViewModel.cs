@@ -48,7 +48,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         private void OkHandler()
         {
-            AppSettings.Save(null);
+            AppSettings.Save();
             Globals.AppSettings = AppSettings.Load();
             CloseActivePopUpCommand.Execute(true);
         }

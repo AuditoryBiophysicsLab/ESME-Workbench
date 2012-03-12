@@ -42,40 +42,17 @@ namespace ESME.Data
 
         public void Save()
         {
-            var serializer = new XmlSerializer<AppSettings> { Data = this };
-            serializer.Save(AppSettingsFile, ReferencedTypes);
-        }
-
-        public void Save(List<Type> referencedTypes)
-        {
-            if (referencedTypes == null) referencedTypes = ReferencedTypes;
-            else referencedTypes.AddRange(ReferencedTypes);
-            var serializer = new XmlSerializer<AppSettings> { Data = this };
-            serializer.Save(AppSettingsFile, referencedTypes);
+            StaticXmlSerializer.Save(AppSettingsFile, this);
         }
 
         public static AppSettings Load()
         {
-            return XmlSerializer<AppSettings>.Load(AppSettingsFile, ReferencedTypes);
+            return (AppSettings)StaticXmlSerializer.Load(AppSettingsFile, typeof(AppSettings));
         }
 
         public static AppSettings Load(string fileName)
         {
-            return XmlSerializer<AppSettings>.Load(fileName, ReferencedTypes);
-        }
-
-        public static AppSettings Load(List<Type> referencedTypes)
-        {
-            if (referencedTypes == null) referencedTypes = ReferencedTypes;
-            else referencedTypes.AddRange(ReferencedTypes);
-            return XmlSerializer<AppSettings>.Load(AppSettingsFile, referencedTypes);
-        }
-
-        public static AppSettings Load(string fileName, List<Type> referencedTypes)
-        {
-            if (referencedTypes == null) referencedTypes = ReferencedTypes;
-            else referencedTypes.AddRange(ReferencedTypes);
-            return XmlSerializer<AppSettings>.Load(fileName, referencedTypes);
+            return (AppSettings)StaticXmlSerializer.Load(fileName, typeof(AppSettings));
         }
 
         [Initialize]

@@ -33,7 +33,7 @@ namespace ESME.Tests.Settings
 
         public void TestLoading()
         {
-            var testSettings = (TestSettings)HRCXmlSerializer.Load("TestSettings.xml", typeof(TestSettings));
+            var testSettings = (TestSettings)StaticXmlSerializer.Load("TestSettings.xml", typeof(TestSettings));
             Assert.NotNull(testSettings);
             Assert.AreEqual("Initial String Property Value", testSettings.StringProperty);
             Assert.AreEqual(0.0, testSettings.Geo.Latitude);
@@ -58,7 +58,7 @@ namespace ESME.Tests.Settings
         public override void Save(string fileName)
         {
             //XmlSerializer<TestSettings>.SaveStatic(this, fileName, ReferencedTypes);
-            HRCXmlSerializer.Save(fileName, this);
+            StaticXmlSerializer.Save(fileName, this);
         }
     }
 }

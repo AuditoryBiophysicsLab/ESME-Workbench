@@ -8,27 +8,34 @@ using System.Threading;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
+using HRC.Collections;
 
 namespace HRC.Utility
 {
     [Serializable]
-    public class HRCXmlSerializer
+    public class StaticXmlSerializer
     {
         public static void Save<T>(string fileName, T source) where T : class, new()
         {
-            var serializerType = typeof(XmlSerializer<T>);
-            var methodInfo = serializerType.GetMethod("SaveStatic", new[] { typeof(T), typeof(string), typeof(List<Type>) });
-            var referencedTypes = FindReferencedTypesIn(typeof(T));
-            methodInfo.Invoke(null, new object[] { source, fileName, referencedTypes });
+            var type = typeof(T);
+            if (!SerializerCache.ContainsKey(type)) SerializerCache.Add(type, new SerializerCacheEntry());
+            var cacheEntry = SerializerCache[type];
+
+            cacheEntry.ReferencedTypes = cacheEntry.ReferencedTypes ?? FindReferencedTypesIn(type);
+            cacheEntry.SerializationMethod = cacheEntry.SerializationMethod ?? typeof (XmlSerializer<T>).GetMethod("SaveStatic", new[] {typeof (T), typeof (string), typeof (List<Type>)});
+
+            cacheEntry.SerializationMethod.Invoke(null, new object[] { source, fileName, cacheEntry.ReferencedTypes });
         }
 
         public static object Load(string fileName, Type type)
         {
-            var serializerType = typeof(XmlSerializer<>);
-            var genericSerializer = serializerType.MakeGenericType(type);
-            var methodInfo = genericSerializer.GetMethod("Load", new[] { typeof(string), typeof(List<Type>) });
-            var referencedTypes = FindReferencedTypesIn(type);
-            return methodInfo.Invoke(null, new object[] { fileName, referencedTypes });
+            if (!SerializerCache.ContainsKey(type)) SerializerCache.Add(type, new SerializerCacheEntry());
+            var cacheEntry = SerializerCache[type];
+
+            cacheEntry.ReferencedTypes = cacheEntry.ReferencedTypes ?? FindReferencedTypesIn(type);
+            cacheEntry.DeserializationMethod = cacheEntry.DeserializationMethod ?? typeof(XmlSerializer<>).MakeGenericType(type).GetMethod("Load", new[] { typeof(string), typeof(List<Type>) });
+
+            return cacheEntry.DeserializationMethod.Invoke(null, new object[] { fileName, cacheEntry.ReferencedTypes });
         }
 
         public static List<Type> FindReferencedTypesIn(Type targetType)
@@ -52,6 +59,15 @@ namespace HRC.Utility
                 }
             }
             return referencedTypes;
+        }
+
+        static readonly ObservableConcurrentDictionary<Type, SerializerCacheEntry> SerializerCache = new ObservableConcurrentDictionary<Type, SerializerCacheEntry>();
+
+        private class SerializerCacheEntry
+        {
+            public List<Type> ReferencedTypes { get; set; }
+            public MethodInfo SerializationMethod { get; set; }
+            public MethodInfo DeserializationMethod { get; set; }
         }
     }
     [AttributeUsage(AttributeTargets.Property)]
