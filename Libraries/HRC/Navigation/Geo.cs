@@ -723,8 +723,8 @@ namespace HRC.Navigation
         /// <returns></returns>
         public static Geo Offset(Geo origin, double distance, double azimuth) { return origin.Offset(distance, azimuth); }
 
-        public static implicit operator Point(Geo e) { return new Point(e.Longitude, e.Latitude); }
-        public static implicit operator PointF(Geo e) { return new PointF((float)e.Longitude, (float)e.Latitude); }
+        public static explicit operator Point(Geo e) { return new Point(e.Longitude, e.Latitude); }
+        public static explicit operator PointF(Geo e) { return new PointF((float)e.Longitude, (float)e.Latitude); }
 
 #if false
     /**

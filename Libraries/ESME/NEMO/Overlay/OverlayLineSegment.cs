@@ -101,7 +101,7 @@ namespace ESME.NEMO.Overlay
             // contains the intersection point, then they DO intersect
             var intersectionPoint = IntersectionPoint(that);
             //Console.WriteLine("Intersection point calculated to be ({0}, {1})", IntersectionPoint.Latitude, IntersectionPoint.Longitude);
-            if ((intersectionPoint != null) && (BoundingBox.Contains(intersectionPoint) && that.BoundingBox.Contains(intersectionPoint)))
+            if ((intersectionPoint != null) && (GeoRect.Contains(intersectionPoint) && that.GeoRect.Contains(intersectionPoint)))
                 return true;
             //if (IntersectionPoint.Longitude < BoundingBox.Left)
             //    Console.WriteLine("Intersection point is LEFT of the bounding box by {0}", BoundingBox.Left - IntersectionPoint.Longitude);
@@ -127,16 +127,16 @@ namespace ESME.NEMO.Overlay
             if (IsColinearWith(that))
             {
                 // If they are colinear, check if our bounding box contains either of the other segment's endpoints
-                if (BoundingBox.Contains(that._geos[0]) ||
-                    (BoundingBox.Contains(that._geos[1])))
+                if (GeoRect.Contains(that._geos[0]) ||
+                    (GeoRect.Contains(that._geos[1])))
                     // If it does, we overlap the other segment
                     return true;
 
                 // If it doesn't, then check if the other segment overlaps us.  This can happen if the other segment
                 // completely contains us, and is also longer than us. If that turns out to be the case, then one or
                 // both of our endpoints will be contained in the other segment's bounding box.
-                if (that.BoundingBox.Contains(_geos[0]) ||
-                    (that.BoundingBox.Contains(_geos[1])))
+                if (that.GeoRect.Contains(_geos[0]) ||
+                    (that.GeoRect.Contains(_geos[1])))
                     // If it does, we overlap the other segment
                     return true;
             }
@@ -245,10 +245,10 @@ namespace ESME.NEMO.Overlay
             {
                 if (IsColinearWith(that))
                 {
-                    if (BoundingBox.Contains(that[0])) return that[0];
-                    if (BoundingBox.Contains(that[1])) return that[1];
-                    if (that.BoundingBox.Contains(this[0])) return this[0];
-                    if (that.BoundingBox.Contains(this[1])) return this[1];
+                    if (GeoRect.Contains(that[0])) return that[0];
+                    if (GeoRect.Contains(that[1])) return that[1];
+                    if (that.GeoRect.Contains(this[0])) return this[0];
+                    if (that.GeoRect.Contains(this[1])) return this[1];
                 }
                 return null;
                 //throw new GeometricException(

@@ -13,16 +13,11 @@ namespace ESME.Database
         public static implicit operator TimeSpan(DbTimeSpan dbTimeSpan) { return new TimeSpan(dbTimeSpan.Ticks); }
         public long Ticks { get; set; }
 
+        [NotMapped] 
         public TimeSpan TimeSpan
         {
             get { return new TimeSpan(Ticks); }
             set { Ticks = value.Ticks; }
-        }
-
-        internal static void ModelInitialization(DbModelBuilder modelBuilder)
-        {
-            modelBuilder.ComplexType<DbTimeSpan>()
-                .Ignore(p => p.TimeSpan);
         }
     }
 }

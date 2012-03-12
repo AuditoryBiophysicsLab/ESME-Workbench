@@ -14,7 +14,9 @@ namespace ESMEWorkbench.ViewModels.Main
             _messageBoxService = messageBoxService;
             Globals.AppSettings = AppSettings.Load();
             AppSettings = Globals.AppSettings;
+#if !UseAspects
             AppSettings.SetDefaults();
+#endif
         }
 
         public void DesignTimeInitialization() { AppSettings = AppSettings.Load(); }

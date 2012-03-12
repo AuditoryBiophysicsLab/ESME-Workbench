@@ -87,7 +87,7 @@ namespace ESME.NEMO.Overlay
                     var overlayLineSegments = new OverlayLineSegments(geos.ToArray(), Colors.Black);
                     if (!overlayLineSegments.IsUsableAsPerimeter)
                         errorText += overlayName + "The points provided are not usable as a perimeter.  Line segments are used in the order given, and cannot cross each other.  The resulting polygon must also be closed." + System.Environment.NewLine;
-                    else return new GeoRect(overlayLineSegments.BoundingBox);
+                    else return new GeoRect(overlayLineSegments.GeoRect);
                 }
             }
             geos = null;
@@ -106,7 +106,7 @@ namespace ESME.NEMO.Overlay
                 var myOvr = new OverlayFile(overlayFileName);
                 if (myOvr.Shapes.Length != 1 || !myOvr.Shapes[0].IsUsableAsPerimeter)
                     errorText += "Specified " + overlayName + " is invalid" + System.Environment.NewLine;
-                else return new GeoRect(myOvr.Shapes[0].BoundingBox);
+                else return new GeoRect(myOvr.Shapes[0].GeoRect);
             }
             catch (Exception e)
             {

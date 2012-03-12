@@ -16,7 +16,9 @@ namespace ESMEWorkbench
             WorkDirectories.ApplicationName = App.Name;
             WorkDirectories = WorkDirectories.Load();
             AppSettings = AppSettings.Load(AppSettings.AppSettingsFile);
+#if !UseAspects
             AppSettings.SetDefaults();
+#endif
             AppSettings.Save();
             ESME.Globals.WorkDirectories = WorkDirectories;
             ESME.Globals.AppSettings = AppSettings;

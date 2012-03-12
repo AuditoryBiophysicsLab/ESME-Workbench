@@ -39,7 +39,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;UseAspects</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -48,7 +48,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;UseAspects</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -96,6 +96,7 @@
       <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
     <Reference Include="PresentationCore">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
@@ -133,6 +134,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildInformation.cs" />
+    <Compile Include="Database\DbTimePeriod.cs" />
     <Compile Include="Database\DbWhoWhenWhere.cs" />
     <Compile Include="Database\DbDateTime.cs" />
     <Compile Include="Database\DbPluginIdentifier.cs" />
@@ -149,8 +151,9 @@
     <Compile Include="Database\Scenario.cs" />
     <Compile Include="Database\Simulation.cs" />
     <Compile Include="Database\Source.cs" />
-    <Compile Include="Data\AppSettings.cs" />
+    <Compile Include="Data\AppSettings%28pre-aspect%29.cs" />
     <Compile Include="Data\CASSTemplate.cs" />
+    <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Data\WorkDirectories.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="Environment\Bathymetry.cs" />
@@ -172,6 +175,8 @@
     <Compile Include="Environment\SoundSpeedSample.cs" />
     <Compile Include="Environment\TimePeriod.cs" />
     <Compile Include="Environment\IEnvironmentalDataSource.cs" />
+    <Compile Include="Exceptions.cs" />
+    <Compile Include="Locations\EnvironmentalDatabaseImportService.cs" />
     <Compile Include="Locations\LocationManagerService.cs" />
     <Compile Include="Mapping\CustomStartEndLineStyle.cs" />
     <Compile Include="Mapping\LayerListViewModel.cs" />
@@ -223,10 +228,14 @@
     <Compile Include="Platform\PlatformState.cs" />
     <Compile Include="Plugins\DefaultEnvironmentalDataSources.cs" />
     <Compile Include="Plugins\ESMEPluginAttribute.cs" />
+    <Compile Include="Plugins\PluginManagerExceptions.cs" />
     <Compile Include="Plugins\PluginManagerService.cs" />
     <Compile Include="Plugins\PluginBase.cs" />
     <Compile Include="Plugins\PluginType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings\Exceptions.cs" />
+    <Compile Include="Settings\SettingsBase.cs" />
+    <Compile Include="Settings\SettingsService.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNL.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLInput.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLOutput.cs" />

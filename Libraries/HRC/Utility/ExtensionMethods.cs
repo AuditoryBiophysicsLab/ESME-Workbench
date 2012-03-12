@@ -111,8 +111,6 @@ namespace HRC.Utility
                 g.FillPolygon(brush, points);
             }
         }
-#endif
-
         public static void Lines(this Graphics g, Geo[] points, float width, Color color)
         {
             var unitsPerPixelX = g.GetUnitsPerPixelX();
@@ -203,7 +201,6 @@ namespace HRC.Utility
         /// <returns></returns>
         public static float GetOriginOffsetY(this Graphics g) { return g.Transform.Elements[5]; }
 
-#if false
         public static void ToHSV(this System.Windows.Media.Color color, out double hue, out double saturation, out double value)
         {
             int max = Math.Max(color.R, Math.Max(color.G, color.B));

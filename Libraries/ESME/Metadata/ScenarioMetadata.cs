@@ -400,8 +400,8 @@ namespace ESME.Metadata
                 if (platform.Trackdefs.Count == 1)
                 {
                     CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0}[{1}] op area", platform.Name, platform.Id), LayerType.OpArea, Colors.Transparent, platform.Trackdefs[0].OverlayFile.Shapes, canBeRemoved: false);
-                    if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[0].OverlayFile.Shapes[0].BoundingBox);
-                    else _scenarioBounds.Union(platform.Trackdefs[0].OverlayFile.Shapes[0].BoundingBox);
+                    if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[0].OverlayFile.Shapes[0].GeoRect);
+                    else _scenarioBounds.Union(platform.Trackdefs[0].OverlayFile.Shapes[0].GeoRect);
                     platform.CalculateBehavior();
                     if (platform.BehaviorModel != null && platform.BehaviorModel.CourseOverlay != null)
                         CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0}[{1}] track", platform.Name, platform.Id), LayerType.Track, Colors.Transparent,
@@ -410,10 +410,10 @@ namespace ESME.Metadata
                 else
                     for (var trackIndex = 0; trackIndex < platform.Trackdefs.Count; trackIndex++)
                     {
-                        CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0}[{1}] OpArea{2]", platform.Name, platform.Id, trackIndex + 1), LayerType.OpArea, Colors.Transparent,
+                        CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0}[{1}] OpArea{2}]", platform.Name, platform.Id, trackIndex + 1), LayerType.OpArea, Colors.Transparent,
                                                               platform.Trackdefs[0].OverlayFile.Shapes, canBeRemoved: false);
-                        if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
-                        else _scenarioBounds.Union(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
+                        if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].GeoRect);
+                        else _scenarioBounds.Union(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].GeoRect);
                     }
             }
             if (RangeComplexes.SelectedArea != null) _scenarioBounds.Union(RangeComplexes.SelectedArea.GeoRect);

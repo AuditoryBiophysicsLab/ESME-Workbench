@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Data;
 using System.Data.Common;
@@ -8,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Cinch;
 using ESME.Database;
+using ESME.Environment;
 using HRC.Navigation;
 using MEFedMVVM.ViewModelLocator;
 
@@ -20,6 +20,7 @@ namespace ESME.Locations
         bool LocationExists(string locationName);
         Location this[string locationName] { get; }
         Location CreateLocation(string locationName, string comments, double north, double south, double east, double west);
+        void SaveChanges();
     }
 
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -73,17 +74,80 @@ namespace ESME.Locations
                                  Name = locationName,
                                  Comments = comments,
                                  GeoRect = new GeoRect(north, south, east, west),
-                                 Creator = new DbWhoWhenWhere
-                                               {
-                                                   When = DateTime.Now,
-                                                   Where = System.Environment.MachineName,
-                                                   Who = System.Environment.UserName,
-                                               },
+                                 StorageDirectory = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()),
+                                 CreationInfo = new DbWhoWhenWhere(true),
                              };
-            Locations.Add(result);
-            _context.SaveChanges();
+            _context.Locations.Add(result);
+            SaveChanges();
+            AddLocationLogEntry(result, "Created");
+            Directory.CreateDirectory(Path.Combine(LocationDirectory, result.StorageDirectory));
             return result;
         }
-    }
 
+        public void SaveChanges() { lock(_context) _context.SaveChanges(); }
+
+        void AddLocationLogEntry(Location location, string message)
+        {
+            var logEntry = new LocationLogEntry
+            {
+                Location = location,
+                LogEntry = new LogEntry
+                {
+                    Message = message,
+                    MessageSource = new DbWhoWhenWhere(true),
+                },
+            };
+            location.LogEntries.Add(logEntry);
+            _context.LocationLogEntries.Add(logEntry);
+            SaveChanges();
+        }
+
+        public EnvironmentalDataSetCollection AddEnvironmentDataSetCollection(Location location, DbPluginIdentifier sourcePlugin)
+        {
+            var environmentalDataSetCollection = new EnvironmentalDataSetCollection
+            {
+                Location = location,
+                SourcePlugin = sourcePlugin,
+                CreationInfo = new DbWhoWhenWhere(true),
+            };
+            AddLocationLogEntry(location, string.Format("Added new data set collection. Source plugin: {0} ", sourcePlugin));
+            location.EnvironmentalDataSetCollections.Add(environmentalDataSetCollection);
+            _context.EnvironmentalDataSetCollections.Add(environmentalDataSetCollection);
+            SaveChanges();
+            return environmentalDataSetCollection;
+        }
+
+        void AddEnvironmentDataSetCollectionLogEntry(EnvironmentalDataSetCollection collection, string message)
+        {
+            var logEntry = new EnvironmentalDataSetCollectionLogEntry
+            {
+                EnvironmentalDataSetCollection = collection,
+                LogEntry = new LogEntry
+                {
+                    Message = message,
+                    MessageSource = new DbWhoWhenWhere(true),
+                },
+            };
+            collection.LogEntries.Add(logEntry);
+            _context.EnvironmentalDataSetCollectionLogEntries.Add(logEntry);
+            SaveChanges();
+        }
+
+        public EnvironmentalDataSet AddEnvironmentDataSet(EnvironmentalDataSetCollection collection, float resolution, TimePeriod timePeriod)
+        {
+            var environmentalDataSet = new EnvironmentalDataSet
+            {
+                CreationInfo = new DbWhoWhenWhere(true),
+                FileName = Path.GetRandomFileName(),
+                Resolution = resolution,
+                TimePeriod = timePeriod,
+                EnvironmentalDataSetCollection = collection,
+            };
+            AddEnvironmentDataSetCollectionLogEntry(collection, string.Format("Added new data set. Resolution: {0}{1}", resolution, timePeriod != TimePeriod.Invalid ? string.Format("  TimePeriod: {0}", timePeriod) : ""));
+            collection.EnvironmentalDataSets.Add(environmentalDataSet);
+            _context.EnvironmentalDataSets.Add(environmentalDataSet);
+            SaveChanges();
+            return environmentalDataSet;
+        }
+    }
 }

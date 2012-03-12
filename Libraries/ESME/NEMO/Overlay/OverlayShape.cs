@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
 using System.Windows.Media;
 using HRC.Navigation;
 
@@ -56,7 +55,8 @@ namespace ESME.NEMO.Overlay
         public virtual bool Contains(Geo location) { throw new NotImplementedException(); }
         public virtual Geo Bounce(Geo startLocation, Geo proposedEndLocation) { throw new NotImplementedException(); }
         public abstract string WellKnownText { get; }
-        public Rect BoundingBox { get; private set; }
+        //public Rect BoundingBox { get; private set; }
+        public GeoRect GeoRect { get; private set; }
         public Color Color { get; set; }
 
         public float Width { get; set; }
@@ -133,9 +133,10 @@ namespace ESME.NEMO.Overlay
                 east = Math.Max(curPoint.Longitude, east);
                 west = Math.Min(curPoint.Longitude, west);
             }
-            var width = Math.Abs(west - east);
-            var height = Math.Abs(north - south);
-            BoundingBox = new Rect(west, south, width, height);
+            //var width = Math.Abs(west - east);
+            //var height = Math.Abs(north - south);
+            //BoundingBox = new Rect(west, south, width, height);
+            GeoRect = new GeoRect(north, south, east, west);
         }
     }
 }

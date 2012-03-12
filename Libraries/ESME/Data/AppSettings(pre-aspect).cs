@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if false
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -14,8 +15,8 @@ using HRC.Validation;
 
 namespace ESME.Data
 {
-    [Serializable, NotifyPropertyChanged]
-    public class AppSettings : ValidatingViewModel
+    [Serializable]
+    public class OldAppSettings : ValidatingViewModel
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>
         {
@@ -39,6 +40,12 @@ namespace ESME.Data
         static string _appName;
 
         public static string AppSettingsFile { get; private set; }
+
+        public void SetDefaults()
+        {
+          if (RAMSettings != null) RAMSettings.SetDefaults();
+          //if (DefaultPluginIdentifiers == null || DefaultPluginIdentifiers.Count == 0) SetDefaultPluginIdentifiers();
+        }
 
         public void Save()
         {
@@ -78,8 +85,23 @@ namespace ESME.Data
             return XmlSerializer<AppSettings>.Load(fileName, referencedTypes);
         }
 
-        [Initialize]
-        public SerializableDictionary<string, string> OpenFileServiceDirectories { get; set; }
+        #region public SerializableDictionary<string, string> OpenFileServiceDirectories { get; set; }
+
+        public SerializableDictionary<string, string> OpenFileServiceDirectories
+        {
+            get { return _openFileServiceDirectories ?? (_openFileServiceDirectories = new SerializableDictionary<string, string>()); }
+            set
+            {
+                if (_openFileServiceDirectories == value) return;
+                _openFileServiceDirectories = value;
+                NotifyPropertyChanged(OpenFileServiceDirectoriesChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs OpenFileServiceDirectoriesChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.OpenFileServiceDirectories);
+        SerializableDictionary<string, string> _openFileServiceDirectories;
+
+        #endregion
 
         #region public string ScenarioDataDirectory { get; set; }
 
@@ -129,20 +151,61 @@ namespace ESME.Data
 
         #endregion
 
-        [Initialize]
-        public BellhopSettings BellhopSettings { get; set; }
+        #region public BellhopSettings BellhopSettings { get; set; }
 
-        [Initialize]
-        public RAMSettings RAMSettings { get; set; }
+        public BellhopSettings BellhopSettings
+        {
+            get { return _bellhopSettings ?? (_bellhopSettings = new BellhopSettings()); }
+            set
+            {
+                if (_bellhopSettings == value) return;
+                _bellhopSettings = value;
+                NotifyPropertyChanged(BellhopSettingsChangedEventArgs);
+            }
+        }
 
-        [Initialize]
-        public NAVOConfiguration NAVOConfiguration { get; set; }
+        static readonly PropertyChangedEventArgs BellhopSettingsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.BellhopSettings);
+        BellhopSettings _bellhopSettings;
+
+        #endregion
+
+        #region public RAMSettings RAMSettings { get; set; }
+
+        public RAMSettings RAMSettings
+        {
+            get { return _ramSettings ?? (_ramSettings = new RAMSettings()); }
+            set
+            {
+                if (_ramSettings == value) return;
+                _ramSettings = value;
+                NotifyPropertyChanged(RamSettingsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RamSettingsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.RAMSettings);
+        RAMSettings _ramSettings;
+
+        #endregion
+
+        #region public NAVOConfiguration NAVOConfiguration { get; set; }
+
+        public NAVOConfiguration NAVOConfiguration
+        {
+            get { return _navoConfiguration ?? (_navoConfiguration = new NAVOConfiguration()); }
+            set
+            {
+                if (_navoConfiguration == value) return;
+                _navoConfiguration = value;
+                NotifyPropertyChanged(NAVOConfigurationChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs NAVOConfigurationChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.NAVOConfiguration);
+        NAVOConfiguration _navoConfiguration;
+
+        #endregion
 
         #region public List<string> ExperimentFiles { get; set; }
-#if UseAspects
-        [Initialize]
-        public List<string> ExperimentFiles { get; set; }
-#else
         // This list is maintained by the ESME Workbench.  When a new experiment is saved, the path to the experiment directory is added to this list
         // Periodically, the VerifyExperimentsStillExist() method is called, which will prune directories that no longer exist.
 
@@ -159,7 +222,6 @@ namespace ESME.Data
 
         static readonly PropertyChangedEventArgs ExperimentDirectoriesChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ExperimentFiles);
         List<string> _experimentFiles;
-#endif
 
         /// <summary>
         /// Add the current experiment to the list for the Transmission Loss Calculator to keep track of
@@ -182,14 +244,59 @@ namespace ESME.Data
 
         #endregion
 
-        [Initialize(true)]
-        public bool DisplayContoursOnTransmissionLoss { get; set; }
+        #region public bool DisplayContoursOnTransmissionLoss { get; set; }
 
-        [Initialize(120f)]
-        public float TransmissionLossContourThreshold { get; set; }
+        public bool DisplayContoursOnTransmissionLoss
+        {
+            get { return _displayContoursOnTransmissionLoss; }
+            set
+            {
+                if (_displayContoursOnTransmissionLoss == value) return;
+                _displayContoursOnTransmissionLoss = value;
+                NotifyPropertyChanged(DisplayContoursOnTransmissionLossChangedEventArgs);
+            }
+        }
 
-        [Initialize(-1)]
-        public int MaxImportThreadCount { get; set; }
+        static readonly PropertyChangedEventArgs DisplayContoursOnTransmissionLossChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.DisplayContoursOnTransmissionLoss);
+        bool _displayContoursOnTransmissionLoss = true;
+
+        #endregion
+
+        #region public float TransmissionLossContourThreshold { get; set; }
+
+        public float TransmissionLossContourThreshold
+        {
+            get { return _transmissionLossContourThreshold; }
+            set
+            {
+                if (Math.Abs(_transmissionLossContourThreshold - value) < .01) return;
+                _transmissionLossContourThreshold = value;
+                NotifyPropertyChanged(TransmissionLossContourThresholdChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs TransmissionLossContourThresholdChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.TransmissionLossContourThreshold);
+        float _transmissionLossContourThreshold = 120;
+
+        #endregion
+
+        #region public int MaxImportThreadCount { get; set; }
+
+        public int MaxImportThreadCount
+        {
+            get { return _maxImportThreadCount; }
+            set
+            {
+                if (_maxImportThreadCount == value) return;
+                _maxImportThreadCount = value;
+                NotifyPropertyChanged(MaxImportThreadCountChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MaxImportThreadCountChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.MaxImportThreadCount);
+        int _maxImportThreadCount = 4;
+
+        #endregion
 
         #region public List<PluginIdentifier> DefaultPluginIdentifiers { get; set; }
         // DefaultPluginIdentifiers should always come from the PluginManagerService.DefaultPluginIdentifiers
@@ -227,18 +334,64 @@ namespace ESME.Data
         }
         #endregion
 
-        public string LocationDirectory { get; set; }
+        #region public string LocationDirectory { get; set; }
+
+        public string LocationDirectory
+        {
+            get { return _locationDirectory; }
+            set
+            {
+                if (_locationDirectory == value) return;
+                _locationDirectory = value;
+                NotifyPropertyChanged(LocationRootDirectoryChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs LocationRootDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.LocationDirectory);
+        string _locationDirectory;
+
+        #endregion
     }
 
-    [NotifyPropertyChanged]
     public sealed class PluginSelection : ValidatingViewModel
     {
-        public string DllFilename { get; set; }
+        #region public string DllFilename { get; set; }
 
-        public string ClassName { get; set; }
+        public string DllFilename
+        {
+            get { return _dllFilename; }
+            set
+            {
+                if (_dllFilename == value) return;
+                _dllFilename = value;
+                NotifyPropertyChanged(DllFilenameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DllFilenameChangedEventArgs = ObservableHelper.CreateArgs<PluginSelection>(x => x.DllFilename);
+        string _dllFilename;
+
+        #endregion
+
+        #region public string ClassName { get; set; }
+
+        public string ClassName
+        {
+            get { return _className; }
+            set
+            {
+                if (_className == value) return;
+                _className = value;
+                NotifyPropertyChanged(ClassNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ClassNameChangedEventArgs = ObservableHelper.CreateArgs<PluginSelection>(x => x.ClassName);
+        string _className;
+
+        #endregion
     }
 
-    [NotifyPropertyChanged]
     public sealed class RAMSettings : ValidatingViewModel
     {
         public RAMSettings()
@@ -288,21 +441,87 @@ namespace ESME.Data
                                          }
                 );
         }
+        public void SetDefaults()
+        {
+            MaximumDepth = 2000;
+            DepthStepSize = 25;
+            RangeStepSize = 50;
+            MaximumRange = 100000;
+        }
 
-        [Initialize(2000f)]
-        public float MaximumDepth { get; set; }
+        #region public float MaximumDepth { get; set; }
 
-        [Initialize(25f)]
-        public float DepthStepSize { get; set; }
+        public float MaximumDepth
+        {
+            get { return _maximumDepth; }
+            set
+            {
+                if (Math.Abs(_maximumDepth - value) < 0.0001) return;
+                _maximumDepth = value;
+                NotifyPropertyChanged(MaximumDepthChangedEventArgs);
+            }
+        }
 
-        [Initialize(100000f)]
-        public float MaximumRange { get; set; }
+        static readonly PropertyChangedEventArgs MaximumDepthChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.MaximumDepth);
+        float _maximumDepth = 2000;
 
-        [Initialize(50f)]
-        public float RangeStepSize { get; set; }
+        #endregion
+
+        #region public float DepthStepSize { get; set; }
+
+        public float DepthStepSize
+        {
+            get { return _depthStepSize; }
+            set
+            {
+                if (Math.Abs(_depthStepSize - value) < 0.0001) return;
+                _depthStepSize = value;
+                NotifyPropertyChanged(DepthCellSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.DepthStepSize);
+        float _depthStepSize = 25;
+
+        #endregion
+
+        #region public float MaximumRange { get; set; }
+
+        public float MaximumRange
+        {
+            get { return _maximumRange; }
+            set
+            {
+                if (Math.Abs(_maximumRange - value) < 0.0001) return;
+                _maximumRange = value;
+                NotifyPropertyChanged(MaximumRangeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MaximumRangeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.MaximumRange);
+        float _maximumRange;
+
+        #endregion
+
+        #region public float RangeStepSize { get; set; }
+
+        public float RangeStepSize
+        {
+            get { return _rangeStepSize; }
+            set
+            {
+                if (Math.Abs(_rangeStepSize - value) < 0.0001) return;
+                _rangeStepSize = value;
+                NotifyPropertyChanged(RangeCellSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.RangeStepSize);
+        float _rangeStepSize = 50;
+
+        #endregion
     }
 
-    [NotifyPropertyChanged]
     public sealed class BellhopSettings : ValidatingViewModel
     {
         public BellhopSettings()
@@ -342,15 +561,62 @@ namespace ESME.Data
                                                  },
 
                                          });
+
         }
 
-        [Initialize(2000f)]
-        public float MaximumDepth { get; set; }
+        #region public float MaximumDepth { get; set; }
 
-        [Initialize(25f)]
-        public float RangeCellSize { get; set; }
+        public float MaximumDepth
+        {
+            get { return _maximumDepth; }
+            set
+            {
+                if (Math.Abs(_maximumDepth - value) < 0.0001) return;
+                _maximumDepth = value;
+                NotifyPropertyChanged(MaximumDepthChangedEventArgs);
+            }
+        }
 
-        [Initialize(25f)]
-        public float DepthCellSize { get; set; }
+        static readonly PropertyChangedEventArgs MaximumDepthChangedEventArgs = ObservableHelper.CreateArgs<BellhopSettings>(x => x.MaximumDepth);
+        float _maximumDepth = 2000;
+
+        #endregion
+
+        #region public float RangeCellSize { get; set; }
+
+        public float RangeCellSize
+        {
+            get { return _rangeCellSize; }
+            set
+            {
+                if (Math.Abs(_rangeCellSize - value) < 0.0001) return;
+                _rangeCellSize = value;
+                NotifyPropertyChanged(RangeCellSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<BellhopSettings>(x => x.RangeCellSize);
+        float _rangeCellSize = 25;
+
+        #endregion
+
+        #region public float DepthCellSize { get; set; }
+
+        public float DepthCellSize
+        {
+            get { return _depthCellSize; }
+            set
+            {
+                if (Math.Abs(_depthCellSize - value) < 0.0001) return;
+                _depthCellSize = value;
+                NotifyPropertyChanged(DepthCellSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<BellhopSettings>(x => x.DepthCellSize);
+        float _depthCellSize = 5;
+
+        #endregion
     }
 }
+#endif

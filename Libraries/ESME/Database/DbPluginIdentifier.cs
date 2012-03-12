@@ -28,5 +28,7 @@ namespace ESME.Database
             get { return _pluginIdentifier.Type; }
             set { _pluginIdentifier.Type = value; }
         }
+
+        public override string ToString() { return string.Format("{0}:{1}:{2}", PluginType, PluginSubtype, Type); }
     }
 }

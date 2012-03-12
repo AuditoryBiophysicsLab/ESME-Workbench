@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
-using ESME.Environment.Descriptors;
 
 namespace ESME.Database
 {
@@ -20,14 +19,11 @@ namespace ESME.Database
 
         public DbSet<Location> Locations { get; set; }
         public DbSet<LocationLogEntry> LocationLogEntries { get; set; }
-        public DbSet<EnvironmentDataSet> EnvironmentDataSets { get; set; }
+        public DbSet<EnvironmentalDataSetCollection> EnvironmentalDataSetCollections { get; set; }
+        public DbSet<EnvironmentalDataSetCollectionLogEntry> EnvironmentalDataSetCollectionLogEntries { get; set; }
+        public DbSet<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }
 
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
-            DbDateTime.ModelInitialization(modelBuilder);
-            DbTimeSpan.ModelInitialization(modelBuilder);
-            DbGeo.ModelInitialization(modelBuilder);
-        }
+        protected override void OnModelCreating(DbModelBuilder modelBuilder) { }
     }
 
     public class Location
@@ -36,9 +32,10 @@ namespace ESME.Database
         public string Name { get; set; }
         public string Comments { get; set; }
         public DbGeoRect GeoRect { get; set; }
-        public DbWhoWhenWhere Creator { get; set; }
+        public DbWhoWhenWhere CreationInfo { get; set; }
+        public string StorageDirectory { get; set; }
 
-        public virtual ICollection<EnvironmentDataSet> EnvironmentDataSets { get; set; }
+        public virtual ICollection<EnvironmentalDataSetCollection> EnvironmentalDataSetCollections { get; set; }
         public virtual ICollection<LocationLogEntry> LogEntries { get; set; }
     }
 
@@ -49,20 +46,40 @@ namespace ESME.Database
         public string Message { get; set; }
         public int? OldSourceID { get; set; }        
     }
+
     public class LocationLogEntry
     {
         public string LocationLogEntryID { get; set; }
         public LogEntry LogEntry { get; set; }
-        public virtual Location Source { get; set; }
+        public virtual Location Location { get; set; }
     }
 
-    public class EnvironmentDataSet
+    public class EnvironmentalDataSetCollection
     {
-        public int EnvironmentDataSetID { get; set; }
-        public EnvironmentDataType EnvironmentDataType { get; set; }
-        public string Filename { get; set; }
+        public int EnvironmentalDataSetCollectionID { get; set; }
         public DbPluginIdentifier SourcePlugin { get; set; }
-        public DbWhoWhenWhere Creator { get; set; }
+        public DbWhoWhenWhere CreationInfo { get; set; }
         public virtual Location Location { get; set; }
+        public virtual ICollection<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }
+        public virtual ICollection<EnvironmentalDataSetCollectionLogEntry> LogEntries { get; set; }
+    }
+
+    public class EnvironmentalDataSetCollectionLogEntry
+    {
+        public string EnvironmentalDataSetCollectionLogEntryID { get; set; }
+        public LogEntry LogEntry { get; set; }
+        public virtual EnvironmentalDataSetCollection EnvironmentalDataSetCollection { get; set; }
+    }
+
+    public class EnvironmentalDataSet
+    {
+        public int EnvironmentalDataSetID { get; set; }
+        public float Resolution { get; set; }
+        public int SampleCount { get; set; }
+        public long FileSize { get; set; }
+        public DbTimePeriod TimePeriod { get; set; }
+        public string FileName { get; set; }
+        public DbWhoWhenWhere CreationInfo { get; set; }
+        public virtual EnvironmentalDataSetCollection EnvironmentalDataSetCollection { get; set; }
     }
 }

@@ -14,9 +14,9 @@ namespace ESME.Database
         public static implicit operator DbGeo(Geo geo) { return new DbGeo(geo); }
         public static implicit operator Geo(DbGeo dbGeo) { return new Geo(dbGeo._geo); }
 
-        public double X { get { return _geo.X; } }
-        public double Y { get { return _geo.Y; } }
-        public double Z { get { return _geo.Z; } }
+        [NotMapped] public double X { get { return _geo.X; } }
+        [NotMapped] public double Y { get { return _geo.Y; } }
+        [NotMapped] public double Z { get { return _geo.Z; } }
 
         readonly Geo _geo = new Geo();
 
@@ -29,15 +29,6 @@ namespace ESME.Database
         {
             get { return _geo.Longitude; }
             set { _geo.Longitude = value; }
-        }
-        internal static void ModelInitialization(DbModelBuilder modelBuilder)
-        {
-            modelBuilder.ComplexType<DbGeo>()
-                .Ignore(p => p.X);
-            modelBuilder.ComplexType<DbGeo>()
-                .Ignore(p => p.Y);
-            modelBuilder.ComplexType<DbGeo>()
-                .Ignore(p => p.Z);
         }
     }
 }

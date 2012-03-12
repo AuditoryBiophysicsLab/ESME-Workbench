@@ -26,12 +26,7 @@ namespace ESME.Database
         public DbSet<ScenarioSpecies> ScenarioSpecies { get; set; }
         public DbSet<AnimatLocation> AnimatLocations { get; set; }
 
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
-            DbDateTime.ModelInitialization(modelBuilder);
-            DbTimeSpan.ModelInitialization(modelBuilder);
-            DbGeo.ModelInitialization(modelBuilder);
-        }
+        protected override void OnModelCreating(DbModelBuilder modelBuilder) { }
     }
 
     public class Scenario

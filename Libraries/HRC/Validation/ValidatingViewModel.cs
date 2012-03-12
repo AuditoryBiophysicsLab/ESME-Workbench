@@ -12,11 +12,9 @@ namespace HRC.Validation
 {
     public abstract class ValidatingViewModel : ViewModelBase, IDataErrorInfo
     {
-// ReSharper disable DoNotCallOverridableMethodsInConstructor
         protected ValidatingViewModel() { ValidationRules = new List<ValidationRule>(); }
-// ReSharper restore DoNotCallOverridableMethodsInConstructor
 
-        protected virtual List<ValidationRule> ValidationRules { get; set; }
+        protected List<ValidationRule> ValidationRules { get; set; }
 
         #region Implementation of IDataErrorInfo
         /// <summary>
@@ -170,13 +168,13 @@ namespace HRC.Validation
         }
         public static int FullCount(params string[] fields)
         {
-            var nonEmptyCount = fields.Where(field => !string.IsNullOrEmpty(field)).Count();
+            var nonEmptyCount = fields.Count(field => !string.IsNullOrEmpty(field));
             return nonEmptyCount;
         }
 
         public static int EmptyCount(params string[] fields)
         {
-            var emptyCount = fields.Where(field => string.IsNullOrEmpty(field)).Count();
+            var emptyCount = fields.Where(string.IsNullOrEmpty).Count();
             return emptyCount;
         }
     }

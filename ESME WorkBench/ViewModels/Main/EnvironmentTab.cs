@@ -237,11 +237,11 @@ namespace ESMEWorkbench.ViewModels.Main
 
         void ZoomToRangeComplex()
         {
-            var bounds = RangeComplexes.SelectedRangeComplex.OpArea.OverlayShape.BoundingBox;
-            var north = (float)bounds.Bottom + 3;
-            var west = (float)bounds.Left - 3;
-            var south = (float)bounds.Top - 3;
-            var east = (float)bounds.Right + 3;
+            var bounds = RangeComplexes.SelectedRangeComplex.OpArea.OverlayShape.GeoRect;
+            var north = (float)bounds.North + 3;
+            var west = (float)bounds.West - 3;
+            var south = (float)bounds.South - 3;
+            var east = (float)bounds.East + 3;
             var mapExtent = new RectangleShape(west, north, east, south);
             MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
         }

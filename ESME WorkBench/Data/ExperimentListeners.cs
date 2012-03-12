@@ -161,14 +161,14 @@ namespace ESMEWorkbench.Data
         void SetScenarioMapExtent(bool dummy)
         {
             var boundingBox = new Rect();
-            if (NemoFile.Scenario.OverlayFile != null) boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox;
+            if (NemoFile.Scenario.OverlayFile != null) boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].GeoRect;
             else
             {
                 foreach (var platform in NemoFile.Scenario.Platforms)
                     foreach (var trackdef in platform.Trackdefs)
                     {
-                        if ((boundingBox.Width == 0) && (boundingBox.Height == 0)) boundingBox = trackdef.OverlayFile.Shapes[0].BoundingBox;
-                        else boundingBox.Union(trackdef.OverlayFile.Shapes[0].BoundingBox);
+                        if ((boundingBox.Width == 0) && (boundingBox.Height == 0)) boundingBox = trackdef.OverlayFile.Shapes[0].GeoRect;
+                        else boundingBox.Union(trackdef.OverlayFile.Shapes[0].GeoRect);
                     }
             }
             var north = (float) boundingBox.Bottom + 3;

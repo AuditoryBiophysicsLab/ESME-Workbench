@@ -1154,10 +1154,10 @@ namespace ESMEWorkbench.Data
             if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(NemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
             else NemoModeToAcousticModelNameMap.UpdateModes(NemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
 
-            if (NemoFile.Scenario.OverlayFile != null) OpArea = new GeoRect(NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox);
+            if (NemoFile.Scenario.OverlayFile != null) OpArea = new GeoRect(NemoFile.Scenario.OverlayFile.Shapes[0].GeoRect);
             else foreach (var trackdef in NemoFile.Scenario.Platforms.SelectMany(platform => platform.Trackdefs))
-                    if (OpArea == null) OpArea = new GeoRect(trackdef.OverlayFile.Shapes[0].BoundingBox);
-                    else OpArea.Union(trackdef.OverlayFile.Shapes[0].BoundingBox);
+                    if (OpArea == null) OpArea = new GeoRect(trackdef.OverlayFile.Shapes[0].GeoRect);
+                    else OpArea.Union(trackdef.OverlayFile.Shapes[0].GeoRect);
             if (SimArea == null) SimArea = new GeoRect(OpArea);
 
             if ((WindSpeedFileName != null) && (File.Exists(WindSpeedFileName)))

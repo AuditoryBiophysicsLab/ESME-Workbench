@@ -23,6 +23,8 @@ namespace ESME.Plugins
         EnvironmentalDataSourcePluginBase<SoundSpeed> SoundSpeedSource { get; }
         EnvironmentalDataSourcePluginBase<Sediment> SedimentSource { get; }
         EnvironmentalDataSourcePluginBase<Bathymetry> BathymetrySource { get; }
+        IESMEPlugin this[PluginIdentifier pluginIdentifier] { get; }
+        PluginTypeDictionary this[PluginType pluginType] { get; }
     }
 
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -66,6 +68,7 @@ namespace ESME.Plugins
             }
             set
             {
+                if (value == null) return;
                 value.ForEach(configuration => ESMEPluginDictionary.PluginIdentifier = configuration);
             }
         }
@@ -82,6 +85,17 @@ namespace ESME.Plugins
                 if (!ESMEPluginDictionary.ContainsKey(pluginType)) ESMEPluginDictionary.Add(pluginType, new PluginTypeDictionary());
                 if (!ESMEPluginDictionary[pluginType].ContainsKey(pluginSubtype)) ESMEPluginDictionary[pluginType].Add(pluginSubtype, new PluginSubtypeDictionary());
                 ESMEPluginDictionary[pluginType][pluginSubtype].DefaultPlugin = value;
+            }
+        }
+
+        public IESMEPlugin this[PluginIdentifier pluginIdentifier]
+        {
+            get
+            {
+                if (!ESMEPluginDictionary.ContainsKey(pluginIdentifier.PluginType)) throw new PluginNotFoundException(string.Format("There are no plugins of type {0}", pluginIdentifier.PluginType));
+                if (!ESMEPluginDictionary[pluginIdentifier.PluginType].ContainsKey(pluginIdentifier.PluginSubtype)) throw new PluginNotFoundException(string.Format("There are no {0} plugins of subtype {1}", pluginIdentifier.PluginType, pluginIdentifier.PluginSubtype));
+                if (!ESMEPluginDictionary[pluginIdentifier.PluginType][pluginIdentifier.PluginSubtype].ContainsKey(pluginIdentifier.Type)) throw new PluginNotFoundException(string.Format("There are no {0}.{1} plugins of type {2}", pluginIdentifier.PluginType, pluginIdentifier.PluginSubtype, pluginIdentifier.Type));
+                return ESMEPluginDictionary[pluginIdentifier.PluginType][pluginIdentifier.PluginSubtype][pluginIdentifier.Type];
             }
         }
 
@@ -120,18 +134,7 @@ namespace ESME.Plugins
 
     public class PluginSubtypeDictionary : ObservableConcurrentDictionary<string, IESMEPlugin>
     {
-        IESMEPlugin _defaultPlugin;
-        public IESMEPlugin DefaultPlugin
-        {
-            get
-            {
-                return _defaultPlugin;
-            }
-            set
-            {
-                _defaultPlugin = value;
-            }
-        }
+        public IESMEPlugin DefaultPlugin { get; set; }
     }
     public class PluginTypeDictionary : ObservableConcurrentDictionary<PluginSubtype, PluginSubtypeDictionary> {}
     public class ESMEPluginDictionary : ObservableConcurrentDictionary<PluginType, PluginTypeDictionary>

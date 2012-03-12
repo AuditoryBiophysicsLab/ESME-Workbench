@@ -22,7 +22,7 @@ namespace ESME.Environment.Descriptors
             _rangeComplex = rangeComplex;
             Name = areaName;
             OverlayShape = overlayShape;
-            GeoRect = new GeoRect(overlayShape.BoundingBox);
+            GeoRect = new GeoRect(overlayShape.GeoRect);
             BathymetryPath = Path.Combine(_rangeComplex.DataPath, Name);
             BathymetryFiles = RangeComplexToken.Load(Path.Combine(BathymetryPath, Name + ".token"));
             BathymetryList = BathymetryFiles.GetObservableWrapper<EnvironmentFile>();

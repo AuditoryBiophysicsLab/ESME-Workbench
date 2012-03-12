@@ -128,7 +128,13 @@ namespace HRC.Navigation
         ///   Expands the current GeoRect exactly enough to contain the specified GeoRect.
         /// </summary>
         /// <param name = "geoRect"></param>
-        public void Union(GeoRect geoRect) { FromRect(Rect.Union(this, geoRect)); }
+        public void Union(GeoRect geoRect)
+        {
+            North = Math.Max(North, geoRect.North);
+            South = Math.Min(South, geoRect.South);
+            East = Math.Max(East, geoRect.East);
+            West = Math.Min(West, geoRect.West);
+        }
 
         /// <summary>
         ///   Expands the current GeoRect exactly enough to contain the specified rectangle.
@@ -140,7 +146,13 @@ namespace HRC.Navigation
         ///   Expands the current GeoRect exactly enough to contain the specified EarthCoordinate.
         /// </summary>
         /// <param name = "geo"></param>
-        public void Union(Geo geo) { FromRect(Rect.Union(this, geo)); }
+        public void Union(Geo geo) //{ FromRect(Rect.Union(this, geo)); }
+        {
+            North = Math.Max(North, geo.Latitude);
+            South = Math.Min(South, geo.Latitude);
+            East = Math.Max(East, geo.Longitude);
+            West = Math.Min(West, geo.Longitude);
+        }
 
         /// <summary>
         /// Returns an enumerable that will result in a closed, clockwise polygon
@@ -176,14 +188,23 @@ namespace HRC.Navigation
         /// <param name = "geoRect"></param>
         /// <param name = "geo"></param>
         /// <returns></returns>
-        public static GeoRect Union(GeoRect geoRect, Geo geo) { return new GeoRect(Rect.Union(geoRect, geo)); }
+        public static GeoRect Union(GeoRect geoRect, Geo geo) //{ return new GeoRect(Rect.Union(geoRect, geo)); }
+        {
+            return new GeoRect(Math.Max(geoRect.North, geo.Latitude),
+                               Math.Min(geoRect.South, geo.Latitude),
+                               Math.Max(geoRect.East, geo.Longitude),
+                               Math.Min(geoRect.West, geo.Longitude));
+        }
 
         /// <summary>
         ///   Indicates whether the GeoRect contains the specified Geo.
         /// </summary>
         /// <param name = "geo"></param>
         /// <returns></returns>
-        public bool Contains(Geo geo) { return ((Rect)this).Contains(geo); }
+        public bool Contains(Geo geo)
+        {
+            return North <= geo.Latitude && geo.Latitude <= South && West <= geo.Longitude && geo.Longitude <= East;
+        }
 
         /// <summary>
         ///   Indicates whether the GeoRect contains the specified GeoRect.

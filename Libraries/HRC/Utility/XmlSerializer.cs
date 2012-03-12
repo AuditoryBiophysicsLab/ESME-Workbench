@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -9,6 +11,55 @@ using System.Xml.Serialization;
 
 namespace HRC.Utility
 {
+    [Serializable]
+    public class HRCXmlSerializer
+    {
+        public static void Save<T>(string fileName, T source) where T : class, new()
+        {
+            var serializerType = typeof(XmlSerializer<T>);
+            var methodInfo = serializerType.GetMethod("SaveStatic", new[] { typeof(T), typeof(string), typeof(List<Type>) });
+            var referencedTypes = FindReferencedTypesIn(typeof(T));
+            methodInfo.Invoke(null, new object[] { source, fileName, referencedTypes });
+        }
+
+        public static object Load(string fileName, Type type)
+        {
+            var serializerType = typeof(XmlSerializer<>);
+            var genericSerializer = serializerType.MakeGenericType(type);
+            var methodInfo = genericSerializer.GetMethod("Load", new[] { typeof(string), typeof(List<Type>) });
+            var referencedTypes = FindReferencedTypesIn(type);
+            return methodInfo.Invoke(null, new object[] { fileName, referencedTypes });
+        }
+
+        public static List<Type> FindReferencedTypesIn(Type targetType)
+        {
+            var memberInfo = targetType.GetMembers(BindingFlags.Static | BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var referencedTypes = new List<Type>();
+            foreach (var member in memberInfo)
+            {
+                if (!member.GetCustomAttributes(typeof(ReferencedTypesAttribute), true).Any()) continue;
+                var fieldInfo = member as FieldInfo;
+                var propertyInfo = member as PropertyInfo;
+                if (propertyInfo != null)
+                {
+                    if (!typeof(IList<Type>).IsAssignableFrom(propertyInfo.PropertyType)) throw new InvalidReferencedTypesAttributeException(String.Format("Error on property {0}.{1}: Properties with the [ReferencedTypes] attribute must be assignable to type IList<Type>", propertyInfo.DeclaringType, propertyInfo.PropertyType));
+                    referencedTypes.AddRange((List<Type>)propertyInfo.GetValue(null, BindingFlags.Static, null, null, null));
+                }
+                else if (fieldInfo != null)
+                {
+                    if (!typeof(IList<Type>).IsAssignableFrom(fieldInfo.FieldType)) throw new InvalidReferencedTypesAttributeException(String.Format("Error on field {0}.{1}: Fields with the [ReferencedTypes] attribute must be assignable to type IList<Type>", fieldInfo.DeclaringType, fieldInfo.FieldType));
+                    referencedTypes.AddRange((List<Type>)fieldInfo.GetValue(null));
+                }
+            }
+            return referencedTypes;
+        }
+    }
+    [AttributeUsage(AttributeTargets.Property)]
+    public class SettingAttribute : Attribute { }
+
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+    public class ReferencedTypesAttribute : Attribute { }
+
     [Serializable]
     public class XmlSerializer<T> where T : class, new()
     {
@@ -54,6 +105,34 @@ namespace HRC.Utility
 
             return Deserialize(file, null, referencedTypes);
         }
+
+        /// <summary>
+        /// Load the data from a file without validating against an XML schema
+        /// </summary>
+        /// <param name="data"> </param>
+        /// <param name="filename">The name of the file containing the data to be loaded</param>
+        /// <param name="referencedTypes">A list of types that are referenced by your class, including any types referenced by members or base classes</param>
+        /// <returns></returns>
+        public static void SaveStatic(T data, string filename, List<Type> referencedTypes)
+        {
+            var retry = 10;
+            Exception ex = null;
+            while (--retry > 0)
+            {
+                try
+                {
+                    File.WriteAllText(filename, SerializeStatic(data, referencedTypes));
+                    return;
+                }
+                catch (Exception e)
+                {
+                    ex = e;
+                    Thread.Sleep(100);
+                }
+            }
+            if (ex != null) throw ex;
+        }
+
 
         public string Xml
         {
@@ -111,6 +190,24 @@ namespace HRC.Utility
             // ReSharper disable AssignNullToNotNullAttribute
             using (var writer = XmlWriter.Create(ms, settings))
                 serializer.Serialize(writer, Data);
+            // ReSharper restore AssignNullToNotNullAttribute
+
+            return Encoding.UTF8.GetString(ms.ToArray());
+        }
+
+        private static string SerializeStatic(T data, List<Type> extraTypes)
+        {
+            var ms = new MemoryStream();
+            var serializer = extraTypes == null ? new XmlSerializer(typeof(T)) : new XmlSerializer(typeof(T), extraTypes.ToArray());
+            var settings = new XmlWriterSettings
+            {
+                Encoding = Encoding.UTF8,
+                Indent = true,
+            };
+
+            // ReSharper disable AssignNullToNotNullAttribute
+            using (var writer = XmlWriter.Create(ms, settings))
+                serializer.Serialize(writer, data);
             // ReSharper restore AssignNullToNotNullAttribute
 
             return Encoding.UTF8.GetString(ms.ToArray());
