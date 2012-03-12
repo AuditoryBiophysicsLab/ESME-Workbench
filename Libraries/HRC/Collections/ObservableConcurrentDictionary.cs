@@ -233,8 +233,8 @@ namespace HRC.Collections
         }
         #endregion
 
-        public XmlSchema GetSchema() { return null; }
-        public void ReadXml(XmlReader reader)
+        XmlSchema IXmlSerializable.GetSchema() { return null; }
+        void IXmlSerializable.ReadXml(XmlReader reader)
         {
             var keySerializer = new XmlSerializer(typeof(TKey));
             var valueSerializer = new XmlSerializer(typeof(TValue));
@@ -264,7 +264,8 @@ namespace HRC.Collections
             }
             reader.ReadEndElement();
         }
-        public void WriteXml(XmlWriter writer) 
+        
+        void IXmlSerializable.WriteXml(XmlWriter writer) 
         {
             var keySerializer = new XmlSerializer(typeof(TKey));
             var valueSerializer = new XmlSerializer(typeof(TValue));

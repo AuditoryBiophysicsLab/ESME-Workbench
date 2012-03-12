@@ -15,25 +15,26 @@ namespace ESME.Tests.Settings
         [Test]
         public void SavingAndLoading()
         {
+            File.Delete("BaseTestSettings.xml");
+            Assert.IsFalse(File.Exists("BaseTestSettings.xml"));
             TestSaving();
             TestLoading();
+            Console.WriteLine(File.ReadAllText("BaseTestSettings.xml"));
         }
         
         public void TestSaving()
         {
-            var testSettings = new TestSettings();
+            var testSettings = new BaseTestSettings();
             Assert.AreEqual("Initial String Property Value", testSettings.StringProperty);
             Assert.AreEqual(0.0, testSettings.Geo.Latitude);
             Assert.AreEqual(0.0, testSettings.Geo.Longitude);
-            File.Delete("TestSettings.xml");
-            Assert.IsFalse(File.Exists("TestSettings.xml"));
-            testSettings.Save("TestSettings.xml");
-            Assert.IsTrue(File.Exists("TestSettings.xml"));
+            testSettings.Save("BaseTestSettings.xml");
+            Assert.IsTrue(File.Exists("BaseTestSettings.xml"));
         }
 
         public void TestLoading()
         {
-            var testSettings = (TestSettings)StaticXmlSerializer.Load("TestSettings.xml", typeof(TestSettings));
+            var testSettings = (BaseTestSettings)StaticXmlSerializer.Load("BaseTestSettings.xml", typeof(BaseTestSettings));
             Assert.NotNull(testSettings);
             Assert.AreEqual("Initial String Property Value", testSettings.StringProperty);
             Assert.AreEqual(0.0, testSettings.Geo.Latitude);
@@ -44,7 +45,7 @@ namespace ESME.Tests.Settings
     }
 
     [Serializable]
-    public class TestSettings : SettingsBase
+    public class BaseTestSettings : SettingsBase
     {
         [ReferencedTypes, UsedImplicitly]
         static readonly List<Type> ReferencedTypes = new List<Type> { typeof(Geo) };

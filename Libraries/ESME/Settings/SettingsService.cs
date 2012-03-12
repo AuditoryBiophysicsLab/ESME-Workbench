@@ -1,45 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.IO;
-using System.Reflection;
-using Cinch;
-using HRC.Collections;
 using HRC.Utility;
-using MEFedMVVM.ViewModelLocator;
 using System.Linq;
+using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Settings
 {
-    public interface ISettingsService
-    {
+    public interface ISettingsService {
         string SettingsRootDirectory { get; set; }
         ISettingsBase this[Type settingType, string fileName] { get; set; }
     }
 
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ExportService(ServiceType.Both, typeof (ISettingsService))]
-    public class SettingsService : ViewModelBase, ISettingsService
+    //[NotifyPropertyChanged]
+    public class SettingsService : ISettingsService
     {
-        #region public string SettingsRootDirectory { get; set; }
-
-        public string SettingsRootDirectory
-        {
-            get { return _settingsRootDirectory; }
-            set
-            {
-                if (_settingsRootDirectory == value) return;
-                _settingsRootDirectory = value;
-                NotifyPropertyChanged(SettingsRootDirectoryChangedEventArgs);
-            }
-        }
+        public string SettingsRootDirectory { get; set; }
 
         public ISettingsBase this[Type settingType, string fileName]
         {
             get
             {
+                if (string.IsNullOrEmpty(SettingsRootDirectory) || !Directory.Exists(SettingsRootDirectory)) return null;
                 if (!_typeDictionary.ContainsKey(settingType))
                 {
                     var typeDirectory = (from directory in Directory.EnumerateDirectories(SettingsRootDirectory)
@@ -53,41 +38,40 @@ namespace ESME.Settings
             }
             set
             {
+                if (string.IsNullOrEmpty(SettingsRootDirectory)) throw new ApplicationException("SettingsRootDirectory has not been set");
+                var typeDirectory = Path.Combine(SettingsRootDirectory, settingType.ToString());
+                if (!Directory.Exists(typeDirectory)) Directory.CreateDirectory(typeDirectory);
                 if (!_typeDictionary.ContainsKey(settingType))
                     _typeDictionary.Add(settingType, new SettingsDictionary());
                 _typeDictionary[settingType][fileName] = value;
+                value.Save(Path.Combine(typeDirectory, fileName));
             }
         }
-
-        static readonly PropertyChangedEventArgs SettingsRootDirectoryChangedEventArgs = ObservableHelper.CreateArgs<SettingsService>(x => x.SettingsRootDirectory);
-        string _settingsRootDirectory;
-
-        #endregion
 
         readonly TypeDictionary _typeDictionary = new TypeDictionary();
+    }
 
-        class TypeDictionary : ObservableConcurrentDictionary<Type, SettingsDictionary>
+    class TypeDictionary : Dictionary<Type, SettingsDictionary>
+    {
+        public void AddType(SettingsService settingsService, Type type)
         {
-            public void AddType(ISettingsService settingsService, Type type)
-            {
-                if (ContainsKey(type)) return;
-                var typeDirectory = Path.Combine(settingsService.SettingsRootDirectory, type.ToString());
-                if (!Directory.Exists(typeDirectory)) Directory.CreateDirectory(typeDirectory);
-                Add(type, new SettingsDictionary(settingsService, type));
-            }
+            if (ContainsKey(type)) return;
+            var typeDirectory = Path.Combine(settingsService.SettingsRootDirectory, type.ToString());
+            if (!Directory.Exists(typeDirectory)) Directory.CreateDirectory(typeDirectory);
+            Add(type, new SettingsDictionary(settingsService, type));
         }
-        class SettingsDictionary : ObservableConcurrentDictionary<string, ISettingsBase>
-        {
-            public SettingsDictionary() {}
+    }
+    class SettingsDictionary : Dictionary<string, ISettingsBase>
+    {
+        public SettingsDictionary() { }
 
-            public SettingsDictionary(ISettingsService settingsService, Type type)
+        public SettingsDictionary(SettingsService settingsService, Type type)
+        {
+            var files = Directory.GetFiles(Path.Combine(settingsService.SettingsRootDirectory, type.ToString()), "*.*", SearchOption.TopDirectoryOnly);
+            foreach (var file in files)
             {
-                var files = Directory.GetFiles(Path.Combine(settingsService.SettingsRootDirectory, type.ToString()), "*.*", SearchOption.TopDirectoryOnly);
-                foreach (var file in files)
-                {
-                    var localFileName = Path.GetFileName(file);
-                    if (localFileName != null) Add(localFileName, null);
-                }
+                var localFileName = Path.GetFileName(file);
+                if (localFileName != null) Add(localFileName, null);
             }
         }
     }

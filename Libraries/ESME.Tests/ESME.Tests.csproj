@@ -57,6 +57,7 @@
     <Compile Include="Environment\EnvironmentDataTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\SettingsBaseTests.cs" />
+    <Compile Include="Settings\SettingsServiceTests.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossJobTests.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossRunFileTests.cs" />
   </ItemGroup>
