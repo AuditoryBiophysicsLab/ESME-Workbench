@@ -24,7 +24,7 @@ namespace HRC.Tests.Aspects
             var test1PropertyChanged = new List<string>();
             Post.Cast<TestPropertyContainer, INotifyPropertyChanged>(test1).PropertyChanged += (s, e) =>
             {
-                Console.WriteLine("PropertyChanged: {0}, Value: {1}", e.PropertyName);
+                Console.WriteLine("PropertyChanged: {0}", e.PropertyName);
                 test1PropertyChanged.Add(e.PropertyName);
             };
             var test2 = new TestPropertyContainer2();
@@ -44,8 +44,8 @@ namespace HRC.Tests.Aspects
             test1PropertyChanged.Clear();
             test1.Property3 = "Property3";
             Assert.AreEqual(test1PropertyChanged.Count, 2);
-            Assert.AreEqual("Property3", test1PropertyChanged[0]);
-            Assert.AreEqual("YYY", test1PropertyChanged[1]);
+            Assert.IsTrue(test1PropertyChanged.Contains("Property3"));
+            Assert.IsTrue(test1PropertyChanged.Contains("YYY"));
             test1PropertyChanged.Clear();
             test2.Property1 = "Property1";
             Assert.AreEqual(test2PropertyChanged.Count, 1);
@@ -57,8 +57,8 @@ namespace HRC.Tests.Aspects
             test2PropertyChanged.Clear();
             test2.Property3 = "Property3";
             Assert.AreEqual(test2PropertyChanged.Count, 2);
-            Assert.AreEqual("Property3", test2PropertyChanged[0]);
-            Assert.AreEqual("YYY", test2PropertyChanged[1]);
+            Assert.IsTrue(test2PropertyChanged.Contains("Property3"));
+            Assert.IsTrue(test2PropertyChanged.Contains("YYY"));
             test2PropertyChanged.Clear();
             test2.Property4 = "Property4";
             Assert.AreEqual(test2PropertyChanged.Count, 1);
@@ -70,11 +70,9 @@ namespace HRC.Tests.Aspects
             test2PropertyChanged.Clear();
             test2.Property6 = "Property6";
             Assert.AreEqual(test2PropertyChanged.Count, 3);
-            Assert.AreEqual("Property6", test2PropertyChanged[0]);
-            Assert.AreEqual("ZZZ", test2PropertyChanged[1]);
-            Assert.AreEqual("abc", test2PropertyChanged[2]);
-            Assert.AreEqual(test2PropertyChanged[1], "ZZZ");
-            Assert.AreEqual(test2PropertyChanged[2], "abc");
+            Assert.IsTrue(test2PropertyChanged.Contains("Property6"));
+            Assert.IsTrue(test2PropertyChanged.Contains("ZZZ"));
+            Assert.IsTrue(test2PropertyChanged.Contains("abc"));
             test2PropertyChanged.Clear();
         }
 
@@ -110,6 +108,7 @@ namespace HRC.Tests.Aspects
             Assert.IsNull(testSettings.NullStringProperty);
             Assert.AreEqual("Default", testSettings.DefaultedStringProperty);
             Assert.Throws(typeof (InvalidOperationException), () => Console.WriteLine(testSettings.ExceptionStringProperty));
+            Console.WriteLine("GuidStringProperty = {0}", testSettings.GuidStringProperty);
             Assert.AreEqual(testSettings.DefaultedIntProperty++, 5);
             Assert.AreEqual(testSettings.DefaultedIntProperty++, 6);
             Assert.IsNull(testSettings.NullStringList);
@@ -159,6 +158,9 @@ namespace HRC.Tests.Aspects
 
         [Initialize]
         public string ExceptionStringProperty { get; set; }
+
+        [Initialize(IsGuid = true)]
+        public string GuidStringProperty { get; set; }
 
         [Initialize(5)]
         public int DefaultedIntProperty { get; set; }

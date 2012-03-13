@@ -1,32 +1,45 @@
 ﻿using System;
 using PostSharp.Aspects;
+using PostSharp.Aspects.Dependencies;
 using PostSharp.Extensibility;
 
 namespace HRC.Aspects
 {
     [Serializable]
     [MulticastAttributeUsage(MulticastTargets.Property)]
-    public class InitializeAttribute : LocationInterceptionAspect, IInstanceScopedAspect
+    [AspectTypeDependency(AspectDependencyAction.Commute, typeof(NotifyPropertyChangedAttribute))]
+    [AspectTypeDependency(AspectDependencyAction.Commute, typeof(AffectsAttribute))]
+    public sealed class InitializeAttribute : LocationInterceptionAspect, IInstanceScopedAspect
     {
+        public override bool CompileTimeValidate(PostSharp.Reflection.LocationInfo locationInfo)
+        {
+            if (IsGuid && locationInfo.LocationType != typeof(string))
+                Message.Write(SeverityType.Error, "Initialize01", "Only string types can be initialized with IsGuid = true");
+            if (IsGuid && _defaultValue != null)
+                Message.Write(SeverityType.Error, "Initialize02", "Cannot specify a default value with IsGuid = true");
+            return true;
+        }
+
         public InitializeAttribute() { }
         public InitializeAttribute(object defaultValue) { _defaultValue = defaultValue; }
 
+        public bool IsGuid { get; set; }
         readonly object _defaultValue;
-        bool _firstTime = true;
+        bool _valueSet;
         public override void OnSetValue(LocationInterceptionArgs args)
         {
-            _firstTime = false;
+            _valueSet = true;
             args.ProceedSetValue();
         }
         public override void OnGetValue(LocationInterceptionArgs args)
         {
-            if (_firstTime)
+            if (!_valueSet)
             {
-                _firstTime = false;
-                if (_defaultValue != null)
+                _valueSet = true;
+                if (_defaultValue != null || IsGuid)
                 {
-                    //Console.WriteLine("Initializing {0} to |{1}|", args.LocationName, _defaultValue); 
-                    args.SetNewValue(_defaultValue);
+                    args.SetNewValue(IsGuid ? Guid.NewGuid().ToString() : _defaultValue);
+                    //Console.WriteLine("Initialized {0} to |{1}|", args.LocationName, args.GetCurrentValue()); 
                 }
                 else if (args.Location.PropertyInfo.GetType().IsClass)
                 {

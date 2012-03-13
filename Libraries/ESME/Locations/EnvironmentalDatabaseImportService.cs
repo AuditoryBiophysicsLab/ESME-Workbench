@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -38,6 +39,21 @@ namespace ESME.Locations
         {
             if (ImportActionBlock == null) ImportActionBlock = CreateImporter();
             ImportActionBlock.Post(Tuple.Create(dataSet, progress));
+        }
+
+        public void ImportMissingDatasets()
+        {
+            foreach (var location in _locationManagerService.Locations)
+            {
+                
+            }
+        }
+
+        readonly ConcurrentDictionary<Guid, ImportJob> _importJobsPending = new ConcurrentDictionary<Guid, ImportJob>();
+
+        public void ImportLocationDatasets(Location location)
+        {
+            
         }
 
         int _busyCount;
@@ -136,5 +152,11 @@ namespace ESME.Locations
             });
             return newImporter;
         }
+    }
+
+    public class ImportJob
+    {
+        public EnvironmentalDataSet EnvironmentalDataSet { get; set; }
+        public IProgress<float> Progress { get; set; }
     }
 }

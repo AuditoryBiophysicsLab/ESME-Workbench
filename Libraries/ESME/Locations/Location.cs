@@ -47,7 +47,8 @@ namespace ESME.Locations
 
     public class Location
     {
-        public int LocationID { get; set; }
+        [Key]
+        public string Key { get; set; }
         public string Name { get; set; }
         public string Comments { get; set; }
         public DbGeoRect GeoRect { get; set; }

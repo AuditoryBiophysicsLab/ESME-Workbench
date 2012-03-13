@@ -17,8 +17,10 @@ namespace HRC.Aspects
     [IntroduceInterface(typeof(INotifyPropertyChanged), OverrideAction = InterfaceOverrideAction.Ignore)]
     [MulticastAttributeUsage(MulticastTargets.Class, Inheritance = MulticastInheritance.Strict)]
     [ProvideAspectRole(StandardRoles.DataBinding)]
-    [AspectEffectDependency(AspectDependencyAction.Order, AspectDependencyPosition.Before, StandardRoles.DataBinding)]
-    //[AspectTypeDependency(AspectDependencyAction.Commute, typeof(AffectsAttribute))]
+    [ProvideAspectRole(StandardEffects.InterfaceIntroduction)]
+    [ProvideAspectRole(StandardEffects.MemberIntroduction)]
+    [AspectTypeDependency(AspectDependencyAction.Commute, typeof(InitializeAttribute))]
+    [AspectTypeDependency(AspectDependencyAction.Commute, typeof(AffectsAttribute))]
     public sealed class NotifyPropertyChangedAttribute : InstanceLevelAspect, INotifyPropertyChanged
     {
         /// <summary>
