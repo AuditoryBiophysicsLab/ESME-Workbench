@@ -34,7 +34,7 @@ namespace TransmissionLossCalculator
             AppSettings.ApplicationName = App.Name;
             WorkDirectories.ApplicationName = App.Name;
             ESME.Globals.AppSettings = AppSettings.Load(AppSettings.AppSettingsFile);
-            ESME.Globals.AppSettings.SetDefaults();
+            //ESME.Globals.AppSettings.SetDefaults();
 
             _messageBoxService = messageBoxService;
             _cpuInfo = new CpuInfo();

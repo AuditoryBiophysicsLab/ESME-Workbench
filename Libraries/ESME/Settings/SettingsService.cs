@@ -8,7 +8,8 @@ using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Settings
 {
-    public interface ISettingsService {
+    public interface ISettingsService 
+    {
         string SettingsRootDirectory { get; set; }
         ISettingsBase this[Type settingType, string fileName] { get; set; }
     }
@@ -65,7 +66,7 @@ namespace ESME.Settings
     {
         public SettingsDictionary() { }
 
-        public SettingsDictionary(SettingsService settingsService, Type type)
+        public SettingsDictionary(ISettingsService settingsService, Type type)
         {
             var files = Directory.GetFiles(Path.Combine(settingsService.SettingsRootDirectory, type.ToString()), "*.*", SearchOption.TopDirectoryOnly);
             foreach (var file in files)

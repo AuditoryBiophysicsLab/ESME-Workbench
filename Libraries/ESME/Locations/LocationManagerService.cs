@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Data;
 using System.Data.Common;
-using System.Data.Entity;
 using System.Data.Entity.Validation;
 using System.IO;
 using System.Linq;

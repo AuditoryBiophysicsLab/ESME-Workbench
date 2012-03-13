@@ -22,10 +22,18 @@ namespace HRC.Tests.Aspects
         {
             var test1 = new TestPropertyContainer();
             var test1PropertyChanged = new List<string>();
-            Post.Cast<TestPropertyContainer, INotifyPropertyChanged>(test1).PropertyChanged += (s, e) => test1PropertyChanged.Add(e.PropertyName);
+            Post.Cast<TestPropertyContainer, INotifyPropertyChanged>(test1).PropertyChanged += (s, e) =>
+            {
+                Console.WriteLine("PropertyChanged: {0}, Value: {1}", e.PropertyName);
+                test1PropertyChanged.Add(e.PropertyName);
+            };
             var test2 = new TestPropertyContainer2();
             var test2PropertyChanged = new List<string>();
-            Post.Cast<TestPropertyContainer2, INotifyPropertyChanged>(test2).PropertyChanged += (s, e) => test2PropertyChanged.Add(e.PropertyName);
+            Post.Cast<TestPropertyContainer2, INotifyPropertyChanged>(test2).PropertyChanged += (s, e) =>
+            {
+                Console.WriteLine("PropertyChanged: {0}", e.PropertyName);
+                test2PropertyChanged.Add(e.PropertyName);
+            };
             test1.Property1 = "Property1";
             Assert.AreEqual(test1PropertyChanged.Count, 1);
             Assert.AreEqual("Property1", test1PropertyChanged[0]);
