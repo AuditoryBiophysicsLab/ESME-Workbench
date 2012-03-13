@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using ESME.NEMO;
 using HRC.Utility;
 
-namespace ESME.Platform
+namespace ESME.Behaviors
 {
 #if false
     public class ActiveMode

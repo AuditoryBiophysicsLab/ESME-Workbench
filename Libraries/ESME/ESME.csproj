@@ -135,6 +135,7 @@
   <ItemGroup>
     <Compile Include="BuildInformation.cs" />
     <Compile Include="Database\DbTimePeriod.cs" />
+    <Compile Include="Database\DbTrackType.cs" />
     <Compile Include="Database\DbWhoWhenWhere.cs" />
     <Compile Include="Database\DbDateTime.cs" />
     <Compile Include="Database\DbPluginIdentifier.cs" />
@@ -144,13 +145,10 @@
     <Compile Include="Database\Importers\NemoFile.cs" />
     <Compile Include="Database\Importers\PSMFile.cs" />
     <Compile Include="Database\Importers\PSMFileRecord.cs" />
-    <Compile Include="Database\Location.cs" />
-    <Compile Include="Database\Mode.cs" />
-    <Compile Include="Database\Platform.cs" />
+    <Compile Include="Locations\Location.cs" />
     <Compile Include="Database\PSMContext.cs" />
-    <Compile Include="Database\Scenario.cs" />
+    <Compile Include="Locations\Scenario.cs" />
     <Compile Include="Database\Simulation.cs" />
-    <Compile Include="Database\Source.cs" />
     <Compile Include="Data\AppSettings%28pre-aspect%29.cs" />
     <Compile Include="Data\CASSTemplate.cs" />
     <Compile Include="Data\AppSettings.cs" />
@@ -220,12 +218,12 @@
     <Compile Include="NEMO\NemoSource.cs" />
     <Compile Include="NEMO\NemoSpecies.cs" />
     <Compile Include="NEMO\NemoTrackdef.cs" />
-    <Compile Include="Platform\ActiveMode.cs" />
+    <Compile Include="Behaviors\ActiveMode.cs" />
     <Compile Include="NEMO\ActiveTimeStep.cs" />
-    <Compile Include="Platform\BehaviorModel.cs" />
-    <Compile Include="Platform\BehaviorModelTest.cs" />
-    <Compile Include="Platform\Exceptions.cs" />
-    <Compile Include="Platform\PlatformState.cs" />
+    <Compile Include="Behaviors\BehaviorModel.cs" />
+    <Compile Include="Behaviors\BehaviorModelTest.cs" />
+    <Compile Include="Behaviors\Exceptions.cs" />
+    <Compile Include="Behaviors\PlatformState.cs" />
     <Compile Include="Plugins\DefaultEnvironmentalDataSources.cs" />
     <Compile Include="Plugins\ESMEPluginAttribute.cs" />
     <Compile Include="Plugins\PluginManagerExceptions.cs" />

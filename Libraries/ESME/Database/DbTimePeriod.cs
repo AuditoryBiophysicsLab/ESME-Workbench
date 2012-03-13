@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Data.Entity;
 using ESME.Environment;
 
 namespace ESME.Database
@@ -12,7 +11,7 @@ namespace ESME.Database
         public static implicit operator DbTimePeriod(TimePeriod timePeriod) { return new DbTimePeriod(timePeriod); }
         public static implicit operator TimePeriod(DbTimePeriod dbTimePeriod) { return (TimePeriod)dbTimePeriod.TimePeriodAsByte; }
         public byte TimePeriodAsByte { get; set; }
-        
+
         [NotMapped]
         public TimePeriod TimePeriod
         {

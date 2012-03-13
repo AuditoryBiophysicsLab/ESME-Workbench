@@ -1,14 +1,20 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using System.Windows;
+using System.Windows.Media;
 using ESME.Database;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Plugins;
+using HRC.Navigation;
+using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Locations
@@ -78,6 +84,40 @@ namespace ESME.Locations
                         var bathymetry = ((EnvironmentalDataSourcePluginBase<Bathymetry>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
                         dataSet.SampleCount = bathymetry.Samples.Count;
                         bathymetry.Save(fileName);
+                        var colormap = new DualColormap(Colormap.Summer, Colormap.Jet) {Threshold = 0};
+                        var bathysize = Math.Max(bathymetry.Samples.Longitudes.Count, bathymetry.Samples.Latitudes.Count);
+                        var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
+                        var displayValues = bathymetry.Samples;
+                        if (bathysize > screenSize)
+                        {
+                            var scaleFactor = screenSize / bathysize;
+                            displayValues = EnvironmentData<Geo<float>>.Decimate(bathymetry.Samples,
+                                                                                 (int)(bathymetry.Samples.Longitudes.Count * scaleFactor),
+                                                                                 (int)(bathymetry.Samples.Latitudes.Count * scaleFactor));
+                        }
+
+                        var imageFilename = Path.GetFileNameWithoutExtension(fileName) + ".bmp";
+                        var imagePath = Path.GetDirectoryName(fileName);
+
+                        var bitmapData = new float[displayValues.Longitudes.Count,displayValues.Latitudes.Count];
+                        for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
+
+                        var displayData = colormap.ToPixelValues(bitmapData,
+                                                                 bathymetry.Minimum.Data,
+                                                                 bathymetry.Maximum.Data < 0
+                                                                     ? bathymetry.Maximum.Data
+                                                                     : 8000,
+                                                                 Colors.Black);
+                        BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
+
+                        var sb = new StringBuilder();
+                        sb.AppendLine(dataSet.Resolution.ToString(CultureInfo.InvariantCulture));
+                        sb.AppendLine("0.0");
+                        sb.AppendLine("0.0");
+                        sb.AppendLine(dataSet.Resolution.ToString(CultureInfo.InvariantCulture));
+                        sb.AppendLine(bathymetry.Samples.GeoRect.West.ToString(CultureInfo.InvariantCulture));
+                        sb.AppendLine(bathymetry.Samples.GeoRect.North.ToString(CultureInfo.InvariantCulture));
+                        using (var writer = new StreamWriter(Path.Combine(imagePath, Path.GetFileNameWithoutExtension(imageFilename) + ".bpw"), false)) writer.Write(sb.ToString());
                         break;
                     default:
                         throw new ApplicationException(string.Format("Unknown environmental data type {0}", sourcePlugin.EnvironmentDataType));

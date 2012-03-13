@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace ESME.Platform
+namespace ESME.Behaviors
 {
     public class PlatformMovementException : Exception
     {

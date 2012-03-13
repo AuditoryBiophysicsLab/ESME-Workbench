@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using FileHelpers;
 
@@ -14,70 +13,68 @@ namespace ESME.Database.Importers
 
             foreach (var entry in entries)
             {
-                var platform = (from p in psm.Platforms
+                var platform = (from p in psm.PSMPlatforms
                                 where p.PlatformName == entry.PlatformName
                                 select p).FirstOrDefault();
                 if (platform == null)
                 {
-                    platform = new Platform
+                    platform = new PSMPlatform
                     {
                         PlatformName = entry.PlatformName,
                         PlatformType = entry.PlatformType,
                     };
-                    psm.Platforms.Add(platform);
+                    psm.PSMPlatforms.Add(platform);
                     psm.SaveChanges();
                 }
-                Source source = null;
-                if (platform.Sources != null)
+                PSMSource source = null;
+                if (platform.PSMSources != null)
                 {
-                    source = (from s in platform.Sources
+                    source = (from s in platform.PSMSources
                               where s.SourceName == entry.SourceName
                               select s).FirstOrDefault();
 
                 }
                 if (source == null)
                 {
-                    source = new Source
+                    source = new PSMSource
                     {
                         SourceName = entry.SourceName,
                         SourceType = entry.SourceType,
 
-                        Platform = platform,
+                        PSMPlatform = platform,
                     };
-                    psm.Sources.Add(source);
+                    psm.PSMSources.Add(source);
                     psm.SaveChanges();
                 }
 
-                Mode mode = null;
-                if (source.Modes != null)
+                PSMMode mode = null;
+                if (source.PSMModes != null)
                 {
-                    mode = (from m in source.Modes
+                    mode = (from m in source.PSMModes
                             where m.ModeName == entry.ModeName && m.ModeType == entry.ModeType
                             select m).FirstOrDefault();
                 }
-                if (mode == null)
+                if (mode != null) continue;
+                mode = new PSMMode
                 {
-                    mode = new Mode
-                    {
-                        Source = source,
-                        ActiveTime = entry.ActiveTime,
-                        Depth = entry.Depth,
-                        SourceLevel = entry.SourceLevel,
-                        LowFrequency = entry.LowFrequency,
-                        HighFrequency = entry.HighFrequency,
-                        PulseInterval = entry.PulseInterval,
-                        PulseLength = entry.PulseLength,
-                        HorizontalBeamWidth = entry.HorizontalBeamwidth,
-                        VerticalBeamWidth = entry.VerticalBeamwidth,
-                        DepressionElevationAngle = entry.DepressionElevationAngle,
-                        RelativeBeamAngle = entry.RelativeBeamAngle,
-                        MaxPropagationRadius = entry.MaxPropagationRadius,
-                        ModeName = entry.ModeName,
-                        ModeType = entry.ModeType,
-                    };
-                    psm.Modes.Add(mode);
-                    psm.SaveChanges();
-                }
+                    Source = source,
+                    ActiveTime = entry.ActiveTime,
+                    Depth = entry.Depth,
+                    SourceLevel = entry.SourceLevel,
+                    LowFrequency = entry.LowFrequency,
+                    HighFrequency = entry.HighFrequency,
+                    PulseInterval = entry.PulseInterval,
+                    PulseLength = entry.PulseLength,
+                    HorizontalBeamWidth = entry.HorizontalBeamwidth,
+                    VerticalBeamWidth = entry.VerticalBeamwidth,
+                    DepressionElevationAngle = entry.DepressionElevationAngle,
+                    RelativeBeamAngle = entry.RelativeBeamAngle,
+                    MaxPropagationRadius = entry.MaxPropagationRadius,
+                    ModeName = entry.ModeName,
+                    ModeType = entry.ModeType,
+                };
+                psm.PSMModes.Add(mode);
+                psm.SaveChanges();
             }
         }
 
@@ -88,9 +85,9 @@ namespace ESME.Database.Importers
                 writer.WriteLine(@"!UNCLASSIFIED,3,3,,,,,,,,,,,,,,,");
                 writer.WriteLine(@"#Platform Type,Platform Name,Source Type,Source Name,Mode Type,Mode Name,Active Time,Depth,Source Level,Low Frequency,High Frequency,Pulse Interval,Pulse Length,Horizontal Beamwidth,Vertical BeamWidth,DE Angle,Relative Beam Angle,Max Propagation Radius");
                 writer.WriteLine(@"#Units,,,,,,seconds,meters,dB,Hz,Hz,seconds,milliseconds,degrees,degrees,degrees,degrees,meters");
-                foreach (var platform in psm.Platforms)
-                    foreach (var source in platform.Sources)
-                        foreach (var mode in source.Modes)
+                foreach (var platform in psm.PSMPlatforms)
+                    foreach (var source in platform.PSMSources)
+                        foreach (var mode in source.PSMModes)
                             writer.WriteLine("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17}",
                                              platform.PlatformType,
                                              platform.PlatformName,

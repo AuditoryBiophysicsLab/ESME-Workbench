@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
-using ESME.Platform;
+using ESME.Behaviors;
 
 namespace ESME.NEMO
 {

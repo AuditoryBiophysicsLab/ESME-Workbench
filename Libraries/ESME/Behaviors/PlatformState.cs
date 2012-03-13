@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using ESME.NEMO;
 using HRC.Navigation;
 
-namespace ESME.Platform
+namespace ESME.Behaviors
 {
     public class PlatformState
     {

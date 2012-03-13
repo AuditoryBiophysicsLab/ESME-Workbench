@@ -1,34 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Data.Common;
-using System.Data.Entity;
+using ESME.Database;
 
-namespace ESME.Database
+namespace ESME.Locations
 {
-    public class ScenarioContext : DbContext
-    {
-        public ScenarioContext(DbConnection connection, bool contextOwnsConnection, IDatabaseInitializer<ScenarioContext> initializer)
-            : base(connection, contextOwnsConnection)
-        {
-            Configuration.AutoDetectChangesEnabled = false;
-            Configuration.ProxyCreationEnabled = false;
-            Configuration.LazyLoadingEnabled = true;
-            Configuration.ValidateOnSaveEnabled = true;
-            System.Data.Entity.Database.SetInitializer(initializer);
-        }
-
-        public DbSet<Scenario> Scenarios { get; set; }
-        public DbSet<ScenarioPlatform> ScenarioPlatforms { get; set; }
-        public DbSet<ScenarioSource> ScenarioSources { get; set; }
-        public DbSet<ScenarioMode> ScenarioModes { get; set; }
-        public DbSet<Perimeter> Perimeters { get; set; }
-        public DbSet<PerimeterCoordinate> PerimeterCoordinates { get; set; }
-        public DbSet<TrackDefinition> TrackDefinitions { get; set; }
-        public DbSet<ScenarioSpecies> ScenarioSpecies { get; set; }
-        public DbSet<AnimatLocation> AnimatLocations { get; set; }
-
-        protected override void OnModelCreating(DbModelBuilder modelBuilder) { }
-    }
-
     public class Scenario
     {
         public int ScenarioID { get; set; }
@@ -42,44 +16,86 @@ namespace ESME.Database
         public string SimAreaName { get; set; }
         public string TimeFrame { get; set; }
 
-        public virtual ICollection<ScenarioPlatform> ScenarioPlatforms { get; set; }
+        public virtual Location Location { get; set; }
+
+        public virtual ICollection<Platform> ScenarioPlatforms { get; set; }
         public virtual ICollection<ScenarioSpecies> ScenarioSpecies { get; set; }
     }
 
-    public class ScenarioPlatform : Platform
+    public class Platform 
     {
         public int ScenarioPlatformID { get; set; }
         public string Description { get; set; }
         public bool Launches { get; set; }
         public bool Tows { get; set; }
         public int RepeatCount { get; set; }
+
+        // Copied from the PSM Platform
+        public int PlatformID { get; set; }
+        public string PlatformName { get; set; }
+        public string PlatformType { get; set; }
+
         public virtual Scenario Scenario { get; set; }
         public virtual TrackDefinition TrackDefinition { get; set; }
-        public virtual ICollection<ScenarioSource> ScenarioSources { get; set; }
+        public virtual ICollection<Source> Sources { get; set; }
     }
 
-    public class ScenarioSource : Source
+    public class Source
     {
-        public int ScenarioSourceID { get; set; }
+        public int SourceID { get; set; }
         public string Description { get; set; }
+        public string SourceName { get; set; }
+        public string SourceType { get; set; }
 
-        public virtual ScenarioPlatform ScenarioPlatform { get; set; }
-        public virtual ICollection<ScenarioMode> ScenarioModes { get; set; }
+        public virtual Platform Platform { get; set; }
+        public virtual ICollection<Mode> Modes { get; set; }
     }
 
-    public class ScenarioMode : Mode
+    public class Mode
     {
-        public int ScenarioModeID { get; set; }
+        public int ModeID { get; set; }
         public string State { get; set; }
         public string Linked { get; set; }
         public int ClusterCount { get; set; }
+        public string ModeName { get; set; }
+        public string ModeType { get; set; }
+        public float? ActiveTime { get; set; }
+        public float? Depth { get; set; }
+        public float SourceLevel { get; set; }
+        public float LowFrequency { get; set; }
+        public float HighFrequency { get; set; }
+        /// <summary>
+        /// In seconds
+        /// </summary>
+        public float PulseInterval { get; set; }
+        /// <summary>
+        /// In milliseconds
+        /// </summary>
+        public float PulseLength { get; set; }
+        public float HorizontalBeamWidth { get; set; }
+        public float VerticalBeamWidth { get; set; }
+        public float DepressionElevationAngle { get; set; }
+        public float RelativeBeamAngle { get; set; }
+        public float MaxPropagationRadius { get; set; }
     }
 
-    public enum TrackType
+    public class TrackDefinition
     {
-        Stationary = 0,
-        StraightLine = 1,
-        PerimeterBounce = 2,
+        public int TrackDefinitionID { get; set; }
+        public DbTrackType TrackType { get; set; }
+        public DbTimeSpan StartTime { get; set; }
+        public DbTimeSpan Duration { get; set; }
+        public bool Random { get; set; }
+        public bool OpsBounds { get; set; }
+        public bool OpsTimes { get; set; }
+        public float InitialLatitude { get; set; }
+        public float InitialLongitude { get; set; }
+        public float InitialDepth { get; set; }
+        public float InitialCourse { get; set; }
+        public float InitialSpeed { get; set; }
+        public string LimitFileName { get; set; }
+
+        public virtual Perimeter Perimeter { get; set; }
     }
 
     public class Perimeter
@@ -93,25 +109,6 @@ namespace ESME.Database
     {
         public int PerimeterCoordinateID { get; set; }
         public DbGeo Geo { get; set; }
-
-        public virtual Perimeter Perimeter { get; set; }
-    }
-
-    public class TrackDefinition
-    {
-        public int TrackDefinitionID { get; set; }
-        public int TrackType { get; set; }
-        public DbTimeSpan StartTime { get; set; }
-        public DbTimeSpan Duration { get; set; }
-        public bool Random { get; set; }
-        public bool OpsBounds { get; set; }
-        public bool OpsTimes { get; set; }
-        public float InitialLatitude { get; set; }
-        public float InitialLongitude { get; set; }
-        public float InitialDepth { get; set; }
-        public float InitialCourse { get; set; }
-        public float InitialSpeed { get; set; }
-        public string LimitFileName { get; set; }
 
         public virtual Perimeter Perimeter { get; set; }
     }

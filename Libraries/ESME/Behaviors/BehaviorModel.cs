@@ -8,7 +8,7 @@ using ESME.NEMO.Overlay;
 using HRC.Navigation;
 using HRC.Utility;
 
-namespace ESME.Platform
+namespace ESME.Behaviors
 {
     public class BehaviorModel
     {

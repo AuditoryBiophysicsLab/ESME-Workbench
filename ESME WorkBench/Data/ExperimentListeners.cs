@@ -8,12 +8,11 @@ using System.Windows.Threading;
 using Cinch;
 using ESME;
 using ESME.Environment;
-using ESME.Environment.NAVO;
 using ESME.Mapping;
 using ESME.Model;
 using ESME.TransmissionLoss;
 using ThinkGeo.MapSuite.Core;
-using BehaviorModel = ESME.Platform.BehaviorModel;
+using ESME.Behaviors;
 
 namespace ESMEWorkbench.Data
 {

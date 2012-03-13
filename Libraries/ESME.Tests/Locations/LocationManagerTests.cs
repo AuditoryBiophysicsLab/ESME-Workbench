@@ -48,46 +48,46 @@ namespace ESME.Tests.Locations
         public void EmptyAndFillDatabase(LocationManagerService locationManager, EnvironmentalDatabaseImportService importManager)
         {
             Assert.AreEqual(0, locationManager.Locations.Count());
-            locationManager.AddLocation("Mass Bay", "These are some comments", 44, 41, -69, -72);
+            locationManager.CreateLocation("Mass Bay", "These are some comments", 44, 41, -69, -72);
             Assert.AreEqual(1, locationManager.Locations.Count());
             var location = locationManager.Locations.First();
             Assert.AreEqual("Mass Bay", location.Name);
             Assert.AreEqual(1, location.LocationLogEntries.Count);
             Assert.AreEqual("Created", location.LocationLogEntries.First().LogEntry.Message);
-            Assert.Throws(typeof(DuplicateNameException), () => locationManager.AddLocation("Mass Bay", "These are some comments", 44, 41, -69, -72));
+            Assert.Throws(typeof(DuplicateNameException), () => locationManager.CreateLocation("Mass Bay", "These are some comments", 44, 41, -69, -72));
             Assert.AreEqual(1, locationManager.Locations.Count());
             Assert.NotNull(importManager);
-            var soundSpeedCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            var soundSpeedCollection = locationManager.CreateEnvironmentalDataSetCollection(location, new PluginIdentifier
             {
                 PluginType = PluginType.EnvironmentalDataSource,
                 PluginSubtype = PluginSubtype.SoundSpeed,
                 Type = typeof(InstallableNAVOPlugin.GDEM3ForESME).ToString(),
             });
-            foreach (var month in NAVOConfiguration.AllMonths) importManager.BeginImport(locationManager.AddEnvironmentDataSet(soundSpeedCollection, 15, month), new TestProgress { DataType = "SoundSpeed", TimePeriod = month, Resolution = 15 });
-            var sedimentCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            foreach (var month in NAVOConfiguration.AllMonths) importManager.BeginImport(locationManager.CreateEnvironmentalDataSet(soundSpeedCollection, 15, month), new TestProgress { DataType = "SoundSpeed", TimePeriod = month, Resolution = 15 });
+            var sedimentCollection = locationManager.CreateEnvironmentalDataSetCollection(location, new PluginIdentifier
             {
                 PluginType = PluginType.EnvironmentalDataSource,
                 PluginSubtype = PluginSubtype.Sediment,
                 Type = typeof(InstallableNAVOPlugin.BST20ForESME).ToString(),
             });
-            importManager.BeginImport(locationManager.AddEnvironmentDataSet(sedimentCollection, 5f, TimePeriod.Invalid), new TestProgress { DataType = "Sediment", Resolution = 5 });
-            var bathymetryCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            importManager.BeginImport(locationManager.CreateEnvironmentalDataSet(sedimentCollection, 5f, TimePeriod.Invalid), new TestProgress { DataType = "Sediment", Resolution = 5 });
+            var bathymetryCollection = locationManager.CreateEnvironmentalDataSetCollection(location, new PluginIdentifier
             {
                 PluginType = PluginType.EnvironmentalDataSource,
                 PluginSubtype = PluginSubtype.Bathymetry,
                 Type = typeof(InstallableNAVOPlugin.DBDB54ForESME).ToString(),
             });
-            importManager.BeginImport(locationManager.AddEnvironmentDataSet(bathymetryCollection, 2f, TimePeriod.Invalid), new TestProgress { DataType = "Bathymetry", Resolution = 2 });
-            importManager.BeginImport(locationManager.AddEnvironmentDataSet(bathymetryCollection, 1f, TimePeriod.Invalid), new TestProgress { DataType = "Bathymetry", Resolution = 1 });
-            importManager.BeginImport(locationManager.AddEnvironmentDataSet(bathymetryCollection, 0.5f, TimePeriod.Invalid), new TestProgress { DataType = "Bathymetry", Resolution = 0.5f });
-            var windCollection = locationManager.AddEnvironmentDataSetCollection(location, new PluginIdentifier
+            importManager.BeginImport(locationManager.CreateEnvironmentalDataSet(bathymetryCollection, 2f, TimePeriod.Invalid), new TestProgress { DataType = "Bathymetry", Resolution = 2 });
+            importManager.BeginImport(locationManager.CreateEnvironmentalDataSet(bathymetryCollection, 1f, TimePeriod.Invalid), new TestProgress { DataType = "Bathymetry", Resolution = 1 });
+            importManager.BeginImport(locationManager.CreateEnvironmentalDataSet(bathymetryCollection, 0.5f, TimePeriod.Invalid), new TestProgress { DataType = "Bathymetry", Resolution = 0.5f });
+            var windCollection = locationManager.CreateEnvironmentalDataSetCollection(location, new PluginIdentifier
             {
                 PluginType = PluginType.EnvironmentalDataSource,
                 PluginSubtype = PluginSubtype.Wind,
                 Type = typeof(InstallableNAVOPlugin.SMGC20ForESME).ToString(),
             });
             foreach (var month in NAVOConfiguration.AllMonths)
-                importManager.BeginImport(locationManager.AddEnvironmentDataSet(windCollection, 60, month), new TestProgress { DataType = "Wind", TimePeriod = month, Resolution = 60 });
+                importManager.BeginImport(locationManager.CreateEnvironmentalDataSet(windCollection, 60, month), new TestProgress { DataType = "Wind", TimePeriod = month, Resolution = 60 });
             while (importManager.BusyCount > 0)
             {
                 Console.WriteLine("Waiting for import manager.  Busy count = {0}", importManager.BusyCount);

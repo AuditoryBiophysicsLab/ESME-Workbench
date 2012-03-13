@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ESME.NEMO;
-using ESME.Platform;
 
-namespace ESME.Model
+namespace ESME.Behaviors
 {
-    public partial class BehaviorModel
+    public partial class OldBehaviorModel
     {
         //todo: think about this. 
 #if false

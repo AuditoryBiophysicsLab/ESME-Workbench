@@ -203,7 +203,7 @@ namespace ESME.Views.Locations
 
         void OkHandler()
         {
-            _locationManagerService.AddLocation(LocationName, null, North, South, East, West);
+            _locationManagerService.CreateLocation(LocationName, null, North, South, East, West);
             Globals.AppSettings.Save();
             CloseActivePopUpCommand.Execute(true);
         }
