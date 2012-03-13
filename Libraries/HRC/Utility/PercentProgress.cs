@@ -17,24 +17,20 @@ namespace HRC.Utility
         [Initialize(100.0)]
         public double MaximumValue { get; set; }
 
+        [Initialize(0)]
         public int PercentComplete { get; set; }
         public void Report(int value)
         {
             if (MaximumValue < value) MaximumValue = value;
             if (MinimumValue > value) MinimumValue = value;
-            PercentComplete = (int)((value / MaximumValue) * 100);
+            var percent = (int)((value / MaximumValue) * 100);
+            if (PercentComplete < percent) PercentComplete = percent;
         }
     }
 
-    public class PercentProgress<T> : PercentProgress
-    {
-        public T ProgressTarget { get; set; }
-    }
-
-    public class PercentProgressList<T> : PercentProgress, IList<PercentProgress>
+    public class PercentProgressList : PercentProgress, IList<PercentProgress>
     {
         readonly List<PercentProgress> _progressList = new List<PercentProgress>();
-        public T ProgressTarget { get; set; }
         public IEnumerator<PercentProgress> GetEnumerator() { return _progressList.GetEnumerator(); }
         IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
         public void Add(PercentProgress item)
@@ -60,5 +56,15 @@ namespace HRC.Utility
             get { return _progressList[index]; }
             set { _progressList[index] = value; }
         }
+    }
+    
+    public class PercentProgress<T> : PercentProgress
+    {
+        public T ProgressTarget { get; set; }
+    }
+
+    public class PercentProgressList<T> : PercentProgressList
+    {
+        public T ProgressTarget { get; set; }
     }
 }

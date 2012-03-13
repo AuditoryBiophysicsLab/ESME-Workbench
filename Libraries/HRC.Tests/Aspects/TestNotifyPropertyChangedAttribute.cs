@@ -196,7 +196,7 @@ namespace HRC.Tests.Aspects
 
         protected void SaveBase<T>(T source, string fileName) where T : class, ISettingsBase, new()
         {
-            var serializerType = typeof(Utility.XmlSerializer<T>);
+            var serializerType = typeof(StaticXmlSerializer);
             var methodInfo = serializerType.GetMethod("SaveStatic", new[] { typeof(T), typeof(string), typeof(List<Type>) });
             Console.WriteLine("Looking for [ReferencedTypes] attribute on static fields and properties...");
             var memberInfo = new List<MemberInfo>();
