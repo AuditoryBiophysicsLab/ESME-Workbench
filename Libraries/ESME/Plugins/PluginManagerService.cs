@@ -120,7 +120,12 @@ namespace ESME.Plugins
 
     public class PluginSubtypeDictionary : ObservableConcurrentDictionary<string, IESMEPlugin>
     {
-        public IESMEPlugin DefaultPlugin { get; set; }
+        IESMEPlugin _defaultPlugin;
+        public IESMEPlugin DefaultPlugin
+        {
+            get { return _defaultPlugin ?? (_defaultPlugin = Values.FirstOrDefault(p => p.IsConfigured)); }
+            set { _defaultPlugin = value; }
+        }
     }
     public class PluginTypeDictionary : ObservableConcurrentDictionary<PluginSubtype, PluginSubtypeDictionary> {}
     public class ESMEPluginDictionary : ObservableConcurrentDictionary<PluginType, PluginTypeDictionary>

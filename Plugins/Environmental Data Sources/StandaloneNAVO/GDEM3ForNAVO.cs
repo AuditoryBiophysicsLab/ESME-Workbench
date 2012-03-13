@@ -103,7 +103,7 @@ namespace StandaloneNAVOPlugin
 
         #endregion
 
-        public override SoundSpeed Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
+        public override SoundSpeed Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, PercentProgress progress = null)
         {
             CheckResolutionAndTimePeriod(resolution, timePeriod);
             var result = new SoundSpeed();

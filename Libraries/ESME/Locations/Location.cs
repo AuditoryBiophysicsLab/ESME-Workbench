@@ -3,6 +3,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
 using ESME.Database;
+using ESME.Environment;
+using HRC.Aspects;
 
 namespace ESME.Locations
 {
@@ -19,10 +21,8 @@ namespace ESME.Locations
         }
 
         public DbSet<Location> Locations { get; set; }
-        public DbSet<LocationLogEntry> LocationLogEntries { get; set; }
-        public DbSet<EnvironmentalDataSetCollection> EnvironmentalDataSetCollections { get; set; }
-        public DbSet<EnvironmentalDataSetCollectionLogEntry> EnvironmentalDataSetCollectionLogEntries { get; set; }
         public DbSet<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }
+        public DbSet<LogEntry> Log { get; set; }
 
         public DbSet<Scenario> Scenarios { get; set; }
         public DbSet<Platform> Platforms { get; set; }
@@ -45,63 +45,57 @@ namespace ESME.Locations
         }
     }
 
-    public class Location
+    public interface IHaveGuid
     {
-        [Key]
-        public string Key { get; set; }
+        string Guid { get; }
+    }
+
+    public class Location : IHaveGuid
+    {
+        [Key, Initialize(IsGuid = true)]
+        public string Guid { get; set; }
         public string Name { get; set; }
         public string Comments { get; set; }
         public DbGeoRect GeoRect { get; set; }
-        public DbWhoWhenWhere CreationInfo { get; set; }
         public string StorageDirectory { get; set; }
 
+        public virtual ICollection<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }
         public virtual ICollection<Scenario> Scenarios { get; set; }
-        public virtual ICollection<EnvironmentalDataSetCollection> EnvironmentalDataSetCollections { get; set; }
-        public virtual ICollection<LocationLogEntry> LocationLogEntries { get; set; }
+        public virtual ICollection<LogEntry> Logs { get; set; }
     }
 
-    [ComplexType]
-    public class LogEntry
+    public class LogEntry : IHaveGuid
     {
+        public LogEntry() {}
+        public LogEntry(IHaveGuid haveGuid) { Guid = haveGuid.Guid; }
+
+        [Key, Initialize(IsGuid = true)]
+        public string Guid { get; set; }
         public DbWhoWhenWhere MessageSource { get; set; }
         public string Message { get; set; }
-        public int? OldSourceID { get; set; }
-    }
+        public string SourceGuid { get; set; }
 
-    public class LocationLogEntry
-    {
-        public int LocationLogEntryID { get; set; }
-        public LogEntry LogEntry { get; set; }
         public virtual Location Location { get; set; }
+        public virtual EnvironmentalDataSet EnvironmentalDataSet { get; set; }
     }
 
-    public class EnvironmentalDataSetCollection
+    public class EnvironmentalDataSet : IHaveGuid
     {
-        public int EnvironmentalDataSetCollectionID { get; set; }
-        public DbPluginIdentifier SourcePlugin { get; set; }
-        public DbWhoWhenWhere CreationInfo { get; set; }
-        public virtual Location Location { get; set; }
-        public virtual ICollection<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }
-        public virtual ICollection<EnvironmentalDataSetCollectionLogEntry> LogEntries { get; set; }
-    }
-
-    public class EnvironmentalDataSetCollectionLogEntry
-    {
-        public int EnvironmentalDataSetCollectionLogEntryID { get; set; }
-        public LogEntry LogEntry { get; set; }
-        public virtual EnvironmentalDataSetCollection EnvironmentalDataSetCollection { get; set; }
-    }
-
-    public class EnvironmentalDataSet
-    {
-        public int EnvironmentalDataSetID { get; set; }
+        [Key, Initialize(IsGuid = true)]
+        public string Guid { get; set; }
         public float Resolution { get; set; }
         public int SampleCount { get; set; }
         public long FileSize { get; set; }
-        public DbTimePeriod TimePeriod { get; set; }
+
+        [EnumDataType(typeof(TimePeriod))]
+        public TimePeriod TimePeriod { get; set; }
+        
         public string FileName { get; set; }
-        public DbWhoWhenWhere CreationInfo { get; set; }
+        public DbPluginIdentifier SourcePlugin { get; set; }
         public int PercentCached { get; set; }
-        public virtual EnvironmentalDataSetCollection EnvironmentalDataSetCollection { get; set; }
+
+        public virtual Location Location { get; set; }
+        
+        public virtual ICollection<LogEntry> Logs { get; set; }
     }
 }

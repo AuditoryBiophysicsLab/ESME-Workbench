@@ -136,7 +136,7 @@ namespace StandaloneNAVOPlugin
 
         #endregion
 
-        public override Bathymetry Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
+        public override Bathymetry Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, PercentProgress progress = null)
         {
             CheckResolutionAndTimePeriod(resolution, timePeriod);
             return DBDB.Extract(DatabaseLocation, ExtractorLocation, resolution, geoRect, progress);

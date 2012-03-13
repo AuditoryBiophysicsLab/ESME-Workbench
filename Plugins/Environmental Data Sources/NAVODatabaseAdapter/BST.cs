@@ -4,22 +4,23 @@ using C5;
 using ESME.Environment;
 using HDF5DotNet;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace NAVODatabaseAdapter
 {
     public static class BST
     {
-        public static Sediment Extract(string bstDirectory, GeoRect region, float resolution, IProgress<float> progress = null)
+        public static Sediment Extract(string bstDirectory, GeoRect region, float resolution, PercentProgress progress = null)
         {
-            if (progress != null) lock (progress) progress.Report(0f);
+            if (progress != null) lock (progress) progress.Report(0);
 
             var north = (float)Math.Ceiling(region.North);
             var south = (float)Math.Floor(region.South);
             var east = (float)Math.Ceiling(region.East);
             var west = (float)Math.Floor(region.West);
 
-            var progressStep = 100f / (((north - south) * (east - west)) + 3);
-            var totalProgress = 0f;
+            if (progress != null) progress.MaximumValue = (((north - south) * (east - west)) + 3);
+            var totalProgress = 0;
 
             var fileId = H5F.open(bstDirectory, H5F.OpenMode.ACC_RDONLY);
             //var highResGroup = H5G.open(fileId, "0.10000/G/UNCLASSIFIED/");
@@ -30,17 +31,17 @@ namespace NAVODatabaseAdapter
                 {
                     var data = ReadDataset(null /* highResGroup */, lowResGroup, (int)lat, (int)lon);
                     if (data != null) dedupeList.AddAll(data);
-                    if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+                    if (progress != null) lock (progress) progress.Report(totalProgress++);
                 }
             var sediment = new Sediment();
-            if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+            if (progress != null) lock (progress) progress.Report(totalProgress++);
             sediment.Samples.AddRange(dedupeList);
             sediment.Samples.Sort();
-            if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+            if (progress != null) lock (progress) progress.Report(totalProgress++);
             if (lowResGroup != null) H5G.close(lowResGroup);
             //if (highResGroup != null) H5G.close(highResGroup);
             H5F.close(fileId);
-            if (progress != null) lock (progress) progress.Report(totalProgress + progressStep);
+            if (progress != null) lock (progress) progress.Report(totalProgress);
             return sediment;
         }
 

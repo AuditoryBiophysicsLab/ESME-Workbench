@@ -98,7 +98,7 @@ namespace StandaloneNAVOPlugin
 
         #endregion
 
-        public override Sediment Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
+        public override Sediment Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, PercentProgress progress = null)
         {
             CheckResolutionAndTimePeriod(resolution, timePeriod);
             return BST.Extract(DataLocation, geoRect, resolution, progress);

@@ -53,6 +53,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AsyncCtpLibrary">
+      <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="Cinch.WPF">
       <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
       <Private>False</Private>
@@ -192,6 +195,7 @@
     <Compile Include="Utility\NotifyIcon.cs" />
     <Compile Include="Utility\NotifyIcon.Interop.cs" />
     <Compile Include="Utility\OSInfo.cs" />
+    <Compile Include="Utility\PercentProgress.cs" />
     <Compile Include="Utility\ProgressInfo.cs" />
     <Compile Include="Utility\PropertyChangedBase.cs" />
     <Compile Include="Utility\TriggerTracing.cs" />

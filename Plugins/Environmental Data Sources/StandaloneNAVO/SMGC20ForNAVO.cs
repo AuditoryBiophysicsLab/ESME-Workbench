@@ -117,7 +117,7 @@ namespace StandaloneNAVOPlugin
 
         #endregion
 
-        public override Wind Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
+        public override Wind Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, PercentProgress progress = null)
         {
             CheckResolutionAndTimePeriod(resolution, timePeriod);
             return SMGC.Import(geoRect, DataLocation);

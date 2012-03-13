@@ -24,14 +24,14 @@ namespace ESME.Locations
 
     public class Platform 
     {
-        public int ScenarioPlatformID { get; set; }
+        public int PlatformID { get; set; }
         public string Description { get; set; }
         public bool Launches { get; set; }
         public bool Tows { get; set; }
         public int RepeatCount { get; set; }
 
         // Copied from the PSM Platform
-        public int PlatformID { get; set; }
+        public int PSMPlatformID { get; set; }
         public string PlatformName { get; set; }
         public string PlatformType { get; set; }
 
@@ -44,6 +44,7 @@ namespace ESME.Locations
     {
         public int SourceID { get; set; }
         public string Description { get; set; }
+        public int PSMSourceID { get; set; }
         public string SourceName { get; set; }
         public string SourceType { get; set; }
 
@@ -54,6 +55,7 @@ namespace ESME.Locations
     public class Mode
     {
         public int ModeID { get; set; }
+        public int PSMModeID { get; set; }
         public string State { get; set; }
         public string Linked { get; set; }
         public int ClusterCount { get; set; }

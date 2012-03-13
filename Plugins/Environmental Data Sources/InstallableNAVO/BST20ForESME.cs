@@ -6,6 +6,7 @@ using ESME.Environment.Descriptors;
 using ESME.Plugins;
 using ESME.Views.Locations;
 using HRC.Navigation;
+using HRC.Utility;
 using Microsoft.Win32;
 using NAVODatabaseAdapter;
 
@@ -45,7 +46,7 @@ namespace InstallableNAVOPlugin
 
         readonly string _dataDirectory;
 
-        public override Sediment Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
+        public override Sediment Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, PercentProgress progress = null)
         {
             CheckResolutionAndTimePeriod(resolution, timePeriod);
             return BST.Extract(Path.Combine(_dataDirectory, RequiredBSTFilename), geoRect, resolution, progress);

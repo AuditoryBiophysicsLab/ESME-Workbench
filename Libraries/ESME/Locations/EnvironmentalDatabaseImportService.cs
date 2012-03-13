@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Windows;
 using System.Windows.Media;
-using ESME.Database;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Plugins;
@@ -35,48 +34,54 @@ namespace ESME.Locations
         [Import] IPluginManagerService _pluginManagerService;
         [Import] LocationManagerService _locationManagerService;
 
-        public void BeginImport(EnvironmentalDataSet dataSet, IProgress<float> progress = null )
+        public PercentProgressList<PercentProgressList<Location>> ImportMissingDatasets()
+        {
+            var result = new PercentProgressList<PercentProgressList<Location>>();
+            foreach (var locationProgress in _locationManagerService.Locations.Select(ImportLocationDatasets).Where(l => l != null))
+                result.Add(locationProgress);
+            return result;
+        }
+
+        public PercentProgressList<Location> ImportLocationDatasets(Location location)
+        {
+            var result = new PercentProgressList<Location> {ProgressTarget = location};
+            foreach (var dataSetProgress in location.EnvironmentalDataSets.Select(ImportDataset).Where(dataSetProgress => dataSetProgress != null)) 
+                result.Add(dataSetProgress);
+            return result;
+        }
+
+        public PercentProgress<EnvironmentalDataSet> ImportDataset(EnvironmentalDataSet dataSet)
         {
             if (ImportActionBlock == null) ImportActionBlock = CreateImporter();
-            ImportActionBlock.Post(Tuple.Create(dataSet, progress));
+            var job = new PercentProgress<EnvironmentalDataSet> { ProgressTarget = dataSet };
+            if (!_importJobsPending.TryAdd(dataSet.Guid, job)) return null;
+            ImportActionBlock.Post(job);
+            return job;
         }
 
-        public void ImportMissingDatasets()
-        {
-            foreach (var location in _locationManagerService.Locations)
-            {
-                
-            }
-        }
-
-        readonly ConcurrentDictionary<Guid, ImportJob> _importJobsPending = new ConcurrentDictionary<Guid, ImportJob>();
-
-        public void ImportLocationDatasets(Location location)
-        {
-            
-        }
+        readonly ConcurrentDictionary<string, PercentProgress<EnvironmentalDataSet>> _importJobsPending = new ConcurrentDictionary<string, PercentProgress<EnvironmentalDataSet>>();
 
         int _busyCount;
         public int BusyCount { get { return _busyCount; } }
 
-        public ActionBlock<Tuple<EnvironmentalDataSet, IProgress<float>>> ImportActionBlock { get; private set; }
-        
-        ActionBlock<Tuple<EnvironmentalDataSet, IProgress<float>>> CreateImporter(TaskScheduler taskScheduler = null, int boundedCapacity = -1, int maxDegreeOfParallelism = -1)
+        public ActionBlock<PercentProgress<EnvironmentalDataSet>> ImportActionBlock { get; private set; }
+
+        ActionBlock<PercentProgress<EnvironmentalDataSet>> CreateImporter(TaskScheduler taskScheduler = null, int boundedCapacity = -1, int maxDegreeOfParallelism = -1)
         {
             if (taskScheduler == null) taskScheduler = TaskScheduler.Default;
             if (_pluginManagerService == null) throw new ServiceNotFoundException("Required service PluginManager was not found");
             if (_locationManagerService == null) throw new ServiceNotFoundException("Required service LocationManager was not found");
-            var newImporter = new ActionBlock<Tuple<EnvironmentalDataSet, IProgress<float>>>(job =>
+            var newImporter = new ActionBlock<PercentProgress<EnvironmentalDataSet>>(job =>
             {
                 Interlocked.Increment(ref _busyCount);
-                var dataSet = job.Item1;
-                var progress = job.Item2;
-                var sourcePlugin = (EnvironmentalDataSourcePluginBase)_pluginManagerService[dataSet.EnvironmentalDataSetCollection.SourcePlugin];
-                var geoRect = dataSet.EnvironmentalDataSetCollection.Location.GeoRect;
+                var dataSet = job.ProgressTarget;
+                var progress = job;
+                var sourcePlugin = (EnvironmentalDataSourcePluginBase)_pluginManagerService[dataSet.SourcePlugin];
+                var geoRect = dataSet.Location.GeoRect;
                 var resolution = dataSet.Resolution;
                 var timePeriod = dataSet.TimePeriod;
-                var fileName = Path.Combine(_locationManagerService.LocationRootDirectory, dataSet.EnvironmentalDataSetCollection.Location.StorageDirectory, dataSet.FileName);
-                if (progress != null) progress.Report(0f);
+                var fileName = Path.Combine(_locationManagerService.LocationRootDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
+                progress.Report(0);
                 //Console.WriteLine("Importer: About to import {0}[{1}] from region {2} {3} {4} {5}", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, dataSet.Resolution, geoRect.North, geoRect.South, geoRect.East, geoRect.West);
                 //Console.WriteLine("Importer: About to invoke {0} plugin [{1}]", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, sourcePlugin.PluginName);
                 switch (sourcePlugin.EnvironmentDataType)
@@ -141,9 +146,10 @@ namespace ESME.Locations
                 //Console.WriteLine("Importer: {0} plugin returned {1} samples", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, dataSet.SampleCount);
                 dataSet.FileSize = new FileInfo(fileName).Length;
                 _locationManagerService.UpdateEnvironmentDataSetPercentCached(dataSet, 100);
-                if (progress != null) progress.Report(100f);
+                progress.Report(100);
                 //Console.WriteLine("Importer: Finished importing {0} at resolution {1}", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, dataSet.Resolution);
                 Interlocked.Decrement(ref _busyCount);
+                _importJobsPending.TryRemove(dataSet.Guid, out progress);
             }, new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = taskScheduler,
@@ -152,11 +158,5 @@ namespace ESME.Locations
             });
             return newImporter;
         }
-    }
-
-    public class ImportJob
-    {
-        public EnvironmentalDataSet EnvironmentalDataSet { get; set; }
-        public IProgress<float> Progress { get; set; }
     }
 }

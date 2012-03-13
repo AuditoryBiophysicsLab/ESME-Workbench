@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.Composition;
 using System.IO;
 using ESME.Environment;
@@ -6,6 +5,7 @@ using ESME.Environment.Descriptors;
 using ESME.Plugins;
 using ESME.Views.Locations;
 using HRC.Navigation;
+using HRC.Utility;
 using Microsoft.Win32;
 using NAVODatabaseAdapter;
 
@@ -48,7 +48,7 @@ namespace InstallableNAVOPlugin
 
         readonly string _dataDirectory;
 
-        public override Bathymetry Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
+        public override Bathymetry Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, PercentProgress progress = null)
         {
             CheckResolutionAndTimePeriod(resolution, timePeriod);
             return DBDB.Extract(Path.Combine(_dataDirectory, RequiredDBDBFilename), Path.Combine(_dataDirectory, RequiredDBDBExtractionProgram), resolution, geoRect, progress);

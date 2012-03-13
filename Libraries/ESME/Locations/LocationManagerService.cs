@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Data;
 using System.Data.Common;
+using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
 using System.IO;
 using System.Linq;
@@ -46,42 +47,25 @@ namespace ESME.Locations
                                  Comments = comments,
                                  GeoRect = new GeoRect(north, south, east, west),
                                  StorageDirectory = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()),
-                                 CreationInfo = new DbWhoWhenWhere(true),
                              };
             _context.Locations.Add(result);
-            SaveChanges();
-            AddLocationLogEntry(result, "Created");
+            Log(result, "Created");
             Directory.CreateDirectory(Path.Combine(LocationRootDirectory, result.StorageDirectory));
             return result;
         }
 
-        public EnvironmentalDataSetCollection CreateEnvironmentalDataSetCollection(Location location, PluginIdentifier sourcePlugin)
-        {
-            var environmentalDataSetCollection = new EnvironmentalDataSetCollection
-            {
-                Location = location,
-                SourcePlugin = sourcePlugin,
-                CreationInfo = new DbWhoWhenWhere(true),
-            };
-            AddLocationLogEntry(location, string.Format("Added new {0} data set collection. Source plugin: {1}", sourcePlugin.PluginSubtype, sourcePlugin.Type));
-            _context.EnvironmentalDataSetCollections.Add(environmentalDataSetCollection);
-            SaveChanges();
-            return environmentalDataSetCollection;
-        }
-
-        public EnvironmentalDataSet CreateEnvironmentalDataSet(EnvironmentalDataSetCollection collection, float resolution, TimePeriod timePeriod)
+        public EnvironmentalDataSet CreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin)
         {
             var environmentalDataSet = new EnvironmentalDataSet
             {
-                CreationInfo = new DbWhoWhenWhere(true),
-                FileName = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + "." + collection.SourcePlugin.PluginSubtype.ToString().ToLower(),
+                FileName = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + "." + sourcePlugin.PluginSubtype.ToString().ToLower(),
                 Resolution = resolution,
                 TimePeriod = timePeriod,
-                EnvironmentalDataSetCollection = collection,
+                Location = location,
+                SourcePlugin = sourcePlugin,
             };
-            AddEnvironmentDataSetCollectionLogEntry(collection, string.Format("Added new data set. Resolution: {0}{1}", resolution, timePeriod != TimePeriod.Invalid ? string.Format("  TimePeriod: {0}", timePeriod) : ""));
             _context.EnvironmentalDataSets.Add(environmentalDataSet);
-            SaveChanges();
+            Log(environmentalDataSet, string.Format("Added new data set. Resolution: {0}{1}", resolution, timePeriod != TimePeriod.Invalid ? string.Format("  TimePeriod: {0}", timePeriod) : ""));
             return environmentalDataSet;
         }
         #endregion
@@ -91,28 +75,16 @@ namespace ESME.Locations
         protected void DeleteLocation(Location location, bool saveChanges)
         {
             // todo: Handle the case where this location is used by one or more scenarios
-            foreach (var collection in location.EnvironmentalDataSetCollections)
-            {
-                foreach (var dataSet in collection.EnvironmentalDataSets)
+                foreach (var dataSet in location.EnvironmentalDataSets)
                     _context.EnvironmentalDataSets.Remove(dataSet);
-                _context.EnvironmentalDataSetCollections.Remove(collection);
-            }
             _context.Locations.Remove(location);
-            if (saveChanges) _context.SaveChanges();
-        }
-        public void DeleteEnvironmentalDataSetCollection(EnvironmentalDataSetCollection collection) { DeleteEnvironmentalDataSetCollection(collection, true); }
-        protected void DeleteEnvironmentalDataSetCollection(EnvironmentalDataSetCollection collection, bool saveChanges)
-        {
-            // todo: Handle the case where this collection is used by one or more scenarios
-            foreach (var dataSet in collection.EnvironmentalDataSets)
-                DeleteEnvironmentalDataSet(dataSet, false);
             if (saveChanges) _context.SaveChanges();
         }
         public void DeleteEnvironmentalDataSet(EnvironmentalDataSet dataSet) { DeleteEnvironmentalDataSet(dataSet, true); }
         protected void DeleteEnvironmentalDataSet(EnvironmentalDataSet dataSet, bool saveChanges)
         {
             // todo: Handle the case where this data set is used by one or more scenarios
-            var fileName = Path.Combine(LocationRootDirectory, dataSet.EnvironmentalDataSetCollection.Location.StorageDirectory, dataSet.FileName);
+            var fileName = Path.Combine(LocationRootDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
             var filesToDelete = Directory.EnumerateFiles(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".*");
             foreach (var file in filesToDelete) File.Delete(file);
             _context.EnvironmentalDataSets.Remove(dataSet);
@@ -150,43 +122,32 @@ namespace ESME.Locations
                 {
                     _context.SaveChanges();
                 }
-                catch (DbEntityValidationException ex)
+                catch (DbEntityValidationException dbEntityValidationException)
                 {
                     Console.WriteLine("SaveChanges caught DbEntityValidationException");
-                    foreach (var innerError in ex.EntityValidationErrors.SelectMany(validationError => validationError.ValidationErrors))
+                    foreach (var innerError in dbEntityValidationException.EntityValidationErrors.SelectMany(validationError => validationError.ValidationErrors))
                         Console.WriteLine("  {0}: {1}", innerError.PropertyName, innerError.ErrorMessage);
+                    throw;
+                }
+                catch (DbUpdateException dbUpdateException)
+                {
+                    Console.WriteLine("SaveChanges caught DbUpdateException");
+                    Console.WriteLine("  {0}", dbUpdateException.InnerException.Message);
+                    if (dbUpdateException.InnerException.InnerException != null)
+                        Console.WriteLine("    {0}", dbUpdateException.InnerException.InnerException.Message);
                     throw;
                 }
             }
         }
 
-        void AddLocationLogEntry(Location location, string message)
-        {
-            var logEntry = new LocationLogEntry
-            {
-                Location = location,
-                LogEntry = new LogEntry
-                {
-                    Message = message,
-                    MessageSource = new DbWhoWhenWhere(true),
-                },
-            };
-            _context.LocationLogEntries.Add(logEntry);
-            SaveChanges();
-        }
+        void Log(Location location, string message) { LogBase(new LogEntry(location) { Location = location }, message); }
+        void Log(EnvironmentalDataSet dataSet, string message) { LogBase(new LogEntry(dataSet) { EnvironmentalDataSet = dataSet }, message); }
 
-        void AddEnvironmentDataSetCollectionLogEntry(EnvironmentalDataSetCollection collection, string message)
+        void LogBase(LogEntry logEntry, string message)
         {
-            var logEntry = new EnvironmentalDataSetCollectionLogEntry
-            {
-                EnvironmentalDataSetCollection = collection,
-                LogEntry = new LogEntry
-                {
-                    Message = message,
-                    MessageSource = new DbWhoWhenWhere(true),
-                },
-            };
-            _context.EnvironmentalDataSetCollectionLogEntries.Add(logEntry);
+            logEntry.Message = message;
+            logEntry.MessageSource = new DbWhoWhenWhere(true);
+            _context.Log.Add(logEntry);
             SaveChanges();
         }
 

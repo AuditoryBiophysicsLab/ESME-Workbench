@@ -51,6 +51,7 @@ namespace DavesWPFTester
 
         void FillDatabaseHandler()
         {
+#if false
             _locationManager.CreateLocation("Mass Bay", "These are some comments", 44, 41, -69, -72);
             var location = _locationManager.Locations.First(); 
             var soundSpeedCollection = _locationManager.CreateEnvironmentalDataSetCollection(location, new PluginIdentifier
@@ -84,6 +85,7 @@ namespace DavesWPFTester
             });
             foreach (var month in NAVOConfiguration.AllMonths)
                 _importManager.BeginImport(_locationManager.CreateEnvironmentalDataSet(windCollection, 60, month), new TestProgress { DataType = "Wind", TimePeriod = month, Resolution = 60 });
+#endif
         }
         #endregion
     }

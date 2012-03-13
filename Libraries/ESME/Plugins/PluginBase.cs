@@ -7,8 +7,10 @@ using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
+using ESME.Locations;
 using ESME.NEMO;
 using HRC.Navigation;
+using HRC.Utility;
 using HRC.Validation;
 
 namespace ESME.Plugins
@@ -178,6 +180,6 @@ namespace ESME.Plugins
 
     public abstract class EnvironmentalDataSourcePluginBase<T> : EnvironmentalDataSourcePluginBase, IEnvironmentalDataSource<T>
     {
-        public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null);
+        public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, PercentProgress progress = null);
     }
 }

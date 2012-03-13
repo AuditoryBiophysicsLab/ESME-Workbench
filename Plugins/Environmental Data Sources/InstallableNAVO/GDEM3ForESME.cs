@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
@@ -8,6 +7,7 @@ using ESME.Environment.NAVO;
 using ESME.Plugins;
 using ESME.Views.Locations;
 using HRC.Navigation;
+using HRC.Utility;
 using Microsoft.Win32;
 using NAVODatabaseAdapter;
 
@@ -44,7 +44,7 @@ namespace InstallableNAVOPlugin
 
         readonly string _dataDirectory;
 
-        public override SoundSpeed Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
+        public override SoundSpeed Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, PercentProgress progress = null)
         {
             CheckResolutionAndTimePeriod(resolution, timePeriod);
             var result = new SoundSpeed();

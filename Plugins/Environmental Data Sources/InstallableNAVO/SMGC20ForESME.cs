@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.Composition;
+﻿using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using ESME.Environment;
@@ -8,6 +7,7 @@ using ESME.Environment.NAVO;
 using ESME.Plugins;
 using ESME.Views.Locations;
 using HRC.Navigation;
+using HRC.Utility;
 using Microsoft.Win32;
 
 namespace InstallableNAVOPlugin
@@ -67,7 +67,7 @@ namespace InstallableNAVOPlugin
 
         #endregion
 
-        public override Wind Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, IProgress<float> progress = null)
+        public override Wind Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, PercentProgress progress = null)
         {
             CheckResolutionAndTimePeriod(resolution, timePeriod);
             var timePeriodData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = timePeriod };
