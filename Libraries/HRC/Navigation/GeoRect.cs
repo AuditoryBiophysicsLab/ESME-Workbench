@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Windows;
-using System.Xml.Serialization;
-using Cinch;
-using HRC.Utility;
+using HRC.Aspects;
 
 namespace HRC.Navigation
 {
-    [Serializable]
-    public class GeoRect : PropertyChangedBase, IEquatable<GeoRect>
+    [Serializable, NotifyPropertyChanged]
+    public class GeoRect : IEquatable<GeoRect>, IDataErrorInfo
     {
-        public GeoRect() { North = South = East = West = 0.0; }
+        public GeoRect() { }
 
         public GeoRect(double north, double south, double east, double west)
         {
@@ -20,30 +17,16 @@ namespace HRC.Navigation
             South = south;
             East = east;
             West = west;
-            Validate();
         }
 
-        public GeoRect(Rect rect)
-        {
-            FromRect(rect);
-            Validate();
-        }
+        public GeoRect(Rect rect) { FromRect(rect); }
 
-        public GeoRect(GeoRect geoRect)
-        {
-            North = geoRect.North;
-            South = geoRect.South;
-            East = geoRect.East;
-            West = geoRect.West;
-            Validate();
-        }
+        public GeoRect(GeoRect geoRect) : this(geoRect.North, geoRect.South, geoRect.East, geoRect.West) { }
 
         public GeoRect(IEnumerable<Geo> geoList)
         {
-            North = double.MinValue;
-            South = double.MaxValue;
-            East = double.MinValue;
-            West = double.MaxValue;
+            North = East = double.MinValue;
+            South = West = double.MaxValue;
             foreach (var geo in geoList)
             {
                 North = Math.Max(North, geo.Latitude);
@@ -51,98 +34,25 @@ namespace HRC.Navigation
                 East = Math.Max(East, geo.Longitude);
                 West = Math.Min(West, geo.Longitude);
             }
-            Validate();
         }
 
-        void Validate()
-        {
-            if (North >= South && East >= West) return;
-            throw new ApplicationException(string.Format("Poorly-formed GeoRect: North={0} South={1} East={2} West={3}", North, South, East, West));
-        }
-
-        #region public double North { get; set; }
-
-        /// <summary>
-        ///   The North edge of the GeoRect
-        /// </summary>
-        public double North
-        {
-            get { return _north; }
-            set
-            {
-                if (Math.Abs(_north - value) < 0.0001) return;
-                _north = value;
-                NotifyPropertyChanged(NorthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs NorthChangedEventArgs = ObservableHelper.CreateArgs<GeoRect>(x => x.North);
-        double _north;
-
-        #endregion
-
-        #region public double South { get; set; }
-
-        /// <summary>
-        ///   The South edge of the GeoRect
-        /// </summary>
-        public double South
-        {
-            get { return _south; }
-            set
-            {
-                if (Math.Abs(_south - value) < 0.0001) return;
-                _south = value;
-                NotifyPropertyChanged(SouthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SouthChangedEventArgs = ObservableHelper.CreateArgs<GeoRect>(x => x.South);
-        double _south;
-
-        #endregion
-
-        #region public double East { get; set; }
-
-        /// <summary>
-        ///   The East edge of the GeoRect
-        /// </summary>
-        public double East
-        {
-            get { return _east; }
-            set
-            {
-                if (Math.Abs(_east - value) < 0.0001) return;
-                _east = value;
-                NotifyPropertyChanged(EastChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs EastChangedEventArgs = ObservableHelper.CreateArgs<GeoRect>(x => x.East);
-        double _east;
-
-        #endregion
-
-        #region public double West { get; set; }
-
-        /// <summary>
-        ///   The West edge of the GeoRect
-        /// </summary>
-        public double West
-        {
-            get { return _west; }
-            set
-            {
-                if (Math.Abs(_west - value) < 0.0001) return;
-                _west = value;
-                NotifyPropertyChanged(WestChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs WestChangedEventArgs = ObservableHelper.CreateArgs<GeoRect>(x => x.West);
-        double _west;
-
-        #endregion
+        [Affects("NorthEast", "NorthWest", "Center", "HeightKm", "Height")]
+        public double North { get; set; }
+        [Affects("SouthEast", "SouthWest", "Center", "HeightKm", "Height")]
+        public double South { get; set; }
+        [Affects("NorthEast", "SouthEast", "Center", "AverageWidthKm", "Width")]
+        public double East { get; set; }
+        [Affects("NorthWest", "SouthWest", "Center", "AverageWidthKm", "Width")]
+        public double West { get; set; }
+        public Geo NorthWest { get { return new Geo(North, West); } }
+        public Geo NorthEast { get { return new Geo(North, East); } }
+        public Geo SouthWest { get { return new Geo(South, West); } }
+        public Geo SouthEast { get { return new Geo(South, East); } }
+        public Geo Center { get { return new Geo((North + South) / 2, (East + West) / 2); } }
+        public double AverageWidthKm { get { return (NorthWest.DistanceKilometers(NorthEast) + SouthWest.DistanceKilometers(SouthEast)) / 2; } }
+        public double HeightKm { get { return (NorthWest.DistanceKilometers(SouthWest) + NorthEast.DistanceKilometers(SouthEast)) / 2; } }
+        public double Width { get { return East - West; } }
+        public double Height { get { return North - South; } }
 
         /// <summary>
         ///   Expands the current GeoRect exactly enough to contain the specified GeoRect.
@@ -154,30 +64,18 @@ namespace HRC.Navigation
             South = Math.Min(South, geoRect.South);
             East = Math.Max(East, geoRect.East);
             West = Math.Min(West, geoRect.West);
-            Validate();
-        }
-
-        /// <summary>
-        ///   Expands the current GeoRect exactly enough to contain the specified rectangle.
-        /// </summary>
-        /// <param name = "rect"></param>
-        public void Union(Rect rect)
-        {
-            FromRect(Rect.Union(this, rect));
-            Validate();
         }
 
         /// <summary>
         ///   Expands the current GeoRect exactly enough to contain the specified EarthCoordinate.
         /// </summary>
         /// <param name = "geo"></param>
-        public void Union(Geo geo) //{ FromRect(Rect.Union(this, geo)); }
+        public void Union(Geo geo)
         {
             North = Math.Max(North, geo.Latitude);
             South = Math.Min(South, geo.Latitude);
             East = Math.Max(East, geo.Longitude);
             West = Math.Min(West, geo.Longitude);
-            Validate();
         }
 
         /// <summary>
@@ -205,7 +103,6 @@ namespace HRC.Navigation
             if (geoRects.Length == 0) return null;
             var result = new GeoRect(geoRects[0]);
             if (geoRects.Length > 1) for (var i = 1; i < geoRects.Length; i++) result.Union(geoRects[i]);
-            result.Validate();
             return result;
         }
 
@@ -228,25 +125,27 @@ namespace HRC.Navigation
         /// </summary>
         /// <param name = "geo"></param>
         /// <returns></returns>
-        public bool Contains(Geo geo)
-        {
-            //if (South <= geo.Latitude && geo.Latitude <= North && West <= geo.Longitude && geo.Longitude <= East) Debugger.Break();
-            return South <= geo.Latitude && geo.Latitude <= North && West <= geo.Longitude && geo.Longitude <= East;
-        }
+        public bool Contains(Geo geo) { return South <= geo.Latitude && geo.Latitude <= North && West <= geo.Longitude && geo.Longitude <= East; }
 
         /// <summary>
         ///   Indicates whether the GeoRect contains the specified GeoRect.
         /// </summary>
         /// <param name = "geoRect"></param>
         /// <returns></returns>
-        public bool Contains(GeoRect geoRect) { return ((Rect) this).Contains(geoRect); }
+        public bool Contains(GeoRect geoRect) { return South <= geoRect.South && geoRect.North <= North && West <= geoRect.West && geoRect.East <= East; }
 
         /// <summary>
         ///   Indicates whether the specified GeoRect is equal to the current GeoRect.
         /// </summary>
         /// <param name = "geoRect"></param>
         /// <returns></returns>
-        public bool Equals(GeoRect geoRect) { return ((Rect) this).Equals(geoRect); }
+        public bool Equals(GeoRect geoRect)
+        {
+            return Math.Abs(North - geoRect.North) < 0.0001 &&
+                   Math.Abs(South - geoRect.South) < 0.0001 &&
+                   Math.Abs(East - geoRect.East) < 0.0001 &&
+                   Math.Abs(West - geoRect.West) < 0.0001;
+        }
 
         /// <summary>
         ///   Indicates whether the specified GeoRects are equal.
@@ -254,7 +153,7 @@ namespace HRC.Navigation
         /// <param name = "geoRect1"></param>
         /// <param name = "geoRect2"></param>
         /// <returns></returns>
-        public static bool Equals(GeoRect geoRect1, GeoRect geoRect2) { return Rect.Equals(geoRect1, geoRect2); }
+        public static bool Equals(GeoRect geoRect1, GeoRect geoRect2) { return geoRect1.Equals(geoRect2); }
 
         /// <summary>
         ///   Returns the intersection of the specified GeoRects.
@@ -262,7 +161,13 @@ namespace HRC.Navigation
         /// <param name = "geoRect1"></param>
         /// <param name = "geoRect2"></param>
         /// <returns></returns>
-        public static GeoRect Intersect(GeoRect geoRect1, GeoRect geoRect2) { return new GeoRect(Rect.Intersect(geoRect1, geoRect2)); }
+        public static GeoRect Intersect(GeoRect geoRect1, GeoRect geoRect2)
+        {
+            return new GeoRect(Math.Min(geoRect1.North, geoRect2.North),
+                               Math.Max(geoRect1.South, geoRect2.South),
+                               Math.Min(geoRect1.East, geoRect2.East),
+                               Math.Max(geoRect1.West, geoRect2.West));
+        }
 
         /// <summary>
         ///   Creates a GeoRect that results from expanding or shrinking the specified GeoRect by the specified width and height amounts, in all directions.
@@ -291,69 +196,29 @@ namespace HRC.Navigation
             return new GeoRect(northWest.Latitude, southEast.Latitude, southEast.Longitude, northWest.Longitude);
         }
 
-        [XmlIgnore]
-        public Geo NorthWest
-        {
-            get { return new Geo(North, West); }
-        }
-
-        [XmlIgnore]
-        public Geo NorthEast
-        {
-            get { return new Geo(North, East); }
-        }
-
-        [XmlIgnore]
-        public Geo SouthWest
-        {
-            get { return new Geo(South, West); }
-        }
-
-        [XmlIgnore]
-        public Geo SouthEast
-        {
-            get { return new Geo(South, East); }
-        }
-
-        [XmlIgnore]
-        public Geo Center
-        {
-            get { return new Geo((North + South) / 2, (East + West) / 2); }
-        }
-
-        [XmlIgnore]
-        public double AverageWidthKm
-        {
-            get { return (NorthWest.DistanceKilometers(NorthEast) + SouthWest.DistanceKilometers(SouthEast)) / 2; }
-        }
-
-        [XmlIgnore]
-        public double HeightKm
-        {
-            get { return (NorthWest.DistanceKilometers(SouthWest) + NorthEast.DistanceKilometers(SouthEast)) / 2; }
-        }
-
-        [XmlIgnore]
-        public double Width
-        {
-            get { return East - West; }
-        }
-
-        [XmlIgnore]
-        public double Height
-        {
-            get { return North - South; }
-        }
-
-        public static implicit operator Rect(GeoRect geoRect) { return new Rect(geoRect.West, geoRect.South, geoRect.Width, geoRect.Height); }
-
         void FromRect(Rect rect)
         {
             North = rect.Bottom;
             South = rect.Top;
             East = rect.Right;
             West = rect.Left;
-            Validate();
+        }
+
+        public static explicit operator Rect(GeoRect geoRect) { return new Rect(geoRect.West, geoRect.South, geoRect.Width, geoRect.Height); }
+
+        public string this[string columnName] { get { return Error; } }
+
+        public string Error
+        {
+            get
+            {
+                return North >= 0 && North <= 90 &&
+                       South >= 0 && South <= 90 && North >= South &&
+                       West >= -360 && West <= 360 &&
+                       East >= 360 && East <= 360 && East >= West
+                           ? null
+                           : string.Format("Poorly-formed GeoRect: North={0} South={1} East={2} West={3}", North, South, East, West);
+            }
         }
     }
 }

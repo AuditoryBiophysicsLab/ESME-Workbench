@@ -28,18 +28,26 @@ namespace ESME.Tests.Locations
 
             var pluginManager = new PluginManagerService { PluginDirectory = PluginDirectory };
 
-            locationManager.CreateLocation("Mass Bay", "These are some comments", 44, 41, -69, -72);
+            var location = locationManager.CreateLocation("Mass Bay", "These are some comments", 44, 41, -69, -72);
             Assert.AreEqual(1, locationManager.Locations.Count());
-            var location = locationManager.Locations.First();
             Assert.AreEqual("Mass Bay", location.Name);
             Assert.Throws(typeof(DuplicateNameException), () => locationManager.CreateLocation("Mass Bay", "These are some comments", 44, 41, -69, -72));
             Assert.AreEqual(1, locationManager.Locations.Count());
-            foreach (var month in NAVOConfiguration.AllMonths) locationManager.CreateEnvironmentalDataSet(location, 15, month, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed].PluginIdentifier);
+            foreach (var month in NAVOConfiguration.AllMonths)
+            {
+                // SoundSpeed dataset for each month
+                locationManager.CreateEnvironmentalDataSet(location, 15, month, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed].PluginIdentifier);
+                // Wind dataset for each month
+                locationManager.CreateEnvironmentalDataSet(location, 60, month, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.Wind].PluginIdentifier);
+            }
+            // Sediment dataset
             locationManager.CreateEnvironmentalDataSet(location, 5f, TimePeriod.Invalid, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment].PluginIdentifier);
+            // Bathymetry dataset at 2min resolution
             locationManager.CreateEnvironmentalDataSet(location, 2f, TimePeriod.Invalid, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier);
+            // Bathymetry dataset at 1min resolution
             locationManager.CreateEnvironmentalDataSet(location, 1f, TimePeriod.Invalid, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier);
+            // Bathymetry dataset at 0.5min resolution
             locationManager.CreateEnvironmentalDataSet(location, 0.5f, TimePeriod.Invalid, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier);
-            foreach (var month in NAVOConfiguration.AllMonths) locationManager.CreateEnvironmentalDataSet(location, 60, month, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.Wind].PluginIdentifier);
             DumpLocationDatabase(locationManager);
         }
 
@@ -76,7 +84,7 @@ namespace ESME.Tests.Locations
             Console.WriteLine("            Data set file: {0} ({1} bytes)", dataSet.FileName, dataSet.FileSize);
             Console.WriteLine("               Resolution: {0} ({1} samples)", dataSet.Resolution, dataSet.SampleCount);
             if (dataSet.TimePeriod != TimePeriod.Invalid)
-                Console.WriteLine("              Time period: {0}", (TimePeriod)dataSet.TimePeriod);
+                Console.WriteLine("              Time period: {0}", dataSet.TimePeriod);
             Console.WriteLine("                   Cached: {0}%", dataSet.PercentCached);
         }
 
