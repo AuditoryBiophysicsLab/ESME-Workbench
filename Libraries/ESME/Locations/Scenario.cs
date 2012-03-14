@@ -132,7 +132,7 @@ namespace ESME.Locations
         [Key, Initialize]
         public Guid Guid { get; set; }
         public string SpeciesFile { get; set; }
-        public string Name { get; set; }
+        public string LatinName { get; set; }
 
         public virtual Scenario Scenario { get; set; }
         public virtual ICollection<AnimatLocation> AnimatLocations { get; set; }

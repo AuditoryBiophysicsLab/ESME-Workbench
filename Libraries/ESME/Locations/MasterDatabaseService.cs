@@ -192,6 +192,12 @@ namespace ESME.Locations
             SaveChanges();
         }
 
+        public ScenarioSpecies AddOrReplaceSpecies(Scenario scenario, ScenarioSpecies newSpecies)
+        {
+            if (scenario.Species.FirstOrDefault(s => s.LatinName == newSpecies.LatinName) != null) throw new DuplicateNameException("Error adding species \"{0}\" to scenario \"{1}\": A species with that name already exists");
+            return null;
+        }
+
         #endregion
 
         #region Delete operations

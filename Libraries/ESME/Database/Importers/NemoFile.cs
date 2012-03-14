@@ -110,42 +110,34 @@ namespace ESME.Database.Importers
                     masterDatabase.SetTrackDefinition(curPlatform, trackDefinition);
                 }
             }
-#if false
             foreach (var nemoAnimals in nemoFile.Scenario.Animals)
             {
                 foreach (var nemoSpecies in nemoAnimals.Species)
                 {
-                    var species = new ScenarioSpecies
+                    nemoSpecies.AnimatDataTask.Start();
+                    TaskEx.WhenAll(nemoSpecies.AnimatDataTask).Wait();
+                    var result = nemoSpecies.AnimatDataTask.Result;
+                    var species = (from s in scenario.Species
+                                   where s.LatinName == nemoSpecies.AnimatDataTask.Result.LatinName
+                                   select s).FirstOrDefault();
+                    if (species != null) Console.WriteLine("Species with name \"{0}\" already exists in scenario \"{1}\", replacing with current data", nemoSpecies.AnimatDataTask.Result.LatinName, scenario.Name);
+
+                    var locationIndex = 1;
+                    foreach (var startPoint in result.AnimatStartPoints)
                     {
-                        Scenario = scenario,
-                    };
-                    locationContext.ScenarioSpecies.Add(species);
-                    locationContext.SaveChanges();
-                    using (var transaction = new TransactionScope())
-                    {
-                        nemoSpecies.AnimatDataTask.Start();
-                        TaskEx.WhenAll(nemoSpecies.AnimatDataTask).Wait();
-                        var result = nemoSpecies.AnimatDataTask.Result;
-                        species.Name = result.LatinName;
-                        var locationIndex = 1;
-                        foreach (var startPoint in result.AnimatStartPoints)
+                        locationIndex++;
+                        Console.Write("{0} Adding animat {1} of {2}\r", species.LatinName, locationIndex, result.AnimatStartPoints.Count);
+#if false
+                        locationContext.AnimatLocations.Add(new AnimatLocation
                         {
-                            locationIndex++;
-                            Console.Write("{0} Adding animat {1} of {2}\r", species.Name, locationIndex, result.AnimatStartPoints.Count);
-                            locationContext.AnimatLocations.Add(new AnimatLocation
-                            {
-                                Geo = new Geo(startPoint.Latitude, startPoint.Longitude),
-                                Depth = startPoint.Data,
-                                ScenarioSpecies = species,
-                            });
-                        }
-                        locationContext.Entry(species).State = EntityState.Modified;
-                        locationContext.SaveChanges();
-                        transaction.Complete();
+                            Geo = new Geo(startPoint.Latitude, startPoint.Longitude),
+                            Depth = startPoint.Data,
+                            ScenarioSpecies = species,
+                        });
+#endif
                     }
                 }
             }
-#endif
         }
     }
 }
