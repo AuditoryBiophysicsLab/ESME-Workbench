@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
+using HRC.Aspects;
 
 namespace ESME.Database
 {
@@ -19,7 +21,8 @@ namespace ESME.Database
 
     public class PSMPlatform
     {
-        public int PSMPlatformID { get; set; }
+        [Key, Initialize(IsGuid = true)]
+        public string Guid { get; set; }
         public string PlatformName { get; set; }
         public string PlatformType { get; set; }
         public virtual ICollection<PSMSource> PSMSources { get; set; }
@@ -27,7 +30,8 @@ namespace ESME.Database
 
     public class PSMSource
     {
-        public int PSMSourceID { get; set; }
+        [Key, Initialize(IsGuid = true)]
+        public string Guid { get; set; }
         public string SourceName { get; set; }
         public string SourceType { get; set; }
         public virtual PSMPlatform PSMPlatform { get; set; }
@@ -36,7 +40,8 @@ namespace ESME.Database
 
     public class PSMMode
     {
-        public int PSMModeID { get; set; }
+        [Key, Initialize(IsGuid = true)]
+        public string Guid { get; set; }
         public string ModeName { get; set; }
         public string ModeType { get; set; }
         public float? ActiveTime { get; set; }

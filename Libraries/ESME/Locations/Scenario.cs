@@ -1,20 +1,23 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using ESME.Behaviors;
 using ESME.Database;
+using ESME.Environment;
+using HRC.Aspects;
 
 namespace ESME.Locations
 {
     public class Scenario
     {
-        public int ScenarioID { get; set; }
-        public string BuilderVersion { get; set; }
-        public string EventName { get; set; }
-        public DbDateTime CreationTime { get; set; }
+        [Key, Initialize(IsGuid = true)]
+        public string Guid { get; set; }
         public string Description { get; set; }
-        public string AnalystName { get; set; }
         public DbTimeSpan StartTime { get; set; }
         public DbTimeSpan Duration { get; set; }
         public string SimAreaName { get; set; }
-        public string TimeFrame { get; set; }
+
+        [EnumDataType(typeof(TimePeriod))]
+        public TimePeriod TimePeriod { get; set; }
 
         public virtual Location Location { get; set; }
 
@@ -24,14 +27,15 @@ namespace ESME.Locations
 
     public class Platform 
     {
-        public int PlatformID { get; set; }
+        [Key, Initialize(IsGuid = true)]
+        public string Guid { get; set; }
         public string Description { get; set; }
         public bool Launches { get; set; }
         public bool Tows { get; set; }
         public int RepeatCount { get; set; }
 
         // Copied from the PSM Platform
-        public int PSMPlatformID { get; set; }
+        public string PSMPlatformGuid { get; set; }
         public string PlatformName { get; set; }
         public string PlatformType { get; set; }
 
@@ -42,9 +46,10 @@ namespace ESME.Locations
 
     public class Source
     {
-        public int SourceID { get; set; }
+        [Key, Initialize(IsGuid = true)]
+        public string Guid { get; set; }
         public string Description { get; set; }
-        public int PSMSourceID { get; set; }
+        public string PSMSourceGuid { get; set; }
         public string SourceName { get; set; }
         public string SourceType { get; set; }
 
@@ -54,8 +59,9 @@ namespace ESME.Locations
 
     public class Mode
     {
-        public int ModeID { get; set; }
-        public int PSMModeID { get; set; }
+        [Key, Initialize(IsGuid = true)]
+        public string Guid { get; set; }
+        public string PSMModeGuid { get; set; }
         public string State { get; set; }
         public string Linked { get; set; }
         public int ClusterCount { get; set; }
@@ -83,8 +89,11 @@ namespace ESME.Locations
 
     public class TrackDefinition
     {
-        public int TrackDefinitionID { get; set; }
-        public DbTrackType TrackType { get; set; }
+        [Key, Initialize(IsGuid = true)]
+        public string Guid { get; set; }
+
+        [EnumDataType(typeof(TrackType))]
+        public TrackType TrackType { get; set; }
         public DbTimeSpan StartTime { get; set; }
         public DbTimeSpan Duration { get; set; }
         public bool Random { get; set; }
@@ -102,14 +111,16 @@ namespace ESME.Locations
 
     public class Perimeter
     {
-        public int PerimeterID { get; set; }
+        [Key, Initialize(IsGuid = true)]
+        public string Guid { get; set; }
         public string Name { get; set; }
         public virtual ICollection<PerimeterCoordinate> PerimeterCoordinates { get; set; }
     }
 
     public class PerimeterCoordinate
     {
-        public int PerimeterCoordinateID { get; set; }
+        [Key, Initialize(IsGuid = true)]
+        public string Guid { get; set; }
         public DbGeo Geo { get; set; }
 
         public virtual Perimeter Perimeter { get; set; }
@@ -117,7 +128,8 @@ namespace ESME.Locations
 
     public class ScenarioSpecies
     {
-        public int ScenarioSpeciesID { get; set; }
+        [Key, Initialize(IsGuid = true)]
+        public string Guid { get; set; }
         public string SpeciesFile { get; set; }
         public string Name { get; set; }
 

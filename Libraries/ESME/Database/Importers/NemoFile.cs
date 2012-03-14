@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
+using ESME.Behaviors;
 using ESME.Locations;
 using HRC.Navigation;
 
@@ -16,15 +17,15 @@ namespace ESME.Database.Importers
             var nemoFile = new NEMO.NemoFile(nemoFilePath, scenarioDataDirectory);
             var scenario = new Scenario
             {
-                BuilderVersion = nemoFile.Scenario.BuilderVersion,
-                AnalystName = nemoFile.Scenario.AnalystName,
-                CreationTime = nemoFile.Scenario.CreationTime,
+                //BuilderVersion = nemoFile.Scenario.BuilderVersion,
+                //AnalystName = nemoFile.Scenario.AnalystName,
+                //CreationTime = nemoFile.Scenario.CreationTime,
                 Description = nemoFile.Scenario.Description,
                 Duration = nemoFile.Scenario.Duration,
-                EventName = nemoFile.Scenario.EventName,
+                //EventName = nemoFile.Scenario.EventName,
                 SimAreaName = nemoFile.Scenario.SimAreaName,
                 StartTime = nemoFile.Scenario.StartTime.TimeOfDay,
-                TimeFrame = nemoFile.Scenario.TimeFrame,
+                //TimeFrame = nemoFile.Scenario.TimeFrame,
             };
             locationContext.Scenarios.Add(scenario);
             locationContext.SaveChanges();
@@ -32,7 +33,7 @@ namespace ESME.Database.Importers
             {
                 var platform = new Platform
                 {
-                    PlatformID = int.Parse(nemoPlatform.Id),
+                    //PlatformID = int.Parse(nemoPlatform.Id),
                     PlatformName = nemoPlatform.Name,
                     Description = nemoPlatform.Description,
                     Launches = false,
@@ -103,7 +104,7 @@ namespace ESME.Database.Importers
                 {
                     var source = new Source
                     {
-                        SourceID = int.Parse(nemoSource.Id),
+                        //SourceID = int.Parse(nemoSource.Id),
                         SourceName = nemoSource.Name,
                         Description = nemoSource.Description,
                         Platform = platform,

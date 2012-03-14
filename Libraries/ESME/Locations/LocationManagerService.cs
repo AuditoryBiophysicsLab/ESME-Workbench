@@ -37,7 +37,7 @@ namespace ESME.Locations
         public bool LocationExists(string locationName) { return Locations.FirstOrDefault(l => l.Name == locationName) != null; }
         public Location this[string locationName] { get { return Locations.Single(l => l.Name == locationName); } }
 
-        #region Create operations
+        #region Create operations for Locations
         public Location CreateLocation(string locationName, string comments, double north, double south, double east, double west)
         {
             if (LocationExists(locationName)) throw new DuplicateNameException(string.Format("A location named {0} already exists, choose another name", locationName));
@@ -68,6 +68,10 @@ namespace ESME.Locations
             Log(environmentalDataSet, string.Format("Added new data set. Resolution: {0}{1}", resolution, timePeriod != TimePeriod.Invalid ? string.Format("  TimePeriod: {0}", timePeriod) : ""));
             return environmentalDataSet;
         }
+        #endregion
+
+        #region Create operations for Scenarios
+        public Scenario CreateScenario() { return null; }
         #endregion
 
         #region Delete operations
