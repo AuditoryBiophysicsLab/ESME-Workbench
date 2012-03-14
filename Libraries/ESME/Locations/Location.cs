@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
 using ESME.Database;
-using ESME.Environment;
 using HRC.Aspects;
 
 namespace ESME.Locations
@@ -34,7 +34,11 @@ namespace ESME.Locations
         public DbSet<ScenarioSpecies> ScenarioSpecies { get; set; }
         public DbSet<AnimatLocation> AnimatLocations { get; set; }
 
-        protected override void OnModelCreating(DbModelBuilder modelBuilder) { }
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<TrackDefinition>().HasRequired(t => t.Platform)
+                   .WithOptional();
+        }
 
         public class LocationDatabaseInitializer : CreateDatabaseIfNotExists<LocationContext>
         {
@@ -47,20 +51,20 @@ namespace ESME.Locations
 
     public interface IHaveGuid
     {
-        string Guid { get; }
+        Guid Guid { get; }
     }
 
     public class Location : IHaveGuid
     {
-        [Key, Initialize(IsGuid = true)]
-        public string Guid { get; set; }
+        [Key, Initialize]
+        public Guid Guid { get; set; }
         public string Name { get; set; }
         public string Comments { get; set; }
         public DbGeoRect GeoRect { get; set; }
         public string StorageDirectory { get; set; }
 
         public virtual ICollection<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }
-        public virtual ICollection<Scenario> Scenarios { get; set; }
+        //public virtual ICollection<Scenario> Scenarios { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
     }
 
@@ -69,30 +73,34 @@ namespace ESME.Locations
         public LogEntry() {}
         public LogEntry(IHaveGuid haveGuid) { Guid = haveGuid.Guid; }
 
-        [Key, Initialize(IsGuid = true)]
-        public string Guid { get; set; }
+        [Key, Initialize]
+        public Guid Guid { get; set; }
         public DbWhoWhenWhere MessageSource { get; set; }
         public string Message { get; set; }
         public string SourceGuid { get; set; }
 
         public virtual Location Location { get; set; }
         public virtual EnvironmentalDataSet EnvironmentalDataSet { get; set; }
+        public virtual Scenario Scenario { get; set; }
+        public virtual Platform Platform { get; set; }
+        public virtual Source Source { get; set; }
+        public virtual Mode Mode { get; set; }
+        public virtual TrackDefinition TrackDefinition { get; set; }
+        public virtual Perimeter Perimeter { get; set; }
     }
 
     public class EnvironmentalDataSet : IHaveGuid
     {
-        [Key, Initialize(IsGuid = true)]
-        public string Guid { get; set; }
+        [Key, Initialize]
+        public Guid Guid { get; set; }
         public float Resolution { get; set; }
         public int SampleCount { get; set; }
         public long FileSize { get; set; }
 
-        [EnumDataType(typeof(TimePeriod))]
-        public TimePeriod TimePeriod { get; set; }
+        public DbTimePeriod TimePeriod { get; set; }
         
         public string FileName { get; set; }
         public DbPluginIdentifier SourcePlugin { get; set; }
-        public int PercentCached { get; set; }
 
         public virtual Location Location { get; set; }
         

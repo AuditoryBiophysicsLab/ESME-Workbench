@@ -1,12 +1,12 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Data.Entity;
 
 namespace ESME.Database
 {
     [ComplexType]
     public class DbTimeSpan
     {
+        public DbTimeSpan() {}
         public DbTimeSpan(DateTime dateTime) { Ticks = dateTime.Ticks; }
         public DbTimeSpan(TimeSpan timeSpan) { Ticks = timeSpan.Ticks; }
         public static implicit operator DbTimeSpan(TimeSpan timeSpan) { return new DbTimeSpan(timeSpan); }

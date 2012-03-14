@@ -109,6 +109,7 @@ namespace HRC.Tests.Aspects
             Assert.AreEqual("Default", testSettings.DefaultedStringProperty);
             Assert.Throws(typeof (InvalidOperationException), () => Console.WriteLine(testSettings.ExceptionStringProperty));
             Console.WriteLine("GuidStringProperty = {0}", testSettings.GuidStringProperty);
+            Console.WriteLine("GuidProperty = {0}", testSettings.GuidProperty);
             Assert.AreEqual(testSettings.DefaultedIntProperty++, 5);
             Assert.AreEqual(testSettings.DefaultedIntProperty++, 6);
             Assert.IsNull(testSettings.NullStringList);
@@ -161,6 +162,9 @@ namespace HRC.Tests.Aspects
 
         [Initialize(IsGuid = true)]
         public string GuidStringProperty { get; set; }
+
+        [Initialize]
+        public Guid GuidProperty { get; set; }
 
         [Initialize(5)]
         public int DefaultedIntProperty { get; set; }

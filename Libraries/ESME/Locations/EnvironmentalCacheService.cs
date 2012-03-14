@@ -20,24 +20,24 @@ using MEFedMVVM.ViewModelLocator;
 namespace ESME.Locations
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
-    [ExportService(ServiceType.Both, typeof(EnvironmentalDatabaseImportService))]
-    public class EnvironmentalDatabaseImportService
+    [ExportService(ServiceType.Both, typeof(EnvironmentalCacheService))]
+    public class EnvironmentalCacheService
     {
-        public EnvironmentalDatabaseImportService() {}
-        public EnvironmentalDatabaseImportService(IPluginManagerService pluginManagerService,
-                                                  LocationManagerService locationManagerService)
+        public EnvironmentalCacheService() {}
+        public EnvironmentalCacheService(IPluginManagerService pluginManagerService,
+                                                  MasterDatabaseService masterDatabaseService)
         {
             _pluginManagerService = pluginManagerService;
-            _locationManagerService = locationManagerService;
+            _masterDatabaseService = masterDatabaseService;
         }
 
         [Import] IPluginManagerService _pluginManagerService;
-        [Import] LocationManagerService _locationManagerService;
+        [Import] MasterDatabaseService _masterDatabaseService;
 
         public PercentProgressList<PercentProgressList<Location>> ImportMissingDatasets()
         {
             var result = new PercentProgressList<PercentProgressList<Location>>();
-            foreach (var locationProgress in _locationManagerService.Locations.Select(ImportLocationDatasets).Where(l => l != null))
+            foreach (var locationProgress in _masterDatabaseService.Locations.Select(ImportLocationDatasets).Where(l => l != null))
                 result.Add(locationProgress);
             return result;
         }
@@ -59,7 +59,7 @@ namespace ESME.Locations
             return job;
         }
 
-        readonly ConcurrentDictionary<string, PercentProgress<EnvironmentalDataSet>> _importJobsPending = new ConcurrentDictionary<string, PercentProgress<EnvironmentalDataSet>>();
+        readonly ConcurrentDictionary<Guid, PercentProgress<EnvironmentalDataSet>> _importJobsPending = new ConcurrentDictionary<Guid, PercentProgress<EnvironmentalDataSet>>();
 
         int _busyCount;
         public int BusyCount { get { return _busyCount; } }
@@ -70,7 +70,7 @@ namespace ESME.Locations
         {
             if (taskScheduler == null) taskScheduler = TaskScheduler.Default;
             if (_pluginManagerService == null) throw new ServiceNotFoundException("Required service PluginManager was not found");
-            if (_locationManagerService == null) throw new ServiceNotFoundException("Required service LocationManager was not found");
+            if (_masterDatabaseService == null) throw new ServiceNotFoundException("Required service LocationManager was not found");
             var newImporter = new ActionBlock<PercentProgress<EnvironmentalDataSet>>(job =>
             {
                 Interlocked.Increment(ref _busyCount);
@@ -80,7 +80,7 @@ namespace ESME.Locations
                 var geoRect = dataSet.Location.GeoRect;
                 var resolution = dataSet.Resolution;
                 var timePeriod = dataSet.TimePeriod;
-                var fileName = Path.Combine(_locationManagerService.LocationRootDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
+                var fileName = Path.Combine(_masterDatabaseService.MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
                 progress.Report(0);
                 //Console.WriteLine("Importer: About to import {0}[{1}] from region {2} {3} {4} {5}", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, dataSet.Resolution, geoRect.North, geoRect.South, geoRect.East, geoRect.West);
                 //Console.WriteLine("Importer: About to invoke {0} plugin [{1}]", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, sourcePlugin.PluginName);
@@ -145,7 +145,6 @@ namespace ESME.Locations
                 }
                 //Console.WriteLine("Importer: {0} plugin returned {1} samples", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, dataSet.SampleCount);
                 dataSet.FileSize = new FileInfo(fileName).Length;
-                _locationManagerService.UpdateEnvironmentDataSetPercentCached(dataSet, 100);
                 progress.Report(100);
                 //Console.WriteLine("Importer: Finished importing {0} at resolution {1}", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, dataSet.Resolution);
                 Interlocked.Decrement(ref _busyCount);

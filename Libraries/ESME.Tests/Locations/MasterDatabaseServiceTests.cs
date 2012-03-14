@@ -11,19 +11,19 @@ using NUnit.Framework;
 
 namespace ESME.Tests.Locations
 {
-    public class LocationManagerTests
+    public class MasterDatabaseServiceTests
     {
-        readonly string _locationRootDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME.LocationService Tests");
+        readonly string _masterDatabaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME.MasterDatabaseService Tests");
         const string PluginDirectory = @"C:\Projects\ESME Deliverables\Libraries\ESME.Tests\bin\Debug";
 
         [Test, RequiresSTA]
         public void EmptyAndFillDatabase()
         {
-            if (Directory.Exists(_locationRootDirectory)) Directory.Delete(_locationRootDirectory, true);
-            for (var i = 0; i < 10; i++) if (Directory.Exists(_locationRootDirectory)) Thread.Sleep(100);
-            Assert.IsFalse(Directory.Exists(_locationRootDirectory));
-            var locationManager = new LocationManagerService { LocationRootDirectory = _locationRootDirectory };
-            Assert.IsTrue(Directory.Exists(_locationRootDirectory));
+            if (Directory.Exists(_masterDatabaseDirectory)) Directory.Delete(_masterDatabaseDirectory, true);
+            for (var i = 0; i < 10; i++) if (Directory.Exists(_masterDatabaseDirectory)) Thread.Sleep(100); else break;
+            Assert.IsFalse(Directory.Exists(_masterDatabaseDirectory));
+            var locationManager = new MasterDatabaseService { MasterDatabaseDirectory = _masterDatabaseDirectory };
+            Assert.IsTrue(Directory.Exists(_masterDatabaseDirectory));
             Assert.AreEqual(0, locationManager.Locations.Count());
 
             var pluginManager = new PluginManagerService { PluginDirectory = PluginDirectory };
@@ -51,7 +51,7 @@ namespace ESME.Tests.Locations
             DumpLocationDatabase(locationManager);
         }
 
-        public void DumpLocationDatabase(LocationManagerService locationService, bool dumpLogs = false)
+        public void DumpLocationDatabase(MasterDatabaseService locationService, bool dumpLogs = false)
         {
             foreach (var location in locationService.Locations)
             {
@@ -85,7 +85,6 @@ namespace ESME.Tests.Locations
             Console.WriteLine("               Resolution: {0} ({1} samples)", dataSet.Resolution, dataSet.SampleCount);
             if (dataSet.TimePeriod != TimePeriod.Invalid)
                 Console.WriteLine("              Time period: {0}", dataSet.TimePeriod);
-            Console.WriteLine("                   Cached: {0}%", dataSet.PercentCached);
         }
 
         public void DumpLogEntry(LogEntry logEntry)

@@ -15,16 +15,16 @@ namespace DavesWPFTester
     public class MainWindowViewModel : ViewModelBase
     {
         readonly IPluginManagerService _pluginManager;
-        readonly LocationManagerService _locationManager;
-        readonly EnvironmentalDatabaseImportService _importManager;
+        readonly MasterDatabaseService _masterDatabase;
+        readonly EnvironmentalCacheService _importManager;
 
         [ImportingConstructor]
-        public MainWindowViewModel(IPluginManagerService pluginManager, LocationManagerService locationManager, EnvironmentalDatabaseImportService importManager) 
+        public MainWindowViewModel(IPluginManagerService pluginManager, MasterDatabaseService masterDatabase, EnvironmentalCacheService importManager) 
         {
             _pluginManager = pluginManager;
             _pluginManager.PluginDirectory = PluginDirectory;
-            _locationManager = locationManager;
-            _locationManager.LocationRootDirectory = _locationRootDirectory;
+            _masterDatabase = masterDatabase;
+            _masterDatabase.MasterDatabaseDirectory = _locationRootDirectory;
             _importManager = importManager;
         }
 

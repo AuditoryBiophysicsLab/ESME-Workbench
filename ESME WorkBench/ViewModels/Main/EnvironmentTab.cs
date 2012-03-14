@@ -77,7 +77,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             try
             {
-                var vm = new NewLocationViewModel(_pluginManagerService, _locationManagerService);
+                var vm = new NewLocationViewModel(_pluginManagerService, _masterDatabaseService);
                 var result = _visualizerService.ShowDialog("NewLocationView", vm);
                 if ((result.HasValue) && (result.Value))
                 {

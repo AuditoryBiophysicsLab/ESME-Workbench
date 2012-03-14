@@ -15,10 +15,10 @@ namespace ESME.Views.Locations
     public sealed class NewLocationViewModel : ValidatingViewModel
     {
         #region Constructor
-        public NewLocationViewModel(IPluginManagerService pluginManagerService, LocationManagerService locationManagerService)
+        public NewLocationViewModel(IPluginManagerService pluginManagerService, MasterDatabaseService masterDatabaseService)
         {
             _pluginManagerService = pluginManagerService;
-            _locationManagerService = locationManagerService;
+            _masterDatabaseService = masterDatabaseService;
             EnvironmentDataSourceViews = new Dictionary<PluginSubtype, ICollectionView>();
             SelectedPlugins = new ObservableConcurrentDictionary<PluginSubtype, EnvironmentalDataSourcePluginBase>();
             SelectedPlugins.CollectionChanged += (s, e) =>
@@ -47,7 +47,7 @@ namespace ESME.Views.Locations
 
         }
 
-        private LocationManagerService _locationManagerService;
+        private MasterDatabaseService _masterDatabaseService;
         #endregion
         #region PluginManager stuff
         readonly IPluginManagerService _pluginManagerService;
@@ -203,7 +203,7 @@ namespace ESME.Views.Locations
 
         void OkHandler()
         {
-            _locationManagerService.CreateLocation(LocationName, null, North, South, East, West);
+            _masterDatabaseService.CreateLocation(LocationName, null, North, South, East, West);
             Globals.AppSettings.Save();
             CloseActivePopUpCommand.Execute(true);
         }

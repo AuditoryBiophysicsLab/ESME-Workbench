@@ -1,5 +1,6 @@
 ﻿using System;
 using PostSharp.Aspects;
+using PostSharp.Reflection;
 using PostSharp.Aspects.Dependencies;
 using PostSharp.Extensibility;
 
@@ -11,13 +12,25 @@ namespace HRC.Aspects
     [AspectTypeDependency(AspectDependencyAction.Commute, typeof(AffectsAttribute))]
     public sealed class InitializeAttribute : LocationInterceptionAspect, IInstanceScopedAspect
     {
-        public override bool CompileTimeValidate(PostSharp.Reflection.LocationInfo locationInfo)
+        public override bool CompileTimeValidate(LocationInfo locationInfo)
         {
-            if (IsGuid && locationInfo.LocationType != typeof(string))
-                Message.Write(SeverityType.Error, "Initialize01", "Only string types can be initialized with IsGuid = true");
+            if (IsGuid && (locationInfo.LocationType != typeof(String) && locationInfo.LocationType != typeof(Guid)))
+            {
+                //Message.Write(SeverityType.Warning, "Initialize00", string.Format("[Initialize] on {0}.{1}", locationInfo.DeclaringType.Name, locationInfo.Name));
+                //Message.Write(SeverityType.Warning, "Initialize00", string.Format("IsGuid == {0}", IsGuid));
+                //Message.Write(SeverityType.Warning, "Initialize00", string.Format("LocationType == {0}", locationInfo.LocationType));
+                //Message.Write(SeverityType.Warning, "Initialize00", string.Format("LocationType != typeof(string) == {0}", locationInfo.LocationType != typeof(string)));
+                //Message.Write(SeverityType.Warning, "Initialize00", string.Format("LocationType != typeof(Guid) == {0}", locationInfo.LocationType != typeof(Guid)));
+                Message.Write(SeverityType.Error, "Initialize01", "Only string and Guid types can be initialized with IsGuid = true");
+            }
             if (IsGuid && _defaultValue != null)
                 Message.Write(SeverityType.Error, "Initialize02", "Cannot specify a default value with IsGuid = true");
             return true;
+        }
+
+        public override void CompileTimeInitialize(LocationInfo targetLocation, AspectInfo aspectInfo)
+        {
+            if (targetLocation.LocationType == typeof(Guid)) IsGuid = true;
         }
 
         public InitializeAttribute() { }
@@ -36,9 +49,17 @@ namespace HRC.Aspects
             if (!_valueSet)
             {
                 _valueSet = true;
-                if (_defaultValue != null || IsGuid)
+                if (IsGuid)
                 {
-                    args.SetNewValue(IsGuid ? Guid.NewGuid().ToString() : _defaultValue);
+                    //Console.WriteLine("Initializing Guid"); 
+                    if (args.Location.LocationType == typeof(string))
+                        args.SetNewValue(Guid.NewGuid().ToString());
+                    else if (args.Location.LocationType == typeof(Guid))
+                        args.SetNewValue(Guid.NewGuid());
+                }
+                else if (_defaultValue != null)
+                {
+                    args.SetNewValue(_defaultValue);
                     //Console.WriteLine("Initialized {0} to |{1}|", args.LocationName, args.GetCurrentValue()); 
                 }
                 else if (args.Location.PropertyInfo.GetType().IsClass)

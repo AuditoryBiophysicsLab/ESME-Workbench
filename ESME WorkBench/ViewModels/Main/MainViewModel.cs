@@ -40,7 +40,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [Import] IHRCSaveFileService _saveFileService;
         [Import] IUIVisualizerService _visualizerService;
         [Import] IPluginManagerService _pluginManagerService;
-        [Import] LocationManagerService _locationManagerService;
+        [Import] MasterDatabaseService _masterDatabaseService;
         readonly IViewAwareStatus _viewAwareStatus;
 #if EXPERIMENTS_SUPPORTED
         Experiment _experiment;
@@ -91,7 +91,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     Directory.CreateDirectory(
                         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                                      "ESME Workbench\\Locations"));
-                _locationManagerService.LocationRootDirectory = Globals.AppSettings.LocationDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench\\Locations");
+                _masterDatabaseService.MasterDatabaseDirectory = Globals.AppSettings.LocationDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench\\Locations");
                 NAVOImporter.PluginManagerService = _pluginManagerService;
             };
 

@@ -136,6 +136,8 @@
   <ItemGroup>
     <Compile Include="Behaviors\TrackType.cs" />
     <Compile Include="BuildInformation.cs" />
+    <Compile Include="Database\DbTimePeriod.cs" />
+    <Compile Include="Database\DbTrackType.cs" />
     <Compile Include="Database\DbWhoWhenWhere.cs" />
     <Compile Include="Database\DbDateTime.cs" />
     <Compile Include="Database\DbPluginIdentifier.cs" />
@@ -174,8 +176,8 @@
     <Compile Include="Environment\TimePeriod.cs" />
     <Compile Include="Environment\IEnvironmentalDataSource.cs" />
     <Compile Include="Exceptions.cs" />
-    <Compile Include="Locations\EnvironmentalDatabaseImportService.cs" />
-    <Compile Include="Locations\LocationManagerService.cs" />
+    <Compile Include="Locations\EnvironmentalCacheService.cs" />
+    <Compile Include="Locations\MasterDatabaseService.cs" />
     <Compile Include="Mapping\CustomStartEndLineStyle.cs" />
     <Compile Include="Mapping\LayerListViewModel.cs" />
     <Compile Include="Mapping\LayerType.cs" />
