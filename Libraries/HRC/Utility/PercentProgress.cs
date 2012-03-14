@@ -60,11 +60,15 @@ namespace HRC.Utility
     
     public class PercentProgress<T> : PercentProgress
     {
+        public PercentProgress() {}
+        public PercentProgress(T target) { ProgressTarget = target; }
         public T ProgressTarget { get; set; }
     }
 
     public class PercentProgressList<T> : PercentProgressList
     {
+        public PercentProgressList() {}
+        public PercentProgressList(T target) { ProgressTarget = target; }
         public T ProgressTarget { get; set; }
     }
 }

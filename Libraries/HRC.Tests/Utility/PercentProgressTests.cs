@@ -1,9 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
-using HRC.Navigation;
+using System.Linq;
 using HRC.Utility;
 using NUnit.Framework;
-using PostSharp;
 
 namespace HRC.Tests.Utility
 {
@@ -12,38 +11,49 @@ namespace HRC.Tests.Utility
         [Test]
         public void Test()
         {
-            var progressList1 = new PercentProgressList<string>
+            var bigList = new PercentProgressList<string>("                                Big List")
             {
-                new PercentProgress<string>{ProgressTarget = "One"},
-                new PercentProgress<string>{ProgressTarget = "Two"},
-                new PercentProgress<string>{ProgressTarget = "Three"},
-                new PercentProgress<string>{ProgressTarget = "Four"},
+                new PercentProgressList<string>("                 List One")
+                {
+                    new PercentProgress<string> {ProgressTarget = "Item One"},
+                    new PercentProgress<string> {ProgressTarget = "Item Two"},
+                    new PercentProgress<string> {ProgressTarget = "Item Three"},
+                    new PercentProgress<string> {ProgressTarget = "Item Four"},
+                },
+                new PercentProgressList<string>("                 List Two")
+                {
+                    new PercentProgress<string> {ProgressTarget = "Item Five"},
+                    new PercentProgress<string> {ProgressTarget = "Item Six"},
+                    new PercentProgress<string> {ProgressTarget = "Item Seven"},
+                    new PercentProgress<string> {ProgressTarget = "Item Eight"},
+                },
             };
-            progressList1.ProgressTarget = "List One";
-            var progressList2 = new PercentProgressList<string>
+#if false
+            ((INotifyPropertyChanged)bigList[0]).PropertyChanged += PropertyChangedHandler;
+            ((INotifyPropertyChanged)bigList[1]).PropertyChanged += PropertyChangedHandler;
+            ((INotifyPropertyChanged)bigList).PropertyChanged += PropertyChangedHandler;
+            foreach (var item in bigList.Cast<PercentProgressList>().SelectMany(list => list)) 
+                ((INotifyPropertyChanged)item).PropertyChanged += PropertyChangedHandler;
+#endif
+
+            foreach (PercentProgressList list in bigList)
             {
-                new PercentProgress<string>{ProgressTarget = "One"},
-                new PercentProgress<string>{ProgressTarget = "Two"},
-                new PercentProgress<string>{ProgressTarget = "Three"},
-                new PercentProgress<string>{ProgressTarget = "Four"},
-            };
-            progressList2.ProgressTarget = "List Two";
-            Post.Cast<PercentProgressList<string>, INotifyPropertyChanged>(progressList1).PropertyChanged += (s, e) => Console.WriteLine("{0} PercentComplete: {1}", ((PercentProgressList<string>)s).ProgressTarget, ((PercentProgressList<string>)s).PercentComplete);
-            Post.Cast<PercentProgressList<string>, INotifyPropertyChanged>(progressList2).PropertyChanged += (s, e) => Console.WriteLine("{0} PercentComplete: {1}", ((PercentProgressList<string>)s).ProgressTarget, ((PercentProgressList<string>)s).PercentComplete);
-            var bigList = new PercentProgressList<string>
-            {
-                progressList1, progressList2
-            };
-            bigList.ProgressTarget = "                                Big List";
-            Post.Cast<PercentProgressList<string>, INotifyPropertyChanged>(bigList).PropertyChanged += (s, e) => Console.WriteLine("{0} PercentComplete: {1}", ((PercentProgressList<string>)s).ProgressTarget, ((PercentProgressList<string>)s).PercentComplete);
-            for (var k = 0; k < 2; k++)
-                for (var j = 0; j < 4; j++)
-                    for (var i = 0; i <= 100; i++)
-                    {
-                        //Assert.AreEqual((i / progressList1.Count) + (j * 25), progressList1.PercentComplete, string.Format("at j = {0} and i = {1}", j, i));
-                        //Console.Write("{0} ", i);
-                        ((PercentProgressList)bigList[k])[j].Report(i);
-                    }
+                foreach (var item in list)
+                {
+                    for (var i = 0; i <= 100; i++) item.Report(i);
+                    Assert.AreEqual(100, item.PercentComplete);
+                }
+                Assert.AreEqual(100, list.PercentComplete);
+            }
+            Assert.AreEqual(100, bigList.PercentComplete);
+        }
+
+        static void PropertyChangedHandler(object sender, PropertyChangedEventArgs args)
+        {
+            var progressList = sender as PercentProgressList<string>;
+            var progressItem = sender as PercentProgress<string>;
+            if (progressList != null) Console.WriteLine("{0}: {1,3}%", progressList.ProgressTarget, progressList.PercentComplete);
+            if (progressItem != null) Console.WriteLine("{0}: {1,3}%", progressItem.ProgressTarget, progressItem.PercentComplete);
         }
     }
 }
