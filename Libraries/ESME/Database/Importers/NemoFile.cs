@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -26,25 +28,23 @@ namespace ESME.Database.Importers
             {
                 var platform = new PSMPlatform
                 {
-                    Guid = "",
                     PlatformName = nemoPlatform.Name,
                     PlatformType = nemoPlatform.Type,
+                    PSMSources = new Collection<PSMSource>(),
                 };
                 foreach (var nemoSource in nemoPlatform.Sources)
                 {
                     var source = new PSMSource
                     {
-                        //SourceID = int.Parse(nemoSource.Id),
-                        Guid = "",
                         SourceName = nemoSource.Name,
                         SourceType = nemoSource.Type,
+                        PSMModes = new Collection<PSMMode>(),
                     };
                     platform.PSMSources.Add(source);
                     foreach (var nemoMode in nemoSource.Modes)
                     {
                         var mode = new PSMMode
                         {
-                            Guid = "",
                             ModeName = nemoMode.Name,
                             ModeType = nemoMode.Type,
                             ActiveTime = nemoMode.ActiveTime,
@@ -121,21 +121,18 @@ namespace ESME.Database.Importers
                                    where s.LatinName == nemoSpecies.AnimatDataTask.Result.LatinName
                                    select s).FirstOrDefault();
                     if (species != null) Console.WriteLine("Species with name \"{0}\" already exists in scenario \"{1}\", replacing with current data", nemoSpecies.AnimatDataTask.Result.LatinName, scenario.Name);
-
-                    var locationIndex = 1;
+                    else species = new ScenarioSpecies {LatinName = nemoSpecies.AnimatDataTask.Result.LatinName};
+                    var animats = new List<AnimatLocation>();
                     foreach (var startPoint in result.AnimatStartPoints)
                     {
-                        locationIndex++;
-                        Console.Write("{0} Adding animat {1} of {2}\r", species.LatinName, locationIndex, result.AnimatStartPoints.Count);
-#if false
-                        locationContext.AnimatLocations.Add(new AnimatLocation
+                        animats.Add(new AnimatLocation
                         {
                             Geo = new Geo(startPoint.Latitude, startPoint.Longitude),
                             Depth = startPoint.Data,
                             ScenarioSpecies = species,
                         });
-#endif
                     }
+                    masterDatabase.AddOrReplaceSpecies(scenario, species, animats);
                 }
             }
         }

@@ -152,7 +152,6 @@
     <Compile Include="Locations\Scenario.cs" />
     <Compile Include="Database\Simulation.cs" />
     <Compile Include="Data\AppSettings%28pre-aspect%29.cs" />
-    <Compile Include="Data\CASSTemplate.cs" />
     <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Data\WorkDirectories.cs" />
     <Compile Include="Delegates.cs" />

@@ -3,6 +3,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using ESME.Database.Importers;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Locations;
@@ -48,6 +49,7 @@ namespace ESME.Tests.Locations
             locationManager.CreateEnvironmentalDataSet(location, 1f, TimePeriod.Invalid, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier);
             // Bathymetry dataset at 0.5min resolution
             locationManager.CreateEnvironmentalDataSet(location, 0.5f, TimePeriod.Invalid, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier);
+            NemoFile.Import(@"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Jacksonville\BU Test Sample.nemo", @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas", location, locationManager);
             DumpLocationDatabase(locationManager);
         }
 

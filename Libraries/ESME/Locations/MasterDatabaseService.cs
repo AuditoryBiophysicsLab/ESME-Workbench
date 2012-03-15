@@ -97,7 +97,7 @@ namespace ESME.Locations
 
         public Platform AddPlatform(Scenario scenario, PSMPlatform psmPlatform, string description)
         {
-            if (scenario.Platforms.FirstOrDefault(p => p.Description == description) != null) throw new DuplicateNameException(string.Format("A platform with the description \"{0}\" already exists in this scenario, choose another name", description));
+            if (scenario.Platforms != null && scenario.Platforms.FirstOrDefault(p => p.Description == description) != null) throw new DuplicateNameException(string.Format("A platform with the description \"{0}\" already exists in this scenario, choose another name", description));
             var platform = new Platform
             {
                 Description = description,
@@ -183,18 +183,29 @@ namespace ESME.Locations
                 _context.PerimeterCoordinates.Add(coordinate);
             }
             // Save to the database
+            Log(perimeter, string.Format("Changed coordinates of perimeter {0}", perimeter.Guid));
             SaveChanges();
         }
 
         public void SetPerimeter(TrackDefinition trackDefinition, Perimeter perimeter)
         {
             trackDefinition.Perimeter = perimeter;
+            Log(trackDefinition, string.Format("Set perimeter for trackdef {0} to {1}", trackDefinition.Guid, perimeter.Guid));
             SaveChanges();
         }
 
-        public ScenarioSpecies AddOrReplaceSpecies(Scenario scenario, ScenarioSpecies newSpecies)
+        public ScenarioSpecies AddOrReplaceSpecies(Scenario scenario, ScenarioSpecies newSpecies, IEnumerable<AnimatLocation> animatLocations)
         {
-            if (scenario.Species.FirstOrDefault(s => s.LatinName == newSpecies.LatinName) != null) throw new DuplicateNameException("Error adding species \"{0}\" to scenario \"{1}\": A species with that name already exists");
+            var existing = scenario.Species.FirstOrDefault(s => s.LatinName == newSpecies.LatinName);
+            if (existing != null)
+            {
+                foreach (var animat in existing.AnimatLocations) _context.AnimatLocations.Remove(animat);
+                _context.ScenarioSpecies.Remove(existing);
+                //Log(newSpecies, string.Format("Replaced species {0}", newSpecies.LatinName));
+            }
+            _context.ScenarioSpecies.Add(newSpecies);
+            foreach (var animat in animatLocations) _context.AnimatLocations.Add(animat);
+            SaveChanges();
             return null;
         }
 
@@ -266,6 +277,11 @@ namespace ESME.Locations
                     Console.WriteLine("  {0}", dbUpdateException.InnerException.Message);
                     if (dbUpdateException.InnerException.InnerException != null)
                         Console.WriteLine("    {0}", dbUpdateException.InnerException.InnerException.Message);
+                    throw;
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine("SaveChanges caught Exception: {0}", exception.Message);
                     throw;
                 }
             }
