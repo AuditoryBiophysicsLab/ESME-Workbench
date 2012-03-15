@@ -117,8 +117,10 @@ namespace ESME.Database.Importers
                     nemoSpecies.AnimatDataTask.Start();
                     TaskEx.WhenAll(nemoSpecies.AnimatDataTask).Wait();
                     var result = nemoSpecies.AnimatDataTask.Result;
-                    var species = (from s in scenario.Species
-                                   where s.LatinName == nemoSpecies.AnimatDataTask.Result.LatinName
+                    ScenarioSpecies species = null;
+                    if (scenario.Species != null)
+                        species = (from s in scenario.Species
+                                   where s.LatinName == result.LatinName
                                    select s).FirstOrDefault();
                     if (species != null) Console.WriteLine("Species with name \"{0}\" already exists in scenario \"{1}\", replacing with current data", nemoSpecies.AnimatDataTask.Result.LatinName, scenario.Name);
                     else species = new ScenarioSpecies {LatinName = nemoSpecies.AnimatDataTask.Result.LatinName};

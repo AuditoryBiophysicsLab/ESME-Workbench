@@ -71,13 +71,13 @@ namespace ESME.Locations
     public class LogEntry : IHaveGuid
     {
         public LogEntry() {}
-        public LogEntry(IHaveGuid haveGuid) { Guid = haveGuid.Guid; }
+        public LogEntry(IHaveGuid haveGuid) { SourceGuid = haveGuid.Guid; }
 
         [Key, Initialize]
         public Guid Guid { get; set; }
         public DbWhoWhenWhere MessageSource { get; set; }
         public string Message { get; set; }
-        public string SourceGuid { get; set; }
+        public Guid SourceGuid { get; set; }
 
         public virtual Location Location { get; set; }
         public virtual EnvironmentalDataSet EnvironmentalDataSet { get; set; }

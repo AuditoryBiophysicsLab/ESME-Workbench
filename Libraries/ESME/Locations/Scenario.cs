@@ -119,8 +119,8 @@ namespace ESME.Locations
 
     public class PerimeterCoordinate
     {
-        [Key]
-        public int PerimeterCoordinateID { get; set; }
+        [Key, Initialize]
+        public Guid PerimeterCoordinateID { get; set; }
         public int Order { get; set; }
         public DbGeo Geo { get; set; }
 

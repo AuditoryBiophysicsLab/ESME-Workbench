@@ -166,8 +166,11 @@ namespace ESME.Locations
             if (existing != null) return existing;
             var perimeter = new Perimeter {Scenario = scenario};
             _context.Perimeters.Add(perimeter);
+            SaveChanges();
             Log(perimeter, "Added");
+            SaveChanges();
             Log(scenario, string.Format("Added perimeter {0}", perimeter.Guid));
+            SaveChanges();
             SetPerimeterCoordinates(perimeter, coordinates);
             return perimeter;
         }
@@ -181,6 +184,7 @@ namespace ESME.Locations
             {
                 coordinate.Perimeter = perimeter;
                 _context.PerimeterCoordinates.Add(coordinate);
+                SaveChanges();
             }
             // Save to the database
             Log(perimeter, string.Format("Changed coordinates of perimeter {0}", perimeter.Guid));
@@ -196,7 +200,8 @@ namespace ESME.Locations
 
         public ScenarioSpecies AddOrReplaceSpecies(Scenario scenario, ScenarioSpecies newSpecies, IEnumerable<AnimatLocation> animatLocations)
         {
-            var existing = scenario.Species.FirstOrDefault(s => s.LatinName == newSpecies.LatinName);
+            ScenarioSpecies existing = null;
+            if (scenario.Species != null) existing = scenario.Species.FirstOrDefault(s => s.LatinName == newSpecies.LatinName);
             if (existing != null)
             {
                 foreach (var animat in existing.AnimatLocations) _context.AnimatLocations.Remove(animat);
