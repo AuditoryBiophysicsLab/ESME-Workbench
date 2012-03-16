@@ -90,6 +90,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESMEBootstrapper", "..\..\I
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "TestManagedBootstrapper", "..\..\Installers\Installable NAVO Databases\TestManagedBootstrapper\TestManagedBootstrapper.wixproj", "{A10F5A4A-A8FB-4D6F-992B-01D6E2E9DBFA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LASPlugin", "LASPlugin\LASPlugin.csproj", "{D1640B4C-4997-4978-9FE7-C358B8A5B84B}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -820,6 +822,34 @@ Global
 		{A10F5A4A-A8FB-4D6F-992B-01D6E2E9DBFA}.Release|x64.ActiveCfg = Release|x64
 		{A10F5A4A-A8FB-4D6F-992B-01D6E2E9DBFA}.Release|x64.Build.0 = Release|x64
 		{A10F5A4A-A8FB-4D6F-992B-01D6E2E9DBFA}.Release|x86.ActiveCfg = Release|x64
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Debug (x64)|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Debug (x64)|Any CPU.Build.0 = Debug|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Debug (x64)|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Debug (x64)|Mixed Platforms.Build.0 = Debug|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Debug (x64)|Win32.ActiveCfg = Debug|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Debug (x64)|x64.ActiveCfg = Debug|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Debug (x64)|x86.ActiveCfg = Debug|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Release (x64)|Any CPU.ActiveCfg = Release|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Release (x64)|Any CPU.Build.0 = Release|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Release (x64)|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Release (x64)|Mixed Platforms.Build.0 = Release|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Release (x64)|Win32.ActiveCfg = Release|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Release (x64)|x64.ActiveCfg = Release|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Release (x64)|x86.ActiveCfg = Release|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Release|Win32.ActiveCfg = Release|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Release|x64.ActiveCfg = Release|Any CPU
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -847,5 +877,6 @@ Global
 		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7} = {FD53A315-6534-4370-924A-193988E9979E}
 		{DDC1E22A-276A-4910-A934-6F72CD22DE31} = {FD53A315-6534-4370-924A-193988E9979E}
 		{409DC754-EEBD-4E49-8DDF-3960F2FFCE73} = {FD53A315-6534-4370-924A-193988E9979E}
+		{D1640B4C-4997-4978-9FE7-C358B8A5B84B} = {FD53A315-6534-4370-924A-193988E9979E}
 	EndGlobalSection
 EndGlobal
