@@ -182,4 +182,5 @@ namespace ESME.Plugins
     {
         public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, PercentProgress progress = null);
     }
+    
 }
