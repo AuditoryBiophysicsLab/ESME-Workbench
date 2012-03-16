@@ -19,8 +19,6 @@ namespace HRC.Navigation
             West = west;
         }
 
-        public GeoRect(Rect rect) { FromRect(rect); }
-
         public GeoRect(GeoRect geoRect) : this(geoRect.North, geoRect.South, geoRect.East, geoRect.West) { }
 
         public GeoRect(IEnumerable<Geo> geoList)
@@ -77,23 +75,7 @@ namespace HRC.Navigation
             East = Math.Max(East, geo.Longitude);
             West = Math.Min(West, geo.Longitude);
         }
-
-        /// <summary>
-        /// Returns an enumerable that will result in a closed, clockwise polygon
-        /// NorthWest, NorthEast, SouthEast, SouthWest, NorthWest
-        /// </summary>
-        public IEnumerable<Geo> ClosedBoundaryCoordinates
-        {
-            get
-            {
-                yield return NorthWest;
-                yield return NorthEast;
-                yield return SouthEast;
-                yield return SouthWest;
-                yield return NorthWest;
-            }
-        }
-
+        
         /// <summary>
         /// Returns a GeoRect that encompasses all the GeoRects passed in as parameters
         /// </summary>
@@ -133,6 +115,22 @@ namespace HRC.Navigation
         /// <param name = "geoRect"></param>
         /// <returns></returns>
         public bool Contains(GeoRect geoRect) { return South <= geoRect.South && geoRect.North <= North && West <= geoRect.West && geoRect.East <= East; }
+        
+        /// <summary>
+        /// Returns an enumerable that will result in a closed, clockwise polygon
+        /// NorthWest, NorthEast, SouthEast, SouthWest, NorthWest
+        /// </summary>
+        public IEnumerable<Geo> ClosedBoundaryCoordinates
+        {
+            get
+            {
+                yield return NorthWest;
+                yield return NorthEast;
+                yield return SouthEast;
+                yield return SouthWest;
+                yield return NorthWest;
+            }
+        }
 
         /// <summary>
         ///   Indicates whether the specified GeoRect is equal to the current GeoRect.
@@ -155,53 +153,11 @@ namespace HRC.Navigation
         /// <returns></returns>
         public static bool Equals(GeoRect geoRect1, GeoRect geoRect2) { return geoRect1.Equals(geoRect2); }
 
-        /// <summary>
-        ///   Returns the intersection of the specified GeoRects.
-        /// </summary>
-        /// <param name = "geoRect1"></param>
-        /// <param name = "geoRect2"></param>
-        /// <returns></returns>
-        public static GeoRect Intersect(GeoRect geoRect1, GeoRect geoRect2)
-        {
-            return new GeoRect(Math.Min(geoRect1.North, geoRect2.North),
-                               Math.Max(geoRect1.South, geoRect2.South),
-                               Math.Min(geoRect1.East, geoRect2.East),
-                               Math.Max(geoRect1.West, geoRect2.West));
-        }
-
-        /// <summary>
-        ///   Creates a GeoRect that results from expanding or shrinking the specified GeoRect by the specified width and height amounts, in all directions.
-        /// </summary>
-        /// <param name = "geoRect">The GeoRect to expand or shrink</param>
-        /// <param name = "width">Amount to change the width of the GeoRect, in meters</param>
-        /// <param name = "height">Amount to change the height of the GeoRect, in meters</param>
-        /// <returns></returns>
-        public static GeoRect Inflate(GeoRect geoRect, double width, double height)
-        {
-            var newNorthWest = new Geo(geoRect.NorthWest);
-            newNorthWest.Move(0, height);
-            newNorthWest.Move(270, width);
-
-            var newSouthEast = new Geo(geoRect.SouthEast);
-            newSouthEast.Move(180, height);
-            newSouthEast.Move(90, width);
-
-            return new GeoRect(newNorthWest.Latitude, newSouthEast.Latitude, newSouthEast.Longitude, newNorthWest.Longitude);
-        }
-
-        public static GeoRect Inflate(GeoRect geoRect, double rangeOutKm)
+         public static GeoRect Inflate(GeoRect geoRect, double rangeOutKm)
         {
             var northWest = Geo.FromDegrees(geoRect.North, geoRect.West).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(315));
             var southEast = Geo.FromDegrees(geoRect.South, geoRect.East).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(135));
             return new GeoRect(northWest.Latitude, southEast.Latitude, southEast.Longitude, northWest.Longitude);
-        }
-
-        void FromRect(Rect rect)
-        {
-            North = rect.Bottom;
-            South = rect.Top;
-            East = rect.Right;
-            West = rect.Left;
         }
 
         public static explicit operator Rect(GeoRect geoRect) { return new Rect(geoRect.West, geoRect.South, geoRect.Width, geoRect.Height); }
