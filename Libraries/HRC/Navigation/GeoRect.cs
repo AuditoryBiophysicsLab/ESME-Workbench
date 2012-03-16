@@ -161,7 +161,8 @@ namespace HRC.Navigation
         }
 
         public static explicit operator Rect(GeoRect geoRect) { return new Rect(geoRect.West, geoRect.South, geoRect.Width, geoRect.Height); }
-
+       
+        #region IDataErrorInfo members
         public string this[string columnName] { get { return Error; } }
 
         public string Error
@@ -175,6 +176,7 @@ namespace HRC.Navigation
                            ? null
                            : string.Format("Poorly-formed GeoRect: North={0} South={1} East={2} West={3}", North, South, East, West);
             }
-        }
+        } 
+        #endregion
     }
 }

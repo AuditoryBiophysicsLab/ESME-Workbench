@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Windows;
 using HRC.Navigation;
 using NUnit.Framework;
 using PostSharp;
@@ -103,8 +101,21 @@ namespace HRC.Tests.Navigation
         
        [Test]
         public void Inflations()
-        {
-            
-        }
+       {
+           var rect = new GeoRect(44, 41, -69, -72);
+           var nw = new Geo(rect.North, rect.West,true);
+           var se = new Geo(rect.South, rect.East,true);
+
+           var kmToInflate = 10.0f;
+
+           nw = nw.Offset(Geo.KilometersToRadians(Math.Sqrt(2) * kmToInflate), Geo.DegreesToRadians(315));
+           se = se.Offset(Geo.KilometersToRadians(Math.Sqrt(2) * kmToInflate), Geo.DegreesToRadians(135));
+
+           var rect1 = new GeoRect(nw.Latitude,se.Latitude,se.Longitude,nw.Longitude);
+
+           var inflatedRect = GeoRect.Inflate(rect, kmToInflate);
+           Assert.IsTrue(rect1.Equals(inflatedRect));
+       }
+        
     }
 }
