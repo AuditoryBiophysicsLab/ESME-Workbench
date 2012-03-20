@@ -54,43 +54,34 @@ namespace ESME.Tests.Simulator
                 scenario = database.ImportScenarioFromNemoFile(location,
                                                                @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Jacksonville\BU Test Sample.nemo",
                                                                @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas");
-                if (scenario.Wind != null)
-                {
-                    database.SetEnvironmentalData(scenario, (from data in location.EnvironmentalDataSets
-                                                             where data.SourcePlugin.PluginSubtype == PluginSubtype.Wind
-                                                             select data).FirstOrDefault());
-                    var sourceFile = Path.Combine(database.MasterDatabaseDirectory, location.StorageDirectory, scenario.Wind.FileName);
-                    var destFile = Path.Combine(_databaseDirectory, scenario.Wind.FileName);
-                    if (File.Exists(sourceFile)) File.Copy(sourceFile, destFile);
-                }
-                if (scenario.SoundSpeed != null)
-                {
-                    var sourceFile = Path.Combine(database.MasterDatabaseDirectory, location.StorageDirectory, scenario.SoundSpeed.FileName);
-                    database.SetEnvironmentalData(scenario, (from data in location.EnvironmentalDataSets
-                                                             where data.SourcePlugin.PluginSubtype == PluginSubtype.SoundSpeed
-                                                             select data).FirstOrDefault());
-                    var destFile = Path.Combine(_databaseDirectory, scenario.SoundSpeed.FileName);
-                    if (File.Exists(sourceFile)) File.Copy(sourceFile, destFile);
-                }
-                if (scenario.Sediment != null)
-                {
-                    database.SetEnvironmentalData(scenario, (from data in location.EnvironmentalDataSets
-                                                             where data.SourcePlugin.PluginSubtype == PluginSubtype.Sediment
-                                                             select data).FirstOrDefault());
-                    var sourceFile = Path.Combine(database.MasterDatabaseDirectory, location.StorageDirectory, scenario.Sediment.FileName);
-                    var destFile = Path.Combine(_databaseDirectory, scenario.Sediment.FileName);
-                    if (File.Exists(sourceFile)) File.Copy(sourceFile, destFile);
-                }
-                if (scenario.Bathymetry != null)
-                {
-                    database.SetEnvironmentalData(scenario, (from data in location.EnvironmentalDataSets
-                                                             where data.SourcePlugin.PluginSubtype == PluginSubtype.Bathymetry
-                                                             select data).FirstOrDefault());
-                    var sourceFile = Path.Combine(database.MasterDatabaseDirectory, location.StorageDirectory, scenario.Bathymetry.FileName);
-                    var destFile = Path.Combine(_databaseDirectory, scenario.Bathymetry.FileName);
-                    if (File.Exists(sourceFile)) File.Copy(sourceFile, destFile);
-                }
 
+                database.SetEnvironmentalData(scenario, (from data in location.EnvironmentalDataSets
+                                                            where data.SourcePlugin.PluginSubtype == PluginSubtype.Wind
+                                                            select data).FirstOrDefault());
+                var sourceFile = Path.Combine(database.MasterDatabaseDirectory, location.StorageDirectory, scenario.Wind.FileName);
+                var destFile = Path.Combine(_databaseDirectory, scenario.Wind.FileName);
+                if (File.Exists(sourceFile)) File.Copy(sourceFile, destFile);
+                
+                database.SetEnvironmentalData(scenario, (from data in location.EnvironmentalDataSets
+                                                            where data.SourcePlugin.PluginSubtype == PluginSubtype.SoundSpeed
+                                                            select data).FirstOrDefault());
+                sourceFile = Path.Combine(database.MasterDatabaseDirectory, location.StorageDirectory, scenario.SoundSpeed.FileName);
+                destFile = Path.Combine(_databaseDirectory, scenario.SoundSpeed.FileName);
+                if (File.Exists(sourceFile)) File.Copy(sourceFile, destFile);
+                
+                database.SetEnvironmentalData(scenario, (from data in location.EnvironmentalDataSets
+                                                            where data.SourcePlugin.PluginSubtype == PluginSubtype.Sediment
+                                                            select data).FirstOrDefault());
+                sourceFile = Path.Combine(database.MasterDatabaseDirectory, location.StorageDirectory, scenario.Sediment.FileName);
+                destFile = Path.Combine(_databaseDirectory, scenario.Sediment.FileName);
+                if (File.Exists(sourceFile)) File.Copy(sourceFile, destFile);
+
+                database.SetEnvironmentalData(scenario, (from data in location.EnvironmentalDataSets
+                                                            where data.SourcePlugin.PluginSubtype == PluginSubtype.Bathymetry
+                                                            select data).FirstOrDefault());
+                sourceFile = Path.Combine(database.MasterDatabaseDirectory, location.StorageDirectory, scenario.Bathymetry.FileName);
+                destFile = Path.Combine(_databaseDirectory, scenario.Bathymetry.FileName);
+                if (File.Exists(sourceFile)) File.Copy(sourceFile, destFile);
             }
             Console.WriteLine("Deleting existing simulation directory...");
             if (Directory.Exists(_simulationDirectory)) Directory.Delete(_simulationDirectory, true);

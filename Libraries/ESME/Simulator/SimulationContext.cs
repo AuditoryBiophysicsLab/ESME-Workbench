@@ -235,6 +235,7 @@ namespace ESME.Simulator
                     Scenario = newScenario,
                     SpeciesFile = species.SpeciesFile,
                 };
+                ScenarioSpecies.Add(newSpecies);
                 foreach (var animat in species.AnimatLocations)
                 {
                     var newAnimat = new AnimatLocation
@@ -244,6 +245,7 @@ namespace ESME.Simulator
                         Depth = animat.Depth,
                         ScenarioSpecies = newSpecies,
                     };
+                    AnimatLocations.Add(newAnimat);
                 }
             }
             SaveChanges();
