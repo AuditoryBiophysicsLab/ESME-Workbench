@@ -9,6 +9,7 @@ namespace ESME.Simulator
     public class SimulationTimeStepRecord
     {
         public const ulong Magic = 0xd3c603dd0d7a1ee6;
+
         public TimeSpan StartTime { get; private set; }
         [Initialize, UsedImplicitly] public List<ActorPositionRecord> ActorPositionRecords { get; private set; }
 
