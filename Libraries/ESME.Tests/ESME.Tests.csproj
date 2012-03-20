@@ -90,6 +90,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\SettingsBaseTests.cs" />
     <Compile Include="Settings\SettingsServiceTests.cs" />
+    <Compile Include="Simulator\SimulationTests.cs" />
+    <Compile Include="Simulator\SimulatorServiceTests.cs" />
     <Compile Include="SQLite\SQLiteTests.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossJobTests.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossRunFileTests.cs" />

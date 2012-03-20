@@ -234,6 +234,10 @@
     <Compile Include="Settings\Exceptions.cs" />
     <Compile Include="Settings\SettingsBase.cs" />
     <Compile Include="Settings\SettingsService.cs" />
+    <Compile Include="Simulator\Simulation.cs" />
+    <Compile Include="Simulator\SimulationContext.cs" />
+    <Compile Include="Simulator\SimulationLog.cs" />
+    <Compile Include="Simulator\SimulatorService.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNL.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLInput.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLOutput.cs" />
