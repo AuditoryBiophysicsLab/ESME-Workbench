@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.Entity;
 using Devart.Data.SQLite;
 using ESME.Locations;
 using ESME.Model;
-using HRC.Aspects;
 
 namespace ESME.Simulator
 {
@@ -64,29 +61,5 @@ namespace ESME.Simulator
                 //context.Database.ExecuteSqlCommand("");
             }
         }
-    }
-
-    public class SimulationTimeStepRecord
-    {
-        public const ulong Magic = 0xd3c603dd0d7a1ee6;
-        public TimeSpan StartTime { get; set; }
-        [Initialize] List<int> _actorPositionOffsets;
-        [Initialize]
-        public List<ActorPositionRecord> ActorPositions { get; set; }
-    }
-
-    public class ActorPositionRecord
-    {
-        public float Latitude { get; set; }
-        public float Longitude { get; set; }
-        [Initialize]
-        public List<ActorExposureRecord> Exposures { get; set; }
-    }
-
-    public class ActorExposureRecord
-    {
-        public int SourceActorModeID { get; set; }
-        public float PeakSPL { get; set; }
-        public float Energy { get; set; }
     }
 }
