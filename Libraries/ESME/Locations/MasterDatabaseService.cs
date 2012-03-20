@@ -8,8 +8,11 @@ using System.Data.Entity.Validation;
 using System.IO;
 using System.Linq;
 using Devart.Data.SQLite;
+using Devart.Data.SQLite.Entity.Configuration;
 using ESME.Database;
 using ESME.Environment;
+using ESME.Database.Importers;
+using ESME.NEMO.Overlay;
 using ESME.Plugins;
 using HRC.Aspects;
 using HRC.Navigation;
@@ -45,7 +48,7 @@ namespace ESME.Locations
         #region Create operations for Locations
         public Location CreateLocation(string locationName, string comments, double north, double south, double east, double west)
         {
-            if (LocationExists(locationName)) throw new DuplicateNameException(string.Format("A location named {0} already exists, choose another name", locationName));
+            if (LocationExists(locationName)) throw new DuplicateNameException(String.Format("A location named {0} already exists, choose another name", locationName));
             var result = new Location
                              {
                                  Name = locationName,
@@ -60,6 +63,17 @@ namespace ESME.Locations
             return result;
         }
 
+        public Location ImportLocationFromOverlayFile(string overlayFilename, string locationName)
+        {
+            var geoRect = new OverlayFile(overlayFilename).Shapes[0].GeoRect;
+            return CreateLocation(locationName,
+                                  String.Format("Imported from {0} on {1} by {2} on {3}", overlayFilename, System.Environment.UserName, DateTime.Now, System.Environment.MachineName),
+                                  geoRect.North,
+                                  geoRect.South,
+                                  geoRect.East,
+                                  geoRect.West);
+        }
+
         public EnvironmentalDataSet CreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin)
         {
             var environmentalDataSet = new EnvironmentalDataSet
@@ -71,7 +85,7 @@ namespace ESME.Locations
                 SourcePlugin = sourcePlugin,
             };
             _context.EnvironmentalDataSets.Add(environmentalDataSet);
-            Log(environmentalDataSet, string.Format("Added new data set. Resolution: {0}{1}", resolution, timePeriod != TimePeriod.Invalid ? string.Format("  TimePeriod: {0}", timePeriod) : ""));
+            Log(environmentalDataSet, String.Format("Added new data set. Resolution: {0}{1}", resolution, timePeriod != TimePeriod.Invalid ? String.Format("  TimePeriod: {0}", timePeriod) : ""));
             SaveChanges();
             return environmentalDataSet;
         }
@@ -80,7 +94,7 @@ namespace ESME.Locations
         #region Create operations for Scenarios
         public Scenario CreateScenario(string scenarioName, string comments, TimeSpan startTime, TimeSpan duration, TimePeriod timePeriod, Location location)
         {
-            if (ScenarioExists(scenarioName)) throw new DuplicateNameException(string.Format("A scenario named {0} already exists, choose another name", scenarioName));
+            if (ScenarioExists(scenarioName)) throw new DuplicateNameException(String.Format("A scenario named {0} already exists, choose another name", scenarioName));
             var result = new Scenario
             {
                 Name = scenarioName,
@@ -88,16 +102,21 @@ namespace ESME.Locations
                 StartTime = startTime,
                 Duration = duration,
                 TimePeriod = timePeriod,
-                //Location = location,
+                Location = location,
             };
             _context.Scenarios.Add(result);
             Log(result, "Created");
             return result;
         }
 
+        public Scenario ImportScenarioFromNemoFile(Location location, string nemoFilePath, string scenarioDataDirectory)
+        {
+            return NemoFile.Import(this, location, nemoFilePath, scenarioDataDirectory);
+        }
+
         public Platform AddPlatform(Scenario scenario, PSMPlatform psmPlatform, string description)
         {
-            if (scenario.Platforms != null && scenario.Platforms.FirstOrDefault(p => p.Description == description) != null) throw new DuplicateNameException(string.Format("A platform with the description \"{0}\" already exists in this scenario, choose another name", description));
+            if (scenario.Platforms != null && scenario.Platforms.FirstOrDefault(p => p.Description == description) != null) throw new DuplicateNameException(String.Format("A platform with the description \"{0}\" already exists in this scenario, choose another name", description));
             var platform = new Platform
             {
                 Description = description,
@@ -156,7 +175,7 @@ namespace ESME.Locations
             _context.TrackDefinitions.Add(trackDefinition);
             Log(trackDefinition, "Added");
             platform.TrackDefinition = trackDefinition;
-            Log(platform, string.Format("Set TrackDefinition to {0}", trackDefinition.Guid));
+            Log(platform, String.Format("Set TrackDefinition to {0}", trackDefinition.Guid));
             SaveChanges();
         }
 
@@ -169,7 +188,7 @@ namespace ESME.Locations
             SaveChanges();
             Log(perimeter, "Added");
             SaveChanges();
-            Log(scenario, string.Format("Added perimeter {0}", perimeter.Guid));
+            Log(scenario, String.Format("Added perimeter {0}", perimeter.Guid));
             SaveChanges();
             SetPerimeterCoordinates(perimeter, coordinates);
             return perimeter;
@@ -187,14 +206,14 @@ namespace ESME.Locations
                 SaveChanges();
             }
             // Save to the database
-            Log(perimeter, string.Format("Changed coordinates of perimeter {0}", perimeter.Guid));
+            Log(perimeter, String.Format("Changed coordinates of perimeter {0}", perimeter.Guid));
             SaveChanges();
         }
 
         public void SetPerimeter(TrackDefinition trackDefinition, Perimeter perimeter)
         {
             trackDefinition.Perimeter = perimeter;
-            Log(trackDefinition, string.Format("Set perimeter for trackdef {0} to {1}", trackDefinition.Guid, perimeter.Guid));
+            Log(trackDefinition, String.Format("Set perimeter for trackdef {0} to {1}", trackDefinition.Guid, perimeter.Guid));
             SaveChanges();
         }
 
@@ -245,12 +264,12 @@ namespace ESME.Locations
         
         void Initialize()
         {
-            if (string.IsNullOrEmpty(MasterDatabaseDirectory)) throw new ApplicationException("MasterDatabaseDirectory cannot be null or empty");
+            if (String.IsNullOrEmpty(MasterDatabaseDirectory)) throw new ApplicationException("MasterDatabaseDirectory cannot be null or empty");
             if (!Directory.Exists(MasterDatabaseDirectory)) Directory.CreateDirectory(MasterDatabaseDirectory);
-            Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
-            Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.Enabled = true;
-            Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.BatchSize = 30;
-            Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.AsynchronousBatch = true;
+            SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
+            SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.Enabled = true;
+            SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.BatchSize = 30;
+            SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.AsynchronousBatch = true;
             var connectionStringBuilder = new SQLiteConnectionStringBuilder
             {
                 FailIfMissing = false,

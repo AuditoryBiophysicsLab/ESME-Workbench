@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Transactions;
 using ESME.Behaviors;
 using ESME.Environment;
 using ESME.Locations;
@@ -15,7 +13,7 @@ namespace ESME.Database.Importers
 {
     public static class NemoFile
     {
-        public static void Import(string nemoFilePath, string scenarioDataDirectory, Location location, MasterDatabaseService masterDatabase)
+        public static Scenario Import(MasterDatabaseService masterDatabase, Location location, string nemoFilePath, string scenarioDataDirectory)
         {
             var nemoFile = new NEMO.NemoFile(nemoFilePath, scenarioDataDirectory);
             var scenario = masterDatabase.CreateScenario(Path.GetFileNameWithoutExtension(nemoFilePath),
@@ -137,6 +135,7 @@ namespace ESME.Database.Importers
                     masterDatabase.AddOrReplaceSpecies(scenario, species, animats);
                 }
             }
+            return scenario;
         }
     }
 }

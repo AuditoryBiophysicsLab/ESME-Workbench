@@ -134,7 +134,5 @@ namespace ESME.NEMO.Overlay
                 }
             }
         }
-
-
     }
 }

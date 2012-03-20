@@ -16,10 +16,9 @@ namespace ESME.Locations
         public string Comments { get; set; }
         public DbTimeSpan StartTime { get; set; }
         public DbTimeSpan Duration { get; set; }
-
         public DbTimePeriod TimePeriod { get; set; }
 
-        //public virtual Location Location { get; set; }
+        public virtual Location Location { get; set; }
 
         public virtual ICollection<Platform> Platforms { get; set; }
         public virtual ICollection<ScenarioSpecies> Species { get; set; }

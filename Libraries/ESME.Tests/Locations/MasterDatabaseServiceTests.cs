@@ -23,34 +23,34 @@ namespace ESME.Tests.Locations
             if (Directory.Exists(_masterDatabaseDirectory)) Directory.Delete(_masterDatabaseDirectory, true);
             for (var i = 0; i < 10; i++) if (Directory.Exists(_masterDatabaseDirectory)) Thread.Sleep(100); else break;
             Assert.IsFalse(Directory.Exists(_masterDatabaseDirectory));
-            var locationManager = new MasterDatabaseService { MasterDatabaseDirectory = _masterDatabaseDirectory };
+            var database = new MasterDatabaseService { MasterDatabaseDirectory = _masterDatabaseDirectory };
             Assert.IsTrue(Directory.Exists(_masterDatabaseDirectory));
-            Assert.AreEqual(0, locationManager.Locations.Count());
+            Assert.AreEqual(0, database.Locations.Count());
 
-            var pluginManager = new PluginManagerService { PluginDirectory = PluginDirectory };
+            var plugins = new PluginManagerService { PluginDirectory = PluginDirectory };
 
-            var location = locationManager.CreateLocation("Mass Bay", "These are some comments", 44, 41, -69, -72);
-            Assert.AreEqual(1, locationManager.Locations.Count());
+            var location = database.CreateLocation("Mass Bay", "These are some comments", 44, 41, -69, -72);
+            Assert.AreEqual(1, database.Locations.Count());
             Assert.AreEqual("Mass Bay", location.Name);
-            Assert.Throws(typeof(DuplicateNameException), () => locationManager.CreateLocation("Mass Bay", "These are some comments", 44, 41, -69, -72));
-            Assert.AreEqual(1, locationManager.Locations.Count());
+            Assert.Throws(typeof(DuplicateNameException), () => database.CreateLocation("Mass Bay", "These are some comments", 44, 41, -69, -72));
+            Assert.AreEqual(1, database.Locations.Count());
             foreach (var month in NAVOConfiguration.AllMonths)
             {
                 // SoundSpeed dataset for each month
-                locationManager.CreateEnvironmentalDataSet(location, 15, month, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed].PluginIdentifier);
+                database.CreateEnvironmentalDataSet(location, 15, month, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed].PluginIdentifier);
                 // Wind dataset for each month
-                locationManager.CreateEnvironmentalDataSet(location, 60, month, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.Wind].PluginIdentifier);
+                database.CreateEnvironmentalDataSet(location, 60, month, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Wind].PluginIdentifier);
             }
             // Sediment dataset
-            locationManager.CreateEnvironmentalDataSet(location, 5f, TimePeriod.Invalid, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment].PluginIdentifier);
+            database.CreateEnvironmentalDataSet(location, 5f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment].PluginIdentifier);
             // Bathymetry dataset at 2min resolution
-            locationManager.CreateEnvironmentalDataSet(location, 2f, TimePeriod.Invalid, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier);
+            database.CreateEnvironmentalDataSet(location, 2f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier);
             // Bathymetry dataset at 1min resolution
-            locationManager.CreateEnvironmentalDataSet(location, 1f, TimePeriod.Invalid, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier);
+            database.CreateEnvironmentalDataSet(location, 1f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier);
             // Bathymetry dataset at 0.5min resolution
-            locationManager.CreateEnvironmentalDataSet(location, 0.5f, TimePeriod.Invalid, pluginManager[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier);
-            NemoFile.Import(@"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Jacksonville\BU Test Sample.nemo", @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas", location, locationManager);
-            DumpLocationDatabase(locationManager);
+            database.CreateEnvironmentalDataSet(location, 0.5f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier);
+            //NemoFile.Import(@"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Jacksonville\BU Test Sample.nemo", @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas", location, database);
+            DumpLocationDatabase(database);
         }
 
         public void DumpLocationDatabase(MasterDatabaseService locationService, bool dumpLogs = false)
