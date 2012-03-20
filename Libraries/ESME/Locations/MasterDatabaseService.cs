@@ -106,7 +106,28 @@ namespace ESME.Locations
             };
             _context.Scenarios.Add(result);
             Log(result, "Created");
+            SaveChanges();
             return result;
+        }
+
+        public void SetEnvironmentalData(Scenario scenario, EnvironmentalDataSet data)
+        {
+            switch (data.SourcePlugin.PluginSubtype)
+            {
+                case PluginSubtype.Wind:
+                    scenario.Wind = data;
+                    break;
+                case PluginSubtype.SoundSpeed:
+                    scenario.SoundSpeed = data;
+                    break;
+                case PluginSubtype.Sediment:
+                    scenario.Sediment = data;
+                    break;
+                case PluginSubtype.Bathymetry:
+                    scenario.Bathymetry = data;
+                    break;
+            }
+            SaveChanges();
         }
 
         public Scenario ImportScenarioFromNemoFile(Location location, string nemoFilePath, string scenarioDataDirectory)

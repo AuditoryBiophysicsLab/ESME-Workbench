@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using ESME.Behaviors;
 using ESME.Database;
-using ESME.Environment;
 using HRC.Aspects;
 
 namespace ESME.Locations
@@ -19,6 +17,10 @@ namespace ESME.Locations
         public DbTimePeriod TimePeriod { get; set; }
 
         public virtual Location Location { get; set; }
+        public virtual EnvironmentalDataSet Wind { get; set; }
+        public virtual EnvironmentalDataSet SoundSpeed { get; set; }
+        public virtual EnvironmentalDataSet Sediment { get; set; }
+        public virtual EnvironmentalDataSet Bathymetry { get; set; }
 
         public virtual ICollection<Platform> Platforms { get; set; }
         public virtual ICollection<ScenarioSpecies> Species { get; set; }

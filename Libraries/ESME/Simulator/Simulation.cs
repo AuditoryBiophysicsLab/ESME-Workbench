@@ -5,7 +5,7 @@ namespace ESME.Simulator
 {
     public class Simulation
     {
-        public static Simulation Run(Scenario scenario, string simulationDirectory)
+        public static Simulation Create(Scenario scenario, string simulationDirectory)
         {
             Directory.CreateDirectory(simulationDirectory);
             var result = new Simulation(scenario, simulationDirectory);
@@ -14,7 +14,14 @@ namespace ESME.Simulator
 
         Simulation(Scenario scenario, string simulationDirectory)
         {
-
+            _scenario = scenario;
+            _simulationDirectory = simulationDirectory;
+            _database = SimulationContext.OpenOrCreate(Path.Combine(_simulationDirectory, "simulation.db"));
+            _database.ImportScenario(_scenario);
         }
+
+        readonly Scenario _scenario;
+        readonly string _simulationDirectory;
+        readonly SimulationContext _database;
     }
 }

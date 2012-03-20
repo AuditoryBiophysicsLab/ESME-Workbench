@@ -121,7 +121,11 @@ namespace ESME.Database.Importers
                                    where s.LatinName == result.LatinName
                                    select s).FirstOrDefault();
                     if (species != null) Console.WriteLine("Species with name \"{0}\" already exists in scenario \"{1}\", replacing with current data", nemoSpecies.AnimatDataTask.Result.LatinName, scenario.Name);
-                    else species = new ScenarioSpecies {LatinName = nemoSpecies.AnimatDataTask.Result.LatinName};
+                    else species = new ScenarioSpecies
+                    {
+                        LatinName = nemoSpecies.AnimatDataTask.Result.LatinName,
+                        Scenario = scenario,
+                    };
                     var animats = new List<AnimatLocation>();
                     foreach (var startPoint in result.AnimatStartPoints)
                     {
