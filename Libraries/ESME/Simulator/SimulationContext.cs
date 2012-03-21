@@ -49,6 +49,8 @@ namespace ESME.Simulator
         public DbSet<ScenarioSpecies> ScenarioSpecies { get; set; }
         public DbSet<AnimatLocation> AnimatLocations { get; set; }
 
+        public DbSet<Actor> Actors { get; set; }
+
         public void ImportScenario(Scenario scenario)
         {
             var newLocation = new Location

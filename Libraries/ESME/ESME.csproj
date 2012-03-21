@@ -234,6 +234,7 @@
     <Compile Include="Settings\Exceptions.cs" />
     <Compile Include="Settings\SettingsBase.cs" />
     <Compile Include="Settings\SettingsService.cs" />
+    <Compile Include="Simulator\Actor.cs" />
     <Compile Include="Simulator\ActorExposureRecord.cs" />
     <Compile Include="Simulator\ActorPositionRecord.cs" />
     <Compile Include="Simulator\Simulation.cs" />

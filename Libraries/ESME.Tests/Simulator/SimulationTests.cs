@@ -88,7 +88,7 @@ namespace ESME.Tests.Simulator
             for (var i = 0; i < 10; i++) if (Directory.Exists(_simulationDirectory)) Thread.Sleep(100); else break;
             Assert.IsFalse(Directory.Exists(_simulationDirectory));
 
-            Console.WriteLine("Starting simulation...");
+            Console.WriteLine("Creating simulation...");
             var foo = Simulation.Create(scenario, _simulationDirectory);
             Console.WriteLine("Test complete");
         }
