@@ -6,6 +6,7 @@ using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Locations;
 using ESME.Plugins;
+using ESME.Scenarios;
 using ESME.Simulator;
 using NUnit.Framework;
 
@@ -51,9 +52,9 @@ namespace ESME.Tests.Simulator
             if (scenario == null)
             {
                 Console.WriteLine("Importing test scenario 'BU Test Sample'...");
-                scenario = database.ImportScenarioFromNemoFile(location,
-                                                               @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Jacksonville\BU Test Sample.nemo",
-                                                               @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas");
+                scenario = Scenario.FromNemoFile(database, location,
+                                                 @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Jacksonville\BU Test Sample.nemo",
+                                                 @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas");
 
                 database.SetEnvironmentalData(scenario, (from data in location.EnvironmentalDataSets
                                                             where data.SourcePlugin.PluginSubtype == PluginSubtype.Wind
@@ -89,7 +90,9 @@ namespace ESME.Tests.Simulator
             Assert.IsFalse(Directory.Exists(_simulationDirectory));
 
             Console.WriteLine("Creating simulation...");
-            var foo = Simulation.Create(scenario, _simulationDirectory);
+            var simulation = Simulation.Create(scenario, _simulationDirectory);
+            Console.WriteLine("Starting simulation...");
+            simulation.Start(10, new TimeSpan(0, 0, 0, 1));
             Console.WriteLine("Test complete");
         }
     }

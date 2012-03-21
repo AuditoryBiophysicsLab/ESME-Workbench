@@ -23,18 +23,15 @@ namespace ESME.Simulator
 
         SimulationLog() { _timeStepOffsets = new List<long>();}
 
-        SimulationLog(TimeSpan timeStepSize, int timeStepCount)
+        public static SimulationLog Create(string fileName, int timeStepCount, TimeSpan timeStepSize)
         {
-            TimeStepSize = timeStepSize;
-            for (var i = 0; i < timeStepCount; i++) _timeStepOffsets[i] = -1;
-        }
-
-        public static SimulationLog Create(string fileName, TimeSpan timeStepSize, int timeStepCount)
-        {
-            var result = new SimulationLog(timeStepSize, timeStepCount)
+            var result = new SimulationLog
             {
                 _writer = new BinaryWriter(new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None)),
+                TimeStepSize = timeStepSize,
             };
+            for (var i = 0; i < timeStepCount; i++) result._timeStepOffsets[i] = -1;
+            result.WriteHeader();
             return result;
         }
 
@@ -63,6 +60,7 @@ namespace ESME.Simulator
             _writer.Write(CreatingComputer);
             _writer.Write(_timeStepOffsets.Count);
             foreach (var offset in _timeStepOffsets) _writer.Write(offset);
+            _writer.BaseStream.Flush();
         }
 
         void ReadHeader()

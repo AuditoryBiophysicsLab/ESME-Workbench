@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Data.Entity;
 using ESME.Database;
 using ESME.NEMO.Overlay;
+using ESME.Scenarios;
 using HRC.Aspects;
 
 namespace ESME.Locations

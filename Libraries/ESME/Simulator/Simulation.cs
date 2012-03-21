@@ -1,10 +1,15 @@
-﻿using System.IO;
-using ESME.Locations;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using ESME.Scenarios;
 
 namespace ESME.Simulator
 {
     public class Simulation
     {
+        public List<Actor> GetActors() { return _database.Actors.ToList(); }
+
         public static Simulation Create(Scenario scenario, string simulationDirectory)
         {
             Directory.CreateDirectory(simulationDirectory);
@@ -23,5 +28,16 @@ namespace ESME.Simulator
         readonly Scenario _scenario;
         readonly string _simulationDirectory;
         readonly SimulationContext _database;
+        SimulationLog _log;
+
+        public void Start(int timeStepCount, TimeSpan timeStepSize)
+        {
+            foreach (var platform in _scenario.Platforms) _database.Actors.Add(new Actor { Platform = platform });
+            foreach (var species in _scenario.Species) 
+                foreach (var animat in species.AnimatLocations)
+                    _database.Actors.Add(new Actor { Animat = animat });
+            _database.SaveChanges();
+            _log = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), timeStepCount, timeStepSize);
+        }
     }
 }

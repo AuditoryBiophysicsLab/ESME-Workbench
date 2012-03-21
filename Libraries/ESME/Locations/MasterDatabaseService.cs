@@ -14,6 +14,7 @@ using ESME.Environment;
 using ESME.Database.Importers;
 using ESME.NEMO.Overlay;
 using ESME.Plugins;
+using ESME.Scenarios;
 using HRC.Aspects;
 using HRC.Navigation;
 using MEFedMVVM.ViewModelLocator;
@@ -37,11 +38,11 @@ namespace ESME.Locations
             }
         }
 
-        public IEnumerable<Location> Locations { get { return _context.Locations; } }
+        public IEnumerable<Location> Locations { get { return Context.Locations; } }
         public Location FindLocation(string locationName) { return Locations.FirstOrDefault(l => l.Name == locationName); }
         public bool LocationExists(string locationName) { return FindLocation(locationName) != null; }
 
-        public IEnumerable<Scenario> Scenarios { get { return _context.Scenarios; } }
+        public IEnumerable<Scenario> Scenarios { get { return Context.Scenarios; } }
         public Scenario FindScenario(string scenarioName) { return Scenarios.FirstOrDefault(l => l.Name == scenarioName); }
         public bool ScenarioExists(string scenarioName) { return FindScenario(scenarioName) != null; }
 
@@ -56,7 +57,7 @@ namespace ESME.Locations
                                  GeoRect = new GeoRect(north, south, east, west),
                                  StorageDirectory = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()),
                              };
-            _context.Locations.Add(result);
+            Context.Locations.Add(result);
             Log(result, "Created");
             Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, result.StorageDirectory));
             SaveChanges();
@@ -84,7 +85,7 @@ namespace ESME.Locations
                 Location = location,
                 SourcePlugin = sourcePlugin,
             };
-            _context.EnvironmentalDataSets.Add(environmentalDataSet);
+            Context.EnvironmentalDataSets.Add(environmentalDataSet);
             Log(environmentalDataSet, String.Format("Added new data set. Resolution: {0}{1}", resolution, timePeriod != TimePeriod.Invalid ? String.Format("  TimePeriod: {0}", timePeriod) : ""));
             SaveChanges();
             return environmentalDataSet;
@@ -104,7 +105,7 @@ namespace ESME.Locations
                 TimePeriod = timePeriod,
                 Location = location,
             };
-            _context.Scenarios.Add(result);
+            Context.Scenarios.Add(result);
             Log(result, "Created");
             SaveChanges();
             return result;
@@ -129,131 +130,6 @@ namespace ESME.Locations
             }
             SaveChanges();
         }
-
-        public Scenario ImportScenarioFromNemoFile(Location location, string nemoFilePath, string scenarioDataDirectory)
-        {
-            return NemoFile.Import(this, location, nemoFilePath, scenarioDataDirectory);
-        }
-
-        public Platform AddPlatform(Scenario scenario, PSMPlatform psmPlatform, string description)
-        {
-            if (scenario.Platforms != null && scenario.Platforms.FirstOrDefault(p => p.Description == description) != null) throw new DuplicateNameException(String.Format("A platform with the description \"{0}\" already exists in this scenario, choose another name", description));
-            var platform = new Platform
-            {
-                Description = description,
-                Launches = false,
-                Tows = false,
-                RepeatCount = 1,
-                PSMPlatformGuid = psmPlatform.Guid,
-                PlatformName = psmPlatform.PlatformName,
-                PlatformType = psmPlatform.PlatformType,
-                Scenario = scenario,
-            };
-            _context.Platforms.Add(platform);
-            Log(platform, "Created");
-            foreach (var psmSource in psmPlatform.PSMSources)
-            {
-                var source = new Source
-                {
-                    PSMSourceGuid = psmSource.Guid,
-                    SourceName = psmSource.SourceName,
-                    SourceType = psmSource.SourceType,
-                    Platform = platform,
-                };
-                _context.Sources.Add(source);
-                Log(source, "Created");
-                foreach (var psmMode in psmSource.PSMModes)
-                {
-                    var mode = new Mode
-                    {
-                        PSMModeGuid = psmMode.Guid,
-                        ModeName = psmMode.ModeName,
-                        ModeType = psmMode.ModeType,
-                        ActiveTime = psmMode.ActiveTime,
-                        Depth = psmMode.Depth,
-                        SourceLevel = psmMode.SourceLevel,
-                        LowFrequency = psmMode.LowFrequency,
-                        HighFrequency = psmMode.HighFrequency,
-                        PulseInterval = psmMode.PulseInterval,
-                        PulseLength = psmMode.PulseLength,
-                        HorizontalBeamWidth = psmMode.HorizontalBeamWidth,
-                        VerticalBeamWidth = psmMode.VerticalBeamWidth,
-                        RelativeBeamAngle = psmMode.RelativeBeamAngle,
-                        MaxPropagationRadius = psmMode.MaxPropagationRadius,
-                        Source = source,
-                    };
-                    _context.Modes.Add(mode);
-                    Log(mode, "Created");
-                }
-            }
-            SaveChanges();
-            return platform;
-        }
-
-        public void SetTrackDefinition(Platform platform, TrackDefinition trackDefinition)
-        {
-            trackDefinition.Platform = platform;
-            _context.TrackDefinitions.Add(trackDefinition);
-            Log(trackDefinition, "Added");
-            platform.TrackDefinition = trackDefinition;
-            Log(platform, String.Format("Set TrackDefinition to {0}", trackDefinition.Guid));
-            SaveChanges();
-        }
-
-        public Perimeter AddOrGetPerimeter(Scenario scenario, string perimeterName, IEnumerable<PerimeterCoordinate> coordinates)
-        {
-            var existing = _context.Perimeters.FirstOrDefault(p => p.Scenario.Guid == scenario.Guid && p.Name == perimeterName);
-            if (existing != null) return existing;
-            var perimeter = new Perimeter {Scenario = scenario};
-            _context.Perimeters.Add(perimeter);
-            SaveChanges();
-            Log(perimeter, "Added");
-            SaveChanges();
-            Log(scenario, String.Format("Added perimeter {0}", perimeter.Guid));
-            SaveChanges();
-            SetPerimeterCoordinates(perimeter, coordinates);
-            return perimeter;
-        }
-
-        public void SetPerimeterCoordinates(Perimeter perimeter, IEnumerable<PerimeterCoordinate> coordinates)
-        {
-            // Delete all the old coordinates, if any
-            if (perimeter.PerimeterCoordinates != null) foreach (var coordinate in perimeter.PerimeterCoordinates) _context.PerimeterCoordinates.Remove(coordinate);
-            // Add the new ones
-            foreach (var coordinate in coordinates)
-            {
-                coordinate.Perimeter = perimeter;
-                _context.PerimeterCoordinates.Add(coordinate);
-                SaveChanges();
-            }
-            // Save to the database
-            Log(perimeter, String.Format("Changed coordinates of perimeter {0}", perimeter.Guid));
-            SaveChanges();
-        }
-
-        public void SetPerimeter(TrackDefinition trackDefinition, Perimeter perimeter)
-        {
-            trackDefinition.Perimeter = perimeter;
-            Log(trackDefinition, String.Format("Set perimeter for trackdef {0} to {1}", trackDefinition.Guid, perimeter.Guid));
-            SaveChanges();
-        }
-
-        public ScenarioSpecies AddOrReplaceSpecies(Scenario scenario, ScenarioSpecies newSpecies, IEnumerable<AnimatLocation> animatLocations)
-        {
-            ScenarioSpecies existing = null;
-            if (scenario.Species != null) existing = scenario.Species.FirstOrDefault(s => s.LatinName == newSpecies.LatinName);
-            if (existing != null)
-            {
-                foreach (var animat in existing.AnimatLocations) _context.AnimatLocations.Remove(animat);
-                _context.ScenarioSpecies.Remove(existing);
-                //Log(newSpecies, string.Format("Replaced species {0}", newSpecies.LatinName));
-            }
-            _context.ScenarioSpecies.Add(newSpecies);
-            foreach (var animat in animatLocations) _context.AnimatLocations.Add(animat);
-            SaveChanges();
-            return null;
-        }
-
         #endregion
 
         #region Delete operations
@@ -262,8 +138,8 @@ namespace ESME.Locations
         {
             // todo: Handle the case where this location is used by one or more scenarios
                 foreach (var dataSet in location.EnvironmentalDataSets)
-                    _context.EnvironmentalDataSets.Remove(dataSet);
-            _context.Locations.Remove(location);
+                    Context.EnvironmentalDataSets.Remove(dataSet);
+            Context.Locations.Remove(location);
             if (saveChanges) SaveChanges();
         }
         public void DeleteEnvironmentalDataSet(EnvironmentalDataSet dataSet) { DeleteEnvironmentalDataSet(dataSet, true); }
@@ -273,7 +149,7 @@ namespace ESME.Locations
             var fileName = Path.Combine(MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
             var filesToDelete = Directory.EnumerateFiles(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".*");
             foreach (var file in filesToDelete) File.Delete(file);
-            _context.EnvironmentalDataSets.Remove(dataSet);
+            Context.EnvironmentalDataSets.Remove(dataSet);
             if (saveChanges) SaveChanges();
         }
         #endregion
@@ -281,8 +157,8 @@ namespace ESME.Locations
         #endregion
         #region Private helper methods, properties and fields
 
-        private LocationContext _context;
-        
+        internal LocationContext Context { get; private set; }
+
         void Initialize()
         {
             if (String.IsNullOrEmpty(MasterDatabaseDirectory)) throw new ApplicationException("MasterDatabaseDirectory cannot be null or empty");
@@ -298,16 +174,16 @@ namespace ESME.Locations
                 BinaryGUID = true,
             };
             DbConnection connection = new SQLiteConnection(connectionStringBuilder.ToString());
-            _context = new LocationContext(connection, true);
+            Context = new LocationContext(connection, true);
         }
 
         void SaveChanges()
         {
-            lock (_context)
+            lock (Context)
             {
                 try
                 {
-                    _context.SaveChanges();
+                    Context.SaveChanges();
                 }
                 catch (DbEntityValidationException dbEntityValidationException)
                 {
@@ -332,20 +208,20 @@ namespace ESME.Locations
             }
         }
 
-        void Log(Location location, string message) { LogBase(new LogEntry(location) { Location = location }, message); }
-        void Log(EnvironmentalDataSet dataSet, string message) { LogBase(new LogEntry(dataSet) { EnvironmentalDataSet = dataSet }, message); }
-        void Log(Scenario scenario, string message) { LogBase(new LogEntry(scenario) { Scenario = scenario }, message); }
-        void Log(Platform platform, string message) { LogBase(new LogEntry(platform) { Platform = platform }, message); }
-        void Log(Source source, string message) { LogBase(new LogEntry(source) { Source = source }, message); }
-        void Log(Mode mode, string message) { LogBase(new LogEntry(mode) { Mode = mode }, message); }
-        void Log(TrackDefinition trackDefinition, string message) { LogBase(new LogEntry(trackDefinition) { TrackDefinition = trackDefinition }, message); }
-        void Log(Perimeter perimeter, string message) { LogBase(new LogEntry(perimeter) { Perimeter = perimeter }, message); }
+        internal void Log(Location location, string message) { LogBase(new LogEntry(location) { Location = location }, message); }
+        internal void Log(EnvironmentalDataSet dataSet, string message) { LogBase(new LogEntry(dataSet) { EnvironmentalDataSet = dataSet }, message); }
+        internal void Log(Scenario scenario, string message) { LogBase(new LogEntry(scenario) { Scenario = scenario }, message); }
+        internal void Log(Platform platform, string message) { LogBase(new LogEntry(platform) { Platform = platform }, message); }
+        internal void Log(Source source, string message) { LogBase(new LogEntry(source) { Source = source }, message); }
+        internal void Log(Mode mode, string message) { LogBase(new LogEntry(mode) { Mode = mode }, message); }
+        internal void Log(TrackDefinition trackDefinition, string message) { LogBase(new LogEntry(trackDefinition) { TrackDefinition = trackDefinition }, message); }
+        internal void Log(Perimeter perimeter, string message) { LogBase(new LogEntry(perimeter) { Perimeter = perimeter }, message); }
 
         void LogBase(LogEntry logEntry, string message)
         {
             logEntry.Message = message;
             logEntry.MessageSource = new DbWhoWhenWhere(true);
-            _context.Log.Add(logEntry);
+            Context.Log.Add(logEntry);
         }
 
         #endregion
@@ -372,7 +248,7 @@ namespace ESME.Locations
             if (disposing)
             {
                 // Dispose managed resources.
-                _context.Dispose();
+                Context.Dispose();
             }
 
             // Note disposing has been done.

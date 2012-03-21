@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Data.Entity;
 using Devart.Data.SQLite;
 using ESME.Locations;
+using ESME.Scenarios;
 using HRC.Navigation;
 
 namespace ESME.Simulator

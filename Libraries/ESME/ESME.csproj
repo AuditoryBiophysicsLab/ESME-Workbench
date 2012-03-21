@@ -148,7 +148,12 @@
     <Compile Include="Database\Importers\PSMFileRecord.cs" />
     <Compile Include="Locations\Location.cs" />
     <Compile Include="Database\PSMContext.cs" />
-    <Compile Include="Locations\Scenario.cs" />
+    <Compile Include="Scenarios\AnimatLocation.cs" />
+    <Compile Include="Scenarios\Mode.cs" />
+    <Compile Include="Scenarios\Perimeter.cs" />
+    <Compile Include="Scenarios\PerimeterCoordinate.cs" />
+    <Compile Include="Scenarios\Platform.cs" />
+    <Compile Include="Scenarios\Scenario.cs" />
     <Compile Include="Database\Simulation.cs" />
     <Compile Include="Data\AppSettings%28pre-aspect%29.cs" />
     <Compile Include="Data\AppSettings.cs" />
@@ -231,6 +236,9 @@
     <Compile Include="Plugins\PluginBase.cs" />
     <Compile Include="Plugins\PluginType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scenarios\ScenarioSpecies.cs" />
+    <Compile Include="Scenarios\Source.cs" />
+    <Compile Include="Scenarios\TrackDefinition.cs" />
     <Compile Include="Settings\Exceptions.cs" />
     <Compile Include="Settings\SettingsBase.cs" />
     <Compile Include="Settings\SettingsService.cs" />

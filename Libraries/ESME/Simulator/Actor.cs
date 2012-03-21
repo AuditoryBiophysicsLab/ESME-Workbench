@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using ESME.Locations;
+using ESME.Scenarios;
 
 namespace ESME.Simulator
 {
