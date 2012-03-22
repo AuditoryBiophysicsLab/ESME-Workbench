@@ -60,7 +60,7 @@ namespace ESME.Locations
         }
         public void Add(Scenario scenario, bool saveChanges = false)
         {
-            var existing = (from s in Context.Scenarios
+            var existing = (from s in Context.Scenarios.Local
                             where s.Name == scenario.Name && s.Location == scenario.Location
                             select s).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A scenario named {0} already exists in location {1}, choose another name", scenario.Name, scenario.Location.Name));
@@ -122,7 +122,7 @@ namespace ESME.Locations
         }
         public void Add(Perimeter perimeter, bool saveChanges = false)
         {
-            var existing = (from p in Context.Perimeters
+            var existing = (from p in Context.Perimeters.Local
                             where p.Name == perimeter.Name && p.Scenario == perimeter.Scenario
                             select p).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A perimeter named {0} already exists in scenario {1}, choose another name", perimeter.Name, perimeter.Scenario.Name));
@@ -132,7 +132,7 @@ namespace ESME.Locations
         }
         public void Add(PerimeterCoordinate coordinate, bool replaceExisting = false, bool saveChanges = false)
         {
-            var existing = (from c in Context.PerimeterCoordinates
+            var existing = (from c in Context.PerimeterCoordinates.Local
                             where c.Perimeter == coordinate.Perimeter
                             select c).FirstOrDefault();
             if (existing != null && !replaceExisting) throw new ArgumentException(string.Format("Perimeter {0} already has a point at index {1}.  Did you intend to replace it?", coordinate.Perimeter.Name, coordinate.Order), "coordinate");
@@ -142,7 +142,7 @@ namespace ESME.Locations
         }
         public void Add(ScenarioSpecies species, bool saveChanges = false)
         {
-            var existing = (from s in Context.ScenarioSpecies
+            var existing = (from s in Context.ScenarioSpecies.Local
                             where s.LatinName == species.LatinName && s.Scenario == species.Scenario
                             select s).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A species named {0} already exists in scenario {1}, choose another name", species.LatinName, species.Scenario.Name));
