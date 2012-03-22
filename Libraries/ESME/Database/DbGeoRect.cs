@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations;
 using HRC.Navigation;
 
 namespace ESME.Database
 {
+    [ComplexType]
     public class DbGeoRect
     {
         public DbGeoRect(){}

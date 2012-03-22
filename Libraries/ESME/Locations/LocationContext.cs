@@ -1,6 +1,5 @@
 using System.Data.Common;
 using System.Data.Entity;
-using ESME.Database;
 using ESME.Scenarios;
 
 namespace ESME.Locations
@@ -33,6 +32,7 @@ namespace ESME.Locations
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+#if false
             modelBuilder.ComplexType<DbDateTime>();
             modelBuilder.ComplexType<DbGeo>();
             modelBuilder.ComplexType<DbGeoRect>();
@@ -52,7 +52,6 @@ namespace ESME.Locations
             modelBuilder.Entity<EnvironmentalDataSet>().HasMany(e => e.Logs).WithOptional();
 
             modelBuilder.Entity<LogEntry>().HasKey(l => l.Guid);
-#if false
             modelBuilder.Entity<LogEntry>().HasOptional(l => l.Location);
             modelBuilder.Entity<LogEntry>().HasOptional(l => l.EnvironmentalDataSet);
             modelBuilder.Entity<LogEntry>().HasOptional(l => l.Scenario);
@@ -60,7 +59,6 @@ namespace ESME.Locations
             modelBuilder.Entity<LogEntry>().HasOptional(l => l.Mode);
             modelBuilder.Entity<LogEntry>().HasOptional(l => l.Perimeter);
             modelBuilder.Entity<LogEntry>().HasOptional(l => l.ScenarioSpecies);
-#endif
 
             modelBuilder.Entity<Scenario>().HasKey(s => s.Guid);
             modelBuilder.Entity<Scenario>().HasRequired(s => s.Location);
@@ -106,6 +104,9 @@ namespace ESME.Locations
 
             modelBuilder.Entity<AnimatLocation>().HasKey(a => a.ID);
             modelBuilder.Entity<AnimatLocation>().HasRequired(a => a.ScenarioSpecies);
+#endif
+            modelBuilder.Entity<Platform>().HasRequired(p => p.TrackDefinition).WithRequiredPrincipal(t => t.Platform);
+            modelBuilder.Entity<TrackDefinition>().HasRequired(t => t.Platform).WithRequiredDependent(p => p.TrackDefinition);
         }
 
         public class LocationDatabaseInitializer : CreateDatabaseIfNotExists<LocationContext>

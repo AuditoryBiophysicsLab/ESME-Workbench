@@ -1,7 +1,9 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace ESME.Database
 {
+    [ComplexType]
     public class DbWhoWhenWhere
     {
         public DbWhoWhenWhere() {}

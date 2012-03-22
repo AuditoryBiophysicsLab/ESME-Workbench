@@ -1,7 +1,6 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using ESME.Database;
-using ESME.Model;
-using ESME.Scenarios;
 using HRC.Aspects;
 
 namespace ESME.Locations
@@ -11,7 +10,7 @@ namespace ESME.Locations
         public LogEntry() {}
         public LogEntry(IHaveGuid haveGuid) { SourceGuid = haveGuid.Guid; }
 
-        [Initialize]
+        [Key, Initialize]
         public Guid Guid { get; set; }
         public DbWhoWhenWhere MessageSource { get; set; }
         public string Message { get; set; }

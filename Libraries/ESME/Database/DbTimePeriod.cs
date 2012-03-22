@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations;
 using ESME.Environment;
 
 namespace ESME.Database
 {
+    [ComplexType]
     public class DbTimePeriod
     {
         public DbTimePeriod() { }

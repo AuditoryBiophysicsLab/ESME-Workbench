@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations;
 using ESME.Plugins;
 
 namespace ESME.Database
 {
+    [ComplexType]
     public class DbPluginIdentifier
     {
         public DbPluginIdentifier() {}

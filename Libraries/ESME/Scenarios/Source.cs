@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using ESME.Locations;
 using HRC.Aspects;
 
@@ -7,7 +8,7 @@ namespace ESME.Scenarios
 {
     public class Source : IHaveGuid
     {
-        [Initialize(IsGuid = true)]
+        [Key, Initialize]
         public Guid Guid { get; set; }
         public string PSMSourceGuid { get; set; }
         public string SourceName { get; set; }

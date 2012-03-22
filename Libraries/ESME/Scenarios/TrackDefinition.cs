@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using ESME.Database;
 using ESME.Locations;
 using HRC.Aspects;
@@ -7,7 +8,7 @@ namespace ESME.Scenarios
 {
     public class TrackDefinition : IHaveGuid
     {
-        [Initialize]
+        [Key, Initialize]
         public Guid Guid { get; set; }
 
         public DbTrackType TrackType { get; set; }

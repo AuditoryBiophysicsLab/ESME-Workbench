@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations;
 using ESME.Behaviors;
 
 namespace ESME.Database
 {
+    [ComplexType]
     public class DbTrackType
     {
         public DbTrackType() { }

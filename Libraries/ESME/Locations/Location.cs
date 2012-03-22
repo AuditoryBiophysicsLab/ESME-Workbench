@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using ESME.Database;
 using HRC.Aspects;
 
@@ -12,7 +13,7 @@ namespace ESME.Locations
 
     public class Location : IHaveGuid
     {
-        [Initialize]
+        [Key, Initialize]
         public Guid Guid { get; set; }
         public string Name { get; set; }
         public string Comments { get; set; }
