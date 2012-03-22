@@ -51,7 +51,6 @@ namespace ESME.Simulator
         public DbSet<PerimeterCoordinate> PerimeterCoordinates { get; set; }
         public DbSet<TrackDefinition> TrackDefinitions { get; set; }
         public DbSet<ScenarioSpecies> ScenarioSpecies { get; set; }
-        public DbSet<AnimatLocation> AnimatLocations { get; set; }
 
         public DbSet<Actor> Actors { get; set; }
 
@@ -246,13 +245,6 @@ namespace ESME.Simulator
                     SpeciesFile = species.SpeciesFile,
                 };
                 ScenarioSpecies.Add(newSpecies);
-                foreach (var animat in species.AnimatLocations) AnimatLocations.Add(new AnimatLocation
-                {
-                    ID = animat.ID,
-                    Geo = new Geo(animat.Geo),
-                    Depth = animat.Depth,
-                    ScenarioSpecies = newSpecies,
-                });
             }
             using (var transaction = new TransactionScope())
             {

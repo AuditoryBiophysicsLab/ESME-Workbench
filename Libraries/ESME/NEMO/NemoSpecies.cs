@@ -21,7 +21,7 @@ namespace ESME.NEMO
             SimAreaPopulation = GetFloat("simAreaPopulation");
             SimAreaTotal = GetInt("simAreaTotal");
             string fileSpeciesName;
-            AnimatDataTask = new Task<AnimatFile>(() => AnimatFile.Load(Path.Combine(scenarioDirectory, "Species", SpeciesFile),out fileSpeciesName));
+            AnimatDataTask = new Task<AnimatFile>(() => AnimatFile.Load(Path.Combine(scenarioDirectory, "Species", SpeciesFile), out fileSpeciesName));
         }
 
         public override IEnumerable<KeyValuePair<string, string>> Properties

@@ -159,26 +159,15 @@ namespace ESME.Scenarios
                 foreach (var nemoSpecies in nemoAnimals.Species)
                 {
                     nemoSpecies.AnimatDataTask.Start();
-                    TaskEx.WhenAll(nemoSpecies.AnimatDataTask).Wait();
                     var result = nemoSpecies.AnimatDataTask.Result;
                     var species = new ScenarioSpecies
                     {
                         LatinName = result.LatinName,
-                        SpeciesFile = nemoSpecies.SpeciesFile,
+                        SpeciesFile = result.Filename,
                         Scenario = scenario,
                     };
                     masterDatabase.Context.ScenarioSpecies.Add(species);
                     masterDatabase.Context.SaveChanges();
-                    foreach (var startPoint in result.AnimatStartPoints)
-                    {
-                        var animat = new AnimatLocation
-                        {
-                            Geo = new Geo(startPoint.Latitude, startPoint.Longitude),
-                            Depth = startPoint.Data,
-                            ScenarioSpecies = species,
-                        };
-                        masterDatabase.Context.AnimatLocations.Add(animat);
-                    }
                 }
             }
             using (var transaction = new TransactionScope())

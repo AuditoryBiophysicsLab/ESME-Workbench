@@ -291,6 +291,11 @@ namespace ESME.Animats
         public string LatinName { get; internal set; }
         public List<Geo<float>> AnimatStartPoints { get; internal set; }
         public int TotalAnimats { get; internal set; }
+        public static AnimatFile Load(string fileName)
+        {
+            string speciesName;
+            return Load(fileName, out speciesName);
+        }
         public static AnimatFile Load(string fileName, out string speciesName)
         {
             switch (Path.GetExtension(fileName).ToLower())
@@ -298,10 +303,12 @@ namespace ESME.Animats
                 case ".3mb":
                     var result = MMMB.Load(fileName);
                     speciesName = result.LatinName;
+                    result.Filename = fileName;
                     return result;
                 case ".ddb":
                     var result1 = DDB.Load(fileName);
                     speciesName = result1.LatinName;
+                    result1.Filename = fileName;
                     return result1;
                 default: 
                     throw new FileFormatException(string.Format("Unable to load animat locations.  Unrecognized file type: \"{0}\"", Path.GetExtension(fileName)));

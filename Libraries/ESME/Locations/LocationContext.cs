@@ -28,7 +28,6 @@ namespace ESME.Locations
         public DbSet<PerimeterCoordinate> PerimeterCoordinates { get; set; }
         public DbSet<TrackDefinition> TrackDefinitions { get; set; }
         public DbSet<ScenarioSpecies> ScenarioSpecies { get; set; }
-        public DbSet<AnimatLocation> AnimatLocations { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
