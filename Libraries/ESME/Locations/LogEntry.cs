@@ -23,7 +23,6 @@ namespace ESME.Locations
         public virtual Platform Platform { get; set; }
         public virtual Source Source { get; set; }
         public virtual Mode Mode { get; set; }
-        public virtual TrackDefinition TrackDefinition { get; set; }
         public virtual Perimeter Perimeter { get; set; }
         public virtual ScenarioSpecies ScenarioSpecies { get; set; }
 #endif

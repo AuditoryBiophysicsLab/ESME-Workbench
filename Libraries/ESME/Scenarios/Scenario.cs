@@ -9,6 +9,7 @@ using ESME.Database;
 using ESME.Environment;
 using ESME.Locations;
 using HRC.Aspects;
+using HRC.Navigation;
 
 namespace ESME.Scenarios
 {
@@ -49,7 +50,47 @@ namespace ESME.Scenarios
             });
             foreach (var nemoPlatform in nemoFile.Scenario.Platforms)
             {
-                var platform = new Platform
+                Perimeter perimeter = null;
+                if (nemoPlatform.Trackdefs.Count <= 0) continue;
+                var trackType = TrackType.Stationary;
+                switch (nemoPlatform.Trackdefs[0].TrackType.ToLower())
+                {
+                    case "perimeter_bounce":
+                        trackType = TrackType.PerimeterBounce;
+                        break;
+                    case "stationary":
+                        trackType = TrackType.Stationary;
+                        break;
+                    case "straight_line":
+                        trackType = TrackType.StraightLine;
+                        break;
+                }
+                if (nemoPlatform.Trackdefs[0].LimitFileName != null)
+                {
+                    var perimeterName = Path.GetFileNameWithoutExtension(nemoPlatform.Trackdefs[0].LimitFileName);
+                    perimeter = (from p in masterDatabase.Context.Perimeters
+                                 where p.Name == perimeterName
+                                 select p).FirstOrDefault();
+                    if (perimeter == null)
+                    {
+                        masterDatabase.Add(perimeter = new Perimeter
+                        {
+                            Name = perimeterName,
+                            Scenario = scenario,
+                        });
+                    }
+                    for (var i = 0; i < nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos.Count; i++)
+                    {
+                        masterDatabase.Add(new PerimeterCoordinate
+                        {
+                            Order = i,
+                            Geo = nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos[i],
+                            Perimeter = perimeter,
+                        });
+                    }
+                }
+                Platform platform;
+                masterDatabase.Add(platform = new Platform
                 {
                     Description = nemoPlatform.Description,
                     //Launches = nemoPlatform.Launcher
@@ -59,7 +100,18 @@ namespace ESME.Scenarios
                     RepeatCount = nemoPlatform.RepeatCount,
                     Scenario = scenario,
                     //Tows = nemoPlatform.Towwer
-                };
+                    //Duration = nemoPlatform.Trackdefs[0].Duration,
+                    Course = nemoPlatform.Trackdefs[0].InitialCourse,
+                    Depth = -1 * nemoPlatform.Trackdefs[0].InitialHeight,
+                    Geo = new Geo(nemoPlatform.Trackdefs[0].InitialLatitude, nemoPlatform.Trackdefs[0].InitialLongitude),
+                    Speed = nemoPlatform.Trackdefs[0].InitialSpeed,
+                    //OpsBounds = nemoPlatform.Trackdefs[0].OpsBounds,
+                    //OpsTimes = nemoPlatform.Trackdefs[0].OpsTimes,
+                    IsRandom = nemoPlatform.Trackdefs[0].Random,
+                    //StartTime = nemoPlatform.Trackdefs[0].StartTime.TimeOfDay,
+                    TrackType = trackType,
+                    Perimeter = perimeter,
+                });
                 foreach (var nemoSource in nemoPlatform.Sources)
                 {
                     Source source;
@@ -93,64 +145,6 @@ namespace ESME.Scenarios
                         });
                     }
                 }
-                if (nemoPlatform.Trackdefs.Count <= 0) continue;
-                var trackType = TrackType.Stationary;
-                switch (nemoPlatform.Trackdefs[0].TrackType.ToLower())
-                {
-                    case "perimeter_bounce":
-                        trackType = TrackType.PerimeterBounce;
-                        break;
-                    case "stationary":
-                        trackType = TrackType.Stationary;
-                        break;
-                    case "straight_line":
-                        trackType = TrackType.StraightLine;
-                        break;
-                }
-                Perimeter perimeter = null;
-                if (nemoPlatform.Trackdefs[0].LimitFileName != null)
-                {
-                    var perimeterName = Path.GetFileNameWithoutExtension(nemoPlatform.Trackdefs[0].LimitFileName);
-                    perimeter = (from p in masterDatabase.Context.Perimeters
-                                 where p.Name == perimeterName
-                                 select p).FirstOrDefault();
-                    if (perimeter == null)
-                    {
-                        masterDatabase.Add(perimeter = new Perimeter
-                        {
-                            Name = perimeterName,
-                            Scenario = scenario,
-                        });
-                    }
-                    for (var i = 0; i < nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos.Count; i++)
-                    {
-                        masterDatabase.Add(new PerimeterCoordinate
-                        {
-                            Order = i,
-                            Geo = nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos[i],
-                            Perimeter = perimeter,
-                        });
-                    }
-                }
-                TrackDefinition trackDefinition;
-                masterDatabase.Add(trackDefinition = new TrackDefinition
-                {
-                    //Duration = nemoPlatform.Trackdefs[0].Duration,
-                    InitialCourse = nemoPlatform.Trackdefs[0].InitialCourse,
-                    InitialDepth = -1 * nemoPlatform.Trackdefs[0].InitialHeight,
-                    InitialLatitude = nemoPlatform.Trackdefs[0].InitialLatitude,
-                    InitialLongitude = nemoPlatform.Trackdefs[0].InitialLongitude,
-                    InitialSpeed = nemoPlatform.Trackdefs[0].InitialSpeed,
-                    OpsBounds = nemoPlatform.Trackdefs[0].OpsBounds,
-                    OpsTimes = nemoPlatform.Trackdefs[0].OpsTimes,
-                    Random = nemoPlatform.Trackdefs[0].Random,
-                    //StartTime = nemoPlatform.Trackdefs[0].StartTime.TimeOfDay,
-                    TrackType = trackType,
-                    Perimeter = perimeter,
-                    Platform = platform,
-                });
-                platform.TrackDefinition = trackDefinition;
-                masterDatabase.Add(platform);
             }
             foreach (var nemoAnimals in nemoFile.Scenario.Animals)
             {

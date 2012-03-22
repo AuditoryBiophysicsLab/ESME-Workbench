@@ -150,12 +150,6 @@ namespace ESME.Locations
             Log(species, "Added new species {0} to scenario {1} in location {2}", species.LatinName, species.Scenario.Name, species.Scenario.Location.Name);
             if (saveChanges) SaveChanges();
         }
-        public void Add(TrackDefinition trackDefinition, bool saveChanges = false)
-        {
-            Context.TrackDefinitions.Add(trackDefinition);
-            Log(trackDefinition, "Added {0} track definition to platform {1} in scenario {2} in location {3}", trackDefinition.TrackType, trackDefinition.Platform, trackDefinition.Platform.Scenario, trackDefinition.Platform.Scenario.Location);
-            if (saveChanges) SaveChanges();
-        }
         #endregion
 
         #region Create operations for Locations
@@ -325,7 +319,6 @@ namespace ESME.Locations
         void Log(Platform platform, string message, params object[] args) { LogBase(new LogEntry(platform) { Location = platform.Scenario.Location, Scenario = platform.Scenario, Platform = platform }, message, args); }
         void Log(Source source, string message, params object[] args) { LogBase(new LogEntry(source) { Location = source.Platform.Scenario.Location, Scenario = source.Platform.Scenario, Platform = source.Platform, Source = source }, message, args); }
         void Log(Mode mode, string message, params object[] args) { LogBase(new LogEntry(mode) { Location = mode.Source.Platform.Scenario.Location, Scenario = mode.Source.Platform.Scenario, Platform = mode.Source.Platform, Source = mode.Source, Mode = mode }, message, args); }
-        void Log(TrackDefinition trackDefinition, string message, params object[] args) { LogBase(new LogEntry(trackDefinition) { Location = trackDefinition.Platform.Scenario.Location, Scenario = trackDefinition.Platform.Scenario, Platform = trackDefinition.Platform, TrackDefinition = trackDefinition }, message, args); }
         void Log(Perimeter perimeter, string message, params object[] args) { LogBase(new LogEntry(perimeter) { Location = perimeter.Scenario.Location, Scenario = perimeter.Scenario, Perimeter = perimeter }, message, args); }
         void Log(ScenarioSpecies species, string message, params object[] args) { LogBase(new LogEntry(species) { Location = species.Scenario.Location, Scenario = species.Scenario, ScenarioSpecies = species }, message, args); }
 #else

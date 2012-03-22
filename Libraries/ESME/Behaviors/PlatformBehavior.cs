@@ -30,7 +30,7 @@ namespace ESME.Behaviors
                         }
                         _modeActiveTimes.Add(mode, modeTimeline.GetActiveTimes(_timeStep).ToList());
                     }
-                _platformLocations = PlatformLocations.ToList();
+                _platformLocations = PlatformLocations;
             }
             catch (Exception e)
             {
@@ -64,22 +64,23 @@ namespace ESME.Behaviors
             }
         }
 
-        IEnumerable<PlatformLocation> PlatformLocations
+        List<PlatformLocation> PlatformLocations
         {
             get
             {
+                var result = new List<PlatformLocation>();
                 var random = new Random();
                 Geo location;
                 double course;
                 OverlayLineSegments perimeter = null;
                 GeoRect bounds = null;
-                var trackType = (TrackType)Platform.TrackDefinition.TrackType;
+                var trackType = (TrackType)Platform.TrackType;
 
-                if (trackType == TrackType.PerimeterBounce && Platform.TrackDefinition.Perimeter == null) throw new PerimeterInvalidException("Must have a perimeter specified for PerimeterBounce behavior");
-                if (Platform.TrackDefinition.Random && Platform.TrackDefinition.Perimeter == null) throw new PerimeterInvalidException("Must have a perimeter specified for random start point behavior");
-                if (Platform.TrackDefinition.Perimeter != null)
+                if (trackType == TrackType.PerimeterBounce && Platform.Perimeter == null) throw new PerimeterInvalidException("Must have a perimeter specified for PerimeterBounce behavior");
+                if (Platform.IsRandom && Platform.Perimeter == null) throw new PerimeterInvalidException("Must have a perimeter specified for random start point behavior");
+                if (Platform.Perimeter != null)
                 {
-                    var points = (from point in Platform.TrackDefinition.Perimeter.PerimeterCoordinates
+                    var points = (from point in Platform.Perimeter.PerimeterCoordinates
                                   select (Geo)point.Geo).ToList();
                     bounds = new GeoRect(points);
                     perimeter = new OverlayLineSegments(points);
@@ -92,18 +93,18 @@ namespace ESME.Behaviors
                     }
                 }
                 if (bounds == null) throw new ApplicationException("Bounds is null, should not happen!");
-                if (Platform.TrackDefinition.Random)
+                if (Platform.IsRandom)
                 {
                     location = new Geo(-90, 0);
-                    while (!bounds.Contains(location)) location = new Geo(bounds.West + (random.NextDouble() * bounds.Width), bounds.South + (random.NextDouble() * bounds.Height));
+                    while (!bounds.Contains(location)) location = new Geo(bounds.South + (random.NextDouble() * bounds.Height), bounds.West + (random.NextDouble() * bounds.Width));
                     course = random.NextDouble() * 360.0;
                 }
                 else
                 {
-                    location = new Geo(Platform.TrackDefinition.InitialLatitude, Platform.TrackDefinition.InitialLongitude);
-                    course = Platform.TrackDefinition.InitialCourse;
+                    location = new Geo(Platform.Geo);
+                    course = Platform.Course;
                 }
-                var speed = Platform.TrackDefinition.InitialSpeed * 0.514444444f;
+                var speed = Platform.Speed * 0.514444444f;
 
                 for (var timeStep = 0; timeStep < _timeStepCount; timeStep++)
                 {
@@ -145,14 +146,15 @@ namespace ESME.Behaviors
                             break;
                     }
                     // Put the current location, course, speed and time into the PlatformStates list
-                    yield return new PlatformLocation
+                    result.Add(new PlatformLocation
                     {
                         Location = new Geo(location),
                         Course = (float)course,
                         Speed = speed,
-                        Depth = Platform.TrackDefinition.InitialDepth,
-                    };
+                        Depth = Platform.Depth,
+                    });
                 }
+                return result;
             }
         }
     }
