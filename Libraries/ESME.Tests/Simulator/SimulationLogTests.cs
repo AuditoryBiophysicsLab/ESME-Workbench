@@ -52,7 +52,6 @@ namespace ESME.Tests.Simulator
                             Assert.AreEqual(exposureIndex * 2000, exposure.Energy);
                         }
                     }
-                    readLog.Add(cur);
                 }
             }
         }

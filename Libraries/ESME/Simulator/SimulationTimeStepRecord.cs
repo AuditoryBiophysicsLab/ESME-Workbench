@@ -33,7 +33,10 @@ namespace ESME.Simulator
         {
             if (_reader == null) throw new IOException("The simulation log file has not been opened for reading");
             for (var i = 0; i < _actorCount; i++)
+            {
+                _reader.BaseStream.Seek(_offsetFromBeginningOfFile + _actorOffsets[i], SeekOrigin.Begin);
                 ActorPositionRecords.Add(ActorPositionRecord.Read(_reader));
+            }
             return this;
         }
 
@@ -56,12 +59,13 @@ namespace ESME.Simulator
         {
             StartTime = startTime;
             _actorOffsets.Clear();
+            foreach (var actorPosition in ActorPositionRecords) _actorOffsets.Add(-1);
             if (writer == null) throw new IOException("The simulation log file has not been opened for writing");
             _offsetFromBeginningOfFile = writer.BaseStream.Position;
             WriteHeader(writer);
             foreach (var actorPositionRecord in ActorPositionRecords) 
             {
-                _actorOffsets.Add((int)(writer.BaseStream.Position - _offsetFromBeginningOfFile));
+                _actorOffsets[ActorPositionRecords.IndexOf(actorPositionRecord)] = ((int)(writer.BaseStream.Position - _offsetFromBeginningOfFile));
                 actorPositionRecord.Write(writer);
             }
             // Go back and write the header again to get the proper offsets
