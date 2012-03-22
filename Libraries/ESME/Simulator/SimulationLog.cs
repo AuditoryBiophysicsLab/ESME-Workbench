@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Management.Instrumentation;
-using HRC;
-using HRC.Aspects;
 
 namespace ESME.Simulator
 {
@@ -15,19 +12,23 @@ namespace ESME.Simulator
         public DateTime EndTime { get; private set; }
         public string CreatingUser { get; private set; }
         public string CreatingComputer { get; private set; }
+        public int TimeStepCount { get; private set; }
         // Add any further metadata here
 
         readonly List<long> _timeStepOffsets;
         BinaryWriter _writer;
         BinaryReader _reader;
+        int _curStepIndex;
+        TimeSpan _curTimeStep;
 
         SimulationLog()
         {
-            _timeStepOffsets = new List<long>(); ;
+            _timeStepOffsets = new List<long>();
         }
 
         public static SimulationLog Create(string fileName, int timeStepCount, TimeSpan timeStepSize)
         {
+            if (timeStepSize.TotalMilliseconds <= 0) throw new ArgumentOutOfRangeException("timeStepSize", "The time step size must be greater than zero");
             var result = new SimulationLog
             {
                 _writer = new BinaryWriter(new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None)),
@@ -35,6 +36,7 @@ namespace ESME.Simulator
                 CreatingUser = System.Environment.UserName,
                 CreatingComputer = System.Environment.MachineName,
                 TimeStepSize = timeStepSize,
+                TimeStepCount = timeStepCount,
             };
             for (var i = 0; i < timeStepCount; i++) result._timeStepOffsets.Add(-1);
             result.WriteHeader();
@@ -76,8 +78,8 @@ namespace ESME.Simulator
             EndTime = new DateTime(_reader.ReadInt64());
             CreatingUser = _reader.ReadString();
             CreatingComputer = _reader.ReadString();
-            var timeStepCount = _reader.ReadInt32();
-            for (var i = 0; i < timeStepCount; i++) _timeStepOffsets.Add(_reader.ReadInt64());
+            TimeStepCount = _reader.ReadInt32();
+            for (var i = 0; i < TimeStepCount; i++) _timeStepOffsets.Add(_reader.ReadInt64());
         }
 
         public SimulationTimeStepRecord this[int timeStepIndex]
@@ -95,7 +97,11 @@ namespace ESME.Simulator
 
         public void Add(SimulationTimeStepRecord timeStep)
         {
+            _timeStepOffsets[_curStepIndex] = _writer.BaseStream.Seek(0, SeekOrigin.End);
+            timeStep.Write(_writer, _curTimeStep);
             WriteHeader();
+            _curStepIndex++;
+            _curTimeStep += TimeStepSize;
         }
 
         #region IDisposable implementation

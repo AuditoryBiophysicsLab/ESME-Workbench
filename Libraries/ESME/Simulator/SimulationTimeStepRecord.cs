@@ -14,12 +14,9 @@ namespace ESME.Simulator
         [Initialize, UsedImplicitly] public List<ActorPositionRecord> ActorPositionRecords { get; private set; }
 
         readonly List<int> _actorOffsets;
-        public SimulationTimeStepRecord(TimeSpan startTime)
-            : this()
-        {
-            StartTime = new TimeSpan(startTime.Ticks);
-        }
-        SimulationTimeStepRecord() { _actorOffsets = new List<int>();}
+
+        public SimulationTimeStepRecord() { _actorOffsets = new List<int>();}
+        
         int _actorCount;
         BinaryReader _reader;
         long _offsetFromBeginningOfFile;
@@ -30,6 +27,14 @@ namespace ESME.Simulator
             for (var i = 0; i < result._actorCount; i++)
                 result.ActorPositionRecords.Add(ActorPositionRecord.Read(reader));
             return result;
+        }
+
+        public SimulationTimeStepRecord ReadAll()
+        {
+            if (_reader == null) throw new IOException("The simulation log file has not been opened for reading");
+            for (var i = 0; i < _actorCount; i++)
+                ActorPositionRecords.Add(ActorPositionRecord.Read(_reader));
+            return this;
         }
 
         internal static SimulationTimeStepRecord Read(BinaryReader reader, long offsetFromBeginningOfFile)
@@ -47,8 +52,9 @@ namespace ESME.Simulator
             return result;
         }
 
-        internal void Write(BinaryWriter writer)
+        internal void Write(BinaryWriter writer, TimeSpan startTime)
         {
+            StartTime = startTime;
             _actorOffsets.Clear();
             if (writer == null) throw new IOException("The simulation log file has not been opened for writing");
             _offsetFromBeginningOfFile = writer.BaseStream.Position;
@@ -77,10 +83,13 @@ namespace ESME.Simulator
         {
             get
             {
-                if (_reader == null && ActorPositionRecords == null) throw new IOException("The simulation log file has not been opened for reading");
-                if (actorIndex < 0 || actorIndex >= _actorOffsets.Count)
-                    throw new IndexOutOfRangeException(string.Format("Requested actor index {0} is invalid.  Valid values are 0 - {1}", actorIndex, _actorOffsets.Count));
-                return ActorPositionRecords != null ? ActorPositionRecords[actorIndex] : ActorPositionRecord.Read(_reader, _offsetFromBeginningOfFile + _actorOffsets[actorIndex]);
+                if (ActorPositionRecords == null)
+                {
+                    if (_reader == null) throw new IOException("The simulation log file has not been opened for reading");
+                    if (actorIndex < 0 || actorIndex >= _actorOffsets.Count) throw new IndexOutOfRangeException(string.Format("Requested actor index {0} is invalid.  Valid values are 0 - {1}", actorIndex, _actorOffsets.Count));
+                    return ActorPositionRecord.Read(_reader, _offsetFromBeginningOfFile + _actorOffsets[actorIndex]);
+                }
+                return ActorPositionRecords[actorIndex];
             }
         }
     }

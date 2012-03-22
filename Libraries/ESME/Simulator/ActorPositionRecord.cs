@@ -10,8 +10,7 @@ namespace ESME.Simulator
         public float Latitude { get; set; }
         public float Longitude { get; set; }
         public float Depth { get; set; }
-        [Initialize]
-        public List<ActorExposureRecord> Exposures { get; set; }
+        [Initialize] public List<ActorExposureRecord> Exposures { get; set; }
 
         public ActorPositionRecord(float latitude, float longitude, float depth)
         {
