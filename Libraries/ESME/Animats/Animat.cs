@@ -8,6 +8,7 @@ using System.Threading;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using ESME.Model;
+using ESME.Simulator;
 using HRC.Navigation;
 using mbs;
 using FileFormatException = ESME.Model.FileFormatException;

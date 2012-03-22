@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
+using ESME.Simulator;
 using mbs;
 
 namespace ESME.Model

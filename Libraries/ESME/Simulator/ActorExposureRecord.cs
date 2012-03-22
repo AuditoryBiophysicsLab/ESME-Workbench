@@ -1,4 +1,5 @@
 using System.IO;
+using ESME.Scenarios;
 
 namespace ESME.Simulator
 {
@@ -7,6 +8,8 @@ namespace ESME.Simulator
         public int SourceActorModeID { get; private set; }
         public float PeakSPL { get; private set; }
         public float Energy { get; private set; }
+
+        public Mode Mode { get; private set; }
 
         ActorExposureRecord() {}
 

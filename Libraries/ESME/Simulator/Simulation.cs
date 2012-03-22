@@ -11,6 +11,7 @@ namespace ESME.Simulator
     public class Simulation
     {
         public List<Actor> GetActors() { return _database.Actors.ToList(); }
+        public Scenario Scenario { get { return _database.Scenarios.First(); } }
 
         public static Simulation Create(Scenario scenario, string simulationDirectory)
         {

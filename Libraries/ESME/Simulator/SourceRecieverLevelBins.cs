@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Xml.Linq;
 
-namespace ESME.Model
+namespace ESME.Simulator
 {
     public class SourceRecieverLevelBins
     {
