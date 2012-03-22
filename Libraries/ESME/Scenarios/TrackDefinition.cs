@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel.DataAnnotations;
 using ESME.Database;
 using ESME.Locations;
 using HRC.Aspects;
@@ -8,7 +7,7 @@ namespace ESME.Scenarios
 {
     public class TrackDefinition : IHaveGuid
     {
-        [Key, Initialize]
+        [Initialize]
         public Guid Guid { get; set; }
 
         public DbTrackType TrackType { get; set; }
@@ -23,8 +22,7 @@ namespace ESME.Scenarios
         public float InitialCourse { get; set; }
         public float InitialSpeed { get; set; }
 
-        //[Association("Platform_TrackDefinition", "Guid", "Guid")]
-        public Platform Platform { get; set; }
+        public virtual Platform Platform { get; set; }
         public virtual Perimeter Perimeter { get; set; }
     }
 }

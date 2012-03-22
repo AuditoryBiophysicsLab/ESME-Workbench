@@ -1,7 +1,10 @@
 using System;
 using System.Data.Common;
 using System.Data.Entity;
+using System.Linq;
+using System.Transactions;
 using Devart.Data.SQLite;
+using ESME.Database;
 using ESME.Locations;
 using ESME.Scenarios;
 using HRC.Navigation;
@@ -26,7 +29,7 @@ namespace ESME.Simulator
             : base(connection, contextOwnsConnection)
         {
             Configuration.AutoDetectChangesEnabled = false;
-            Configuration.ProxyCreationEnabled = false;
+            Configuration.ProxyCreationEnabled = true;
             Configuration.LazyLoadingEnabled = true;
             Configuration.ValidateOnSaveEnabled = true;
             Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
@@ -52,7 +55,7 @@ namespace ESME.Simulator
 
         public DbSet<Actor> Actors { get; set; }
 
-        public void ImportScenario(Scenario scenario)
+        public Scenario ImportScenario(Scenario scenario)
         {
             var newLocation = new Location
             {
@@ -134,50 +137,8 @@ namespace ESME.Simulator
             };
             Scenarios.Add(newScenario);
 
-
             foreach (var platform in scenario.Platforms)
             {
-                Perimeter perimeter = null;
-                TrackDefinition trackDefinition = null;
-                if (platform.TrackDefinition != null)
-                {
-                    if (platform.TrackDefinition.Perimeter != null)
-                    {
-                        perimeter = new Perimeter
-                        {
-                            Guid = platform.TrackDefinition.Perimeter.Guid,
-                            Name = platform.TrackDefinition.Perimeter.Name,
-                            Scenario = newScenario,
-                        };
-                        Perimeters.Add(perimeter);
-                        if (platform.TrackDefinition.Perimeter.PerimeterCoordinates != null)
-                        {
-                            foreach (var coordinate in platform.TrackDefinition.Perimeter.PerimeterCoordinates)
-                                PerimeterCoordinates.Add(new PerimeterCoordinate
-                                {
-                                    Geo = new Geo(coordinate.Geo),
-                                    Order = coordinate.Order,
-                                    Perimeter = perimeter,
-                                });
-                        }
-                    }
-                    trackDefinition = new TrackDefinition
-                    {
-                        Duration = platform.TrackDefinition.Duration,
-                        InitialCourse = platform.TrackDefinition.InitialCourse,
-                        InitialDepth = platform.TrackDefinition.InitialDepth,
-                        InitialLatitude = platform.TrackDefinition.InitialLatitude,
-                        InitialLongitude = platform.TrackDefinition.InitialLongitude,
-                        InitialSpeed = platform.TrackDefinition.InitialSpeed,
-                        OpsBounds = platform.TrackDefinition.OpsBounds,
-                        OpsTimes = platform.TrackDefinition.OpsTimes,
-                        Random = platform.TrackDefinition.Random,
-                        StartTime = platform.TrackDefinition.StartTime,
-                        TrackType = platform.TrackDefinition.TrackType,
-                        Perimeter = perimeter,
-                    };
-                    TrackDefinitions.Add(trackDefinition);
-                }
                 var newPlatform = new Platform
                 {
                     Description = platform.Description,
@@ -189,7 +150,6 @@ namespace ESME.Simulator
                     RepeatCount = platform.RepeatCount,
                     Scenario = newScenario,
                     Tows = platform.Tows,
-                    TrackDefinition = trackDefinition,
                 };
                 Platforms.Add(newPlatform);
                 foreach (var source in platform.Sources)
@@ -228,8 +188,55 @@ namespace ESME.Simulator
                         Modes.Add(newMode);
                     }
                 }
+                Perimeter perimeter = null;
+                if (platform.TrackDefinition != null)
+                {
+                    if (platform.TrackDefinition.Perimeter != null)
+                    {
+                        perimeter = (from p in Perimeters
+                                     where p.Guid.Equals(platform.TrackDefinition.Perimeter.Guid)
+                                     select p).FirstOrDefault();
+                        if (perimeter == null)
+                        {
+                            perimeter = new Perimeter
+                            {
+                                Guid = platform.TrackDefinition.Perimeter.Guid,
+                                Name = platform.TrackDefinition.Perimeter.Name,
+                                Scenario = newScenario,
+                            };
+                            Perimeters.Add(perimeter);
+                            if (platform.TrackDefinition.Perimeter.PerimeterCoordinates != null)
+                            {
+                                foreach (var coordinate in platform.TrackDefinition.Perimeter.PerimeterCoordinates)
+                                    PerimeterCoordinates.Add(new PerimeterCoordinate
+                                    {
+                                        Geo = new Geo(coordinate.Geo),
+                                        Order = coordinate.Order,
+                                        Perimeter = perimeter,
+                                    });
+                            }
+                        }
+                    }
+                    var trackDefinition = new TrackDefinition
+                    {
+                        Duration = platform.TrackDefinition.Duration,
+                        InitialCourse = platform.TrackDefinition.InitialCourse,
+                        InitialDepth = platform.TrackDefinition.InitialDepth,
+                        InitialLatitude = platform.TrackDefinition.InitialLatitude,
+                        InitialLongitude = platform.TrackDefinition.InitialLongitude,
+                        InitialSpeed = platform.TrackDefinition.InitialSpeed,
+                        OpsBounds = platform.TrackDefinition.OpsBounds,
+                        OpsTimes = platform.TrackDefinition.OpsTimes,
+                        Random = platform.TrackDefinition.Random,
+                        StartTime = platform.TrackDefinition.StartTime,
+                        TrackType = platform.TrackDefinition.TrackType,
+                        Perimeter = perimeter,
+                    };
+                    newPlatform.TrackDefinition = trackDefinition;
+                    TrackDefinitions.Add(trackDefinition);
+                }
             }
-            foreach (var species in scenario.Species)
+            foreach (var species in scenario.ScenarioSpecies)
             {
                 var newSpecies = new ScenarioSpecies
                 {
@@ -239,25 +246,101 @@ namespace ESME.Simulator
                     SpeciesFile = species.SpeciesFile,
                 };
                 ScenarioSpecies.Add(newSpecies);
-                foreach (var animat in species.AnimatLocations)
+                foreach (var animat in species.AnimatLocations) AnimatLocations.Add(new AnimatLocation
                 {
-                    var newAnimat = new AnimatLocation
-                    {
-                        AnimatLocationID = animat.AnimatLocationID,
-                        Geo = new Geo(animat.Geo),
-                        Depth = animat.Depth,
-                        ScenarioSpecies = newSpecies,
-                    };
-                    AnimatLocations.Add(newAnimat);
-                }
+                    ID = animat.ID,
+                    Geo = new Geo(animat.Geo),
+                    Depth = animat.Depth,
+                    ScenarioSpecies = newSpecies,
+                });
             }
-            SaveChanges();
+            using (var transaction = new TransactionScope())
+            {
+                SaveChanges();
+                transaction.Complete();
+            }
+            return newScenario;
         }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<TrackDefinition>().HasRequired(t => t.Platform)
-                .WithOptional();
+            modelBuilder.ComplexType<DbDateTime>();
+            modelBuilder.ComplexType<DbGeo>();
+            modelBuilder.ComplexType<DbGeoRect>();
+            modelBuilder.ComplexType<DbPluginIdentifier>();
+            modelBuilder.ComplexType<DbDateTime>();
+            modelBuilder.ComplexType<DbTimeSpan>();
+            modelBuilder.ComplexType<DbTrackType>();
+            modelBuilder.ComplexType<DbWhoWhenWhere>();
+
+            // Explicitly configuring the keys and relationships of each table
+            modelBuilder.Entity<Location>().HasKey(l => l.Guid);
+            modelBuilder.Entity<Location>().HasMany(l => l.EnvironmentalDataSets);
+            modelBuilder.Entity<Location>().HasMany(l => l.Logs).WithOptional();
+
+            modelBuilder.Entity<EnvironmentalDataSet>().HasKey(e => e.Guid);
+            modelBuilder.Entity<EnvironmentalDataSet>().HasRequired(e => e.Location);
+            modelBuilder.Entity<EnvironmentalDataSet>().HasMany(e => e.Logs).WithOptional();
+
+            modelBuilder.Entity<LogEntry>().HasKey(l => l.Guid);
+#if false
+            modelBuilder.Entity<LogEntry>().HasOptional(l => l.Location);
+            modelBuilder.Entity<LogEntry>().HasOptional(l => l.EnvironmentalDataSet);
+            modelBuilder.Entity<LogEntry>().HasOptional(l => l.Scenario);
+            modelBuilder.Entity<LogEntry>().HasOptional(l => l.Source);
+            modelBuilder.Entity<LogEntry>().HasOptional(l => l.Mode);
+            modelBuilder.Entity<LogEntry>().HasOptional(l => l.Perimeter);
+            modelBuilder.Entity<LogEntry>().HasOptional(l => l.ScenarioSpecies);
+#endif
+
+            modelBuilder.Entity<Scenario>().HasKey(s => s.Guid);
+            modelBuilder.Entity<Scenario>().HasRequired(s => s.Location);
+            modelBuilder.Entity<Scenario>().HasMany(s => s.Platforms).WithRequired(p => p.Scenario);
+            modelBuilder.Entity<Scenario>().HasMany(s => s.ScenarioSpecies).WithRequired(s => s.Scenario);
+            modelBuilder.Entity<Scenario>().HasMany(s => s.Logs).WithOptional();
+            modelBuilder.Entity<Scenario>().HasOptional(s => s.Wind);
+            modelBuilder.Entity<Scenario>().HasOptional(s => s.SoundSpeed);
+            modelBuilder.Entity<Scenario>().HasOptional(s => s.Sediment);
+            modelBuilder.Entity<Scenario>().HasOptional(s => s.Bathymetry);
+
+            modelBuilder.Entity<Platform>().HasKey(p => p.Guid);
+            modelBuilder.Entity<Platform>().HasRequired(p => p.Scenario);
+            modelBuilder.Entity<Platform>().HasRequired(p => p.TrackDefinition).WithRequiredPrincipal(t => t.Platform);
+            modelBuilder.Entity<Platform>().HasMany(p => p.Sources);
+            modelBuilder.Entity<Platform>().HasMany(p => p.Logs).WithOptional();
+
+            modelBuilder.Entity<Source>().HasKey(s => s.Guid);
+            modelBuilder.Entity<Source>().HasRequired(s => s.Platform);
+            modelBuilder.Entity<Source>().HasMany(s => s.Modes);
+            modelBuilder.Entity<Source>().HasMany(s => s.Logs).WithOptional();
+
+            modelBuilder.Entity<Mode>().HasKey(m => m.Guid);
+            modelBuilder.Entity<Mode>().HasRequired(m => m.Source);
+            modelBuilder.Entity<Mode>().HasMany(m => m.Logs).WithOptional();
+
+            modelBuilder.Entity<Perimeter>().HasKey(p => p.Guid);
+            modelBuilder.Entity<Perimeter>().HasRequired(p => p.Scenario);
+            modelBuilder.Entity<Perimeter>().HasMany(p => p.PerimeterCoordinates);
+            modelBuilder.Entity<Perimeter>().HasMany(s => s.Logs).WithOptional();
+
+            modelBuilder.Entity<PerimeterCoordinate>().HasKey(p => p.Guid);
+            modelBuilder.Entity<PerimeterCoordinate>().HasRequired(p => p.Perimeter);
+
+            modelBuilder.Entity<TrackDefinition>().HasKey(t => t.Guid);
+            modelBuilder.Entity<TrackDefinition>().HasRequired(t => t.Platform).WithRequiredDependent(p => p.TrackDefinition);
+            modelBuilder.Entity<TrackDefinition>().HasRequired(t => t.Perimeter);
+
+            modelBuilder.Entity<ScenarioSpecies>().HasKey(s => s.Guid);
+            modelBuilder.Entity<ScenarioSpecies>().HasRequired(s => s.Scenario);
+            modelBuilder.Entity<ScenarioSpecies>().HasMany(s => s.AnimatLocations);
+            modelBuilder.Entity<ScenarioSpecies>().HasMany(s => s.Logs).WithOptional();
+
+            modelBuilder.Entity<AnimatLocation>().HasKey(a => a.ID);
+            modelBuilder.Entity<AnimatLocation>().HasRequired(a => a.ScenarioSpecies);
+
+            modelBuilder.Entity<Actor>().HasKey(a => a.ID);
+            modelBuilder.Entity<Actor>().HasOptional(a => a.Platform).WithOptionalDependent();
+            modelBuilder.Entity<Actor>().HasOptional(a => a.AnimatLocation).WithOptionalDependent();
         }
 
         public class LocationDatabaseInitializer : CreateDatabaseIfNotExists<LocationContext>

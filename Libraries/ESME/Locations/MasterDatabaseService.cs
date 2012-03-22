@@ -11,7 +11,6 @@ using Devart.Data.SQLite;
 using Devart.Data.SQLite.Entity.Configuration;
 using ESME.Database;
 using ESME.Environment;
-using ESME.Database.Importers;
 using ESME.NEMO.Overlay;
 using ESME.Plugins;
 using ESME.Scenarios;
@@ -96,19 +95,17 @@ namespace ESME.Locations
         public Scenario CreateScenario(string scenarioName, string comments, TimeSpan startTime, TimeSpan duration, TimePeriod timePeriod, Location location)
         {
             if (ScenarioExists(scenarioName)) throw new DuplicateNameException(String.Format("A scenario named {0} already exists, choose another name", scenarioName));
-            var result = new Scenario
-            {
-                Name = scenarioName,
-                Comments = comments,
-                StartTime = startTime,
-                Duration = duration,
-                TimePeriod = timePeriod,
-                Location = location,
-            };
-            Context.Scenarios.Add(result);
-            Log(result, "Created");
+            var scenario = Context.Scenarios.Create();
+            scenario.Name = scenarioName;
+            scenario.Comments = comments;
+            scenario.StartTime = startTime;
+            scenario.Duration = duration;
+            scenario.TimePeriod = timePeriod;
+            scenario.Location = location;
+            Context.Scenarios.Add(scenario);
+            Log(scenario, "Created");
             SaveChanges();
-            return result;
+            return scenario;
         }
 
         public void SetEnvironmentalData(Scenario scenario, EnvironmentalDataSet data)
@@ -207,7 +204,7 @@ namespace ESME.Locations
                 }
             }
         }
-
+#if false
         internal void Log(Location location, string message) { LogBase(new LogEntry(location) { Location = location }, message); }
         internal void Log(EnvironmentalDataSet dataSet, string message) { LogBase(new LogEntry(dataSet) { EnvironmentalDataSet = dataSet }, message); }
         internal void Log(Scenario scenario, string message) { LogBase(new LogEntry(scenario) { Scenario = scenario }, message); }
@@ -216,6 +213,16 @@ namespace ESME.Locations
         internal void Log(Mode mode, string message) { LogBase(new LogEntry(mode) { Mode = mode }, message); }
         internal void Log(TrackDefinition trackDefinition, string message) { LogBase(new LogEntry(trackDefinition) { TrackDefinition = trackDefinition }, message); }
         internal void Log(Perimeter perimeter, string message) { LogBase(new LogEntry(perimeter) { Perimeter = perimeter }, message); }
+#else
+        internal void Log(Location location, string message) { LogBase(new LogEntry(location), message); }
+        internal void Log(EnvironmentalDataSet dataSet, string message) { LogBase(new LogEntry(dataSet), message); }
+        internal void Log(Scenario scenario, string message) { LogBase(new LogEntry(scenario), message); }
+        internal void Log(Platform platform, string message) { LogBase(new LogEntry(platform), message); }
+        internal void Log(Source source, string message) { LogBase(new LogEntry(source), message); }
+        internal void Log(Mode mode, string message) { LogBase(new LogEntry(mode), message); }
+        internal void Log(TrackDefinition trackDefinition, string message) { LogBase(new LogEntry(trackDefinition), message); }
+        internal void Log(Perimeter perimeter, string message) { LogBase(new LogEntry(perimeter), message); }
+#endif
 
         void LogBase(LogEntry logEntry, string message)
         {

@@ -105,10 +105,12 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Threading.Tasks.Dataflow, Version=0.0.4098.29463, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -146,15 +148,17 @@
     <Compile Include="Database\Importers\NemoFile.cs" />
     <Compile Include="Database\Importers\PSMFile.cs" />
     <Compile Include="Database\Importers\PSMFileRecord.cs" />
+    <Compile Include="Locations\EnvironmentalDataSet.cs" />
     <Compile Include="Locations\Location.cs" />
     <Compile Include="Database\PSMContext.cs" />
+    <Compile Include="Locations\LocationContext.cs" />
+    <Compile Include="Locations\LogEntry.cs" />
     <Compile Include="Scenarios\AnimatLocation.cs" />
     <Compile Include="Scenarios\Mode.cs" />
     <Compile Include="Scenarios\Perimeter.cs" />
     <Compile Include="Scenarios\PerimeterCoordinate.cs" />
     <Compile Include="Scenarios\Platform.cs" />
     <Compile Include="Scenarios\Scenario.cs" />
-    <Compile Include="Database\Simulation.cs" />
     <Compile Include="Data\AppSettings%28pre-aspect%29.cs" />
     <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Data\WorkDirectories.cs" />
@@ -318,7 +322,6 @@
     <Compile Include="TransmissionLoss\Bellhop\Bellhop.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossFieldCache.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>

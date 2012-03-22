@@ -19,10 +19,9 @@ namespace ESME.Simulator
 
         Simulation(Scenario scenario, string simulationDirectory)
         {
-            _scenario = scenario;
             _simulationDirectory = simulationDirectory;
             _database = SimulationContext.OpenOrCreate(Path.Combine(_simulationDirectory, "simulation.db"));
-            _database.ImportScenario(_scenario);
+            _scenario = _database.ImportScenario(scenario);
         }
 
         readonly Scenario _scenario;
@@ -33,9 +32,9 @@ namespace ESME.Simulator
         public void Start(int timeStepCount, TimeSpan timeStepSize)
         {
             foreach (var platform in _scenario.Platforms) _database.Actors.Add(new Actor { Platform = platform });
-            foreach (var species in _scenario.Species) 
+            foreach (var species in _scenario.ScenarioSpecies) 
                 foreach (var animat in species.AnimatLocations)
-                    _database.Actors.Add(new Actor { Animat = animat });
+                    _database.Actors.Add(new Actor { AnimatLocation = animat });
             _database.SaveChanges();
             _log = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), timeStepCount, timeStepSize);
         }

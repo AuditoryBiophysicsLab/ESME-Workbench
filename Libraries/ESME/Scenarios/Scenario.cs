@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using ESME.Behaviors;
 using ESME.Database;
 using ESME.Environment;
@@ -16,8 +15,9 @@ namespace ESME.Scenarios
 {
     public class Scenario : IHaveGuid
     {
-        [Key, Initialize]
+        [Initialize]
         public Guid Guid { get; set; }
+
         public string Name { get; set; }
         public string Comments { get; set; }
         public DbTimeSpan StartTime { get; set; }
@@ -31,11 +31,13 @@ namespace ESME.Scenarios
         public virtual EnvironmentalDataSet Bathymetry { get; set; }
 
         public virtual ICollection<Platform> Platforms { get; set; }
-        public virtual ICollection<ScenarioSpecies> Species { get; set; }
+        public virtual ICollection<ScenarioSpecies> ScenarioSpecies { get; set; }
+        public virtual ICollection<LogEntry> Logs { get; set; }
 
         #region Importer for NEMO files
         public static Scenario FromNemoFile(MasterDatabaseService masterDatabase, Location location, string nemoFilePath, string scenarioDataDirectory)
         {
+            
             var nemoFile = new NEMO.NemoFile(nemoFilePath, scenarioDataDirectory);
             var scenario = masterDatabase.CreateScenario(Path.GetFileNameWithoutExtension(nemoFilePath),
                                                           nemoFile.Scenario.Description,
@@ -122,8 +124,6 @@ namespace ESME.Scenarios
                             };
                             masterDatabase.Context.Perimeters.Add(perimeter);
                         }
-                        if (perimeter.PerimeterCoordinates != null)
-                            foreach (var coordinate in perimeter.PerimeterCoordinates) masterDatabase.Context.PerimeterCoordinates.Remove(coordinate);
                         for (var i = 0; i < nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos.Count; i++)
                         {
                             masterDatabase.Context.PerimeterCoordinates.Add(new PerimeterCoordinate
@@ -167,19 +167,24 @@ namespace ESME.Scenarios
                         Scenario = scenario,
                     };
                     masterDatabase.Context.ScenarioSpecies.Add(species);
-                    var animats = new List<AnimatLocation>();
+                    masterDatabase.Context.SaveChanges();
                     foreach (var startPoint in result.AnimatStartPoints)
                     {
-                        masterDatabase.Context.AnimatLocations.Add(new AnimatLocation
+                        var animat = new AnimatLocation
                         {
                             Geo = new Geo(startPoint.Latitude, startPoint.Longitude),
                             Depth = startPoint.Data,
                             ScenarioSpecies = species,
-                        });
+                        };
+                        masterDatabase.Context.AnimatLocations.Add(animat);
                     }
                 }
             }
-            masterDatabase.Context.SaveChanges();
+            using (var transaction = new TransactionScope())
+            {
+                masterDatabase.Context.SaveChanges();
+                transaction.Complete();
+            }
             return scenario;
         }
         #endregion

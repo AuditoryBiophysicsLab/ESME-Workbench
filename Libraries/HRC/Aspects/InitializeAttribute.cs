@@ -1,4 +1,5 @@
 ﻿using System;
+using PostSharp;
 using PostSharp.Aspects;
 using PostSharp.Reflection;
 using PostSharp.Aspects.Dependencies;
@@ -21,10 +22,12 @@ namespace HRC.Aspects
                 //Message.Write(SeverityType.Warning, "Initialize00", string.Format("LocationType == {0}", locationInfo.LocationType));
                 //Message.Write(SeverityType.Warning, "Initialize00", string.Format("LocationType != typeof(string) == {0}", locationInfo.LocationType != typeof(string)));
                 //Message.Write(SeverityType.Warning, "Initialize00", string.Format("LocationType != typeof(Guid) == {0}", locationInfo.LocationType != typeof(Guid)));
-                Message.Write(SeverityType.Error, "Initialize01", "Only string and Guid types can be initialized with IsGuid = true");
+                Message.Write(MessageLocation.Of(locationInfo), SeverityType.Error, "Initialize01", "Only string and Guid types can be initialized with IsGuid = true");
             }
             if (IsGuid && _defaultValue != null)
-                Message.Write(SeverityType.Error, "Initialize02", "Cannot specify a default value with IsGuid = true");
+                Message.Write(MessageLocation.Of(locationInfo), SeverityType.Error, "Initialize02", "Cannot specify a default value with IsGuid = true");
+            if (locationInfo.LocationType.IsInterface)
+                Message.Write(MessageLocation.Of(locationInfo), SeverityType.Error, "Initialize03", string.Format("Cannot initialize a property that is an interface type (in {0}.{1})", locationInfo.DeclaringType.Module, locationInfo.Name));
             return true;
         }
 

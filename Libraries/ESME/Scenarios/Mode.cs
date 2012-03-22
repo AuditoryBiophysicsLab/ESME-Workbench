@@ -1,5 +1,5 @@
 using System;
-using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 using ESME.Locations;
 using HRC.Aspects;
 
@@ -7,7 +7,7 @@ namespace ESME.Scenarios
 {
     public class Mode : IHaveGuid
     {
-        [Key, Initialize]
+        [Initialize]
         public Guid Guid { get; set; }
         public string PSMModeGuid { get; set; }
         public string ModeName { get; set; }
@@ -32,5 +32,6 @@ namespace ESME.Scenarios
         public float MaxPropagationRadius { get; set; }
 
         public virtual Source Source { get; set; }
+        public virtual ICollection<LogEntry> Logs { get; set; }
     }
 }
