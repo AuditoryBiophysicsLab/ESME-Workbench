@@ -30,6 +30,7 @@ namespace ESME.Tests.Simulator
                     writeLog.Add(cur);
                 }
             }
+
             using (var readLog = SimulationLog.Open(Path.Combine(_simulationDirectory, "simulation.log")))
             {
                 Assert.AreEqual(100, readLog.TimeStepCount);
