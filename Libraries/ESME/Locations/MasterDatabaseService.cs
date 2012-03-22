@@ -44,6 +44,119 @@ namespace ESME.Locations
         public IEnumerable<Scenario> Scenarios { get { return Context.Scenarios; } }
         public Scenario FindScenario(string scenarioName) { return Scenarios.FirstOrDefault(l => l.Name == scenarioName); }
         public bool ScenarioExists(string scenarioName) { return FindScenario(scenarioName) != null; }
+        #region Add operations
+        public void Add(Location location, bool saveChanges = false)
+        {
+            if (LocationExists(location.Name)) throw new DuplicateNameException(String.Format("A location named {0} already exists, choose another name", location.Name));
+            Context.Locations.Add(location);
+            Log(location, "Added location {0}", location.Name);
+            if (saveChanges) SaveChanges();
+        }
+        public void Add(EnvironmentalDataSet dataSet, bool saveChanges = false)
+        {
+            Context.EnvironmentalDataSets.Add(dataSet);
+            Log(dataSet, "Added new data set to location {0}. Data type: {1}, resolution: {2}{3}", dataSet.Location.Name, dataSet.SourcePlugin.PluginSubtype, dataSet.Resolution, (TimePeriod)dataSet.TimePeriod != TimePeriod.Invalid ? String.Format("  TimePeriod: {0}", (TimePeriod)dataSet.TimePeriod) : "");
+            if (saveChanges) SaveChanges();
+        }
+        public void Add(Scenario scenario, bool saveChanges = false)
+        {
+            var existing = (from s in Context.Scenarios
+                            where s.Name == scenario.Name && s.Location == scenario.Location
+                            select s).FirstOrDefault();
+            if (existing != null) throw new DuplicateNameException(String.Format("A scenario named {0} already exists in location {1}, choose another name", scenario.Name, scenario.Location.Name));
+            Context.Scenarios.Add(scenario);
+            Log(scenario, "Added new scenario {0} to data set to location {1}", scenario.Name, scenario.Location.Name);
+            if (saveChanges) SaveChanges();
+        }
+        public void Add(Platform platform, bool saveChanges = false)
+        {
+            Context.Platforms.Add(platform);
+            Log(platform, "Added new platform {0} to scenario {1} in location {2}", platform.Description, platform.Scenario.Name, platform.Scenario.Location.Name);
+            if (saveChanges) SaveChanges();
+        }
+        public void Add(Source source, bool saveChanges = false)
+        {
+            Context.Sources.Add(source);
+            Log(source, "Added new source {0} to platform {1} in scenario {2} in location {3}", source.SourceName, source.Platform.Description, source.Platform.Scenario.Name, source.Platform.Scenario.Location.Name);
+            if (saveChanges) SaveChanges();
+        }
+        public void Add(Mode mode, bool saveChanges = false)
+        {
+            Context.Modes.Add(mode);
+            Log(mode, "Added new mode {0} to source {1} of platform {2} in scenario {3} in location {4}", mode.ModeName, mode.Source.SourceName, mode.Source.Platform.Description, mode.Source.Platform.Scenario.Name, mode.Source.Platform.Scenario.Location.Name);
+            if (saveChanges) SaveChanges();
+        }
+        public void Add(Scenario scenario, EnvironmentalDataSet dataSet, bool replaceExisting = false, bool saveChanges = false)
+        {
+            EnvironmentalDataSet oldData = null;
+            // todo: Check to see if replacing any of these datasets might invalidate any transmission losses we have previously calculated
+            switch (dataSet.SourcePlugin.PluginSubtype)
+            {
+                case PluginSubtype.Wind:
+                    if (scenario.Wind != null && !replaceExisting) throw new ArgumentException(string.Format("Scenario {0} already has a wind dataset.  Did you intend to replace it?", scenario.Name), "dataSet");
+                    oldData = scenario.Wind;
+                    scenario.Wind = dataSet;
+                    break;
+                case PluginSubtype.SoundSpeed:
+                    if (scenario.SoundSpeed != null && !replaceExisting) throw new ArgumentException(string.Format("Scenario {0} already has a sound speed dataset.  Did you intend to replace it?", scenario.Name), "dataSet");
+                    oldData = scenario.SoundSpeed;
+                    scenario.SoundSpeed = dataSet;
+                    break;
+                case PluginSubtype.Sediment:
+                    if (scenario.Sediment != null && !replaceExisting) throw new ArgumentException(string.Format("Scenario {0} already has a sediment dataset.  Did you intend to replace it?", scenario.Name), "dataSet");
+                    oldData = scenario.Sediment;
+                    scenario.Sediment = dataSet;
+                    break;
+                case PluginSubtype.Bathymetry:
+                    if (scenario.Bathymetry != null && !replaceExisting) throw new ArgumentException(string.Format("Scenario {0} already has a bathymetry dataset.  Did you intend to replace it?", scenario.Name), "dataSet");
+                    oldData = scenario.Bathymetry;
+                    scenario.Bathymetry = dataSet;
+                    break;
+            }
+            // todo: enhance these messages to include resolution and time period
+            if (oldData == null)
+                Log(scenario, dataSet, "Added new {0} data set to scenario {1} (source {2})", dataSet.SourcePlugin.PluginSubtype, scenario.Name, dataSet.SourcePlugin.Type);
+            else
+                Log(scenario, dataSet, "Replaced old {0} data set in scenario {1} (old source {2}) with data from source {3}", oldData.SourcePlugin.PluginSubtype, scenario.Name, oldData.SourcePlugin.Type, dataSet.SourcePlugin.Type);
+            if (saveChanges) SaveChanges();
+        }
+        public void Add(Perimeter perimeter, bool saveChanges = false)
+        {
+            var existing = (from p in Context.Perimeters
+                            where p.Name == perimeter.Name && p.Scenario == perimeter.Scenario
+                            select p).FirstOrDefault();
+            if (existing != null) throw new DuplicateNameException(String.Format("A perimeter named {0} already exists in scenario {1}, choose another name", perimeter.Name, perimeter.Scenario.Name));
+            Context.Perimeters.Add(perimeter);
+            Log(perimeter, "Added new perimeter {0} to scenario {1} in location {2}", perimeter.Name, perimeter.Scenario.Name, perimeter.Scenario.Location.Name);
+            if (saveChanges) SaveChanges();
+        }
+        public void Add(PerimeterCoordinate coordinate, bool replaceExisting = false, bool saveChanges = false)
+        {
+            var existing = (from c in Context.PerimeterCoordinates
+                            where c.Perimeter == coordinate.Perimeter
+                            select c).FirstOrDefault();
+            if (existing != null && !replaceExisting) throw new ArgumentException(string.Format("Perimeter {0} already has a point at index {1}.  Did you intend to replace it?", coordinate.Perimeter.Name, coordinate.Order), "coordinate");
+            if (existing != null) Context.PerimeterCoordinates.Remove(existing);
+            Context.PerimeterCoordinates.Add(coordinate);
+            if (saveChanges) SaveChanges();
+        }
+        public void Add(ScenarioSpecies species, bool saveChanges = false)
+        {
+            var existing = (from s in Context.ScenarioSpecies
+                            where s.LatinName == species.LatinName && s.Scenario == species.Scenario
+                            select s).FirstOrDefault();
+            if (existing != null) throw new DuplicateNameException(String.Format("A species named {0} already exists in scenario {1}, choose another name", species.LatinName, species.Scenario.Name));
+            Context.ScenarioSpecies.Add(species);
+            Log(species, "Added new species {0} to scenario {1} in location {2}", species.LatinName, species.Scenario.Name, species.Scenario.Location.Name);
+            if (saveChanges) SaveChanges();
+        }
+        public void Add(TrackDefinition trackDefinition, bool saveChanges = false)
+        {
+            Context.TrackDefinitions.Add(trackDefinition);
+            Log(trackDefinition, "Added {0} track definition to platform {1} in scenario {2} in location {3}", trackDefinition.TrackType, trackDefinition.Platform, trackDefinition.Platform.Scenario, trackDefinition.Platform.Scenario.Location);
+            if (saveChanges) SaveChanges();
+        }
+        #endregion
 
         #region Create operations for Locations
         public Location CreateLocation(string locationName, string comments, double north, double south, double east, double west)
@@ -85,7 +198,7 @@ namespace ESME.Locations
                 SourcePlugin = sourcePlugin,
             };
             Context.EnvironmentalDataSets.Add(environmentalDataSet);
-            Log(environmentalDataSet, String.Format("Added new data set. Resolution: {0}{1}", resolution, timePeriod != TimePeriod.Invalid ? String.Format("  TimePeriod: {0}", timePeriod) : ""));
+            Log(environmentalDataSet, "Added new data set to {0}. Data type: {1}, resolution: {2}{3}", location.Name, sourcePlugin.PluginSubtype, resolution, timePeriod != TimePeriod.Invalid ? String.Format("  TimePeriod: {0}", timePeriod) : "");
             SaveChanges();
             return environmentalDataSet;
         }
@@ -204,15 +317,17 @@ namespace ESME.Locations
                 }
             }
         }
-#if false
-        internal void Log(Location location, string message) { LogBase(new LogEntry(location) { Location = location }, message); }
-        internal void Log(EnvironmentalDataSet dataSet, string message) { LogBase(new LogEntry(dataSet) { EnvironmentalDataSet = dataSet }, message); }
-        internal void Log(Scenario scenario, string message) { LogBase(new LogEntry(scenario) { Scenario = scenario }, message); }
-        internal void Log(Platform platform, string message) { LogBase(new LogEntry(platform) { Platform = platform }, message); }
-        internal void Log(Source source, string message) { LogBase(new LogEntry(source) { Source = source }, message); }
-        internal void Log(Mode mode, string message) { LogBase(new LogEntry(mode) { Mode = mode }, message); }
-        internal void Log(TrackDefinition trackDefinition, string message) { LogBase(new LogEntry(trackDefinition) { TrackDefinition = trackDefinition }, message); }
-        internal void Log(Perimeter perimeter, string message) { LogBase(new LogEntry(perimeter) { Perimeter = perimeter }, message); }
+#if true
+        void Log(Location location, string message, params object[] args) { LogBase(new LogEntry(location) { Location = location }, message, args); }
+        void Log(EnvironmentalDataSet dataSet, string message, params object[] args) { LogBase(new LogEntry(dataSet) { Location = dataSet.Location, EnvironmentalDataSet = dataSet }, message, args); }
+        void Log(Scenario scenario, string message, params object[] args) { LogBase(new LogEntry(scenario) { Location = scenario.Location, Scenario = scenario }, message, args); }
+        void Log(Scenario scenario, EnvironmentalDataSet dataSet, string message, params object[] args) { LogBase(new LogEntry(dataSet) { Location = scenario.Location, EnvironmentalDataSet = dataSet, Scenario = scenario }, message, args); }
+        void Log(Platform platform, string message, params object[] args) { LogBase(new LogEntry(platform) { Location = platform.Scenario.Location, Scenario = platform.Scenario, Platform = platform }, message, args); }
+        void Log(Source source, string message, params object[] args) { LogBase(new LogEntry(source) { Location = source.Platform.Scenario.Location, Scenario = source.Platform.Scenario, Platform = source.Platform, Source = source }, message, args); }
+        void Log(Mode mode, string message, params object[] args) { LogBase(new LogEntry(mode) { Location = mode.Source.Platform.Scenario.Location, Scenario = mode.Source.Platform.Scenario, Platform = mode.Source.Platform, Source = mode.Source, Mode = mode }, message, args); }
+        void Log(TrackDefinition trackDefinition, string message, params object[] args) { LogBase(new LogEntry(trackDefinition) { Location = trackDefinition.Platform.Scenario.Location, Scenario = trackDefinition.Platform.Scenario, Platform = trackDefinition.Platform, TrackDefinition = trackDefinition }, message, args); }
+        void Log(Perimeter perimeter, string message, params object[] args) { LogBase(new LogEntry(perimeter) { Location = perimeter.Scenario.Location, Scenario = perimeter.Scenario, Perimeter = perimeter }, message, args); }
+        void Log(ScenarioSpecies species, string message, params object[] args) { LogBase(new LogEntry(species) { Location = species.Scenario.Location, Scenario = species.Scenario, ScenarioSpecies = species }, message, args); }
 #else
         internal void Log(Location location, string message) { LogBase(new LogEntry(location), message); }
         internal void Log(EnvironmentalDataSet dataSet, string message) { LogBase(new LogEntry(dataSet), message); }
@@ -224,9 +339,9 @@ namespace ESME.Locations
         internal void Log(Perimeter perimeter, string message) { LogBase(new LogEntry(perimeter), message); }
 #endif
 
-        void LogBase(LogEntry logEntry, string message)
+        void LogBase(LogEntry logEntry, string message, params object[] args)
         {
-            logEntry.Message = message;
+            logEntry.Message = string.Format(message, args);
             logEntry.MessageSource = new DbWhoWhenWhere(true);
             Context.Log.Add(logEntry);
         }

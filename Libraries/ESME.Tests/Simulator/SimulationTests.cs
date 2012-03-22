@@ -30,7 +30,7 @@ namespace ESME.Tests.Simulator
             if (location == null)
             {
                 Console.WriteLine("Creating test location 'Jacksonville'...");
-                location = database.ImportLocationFromOverlayFile(@"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\Jacksonville\Areas\Jax_Ops_Area_300km.ovr", "Jacksonville");
+                location = database.ImportLocationFromOverlayFile(@"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr", "Jacksonville");
                 foreach (var month in NAVOConfiguration.AllMonths)
                 {
                     // SoundSpeed dataset for each month

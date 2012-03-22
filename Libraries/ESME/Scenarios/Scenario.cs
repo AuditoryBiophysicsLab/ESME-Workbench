@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Transactions;
 using ESME.Behaviors;
 using ESME.Database;
 using ESME.Environment;
 using ESME.Locations;
 using HRC.Aspects;
-using HRC.Navigation;
 
 namespace ESME.Scenarios
 {
@@ -38,17 +36,21 @@ namespace ESME.Scenarios
         #region Importer for NEMO files
         public static Scenario FromNemoFile(MasterDatabaseService masterDatabase, Location location, string nemoFilePath, string scenarioDataDirectory)
         {
-            
             var nemoFile = new NEMO.NemoFile(nemoFilePath, scenarioDataDirectory);
-            var scenario = masterDatabase.CreateScenario(Path.GetFileNameWithoutExtension(nemoFilePath),
-                                                          nemoFile.Scenario.Description,
-                                                          nemoFile.Scenario.StartTime.TimeOfDay,
-                                                          nemoFile.Scenario.Duration,
-                                                          (TimePeriod)Enum.Parse(typeof(TimePeriod), nemoFile.Scenario.TimeFrame),
-                                                          location);
+            var scenario = new Scenario
+            {
+                Location = location,
+                Name = Path.GetFileNameWithoutExtension(nemoFilePath),
+                Comments = nemoFile.Scenario.Description,
+                StartTime = nemoFile.Scenario.StartTime.TimeOfDay,
+                Duration = nemoFile.Scenario.Duration,
+                TimePeriod = (TimePeriod)Enum.Parse(typeof (TimePeriod), nemoFile.Scenario.TimeFrame),
+            };
+            masterDatabase.Add(scenario);
             foreach (var nemoPlatform in nemoFile.Scenario.Platforms)
             {
-                var platform = new Platform
+                Platform platform;
+                masterDatabase.Add(platform = new Platform
                 {
                     Description = nemoPlatform.Description,
                     //Launches = nemoPlatform.Launcher
@@ -58,21 +60,20 @@ namespace ESME.Scenarios
                     RepeatCount = nemoPlatform.RepeatCount,
                     Scenario = scenario,
                     //Tows = nemoPlatform.Towwer
-                };
-                masterDatabase.Context.Platforms.Add(platform);
+                });
                 foreach (var nemoSource in nemoPlatform.Sources)
                 {
-                    var source = new Source
+                    Source source;
+                    masterDatabase.Add(source = new Source
                     {
                         //PSMSourceGuid = 
                         Platform = platform,
                         SourceName = nemoSource.Name,
                         SourceType = nemoSource.Type,
-                    };
-                    masterDatabase.Context.Sources.Add(source);
+                    });
                     foreach (var nemoMode in nemoSource.Modes)
                     {
-                        var mode = new Mode
+                        masterDatabase.Add(new Mode
                         {
                             ActiveTime = nemoMode.ActiveTime,
                             DepressionElevationAngle = nemoMode.DepressionElevationAngle,
@@ -90,69 +91,65 @@ namespace ESME.Scenarios
                             Source = source,
                             SourceLevel = nemoMode.SourceLevel,
                             VerticalBeamWidth = nemoMode.VerticalBeamWidth,
-                        };
-                        masterDatabase.Context.Modes.Add(mode);
+                        });
                     }
                 }
-                if (nemoPlatform.Trackdefs.Count > 0)
+                if (nemoPlatform.Trackdefs.Count <= 0) continue;
+                var trackType = TrackType.Stationary;
+                switch (nemoPlatform.Trackdefs[0].TrackType.ToLower())
                 {
-                    var trackType = TrackType.Stationary;
-                    switch (nemoPlatform.Trackdefs[0].TrackType.ToLower())
-                    {
-                        case "perimeter_bounce":
-                            trackType = TrackType.PerimeterBounce;
-                            break;
-                        case "stationary":
-                            trackType = TrackType.Stationary;
-                            break;
-                        case "straight_line":
-                            trackType = TrackType.StraightLine;
-                            break;
-                    }
-                    Perimeter perimeter = null;
-                    if (nemoPlatform.Trackdefs[0].LimitFileName != null)
-                    {
-                        var perimeterName = Path.GetFileNameWithoutExtension(nemoPlatform.Trackdefs[0].LimitFileName);
-                        perimeter = (from p in masterDatabase.Context.Perimeters
-                                     where p.Name == perimeterName
-                                     select p).FirstOrDefault();
-                        if (perimeter == null)
-                        {
-                            perimeter = new Perimeter
-                            {
-                                Name = perimeterName,
-                                Scenario = scenario,
-                            };
-                            masterDatabase.Context.Perimeters.Add(perimeter);
-                        }
-                        for (var i = 0; i < nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos.Count; i++)
-                        {
-                            masterDatabase.Context.PerimeterCoordinates.Add(new PerimeterCoordinate
-                            {
-                                Order = i,
-                                Geo = nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos[i],
-                                Perimeter = perimeter,
-                            });
-                        }
-                    }
-                    var trackDefinition = new TrackDefinition
-                    {
-                        Duration = nemoPlatform.Trackdefs[0].Duration,
-                        InitialCourse = nemoPlatform.Trackdefs[0].InitialCourse,
-                        InitialDepth = -1 * nemoPlatform.Trackdefs[0].InitialHeight,
-                        InitialLatitude = nemoPlatform.Trackdefs[0].InitialLatitude,
-                        InitialLongitude = nemoPlatform.Trackdefs[0].InitialLongitude,
-                        InitialSpeed = nemoPlatform.Trackdefs[0].InitialSpeed,
-                        OpsBounds = nemoPlatform.Trackdefs[0].OpsBounds,
-                        OpsTimes = nemoPlatform.Trackdefs[0].OpsTimes,
-                        Random = nemoPlatform.Trackdefs[0].Random,
-                        StartTime = nemoPlatform.Trackdefs[0].StartTime.TimeOfDay,
-                        TrackType = trackType,
-                        Perimeter = perimeter,
-                    };
-                    platform.TrackDefinition = trackDefinition;
-                    masterDatabase.Context.TrackDefinitions.Add(trackDefinition);
+                    case "perimeter_bounce":
+                        trackType = TrackType.PerimeterBounce;
+                        break;
+                    case "stationary":
+                        trackType = TrackType.Stationary;
+                        break;
+                    case "straight_line":
+                        trackType = TrackType.StraightLine;
+                        break;
                 }
+                Perimeter perimeter = null;
+                if (nemoPlatform.Trackdefs[0].LimitFileName != null)
+                {
+                    var perimeterName = Path.GetFileNameWithoutExtension(nemoPlatform.Trackdefs[0].LimitFileName);
+                    perimeter = (from p in masterDatabase.Context.Perimeters
+                                 where p.Name == perimeterName
+                                 select p).FirstOrDefault();
+                    if (perimeter == null)
+                    {
+                        masterDatabase.Add(perimeter = new Perimeter
+                        {
+                            Name = perimeterName,
+                            Scenario = scenario,
+                        });
+                    }
+                    for (var i = 0; i < nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos.Count; i++)
+                    {
+                        masterDatabase.Add(new PerimeterCoordinate
+                        {
+                            Order = i,
+                            Geo = nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos[i],
+                            Perimeter = perimeter,
+                        });
+                    }
+                }
+                TrackDefinition trackDefinition;
+                masterDatabase.Add(trackDefinition = new TrackDefinition
+                {
+                    Duration = nemoPlatform.Trackdefs[0].Duration,
+                    InitialCourse = nemoPlatform.Trackdefs[0].InitialCourse,
+                    InitialDepth = -1 * nemoPlatform.Trackdefs[0].InitialHeight,
+                    InitialLatitude = nemoPlatform.Trackdefs[0].InitialLatitude,
+                    InitialLongitude = nemoPlatform.Trackdefs[0].InitialLongitude,
+                    InitialSpeed = nemoPlatform.Trackdefs[0].InitialSpeed,
+                    OpsBounds = nemoPlatform.Trackdefs[0].OpsBounds,
+                    OpsTimes = nemoPlatform.Trackdefs[0].OpsTimes,
+                    Random = nemoPlatform.Trackdefs[0].Random,
+                    StartTime = nemoPlatform.Trackdefs[0].StartTime.TimeOfDay,
+                    TrackType = trackType,
+                    Perimeter = perimeter,
+                });
+                platform.TrackDefinition = trackDefinition;
             }
             foreach (var nemoAnimals in nemoFile.Scenario.Animals)
             {
@@ -160,14 +157,12 @@ namespace ESME.Scenarios
                 {
                     nemoSpecies.AnimatDataTask.Start();
                     var result = nemoSpecies.AnimatDataTask.Result;
-                    var species = new ScenarioSpecies
+                    masterDatabase.Add(new ScenarioSpecies
                     {
                         LatinName = result.LatinName,
                         SpeciesFile = result.Filename,
                         Scenario = scenario,
-                    };
-                    masterDatabase.Context.ScenarioSpecies.Add(species);
-                    masterDatabase.Context.SaveChanges();
+                    });
                 }
             }
             using (var transaction = new TransactionScope())

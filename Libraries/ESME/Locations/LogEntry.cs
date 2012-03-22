@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using ESME.Database;
+using ESME.Scenarios;
 using HRC.Aspects;
 
 namespace ESME.Locations
@@ -15,7 +16,7 @@ namespace ESME.Locations
         public DbWhoWhenWhere MessageSource { get; set; }
         public string Message { get; set; }
         public Guid SourceGuid { get; set; }
-#if false
+#if true
         public virtual Location Location { get; set; }
         public virtual EnvironmentalDataSet EnvironmentalDataSet { get; set; }
         public virtual Scenario Scenario { get; set; }
