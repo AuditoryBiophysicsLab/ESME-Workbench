@@ -12,8 +12,6 @@ namespace ESME.Scenarios
         public Guid Guid { get; set; }
 
         public DbTrackType TrackType { get; set; }
-        public DbTimeSpan StartTime { get; set; }
-        public DbTimeSpan Duration { get; set; }
         public bool Random { get; set; }
         public bool OpsBounds { get; set; }
         public bool OpsTimes { get; set; }
@@ -21,6 +19,10 @@ namespace ESME.Scenarios
         public float InitialLongitude { get; set; }
         public float InitialDepth { get; set; }
         public float InitialCourse { get; set; }
+
+        /// <summary>
+        /// Speed in knots (nautical miles per hour)
+        /// </summary>
         public float InitialSpeed { get; set; }
 
         public virtual Platform Platform { get; set; }

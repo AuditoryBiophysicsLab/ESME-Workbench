@@ -122,8 +122,8 @@ namespace ESME.Locations
         }
         public void Add(Perimeter perimeter, bool saveChanges = false)
         {
-            var existing = (from p in Context.Perimeters.Local
-                            where p.Name == perimeter.Name && p.Scenario == perimeter.Scenario
+            var existing = (from p in Context.Perimeters
+                            where p.Name == perimeter.Name && p.Scenario.Guid == perimeter.Scenario.Guid
                             select p).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A perimeter named {0} already exists in scenario {1}, choose another name", perimeter.Name, perimeter.Scenario.Name));
             Context.Perimeters.Add(perimeter);

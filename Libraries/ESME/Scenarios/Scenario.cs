@@ -49,8 +49,7 @@ namespace ESME.Scenarios
             });
             foreach (var nemoPlatform in nemoFile.Scenario.Platforms)
             {
-                Platform platform;
-                masterDatabase.Add(platform = new Platform
+                var platform = new Platform
                 {
                     Description = nemoPlatform.Description,
                     //Launches = nemoPlatform.Launcher
@@ -60,7 +59,7 @@ namespace ESME.Scenarios
                     RepeatCount = nemoPlatform.RepeatCount,
                     Scenario = scenario,
                     //Tows = nemoPlatform.Towwer
-                });
+                };
                 foreach (var nemoSource in nemoPlatform.Sources)
                 {
                     Source source;
@@ -85,8 +84,8 @@ namespace ESME.Scenarios
                             ModeName = nemoMode.Name,
                             ModeType = nemoMode.Type,
                             //PSMModeGuid = 
-                            PulseInterval = (float)nemoMode.PulseInterval.TotalSeconds,
-                            PulseLength = (float)nemoMode.PulseLength.TotalSeconds * 1000,
+                            PulseInterval = new TimeSpan(nemoMode.PulseInterval.Ticks),
+                            PulseLength = new TimeSpan(nemoMode.PulseLength.Ticks),
                             RelativeBeamAngle = nemoMode.RelativeBeamAngle,
                             Source = source,
                             SourceLevel = nemoMode.SourceLevel,
@@ -136,7 +135,7 @@ namespace ESME.Scenarios
                 TrackDefinition trackDefinition;
                 masterDatabase.Add(trackDefinition = new TrackDefinition
                 {
-                    Duration = nemoPlatform.Trackdefs[0].Duration,
+                    //Duration = nemoPlatform.Trackdefs[0].Duration,
                     InitialCourse = nemoPlatform.Trackdefs[0].InitialCourse,
                     InitialDepth = -1 * nemoPlatform.Trackdefs[0].InitialHeight,
                     InitialLatitude = nemoPlatform.Trackdefs[0].InitialLatitude,
@@ -145,12 +144,13 @@ namespace ESME.Scenarios
                     OpsBounds = nemoPlatform.Trackdefs[0].OpsBounds,
                     OpsTimes = nemoPlatform.Trackdefs[0].OpsTimes,
                     Random = nemoPlatform.Trackdefs[0].Random,
-                    StartTime = nemoPlatform.Trackdefs[0].StartTime.TimeOfDay,
+                    //StartTime = nemoPlatform.Trackdefs[0].StartTime.TimeOfDay,
                     TrackType = trackType,
                     Perimeter = perimeter,
                     Platform = platform,
                 });
                 platform.TrackDefinition = trackDefinition;
+                masterDatabase.Add(platform);
             }
             foreach (var nemoAnimals in nemoFile.Scenario.Animals)
             {

@@ -218,7 +218,7 @@ namespace ESME.Simulator
                     }
                     var trackDefinition = new TrackDefinition
                     {
-                        Duration = platform.TrackDefinition.Duration,
+                        //Duration = platform.TrackDefinition.Duration,
                         InitialCourse = platform.TrackDefinition.InitialCourse,
                         InitialDepth = platform.TrackDefinition.InitialDepth,
                         InitialLatitude = platform.TrackDefinition.InitialLatitude,
@@ -227,7 +227,7 @@ namespace ESME.Simulator
                         OpsBounds = platform.TrackDefinition.OpsBounds,
                         OpsTimes = platform.TrackDefinition.OpsTimes,
                         Random = platform.TrackDefinition.Random,
-                        StartTime = platform.TrackDefinition.StartTime,
+                        //StartTime = platform.TrackDefinition.StartTime,
                         TrackType = platform.TrackDefinition.TrackType,
                         Perimeter = perimeter,
                     };

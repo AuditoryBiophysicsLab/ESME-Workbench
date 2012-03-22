@@ -58,6 +58,18 @@ namespace ESME.NEMO.Overlay
             CheckCrossingSegments();
         }
 
+        public OverlayLineSegments(ICollection<Geo> points)
+            : base(Colors.Black, 1f, LineStyle.Solid)
+        {
+            Segments = new List<OverlayLineSegment>();
+            Add(points);
+            if (points.Count < 2) return;
+            CreateSegments();
+            ComputeBoundingBox();
+            CheckForClosure();
+            CheckCrossingSegments();
+        }
+
         private void CreateSegments()
         {
             for (var i = 0; i < Length - 1; i++)

@@ -135,6 +135,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Behaviors\PlatformBehavior.cs" />
     <Compile Include="Behaviors\TrackType.cs" />
     <Compile Include="BuildInformation.cs" />
     <Compile Include="Database\DbTimePeriod.cs" />
@@ -232,7 +233,7 @@
     <Compile Include="Behaviors\BehaviorModel.cs" />
     <Compile Include="Behaviors\BehaviorModelTest.cs" />
     <Compile Include="Behaviors\Exceptions.cs" />
-    <Compile Include="Behaviors\PlatformState.cs" />
+    <Compile Include="Behaviors\PlatformLocation.cs" />
     <Compile Include="Plugins\DefaultEnvironmentalDataSources.cs" />
     <Compile Include="Plugins\ESMEPluginAttribute.cs" />
     <Compile Include="Plugins\PluginManagerExceptions.cs" />

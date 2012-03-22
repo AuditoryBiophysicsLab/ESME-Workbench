@@ -166,12 +166,12 @@ namespace ESME.Behaviors
                     curSpeedMetersPerSecond = 0;
 
                 // Put the current location, course, speed and time into the PlatformStates list
-                PlatformStates.Add(new PlatformState
+                PlatformStates.Add(new PlatformLocation
                                    {
                                        Location = curLocation,
                                        Course = (float) curCourseDegrees,
                                        Speed = (float) curSpeedMetersPerSecond,
-                                       SimulationTime = currentTime
+                                       //SimulationTime = currentTime
                                    });
             }
             overlayPoints.Add(new Geo(curLocation));

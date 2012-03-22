@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using FileHelpers;
 
@@ -63,8 +64,8 @@ namespace ESME.Database.Importers
                     SourceLevel = entry.SourceLevel,
                     LowFrequency = entry.LowFrequency,
                     HighFrequency = entry.HighFrequency,
-                    PulseInterval = entry.PulseInterval,
-                    PulseLength = entry.PulseLength,
+                    PulseInterval = new TimeSpan((int)(entry.PulseInterval * 10000000)),    // Ticks are 100ns, this converts the seconds value in the PSM file to ticks
+                    PulseLength = new TimeSpan((int)(entry.PulseLength * 10000)),           // Ticks are 100ns, this converts the millisecond value in the PSM file to ticks
                     HorizontalBeamWidth = entry.HorizontalBeamwidth,
                     VerticalBeamWidth = entry.VerticalBeamwidth,
                     DepressionElevationAngle = entry.DepressionElevationAngle,

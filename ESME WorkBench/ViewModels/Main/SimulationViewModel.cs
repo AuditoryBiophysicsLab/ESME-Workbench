@@ -275,7 +275,8 @@ namespace ESMEWorkbench.ViewModels.Main
                 // For the current time step, loop through all platform
                 foreach (var platform in platforms)
                 {
-                    var platformState = platform.BehaviorModel.PlatformStates[curTime];
+                    //var platformState = platform.BehaviorModel.PlatformStates[curTime];
+                    var platformState = platform.BehaviorModel.PlatformStates[0];
                     var platformLocation = platformState.Location;
                     var platformCourse = platformState.Course;
                     // For the current platform, loop through all sources
