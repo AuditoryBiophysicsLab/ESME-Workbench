@@ -37,16 +37,16 @@ namespace ESME.Scenarios
         public static Scenario FromNemoFile(MasterDatabaseService masterDatabase, Location location, string nemoFilePath, string scenarioDataDirectory)
         {
             var nemoFile = new NEMO.NemoFile(nemoFilePath, scenarioDataDirectory);
-            var scenario = new Scenario
+            Scenario scenario;
+            masterDatabase.Add(scenario = new Scenario
             {
                 Location = location,
                 Name = Path.GetFileNameWithoutExtension(nemoFilePath),
                 Comments = nemoFile.Scenario.Description,
                 StartTime = nemoFile.Scenario.StartTime.TimeOfDay,
                 Duration = nemoFile.Scenario.Duration,
-                TimePeriod = (TimePeriod)Enum.Parse(typeof (TimePeriod), nemoFile.Scenario.TimeFrame),
-            };
-            masterDatabase.Add(scenario);
+                TimePeriod = (TimePeriod)Enum.Parse(typeof(TimePeriod), nemoFile.Scenario.TimeFrame),
+            });
             foreach (var nemoPlatform in nemoFile.Scenario.Platforms)
             {
                 Platform platform;
@@ -148,6 +148,7 @@ namespace ESME.Scenarios
                     StartTime = nemoPlatform.Trackdefs[0].StartTime.TimeOfDay,
                     TrackType = trackType,
                     Perimeter = perimeter,
+                    Platform = platform,
                 });
                 platform.TrackDefinition = trackDefinition;
             }

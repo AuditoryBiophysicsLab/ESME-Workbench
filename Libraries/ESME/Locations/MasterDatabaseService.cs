@@ -133,7 +133,7 @@ namespace ESME.Locations
         public void Add(PerimeterCoordinate coordinate, bool replaceExisting = false, bool saveChanges = false)
         {
             var existing = (from c in Context.PerimeterCoordinates.Local
-                            where c.Perimeter == coordinate.Perimeter
+                            where c.Perimeter == coordinate.Perimeter && c.Order == coordinate.Order
                             select c).FirstOrDefault();
             if (existing != null && !replaceExisting) throw new ArgumentException(string.Format("Perimeter {0} already has a point at index {1}.  Did you intend to replace it?", coordinate.Perimeter.Name, coordinate.Order), "coordinate");
             if (existing != null) Context.PerimeterCoordinates.Remove(existing);
