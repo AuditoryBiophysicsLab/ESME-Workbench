@@ -246,6 +246,7 @@ namespace ESME.Simulator
             //modelBuilder.Entity<TrackDefinition>().HasRequired(t => t.Platform).WithRequiredDependent(p => p.TrackDefinition);
             //modelBuilder.Entity<TrackDefinition>().HasOptional(p => p.Platform).WithRequired(t => t.TrackDefinition);
             //modelBuilder.Entity<TrackDefinition>().HasRequired(t => t.Platform).WithOptional(p => p.TrackDefinition);
+            modelBuilder.Entity<Platform>().HasOptional(p => p.Perimeter).WithOptionalDependent();
         }
 
         public class LocationDatabaseInitializer : CreateDatabaseIfNotExists<LocationContext>

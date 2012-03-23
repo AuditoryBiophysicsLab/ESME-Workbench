@@ -103,6 +103,7 @@ namespace ESME.Locations
             modelBuilder.Entity<AnimatLocation>().HasKey(a => a.ID);
             modelBuilder.Entity<AnimatLocation>().HasRequired(a => a.ScenarioSpecies);
 #endif
+            modelBuilder.Entity<Platform>().HasOptional(p => p.Perimeter).WithOptionalDependent();
         }
 
         public class LocationDatabaseInitializer : CreateDatabaseIfNotExists<LocationContext>

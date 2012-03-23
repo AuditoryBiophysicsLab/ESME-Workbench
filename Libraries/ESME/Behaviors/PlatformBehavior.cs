@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.Scenarios;
 using HRC.Navigation;
@@ -23,7 +22,7 @@ namespace ESME.Behaviors
                     foreach (var mode in source.Modes)
                     {
                         var modeTimeline = new ActivityTimeline();
-                        while (modeTimeline.Duration > _duration)
+                        while (modeTimeline.Duration < _duration)
                         {
                             modeTimeline.AddActivity(true, mode.PulseLength);
                             modeTimeline.AddActivity(false, (TimeSpan)mode.PulseInterval - mode.PulseLength);
@@ -81,6 +80,7 @@ namespace ESME.Behaviors
                 if (Platform.Perimeter != null)
                 {
                     var points = (from point in Platform.Perimeter.PerimeterCoordinates
+                                  orderby point.Order
                                   select (Geo)point.Geo).ToList();
                     bounds = new GeoRect(points);
                     perimeter = new OverlayLineSegments(points);
@@ -117,12 +117,12 @@ namespace ESME.Behaviors
                             break;
                         case TrackType.StraightLine:
                             // straight line navigation code
-                            location = location.Offset(Geo.KilometersToRadians((speed * NemoBase.SimulationStepTime.TotalSeconds) / 1000),
+                            location = location.Offset(Geo.KilometersToRadians((speed * _timeStep.TotalSeconds) / 1000),
                                                        course * (Math.PI / 180));
                             break;
                         case TrackType.PerimeterBounce:
                             // perimeter bounce navigation code here
-                            var proposedLocation = location.Offset(Geo.KilometersToRadians((speed * NemoBase.SimulationStepTime.TotalSeconds) / 1000),
+                            var proposedLocation = location.Offset(Geo.KilometersToRadians((speed * _timeStep.TotalSeconds) / 1000),
                                                                    course * (Math.PI / 180));
                             if (perimeter.Contains(proposedLocation)) location = proposedLocation;
                             else

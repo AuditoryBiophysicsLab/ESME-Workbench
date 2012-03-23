@@ -92,7 +92,7 @@ namespace ESME.Tests.Simulator
             Console.WriteLine("Creating simulation...");
             var simulation = Simulation.Create(scenario, _simulationDirectory);
             Console.WriteLine("Starting simulation...");
-            simulation.Start(10, new TimeSpan(0, 0, 0, 1));
+            simulation.Start(1000, new TimeSpan(0, 0, 0, 1));
             Console.WriteLine("Test complete");
         }
     }

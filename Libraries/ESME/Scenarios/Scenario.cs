@@ -78,15 +78,15 @@ namespace ESME.Scenarios
                             Name = perimeterName,
                             Scenario = scenario,
                         });
-                    }
-                    for (var i = 0; i < nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos.Count; i++)
-                    {
-                        masterDatabase.Add(new PerimeterCoordinate
+                        for (var i = 0; i < nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos.Count; i++)
                         {
-                            Order = i,
-                            Geo = nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos[i],
-                            Perimeter = perimeter,
-                        });
+                            masterDatabase.Add(new PerimeterCoordinate
+                            {
+                                Order = i,
+                                Geo = nemoPlatform.Trackdefs[0].OverlayFile.Shapes[0].Geos[i],
+                                Perimeter = perimeter,
+                            });
+                        }
                     }
                 }
                 Platform platform;
@@ -145,6 +145,7 @@ namespace ESME.Scenarios
                         });
                     }
                 }
+                masterDatabase.Context.SaveChanges();
             }
             foreach (var nemoAnimals in nemoFile.Scenario.Animals)
             {
