@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -166,5 +167,132 @@ namespace ESME.Locations
             Interlocked.Decrement(ref _busyCount);
             _importJobsPending.TryRemove(dataSet.Guid, out progress);
         }
+
+        readonly ConcurrentDictionary<Guid, EnvironmentalCacheBase> _cache = new ConcurrentDictionary<Guid, EnvironmentalCacheBase>();
+
+        public EnvironmentDataSetBase this[EnvironmentalDataSet dataSet]
+        {
+            get
+            {
+                EnvironmentalCacheBase requestedData; 
+                var isCached = _cache.TryGetValue(dataSet.Guid, out requestedData);
+                if (isCached)
+                {
+                    while (requestedData == null)
+                    {
+                        Thread.Sleep(50);
+                        requestedData = _cache[dataSet.Guid];
+                    }
+                    requestedData.LastAccessed = DateTime.Now;
+                    return (EnvironmentDataSetBase)requestedData.Data;
+                }
+                var added = _cache.TryAdd(dataSet.Guid, null);
+                if (!added)
+                {
+                    while (requestedData == null)
+                    {
+                        Thread.Sleep(50);
+                        requestedData = _cache[dataSet.Guid];
+                    }
+                    requestedData.LastAccessed = DateTime.Now;
+                    return (EnvironmentDataSetBase)requestedData.Data;
+                }
+                _cache[dataSet.Guid] = EnvironmentalCacheBase.Load(dataSet);
+                _cache[dataSet.Guid].LastAccessed = DateTime.Now;
+                return (EnvironmentDataSetBase)_cache[dataSet.Guid].Data;
+            } 
+        }
+    }
+
+    internal abstract class EnvironmentalCacheBase
+    {
+        public DateTime Loaded { get; protected set; }
+        public DateTime LastAccessed { get; internal set; }
+        public object Data { get; protected set; }
+        public static EnvironmentalCacheBase Load(EnvironmentalDataSet dataSet)
+        {
+            EnvironmentalCacheBase result;
+            switch (dataSet.SourcePlugin.PluginSubtype)
+            {
+                case PluginSubtype.Wind:
+                    result = new WindCacheEntry(dataSet);
+                    break;
+                case PluginSubtype.SoundSpeed:
+                    result = new SoundSpeedCacheEntry(dataSet);
+                    break;
+                case PluginSubtype.Sediment:
+                    result = new SedimentCacheEntry(dataSet);
+                    break;
+                case PluginSubtype.Bathymetry:
+                    result = new BathymetryCacheEntry(dataSet);
+                    break;
+                default:
+                    throw new ApplicationException(string.Format("Unknown environmental data type: {0}", dataSet.SourcePlugin.PluginSubtype));
+            }
+            result.Loaded = DateTime.Now;
+            return result;
+        }
+    }
+
+    internal class EnvironmentalCacheEntry<T> : EnvironmentalCacheBase where T : EnvironmentDataSetBase
+    {
+        public EnvironmentalCacheEntry(EnvironmentalDataSet dataSet) 
+        {
+            switch (dataSet.SourcePlugin.PluginSubtype)
+            {
+                case PluginSubtype.Wind:
+                    if (!(Data is Wind)) throw new EnvironmentDataTypeMismatchException(string.Format("Error loading Wind data into data cache for {0}", typeof (T)));
+                    break;
+                case PluginSubtype.SoundSpeed:
+                    if (!(Data is SoundSpeed)) throw new EnvironmentDataTypeMismatchException(string.Format("Error loading SoundSpeed data into data cache for {0}", typeof(T)));
+                    break;
+                case PluginSubtype.Sediment:
+                    if (!(Data is Sediment)) throw new EnvironmentDataTypeMismatchException(string.Format("Error loading Sediment data into data cache for {0}", typeof(T)));
+                    break;
+                case PluginSubtype.Bathymetry:
+                    if (!(Data is Bathymetry)) throw new EnvironmentDataTypeMismatchException(string.Format("Error loading Bathymetry data into data cache for {0}", typeof(T)));
+                    break;
+                default:
+                    throw new ApplicationException(string.Format("Unknown environmental data type: {0}", dataSet.SourcePlugin.PluginSubtype));
+            }
+            Loaded = DateTime.Now;
+        }
+
+        T _data;
+        public new T Data
+        {
+            get
+            {
+                LastAccessed = DateTime.Now;
+                return _data;
+            }
+            protected set { _data = value; }
+        }
+    }
+
+    internal class WindCacheEntry : EnvironmentalCacheEntry<Wind>
+    {
+        public WindCacheEntry(EnvironmentalDataSet dataSet) : base(dataSet) { Data = Wind.Load(dataSet.FileName); }
+    }
+    internal class SoundSpeedCacheEntry : EnvironmentalCacheEntry<SoundSpeed>
+    {
+        public SoundSpeedCacheEntry(EnvironmentalDataSet dataSet) : base(dataSet) { Data = SoundSpeed.Load(dataSet.FileName); }
+    }
+    internal class SedimentCacheEntry : EnvironmentalCacheEntry<Sediment>
+    {
+        public SedimentCacheEntry(EnvironmentalDataSet dataSet) : base(dataSet) { Data = Sediment.Load(dataSet.FileName); }
+    }
+    internal class BathymetryCacheEntry : EnvironmentalCacheEntry<Bathymetry>
+    {
+        public BathymetryCacheEntry(EnvironmentalDataSet dataSet) : base(dataSet) { Data = Bathymetry.Load(dataSet.FileName); }
+    }
+
+    [Serializable]
+    public class EnvironmentDataTypeMismatchException : Exception
+    {
+        public EnvironmentDataTypeMismatchException() { }
+        public EnvironmentDataTypeMismatchException(string message) : base(message) { }
+        public EnvironmentDataTypeMismatchException(string message, Exception inner) : base(message, inner) { }
+        protected EnvironmentDataTypeMismatchException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 }
