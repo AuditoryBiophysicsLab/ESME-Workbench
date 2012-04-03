@@ -94,12 +94,13 @@ namespace ESME.Animats
         #endregion
 
         #region public methods
-
+#if false
         public void RecordExposure(string modeName, int sourceID, float receieveLevel)
         {
             LevelBins[sourceID].AddExposure(receieveLevel, modeName);
             //Species.LevelBins[sourceID].AddExposure(receieveLevel, modeName);
         }
+
 
         public void SummarizeExposureToSpeciesBins()
         {
@@ -116,7 +117,8 @@ namespace ESME.Animats
                 }
             }
         }
-
+        
+#endif
         public void CreateLevelBins(int sourceCount, float lowReceiveLevel, float binWidth, int binCount)
         {
             Species.CreateLevelBins(sourceCount, lowReceiveLevel, binWidth, binCount);
@@ -126,6 +128,7 @@ namespace ESME.Animats
                 LevelBins[i] = new SourceRecieverLevelBins(lowReceiveLevel, binWidth, binCount);
         }
 
+#if false
         public void AddAnimatRecord(XElement sourceElement)
         {
             var animat = new XElement("Animat");
@@ -140,7 +143,8 @@ namespace ESME.Animats
             }
             animat.Add(sources);
             sourceElement.Add(animat);
-        }
+        } 
+#endif
 
         #endregion
     }
@@ -229,12 +233,14 @@ namespace ESME.Animats
         [XmlIgnore]
         public SpeciesList SpeciesList { get; set; }
 
+#if false
         public void AddAnimatList(XElement rootElement)
         {
             var animats = new XElement("Animats");
             foreach (var a in this) a.AddAnimatRecord(animats);
             rootElement.Add(animats);
-        }
+        } 
+#endif
 
         public new void Add(Animat animat)
         {

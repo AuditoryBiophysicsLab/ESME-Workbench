@@ -237,8 +237,8 @@ namespace ESMEWorkbench.ViewModels.Main
 
         void Complete()
         {
-            _experiment.AnimatInterface.SummarizeAnimatExposuresToSpeciesBins();
-            _experiment.AnimatInterface.WriteSpeciesLevelBins(OutputFileName);
+            //_experiment.AnimatInterface.SummarizeAnimatExposuresToSpeciesBins();
+            //_experiment.AnimatInterface.WriteSpeciesLevelBins(OutputFileName);
             CloseActivePopUpCommand.Execute(true);
         }
 
@@ -309,7 +309,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                         var transmissionLoss = transmissionLossField.Lookup(animatBearing, animatRange, (float) animat.Location.Data);
                                         var soundPressureLevel = mode.SourceLevel - transmissionLoss;
                                         animat.CreateLevelBins(modeCount, 120, 6, 15);
-                                        animat.RecordExposure(mode.PSMName, mode.ModeID, soundPressureLevel);
+                                        //animat.RecordExposure(mode.PSMName, mode.ModeID, soundPressureLevel);
                                     }
                                     //if (platform.BehaviorModel.PlatformStates[curTime].ActiveSourceStates
                                 }

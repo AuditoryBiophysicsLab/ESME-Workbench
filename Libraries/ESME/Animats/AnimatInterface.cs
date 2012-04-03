@@ -151,11 +151,13 @@ namespace ESME.Animats
                    };
         }
 
+#if false
         public void SummarizeAnimatExposuresToSpeciesBins()
         {
             foreach (var animat in AnimatList)
                 animat.SummarizeExposureToSpeciesBins();
-        }
+        } 
+
 
         public void WriteSpeciesLevelBins(string filename)
         {
@@ -198,7 +200,7 @@ namespace ESME.Animats
                 }
             }
         }
-
+#endif
         public void OutputLogFile(string logPath)
         {
             //matlab-friendly csv output of positions

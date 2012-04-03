@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml.Linq;
+using ESME.Scenarios;
 
 namespace ESME.Simulator
 {
@@ -17,8 +19,6 @@ namespace ESME.Simulator
         /// </summary>
         public float BinWidth { get; set; }
 
-        public string ModeName { get; set; }
-
         /// <summary>
         /// The actual array of recieved level bins
         /// </summary>
@@ -31,15 +31,15 @@ namespace ESME.Simulator
             Bins = new int[binCount + 2];
         }
 
-        public void AddExposure(float exposureLevel, string modeName)
+        public void AddExposure(float exposureLevel)
         {
-            if (ModeName != modeName) ModeName = modeName;
             int bin;
             if (exposureLevel < LowExposureLevel) bin = 0;
-            else bin = (int) Math.Min(((exposureLevel - LowExposureLevel)/BinWidth) + 1, Bins.Length - 1);
+            else bin = (int)Math.Min(((exposureLevel - LowExposureLevel) / BinWidth) + 1, Bins.Length - 1);
             Bins[bin]++;
         }
 
+#if false
         public void WriteSummaryHeader(StreamWriter stream)
         {
             stream.WriteLine("Bins widths (dB SPL re: 1 uPa):,{0}", BinWidth);
@@ -113,6 +113,7 @@ namespace ESME.Simulator
             var exposureBins = new XElement("ExposureBins");
             foreach (var bin in Bins) exposureBins.Add(new XElement("ExposureBin", bin));
             sourceElement.Add(exposureBins);
-        }
+        } 
+#endif
     }
 }
