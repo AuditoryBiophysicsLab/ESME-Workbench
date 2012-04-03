@@ -194,6 +194,7 @@
     <Compile Include="Utility\Minidump.cs" />
     <Compile Include="Utility\NotifyIcon.cs" />
     <Compile Include="Utility\NotifyIcon.Interop.cs" />
+    <Compile Include="Utility\NTFS.cs" />
     <Compile Include="Utility\OSInfo.cs" />
     <Compile Include="Utility\PercentProgress.cs" />
     <Compile Include="Utility\ProgressInfo.cs" />

@@ -53,7 +53,7 @@ namespace ESME.NEMO.Overlay
             protected set {throw new NotImplementedException(); }
         }
         public virtual bool Contains(Geo location) { throw new NotImplementedException(); }
-        public virtual Geo Bounce(Geo startLocation, Geo proposedEndLocation) { throw new NotImplementedException(); }
+        public virtual Geo Reflect(Geo startLocation, Geo proposedEndLocation, out Course proposedCourse) { throw new NotImplementedException(); }
         public abstract string WellKnownText { get; }
         //public Rect BoundingBox { get; private set; }
         public GeoRect GeoRect { get; private set; }

@@ -27,6 +27,10 @@ namespace ESME.Locations
         public DbSet<Perimeter> Perimeters { get; set; }
         public DbSet<PerimeterCoordinate> PerimeterCoordinates { get; set; }
         public DbSet<ScenarioSpecies> ScenarioSpecies { get; set; }
+        public DbSet<AnalysisPoint> AnalysisPoints { get; set; }
+        public DbSet<Scenarios.TransmissionLoss> TransmissionLosses { get; set; }
+        public DbSet<Radial> Radials { get; set; }
+        public DbSet<LevelRadius> LevelRadii { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -103,7 +107,7 @@ namespace ESME.Locations
             modelBuilder.Entity<AnimatLocation>().HasKey(a => a.ID);
             modelBuilder.Entity<AnimatLocation>().HasRequired(a => a.ScenarioSpecies);
 #endif
-            modelBuilder.Entity<Platform>().HasOptional(p => p.Perimeter).WithOptionalDependent();
+            modelBuilder.Entity<Platform>().HasOptional(p => p.Perimeter).WithMany();
         }
 
         public class LocationDatabaseInitializer : CreateDatabaseIfNotExists<LocationContext>

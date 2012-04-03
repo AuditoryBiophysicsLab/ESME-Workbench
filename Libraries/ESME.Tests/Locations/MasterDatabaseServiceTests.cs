@@ -3,11 +3,11 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using ESME.Database.Importers;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Locations;
 using ESME.Plugins;
+using ESME.Tests.Common;
 using NUnit.Framework;
 
 namespace ESME.Tests.Locations
@@ -50,50 +50,7 @@ namespace ESME.Tests.Locations
             // Bathymetry dataset at 0.5min resolution
             database.CreateEnvironmentalDataSet(location, 0.5f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier);
             //NemoFile.Import(@"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Jacksonville\BU Test Sample.nemo", @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas", location, database);
-            DumpLocationDatabase(database);
-        }
-
-        public void DumpLocationDatabase(MasterDatabaseService locationService, bool dumpLogs = false)
-        {
-            foreach (var location in locationService.Locations)
-            {
-                DumpLocation(location);
-                if (dumpLogs) foreach (var logEntry in location.Logs) DumpLogEntry(logEntry);
-                if (location.EnvironmentalDataSets != null)
-                    foreach (var dataSet in location.EnvironmentalDataSets)
-                        DumpEnvironmentalDataSet(dataSet);
-            }
-        }
-
-        public void DumpLocation(Location location)
-        {
-            Console.WriteLine("       Location name: {0}", location.Name);
-            //Console.WriteLine("  Location ID: {0}", location.LocationID);
-            Console.WriteLine("            Comments: {0}", location.Comments);
-            Console.WriteLine("               North: {0}", location.GeoRect.North);
-            Console.WriteLine("               South: {0}", location.GeoRect.South);
-            Console.WriteLine("                East: {0}", location.GeoRect.East);
-            Console.WriteLine("                West: {0}", location.GeoRect.West);
-            Console.WriteLine("           Directory: {0}", location.StorageDirectory);
-            if (location.EnvironmentalDataSets == null)
-                Console.WriteLine("           Data sets: (none)");
-            else
-                Console.WriteLine("           Data sets: {0}", location.EnvironmentalDataSets.Count);
-        }
-
-        public void DumpEnvironmentalDataSet(EnvironmentalDataSet dataSet)
-        {
-            Console.WriteLine("            Data set file: {0} ({1} bytes)", dataSet.FileName, dataSet.FileSize);
-            Console.WriteLine("               Resolution: {0} ({1} samples)", dataSet.Resolution, dataSet.SampleCount);
-            if (dataSet.TimePeriod != TimePeriod.Invalid)
-                Console.WriteLine("              Time period: {0}", dataSet.TimePeriod);
-        }
-
-        public void DumpLogEntry(LogEntry logEntry)
-        {
-            Console.WriteLine("           Log message: {0}", logEntry.Message);
-            Console.WriteLine("             Logged by: {0}", logEntry.MessageSource);
-            Console.WriteLine("           Source Guid: {0}", logEntry.SourceGuid);
+            TestLocation.Dump(database);
         }
     }
 

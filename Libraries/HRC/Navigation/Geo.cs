@@ -197,9 +197,14 @@ namespace HRC.Navigation
         protected void UpdateLatitudeLongitude()
         {
             _latitudeRadians = GeographicLatitude(Math.Atan2(Z, Math.Sqrt(X * X + Y * Y)));
+            if (double.IsNaN(_latitudeRadians)) throw new InvalidOperationException("NaN is an invalid value for LatitudeRadians");
             _latitudeDegrees = RadiansToDegrees(_latitudeRadians);
+            if (double.IsNaN(_latitudeDegrees)) throw new InvalidOperationException("NaN is an invalid value for Latitude");
             _longitudeRadians = Math.Atan2(Y, X);
+            if (double.IsNaN(_longitudeRadians)) throw new InvalidOperationException("NaN is an invalid value for LongitudeRadians");
             _longitudeDegrees = RadiansToDegrees(_longitudeRadians);
+            if (double.IsNaN(_longitudeDegrees)) throw new InvalidOperationException("NaN is an invalid value for Longitude");
+
             NotifyPropertyChanged(LatitudeChangedEventArgs);
             NotifyPropertyChanged(LongitudeChangedEventArgs);
             NotifyPropertyChanged(LatitudeRadiansChangedEventArgs);

@@ -150,6 +150,47 @@ namespace ESME.Locations
             Log(species, "Added new species {0} to scenario {1} in location {2}", species.LatinName, species.Scenario.Name, species.Scenario.Location.Name);
             if (saveChanges) SaveChanges();
         }
+
+        public void Add(AnalysisPoint analysisPoint, bool saveChanges = false)
+        {
+            var existing = (from a in Context.AnalysisPoints
+                            where a.Geo.Latitude == analysisPoint.Geo.Latitude && a.Geo.Longitude == analysisPoint.Geo.Longitude
+                            select a).FirstOrDefault();
+            if (existing != null) throw new DuplicateNameException(String.Format("An analysis point already exists at {0}, choose another location or edit the existing point", (Geo)analysisPoint.Geo));
+            Context.AnalysisPoints.Add(analysisPoint);
+            Log(analysisPoint, "Added new analysis point at {0} to scenario {1} in location {2}", (Geo)analysisPoint.Geo, analysisPoint.Scenario, analysisPoint.Scenario.Location);
+            if (saveChanges) SaveChanges();
+        }
+        public void Add(Scenarios.TransmissionLoss transmissionLoss, bool saveChanges = false)
+        {
+            var existing = (from t in Context.TransmissionLosses
+                            where t.Mode.Guid == transmissionLoss.Mode.Guid && t.AnalysisPoint.Guid == transmissionLoss.AnalysisPoint.Guid
+                            select t).FirstOrDefault();
+            if (existing != null) throw new DuplicateNameException(String.Format("A transmission loss for mode {0} already exists for the analysis point at {1}", transmissionLoss.Mode.ModeName, (Geo)transmissionLoss.AnalysisPoint.Geo));
+            Context.TransmissionLosses.Add(transmissionLoss);
+            Log(transmissionLoss, "Added new transmission loss for mode {0} to analysis point at {1} to scenario {2} in location {3}", transmissionLoss.Mode.ModeName, (Geo)transmissionLoss.AnalysisPoint.Geo, transmissionLoss.AnalysisPoint.Scenario, transmissionLoss.AnalysisPoint.Scenario.Location);
+            if (saveChanges) SaveChanges();
+        }
+        public void Add(Radial radial, bool saveChanges = false)
+        {
+            var existing = (from r in Context.Radials
+                            where r.Bearing == radial.Bearing && r.TransmissionLoss.Guid == radial.TransmissionLoss.Guid
+                            select r).FirstOrDefault();
+            if (existing != null) throw new DuplicateNameException(String.Format("A radial with bearing {0} already exists in the transmission loss for mode {1} in analysis point at {2}", radial.Bearing, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo));
+            Context.Radials.Add(radial);
+            Log(radial, "Added new radial with bearing {0} and length {1} to transmission loss for mode {2} in analysis point at {3} to scenario {4} in location {5}", radial.Bearing, radial.Length, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo, radial.TransmissionLoss.AnalysisPoint.Scenario, radial.TransmissionLoss.AnalysisPoint.Scenario.Location);
+            if (saveChanges) SaveChanges();
+        }
+        public void Add(LevelRadius levelRadius, bool saveChanges = false)
+        {
+            var existing = (from lr in Context.LevelRadii
+                            where lr.Level == levelRadius.Level && lr.Radial.Guid == levelRadius.Radial.Guid
+                            select lr).FirstOrDefault();
+            if (existing != null) throw new DuplicateNameException(String.Format("A LevelRadius with level {0} already exists for radial with bearing {1} already exists in the transmission loss for mode {2} in analysis point at {3}", levelRadius.Level, levelRadius.Radial.Bearing, levelRadius.Radial.TransmissionLoss.Mode.ModeName, (Geo)levelRadius.Radial.TransmissionLoss.AnalysisPoint.Geo));
+            Context.LevelRadii.Add(levelRadius);
+            Log(levelRadius, "Added new radius at level {0} on radial with bearing {1} and length {2} in transmission loss for mode {3} in analysis point at {4} to scenario {5} in location {6}", levelRadius.Level, levelRadius.Radial.Bearing, levelRadius.Radial.Length, levelRadius.Radial.TransmissionLoss.Mode.ModeName, (Geo)levelRadius.Radial.TransmissionLoss.AnalysisPoint.Geo, levelRadius.Radial.TransmissionLoss.AnalysisPoint.Scenario, levelRadius.Radial.TransmissionLoss.AnalysisPoint.Scenario.Location);
+            if (saveChanges) SaveChanges();
+        }
         #endregion
 
         #region Create operations for Locations
@@ -321,6 +362,10 @@ namespace ESME.Locations
         void Log(Mode mode, string message, params object[] args) { LogBase(new LogEntry(mode) { Location = mode.Source.Platform.Scenario.Location, Scenario = mode.Source.Platform.Scenario, Platform = mode.Source.Platform, Source = mode.Source, Mode = mode }, message, args); }
         void Log(Perimeter perimeter, string message, params object[] args) { LogBase(new LogEntry(perimeter) { Location = perimeter.Scenario.Location, Scenario = perimeter.Scenario, Perimeter = perimeter }, message, args); }
         void Log(ScenarioSpecies species, string message, params object[] args) { LogBase(new LogEntry(species) { Location = species.Scenario.Location, Scenario = species.Scenario, ScenarioSpecies = species }, message, args); }
+        void Log(AnalysisPoint analysisPoint, string message, params object[] args) { LogBase(new LogEntry(analysisPoint) { Location = analysisPoint.Scenario.Location, Scenario = analysisPoint.Scenario, AnalysisPoint = analysisPoint }, message, args); }
+        void Log(Scenarios.TransmissionLoss transmissionLoss, string message, params object[] args) { LogBase(new LogEntry(transmissionLoss) { Location = transmissionLoss.AnalysisPoint.Scenario.Location, Scenario = transmissionLoss.AnalysisPoint.Scenario, TransmissionLoss = transmissionLoss }, message, args); }
+        void Log(Radial radial, string message, params object[] args) { LogBase(new LogEntry(radial) { Location = radial.TransmissionLoss.AnalysisPoint.Scenario.Location, Scenario = radial.TransmissionLoss.AnalysisPoint.Scenario, Radial = radial }, message, args); }
+        void Log(LevelRadius levelRadius, string message, params object[] args) { LogBase(new LogEntry(levelRadius) { Location = levelRadius.Radial.TransmissionLoss.AnalysisPoint.Scenario.Location, Scenario = levelRadius.Radial.TransmissionLoss.AnalysisPoint.Scenario, LevelRadius = levelRadius }, message, args); }
 #else
         internal void Log(Location location, string message) { LogBase(new LogEntry(location), message); }
         internal void Log(EnvironmentalDataSet dataSet, string message) { LogBase(new LogEntry(dataSet), message); }

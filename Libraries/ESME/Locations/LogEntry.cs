@@ -25,6 +25,10 @@ namespace ESME.Locations
         public virtual Mode Mode { get; set; }
         public virtual Perimeter Perimeter { get; set; }
         public virtual ScenarioSpecies ScenarioSpecies { get; set; }
+        public virtual AnalysisPoint AnalysisPoint { get; set; }
+        public virtual Scenarios.TransmissionLoss TransmissionLoss { get; set; }
+        public virtual Radial Radial { get; set; }
+        public virtual LevelRadius LevelRadius { get; set; }
 #endif
     }
 }

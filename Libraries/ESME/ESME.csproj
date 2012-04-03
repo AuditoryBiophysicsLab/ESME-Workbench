@@ -154,6 +154,7 @@
     <Compile Include="Database\PSMContext.cs" />
     <Compile Include="Locations\LocationContext.cs" />
     <Compile Include="Locations\LogEntry.cs" />
+    <Compile Include="Scenarios\AnalysisPoint.cs" />
     <Compile Include="Scenarios\AnimatLocation.cs" />
     <Compile Include="Scenarios\Mode.cs" />
     <Compile Include="Scenarios\Perimeter.cs" />

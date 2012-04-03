@@ -52,7 +52,8 @@ namespace ESME.Behaviors
             PlatformStates = new PlatformStates();
             NemoTrackdef curTrackdef = null;
             var curLocation = new Geo();
-            double curCourseDegrees = 0;
+            Course course = null;
+            //double curCourseDegrees = 0;
             double curSpeedMetersPerSecond = 0;
             var overlayPoints = new List<Geo>();
             OverlayShape curTrackBoundingRegion = null;
@@ -78,13 +79,13 @@ namespace ESME.Behaviors
                             // make this trackdef the current one
                             curTrackdef = trackdef;
                             curLocation = curTrackdef.InitialLocation;
-                            curCourseDegrees = curTrackdef.InitialCourse;
-                            curSpeedMetersPerSecond = curTrackdef.InitialSpeed*0.514444444f;
+                            course = new Course(curTrackdef.InitialCourse);
+                            curSpeedMetersPerSecond = curTrackdef.InitialSpeed * 0.514444444f;
                             CourseChangePoints.Add(new CourseChangeDatum
                             {
                                 IsStart = true,
                                 Location = curLocation,
-                                NewCourse = curCourseDegrees,
+                                NewCourse = course.Degrees,
                             });
 
                             // Conversion factor for knots to meters per second
@@ -124,12 +125,12 @@ namespace ESME.Behaviors
                         case "straight_line":
                             // straight line navigation code
                             curLocation = curLocation.Offset(Geo.KilometersToRadians((curSpeedMetersPerSecond * NemoBase.SimulationStepTime.TotalSeconds) / 1000),
-                                                             curCourseDegrees * (Math.PI / 180));
+                                                             course.Radians);
                             break;
                         case "perimeter_bounce":
                             // perimeter bounce navigation code here
                             var proposedLocation = curLocation.Offset(Geo.KilometersToRadians((curSpeedMetersPerSecond * NemoBase.SimulationStepTime.TotalSeconds) / 1000),
-                                                                      curCourseDegrees * (Math.PI / 180));
+                                                                      course.Radians);
                             //proposedLocation = new EarthCoordinate3D(curLocation);
                             //proposedLocation.Move(curCourseDegrees, curSpeedMetersPerSecond*NemoBase.SimulationStepTime.TotalSeconds);
                             if (curTrackBoundingRegion == null) throw new PlatformBehaviorException("Platform behavior is specified as Perimeter Bounce, but no bounding shape was specified");
@@ -137,23 +138,24 @@ namespace ESME.Behaviors
                             else
                             {
                                 //curLocation.Compare(proposedLocation);
-                                proposedLocation = new Geo(curTrackBoundingRegion.Bounce(curLocation, proposedLocation));
+                                Course proposedCourse;
+                                proposedLocation = new Geo(curTrackBoundingRegion.Reflect(curLocation, proposedLocation, out proposedCourse));
                                 if (!curTrackBoundingRegion.Contains(proposedLocation))
                                 {
-                                    proposedLocation = new Geo(curTrackBoundingRegion.Bounce(curLocation, proposedLocation));
+                                    proposedLocation = new Geo(curTrackBoundingRegion.Reflect(curLocation, proposedLocation, out proposedCourse));
                                     if (!curTrackBoundingRegion.Contains(proposedLocation)) throw new PlatformMovementException("Two reflections failed to keep the platform inside the bounding region.  Please check the bounding region closely for small pockets or other irregularities");
                                 }
 
-                                var newCourseDegrees = new Course(curLocation, proposedLocation).Degrees;
+                                var newCourse = new Course(curLocation, proposedLocation);
                                 CourseChangePoints.Add(new CourseChangeDatum
                                 {
                                     Location = curLocation,
-                                    OldCourse = curCourseDegrees,
-                                    NewCourse = newCourseDegrees,
+                                    OldCourse = course.Degrees,
+                                    NewCourse = newCourse.Degrees,
                                 });
 
                                 //curLocation.Compare(proposedLocation);
-                                curCourseDegrees = newCourseDegrees;
+                                course = newCourse;
                                 curLocation = new Geo(proposedLocation);
                                 if (!curTrackBoundingRegion.Contains(curLocation)) throw new PlatformMovementException("Reflected position is outside the bounding region");
                                 overlayPoints.Add(curLocation);
@@ -169,7 +171,7 @@ namespace ESME.Behaviors
                 PlatformStates.Add(new PlatformLocation
                                    {
                                        Location = curLocation,
-                                       Course = (float) curCourseDegrees,
+                                       Course = (float) course.Degrees,
                                        Speed = (float) curSpeedMetersPerSecond,
                                        //SimulationTime = currentTime
                                    });
@@ -181,7 +183,7 @@ namespace ESME.Behaviors
             {
                 IsEnd = true,
                 Location = curLocation,
-                OldCourse = curCourseDegrees,
+                OldCourse = course.Degrees,
             });
 
             CourseStart = new OverlayPoint(NemoPlatform.Trackdefs[0].InitialLocation, Colors.Green, 2);

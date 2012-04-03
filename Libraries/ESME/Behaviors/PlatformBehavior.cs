@@ -70,7 +70,7 @@ namespace ESME.Behaviors
                 var result = new List<PlatformLocation>();
                 var random = new Random();
                 Geo location;
-                double course;
+                Course course;
                 OverlayLineSegments perimeter = null;
                 GeoRect bounds = null;
                 var trackType = (TrackType)Platform.TrackType;
@@ -97,12 +97,12 @@ namespace ESME.Behaviors
                 {
                     location = new Geo(-90, 0);
                     while (!bounds.Contains(location)) location = new Geo(bounds.South + (random.NextDouble() * bounds.Height), bounds.West + (random.NextDouble() * bounds.Width));
-                    course = random.NextDouble() * 360.0;
+                    course = new Course(random.NextDouble() * 360.0);
                 }
                 else
                 {
                     location = new Geo(Platform.Geo);
-                    course = Platform.Course;
+                    course = new Course(Platform.Course);
                 }
                 var speed = Platform.Speed * 0.514444444f;
 
@@ -118,26 +118,30 @@ namespace ESME.Behaviors
                         case TrackType.StraightLine:
                             // straight line navigation code
                             location = location.Offset(Geo.KilometersToRadians((speed * _timeStep.TotalSeconds) / 1000),
-                                                       course * (Math.PI / 180));
+                                                       course.Radians);
                             break;
                         case TrackType.PerimeterBounce:
                             // perimeter bounce navigation code here
                             var proposedLocation = location.Offset(Geo.KilometersToRadians((speed * _timeStep.TotalSeconds) / 1000),
-                                                                   course * (Math.PI / 180));
+                                                                   course.Radians);
                             if (perimeter.Contains(proposedLocation)) location = proposedLocation;
                             else
                             {
                                 //curLocation.Compare(proposedLocation);
-                                proposedLocation = new Geo(perimeter.Bounce(location, proposedLocation));
+                                Course proposedCourse;
+                                Console.WriteLine("At time step {0}, {1} crossed the perimeter at ({2}, {3}) while on course {4}", timeStep, Platform.PlatformName, proposedLocation.Latitude, proposedLocation.Longitude, course);
+                                proposedLocation = new Geo(perimeter.Reflect(location, proposedLocation, out proposedCourse));
+                                Console.WriteLine("  Bounced location: ({0}, {1}) and course {2}", proposedLocation.Latitude, proposedLocation.Longitude, new Course(location, proposedLocation).Degrees);
                                 if (!perimeter.Contains(proposedLocation))
                                 {
-                                    proposedLocation = new Geo(perimeter.Bounce(location, proposedLocation));
+                                    proposedLocation = new Geo(perimeter.Reflect(location, proposedLocation, out proposedCourse));
+                                    Console.WriteLine("  Bounced location (2): ({0}, {1}) and course {2}", proposedLocation.Latitude, proposedLocation.Longitude, new Course(location, proposedLocation).Degrees);
                                     if (!perimeter.Contains(proposedLocation))
                                         throw new PlatformMovementException(
                                             "Two reflections failed to keep the platform inside the bounding region.  Please check the bounding region closely for small pockets or other irregularities");
                                 }
 
-                                var newCourse = new Course(location, proposedLocation).Degrees;
+                                var newCourse = new Course(location, proposedLocation);
 
                                 course = newCourse;
                                 location = new Geo(proposedLocation);
@@ -149,7 +153,7 @@ namespace ESME.Behaviors
                     result.Add(new PlatformLocation
                     {
                         Location = new Geo(location),
-                        Course = (float)course,
+                        Course = (float)course.Degrees,
                         Speed = speed,
                         Depth = Platform.Depth,
                     });

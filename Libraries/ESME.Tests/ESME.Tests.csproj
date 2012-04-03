@@ -86,10 +86,12 @@
   <ItemGroup>
     <Compile Include="Behaviors\ActivityTimelineTests.cs" />
     <Compile Include="Class1.cs" />
+    <Compile Include="Common\TestLocation.cs" />
     <Compile Include="Environment\EnvironmentDataTests.cs" />
     <Compile Include="Locations\MasterDatabaseServiceTests.cs" />
     <Compile Include="Plugins\PluginManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scenarios\AnalysisPointTests.cs" />
     <Compile Include="Settings\SettingsBaseTests.cs" />
     <Compile Include="Settings\SettingsServiceTests.cs" />
     <Compile Include="Simulator\SimulationLogTests.cs" />

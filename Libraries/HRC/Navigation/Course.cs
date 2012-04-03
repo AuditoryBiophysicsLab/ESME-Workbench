@@ -25,6 +25,12 @@ namespace HRC.Navigation
             Normalize();
         }
 
+        public Course(Course course)
+        {
+            _course = course._course;
+            Normalize();
+        }
+
         /// <summary>
         /// Create a new Course object, which will be initialized with the course required to get from initialPoint to finalPoint
         /// </summary>
@@ -39,21 +45,11 @@ namespace HRC.Navigation
         public double Degrees
         {
             get { return _course; }
-            set
-            {
-                _course = value;
-                Normalize();
-            }
         }
 
         public double Radians
         {
             get { return _course*DegreesToRadians; }
-            set
-            {
-                _course = value*RadiansToDegrees;
-                Normalize();
-            }
         }
 
         public static Course operator +(Course c1, Course c2) { return new Course(c1.Degrees + c2.Degrees); }
@@ -71,7 +67,7 @@ namespace HRC.Navigation
         // Reflects a bearing given the normal vector (bearing) of the reflecting surface.
         // For correct results, please ensure the normal vector is pointing towards the inbound
         // bearing vector.
-        public void Reflect(Course normalToReflector)
+        public Course Reflect(Course normalToReflector)
         {
             var myX = Math.Sin(Radians);
             var myY = Math.Cos(Radians);
@@ -83,8 +79,7 @@ namespace HRC.Navigation
             var newX = myX - (2*dot*normX);
             var newY = myY - (2*dot*normY);
 
-            _course = Math.Atan2(newX, newY)*RadiansToDegrees;
-            Normalize();
+            return new Course(Math.Atan2(newX, newY) * RadiansToDegrees);
         }
 
         // Normalize the bearing to +/- 180 degrees

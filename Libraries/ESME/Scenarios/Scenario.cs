@@ -32,6 +32,7 @@ namespace ESME.Scenarios
 
         public virtual ICollection<Platform> Platforms { get; set; }
         public virtual ICollection<ScenarioSpecies> ScenarioSpecies { get; set; }
+        public virtual ICollection<AnalysisPoint> AnalysisPoints { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
 
         #region Importer for NEMO files
@@ -169,5 +170,13 @@ namespace ESME.Scenarios
             return scenario;
         }
         #endregion
+    }
+
+    public static class ScenarioExensions
+    {
+        public static IEnumerable<Mode> GetAllModes(this Scenario scenario) 
+        {
+            return scenario.Platforms.SelectMany(platform => platform.Sources.SelectMany(source => source.Modes));
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿//#define MATLAB_DEBUG_OUTPUT
+﻿#define MATLAB_DEBUG_OUTPUT
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -108,10 +108,10 @@ namespace ESME.NEMO.Overlay
                     {
                         var edgeNormalCourse = new Course(this[i], this[i + 1]);
                         var trialCw = Segments[i].Midpoint;
-                        edgeNormalCourse.Degrees += 90;
+                        edgeNormalCourse = edgeNormalCourse + 90;
                         trialCw = trialCw.Move(edgeNormalCourse.Degrees, 100);
                         if (Contains(trialCw))
-                            Normals[i] = new Course(edgeNormalCourse.Degrees);
+                            Normals[i] = new Course(edgeNormalCourse);
                         else
                             Normals[i] = new Course(edgeNormalCourse.Reciprocal);
                     }
@@ -134,22 +134,24 @@ namespace ESME.NEMO.Overlay
 #endif
 
         /// <summary>
-        /// Takes a start location and a proposed end location, and returns a 'bounced' end location
+        /// Takes a start location and a proposed end location, and returns a reflected end location
         /// If the proposed end location is outside of the current figure, the end location is reflected
         /// by the normal to the intersecting segment, and returned to the caller.  If the proposed end
         /// location is inside the current figure, then it is simply returned to the caller.
         /// </summary>
         /// <param name="startLocation">Start location for the current proposed move</param>
         /// <param name="proposedEndLocation">End location for the current proposed move</param>
+        /// <param name="proposedCourse"> </param>
         /// <returns>Actual end location that remains inside the figure, which may be reflected from the
         /// proposed end location provided if the proposed end location lies outside the figure</returns>
-        public override Geo Bounce(Geo startLocation, Geo proposedEndLocation)
+        public override Geo Reflect(Geo startLocation, Geo proposedEndLocation, out Course proposedCourse)
         {
             //Geo start = new Geo(StartLocation);
             //Geo end = new Geo(ProposedEndLocation);
 #if MATLAB_DEBUG_OUTPUT
             MatlabDumpVertices();
 #endif
+            proposedCourse = new Course(startLocation, proposedEndLocation);
             if (Contains(proposedEndLocation))
                 return proposedEndLocation;
 
@@ -160,7 +162,7 @@ namespace ESME.NEMO.Overlay
                 startLocation.Longitude, startLocation.Latitude, 
                 proposedEndLocation.Longitude, proposedEndLocation.Latitude);
 #endif
-            var proposedCourse = new Course(startLocation, proposedEndLocation);
+            
             var proposedCourseSegment = new OverlayLineSegment(startLocation, proposedEndLocation);
             for (var i = 0; i < Segments.Count(); i++)
             {
@@ -168,9 +170,9 @@ namespace ESME.NEMO.Overlay
 #if MATLAB_DEBUG_OUTPUT
                 Console.WriteLine("Intersects({0},:)=[{1} {2}];", i + 1, intersect.Longitude, intersect.Latitude);
 #endif
-                if (intersect == null) continue;
+                //if (intersect == null) continue;
                 if (!proposedCourseSegment.Contains(intersect) || !Segments[i].Contains(intersect)) continue;
-                proposedCourse.Reflect(Normals[i]);
+                proposedCourse = proposedCourse.Reflect(Normals[i]);
                 var distance = startLocation.DistanceKilometers(proposedEndLocation);
                 var result = startLocation.Offset(Geo.KilometersToRadians(distance), proposedCourse.Radians);
                 return result;
