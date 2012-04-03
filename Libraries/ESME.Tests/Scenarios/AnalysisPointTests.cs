@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using ESME.Locations;
 using ESME.Scenarios;
@@ -68,11 +69,14 @@ namespace ESME.Tests.Scenarios
             Console.WriteLine("Found {0} analysis points", scenario.AnalysisPoints.Count);
             foreach (var analysisPoint in scenario.AnalysisPoints)
             {
-                Console.WriteLine("  Analysis point at {0} contains {1} transmission loss jobs", analysisPoint.Geo, analysisPoint.TransmissionLosses.Count);
+                Console.WriteLine("  Analysis point at {0} contains {1} transmission loss jobs", (Geo)analysisPoint.Geo, analysisPoint.TransmissionLosses.Count);
                 foreach (var transmissionLoss in analysisPoint.TransmissionLosses)
                 {
-                    Console.WriteLine("    Transmission loss job found for platform {0}, source {1}, mode {2}", transmissionLoss.Mode.Source.Platform.PlatformName, transmissionLoss.Mode.Source.SourceName, transmissionLoss.Mode.ModeName);
-                    foreach (var radial in transmissionLoss.Radials)
+                    Console.WriteLine("    Transmission loss job for platform {0}, source {1}, mode {2} has {3} radials", transmissionLoss.Mode.Source.Platform.PlatformName, transmissionLoss.Mode.Source.SourceName, transmissionLoss.Mode.ModeName, transmissionLoss.Radials.Count);
+                    var radials = from r in transmissionLoss.Radials
+                                  orderby r.Bearing
+                                  select r;
+                    foreach (var radial in radials)
                     {
                         Console.WriteLine("      Radial at bearing {0} and length {1}", radial.Bearing, radial.Length);
                     }
