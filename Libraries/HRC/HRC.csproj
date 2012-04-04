@@ -144,9 +144,8 @@
     <Compile Include="LinqStatistics\EnumerableStatsVarianceP.cs" />
     <Compile Include="Navigation\BoundingCircle.cs" />
     <Compile Include="Navigation\ConvexHull.cs" />
+    <Compile Include="Navigation\OldGeo.cs" />
     <Compile Include="Navigation\Course.cs" />
-    <Compile Include="Navigation\EarthCoordinate.cs" />
-    <Compile Include="Navigation\EarthCoordinate3DTypeConverter.cs" />
     <Compile Include="Navigation\Geo.cs" />
     <Compile Include="Navigation\GeoPath.cs" />
     <Compile Include="Navigation\GeoPoint.cs" />
@@ -159,7 +158,6 @@
     <Compile Include="Navigation\Limits.cs" />
     <Compile Include="Navigation\Planet.cs" />
     <Compile Include="Navigation\Rotation.cs" />
-    <Compile Include="Navigation\TrackPoint.cs" />
     <Compile Include="Navigation\UTM.cs" />
     <Compile Include="NetCDF\NetCDFFile.cs" />
     <Compile Include="NetCDF\NcAtt.cs" />
@@ -169,7 +167,6 @@
     <Compile Include="NetCDF\NcVar.cs" />
     <Compile Include="NetCDF\NetCDFReaders.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Navigation\EarthCoordinateTypeConverter.cs" />
     <Compile Include="Services\HRCColorPickerService.cs" />
     <Compile Include="Services\HRCOpenFileService.cs" />
     <Compile Include="Services\HRCSaveFileService.cs" />

@@ -2,16 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace HRC.Navigation
 {
     public class Limits
     {
-        // used as a zero reference
-        static readonly TrackPoint ZeroPosit = new TrackPoint();
-
         // used as a default Limit
         public static Limits Root = new Limits();
 
@@ -256,111 +252,6 @@ namespace HRC.Navigation
             return result;
         }
 
-        /**
-    * create a Limits from parameters range and arc. the beam pattern in created
-    * at geographical location 0, 0 lat, long, facing north. to use it, it must
-    * be relocated to the current position and course
-    * 
-    * @param double aRadius - radius in meters
-    * @param double aBeamWidth - beam width in degrees
-    * @param double relAngle - relative angular offset -180/+180
-    * @return - an Limits
-    */
-        public static Limits CreateBeamPattern(double aRadius, double aBeamWidth, double relAngle) { return CreateBeamPatternAt(ZeroPosit, aRadius, aBeamWidth, relAngle); }
-
-        /**
-    * @see createBeamPattern
-    * @param posit
-    *           - position to create beam pattern at.
-    * @return
-    */
-
-        public static Limits CreateBeamPatternAt(TrackPoint posit, double aRadius, double aBeamWidth, double relAngle)
-        {
-            var flag360 = false;
-            var beamWidth = aBeamWidth;
-
-            var radius = Geo.KilometersToRadians(aRadius / 1000.0);
-
-            if (Math.Abs(beamWidth - 360.0) < 0.001)
-            {
-                flag360 = true;
-                beamWidth -= 5.0;
-            }
-
-            var origin = posit.GetGeoLlh();
-
-            var top = beamWidth;
-            var bot = 0.0;
-
-            if (top >= 180.0)
-            {
-                top = 180.0;
-                bot = beamWidth - 180.0;
-            }
-
-            var arc = new List<Geo>();
-
-            var left = Geo.Offset(origin, radius, -Geo.DegreesToRadians(top / 2.0));
-            var right = Geo.Offset(origin, radius, Geo.DegreesToRadians(top / 2.0));
-
-            var arc1 = Geo.ApproximateArc(origin, left, right, Geo.DegreesToRadians(5.0));
-
-            arc.AddRange(arc1);
-
-            if (bot > 0.0)
-            {
-                var half = bot / 2.0;
-
-                left = Geo.Offset(origin, radius, Geo.DegreesToRadians(270.0 - half));
-                right = Geo.Offset(origin, radius, Geo.DegreesToRadians(270.0));
-
-                var arc2 = Geo.ApproximateArc(origin, left, right, Geo.DegreesToRadians(5.0));
-
-                var index = 0;
-                foreach (var g in arc2)
-                {
-                    arc.Insert(index, g);
-                    ++index;
-                }
-
-                left = Geo.Offset(origin, radius, Geo.DegreesToRadians(90.0));
-                right = Geo.Offset(origin, radius, Geo.DegreesToRadians(90.0 + half));
-
-                arc2 = Geo.ApproximateArc(origin, left, right, Geo.DegreesToRadians(5.0));
-
-                arc.AddRange(arc2);
-            }
-
-            if (flag360)
-            {
-                arc.Add(arc[0]);
-                arc.Insert(0, origin);
-            }
-            else
-            {
-                arc.Insert(0, origin);
-                arc.Add(origin);
-            }
-
-            var limit = new Limits
-                        {
-                            Name = String.Format("BEAM {0} {1}", aRadius, beamWidth),
-                            Geos = arc
-                        };
-
-            // I believe shapelist is intended to hold the unrotated version of
-            // the beam pattern
-            limit._shapeList.AddRange(limit.Geos);
-
-            // this call affects geoPointlist
-            limit.Rotate(posit.GetCourse() + relAngle);
-
-            limit.Initialize();
-
-            return limit;
-        }
-
         public String Name { get; set; }
 
         /**
@@ -483,8 +374,6 @@ namespace HRC.Navigation
             return false;
         }
 
-        bool IsPointInside(TrackPoint loc) { return IsPointInPolygon(loc.GetGeoLlh(), _centerOfRegion, Geos); }
-
         static bool IsPointInPolygon(Geo x, Geo center, IList<Geo> poly)
         {
             // do this only once and pass it in for the math.
@@ -542,8 +431,6 @@ namespace HRC.Navigation
             return isIn;
         }
 
-
-        public bool Contains(TrackPoint aLocation) { return IsPointInside(aLocation); }
 
         // public double getAreaKm2()
         // {
