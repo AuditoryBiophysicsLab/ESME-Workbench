@@ -62,7 +62,7 @@ namespace ESME.Environment
 
     public class SoundSpeedProfile : SoundSpeedProfileGeneric<SoundSpeedSample>
     {
-        public SoundSpeedProfile() {        }
+        public SoundSpeedProfile() { }
         public SoundSpeedProfile(Geo location) : base(location) { }
 
         /// <summary>

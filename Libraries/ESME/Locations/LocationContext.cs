@@ -9,7 +9,7 @@ namespace ESME.Locations
         public LocationContext(DbConnection connection, bool contextOwnsConnection)
             : base(connection, contextOwnsConnection)
         {
-            Configuration.AutoDetectChangesEnabled = false;
+            Configuration.AutoDetectChangesEnabled = true;
             Configuration.ProxyCreationEnabled = true;
             Configuration.LazyLoadingEnabled = true;
             Configuration.ValidateOnSaveEnabled = true;
@@ -108,6 +108,7 @@ namespace ESME.Locations
             modelBuilder.Entity<AnimatLocation>().HasRequired(a => a.ScenarioSpecies);
 #endif
             modelBuilder.Entity<Platform>().HasOptional(p => p.Perimeter).WithMany();
+            //modelBuilder.Entity<Radial>().Map()
         }
 
         public class LocationDatabaseInitializer : CreateDatabaseIfNotExists<LocationContext>

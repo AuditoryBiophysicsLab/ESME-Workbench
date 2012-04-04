@@ -4,7 +4,6 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,19 +24,19 @@ namespace ESME.Locations
     public class EnvironmentalCacheService
     {
         public EnvironmentalCacheService() {}
-        public EnvironmentalCacheService(IPluginManagerService pluginManagerService, MasterDatabaseService masterDatabaseService)
+        public EnvironmentalCacheService(IPluginManagerService pluginManagerService, MasterDatabaseService databaseService)
         {
             _pluginManagerService = pluginManagerService;
-            _masterDatabaseService = masterDatabaseService;
+            _databaseService = databaseService;
         }
 
         [Import] IPluginManagerService _pluginManagerService;
-        [Import] MasterDatabaseService _masterDatabaseService;
+        [Import] MasterDatabaseService _databaseService;
 
         public PercentProgressList<PercentProgressList<Location>> ImportMissingDatasets()
         {
             var result = new PercentProgressList<PercentProgressList<Location>>();
-            foreach (var locationProgress in _masterDatabaseService.Locations.Select(ImportLocationDatasets).Where(l => l != null))
+            foreach (var locationProgress in _databaseService.Locations.Select(ImportLocationDatasets).Where(l => l != null))
                 result.Add(locationProgress);
             return result;
         }
@@ -77,7 +76,7 @@ namespace ESME.Locations
         {
             if (taskScheduler == null) taskScheduler = TaskScheduler.Default;
             if (_pluginManagerService == null) throw new ServiceNotFoundException("Required service PluginManager was not found");
-            if (_masterDatabaseService == null) throw new ServiceNotFoundException("Required service LocationManager was not found");
+            if (_databaseService == null) throw new ServiceNotFoundException("Required service LocationManager was not found");
             var newImporter = new ActionBlock<PercentProgress<EnvironmentalDataSet>>(job => Import(job),
                                                                                      new ExecutionDataflowBlockOptions
                                                                                      {
@@ -97,7 +96,7 @@ namespace ESME.Locations
             var geoRect = dataSet.Location.GeoRect;
             var resolution = dataSet.Resolution;
             var timePeriod = dataSet.TimePeriod;
-            var fileName = Path.Combine(_masterDatabaseService.MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
+            var fileName = Path.Combine(_databaseService.MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
             progress.Report(0);
             //Console.WriteLine("Importer: About to import {0}[{1}] from region {2} {3} {4} {5}", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, dataSet.Resolution, geoRect.North, geoRect.South, geoRect.East, geoRect.West);
             //Console.WriteLine("Importer: About to invoke {0} plugin [{1}]", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, sourcePlugin.PluginName);
@@ -168,13 +167,13 @@ namespace ESME.Locations
             _importJobsPending.TryRemove(dataSet.Guid, out progress);
         }
 
-        readonly ConcurrentDictionary<Guid, EnvironmentalCacheBase> _cache = new ConcurrentDictionary<Guid, EnvironmentalCacheBase>();
+        readonly ConcurrentDictionary<Guid, EnvironmentalCacheEntry> _cache = new ConcurrentDictionary<Guid, EnvironmentalCacheEntry>();
 
         public EnvironmentDataSetBase this[EnvironmentalDataSet dataSet]
         {
             get
             {
-                EnvironmentalCacheBase requestedData; 
+                EnvironmentalCacheEntry requestedData; 
                 var isCached = _cache.TryGetValue(dataSet.Guid, out requestedData);
                 if (isCached)
                 {
@@ -184,7 +183,7 @@ namespace ESME.Locations
                         requestedData = _cache[dataSet.Guid];
                     }
                     requestedData.LastAccessed = DateTime.Now;
-                    return (EnvironmentDataSetBase)requestedData.Data;
+                    return requestedData.Data;
                 }
                 var added = _cache.TryAdd(dataSet.Guid, null);
                 if (!added)
@@ -195,104 +194,52 @@ namespace ESME.Locations
                         requestedData = _cache[dataSet.Guid];
                     }
                     requestedData.LastAccessed = DateTime.Now;
-                    return (EnvironmentDataSetBase)requestedData.Data;
+                    return requestedData.Data;
                 }
-                _cache[dataSet.Guid] = EnvironmentalCacheBase.Load(dataSet);
+                _cache[dataSet.Guid] = EnvironmentalCacheEntry.Load(_databaseService.MasterDatabaseDirectory, dataSet);
                 _cache[dataSet.Guid].LastAccessed = DateTime.Now;
-                return (EnvironmentDataSetBase)_cache[dataSet.Guid].Data;
+                return _cache[dataSet.Guid].Data;
             } 
         }
     }
 
-    internal abstract class EnvironmentalCacheBase
+    internal class EnvironmentalCacheEntry
     {
         public DateTime Loaded { get; protected set; }
         public DateTime LastAccessed { get; internal set; }
-        public object Data { get; protected set; }
-        public static EnvironmentalCacheBase Load(EnvironmentalDataSet dataSet)
+        public EnvironmentDataSetBase Data { get; protected set; }
+        public static EnvironmentalCacheEntry Load(string databaseDirectory, EnvironmentalDataSet dataSet)
         {
-            EnvironmentalCacheBase result;
-            switch (dataSet.SourcePlugin.PluginSubtype)
+            var locationStorageDirectory = Path.Combine(databaseDirectory, dataSet.Location.StorageDirectory);
+            switch ((PluginSubtype)dataSet.SourcePlugin.PluginSubtype)
             {
                 case PluginSubtype.Wind:
-                    result = new WindCacheEntry(dataSet);
-                    break;
+                    return new EnvironmentalCacheEntry
+                    {
+                        Loaded = DateTime.Now,
+                        Data = Wind.Load(Path.Combine(locationStorageDirectory, dataSet.FileName)),
+                    };
                 case PluginSubtype.SoundSpeed:
-                    result = new SoundSpeedCacheEntry(dataSet);
-                    break;
+                    return new EnvironmentalCacheEntry
+                    {
+                        Loaded = DateTime.Now,
+                        Data = SoundSpeed.Load(Path.Combine(locationStorageDirectory, dataSet.FileName)),
+                    };
                 case PluginSubtype.Sediment:
-                    result = new SedimentCacheEntry(dataSet);
-                    break;
+                    return new EnvironmentalCacheEntry
+                    {
+                        Loaded = DateTime.Now,
+                        Data = Sediment.Load(Path.Combine(locationStorageDirectory, dataSet.FileName)),
+                    };
                 case PluginSubtype.Bathymetry:
-                    result = new BathymetryCacheEntry(dataSet);
-                    break;
+                    return new EnvironmentalCacheEntry
+                    {
+                        Loaded = DateTime.Now,
+                        Data = Bathymetry.Load(Path.Combine(locationStorageDirectory, dataSet.FileName)),
+                    };
                 default:
                     throw new ApplicationException(string.Format("Unknown environmental data type: {0}", dataSet.SourcePlugin.PluginSubtype));
             }
-            result.Loaded = DateTime.Now;
-            return result;
         }
-    }
-
-    internal class EnvironmentalCacheEntry<T> : EnvironmentalCacheBase where T : EnvironmentDataSetBase
-    {
-        public EnvironmentalCacheEntry(EnvironmentalDataSet dataSet) 
-        {
-            switch (dataSet.SourcePlugin.PluginSubtype)
-            {
-                case PluginSubtype.Wind:
-                    if (!(Data is Wind)) throw new EnvironmentDataTypeMismatchException(string.Format("Error loading Wind data into data cache for {0}", typeof (T)));
-                    break;
-                case PluginSubtype.SoundSpeed:
-                    if (!(Data is SoundSpeed)) throw new EnvironmentDataTypeMismatchException(string.Format("Error loading SoundSpeed data into data cache for {0}", typeof(T)));
-                    break;
-                case PluginSubtype.Sediment:
-                    if (!(Data is Sediment)) throw new EnvironmentDataTypeMismatchException(string.Format("Error loading Sediment data into data cache for {0}", typeof(T)));
-                    break;
-                case PluginSubtype.Bathymetry:
-                    if (!(Data is Bathymetry)) throw new EnvironmentDataTypeMismatchException(string.Format("Error loading Bathymetry data into data cache for {0}", typeof(T)));
-                    break;
-                default:
-                    throw new ApplicationException(string.Format("Unknown environmental data type: {0}", dataSet.SourcePlugin.PluginSubtype));
-            }
-            Loaded = DateTime.Now;
-        }
-
-        T _data;
-        public new T Data
-        {
-            get
-            {
-                LastAccessed = DateTime.Now;
-                return _data;
-            }
-            protected set { _data = value; }
-        }
-    }
-
-    internal class WindCacheEntry : EnvironmentalCacheEntry<Wind>
-    {
-        public WindCacheEntry(EnvironmentalDataSet dataSet) : base(dataSet) { Data = Wind.Load(dataSet.FileName); }
-    }
-    internal class SoundSpeedCacheEntry : EnvironmentalCacheEntry<SoundSpeed>
-    {
-        public SoundSpeedCacheEntry(EnvironmentalDataSet dataSet) : base(dataSet) { Data = SoundSpeed.Load(dataSet.FileName); }
-    }
-    internal class SedimentCacheEntry : EnvironmentalCacheEntry<Sediment>
-    {
-        public SedimentCacheEntry(EnvironmentalDataSet dataSet) : base(dataSet) { Data = Sediment.Load(dataSet.FileName); }
-    }
-    internal class BathymetryCacheEntry : EnvironmentalCacheEntry<Bathymetry>
-    {
-        public BathymetryCacheEntry(EnvironmentalDataSet dataSet) : base(dataSet) { Data = Bathymetry.Load(dataSet.FileName); }
-    }
-
-    [Serializable]
-    public class EnvironmentDataTypeMismatchException : Exception
-    {
-        public EnvironmentDataTypeMismatchException() { }
-        public EnvironmentDataTypeMismatchException(string message) : base(message) { }
-        public EnvironmentDataTypeMismatchException(string message, Exception inner) : base(message, inner) { }
-        protected EnvironmentDataTypeMismatchException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 }

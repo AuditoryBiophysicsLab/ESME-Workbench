@@ -11,12 +11,12 @@ namespace ESME.Tests.Common
 {
     public static class TestLocation
     {
-        public static Location LoadOrCreate(string locationName, string overlayFile, string databaseDirectory, string pluginDirectory, out MasterDatabaseService databaseService, out EnvironmentalCacheService cacheService)
+        public static Location LoadOrCreate(string locationName, string overlayFile, string databaseDirectory, string pluginDirectory, out MasterDatabaseService databaseService, out EnvironmentalCacheService cacheService, out PluginManagerService pluginService)
         {
             Console.WriteLine("Creating database service...");
             databaseService = new MasterDatabaseService {MasterDatabaseDirectory = databaseDirectory};
             Console.WriteLine("Loading plugins...");
-            var pluginService = new PluginManagerService {PluginDirectory = pluginDirectory};
+            pluginService = new PluginManagerService {PluginDirectory = pluginDirectory};
             cacheService = new EnvironmentalCacheService(pluginService, databaseService);
             Console.WriteLine(string.Format("Looking for test location '{0}'...", locationName));
             var location = databaseService.FindLocation(locationName);
@@ -105,32 +105,20 @@ namespace ESME.Tests.Common
             scenario = Scenario.FromNemoFile(databaseService, location, scenarioFile, simAreaFolder);
 
             databaseService.SetEnvironmentalData(scenario, (from data in location.EnvironmentalDataSets
-                                                            where data.SourcePlugin.PluginSubtype == PluginSubtype.Wind
+                                                            where data.SourcePlugin.PluginSubtype == PluginSubtype.Wind && ((TimePeriod)scenario.TimePeriod == (TimePeriod)data.TimePeriod)
                                                             select data).FirstOrDefault());
-            var sourceFile = Path.Combine(databaseService.MasterDatabaseDirectory, location.StorageDirectory, scenario.Wind.FileName);
-            var destFile = Path.Combine(databaseService.MasterDatabaseDirectory, scenario.Wind.FileName);
-            if (File.Exists(sourceFile)) File.Copy(sourceFile, destFile);
 
             databaseService.SetEnvironmentalData(scenario, (from data in location.EnvironmentalDataSets
-                                                            where data.SourcePlugin.PluginSubtype == PluginSubtype.SoundSpeed
+                                                            where data.SourcePlugin.PluginSubtype == PluginSubtype.SoundSpeed && ((TimePeriod)scenario.TimePeriod == (TimePeriod)data.TimePeriod)
                                                             select data).FirstOrDefault());
-            sourceFile = Path.Combine(databaseService.MasterDatabaseDirectory, location.StorageDirectory, scenario.SoundSpeed.FileName);
-            destFile = Path.Combine(databaseService.MasterDatabaseDirectory, scenario.SoundSpeed.FileName);
-            if (File.Exists(sourceFile)) File.Copy(sourceFile, destFile);
 
             databaseService.SetEnvironmentalData(scenario, (from data in location.EnvironmentalDataSets
                                                             where data.SourcePlugin.PluginSubtype == PluginSubtype.Sediment
                                                             select data).FirstOrDefault());
-            sourceFile = Path.Combine(databaseService.MasterDatabaseDirectory, location.StorageDirectory, scenario.Sediment.FileName);
-            destFile = Path.Combine(databaseService.MasterDatabaseDirectory, scenario.Sediment.FileName);
-            if (File.Exists(sourceFile)) File.Copy(sourceFile, destFile);
 
             databaseService.SetEnvironmentalData(scenario, (from data in location.EnvironmentalDataSets
                                                             where data.SourcePlugin.PluginSubtype == PluginSubtype.Bathymetry
                                                             select data).FirstOrDefault());
-            sourceFile = Path.Combine(databaseService.MasterDatabaseDirectory, location.StorageDirectory, scenario.Bathymetry.FileName);
-            destFile = Path.Combine(databaseService.MasterDatabaseDirectory, scenario.Bathymetry.FileName);
-            if (File.Exists(sourceFile)) File.Copy(sourceFile, destFile);
             return scenario;
         }
     }

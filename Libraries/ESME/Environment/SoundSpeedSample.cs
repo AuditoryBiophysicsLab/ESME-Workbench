@@ -18,21 +18,27 @@ namespace ESME.Environment
             SoundSpeed = soundSpeed;
         }
 
-        public SoundSpeedSample(float depth, float temperature, float salinity) : this(depth, float.NaN)
+        public SoundSpeedSample(float depth, float temperature, float salinity)
         {
+            Depth = depth;
             Temperature = temperature;
             Salinity = salinity;
+            SoundSpeed = float.NaN;
         }
 
-        public SoundSpeedSample(float depth, float temperature, float salinity, float soundSpeed) : this(depth, soundSpeed)
+        public SoundSpeedSample(float depth, float temperature, float salinity, float soundSpeed)
         {
+            Depth = depth;
             Temperature = temperature;
             Salinity = salinity;
+            SoundSpeed = soundSpeed;
         }
 
         public SoundSpeedSample() 
         {
             Depth = float.NaN;
+            Temperature = float.NaN;
+            Salinity = float.NaN;
             SoundSpeed = float.NaN;
         }
 

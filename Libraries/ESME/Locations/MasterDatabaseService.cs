@@ -90,7 +90,7 @@ namespace ESME.Locations
         {
             EnvironmentalDataSet oldData = null;
             // todo: Check to see if replacing any of these datasets might invalidate any transmission losses we have previously calculated
-            switch (dataSet.SourcePlugin.PluginSubtype)
+            switch ((PluginSubtype)dataSet.SourcePlugin.PluginSubtype)
             {
                 case PluginSubtype.Wind:
                     if (scenario.Wind != null && !replaceExisting) throw new ArgumentException(string.Format("Scenario {0} already has a wind dataset.  Did you intend to replace it?", scenario.Name), "dataSet");
@@ -258,7 +258,7 @@ namespace ESME.Locations
 
         public void SetEnvironmentalData(Scenario scenario, EnvironmentalDataSet data)
         {
-            switch (data.SourcePlugin.PluginSubtype)
+            switch ((PluginSubtype)data.SourcePlugin.PluginSubtype)
             {
                 case PluginSubtype.Wind:
                     scenario.Wind = data;

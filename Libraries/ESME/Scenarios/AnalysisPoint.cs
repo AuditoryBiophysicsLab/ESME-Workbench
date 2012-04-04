@@ -38,6 +38,32 @@ namespace ESME.Scenarios
         public DbDateTime CalculationCompleted { get; set; }
         public double Bearing { get; set; }
         public double Length { get; set; }
+        public byte[] RangeAxisBlob { get; set; }
+        public byte[] DepthAxisBlob { get; set; }
+        [NotMapped]
+        public double[] Ranges
+        {
+            get { return _ranges ?? (_ranges = RangeAxisBlob.ToArray()); }
+            set
+            {
+                _ranges = value;
+                RangeAxisBlob = _ranges.ToBlob();
+            }
+        }
+        double[] _ranges;
+
+        [NotMapped]
+        public double[] Depths
+        {
+            get { return _depths ?? (_depths = DepthAxisBlob.ToArray()); }
+            set
+            {
+                _depths = value;
+                DepthAxisBlob = _depths.ToBlob();
+            }
+        }
+        double[] _depths;
+
 
         public virtual TransmissionLoss TransmissionLoss { get; set; }
         public virtual ICollection<LevelRadius> LevelRadii { get; set; }

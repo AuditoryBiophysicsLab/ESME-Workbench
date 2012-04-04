@@ -138,6 +138,7 @@
     <Compile Include="Behaviors\PlatformBehavior.cs" />
     <Compile Include="Behaviors\TrackType.cs" />
     <Compile Include="BuildInformation.cs" />
+    <Compile Include="Database\BlobHelpers.cs" />
     <Compile Include="Database\DbTimePeriod.cs" />
     <Compile Include="Database\DbTrackType.cs" />
     <Compile Include="Database\DbWhoWhenWhere.cs" />

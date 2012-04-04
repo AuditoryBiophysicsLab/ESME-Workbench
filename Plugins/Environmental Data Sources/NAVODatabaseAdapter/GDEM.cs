@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ESME.Environment;
+using ESME.Environment.NAVO;
 using ESME.Model;
 using HRC.Navigation;
 using HRC.NetCDF;
@@ -125,9 +126,10 @@ namespace NAVODatabaseAdapter
                         var temperatureValue = temperatureData[(uint)depthIndex, (uint)latSourceIndex, (uint)lonSourceIndex];
                         var salinityValue = salinityData[(uint)depthIndex, (uint)latSourceIndex, (uint)lonSourceIndex];
                         if ((Math.Abs(temperatureValue - temperatureMissingValue) < 0.0001) || (Math.Abs(salinityValue - salinityMissingValue) < 0.0001)) break;
-                        newProfile.Add(new SoundSpeedSample((float)temperatureDepths[depthIndex],
-                                                            (temperatureValue * temperatureScaleFactor) + temperatureAddOffset,
-                                                            (salinityValue * salinityScaleFactor) + salinityAddOffset));
+                        var temperature = (temperatureValue * temperatureScaleFactor) + temperatureAddOffset;
+                        var salinity = (salinityValue * salinityScaleFactor) + salinityAddOffset;
+                        newProfile.Add(new SoundSpeedSample((float)temperatureDepths[depthIndex], temperature, salinity,
+                                                            ChenMilleroLi.SoundSpeed(newProfile, (float)temperatureDepths[depthIndex], temperature, salinity)));
                     }
                     if (newProfile.Data.Count > 0) newFieldEnvironmentData.Add(newProfile);
                 }

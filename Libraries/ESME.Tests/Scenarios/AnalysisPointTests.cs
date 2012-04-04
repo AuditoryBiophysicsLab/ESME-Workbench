@@ -3,11 +3,14 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using ESME.Locations;
+using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.Simulator;
 using ESME.Tests.Common;
+using ESME.TransmissionLoss;
 using HRC.Navigation;
 using NUnit.Framework;
+using AnalysisPoint = ESME.Scenarios.AnalysisPoint;
 
 namespace ESME.Tests.Scenarios
 {
@@ -21,7 +24,8 @@ namespace ESME.Tests.Scenarios
         {
             MasterDatabaseService database;
             EnvironmentalCacheService cache;
-            var location = TestLocation.LoadOrCreate("Jacksonville", @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr", _databaseDirectory, PluginDirectory, out database, out cache);
+            PluginManagerService plugins;
+            var location = TestLocation.LoadOrCreate("Jacksonville", @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr", _databaseDirectory, PluginDirectory, out database, out cache, out plugins);
             var scenario = TestScenario.LoadOrCreate(database, location, @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas", @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Jacksonville\BU Test Sample.nemo");
             var center = new Geo((location.GeoRect.North + location.GeoRect.South) / 2, (location.GeoRect.East + location.GeoRect.West) / 2);
             var analysisPoint = new AnalysisPoint
@@ -64,8 +68,10 @@ namespace ESME.Tests.Scenarios
         {
             MasterDatabaseService database;
             EnvironmentalCacheService cache;
-            var location = TestLocation.LoadOrCreate("Jacksonville", @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr", _databaseDirectory, PluginDirectory, out database, out cache);
+            PluginManagerService plugins;
+            var location = TestLocation.LoadOrCreate("Jacksonville", @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr", _databaseDirectory, PluginDirectory, out database, out cache, out plugins);
             var scenario = TestScenario.LoadOrCreate(database, location, @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas", @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Jacksonville\BU Test Sample.nemo");
+            var calculator = new TransmissionLossCalculatorService(database, plugins, cache, 50, 25);
             Console.WriteLine("Found {0} analysis points", scenario.AnalysisPoints.Count);
             foreach (var analysisPoint in scenario.AnalysisPoints)
             {
@@ -78,7 +84,8 @@ namespace ESME.Tests.Scenarios
                                   select r;
                     foreach (var radial in radials)
                     {
-                        Console.WriteLine("      Radial at bearing {0} and length {1}", radial.Bearing, radial.Length);
+                        Console.WriteLine("      Computing radial at bearing {0} and length {1}", radial.Bearing, radial.Length);
+                        calculator.TestAdd(radial, @"C:\Users\Dave Anderson\Desktop\BellhopTest");
                     }
                 } 
             }
