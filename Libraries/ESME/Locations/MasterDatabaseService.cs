@@ -50,6 +50,10 @@ namespace ESME.Locations
         public void Add(Location location, bool saveChanges = false)
         {
             if (LocationExists(location.Name)) throw new DuplicateNameException(String.Format("A location named {0} already exists, choose another name", location.Name));
+            if (location.StorageDirectory == null)
+                location.StorageDirectory = Path.Combine("locations", Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
+            var storageDirectoryPath = Path.Combine(MasterDatabaseDirectory, location.StorageDirectory);
+            if (!Directory.Exists(storageDirectoryPath)) Directory.CreateDirectory(storageDirectoryPath);
             Context.Locations.Add(location);
             Log(location, "Added location {0}", location.Name);
             if (saveChanges) SaveChanges();

@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Xml;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
+using ESME.Locations;
 using ESME.Plugins;
+using ESME.Views.Locations;
 using HRC.Navigation;
 using HRC.Utility;
 
@@ -29,7 +33,10 @@ namespace LASPlugin
             throw new NotImplementedException();
         }
 
-
+        public override IEnumerable<EnvironmentalDataSet> SelectedDataSets
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
     //ported from http://ferret.pmel.noaa.gov/FERRET_17sep07/LAS/FAQ/ls.pl
     internal class LASQUery

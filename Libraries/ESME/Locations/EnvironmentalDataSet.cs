@@ -8,6 +8,7 @@ namespace ESME.Locations
 {
     public class EnvironmentalDataSet : IHaveGuid
     {
+        public EnvironmentalDataSet() { TimePeriod = Environment.TimePeriod.Invalid; }
         [Key, Initialize]
         public Guid Guid { get; set; }
         public float Resolution { get; set; }

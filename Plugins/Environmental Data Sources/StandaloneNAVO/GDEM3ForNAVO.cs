@@ -9,6 +9,7 @@ using Cinch;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
+using ESME.Locations;
 using ESME.Plugins;
 using ESME.Views.Locations;
 using HRC.Navigation;
@@ -50,14 +51,12 @@ namespace StandaloneNAVOPlugin
                     RuleDelegate = (o, r) => ((GDEM3ForNAVO)o).IsConfigured,
                 },
             });
-            UsageOptionsControl = new MultipleSelectionsView
+            SelectionControlViewModel = new MultipleSelectionsViewModel<float>
             {
-                DataContext = new MultipleSelectionsViewModel<float>
-                {
-                    UnitName = " min",
-                    AvailableSelections = AvailableResolutions,
-                }
+                UnitName = " min",
+                AvailableSelections = AvailableResolutions,
             };
+            SelectionControl = new MultipleSelectionsView { DataContext = SelectionControlViewModel };
         }
 
         public override bool IsConfigured
@@ -109,6 +108,21 @@ namespace StandaloneNAVOPlugin
             var result = new SoundSpeed();
             result.Add(GDEM.ReadFile(DataLocation, timePeriod, geoRect));
             return result;
+        }
+        public override IEnumerable<EnvironmentalDataSet> SelectedDataSets
+        {
+            get
+            {
+                return from simpleSelectionViewModel in ((MultipleSelectionsViewModel<float>)SelectionControlViewModel).SimpleSelectionViewModels
+                       where simpleSelectionViewModel.IsSelected
+                       from month in NAVOConfiguration.AllMonths
+                       select new EnvironmentalDataSet
+                       {
+                           SourcePlugin = PluginIdentifier,
+                           Resolution = simpleSelectionViewModel.Value,
+                           TimePeriod = month,
+                       };
+            }
         }
     }
 }

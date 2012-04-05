@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.Composition;
+﻿using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
+using ESME.Locations;
 using ESME.Plugins;
 using ESME.Views.Locations;
 using HRC.Navigation;
@@ -35,14 +37,12 @@ namespace InstallableNAVOPlugin
             IsConfigured = _dataDirectory != null &&
                            Directory.Exists(_dataDirectory) &&
                            File.Exists(Path.Combine(_dataDirectory, RequiredSMGCFilename));
-            UsageOptionsControl = new MultipleSelectionsView
+            SelectionControlViewModel = new MultipleSelectionsViewModel<float>
             {
-                DataContext = new MultipleSelectionsViewModel<float>
-                {
-                    UnitName = " min",
-                    AvailableSelections = AvailableResolutions,
-                }
+                UnitName = " min",
+                AvailableSelections = AvailableResolutions,
             };
+            SelectionControl = new MultipleSelectionsView { DataContext = SelectionControlViewModel };
         }
 
         readonly string _dataDirectory;
@@ -75,6 +75,21 @@ namespace InstallableNAVOPlugin
             var result = new Wind();
             result.TimePeriods.Add(timePeriodData);
             return result;
+        }
+        public override IEnumerable<EnvironmentalDataSet> SelectedDataSets
+        {
+            get
+            {
+                return from simpleSelectionViewModel in ((MultipleSelectionsViewModel<float>)SelectionControlViewModel).SimpleSelectionViewModels
+                       where simpleSelectionViewModel.IsSelected
+                       from month in NAVOConfiguration.AllMonths
+                       select new EnvironmentalDataSet
+                       {
+                           SourcePlugin = PluginIdentifier,
+                           Resolution = simpleSelectionViewModel.Value,
+                           TimePeriod = month,
+                       };
+            }
         }
     }
 }

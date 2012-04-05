@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -128,9 +129,9 @@ namespace ESME.Plugins
     }
 
     [Serializable]
-    public class EnvironmentalDataSourcePluginBase : PluginBase
+    public abstract class EnvironmentalDataSourcePluginBase : PluginBase
     {
-        public EnvironmentalDataSourcePluginBase() { UsageOptionsControl = null; }
+        protected EnvironmentalDataSourcePluginBase() { SelectionControl = null; }
         /// <summary>
         /// An array of available resolutions, expressed in arc-minutes per sample
         /// </summary>
@@ -138,7 +139,9 @@ namespace ESME.Plugins
         [XmlIgnore] public bool IsTimeVariantData { get; protected set; }
         [XmlIgnore] public TimePeriod[] AvailableTimePeriods { get; protected set; }
         [XmlIgnore] public EnvironmentDataType EnvironmentDataType { get; protected set; }
-        [XmlIgnore] public Control UsageOptionsControl { get; protected set; }
+        [XmlIgnore] public Control SelectionControl { get; protected set; }
+        [XmlIgnore] public object SelectionControlViewModel { get; protected set; }
+        [XmlIgnore] public abstract IEnumerable<EnvironmentalDataSet> SelectedDataSets { get; }
 
         protected void CheckResolutionAndTimePeriod(float resolution, TimePeriod timePeriod)
         {

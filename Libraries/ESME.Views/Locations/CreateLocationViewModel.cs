@@ -4,21 +4,25 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows.Data;
 using Cinch;
+using ESME.Environment.NAVO;
 using ESME.Locations;
 using ESME.Plugins;
+using HRC.Aspects;
 using HRC.Collections;
 using System.Linq;
+using HRC.Navigation;
 using HRC.Validation;
 
 namespace ESME.Views.Locations
 {
+    [NotifyPropertyChanged]
     public sealed class CreateLocationViewModel : ValidatingViewModel
     {
         #region Constructor
-        public CreateLocationViewModel(IPluginManagerService pluginManagerService, MasterDatabaseService masterDatabaseService)
+        public CreateLocationViewModel(IPluginManagerService plugins, MasterDatabaseService database)
         {
-            _pluginManagerService = pluginManagerService;
-            _masterDatabaseService = masterDatabaseService;
+            _plugins = plugins;
+            _database = database;
             EnvironmentDataSourceViews = new Dictionary<PluginSubtype, ICollectionView>();
             SelectedPlugins = new ObservableConcurrentDictionary<PluginSubtype, EnvironmentalDataSourcePluginBase>();
             SelectedPlugins.CollectionChanged += (s, e) =>
@@ -40,18 +44,14 @@ namespace ESME.Views.Locations
             AddEnvironmentDataSourceView(PluginSubtype.SoundSpeed);
             AddEnvironmentDataSourceView(PluginSubtype.Sediment);
             AddEnvironmentDataSourceView(PluginSubtype.Bathymetry);
-            ValidationRules.AddRange(new List<ValidationRule>
-            {
-                NorthValidationRule, SouthValidationRule, EastValidationRule, WestValidationRule
-            });
-
+            ValidationRules.AddRange(new List<ValidationRule> { NorthValidationRule, SouthValidationRule, EastValidationRule, WestValidationRule });
         }
 
-        private MasterDatabaseService _masterDatabaseService;
+        private readonly MasterDatabaseService _database;
         #endregion
         #region PluginManager stuff
-        readonly IPluginManagerService _pluginManagerService;
-        public IPluginManagerService PluginManager { get { return _pluginManagerService; } }
+        readonly IPluginManagerService _plugins;
+        public IPluginManagerService PluginManager { get { return _plugins; } }
         public Dictionary<PluginSubtype, ICollectionView> EnvironmentDataSourceViews { get; set; }
         public ObservableConcurrentDictionary<PluginSubtype, EnvironmentalDataSourcePluginBase> SelectedPlugins { get; set; }
 
@@ -67,37 +67,13 @@ namespace ESME.Views.Locations
         }
         #endregion
 
-        #region public string LocationName { get; set; }
-
-        public string LocationName
-        {
-            get { return _locationName; }
-            set
-            {
-                if (_locationName == value) return;
-                _locationName = value;
-                NotifyPropertyChanged(LocationNameChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs LocationNameChangedEventArgs = ObservableHelper.CreateArgs<CreateLocationViewModel>(x => x.LocationName);
-        string _locationName;
-
-        #endregion
-        #region public double North { get; set; }
-
-        public double North
-        {
-            get { return _north; }
-            set
-            {
-                _north = value;
-                NotifyPropertyChanged(NorthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs NorthChangedEventArgs = ObservableHelper.CreateArgs<CreateLocationViewModel>(x => x.North);
-        double _north;
+        public string LocationName { get; set; }
+        public string Comments { get; set; }
+        public double North { get; set; }
+        public double South { get; set; }
+        public double East { get; set; }
+        public double West { get; set; }
+        #region Validation Rules
         static readonly ValidationRule NorthValidationRule = new ValidationRule
         {
             PropertyName = "North",
@@ -108,23 +84,6 @@ namespace ESME.Views.Locations
                 return target.North >= -90 && target.North <= 90 && target.North > target.South;
             },
         };
-
-        #endregion
-        #region public double South { get; set; }
-
-        public double South
-        {
-            get { return _south; }
-            set
-            {
-                _south = value;
-                NotifyPropertyChanged(SouthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SouthChangedEventArgs = ObservableHelper.CreateArgs<CreateLocationViewModel>(x => x.South);
-        double _south;
-
         static readonly ValidationRule SouthValidationRule = new ValidationRule
         {
             PropertyName = "South",
@@ -135,23 +94,6 @@ namespace ESME.Views.Locations
                 return target.South >= -90 && target.South <= 90 && target.North > target.South;
             },
         };
-
-        #endregion
-        #region public double East { get; set; }
-
-        public double East
-        {
-            get { return _east; }
-            set
-            {
-                _east = value;
-                NotifyPropertyChanged(EastChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs EastChangedEventArgs = ObservableHelper.CreateArgs<CreateLocationViewModel>(x => x.East);
-        double _east;
-
         static readonly ValidationRule EastValidationRule = new ValidationRule
         {
             PropertyName = "East",
@@ -162,23 +104,6 @@ namespace ESME.Views.Locations
                 return target.East >= -180 && target.East <= 180 && target.East > target.West;
             },
         };
-
-        #endregion
-        #region public double West { get; set; }
-
-        public double West
-        {
-            get { return _west; }
-            set
-            {
-                _west = value;
-                NotifyPropertyChanged(WestChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs WestChangedEventArgs = ObservableHelper.CreateArgs<CreateLocationViewModel>(x => x.West);
-        double _west;
-
         static readonly ValidationRule WestValidationRule = new ValidationRule
         {
             PropertyName = "West",
@@ -189,7 +114,6 @@ namespace ESME.Views.Locations
                 return target.West >= -180 && target.West <= 180 && target.East > target.West;
             },
         };
-
         #endregion
 
         #region Commands
@@ -203,7 +127,21 @@ namespace ESME.Views.Locations
 
         void OkHandler()
         {
-            _masterDatabaseService.CreateLocation(LocationName, null, North, South, East, West);
+            var location = new Location
+            {
+                Name = LocationName,
+                Comments = Comments,
+                GeoRect = new GeoRect(North, South, East, West),
+            };
+            _database.Add(location, true);
+            foreach (var dataSet in from pluginSubtype in new[] { PluginSubtype.Wind, PluginSubtype.SoundSpeed, PluginSubtype.Sediment, PluginSubtype.Bathymetry }
+                                    where SelectedPlugins[pluginSubtype] != null
+                                    from dataSet in SelectedPlugins[pluginSubtype].SelectedDataSets
+                                    select dataSet)
+            {
+                dataSet.Location = location;
+                _database.Add(dataSet, true);
+            }
             Globals.AppSettings.Save();
             CloseActivePopUpCommand.Execute(true);
         }

@@ -1,7 +1,10 @@
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Linq;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
+using ESME.Locations;
 using ESME.Plugins;
 using ESME.Views.Locations;
 using HRC.Navigation;
@@ -36,14 +39,12 @@ namespace InstallableNAVOPlugin
                            Directory.Exists(_dataDirectory) &&
                            File.Exists(Path.Combine(_dataDirectory, RequiredDBDBFilename)) &&
                            File.Exists(Path.Combine(_dataDirectory, RequiredDBDBExtractionProgram));
-            UsageOptionsControl = new MultipleSelectionsView
+            SelectionControlViewModel = new MultipleSelectionsViewModel<float>
             {
-                DataContext = new MultipleSelectionsViewModel<float>
-                {
-                    UnitName = " min",
-                    AvailableSelections = AvailableResolutions,
-                }
+                UnitName = " min",
+                AvailableSelections = AvailableResolutions,
             };
+            SelectionControl = new MultipleSelectionsView { DataContext = SelectionControlViewModel };
         }
 
         readonly string _dataDirectory;
@@ -52,6 +53,20 @@ namespace InstallableNAVOPlugin
         {
             CheckResolutionAndTimePeriod(resolution, timePeriod);
             return DBDB.Extract(Path.Combine(_dataDirectory, RequiredDBDBFilename), Path.Combine(_dataDirectory, RequiredDBDBExtractionProgram), resolution, geoRect, progress);
+        }
+        public override IEnumerable<EnvironmentalDataSet> SelectedDataSets
+        {
+            get
+            {
+                return from simpleSelection in ((MultipleSelectionsViewModel<float>)SelectionControlViewModel).SimpleSelectionViewModels
+                       where simpleSelection.IsSelected
+                       select new EnvironmentalDataSet
+                       {
+                           SourcePlugin = PluginIdentifier,
+                           Resolution = simpleSelection.Value,
+                           TimePeriod = TimePeriod.Invalid,
+                       };
+            }
         }
     }
 }

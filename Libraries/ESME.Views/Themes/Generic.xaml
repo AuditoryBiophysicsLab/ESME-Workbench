@@ -41,7 +41,7 @@
                                           SelectedItem="{Binding Path=SelectedItem,
                                                                  RelativeSource={RelativeSource TemplatedParent}}" />
                             </Grid>
-                            <ContentPresenter x:Name="UsageOptions" Content="{Binding Path=SelectedPlugin.UsageOptionsControl, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <ContentPresenter x:Name="UsageOptions" Content="{Binding Path=SelectedPlugin.SelectionControl, RelativeSource={RelativeSource TemplatedParent}}" />
                             <Expander x:Name="Configuration">
                                 <Expander.Header>
                                     <TextBlock x:Name="ConfigurationHeader" Text="{Binding Path=SelectedPlugin.PluginName, RelativeSource={RelativeSource TemplatedParent}, StringFormat=\{0\} configuration}" />
@@ -66,7 +66,7 @@
                         <DataTrigger Binding="{Binding Path=SelectedPlugin.IsConfigured, RelativeSource={RelativeSource Self}}" Value="False">
                             <Setter TargetName="UsageOptions" Property="Visibility" Value="Collapsed" />
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding Path=SelectedPlugin.UsageOptionsControl, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                        <DataTrigger Binding="{Binding Path=SelectedPlugin.SelectionControl, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
                             <Setter TargetName="UsageOptions" Property="Visibility" Value="Collapsed" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding Path=ItemsSource, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
