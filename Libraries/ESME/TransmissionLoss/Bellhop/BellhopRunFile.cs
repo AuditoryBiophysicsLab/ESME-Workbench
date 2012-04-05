@@ -33,7 +33,7 @@ namespace ESME.TransmissionLoss.Bellhop
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
-                var curTransect = new Transect(null, transmissionLossJob.SoundSource, radialBearing, transmissionLossJob.SoundSource.Radius);
+                var curTransect = new Transect(null, transmissionLossJob.SoundSource.Geo, radialBearing, transmissionLossJob.SoundSource.Radius);
                 bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, environmentInformation.Bathymetry);
                 maxCalculationDepthMeters = Math.Max((float)bottomProfiles[bearingIndex].MaxDepth, maxCalculationDepthMeters);
                 soundSpeedProfiles[bearingIndex] = environmentInformation.SoundSpeedField.EnvironmentData.GetNearestPoint(curTransect.MidPoint);
@@ -43,7 +43,7 @@ namespace ESME.TransmissionLoss.Bellhop
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
-                var sedimentType = environmentInformation.Sediment.Samples.GetNearestPoint(transmissionLossJob.SoundSource);
+                var sedimentType = environmentInformation.Sediment.Samples.GetNearestPoint(transmissionLossJob.SoundSource.Geo);
                 var bellhopConfig = Bellhop.GetRadialConfiguration(transmissionLossJob, soundSpeedProfiles[bearingIndex], sedimentType, maxCalculationDepthMeters, rangeCellCount, depthCellCount, false, false, false, 1500);
                 bellhopRunFile.TransmissionLossRunFileRadials.Add(new BellhopRunFileRadial {BearingFromSourceDegrees = radialBearing, Configuration = bellhopConfig, BottomProfile = bottomProfiles[bearingIndex].ToBellhopString(),});
             }

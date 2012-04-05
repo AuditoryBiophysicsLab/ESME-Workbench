@@ -15,7 +15,7 @@ namespace ESME.TransmissionLoss.Bellhop
         {
             MaxDepth = double.MinValue;
             Profile = new List<BottomProfilePoint>();
-            Length = Geo.DistanceMeters(transect.StartPoint, transect.EndPoint);
+            Length = transect.StartPoint.DistanceKilometers(transect.EndPoint) * 1000;
             var stepLength = Length / (numberOfPointsInTransect - 1);
             var currentPoint = transect.StartPoint;
             var curRange = 0.0;
@@ -28,7 +28,7 @@ namespace ESME.TransmissionLoss.Bellhop
                     MaxDepth = curDepth;
                     DeepestPoint = currentPoint;
                 }
-                currentPoint = new Geo(currentPoint, transect.Bearing, stepLength);
+                currentPoint = currentPoint.Offset(Geo.KilometersToRadians(stepLength / 1000f), Geo.DegreesToRadians(transect.Bearing));
                 curRange += stepLength;
             }
             //Profile = profile.ToList();

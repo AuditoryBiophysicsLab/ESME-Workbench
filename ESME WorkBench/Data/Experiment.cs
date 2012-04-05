@@ -1021,7 +1021,7 @@ namespace ESMEWorkbench.Data
 
         void DisplayAnalysisPoint(AnalysisPoint curPoint)
         {
-            var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude, curPoint.Longitude);
+            var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Geo.Latitude, curPoint.Geo.Longitude);
             var analysisPointLayer = (AnalysisPointLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == analysisPointName);
             if (analysisPointLayer == null)
             {
@@ -1046,12 +1046,12 @@ namespace ESMEWorkbench.Data
             foreach (var soundSource in curPoint.SoundSources)
             {
                 if (!soundSource.ShouldBeCalculated) continue;
-                sourcePoints.Add(curPoint);
+                sourcePoints.Add(curPoint.Geo);
                 foreach (var radialBearing in soundSource.RadialBearings)
                 {
-                    var endPoint = curPoint.Move(radialBearing, soundSource.Radius);
+                    var endPoint = curPoint.Geo.Offset(Geo.KilometersToRadians(soundSource.Radius / 1000f), Geo.DegreesToRadians(radialBearing));
                     sourcePoints.Add(endPoint);
-                    sourcePoints.Add(curPoint);
+                    sourcePoints.Add(curPoint.Geo);
                 }
             }
             analysisPointLayer.Clear();
@@ -1106,7 +1106,7 @@ namespace ESMEWorkbench.Data
             foreach (var analysisPoint in AnalysisPoints.Where(analysisPoint => transmissionLossField.Geo.Equals(analysisPoint)))
             {
                 analysisPoint.TransmissionLossFields.Add(transmissionLossField);
-                Console.WriteLine(string.Format("Matched TL Field @({0}, {1}) to analysis point @({2}, {3})", transmissionLossField.Latitude, transmissionLossField.Longitude, analysisPoint.Latitude, analysisPoint.Longitude));
+                Console.WriteLine(string.Format("Matched TL Field @({0}, {1}) to analysis point @({2}, {3})", transmissionLossField.Latitude, transmissionLossField.Longitude, analysisPoint.Geo.Latitude, analysisPoint.Geo.Longitude));
                 return;
             }
         }

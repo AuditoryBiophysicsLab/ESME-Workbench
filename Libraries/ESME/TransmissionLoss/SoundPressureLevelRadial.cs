@@ -39,7 +39,7 @@ namespace ESME.TransmissionLoss
                 sw.WriteLine("Depth (m)," + soundPressureLevelField.SourceDepth);
                 sw.WriteLine("High Frequency (Hz)," + soundPressureLevelField.HighFrequency);
                 sw.WriteLine("Low Frequency (Hz)," + soundPressureLevelField.LowFrequency);
-                var radialEnd = new Geo(soundPressureLevelField.Latitude, soundPressureLevelField.Longitude).Move(BearingFromSource, soundPressureLevelField.Radius);
+                var radialEnd = new Geo(soundPressureLevelField.Latitude, soundPressureLevelField.Longitude).Offset(Geo.KilometersToRadians(soundPressureLevelField.Radius / 1000f), Geo.DegreesToRadians(BearingFromSource));
                 sw.WriteLine("Receiver Latitude," + radialEnd.Latitude);
                 sw.WriteLine("Receiver Longitude," + radialEnd.Longitude);
                 sw.WriteLine();

@@ -38,7 +38,7 @@ namespace HRC.Navigation
         /// <param name="finalPoint">Ending point of the course</param>
         public Course(Geo initialPoint, Geo finalPoint)
         {
-            _course = initialPoint.AzimuthDegrees(finalPoint);
+            _course = Geo.RadiansToDegrees(initialPoint.Azimuth(finalPoint));
             Normalize();
         }
 

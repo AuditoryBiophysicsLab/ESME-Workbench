@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace HRC.Navigation
@@ -31,7 +32,7 @@ namespace HRC.Navigation
         readonly List<Geo> _shapeList = new List<Geo>();
 
         // used to test inside polygon (as in beam pattern)
-        GeoRegion _region;
+        GeoArray _region;
         Geo _centerOfRegion;
         bool _isClockWise;
         BoundingCircle _boundingCircle;
@@ -79,11 +80,11 @@ namespace HRC.Navigation
             // need this for a few things
 
             // create a region for testing inside / outside
-            _region = new GeoRegion(Geos);
+            _region = new GeoArray(Geos);
 
             // BoundingCircle attempt to get the center of the polygon. when the
             // shape is not a poly, it hacks a fur ball
-            _boundingCircle = Geos.Count < 3 ? new BoundingCircle(Geo.FromDegrees(0.0, 0.0), 0.0) : new BoundingCircle(new GeoPath(Geos));
+            _boundingCircle = Geos.Count < 3 ? new BoundingCircle(new Geo(0.0, 0.0), 0.0) : new BoundingCircle(_region);
 
             _centerOfRegion = _boundingCircle.Center;
 
@@ -124,11 +125,11 @@ namespace HRC.Navigation
 
             result.Geos.Clear();
 
-            result.Geos.Add(Geo.FromDegrees(result._minLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(225)));
-            result.Geos.Add(Geo.FromDegrees(result._maxLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(315)));
-            result.Geos.Add(Geo.FromDegrees(result._maxLat, result._maxLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(45)));
-            result.Geos.Add(Geo.FromDegrees(result._minLat, result._maxLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(135)));
-            result.Geos.Add(Geo.FromDegrees(result._minLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(225)));
+            result.Geos.Add(new Geo(result._minLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(225)));
+            result.Geos.Add(new Geo(result._maxLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(315)));
+            result.Geos.Add(new Geo(result._maxLat, result._maxLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(45)));
+            result.Geos.Add(new Geo(result._minLat, result._maxLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(135)));
+            result.Geos.Add(new Geo(result._minLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(225)));
 
             result.Initialize();
 
@@ -186,14 +187,11 @@ namespace HRC.Navigation
                 }
 
                 Geo lastEndPt = null;
-                var segIt = _region.Segments;
-                List<Geo> segPts = null;
-                while (segIt.MoveNext())
+                GeoSegment segment = null;
+                foreach (var curSegment in _region.Segments)
                 {
-                    var seg = segIt.Current;
-                    segPts = seg.Segments;
-
-                    var lineCourse = segPts[0].Azimuth(segPts[1]);
+                    var lineCourse = curSegment[0].Azimuth(curSegment[1]);
+                    segment = curSegment;
 
                     // gives specular reflection with angle from center of region
                     // double ang = Geo.angle(centerOfRegion, segPts[1], segPts[0]);
@@ -201,15 +199,15 @@ namespace HRC.Navigation
                     // -1) * ang)) % (360.0);
                     var azimuth = (lineCourse + (_isClockWise ? -1 : 1) * (Math.PI / 2)) % ((Math.PI * 2.0));
 
-                    var newPt0 = Geo.Offset(segPts[0], Geo.KilometersToRadians(rangeOutKm), azimuth);
-                    var newPt1 = Geo.Offset(segPts[1], Geo.KilometersToRadians(rangeOutKm), azimuth);
+                    var newPt0 = curSegment[0].Offset(Geo.KilometersToRadians(rangeOutKm), azimuth);
+                    var newPt1 = curSegment[1].Offset(Geo.KilometersToRadians(rangeOutKm), azimuth);
 
                     if (lastEndPt != null)
                     {
                         var left = (_isClockWise ? lastEndPt : newPt0);
                         var right = (_isClockWise ? newPt0 : lastEndPt);
 
-                        var arc = Geo.ApproximateArc(segPts[0], left, right, Geo.DegreesToRadians(5.0));
+                        var arc = curSegment[0].ApproximateArc(left, right, Geo.DegreesToRadians(5.0));
                         var arcList = new List<Geo>(arc.Length);
                         for (var i = 1; i < arc.Length - 1; i++)
                         {
@@ -231,7 +229,7 @@ namespace HRC.Navigation
                 {
                     var left = (_isClockWise ? lastEndPt : geoList[0]);
                     var right = (_isClockWise ? geoList[0] : lastEndPt);
-                    var arc = Geo.ApproximateArc(segPts[1], left, right, Geo.DegreesToRadians(5.0));
+                    var arc = segment[1].ApproximateArc(left, right, Geo.DegreesToRadians(5.0));
 
                     var arcList = new List<Geo>(arc.Length);
                     for (var i = 1; i < arc.Length; i++)
@@ -261,11 +259,11 @@ namespace HRC.Navigation
     */
         public List<Geo> GetGeoList() { return Geos; }
 
-        public GeoRegion GetGeoRegion() { return _region; }
+        public GeoArray GetGeoRegion() { return _region; }
 
-        public Geo GetNorthWestPoint() { return Geo.FromDegrees(_maxLat, _minLon); }
+        public Geo GetNorthWestPoint() { return new Geo(_maxLat, _minLon); }
 
-        public Geo GetSouthEastPoint() { return Geo.FromDegrees(_minLat, _maxLon); }
+        public Geo GetSouthEastPoint() { return new Geo(_minLat, _maxLon); }
 
         /**
     * create a random Geo point inside this pattern. tries 100 times to get a
@@ -286,7 +284,7 @@ namespace HRC.Navigation
             double lat;
             double lon;
 
-            var geo = new Geo();
+            Geo geo;
 
             var count = 100;
 
@@ -297,7 +295,7 @@ namespace HRC.Navigation
                 lat = _minLat + (Random.NextDouble() * latDelta);
                 lon = _minLon + (Random.NextDouble() * lonDelta);
 
-                geo.Initialize(lat, lon);
+                geo = new Geo(lat, lon);
 
                 if (IsPointInPolygon(geo, _centerOfRegion, Geos))
                 {
@@ -312,7 +310,7 @@ namespace HRC.Navigation
             lat = _minLat + ((_maxLat - _minLat) / 2.0);
             lon = _minLon + ((_maxLon - _minLon) / 2.0);
 
-            geo.Initialize(lat, lon);
+            geo = new Geo(lat, lon);
 
             return geo;
         }
@@ -343,15 +341,7 @@ namespace HRC.Navigation
             // this has happened
             if (_region == null) throw new ApplicationException("Limits.isInside: region is null");
 
-            foreach (var point in limit.Geos)
-            {
-                if (_region.IsPointInside(point) == false)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return limit.Geos.All(point => _region.Contains(point));
         }
 
         public bool Contains(double aLat, double aLong)
@@ -363,7 +353,7 @@ namespace HRC.Navigation
                 return false;
             }
 
-            var geo = Geo.FromDegrees(aLat, aLong);
+            var geo = new Geo(aLat, aLong);
 
             // return getGeoRegion().isPointInside(Geo.FromDegrees(aLat, aLong));
             if (_boundingCircle == null || _boundingCircle.Intersects(geo, 0.0))
@@ -399,21 +389,21 @@ namespace HRC.Navigation
             // Geo p1 = new Geo(poly[0]);
             // Geo p2 = new Geo(poly[0]);
             var p1 = new Geo(poly[0]);
-            var p2 = new Geo(poly[0]);
+            Geo p2;
             var polySize = poly.Count;
             for (var i = 1; i < polySize; i++)
             {
-                p2.Initialize(poly[i]);
+                p2 = new Geo(poly[i]);
                 /*
           * p1 and p2 are on different sides of the ray, and the great acircle
           * between p1 and p2 is on the side that counts;
           */
-                if ((p1.Dot(ray) < 0.0) != (p2.Dot(ray) < 0.0) && p1.Intersect(p2, ray).Dot(side) > 0.0)
+                if ((p1.Dot(ray) < 0.0) != (p2.Dot(ray) < 0.0) && new GeoSegment(p1, p2).GreatCircleIntersection(ray).Dot(side) > 0.0)
                 {
                     isIn = !isIn;
                 }
 
-                p1.Initialize(p2);
+                p1 = new Geo(p2);
             }
 
             // Check for unclosed polygons, if the polygon isn't closed,
@@ -421,8 +411,8 @@ namespace HRC.Navigation
             // point.
             if (!poly[0].Equals(p1))
             {
-                p2.Initialize(poly[0]);
-                if ((p1.Dot(ray) < 0.0) != (p2.Dot(ray) < 0.0) && p1.Intersect(p2, ray).Dot(side) > 0.0)
+                p2 = new Geo(poly[0]);
+                if ((p1.Dot(ray) < 0.0) != (p2.Dot(ray) < 0.0) && new GeoSegment(p1, p2).GreatCircleIntersection(ray).Dot(side) > 0.0)
                 {
                     isIn = !isIn;
                 }
@@ -446,9 +436,7 @@ namespace HRC.Navigation
                 return 0.0;
             }
 
-            var array = _region.Points;
-
-            var se = Area(array);
+            var se = Area(_region.Geos.ToList());
 
             // square NM
             const double r2 = 3443.9182 * 3443.9182;
@@ -466,9 +454,7 @@ namespace HRC.Navigation
                 return 0.0;
             }
 
-            var array = _region.Points;
-
-            var se = Area(array);
+            var se = Area(_region.Geos.ToList());
 
             // square clicks
             const double r2 = 6371.0 * 6371.0;
@@ -478,12 +464,12 @@ namespace HRC.Navigation
             return km;
         }
 
-        static double Area(IList<GeoPoint> array)
+        static double Area(IList<Geo> array)
         {
             var count = 0;
             double area = 0;
-            var v0 = new Geo(array[0].Point);
-            var v1 = new Geo(array[1].Point);
+            var v0 = new Geo(array[0]);
+            var v1 = new Geo(array[1]);
             var p0 = new Geo(v0);
             var p1 = new Geo(v1);
             var p2 = new Geo();
@@ -493,23 +479,23 @@ namespace HRC.Navigation
             for (var i = 2; i < size; i++)
             {
                 count += 1;
-                p2 = new Geo(array[i].Point);
-                angle = Geo.AngleRadians(p0, p1, p2);
+                p2 = new Geo(array[i]);
+                angle = p0.Angle(p1, p2);
                 area += angle;
-                p0.Initialize(p1);
-                p1.Initialize(p2);
+                p0 = p1;
+                p1 = p2;
             }
 
             count += 1;
-            p2.Initialize(v0);
-            angle = Geo.AngleRadians(p0, p1, p2);
+            p2 = v0;
+            angle = p0.Angle(p1, p2);
             area += angle;
-            p0.Initialize(p1);
-            p1.Initialize(p2);
+            p0 = p1;
+            p1 = p2;
 
             count += 1;
-            p2.Initialize(v1);
-            angle = Geo.AngleRadians(p0, p1, p2);
+            p2 = v1;
+            angle = p0.Angle(p1, p2);
             area += angle;
 
             return area - ((count - 2) * Math.PI);
@@ -531,7 +517,7 @@ namespace HRC.Navigation
 
             foreach (var g in _shapeList)
             {
-                var geo = Rotation.Rotate(_shapeList[0], rads, g);
+                var geo = Rotation.Rotate(_shapeList[0], g, rads, false);
 
                 Geos.Add(geo);
             }
@@ -541,7 +527,7 @@ namespace HRC.Navigation
         {
             var sb = new StringBuilder();
             sb.AppendLine(Name);
-            foreach (var p in _region.Points) sb.AppendLine(p.Point.ToString());
+            foreach (var p in _region.Geos) sb.AppendLine(p.ToString());
             //return Name;
             return sb.ToString();
         }
@@ -581,20 +567,20 @@ namespace HRC.Navigation
             var result = false;
             if (_region.Length > 0)
             {
-                var segIt = _region.Segments;
-
-                if (segIt.MoveNext())
+                var segments = _region.Segments.ToList();
+                for (int segmentIndex = 0; segmentIndex < segments.Count; segmentIndex++)
                 {
+                    var segment = segments[segmentIndex];
                     var seg1 = new Geo[2];
-                    var temp = segIt.Current;
-                    seg1[0] = Geo.FromGeo(temp.Segments[0]);
-                    seg1[1] = Geo.FromGeo(temp.Segments[1]);
+                    seg1[0] = new Geo(segment[0]);
+                    seg1[1] = new Geo(segment[1]);
 
                     var seg2 = new Geo[2];
-                    if (!segIt.MoveNext()) throw new ApplicationException("Not enough segments!");
-                    temp = segIt.Current;
-                    seg2[0] = Geo.FromGeo(temp.Segments[0]);
-                    seg2[1] = Geo.FromGeo(temp.Segments[1]);
+                    segmentIndex++;
+                    if (segmentIndex >= segments.Count) throw new ApplicationException("Not enough segments!");
+                    segment = segments[segmentIndex];
+                    seg2[0] = new Geo(segment[0]);
+                    seg2[1] = new Geo(segment[1]);
 
                     var pointInside = seg1[0].MidPoint(seg2[1]);
                     var s1 = seg1[0];

@@ -12,7 +12,7 @@ using HRC.Navigation;
 namespace ESME.Environment
 {
     [Serializable]
-    public class EnvironmentData<T> : System.Collections.Generic.IList<T> where T : Geo, new()
+    public class EnvironmentData<T> : System.Collections.Generic.IList<T> where T : Geo, IComparer<T>, new()
     {
         /// <summary>
         /// Construct an EnvironmentData object
@@ -123,7 +123,7 @@ namespace ESME.Environment
                 // If we found no candidate points within the current window size, expand the window and try again
                 if (candidatePoints.Count == 0) continue;
                 var minDistance = double.MaxValue;
-                matchingPoint = null;
+                matchingPoint = default(T);
                 foreach (var item in candidatePoints) 
                 {
                     var curDistance = item.DistanceKilometers(location);
@@ -158,7 +158,7 @@ namespace ESME.Environment
         /// <returns>true if a point was found within the distance constraint, false otherwise</returns>
         public bool TryGetNearestPoint(Geo location, out T result, double maxDistance = double.NaN)
         {
-            result = null;
+            result = default(T);
             try
             {
                 result = GetNearestPoint(location, maxDistance);
@@ -619,7 +619,7 @@ namespace ESME.Environment
     }
 
     [Serializable]
-    public class TimePeriodEnvironmentData<T> where T : Geo, new()
+    public class TimePeriodEnvironmentData<T> where T : Geo, IComparer<T>, new()
     {
         public TimePeriodEnvironmentData() { EnvironmentData = new EnvironmentData<T>(); }
 

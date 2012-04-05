@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Windows.Controls;
+using HRC.Navigation;
 
 namespace HRC
 {

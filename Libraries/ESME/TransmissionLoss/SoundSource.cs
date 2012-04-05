@@ -14,7 +14,7 @@ using HRC.Utility;
 
 namespace ESME.TransmissionLoss
 {
-    public class SoundSource : Geo, IEquatable<SoundSource>, ISupportValidation
+    public class SoundSource : ValidatingViewModelBase, IEquatable<SoundSource>, ISupportValidation
     {
         public SoundSource()
         {
@@ -25,8 +25,7 @@ namespace ESME.TransmissionLoss
 
         public SoundSource(Geo location, NemoMode nemoMode, int radialCount) : this()
         {
-            Latitude = location.Latitude;
-            Longitude = location.Longitude;
+            Geo = location;
 
             AcousticProperties = new AcousticProperties(nemoMode);
 
@@ -37,6 +36,7 @@ namespace ESME.TransmissionLoss
             SourceLevel = nemoMode.SourceLevel;
         }
 
+        public Geo Geo { get; set; }
         /// <summary>
         ///   The Acoustic Properties of this sound source
         /// </summary>
@@ -226,33 +226,11 @@ namespace ESME.TransmissionLoss
 
         public bool Equals(SoundSource other)
         {
-            if (!base.Equals(other)) return false; // Compare as an Geo first
+            if (!Geo.Equals(other.Geo)) return false; // Compare as an Geo first
             if (!AcousticProperties.Equals(other.AcousticProperties)) return false;
             if (RadialBearings.Count != other.RadialBearings.Count) return false;
             return !RadialBearings.Where((t, bearingIndex) => Math.Abs(t - other.RadialBearings[bearingIndex]) > 0.0001).Any();
         }
-
-        #endregion
-
-        #region public bool IsValid { get; private set; }
-
-        [XmlIgnore]
-        public bool IsValid
-        {
-            get
-            {
-                return _isValid;
-            }
-            private set
-            {
-                if (_isValid == value) return;
-                _isValid = value;
-                NotifyPropertyChanged(IsValidChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsValidChangedEventArgs = ObservableHelper.CreateArgs<SoundSource>(x => x.IsValid);
-        bool _isValid;
 
         #endregion
 
@@ -269,7 +247,6 @@ namespace ESME.TransmissionLoss
             {
                 if (_validationErrorText == value) return;
                 _validationErrorText = value;
-                IsValid = string.IsNullOrEmpty(_validationErrorText);
                 NotifyPropertyChanged(ValidationErrorTextChangedEventArgs);
             }
         }
@@ -293,7 +270,7 @@ namespace ESME.TransmissionLoss
                 return;
             }
             var bathymetry = Bathymetry.Target;
-            if (!bathymetry.Samples.GeoRect.Contains(this))
+            if (!bathymetry.Samples.GeoRect.Contains(Geo))
             {
                 ValidationErrorText = "Sound source not contained within bathymetry bounds";
                 return;
@@ -302,7 +279,7 @@ namespace ESME.TransmissionLoss
             //Console.WriteLine("Validate: Bathymetry bounds: North {0} South {1} East {2} West {3}", bathymetry.GeoRect.North, bathymetry.GeoRect.South, bathymetry.GeoRect.East, bathymetry.GeoRect.West);
             foreach (var radialBearing in RadialBearings)
             {
-                var radialEndPoint = new Geo(this, radialBearing, Radius);
+                var radialEndPoint = Geo.Offset(Geo.KilometersToRadians(Radius / 1000f), Geo.DegreesToRadians(radialBearing));
                 if (!bathymetry.Samples.GeoRect.Contains(radialEndPoint))
                 {
                     //Console.WriteLine("Source name {0} location ({1}, {2}) bearing {3} endpoint ({4}, {5}) outside of bathymetry", Name, Latitude, Longitude, radialBearing, radialEndPoint.Latitude, radialEndPoint.Longitude);

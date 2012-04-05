@@ -6,27 +6,24 @@ namespace ESME.Environment
     [Serializable]
     public class Transect : Geo
     {
-        readonly Geo _endPoint;
-        readonly Geo _midPoint;
-
         public Transect(string name, Geo startPoint, Geo endPoint)
             : base(startPoint)
         {
             Name = name;
-            _endPoint = endPoint;
-            Length = DistanceMeters(_endPoint);
-            Bearing = AzimuthDegrees(_endPoint);
-            _midPoint = startPoint.Move(Bearing, Length / 2);
+            EndPoint = endPoint;
+            Length = DistanceKilometers(EndPoint) * 1000;
+            Bearing = RadiansToDegrees(Azimuth(EndPoint));
+            MidPoint = Offset(KilometersToRadians(Length / 2000), DegreesToRadians(Bearing));
         }
 
         public Transect(string name, Geo startPoint, double bearing, double length) : base(startPoint)
         {
             Name = name;
-            _endPoint = new Geo(this, bearing, length);
             Length = length;
+            EndPoint = Offset(KilometersToRadians(Length / 1000), DegreesToRadians(Bearing));
             Bearing = bearing;
-            _midPoint = new Geo(startPoint);
-            _midPoint.Move(Bearing, Length / 2);
+            MidPoint = new Geo(startPoint);
+            MidPoint = Offset(KilometersToRadians(Length / 2000), DegreesToRadians(Bearing));
         }
 
         /// <summary>
@@ -47,16 +44,16 @@ namespace ESME.Environment
         /// <summary>
         /// Start point of the transect
         /// </summary>
-        public Geo StartPoint { get { return new Geo(this); } }
+        public Geo StartPoint { get { return this; } }
 
         /// <summary>
         /// End point of the transect
         /// </summary>
-        public Geo EndPoint { get { return new Geo(_endPoint); } }
+        public Geo EndPoint { get; private set; }
 
         /// <summary>
         /// Mid point of the transect
         /// </summary>
-        public new Geo MidPoint { get { return new Geo(_midPoint); } }
+        public new Geo MidPoint { get; private set; }
     }
 }

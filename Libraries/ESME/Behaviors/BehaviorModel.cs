@@ -124,13 +124,11 @@ namespace ESME.Behaviors
                             break;
                         case "straight_line":
                             // straight line navigation code
-                            curLocation = curLocation.Offset(Geo.KilometersToRadians((curSpeedMetersPerSecond * NemoBase.SimulationStepTime.TotalSeconds) / 1000),
-                                                             course.Radians);
+                            curLocation = curLocation.Offset(Geo.KilometersToRadians((curSpeedMetersPerSecond * NemoBase.SimulationStepTime.TotalSeconds) / 1000), course.Radians);
                             break;
                         case "perimeter_bounce":
                             // perimeter bounce navigation code here
-                            var proposedLocation = curLocation.Offset(Geo.KilometersToRadians((curSpeedMetersPerSecond * NemoBase.SimulationStepTime.TotalSeconds) / 1000),
-                                                                      course.Radians);
+                            var proposedLocation = curLocation.Offset(Geo.KilometersToRadians((curSpeedMetersPerSecond * NemoBase.SimulationStepTime.TotalSeconds) / 1000), course.Radians);
                             //proposedLocation = new EarthCoordinate3D(curLocation);
                             //proposedLocation.Move(curCourseDegrees, curSpeedMetersPerSecond*NemoBase.SimulationStepTime.TotalSeconds);
                             if (curTrackBoundingRegion == null) throw new PlatformBehaviorException("Platform behavior is specified as Perimeter Bounce, but no bounding shape was specified");

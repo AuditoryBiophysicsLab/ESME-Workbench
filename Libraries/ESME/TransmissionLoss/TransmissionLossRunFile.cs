@@ -68,8 +68,8 @@ namespace ESME.TransmissionLoss
             result.AreaName = rangeComplexes.SelectedArea.Name;
             result.BathymetryResolution = rangeComplexes.SelectedBathymetry.Name;
             result.ReferenceLocation = new Geo(rangeComplex.RangeComplexMetadata.Latitude, rangeComplex.RangeComplexMetadata.Longitude);
-            var lat = soundSource.Latitude;
-            var lon = soundSource.Longitude;
+            var lat = soundSource.Geo.Latitude;
+            var lon = soundSource.Geo.Longitude;
             var locationString = string.Format("{0}{1:0.####}_{2}{3:0.####}",
                                                lat >= 0 ? "n" : "s", Math.Abs(lat),
                                                lon >= 0 ? "e" : "w", Math.Abs(lon));

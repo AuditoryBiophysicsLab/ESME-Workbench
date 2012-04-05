@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using ESME.Model;
+using HRC;
 using HRC.Navigation;
 
 namespace ESME.Environment
@@ -67,11 +69,10 @@ namespace ESME.Environment
             }
             return result;
         }
-
     }
 
     [Serializable]
-    public class SedimentSample : Geo<SedimentSampleBase>, IComparable<SedimentSample>
+    public class SedimentSample : Geo<SedimentSampleBase>, IComparable<SedimentSample>, IComparer<SedimentSample>
     {
         public SedimentSample() { }
 
@@ -99,6 +100,11 @@ namespace ESME.Environment
             var location = Geo.Deserialize(reader);
             var sampleBase = SedimentSampleBase.Deserialize(reader);
             return sampleBase.SampleValue == 0 ? null : new SedimentSample(location, sampleBase);
+        }
+        public int Compare(SedimentSample x, SedimentSample y)
+        {
+            var compare = x.Latitude.CompareTo(y.Latitude);
+            return compare != 0 ? compare : x.Longitude.CompareTo(y.Longitude);
         }
     }
 

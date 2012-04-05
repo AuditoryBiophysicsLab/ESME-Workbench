@@ -109,7 +109,7 @@ namespace ESME.NEMO.Overlay
                         var edgeNormalCourse = new Course(this[i], this[i + 1]);
                         var trialCw = Segments[i].Midpoint;
                         edgeNormalCourse = edgeNormalCourse + 90;
-                        trialCw = trialCw.Move(edgeNormalCourse.Degrees, 100);
+                        trialCw = trialCw.Offset(Geo.KilometersToRadians(0.1), Geo.DegreesToRadians(edgeNormalCourse.Degrees));
                         if (Contains(trialCw))
                             Normals[i] = new Course(edgeNormalCourse);
                         else

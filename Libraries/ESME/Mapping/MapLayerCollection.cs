@@ -7,7 +7,6 @@ using ESME.Animats;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
-using ESME.TransmissionLoss.REFMS;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
@@ -207,7 +206,7 @@ namespace ESME.Mapping
                 //oldIndex--;
                 curPoint.OldLocation = null;
             }
-            var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude, curPoint.Longitude);
+            var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Geo.Latitude, curPoint.Geo.Longitude);
             var analysisPointLayer = Find<AnalysisPointLayer>(LayerType.AnalysisPoint, analysisPointName);
             if (analysisPointLayer == null)
             {
@@ -235,15 +234,15 @@ namespace ESME.Mapping
                 var sourcePoints = new List<Geo>();
                 var circlePoints = new List<Geo>();
                 if (!soundSource.ShouldBeCalculated) continue;
-                sourcePoints.Add(curPoint);
+                sourcePoints.Add(curPoint.Geo);
                 foreach (var radialBearing in soundSource.RadialBearings)
                 {
-                    sourcePoints.Add(Geo.Move(curPoint, radialBearing, soundSource.Radius));
-                    sourcePoints.Add(curPoint);
+                    sourcePoints.Add(curPoint.Geo.Offset(Geo.KilometersToRadians(soundSource.Radius / 1000f), Geo.DegreesToRadians(radialBearing)));
+                    sourcePoints.Add(curPoint.Geo);
                 }
 
                 for (var angle = 0; angle <= 360; angle++)
-                    circlePoints.Add(Geo.Move(curPoint, angle, soundSource.Radius));
+                    circlePoints.Add(curPoint.Geo.Offset(Geo.KilometersToRadians(soundSource.Radius / 1000f), Geo.DegreesToRadians(angle)));
 
                 analysisPointLayer.Add(new OverlayLineSegments(sourcePoints.ToArray(), Colors.Red, 5));
                 analysisPointLayer.Add(new OverlayLineSegments(circlePoints.ToArray(), Colors.Red, 5));
@@ -253,14 +252,14 @@ namespace ESME.Mapping
 
         public void RemovePropagationPoint(CASSOutput curPoint)
         {
-            var layerName = string.Format("Prop {0}|{1}|{2}: [{3:0.###}, {4:0.###}]", curPoint.PlatformName, curPoint.SourceName, curPoint.ModeName, curPoint.Latitude, curPoint.Longitude);
+            var layerName = string.Format("Prop {0}|{1}|{2}: [{3:0.###}, {4:0.###}]", curPoint.PlatformName, curPoint.SourceName, curPoint.ModeName, curPoint.Geo.Latitude, curPoint.Geo.Longitude);
             var propagationPointLayer = Find<PropagationLayer>(LayerType.Propagation, layerName);
             if (propagationPointLayer != null) Remove(propagationPointLayer);
         }
 
         public void DisplayPropagationPoint(CASSOutput curPoint)
         {
-            var layerName = string.Format("Prop {0}|{1}|{2}: [{3:0.###}, {4:0.###}]", curPoint.PlatformName, curPoint.SourceName, curPoint.ModeName, curPoint.Latitude, curPoint.Longitude);
+            var layerName = string.Format("Prop {0}|{1}|{2}: [{3:0.###}, {4:0.###}]", curPoint.PlatformName, curPoint.SourceName, curPoint.ModeName, curPoint.Geo.Latitude, curPoint.Geo.Longitude);
             var propagationPointLayer = Find<PropagationLayer>(LayerType.Propagation, layerName);
             if (propagationPointLayer == null)
             {
@@ -292,15 +291,15 @@ namespace ESME.Mapping
 
                 var curRadialBearing = curPoint.RadialBearings[radialIndex];
                 // Line from center to radius
-                displayPoints.Add(curPoint);
-                displayPoints.Add(Geo.Move(curPoint, curRadialBearing, curPoint.MaxRangeDistance));
+                displayPoints.Add(curPoint.Geo);
+                displayPoints.Add(curPoint.Geo.Offset(Geo.KilometersToRadians(curPoint.MaxRangeDistance / 1000f), Geo.DegreesToRadians(curRadialBearing)));
                 propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
                 displayPoints.Clear();
 
                 // arrow at end of radial
-                displayPoints.Add(Geo.Move(curPoint, curRadialBearing + 5, curPoint.MaxRangeDistance * .9));
-                displayPoints.Add(Geo.Move(curPoint, curRadialBearing, curPoint.MaxRangeDistance));
-                displayPoints.Add(Geo.Move(curPoint, curRadialBearing - 5, curPoint.MaxRangeDistance * .9));
+                displayPoints.Add(curPoint.Geo.Offset(Geo.KilometersToRadians((curPoint.MaxRangeDistance * .9) / 1000f), Geo.DegreesToRadians(curRadialBearing + 5)));
+                displayPoints.Add(curPoint.Geo.Offset(Geo.KilometersToRadians(curPoint.MaxRangeDistance / 1000f), Geo.DegreesToRadians(curRadialBearing)));
+                displayPoints.Add(curPoint.Geo.Offset(Geo.KilometersToRadians((curPoint.MaxRangeDistance * .9) / 1000f), Geo.DegreesToRadians(curRadialBearing - 5)));
                 propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
                 displayPoints.Clear();
             }
@@ -310,8 +309,7 @@ namespace ESME.Mapping
                 for (var radialIndex = 0; radialIndex <= radialCount; radialIndex++)
                 {
                     var curRadialBearing = curPoint.RadialBearings[radialIndex % radialCount];
-                    displayPoints.Add(Geo.Move(curPoint, curRadialBearing,
-                                                           curPoint.ThresholdRadii[radialIndex % radialCount]));
+                    displayPoints.Add(curPoint.Geo.Offset(Geo.KilometersToRadians(curPoint.ThresholdRadii[radialIndex % radialCount] / 1000f), Geo.DegreesToRadians(curRadialBearing)));
                 }
                 propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
                 displayPoints.Clear();
@@ -320,7 +318,7 @@ namespace ESME.Mapping
             if (!float.IsNaN(curPoint.ThresholdRadius))
             {
                 // Display circle at maximum threshold radius
-                for (var angle = 0; angle <= 360; angle++) circlePoints.Add(Geo.Move(curPoint, angle, curPoint.ThresholdRadius));
+                for (var angle = 0; angle <= 360; angle++) circlePoints.Add(curPoint.Geo.Offset(Geo.KilometersToRadians(curPoint.ThresholdRadius / 1000f), Geo.DegreesToRadians(angle)));
                 propagationPointLayer.Add(new OverlayLineSegments(circlePoints.ToArray(), Colors.Red, 5));
             }
             propagationPointLayer.Done();

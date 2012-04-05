@@ -155,7 +155,7 @@ namespace ESME.Environment
     }
 
     [Serializable]
-    public class WindSample : Geo<float>
+    public class WindSample : Geo<float>, IComparer<WindSample>
     {
         public WindSample() {  }
         public WindSample(Geo location, float sample) : base(location.Latitude, location.Longitude, sample) {  }
@@ -169,6 +169,12 @@ namespace ESME.Environment
         public new static WindSample Deserialize(BinaryReader reader)
         {
             return new WindSample(Geo.Deserialize(reader), reader.ReadSingle());
+        }
+
+        public int Compare(WindSample x, WindSample y)
+        {
+            var compare = x.Latitude.CompareTo(y.Latitude);
+            return compare != 0 ? compare : x.Longitude.CompareTo(y.Longitude);
         }
     }
 }

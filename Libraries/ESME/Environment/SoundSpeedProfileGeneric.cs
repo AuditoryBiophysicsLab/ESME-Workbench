@@ -10,7 +10,20 @@ namespace ESME.Environment
     {
         public SoundSpeedProfileAverager() {}
 
-        public SoundSpeedProfileAverager(SoundSpeedProfile profile) : base(profile)
+        public SoundSpeedProfileAverager(Geo<List<SoundSpeedSample>> profile) : base(profile)
+        {
+            if (profile.Data.Count == 0)
+                foreach (var datum in profile.Data) Add(new AverageSoundSpeedSample(datum));
+            else
+                foreach (var datum in profile.Data)
+                {
+                    var averagerAtDepth = this[datum.Depth];
+                    if (averagerAtDepth != null) averagerAtDepth.Add(datum);
+                    else Add(new AverageSoundSpeedSample(datum));
+                }
+        }
+
+        public void Add(Geo<List<SoundSpeedSample>> profile)
         {
             if (profile.Data.Count == 0)
                 foreach (var datum in profile.Data) Add(new AverageSoundSpeedSample(datum));
@@ -60,7 +73,7 @@ namespace ESME.Environment
         public float Average { get { return Value / Count; } }
     }
 
-    public class SoundSpeedProfile : SoundSpeedProfileGeneric<SoundSpeedSample>
+    public class SoundSpeedProfile : SoundSpeedProfileGeneric<SoundSpeedSample>, IComparer<SoundSpeedProfile>
     {
         public SoundSpeedProfile() { }
         public SoundSpeedProfile(Geo location) : base(location) { }
@@ -85,6 +98,12 @@ namespace ESME.Environment
             //for (var i = 0; i < itemCount; i++) result.Add((T)genericDeserializer.Invoke(null, new object[] { reader }));
             for (var i = 0; i < itemCount; i++) result.Add(SoundSpeedSample.Deserialize(reader));
             return result;
+        }
+
+        public int Compare(SoundSpeedProfile x, SoundSpeedProfile y) 
+        {
+            var compare = x.Latitude.CompareTo(y.Latitude); 
+            return compare != 0 ? compare : x.Longitude.CompareTo(y.Longitude);
         }
     }
 

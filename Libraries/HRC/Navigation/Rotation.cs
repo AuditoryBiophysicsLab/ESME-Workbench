@@ -2,27 +2,42 @@
 
 namespace HRC.Navigation
 {
-    public class Rotation
-    {
-        readonly Geo _g;
-        readonly double _m00;
-        readonly double _m11;
-        readonly double _m22;
-        readonly double _m01;
-        readonly double _m10;
-        readonly double _m12;
-        readonly double _m21;
-        readonly double _m02;
-        readonly double _m20;
+/**
+ * Defines a 3-D rotation, M, such that the matrix multiplication, Mv, rotates
+ * vector v an angle ,angle, counter clockwise about the Geo, g. See Newman and
+ * Sproull, 1973, Principles of Interactive Computer Garaphics, McGraw-Hill, New
+ * York, 463-465.
+ */
+    /**
+    * Static method that does what creating a Rotation object can calling
+    * rotate() on it does. Rotates vector geo2 an angle counter clockwise about
+    * the Geo, v1.
+    * 
+    * @param v1
+    * @param angle
+    * @param geo2
+    * @param ret The Geo to load the results in, may be null which will cause
+    *        the method to allocate a new Geo object.
+    * @return the ret Geo passed in, or a new one if ret was null.
+    */
 
-        public Rotation(Geo g, double angle)
+    public static class Rotation
+    {
+        /// <summary>
+        /// Rotates geo2 counterclockwise about geo1 through the specified angle
+        /// </summary>
+        /// <param name="geo1"></param>
+        /// <param name="angle"></param>
+        /// <param name="geo2"></param>
+        /// <param name="isDegrees"> </param>
+        /// <returns></returns>
+        public static Geo Rotate(Geo geo1, Geo geo2, double angle, bool isDegrees)
         {
-            _g = g;
-            var x = _g.X;
-            var y = _g.Y;
-            var z = _g.Z;
-            var c = Math.Cos(angle);
-            var s = Math.Sin(angle);
+            var x = geo1.X;
+            var y = geo1.Y;
+            var z = geo1.Z;
+            var c = Math.Cos(isDegrees ? MoreMath.DegreesToRadians(angle) : angle);
+            var s = Math.Sin(isDegrees ? MoreMath.DegreesToRadians(angle) : angle);
             var b = 1.0 - c;
             var bx = b * x;
             var by = b * y;
@@ -36,34 +51,17 @@ namespace HRC.Navigation
             var sx = s * x;
             var sy = s * y;
             var sz = s * z;
-            _m00 = c + bxx;
-            _m11 = c + byy;
-            _m22 = c + bzz;
-            _m01 = (-sz) + bxy;
-            _m10 = sz + bxy;
-            _m12 = (-sx) + byz;
-            _m21 = sx + byz;
-            _m02 = sy + bxz;
-            _m20 = (-sy) + bxz;
-        }
+            var m00 = c + bxx;
+            var m11 = c + byy;
+            var m22 = c + bzz;
+            var m01 = (-sz) + bxy;
+            var m10 = sz + bxy;
+            var m12 = (-sx) + byz;
+            var m21 = sx + byz;
+            var m02 = sy + bxz;
+            var m20 = (-sy) + bxz;
 
-        public Geo Rotate(Geo v)
-        {
-            return new Geo(_m00 * v.X + _m01 * v.Y + _m02 * v.Z, _m10 * v.X + _m11 * v.Y + _m12 * v.Z, _m20 * v.X + _m21 * v.Y + _m22 * v.Z);
-        }
-
-        /// <summary>
-        /// Static method that does what creating a Rotation object and calling
-        /// rotate() on it does. Rotates vector v2 an angle counter clockwise about
-        /// the Geo, v1.
-        /// </summary>
-        /// <param name="v1"></param>
-        /// <param name="angle"></param>
-        /// <param name="v2"></param>
-        /// <returns></returns>
-        public static Geo Rotate(Geo v1, double angle, Geo v2)
-        {
-            return new Rotation(v1, angle).Rotate(v2);
+            return new Geo(m00 * geo2.X + m01 * geo2.Y + m02 * geo2.Z, m10 * geo2.X + m11 * geo2.Y + m12 * geo2.Z, m20 * geo2.X + m21 * geo2.Y + m22 * geo2.Z);
         }
     }
 }

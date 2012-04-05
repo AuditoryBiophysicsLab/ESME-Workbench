@@ -194,8 +194,7 @@ namespace ESME.Views.TransmissionLoss
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
-                var curTransect = new Transect(null, transmissionLossJob.SoundSource, radialBearing,
-                                               transmissionLossJob.SoundSource.Radius);
+                var curTransect = new Transect(null, transmissionLossJob.SoundSource.Geo, radialBearing, transmissionLossJob.SoundSource.Radius);
                 var bathymetry = ((Task<Bathymetry>)_environmentData[EnvironmentDataType.Bathymetry]).Result;
                 bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, bathymetry);
                 maxCalculationDepthMeters = Math.Max((float)bottomProfiles[bearingIndex].MaxDepth, maxCalculationDepthMeters);
@@ -208,7 +207,7 @@ namespace ESME.Views.TransmissionLoss
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
-                var sedimentType = ((Task<Sediment>)_environmentData[EnvironmentDataType.Sediment]).Result.Samples.GetNearestPoint(transmissionLossJob.SoundSource);
+                var sedimentType = ((Task<Sediment>)_environmentData[EnvironmentDataType.Sediment]).Result.Samples.GetNearestPoint(transmissionLossJob.SoundSource.Geo);
                 TransmissionLossRadialCalculatorViewModel radialViewModel;
                 double[,] topReflectionCoefficient = null;
                 if (!float.IsNaN(windSpeeds[bearingIndex])) topReflectionCoefficient = Bellhop.GenerateReflectionCoefficients(windSpeeds[bearingIndex], transmissionLossJob.SoundSource.AcousticProperties.Frequency);

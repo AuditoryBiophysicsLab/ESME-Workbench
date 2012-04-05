@@ -17,7 +17,7 @@ using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.TransmissionLoss.CASS
 {
-    public class CASSOutput : Geo, IEquatable<AcousticProperties>, ISupportValidation
+    public class CASSOutput : ValidatingViewModelBase, IEquatable<AcousticProperties>, ISupportValidation
     {
         #region Public Properties
 
@@ -101,6 +101,8 @@ namespace ESME.TransmissionLoss.CASS
 
         public List<float[,]> Pressures { get; set; }
 
+        public Geo Geo { get; set; }
+
         #endregion
 
         public string Filename { get; set; }
@@ -179,29 +181,6 @@ namespace ESME.TransmissionLoss.CASS
 
         WeakReference<Bathymetry> _bathymetry;
 
-        #region public bool IsValid { get; set; }
-
-        [XmlIgnore]
-        public bool IsValid
-        {
-            get
-            {
-                Validate();
-                return _isValid;
-            }
-            private set
-            {
-                if (_isValid == value) return;
-                _isValid = value;
-                NotifyPropertyChanged(IsValidChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsValidChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPoint>(x => x.IsValid);
-        bool _isValid;
-
-        #endregion
-
         #region public string ValidationErrorText { get; set; }
         [XmlIgnore]
         public string ValidationErrorText
@@ -215,7 +194,6 @@ namespace ESME.TransmissionLoss.CASS
             {
                 if (_validationErrorText == value) return;
                 _validationErrorText = value;
-                IsValid = string.IsNullOrEmpty(_validationErrorText);
                 NotifyPropertyChanged(ValidationErrorTextChangedEventArgs);
             }
         }
@@ -234,7 +212,7 @@ namespace ESME.TransmissionLoss.CASS
             }
 
             var bathymetry = Bathymetry.Target;
-            if (!bathymetry.Samples.GeoRect.Contains(this))
+            if (!bathymetry.Samples.GeoRect.Contains(Geo))
             {
                 ValidationErrorText = "Propagation point not contained within bathymetry bounds";
                 return;
@@ -244,7 +222,7 @@ namespace ESME.TransmissionLoss.CASS
 
             foreach (var radialBearing in RadialBearings)
             {
-                var radialEndPoint = new Geo(this, radialBearing, MaxRangeDistance);
+                var radialEndPoint = Geo.Offset(Geo.KilometersToRadians(MaxRangeDistance / 1000f), Geo.DegreesToRadians(radialBearing));
                 if (!bathymetry.Samples.GeoRect.Contains(radialEndPoint))
                 {
                     //Console.WriteLine("Source name {0} location ({1}, {2}) bearing {3} endpoint ({4}, {5}) outside of bathymetry", Name, Latitude, Longitude, radialBearing, radialEndPoint.Latitude, radialEndPoint.Longitude);
@@ -643,8 +621,7 @@ namespace ESME.TransmissionLoss.CASS
             SourceRefLonLocation = reader.ReadSingle();
             SourceRefLonLocationUnits = ParseCASSString(reader, 10, '\0');
 
-            Latitude = SourceRefLatLocation;
-            Longitude = SourceRefLonLocation;
+            Geo = new Geo(SourceRefLatLocation, SourceRefLonLocation);
 
             PlatformName = ParseCASSString(reader, 50, '\0');
             SourceName = ParseCASSString(reader, 50, '\0');

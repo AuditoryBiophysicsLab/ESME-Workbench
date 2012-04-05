@@ -1,60 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Linq;
 
 namespace HRC.Navigation
 {
     public class BoundingCircle
     {
-        public BoundingCircle(Geo center, double radius) 
-        {
-            Init(center, radius);
-        }
-
-        public BoundingCircle(GeoPath path)
-        {
-            Init(path.Points);
-        }
-
-        void Init(Geo center, double radius) 
+        /// <summary>
+        /// Construct a BoundingCircle
+        /// </summary>
+        /// <param name="center">Center of the BoundingCircle</param>
+        /// <param name="radius">Radius of the BoundingCircle, in radians</param>
+        public BoundingCircle(Geo center, double radius)
         {
             Center = center;
             Radius = radius;
         }
 
-        void Init(List<GeoPoint> region)
+        public BoundingCircle(IGeoArray geoArray)
         {
-            var c = Intersection.Center(region); // centroid
-            var storage = new Geo();
-            var r = 0.0;
-            var length = region.Count;
-            for (var i = 0; i < length; i++)
-            {
-                storage.Initialize(region[i].Point);
-                var pr = c.DistanceRadians(storage);
-                if (pr > r)
-                {
-                    r = pr;
-                }
-            }
-
-            Init(c, r);
+            Center = geoArray.Center;
+            Radius = geoArray.Geos.Max(g => Center.DistanceRadians(g));
         }
 
         public Geo Center { get; private set; }
 
+        /// <summary>
+        /// Radius of the bounding circle, in radians.
+        /// </summary>
         public double Radius { get; private set; }
+        
+        public bool Intersects(BoundingCircle bc) { return Intersects(bc.Center, bc.Radius); }
+        public bool Intersects(Geo g, double r) { return Center.DistanceRadians(g) <= (Radius + r); }
+        public bool Contains(Geo g) { return Intersects(g.BoundingCircle); }
 
-        public bool Intersects(BoundingCircle bc) {
-            return Intersects(bc.Center, bc.Radius);
-        }
-        
-        public bool Intersects(Geo g, double r) {
-            return Center.DistanceRadians(g) <= (Radius + r);
-        }
-        
-        public new String ToString() {
-            return "BoundingCircle: center(" + Center + ") with radius (" + Radius + ")";
-        }
-        
+        public override string ToString() { return string.Format("BoundingCircle: center: {0}, radius: {1:0.#####} degrees", Center, Geo.RadiansToDegrees(Radius)); }
     }
 }

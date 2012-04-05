@@ -49,22 +49,22 @@ namespace HRC.Navigation
         public static double GeographicLatitude(double geocentricLatitude) { return Math.Atan(Math.Tan(geocentricLatitude) / FlatteningC); }
 
         /** Convert from degrees to radians. */
-        public static double DegreesToRadians(double degrees) { return Navigation.Length.DECIMAL_DEGREE.toRadians(degrees); }
+        public static double DegreesToRadians(double degrees) { return Navigation.Length.Degrees.ToRadians(degrees); }
 
         /** Convert from radians to degrees. */
-        public static double RadiansToDegrees(double radians) { return Navigation.Length.DECIMAL_DEGREE.fromRadians(radians); }
+        public static double RadiansToDegrees(double radians) { return Navigation.Length.Degrees.FromRadians(radians); }
 
         /** Convert radians to kilometers. * */
-        public static double RadiansToKilometers(double radians) { return Navigation.Length.KM.fromRadians(radians); }
+        public static double RadiansToKilometers(double radians) { return Navigation.Length.Kilometers.FromRadians(radians); }
 
         /** Convert kilometers to radians. * */
-        public static double KilometersToRadians(double km) { return Navigation.Length.KM.toRadians(km); }
+        public static double KilometersToRadians(double km) { return Navigation.Length.Kilometers.ToRadians(km); }
 
         /** Convert radians to nauticalMiles. * */
-        public static double RadiansToNauticalMiles(double radians) { return Navigation.Length.NM.fromRadians(radians); }
+        public static double RadiansToNauticalMiles(double radians) { return Navigation.Length.NauticalMiles.FromRadians(radians); }
 
         /** Convert nautical miles to radians. * */
-        public static double NauticalMilesToRadians(double nm) { return Navigation.Length.NM.toRadians(nm); }
+        public static double NauticalMilesToRadians(double nm) { return Navigation.Length.NauticalMiles.ToRadians(nm); }
 
         public OldGeo() { }
 

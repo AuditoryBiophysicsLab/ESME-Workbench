@@ -16,7 +16,7 @@ using HRC.Utility;
 namespace ESME.TransmissionLoss
 {
     [Serializable]
-    public class AnalysisPoint : Geo, IEquatable<AnalysisPoint>, ISupportValidation
+    public class AnalysisPoint : ValidatingViewModelBase, IEquatable<AnalysisPoint>, ISupportValidation
     {
         private AnalysisPoint()
         {
@@ -25,6 +25,7 @@ namespace ESME.TransmissionLoss
             SoundSources = new List<SoundSource>();
             AnalysisPointID = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
             OldLocation = null;
+#if false
             PropertyChanged += (s, e) =>
             {
                 var ap = (AnalysisPoint)s;
@@ -40,13 +41,15 @@ namespace ESME.TransmissionLoss
                         break;
                 }
             };
+#endif
         }
 
         public AnalysisPoint(Geo location) : this()
         {
-            Latitude = location.Latitude;
-            Longitude = location.Longitude;
+            Geo = location;
         }
+
+        public Geo Geo { get; set; }
 
         /// <summary>
         ///   The presumptively-unique analysis point ID.
@@ -125,29 +128,6 @@ namespace ESME.TransmissionLoss
 
         #endregion
 
-        #region public bool IsValid { get; set; }
-
-        [XmlIgnore]
-        public bool IsValid
-        {
-            get
-            {
-                Validate();
-                return _isValid;
-            }
-            private set
-            {
-                if (_isValid == value) return;
-                _isValid = value;
-                NotifyPropertyChanged(IsValidChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsValidChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPoint>(x => x.IsValid);
-        bool _isValid;
-
-        #endregion
-
         #region public string ValidationErrorText { get; set; }
         [XmlIgnore]
         public string ValidationErrorText
@@ -161,7 +141,6 @@ namespace ESME.TransmissionLoss
             {
                 if (_validationErrorText == value) return;
                 _validationErrorText = value;
-                IsValid = string.IsNullOrEmpty(_validationErrorText);
                 NotifyPropertyChanged(ValidationErrorTextChangedEventArgs);
             }
         }
@@ -180,7 +159,7 @@ namespace ESME.TransmissionLoss
             }
 
             var bathymetry = Bathymetry.Target;
-            if (!bathymetry.Samples.GeoRect.Contains(this))
+            if (!bathymetry.Samples.GeoRect.Contains(Geo))
             {
                 ValidationErrorText = "Analysis point not contained within bathymetry bounds";
                 return;

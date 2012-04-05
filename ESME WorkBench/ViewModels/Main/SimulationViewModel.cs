@@ -302,7 +302,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                 foreach (var animat in animats)
                                 {
                                     var animatRange = (float)(platformLocation.DistanceKilometers(animat.Location) * 1000);
-                                    var animatBearing = (float)(platformLocation.AzimuthDegrees(animat.Location));
+                                    var animatBearing = (float)(Geo.RadiansToDegrees(platformLocation.Azimuth(animat.Location)));
                                     // If the animat is not within the radius, skip it.
                                     if ((animatRange <= beamRadius) && (horizontalBeamLimits.Contains(animatBearing)))
                                     {

@@ -593,7 +593,7 @@ namespace ESME.Metadata
                                  }).Distinct().ToList();
             foreach (var mode in distinctModes)
             {
-                if (mode.Mode.Name.ToLower() != "explosive") analysisPoint.SoundSources.Add(new SoundSource(analysisPoint, mode.Mode, 16));
+                if (mode.Mode.Name.ToLower() != "explosive") analysisPoint.SoundSources.Add(new SoundSource(analysisPoint.Geo, mode.Mode, 16));
             }
             if (analysisPoint.SoundSources.Count > 0) AnalysisPoints.Add(analysisPoint);
             Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));

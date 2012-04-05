@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using HRC;
 using HRC.Navigation;
 
 namespace ESME.Environment
@@ -68,7 +70,7 @@ namespace ESME.Environment
     }
 
     [Serializable]
-    public class BottomLossSample : Geo<BottomLossData>
+    public class BottomLossSample : Geo<BottomLossData>, IComparer<BottomLossSample>
     {
         public BottomLossSample() { }
 
@@ -85,11 +87,17 @@ namespace ESME.Environment
         {
             return new BottomLossSample(Geo.Deserialize(reader), BottomLossData.Deserialize(reader));
         }
+
+        public int Compare(BottomLossSample x, BottomLossSample y)
+        {
+            var compare = x.Latitude.CompareTo(y.Latitude); 
+            return compare != 0 ? compare : x.Longitude.CompareTo(y.Longitude);
+        }
     }
 
     // ReSharper disable InconsistentNaming
     [Serializable]
-    public class BottomLossData
+    public class BottomLossData : IComparer<BottomLossData>
     {
             public double CurveNumber { get; set; }
             public double RATIOD { get; set; }
@@ -155,6 +163,30 @@ namespace ESME.Environment
                 SEDTHK_M = reader.ReadDouble(),
                 SEDTHK_S = reader.ReadDouble(),
             };
+        }
+
+        public int Compare(BottomLossData x, BottomLossData y)
+        {
+            var compare = x.CurveNumber.CompareTo(y.CurveNumber); if (compare != 0) return compare;
+            compare = x.RATIOD.CompareTo(y.RATIOD); if (compare != 0) return compare;
+            compare = x.DLD.CompareTo(y.DLD); if (compare != 0) return compare;
+            compare = x.RHOLD.CompareTo(y.RHOLD); if (compare != 0) return compare;
+            compare = x.RHOSD.CompareTo(y.RHOSD); if (compare != 0) return compare;
+            compare = x.GD.CompareTo(y.GD); if (compare != 0) return compare;
+            compare = x.BETAD.CompareTo(y.BETAD); if (compare != 0) return compare;
+
+            compare = x.FKZD.CompareTo(y.FKZD); if (compare != 0) return compare;
+            compare = x.FKZP.CompareTo(y.FKZP); if (compare != 0) return compare;
+            compare = x.BRFLD.CompareTo(y.BRFLD); if (compare != 0) return compare;
+            compare = x.FEXP.CompareTo(y.FEXP); if (compare != 0) return compare;
+            compare = x.D2A.CompareTo(y.D2A); if (compare != 0) return compare;
+            compare = x.ALF2A.CompareTo(y.ALF2A); if (compare != 0) return compare;
+
+            compare = x.RHO2A.CompareTo(y.RHO2A); if (compare != 0) return compare;
+            compare = x.SUBCRIT.CompareTo(y.SUBCRIT); if (compare != 0) return compare;
+            compare = x.T2RH.CompareTo(y.T2RH); if (compare != 0) return compare;
+            compare = x.SEDTHK_M.CompareTo(y.SEDTHK_M); if (compare != 0) return compare;
+            return x.SEDTHK_S.CompareTo(y.SEDTHK_S);
         }
     }
 

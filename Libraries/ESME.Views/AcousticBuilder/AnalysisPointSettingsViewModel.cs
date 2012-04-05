@@ -24,9 +24,9 @@ namespace ESME.Views.AcousticBuilder
             AvailableModes = new ObservableCollection<SoundSource>();
             AnalysisPoint = analysisPoint;
             IsItemSelected = false;
-            Latitude = AnalysisPoint.Latitude;
-            Longitude = AnalysisPoint.Longitude;
-            AnalysisPoint.OldLocation = new Geo(AnalysisPoint);
+            Latitude = analysisPoint.Geo.Latitude;
+            Longitude = analysisPoint.Geo.Longitude;
+            AnalysisPoint.OldLocation = analysisPoint.Geo;
             
             ValidationRules.AddRange(new List<ValidationRule>
             {
@@ -188,8 +188,7 @@ namespace ESME.Views.AcousticBuilder
                                              delegate { return IsValid; },
                                              delegate
                                              {
-                                                 AnalysisPoint.Latitude = Latitude;
-                                                 AnalysisPoint.Longitude = Longitude;
+                                                 this.AnalysisPoint.Geo = new Geo(Latitude, Longitude);
                                                  CloseActivePopUpCommand.Execute(true);
                                              }));
             }

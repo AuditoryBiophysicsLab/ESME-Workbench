@@ -163,9 +163,7 @@ namespace ESME.TransmissionLoss.CASS
                 if (!double.TryParse(packet[1].Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out lon)) throw new DataMisalignedException("");
                 var retpacket = new NAEMOEnvironmentLocation(new Geo(lat, lon))
                 {
-                        Latitude = lat,
-                        Longitude = lon,
-                        Filename = environmentFileName
+                    Filename = environmentFileName
                 };
                 var curGroupLineIndex = 0;
                 while (curGroupLineIndex < packet.Count)
