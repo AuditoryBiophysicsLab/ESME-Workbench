@@ -5,10 +5,10 @@ namespace ESME.Views.Locations
     /// <summary>
     /// Interaction logic for NewLocationView.xaml
     /// </summary>
-    [PopupNameToViewLookupKeyMetadata("NewLocationView", typeof(NewLocationView))]
-    public partial class NewLocationView
+    [PopupNameToViewLookupKeyMetadata("CreateLocationView", typeof(CreateLocationView))]
+    public partial class CreateLocationView
     {
-        public NewLocationView()
+        public CreateLocationView()
         {
             InitializeComponent();
         }

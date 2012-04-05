@@ -89,7 +89,7 @@ namespace ESME.NEMO
             {
                 if (_propertyViewName == value) return;
                 _propertyViewName = value;
-                NotifyPropertyChanged(PropertyViewNameChangedEventArgs);
+                OnPropertyChanged(PropertyViewNameChangedEventArgs);
             }
         }
 

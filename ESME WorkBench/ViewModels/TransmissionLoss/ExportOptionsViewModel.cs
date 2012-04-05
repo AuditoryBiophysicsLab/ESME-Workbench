@@ -124,7 +124,7 @@ namespace ESMEWorkbench.ViewModels.TransmissionLoss
             {
                 if (_exportAnalysisPoints == value) return;
                 _exportAnalysisPoints = value;
-                NotifyPropertyChanged(ExportAnalysisPointsChangedEventArgs);
+                OnPropertyChanged(ExportAnalysisPointsChangedEventArgs);
             }
         }
 
@@ -142,7 +142,7 @@ namespace ESMEWorkbench.ViewModels.TransmissionLoss
             {
                 if (_exportToESME == value) return;
                 _exportToESME = value;
-                NotifyPropertyChanged(ExportToESMEChangedEventArgs);
+                OnPropertyChanged(ExportToESMEChangedEventArgs);
             }
         }
 
@@ -160,7 +160,7 @@ namespace ESMEWorkbench.ViewModels.TransmissionLoss
             {
                 if (_exportToCASS == value) return;
                 _exportToCASS = value;
-                NotifyPropertyChanged(ExportToCASSChangedEventArgs);
+                OnPropertyChanged(ExportToCASSChangedEventArgs);
             }
         }
 
@@ -178,7 +178,7 @@ namespace ESMEWorkbench.ViewModels.TransmissionLoss
             {
                 if (_exportEnvironmentToCASS == value) return;
                 _exportEnvironmentToCASS = value;
-                NotifyPropertyChanged(ExportEnvironmentToCASSChangedEventArgs);
+                OnPropertyChanged(ExportEnvironmentToCASSChangedEventArgs);
             }
         }
 
@@ -196,7 +196,7 @@ namespace ESMEWorkbench.ViewModels.TransmissionLoss
             {
                 if (_exportCASSBathymetry == value) return;
                 _exportCASSBathymetry = value;
-                NotifyPropertyChanged(ExportCASSBathymetryChangedEventArgs);
+                OnPropertyChanged(ExportCASSBathymetryChangedEventArgs);
             }
         }
 
@@ -214,7 +214,7 @@ namespace ESMEWorkbench.ViewModels.TransmissionLoss
             {
                 if (_exportCASSClimatology == value) return;
                 _exportCASSClimatology = value;
-                NotifyPropertyChanged(ExportCASSClimatologyChangedEventArgs);
+                OnPropertyChanged(ExportCASSClimatologyChangedEventArgs);
             }
         }
 

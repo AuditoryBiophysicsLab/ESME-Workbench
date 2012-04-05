@@ -14,7 +14,7 @@ namespace HRC.Utility
             {
                 if (_name == value) return;
                 _name = value;
-                NotifyPropertyChanged(NameChangedEventArgs);
+                OnPropertyChanged(NameChangedEventArgs);
             }
         }
 
@@ -35,7 +35,7 @@ namespace HRC.Utility
             {
                 if (_scaleToMeters == value) return;
                 _scaleToMeters = value;
-                NotifyPropertyChanged(ScaleToMetersChangedEventArgs);
+                OnPropertyChanged(ScaleToMetersChangedEventArgs);
             }
         }
 
@@ -53,9 +53,9 @@ namespace HRC.Utility
             {
                 if (_quantity == value) return;
                 _quantity = value;
-                NotifyPropertyChanged(QuantityChangedEventArgs);
+                OnPropertyChanged(QuantityChangedEventArgs);
                 _meters = _quantity * ScaleToMeters;
-                NotifyPropertyChanged(MetersChangedEventArgs);
+                OnPropertyChanged(MetersChangedEventArgs);
             }
         }
 
@@ -73,9 +73,9 @@ namespace HRC.Utility
             {
                 if (_meters == value) return;
                 _meters = value;
-                NotifyPropertyChanged(MetersChangedEventArgs);
+                OnPropertyChanged(MetersChangedEventArgs);
                 _quantity = _meters / ScaleToMeters;
-                NotifyPropertyChanged(QuantityChangedEventArgs);
+                OnPropertyChanged(QuantityChangedEventArgs);
             }
         }
 

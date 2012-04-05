@@ -25,7 +25,7 @@ namespace ESMEWorkbench.ViewModels.Ribbon
                 if (_header != value)
                 {
                     _header = value;
-                    NotifyPropertyChanged(new PropertyChangedEventArgs("Header"));
+                    OnPropertyChanged(new PropertyChangedEventArgs("Header"));
                 }
             }
         }
@@ -39,7 +39,7 @@ namespace ESMEWorkbench.ViewModels.Ribbon
                 if (_isVisible != value)
                 {
                     _isVisible = value;
-                    NotifyPropertyChanged(new PropertyChangedEventArgs("IsVisible"));
+                    OnPropertyChanged(new PropertyChangedEventArgs("IsVisible"));
                 }
             }
         }

@@ -12,7 +12,7 @@ namespace HRC.Utility
             {
                 if (_status == value) return;
                 _status = value;
-                NotifyPropertyChanged("Status");
+                OnPropertyChanged("Status");
             }
         }
 
@@ -28,7 +28,7 @@ namespace HRC.Utility
             set
             {
                 _currentValue = value;
-                NotifyPropertyChanged("CurrentValue");
+                OnPropertyChanged("CurrentValue");
             }
         }
 
@@ -44,7 +44,7 @@ namespace HRC.Utility
             set
             {
                 _maximumValue = value;
-                NotifyPropertyChanged("MaximumValue");
+                OnPropertyChanged("MaximumValue");
             }
         }
 

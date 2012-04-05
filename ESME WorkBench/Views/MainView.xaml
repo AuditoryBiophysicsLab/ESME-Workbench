@@ -235,10 +235,55 @@
                                     SmallImageSource="..\Images\SmallIcons\globe-icon.png" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Location">
-                    <r:RibbonButton Command="{Binding NewLocationCommand}"
-                                    Label="New"
-                                    LargeImageSource="..\Images\LargeIcons\map_add.png"
-                                    SmallImageSource="..\Images\SmallIcons\map_add.png" />
+                    <ListView Width="150"
+                              Height="66"
+                              DisplayMemberPath="Name"
+                              ItemsSource="{Binding Database.Locations}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                              SelectedIndex="{Binding SelectedLocationIndex}"
+                              SelectedItem="{Binding SelectedLocation}"
+                              SelectionMode="Single">
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel />
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                    </ListView>
+                    <r:RibbonMenuButton Label="Add"
+                                        SmallImageSource="..\Images\SmallIcons\layer_add.png"
+                                        ToolTipDescription="Add a new location through one of several available means"
+                                        ToolTipTitle="Add location">
+                        <r:RibbonMenuItem Command="{Binding CreateLocationFromBoundingBoxCommand}"
+                                          Header="Enter boundaries..."
+                                          ImageSource="..\Images\SmallIcons\layer_command.png"
+                                          ToolTipDescription="Create a new location by entering its northern, southern, eastern and western boundaries"
+                                          ToolTipTitle="Create a new location by specifying its boundaries" />
+                        <r:RibbonMenuItem Command="{Binding CreateLocationFromOverlayFileCommand}"
+                                          Header="Import overlay file..."
+                                          ImageSource="..\Images\SmallIcons\layer_import.png"
+                                          ToolTipDescription="Create a new location by loading an overlay file that specifies its northern, southern, eastern and western boundaries"
+                                          ToolTipTitle="Create a location from an existing overlay file" />
+                        <r:RibbonMenuItem Command="{Binding DisabledCommand}"
+                                          Header="Import location file..."
+                                          ImageSource="..\Images\SmallIcons\layer_database.png"
+                                          ToolTipDescription="This feature is not yet implemented"
+                                          ToolTipTitle="Create a location by importing a location file" />
+                        <r:RibbonMenuItem Command="{Binding DisabledCommand}"
+                                          Header="Selecting area on map"
+                                          ImageSource="..\Images\SmallIcons\layer_to_image_size.png"
+                                          ToolTipDescription="This feature is not yet implemented"
+                                          ToolTipTitle="Create a location by selecting an area on the map" />
+                    </r:RibbonMenuButton>
+                    <r:RibbonButton Command="{Binding DisabledCommand}"
+                                    Label="Edit"
+                                    SmallImageSource="..\Images\SmallIcons\layer_edit.png"
+                                    ToolTipDescription="Edit the boundaries and/or cached environmental data of the selected location"
+                                    ToolTipTitle="Edit location" />
+                    <r:RibbonButton Command="{Binding DisabledCommand}"
+                                    Label="Delete"
+                                    SmallImageSource="..\Images\SmallIcons\layer_delete.png"
+                                    ToolTipDescription="Delete an existing location, along with all cached data and all scenarios that depend upon it"
+                                    ToolTipTitle="Delete location" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Range Complex" ToolTip="{Binding ScenarioLoadedToolTip}">
                     <ListView Width="150"

@@ -100,7 +100,7 @@ namespace ESME.Metadata
                     {
                         _bathymetry = new WeakReference<Bathymetry>(((Task<Bathymetry>)RangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).Result);
                         Debug.WriteLine("{0} Bathymetry weak reference is set", DateTime.Now);
-                        NotifyPropertyChanged(CanPlaceAnalysisPointChangedEventArgs);
+                        OnPropertyChanged(CanPlaceAnalysisPointChangedEventArgs);
                     }
                     else
                     {
@@ -142,7 +142,7 @@ namespace ESME.Metadata
                 if (_currentMapLayers != null) _currentMapLayers.CollectionChanged -= CurrentMapLayersCollectionChanged;
                 _currentMapLayers = value;
                 if (_currentMapLayers != null) _currentMapLayers.CollectionChanged += CurrentMapLayersCollectionChanged;
-                NotifyPropertyChanged(MapLayersChangedEventArgs);
+                OnPropertyChanged(MapLayersChangedEventArgs);
             }
         }
 
@@ -180,7 +180,7 @@ namespace ESME.Metadata
                     Debug.WriteLine("NotifyCollectionChangedAction.Reset");
                     break;
             }
-            NotifyPropertyChanged(MapLayersChangedEventArgs);
+            OnPropertyChanged(MapLayersChangedEventArgs);
         }
         static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<ScenarioMetadata>(x => x.CurrentMapLayers);
         [XmlIgnore]
@@ -197,7 +197,7 @@ namespace ESME.Metadata
             {
                 if (_cassOutputs == value) return;
                 _cassOutputs = value;
-                NotifyPropertyChanged(CASSOutputsChangedEventArgs);
+                OnPropertyChanged(CASSOutputsChangedEventArgs);
             }
         }
 
@@ -316,8 +316,8 @@ namespace ESME.Metadata
                     _scenarioBounds = null;
                     NemoModeToAcousticModelNameMap = null;
                 }
-                NotifyPropertyChanged(NemoFileChangedEventArgs);
-                NotifyPropertyChanged(CanPlaceAnalysisPointChangedEventArgs);
+                OnPropertyChanged(NemoFileChangedEventArgs);
+                OnPropertyChanged(CanPlaceAnalysisPointChangedEventArgs);
             }
         }
 
@@ -443,7 +443,7 @@ namespace ESME.Metadata
             {
                 if (_scenarioFilename == value) return;
                 _scenarioFilename = value;
-                NotifyPropertyChanged(ScenarioFilenameChangedEventArgs);
+                OnPropertyChanged(ScenarioFilenameChangedEventArgs);
                 //NemoFile = _scenarioFilename != null ? new NemoFile(_scenarioFilename, Globals.AppSettings.ScenarioDataDirectory) : null;
                 Dispatcher.InvokeAsynchronouslyInBackground(DisplayExistingAnalysisPoints);
             }
@@ -463,7 +463,7 @@ namespace ESME.Metadata
             {
                 if (_selectedAreaName == value) return;
                 _selectedAreaName = value;
-                NotifyPropertyChanged(SelectedAreaNameChangedEventArgs);
+                OnPropertyChanged(SelectedAreaNameChangedEventArgs);
             }
         }
 
@@ -481,7 +481,7 @@ namespace ESME.Metadata
             {
                 if (_selectedBathymetryName == value) return;
                 _selectedBathymetryName = value;
-                NotifyPropertyChanged(SelectedBathymetryNameChangedEventArgs);
+                OnPropertyChanged(SelectedBathymetryNameChangedEventArgs);
             }
         }
 
@@ -499,7 +499,7 @@ namespace ESME.Metadata
             {
                 if (_nemoModeToAcousticModelNameMap == value) return;
                 _nemoModeToAcousticModelNameMap = value;
-                NotifyPropertyChanged(NemoModeToAcousticModelNameMapChangedEventArgs);
+                OnPropertyChanged(NemoModeToAcousticModelNameMapChangedEventArgs);
             }
         }
 
@@ -554,7 +554,7 @@ namespace ESME.Metadata
             {
                 if (_isInAnalysisPointMode == value) return;
                 _isInAnalysisPointMode = value;
-                NotifyPropertyChanged(IsInAnalysisPointModeChangedEventArgs);
+                OnPropertyChanged(IsInAnalysisPointModeChangedEventArgs);
                 MediatorMessage.Send(MediatorMessage.SetAnalysisPointMode, _isInAnalysisPointMode);
             }
         }
@@ -614,7 +614,7 @@ namespace ESME.Metadata
                 {
                     _analysisPoints.CollectionChanged += AnalysisPointsCollectionChanged;
                 }
-                NotifyPropertyChanged(AnalysisPointsChangedEventArgs);
+                OnPropertyChanged(AnalysisPointsChangedEventArgs);
                 SetBathymetry();
             }
         }
@@ -642,7 +642,7 @@ namespace ESME.Metadata
 
         void AnalysisPointsCollectionChanged(object sender, NotifyCollectionChangedEventArgs eventArgs)
         {
-            NotifyPropertyChanged(AnalysisPointsChangedEventArgs);
+            OnPropertyChanged(AnalysisPointsChangedEventArgs);
             switch (eventArgs.Action)
             {
                 case NotifyCollectionChangedAction.Add:
@@ -683,7 +683,7 @@ namespace ESME.Metadata
             {
                 if (_treeViewRootNodes == value) return;
                 _treeViewRootNodes = value;
-                NotifyPropertyChanged(TreeViewRootNodesChangedEventArgs);
+                OnPropertyChanged(TreeViewRootNodesChangedEventArgs);
                 MediatorMessage.Send(MediatorMessage.SetTreeRoots, TreeViewRootNodes);
             }
         }
@@ -777,7 +777,7 @@ namespace ESME.Metadata
             {
                 if (_creator == value) return;
                 _creator = value;
-                NotifyPropertyChanged(CreatorChangedEventArgs);
+                OnPropertyChanged(CreatorChangedEventArgs);
             }
         }
 
@@ -795,7 +795,7 @@ namespace ESME.Metadata
             {
                 if (_creationDateTime == value) return;
                 _creationDateTime = value;
-                NotifyPropertyChanged(CreationDateChangedEventArgs);
+                OnPropertyChanged(CreationDateChangedEventArgs);
             }
         }
 
@@ -813,7 +813,7 @@ namespace ESME.Metadata
             {
                 if (_bounds == value) return;
                 _bounds = value;
-                NotifyPropertyChanged(BoundsChangedEventArgs);
+                OnPropertyChanged(BoundsChangedEventArgs);
             }
         }
 
@@ -831,7 +831,7 @@ namespace ESME.Metadata
             {
                 if (_filename == value) return;
                 _filename = value;
-                NotifyPropertyChanged(FilenameChangedEventArgs);
+                OnPropertyChanged(FilenameChangedEventArgs);
             }
         }
 

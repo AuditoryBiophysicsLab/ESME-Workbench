@@ -41,7 +41,6 @@ namespace ESMEWorkbench.ViewModels.Main
         [Import, UsedImplicitly] IHRCSaveFileService _saveFile;
         [Import, UsedImplicitly] IUIVisualizerService _visualizer;
         [Import, UsedImplicitly] IPluginManagerService _plugins;
-        [Import, UsedImplicitly] MasterDatabaseService _database;
         [Import, UsedImplicitly] EnvironmentalCacheService _cache;
         [Import, UsedImplicitly] TransmissionLossCalculatorService _transmissionLoss;
         readonly IViewAwareStatus _viewAwareStatus;
@@ -57,7 +56,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #region Constructor
         [ImportingConstructor]
-        public MainViewModel(IViewAwareStatus viewAwareStatus)
+        public MainViewModel(IViewAwareStatus viewAwareStatus, MasterDatabaseService database)
         {
             try
             {
@@ -69,9 +68,21 @@ namespace ESMEWorkbench.ViewModels.Main
                 throw;
             }
             _viewAwareStatus = viewAwareStatus;
+            Database = database;
 
             _pleaseWait = new PleaseWaitViewModel((Window)_viewAwareStatus.View, _visualizer);
             if (Designer.IsInDesignMode) return;
+#if false
+		    _database.PropertyChanged += (s, e) =>
+            {
+                switch (e.PropertyName)
+                {
+                    case "Locations":
+                        NotifyPropertyChanged("Locations");
+                        break;
+                }
+            };
+#endif            
             _viewAwareStatus.ViewUnloaded += () =>
             {
                 if (Designer.IsInDesignMode) return;
@@ -92,7 +103,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 Globals.AppSettings.PluginManagerService = _plugins;
                 if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database")))
                     Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
-                _database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
+                Database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
                 NAVOImporter.PluginManagerService = _plugins;
             };
 
@@ -102,6 +113,8 @@ namespace ESMEWorkbench.ViewModels.Main
             IsEnvironmentTabSelected = Settings.Default.SelectedRibbonTabIndex == 1;
 
         }
+
+        public MasterDatabaseService Database { get; private set; }
 
         protected override void OnDispose()
         {

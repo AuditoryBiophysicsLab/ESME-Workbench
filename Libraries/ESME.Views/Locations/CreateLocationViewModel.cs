@@ -12,10 +12,10 @@ using HRC.Validation;
 
 namespace ESME.Views.Locations
 {
-    public sealed class NewLocationViewModel : ValidatingViewModel
+    public sealed class CreateLocationViewModel : ValidatingViewModel
     {
         #region Constructor
-        public NewLocationViewModel(IPluginManagerService pluginManagerService, MasterDatabaseService masterDatabaseService)
+        public CreateLocationViewModel(IPluginManagerService pluginManagerService, MasterDatabaseService masterDatabaseService)
         {
             _pluginManagerService = pluginManagerService;
             _masterDatabaseService = masterDatabaseService;
@@ -80,7 +80,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        static readonly PropertyChangedEventArgs LocationNameChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.LocationName);
+        static readonly PropertyChangedEventArgs LocationNameChangedEventArgs = ObservableHelper.CreateArgs<CreateLocationViewModel>(x => x.LocationName);
         string _locationName;
 
         #endregion
@@ -96,7 +96,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        static readonly PropertyChangedEventArgs NorthChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.North);
+        static readonly PropertyChangedEventArgs NorthChangedEventArgs = ObservableHelper.CreateArgs<CreateLocationViewModel>(x => x.North);
         double _north;
         static readonly ValidationRule NorthValidationRule = new ValidationRule
         {
@@ -104,7 +104,7 @@ namespace ESME.Views.Locations
             Description = "Must be between -90 and +90 and be greater than South",
             RuleDelegate = (o, r) =>
             {
-                var target = (NewLocationViewModel)o;
+                var target = (CreateLocationViewModel)o;
                 return target.North >= -90 && target.North <= 90 && target.North > target.South;
             },
         };
@@ -122,7 +122,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        static readonly PropertyChangedEventArgs SouthChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.South);
+        static readonly PropertyChangedEventArgs SouthChangedEventArgs = ObservableHelper.CreateArgs<CreateLocationViewModel>(x => x.South);
         double _south;
 
         static readonly ValidationRule SouthValidationRule = new ValidationRule
@@ -131,7 +131,7 @@ namespace ESME.Views.Locations
             Description = "Must be between -90 and +90 and be less than North",
             RuleDelegate = (sender, eventArgs) =>
             {
-                var target = (NewLocationViewModel)sender;
+                var target = (CreateLocationViewModel)sender;
                 return target.South >= -90 && target.South <= 90 && target.North > target.South;
             },
         };
@@ -149,7 +149,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        static readonly PropertyChangedEventArgs EastChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.East);
+        static readonly PropertyChangedEventArgs EastChangedEventArgs = ObservableHelper.CreateArgs<CreateLocationViewModel>(x => x.East);
         double _east;
 
         static readonly ValidationRule EastValidationRule = new ValidationRule
@@ -158,7 +158,7 @@ namespace ESME.Views.Locations
             Description = "Must be between -180 and +180 and be greater than West",
             RuleDelegate = (sender, eventArgs) =>
             {
-                var target = (NewLocationViewModel)sender;
+                var target = (CreateLocationViewModel)sender;
                 return target.East >= -180 && target.East <= 180 && target.East > target.West;
             },
         };
@@ -176,7 +176,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        static readonly PropertyChangedEventArgs WestChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.West);
+        static readonly PropertyChangedEventArgs WestChangedEventArgs = ObservableHelper.CreateArgs<CreateLocationViewModel>(x => x.West);
         double _west;
 
         static readonly ValidationRule WestValidationRule = new ValidationRule
@@ -185,7 +185,7 @@ namespace ESME.Views.Locations
             Description = "Must be between -180 and +180 and be less than East",
             RuleDelegate = (sender, eventArgs) =>
             {
-                var target = (NewLocationViewModel)sender;
+                var target = (CreateLocationViewModel)sender;
                 return target.West >= -180 && target.West <= 180 && target.East > target.West;
             },
         };

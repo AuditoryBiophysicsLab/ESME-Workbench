@@ -194,7 +194,7 @@ namespace ESME.Mapping
             {
                 if (_isValid == value) return;
                 _isValid = value;
-                NotifyPropertyChanged(IsValidChangedEventArgs);
+                OnPropertyChanged(IsValidChangedEventArgs);
             }
         }
         #endregion
@@ -218,7 +218,7 @@ namespace ESME.Mapping
                 if (_validationErrorText == value) return;
                 _validationErrorText = value;
                 IsValid = string.IsNullOrEmpty(_validationErrorText);
-                NotifyPropertyChanged(ValidationErrorTextChangedEventArgs);
+                OnPropertyChanged(ValidationErrorTextChangedEventArgs);
             }
         }
         #endregion
@@ -446,7 +446,7 @@ namespace ESME.Mapping
             {
                 if (_toolTip == value) return;
                 _toolTip = value;
-                NotifyPropertyChanged(ToolTipChangedEventArgs);
+                OnPropertyChanged(ToolTipChangedEventArgs);
             }
         }
         #endregion
@@ -481,7 +481,7 @@ namespace ESME.Mapping
                 OrderMenu.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
                 if (_canBeReordered == value) return;
                 _canBeReordered = value;
-                NotifyPropertyChanged(CanBeReorderedChangedEventArgs);
+                OnPropertyChanged(CanBeReorderedChangedEventArgs);
             }
         }
         #endregion
@@ -500,7 +500,7 @@ namespace ESME.Mapping
                 RemoveMenu.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
                 if (_canBeRemoved == value) return;
                 _canBeRemoved = value;
-                NotifyPropertyChanged(CanBeRemovedChangedEventArgs);
+                OnPropertyChanged(CanBeRemovedChangedEventArgs);
             }
         }
         #endregion
@@ -518,7 +518,7 @@ namespace ESME.Mapping
             {
                 if (_canChangeLineColor == value) return;
                 _canChangeLineColor = value;
-                NotifyPropertyChanged(CanChangeLineColorChangedEventArgs);
+                OnPropertyChanged(CanChangeLineColorChangedEventArgs);
             }
         }
         #endregion
@@ -535,7 +535,7 @@ namespace ESME.Mapping
             set
             {
                 _canChangeAreaColor = value;
-                NotifyPropertyChanged(CanChangeAreaColorChangedEventArgs);
+                OnPropertyChanged(CanChangeAreaColorChangedEventArgs);
             }
         }
         #endregion
@@ -553,7 +553,7 @@ namespace ESME.Mapping
             {
                 if (_canChangeLineWidth == value) return;
                 _canChangeLineWidth = value;
-                NotifyPropertyChanged(CanChangeLineWidthChangedEventArgs);
+                OnPropertyChanged(CanChangeLineWidthChangedEventArgs);
             }
         }
         #endregion
@@ -572,7 +572,7 @@ namespace ESME.Mapping
             {
                 if (_contextMenu == value) return;
                 _contextMenu = value;
-                NotifyPropertyChanged(ContextMenuChangedEventArgs);
+                OnPropertyChanged(ContextMenuChangedEventArgs);
             }
         }
         #endregion
@@ -591,7 +591,7 @@ namespace ESME.Mapping
             {
                 if (_lineColorPickerMenu == value) return;
                 _lineColorPickerMenu = value;
-                NotifyPropertyChanged(LineColorPickerMenuChangedEventArgs);
+                OnPropertyChanged(LineColorPickerMenuChangedEventArgs);
             }
         }
         #endregion
@@ -610,7 +610,7 @@ namespace ESME.Mapping
             {
                 if (_lineOrPointPickerMenu == value) return;
                 _lineOrPointPickerMenu = value;
-                NotifyPropertyChanged(LineOrPointPickerMenuChangedEventArgs);
+                OnPropertyChanged(LineOrPointPickerMenuChangedEventArgs);
             }
         }
         #endregion
@@ -629,7 +629,7 @@ namespace ESME.Mapping
             {
                 if (_pointShapePickerMenu == value) return;
                 _pointShapePickerMenu = value;
-                NotifyPropertyChanged(PointShapePickerMenuChangedEventArgs);
+                OnPropertyChanged(PointShapePickerMenuChangedEventArgs);
             }
         }
         #endregion
@@ -643,7 +643,7 @@ namespace ESME.Mapping
             {
                 if (_isEnabled == value) return;
                 _isEnabled = value;
-                NotifyPropertyChanged(IsEnabledChangedEventArgs);
+                OnPropertyChanged(IsEnabledChangedEventArgs);
                 if (!_isEnabled) IsChecked = false;
             }
         }
@@ -675,7 +675,7 @@ namespace ESME.Mapping
                 MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
                 MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
 
-                NotifyPropertyChanged(IsCheckedChangedEventArgs);
+                OnPropertyChanged(IsCheckedChangedEventArgs);
             }
         }
         #endregion
@@ -689,7 +689,7 @@ namespace ESME.Mapping
             {
                 if (_lineColorBrush == value) return;
                 _lineColorBrush = value;
-                NotifyPropertyChanged(LineColorBrushChangedEventArgs);
+                OnPropertyChanged(LineColorBrushChangedEventArgs);
             }
         }
         #endregion
@@ -703,7 +703,7 @@ namespace ESME.Mapping
             {
                 if (_areaColorBrush == value) return;
                 _areaColorBrush = value;
-                NotifyPropertyChanged(AreaColorBrushChangedEventArgs);
+                OnPropertyChanged(AreaColorBrushChangedEventArgs);
             }
         }
         #endregion

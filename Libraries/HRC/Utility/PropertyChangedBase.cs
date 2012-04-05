@@ -27,7 +27,7 @@ namespace HRC.Utility
                 _propertyChanged = (PropertyChangedEventHandler)Delegate.Remove(_propertyChanged, value);
             }
         }
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs e)
+        protected void OnPropertyChanged(PropertyChangedEventArgs e)
         {
             var handlers = _propertyChanged;
             if (handlers == null) return;
@@ -39,7 +39,7 @@ namespace HRC.Utility
                     handler(this, e);
             }
         }
-        protected void NotifyPropertyChanged(string propertyName)
+        protected void OnPropertyChanged(string propertyName)
         {
             var handlers = _propertyChanged;
             if (handlers == null) return;

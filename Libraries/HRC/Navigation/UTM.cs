@@ -88,7 +88,7 @@ namespace HRC.Navigation
             {
                 if (Math.Abs(_easting - value) < .5) return;
                 _easting = value;
-                NotifyPropertyChanged(EastingChangedEventArgs);
+                OnPropertyChanged(EastingChangedEventArgs);
             }
         }
 
@@ -106,7 +106,7 @@ namespace HRC.Navigation
             {
                 if (Math.Abs(_northing - value) < 0.5) return;
                 _northing = value;
-                NotifyPropertyChanged(NorthingChangedEventArgs);
+                OnPropertyChanged(NorthingChangedEventArgs);
             }
         }
 
@@ -124,7 +124,7 @@ namespace HRC.Navigation
             {
                 if (_zone == value) return;
                 _zone = value;
-                NotifyPropertyChanged(ZoneChangedEventArgs);
+                OnPropertyChanged(ZoneChangedEventArgs);
             }
         }
 

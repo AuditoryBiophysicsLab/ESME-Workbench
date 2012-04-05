@@ -52,7 +52,7 @@ namespace ESME.Mapping
             {
                 if (_toolTipTitle == value) return;
                 _toolTipTitle = value;
-                NotifyPropertyChanged(ToolTipTitleChangedEventArgs);
+                OnPropertyChanged(ToolTipTitleChangedEventArgs);
             }
         }
 
@@ -70,7 +70,7 @@ namespace ESME.Mapping
             {
                 if (_toolTipProperties == value) return;
                 _toolTipProperties = value;
-                NotifyPropertyChanged(ToolTipPropertiesChangedEventArgs);
+                OnPropertyChanged(ToolTipPropertiesChangedEventArgs);
             }
         }
 
@@ -88,7 +88,7 @@ namespace ESME.Mapping
             {
                 if (_name == value) return;
                 _name = value;
-                NotifyPropertyChanged(NameChangedEventArgs);
+                OnPropertyChanged(NameChangedEventArgs);
             }
         }
 
@@ -120,11 +120,11 @@ namespace ESME.Mapping
             {
                 if (_mapLayers == value) return;
                 _mapLayers = value;
-                NotifyPropertyChanged(MapLayersChangedEventArgs);
+                OnPropertyChanged(MapLayersChangedEventArgs);
                 if (_mapLayers != null) _mapLayers.CollectionChanged += (s, e) =>
                 {
-                    NotifyPropertyChanged(NameChangedEventArgs);
-                    NotifyPropertyChanged(ChildrenChangedEventArgs);
+                    OnPropertyChanged(NameChangedEventArgs);
+                    OnPropertyChanged(ChildrenChangedEventArgs);
                 };
             }
         }
@@ -143,8 +143,8 @@ namespace ESME.Mapping
             {
                 if (_nodes == value) return;
                 _nodes = value;
-                NotifyPropertyChanged(NodesChangedEventArgs);
-                NotifyPropertyChanged(ChildrenChangedEventArgs);
+                OnPropertyChanged(NodesChangedEventArgs);
+                OnPropertyChanged(ChildrenChangedEventArgs);
             }
         }
 
@@ -162,7 +162,7 @@ namespace ESME.Mapping
             {
                 if (_contextMenu == value) return;
                 _contextMenu = value;
-                NotifyPropertyChanged(ContextMenuChangedEventArgs);
+                OnPropertyChanged(ContextMenuChangedEventArgs);
             }
         }
 
@@ -180,7 +180,7 @@ namespace ESME.Mapping
             {
                 if (_hasContextMenu == value) return;
                 _hasContextMenu = value;
-                NotifyPropertyChanged(HasContextMenuChangedEventArgs);
+                OnPropertyChanged(HasContextMenuChangedEventArgs);
             }
         }
 
@@ -198,7 +198,7 @@ namespace ESME.Mapping
             {
                 if (_propertyViewName == value) return;
                 _propertyViewName = value;
-                NotifyPropertyChanged(PropertyViewNameChangedEventArgs);
+                OnPropertyChanged(PropertyViewNameChangedEventArgs);
             }
         }
 
@@ -216,7 +216,7 @@ namespace ESME.Mapping
             {
                 if (_windowTitle == value) return;
                 _windowTitle = value;
-                NotifyPropertyChanged(WindowTitleChangedEventArgs);
+                OnPropertyChanged(WindowTitleChangedEventArgs);
             }
         }
 
@@ -234,7 +234,7 @@ namespace ESME.Mapping
             {
                 if (_keyValuePairs == value) return;
                 _keyValuePairs = value;
-                NotifyPropertyChanged(KeyValuePairsChangedEventArgs);
+                OnPropertyChanged(KeyValuePairsChangedEventArgs);
             }
         }
 

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Data;
 using System.Data.Common;
+using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
 using System.IO;
@@ -16,14 +18,14 @@ using ESME.Plugins;
 using ESME.Scenarios;
 using HRC.Aspects;
 using HRC.Navigation;
+using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Locations
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ExportService(ServiceType.Both, typeof(MasterDatabaseService))]
-    [NotifyPropertyChanged]
-    public class MasterDatabaseService : IDisposable
+    public class MasterDatabaseService : PropertyChangedBase, IDisposable
     {
         #region Public methods and properties
         string _masterDatabaseDirectory;
@@ -37,12 +39,12 @@ namespace ESME.Locations
             }
         }
 
-        public IEnumerable<Location> Locations { get { return Context.Locations; } }
-        public Location FindLocation(string locationName) { return Locations.FirstOrDefault(l => l.Name == locationName); }
+        public ObservableCollection<Location> Locations { get { return Context == null ? null : Context.Locations.Local; } }
+        public Location FindLocation(string locationName) { return Locations == null ? null : Locations.FirstOrDefault(l => l.Name == locationName); }
         public bool LocationExists(string locationName) { return FindLocation(locationName) != null; }
 
-        public IEnumerable<Scenario> Scenarios { get { return Context.Scenarios; } }
-        public Scenario FindScenario(string scenarioName) { return Scenarios.FirstOrDefault(l => l.Name == scenarioName); }
+        public ObservableCollection<Scenario> Scenarios { get { return Context == null ? null : Context.Scenarios.Local; } }
+        public Scenario FindScenario(string scenarioName) { return Scenarios == null ? null : Scenarios.FirstOrDefault(l => l.Name == scenarioName); }
         public bool ScenarioExists(string scenarioName) { return FindScenario(scenarioName) != null; }
         #region Add operations
         public void Add(Location location, bool saveChanges = false)
@@ -332,6 +334,10 @@ namespace ESME.Locations
             };
             DbConnection connection = new SQLiteConnection(connectionStringBuilder.ToString());
             Context = new LocationContext(connection, true);
+            Context.Locations.Load();
+            Context.Scenarios.Load();
+            OnPropertyChanged("Locations");
+            OnPropertyChanged("Scenarios");
         }
 
         void SaveChanges()

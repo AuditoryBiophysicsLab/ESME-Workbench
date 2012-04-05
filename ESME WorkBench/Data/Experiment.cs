@@ -50,7 +50,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_comments == value) return;
                 _comments = value;
-                NotifyPropertyChanged(NameChangedEventArgs);
+                OnPropertyChanged(NameChangedEventArgs);
             }
         }
 
@@ -69,7 +69,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_author == value) return;
                 _author = value;
-                NotifyPropertyChanged(AuthorChangedEventArgs);
+                OnPropertyChanged(AuthorChangedEventArgs);
             }
         }
 
@@ -88,7 +88,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_created == value) return;
                 _created = value;
-                NotifyPropertyChanged(CreatedChangedEventArgs);
+                OnPropertyChanged(CreatedChangedEventArgs);
             }
         }
 
@@ -107,7 +107,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_lastModified == value) return;
                 _lastModified = value;
-                NotifyPropertyChanged(LastModifiedChangedEventArgs);
+                OnPropertyChanged(LastModifiedChangedEventArgs);
             }
         }
 
@@ -126,7 +126,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_modifiedBy == value) return;
                 _modifiedBy = value;
-                NotifyPropertyChanged(ModifiedByChangedEventArgs);
+                OnPropertyChanged(ModifiedByChangedEventArgs);
             }
         }
 
@@ -145,7 +145,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_windSpeedFileName == value) return;
                 _windSpeedFileName = value;
-                NotifyPropertyChanged(WindSpeedFileNameChangedEventArgs);
+                OnPropertyChanged(WindSpeedFileNameChangedEventArgs);
                 WindSpeed = null;
                 InitializeEnvironment(false);
             }
@@ -166,7 +166,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_soundSpeedFileName == value) return;
                 _soundSpeedFileName = value;
-                NotifyPropertyChanged(SoundSpeedFileNameChangedEventArgs);
+                OnPropertyChanged(SoundSpeedFileNameChangedEventArgs);
                 SoundSpeedField = null;
                 InitializeEnvironment(false);
             }
@@ -183,7 +183,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_temperatureFilename == value) return;
                 _temperatureFilename = value;
-                NotifyPropertyChanged(TemperatureFilenameChangedEventArgs);
+                OnPropertyChanged(TemperatureFilenameChangedEventArgs);
             }
         }
 
@@ -201,7 +201,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_salinityFilename == value) return;
                 _salinityFilename = value;
-                NotifyPropertyChanged(SalinityFilenameChangedEventArgs);
+                OnPropertyChanged(SalinityFilenameChangedEventArgs);
             }
         }
 
@@ -224,7 +224,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_sedimentFileName == value) return;
                 _sedimentFileName = value;
-                NotifyPropertyChanged(SedimentFileNameChangedEventArgs);
+                OnPropertyChanged(SedimentFileNameChangedEventArgs);
                 Sediment = null;
                 InitializeEnvironment(false);
             }
@@ -245,7 +245,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_bathymetryFileName == value) return;
                 _bathymetryFileName = value;
-                NotifyPropertyChanged(BathymetryFileNameChangedEventArgs);
+                OnPropertyChanged(BathymetryFileNameChangedEventArgs);
                 Bathymetry = null;
                 InitializeEnvironment(false);
             }
@@ -267,7 +267,7 @@ namespace ESMEWorkbench.Data
                 if (_scenarioFileName == value) return;
                 _scenarioFileName = value;
                 LoadScenarioFile();
-                NotifyPropertyChanged(ScenarioFileNameChangedEventArgs);
+                OnPropertyChanged(ScenarioFileNameChangedEventArgs);
                 InitializeEnvironment(false);
             }
         }
@@ -301,13 +301,13 @@ namespace ESMEWorkbench.Data
                 if (_analysisPoints != null) _analysisPoints.CollectionChanged -= AnalysisPointsCollectionChanged;
                 _analysisPoints = value;
                 if (_analysisPoints != null) _analysisPoints.CollectionChanged += AnalysisPointsCollectionChanged;
-                NotifyPropertyChanged(AnalysisPointsChangedEventArgs);
+                OnPropertyChanged(AnalysisPointsChangedEventArgs);
             }
         }
 
         void AnalysisPointsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            NotifyPropertyChanged(AnalysisPointsChangedEventArgs);
+            OnPropertyChanged(AnalysisPointsChangedEventArgs);
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
@@ -384,7 +384,7 @@ namespace ESMEWorkbench.Data
                 if (_animalPopulationFiles != null) _animalPopulationFiles.CollectionChanged -= AnimalPopulationFilesCollectionChanged;
                 _animalPopulationFiles = value;
                 if (_animalPopulationFiles != null) _animalPopulationFiles.CollectionChanged += AnimalPopulationFilesCollectionChanged;
-                NotifyPropertyChanged(AnimalPopulationFilesChangedEventArgs);
+                OnPropertyChanged(AnimalPopulationFilesChangedEventArgs);
             }
         }
 
@@ -455,7 +455,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_opArea == value) return;
                 _opArea = value;
-                NotifyPropertyChanged(OpAreaChangedEventArgs);
+                OnPropertyChanged(OpAreaChangedEventArgs);
             }
         }
 
@@ -473,7 +473,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_simArea == value) return;
                 _simArea = value;
-                NotifyPropertyChanged(SimAreaChangedEventArgs);
+                OnPropertyChanged(SimAreaChangedEventArgs);
             }
         }
 
@@ -494,7 +494,7 @@ namespace ESMEWorkbench.Data
             {
                 lock (this)
                 {
-                    NotifyPropertyChanged(NextObjectIDChangedEventArgs);
+                    OnPropertyChanged(NextObjectIDChangedEventArgs);
                     return _nextObjectID++;
                 }
             }
@@ -518,7 +518,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_fileName == value) return;
                 _fileName = value;
-                NotifyPropertyChanged(FileNameChangedEventArgs);
+                OnPropertyChanged(FileNameChangedEventArgs);
             }
         }
 
@@ -599,7 +599,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_bathymetry == value) return;
                 _bathymetry = value;
-                NotifyPropertyChanged(BathymetryChangedEventArgs);
+                OnPropertyChanged(BathymetryChangedEventArgs);
                 //AnalysisPoint.Bathymetry.Target = _bathymetry;
                 //SoundSource.Bathymetry.Target = _bathymetry;
                 if ((_bathymetry == null) || (AnalysisPoints == null)) return;
@@ -732,7 +732,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_availableTimePeriods == value) return;
                 _availableTimePeriods = value;
-                NotifyPropertyChanged(AvailableTimePeriodsChangedEventArgs);
+                OnPropertyChanged(AvailableTimePeriodsChangedEventArgs);
             }
         }
 
@@ -750,7 +750,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_nemoModeToAcousticModelNameMap == value) return;
                 _nemoModeToAcousticModelNameMap = value;
-                NotifyPropertyChanged(NemoModeToAcousticModelNameMapChangedEventArgs);
+                OnPropertyChanged(NemoModeToAcousticModelNameMapChangedEventArgs);
             }
         }
 
@@ -778,7 +778,7 @@ namespace ESMEWorkbench.Data
             {
                 if (_isChanged == value) return;
                 _isChanged = value;
-                NotifyPropertyChanged(IsChangedChangedEventArgs);
+                OnPropertyChanged(IsChangedChangedEventArgs);
             }
         }
 
@@ -805,7 +805,7 @@ namespace ESMEWorkbench.Data
                 case NotifyCollectionChangedAction.Reset:
                     break;
             }
-            NotifyPropertyChanged(TransmissionLossFieldsChangedEventArgs);
+            OnPropertyChanged(TransmissionLossFieldsChangedEventArgs);
         }
 
         static void LocalPropertyChanged(object sender, PropertyChangedEventArgs e)

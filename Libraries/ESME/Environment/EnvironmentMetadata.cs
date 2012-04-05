@@ -27,7 +27,7 @@ namespace ESME.Environment
             {
                 if (_environmentFilename == value) return;
                 _environmentFilename = value;
-                NotifyPropertyChanged(EnvironmentFilenameChangedEventArgs);
+                OnPropertyChanged(EnvironmentFilenameChangedEventArgs);
             }
         }
 
@@ -45,7 +45,7 @@ namespace ESME.Environment
             {
                 if (_timePeriod == value) return;
                 _timePeriod = value;
-                NotifyPropertyChanged(TimePeriodChangedEventArgs);
+                OnPropertyChanged(TimePeriodChangedEventArgs);
             }
         }
 
@@ -63,7 +63,7 @@ namespace ESME.Environment
             {
                 if (_creationDateTime == value) return;
                 _creationDateTime = value;
-                NotifyPropertyChanged(CreationDateTimeChangedEventArgs);
+                OnPropertyChanged(CreationDateTimeChangedEventArgs);
             }
         }
 
@@ -81,7 +81,7 @@ namespace ESME.Environment
             {
                 if (_bathymetryFilename == value) return;
                 _bathymetryFilename = value;
-                NotifyPropertyChanged(BathymetryFilenameChangedEventArgs);
+                OnPropertyChanged(BathymetryFilenameChangedEventArgs);
             }
         }
 
@@ -99,7 +99,7 @@ namespace ESME.Environment
             {
                 if (_temperatureSourceFilename == value) return;
                 _temperatureSourceFilename = value;
-                NotifyPropertyChanged(TemperatureSourceFilenameChangedEventArgs);
+                OnPropertyChanged(TemperatureSourceFilenameChangedEventArgs);
             }
         }
 
@@ -117,7 +117,7 @@ namespace ESME.Environment
             {
                 if (_salinitySourceFilename == value) return;
                 _salinitySourceFilename = value;
-                NotifyPropertyChanged(SalinitySourceFilenameChangedEventArgs);
+                OnPropertyChanged(SalinitySourceFilenameChangedEventArgs);
             }
         }
 
@@ -135,7 +135,7 @@ namespace ESME.Environment
             {
                 if (_windspeedSourceFilename == value) return;
                 _windspeedSourceFilename = value;
-                NotifyPropertyChanged(WindspeedSourceFilenameChangedEventArgs);
+                OnPropertyChanged(WindspeedSourceFilenameChangedEventArgs);
             }
         }
 
@@ -153,7 +153,7 @@ namespace ESME.Environment
             {
                 if (_bottomtypeSourceFilename == value) return;
                 _bottomtypeSourceFilename = value;
-                NotifyPropertyChanged(BottomtypeSourceFilenameChangedEventArgs);
+                OnPropertyChanged(BottomtypeSourceFilenameChangedEventArgs);
             }
         }
 
@@ -171,7 +171,7 @@ namespace ESME.Environment
             {
                 if (_boundingBox == value) return;
                 _boundingBox = value;
-                NotifyPropertyChanged(BoundingBoxChangedEventArgs);
+                OnPropertyChanged(BoundingBoxChangedEventArgs);
             }
         }
 
@@ -190,7 +190,7 @@ namespace ESME.Environment
             {
                 if (_basePath == value) return;
                 _basePath = value;
-                NotifyPropertyChanged(SimAreaBasePathChangedEventArgs);
+                OnPropertyChanged(SimAreaBasePathChangedEventArgs);
             }
         }
 
@@ -263,7 +263,7 @@ namespace ESME.Environment
             {
                 if (_bathymetryFilename == value) return;
                 _bathymetryFilename = value;
-                NotifyPropertyChanged(BathymetryFilenameChangedEventArgs);
+                OnPropertyChanged(BathymetryFilenameChangedEventArgs);
             }
         }
 
@@ -281,7 +281,7 @@ namespace ESME.Environment
             {
                 if (_creationDateTime == value) return;
                 _creationDateTime = value;
-                NotifyPropertyChanged(CreationDateTimeChangedEventArgs);
+                OnPropertyChanged(CreationDateTimeChangedEventArgs);
             }
         }
 
@@ -299,7 +299,7 @@ namespace ESME.Environment
             {
                 if (_bathymetrySourceFilename == value) return;
                 _bathymetrySourceFilename = value;
-                NotifyPropertyChanged(BathymetrySourceFilenameChangedEventArgs);
+                OnPropertyChanged(BathymetrySourceFilenameChangedEventArgs);
             }
         }
 
@@ -317,7 +317,7 @@ namespace ESME.Environment
             {
                 if (_extractionCommand == value) return;
                 _extractionCommand = value;
-                NotifyPropertyChanged(ExtractionCommandChangedEventArgs);
+                OnPropertyChanged(ExtractionCommandChangedEventArgs);
             }
         }
 
@@ -338,7 +338,7 @@ namespace ESME.Environment
             {
                 if (_resolution == value) return;
                 _resolution = value;
-                NotifyPropertyChanged(ResolutionChangedEventArgs);
+                OnPropertyChanged(ResolutionChangedEventArgs);
             }
         }
 
@@ -356,7 +356,7 @@ namespace ESME.Environment
             {
                 if (_operationalAreaName == value) return;
                 _operationalAreaName = value;
-                NotifyPropertyChanged(OperationalAreaNameChangedEventArgs);
+                OnPropertyChanged(OperationalAreaNameChangedEventArgs);
             }
         }
 
@@ -374,7 +374,7 @@ namespace ESME.Environment
             {
                 if (_boundingBox == value) return;
                 _boundingBox = value;
-                NotifyPropertyChanged(BoundingBoxChangedEventArgs);
+                OnPropertyChanged(BoundingBoxChangedEventArgs);
             }
         }
 
@@ -393,7 +393,7 @@ namespace ESME.Environment
             {
                 if (_basePath == value) return;
                 _basePath = value;
-                NotifyPropertyChanged(SimAreaBasePathChangedEventArgs);
+                OnPropertyChanged(SimAreaBasePathChangedEventArgs);
             }
         }
 

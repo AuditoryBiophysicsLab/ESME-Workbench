@@ -104,7 +104,7 @@ namespace ESME.Mapping
             {
                 if (_areaColorPickerMenu == value) return;
                 _areaColorPickerMenu = value;
-                NotifyPropertyChanged(AreaColorPickerMenuChangedEventArgs);
+                OnPropertyChanged(AreaColorPickerMenuChangedEventArgs);
             }
         }
         static readonly PropertyChangedEventArgs AreaColorPickerMenuChangedEventArgs = ObservableHelper.CreateArgs<ShapefileMapLayer>(x => x.AreaColorPickerMenu);

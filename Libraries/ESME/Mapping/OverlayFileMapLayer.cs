@@ -157,7 +157,7 @@ namespace ESME.Mapping
                 if (_analysisPoint == value) return;
                 if ((value != null) && (_analysisPoint != null)) _analysisPoint.PropertyChanged -= AnalysisPointChanged;
                 _analysisPoint = value;
-                NotifyPropertyChanged(AnalysisPointChangedEventArgs);
+                OnPropertyChanged(AnalysisPointChangedEventArgs);
                 if (_analysisPoint != null) _analysisPoint.PropertyChanged += AnalysisPointChanged;
             }
         }
@@ -203,7 +203,7 @@ namespace ESME.Mapping
                 if (_cassOutput == value) return;
                 if ((value != null) && (_cassOutput != null)) _cassOutput.PropertyChanged -= CASSOutputChanged;
                 _cassOutput = value;
-                NotifyPropertyChanged(CASSOutputChangedEventArgs);
+                OnPropertyChanged(CASSOutputChangedEventArgs);
                 if (_cassOutput != null) _cassOutput.PropertyChanged += CASSOutputChanged;
             }
         }

@@ -10,16 +10,19 @@ using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
+using ESME.Locations;
 using ESME.Mapping;
 using ESME.Model;
 using ESME.NEMO.Overlay;
 using ESME.Views.Locations;
 using ESMEWorkbench.ViewModels.NAVO;
+using HRC.Aspects;
 using HRC.Navigation;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
+    [NotifyPropertyChanged]
     public partial class MainViewModel
     {
         bool _once = true;
@@ -60,25 +63,25 @@ namespace ESMEWorkbench.ViewModels.Main
         public Dictionary<EnvironmentDataType, MapLayerViewModel> EnvironmentLayers { get; private set; }
         readonly List<MapLayerViewModel> _sedimentLayers = new List<MapLayerViewModel>();
 
-        #region NewLocationCommand
-        public SimpleCommand<object, object> NewLocationCommand
+        #region CreateLocationCommand
+        public SimpleCommand<object, object> CreateLocationFromBoundingBoxCommand
         {
-            get { return _newLocation ?? (_newLocation = new SimpleCommand<object, object>(delegate { return IsNewLocationCommandEnabled; }, delegate { NewLocationHandler(); })); }
+            get { return _createLocation ?? (_createLocation = new SimpleCommand<object, object>(delegate { return IsCreateLocationCommandEnabled; }, delegate { CreateLocationHandler(); })); }
         }
 
-        SimpleCommand<object, object> _newLocation;
+        SimpleCommand<object, object> _createLocation;
 
-        static bool IsNewLocationCommandEnabled
+        static bool IsCreateLocationCommandEnabled
         {
             get { return true; }
         }
 
-        void NewLocationHandler()
+        void CreateLocationHandler()
         {
             try
             {
-                var vm = new NewLocationViewModel(_plugins, _database);
-                var result = _visualizer.ShowDialog("NewLocationView", vm);
+                var vm = new CreateLocationViewModel(_plugins, Database);
+                var result = _visualizer.ShowDialog("CreateLocationView", vm);
                 if ((result.HasValue) && (result.Value))
                 {
                     
@@ -87,6 +90,9 @@ namespace ESMEWorkbench.ViewModels.Main
             catch (Exception e) { _messageBox.ShowError(e.Message); }
         }
         #endregion
+
+        public int SelectedLocationIndex { get; set; }
+        public Location SelectedLocation { get; set; }
 
         #region public bool AreAllViewModelsReady { get; set; }
 

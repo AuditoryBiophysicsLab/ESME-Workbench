@@ -133,10 +133,10 @@
       <DependentUpon>MetadataPropertiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Locations\MetadataPropertiesViewModel.cs" />
-    <Compile Include="Locations\NewLocationView.xaml.cs">
-      <DependentUpon>NewLocationView.xaml</DependentUpon>
+    <Compile Include="Locations\CreateLocationView.xaml.cs">
+      <DependentUpon>CreateLocationView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Locations\NewLocationViewModel.cs" />
+    <Compile Include="Locations\CreateLocationViewModel.cs" />
     <Compile Include="Locations\NewOverlayViewModel.cs" />
     <Compile Include="Locations\NewOverlayView.xaml.cs">
       <DependentUpon>NewOverlayView.xaml</DependentUpon>
@@ -271,7 +271,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Locations\NewLocationView.xaml">
+    <Page Include="Locations\CreateLocationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

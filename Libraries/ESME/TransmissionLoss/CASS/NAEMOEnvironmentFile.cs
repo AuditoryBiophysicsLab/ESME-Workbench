@@ -24,7 +24,7 @@ namespace ESME.TransmissionLoss.CASS
             {
                 if (_overlayFileName == value) return;
                 _overlayFileName = value;
-                NotifyPropertyChanged(OverlayFileNameChangedEventArgs);
+                OnPropertyChanged(OverlayFileNameChangedEventArgs);
             }
         }
 
@@ -42,7 +42,7 @@ namespace ESME.TransmissionLoss.CASS
             {
                 if (_bathymetryFilename == value) return;
                 _bathymetryFilename = value;
-                NotifyPropertyChanged(BathymetryFilenameChangedEventArgs);
+                OnPropertyChanged(BathymetryFilenameChangedEventArgs);
             }
         }
 
@@ -60,7 +60,7 @@ namespace ESME.TransmissionLoss.CASS
             {
                 if (_timePeriod == value) return;
                 _timePeriod = value;
-                NotifyPropertyChanged(TimePeriodChangedEventArgs);
+                OnPropertyChanged(TimePeriodChangedEventArgs);
             }
         }
 
@@ -78,7 +78,7 @@ namespace ESME.TransmissionLoss.CASS
             {
                 if (_locations == value) return;
                 _locations = value;
-                NotifyPropertyChanged(LocationsChangedEventArgs);
+                OnPropertyChanged(LocationsChangedEventArgs);
             }
         }
 
