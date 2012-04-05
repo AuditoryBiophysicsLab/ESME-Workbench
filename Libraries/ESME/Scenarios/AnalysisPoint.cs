@@ -34,6 +34,7 @@ namespace ESME.Scenarios
         [Key, Initialize]
         public Guid Guid { get; set; }
         public bool IsCalculated { get; set; }
+        public string Filename { get; set; }
         public DbDateTime CalculationStarted { get; set; }
         public DbDateTime CalculationCompleted { get; set; }
         public double Bearing { get; set; }
@@ -41,7 +42,7 @@ namespace ESME.Scenarios
         public byte[] RangeAxisBlob { get; set; }
         public byte[] DepthAxisBlob { get; set; }
         [NotMapped]
-        public double[] Ranges
+        public float[] Ranges
         {
             get { return _ranges ?? (_ranges = RangeAxisBlob.ToArray()); }
             set
@@ -50,10 +51,10 @@ namespace ESME.Scenarios
                 RangeAxisBlob = _ranges.ToBlob();
             }
         }
-        double[] _ranges;
+        float[] _ranges;
 
         [NotMapped]
-        public double[] Depths
+        public float[] Depths
         {
             get { return _depths ?? (_depths = DepthAxisBlob.ToArray()); }
             set
@@ -62,8 +63,7 @@ namespace ESME.Scenarios
                 DepthAxisBlob = _depths.ToBlob();
             }
         }
-        double[] _depths;
-
+        float[] _depths;
 
         public virtual TransmissionLoss TransmissionLoss { get; set; }
         public virtual ICollection<LevelRadius> LevelRadii { get; set; }

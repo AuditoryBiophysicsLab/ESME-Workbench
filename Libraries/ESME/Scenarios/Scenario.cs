@@ -20,6 +20,7 @@ namespace ESME.Scenarios
 
         public string Name { get; set; }
         public string Comments { get; set; }
+        public string StorageDirectory { get; set; }
         public DbTimeSpan StartTime { get; set; }
         public DbTimeSpan Duration { get; set; }
         public DbTimePeriod TimePeriod { get; set; }

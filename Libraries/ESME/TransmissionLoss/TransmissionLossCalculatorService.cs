@@ -88,6 +88,7 @@ namespace ESME.TransmissionLoss
             var soundSpeed = (SoundSpeed)_cacheService[scenario.SoundSpeed];
             var sediment = (Sediment)_cacheService[scenario.Sediment];
             var bathymetry = (Bathymetry)_cacheService[scenario.Bathymetry];
+            soundSpeed.Extend(bathymetry.DeepestPoint);
             var centerPoint = ((Geo)analysisPoint.Geo).Offset(Geo.KilometersToRadians(radial.Length / 2000), Geo.DegreesToRadians(radial.Bearing));
             var windSpeed = wind[timePeriod].EnvironmentData.GetNearestPoint(centerPoint);
             var soundSpeedProfile = soundSpeed[timePeriod].EnvironmentData.GetNearestPoint(centerPoint);
@@ -144,13 +145,17 @@ namespace ESME.TransmissionLoss
             };
 #endif
             bellhopProcess.Start();
+            radial.CalculationStarted = DateTime.Now;
             bellhopProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
             bellhopProcess.BeginOutputReadLine();
-            while (!bellhopProcess.HasExited)
-            {
-                Thread.Sleep(100);
-                // mProgress_percent = BellhopProcess.ProgressPercent;
-            }
+            while (!bellhopProcess.HasExited) Thread.Sleep(100);
+            radial.CalculationCompleted = DateTime.Now;
+            var output = new TransmissionLossRadial((float)radial.Bearing, new BellhopOutput(baseFilename + ".shd"));
+            radial.Filename = Path.GetFileName(baseFilename + ".shd");
+            radial.Ranges = output.Ranges.ToArray();
+            radial.Depths = output.Depths.ToArray();
+            radial.IsCalculated = true;
+            _databaseService.Context.SaveChanges();
         }
 
         public static void CreateBellhopEnvironmentFiles(string baseFilename, SoundSpeedProfile ssp, SedimentType sediment, BottomProfile bottomProfile, float windSpeed, float frequency, float sourceDepth, float radius, float verticalBeamWidth, float depressionElevationAngle, float maxCalculationDepthMeters, float rangeCellSize, float depthCellSize, bool useSurfaceReflection, bool generateArrivalsFile, int beamCount)

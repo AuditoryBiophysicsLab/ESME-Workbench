@@ -64,6 +64,11 @@ namespace ESME.Locations
                             where s.Name == scenario.Name && s.Location == scenario.Location
                             select s).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A scenario named {0} already exists in location {1}, choose another name", scenario.Name, scenario.Location.Name));
+            if (scenario.StorageDirectory == null)
+                scenario.StorageDirectory = Path.Combine("scenarios", Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
+            var storageDirectoryPath = Path.Combine(MasterDatabaseDirectory, scenario.StorageDirectory);
+            if (!Directory.Exists(storageDirectoryPath)) Directory.CreateDirectory(storageDirectoryPath);
+
             Context.Scenarios.Add(scenario);
             Log(scenario, "Added new scenario {0} to data set to location {1}", scenario.Name, scenario.Location.Name);
             if (saveChanges) SaveChanges();
@@ -202,7 +207,7 @@ namespace ESME.Locations
                                  Name = locationName,
                                  Comments = comments,
                                  GeoRect = new GeoRect(north, south, east, west),
-                                 StorageDirectory = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()),
+                                 StorageDirectory = Path.Combine("locations", Path.GetFileNameWithoutExtension(Path.GetRandomFileName())),
                              };
             Context.Locations.Add(result);
             Log(result, "Created");
@@ -250,6 +255,8 @@ namespace ESME.Locations
             scenario.Duration = duration;
             scenario.TimePeriod = timePeriod;
             scenario.Location = location;
+            scenario.StorageDirectory = Path.Combine("scenarios", Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
+            Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, scenario.StorageDirectory));
             Context.Scenarios.Add(scenario);
             Log(scenario, "Created");
             SaveChanges();
@@ -307,7 +314,12 @@ namespace ESME.Locations
         void Initialize()
         {
             if (String.IsNullOrEmpty(MasterDatabaseDirectory)) throw new ApplicationException("MasterDatabaseDirectory cannot be null or empty");
-            if (!Directory.Exists(MasterDatabaseDirectory)) Directory.CreateDirectory(MasterDatabaseDirectory);
+            if (!Directory.Exists(MasterDatabaseDirectory))
+            {
+                Directory.CreateDirectory(MasterDatabaseDirectory);
+                Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, "locations"));
+                Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, "scenarios"));
+            }
             SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
             SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.Enabled = true;
             SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.BatchSize = 30;

@@ -85,7 +85,7 @@ namespace ESME.Tests.Scenarios
                     foreach (var radial in radials)
                     {
                         Console.WriteLine("      Computing radial at bearing {0} and length {1}", radial.Bearing, radial.Length);
-                        calculator.TestAdd(radial, @"C:\Users\Dave Anderson\Desktop\BellhopTest");
+                        calculator.TestAdd(radial, Path.Combine(database.MasterDatabaseDirectory, scenario.StorageDirectory));
                     }
                 } 
             }
