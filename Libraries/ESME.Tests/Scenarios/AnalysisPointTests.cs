@@ -25,8 +25,8 @@ namespace ESME.Tests.Scenarios
             MasterDatabaseService database;
             EnvironmentalCacheService cache;
             PluginManagerService plugins;
-            var location = TestLocation.LoadOrCreate("Jacksonville", @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr", _databaseDirectory, PluginDirectory, out database, out cache, out plugins);
-            var scenario = TestScenario.LoadOrCreate(database, location, @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas", @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Jacksonville\BU Test Sample.nemo");
+            var location = TestLocation.LoadOrCreate("Jacksonville", @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr", _databaseDirectory, PluginDirectory, out database, out cache, out plugins);
+            var scenario = TestScenario.LoadOrCreate(database, location, @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Sim Areas", @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Jacksonville\BU Test Sample.nemo");
             var center = new Geo((location.GeoRect.North + location.GeoRect.South) / 2, (location.GeoRect.East + location.GeoRect.West) / 2);
             var analysisPoint = new AnalysisPoint
             {

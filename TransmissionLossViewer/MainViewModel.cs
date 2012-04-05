@@ -12,6 +12,7 @@ using System.Windows.Threading;
 using Cinch;
 using ESME;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.Services;
 using ESME.Views.TransmissionLossViewer;
@@ -78,6 +79,10 @@ namespace TransmissionLossViewer
                             _messageBoxService.ShowError(string.Format("Error opening CASS file \"{0}\":\n{1}", args[1], ex.Message));
                         }
                     }
+                    if (args[1].ToLower().EndsWith(".shd"))
+                    {
+                        TransmissionLossRadial = new TransmissionLossRadial(0, new BellhopOutput(_openFileService.FileName));
+                    }
                 }
             }
         }
@@ -85,6 +90,26 @@ namespace TransmissionLossViewer
         
             
         #endregion
+
+        #region public TransmissionLossRadial TransmissionLossRadial { get; set; }
+
+        public TransmissionLossRadial TransmissionLossRadial
+        {
+            get { return _transmissionLossRadial; }
+            set
+            {
+                if (_transmissionLossRadial == value) return;
+                _transmissionLossRadial = value;
+                MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, _transmissionLossRadial);
+                NotifyPropertyChanged(TransmissionLossRadialChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs TransmissionLossRadialChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.TransmissionLossRadial);
+        TransmissionLossRadial _transmissionLossRadial;
+
+        #endregion
+
 
         #region public double SelectedRadialBearing { get; set; }
 
@@ -260,15 +285,16 @@ namespace TransmissionLossViewer
         {
             get { return _open ?? (_open = new SimpleCommand<object, object>(
                 delegate
-                {
-                    _openFileService.Filter = "CASS Output (*.bin)|*.bin|All Files (*.*)|*.*";
+                    {
+                        _openFileService.Filter = "Bellhop Shades (*.shd)|*.shd|All Files(*.*)|*.*"; //CASS Output (*.bin)|*.bin|All Files (*.*)|*.*";
                     _openFileService.InitialDirectory = Properties.Settings.Default.ExperimentReportDirectory;
                     _openFileService.Title = "Select a Transmission Loss file to view";
 
                     var result = _openFileService.ShowDialog((Window) _viewAwareStatus.View);
                     if (result.HasValue && result.Value)
                     {
-                      OpenCASSFile(_openFileService.FileName);
+                      //OpenCASSFile(_openFileService.FileName);
+                        TransmissionLossRadial = new TransmissionLossRadial(0,new BellhopOutput(_openFileService.FileName));
                     }
                 })); }
         }

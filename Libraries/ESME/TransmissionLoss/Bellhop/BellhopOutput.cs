@@ -58,7 +58,7 @@ namespace ESME.TransmissionLoss.Bellhop
                                     TransmissionLoss[depth, range] = (float)Math.Abs(Math.Sqrt((real * real) + (imag * imag)));
                                 else 
                                     TransmissionLoss[depth, range] = float.NaN;
-                                if (TransmissionLoss[depth, range] < 0) Debugger.Break();
+                                if (TransmissionLoss[depth, range] <= 0) Debugger.Break();
                             } // for Range
                         } // for Depth
                     } // for Source
