@@ -11,13 +11,16 @@ namespace ESME.TransmissionLoss.Bellhop
 {
     public class BottomProfile
     {
-        public BottomProfile(int numberOfPointsInTransect, Transect transect, Bathymetry bathymetry)
+        public BottomProfile(int numberOfPointsInTransect, GeoSegment geoSegment , Bathymetry bathymetry)
         {
             MaxDepth = double.MinValue;
             Profile = new List<BottomProfilePoint>();
-            Length = transect.StartPoint.DistanceKilometers(transect.EndPoint) * 1000;
+            Length = Geo.RadiansToKilometers(geoSegment.LengthRadians) * 1000;
+            //Length = transect.StartPoint.DistanceKilometers(transect.EndPoint) * 1000;
             var stepLength = Length / (numberOfPointsInTransect - 1);
-            var currentPoint = transect.StartPoint;
+            var stepFraction = 1.0 / numberOfPointsInTransect;
+            //var currentPoint = transect.StartPoint;
+            var currentPoint = geoSegment[0];
             var curRange = 0.0;
             for (var i = 0; i < numberOfPointsInTransect; i++)
             {
@@ -28,7 +31,8 @@ namespace ESME.TransmissionLoss.Bellhop
                     MaxDepth = curDepth;
                     DeepestPoint = currentPoint;
                 }
-                currentPoint = currentPoint.Offset(Geo.KilometersToRadians(stepLength / 1000f), Geo.DegreesToRadians(transect.Bearing));
+                currentPoint = geoSegment.Slerp(stepFraction * i);
+                //currentPoint = currentPoint.Offset(Geo.KilometersToRadians(stepLength / 1000f), Geo.DegreesToRadians(transect.Bearing));
                 curRange += stepLength;
             }
             //Profile = profile.ToList();

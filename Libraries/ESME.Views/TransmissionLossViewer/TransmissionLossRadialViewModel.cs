@@ -374,9 +374,10 @@ namespace ESME.Views.TransmissionLossViewer
             var actualControlWidth = ((TransmissionLossRadialView)_viewAwareStatus.View).OverlayCanvas.ActualWidth;
             if (actualControlHeight == 0 || actualControlWidth == 0) return;
 
-            var transect = new Transect("", _location, _transmissionLossRadial.BearingFromSource, _transmissionLossRadial.Ranges.Last());
-            
-            var profile = new BottomProfile(_transmissionLossRadial.Ranges.Count, transect, _bathymetry);
+            //var transect = new Transect("", _location, _transmissionLossRadial.BearingFromSource, _transmissionLossRadial.Ranges.Last());
+            var radialSegment = new GeoSegment(_location, Geo.KilometersToRadians(_transmissionLossRadial.Ranges.Last() / 1000f), Geo.DegreesToRadians(_transmissionLossRadial.BearingFromSource));
+
+            var profile = new BottomProfile(_transmissionLossRadial.Ranges.Count, radialSegment, _bathymetry);
             //todo ; later try to subtract half a depth cell from each depth (off-by-1/2 error on display)
             //todo: Dave changed the bottom profile format on 13 Aug 2011.  New format is a list of range/depth pairs where depth changes by more than 1cm
             // this algorithm will need to change if it's ever used again

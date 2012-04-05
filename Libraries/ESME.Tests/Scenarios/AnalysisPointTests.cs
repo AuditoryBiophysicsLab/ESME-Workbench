@@ -41,8 +41,8 @@ namespace ESME.Tests.Scenarios
                     IsReadyToCalculate = false,
                     Mode = mode,
                 };
-                const int radialCount = 8;
-                const double radialLength = 10000;
+                const int radialCount = 32;
+                const double radialLength = 100000;
                 for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
                 {
                     var radial = new Radial

@@ -13,6 +13,7 @@ using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.RAM;
 using HRC.Collections;
+using HRC.Navigation;
 using HRC.Utility;
 
 namespace ESME.Views.TransmissionLoss
@@ -194,12 +195,13 @@ namespace ESME.Views.TransmissionLoss
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
-                var curTransect = new Transect(null, transmissionLossJob.SoundSource.Geo, radialBearing, transmissionLossJob.SoundSource.Radius);
+                //var curTransect = new Transect(null, transmissionLossJob.SoundSource.Geo, radialBearing, transmissionLossJob.SoundSource.Radius);
                 var bathymetry = ((Task<Bathymetry>)_environmentData[EnvironmentDataType.Bathymetry]).Result;
-                bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, bathymetry);
+                var radialSegment = new GeoSegment(transmissionLossJob.SoundSource.Geo, Geo.KilometersToRadians(transmissionLossJob.SoundSource.Radius / 1000f), Geo.DegreesToRadians(radialBearing));
+                bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, radialSegment, bathymetry);
                 maxCalculationDepthMeters = Math.Max((float)bottomProfiles[bearingIndex].MaxDepth, maxCalculationDepthMeters);
-                soundSpeedProfiles[bearingIndex] = ((Task<SoundSpeed>)_environmentData[EnvironmentDataType.SoundSpeed]).Result[TransmissionLossRunFile.TimePeriod].EnvironmentData.GetNearestPoint(curTransect.MidPoint);
-                windSpeeds[bearingIndex] = ((Task<Wind>)_environmentData[EnvironmentDataType.Wind]).Result[TransmissionLossRunFile.TimePeriod].EnvironmentData.GetNearestPoint(curTransect.MidPoint).Data;
+                soundSpeedProfiles[bearingIndex] = ((Task<SoundSpeed>)_environmentData[EnvironmentDataType.SoundSpeed]).Result[TransmissionLossRunFile.TimePeriod].EnvironmentData.GetNearestPoint(radialSegment.Center);
+                windSpeeds[bearingIndex] = ((Task<Wind>)_environmentData[EnvironmentDataType.Wind]).Result[TransmissionLossRunFile.TimePeriod].EnvironmentData.GetNearestPoint(radialSegment.Center).Data;
             }
             maxCalculationDepthMeters *= 1.1f;
             //maxCalculationDepthMeters = 2000;

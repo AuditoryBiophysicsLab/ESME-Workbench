@@ -2,6 +2,7 @@
 using ESME.Data;
 using ESME.Environment;
 using ESME.Model;
+using HRC.Navigation;
 using HRC.Utility;
 
 namespace ESME.TransmissionLoss.Bellhop
@@ -33,10 +34,11 @@ namespace ESME.TransmissionLoss.Bellhop
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
-                var curTransect = new Transect(null, transmissionLossJob.SoundSource.Geo, radialBearing, transmissionLossJob.SoundSource.Radius);
-                bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, environmentInformation.Bathymetry);
+                //var curTransect = new Transect(null, transmissionLossJob.SoundSource.Geo, radialBearing, transmissionLossJob.SoundSource.Radius);
+                var radialSegment = new GeoSegment(transmissionLossJob.SoundSource.Geo, Geo.KilometersToRadians(transmissionLossJob.SoundSource.Radius / 1000f), Geo.DegreesToRadians(radialBearing));
+                bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, radialSegment, environmentInformation.Bathymetry);
                 maxCalculationDepthMeters = Math.Max((float)bottomProfiles[bearingIndex].MaxDepth, maxCalculationDepthMeters);
-                soundSpeedProfiles[bearingIndex] = environmentInformation.SoundSpeedField.EnvironmentData.GetNearestPoint(curTransect.MidPoint);
+                soundSpeedProfiles[bearingIndex] = environmentInformation.SoundSpeedField.EnvironmentData.GetNearestPoint(radialSegment.Center);
             }
 
             var depthCellCount = (int)Math.Round((maxCalculationDepthMeters / appSettings.BellhopSettings.DepthCellSize)) + 1;

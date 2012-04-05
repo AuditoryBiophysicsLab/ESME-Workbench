@@ -92,7 +92,9 @@ namespace ESME.TransmissionLoss
             var windSpeed = wind[timePeriod].EnvironmentData.GetNearestPoint(centerPoint);
             var soundSpeedProfile = soundSpeed[timePeriod].EnvironmentData.GetNearestPoint(centerPoint);
             var sedimentType = sediment.Samples.GetNearestPoint(centerPoint);
-            var bottomProfile = new BottomProfile(100, new Transect("transect", analysisPoint.Geo, radial.Bearing, radial.Length), bathymetry);
+            var radialSegment = new GeoSegment(analysisPoint.Geo, Geo.KilometersToRadians(radial.Length / 1000f), Geo.DegreesToRadians(radial.Bearing));
+            //var bottomProfile = new BottomProfile(100, new Transect("transect", analysisPoint.Geo, radial.Bearing, radial.Length), bathymetry);
+            var bottomProfile = new BottomProfile(100, radialSegment, bathymetry);
             var sourceDepth = platform.Depth;
             if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
             if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
