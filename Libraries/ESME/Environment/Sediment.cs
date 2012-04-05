@@ -84,11 +84,6 @@ namespace ESME.Environment
             return SedimentTypes.Find(sedimentSample.Data.SampleValue);
         }
 
-        public int CompareTo(SedimentSample other)
-        {
-            return Data.CompareTo(other.Data);
-        }
-
         public new void Serialize(BinaryWriter writer)
         {
             base.Serialize(writer);
@@ -101,10 +96,11 @@ namespace ESME.Environment
             var sampleBase = SedimentSampleBase.Deserialize(reader);
             return sampleBase.SampleValue == 0 ? null : new SedimentSample(location, sampleBase);
         }
-        public int Compare(SedimentSample x, SedimentSample y)
+        public int Compare(SedimentSample x, SedimentSample y) { return x.CompareTo(y); }
+        public int CompareTo(SedimentSample other)
         {
-            var compare = x.Latitude.CompareTo(y.Latitude);
-            return compare != 0 ? compare : x.Longitude.CompareTo(y.Longitude);
+            var compare = Latitude.CompareTo(other.Latitude);
+            return compare != 0 ? compare : Longitude.CompareTo(other.Longitude);
         }
     }
 

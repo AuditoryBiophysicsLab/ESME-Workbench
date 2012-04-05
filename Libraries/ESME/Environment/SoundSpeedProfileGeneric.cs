@@ -73,7 +73,7 @@ namespace ESME.Environment
         public float Average { get { return Value / Count; } }
     }
 
-    public class SoundSpeedProfile : SoundSpeedProfileGeneric<SoundSpeedSample>, IComparer<SoundSpeedProfile>
+    public class SoundSpeedProfile : SoundSpeedProfileGeneric<SoundSpeedSample>, IComparer<SoundSpeedProfile>, IComparable<SoundSpeedProfile>
     {
         public SoundSpeedProfile() { }
         public SoundSpeedProfile(Geo location) : base(location) { }
@@ -100,10 +100,15 @@ namespace ESME.Environment
             return result;
         }
 
-        public int Compare(SoundSpeedProfile x, SoundSpeedProfile y) 
+        public int Compare(SoundSpeedProfile x, SoundSpeedProfile y)
         {
-            var compare = x.Latitude.CompareTo(y.Latitude); 
-            return compare != 0 ? compare : x.Longitude.CompareTo(y.Longitude);
+            return x.CompareTo(y);
+        }
+
+        public int CompareTo(SoundSpeedProfile other)
+        {
+            var compare = Latitude.CompareTo(other.Latitude);
+            return compare != 0 ? compare : Longitude.CompareTo(other.Longitude);
         }
     }
 

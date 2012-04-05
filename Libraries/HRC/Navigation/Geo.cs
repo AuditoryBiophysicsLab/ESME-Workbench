@@ -13,7 +13,7 @@ namespace HRC.Navigation
     /// <summary>
     /// A class that represents a point on the Earth as a three dimensional unit length vector, rather than latitude and longitude
     /// </summary>
-    public class Geo : IEquatable<object>, IEquatable<Geo>, IGeoExtent, IComparer<Geo>
+    public class Geo : IEquatable<object>, IEquatable<Geo>, IGeoExtent, IComparer<Geo>, IComparable<Geo>
     {
         #region Constants for the shape of the Earth
         /***************************************************************************
@@ -406,10 +406,11 @@ namespace HRC.Navigation
             return this == obj as Geo;
         }
 
-        public int Compare(Geo x, Geo y)
+        public int Compare(Geo x, Geo y) { return x.CompareTo(y); }
+        public int CompareTo(Geo other)
         {
-            var compare = x.Latitude.CompareTo(y.Latitude);
-            return compare != 0 ? compare : x.Longitude.CompareTo(y.Longitude);
+            var compare = Latitude.CompareTo(other.Latitude);
+            return compare != 0 ? compare : Longitude.CompareTo(other.Longitude);
         }
         public override string ToString() { return string.Format("Geo[{0}, {1}]", Math.Round(Latitude, 10), Math.Round(Longitude, 10)); }
         #endregion
@@ -436,7 +437,7 @@ namespace HRC.Navigation
         }
     }
 
-    public class Geo<T> : Geo, IComparer<Geo<T>>
+    public class Geo<T> : Geo, IComparer<Geo<T>>, IComparable<Geo<T>>
     {
         public Geo() { }
         public Geo(double lat, double lon) : base(lat, lon) { }
@@ -447,10 +448,11 @@ namespace HRC.Navigation
         public Geo(Geo geo, T data) : base(geo) { Data = data; }
 
         public T Data { get; set; }
-        public int Compare(Geo<T> x, Geo<T> y)
+        public int Compare(Geo<T> x, Geo<T> y) { return x.CompareTo(y); }
+        public int CompareTo(Geo<T> other)
         {
-            var compare = x.Latitude.CompareTo(y.Latitude);
-            return compare != 0 ? compare : x.Longitude.CompareTo(y.Longitude);
+            var compare = Latitude.CompareTo(other.Latitude);
+            return compare != 0 ? compare : Longitude.CompareTo(other.Longitude);
         }
     }
 }
