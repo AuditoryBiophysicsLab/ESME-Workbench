@@ -10,7 +10,7 @@ namespace ESME.Model
 {
     public class Species : IEquatable<Species>, IHasIDField
     {
-        [XmlIgnore] public SourceRecieverLevelBins[] LevelBins;
+        [XmlIgnore] public HistogramBins[] LevelBins;
 
         #region Public Properties
 
@@ -45,9 +45,9 @@ namespace ESME.Model
         public void CreateLevelBins(int sourceCount, float lowReceiveLevel, float binWidth, int binCount)
         {
             if (LevelBins != null) return;
-            LevelBins = new SourceRecieverLevelBins[sourceCount];
+            LevelBins = new HistogramBins[sourceCount];
             for (int i = 0; i < sourceCount; i++)
-                LevelBins[i] = new SourceRecieverLevelBins(lowReceiveLevel, binWidth, binCount);
+                LevelBins[i] = new HistogramBins(lowReceiveLevel, binWidth, binCount);
         }
 
         #endregion

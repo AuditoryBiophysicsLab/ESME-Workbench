@@ -18,7 +18,7 @@ namespace ESME.Animats
     [Serializable]
     public class Animat
     {
-        [XmlIgnore] public SourceRecieverLevelBins[] LevelBins;
+        [XmlIgnore] public HistogramBins[] LevelBins;
         [XmlIgnore] private double _soundPressureLevel;
 
         #region Public Properties
@@ -123,9 +123,9 @@ namespace ESME.Animats
         {
             Species.CreateLevelBins(sourceCount, lowReceiveLevel, binWidth, binCount);
             if (LevelBins != null) return;
-            LevelBins = new SourceRecieverLevelBins[sourceCount];
+            LevelBins = new HistogramBins[sourceCount];
             for (var i = 0; i < sourceCount; i++)
-                LevelBins[i] = new SourceRecieverLevelBins(lowReceiveLevel, binWidth, binCount);
+                LevelBins[i] = new HistogramBins(lowReceiveLevel, binWidth, binCount);
         }
 
 #if false

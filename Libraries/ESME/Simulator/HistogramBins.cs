@@ -7,35 +7,35 @@ using ESME.Scenarios;
 
 namespace ESME.Simulator
 {
-    public class SourceRecieverLevelBins
+    public class HistogramBins
     {
         /// <summary>
         /// Lowest tracked exposure level, in dB re: 1 uPa
         /// </summary>
-        public float LowExposureLevel { get; set; }
+        public float Low { get; set; }
 
         /// <summary>
         /// Exposure bin width, in dB
         /// </summary>
-        public float BinWidth { get; set; }
+        public float Width { get; set; }
 
         /// <summary>
         /// The actual array of recieved level bins
         /// </summary>
         public int[] Bins { get; set; }
 
-        public SourceRecieverLevelBins(float lowExposure, float binWidth, int binCount)
+        public HistogramBins(float low, float width, int count)
         {
-            LowExposureLevel = lowExposure;
-            BinWidth = binWidth;
-            Bins = new int[binCount + 2];
+            Low = low;
+            Width = width;
+            Bins = new int[count + 2];
         }
 
-        public void AddExposure(float exposureLevel)
+        public void Add(float exposureLevel)
         {
             int bin;
-            if (exposureLevel < LowExposureLevel) bin = 0;
-            else bin = (int)Math.Min(((exposureLevel - LowExposureLevel) / BinWidth) + 1, Bins.Length - 1);
+            if (exposureLevel < Low) bin = 0;
+            else bin = (int)Math.Min(((exposureLevel - Low) / Width) + 1, Bins.Length - 1);
             Bins[bin]++;
         }
 

@@ -252,12 +252,14 @@
     <Compile Include="Simulator\Actor.cs" />
     <Compile Include="Simulator\ActorExposureRecord.cs" />
     <Compile Include="Simulator\ActorPositionRecord.cs" />
+    <Compile Include="SimulationAnalysis\AnimatScatterplot.cs" />
     <Compile Include="Simulator\Interfaces.cs" />
     <Compile Include="Simulator\Simulation.cs" />
     <Compile Include="Simulator\SimulationContext.cs" />
     <Compile Include="Simulator\SimulationLog.cs" />
     <Compile Include="Simulator\SimulationTimeStepRecord.cs" />
     <Compile Include="Simulator\SimulatorService.cs" />
+    <Compile Include="SimulationAnalysis\SourceModeThreshholdHistogram.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNL.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLInput.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLOutput.cs" />
@@ -313,7 +315,7 @@
     <Compile Include="TransmissionLoss\Bellhop\BellhopRunFile.cs" />
     <Compile Include="Model\EnvironmentInformation.cs" />
     <Compile Include="Model\Exceptions.cs" />
-    <Compile Include="Simulator\SourceRecieverLevelBins.cs" />
+    <Compile Include="Simulator\HistogramBins.cs" />
     <Compile Include="Model\Generics.cs" />
     <Compile Include="Model\ProgressTracking.cs" />
     <Compile Include="Model\SedimentType.cs" />
