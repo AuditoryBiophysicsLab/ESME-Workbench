@@ -17,6 +17,7 @@ using ESME.Environment;
 using ESME.Locations;
 using ESME.Mapping;
 using ESME.Plugins;
+using ESME.TransmissionLoss;
 using ESMEWorkbench.Data;
 using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.RecentFiles;
@@ -35,12 +36,14 @@ namespace ESMEWorkbench.ViewModels.Main
     {
         #region Private fields
 
-        [Import] IMessageBoxService _messageBoxService;
-        [Import] IHRCOpenFileService _openFileService;
-        [Import] IHRCSaveFileService _saveFileService;
-        [Import] IUIVisualizerService _visualizerService;
-        [Import] IPluginManagerService _pluginManagerService;
-        [Import] MasterDatabaseService _masterDatabaseService;
+        [Import, UsedImplicitly] IMessageBoxService _messageBox;
+        [Import, UsedImplicitly] IHRCOpenFileService _openFile;
+        [Import, UsedImplicitly] IHRCSaveFileService _saveFile;
+        [Import, UsedImplicitly] IUIVisualizerService _visualizer;
+        [Import, UsedImplicitly] IPluginManagerService _plugins;
+        [Import, UsedImplicitly] MasterDatabaseService _database;
+        [Import, UsedImplicitly] EnvironmentalCacheService _cache;
+        [Import, UsedImplicitly] TransmissionLossCalculatorService _transmissionLoss;
         readonly IViewAwareStatus _viewAwareStatus;
 #if EXPERIMENTS_SUPPORTED
         Experiment _experiment;
@@ -67,7 +70,7 @@ namespace ESMEWorkbench.ViewModels.Main
             }
             _viewAwareStatus = viewAwareStatus;
 
-            _pleaseWait = new PleaseWaitViewModel((Window)_viewAwareStatus.View, _visualizerService);
+            _pleaseWait = new PleaseWaitViewModel((Window)_viewAwareStatus.View, _visualizer);
             if (Designer.IsInDesignMode) return;
             _viewAwareStatus.ViewUnloaded += () =>
             {
@@ -79,20 +82,18 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 if (Designer.IsInDesignMode) return;
 #if DEBUG
-                _pluginManagerService.PluginDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                _plugins.PluginDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 #else
                 _pluginManagerService.PluginDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Plugins");
 #endif
 
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 MediatorMessage.Send(MediatorMessage.MainViewModelInitialized, _dispatcher);
-                Globals.AppSettings.PluginManagerService = _pluginManagerService;
-                if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench\\Locations")))
-                    Directory.CreateDirectory(
-                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                                     "ESME Workbench\\Locations"));
-                _masterDatabaseService.MasterDatabaseDirectory = Globals.AppSettings.LocationDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench\\Locations");
-                NAVOImporter.PluginManagerService = _pluginManagerService;
+                Globals.AppSettings.PluginManagerService = _plugins;
+                if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database")))
+                    Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
+                _database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
+                NAVOImporter.PluginManagerService = _plugins;
             };
 
             IsLatLonGridVisible = Settings.Default.ShowGrid;
@@ -215,10 +216,12 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #endregion
 
-        async void InitializeEnvironmentManager()
+        void InitializeEnvironmentManager()
         {
+#if false
             RangeComplexes = RangeComplexes.Singleton;
             ImportProgressCollection = ImportProgressCollection.Singleton;
+
             try
             {
                 try
@@ -255,6 +258,7 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 _messageBoxService.ShowError(e.Message);
             }
+#endif
         }
 
         public ImportProgressCollection ImportProgressCollection
@@ -356,7 +360,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void ShowAboutView()
         {
             var aboutViewModel = new AboutViewModel();
-            _visualizerService.ShowDialog("AboutView", aboutViewModel);
+            _visualizer.ShowDialog("AboutView", aboutViewModel);
         }
 
         #region public bool IsLatLonGridVisible { get; set; }
@@ -441,7 +445,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     }
                     catch (Exception e)
                     {
-                        _messageBoxService.ShowError("Error opening scenario: " + e.Message);
+                        _messageBox.ShowError("Error opening scenario: " + e.Message);
                         RecentFiles.RemoveFile(_recentFilesSelectedItem.LongName);
                     }
                 }

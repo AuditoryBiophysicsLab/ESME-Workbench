@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Serialization;
 using ESME.Settings;
-using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
@@ -200,8 +199,8 @@ namespace HRC.Tests.Aspects
 
         protected void SaveBase<T>(T source, string fileName) where T : class, ISettingsBase, new()
         {
-            var serializerType = typeof(StaticXmlSerializer);
-            var methodInfo = serializerType.GetMethod("SaveStatic", new[] { typeof(T), typeof(string), typeof(List<Type>) });
+            //var serializerType = typeof(StaticXmlSerializer);
+            //var methodInfo = serializerType.GetMethod("SaveStatic", new[] { typeof(T), typeof(string), typeof(List<Type>) });
             Console.WriteLine("Looking for [ReferencedTypes] attribute on static fields and properties...");
             var memberInfo = new List<MemberInfo>();
             memberInfo.AddRange(typeof(T).GetFields(BindingFlags.Static | BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
@@ -233,8 +232,8 @@ namespace HRC.Tests.Aspects
             //methodInfo.Invoke(null, new object[] { source, fileName, referencedTypes });
         }
 
-        List<Type> _allReferencedTypes = new List<Type>();
-        MethodInfo _saveMethod;
+        //List<Type> _allReferencedTypes = new List<Type>();
+        //MethodInfo _saveMethod;
 
         //protected void SaveBase<T>(T source, string settingsRootDirectory) where T : SettingsBase, new()
         //{

@@ -13,7 +13,7 @@ namespace ESME.Views.Locations
     {
         public NewRangeComplexViewModel(AppSettings appSettings)
         {
-            SimAreaFolder = appSettings.ScenarioDataDirectory;
+            //SimAreaFolder = appSettings.ScenarioDataDirectory;
             ValidationRules.AddRange(new List<ValidationRule>
             {
                 new ValidationRule

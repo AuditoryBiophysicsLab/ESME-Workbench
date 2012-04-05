@@ -37,14 +37,14 @@ namespace ESMEWorkbench.ViewModels.Main
             Console.WriteLine("All view models are ready!");
             //WizardViewModel.LaunchWizardIfNeeded(_visualizerService);
 
-            if (ESME.Globals.AppSettings != null && ESME.Globals.AppSettings.ScenarioDataDirectory != null && File.Exists(Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv")))
+            if (ESME.Globals.AppSettings != null)
                 InitializeEnvironmentManager();
             else
-                _messageBoxService.ShowError("The ESME Workbench is not fully configured, and may not function properly.  Please complete the configuration wizard or fill in the proper configuration details in the Application Options Configuration dialog.");
+                _messageBox.ShowError("The ESME Workbench is not fully configured, and may not function properly.  Please complete the configuration wizard or fill in the proper configuration details in the Application Options Configuration dialog.");
 
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             AreAllViewModelsReady = true;
-            if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
+            //if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
             if (RangeComplexes != null) RangeComplexes.PropertyChanged += (s, e) =>
             {
                 switch (e.PropertyName)
@@ -77,14 +77,14 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             try
             {
-                var vm = new NewLocationViewModel(_pluginManagerService, _masterDatabaseService);
-                var result = _visualizerService.ShowDialog("NewLocationView", vm);
+                var vm = new NewLocationViewModel(_plugins, _database);
+                var result = _visualizer.ShowDialog("NewLocationView", vm);
                 if ((result.HasValue) && (result.Value))
                 {
                     
                 }
             }
-            catch (Exception e) { _messageBoxService.ShowError(e.Message); }
+            catch (Exception e) { _messageBox.ShowError(e.Message); }
         }
         #endregion
 
@@ -212,7 +212,7 @@ namespace ESMEWorkbench.ViewModels.Main
             try
             {
                 var vm = new NewRangeComplexViewModel(ESME.Globals.AppSettings);
-                var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
+                var result = _visualizer.ShowDialog("NewRangeComplexView", vm);
                 if ((result.HasValue) && (result.Value))
                 {
                     var opAreaCoords = vm.ExistingOpAreaOverlayFilename != null ? new OverlayFile(vm.ExistingOpAreaOverlayFilename).Shapes[0].Geos : vm.NewOpAreaOverlayGeos;
@@ -223,7 +223,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                                       simAreaCoords);
                 }
             }
-            catch (Exception e) { _messageBoxService.ShowError(e.Message); }
+            catch (Exception e) { _messageBox.ShowError(e.Message); }
         }
         #endregion
 
@@ -257,7 +257,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         void DeleteRangeComplexHandler()
         {
-            var result = _messageBoxService.ShowYesNo(string.Format("Warning: Deleting the range complex \"{0}\" will also delete any overlays, bathymetry and environment data that have previously been created or extracted.\n\nThis operation CANNOT be undone.\n\nProceed with deletion?", RangeComplexes.SelectedRangeComplex.Name),
+            var result = _messageBox.ShowYesNo(string.Format("Warning: Deleting the range complex \"{0}\" will also delete any overlays, bathymetry and environment data that have previously been created or extracted.\n\nThis operation CANNOT be undone.\n\nProceed with deletion?", RangeComplexes.SelectedRangeComplex.Name),
                                                  CustomDialogIcons.Exclamation);
             if (result == CustomDialogResults.No) return;
             try
@@ -265,7 +265,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 RangeComplexes.RemoveRangeComplex(RangeComplexes.SelectedRangeComplex.Name);
                 RangeComplexes.SelectedRangeComplex = null;
             }
-            catch (Exception e) { _messageBoxService.ShowError(e.Message); }
+            catch (Exception e) { _messageBox.ShowError(e.Message); }
         }
         #endregion
 
@@ -304,11 +304,11 @@ namespace ESMEWorkbench.ViewModels.Main
             try
             {
                 var vm = new NewOverlayViewModel(ESME.Globals.AppSettings, RangeComplexes.SelectedRangeComplex.Name);
-                var result = _visualizerService.ShowDialog("NewOverlayView", vm);
+                var result = _visualizer.ShowDialog("NewOverlayView", vm);
                 if ((!result.HasValue) || (!result.Value)) return;
                 RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.CreateArea(vm.OverlayName, vm.OverlayGeos);
             }
-            catch (Exception e) { _messageBoxService.ShowError(e.Message); }
+            catch (Exception e) { _messageBox.ShowError(e.Message); }
         }
 
         #endregion
@@ -335,7 +335,7 @@ namespace ESMEWorkbench.ViewModels.Main
             try
             {
                 var vm = new OverlayExpandViewModel(RangeComplexes.SelectedRangeComplex, RangeComplexes.SelectedArea);
-                var result = _visualizerService.ShowDialog("OverlayExpandView", vm);
+                var result = _visualizer.ShowDialog("OverlayExpandView", vm);
                 if ((!result.HasValue) || (!result.Value)) return;
 
                 var curOverlay = RangeComplexes.SelectedArea.OverlayShape;
@@ -348,7 +348,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
                 RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.CreateArea(vm.OverlayName, coordinateList);
             }
-            catch (Exception e) { _messageBoxService.ShowError(e.Message); }
+            catch (Exception e) { _messageBox.ShowError(e.Message); }
         }
 
         #endregion
@@ -367,10 +367,10 @@ namespace ESMEWorkbench.ViewModels.Main
             var canDelete = RangeComplexes.SelectedRangeComplex.TryRemoveArea(RangeComplexes.SelectedArea.Name, out error);
             if (!canDelete)
             {
-                _messageBoxService.ShowError(error);
+                _messageBox.ShowError(error);
                 return;
             }
-            var result = _messageBoxService.ShowYesNo(string.Format("Are you sure you want to delete the overlay \"{0}\"?\r\nThis operation cannot be undone.", RangeComplexes.SelectedArea.Name), CustomDialogIcons.Exclamation);
+            var result = _messageBox.ShowYesNo(string.Format("Are you sure you want to delete the overlay \"{0}\"?\r\nThis operation cannot be undone.", RangeComplexes.SelectedArea.Name), CustomDialogIcons.Exclamation);
             if (result == CustomDialogResults.No) return;
             RangeComplexes.SelectedRangeComplex.RemoveArea(RangeComplexes.SelectedArea.Name);
             RangeComplexes.SelectedArea = null;
@@ -496,10 +496,10 @@ namespace ESMEWorkbench.ViewModels.Main
 
         void ExportAllEnvironmentalDataHandler()
         {
-            var result = _messageBoxService.ShowYesNo("This operation might take a long time to complete.\r\nReally export ALL environment data to NUWC-format files?", CustomDialogIcons.Question);
+            var result = _messageBox.ShowYesNo("This operation might take a long time to complete.\r\nReally export ALL environment data to NUWC-format files?", CustomDialogIcons.Question);
             if (result == CustomDialogResults.No) return;
             var vm = new ExportAllEnvironmentalDataProgressViewModel(_rangeComplexes.SelectedRangeComplex, _dispatcher);
-            _visualizerService.ShowDialog("ExportAllEnvironmentalDataProgressView", vm);
+            _visualizer.ShowDialog("ExportAllEnvironmentalDataProgressView", vm);
         }
 
        

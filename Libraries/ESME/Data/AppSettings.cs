@@ -58,6 +58,7 @@ namespace ESME.Data
         [Initialize]
         public SerializableDictionary<string, string> OpenFileServiceDirectories { get; set; }
 
+#if false
         #region public string ScenarioDataDirectory { get; set; }
 
         static readonly PropertyChangedEventArgs ScenarioDataDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioDataDirectory);
@@ -105,6 +106,7 @@ namespace ESME.Data
         }
 
         #endregion
+#endif
 
         [Initialize]
         public BellhopSettings BellhopSettings { get; set; }
@@ -114,7 +116,7 @@ namespace ESME.Data
 
         [Initialize]
         public NAVOConfiguration NAVOConfiguration { get; set; }
-
+#if false
         #region public List<string> ExperimentFiles { get; set; }
 #if UseAspects
         [Initialize]
@@ -158,6 +160,7 @@ namespace ESME.Data
         }
 
         #endregion
+#endif
 
         [Initialize(true)]
         public bool DisplayContoursOnTransmissionLoss { get; set; }
@@ -204,7 +207,7 @@ namespace ESME.Data
         }
         #endregion
 
-        public string LocationDirectory { get; set; }
+        public string DatabaseDirectory { get; set; }
     }
 
     [NotifyPropertyChanged]

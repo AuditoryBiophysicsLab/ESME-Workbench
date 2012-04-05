@@ -26,14 +26,14 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 return _editOptions ?? (_editOptions = new SimpleCommand<object, object>(obj =>
                 {
-                    var programOptionsViewModel = new ApplicationOptionsViewModel(_messageBoxService);
-                    var result = _visualizerService.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
+                    var programOptionsViewModel = new ApplicationOptionsViewModel(_messageBox);
+                    var result = _visualizer.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
                     if ((result.HasValue) && (result.Value)) ESME.Globals.AppSettings.Save();
                     ESME.Globals.AppSettings = AppSettings.Load();
                     ESME.Globals.AppSettings = ESME.Globals.AppSettings;
-                    if (ESME.Globals.AppSettings != null && ESME.Globals.AppSettings.ScenarioDataDirectory != null &&
-                        File.Exists(Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"))) 
-                        InitializeEnvironmentManager();
+                    //if (ESME.Globals.AppSettings != null && ESME.Globals.AppSettings.ScenarioDataDirectory != null &&
+                    //    File.Exists(Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"))) 
+                    //    InitializeEnvironmentManager();
                 }));
             }
         }
@@ -54,7 +54,7 @@ namespace ESMEWorkbench.ViewModels.Main
             var userManual = Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ESME Workbench*Manual*.pdf");
             if (userManual.Length == 0)
             {
-                _messageBoxService.ShowError("The user manual was not found!");
+                _messageBox.ShowError("The user manual was not found!");
                 return;
             }
             var info = new ProcessStartInfo(userManual[0]) {UseShellExecute = true, Verb = "open"};
@@ -135,13 +135,13 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 return _addShapefile ?? (_addShapefile = new SimpleCommand<object, object>(obj =>
                 {
-                    _openFileService.Filter = "ESRI Shapefiles (*.shp)|*.shp";
-                    _openFileService.InitialDirectory = Settings.Default.LastShapefileDirectory;
-                    _openFileService.FileName = null;
-                    var result = _openFileService.ShowDialog(null);
+                    _openFile.Filter = "ESRI Shapefiles (*.shp)|*.shp";
+                    _openFile.InitialDirectory = Settings.Default.LastShapefileDirectory;
+                    _openFile.FileName = null;
+                    var result = _openFile.ShowDialog(null);
                     if (!result.HasValue || !result.Value) return;
-                    Settings.Default.LastShapefileDirectory = Path.GetDirectoryName(_openFileService.FileName);
-                    MediatorMessage.Send(MediatorMessage.AddFileCommand, _openFileService.FileName);
+                    Settings.Default.LastShapefileDirectory = Path.GetDirectoryName(_openFile.FileName);
+                    MediatorMessage.Send(MediatorMessage.AddFileCommand, _openFile.FileName);
                 }));
             }
         }
@@ -156,13 +156,13 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 return _addOverlayFileCommand ?? (_addOverlayFileCommand = new SimpleCommand<object, object>(obj =>
                 {
-                    _openFileService.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
-                    _openFileService.InitialDirectory = Settings.Default.LastOverlayFileDirectory;
-                    _openFileService.FileName = "";
-                    var result = _openFileService.ShowDialog(null);
+                    _openFile.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
+                    _openFile.InitialDirectory = Settings.Default.LastOverlayFileDirectory;
+                    _openFile.FileName = "";
+                    var result = _openFile.ShowDialog(null);
                     if (!result.HasValue || !result.Value) return;
-                    Settings.Default.LastOverlayFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
-                    MediatorMessage.Send(MediatorMessage.AddFileCommand, _openFileService.FileName);
+                    Settings.Default.LastOverlayFileDirectory = Path.GetDirectoryName(_openFile.FileName);
+                    MediatorMessage.Send(MediatorMessage.AddFileCommand, _openFile.FileName);
                 }));
             }
         }
@@ -232,7 +232,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 return _acousticSimulatorOptions ?? (_acousticSimulatorOptions = new SimpleCommand<object, object>(delegate
                 {
                     var viewModel = new AcousticSimulatorOptionsViewModel();
-                    var result = _visualizerService.ShowDialog("AcousticSimulatorOptionsView", viewModel);
+                    var result = _visualizer.ShowDialog("AcousticSimulatorOptionsView", viewModel);
                     if ((result.HasValue) && (result.Value)) ESME.Globals.AppSettings.Save();
                     else ESME.Globals.AppSettings = AppSettings.Load();
                 }));

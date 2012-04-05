@@ -24,20 +24,20 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.AddAnimatPopulationFileCommand)]
         void AddAnimatPopulationFile(bool dummy)
         {
-            _openFileService.InitialDirectory = Settings.Default.LastAnimatPopulationDirectory;
-            _openFileService.Filter = "Animat Scenario Files (*.sce)|*.sce";
-            _openFileService.FileName = null;
-            var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
+            _openFile.InitialDirectory = Settings.Default.LastAnimatPopulationDirectory;
+            _openFile.Filter = "Animat Scenario Files (*.sce)|*.sce";
+            _openFile.FileName = null;
+            var result = _openFile.ShowDialog((Window)_viewAwareStatus.View);
             if ((!result.HasValue) || (!result.Value)) return;
-            Settings.Default.LastAnimatPopulationDirectory = Path.GetDirectoryName(_openFileService.FileName);
-            _experiment.AnimalPopulationFiles.Add(_openFileService.FileName);
+            Settings.Default.LastAnimatPopulationDirectory = Path.GetDirectoryName(_openFile.FileName);
+            _experiment.AnimalPopulationFiles.Add(_openFile.FileName);
         }
 
         [MediatorMessageSink(MediatorMessage.RunExperimentCommand)]
         void RunExperiment(Experiment experiment)
         {
             var simulationViewModel = new SimulationViewModel(experiment);
-            var result = _visualizerService.ShowDialog("SimulationView", simulationViewModel);
+            var result = _visualizer.ShowDialog("SimulationView", simulationViewModel);
         }
 
         [MediatorMessageSink(MediatorMessage.AddAnalysisPoint)]
@@ -48,8 +48,8 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.ViewAnalysisPoint)]
         void ViewAnalysisPoint(AnalysisPoint analysisPoint)
         {
-            var analysisPointVisualizerViewModel = new AnalysisPointVisualizerViewModel(analysisPoint, _saveFileService);
-            _visualizerService.ShowDialog("AnalysisPointVisualizerView", analysisPointVisualizerViewModel);
+            var analysisPointVisualizerViewModel = new AnalysisPointVisualizerViewModel(analysisPoint, _saveFile);
+            _visualizer.ShowDialog("AnalysisPointVisualizerView", analysisPointVisualizerViewModel);
         }
 
         [MediatorMessageSink(MediatorMessage.EnableGUI)]
@@ -67,7 +67,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void AcousticOptions(bool dummy)
         {
             var acousticOptions = new AcousticEngineParameterViewModel(_experiment);
-            _visualizerService.ShowDialog("AcousticEngineParameterConfigurationView", acousticOptions);
+            _visualizer.ShowDialog("AcousticEngineParameterConfigurationView", acousticOptions);
         }
 
         [MediatorMessageSink(MediatorMessage.DavesTestCommand)]
@@ -77,7 +77,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                 {
                                     TestString = "Set from ESME"
                                 };
-            _visualizerService.ShowDialog("TestView", testViewModel);
+            _visualizer.ShowDialog("TestView", testViewModel);
         }
 #if false
 

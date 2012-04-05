@@ -379,7 +379,7 @@ namespace ESME.Animats
         /// </summary>
         /// <param name="fileName">the full path to the .ddb file</param>
         /// <returns></returns>
-        public static DDB Load(string fileName)
+        public static new DDB Load(string fileName)
         {
             if(Path.GetExtension(fileName) != ".ddb") throw new FileFormatException("only ddb files are supported.");
             var result = new DDB {Filename = fileName};
@@ -750,7 +750,7 @@ namespace ESME.Animats
         /// </summary>
         /// <param name="fileName">the full path to the .3mb file</param>
         /// <returns></returns>
-        public static MMMB Load(string fileName)
+        public static new MMMB Load(string fileName)
         {
             if (Path.GetExtension(fileName) != ".3mb") throw new FileFormatException("only 3MB files are supported.");
             var result = new MMMB {Filename = fileName};

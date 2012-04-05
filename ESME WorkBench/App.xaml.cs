@@ -11,7 +11,6 @@ using HRC.Utility;
 
 #if DEBUG
 using System.Security.Principal;
-using ESMEWorkbench.Properties;
 
 #endif
 

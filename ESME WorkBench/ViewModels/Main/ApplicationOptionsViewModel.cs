@@ -133,6 +133,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #endregion
 
+#if false
         #region public string ScenarioDataDirectory { get; set; }
 
         public string ScenarioDataDirectory
@@ -148,5 +149,6 @@ namespace ESMEWorkbench.ViewModels.Main
         static readonly PropertyChangedEventArgs ScenarioDataDirectoryChangedEventArgs = ObservableHelper.CreateArgs<ApplicationOptionsViewModel>(x => x.ScenarioDataDirectory);
 
         #endregion
+#endif
     }
 }

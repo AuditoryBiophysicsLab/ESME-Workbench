@@ -9,6 +9,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.TransmissionLoss;
+using HRC;
 using HRC.Navigation;
 using HRC.Validation;
 using MEFedMVVM.ViewModelLocator;
@@ -45,7 +46,7 @@ namespace ESME.Views.AcousticBuilder
             });
         }
 
-        [Import] static IMessageBoxService _messageBoxService;
+        [Import, UsedImplicitly] static IMessageBoxService _messageBoxService;
 
         #region public double Latitude { get; set; }
 

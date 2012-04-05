@@ -15,7 +15,7 @@ namespace ESME.Views.Locations
     {
         public NewOverlayViewModel(AppSettings appSettings, string locationName)
         {
-            SimAreaFolder = appSettings.ScenarioDataDirectory;
+            //SimAreaFolder = appSettings.ScenarioDataDirectory;
             LocationName = locationName;
             RangeComplexAreasFolder = Path.Combine(SimAreaFolder, LocationName, "Areas");
             ValidationRules.AddRange(new List<ValidationRule>

@@ -56,7 +56,7 @@ namespace ESME.NEMO.Overlay
         public virtual Geo Reflect(Geo startLocation, Geo proposedEndLocation, out Course proposedCourse) { throw new NotImplementedException(); }
         public abstract string WellKnownText { get; }
         //public Rect BoundingBox { get; private set; }
-        public GeoRect GeoRect { get; private set; }
+        public GeoRect GeoRect { get; protected set; }
         public Color Color { get; set; }
 
         public float Width { get; set; }

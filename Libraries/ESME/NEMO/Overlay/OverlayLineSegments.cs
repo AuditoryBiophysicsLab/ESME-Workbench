@@ -18,7 +18,6 @@ namespace ESME.NEMO.Overlay
         public double South { get; private set; }
         public double East { get; private set; }
         public double West { get; private set; }
-        public GeoRect GeoRect { get; private set; }
 
         public OverlayLineSegments(GeoRect geoRect) : base(Colors.Black, 1f, LineStyle.Solid)
         {

@@ -444,11 +444,8 @@ namespace ESME.Metadata
                 if (_scenarioFilename == value) return;
                 _scenarioFilename = value;
                 NotifyPropertyChanged(ScenarioFilenameChangedEventArgs);
-                NemoFile = _scenarioFilename != null ? new NemoFile(_scenarioFilename, Globals.AppSettings.ScenarioDataDirectory) : null;
-                Dispatcher.InvokeAsynchronouslyInBackground(() =>
-                {
-                    DisplayExistingAnalysisPoints();
-                });
+                //NemoFile = _scenarioFilename != null ? new NemoFile(_scenarioFilename, Globals.AppSettings.ScenarioDataDirectory) : null;
+                Dispatcher.InvokeAsynchronouslyInBackground(DisplayExistingAnalysisPoints);
             }
         }
 

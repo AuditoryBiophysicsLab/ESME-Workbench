@@ -127,10 +127,10 @@ namespace ESME.Views.Controls
 
         private readonly Dispatcher _dispatcher;
         private readonly IViewAwareStatus _viewAwareStatus;
-        private bool _iAmInitialized;
+        //private bool _iAmInitialized;
         private bool _isRendered;
-        private Geo _location;
-        private TransmissionLossRadial _tempRadial;
+        //private Geo _location;
+        //private TransmissionLossRadial _tempRadial;
         private WriteableBitmap _writeableBitmap;
 
 

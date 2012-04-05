@@ -11,7 +11,7 @@ namespace System.IO
         [DllImport("kernel32.dll")]
         static extern bool CreateSymbolicLink(string lpSymlinkFileName, string lpTargetFileName, int dwFlags);
 
-        static int SYMLINK_FLAG_DIRECTORY = 1;
+        const int SYMLINK_FLAG_DIRECTORY = 1;
 
         [DllImport("kernel32.dll")]
         static extern bool CreateHardLink(string lpSymlinkFileName, string lpTargetFileName, int lpSecurityAttributes = 0);

@@ -67,7 +67,7 @@ namespace ESME.TransmissionLoss
         [Import] EnvironmentalCacheService _cacheService;
         readonly float _rangeCellSize;
         readonly float _depthCellSize;
-        StringBuilder _bellhopOutput;
+        //StringBuilder _bellhopOutput;
         //[Initialize, UsedImplicitly] public ObservableList<PercentProgress<Radial>> WorkQueue { get; private set; }
 
         public void TestAdd(Radial radial, string directoryPath)

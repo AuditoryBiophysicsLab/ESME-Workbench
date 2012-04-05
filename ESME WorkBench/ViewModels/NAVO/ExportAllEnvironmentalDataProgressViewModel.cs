@@ -10,7 +10,6 @@ using Cinch;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
-using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
 using HRC.Utility;
 using RangeComplex = ESME.Environment.Descriptors.RangeComplex;
@@ -69,12 +68,12 @@ namespace ESMEWorkbench.ViewModels.NAVO
 
         int _environmentFileCountMultiplier = 1;
 
-        void ExportAll(RangeComplex rangeComplex, Dispatcher dispatcher, CancellationToken cancellationToken, IProgress<ProgressInfoInt> bathymetryProgress = null, IProgress<ProgressInfoInt> environmentProgress = null)
+        void ExportAll(RangeComplex rangeComplex, Dispatcher dispatcher, CancellationToken cancellationToken, IProgress<ProgressInfoInt> bathymetryProgress = null)
         {
             var bathymetryMax = 0;
             var bathymetryCount = 0;
             var environmentMax = 0;
-            var environmentCount = 0;
+            //var environmentCount = 0;
             if (File.Exists(Path.Combine(rangeComplex.DataPath, "data.bottomloss"))) _environmentFileCountMultiplier = 4;
 
             var bottomLossTask = new Task<BottomLoss>(() => BottomLoss.Load(Path.Combine(rangeComplex.DataPath, "data.bottomloss")));
@@ -83,17 +82,17 @@ namespace ESMEWorkbench.ViewModels.NAVO
             sedimentTask.Start();
             var envBlock = new ActionBlock<Tuple<RangeComplexArea, EnvironmentFile, List<Geo>, List<SedimentSample>, List<BottomLossSample>, Task<Bathymetry>, TimePeriod>>(stuff =>
             {
-                var area = stuff.Item1;
+                //var area = stuff.Item1;
                 var resolution = stuff.Item2;
                 var locations = stuff.Item3;
-                var sedimentList = stuff.Item4;
-                var bottomLossList = stuff.Item5;
+                //var sedimentList = stuff.Item4;
+                //var bottomLossList = stuff.Item5;
                 var bathyTask = stuff.Item6;
                 var period = stuff.Item7;
 
-                var bathyFileName = Path.Combine(rangeComplex.BathymetryPath, string.Format("{0}_{1}_bathy.txt", area.Name, resolution.Name));
+                //var bathyFileName = Path.Combine(rangeComplex.BathymetryPath, string.Format("{0}_{1}_bathy.txt", area.Name, resolution.Name));
 
-                var cassEnvironmentFileName = Path.Combine(rangeComplex.EnvironmentPath, string.Format("{0}_{1}_env_{2}", area.Name, resolution.Name, period));
+                //var cassEnvironmentFileName = Path.Combine(rangeComplex.EnvironmentPath, string.Format("{0}_{1}_env_{2}", area.Name, resolution.Name, period));
                 var windTask = new Task<Wind>(() => Wind.Load(Path.Combine(rangeComplex.DataPath, "data.wind")));
 
                 var soundSpeedTask = new Task<SoundSpeed>(() => EnvironmentFile.CalculateSoundSpeed(rangeComplex, period, bathyTask, resolution.GeoRect));
@@ -261,7 +260,7 @@ namespace ESMEWorkbench.ViewModels.NAVO
                 EnvironmentProgress.MaximumValue = e.MaximumValue;
                 EnvironmentProgress.Status = string.Format("{0}/{1}", e.CurrentValue, e.MaximumValue);
             });
-            TaskEx.Run(() => ExportAll(rangeComplex, dispatcher, _cancellationTokenSource.Token, bathymetryProgress, environmentProgress));
+            TaskEx.Run(() => ExportAll(rangeComplex, dispatcher, _cancellationTokenSource.Token, bathymetryProgress));
         }
     }
 }

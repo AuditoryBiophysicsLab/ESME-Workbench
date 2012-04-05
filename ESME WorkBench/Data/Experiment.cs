@@ -25,6 +25,7 @@ using ESME.Mapping;
 using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
+using HRC;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
@@ -273,10 +274,10 @@ namespace ESMEWorkbench.Data
 
         void LoadScenarioFile()
         {
-            if ((_scenarioFileName != null) && (Globals.AppSettings.ScenarioDataDirectory != null) && File.Exists(_scenarioFileName) && Directory.Exists(Globals.AppSettings.ScenarioDataDirectory))
-            {
-                NemoFile = new NemoFile(_scenarioFileName, Globals.AppSettings.ScenarioDataDirectory);
-            }
+            //if ((_scenarioFileName != null) && (Globals.AppSettings.ScenarioDataDirectory != null) && File.Exists(_scenarioFileName) && Directory.Exists(Globals.AppSettings.ScenarioDataDirectory))
+            //{
+            //    NemoFile = new NemoFile(_scenarioFileName, Globals.AppSettings.ScenarioDataDirectory);
+            //}
         }
 
         [XmlIgnore]
@@ -577,7 +578,7 @@ namespace ESMEWorkbench.Data
         [XmlElement]
         public double CurrentScale { get; set; }
 
-        [Import] static IMessageBoxService _messageBoxService;
+        [Import, UsedImplicitly] static IMessageBoxService _messageBoxService;
 
         [XmlIgnore]
         public Wind WindSpeed { get; private set; }
@@ -871,7 +872,7 @@ namespace ESMEWorkbench.Data
 
         void Initialize()
         {
-            Globals.AppSettings.VerifyExperimentsStillExist();
+            //Globals.AppSettings.VerifyExperimentsStillExist();
 
             // if (CurrentExtent != null) MediatorMessage.Send(MediatorMessage.SetCurrentExtent, new RectangleShape(CurrentExtent)););
             if (CurrentScale != 0) MediatorMessage.Send(MediatorMessage.SetCurrentScale, CurrentScale);

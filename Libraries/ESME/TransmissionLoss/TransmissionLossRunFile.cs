@@ -54,7 +54,7 @@ namespace ESME.TransmissionLoss
             }
             if (result == null) throw new ApplicationException("Result is null");
             result.TransmissionLossAlgorithm = algorithm;
-            result.ScenarioDataDirectory = Globals.AppSettings.ScenarioDataDirectory;
+            //result.ScenarioDataDirectory = Globals.AppSettings.ScenarioDataDirectory;
             result.TransmissionLossJob = new TransmissionLossJob
             {
                 SoundSource = soundSource,

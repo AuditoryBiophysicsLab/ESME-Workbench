@@ -48,7 +48,7 @@ namespace ESMEWorkbench.ViewModels.Main
                         if (e.PropertyName == "CanPlaceAnalysisPoint") _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(CanPlaceAnalysisPointChangedEventArgs));
                     };
                     _scenarioMetadata.Dispatcher = _dispatcher;
-                    _scenarioMetadata.VisualizerService = _visualizerService;
+                    _scenarioMetadata.VisualizerService = _visualizer;
                 }
                 IsScenarioLoaded = _scenarioMetadata != null;
             }
@@ -89,16 +89,16 @@ namespace ESMEWorkbench.ViewModels.Main
 
         void OpenScenarioHandler(string fileName)
         {
-            _openFileService.FileName = null;
+            _openFile.FileName = null;
             if (fileName == null)
             {
-                _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
-                _openFileService.InitialDirectory = Settings.Default.LastScenarioFileDirectory;
-                _openFileService.FileName = null;
-                var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
+                _openFile.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
+                _openFile.InitialDirectory = Settings.Default.LastScenarioFileDirectory;
+                _openFile.FileName = null;
+                var result = _openFile.ShowDialog((Window)_viewAwareStatus.View);
                 if (!result.HasValue || !result.Value) return;
-                fileName = _openFileService.FileName;
-                Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
+                fileName = _openFile.FileName;
+                Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFile.FileName);
             }
             ScenarioMetadata = null;
             RecentFiles.InsertFile(fileName);
@@ -107,7 +107,7 @@ namespace ESMEWorkbench.ViewModels.Main
             try
             {
                 ScenarioMetadata = ScenarioMetadata.Load(ScenarioMetadata.MetadataFilename(fileName), RangeComplexes);
-                ScenarioMetadata.MessageBoxService = _messageBoxService;
+                ScenarioMetadata.MessageBoxService = _messageBox;
                 ScenarioMetadata.CurrentMapLayers = CurrentMapLayers;
                 _dispatcher.InvokeIfRequired(() =>
                 {
@@ -152,7 +152,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 _scenarioFileWatcher.Deleted += (s, e) =>
                 {
                     CloseScenarioHandler();
-                    _messageBoxService.ShowError(string.Format("Scenario file {0} was deleted", fileName));
+                    _messageBox.ShowError(string.Format("Scenario file {0} was deleted", fileName));
                 };
                 _scenarioFileWatcher.EnableRaisingEvents = true;
             }
@@ -166,7 +166,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     sb.AppendLine(inner.Message);
                     inner = inner.InnerException;
                 }
-                _messageBoxService.ShowError("Error opening scenario \"" + Path.GetFileName(fileName) + "\":\n" + sb);
+                _messageBox.ShowError("Error opening scenario \"" + Path.GetFileName(fileName) + "\":\n" + sb);
                 if (ScenarioMetadata != null) ScenarioMetadata.RemoveScenarioDisplay();
                 ScenarioMetadata = null;
             }
@@ -214,7 +214,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void ConfigureAcousticModelsHandler()
         {
             var modeAcousticModelSelectionViewModel = new ModeAcousticModelSelectionViewModel(ScenarioMetadata.NemoModeToAcousticModelNameMap, ESME.Globals.ValidTransmissionLossAlgorithms);
-            _visualizerService.ShowDialog("ModeAcousticModelSelectionView", modeAcousticModelSelectionViewModel);
+            _visualizer.ShowDialog("ModeAcousticModelSelectionView", modeAcousticModelSelectionViewModel);
         }
 
         #endregion
@@ -289,7 +289,7 @@ namespace ESMEWorkbench.ViewModels.Main
             var target = _openPropertyWindows.Find(property => property.Item1 == propertyViewModel);
             if (target == null)
             {
-                var window = _visualizerService.ShowWindow(propertyViewModel.PropertyViewName, propertyViewModel, true, (s, e) => _openPropertyWindows.Remove(_openPropertyWindows.Find(property => property.Item1 == (IHaveProperties)e.State)));
+                var window = _visualizer.ShowWindow(propertyViewModel.PropertyViewName, propertyViewModel, true, (s, e) => _openPropertyWindows.Remove(_openPropertyWindows.Find(property => property.Item1 == (IHaveProperties)e.State)));
                 _openPropertyWindows.Add(new Tuple<IHaveProperties, Window>(propertyViewModel, window));
             }
             else
@@ -310,7 +310,7 @@ namespace ESMEWorkbench.ViewModels.Main
         public void EditAnalysisPoint(AnalysisPoint analysisPoint)
         {
             var analysisPointPropertiesViewModel = new AnalysisPointPropertiesViewModel(analysisPoint);
-            var settingsResult = _visualizerService.ShowDialog("AnalysisPointPropertiesView", analysisPointPropertiesViewModel);
+            var settingsResult = _visualizer.ShowDialog("AnalysisPointPropertiesView", analysisPointPropertiesViewModel);
             if (settingsResult.HasValue && settingsResult.Value)
             {
                 ScenarioMetadata.CurrentMapLayers.DisplayAnalysisPoint(analysisPoint);
@@ -328,8 +328,8 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.ViewPropagation)]
         public void ViewPropagation(CASSOutput cassOutput)
         {
-            var propagationViewModel = new PropagationViewModel(cassOutput,_saveFileService,_openFileService,_messageBoxService,_visualizerService);
-            _visualizerService.ShowDialog("PropagationView", propagationViewModel);
+            var propagationViewModel = new PropagationViewModel(cassOutput,_saveFile,_openFile,_messageBox,_visualizer);
+            _visualizer.ShowDialog("PropagationView", propagationViewModel);
         }
     }
 }
