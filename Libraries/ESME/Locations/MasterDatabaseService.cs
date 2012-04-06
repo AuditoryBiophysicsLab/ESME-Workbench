@@ -315,7 +315,7 @@ namespace ESME.Locations
         #endregion
         #region Private helper methods, properties and fields
 
-        internal LocationContext Context { get; private set; }
+        public LocationContext Context { get; private set; }
 
         void Initialize()
         {

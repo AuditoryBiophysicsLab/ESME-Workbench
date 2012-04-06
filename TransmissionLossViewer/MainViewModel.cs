@@ -1,31 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Data.Entity;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Cinch;
 using ESME;
+using ESME.Environment;
+using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.Services;
 using ESME.Views.TransmissionLossViewer;
+using HRC.Aspects;
 using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
+using ESME.Locations;
 
 
 namespace TransmissionLossViewer
 {
     [ExportViewModel("TransmissionLossViewerMainViewModel")]
+    [NotifyPropertyChanged]
     class MainViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
-
+        readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME.AnalysisPoint Tests\Database");
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
         readonly IHRCSaveFileService _saveFileService;
@@ -33,14 +38,51 @@ namespace TransmissionLossViewer
         readonly IViewParameterService _viewParameterService;
         readonly IMessageBoxService _messageBoxService;
         readonly IUIVisualizerService _visualizerService;
-        //bool _iAmInitialized;
-        //readonly AnalysisPoint _tempAnalysisPoint;
+        public MasterDatabaseService Database { get; private set; }
+        private Scenario _selectedScenario;
+        public Scenario SelectedScenario
+        {
+            get { return _selectedScenario; }
+            set
+            {
+                _selectedScenario = value;
+                Database.Context.Radials.Load();
+                Radials.Clear();
+                var radials = from r in Database.Context.Radials.Local
+                              where
+                                  r.IsCalculated &&
+                                  r.TransmissionLoss.AnalysisPoint.Scenario.Guid == _selectedScenario.Guid
+                              select r;
+                foreach (var radial in radials)
+                {
+                    Radials.Add(radial);
+                }
+                
+            }
+        }
 
+        private Radial _selectedRadial;
+        public Radial SelectedRadial
+        {
+            get { return _selectedRadial; }
+            set
+            {
+                _selectedRadial = value;
+                var filename = Path.Combine(Database.MasterDatabaseDirectory,
+                                            _selectedRadial.TransmissionLoss.AnalysisPoint.Scenario.StorageDirectory,
+                                            _selectedRadial.Filename);
+                TransmissionLossRadial = new TransmissionLossRadial((float) _selectedRadial.Bearing, new BellhopOutput(filename));
+            }
+        }
+
+        [Initialize]
+        public ObservableCollection<Radial> Radials { get; set; }
         #region public constructor
         [ImportingConstructor]
-        public MainViewModel(IHRCSaveFileService saveFileService, IHRCOpenFileService openFileService, IViewParameterService viewParameterService, IViewAwareStatus viewAwareStatus,IMessageBoxService messageBoxService,IUIVisualizerService visualizerService)
+        public MainViewModel(IHRCSaveFileService saveFileService, IHRCOpenFileService openFileService, IViewParameterService viewParameterService, IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IUIVisualizerService visualizerService, MasterDatabaseService database)
         {
             RegisterMediator();
+            Database = database;
             _saveFileService = saveFileService;
             _openFileService = openFileService;
             _messageBoxService = messageBoxService;
@@ -58,6 +100,8 @@ namespace TransmissionLossViewer
                                                      };
             _viewAwareStatus = viewAwareStatus;
             _viewAwareStatus.ViewLoaded += ViewLoaded;
+            //this will change...
+            Database.MasterDatabaseDirectory = _databaseDirectory;
         }
 
         void ViewLoaded()
@@ -87,8 +131,8 @@ namespace TransmissionLossViewer
             }
         }
 
-        
-            
+
+
         #endregion
 
         #region public TransmissionLossRadial TransmissionLossRadial { get; set; }
@@ -109,7 +153,6 @@ namespace TransmissionLossViewer
         TransmissionLossRadial _transmissionLossRadial;
 
         #endregion
-
 
         #region public double SelectedRadialBearing { get; set; }
 
@@ -139,9 +182,9 @@ namespace TransmissionLossViewer
                 if (_selectedTransmissionLossFieldName == value) return;
                 _selectedTransmissionLossFieldName = value;
                 NotifyPropertyChanged(SelectedTransmissionLossFieldNameChangedEventArgs);
-                
-                
-                
+
+
+
             }
         }
 
@@ -152,7 +195,7 @@ namespace TransmissionLossViewer
 
         #region public string  OutputFileName { get; set; }
 
-        public string  OutputFileName
+        public string OutputFileName
         {
             get
             {
@@ -169,7 +212,7 @@ namespace TransmissionLossViewer
             }
 
         }
-        
+
         #endregion
 
         #region public double TransmissionLayersWidth { get; set; }
@@ -205,18 +248,21 @@ namespace TransmissionLossViewer
         SimpleCommand<object, EventToCommandArgs> _viewClosing;
 
         #endregion
-        
+
         #region CloseWindowCommand
 
         SimpleCommand<object, object> _closeWindow;
 
         public SimpleCommand<object, object> CloseWindowCommand
         {
-            get { return _closeWindow ?? (_closeWindow = new SimpleCommand<object, object>(delegate
-                                                                                           {
-                                                                                               ((MainView)_viewAwareStatus.View).Close();
+            get
+            {
+                return _closeWindow ?? (_closeWindow = new SimpleCommand<object, object>(delegate
+                                                                                         {
+                                                                                             ((MainView)_viewAwareStatus.View).Close();
 
-                                                                                           })); }
+                                                                                         }));
+            }
         }
 
         #endregion
@@ -231,17 +277,17 @@ namespace TransmissionLossViewer
             {
                 return _saveAs ?? (_saveAs = new SimpleCommand<object, object>(delegate
                 {
-                    
+
                     _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png| JPEG (*.jpeg)|*.jpg|Bitmap (*.bmp)|*.bmp";
                     _saveFileService.OverwritePrompt = true;
                     //if (OutputFileName == null) return;
                     _saveFileService.FileName = OutputFileName;
-                   
+
                     var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
                     if (result.HasValue && result.Value)
                     {
                         Properties.Settings.Default.LastImageExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-                        MediatorMessage.Send(MediatorMessage.SaveRadialBitmap,_saveFileService.FileName);
+                        MediatorMessage.Send(MediatorMessage.SaveRadialBitmap, _saveFileService.FileName);
                     }
                     //MediatorMessage.Send(MediatorMessage.ResetSelectedField, true);
                     Keyboard.Focus((Window)_viewAwareStatus.View);
@@ -283,20 +329,23 @@ namespace TransmissionLossViewer
 
         public SimpleCommand<object, object> OpenCommand
         {
-            get { return _open ?? (_open = new SimpleCommand<object, object>(
-                delegate
+            get
+            {
+                return _open ?? (_open = new SimpleCommand<object, object>(
+                    delegate
                     {
                         _openFileService.Filter = "Bellhop Shades (*.shd)|*.shd|All Files(*.*)|*.*"; //CASS Output (*.bin)|*.bin|All Files (*.*)|*.*";
-                    _openFileService.InitialDirectory = Properties.Settings.Default.ExperimentReportDirectory;
-                    _openFileService.Title = "Select a Transmission Loss file to view";
+                        _openFileService.InitialDirectory = Properties.Settings.Default.ExperimentReportDirectory;
+                        _openFileService.Title = "Select a Transmission Loss file to view";
 
-                    var result = _openFileService.ShowDialog((Window) _viewAwareStatus.View);
-                    if (result.HasValue && result.Value)
-                    {
-                      //OpenCASSFile(_openFileService.FileName);
-                        TransmissionLossRadial = new TransmissionLossRadial(0,new BellhopOutput(_openFileService.FileName));
-                    }
-                })); }
+                        var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
+                        if (result.HasValue && result.Value)
+                        {
+                            //OpenCASSFile(_openFileService.FileName);
+                            TransmissionLossRadial = new TransmissionLossRadial(0, new BellhopOutput(_openFileService.FileName));
+                        }
+                    }));
+            }
         }
 
         SimpleCommand<object, object> _open;
@@ -324,9 +373,9 @@ namespace TransmissionLossViewer
         void SetSelectedRadialBearing(double selectedRadialBearing) { SelectedRadialBearing = selectedRadialBearing; }
 
         [MediatorMessageSink(MediatorMessage.TransmissionLossFieldChanged)]
-        void TransmissionLossFieldChanged(TransmissionLossField transmissionLossField) { lock(this) SelectedTransmissionLossFieldName = transmissionLossField.Name; }
+        void TransmissionLossFieldChanged(TransmissionLossField transmissionLossField) { lock (this) SelectedTransmissionLossFieldName = transmissionLossField.Name; }
 
-        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService) 
+        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
         {
             _viewAwareStatus = viewAwareStatusService;
             _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;

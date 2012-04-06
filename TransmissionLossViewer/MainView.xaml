@@ -71,6 +71,10 @@
 			          HorizontalAlignment="Right"
 			          IsEnabled="False" />
 		</Menu>
+        <StackPanel Orientation="Vertical">
+            <ListBox ItemsSource="{Binding Database.Scenarios}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedScenario}"/>
+            <ListBox ItemsSource="{Binding Radials}" DisplayMemberPath="Filename" SelectedItem="{Binding SelectedRadial}"/>
+        </StackPanel>
         <!--<TransmissionLoss:TransmissionLossMetadataView DataContext="{Binding CASSOutput}"/> -->
 		<View:TransmissionLossRadialView DockPanel.Dock="Bottom" />
 
