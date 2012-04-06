@@ -2,20 +2,16 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
-using System.Data.Entity;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Threading;
 using Cinch;
 using ESME;
-using ESME.Environment;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
-using ESME.TransmissionLoss.CASS;
 using ESME.Views.Services;
 using ESME.Views.TransmissionLossViewer;
 using HRC.Aspects;
@@ -30,7 +26,7 @@ namespace TransmissionLossViewer
     [NotifyPropertyChanged]
     class MainViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
-        readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME.AnalysisPoint Tests\Database");
+        readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"ESME.AnalysisPoint Tests\Database");
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
         readonly IHRCSaveFileService _saveFileService;
@@ -113,12 +109,9 @@ namespace TransmissionLossViewer
             set
             {
                 _selectedRadial = value;
-                TransmissionLossRadial = null;
+                
                 if (_selectedRadial == null) return;
-                var filename = Path.Combine(Database.MasterDatabaseDirectory,
-                                            _selectedRadial.TransmissionLoss.AnalysisPoint.Scenario.StorageDirectory,
-                                            _selectedRadial.Filename);
-                TransmissionLossRadial = new TransmissionLossRadial((float) _selectedRadial.Bearing, new BellhopOutput(filename));
+                MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, _selectedRadial);
             }
         }
 
@@ -153,61 +146,15 @@ namespace TransmissionLossViewer
                                                          }
                                                      };
             _viewAwareStatus = viewAwareStatus;
-            _viewAwareStatus.ViewLoaded += ViewLoaded;
+            
             //this will change...
             Database.MasterDatabaseDirectory = _databaseDirectory;
             
         }
 
-        void ViewLoaded()
-        {
-            //todo
-            var args = Environment.GetCommandLineArgs();
-            if (args.Length == 2)
-            {
-                if (File.Exists(args[1]))
-                {
-#if false
-                    if (args[1].ToLower().EndsWith(".bin"))
-                    {
-                        try
-                        {
-                            OpenCASSFile(args[1]);
-                        }
-                        catch (Exception ex)
-                        {
-                            _messageBoxService.ShowError(string.Format("Error opening CASS file \"{0}\":\n{1}", args[1], ex.Message));
-                        }
-                    } 
-#endif
-                    if (args[1].ToLower().EndsWith(".shd"))
-                    {
-                        TransmissionLossRadial = new TransmissionLossRadial(0, new BellhopOutput(_openFileService.FileName));
-                    }
-                }
-            }
-        }
+        
 
 
-
-        #endregion
-
-        #region public TransmissionLossRadial TransmissionLossRadial { get; set; }
-
-        public TransmissionLossRadial TransmissionLossRadial
-        {
-            get { return _transmissionLossRadial; }
-            set
-            {
-                if (_transmissionLossRadial == value) return;
-                _transmissionLossRadial = value;
-                MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, _transmissionLossRadial);
-                NotifyPropertyChanged(TransmissionLossRadialChangedEventArgs);
-            }
-        }
-
-        private static readonly PropertyChangedEventArgs TransmissionLossRadialChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.TransmissionLossRadial);
-        TransmissionLossRadial _transmissionLossRadial;
 
         #endregion
 

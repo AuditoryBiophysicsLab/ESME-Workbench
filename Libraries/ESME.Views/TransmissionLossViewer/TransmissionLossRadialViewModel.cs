@@ -6,11 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Environment;
+using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.Views.Controls;
@@ -157,7 +159,7 @@ namespace ESME.Views.TransmissionLossViewer
             _dispatcher = Dispatcher.CurrentDispatcher;
             _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialColorMapChanged, ColorMapViewModel.Default);
             _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialViewInitialized, true);
-            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry, true);
+            _viewAwareStatus.ViewLoaded += () => ((Control)_viewAwareStatus.View).SizeChanged += (s, e) => CalculateBottomProfileGeometry();
         }
 
 
@@ -195,21 +197,35 @@ namespace ESME.Views.TransmissionLossViewer
             _bathymetry = bathymetry;
             if (TransmissionLossRadial != null) CalculateBottomProfileGeometry();
         }
-
+        readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME.AnalysisPoint Tests\Database"); //todo
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialChanged)]
-        void TransmissionLossRadialChanged(TransmissionLossRadial transmissionLossRadial)
+        void TransmissionLossRadialChanged(Radial radial)
         {
             if (_iAmInitialized)
             {
                 Debug.WriteLine("TransmissionLossRadialViewModel: Initializing transmission loss radial");
-                TransmissionLossRadial = transmissionLossRadial;
-                //if (_bathymetry == null) 
-                MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry,true);
+                Radial = radial;
+                _isRendered = false;
+                _writeableBitmap = null;
+                NotifyPropertyChanged(WriteableBitmapChangedEventArgs);
+                if (Radial == null) return;
+                RangeMin = Radial.Ranges.First();
+                RangeMax = Radial.Ranges.Last();
+                DepthMin = Radial.Depths.First();
+                DepthMax = Radial.Depths.Last();
+                TransmissionLossRadial = new TransmissionLossRadial((float)Radial.Bearing, new BellhopOutput(Path.Combine(_databaseDirectory, Radial.TransmissionLoss.AnalysisPoint.Scenario.StorageDirectory,
+                                            Radial.Filename)));
+                ColorMapViewModel.MaxValue =TransmissionLossRadial.StatMax;
+                ColorMapViewModel.MinValue =TransmissionLossRadial.StatMin;
+                NotifyPropertyChanged(TransmissionLossRadialChangedEventArgs);
+                CalculateBottomProfileGeometry();
+                RenderBitmap();
             }
             else
             {
                 Debug.WriteLine("TransmissionLossRadialViewModel: Deferring initialization of transmission loss radial");
-                _tempRadial = transmissionLossRadial;
+                //_tempRadial = transmissionLossRadial;
+                throw new NotImplementedException("waugh!");
             }
         }
 
@@ -264,7 +280,7 @@ namespace ESME.Views.TransmissionLossViewer
             if (TransmissionLossRadial == null || ColorMapViewModel == null) return;
 
             var width = TransmissionLossRadial.Ranges.Count;
-            var height = TransmissionLossRadial.Depths.Count;
+            var height =TransmissionLossRadial.Depths.Count;
 
             if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null);
             var infinityColor = _colorMapViewModel.Colors[0];
@@ -327,30 +343,11 @@ namespace ESME.Views.TransmissionLossViewer
         #region public TransmissionLossRadial TransmissionLossRadial { get; set; }
 
         static readonly PropertyChangedEventArgs TransmissionLossRadialChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.TransmissionLossRadial);
-        TransmissionLossRadial _transmissionLossRadial;
+        private TransmissionLossRadial TransmissionLossRadial { get; set; }
+        
+        public Radial Radial { get; set; }
 
-        public TransmissionLossRadial TransmissionLossRadial
-        {
-            get { return _transmissionLossRadial; }
-            set
-            {
-                if (_transmissionLossRadial == value) return;
-                _transmissionLossRadial = value;
-                _isRendered = false;
-                _writeableBitmap = null;
-                NotifyPropertyChanged(WriteableBitmapChangedEventArgs);
-                if (_transmissionLossRadial == null) return;
-                RangeMin = TransmissionLossRadial.Ranges.First();
-                RangeMax = TransmissionLossRadial.Ranges.Last();
-                DepthMin = TransmissionLossRadial.Depths.First();
-                DepthMax = TransmissionLossRadial.Depths.Last();
-                // ColorMapViewModel.MinValue = TransmissionLossRadial.StatMin;
-                ColorMapViewModel.MaxValue = TransmissionLossRadial.StatMax;
-                ColorMapViewModel.MinValue = TransmissionLossRadial.StatMin;
-                NotifyPropertyChanged(TransmissionLossRadialChangedEventArgs);
-                RenderBitmap();
-            }
-        }
+        
 
         #endregion
 
@@ -372,32 +369,24 @@ namespace ESME.Views.TransmissionLossViewer
 
         void CalculateBottomProfileGeometry()
         {
-            if (_viewAwareStatus == null) return;
+            if (_viewAwareStatus == null || Radial == null) return;
             var actualControlHeight = ((TransmissionLossRadialView)_viewAwareStatus.View).OverlayCanvas.ActualHeight;
             var actualControlWidth = ((TransmissionLossRadialView)_viewAwareStatus.View).OverlayCanvas.ActualWidth;
             if (actualControlHeight == 0 || actualControlWidth == 0) return;
-
-            //var transect = new Transect("", _location, _transmissionLossRadial.BearingFromSource, _transmissionLossRadial.Ranges.Last());
-            var radialSegment = new GeoSegment(_location, Geo.KilometersToRadians(_transmissionLossRadial.Ranges.Last() / 1000f), Geo.DegreesToRadians(_transmissionLossRadial.BearingFromSource));
-
-            var profile = new BottomProfile(_transmissionLossRadial.Ranges.Count, radialSegment, _bathymetry);
+            
+            var profile = Radial.BottomProfile;
+            var maxDepth = Radial.Depths.Last();
+            var maxRange = Radial.Ranges.Last();
+            var sb = new StringBuilder();
+            foreach (var point in profile)
+            {
+                var y = point.Depth*(actualControlHeight/maxDepth);
+                var x = point.Range*1000*(actualControlWidth/maxRange);
+                sb.Append(sb.Length == 0 ? string.Format("M 0,{0} ", y) : string.Format("L {0},{1} ", x, y));
+            }
+            BottomProfileGeometry = sb.ToString();
             //todo ; later try to subtract half a depth cell from each depth (off-by-1/2 error on display)
             //todo: Dave changed the bottom profile format on 13 Aug 2011.  New format is a list of range/depth pairs where depth changes by more than 1cm
-            // this algorithm will need to change if it's ever used again
-            var depths = profile.Profile.Select(point => point.Depth * (actualControlHeight / _transmissionLossRadial.Depths.Last())).ToList();
-            var pixelsPerRange = (actualControlWidth / _transmissionLossRadial.Ranges.Count);
-            var sb = new StringBuilder();
-
-            sb.Append(string.Format("M 0,{0} ", depths[0]));
-            for (var index = 0; index < depths.Count; index++)
-            {
-                var depth = depths[index];
-                sb.Append(string.Format("L {0},{1} ", index * pixelsPerRange, depth));
-            }
-            sb.Append(string.Format("L {0},{1} ", depths.Count * pixelsPerRange, depths.Last()));
-
-            BottomProfileGeometry = sb.ToString();
-            
         }
 
         #endregion

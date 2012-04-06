@@ -55,7 +55,7 @@ namespace ESME.Database
             using (var reader = new BinaryReader(new MemoryStream(blob)))
             {
                 var result = new BottomProfilePoint[reader.ReadInt32()];
-                for (var index = 0; index < result.Length; index++) result[index] = new BottomProfilePoint {Range = reader.ReadSingle(), Depth = reader.ReadSingle()};
+                for (var index = 0; index < result.Length; index++) result[index] = new BottomProfilePoint { Range = reader.ReadDouble(), Depth = reader.ReadDouble() };
                 return result;
             }
         }
