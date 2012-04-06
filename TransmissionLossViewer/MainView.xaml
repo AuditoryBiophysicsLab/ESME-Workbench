@@ -45,7 +45,7 @@
 
 	<DockPanel LastChildFill="True">
 
-		<Menu Name="TransmissionLossViewFileMenu"
+		<!--<Menu Name="TransmissionLossViewFileMenu"
 		      DockPanel.Dock="Top"
 		      HorizontalAlignment="Stretch"
 		      BorderBrush="Black"
@@ -70,9 +70,12 @@
 			<MenuItem Header=" _Help"
 			          HorizontalAlignment="Right"
 			          IsEnabled="False" />
-		</Menu>
+		</Menu> -->
         <StackPanel Orientation="Vertical">
             <ListBox ItemsSource="{Binding Database.Scenarios}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedScenario}"/>
+            <ListBox ItemsSource="{Binding Platforms}" DisplayMemberPath="PlatformName" SelectedItem="{Binding SelectedPlatform}"/>
+            <ListBox ItemsSource="{Binding Sources}" DisplayMemberPath="SourceName" SelectedItem="{Binding SelectedSource}"/>
+            <ListBox ItemsSource="{Binding Modes}" DisplayMemberPath="ModeName" SelectedItem="{Binding SelectedMode}"/>
             <ListBox ItemsSource="{Binding Radials}" DisplayMemberPath="Filename" SelectedItem="{Binding SelectedRadial}"/>
         </StackPanel>
         <!--<TransmissionLoss:TransmissionLossMetadataView DataContext="{Binding CASSOutput}"/> -->

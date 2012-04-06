@@ -338,6 +338,8 @@ namespace ESME.Views.TransmissionLossViewer
                 _transmissionLossRadial = value;
                 _isRendered = false;
                 _writeableBitmap = null;
+                NotifyPropertyChanged(WriteableBitmapChangedEventArgs);
+                if (_transmissionLossRadial == null) return;
                 RangeMin = TransmissionLossRadial.Ranges.First();
                 RangeMax = TransmissionLossRadial.Ranges.Last();
                 DepthMin = TransmissionLossRadial.Depths.First();

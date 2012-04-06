@@ -46,18 +46,63 @@ namespace TransmissionLossViewer
             set
             {
                 _selectedScenario = value;
-                Database.Context.Radials.Load();
+                Platforms.Clear();
+                if (_selectedScenario == null) return;
+                foreach (var platform in from p in Database.Context.Platforms
+                                         where p.Scenario.Guid == _selectedScenario.Guid
+                                         select p)
+                    Platforms.Add(platform);
+            }
+        }
+
+        private Platform _selectedPlatform;
+        public Platform SelectedPlatform
+        {
+            get { return _selectedPlatform; }
+            set { 
+                _selectedPlatform = value;
+                Sources.Clear();
+                if (_selectedPlatform == null) return;
+
+                foreach (var source in from s in Database.Context.Sources
+                                       where s.Platform.Guid == _selectedPlatform.Guid
+                                       select s)
+                    Sources.Add(source);
+            }
+        }
+
+        private Source _selectedSource;
+        public Source SelectedSource
+        {
+            get { return _selectedSource; }
+            set
+            {
+                _selectedSource = value;
+                Modes.Clear();
+                if (_selectedSource == null) return;
+
+                foreach (var mode in from m in Database.Context.Modes
+                                     where m.Source.Guid == _selectedSource.Guid
+                                     select m)
+                    Modes.Add(mode);
+            }
+        }
+
+        private Mode _selectedMode;
+        public Mode SelectedMode
+        {
+            get { return _selectedMode; }
+            set
+            {
+                _selectedMode = value;
                 Radials.Clear();
-                var radials = from r in Database.Context.Radials.Local
-                              where
-                                  r.IsCalculated &&
-                                  r.TransmissionLoss.AnalysisPoint.Scenario.Guid == _selectedScenario.Guid
-                              select r;
-                foreach (var radial in radials)
-                {
+                if (_selectedMode == null) return;
+                foreach (var radial in from r in Database.Context.Radials
+                                       where
+                                           r.IsCalculated &&
+                                           r.TransmissionLoss.Mode.Guid == _selectedMode.Guid
+                                       select r)
                     Radials.Add(radial);
-                }
-                
             }
         }
 
@@ -68,6 +113,8 @@ namespace TransmissionLossViewer
             set
             {
                 _selectedRadial = value;
+                TransmissionLossRadial = null;
+                if (_selectedRadial == null) return;
                 var filename = Path.Combine(Database.MasterDatabaseDirectory,
                                             _selectedRadial.TransmissionLoss.AnalysisPoint.Scenario.StorageDirectory,
                                             _selectedRadial.Filename);
@@ -77,6 +124,13 @@ namespace TransmissionLossViewer
 
         [Initialize]
         public ObservableCollection<Radial> Radials { get; set; }
+        [Initialize]
+        public ObservableCollection<Platform> Platforms { get; set; }
+        [Initialize]
+        public ObservableCollection<Source> Sources { get; set; }
+        [Initialize]
+        public ObservableCollection<Mode> Modes { get; set; }   
+
         #region public constructor
         [ImportingConstructor]
         public MainViewModel(IHRCSaveFileService saveFileService, IHRCOpenFileService openFileService, IViewParameterService viewParameterService, IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IUIVisualizerService visualizerService, MasterDatabaseService database)
@@ -102,6 +156,7 @@ namespace TransmissionLossViewer
             _viewAwareStatus.ViewLoaded += ViewLoaded;
             //this will change...
             Database.MasterDatabaseDirectory = _databaseDirectory;
+            
         }
 
         void ViewLoaded()
@@ -112,6 +167,7 @@ namespace TransmissionLossViewer
             {
                 if (File.Exists(args[1]))
                 {
+#if false
                     if (args[1].ToLower().EndsWith(".bin"))
                     {
                         try
@@ -122,7 +178,8 @@ namespace TransmissionLossViewer
                         {
                             _messageBoxService.ShowError(string.Format("Error opening CASS file \"{0}\":\n{1}", args[1], ex.Message));
                         }
-                    }
+                    } 
+#endif
                     if (args[1].ToLower().EndsWith(".shd"))
                     {
                         TransmissionLossRadial = new TransmissionLossRadial(0, new BellhopOutput(_openFileService.FileName));
@@ -249,6 +306,7 @@ namespace TransmissionLossViewer
 
         #endregion
 
+#if false
         #region CloseWindowCommand
 
         SimpleCommand<object, object> _closeWindow;
@@ -367,7 +425,8 @@ namespace TransmissionLossViewer
         {
             var aboutViewModel = new AboutViewModel();
             _visualizerService.ShowDialog("TLVAboutView", aboutViewModel);
-        }
+        } 
+#endif
 
         [MediatorMessageSink(MediatorMessage.SetSelectedRadialBearing)]
         void SetSelectedRadialBearing(double selectedRadialBearing) { SelectedRadialBearing = selectedRadialBearing; }
@@ -395,6 +454,7 @@ namespace TransmissionLossViewer
             }
         }
 
+#if false
         #region public CASSOutput CASSOutput { get; set; }
 
         public CASSOutput CASSOutput
@@ -419,6 +479,7 @@ namespace TransmissionLossViewer
             var tlf = TransmissionLossField.FromCASS(CASSOutput);
             MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged, tlf);
         }
-
+        
+#endif
     }
 }
