@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
 using ESME.Scenarios;
@@ -38,6 +39,8 @@ namespace ESME.Tests.Scenarios
             var location = TestLocation.LoadOrCreate("Jacksonville", OverlayFile, _databaseDirectory, PluginDirectory, out database, out cache, out plugins);
             var scenario = TestScenario.LoadOrCreate(database, location, SimAreaDirectory, NemoFile);
             var center = new Geo((location.GeoRect.North + location.GeoRect.South) / 2, (location.GeoRect.East + location.GeoRect.West) / 2);
+            var bathymetry = (Bathymetry)cache[scenario.Bathymetry];
+            var depthAtAnalysisPoint = -bathymetry.Samples.GetNearestPoint(center).Data;
             var analysisPoint = new AnalysisPoint
             {
                 Geo = center,
@@ -45,14 +48,22 @@ namespace ESME.Tests.Scenarios
             };
             foreach (var mode in scenario.GetAllModes())
             {
+                var sourceDepth = mode.Source.Platform.Depth;
+                if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
+                if (sourceDepth >= depthAtAnalysisPoint)
+                {
+                    Console.WriteLine("Skipping {0}:{1}:{2}, because the depth is below the bottom for this analysis point", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName);
+                    continue;
+                }
                 var transmissionLoss = new ESME.Scenarios.TransmissionLoss
                 {
                     AnalysisPoint = analysisPoint,
                     IsReadyToCalculate = false,
                     Mode = mode,
                 };
-                const int radialCount = 32;
-                const double radialLength = 100000;
+
+                const int radialCount = 16;
+                const double radialLength = 25000;
                 for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
                 {
                     var radial = new Radial
@@ -81,7 +92,7 @@ namespace ESME.Tests.Scenarios
             PluginManagerService plugins;
             var location = TestLocation.LoadOrCreate("Jacksonville", OverlayFile, _databaseDirectory, PluginDirectory, out database, out cache, out plugins);
             var scenario = TestScenario.LoadOrCreate(database, location, SimAreaDirectory, NemoFile);
-            var calculator = new TransmissionLossCalculatorService(database, plugins, cache, 50, 25);
+            var calculator = new TransmissionLossCalculatorService(database, plugins, cache, 10, 1);
             Console.WriteLine("Found {0} analysis points", scenario.AnalysisPoints.Count);
             foreach (var analysisPoint in scenario.AnalysisPoints)
             {

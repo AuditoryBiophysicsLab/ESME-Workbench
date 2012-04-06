@@ -58,7 +58,7 @@ namespace ESME.TransmissionLoss.Bellhop
                                     TransmissionLoss[depth, range] = (float)Math.Abs(Math.Sqrt((real * real) + (imag * imag)));
                                 else 
                                     TransmissionLoss[depth, range] = float.NaN;
-                                if (TransmissionLoss[depth, range] <= 0) Debugger.Break();
+                                if (TransmissionLoss[depth, range] < 0) Debugger.Break();
                             } // for Range
                         } // for Depth
                     } // for Source
@@ -100,7 +100,7 @@ namespace ESME.TransmissionLoss.Bellhop
                     var originalData = TransmissionLoss[depth, range];
                     if (double.IsNaN(originalData)) Debugger.Break();
                     //curData = (float)(-20 * Math.Log10(Math.Max(originalData, 1e-10)));
-                    curData = (float)(-20 * Math.Log10(originalData));
+                    curData = originalData < 1e-30 ? 0 : (float)(-20 * Math.Log10(originalData));
                     // This is where we're ending up with negative TL values.  Don't think that should happen...
                     //if (curData < 0) Debugger.Break();
 
