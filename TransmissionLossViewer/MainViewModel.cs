@@ -172,6 +172,7 @@ namespace TransmissionLossViewer
                 {
                     var ea = (CancelEventArgs)vcArgs.EventArgs;
                     Properties.Settings.Default.Save();
+                    Database.Dispose();
                 }));
             }
         }
