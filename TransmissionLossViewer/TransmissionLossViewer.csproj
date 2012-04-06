@@ -47,11 +47,20 @@
     <Reference Include="Cinch.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
     </Reference>
+    <Reference Include="FileHelpers">
+      <HintPath>..\ESME WorkBench\External References\FileHelpers.dll</HintPath>
+    </Reference>
+    <Reference Include="MapSuiteCore">
+      <HintPath>..\ESME WorkBench\External References\MapSuiteCore.dll</HintPath>
+    </Reference>
     <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3">
       <HintPath>..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Expression.Interactions">
       <HintPath>..\ESME WorkBench\External References\Microsoft.Expression.Interactions.dll</HintPath>
+    </Reference>
+    <Reference Include="NetTopologySuite">
+      <HintPath>..\ESME WorkBench\External References\NetTopologySuite.dll</HintPath>
     </Reference>
     <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
     <Reference Include="System" />
@@ -72,6 +81,9 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WpfDesktopEdition">
+      <HintPath>..\ESME WorkBench\External References\WpfDesktopEdition.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">

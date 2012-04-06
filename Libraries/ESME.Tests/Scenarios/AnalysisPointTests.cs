@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define Dave
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -16,6 +17,15 @@ namespace ESME.Tests.Scenarios
 {
     public class AnalysisPointTests
     {
+#if Dave
+        const string OverlayFile = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr";
+        const string SimAreaDirectory = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas";
+        const string NemoFile = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Jacksonville\BU Test Sample.nemo";
+#else
+        const string OverlayFile = @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr";
+        const string SimAreaDirectory = @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Sim Areas";
+        const string NemoFile = @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Jacksonville\BU Test Sample.nemo";
+#endif
         readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME.AnalysisPoint Tests\Database");
         readonly string _simulationDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME.AnalysisPoint Tests\Simulation Output");
         const string PluginDirectory = @"C:\Projects\ESME Deliverables\Libraries\ESME.Tests\bin\Debug";
@@ -25,8 +35,8 @@ namespace ESME.Tests.Scenarios
             MasterDatabaseService database;
             EnvironmentalCacheService cache;
             PluginManagerService plugins;
-            var location = TestLocation.LoadOrCreate("Jacksonville", @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr", _databaseDirectory, PluginDirectory, out database, out cache, out plugins);
-            var scenario = TestScenario.LoadOrCreate(database, location, @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Sim Areas", @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Jacksonville\BU Test Sample.nemo");
+            var location = TestLocation.LoadOrCreate("Jacksonville", OverlayFile, _databaseDirectory, PluginDirectory, out database, out cache, out plugins);
+            var scenario = TestScenario.LoadOrCreate(database, location, SimAreaDirectory, NemoFile);
             var center = new Geo((location.GeoRect.North + location.GeoRect.South) / 2, (location.GeoRect.East + location.GeoRect.West) / 2);
             var analysisPoint = new AnalysisPoint
             {
@@ -69,8 +79,8 @@ namespace ESME.Tests.Scenarios
             MasterDatabaseService database;
             EnvironmentalCacheService cache;
             PluginManagerService plugins;
-            var location = TestLocation.LoadOrCreate("Jacksonville", @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr", _databaseDirectory, PluginDirectory, out database, out cache, out plugins);
-            var scenario = TestScenario.LoadOrCreate(database, location, @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas", @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Jacksonville\BU Test Sample.nemo");
+            var location = TestLocation.LoadOrCreate("Jacksonville", OverlayFile, _databaseDirectory, PluginDirectory, out database, out cache, out plugins);
+            var scenario = TestScenario.LoadOrCreate(database, location, SimAreaDirectory, NemoFile);
             var calculator = new TransmissionLossCalculatorService(database, plugins, cache, 50, 25);
             Console.WriteLine("Found {0} analysis points", scenario.AnalysisPoints.Count);
             foreach (var analysisPoint in scenario.AnalysisPoints)

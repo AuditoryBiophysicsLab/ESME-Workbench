@@ -80,7 +80,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             try
             {
-                var vm = new CreateLocationViewModel(_plugins, Database);
+                var vm = new CreateLocationViewModel(_plugins, Database, _cache);
                 var result = _visualizer.ShowDialog("CreateLocationView", vm);
                 if ((result.HasValue) && (result.Value))
                 {

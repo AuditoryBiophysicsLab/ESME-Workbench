@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Windows.Data;
 using Cinch;
 using ESME.Environment.NAVO;
@@ -19,10 +20,11 @@ namespace ESME.Views.Locations
     public sealed class CreateLocationViewModel : ValidatingViewModel
     {
         #region Constructor
-        public CreateLocationViewModel(IPluginManagerService plugins, MasterDatabaseService database)
+        public CreateLocationViewModel(IPluginManagerService plugins, MasterDatabaseService database, EnvironmentalCacheService cache)
         {
             _plugins = plugins;
             _database = database;
+            _cache = cache;
             EnvironmentDataSourceViews = new Dictionary<PluginSubtype, ICollectionView>();
             SelectedPlugins = new ObservableConcurrentDictionary<PluginSubtype, EnvironmentalDataSourcePluginBase>();
             SelectedPlugins.CollectionChanged += (s, e) =>
@@ -47,7 +49,8 @@ namespace ESME.Views.Locations
             ValidationRules.AddRange(new List<ValidationRule> { NorthValidationRule, SouthValidationRule, EastValidationRule, WestValidationRule });
         }
 
-        private readonly MasterDatabaseService _database;
+        readonly EnvironmentalCacheService _cache;
+        readonly MasterDatabaseService _database;
         #endregion
         #region PluginManager stuff
         readonly IPluginManagerService _plugins;
@@ -140,7 +143,9 @@ namespace ESME.Views.Locations
                                     select dataSet)
             {
                 dataSet.Location = location;
+                dataSet.FileName = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + "." + ((PluginIdentifier)dataSet.SourcePlugin).PluginSubtype.ToString().ToLower();
                 _database.Add(dataSet, true);
+                _cache.ImportDataset(dataSet);
             }
             Globals.AppSettings.Save();
             CloseActivePopUpCommand.Execute(true);

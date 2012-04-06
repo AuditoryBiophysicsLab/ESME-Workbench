@@ -165,9 +165,9 @@ namespace ESME.TransmissionLoss
             using (var envFile = new StreamWriter(baseFilename + ".env", false))
             {
                 envFile.WriteLine("'Bellhop'");
-                envFile.WriteLine("{0},", frequency);
+                envFile.WriteLine("{0}", frequency);
                 envFile.WriteLine("1"); // was NMEDIA in gui_genbellhopenv.m
-                envFile.WriteLine(useSurfaceReflection ? "'CFLT'," : "'CVLT',");
+                envFile.WriteLine(useSurfaceReflection ? "'CFLT'" : "'CVLT'");
 
                 //if (depthCellCount < 5) throw new BathymetryTooShallowException("Error: Maximum depth of transect (" + maxCalculationDepthMeters + " meters) less than minimum required for transmission loss calculations.\nPlease choose a different location for this transect.");
 
@@ -192,7 +192,7 @@ namespace ESME.TransmissionLoss
                 var angle1 = depressionElevationAngle - verticalHalfAngle;
                 var angle2 = depressionElevationAngle + verticalHalfAngle;
                 envFile.WriteLine("{0} {1} /", angle1, angle2); // Beam fan half-angles (negative angles are toward the surface
-                envFile.WriteLine("0.0 {0} {1}", ssp.Data[ssp.Data.Count - 1].Depth * 2, (radius / 1000.0) * 1.01); // step zbox(meters) rbox(km)
+                envFile.WriteLine("0.0 {0} {1}", maxCalculationDepthMeters, (radius / 1000.0) * 1.01); // step zbox(meters) rbox(km)
             }
             using (var trcFile = new StreamWriter(baseFilename + ".trc", false))
             {
