@@ -13,6 +13,7 @@ using Devart.Data.SQLite;
 using Devart.Data.SQLite.Entity.Configuration;
 using ESME.Database;
 using ESME.Environment;
+using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.Plugins;
 using ESME.Scenarios;
@@ -162,12 +163,47 @@ namespace ESME.Locations
             if (saveChanges) SaveChanges();
         }
 
-        public void Add(AnalysisPoint analysisPoint, bool saveChanges = false)
+        public void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry, int radialCount, float radialLength, bool saveChanges = false)
         {
-            var existing = (from a in Context.AnalysisPoints
-                            where a.Geo.Latitude == analysisPoint.Geo.Latitude && a.Geo.Longitude == analysisPoint.Geo.Longitude
+            var existing = (from a in Context.AnalysisPoints.Local
+                            where a.Geo == analysisPoint.Geo
                             select a).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("An analysis point already exists at {0}, choose another location or edit the existing point", (Geo)analysisPoint.Geo));
+            if (analysisPoint.Scenario == null) throw new ScenarioException(string.Format("Scenario for analysis point at {0} was not specified", analysisPoint.Geo));
+            var depthAtAnalysisPoint = -bathymetry.Samples.GetNearestPoint(analysisPoint.Geo).Data;
+            foreach (var mode in analysisPoint.Scenario.GetAllModes())
+            {
+                var sourceDepth = mode.Source.Platform.Depth;
+                if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
+                if (sourceDepth >= depthAtAnalysisPoint)
+                {
+                    Console.WriteLine("Skipping {0}:{1}:{2}, because the depth is below the bottom for this analysis point", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName);
+                    continue;
+                }
+                var transmissionLoss = new Scenarios.TransmissionLoss
+                {
+                    AnalysisPoint = analysisPoint,
+                    IsReadyToCalculate = false,
+                    Mode = mode,
+                };
+
+                for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
+                {
+                    var radial = new Radial
+                    {
+                        TransmissionLoss = transmissionLoss,
+                        CalculationCompleted = DateTime.MaxValue,
+                        CalculationStarted = DateTime.MaxValue,
+                        Bearing = (360.0 / radialCount) * radialIndex,
+                        Length = radialLength,
+                        IsCalculated = false,
+                    };
+                    Add(radial);
+                    transmissionLoss.Radials.Add(radial);
+                }
+                Add(transmissionLoss);
+                analysisPoint.TransmissionLosses.Add(transmissionLoss);
+            }
             Context.AnalysisPoints.Add(analysisPoint);
             Log(analysisPoint, "Added new analysis point at {0} to scenario {1} in location {2}", (Geo)analysisPoint.Geo, analysisPoint.Scenario, analysisPoint.Scenario.Location);
             if (saveChanges) SaveChanges();

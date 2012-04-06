@@ -1,4 +1,4 @@
-﻿//#define Dave
+﻿#define Dave
 using System;
 using System.IO;
 using System.Linq;
@@ -6,7 +6,6 @@ using System.Threading;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
-using ESME.Scenarios;
 using ESME.Tests.Common;
 using ESME.TransmissionLoss;
 using HRC.Navigation;
@@ -50,49 +49,15 @@ namespace ESME.Tests.Scenarios
             var location = TestLocation.LoadOrCreate("Jacksonville", OverlayFile, _databaseDirectory, PluginDirectory, out database, out cache, out plugins);
             var scenario = TestScenario.LoadOrCreate(database, location, SimAreaDirectory, NemoFile);
             var center = new Geo((location.GeoRect.North + location.GeoRect.South) / 2, (location.GeoRect.East + location.GeoRect.West) / 2);
-            var bathymetry = (Bathymetry)cache[scenario.Bathymetry];
-            var depthAtAnalysisPoint = -bathymetry.Samples.GetNearestPoint(center).Data;
-            var analysisPoint = new AnalysisPoint
-            {
-                Geo = center,
-                Scenario = scenario,
-            };
-            foreach (var mode in scenario.GetAllModes())
-            {
-                var sourceDepth = mode.Source.Platform.Depth;
-                if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
-                if (sourceDepth >= depthAtAnalysisPoint)
-                {
-                    Console.WriteLine("Skipping {0}:{1}:{2}, because the depth is below the bottom for this analysis point", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName);
-                    continue;
-                }
-                var transmissionLoss = new ESME.Scenarios.TransmissionLoss
-                {
-                    AnalysisPoint = analysisPoint,
-                    IsReadyToCalculate = false,
-                    Mode = mode,
-                };
-
-                const int radialCount = 16;
-                const double radialLength = 25000;
-                for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
-                {
-                    var radial = new Radial
-                    {
-                        TransmissionLoss = transmissionLoss,
-                        CalculationCompleted = DateTime.MaxValue,
-                        CalculationStarted = DateTime.MaxValue,
-                        Bearing = (360.0 / radialCount) * radialIndex,
-                        Length = radialLength,
-                        IsCalculated = false,
-                    };
-                    database.Add(radial);
-                    transmissionLoss.Radials.Add(radial);
-                    database.Add(transmissionLoss);
-                }
-                analysisPoint.TransmissionLosses.Add(transmissionLoss);
-            }
-            database.Add(analysisPoint, true);
+            database.Add(new AnalysisPoint { Geo = center, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], 16, 25000, true);
+            var northEast = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(45));
+            database.Add(new AnalysisPoint { Geo = northEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], 16, 25000, true);
+            var southEast = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(135));
+            database.Add(new AnalysisPoint { Geo = southEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], 16, 25000, true);
+            var southWest = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(225));
+            database.Add(new AnalysisPoint { Geo = southWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], 16, 25000, true);
+            var northWest = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(315));
+            database.Add(new AnalysisPoint { Geo = northWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], 16, 25000, true);
         }
 
         [Test, RequiresSTA]
