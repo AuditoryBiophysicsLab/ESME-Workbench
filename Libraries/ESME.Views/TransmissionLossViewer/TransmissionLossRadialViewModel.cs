@@ -267,18 +267,19 @@ namespace ESME.Views.TransmissionLossViewer
             var height = TransmissionLossRadial.Depths.Count;
 
             if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null);
-
+            var infinityColor = _colorMapViewModel.Colors[0];
             _writeableBitmap.Lock();
             unsafe
             {
                 var curOffset = (int)_writeableBitmap.BackBuffer;
-                for (int y = 0; y < height; y++)
+                for (var y = 0; y < height; y++)
                 {
-                    for (int x = 0; x < width; x++)
+                    for (var x = 0; x < width; x++)
                     {
                         // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
                         // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
-                        var curColor = _colorMapViewModel.Lookup(TransmissionLossRadial.TransmissionLoss[y, x]);
+                        var curValue = TransmissionLossRadial.TransmissionLoss[y, x];
+                        var curColor = float.IsInfinity(curValue) ? infinityColor : _colorMapViewModel.Lookup(curValue);
                         *((int*)curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
                         curOffset += sizeof(Int32);
                     }
