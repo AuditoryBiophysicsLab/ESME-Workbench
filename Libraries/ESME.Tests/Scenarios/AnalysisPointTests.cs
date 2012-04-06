@@ -7,7 +7,6 @@ using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
 using ESME.Scenarios;
-using ESME.Simulator;
 using ESME.Tests.Common;
 using ESME.TransmissionLoss;
 using HRC.Navigation;
@@ -28,11 +27,23 @@ namespace ESME.Tests.Scenarios
         const string NemoFile = @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Jacksonville\BU Test Sample.nemo";
 #endif
         readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME.AnalysisPoint Tests\Database");
-        readonly string _simulationDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME.AnalysisPoint Tests\Simulation Output");
         const string PluginDirectory = @"C:\Projects\ESME Deliverables\Libraries\ESME.Tests\bin\Debug";
         [Test, RequiresSTA]
-        public void AnalysisPointTest()
+        public void CreateTestDatabase()
         {
+            if (Directory.Exists(_databaseDirectory))
+            {
+                Console.WriteLine("Deleting database directory {0}", _databaseDirectory);
+                foreach (var file in Directory.EnumerateFiles(_databaseDirectory, "*.*", SearchOption.AllDirectories))
+                    File.Delete(file);
+                Directory.Delete(_databaseDirectory, true);
+                var retry = 10;
+                while (Directory.Exists(_databaseDirectory) && retry > 0)
+                {
+                    Thread.Sleep(100);
+                    retry--;
+                }
+            }
             MasterDatabaseService database;
             EnvironmentalCacheService cache;
             PluginManagerService plugins;
@@ -85,7 +96,7 @@ namespace ESME.Tests.Scenarios
         }
 
         [Test, RequiresSTA]
-        public void CalculationTest()
+        public void CalculateAnalysisPoint()
         {
             MasterDatabaseService database;
             EnvironmentalCacheService cache;
