@@ -155,6 +155,7 @@ namespace ESME.TransmissionLoss
             radial.Ranges = output.Ranges.ToArray();
             radial.Depths = output.Depths.ToArray();
             radial.IsCalculated = true;
+            radial.BottomProfile = bottomProfile.Profile.ToArray();
             _databaseService.Context.SaveChanges();
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using ESME.Database;
 using ESME.Locations;
+using ESME.TransmissionLoss.Bellhop;
 using HRC.Aspects;
 
 namespace ESME.Scenarios
@@ -41,6 +42,7 @@ namespace ESME.Scenarios
         public double Length { get; set; }
         public byte[] RangeAxisBlob { get; set; }
         public byte[] DepthAxisBlob { get; set; }
+        public byte[] BottomProfileBlob { get; set; }
         [NotMapped]
         public float[] Ranges
         {
@@ -64,6 +66,18 @@ namespace ESME.Scenarios
             }
         }
         float[] _depths;
+
+        [NotMapped]
+        public BottomProfilePoint[] BottomProfile
+        {
+            get { return _bottomProfile ?? (_bottomProfile = BottomProfileBlob.ToBottomProfileArray()); }
+            set
+            {
+                _bottomProfile = value;
+                BottomProfileBlob = _bottomProfile.ToBlob();
+            }
+        }
+        BottomProfilePoint[] _bottomProfile;
 
         public virtual TransmissionLoss TransmissionLoss { get; set; }
         public virtual ICollection<LevelRadius> LevelRadii { get; set; }
