@@ -1,4 +1,4 @@
-﻿#define Dave
+﻿//#define Dave
 using System;
 using System.IO;
 using System.Linq;
@@ -51,13 +51,13 @@ namespace ESME.Tests.Scenarios
             var center = new Geo((location.GeoRect.North + location.GeoRect.South) / 2, (location.GeoRect.East + location.GeoRect.West) / 2);
             database.Add(new AnalysisPoint { Geo = center, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], 16, 25000, true);
             var northEast = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(45));
-            database.Add(new AnalysisPoint { Geo = northEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], 16, 25000, true);
+            database.Add(new AnalysisPoint { Geo = northEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], 8, 10000, true);
             var southEast = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(135));
-            database.Add(new AnalysisPoint { Geo = southEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], 16, 25000, true);
+            database.Add(new AnalysisPoint { Geo = southEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], 8, 10000, true);
             var southWest = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(225));
-            database.Add(new AnalysisPoint { Geo = southWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], 16, 25000, true);
+            database.Add(new AnalysisPoint { Geo = southWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], 8, 10000, true);
             var northWest = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(315));
-            database.Add(new AnalysisPoint { Geo = northWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], 16, 25000, true);
+            database.Add(new AnalysisPoint { Geo = northWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], 8, 10000, true);
         }
 
         [Test, RequiresSTA]

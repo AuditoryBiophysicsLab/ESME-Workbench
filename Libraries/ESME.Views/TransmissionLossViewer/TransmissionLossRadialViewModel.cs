@@ -16,12 +16,14 @@ using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.Views.Controls;
+using HRC.Aspects;
 using HRC.Navigation;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Views.TransmissionLossViewer
 {
     [ExportViewModel("TransmissionLossRadialViewModel")]
+    [NotifyPropertyChanged]
     public class TransmissionLossRadialViewModel : ViewModelBase
     {
         static readonly PropertyChangedEventArgs WriteableBitmapChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.WriteableBitmap);
@@ -102,24 +104,6 @@ namespace ESME.Views.TransmissionLossViewer
 
         #endregion
 
-        #region public Bathymetry Bathymetry { get; set; }
-
-        static readonly PropertyChangedEventArgs BathymetryChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.Bathymetry);
-        Bathymetry _bathymetry;
-
-        public Bathymetry Bathymetry
-        {
-            get { return _bathymetry; }
-            set
-            {
-                if (_bathymetry == value) return;
-                _bathymetry = value;
-                NotifyPropertyChanged(BathymetryChangedEventArgs);
-            }
-        }
-
-        #endregion
-
         #region GridSizeChangedCommand
 
         SimpleCommand<object, object> _gridSizeChanged;
@@ -130,11 +114,9 @@ namespace ESME.Views.TransmissionLossViewer
             {
                 return _gridSizeChanged ?? (_gridSizeChanged = new SimpleCommand<object, object>(delegate
                                                                                                  {
-                                                                                                     if(_bathymetry == null) MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry,true);
-                                                                                                     else
-                                                                                                     {
+                                                                                                     
                                                                                                          if (TransmissionLossRadial != null) CalculateBottomProfileGeometry();
-                                                                                                     }
+                                                                                                     
                                                                                                     
                                                                                                  }));
             }
@@ -191,12 +173,7 @@ namespace ESME.Views.TransmissionLossViewer
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialEarthCoordinate)]
         void TransmissionLossRadialEarthCoordinate(Geo location) { _location = location; }
 
-        [MediatorMessageSink(MediatorMessage.SetTransmissionLossBathymetry)]
-        void SetTransmissionLossBathymetry(Bathymetry bathymetry)
-        {
-            _bathymetry = bathymetry;
-            if (TransmissionLossRadial != null) CalculateBottomProfileGeometry();
-        }
+       
         readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME.AnalysisPoint Tests\Database"); //todo
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialChanged)]
         void TransmissionLossRadialChanged(Radial radial)

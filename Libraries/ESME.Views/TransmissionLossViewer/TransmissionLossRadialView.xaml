@@ -1,96 +1,102 @@
 ﻿<UserControl x:Class="ESME.Views.TransmissionLossViewer.TransmissionLossRadialView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:controls="clr-namespace:ESME.Views.Controls"
-             xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
-             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
-             mef:ViewModelLocator.ViewModel="TransmissionLossRadialViewModel"
-             mc:Ignorable="d"
+             xmlns:controls="clr-namespace:ESME.Views.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
+             Background="White"
              d:DesignHeight="300"
              d:DesignWidth="300"
-             Background="White">
-	
-	<DockPanel x:Name="RadialView">
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Height="22">
-          <!--  <TextBlock Text="{Binding ColorMapViewModel.CurMinValue, StringFormat=CurMin: {0.000}}" />
-            <TextBlock Text="{Binding ColorMapViewModel.CurMaxValue, StringFormat=CurMax: {0.000}}" /> -->
-        </StackPanel>
-		<DockPanel DockPanel.Dock="Left">
-			<DockPanel>
-				<TextBlock DockPanel.Dock="Bottom"
-				           Height="{Binding ActualHeight, ElementName=RangeAxis, Mode=OneWay}" />
-				<controls:DataAxis x:Name="DepthAxis"
-				                   AxisLabel="Depth (m)"
-				                   AxisLocation="Right"
-				                   StartValue="{Binding DepthMin}"
-				                   EndValue="{Binding DepthMax}"
-				                   TickValueFormat="0" VerticalAlignment="Top" />
-			</DockPanel>
-		</DockPanel>
-		<DockPanel DockPanel.Dock="Right">
-			<DockPanel Width="80">
-                <TextBlock DockPanel.Dock="Bottom"
-				           Height="{Binding ActualHeight, ElementName=RangeAxis, Mode=OneWay}" />
-				<DockPanel LastChildFill="False"
-				           Margin="5 0 0 0">
-                    <controls:DataAxis AxisLocation="Left"
-					                   DockPanel.Dock="Right"
-					                   AxisLabel="Transmission Loss (dB)"
-					                   StartValue="{Binding ColorMapViewModel.MaxValue}"
-					                   EndValue="{Binding ColorMapViewModel.MinValue}"
-					                   TickValueFormat="0.#" />
-					<controls:ColorBarView ColorBarImage="{Binding ColorMapViewModel.ColorBitmap}"
-					                       Maximum="{Binding ColorMapViewModel.MaxValue}"
-					                       Minimum="{Binding ColorMapViewModel.MinValue}"
-					                       CurrentMaximum="{Binding ColorMapViewModel.CurMaxValue}"
-					                       CurrentMinimum="{Binding ColorMapViewModel.CurMinValue}"
-					                       DockPanel.Dock="Right"
-					                       MinWidth="50" />
-				</DockPanel>
-			</DockPanel>
-		</DockPanel>
-		<DockPanel DockPanel.Dock="Bottom">
-			<controls:DataAxis x:Name="RangeAxis"
-			                   AxisLocation="Top"
-			                   AxisLabel="Range (m)"
-			                   StartValue="{Binding RangeMin}"
-			                   EndValue="{Binding RangeMax}"
-			                   TickValueFormat="0" />
-		</DockPanel>
+             mef:ViewModelLocator.ViewModel="TransmissionLossRadialViewModel"
+             mc:Ignorable="d">
 
-		<Grid>
+    <DockPanel x:Name="RadialView">
+        <StackPanel Height="22"
+                    DockPanel.Dock="Top"
+                    Orientation="Horizontal">
+            <!--
+                <TextBlock Text="{Binding ColorMapViewModel.CurMinValue, StringFormat=CurMin: {0.000}}" />
+                <TextBlock Text="{Binding ColorMapViewModel.CurMaxValue, StringFormat=CurMax: {0.000}}" />
+            -->
+        </StackPanel>
+        <DockPanel DockPanel.Dock="Left">
+            <DockPanel>
+                <TextBlock Height="{Binding ActualHeight, ElementName=RangeAxis, Mode=OneWay}" DockPanel.Dock="Bottom" />
+                <controls:DataAxis x:Name="DepthAxis"
+                                   VerticalAlignment="Top"
+                                   AxisLabel="Depth (m)"
+                                   AxisLocation="Right"
+                                   EndValue="{Binding DepthMax}"
+                                   StartValue="{Binding DepthMin}"
+                                   TickValueFormat="0" />
+            </DockPanel>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Right">
+            <DockPanel Width="80">
+                <TextBlock Height="{Binding ActualHeight, ElementName=RangeAxis, Mode=OneWay}" DockPanel.Dock="Bottom" />
+                <DockPanel Margin="5 0 0 0" LastChildFill="False">
+                    <controls:DataAxis AxisLabel="Transmission Loss (dB)"
+                                       AxisLocation="Left"
+                                       DockPanel.Dock="Right"
+                                       EndValue="{Binding ColorMapViewModel.MinValue}"
+                                       StartValue="{Binding ColorMapViewModel.MaxValue}"
+                                       TickValueFormat="0.#" />
+                    <controls:ColorBarView MinWidth="50"
+                                           ColorBarImage="{Binding ColorMapViewModel.ColorBitmap}"
+                                           CurrentMaximum="{Binding ColorMapViewModel.CurMaxValue}"
+                                           CurrentMinimum="{Binding ColorMapViewModel.CurMinValue}"
+                                           DockPanel.Dock="Right"
+                                           Maximum="{Binding ColorMapViewModel.MaxValue}"
+                                           Minimum="{Binding ColorMapViewModel.MinValue}" />
+                </DockPanel>
+            </DockPanel>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Bottom">
+            <controls:DataAxis x:Name="RangeAxis"
+                               AxisLabel="Range (m)"
+                               AxisLocation="Top"
+                               EndValue="{Binding RangeMax}"
+                               StartValue="{Binding RangeMin}"
+                               TickValueFormat="0" />
+        </DockPanel>
+
+        <Grid>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SizeChanged">
                     <cinch:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
                 </i:EventTrigger>
-               <!-- <i:EventTrigger EventName="SourceUpdated">
+                <!--
+                    <i:EventTrigger EventName="SourceUpdated">
                     <cinch:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
-                </i:EventTrigger> -->
+                    </i:EventTrigger>
+                -->
             </i:Interaction.Triggers>
             <Grid.ColumnDefinitions>
-				<ColumnDefinition />
-			</Grid.ColumnDefinitions>
-			<Grid.RowDefinitions>
-				<RowDefinition />
-			</Grid.RowDefinitions>
-			<Image Source="{Binding WriteableBitmap}"
-			       Stretch="Fill"
-			       Grid.Column="0"
-			       Grid.Row="0" />
-			<Canvas Grid.Row="0"
-			        Grid.Column="0"
-			        x:Name="OverlayCanvas">
-				<!-- <Canvas.RenderTransform>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Image Grid.Row="0"
+                   Grid.Column="0"
+                   Source="{Binding WriteableBitmap}"
+                   Stretch="Fill" />
+            <Canvas x:Name="OverlayCanvas"
+                    Grid.Row="0"
+                    Grid.Column="0">
+                <!--
+                    <Canvas.RenderTransform>
                     <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}"/>
-                </Canvas.RenderTransform> -->
-				<Path Stroke="BlanchedAlmond"
-				      StrokeThickness="3"
-				      Data="{Binding BottomProfileGeometry}" />
-			</Canvas>
+                    </Canvas.RenderTransform>
+                -->
+                <Path Data="{Binding BottomProfileGeometry}"
+                      Stroke="BlanchedAlmond"
+                      StrokeThickness="3" />
+            </Canvas>
 
-		</Grid>
-	</DockPanel>
+        </Grid>
+    </DockPanel>
 </UserControl>

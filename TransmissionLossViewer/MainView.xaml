@@ -12,7 +12,8 @@
         Top="{Binding Source={x:Static Properties:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
         Left="{Binding Source={x:Static Properties:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
         Height="{Binding Source={x:Static Properties:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
-        Width="{Binding Source={x:Static Properties:Settings.Default}, Path=WindowWidth, Mode=TwoWay}">
+        Width="{Binding Source={x:Static Properties:Settings.Default}, Path=WindowWidth, Mode=TwoWay}"
+        Title="{Binding TitleString, Mode=TwoWay}">
 	<Window.InputBindings>
 		<KeyBinding Command="{Binding SaveAsCommand}"
 		            Key="S"
@@ -36,14 +37,9 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
 
-	<Window.Title>
-		<MultiBinding StringFormat="Transmission Loss: {0} radial bearing {1:000.0} degrees">
-			<Binding Path="SelectedTransmissionLossFieldName" />
-			<Binding Path="SelectedRadialBearing" />
-		</MultiBinding>
-    </Window.Title>
+    
 
-	<DockPanel LastChildFill="True">
+    <DockPanel LastChildFill="True">
 
 		<!--<Menu Name="TransmissionLossViewFileMenu"
 		      DockPanel.Dock="Top"
