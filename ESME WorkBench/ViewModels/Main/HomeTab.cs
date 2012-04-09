@@ -15,6 +15,7 @@ using ESME.Model;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.AcousticBuilder;
+using ESME.Views.Locations;
 using ESME.Views.TransmissionLoss;
 using ESME.Views.TransmissionLossViewer;
 using ESMEWorkbench.Properties;
@@ -252,7 +253,6 @@ namespace ESMEWorkbench.ViewModels.Main
 
         void ExportAnalysisPointsHandler() { ScenarioMetadata.ExportAnalysisPoints(); }
         #endregion
-        
 
         #region public bool CanPlaceAnalysisPoint { get; set; }
 
@@ -280,6 +280,29 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #endregion
 
+        #region ImportScenarioFileCommand
+        public SimpleCommand<object, object> ImportScenarioFileCommand
+        {
+            get { return _importScenarioFile ?? (_importScenarioFile = new SimpleCommand<object, object>(delegate { return IsImportScenarioFileCommandEnabled; }, delegate { ImportScenarioFileHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _importScenarioFile;
+
+        bool IsImportScenarioFileCommandEnabled
+        {
+            get { return true; }
+        }
+
+        void ImportScenarioFileHandler()
+        {
+            var vm = new ImportScenarioFileViewModel(Database, _cache, _plugins);
+            var result = _visualizer.ShowDialog("ImportScenarioFileView", vm);
+            if (result.HasValue && result.Value)
+            {
+                
+            }
+        }
+        #endregion
         
 
         readonly List<Tuple<IHaveProperties, Window>> _openPropertyWindows = new List<Tuple<IHaveProperties, Window>>();
