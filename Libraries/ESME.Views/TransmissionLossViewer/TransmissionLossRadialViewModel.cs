@@ -132,7 +132,6 @@ namespace ESME.Views.TransmissionLossViewer
         WriteableBitmap _writeableBitmap;
         Geo _location;
 
-
         [ImportingConstructor]
         public TransmissionLossRadialViewModel(IViewAwareStatus viewAwareStatus)
         {
@@ -143,7 +142,6 @@ namespace ESME.Views.TransmissionLossViewer
             _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialViewInitialized, true);
             _viewAwareStatus.ViewLoaded += () => ((Control)_viewAwareStatus.View).SizeChanged += (s, e) => CalculateBottomProfileGeometry();
         }
-
 
         public WriteableBitmap WriteableBitmap
         {
@@ -172,7 +170,6 @@ namespace ESME.Views.TransmissionLossViewer
 
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialEarthCoordinate)]
         void TransmissionLossRadialEarthCoordinate(Geo location) { _location = location; }
-
        
         readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME.AnalysisPoint Tests\Database"); //todo
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialChanged)]
@@ -218,7 +215,31 @@ namespace ESME.Views.TransmissionLossViewer
                 
             }
         }
+        [MediatorMessageSink(MediatorMessage.SaveRadial)]
+        public void SaveAsCSV(string fileName)
+        {
+            using (var sw = new StreamWriter(fileName))
+            {
+                // Write the X axis values out first
+                sw.WriteLine("Vertical Transmission Loss (dB)");
+                sw.Write(",Range (m),");
 
+                foreach (var t in TransmissionLossRadial.Ranges) sw.Write(t + ","); //write out the X axis values.
+                sw.WriteLine(); // Terminate the line
+                sw.WriteLine("Depth (m)");
+                // Write the slice data
+                for (var i = 0; i < TransmissionLossRadial.Depths.Count; i++)
+                {
+                    // Write out the Y axis value
+                    sw.Write(TransmissionLossRadial.Depths[i] + ",,");
+                    for (var j = 0; j < TransmissionLossRadial.Ranges.Count; j++)
+                        sw.Write(TransmissionLossRadial.TransmissionLoss[i, j] + ",");
+                    sw.WriteLine(); // Terminate the line
+                } // for i
+            } // using sw
+        }
+
+        #region RenderBitmap
         [MediatorMessageSink(MediatorMessage.SaveRadialBitmap)]
         void SaveRadialBitmap(string fileName)
         {
@@ -257,7 +278,7 @@ namespace ESME.Views.TransmissionLossViewer
             if (TransmissionLossRadial == null || ColorMapViewModel == null) return;
 
             var width = TransmissionLossRadial.Ranges.Count;
-            var height =TransmissionLossRadial.Depths.Count;
+            var height = TransmissionLossRadial.Depths.Count;
 
             if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null);
             var infinityColor = _colorMapViewModel.Colors[0];
@@ -284,7 +305,8 @@ namespace ESME.Views.TransmissionLossViewer
             _dispatcher.BeginInvoke(new VoidDelegate(RenderFinished), DispatcherPriority.ApplicationIdle);
         }
 
-        void RenderFinished() { NotifyPropertyChanged(WriteableBitmapChangedEventArgs); }
+        void RenderFinished() { NotifyPropertyChanged(WriteableBitmapChangedEventArgs); } 
+        #endregion
 
         #region public ColorMapViewModel ColorMapViewModel { get; set; }
 

@@ -50,6 +50,7 @@ namespace ESME
         public const string TransmissionLossRadialColorMapChanged = "TransmissionLossRadialColorMapChangedMessage";
         public const string TransmissionLossRadialChanged = "TransmissionLossRadialChangedMessage";
         public const string SaveRadialAsCSV = "SaveRadialAsCSVMessage";
+        public const string SaveRadial = "SaveRadialMessage";
         public const string SaveRadialBitmap = "SaveRadialBitmapMessage";
         public const string SetSelectedRadialBearing = "SetSelectedRadialBearingMessage";
         public const string SetSelectedDepth = "SetSelectedDepthMessage";

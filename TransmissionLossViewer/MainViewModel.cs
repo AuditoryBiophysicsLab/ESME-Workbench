@@ -127,7 +127,6 @@ namespace TransmissionLossViewer
 
         public string TitleString { get; set; }
 
-        #region public constructor
         [ImportingConstructor]
         public MainViewModel(IHRCSaveFileService saveFileService, IHRCOpenFileService openFileService, IViewParameterService viewParameterService, IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IUIVisualizerService visualizerService, MasterDatabaseService database)
         {
@@ -156,12 +155,6 @@ namespace TransmissionLossViewer
             
         }
 
-        
-
-
-
-        #endregion
-
         #region ViewClosingCommand
 
         public SimpleCommand<object, EventToCommandArgs> ViewClosingCommand
@@ -180,8 +173,6 @@ namespace TransmissionLossViewer
         SimpleCommand<object, EventToCommandArgs> _viewClosing;
 
         #endregion
-
-
         
         #region SaveAsCommand
 
@@ -221,14 +212,14 @@ namespace TransmissionLossViewer
                         Properties.Settings.Default.LastImageExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
                         MediatorMessage.Send(MediatorMessage.SaveRadialBitmap, _saveFileService.FileName);
                     }
-                    //MediatorMessage.Send(MediatorMessage.ResetSelectedField, true);
+                    MediatorMessage.Send(MediatorMessage.ResetSelectedField, true);
                     //Keyboard.Focus((Window)_viewAwareStatus.View);
                 }));
             }
         }
-
+        
         #endregion
-#if false
+
         #region ExportAsCommand
 
         public SimpleCommand<object, object> ExportAsCommand
@@ -245,9 +236,10 @@ namespace TransmissionLossViewer
                     if (result.HasValue && result.Value)
                     {
                         Properties.Settings.Default.LastCSVExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-                        MediatorMessage.Send(MediatorMessage.SaveRadialAsCSV, _saveFileService.FileName);
+                        MediatorMessage.Send(MediatorMessage.SaveRadial, _saveFileService.FileName);
+                        
                     }
-                    //MediatorMessage.Send(MediatorMessage.ResetSelectedField,true);
+                    MediatorMessage.Send(MediatorMessage.ResetSelectedField,true);
                     //Keyboard.Focus((Window)_viewAwareStatus.View);
                 }));
             }
@@ -256,25 +248,6 @@ namespace TransmissionLossViewer
         SimpleCommand<object, object> _exportAs;
 
         #endregion
-        
-        #region AboutCommand
-
-        public SimpleCommand<object, object> AboutCommand
-        {
-            get { return _about ?? (_about = new SimpleCommand<object, object>(arg => ShowAboutView())); }
-        }
-
-        SimpleCommand<object, object> _about;
-        void ShowAboutView()
-        {
-            var aboutViewModel = new AboutViewModel();
-            _visualizerService.ShowDialog("TLVAboutView", aboutViewModel);
-        } 
-        #endregion
-
-        
-#endif
-
 
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
         {
@@ -295,33 +268,5 @@ namespace TransmissionLossViewer
                 throw;
             }
         }
-
-#if false
-        #region public CASSOutput CASSOutput { get; set; }
-
-        public CASSOutput CASSOutput
-        {
-            get { return _cassOutput; }
-            set
-            {
-                if (_cassOutput == value) return;
-                _cassOutput = value;
-                NotifyPropertyChanged(CASSOutputChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs CASSOutputChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.CASSOutput);
-        CASSOutput _cassOutput;
-
-        #endregion
-
-        void OpenCASSFile(string filename)
-        {
-            CASSOutput = CASSOutput.FromBinaryFile(filename, false);
-            var tlf = TransmissionLossField.FromCASS(CASSOutput);
-            MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged, tlf);
-        }
-        
-#endif
     }
 }
