@@ -267,10 +267,34 @@ namespace ESME.Views.TransmissionLossViewer
 
 
             var theView = ((TransmissionLossRadialView)_viewAwareStatus.View);
-            var bmp = new RenderTargetBitmap((int)theView.ActualWidth, (int)theView.ActualHeight, 96, 96, PixelFormats.Pbgra32);
-            bmp.Render(theView);
+            var m = PresentationSource.FromVisual(Application.Current.MainWindow).CompositionTarget.TransformToDevice;
+            double dx = 96*m.M11;
+            double dy = 96*m.M22;
+            var bmp = CaptureScreen(theView, dx, dy);
             encoder.Frames.Add(BitmapFrame.Create(bmp));
             using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream);
+        }
+        // from http://blogs.msdn.com/b/jaimer/archive/2009/07/03/rendertargetbitmap-tips.aspx
+        private static BitmapSource CaptureScreen(Visual target, double dpiX, double dpiY)
+        {
+            if (target == null)
+            {
+                return null;
+            }
+            var bounds = VisualTreeHelper.GetDescendantBounds(target);
+            var rtb = new RenderTargetBitmap((int)(bounds.Width * dpiX / 96.0),
+                                                            (int)(bounds.Height * dpiY / 96.0),
+                                                            dpiX,
+                                                            dpiY,
+                                                            PixelFormats.Pbgra32);
+            var dv = new DrawingVisual();
+            using (var ctx = dv.RenderOpen())
+            {
+                var vb = new VisualBrush(target);
+                ctx.DrawRectangle(vb, null, new Rect(new Point(), bounds.Size));
+            }
+            rtb.Render(dv);
+            return rtb;
         }
 
         void RenderBitmap()
