@@ -101,8 +101,7 @@ namespace ESME.Views.TransmissionLossViewer
         static readonly PropertyChangedEventArgs SelectedBearingGeometryChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.SelectedBearingGeometry);
 
         #endregion
-
-       
+        
         #region public double SelectedRadialBearing { get; set; }
 
         public double SelectedRadialBearing

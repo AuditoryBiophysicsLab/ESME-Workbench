@@ -60,7 +60,23 @@
             <ListBox ItemsSource="{Binding Radials}" DisplayMemberPath="Filename" SelectedItem="{Binding SelectedRadial}"/>
         </StackPanel>
         <!--<TransmissionLoss:TransmissionLossMetadataView DataContext="{Binding CASSOutput}"/> -->
-		<View:TransmissionLossRadialView DockPanel.Dock="Bottom" />
+        <DockPanel DockPanel.Dock="Bottom">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Grid.Row="0" Grid.Column="0">
+            <Run Text="Selected radial bearing: " />
+            <Run Text="{Binding SelectedRadial.Bearing, StringFormat={}{0:000.0}}" />
+            <Run Text="deg" />
+                    </TextBlock>
+                    <Path Stroke="DarkGray" Fill="Transparent" Grid.Row="0" Grid.Column="1" Height="17" Width="17" Margin="20 2"
+                Data="{Binding SelectedBearingGeometry}" />
+                </StackPanel>
+                <Slider AutoToolTipPlacement="BottomRight" AutoToolTipPrecision="0" Grid.Row="1" Grid.Column="0"
+                Grid.ColumnSpan="2" TickPlacement="BottomRight" Minimum="1" Maximum="{Binding Radials.Count}"
+                Value="{Binding SelectedRadial}" Margin="5" />
+            </StackPanel>
+        </DockPanel>
+        <View:TransmissionLossRadialView/>
 
 	</DockPanel>
 </Window>

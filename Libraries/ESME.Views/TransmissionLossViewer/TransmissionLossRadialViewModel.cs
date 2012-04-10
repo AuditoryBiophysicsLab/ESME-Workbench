@@ -130,7 +130,6 @@ namespace ESME.Views.TransmissionLossViewer
         bool _isRendered;
         TransmissionLossRadial _tempRadial;
         WriteableBitmap _writeableBitmap;
-        Geo _location;
 
         [ImportingConstructor]
         public TransmissionLossRadialViewModel(IViewAwareStatus viewAwareStatus)
@@ -168,10 +167,8 @@ namespace ESME.Views.TransmissionLossViewer
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialColorMapChanged)]
         void TransmissionLossRadialColorMapChanged(ColorMapViewModel colorMapViewModel) { ColorMapViewModel = colorMapViewModel; }
 
-        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialEarthCoordinate)]
-        void TransmissionLossRadialEarthCoordinate(Geo location) { _location = location; }
-       
         readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME.AnalysisPoint Tests\Database"); //todo
+        
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialChanged)]
         void TransmissionLossRadialChanged(Radial radial)
         {
@@ -181,8 +178,11 @@ namespace ESME.Views.TransmissionLossViewer
                 Radial = radial;
                 _isRendered = false;
                 _writeableBitmap = null;
-                NotifyPropertyChanged(WriteableBitmapChangedEventArgs);
-                if (Radial == null) return;
+                if (Radial == null)
+                {
+                    NotifyPropertyChanged(WriteableBitmapChangedEventArgs);
+                    return;
+                }
                 RangeMin = Radial.Ranges.First();
                 RangeMax = Radial.Ranges.Last();
                 DepthMin = Radial.Depths.First();
@@ -280,7 +280,11 @@ namespace ESME.Views.TransmissionLossViewer
             var width = TransmissionLossRadial.Ranges.Count;
             var height = TransmissionLossRadial.Depths.Count;
 
-            if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null);
+            var m = PresentationSource.FromVisual(Application.Current.MainWindow).CompositionTarget.TransformToDevice;
+            double dx = m.M11;
+            double dy = m.M22;
+
+            if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(width, height, dx, dy, PixelFormats.Bgr32, null);
             var infinityColor = _colorMapViewModel.Colors[0];
             _writeableBitmap.Lock();
             unsafe
@@ -293,11 +297,11 @@ namespace ESME.Views.TransmissionLossViewer
                         // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
                         // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
                         var curValue = TransmissionLossRadial.TransmissionLoss[y, x];
-                        var curColor = float.IsInfinity(curValue) ? infinityColor : _colorMapViewModel.Lookup(curValue);
+                        var curColor = float.IsInfinity(curValue) ? infinityColor : ColorMapViewModel.Lookup(curValue);
                         *((int*)curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
                         curOffset += sizeof(Int32);
                     }
-                }
+                }  
             }
             _writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
             _writeableBitmap.Unlock();
