@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
@@ -46,67 +47,14 @@ namespace TransmissionLossViewer
             set
             {
                 _selectedScenario = value;
-                Platforms.Clear();
-                if (_selectedScenario == null) return;
-                foreach (var platform in from p in Database.Context.Platforms
-                                         where p.Scenario.Guid == _selectedScenario.Guid
-                                         select p)
-                    Platforms.Add(platform);
-
-                AnalysisPoints.Clear();
-                AnalysisPoints.AddRange(from d in Database.Context.AnalysisPoints
-                                        where d.Scenario.Guid == _selectedScenario.Guid
-                                        select d);
+               AnalysisPoints.Clear();
+                AnalysisPoints.AddRange(from p in Database.Context.AnalysisPoints
+                                        where p.Scenario.Guid == _selectedScenario.Guid
+                                        select p);
 
             }
         }
-        private Platform _selectedPlatform;
-        public Platform SelectedPlatform
-        {
-            get { return _selectedPlatform; }
-            set
-            {
-                _selectedPlatform = value;
-                Sources.Clear();
-                if (_selectedPlatform == null) return;
-
-                Sources.AddRange(from s in Database.Context.Sources
-                                       where s.Platform.Guid == _selectedPlatform.Guid
-                                       select s);
-            }
-        }
-        private Source _selectedSource;
-        public Source SelectedSource
-        {
-            get { return _selectedSource; }
-            set
-            {
-                _selectedSource = value;
-                Modes.Clear();
-                if (_selectedSource == null) return;
-
-                Modes.AddRange(from m in Database.Context.Modes
-                               where m.Source.Guid == _selectedSource.Guid
-                               select m);
-                    
-            }
-        }
-        private Mode _selectedMode;
-        public Mode SelectedMode
-        {
-            get { return _selectedMode; }
-            set
-            {
-                _selectedMode = value;
-                Radials.Clear();
-                if (_selectedMode == null) return;
-                Radials.AddRange(from r in Database.Context.Radials
-                                 where
-                                     r.IsCalculated &&
-                                     r.TransmissionLoss.Mode.Guid == _selectedMode.Guid
-                                 select r);
-            }
-        }
+        
         private Radial _selectedRadial;
         public Radial SelectedRadial
         {
@@ -119,11 +67,11 @@ namespace TransmissionLossViewer
                     TitleString = "Transmission Loss Viewer: <no radial selected>";
                     return;
                 }
-                MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, _selectedRadial);
                 TitleString = string.Format("Transmission Loss Viewer: radial bearing {0:000.0} degrees", _selectedRadial.Bearing);
+                MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, _selectedRadial);
             }
         }
-
+        
         private AnalysisPoint _selectedAnalysisPoint;
         public AnalysisPoint SelectedAnalysisPoint
         {
@@ -139,24 +87,62 @@ namespace TransmissionLossViewer
                                 where m
                                 select m).Distinct()); 
 #endif
+                AnalysisPointModes.Clear();
+                foreach (var tl in from t in Database.Context.TransmissionLosses
+                         where t.AnalysisPoint.Guid == _selectedAnalysisPoint.Guid
+                         select t)
+                {
+                    AnalysisPointModes.Add(Tuple.Create(string.Format("{0}:{1}:{2}",tl.Mode.Source.Platform.PlatformName,tl.Mode.Source.SourceName,tl.Mode.ModeName),tl));
+                }
+              //  Radials.Clear();
+             //   Radials.AddRange(from r in Database.Context.Radials
+             //                        where r.TransmissionLoss.AnalysisPoint.Guid == _selectedAnalysisPoint.Guid
+             //                        select r);
+            }
+        }
+
+        private Tuple<string, TransmissionLoss> _selectedMode;
+        public Tuple<string,TransmissionLoss> SelectedMode
+        {
+            get { return _selectedMode; }
+            set
+            {
+                _selectedMode = value;
+                if (_selectedMode == null) return;
                 Radials.Clear();
-                Radials.AddRange(from r in Radials
-                                     where r.TransmissionLoss.AnalysisPoint.Guid == _selectedAnalysisPoint.Guid
-                                     select r);
+                Radials.AddRange(from r in Database.Context.Radials
+                                 where r.TransmissionLoss.Guid == _selectedMode.Item2.Guid
+                                 select r);
+                RadialCount = Radials.Count;
+                SelectedRadialIndex = 0;
+                SelectedRadial = Radials.First();
+                
+                
             }
         }
 
         [Initialize]
         public ObservableList<Radial> Radials { get; set; }
-        [Initialize]
-        public ObservableList<Platform> Platforms { get; set; }
-        [Initialize]
-        public ObservableList<Source> Sources { get; set; }
-        [Initialize]
-        public ObservableList<Mode> Modes { get; set; }
-        [Initialize]
+        public int RadialCount { get; set; }
+        [Initialize]    
         public ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
 
+        [Initialize]
+        public ObservableList<Tuple<string, TransmissionLoss>> AnalysisPointModes { get; set; }
+       
+
+        private int _selectedRadialIndex;
+        public int SelectedRadialIndex
+        {
+            get { return _selectedRadialIndex; }
+            set
+            {
+                _selectedRadialIndex = value;
+                SelectedRadial = Radials[_selectedRadialIndex];
+            }
+        }
+
+        public string SelectedAnalysisPointDisplayString { get; set; }
         public string TitleString { get; set; }
 
         [ImportingConstructor]
@@ -216,7 +202,7 @@ namespace TransmissionLossViewer
                 lock (this)
                 {
                     if (SelectedRadial == null) return null;
-                    var fieldName = SelectedMode.ModeName;
+                    var fieldName = SelectedRadial.TransmissionLoss.Mode.ModeName;
                     return Path.Combine(Properties.Settings.Default.ExperimentReportDirectory, fieldName + string.Format(" radial {0} degrees", SelectedRadial.Bearing));
                 }
                 return _outputFileName;

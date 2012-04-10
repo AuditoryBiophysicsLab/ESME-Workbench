@@ -34,10 +34,7 @@
 		      HorizontalAlignment="Stretch"
 		      BorderBrush="Black"
 		      BorderThickness="1">
-			<MenuItem Header="_File">
-				<!--<MenuItem Header="Open"
-				          Command="{Binding OpenCommand}"
-				          InputGestureText="Ctrl+O" /> -->
+			<MenuItem Header="_File">				
 				<MenuItem Header="Save As"
 				          Command="{Binding SaveAsCommand}"
 				          InputGestureText="Ctrl+S" />
@@ -47,19 +44,13 @@
 				<MenuItem Header="Exit"
 				          Command="{Binding CloseWindowCommand}"
 				          InputGestureText="Ctrl+W" />
-			</MenuItem>
-			<!--<MenuItem Header=" _Help"
-			          HorizontalAlignment="Right"
-			          IsEnabled="False" /> -->
+			</MenuItem>			
 		</Menu>
         <StackPanel Orientation="Vertical">
             <ListBox ItemsSource="{Binding Database.Scenarios}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedScenario}"/>
-            <ListBox ItemsSource="{Binding Platforms}" DisplayMemberPath="PlatformName" SelectedItem="{Binding SelectedPlatform}"/>
-            <ListBox ItemsSource="{Binding Sources}" DisplayMemberPath="SourceName" SelectedItem="{Binding SelectedSource}"/>
-            <ListBox ItemsSource="{Binding Modes}" DisplayMemberPath="ModeName" SelectedItem="{Binding SelectedMode}"/>
-            <ListBox ItemsSource="{Binding Radials}" DisplayMemberPath="Filename" SelectedItem="{Binding SelectedRadial}"/>
-        </StackPanel>
-        <!--<TransmissionLoss:TransmissionLossMetadataView DataContext="{Binding CASSOutput}"/> -->
+            <ListBox ItemsSource="{Binding AnalysisPoints}" DisplayMemberPath="Geo" SelectedItem="{Binding SelectedAnalysisPoint}"/>
+            <ListBox ItemsSource="{Binding AnalysisPointModes}" DisplayMemberPath="Item1" SelectedItem="{Binding SelectedMode}" />            
+        </StackPanel>        
         <DockPanel DockPanel.Dock="Bottom">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
@@ -72,8 +63,8 @@
                 Data="{Binding SelectedBearingGeometry}" />
                 </StackPanel>
                 <Slider AutoToolTipPlacement="BottomRight" AutoToolTipPrecision="0" Grid.Row="1" Grid.Column="0"
-                Grid.ColumnSpan="2" TickPlacement="BottomRight" Minimum="1" Maximum="{Binding Radials.Count}"
-                Value="{Binding SelectedRadial}" Margin="5" />
+                Grid.ColumnSpan="2" TickPlacement="BottomRight" Minimum="1" Maximum="{Binding RadialCount, Mode=TwoWay}"
+                Value="{Binding SelectedRadialIndex}" Margin="5" />
             </StackPanel>
         </DockPanel>
         <View:TransmissionLossRadialView/>

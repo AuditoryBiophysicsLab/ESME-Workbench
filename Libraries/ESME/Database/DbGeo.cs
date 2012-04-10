@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using HRC.Navigation;
 
@@ -13,5 +14,10 @@ namespace ESME.Database
         public static implicit operator Geo(DbGeo dbGeo) { return new Geo(dbGeo.Latitude, dbGeo.Longitude); }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("[{0:0.###}, {1:0.###}]", Latitude,Longitude);
+        }
     }
 }
