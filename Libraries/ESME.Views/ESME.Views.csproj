@@ -77,6 +77,13 @@
     </Compile>
     <Compile Include="AcousticBuilder\AnalysisPointSettingsViewModel.cs" />
     <Compile Include="BuildInformation.cs" />
+    <Compile Include="ColorPicker\BindOnEnterTextBox.cs" />
+    <Compile Include="ColorPicker\ColorComboBox.cs" />
+    <Compile Include="ColorPicker\ColorPicker.cs" />
+    <Compile Include="ColorPicker\ColorSlider.cs" />
+    <Compile Include="ColorPicker\ColorUtils.cs" />
+    <Compile Include="ColorPicker\HsvControl.cs" />
+    <Compile Include="ColorPicker\SpectrumSlider.cs" />
     <Compile Include="Controls\AutoScrollingTextBlock.xaml.cs">
       <DependentUpon>AutoScrollingTextBlock.xaml</DependentUpon>
     </Compile>
@@ -96,6 +103,7 @@
       <DependentUpon>HeaderedPropertyDisplayPopup.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\HiddenIfNull.cs" />
+    <Compile Include="Controls\LayerControl.cs" />
     <Compile Include="Controls\PluginSelector.cs" />
     <Compile Include="Controls\ScatterPlot.xaml.cs">
       <DependentUpon>ScatterPlot.xaml</DependentUpon>

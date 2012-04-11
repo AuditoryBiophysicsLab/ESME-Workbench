@@ -7,7 +7,7 @@ using HRC.Aspects;
 
 namespace ESME.Scenarios
 {
-    public class Platform : IHaveGuid
+    public class Platform : IHaveGuid, IHaveLayerSettings
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
@@ -34,6 +34,7 @@ namespace ESME.Scenarios
 
         public virtual Scenario Scenario { get; set; }
         public virtual Perimeter Perimeter { get; set; }
+        public virtual LayerSettings LayerSettings { get; set; }
         public virtual ICollection<Source> Sources { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
     }

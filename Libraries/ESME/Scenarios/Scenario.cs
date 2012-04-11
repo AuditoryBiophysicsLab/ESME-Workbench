@@ -13,7 +13,7 @@ using HRC.Navigation;
 
 namespace ESME.Scenarios
 {
-    public class Scenario : IHaveGuid
+    public class Scenario : IHaveGuid, IHaveLayerSettings
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
@@ -26,6 +26,8 @@ namespace ESME.Scenarios
         public DbTimePeriod TimePeriod { get; set; }
 
         public virtual Location Location { get; set; }
+        public virtual LayerSettings LayerSettings { get; set; }
+
         public virtual EnvironmentalDataSet Wind { get; set; }
         public virtual EnvironmentalDataSet SoundSpeed { get; set; }
         public virtual EnvironmentalDataSet Sediment { get; set; }

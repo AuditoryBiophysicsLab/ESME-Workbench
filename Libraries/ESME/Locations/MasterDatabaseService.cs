@@ -61,6 +61,8 @@ namespace ESME.Locations
         }
         public void Add(EnvironmentalDataSet dataSet, bool saveChanges = false)
         {
+            if (dataSet.LayerSettings == null) dataSet.LayerSettings = new LayerSettings();
+            Context.LayerSettings.Add(dataSet.LayerSettings);
             Context.EnvironmentalDataSets.Add(dataSet);
             Log(dataSet, "Added new data set to location {0}. Data type: {1}, resolution: {2}{3}", dataSet.Location.Name, dataSet.SourcePlugin.PluginSubtype, dataSet.Resolution, (TimePeriod)dataSet.TimePeriod != TimePeriod.Invalid ? String.Format("  TimePeriod: {0}", (TimePeriod)dataSet.TimePeriod) : "");
             if (saveChanges) SaveChanges();
@@ -71,6 +73,8 @@ namespace ESME.Locations
                             where s.Name == scenario.Name && s.Location == scenario.Location
                             select s).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A scenario named {0} already exists in location {1}, choose another name", scenario.Name, scenario.Location.Name));
+            if (scenario.LayerSettings == null) scenario.LayerSettings = new LayerSettings();
+            Context.LayerSettings.Add(scenario.LayerSettings);
             if (scenario.StorageDirectory == null)
                 scenario.StorageDirectory = Path.Combine("scenarios", Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
             var storageDirectoryPath = Path.Combine(MasterDatabaseDirectory, scenario.StorageDirectory);
@@ -83,18 +87,24 @@ namespace ESME.Locations
         public void Add(Platform platform, bool saveChanges = false)
         {
             Context.Platforms.Add(platform);
+            if (platform.LayerSettings == null) platform.LayerSettings = new LayerSettings();
+            Context.LayerSettings.Add(platform.LayerSettings);
             Log(platform, "Added new platform {0} to scenario {1} in location {2}", platform.Description, platform.Scenario.Name, platform.Scenario.Location.Name);
             if (saveChanges) SaveChanges();
         }
         public void Add(Source source, bool saveChanges = false)
         {
             Context.Sources.Add(source);
+            if (source.LayerSettings == null) source.LayerSettings = new LayerSettings();
+            Context.LayerSettings.Add(source.LayerSettings);
             Log(source, "Added new source {0} to platform {1} in scenario {2} in location {3}", source.SourceName, source.Platform.Description, source.Platform.Scenario.Name, source.Platform.Scenario.Location.Name);
             if (saveChanges) SaveChanges();
         }
         public void Add(Mode mode, bool saveChanges = false)
         {
             Context.Modes.Add(mode);
+            if (mode.LayerSettings == null) mode.LayerSettings = new LayerSettings();
+            Context.LayerSettings.Add(mode.LayerSettings);
             Log(mode, "Added new mode {0} to source {1} of platform {2} in scenario {3} in location {4}", mode.ModeName, mode.Source.SourceName, mode.Source.Platform.Description, mode.Source.Platform.Scenario.Name, mode.Source.Platform.Scenario.Location.Name);
             if (saveChanges) SaveChanges();
         }
@@ -138,6 +148,8 @@ namespace ESME.Locations
                             where p.Name == perimeter.Name && p.Scenario.Guid == perimeter.Scenario.Guid
                             select p).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A perimeter named {0} already exists in scenario {1}, choose another name", perimeter.Name, perimeter.Scenario.Name));
+            if (perimeter.LayerSettings == null) perimeter.LayerSettings = new LayerSettings();
+            Context.LayerSettings.Add(perimeter.LayerSettings);
             Context.Perimeters.Add(perimeter);
             Log(perimeter, "Added new perimeter {0} to scenario {1} in location {2}", perimeter.Name, perimeter.Scenario.Name, perimeter.Scenario.Location.Name);
             if (saveChanges) SaveChanges();
@@ -158,6 +170,8 @@ namespace ESME.Locations
                             where s.LatinName == species.LatinName && s.Scenario == species.Scenario
                             select s).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A species named {0} already exists in scenario {1}, choose another name", species.LatinName, species.Scenario.Name));
+            if (species.LayerSettings == null) species.LayerSettings = new LayerSettings();
+            Context.LayerSettings.Add(species.LayerSettings);
             Context.ScenarioSpecies.Add(species);
             Log(species, "Added new species {0} to scenario {1} in location {2}", species.LatinName, species.Scenario.Name, species.Scenario.Location.Name);
             if (saveChanges) SaveChanges();
@@ -169,6 +183,8 @@ namespace ESME.Locations
                             where a.Geo == analysisPoint.Geo
                             select a).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("An analysis point already exists at {0}, choose another location or edit the existing point", (Geo)analysisPoint.Geo));
+            if (analysisPoint.LayerSettings == null) analysisPoint.LayerSettings = new LayerSettings();
+            Context.LayerSettings.Add(analysisPoint.LayerSettings);
             if (analysisPoint.Scenario == null) throw new ScenarioException(string.Format("Scenario for analysis point at {0} was not specified", analysisPoint.Geo));
             var depthAtAnalysisPoint = -bathymetry.Samples.GetNearestPoint(analysisPoint.Geo).Data;
             foreach (var mode in analysisPoint.Scenario.GetAllModes())
@@ -214,6 +230,8 @@ namespace ESME.Locations
                             where t.Mode.Guid == transmissionLoss.Mode.Guid && t.AnalysisPoint.Guid == transmissionLoss.AnalysisPoint.Guid
                             select t).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A transmission loss for mode {0} already exists for the analysis point at {1}", transmissionLoss.Mode.ModeName, (Geo)transmissionLoss.AnalysisPoint.Geo));
+            if (transmissionLoss.LayerSettings == null) transmissionLoss.LayerSettings = new LayerSettings();
+            Context.LayerSettings.Add(transmissionLoss.LayerSettings);
             Context.TransmissionLosses.Add(transmissionLoss);
             Log(transmissionLoss, "Added new transmission loss for mode {0} to analysis point at {1} to scenario {2} in location {3}", transmissionLoss.Mode.ModeName, (Geo)transmissionLoss.AnalysisPoint.Geo, transmissionLoss.AnalysisPoint.Scenario, transmissionLoss.AnalysisPoint.Scenario.Location);
             if (saveChanges) SaveChanges();
@@ -279,6 +297,8 @@ namespace ESME.Locations
                 Location = location,
                 SourcePlugin = sourcePlugin,
             };
+            if (environmentalDataSet.LayerSettings == null) environmentalDataSet.LayerSettings = new LayerSettings();
+            Context.LayerSettings.Add(environmentalDataSet.LayerSettings);
             Context.EnvironmentalDataSets.Add(environmentalDataSet);
             Log(environmentalDataSet, "Added new data set to {0}. Data type: {1}, resolution: {2}{3}", location.Name, sourcePlugin.PluginSubtype, resolution, timePeriod != TimePeriod.Invalid ? String.Format("  TimePeriod: {0}", timePeriod) : "");
             SaveChanges();
@@ -299,6 +319,8 @@ namespace ESME.Locations
             scenario.Location = location;
             scenario.StorageDirectory = Path.Combine("scenarios", Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
             Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, scenario.StorageDirectory));
+            if (scenario.LayerSettings == null) scenario.LayerSettings = new LayerSettings();
+            Context.LayerSettings.Add(scenario.LayerSettings);
             Context.Scenarios.Add(scenario);
             Log(scenario, "Created");
             SaveChanges();

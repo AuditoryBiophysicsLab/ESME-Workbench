@@ -2,16 +2,63 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:app="clr-namespace:DavesWPFTester"
+        xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:Locations="clr-namespace:ESME.Locations;assembly=ESME"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-        Title="Plugin tester"
+        xmlns:Scenarios="clr-namespace:ESME.Scenarios;assembly=ESME"
+        xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views"
+        Title="Scenario Tree View Tester"
         d:DataContext="{d:DesignInstance app:MainWindowViewModel}"
         mef:ViewModelLocator.ViewModel="MainWindowViewModel"
         SizeToContent="WidthAndHeight"
         SnapsToDevicePixels="True"
         mc:Ignorable="d">
+    <Window.Resources>
+        <Style TargetType="{x:Type TreeViewItem}">
+            <Setter Property="KeyboardNavigation.AcceptsReturn" Value="True" />
+            <Setter Property="views:VirtualToggleButton.IsVirtualToggleButton" Value="True" />
+            <Setter Property="views:VirtualToggleButton.IsChecked" Value="{Binding Scenarios:LayerSettings.IsChecked, RelativeSource={RelativeSource Self}}" />
+            <!--  <Setter Property="ToolTip" Value="{Binding ToolTip}" />  -->
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="FontWeight" Value="Bold" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </Window.Resources>
     <StackPanel Orientation="Vertical">
-        <Button Command="{Binding FillDatabaseCommand}" Content="Fill database..." />
+        <ContentControl Content="{Binding Scenario}">
+            <ContentControl.ContentTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="{Binding Name}" />
+                        <TreeView x:Name="TreeView"
+                                  BorderBrush="Transparent"
+                                  ItemsSource="{Binding Platforms}">
+                            <TreeView.Resources>
+                                <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
+                                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                                                           LayerName="{Binding PlatformName}"
+                                                           LineColor="{Binding LayerSettings.ActualLineColor}" />
+                                </HierarchicalDataTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
+                                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                                                           LayerName="{Binding SourceName}"
+                                                           LineColor="{Binding LayerSettings.ActualLineColor}" />
+                                </HierarchicalDataTemplate>
+                                <DataTemplate DataType="{x:Type Scenarios:Mode}">
+                                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                                                           LayerName="{Binding ModeName}"
+                                                           LineColor="{Binding LayerSettings.ActualLineColor}" />
+                                </DataTemplate>
+                            </TreeView.Resources>
+                        </TreeView>
+                    </StackPanel>
+                </DataTemplate>
+            </ContentControl.ContentTemplate>
+        </ContentControl>
     </StackPanel>
 </Window>

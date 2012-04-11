@@ -139,6 +139,8 @@
     <Compile Include="Behaviors\TrackType.cs" />
     <Compile Include="BuildInformation.cs" />
     <Compile Include="Database\BlobHelpers.cs" />
+    <Compile Include="Database\DbColor.cs" />
+    <Compile Include="Database\DbPointSymbolType.cs" />
     <Compile Include="Database\DbTimePeriod.cs" />
     <Compile Include="Database\DbTrackType.cs" />
     <Compile Include="Database\DbWhoWhenWhere.cs" />
@@ -157,6 +159,7 @@
     <Compile Include="Locations\LogEntry.cs" />
     <Compile Include="Scenarios\AnalysisPoint.cs" />
     <Compile Include="Scenarios\AnimatLocation.cs" />
+    <Compile Include="Scenarios\LayerSettings.cs" />
     <Compile Include="Scenarios\Mode.cs" />
     <Compile Include="Scenarios\Perimeter.cs" />
     <Compile Include="Scenarios\PerimeterCoordinate.cs" />

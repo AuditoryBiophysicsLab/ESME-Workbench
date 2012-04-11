@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using ESME.Database;
+using ESME.Scenarios;
 using HRC.Aspects;
 
 namespace ESME.Locations
@@ -9,6 +10,11 @@ namespace ESME.Locations
     public interface IHaveGuid
     {
         Guid Guid { get; }
+    }
+
+    public interface IHaveLayerSettings
+    {
+        LayerSettings LayerSettings { get; set; }
     }
 
     public class Location : IHaveGuid

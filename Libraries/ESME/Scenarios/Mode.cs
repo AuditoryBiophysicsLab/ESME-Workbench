@@ -7,7 +7,7 @@ using HRC.Aspects;
 
 namespace ESME.Scenarios
 {
-    public class Mode : IHaveGuid,IEquatable<Mode>
+    public class Mode : IHaveGuid, IHaveLayerSettings, IEquatable<Mode>
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
@@ -28,7 +28,9 @@ namespace ESME.Scenarios
         public float MaxPropagationRadius { get; set; }
 
         public virtual Source Source { get; set; }
+        public virtual LayerSettings LayerSettings { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
+        public virtual ICollection<TransmissionLoss> TransmissionLosses { get; set; }
 
         /// <summary>
         /// Indicates whether the current object is equal to another object of the same type.

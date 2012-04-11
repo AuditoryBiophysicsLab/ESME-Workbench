@@ -17,6 +17,12 @@
                 xmlns:Utility="clr-namespace:HRC.Utility;assembly=HRC"
                 xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
                 Title="{Binding MainWindowTitle}"
+                Width="{Binding Source={x:Static p:Settings.Default},
+                                Path=WindowWidth,
+                                Mode=TwoWay}"
+                Height="{Binding Source={x:Static p:Settings.Default},
+                                 Path=WindowHeight,
+                                 Mode=TwoWay}"
                 d:DataContext="{d:DesignInstance Type=Main:MainViewModel}"
                 d:DesignHeight="500"
                 d:DesignWidth="900"

@@ -8,24 +8,26 @@ using HRC.Aspects;
 
 namespace ESME.Scenarios
 {
-    public class AnalysisPoint : IHaveGuid
+    public class AnalysisPoint : IHaveGuid, IHaveLayerSettings
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
         public DbGeo Geo { get; set; }
 
         public virtual Scenario Scenario { get; set; }
+        public virtual LayerSettings LayerSettings { get; set; }
 
         public virtual ICollection<TransmissionLoss> TransmissionLosses { get; set; }
     }
 
-    public class TransmissionLoss : IHaveGuid
+    public class TransmissionLoss : IHaveGuid, IHaveLayerSettings
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
         public bool IsReadyToCalculate { get; set; }
         public virtual AnalysisPoint AnalysisPoint { get; set; }
         public virtual Mode Mode { get; set; }
+        public virtual LayerSettings LayerSettings { get; set; }
 
         public virtual ICollection<Radial> Radials { get; set; }
     }
