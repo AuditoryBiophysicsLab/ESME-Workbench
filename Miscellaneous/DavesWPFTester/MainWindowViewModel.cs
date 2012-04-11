@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
@@ -36,5 +37,24 @@ namespace DavesWPFTester
 
         public Scenario Scenario { get; set; }
         //public Location Location { get; set; }
+        #region ViewClosingCommand
+
+        public SimpleCommand<object, EventToCommandArgs> ViewClosingCommand
+        {
+            get
+            {
+                return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(vcArgs =>
+                {
+                    var ea = (CancelEventArgs)vcArgs.EventArgs;
+                    Properties.Settings.Default.Save();
+                    _database.Context.SaveChanges();
+                    _database.Dispose();
+                }));
+            }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _viewClosing;
+
+        #endregion
     }
 }

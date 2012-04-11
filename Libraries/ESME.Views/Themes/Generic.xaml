@@ -15,8 +15,7 @@
                             <Grid DockPanel.Dock="Top">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="16" />
-                                    <ColumnDefinition Width="16" />
-                                    <!--  <ColumnDefinition Width="16" />  -->
+                                    <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="*" SharedSizeGroup="LayerName" />
                                 </Grid.ColumnDefinitions>
                                 <CheckBox Grid.Column="0"
@@ -26,13 +25,14 @@
                                           IsThreeState="True" />
                                 <ToggleButton x:Name="LineColorToggle"
                                               Grid.Column="1"
+                                              Width="16"
                                               VerticalAlignment="Center"
                                               Background="{TemplateBinding LineColor}"
                                               IsHitTestVisible="{Binding ElementName=LineColorPopup,
                                                                          Path=IsOpen,
                                                                          Mode=OneWay,
                                                                          Converter={StaticResource BooleanInverter}}"
-                                              ToolTip="Click to change line color"
+                                              ToolTip="Click to change line color and weight"
                                               Visibility="{TemplateBinding LineColorVisibility}">
                                     <ToggleButton.Template>
                                         <ControlTemplate>
@@ -51,9 +51,28 @@
                                        IsOpen="{Binding IsChecked,
                                                         ElementName=LineColorToggle}"
                                        StaysOpen="False">
-                                    <colorPicker:ColorPicker Background="LightYellow"
-                                                             Padding="5" BorderBrush="Black" BorderThickness="1" 
-                                                             SelectedColor="{Binding LineColor, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:LayerControl}}, Mode=TwoWay}" />
+                                    <Border BorderBrush="Black" BorderThickness="1">
+                                        <StackPanel Orientation="Vertical">
+                                            <colorPicker:ColorPicker Background="LightYellow"
+                                                                     Padding="5"
+                                                                     SelectedColor="{Binding LineColor,
+                                                                                             RelativeSource={RelativeSource FindAncestor,
+                                                                                                                            AncestorType={x:Type Controls:LayerControl}},
+                                                                                             Mode=TwoWay}" />
+                                            <Slider Background="LightYellow"
+                                                    Padding="5"
+                                                    Maximum="10"
+                                                    Minimum="0.5"
+                                                    Orientation="Horizontal"
+                                                    SmallChange="0.1"
+                                                    TickFrequency="0.5"
+                                                    ToolTip="Line weight"
+                                                    Value="{Binding LineWidth,
+                                                                    RelativeSource={RelativeSource FindAncestor,
+                                                                                                   AncestorType={x:Type Controls:LayerControl}},
+                                                                    Mode=TwoWay}" />
+                                        </StackPanel>
+                                    </Border>
                                 </Popup>
                                 <TextBlock x:Name="LayerName"
                                            Grid.Column="2"

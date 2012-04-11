@@ -9,7 +9,8 @@
         xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
         xmlns:Scenarios="clr-namespace:ESME.Scenarios;assembly=ESME"
         xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views"
-        Title="Scenario Tree View Tester"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF" Title="Scenario Tree View Tester"
         d:DataContext="{d:DesignInstance app:MainWindowViewModel}"
         mef:ViewModelLocator.ViewModel="MainWindowViewModel"
         SizeToContent="WidthAndHeight"
@@ -29,6 +30,12 @@
         </Style>
 
     </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
     <StackPanel Orientation="Vertical">
         <ContentControl Content="{Binding Scenario}">
             <ContentControl.ContentTemplate>
@@ -47,12 +54,12 @@
                                 <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
                                     <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
                                                            LayerName="{Binding SourceName}"
-                                                           LineColor="{Binding LayerSettings.ActualLineColor}" />
+                                                           LineColorVisibility="Collapsed" />
                                 </HierarchicalDataTemplate>
                                 <DataTemplate DataType="{x:Type Scenarios:Mode}">
                                     <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
                                                            LayerName="{Binding ModeName}"
-                                                           LineColor="{Binding LayerSettings.ActualLineColor}" />
+                                                           LineColorVisibility="Collapsed" />
                                 </DataTemplate>
                             </TreeView.Resources>
                         </TreeView>

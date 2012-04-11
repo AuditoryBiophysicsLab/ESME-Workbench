@@ -40,6 +40,22 @@ namespace ESME.Views.Controls
 
         #endregion
 
+        #region dependency property double LineWidth
+
+        public static DependencyProperty LineWidthProperty = DependencyProperty.Register("LineWidth",
+                                                                                 typeof (double),
+                                                                                 typeof (LayerControl),
+                                                                                 new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+        public double LineWidth
+        {
+            get { return (double)GetValue(LineWidthProperty); }
+            set { SetValue(LineWidthProperty, value); }
+        }
+
+        #endregion
+
+
         #region dependency property string LayerName
 
         public static DependencyProperty LayerNameProperty = DependencyProperty.Register("LayerName",
