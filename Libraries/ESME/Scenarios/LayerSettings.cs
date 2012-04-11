@@ -26,7 +26,7 @@ namespace ESME.Scenarios
         public bool IsChecked { get; set; }
         public DbPointSymbolType PointSymbolType { get; set; }
         public DbColor LineColor { get; set; }
-        public float LineWeight { get; set; }
+        public double LineWeight { get; set; }
         public DbColor AreaColor { get; set; }
         public int LayerOrder { get; set; }
 
