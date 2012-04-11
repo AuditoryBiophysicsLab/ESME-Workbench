@@ -15,8 +15,6 @@ using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
 using ESME.Locations;
 using AnalysisPoint = ESME.Scenarios.AnalysisPoint;
-
-
 namespace TransmissionLossViewer
 {
     [ExportViewModel("TransmissionLossViewerMainViewModel")]
@@ -27,8 +25,6 @@ namespace TransmissionLossViewer
         IViewAwareStatus _viewAwareStatus;
         readonly IHRCSaveFileService _saveFileService;
         readonly IViewParameterService _viewParameterService;
-        
-
         public MasterDatabaseService Database { get; private set; }
         [Initialize]
         public ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
@@ -49,7 +45,6 @@ namespace TransmissionLossViewer
                 AnalysisPoints.AddRange(from p in Database.Context.AnalysisPoints
                                         where p.Scenario.Guid == _selectedScenario.Guid
                                         select p);
-
             }
         }
         #endregion
@@ -63,13 +58,6 @@ namespace TransmissionLossViewer
             {
                 _selectedAnalysisPoint = value;
                 if (_selectedAnalysisPoint == null) return;
-#if false
-                Modes.Clear();
-                Modes.AddRange((from m in Modes
-                                where m.Source.Platform.Scenario.Guid == _selectedAnalysisPoint.Scenario.Guid
-                                where m
-                                select m).Distinct()); 
-#endif
                 AnalysisPointModes.Clear();
                 foreach (var tl in from t in Database.Context.TransmissionLosses
                                    where t.AnalysisPoint.Guid == _selectedAnalysisPoint.Guid
@@ -77,10 +65,6 @@ namespace TransmissionLossViewer
                 {
                     AnalysisPointModes.Add(Tuple.Create(string.Format("{0}:{1}:{2}", tl.Mode.Source.Platform.PlatformName, tl.Mode.Source.SourceName, tl.Mode.ModeName), tl));
                 }
-                //  Radials.Clear();
-                //   Radials.AddRange(from r in Database.Context.Radials
-                //                        where r.TransmissionLoss.AnalysisPoint.Guid == _selectedAnalysisPoint.Guid
-                //                        select r);
             }
         }
         #endregion
@@ -147,7 +131,6 @@ namespace TransmissionLossViewer
                 if (_selectedRadial == null)
                 {
                     TitleString = "Transmission Loss Viewer: <no radial selected>";
-                    MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, (Radial)null);
                     return;
                 }
                 TitleString = string.Format("Transmission Loss Viewer: radial bearing {0:000.0} degrees", _selectedRadial.Bearing);
@@ -170,7 +153,6 @@ namespace TransmissionLossViewer
         #endregion
 
         public string TitleString { get; set; }
-
         public int RadialCount { get; set; }
 
         [ImportingConstructor]
@@ -223,8 +205,7 @@ namespace TransmissionLossViewer
                 lock (this)
                 {
                     if (SelectedRadial == null) return null;
-                    var fieldName = SelectedRadial.TransmissionLoss.Mode.ModeName;
-                    return Path.Combine(Properties.Settings.Default.ExperimentReportDirectory, fieldName + string.Format(" radial {0} degrees", SelectedRadial.Bearing));
+                    return Path.Combine(Properties.Settings.Default.ExperimentReportDirectory, string.Format("{0} {1} {2} bearing {3} degrees", SelectedRadial.TransmissionLoss.Mode.ModeName, SelectedRadial.TransmissionLoss.Mode.Source.SourceName, SelectedRadial.TransmissionLoss.Mode.Source.Platform.PlatformName,SelectedRadial.Bearing));
                 }
                 
             }
@@ -287,8 +268,9 @@ namespace TransmissionLossViewer
 
         #endregion 
         #endregion
-        
-        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService){_viewAwareStatus = viewAwareStatusService;}
+
+        #region aging viewaware and mediator registrations
+        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService) { _viewAwareStatus = viewAwareStatusService; }
 
         void RegisterMediator()
         {
@@ -301,6 +283,7 @@ namespace TransmissionLossViewer
                 Debug.WriteLine("***********\nMainViewModel: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
-        }
+        } 
+        #endregion
     }
 }
