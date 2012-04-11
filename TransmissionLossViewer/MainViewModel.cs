@@ -40,6 +40,8 @@ namespace TransmissionLossViewer
         readonly IUIVisualizerService _visualizerService;
 
         public MasterDatabaseService Database { get; private set; }
+
+        #region public Scenario SelectedScenario {get; set;}
         private Scenario _selectedScenario;
         public Scenario SelectedScenario
         {
@@ -47,14 +49,16 @@ namespace TransmissionLossViewer
             set
             {
                 _selectedScenario = value;
-               AnalysisPoints.Clear();
+                AnalysisPoints.Clear();
                 AnalysisPoints.AddRange(from p in Database.Context.AnalysisPoints
                                         where p.Scenario.Guid == _selectedScenario.Guid
                                         select p);
 
             }
-        }
-        
+        } 
+        #endregion
+
+        #region public Radial SelectedRadial {get; set;}
         private Radial _selectedRadial;
         public Radial SelectedRadial
         {
@@ -70,8 +74,10 @@ namespace TransmissionLossViewer
                 TitleString = string.Format("Transmission Loss Viewer: radial bearing {0:000.0} degrees", _selectedRadial.Bearing);
                 MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, _selectedRadial);
             }
-        }
-        
+        } 
+        #endregion
+
+        #region public AnalysisPoint SelectedAnalysisPoint {get; set;}
         private AnalysisPoint _selectedAnalysisPoint;
         public AnalysisPoint SelectedAnalysisPoint
         {
@@ -89,20 +95,22 @@ namespace TransmissionLossViewer
 #endif
                 AnalysisPointModes.Clear();
                 foreach (var tl in from t in Database.Context.TransmissionLosses
-                         where t.AnalysisPoint.Guid == _selectedAnalysisPoint.Guid
-                         select t)
+                                   where t.AnalysisPoint.Guid == _selectedAnalysisPoint.Guid
+                                   select t)
                 {
-                    AnalysisPointModes.Add(Tuple.Create(string.Format("{0}:{1}:{2}",tl.Mode.Source.Platform.PlatformName,tl.Mode.Source.SourceName,tl.Mode.ModeName),tl));
+                    AnalysisPointModes.Add(Tuple.Create(string.Format("{0}:{1}:{2}", tl.Mode.Source.Platform.PlatformName, tl.Mode.Source.SourceName, tl.Mode.ModeName), tl));
                 }
-              //  Radials.Clear();
-             //   Radials.AddRange(from r in Database.Context.Radials
-             //                        where r.TransmissionLoss.AnalysisPoint.Guid == _selectedAnalysisPoint.Guid
-             //                        select r);
+                //  Radials.Clear();
+                //   Radials.AddRange(from r in Database.Context.Radials
+                //                        where r.TransmissionLoss.AnalysisPoint.Guid == _selectedAnalysisPoint.Guid
+                //                        select r);
             }
-        }
+        } 
+        #endregion
 
+        #region public Tuple<string,TransmissionLoss> SelectedMode {get;set;}
         private Tuple<string, TransmissionLoss> _selectedMode;
-        public Tuple<string,TransmissionLoss> SelectedMode
+        public Tuple<string, TransmissionLoss> SelectedMode
         {
             get { return _selectedMode; }
             set
@@ -113,24 +121,14 @@ namespace TransmissionLossViewer
                 Radials.AddRange(from r in Database.Context.Radials
                                  where r.TransmissionLoss.Guid == _selectedMode.Item2.Guid
                                  select r);
-                RadialCount = Radials.Count;
-                SelectedRadialIndex = 0;
+                RadialCount = Radials.Count-1;
                 SelectedRadial = Radials.First();
-                
-                
+                SelectedRadialIndex = 0;
             }
-        }
+        } 
+        #endregion
 
-        [Initialize]
-        public ObservableList<Radial> Radials { get; set; }
-        public int RadialCount { get; set; }
-        [Initialize]    
-        public ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
-
-        [Initialize]
-        public ObservableList<Tuple<string, TransmissionLoss>> AnalysisPointModes { get; set; }
-       
-
+        #region public int SelectedRadialIndex {get; set;}
         private int _selectedRadialIndex;
         public int SelectedRadialIndex
         {
@@ -141,9 +139,54 @@ namespace TransmissionLossViewer
                 SelectedRadial = Radials[_selectedRadialIndex];
             }
         }
+        #endregion
 
-        public string SelectedAnalysisPointDisplayString { get; set; }
-        public string TitleString { get; set; }
+        [Initialize]
+        public ObservableList<Radial> Radials { get; set; }
+
+        #region public int RadialCount { get; set; }
+
+        public int RadialCount
+        {
+            get { return _radialCount; }
+            set
+            {
+                if (_radialCount == value) return;
+                _radialCount = value;
+                NotifyPropertyChanged(RadialCountChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs RadialCountChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RadialCount);
+        int _radialCount;
+
+        #endregion
+
+        
+        [Initialize]    
+        public ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
+
+        [Initialize]
+        public ObservableList<Tuple<string, TransmissionLoss>> AnalysisPointModes { get; set; }
+
+        #region public string TitleString { get; set; }
+
+        public string TitleString
+        {
+            get { return _titleString; }
+            set
+            {
+                if (_titleString == value) return;
+                _titleString = value;
+                NotifyPropertyChanged(TitleStringChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs TitleStringChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.TitleString);
+        string _titleString;
+
+        #endregion
+
 
         [ImportingConstructor]
         public MainViewModel(IHRCSaveFileService saveFileService, IHRCOpenFileService openFileService, IViewParameterService viewParameterService, IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IUIVisualizerService visualizerService, MasterDatabaseService database)
@@ -169,7 +212,7 @@ namespace TransmissionLossViewer
 
             //this will change...
             Database.MasterDatabaseDirectory = _databaseDirectory;
-            TitleString = "Transmission Loss Viewer: <no radial selected>";
+            //TitleString = "Transmission Loss Viewer: <no radial selected>";
 
         }
 
@@ -271,9 +314,12 @@ namespace TransmissionLossViewer
 
         public string SelectedBearingGeometry
         {
-            get
+            get { return _selectedBearingGeometry; }
+            set
             {
-                if (SelectedRadial == null) return null;
+                if (_selectedBearingGeometry == value) return;
+                if (SelectedRadial == null) return;
+                
                 var sb = new StringBuilder();
                 const double radius = 8;
                 double x, y;
@@ -288,13 +334,17 @@ namespace TransmissionLossViewer
                 x = (Math.Sin(SelectedRadial.Bearing * (Math.PI / 180)) * radius) + radius;
                 y = (-Math.Cos(SelectedRadial.Bearing * (Math.PI / 180)) * radius) + radius;
                 sb.Append(string.Format("L {0:0.###},{1:0.###} ", x, y));
-                return sb.ToString();
+                _selectedBearingGeometry = sb.ToString();
+
+                NotifyPropertyChanged(SelectedBearingGeometryChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs SelectedBearingGeometryChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.SelectedBearingGeometry);
+        private static readonly PropertyChangedEventArgs SelectedBearingGeometryChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedBearingGeometry);
+        string _selectedBearingGeometry;
 
         #endregion
+
 
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
         {
