@@ -350,6 +350,7 @@ namespace ESME.Metadata
 
                 _outputQueue = new BufferBlock<CASSOutput>();
 
+#if false
                 _uiUpdater = new ActionBlock<CASSOutput>(newItem => Dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayPropagationPoint(newItem)),
                 new ExecutionDataflowBlockOptions
                 {
@@ -357,6 +358,7 @@ namespace ESME.Metadata
                     BoundedCapacity = -1,
                     MaxDegreeOfParallelism = -1,
                 });
+#endif
 
                 _inputQueue.LinkTo(_maxRadiusCalculator);
                 _maxRadiusCalculator.LinkTo(_outputQueue);

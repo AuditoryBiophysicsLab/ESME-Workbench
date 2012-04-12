@@ -89,13 +89,10 @@ namespace ESME.TransmissionLoss
             var sediment = (Sediment)_cacheService[scenario.Sediment];
             var bathymetry = (Bathymetry)_cacheService[scenario.Bathymetry];
             soundSpeed.Extend(bathymetry.DeepestPoint);
-            var centerPoint = ((Geo)analysisPoint.Geo).Offset(Geo.KilometersToRadians(radial.Length / 2000), Geo.DegreesToRadians(radial.Bearing));
-            var windSpeed = wind[timePeriod].EnvironmentData.GetNearestPoint(centerPoint);
-            var soundSpeedProfile = soundSpeed[timePeriod].EnvironmentData.GetNearestPoint(centerPoint);
-            var sedimentType = sediment.Samples.GetNearestPoint(centerPoint);
-            var radialSegment = new GeoSegment(analysisPoint.Geo, Geo.KilometersToRadians(radial.Length / 1000f), Geo.DegreesToRadians(radial.Bearing));
-            //var bottomProfile = new BottomProfile(100, new Transect("transect", analysisPoint.Geo, radial.Bearing, radial.Length), bathymetry);
-            var bottomProfile = new BottomProfile(100, radialSegment, bathymetry);
+            var windSpeed = wind[timePeriod].EnvironmentData.GetNearestPoint(radial.Segment.Center);
+            var soundSpeedProfile = soundSpeed[timePeriod].EnvironmentData.GetNearestPoint(radial.Segment.Center);
+            var sedimentType = sediment.Samples.GetNearestPoint(radial.Segment.Center);
+            var bottomProfile = new BottomProfile(100, radial.Segment, bathymetry);
             var sourceDepth = platform.Depth;
             if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
             if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);

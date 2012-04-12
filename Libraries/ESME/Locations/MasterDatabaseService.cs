@@ -37,6 +37,8 @@ namespace ESME.Locations
             {
                 _masterDatabaseDirectory = value;
                 Initialize();
+                Location.Database = this;
+                Scenario.Database = this;
             }
         }
 

@@ -177,6 +177,8 @@ namespace ESME.Scenarios
         #endregion
 
         [UsedImplicitly] public event PropertyChangedEventHandler PropertyChanged;
+        [NotMapped] public static MasterDatabaseService Database { get; set; }
+        [NotMapped] public static EnvironmentalCacheService Cache { get; set; }
     }
 
     public static class ScenarioExensions

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -14,11 +15,11 @@ using System.Xml.Serialization;
 using Cinch;
 using ESME;
 using ESME.Mapping;
-using ESMEWorkbench.Controls;
 using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.Layers;
+using ESMEWorkbench.Views;
+using HRC.Aspects;
 using HRC.Navigation;
-using HRC.Services;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ThinkGeo.MapSuite.Core;
@@ -27,13 +28,12 @@ using ThinkGeo.MapSuite.WpfDesktopEdition;
 namespace ESMEWorkbench.ViewModels.Map
 {
     [ExportViewModel("MapViewModel")]
-    [Serializable]
-    public class MapViewModel : ViewModelBase
+    [NotifyPropertyChanged]
+    public class MapViewModel
     {
         #region Private fields
 
         readonly IViewAwareStatus _viewAwareStatus;
-        readonly IMessageBoxService _messageBoxService;
         Dispatcher _dispatcher;
         WpfMap _wpfMap;
 
@@ -42,9 +42,8 @@ namespace ESMEWorkbench.ViewModels.Map
         public string MapDLLVersion { get; private set; }
 
         [ImportingConstructor]
-        public MapViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCColorPickerService colorPickerService)
+        public MapViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBox)
         {
-            MapLayerViewModel.ColorPickerService = colorPickerService;
             viewAwareStatus.ViewLoaded += ViewLoaded;
             try
             {
@@ -52,64 +51,31 @@ namespace ESMEWorkbench.ViewModels.Map
             }
             catch (Exception ex)
             {
-                Globals.DisplayException(messageBoxService, ex, "***********\nMapViewModel: Mediator registration failed\n***********");
+                Globals.DisplayException(messageBox, ex, "***********\nMapViewModel: Mediator registration failed\n***********");
                 throw;
             }
             _viewAwareStatus = viewAwareStatus;
-            _messageBoxService = messageBoxService;
             //_synchronizationContext = synchronizationContext;
 
             Cursor = Cursors.Arrow;
-
-            MouseMoveCommand = new SimpleCommand<object, EventToCommandArgs>(delegate(EventToCommandArgs arg)
-                                                                             {
-                                                                                 var e = (MouseEventArgs) arg.EventArgs;
-                                                                                 var point = e.MouseDevice.GetPosition(_wpfMap);
-                                                                                 var pointShape = ExtentHelper.ToWorldCoordinate(_wpfMap.CurrentExtent, (float) point.X, (float) point.Y, (float) _wpfMap.ActualWidth, (float) _wpfMap.ActualHeight);
-                                                                                 MediatorMessage.Send(MediatorMessage.SetMouseEarthCoordinate, new Geo(pointShape.Y, pointShape.X));
-                                                                             });
-
-            MouseLeftButtonUpCommand = new SimpleCommand<object, object>(delegate
-                                                                         {
-                                                                             if (IsInAnalysisPointMode)
-                                                                             {
-                                                                                 IsInAnalysisPointMode = false;
-                                                                                 MediatorMessage.Send(MediatorMessage.SetAnalysisPointMode, false);
-                                                                                 MediatorMessage.Send(MediatorMessage.PlaceAnalysisPoint);
-                                                                             }
-                                                                             if (!IsQuickLookPointMode) return;
-                                                                             IsQuickLookPointMode = false;
-                                                                             MediatorMessage.Send(MediatorMessage.SetupAndRunQuickLookPoint);
-                                                                         });
         }
-
-        [XmlIgnore]
-
-        #region public bool IsInAnalysisPointMode { get; set; }
 
         public bool IsInAnalysisPointMode
         {
             get { return _isInAnalysisPointMode; }
             set
             {
-                if (_isInAnalysisPointMode == value) return;
                 _isInAnalysisPointMode = value;
-                NotifyPropertyChanged(IsInAnalysisPointModeChangedEventArgs);
                 Cursor = _isInAnalysisPointMode ? Cursors.Cross : Cursors.Arrow;
             }
         }
-
-        static readonly PropertyChangedEventArgs IsInAnalysisPointModeChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.IsInAnalysisPointMode);
         bool _isInAnalysisPointMode;
-
-        #endregion
 
         [XmlIgnore]
         public bool IsQuickLookPointMode { get; set; }
 
         #region public Cursor Cursor { get; set; }
 
-        static readonly PropertyChangedEventArgs CursorChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.Cursor);
         Cursor _cursor;
 
         public Cursor Cursor
@@ -119,21 +85,17 @@ namespace ESMEWorkbench.ViewModels.Map
             {
                 if (_cursor == value) return;
                 _cursor = value;
-                NotifyPropertyChanged(CursorChangedEventArgs);
             }
         }
 
         #endregion
 
-        public SimpleCommand<Object, EventToCommandArgs> MouseMoveCommand { get; private set; }
-        public SimpleCommand<Object, Object> MouseLeftButtonUpCommand { get; private set; }
-
         void ViewLoaded()
         {
             if (Designer.IsInDesignMode) return;
 
-            _wpfMap = ((MapView) _viewAwareStatus.View).WpfMap;
-            _dispatcher = ((MapView)_viewAwareStatus.View).Dispatcher;
+            _wpfMap = ((MainView)_viewAwareStatus.View).MapView.WpfMap;
+            _dispatcher = ((MainView)_viewAwareStatus.View).Dispatcher;
 
             MapLayerViewModel.MapOverlay = _wpfMap.Overlays;
 
@@ -144,9 +106,9 @@ namespace ESMEWorkbench.ViewModels.Map
             _wpfMap.MapTools.Logo.IsEnabled = false;
 
             _wpfMap.BackgroundOverlay.BackgroundBrush = new GeoSolidBrush(GeoColor.StandardColors.Black);
-            AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
-            AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
-            var localizedName = ((MapView) _viewAwareStatus.View).FontFamily.FamilyNames[XmlLanguage.GetLanguage(CultureInfo.CurrentUICulture.Name)];
+            _wpfMap.AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
+            _wpfMap.AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
+            var localizedName = ((MainView)_viewAwareStatus.View).FontFamily.FamilyNames[XmlLanguage.GetLanguage(CultureInfo.CurrentUICulture.Name)];
 
             var customUnitScaleBarAdornmentLayer = new CustomUnitScaleBarAdornmentLayer
                                                    {
@@ -157,22 +119,53 @@ namespace ESMEWorkbench.ViewModels.Map
                                                        GeoFont = new GeoFont(localizedName, 10),
                                                        GeoSolidBrush = new GeoSolidBrush(GeoColor.StandardColors.White),
                                                    };
-            AdornmentOverlay.Layers.Add("Scale", customUnitScaleBarAdornmentLayer);
-            AdornmentOverlay.Layers["Scale"].IsVisible = Settings.Default.ShowScaleBar;
+            _wpfMap.AdornmentOverlay.Layers.Add("Scale", customUnitScaleBarAdornmentLayer);
+            _wpfMap.AdornmentOverlay.Layers["Scale"].IsVisible = Settings.Default.ShowScaleBar;
 
             _wpfMap.MapTools.PanZoomBar.Visibility = Settings.Default.ShowPanZoom ? Visibility.Visible : Visibility.Hidden;
+            WorldMapLayer = new ShapefileMapLayer
+            {
+                LayerType = LayerType.BaseMap,
+                AreaStyle = AreaStyles.Country2,
+                CanBeRemoved = false,
+                CanBeReordered = true,
+                CanChangeAreaColor = true,
+                CanChangeLineColor = true,
+                ShapefileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"),
+                Name = "World Map",
+            };
+            _wpfMap.Overlays.Add(WorldMapLayer.Overlay);
 
             MediatorMessage.Send(MediatorMessage.MapViewModelInitialized);
         }
 
-        public GeoCollection<Overlay> Overlays
+        public MapLayerViewModel WorldMapLayer { get; set; }
+        public bool IsGridVisible
         {
-            get { return _wpfMap.Overlays; }
+            get { return Settings.Default.ShowGrid; }
+            set
+            {
+                _wpfMap.AdornmentOverlay.Layers["Grid"].IsVisible = value;
+                Settings.Default.ShowGrid = value;
+            }
         }
-
-        public AdornmentOverlay AdornmentOverlay
+        public bool IsScaleVisible
         {
-            get { return _wpfMap.AdornmentOverlay; }
+            get { return Settings.Default.ShowScaleBar; }
+            set
+            {
+                _wpfMap.AdornmentOverlay.Layers["Scale"].IsVisible = value;
+                Settings.Default.ShowScaleBar = value;
+            }
+        }
+        public bool IsPanZoomVisible
+        {
+            get { return Settings.Default.ShowPanZoom; }
+            set
+            {
+                _wpfMap.MapTools.PanZoomBar.Visibility = value ? Visibility.Visible : Visibility.Hidden;
+                Settings.Default.ShowPanZoom = value;
+            }
         }
 
         #region public MapLayerCollection MapLayers { get; set; }
@@ -211,11 +204,9 @@ namespace ESMEWorkbench.ViewModels.Map
                     }
                 }
                 if (_mapLayers != null) _mapLayers.CollectionChanged += MapLayersCollectionChanged;
-                NotifyPropertyChanged(MapLayersChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.MapLayers);
         MapLayerCollection _mapLayers;
 
         void MapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -301,14 +292,12 @@ namespace ESMEWorkbench.ViewModels.Map
             {
                 if (_currentExtent == value) return;
                 _currentExtent = value;
-                NotifyPropertyChanged(CurrentExtentChangedEventArgs);
                 _wpfMap.CurrentExtent = _currentExtent;
                 _wpfMap.Refresh();
                 if (MapLayers != null) MapLayers.CurrentExtent = _currentExtent;
             }
         }
 
-        static readonly PropertyChangedEventArgs CurrentExtentChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.CurrentExtent);
         RectangleShape _currentExtent;
 
         #endregion
@@ -328,13 +317,11 @@ namespace ESMEWorkbench.ViewModels.Map
             {
                 if (_currentScale == value) return;
                 _currentScale = value;
-                NotifyPropertyChanged(CurrentScaleChangedEventArgs);
                 _wpfMap.CurrentScale = _currentScale;
                 SetCurrentScale(_currentScale);
             }
         }
 
-        static readonly PropertyChangedEventArgs CurrentScaleChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.CurrentScale);
         double _currentScale;
 
         #endregion
@@ -347,27 +334,6 @@ namespace ESMEWorkbench.ViewModels.Map
 
         [MediatorMessageSink(MediatorMessage.RefreshLayer)]
         void RefreshLayer(MapLayerViewModel layer) { _wpfMap.Refresh(layer.LayerOverlay); }
-
-        [MediatorMessageSink(MediatorMessage.SetGridOverlayDisplay)]
-        void SetGridOverlayDisplay(Boolean isVisible)
-        {
-            AdornmentOverlay.Layers["Grid"].IsVisible = isVisible;
-            RefreshMap(true);
-        }
-
-        [MediatorMessageSink(MediatorMessage.SetPanZoomDisplay)]
-        void SetPanZoomDisplay(Boolean isVisible)
-        {
-            _wpfMap.MapTools.PanZoomBar.Visibility = isVisible ? Visibility.Visible : Visibility.Hidden;
-            //RefreshMap(true);
-        }
-
-        [MediatorMessageSink(MediatorMessage.SetScaleBarDisplay)]
-        void SetScaleBarDisplay(Boolean isVisible)
-        {
-            AdornmentOverlay.Layers["Scale"].IsVisible = isVisible;
-            RefreshMap(true);
-        }
 
         [MediatorMessageSink(MediatorMessage.SetMapCursor)]
         void SetMapCursor(Cursor cursor) { Cursor = cursor; }
@@ -413,6 +379,79 @@ namespace ESMEWorkbench.ViewModels.Map
         {
             ((UserControl)_viewAwareStatus.View).IsEnabled = enable;
         }
+        #region Mouse events
 
+        #region MouseLeftButtonDownCommand
+        public SimpleCommand<object, object> MouseLeftButtonDownCommand
+        {
+            get { return _mouseLeftButtonDown ?? (_mouseLeftButtonDown = new SimpleCommand<object, object>(delegate { MouseLeftButtonDownHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _mouseLeftButtonDown;
+
+        void MouseLeftButtonDownHandler() { }
+        #endregion
+
+        #region MouseLeftButtonUpCommand
+        public SimpleCommand<object, object> MouseLeftButtonUpCommand
+        {
+            get { return _mouseLeftButtonUp ?? (_mouseLeftButtonUp = new SimpleCommand<object, object>(delegate { MouseLeftButtonUpHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _mouseLeftButtonUp;
+
+        void MouseLeftButtonUpHandler()
+        {
+            if (IsInAnalysisPointMode)
+            {
+                IsInAnalysisPointMode = false;
+                MediatorMessage.Send(MediatorMessage.SetAnalysisPointMode, false);
+                MediatorMessage.Send(MediatorMessage.PlaceAnalysisPoint);
+            }
+            if (!IsQuickLookPointMode) return;
+            IsQuickLookPointMode = false;
+            MediatorMessage.Send(MediatorMessage.SetupAndRunQuickLookPoint);
+        }
+        #endregion
+
+        #region MouseRightButtonDownCommand
+        public SimpleCommand<object, object> MouseRightButtonDownCommand
+        {
+            get { return _mouseRightButtonDown ?? (_mouseRightButtonDown = new SimpleCommand<object, object>(delegate { MouseRightButtonDownHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _mouseRightButtonDown;
+
+        void MouseRightButtonDownHandler() { }
+        #endregion
+
+        #region MouseRightButtonUpCommand
+        public SimpleCommand<object, object> MouseRightButtonUpCommand
+        {
+            get { return _mouseRightButtonUp ?? (_mouseRightButtonUp = new SimpleCommand<object, object>(delegate { MouseRightButtonUpHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _mouseRightButtonUp;
+
+        void MouseRightButtonUpHandler() { }
+        #endregion
+
+        #region MouseMoveCommand
+        public SimpleCommand<object, EventToCommandArgs> MouseMoveCommand
+        {
+            get { return _mouseMove ?? (_mouseMove = new SimpleCommand<object, EventToCommandArgs>(delegate(EventToCommandArgs arg) { MouseMoveHandler(arg); })); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _mouseMove;
+
+        void MouseMoveHandler(EventToCommandArgs arg)
+        {
+            var e = (MouseEventArgs)arg.EventArgs;
+            var point = e.MouseDevice.GetPosition(_wpfMap);
+            var pointShape = ExtentHelper.ToWorldCoordinate(_wpfMap.CurrentExtent, (float)point.X, (float)point.Y, (float)_wpfMap.ActualWidth, (float)_wpfMap.ActualHeight);
+            MediatorMessage.Send(MediatorMessage.SetMouseEarthCoordinate, new Geo(pointShape.Y, pointShape.X));
+        }
+        #endregion
+        #endregion
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using HRC.Navigation;
 
 namespace ESME.Model
 {
@@ -19,7 +19,7 @@ namespace ESME.Model
         ulong IDField { get; set; }
     }
 
-    public interface ISupportValidation : INotifyPropertyChanged
+    public interface ISupportValidation
     {
         bool IsValid { get; }
         string ValidationErrorText { get; }

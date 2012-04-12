@@ -81,6 +81,7 @@ namespace ESMEWorkbench.ViewModels.Main
         SimpleCommand<object, object> _launchMMMBSpeciesBuilder;
         #endregion
 
+#if false
         #region CreateMMMBSBathymetryFileCommand
         public SimpleCommand<object, object> CreateMMMBSBathymetryFileCommand
         {
@@ -119,5 +120,6 @@ namespace ESMEWorkbench.ViewModels.Main
             }
         }
         #endregion
+#endif
     }
 }

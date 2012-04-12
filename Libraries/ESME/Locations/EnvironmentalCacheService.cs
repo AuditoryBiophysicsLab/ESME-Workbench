@@ -13,6 +13,7 @@ using System.Windows.Media;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Plugins;
+using ESME.Scenarios;
 using HRC.Navigation;
 using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
@@ -23,8 +24,8 @@ namespace ESME.Locations
     [ExportService(ServiceType.Both, typeof(EnvironmentalCacheService))]
     public class EnvironmentalCacheService
     {
-        public EnvironmentalCacheService() {}
-        public EnvironmentalCacheService(IPluginManagerService plugins, MasterDatabaseService database)
+        public EnvironmentalCacheService() { Location.Cache = this; Scenario.Cache = this; }
+        public EnvironmentalCacheService(IPluginManagerService plugins, MasterDatabaseService database) : this()
         {
             _plugins = plugins;
             _database = database;

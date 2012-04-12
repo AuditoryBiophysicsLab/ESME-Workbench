@@ -7,7 +7,6 @@ using Cinch;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
-using ESME.TransmissionLoss.REFMS;
 using HRC.ViewModels;
 using ThinkGeo.MapSuite.Core;
 
@@ -190,42 +189,32 @@ namespace ESME.Mapping
             ContextMenu.Add(new MenuItemViewModelBase
             {
                 Header = "View...",
-                Command = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.ViewPropagation, _cassOutput)),
+                Command = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.ViewPropagation, _transmissionLoss)),
             });
         }
 
+        Scenarios.TransmissionLoss _transmissionLoss;
+
         [XmlIgnore]
-        public CASSOutput CASSOutput
+        public Scenarios.TransmissionLoss TransmissionLoss
         {
-            get { return _cassOutput; }
+            get { return _transmissionLoss; }
             set
             {
-                if (_cassOutput == value) return;
-                if ((value != null) && (_cassOutput != null)) _cassOutput.PropertyChanged -= CASSOutputChanged;
-                _cassOutput = value;
-                OnPropertyChanged(CASSOutputChangedEventArgs);
-                if (_cassOutput != null) _cassOutput.PropertyChanged += CASSOutputChanged;
+                _transmissionLoss = value;
+                Validate();
             }
-        }
-        CASSOutput _cassOutput;
-        static readonly PropertyChangedEventArgs CASSOutputChangedEventArgs = ObservableHelper.CreateArgs<PropagationLayer>(x => x.CASSOutput);
-
-        void CASSOutputChanged(object sender, PropertyChangedEventArgs e)
-        {
-            var point = (CASSOutput)sender;
-            point.Validate();
-            ValidationErrorText = point.ValidationErrorText;
         }
 
         public override void Validate()
         {
-            if (CASSOutput == null)
+            if (TransmissionLoss == null)
             {
-                ValidationErrorText = "Unable to validate - CASSOutput is null";
+                ValidationErrorText = "Unable to validate - TransmissionLoss is null";
                 return;
             }
-            CASSOutput.Validate();
-            ValidationErrorText = CASSOutput.ValidationErrorText;
+            TransmissionLoss.Validate();
+            ValidationErrorText = TransmissionLoss.ValidationErrorText;
         }
     }
 }

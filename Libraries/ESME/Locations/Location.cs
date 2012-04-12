@@ -29,5 +29,8 @@ namespace ESME.Locations
         public virtual ICollection<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }
         //public virtual ICollection<Scenario> Scenarios { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
+
+        [NotMapped] public static MasterDatabaseService Database { get; set; }
+        [NotMapped] public static EnvironmentalCacheService Cache { get; set; }
     }
 }

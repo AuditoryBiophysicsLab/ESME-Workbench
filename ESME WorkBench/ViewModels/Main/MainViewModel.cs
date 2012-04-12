@@ -5,12 +5,9 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
-using System.Xml.Serialization;
 using Cinch;
 using ESME;
 using ESME.Environment;
@@ -20,15 +17,13 @@ using ESME.Plugins;
 using ESME.TransmissionLoss;
 using ESMEWorkbench.Data;
 using ESMEWorkbench.Properties;
-using ESMEWorkbench.ViewModels.Layers;
+using ESMEWorkbench.ViewModels.Map;
 using ESMEWorkbench.ViewModels.RecentFiles;
 using HRC;
 using HRC.Navigation;
 using HRC.Services;
-using HRC.Utility;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
-using ESME.Environment.Descriptors;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
@@ -37,7 +32,6 @@ namespace ESMEWorkbench.ViewModels.Main
     {
         #region Private fields
 
-        [Import, UsedImplicitly] IMessageBoxService _messageBox;
         [Import, UsedImplicitly] IHRCOpenFileService _openFile;
         [Import, UsedImplicitly] IHRCSaveFileService _saveFile;
         [Import, UsedImplicitly] IUIVisualizerService _visualizer;
@@ -45,19 +39,18 @@ namespace ESMEWorkbench.ViewModels.Main
         [Import, UsedImplicitly] EnvironmentalCacheService _cache;
         [Import, UsedImplicitly] TransmissionLossCalculatorService _transmissionLoss;
         readonly IViewAwareStatus _viewAwareStatus;
+        readonly IMessageBoxService _messageBox;
 #if EXPERIMENTS_SUPPORTED
         Experiment _experiment;
 #endif
         //TransmissionLossQueueCalculatorViewModel _bellhopQueueCalculatorViewModel;
         Dispatcher _dispatcher;
         public const bool ExperimentsCurrentlySupported = false;
-
-        readonly PleaseWaitViewModel _pleaseWait;
         #endregion
 
         #region Constructor
         [ImportingConstructor]
-        public MainViewModel(IViewAwareStatus viewAwareStatus, MasterDatabaseService database)
+        public MainViewModel(IViewAwareStatus viewAwareStatus, MasterDatabaseService database, IMessageBoxService messageBox)
         {
             try
             {
@@ -69,20 +62,10 @@ namespace ESMEWorkbench.ViewModels.Main
                 throw;
             }
             _viewAwareStatus = viewAwareStatus;
+            _messageBox = messageBox;
             Database = database;
-            _pleaseWait = new PleaseWaitViewModel((Window)_viewAwareStatus.View, _visualizer);
+            MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox);
             if (Designer.IsInDesignMode) return;
-#if false
-		    _database.PropertyChanged += (s, e) =>
-            {
-                switch (e.PropertyName)
-                {
-                    case "Locations":
-                        NotifyPropertyChanged("Locations");
-                        break;
-                }
-            };
-#endif            
             _viewAwareStatus.ViewUnloaded += () =>
             {
                 if (Designer.IsInDesignMode) return;
@@ -106,12 +89,6 @@ namespace ESMEWorkbench.ViewModels.Main
                 Database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
                 NAVOImporter.PluginManagerService = _plugins;
             };
-
-            IsLatLonGridVisible = Settings.Default.ShowGrid;
-            IsScaleBarVisible = Settings.Default.ShowScaleBar;
-            IsPanZoomVisible = Settings.Default.ShowPanZoom;
-            IsEnvironmentTabSelected = Settings.Default.SelectedRibbonTabIndex == 1;
-
         }
 
         public MasterDatabaseService Database { get; private set; }
@@ -123,8 +100,6 @@ namespace ESMEWorkbench.ViewModels.Main
         }
 
         #endregion
-
-        #region ViewModel properties
 
         #region public string DecoratedExperimentName { get; set; }
 
@@ -176,42 +151,26 @@ namespace ESMEWorkbench.ViewModels.Main
                 if (-180 > lon || lon > 180) return null;
                 var northSouth = lat >= 0 ? "N" : "S";
                 var eastWest = lon >= 0 ? "E" : "W";
-                if (RangeComplexes != null && RangeComplexes.SelectedBathymetry != null)
+                if (Scenario != null && Scenario.Bathymetry != null && ((Bathymetry)_cache[Scenario.Bathymetry]).Samples.GeoRect.Contains(MouseGeo))
                 {
-                    if ((_bathymetry == null || _bathymetry.Target == null) && RangeComplexes.IsEnvironmentLoaded)
-                    {
-                        _bathymetry = new WeakReference<Bathymetry>(((Task<Bathymetry>)RangeComplexes.EnvironmentData[EnvironmentDataType.Bathymetry]).Result);
-                    }
-                    if (_bathymetry != null && _bathymetry.Target != null && _bathymetry.Target.Samples.GeoRect.Contains(MouseGeo)) return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3} Elevation: {4:0.#}m", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest, _bathymetry.Target.Samples.GetNearestPoint(MouseGeo).Data);
+                    MouseDepth = ((Bathymetry)_cache[Scenario.Bathymetry]).Samples.GetNearestPoint(MouseGeo).Data;
+                    return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3} Elevation: {4:0.#}m",
+                                         Math.Abs(lat),
+                                         northSouth,
+                                         Math.Abs(lon),
+                                         eastWest,
+                                         MouseDepth);
                 }
+                MouseDepth = null;
                 return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3}", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest);
             }
         }
 
         static readonly PropertyChangedEventArgs MouseLocationInfoChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MouseLocationInfo);
-        WeakReference<Bathymetry> _bathymetry;
 
         #endregion
 
-        #region public float? MouseDepth { get; set; }
-
-        public float? MouseDepth
-        {
-            get { return _mouseDepth; }
-            set
-            {
-                if (_mouseDepth == value) return;
-                _mouseDepth = value;
-                NotifyPropertyChanged(MouseDepthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs MouseDepthChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MouseDepth);
-        float? _mouseDepth;
-
-        #endregion
-
-        #region public bool IsDebugMode { get; set; }
+        public float? MouseDepth { get; set; }
 
         public bool IsDebugMode
         {
@@ -225,213 +184,19 @@ namespace ESMEWorkbench.ViewModels.Main
             }
         }
 
-        #endregion
-
-        #endregion
-
-        void InitializeEnvironmentManager()
-        {
-#if false
-            RangeComplexes = RangeComplexes.Singleton;
-            ImportProgressCollection = ImportProgressCollection.Singleton;
-
-            try
-            {
-                try
-                {
-                    await RangeComplexes.ReadRangeComplexFile(Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
-                }
-                catch (AggregateException ae)
-                {
-                    var sb = new StringBuilder();
-                    foreach (var e in ae.InnerExceptions) sb.AppendLine(e.Message);
-                    _messageBoxService.ShowError("Error loading range complexes:\n" + sb);
-                }
-                catch (Exception e)
-                {
-                    _messageBoxService.ShowError(e.Message);
-                }
-                RangeComplexes.PropertyChanged += (s, e) =>
-                {
-                    switch (e.PropertyName)
-                    {
-                        case "SelectedRangeComplex":
-                            DisplayRangeComplex();
-                            break;
-                        case "SelectedArea":
-                            DisplaySelectedArea();
-                            break;
-                        case "SelectedBathymetry":
-                            DisplayBathymetry();
-                            break;
-                    }
-                };
-            }
-            catch (Exception e)
-            {
-                _messageBoxService.ShowError(e.Message);
-            }
-#endif
-        }
-
-        public ImportProgressCollection ImportProgressCollection
-        {
-            get { return _importProgressCollection; }
-            private set
-            {
-                if (_importProgressCollection == value) return;
-                _importProgressCollection = value;
-                NotifyPropertyChanged(ImportProgressCollectionChangedEventArgs);
-            }
-        }
-        static readonly PropertyChangedEventArgs ImportProgressCollectionChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.ImportProgressCollection);
-        ImportProgressCollection _importProgressCollection;
-
-        [XmlIgnore]
-        public RangeComplexes RangeComplexes
-        {
-            get { return _rangeComplexes; }
-            private set
-            {
-                if (_rangeComplexes == value) return;
-                _rangeComplexes = value;
-                NotifyPropertyChanged(RangeComplexesChangedEventArgs);
-
-                if (_rangeComplexes != null) _rangeComplexes.PropertyChanged += (s, e) =>
-                {
-                    switch (e.PropertyName)
-                    {
-                        case "IsEnvironmentFullySpecified":
-                            if (RangeComplexes != null && RangeComplexes.IsEnvironmentFullySpecified) HookLayerData();
-                            else ClearLayerData();
-                            break;
-                    }
-                };
-            }
-        }
-        static readonly PropertyChangedEventArgs RangeComplexesChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RangeComplexes);
-        RangeComplexes _rangeComplexes;
-
         public MapLayerCollection CurrentMapLayers { get; set; }
-
-        #region public int SelectedRibbonTabIndex { get; set; }
 
         public int SelectedRibbonTabIndex
         {
             get { return Settings.Default.SelectedRibbonTabIndex; }
-            set
-            {
-                if (Settings.Default.SelectedRibbonTabIndex == value) return;
-                Settings.Default.SelectedRibbonTabIndex = value;
-                IsEnvironmentTabSelected = Settings.Default.SelectedRibbonTabIndex == 1;
-                if (!IsEnvironmentTabSelected) SelectedSidebarTabIndex = IsScenarioLoaded ? 1 : 0;
-
-                NotifyPropertyChanged(SelectedRibbonTabIndexChangedEventArgs);
-            }
+            set { Settings.Default.SelectedRibbonTabIndex = value; }
         }
-
-        static readonly PropertyChangedEventArgs SelectedRibbonTabIndexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRibbonTabIndex);
-
-        #endregion
-
-        #region public bool IsEnvironmentTabSelected { get; set; }
-
-        public bool IsEnvironmentTabSelected
-        {
-            get { return _isEnvironmentTabSelected; }
-            set
-            {
-                if (_isEnvironmentTabSelected == value) return;
-                _isEnvironmentTabSelected = value;
-                NotifyPropertyChanged(IsEnvironmentTabSelectedChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsEnvironmentTabSelectedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsEnvironmentTabSelected);
-        bool _isEnvironmentTabSelected;
-
-        #endregion
-
-        #region public int SelectedSidebarTabIndex { get; set; }
-
-        public int SelectedSidebarTabIndex
-        {
-            get { return _selectedSidebarTabIndex; }
-            set
-            {
-                if (_selectedSidebarTabIndex == value) return;
-                _selectedSidebarTabIndex = value;
-                NotifyPropertyChanged(SelectedSidebarTabIndexChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedSidebarTabIndexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedSidebarTabIndex);
-        int _selectedSidebarTabIndex;
-
-        #endregion
 
         void ShowAboutView()
         {
             var aboutViewModel = new AboutViewModel();
             _visualizer.ShowDialog("AboutView", aboutViewModel);
         }
-
-        #region public bool IsLatLonGridVisible { get; set; }
-
-        public bool IsLatLonGridVisible
-        {
-            get { return _isLatLonGridVisible; }
-            set
-            {
-                _isLatLonGridVisible = value;
-                Settings.Default.ShowGrid = value;
-                MediatorMessage.Send(MediatorMessage.SetGridOverlayDisplay, value);
-                NotifyPropertyChanged(IsLatLonGridVisibleChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsLatLonGridVisibleChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsLatLonGridVisible);
-        bool _isLatLonGridVisible;
-
-        #endregion
-
-        #region public bool IsPanZoomVisible { get; set; }
-
-        public bool IsPanZoomVisible
-        {
-            get { return _isPanZoomVisible; }
-            set
-            {
-                _isPanZoomVisible = value;
-                Settings.Default.ShowPanZoom = value;
-                MediatorMessage.Send(MediatorMessage.SetPanZoomDisplay, value);
-                NotifyPropertyChanged(IsPanZoomVisibleChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsPanZoomVisibleChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsPanZoomVisible);
-        bool _isPanZoomVisible;
-
-        #endregion
-
-        #region public bool IsScaleBarVisible { get; set; }
-
-        public bool IsScaleBarVisible
-        {
-            get { return _isScaleBarVisible; }
-            set
-            {
-                _isScaleBarVisible = value;
-                Settings.Default.ShowScaleBar = value;
-                MediatorMessage.Send(MediatorMessage.SetScaleBarDisplay, value);
-                NotifyPropertyChanged(IsScaleBarVisibleChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsScaleBarVisibleChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsScaleBarVisible);
-        bool _isScaleBarVisible;
-
-        #endregion
 
         #region public RecentFileDescriptor RecentFilesSelectedItem { get; set; }
 
@@ -452,7 +217,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     }
                     try
                     {
-                        OpenScenarioHandler(_recentFilesSelectedItem.LongName);
+                        //OpenScenarioHandler(_recentFilesSelectedItem.LongName);
                         NotifyPropertyChanged(RecentFilesSelectedItemChangedEventArgs);
                         return;
                     }
@@ -544,24 +309,6 @@ namespace ESMEWorkbench.ViewModels.Main
         }
 
         SimpleCommand<object, EventToCommandArgs> _previewKeyDown;
-
-        #endregion
-
-        #region public MapLayerCollections MapLayerCollections { get; set; }
-
-        public Dictionary<string, MapLayerCollection> MapLayerCollections
-        {
-            get { return _mapLayerCollections ?? (_mapLayerCollections = new Dictionary<string, MapLayerCollection>()); }
-            set
-            {
-                if (_mapLayerCollections == value) return;
-                _mapLayerCollections = value;
-                NotifyPropertyChanged(MapLayerCollectionsChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs MapLayerCollectionsChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MapLayerCollections);
-        Dictionary<string, MapLayerCollection> _mapLayerCollections;
 
         #endregion
 

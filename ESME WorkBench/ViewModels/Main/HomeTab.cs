@@ -19,6 +19,7 @@ using ESME.Views.TransmissionLoss;
 using ESME.Views.TransmissionLossViewer;
 using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.Layers;
+using ESMEWorkbench.ViewModels.Map;
 using HRC.Aspects;
 using AnalysisPoint = ESME.TransmissionLoss.AnalysisPoint;
 
@@ -29,6 +30,7 @@ namespace ESMEWorkbench.ViewModels.Main
         public MapLayerCollection ScenarioMapLayers { get; set; }
 
         [Initialize] public LayerTreeViewModel LayerTreeViewModel { get; set; }
+        public MapViewModel MapViewModel { get; set; }
 
         Scenario _scenario;
         public Scenario Scenario
@@ -92,121 +94,6 @@ namespace ESMEWorkbench.ViewModels.Main
         static readonly PropertyChangedEventArgs IsScenarioLoadedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsScenarioLoaded);
         bool _isScenarioLoaded;
 
-        #endregion
-
-        #region OpenScenarioCommand
-        public SimpleCommand<object, object> OpenScenarioCommand
-        {
-            get { return _openScenario ?? (_openScenario = new SimpleCommand<object, object>(delegate { OpenScenarioHandler(null); })); }
-        }
-
-        SimpleCommand<object, object> _openScenario;
-
-        void OpenScenarioHandler(string fileName)
-        {
-            _openFile.FileName = null;
-            if (fileName == null)
-            {
-                _openFile.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
-                _openFile.InitialDirectory = Settings.Default.LastScenarioFileDirectory;
-                _openFile.FileName = null;
-                var result = _openFile.ShowDialog((Window)_viewAwareStatus.View);
-                if (!result.HasValue || !result.Value) return;
-                fileName = _openFile.FileName;
-                Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFile.FileName);
-            }
-            ScenarioMetadata = null;
-            RecentFiles.InsertFile(fileName);
-            //NemoScenario.Test(fileName);
-            _pleaseWait.Message = "Loading scenario, please wait...";
-            try
-            {
-                ScenarioMetadata = ScenarioMetadata.Load(ScenarioMetadata.MetadataFilename(fileName), RangeComplexes);
-                ScenarioMetadata.MessageBoxService = _messageBox;
-                ScenarioMetadata.CurrentMapLayers = CurrentMapLayers;
-                _dispatcher.InvokeIfRequired(() =>
-                {
-                    ScenarioMetadata.ScenarioFilename = fileName;
-                    MainWindowTitle = string.Format("ESME Workbench: {0} [{1}]", ScenarioMetadata.NemoFile.Scenario.EventName, ScenarioMetadata.NemoFile.Scenario.TimeFrame);
-                });
-                if (_scenarioFileWatcher != null)
-                {
-                    _scenarioFileWatcher.EnableRaisingEvents = false;
-                    _scenarioFileWatcher.Dispose();
-                }
-                _scenarioFileWatcher = new FileSystemWatcher(Path.GetDirectoryName(fileName), "*" + Path.GetExtension(fileName))
-                {
-                    NotifyFilter = NotifyFilters.LastWrite,
-                };
-                _scenarioFileWatcher.Changed += (s, e) =>
-                {
-                    if (_scenarioFileTimer != null) return;
-                    _scenarioFileTimer = new Timer(1000) { AutoReset = false };
-                    CloseScenarioHandler();
-                    _scenarioFileTimer.Start();
-                    _scenarioFileTimer.Elapsed += (s1, e1) =>
-                    {
-                        _dispatcher.InvokeInBackgroundIfRequired(() => _pleaseWait.Message = "Reloading scenario, please wait...");
-                        ScenarioMetadata =
-                                ScenarioMetadata.Load(ScenarioMetadata.MetadataFilename(fileName), RangeComplexes) ??
-                                new ScenarioMetadata
-                                {
-                                    Filename = ScenarioMetadata.MetadataFilename(fileName),
-                                    RangeComplexes = RangeComplexes
-                                };
-                        ScenarioMetadata.CurrentMapLayers = CurrentMapLayers;
-                        ScenarioMetadata.ScenarioFilename = fileName;
-                        _dispatcher.InvokeIfRequired(() =>
-                        {
-                            MainWindowTitle = string.Format("ESME Workbench: {0} [{1}]",ScenarioMetadata.NemoFile.Scenario.EventName,ScenarioMetadata.NemoFile.Scenario.TimeFrame);
-                        });
-                        _scenarioFileTimer = null;
-                        _dispatcher.InvokeInBackgroundIfRequired(() => _pleaseWait.Hide());
-                    };
-                };
-                _scenarioFileWatcher.Deleted += (s, e) =>
-                {
-                    CloseScenarioHandler();
-                    _messageBox.ShowError(string.Format("Scenario file {0} was deleted", fileName));
-                };
-                _scenarioFileWatcher.EnableRaisingEvents = true;
-            }
-            catch (Exception ex)
-            {
-                var sb = new StringBuilder();
-                sb.AppendLine(ex.Message);
-                var inner = ex.InnerException;
-                while (inner != null)
-                {
-                    sb.AppendLine(inner.Message);
-                    inner = inner.InnerException;
-                }
-                _messageBox.ShowError("Error opening scenario \"" + Path.GetFileName(fileName) + "\":\n" + sb);
-                if (ScenarioMetadata != null) ScenarioMetadata.RemoveScenarioDisplay();
-                ScenarioMetadata = null;
-            }
-            finally
-            {
-                _pleaseWait.Hide();
-            }
-        }
-        FileSystemWatcher _scenarioFileWatcher;
-        Timer _scenarioFileTimer;
-        #endregion
-
-        #region CloseScenarioCommand
-        public SimpleCommand<object, object> CloseScenarioCommand
-        {
-            get { return _closeScenario ?? (_closeScenario = new SimpleCommand<object, object>(delegate { return IsScenarioLoaded; }, delegate { CloseScenarioHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _closeScenario;
-
-        void CloseScenarioHandler()
-        {
-            ScenarioMetadata.RemoveScenarioDisplay();
-            ScenarioMetadata = null;
-        }
         #endregion
 
         #region ConfigureAcousticModelsCommand

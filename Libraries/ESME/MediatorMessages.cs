@@ -7,9 +7,6 @@ namespace ESME
     {
         public const string CancelCurrentCommand = "CancelCurrentCommandMessage";
         public const string SaveExperimentAsCommand = "SaveExperimentAsCommandMessage";
-        public const string SetGridOverlayDisplay = "ToggleGridOverlayDisplayCommandMessage";
-        public const string SetPanZoomDisplay = "TogglePanZoomDisplayCommandMessage";
-        public const string SetScaleBarDisplay = "ToggleScaleBarDisplayCommandMessage";
         public const string SetAnalysisPointMode = "AnalysisPointCommandMessage";
         public const string QuickLookPointCommand = "QuickLookPointCommandMessage";
         public const string AddFileCommand = "AddFileCommandMessage";
