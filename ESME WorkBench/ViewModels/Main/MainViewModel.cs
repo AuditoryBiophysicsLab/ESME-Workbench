@@ -20,6 +20,7 @@ using ESME.Plugins;
 using ESME.TransmissionLoss;
 using ESMEWorkbench.Data;
 using ESMEWorkbench.Properties;
+using ESMEWorkbench.ViewModels.Layers;
 using ESMEWorkbench.ViewModels.RecentFiles;
 using HRC;
 using HRC.Navigation;
@@ -69,7 +70,6 @@ namespace ESMEWorkbench.ViewModels.Main
             }
             _viewAwareStatus = viewAwareStatus;
             Database = database;
-
             _pleaseWait = new PleaseWaitViewModel((Window)_viewAwareStatus.View, _visualizer);
             if (Designer.IsInDesignMode) return;
 #if false

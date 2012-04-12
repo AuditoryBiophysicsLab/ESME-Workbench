@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.ComponentModel;
 using System.IO;
 using System.Text;
@@ -12,20 +11,35 @@ using ESME;
 using ESME.Mapping;
 using ESME.Metadata;
 using ESME.Model;
-using ESME.TransmissionLoss;
+using ESME.Scenarios;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.AcousticBuilder;
 using ESME.Views.Locations;
 using ESME.Views.TransmissionLoss;
 using ESME.Views.TransmissionLossViewer;
 using ESMEWorkbench.Properties;
-using ESMEWorkbench.ViewModels.NAVO;
+using ESMEWorkbench.ViewModels.Layers;
+using HRC.Aspects;
+using AnalysisPoint = ESME.TransmissionLoss.AnalysisPoint;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {
         public MapLayerCollection ScenarioMapLayers { get; set; }
+
+        [Initialize] public LayerTreeViewModel LayerTreeViewModel { get; set; }
+
+        Scenario _scenario;
+        public Scenario Scenario
+        {
+            get { return _scenario; }
+            set
+            {
+                _scenario = value;
+                LayerTreeViewModel.Scenario = _scenario;
+            }
+        }
 
         #region public ScenarioMetadata ScenarioMetadata { get; set; }
 
@@ -297,10 +311,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             var vm = new ImportScenarioFileViewModel(Database, _cache, _plugins);
             var result = _visualizer.ShowDialog("ImportScenarioFileView", vm);
-            if (result.HasValue && result.Value)
-            {
-                
-            }
+            if (result.HasValue && result.Value) Scenario = vm.Scenario;
         }
         #endregion
         

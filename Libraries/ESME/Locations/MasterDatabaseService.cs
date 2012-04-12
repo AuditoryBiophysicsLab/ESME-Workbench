@@ -279,12 +279,12 @@ namespace ESME.Locations
         public Location ImportLocationFromOverlayFile(string overlayFilename, string locationName)
         {
             var geoRect = new OverlayFile(overlayFilename).Shapes[0].GeoRect;
-            return CreateLocation(locationName,
-                                  String.Format("Imported from {0} on {1} by {2} on {3}", overlayFilename, System.Environment.UserName, DateTime.Now, System.Environment.MachineName),
-                                  geoRect.North,
-                                  geoRect.South,
-                                  geoRect.East,
-                                  geoRect.West);
+            return FindLocation(locationName) ?? CreateLocation(locationName,
+                                                                String.Format("Imported from {0} on {1} by {2} on {3}", overlayFilename, System.Environment.UserName, DateTime.Now, System.Environment.MachineName),
+                                                                geoRect.North,
+                                                                geoRect.South,
+                                                                geoRect.East,
+                                                                geoRect.West);
         }
 
         public EnvironmentalDataSet CreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin)
