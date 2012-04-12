@@ -50,6 +50,9 @@
     <Reference Include="FileHelpers">
       <HintPath>..\..\ESME WorkBench\External References\FileHelpers.dll</HintPath>
     </Reference>
+    <Reference Include="HDF5DotNet">
+      <HintPath>..\..\ESME WorkBench\External References\HDF5DotNet.dll</HintPath>
+    </Reference>
     <Reference Include="MapSuiteCore">
       <HintPath>..\..\ESME WorkBench\External References\MapSuiteCore.dll</HintPath>
     </Reference>
