@@ -3,18 +3,17 @@
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                 xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                xmlns:EnvironmentBuilder="clr-namespace:ESME.Views.EnvironmentBuilder;assembly=ESME.Views"
                 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                 xmlns:ia="http://schemas.microsoft.com/expression/2010/interactions"
                 xmlns:LocalControls="clr-namespace:ESMEWorkbench.Controls"
                 xmlns:Main="clr-namespace:ESMEWorkbench.ViewModels.Main"
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-                xmlns:NAVO="clr-namespace:ESME.Environment.NAVO;assembly=ESME"
+                xmlns:mef="http:\\www.codeplex.com\MEFedMVVM" 
                 xmlns:p="clr-namespace:ESMEWorkbench.Properties"
                 xmlns:r="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
                 xmlns:Utility="clr-namespace:HRC.Utility;assembly=HRC"
                 xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+                xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
                 Title="{Binding MainWindowTitle}"
                 Width="{Binding Source={x:Static p:Settings.Default},
                                 Path=WindowWidth,
@@ -42,9 +41,6 @@
     </r:RibbonWindow.Resources>
     <r:RibbonWindow.InputBindings>
         <KeyBinding Key="Escape" Command="{Binding CancelCurrentCommand}" />
-        <KeyBinding Key="O"
-                    Command="{Binding OpenScenarioCommand}"
-                    Modifiers="Control" />
     </r:RibbonWindow.InputBindings>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
@@ -68,27 +64,7 @@
                   DockPanel.Dock="Top"
                   SelectedIndex="{Binding SelectedRibbonTabIndex}">
             <r:Ribbon.ApplicationMenu>
-                <r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
-                    <r:RibbonApplicationMenuItem Command="{Binding OpenScenarioCommand}"
-                                                 Header="Open Scenario"
-                                                 ImageSource="..\Images\LargeIcons\open-icon.png"
-                                                 InputGestureText="Ctrl+O"
-                                                 ToolTipDescription="Open a scenario file"
-                                                 ToolTipTitle="{Binding Header,
-                                                                        RelativeSource={RelativeSource Self}}" />
-                    <r:RibbonApplicationMenuItem Command="{Binding NewScenarioCommand}"
-                                                 Header="New Scenario"
-                                                 ImageSource="..\Images\LargeIcons\new-icon.png"
-                                                 InputGestureText="Ctrl+N"
-                                                 ToolTipDescription="Create a new scenario"
-                                                 ToolTipTitle="{Binding Header,
-                                                                        RelativeSource={RelativeSource Self}}" />
-                    <r:RibbonApplicationMenuItem Command="{Binding CloseScenarioCommand}"
-                                                 Header="Close Scenario"
-                                                 ImageSource="..\Images\LargeIcons\close-icon.png"
-                                                 ToolTipDescription="Close the current scenario file"
-                                                 ToolTipTitle="{Binding Header,
-                                                                        RelativeSource={RelativeSource Self}}" />
+                <Controls:SlimRibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
                     <r:RibbonApplicationMenuItem Command="{Binding AboutCommand}"
                                                  Header="About"
                                                  ImageSource="..\Images\LargeIcons\about-icon.png"
@@ -116,39 +92,10 @@
                                                  ToolTipTitle="{Binding Header,
                                                                         RelativeSource={RelativeSource Self}}" />
 
-                    <r:RibbonApplicationMenu.AuxiliaryPaneContent>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="5" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-                            <r:RibbonSeparator Grid.Row="0" Label="Recent Scenarios" />
-                            <r:RibbonGallery Grid.Row="2"
-                                             CanUserFilter="False"
-                                             ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                             SelectedItem="{Binding RecentFilesSelectedItem}">
-                                <r:RibbonGalleryCategory Background="Transparent" ItemsSource="{Binding RecentFiles.List}">
-                                    <r:RibbonGalleryCategory.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel IsItemsHost="True" Orientation="Vertical" />
-                                        </ItemsPanelTemplate>
-                                    </r:RibbonGalleryCategory.ItemsPanel>
-                                    <r:RibbonGalleryCategory.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding ShortName}" />
-                                        </DataTemplate>
-                                    </r:RibbonGalleryCategory.ItemTemplate>
-                                    <r:RibbonGalleryCategory.Style>
-                                        <Style />
-                                    </r:RibbonGalleryCategory.Style>
-                                </r:RibbonGalleryCategory>
-                            </r:RibbonGallery>
-                        </Grid>
-                    </r:RibbonApplicationMenu.AuxiliaryPaneContent>
-                </r:RibbonApplicationMenu>
+                </Controls:SlimRibbonApplicationMenu>
             </r:Ribbon.ApplicationMenu>
             <r:RibbonTab Header="Home" KeyTip="H">
+                <!-- 
                 <r:RibbonGroup Header="Overlays">
                     <r:RibbonCheckBox IsChecked="{Binding IsLatLonGridVisible}"
                                       Label="Lat/Lon Grid"
@@ -166,7 +113,64 @@
                                       ToolTipTitle="{Binding Label,
                                                              RelativeSource={RelativeSource Self}}" />
                 </r:RibbonGroup>
-                <r:RibbonGroup Header="Scenario">
+                -->
+                <r:RibbonGroup Header="Map">
+                    <r:RibbonButton Command="{Binding ZoomToWorldMapCommand}"
+                                    Label="World Map"
+                                    LargeImageSource="..\Images\LargeIcons\globe-icon.png"
+                                    SmallImageSource="..\Images\SmallIcons\globe-icon.png" />
+                </r:RibbonGroup>
+                <r:RibbonGroup Header="Location">
+                    <ListView Width="150"
+                              Height="66"
+                              DisplayMemberPath="Name"
+                              ItemsSource="{Binding Database.Locations}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                              SelectedIndex="{Binding SelectedLocationIndex}"
+                              SelectedItem="{Binding SelectedLocation}"
+                              SelectionMode="Single">
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel />
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                    </ListView>
+                    <r:RibbonMenuButton Label="Add"
+                                        SmallImageSource="..\Images\SmallIcons\layer_add.png"
+                                        ToolTipDescription="Add a new location through one of several available means"
+                                        ToolTipTitle="Add location">
+                        <r:RibbonMenuItem Command="{Binding CreateLocationFromBoundingBoxCommand}"
+                                          Header="Enter boundaries..."
+                                          ImageSource="..\Images\SmallIcons\layer_command.png"
+                                          ToolTipDescription="Create a new location by entering its northern, southern, eastern and western boundaries"
+                                          ToolTipTitle="Create a new location by specifying its boundaries" />
+                        <r:RibbonMenuItem Command="{Binding CreateLocationFromOverlayFileCommand}"
+                                          Header="Import overlay file..."
+                                          ImageSource="..\Images\SmallIcons\layer_import.png"
+                                          ToolTipDescription="Create a new location by loading an overlay file that specifies its northern, southern, eastern and western boundaries"
+                                          ToolTipTitle="Create a location from an existing overlay file" />
+                        <r:RibbonMenuItem Command="{Binding DisabledCommand}"
+                                          Header="Import location file..."
+                                          ImageSource="..\Images\SmallIcons\layer_database.png"
+                                          ToolTipDescription="This feature is not yet implemented"
+                                          ToolTipTitle="Create a location by importing a location file" />
+                        <r:RibbonMenuItem Command="{Binding DisabledCommand}"
+                                          Header="Selecting area on map"
+                                          ImageSource="..\Images\SmallIcons\layer_to_image_size.png"
+                                          ToolTipDescription="This feature is not yet implemented"
+                                          ToolTipTitle="Create a location by selecting an area on the map" />
+                    </r:RibbonMenuButton>
+                    <r:RibbonButton Command="{Binding DisabledCommand}"
+                                    Label="Edit"
+                                    SmallImageSource="..\Images\SmallIcons\layer_edit.png"
+                                    ToolTipDescription="Edit the boundaries and/or cached environmental data of the selected location"
+                                    ToolTipTitle="Edit location" />
+                    <r:RibbonButton Command="{Binding DisabledCommand}"
+                                    Label="Delete"
+                                    SmallImageSource="..\Images\SmallIcons\layer_delete.png"
+                                    ToolTipDescription="Delete an existing location, along with all cached data and all scenarios that depend upon it"
+                                    ToolTipTitle="Delete location" />
+                </r:RibbonGroup>                <r:RibbonGroup Header="Scenario">
                     <ListView Width="150"
                               Height="66"
                               DisplayMemberPath="Name"
@@ -239,78 +243,13 @@
                                                            RelativeSource={RelativeSource Self}}" />
                 </r:RibbonGroup>
             </r:RibbonTab>
+            <!-- 
             <r:RibbonTab Header="Environment" KeyTip="V">
-                <r:RibbonGroup Header="Map">
-                    <r:RibbonButton Command="{Binding ZoomToWorldMapCommand}"
-                                    Label="World Map"
-                                    LargeImageSource="..\Images\LargeIcons\globe-icon.png"
-                                    SmallImageSource="..\Images\SmallIcons\globe-icon.png" />
-                </r:RibbonGroup>
-                <r:RibbonGroup Header="Location">
-                    <ListView Width="150"
-                              Height="66"
-                              DisplayMemberPath="Name"
-                              ItemsSource="{Binding Database.Locations}"
-                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                              SelectedIndex="{Binding SelectedLocationIndex}"
-                              SelectedItem="{Binding SelectedLocation}"
-                              SelectionMode="Single">
-                        <ListView.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel />
-                            </ItemsPanelTemplate>
-                        </ListView.ItemsPanel>
-                    </ListView>
-                    <r:RibbonMenuButton Label="Add"
-                                        SmallImageSource="..\Images\SmallIcons\layer_add.png"
-                                        ToolTipDescription="Add a new location through one of several available means"
-                                        ToolTipTitle="Add location">
-                        <r:RibbonMenuItem Command="{Binding CreateLocationFromBoundingBoxCommand}"
-                                          Header="Enter boundaries..."
-                                          ImageSource="..\Images\SmallIcons\layer_command.png"
-                                          ToolTipDescription="Create a new location by entering its northern, southern, eastern and western boundaries"
-                                          ToolTipTitle="Create a new location by specifying its boundaries" />
-                        <r:RibbonMenuItem Command="{Binding CreateLocationFromOverlayFileCommand}"
-                                          Header="Import overlay file..."
-                                          ImageSource="..\Images\SmallIcons\layer_import.png"
-                                          ToolTipDescription="Create a new location by loading an overlay file that specifies its northern, southern, eastern and western boundaries"
-                                          ToolTipTitle="Create a location from an existing overlay file" />
-                        <r:RibbonMenuItem Command="{Binding DisabledCommand}"
-                                          Header="Import location file..."
-                                          ImageSource="..\Images\SmallIcons\layer_database.png"
-                                          ToolTipDescription="This feature is not yet implemented"
-                                          ToolTipTitle="Create a location by importing a location file" />
-                        <r:RibbonMenuItem Command="{Binding DisabledCommand}"
-                                          Header="Selecting area on map"
-                                          ImageSource="..\Images\SmallIcons\layer_to_image_size.png"
-                                          ToolTipDescription="This feature is not yet implemented"
-                                          ToolTipTitle="Create a location by selecting an area on the map" />
-                    </r:RibbonMenuButton>
-                    <r:RibbonButton Command="{Binding DisabledCommand}"
-                                    Label="Edit"
-                                    SmallImageSource="..\Images\SmallIcons\layer_edit.png"
-                                    ToolTipDescription="Edit the boundaries and/or cached environmental data of the selected location"
-                                    ToolTipTitle="Edit location" />
-                    <r:RibbonButton Command="{Binding DisabledCommand}"
-                                    Label="Delete"
-                                    SmallImageSource="..\Images\SmallIcons\layer_delete.png"
-                                    ToolTipDescription="Delete an existing location, along with all cached data and all scenarios that depend upon it"
-                                    ToolTipTitle="Delete location" />
-                </r:RibbonGroup>
+
             </r:RibbonTab>
 
             <r:RibbonTab Header="Simulation" KeyTip="S">
-                <r:RibbonGroup Header="Simulators">
-                    <r:RibbonButton Command="{Binding RunTransmissionLossCalculatorCommand}"
-                                    Label="Acoustic Simulator"
-                                    LargeImageSource="..\Images\LargeIcons\orbz_water.png"
-                                    SmallImageSource="..\Images\SmallIcons\orbz_water.png"
-                                    ToolTipDescription="Runs the Acoustic Simulator. The icon will appear in your system tray."
-                                    ToolTipTitle="{Binding Label,
-                                                           RelativeSource={RelativeSource Self}}" />
-
-                </r:RibbonGroup>
-
+       
                 <r:RibbonGroup Header="Animals">
                     <r:RibbonButton Command="{Binding LaunchMMMBSCommand}"
                                     Label="MMMBS"
@@ -327,6 +266,7 @@
                                                            RelativeSource={RelativeSource Self}}" />
                 </r:RibbonGroup>
             </r:RibbonTab>
+            -->
         </r:Ribbon>
         <Grid>
             <Grid.ColumnDefinitions>

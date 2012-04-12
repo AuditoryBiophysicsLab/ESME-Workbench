@@ -123,7 +123,7 @@ namespace ESME.Locations
                     var bathymetry = ((EnvironmentalDataSourcePluginBase<Bathymetry>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
                     dataSet.SampleCount = bathymetry.Samples.Count;
                     bathymetry.Save(fileName);
-                    var colormap = new DualColormap(Colormap.Summer, Colormap.Jet) { Threshold = 0 };
+                    var colormap = new DualColormap(Colormap.Summer, Colormap.Haxby) { Threshold = 0 };
                     var bathysize = Math.Max(bathymetry.Samples.Longitudes.Count, bathymetry.Samples.Latitudes.Count);
                     var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
                     var displayValues = bathymetry.Samples;
@@ -145,8 +145,8 @@ namespace ESME.Locations
                                                              bathymetry.Minimum.Data,
                                                              bathymetry.Maximum.Data < 0
                                                                  ? bathymetry.Maximum.Data
-                                                                 : 8000,
-                                                             Colors.Black);
+                                                                 : 8000);
+                                                             //Colors.Black);
                     BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
 
                     var sb = new StringBuilder();

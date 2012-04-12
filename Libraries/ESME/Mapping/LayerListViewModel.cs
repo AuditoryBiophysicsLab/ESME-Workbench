@@ -34,8 +34,6 @@ namespace ESME.Mapping
             }
             _viewAwareStatus = viewAwareStatus;
             _messageBoxService = messageBoxService;
-
-            _viewAwareStatus.ViewLoaded += ViewLoaded;
         }
 
         #region public MapLayerCollection MapLayers { get; set; }
@@ -79,28 +77,6 @@ namespace ESME.Mapping
 
         [MediatorMessageSink(MediatorMessage.SetMapLayers)]
         void SetMapLayers(MapLayerCollection mapLayers) { MapLayers = mapLayers; }
-
-        static void ViewLoaded()
-        {
-            MediatorMessage.Send(MediatorMessage.LayerListViewModelInitialized);
-        }
-
-#if false
-        [MediatorMessageSink(MediatorMessage.RemoveLayer)]
-        void RemoveLayer(MapLayerViewModel layer)
-        {
-            MapLayers.Remove(layer);
-            if (layer.LayerType == LayerType.AnalysisPoint) MediatorMessage.Send(MediatorMessage.RemoveAnalysisPoint, layer.AnalysisPoint);
-        }
-
-        [MediatorMessageSink(MediatorMessage.LayersReordered)]
-        void ReorderLayer(MapLayerViewModel layer)
-        {
-            var layerIndex = MapLayers.IndexOf(layer);
-            if (layerIndex == -1) return;
-            MapLayers.Move(layerIndex, layer.Index);
-        }
-#endif
 
         [MediatorMessageSink(MediatorMessage.EnableGUI)]
         void EnableGUI(bool enable)

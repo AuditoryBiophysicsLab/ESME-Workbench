@@ -12,15 +12,15 @@
                         <StackPanel Orientation="Horizontal">
                             <Grid DockPanel.Dock="Top">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="16" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" SharedSizeGroup="LayerName" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <CheckBox Grid.Column="0"
                                           VerticalAlignment="Center"
                                           Focusable="False"
                                           IsChecked="{TemplateBinding IsChecked}"
-                                          IsThreeState="True" />
+                                          Visibility="{TemplateBinding CheckBoxVisibility}" />
                                 <ToggleButton x:Name="LineColorToggle"
                                               Grid.Column="1"
                                               Width="16"

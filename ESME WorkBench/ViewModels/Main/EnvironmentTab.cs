@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Reflection;
-using System.Windows.Threading;
 using Cinch;
 using ESME;
-using ESME.Environment.Descriptors;
 using ESME.Locations;
-using ESME.Mapping;
 using ESME.Views.Locations;
 using HRC.Aspects;
 using ThinkGeo.MapSuite.Core;
@@ -18,26 +12,6 @@ namespace ESMEWorkbench.ViewModels.Main
     [NotifyPropertyChanged]
     public partial class MainViewModel
     {
-        bool _once = true;
-        [MediatorMessageSink(MediatorMessage.AllViewModelsAreReady)]
-        public void AllViewModelsAreReady(bool allViewModelsAreReady)
-        {
-            if (!_once) return;
-            _once = false;
-            EnvironmentLayers = new Dictionary<EnvironmentDataType, MapLayerViewModel>
-            {
-                {EnvironmentDataType.Bathymetry, null}, 
-                {EnvironmentDataType.SoundSpeed, null}, 
-                {EnvironmentDataType.Wind, null}
-            };
-            Console.WriteLine("All view models are ready!");
-
-            AreAllViewModelsReady = true;
-        }
-
-        public Dictionary<EnvironmentDataType, MapLayerViewModel> EnvironmentLayers { get; private set; }
-        readonly List<MapLayerViewModel> _sedimentLayers = new List<MapLayerViewModel>();
-
         #region CreateLocationCommand
         public SimpleCommand<object, object> CreateLocationFromBoundingBoxCommand
         {

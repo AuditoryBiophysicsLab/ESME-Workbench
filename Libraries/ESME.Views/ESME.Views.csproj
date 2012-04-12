@@ -54,6 +54,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
+    <Reference Include="RibbonControlsLibrary, Version=4.0.0.11019, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Drawing" />
@@ -108,6 +109,7 @@
     <Compile Include="Controls\ScatterPlot.xaml.cs">
       <DependentUpon>ScatterPlot.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\SlimRibbonApplicationMenu.cs" />
     <Compile Include="Controls\TimePeriodComboBox.xaml.cs">
       <DependentUpon>TimePeriodComboBox.xaml</DependentUpon>
     </Compile>
@@ -405,6 +407,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="InstallationWizard\dlgbmp.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="NewFolder1\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

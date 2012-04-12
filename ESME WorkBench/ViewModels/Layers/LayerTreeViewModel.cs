@@ -3,6 +3,7 @@ using System.Windows.Media;
 using ESME.Database;
 using ESME.Locations;
 using ESME.Scenarios;
+using ESMEWorkbench.ViewModels.Map;
 using HRC.Aspects;
 using HRC.Utility;
 using HRC.WPF;
@@ -12,9 +13,15 @@ namespace ESMEWorkbench.ViewModels.Layers
     [NotifyPropertyChanged]
     public class LayerTreeViewModel
     {
-        public LayerTreeViewModel()
+        MapViewModel _mapViewModel;
+        public MapViewModel MapViewModel
         {
-            RootNodes.Add(new WorldMapNode());
+            get { return _mapViewModel; }
+            set
+            {
+                _mapViewModel = value;
+                RootNodes.Add(new WorldMapNode(_mapViewModel));
+            }
         }
 
         Scenario _scenario;
@@ -87,21 +94,23 @@ namespace ESMEWorkbench.ViewModels.Layers
                         break;
                 }
             };
-            IsChecked = true;
         }
 
         [Initialize]
         public ObservableList<object> EnvironmentLayers { get; set; }
-
-        public bool? IsChecked { get; set; }
     }
 
     [NotifyPropertyChanged]
     public class BathymetryNode
     {
         public BathymetryNode(EnvironmentalDataSet bathymetry) { Bathymetry = bathymetry; }
-        [Initialize(true)]
-        public bool IsChecked { get; set; }
+
+        public bool IsChecked
+        {
+            get { return Bathymetry.LayerSettings.IsChecked; }
+            set { Bathymetry.LayerSettings.IsChecked = value; }
+        }
+
         public EnvironmentalDataSet Bathymetry { get; set; }
     }
 
@@ -115,8 +124,11 @@ namespace ESMEWorkbench.ViewModels.Layers
             SedimentTypes.Add(new SedimentTypeNode { SedimentType = "Slime" });
             SedimentTypes.Add(new SedimentTypeNode { SedimentType = "Atlantis" });
         }
-        [Initialize(true)]
-        public bool IsChecked { get; set; }
+        public bool IsChecked
+        {
+            get { return Sediment.LayerSettings.IsChecked; }
+            set { Sediment.LayerSettings.IsChecked = value; }
+        }
         public EnvironmentalDataSet Sediment { get; set; }
         [Initialize]
         public ObservableList<SedimentTypeNode> SedimentTypes { get; set; }
@@ -142,21 +154,43 @@ namespace ESMEWorkbench.ViewModels.Layers
     }
 
     [NotifyPropertyChanged]
+    public class AnalysisPointNode
+    {
+        
+    }
+
+    [NotifyPropertyChanged]
     public class WorldMapNode
     {
-        public WorldMapNode()
+        public WorldMapNode(MapViewModel mapViewModel)
         {
-            LineColor = new DbColor(ColorExtensions.GetRandomNamedColor());
+            _mapViewModel = mapViewModel;
             Features.Add(new WorldMapFeatureNode { FeatureName = "Pan/Zoom" });
             Features.Add(new WorldMapFeatureNode { FeatureName = "Lat/Lon Grid" });
             Features.Add(new WorldMapFeatureNode { FeatureName = "Scale" });
+            IsInitialized = true;
+        }
+        [Affects("LineColor", "LineWeight", "IsChecked", "Features")]
+        public bool IsInitialized { get; set; }
+
+        readonly MapViewModel _mapViewModel;
+        public Color LineColor
+        {
+            get { return _mapViewModel.WorldMapLayer.LineColor; }
+            set { _mapViewModel.WorldMapLayer.LineColor = value; }
         }
 
-        public Color LineColor { get; set; }
-        [Initialize(1.0)]
-        public double LineWeight { get; set; }
-        [Initialize(true)]
-        public bool IsChecked { get; set; }
+        public double LineWeight
+        {
+            get { return _mapViewModel.WorldMapLayer.LineWidth; }
+            set { _mapViewModel.WorldMapLayer.LineWidth = (float)value; }
+        }
+
+        public bool IsChecked
+        {
+            get { return _mapViewModel.IsWorldMapVisible; }
+            set { _mapViewModel.IsWorldMapVisible = value; }
+        }
         [Initialize]
         public ObservableList<WorldMapFeatureNode> Features { get; set; }
     }

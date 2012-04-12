@@ -17,6 +17,7 @@ using ESME;
 using ESME.Mapping;
 using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.Layers;
+using ESMEWorkbench.ViewModels.Main;
 using ESMEWorkbench.Views;
 using HRC.Aspects;
 using HRC.Navigation;
@@ -34,6 +35,7 @@ namespace ESMEWorkbench.ViewModels.Map
         #region Private fields
 
         readonly IViewAwareStatus _viewAwareStatus;
+        readonly MainViewModel _mainViewModel;
         Dispatcher _dispatcher;
         WpfMap _wpfMap;
 
@@ -42,8 +44,9 @@ namespace ESMEWorkbench.ViewModels.Map
         public string MapDLLVersion { get; private set; }
 
         [ImportingConstructor]
-        public MapViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBox)
+        public MapViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBox, MainViewModel mainViewModel)
         {
+            _mainViewModel = mainViewModel;
             viewAwareStatus.ViewLoaded += ViewLoaded;
             try
             {
@@ -135,11 +138,11 @@ namespace ESMEWorkbench.ViewModels.Map
                 Name = "World Map",
             };
             _wpfMap.Overlays.Add(WorldMapLayer.Overlay);
-
-            MediatorMessage.Send(MediatorMessage.MapViewModelInitialized);
+            WorldMapLayer.Overlay.IsVisible = Settings.Default.ShowWorldMap;
+            _mainViewModel.LayerTreeViewModel.MapViewModel = this;
         }
 
-        public MapLayerViewModel WorldMapLayer { get; set; }
+        public MapLayerViewModel WorldMapLayer { get; private set; }
         public bool IsGridVisible
         {
             get { return Settings.Default.ShowGrid; }
@@ -165,6 +168,15 @@ namespace ESMEWorkbench.ViewModels.Map
             {
                 _wpfMap.MapTools.PanZoomBar.Visibility = value ? Visibility.Visible : Visibility.Hidden;
                 Settings.Default.ShowPanZoom = value;
+            }
+        }
+        public bool IsWorldMapVisible
+        {
+            get { return Settings.Default.ShowWorldMap; }
+            set
+            {
+                WorldMapLayer.Overlay.IsVisible = value;
+                Settings.Default.ShowWorldMap = value;
             }
         }
 

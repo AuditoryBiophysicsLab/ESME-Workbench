@@ -868,8 +868,6 @@ namespace ESMEWorkbench.Data
         }
 
 
-        public void InitializeIfViewModelsReady() { if (_allViewModelsAreReady) Initialize(); }
-
         void Initialize()
         {
             //Globals.AppSettings.VerifyExperimentsStillExist();
@@ -1197,7 +1195,7 @@ namespace ESMEWorkbench.Data
                 bathyBoundsLayer.Done();
 
                 const string bathyBitmapName = "Bathymetry: Bitmap";
-                var colormap = new DualColormap(Colormap.Summer, Colormap.Jet)
+                var colormap = new DualColormap(Colormap.Summer, Colormap.Haxby)
                 {
                     Threshold = 0,
                 };

@@ -20,20 +20,6 @@ namespace ESMEWorkbench.Data
     {
         static Dispatcher _mainViewModelDispatcher;
 
-        [MediatorMessageSink(MediatorMessage.MainViewModelInitialized)]
-        void MainViewModelInitialized(Dispatcher dispatcher)
-        {
-            _mainViewModelDispatcher = dispatcher;
-        }
-
-        [MediatorMessageSink(MediatorMessage.AllViewModelsAreReady)]
-        void AllViewModelsAreReady(bool allViewModelsAreReady)
-        {
-            _allViewModelsAreReady = true;
-            InitializeIfViewModelsReady();
-        }
-        static bool _allViewModelsAreReady;
-
         [MediatorMessageSink(MediatorMessage.AddFileCommand)]
         void AddFileCommand(string fileName)
         {

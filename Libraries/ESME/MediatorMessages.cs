@@ -34,11 +34,6 @@ namespace ESME
         public const string SetTreeRoots = "SetTreeRootsMessage";
         public const string EnableGUI = "EnableGUIMessage";
 
-        public const string LayerListViewModelInitialized = "LayerListViewModelInitializedMessage";
-        public const string MapViewModelInitialized = "MapViewModelInitializedMessage";
-        public const string MainViewModelInitialized = "MainViewModelInitializedMessage";
-        public const string AllViewModelsAreReady = "AllViewModelsAreReadyMessage";
-
         public const string AnalysisPointViewInitialized = "AnalysisPointViewInitializedMessage";
         public const string TransmissionLossFieldViewInitialized = "TransmissionLossFieldViewInitializedMessage";
         public const string TransmissionLossRadialViewInitialized = "TransmissionLossRadialViewInitializedMessage";

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -18,7 +17,6 @@ using ESME.TransmissionLoss;
 using ESMEWorkbench.Data;
 using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.Map;
-using ESMEWorkbench.ViewModels.RecentFiles;
 using HRC;
 using HRC.Navigation;
 using HRC.Services;
@@ -64,7 +62,7 @@ namespace ESMEWorkbench.ViewModels.Main
             _viewAwareStatus = viewAwareStatus;
             _messageBox = messageBox;
             Database = database;
-            MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox);
+            MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this);
             if (Designer.IsInDesignMode) return;
             _viewAwareStatus.ViewUnloaded += () =>
             {
@@ -82,7 +80,6 @@ namespace ESMEWorkbench.ViewModels.Main
 #endif
 
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
-                MediatorMessage.Send(MediatorMessage.MainViewModelInitialized, _dispatcher);
                 Globals.AppSettings.PluginManagerService = _plugins;
                 if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database")))
                     Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
@@ -198,62 +195,6 @@ namespace ESMEWorkbench.ViewModels.Main
             _visualizer.ShowDialog("AboutView", aboutViewModel);
         }
 
-        #region public RecentFileDescriptor RecentFilesSelectedItem { get; set; }
-
-        public RecentFileDescriptor RecentFilesSelectedItem
-        {
-            get { return null; }
-            set
-            {
-                if (_recentFilesSelectedItem == value) return;
-                _recentFilesSelectedItem = value;
-                if (_recentFilesSelectedItem != null)
-                {
-                    if (!_recentFilesSelectedItem.LongName.EndsWith(".nemo"))
-                    {
-                        RecentFiles.RemoveFile(_recentFilesSelectedItem.LongName);
-                        _recentFilesSelectedItem = null;
-                        return;
-                    }
-                    try
-                    {
-                        //OpenScenarioHandler(_recentFilesSelectedItem.LongName);
-                        NotifyPropertyChanged(RecentFilesSelectedItemChangedEventArgs);
-                        return;
-                    }
-                    catch (Exception e)
-                    {
-                        _messageBox.ShowError("Error opening scenario: " + e.Message);
-                        RecentFiles.RemoveFile(_recentFilesSelectedItem.LongName);
-                    }
-                }
-                NotifyPropertyChanged(RecentFilesSelectedItemChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs RecentFilesSelectedItemChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RecentFilesSelectedItem);
-        RecentFileDescriptor _recentFilesSelectedItem;
-
-        #endregion
-
-        #region public RecentFileList RecentFiles { get; set; }
-
-        public RecentFileList RecentFiles
-        {
-            get { return _recentFiles; }
-            set
-            {
-                if (_recentFiles == value) return;
-                _recentFiles = value;
-                NotifyPropertyChanged(RecentFilesChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs RecentFilesChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RecentFiles);
-        RecentFileList _recentFiles = new RecentFileList();
-
-        #endregion
-
         #region public bool IsInAnalysisPointMode { get; set; }
 
         public bool IsInAnalysisPointMode
@@ -311,38 +252,5 @@ namespace ESMEWorkbench.ViewModels.Main
         SimpleCommand<object, EventToCommandArgs> _previewKeyDown;
 
         #endregion
-
-        [MediatorMessageSink(MediatorMessage.MainViewModelInitialized), UsedImplicitly]
-        void MainViewModelInitialized(Dispatcher dispatcher)
-        {
-            _mainViewModelInitialized = true;
-            AllViewModelsAreReady();
-        }
-        static bool _mainViewModelInitialized;
-
-        [MediatorMessageSink(MediatorMessage.MapViewModelInitialized), UsedImplicitly]
-        void MapViewModelInitialized(bool dummy)
-        {
-            _mapViewModelInitialized = true;
-            AllViewModelsAreReady();
-        }
-        static bool _mapViewModelInitialized;
-
-        [MediatorMessageSink(MediatorMessage.LayerListViewModelInitialized), UsedImplicitly]
-        void LayerListViewModelInitialized(bool dummy)
-        {
-            _layerListViewModelInitialized = true;
-            AllViewModelsAreReady();
-        }
-        static bool _layerListViewModelInitialized;
-
-        static void AllViewModelsAreReady()
-        {
-            if (!_layerListViewModelInitialized || !_mapViewModelInitialized || !_mainViewModelInitialized) return;
-            _allViewModelsAreReady = true;
-            MediatorMessage.Send(MediatorMessage.AllViewModelsAreReady, true);
-        }
-        static bool _allViewModelsAreReady;
-
     }
 }
