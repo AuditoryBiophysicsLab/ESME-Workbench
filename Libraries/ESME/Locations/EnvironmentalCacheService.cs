@@ -24,19 +24,19 @@ namespace ESME.Locations
     public class EnvironmentalCacheService
     {
         public EnvironmentalCacheService() {}
-        public EnvironmentalCacheService(IPluginManagerService pluginManagerService, MasterDatabaseService databaseService)
+        public EnvironmentalCacheService(IPluginManagerService plugins, MasterDatabaseService database)
         {
-            _pluginManagerService = pluginManagerService;
-            _databaseService = databaseService;
+            _plugins = plugins;
+            _database = database;
         }
 
-        [Import] IPluginManagerService _pluginManagerService;
-        [Import] MasterDatabaseService _databaseService;
+        [Import] IPluginManagerService _plugins;
+        [Import] MasterDatabaseService _database;
 
         public PercentProgressList<PercentProgressList<Location>> ImportMissingDatasets()
         {
             var result = new PercentProgressList<PercentProgressList<Location>>();
-            foreach (var locationProgress in _databaseService.Locations.Select(ImportLocationDatasets).Where(l => l != null))
+            foreach (var locationProgress in _database.Locations.Select(ImportLocationDatasets).Where(l => l != null))
                 result.Add(locationProgress);
             return result;
         }
@@ -75,8 +75,9 @@ namespace ESME.Locations
         ActionBlock<PercentProgress<EnvironmentalDataSet>> CreateImporter(TaskScheduler taskScheduler = null, int boundedCapacity = -1, int maxDegreeOfParallelism = -1)
         {
             if (taskScheduler == null) taskScheduler = TaskScheduler.Default;
-            if (_pluginManagerService == null) throw new ServiceNotFoundException("Required service PluginManager was not found");
-            if (_databaseService == null) throw new ServiceNotFoundException("Required service LocationManager was not found");
+            if (_plugins == null) throw new ServiceNotFoundException("Required service PluginManager was not found");
+            if (_database == null) throw new ServiceNotFoundException("Required service MasterDatabaseService was not found");
+            if (string.IsNullOrEmpty(_database.MasterDatabaseDirectory)) throw new ServiceNotFoundException("Required service MasterDatabaseService is not properly configured.");
             var newImporter = new ActionBlock<PercentProgress<EnvironmentalDataSet>>(job => Import(job),
                                                                                      new ExecutionDataflowBlockOptions
                                                                                      {
@@ -92,11 +93,11 @@ namespace ESME.Locations
             Interlocked.Increment(ref _busyCount);
             var dataSet = job.ProgressTarget;
             var progress = job;
-            var sourcePlugin = (EnvironmentalDataSourcePluginBase)_pluginManagerService[dataSet.SourcePlugin];
+            var sourcePlugin = (EnvironmentalDataSourcePluginBase)_plugins[dataSet.SourcePlugin];
             var geoRect = dataSet.Location.GeoRect;
             var resolution = dataSet.Resolution;
             var timePeriod = dataSet.TimePeriod;
-            var fileName = Path.Combine(_databaseService.MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
+            var fileName = Path.Combine(_database.MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
             progress.Report(0);
             //Console.WriteLine("Importer: About to import {0}[{1}] from region {2} {3} {4} {5}", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, dataSet.Resolution, geoRect.North, geoRect.South, geoRect.East, geoRect.West);
             //Console.WriteLine("Importer: About to invoke {0} plugin [{1}]", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, sourcePlugin.PluginName);
@@ -196,7 +197,8 @@ namespace ESME.Locations
                     requestedData.LastAccessed = DateTime.Now;
                     return requestedData.Data;
                 }
-                _cache[dataSet.Guid] = EnvironmentalCacheEntry.Load(_databaseService.MasterDatabaseDirectory, dataSet);
+                if (string.IsNullOrEmpty(_database.MasterDatabaseDirectory)) throw new ServiceNotFoundException("Required service MasterDatabaseService is not properly configured.");
+                _cache[dataSet.Guid] = EnvironmentalCacheEntry.Load(_database.MasterDatabaseDirectory, dataSet);
                 _cache[dataSet.Guid].LastAccessed = DateTime.Now;
                 return _cache[dataSet.Guid].Data;
             } 

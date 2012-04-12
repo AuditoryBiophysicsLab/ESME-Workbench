@@ -25,36 +25,35 @@ namespace ESME.Views.Controls
 
         #endregion
 
-        #region dependency property Color LineColor
+        #region dependency property Color LineOrSymbolColor
 
-        public static DependencyProperty LineColorProperty = DependencyProperty.Register("LineColor",
-                                                                                         typeof (Color),
-                                                                                         typeof (LayerControl),
-                                                                                         new FrameworkPropertyMetadata(Colors.Red, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+        public static DependencyProperty LineOrSymbolColorProperty = DependencyProperty.Register("LineOrSymbolColor",
+                                                                                 typeof (Color),
+                                                                                 typeof (LayerControl),
+                                                                                 new FrameworkPropertyMetadata(Colors.Red, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
-        public Color LineColor
+        public Color LineOrSymbolColor
         {
-            get { return (Color)GetValue(LineColorProperty); }
-            set { SetValue(LineColorProperty, value); }
+            get { return (Color)GetValue(LineOrSymbolColorProperty); }
+            set { SetValue(LineOrSymbolColorProperty, value); }
         }
 
         #endregion
 
-        #region dependency property double LineWidth
+        #region dependency property double LineOrSymbolSize
 
-        public static DependencyProperty LineWidthProperty = DependencyProperty.Register("LineWidth",
+        public static DependencyProperty LineOrSymbolSizeProperty = DependencyProperty.Register("LineOrSymbolSize",
                                                                                  typeof (double),
                                                                                  typeof (LayerControl),
                                                                                  new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
-        public double LineWidth
+        public double LineOrSymbolSize
         {
-            get { return (double)GetValue(LineWidthProperty); }
-            set { SetValue(LineWidthProperty, value); }
+            get { return (double)GetValue(LineOrSymbolSizeProperty); }
+            set { SetValue(LineOrSymbolSizeProperty, value); }
         }
 
         #endregion
-
 
         #region dependency property string LayerName
 

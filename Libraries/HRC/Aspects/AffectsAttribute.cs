@@ -45,7 +45,6 @@ namespace HRC.Aspects
         [IntroduceMember(Visibility = Visibility.Public, OverrideAction = MemberOverrideAction.Ignore)]
         public event PropertyChangedEventHandler PropertyChanged;
 
-
         public override void OnSetValue(LocationInterceptionArgs args)
         {
             // Don't go further if the new value is equal to the old one.

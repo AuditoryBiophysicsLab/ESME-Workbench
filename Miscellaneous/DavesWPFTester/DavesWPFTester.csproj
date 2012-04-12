@@ -220,6 +220,10 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\ESME.Tests\ESME.Tests.csproj">
+      <Project>{30119915-93B3-4B5F-8678-9FB7B0CF8FC2}</Project>
+      <Name>ESME.Tests</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libraries\ESME.Views\ESME.Views.csproj">
       <Project>{49221733-2EB6-468F-8833-06C0E36B3C83}</Project>
       <Name>ESME.Views</Name>
