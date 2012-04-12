@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using ESME.Database;
+using ESME.Plugins;
 using ESME.Scenarios;
 using HRC.Aspects;
 
@@ -25,5 +26,26 @@ namespace ESME.Locations
         public virtual LayerSettings LayerSettings { get; set; }
 
         public virtual ICollection<LogEntry> Logs { get; set; }
+
+        [NotMapped]
+        public string LayerName
+        {
+            get
+            {
+                switch (((PluginIdentifier)SourcePlugin).PluginSubtype)
+                {
+                    case PluginSubtype.Wind:
+                        return "Wind Speed";
+                    case PluginSubtype.SoundSpeed:
+                        return "Sound Speed";
+                    case PluginSubtype.Bathymetry:
+                        return "Bathymetry";
+                    case PluginSubtype.Sediment:
+                        return "Sediment Type";
+                    default:
+                        throw new ApplicationException(string.Format("Unknown layer type: {0}", ((PluginIdentifier)SourcePlugin).PluginSubtype));
+                }
+            }
+        }
     }
 }

@@ -6,11 +6,12 @@
         xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:Locations="clr-namespace:ESME.Locations;assembly=ESME"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
         xmlns:Scenarios="clr-namespace:ESME.Scenarios;assembly=ESME"
         xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views"
-        xmlns:System="clr-namespace:System;assembly=mscorlib" Title="Scenario Tree View Tester"
+        Title="Scenario Tree View Tester"
         d:DataContext="{d:DesignInstance app:MainWindowViewModel}"
         mef:ViewModelLocator.ViewModel="MainWindowViewModel"
         SizeToContent="WidthAndHeight"
@@ -41,7 +42,7 @@
             <TreeView x:Name="TreeView" BorderBrush="Transparent" ItemsSource="{Binding RootNodes}">
                 <TreeView.Resources>
                     <HierarchicalDataTemplate DataType="{x:Type Scenarios:Scenario}" ItemsSource="{Binding Platforms}">
-                        <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding Name}" LineColorVisibility="Collapsed"  />
+                        <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding Name, StringFormat=Scenario: {0}}" LineColorVisibility="Collapsed" />
                     </HierarchicalDataTemplate>
                     <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
                         <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding PlatformName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" />
@@ -49,8 +50,32 @@
                     <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
                         <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding SourceName}" LineColorVisibility="Collapsed" />
                     </HierarchicalDataTemplate>
-                    <DataTemplate DataType="{x:Type Scenarios:Mode}">
+                    <HierarchicalDataTemplate DataType="{x:Type app:EnvironmentNode}" ItemsSource="{Binding EnvironmentLayers}">
+                        <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="Environment" LineColorVisibility="Collapsed" />
+                    </HierarchicalDataTemplate>
+                    <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
                         <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding ModeName}" LineColorVisibility="Collapsed" />
+                    </HierarchicalDataTemplate>
+                    <HierarchicalDataTemplate DataType="{x:Type app:WorldMapNode}" ItemsSource="{Binding Features}">
+                        <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="World Map" LineOrSymbolColor="{Binding LineColor}" LineOrSymbolSize="{Binding LineWeight}" />
+                    </HierarchicalDataTemplate>
+                    <HierarchicalDataTemplate DataType="{x:Type app:SedimentNode}" ItemsSource="{Binding SedimentTypes}">
+                        <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="Sediment" LineColorVisibility="Collapsed" />
+                    </HierarchicalDataTemplate>
+                    <DataTemplate DataType="{x:Type Scenarios:TransmissionLoss}">
+                        <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type app:SedimentTypeNode}">
+                        <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="{Binding SedimentType}" LineOrSymbolColor="{Binding SymbolColor}" LineOrSymbolSize="{Binding SymbolSize}" />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type Locations:EnvironmentalDataSet}">
+                        <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type app:WorldMapFeatureNode}">
+                        <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="{Binding FeatureName}" LineColorVisibility="Collapsed" />
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type app:BathymetryNode}">
+                        <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="Bathymetry" LineColorVisibility="Collapsed" />
                     </DataTemplate>
                 </TreeView.Resources>
             </TreeView>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Cinch;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
@@ -96,7 +97,26 @@ namespace ESME.Views.Locations
             // Bathymetry dataset at 0.5min resolution
             Console.WriteLine("Importing 0.5min bathymetry");
             _cache.ImportDataset(_database.CreateEnvironmentalDataSet(location, 0.5f, TimePeriod.Invalid, _plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
-            Scenario = Scenario.FromNemoFile(_database, location, ScenarioFilename, simAreaFolder); 
+            Scenario = Scenario.FromNemoFile(_database, location, ScenarioFilename, simAreaFolder);
+            _database.SetEnvironmentalData(Scenario,
+                                           (from data in location.EnvironmentalDataSets
+                                            where data.SourcePlugin.PluginSubtype == PluginSubtype.Wind && ((TimePeriod)Scenario.TimePeriod == (TimePeriod)data.TimePeriod)
+                                            select data).FirstOrDefault());
+
+            _database.SetEnvironmentalData(Scenario,
+                                           (from data in location.EnvironmentalDataSets
+                                            where data.SourcePlugin.PluginSubtype == PluginSubtype.SoundSpeed && ((TimePeriod)Scenario.TimePeriod == (TimePeriod)data.TimePeriod)
+                                            select data).FirstOrDefault());
+
+            _database.SetEnvironmentalData(Scenario,
+                                           (from data in location.EnvironmentalDataSets
+                                            where data.SourcePlugin.PluginSubtype == PluginSubtype.Sediment
+                                            select data).FirstOrDefault());
+
+            _database.SetEnvironmentalData(Scenario,
+                                           (from data in location.EnvironmentalDataSets
+                                            where data.SourcePlugin.PluginSubtype == PluginSubtype.Bathymetry
+                                            select data).FirstOrDefault());
             CloseActivePopUpCommand.Execute(true);
         }
         #endregion

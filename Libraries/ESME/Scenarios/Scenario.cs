@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using ESME.Behaviors;
 using ESME.Database;
 using ESME.Environment;
 using ESME.Locations;
+using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 
@@ -173,6 +175,8 @@ namespace ESME.Scenarios
             return scenario;
         }
         #endregion
+
+        [UsedImplicitly] public event PropertyChangedEventHandler PropertyChanged;
     }
 
     public static class ScenarioExensions

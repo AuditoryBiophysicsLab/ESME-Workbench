@@ -60,7 +60,7 @@ namespace ESME.Views.Controls
         public static DependencyProperty LayerNameProperty = DependencyProperty.Register("LayerName",
                                                                                          typeof (string),
                                                                                          typeof (LayerControl),
-                                                                                         new FrameworkPropertyMetadata("LayerName", FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+                                                                                         new FrameworkPropertyMetadata("LayerName"));
 
         public string LayerName
         {

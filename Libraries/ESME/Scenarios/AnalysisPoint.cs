@@ -24,12 +24,16 @@ namespace ESME.Scenarios
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
+
         public bool IsReadyToCalculate { get; set; }
         public virtual AnalysisPoint AnalysisPoint { get; set; }
         public virtual Mode Mode { get; set; }
         public virtual LayerSettings LayerSettings { get; set; }
 
         public virtual ICollection<Radial> Radials { get; set; }
+
+        [NotMapped]
+        public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", AnalysisPoint.Geo.Latitude, AnalysisPoint.Geo.Longitude); } }
     }
 
     public class Radial : IHaveGuid
