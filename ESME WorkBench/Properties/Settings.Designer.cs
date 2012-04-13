@@ -406,5 +406,29 @@ namespace ESMEWorkbench.Properties {
                 this["SelectedRibbonTabIndex"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("#FF808080")]
+        public global::System.Windows.Media.Color WorldMapLineColor {
+            get {
+                return ((global::System.Windows.Media.Color)(this["WorldMapLineColor"]));
+            }
+            set {
+                this["WorldMapLineColor"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double WorldMapLineWeight {
+            get {
+                return ((double)(this["WorldMapLineWeight"]));
+            }
+            set {
+                this["WorldMapLineWeight"] = value;
+            }
+        }
     }
 }

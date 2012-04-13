@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -25,6 +24,8 @@ namespace ESME.Scenarios
         public virtual LayerSettings LayerSettings { get; set; }
 
         public virtual ICollection<TransmissionLoss> TransmissionLosses { get; set; }
+
+        public void CreateMapLayers() { throw new NotImplementedException(); }
     }
 
     [NotifyPropertyChanged]
@@ -74,6 +75,8 @@ namespace ESME.Scenarios
             private set { _validationErrorText = value; }
         }
         string _validationErrorText;
+
+        public void CreateMapLayers() { throw new NotImplementedException(); }
     }
 
     [NotifyPropertyChanged]

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Data;
@@ -17,7 +16,6 @@ using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.Plugins;
 using ESME.Scenarios;
-using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
@@ -179,7 +177,7 @@ namespace ESME.Locations
             if (saveChanges) SaveChanges();
         }
 
-        public void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry, int radialCount, float radialLength, bool saveChanges = false)
+        public void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry, bool saveChanges = false)
         {
             var existing = (from a in Context.AnalysisPoints.Local
                             where a.Geo == analysisPoint.Geo
@@ -204,7 +202,7 @@ namespace ESME.Locations
                     IsReadyToCalculate = false,
                     Mode = mode,
                 };
-
+                var radialCount = mode.MaxPropagationRadius <= 10000 ? 8 : 16;
                 for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
                 {
                     var radial = new Radial
@@ -213,7 +211,7 @@ namespace ESME.Locations
                         CalculationCompleted = DateTime.MaxValue,
                         CalculationStarted = DateTime.MaxValue,
                         Bearing = (360.0 / radialCount) * radialIndex,
-                        Length = radialLength,
+                        Length = transmissionLoss.Mode.MaxPropagationRadius,
                         IsCalculated = false,
                     };
                     Add(radial);

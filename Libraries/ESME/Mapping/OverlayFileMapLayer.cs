@@ -1,13 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Xml.Serialization;
-using Cinch;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
-using ESME.TransmissionLoss.CASS;
-using HRC.ViewModels;
+using HRC.Navigation;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Mapping
@@ -51,25 +51,7 @@ namespace ESME.Mapping
         public OverlayShapeMapLayer()
         {
             LayerOverlay.Layers.Clear();
-            PointColorMenu.Command = LineColorMenu.Command;
-            PointShapePickerMenu = new List<MenuItemViewModelBase>
-            {
-                PointColorMenu,
-                SymbolSizeMenu,
-                PointStyleMenu,
-            };
             PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
-            foreach (var item in PointStyleMenu.Children)
-            {
-                var item1 = item;
-                item.Command = new SimpleCommand<object, object>(obj =>
-                {
-                    PointSymbolType = ((PointSymbolTypeMenuItemViewModel)item1).PointSymbolType;
-                    MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                    MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
-                });
-            }
-            CheckProperPointSymbolTypeMenu();
             while (PointSymbolType == PointSymbolType.Cross) PointSymbolType = (PointSymbolType)(Random.Next(8));
         }
 
@@ -96,7 +78,24 @@ namespace ESME.Mapping
                                                 BaseShape.CreateShapeFromWellKnownData(overlayShape.WellKnownText)));
         }
 
+        static string WellKnownText(ICollection<Geo> geos)
+        {
+            if (geos.Count < 1) return null;
+            if (geos.Count == 1) return string.Format("POINT({0} {1})", geos.First().Latitude, geos.First().Longitude);
+            var retval = new StringBuilder();
+            retval.Append("LINESTRING(");
+            foreach (var geo in geos) retval.Append(string.Format("{0} {1}, ", geo.Longitude, geo.Latitude));
+            retval.Remove(retval.Length - 2, 2); // Lose the last comma and space
+            retval.Append(")");
+            return retval.ToString();
+        }
+
         public void Add(IEnumerable<OverlayShape> overlayShapes) { foreach (var shape in overlayShapes) Add(shape); }
+        public void Add(ICollection<Geo> geos)
+        {
+            _layer = new InMemoryFeatureLayer();
+            _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText(geos))));
+        }
 
         public void Clear() { if (_layer != null) _layer.InternalFeatures.Clear(); }
 
@@ -112,7 +111,8 @@ namespace ESME.Mapping
 
             _layer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
             LayerOverlay.Layers.Add(_layer);
-            MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+            MediatorMessage.Send(MediatorMessage.AddMapLayer, this);
+            //MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
         }
 
         [XmlIgnore]
@@ -128,22 +128,8 @@ namespace ESME.Mapping
     {
         public AnalysisPointLayer()
         {
-            ContextMenu.Add(new MenuItemViewModelBase
-            {
-                Header = "Properties...",
-                Command = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.EditAnalysisPoint, AnalysisPoint)),
-            });
             LayerType = LayerType.AnalysisPoint;
-            RemoveMenu.Command = new SimpleCommand<object, object>(obj => CanBeRemoved, obj =>
-            {
-                MediatorMessage.Send(MediatorMessage.RemoveLayer, this);
-                if (AnalysisPoint != null) MediatorMessage.Send(MediatorMessage.RemoveAnalysisPoint, AnalysisPoint);
-            });
-
         }
-
-        static readonly PropertyChangedEventArgs AnalysisPointChangedEventArgs =
-            ObservableHelper.CreateArgs<AnalysisPointLayer>(x => x.AnalysisPoint);
 
         AnalysisPoint _analysisPoint;
 
@@ -153,19 +139,14 @@ namespace ESME.Mapping
             get { return _analysisPoint; }
             set
             {
-                if (_analysisPoint == value) return;
-                if ((value != null) && (_analysisPoint != null)) _analysisPoint.PropertyChanged -= AnalysisPointChanged;
                 _analysisPoint = value;
-                OnPropertyChanged(AnalysisPointChangedEventArgs);
-                if (_analysisPoint != null) _analysisPoint.PropertyChanged += AnalysisPointChanged;
+                if (_analysisPoint != null) _analysisPoint.PropertyChanged += (s, e) =>
+                {
+                    var ap = (AnalysisPoint)s;
+                    ap.Validate();
+                    ValidationErrorText = ap.ValidationErrorText;
+                };
             }
-        }
-
-        void AnalysisPointChanged(object sender, PropertyChangedEventArgs e)
-        {
-            var ap = (AnalysisPoint)sender;
-            ap.Validate();
-            ValidationErrorText = ap.ValidationErrorText;
         }
 
         public override void Validate()
@@ -186,11 +167,6 @@ namespace ESME.Mapping
         public PropagationLayer() 
         {
             LayerType = LayerType.Propagation;
-            ContextMenu.Add(new MenuItemViewModelBase
-            {
-                Header = "View...",
-                Command = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.ViewPropagation, _transmissionLoss)),
-            });
         }
 
         Scenarios.TransmissionLoss _transmissionLoss;

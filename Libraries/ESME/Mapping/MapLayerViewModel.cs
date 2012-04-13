@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
-using System.Xml.Serialization;
 using Cinch;
 using ESME.Model;
+using HRC.Aspects;
 using HRC.Services;
 using HRC.Utility;
 using HRC.ViewModels;
@@ -15,12 +14,12 @@ using ThinkGeo.MapSuite.WpfDesktopEdition;
 namespace ESME.Mapping
 {
     [Serializable]
-    public class MapLayerViewModel : PropertyChangedBase, ISupportValidation, IHaveAName
+    [NotifyPropertyChanged]
+    public class MapLayerViewModel : ISupportValidation, IHaveAName
     {
         protected static readonly Random Random;
         static readonly Color[] Palette;
         static int _paletteIndex;
-
         #region Menu Initializers
         protected readonly MenuItemViewModelBase ColorMenu = new MenuItemViewModelBase
         {
@@ -135,42 +134,27 @@ namespace ESME.Mapping
 
         #endregion
 
-        Brush _areaColorBrush;
         int _index = -1;
-        LayerOverlay _layerOverlay;
-
-        Brush _lineColorBrush;
 
         #region Helpers
-        [XmlIgnore]
         protected static Color RandomColor
         {
             get
             {
-#if true
                 var color = Palette[_paletteIndex++];
                 _paletteIndex %= Palette.Length;
                 return color;
-#else
-                if (_random == null) _random = new Random();
-                var randomBytes = new byte[3];
-                while (true)
-                {
-                    _random.NextBytes(randomBytes);
-                    if ((randomBytes[0] >= 0x40) || (randomBytes[1] >= 0x40) || (randomBytes[2] >= 0x40)) break;
-                }
-                return Color.FromArgb(255, randomBytes[0], randomBytes[1], randomBytes[2]);
-#endif
             }
         }
 
-        static AreaStyle CreateAreaStyle(Color pen, float width, Color brush)
+        public static AreaStyle CreateAreaStyle(Color pen, float width, Color brush)
         {
+            if (brush == Colors.Transparent) return new AreaStyle(new GeoPen(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B), width));
             return new AreaStyle(new GeoPen(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B), width),
                                  new GeoSolidBrush(GeoColor.FromArgb(brush.A, brush.R, brush.G, brush.B)));
         }
 
-        static LineStyle CreateLineStyle(Color pen, float width) { return new LineStyle(new GeoPen(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B), width)); }
+        public static LineStyle CreateLineStyle(Color pen, float width) { return new LineStyle(new GeoPen(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B), width)); }
         protected static PointStyle CreatePointStyle(PointSymbolType pointSymbolType, Color pen, int width)
         {
             return new PointStyle(pointSymbolType, new GeoSolidBrush(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B)),
@@ -180,32 +164,12 @@ namespace ESME.Mapping
 
         #endregion
 
-        #region public bool IsValid { get; set; }
-        static readonly PropertyChangedEventArgs IsValidChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.IsValid);
-
-        bool _isValid = true;
-
-        [XmlIgnore]
-        public bool IsValid
-        {
-            get { return _isValid; }
-            private set
-            {
-                if (_isValid == value) return;
-                _isValid = value;
-                OnPropertyChanged(IsValidChangedEventArgs);
-            }
-        }
-        #endregion
+        public bool IsValid { get; private set; }
 
         #region public string ValidationErrorText { get; set; }
-        static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.ValidationErrorText);
 
         string _validationErrorText;
 
-        [XmlIgnore]
         public string ValidationErrorText
         {
             get
@@ -218,7 +182,6 @@ namespace ESME.Mapping
                 if (_validationErrorText == value) return;
                 _validationErrorText = value;
                 IsValid = string.IsNullOrEmpty(_validationErrorText);
-                OnPropertyChanged(ValidationErrorTextChangedEventArgs);
             }
         }
         #endregion
@@ -231,6 +194,8 @@ namespace ESME.Mapping
 
         public MapLayerViewModel()
         {
+            CanChangeLineWidth = true;
+            IsValid = true;
             LayerOverlay = new LayerOverlay
             {
                 TileType = TileType.SingleTile,
@@ -244,37 +209,14 @@ namespace ESME.Mapping
             CanBeRemoved = false;
             CanBeReordered = true;
 
-            PropertiesMenu.Command = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.ShowProperties, this));
-
             LineColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeLineColor, obj =>
             {
                 var result = ColorPickerService.ShowDialog();
                 if (!result.HasValue || !result.Value) return;
                 LineColor = ColorPickerService.Color;
-                MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
             });
 
-            MoveToTopMenu.Command = new SimpleCommand<object, object>(arg => Index < (MapLayers.Count - 1), obj =>
-            {
-                MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                MediatorMessage.Send(MediatorMessage.MoveLayerToTop, this);
-            });
-            MoveUpMenu.Command = new SimpleCommand<object, object>(arg => Index < (MapLayers.Count - 1), obj =>
-            {
-                MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                MediatorMessage.Send(MediatorMessage.MoveLayerUp, this);
-            });
-            MoveDownMenu.Command = new SimpleCommand<object, object>(arg => Index > 0, obj =>
-            {
-                MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                MediatorMessage.Send(MediatorMessage.MoveLayerDown, this);
-            });
-            MoveToBottomMenu.Command = new SimpleCommand<object, object>(arg => Index > 0, obj =>
-            {
-                MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, this);
-            });
             ContextMenu = new List<MenuItemViewModelBase>
             {
                 OrderMenu,
@@ -304,8 +246,7 @@ namespace ESME.Mapping
                     Command = new SimpleCommand<object, object>(obj => CanChangeLineWidth, obj =>
                     {
                         LineWidth = width;
-                        MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                        MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                        MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
                     }),
                 });
             }
@@ -321,16 +262,13 @@ namespace ESME.Mapping
                     Command = new SimpleCommand<object, object>(obj => CanChangeLineWidth, obj =>
                     {
                         LineWidth = size;
-                        MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                        MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                        MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
                     }),
                 });
             }
 
             ColorMenu.Children.Add(LineColorMenu);
             ColorMenu.Children.Add(LineWeightMenu);
-
-            IsChecked = true;
 
             CheckProperLineWidthMenu();
         }
@@ -340,21 +278,8 @@ namespace ESME.Mapping
         public static IHRCColorPickerService ColorPickerService { get; set; }
         public static GeoCollection<Overlay> MapOverlay { get; set; }
 
-        [XmlIgnore]
-        public LayerOverlay LayerOverlay
-        {
-            get { return _layerOverlay; }
-            set
-            {
-                _layerOverlay = value;
-                Overlay = _layerOverlay;
-            }
-        }
+        public LayerOverlay LayerOverlay { get; set; }
 
-        [XmlIgnore]
-        public Overlay Overlay { get; set; }
-
-        [XmlIgnore]
         public virtual Visibility IsLineColorVisible
         {
             get
@@ -378,7 +303,6 @@ namespace ESME.Mapping
             }
         }
 
-        [XmlIgnore]
         public Visibility IsAreaColorVisible
         {
             get
@@ -394,7 +318,6 @@ namespace ESME.Mapping
             }
         }
 
-        [XmlIgnore]
         public bool IsFeatureLayer
         {
             get
@@ -412,7 +335,6 @@ namespace ESME.Mapping
             }
         }
 
-        [XmlIgnore]
         public string PointLineTooltip
         {
             get
@@ -422,291 +344,87 @@ namespace ESME.Mapping
             }
         }
 
-        [XmlElement]
-        public int Index
-        {
-            get { return (MapOverlay != null) ? MapOverlay.IndexOf(LayerOverlay) : _index; }
-            set
-            {
-                if ((MapOverlay != null) && (MapOverlay.Contains(LayerOverlay))) MapOverlay.MoveTo(LayerOverlay, value);
-                _index = value;
-            }
-        }
+        public string ToolTip { get; set; }
 
-        #region public string ToolTip { get; set; }
-        static readonly PropertyChangedEventArgs ToolTipChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.ToolTip);
-
-        string _toolTip;
-
-        public string ToolTip
-        {
-            get { return _toolTip; }
-            set
-            {
-                if (_toolTip == value) return;
-                _toolTip = value;
-                OnPropertyChanged(ToolTipChangedEventArgs);
-            }
-        }
-        #endregion
-
-        #region public LayerType LayerType { get; set; }
         LayerType _layerType;
-
         public LayerType LayerType
         {
             get { return _layerType; }
             set
             {
-                if (_layerType == value) return;
                 _layerType = value;
 
                 LineOrPointPickerMenu = IsFeatureLayer ? PointShapePickerMenu : LineColorPickerMenu;
             }
         }
-        #endregion
-
-        #region public bool CanBeReordered { get; set; }
-        static readonly PropertyChangedEventArgs CanBeReorderedChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanBeReordered);
 
         bool _canBeReordered;
-
         public bool CanBeReordered
         {
             get { return _canBeReordered; }
             set
             {
                 OrderMenu.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
-                if (_canBeReordered == value) return;
                 _canBeReordered = value;
-                OnPropertyChanged(CanBeReorderedChangedEventArgs);
             }
         }
-        #endregion
-
-        #region public bool CanBeRemoved { get; set; }
-        static readonly PropertyChangedEventArgs CanBeRemovedChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanBeRemoved);
 
         bool _canBeRemoved;
-
         public bool CanBeRemoved
         {
             get { return _canBeRemoved; }
             set
             {
                 RemoveMenu.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
-                if (_canBeRemoved == value) return;
                 _canBeRemoved = value;
-                OnPropertyChanged(CanBeRemovedChangedEventArgs);
             }
         }
-        #endregion
-
-        #region public bool CanChangeLineColor { get; set; }
-        static readonly PropertyChangedEventArgs CanChangeLineColorChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanChangeLineColor);
-
         bool _canChangeLineColor;
-
         public bool CanChangeLineColor
         {
             get { return _canChangeLineColor; }
             set
             {
-                if (_canChangeLineColor == value) return;
                 _canChangeLineColor = value;
-                OnPropertyChanged(CanChangeLineColorChangedEventArgs);
             }
         }
-        #endregion
 
-        #region public bool CanChangeAreaColor { get; set; }
-        static readonly PropertyChangedEventArgs CanChangeAreaColorChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanChangeAreaColor);
+        public bool CanChangeAreaColor { get; set; }
 
-        bool _canChangeAreaColor;
+        public bool CanChangeLineWidth { get; set; }
 
-        public bool CanChangeAreaColor
-        {
-            get { return _canChangeAreaColor; }
-            set
-            {
-                _canChangeAreaColor = value;
-                OnPropertyChanged(CanChangeAreaColorChangedEventArgs);
-            }
-        }
-        #endregion
+        public List<MenuItemViewModelBase> ContextMenu { get; set; }
 
-        #region public bool CanChangeLineWidth { get; set; }
-        static readonly PropertyChangedEventArgs CanChangeLineWidthChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanChangeLineWidth);
+        public List<MenuItemViewModelBase> LineColorPickerMenu { get; set; }
 
-        bool _canChangeLineWidth = true;
+        public List<MenuItemViewModelBase> LineOrPointPickerMenu { get; set; }
 
-        public bool CanChangeLineWidth
-        {
-            get { return _canChangeLineWidth; }
-            set
-            {
-                if (_canChangeLineWidth == value) return;
-                _canChangeLineWidth = value;
-                OnPropertyChanged(CanChangeLineWidthChangedEventArgs);
-            }
-        }
-        #endregion
+        public List<MenuItemViewModelBase> PointShapePickerMenu { get; set; }
 
-        #region public List<MenuItemViewModelBase> ContextMenu { get; set; }
-        static readonly PropertyChangedEventArgs ContextMenuChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.ContextMenu);
-
-        List<MenuItemViewModelBase> _contextMenu;
-
-        [XmlIgnore]
-        public List<MenuItemViewModelBase> ContextMenu
-        {
-            get { return _contextMenu; }
-            set
-            {
-                if (_contextMenu == value) return;
-                _contextMenu = value;
-                OnPropertyChanged(ContextMenuChangedEventArgs);
-            }
-        }
-        #endregion
-
-        #region public List<MenuItemViewModelBase> LineColorPickerMenu { get; set; }
-        static readonly PropertyChangedEventArgs LineColorPickerMenuChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineColorPickerMenu);
-
-        List<MenuItemViewModelBase> _lineColorPickerMenu;
-
-        [XmlIgnore]
-        public List<MenuItemViewModelBase> LineColorPickerMenu
-        {
-            get { return _lineColorPickerMenu; }
-            set
-            {
-                if (_lineColorPickerMenu == value) return;
-                _lineColorPickerMenu = value;
-                OnPropertyChanged(LineColorPickerMenuChangedEventArgs);
-            }
-        }
-        #endregion
-
-        #region public List<MenuItemViewModelBase> LineOrPointPickerMenu { get; set; }
-        static readonly PropertyChangedEventArgs LineOrPointPickerMenuChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineOrPointPickerMenu);
-
-        List<MenuItemViewModelBase> _lineOrPointPickerMenu;
-
-        [XmlIgnore]
-        public List<MenuItemViewModelBase> LineOrPointPickerMenu
-        {
-            get { return _lineOrPointPickerMenu; }
-            set
-            {
-                if (_lineOrPointPickerMenu == value) return;
-                _lineOrPointPickerMenu = value;
-                OnPropertyChanged(LineOrPointPickerMenuChangedEventArgs);
-            }
-        }
-        #endregion
-
-        #region public List<MenuItemViewModelBase> PointShapePickerMenu { get; set; }
-        static readonly PropertyChangedEventArgs PointShapePickerMenuChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.PointShapePickerMenu);
-
-        List<MenuItemViewModelBase> _pointShapePickerMenu;
-
-        [XmlIgnore]
-        public List<MenuItemViewModelBase> PointShapePickerMenu
-        {
-            get { return _pointShapePickerMenu; }
-            set
-            {
-                if (_pointShapePickerMenu == value) return;
-                _pointShapePickerMenu = value;
-                OnPropertyChanged(PointShapePickerMenuChangedEventArgs);
-            }
-        }
-        #endregion
-
-        #region public bool IsEnabled { get; set; }
-
+        bool _isEnabled = true;
         public bool IsEnabled
         {
             get { return _isEnabled; }
             set
             {
-                if (_isEnabled == value) return;
                 _isEnabled = value;
-                OnPropertyChanged(IsEnabledChangedEventArgs);
                 if (!_isEnabled) IsChecked = false;
             }
         }
-
-        static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.IsEnabled);
-        bool _isEnabled = true;
-
-        #endregion
-
-        #region public bool IsChecked { get; set; }
-        static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.IsChecked);
-
         bool _isChecked;
-        
         public bool IsChecked
         {
             get { return _isChecked; }
             set
             {
                 _isChecked = value;
-
-                try
-                {
-                    LayerOverlay.IsVisible = _isChecked;
-                }
-                catch (NullReferenceException) {}
-
-                MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
-
-                OnPropertyChanged(IsCheckedChangedEventArgs);
+                if (LayerOverlay != null) MediatorMessage.Send(_isChecked ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, LayerOverlay);
             }
         }
-        #endregion
 
-        #region public Brush LineColorBrush { get; set; }
-        [XmlIgnore]
-        public Brush LineColorBrush
-        {
-            get { return _lineColorBrush; }
-            set
-            {
-                if (_lineColorBrush == value) return;
-                _lineColorBrush = value;
-                OnPropertyChanged(LineColorBrushChangedEventArgs);
-            }
-        }
-        #endregion
+        public Brush LineColorBrush { get; set; }
 
-        #region public Brush AreaColorBrush { get; set; }
-        [XmlIgnore]
-        public Brush AreaColorBrush
-        {
-            get { return _areaColorBrush; }
-            set
-            {
-                if (_areaColorBrush == value) return;
-                _areaColorBrush = value;
-                OnPropertyChanged(AreaColorBrushChangedEventArgs);
-            }
-        }
-        #endregion
+        public Brush AreaColorBrush { get; set; }
 
         #region ISupportValidation Members
         public virtual void Validate()
@@ -715,16 +433,15 @@ namespace ESME.Mapping
         }
         #endregion
 
-        #region public AreaStyle AreaStyle { get; set; }
         AreaStyle _areaStyle;
-
-        [XmlIgnore]
         public AreaStyle AreaStyle
         {
             get { return _areaStyle; }
             set
             {
-                if (_areaStyle == value) return;
+                _areaStyle = value;
+                if (_areaStyle == null) return;
+
                 _lineColor = Color.FromArgb(value.OutlinePen.Color.AlphaComponent, value.OutlinePen.Color.RedComponent,
                                            value.OutlinePen.Color.GreenComponent, value.OutlinePen.Color.BlueComponent);
                 _lineWidth = value.OutlinePen.Width;
@@ -732,49 +449,45 @@ namespace ESME.Mapping
                                            value.FillSolidBrush.Color.RedComponent,
                                            value.FillSolidBrush.Color.GreenComponent,
                                            value.FillSolidBrush.Color.BlueComponent);
-                _areaStyle = value;
                 if (LayerOverlay.Layers.Count == 0) return;
                 ((FeatureLayer)LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = _areaStyle;
                 ((FeatureLayer)LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel =
                     ApplyUntilZoomLevel.Level20;
+                MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
             }
         }
-        #endregion
 
-        #region public LineStyle LineStyle { get; set; }
         LineStyle _lineStyle;
-
-        [XmlIgnore]
         public LineStyle LineStyle
         {
             get { return _lineStyle; }
             set
             {
-                if (_lineStyle == value) return;
                 _lineStyle = value;
+                if (_lineStyle == null) return;
                 if (LayerOverlay.Layers.Count == 0) return;
                 ((FeatureLayer)LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultLineStyle = _lineStyle;
                 ((FeatureLayer)LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel =
                     ApplyUntilZoomLevel.Level20;
+                MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
             }
         }
-        #endregion
 
         #region public LineStyle CustomLineStyle { get; set; }
         LineStyle _customLineStyle;
 
-        [XmlIgnore]
         public LineStyle CustomLineStyle
         {
             get { return _customLineStyle; }
             set
             {
-                if (_customLineStyle == value) return;
                 _customLineStyle = value;
+                if (_customLineStyle == null) return;
                 if (LayerOverlay.Layers.Count == 0) return;
                 ((FeatureLayer)LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.CustomStyles.Add(_customLineStyle);
                 ((FeatureLayer)LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel =
                     ApplyUntilZoomLevel.Level20;
+                MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
             }
         }
         #endregion
@@ -782,27 +495,24 @@ namespace ESME.Mapping
         #region public PointStyle PointStyle { get; set; }
         PointStyle _pointStyle;
 
-        [XmlIgnore]
         public PointStyle PointStyle
         {
             get { return _pointStyle; }
             set
             {
-                if (_pointStyle == value) return;
                 _pointStyle = value;
+                if (_pointStyle == null) return;
                 if (LayerOverlay.Layers.Count == 0) return;
                 ((FeatureLayer)LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultPointStyle = _pointStyle;
                 ((FeatureLayer)LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel =
                     ApplyUntilZoomLevel.Level20;
+                MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
             }
         }
         #endregion
 
         #region public float LineWidth { get; set; }
-        //float _lineWidth = (float)Math.Max(1, ((_random.NextDouble() * 9) + 1) / 2);
         float _lineWidth = Random.Next(2, 10) / 2.0f;
-
-        [XmlElement]
         public float LineWidth
         {
             get { return _lineWidth; }
@@ -813,6 +523,7 @@ namespace ESME.Mapping
                 _lineStyle = CreateLineStyle(LineColor, LineWidth);
                 _pointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
                 CheckProperLineWidthMenu();
+                MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
             }
         }
 
@@ -823,46 +534,26 @@ namespace ESME.Mapping
         }
         #endregion
 
-        #region public Color AreaColor { get; set; }
-        static readonly PropertyChangedEventArgs AreaColorBrushChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AreaColorBrush);
-
         Color _areaColor = RandomColor;
-
-        [XmlElement]
         public Color AreaColor
         {
             get { return _areaColor; }
             set
             {
-                if (_areaColor == value) return;
                 _areaColor = value;
                 _areaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
-                _areaColorBrush = new SolidColorBrush(_areaColor);
+                AreaColorBrush = new SolidColorBrush(_areaColor);
+                MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
             }
         }
-        #endregion
 
-        #region public string Name { get; set; }
-        [XmlElement]
         public string Name
         {
-            get { return Overlay.Name; }
-            set
-            {
-                if (Overlay.Name == value) return;
-                Overlay.Name = value;
-            }
+            get { return LayerOverlay.Name; }
+            set { LayerOverlay.Name = value; }
         }
-        #endregion
-
-        #region public Color LineColor { get; set; }
-        static readonly PropertyChangedEventArgs LineColorBrushChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineColorBrush);
 
         Color _lineColor = RandomColor;
-
-        [XmlElement]
         public Color LineColor
         {
             get { return _lineColor; }
@@ -873,21 +564,19 @@ namespace ESME.Mapping
                 _areaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
                 _lineStyle = CreateLineStyle(LineColor, LineWidth);
                 _pointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)Math.Max(1, LineWidth));
-                _lineColorBrush = new SolidColorBrush(_lineColor);
+                LineColorBrush = new SolidColorBrush(_lineColor);
+                MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
             }
         }
-        #endregion
 
         #region public PointSymbolType PointSymbolType { get; set; }
 
         PointSymbolType _pointSymbolType = (PointSymbolType)(Random.Next(8));
-
         public PointSymbolType PointSymbolType
         {
             get { return _pointSymbolType; }
             set
             {
-                if (_pointSymbolType == value) return;
                 _pointSymbolType = value;
                 _pointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
                 CheckProperPointSymbolTypeMenu();

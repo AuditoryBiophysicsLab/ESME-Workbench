@@ -98,5 +98,11 @@
     <Setting Name="SelectedRibbonTabIndex" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
+    <Setting Name="WorldMapLineColor" Type="System.Windows.Media.Color" Scope="User">
+      <Value Profile="(Default)">#FF808080</Value>
+    </Setting>
+    <Setting Name="WorldMapLineWeight" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

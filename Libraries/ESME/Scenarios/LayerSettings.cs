@@ -1,8 +1,10 @@
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Windows.Media;
 using ESME.Database;
 using ESME.Locations;
+using HRC;
 using HRC.Aspects;
 using HRC.WPF;
 
@@ -41,6 +43,12 @@ namespace ESME.Scenarios
         {
             get { return AreaDbColor.Color; }
             set { AreaDbColor.Color = value; }
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

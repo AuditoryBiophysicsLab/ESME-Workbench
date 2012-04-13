@@ -2,18 +2,18 @@
                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                 xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
+                xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                 xmlns:ia="http://schemas.microsoft.com/expression/2010/interactions"
                 xmlns:LocalControls="clr-namespace:ESMEWorkbench.Controls"
                 xmlns:Main="clr-namespace:ESMEWorkbench.ViewModels.Main"
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                xmlns:mef="http:\\www.codeplex.com\MEFedMVVM" 
+                xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
                 xmlns:p="clr-namespace:ESMEWorkbench.Properties"
                 xmlns:r="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
                 xmlns:Utility="clr-namespace:HRC.Utility;assembly=HRC"
                 xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
-                xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
                 Title="{Binding MainWindowTitle}"
                 Width="{Binding Source={x:Static p:Settings.Default},
                                 Path=WindowWidth,
@@ -60,9 +60,7 @@
             </StatusBarItem>
         </StatusBar>
         <!--  SelectedIndex="{Binding Source={x:Static p:Settings.Default}, Path=SelectedRibbonTabIndex, Mode=TwoWay}"  -->
-        <r:Ribbon x:Name="Ribbon"
-                  DockPanel.Dock="Top"
-                  SelectedIndex="{Binding SelectedRibbonTabIndex}">
+        <r:Ribbon x:Name="Ribbon" DockPanel.Dock="Top" SelectedIndex="{Binding SelectedRibbonTabIndex}">
             <r:Ribbon.ApplicationMenu>
                 <Controls:SlimRibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
                     <r:RibbonApplicationMenuItem Command="{Binding AboutCommand}"
@@ -95,30 +93,27 @@
                 </Controls:SlimRibbonApplicationMenu>
             </r:Ribbon.ApplicationMenu>
             <r:RibbonTab Header="Home" KeyTip="H">
-                <!-- 
-                <r:RibbonGroup Header="Overlays">
+                <!--
+                    <r:RibbonGroup Header="Overlays">
                     <r:RibbonCheckBox IsChecked="{Binding IsLatLonGridVisible}"
-                                      Label="Lat/Lon Grid"
-                                      ToolTipDescription="Shows and hides the latitude/longitude grid overlay on the map"
-                                      ToolTipTitle="{Binding Label,
-                                                             RelativeSource={RelativeSource Self}}" />
+                    Label="Lat/Lon Grid"
+                    ToolTipDescription="Shows and hides the latitude/longitude grid overlay on the map"
+                    ToolTipTitle="{Binding Label,
+                    RelativeSource={RelativeSource Self}}" />
                     <r:RibbonCheckBox IsChecked="{Binding IsPanZoomVisible}"
-                                      Label="Pan &amp; Zoom"
-                                      ToolTipDescription="Shows and hides the pan/zoom control overlay on the map"
-                                      ToolTipTitle="{Binding Label,
-                                                             RelativeSource={RelativeSource Self}}" />
+                    Label="Pan &amp; Zoom"
+                    ToolTipDescription="Shows and hides the pan/zoom control overlay on the map"
+                    ToolTipTitle="{Binding Label,
+                    RelativeSource={RelativeSource Self}}" />
                     <r:RibbonCheckBox IsChecked="{Binding IsScaleBarVisible}"
-                                      Label="Scale Bar"
-                                      ToolTipDescription="Shows and hides the scale bar overlay on the map"
-                                      ToolTipTitle="{Binding Label,
-                                                             RelativeSource={RelativeSource Self}}" />
-                </r:RibbonGroup>
+                    Label="Scale Bar"
+                    ToolTipDescription="Shows and hides the scale bar overlay on the map"
+                    ToolTipTitle="{Binding Label,
+                    RelativeSource={RelativeSource Self}}" />
+                    </r:RibbonGroup>
                 -->
                 <r:RibbonGroup Header="Map">
-                    <r:RibbonButton Command="{Binding ZoomToWorldMapCommand}"
-                                    Label="World Map"
-                                    LargeImageSource="..\Images\LargeIcons\globe-icon.png"
-                                    SmallImageSource="..\Images\SmallIcons\globe-icon.png" />
+                    <r:RibbonButton Command="{Binding ZoomToWorldMapCommand}" Label="World Map" LargeImageSource="..\Images\LargeIcons\globe-icon.png" SmallImageSource="..\Images\SmallIcons\globe-icon.png" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Location">
                     <ListView Width="150"
@@ -135,10 +130,7 @@
                             </ItemsPanelTemplate>
                         </ListView.ItemsPanel>
                     </ListView>
-                    <r:RibbonMenuButton Label="Add"
-                                        SmallImageSource="..\Images\SmallIcons\layer_add.png"
-                                        ToolTipDescription="Add a new location through one of several available means"
-                                        ToolTipTitle="Add location">
+                    <r:RibbonMenuButton Label="Add" SmallImageSource="..\Images\SmallIcons\layer_add.png" ToolTipDescription="Add a new location through one of several available means" ToolTipTitle="Add location">
                         <r:RibbonMenuItem Command="{Binding CreateLocationFromBoundingBoxCommand}"
                                           Header="Enter boundaries..."
                                           ImageSource="..\Images\SmallIcons\layer_command.png"
@@ -170,7 +162,8 @@
                                     SmallImageSource="..\Images\SmallIcons\layer_delete.png"
                                     ToolTipDescription="Delete an existing location, along with all cached data and all scenarios that depend upon it"
                                     ToolTipTitle="Delete location" />
-                </r:RibbonGroup>                <r:RibbonGroup Header="Scenario">
+                </r:RibbonGroup>
+                <r:RibbonGroup Header="Scenario">
                     <ListView Width="150"
                               Height="66"
                               DisplayMemberPath="Name"
@@ -213,13 +206,6 @@
                                                            RelativeSource={RelativeSource Self}}" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Acoustics">
-                    <r:RibbonButton Command="{Binding ExportAnalysisPointsCommand}"
-                                    Label="Export"
-                                    LargeImageSource="..\Images\LargeIcons\hourglass_go.png"
-                                    SmallImageSource="..\Images\SmallIcons\export-icon.png"
-                                    ToolTipDescription="Export all Analysis Points to be calculated by the various acoustic models (configure the models using the Models button)"
-                                    ToolTipTitle="{Binding Label,
-                                                           RelativeSource={RelativeSource Self}}" />
                     <r:RibbonToggleButton IsChecked="{Binding IsInAnalysisPointMode}"
                                           IsEnabled="{Binding CanPlaceAnalysisPoint}"
                                           Label="Analysis Point"
@@ -227,45 +213,31 @@
                                           ToolTipDescription="Add a new analysis point to the experiment"
                                           ToolTipTitle="{Binding Label,
                                                                  RelativeSource={RelativeSource Self}}" />
-                    <r:RibbonButton Command="{Binding ConfigureAcousticModelsCommand}"
-                                    IsEnabled="{Binding IsScenarioLoaded}"
-                                    Label="Models"
-                                    SmallImageSource="..\Images\SmallIcons\chart_curve_edit.png"
-                                    ToolTipDescription="Choose an acoustic model for each distinct mode in the scenario"
-                                    ToolTipTitle="{Binding Label,
-                                                           RelativeSource={RelativeSource Self}}" />
-                    <r:RibbonButton Command="{Binding ReverifyAcousticModelsCommand}"
-                                    IsEnabled="{Binding IsScenarioLoaded}"
-                                    Label="Re-verify"
-                                    SmallImageSource="..\Images\SmallIcons\update.png"
-                                    ToolTipDescription="Force reverification of acoustic fields in this scenario"
-                                    ToolTipTitle="{Binding Label,
-                                                           RelativeSource={RelativeSource Self}}" />
                 </r:RibbonGroup>
             </r:RibbonTab>
-            <!-- 
-            <r:RibbonTab Header="Environment" KeyTip="V">
-
-            </r:RibbonTab>
-
-            <r:RibbonTab Header="Simulation" KeyTip="S">
-       
+            <!--
+                <r:RibbonTab Header="Environment" KeyTip="V">
+                
+                </r:RibbonTab>
+                
+                <r:RibbonTab Header="Simulation" KeyTip="S">
+                
                 <r:RibbonGroup Header="Animals">
-                    <r:RibbonButton Command="{Binding LaunchMMMBSCommand}"
-                                    Label="MMMBS"
-                                    LargeImageSource="..\Images\3mbNewIcon.ico"
-                                    SmallImageSource="..\Images\3mbNewIcon.ico"
-                                    ToolTipDescription="Launch the Marine Mammal Movement and Behavior Simulator to define animat populations."
-                                    ToolTipTitle="{Binding Label,
-                                                           RelativeSource={RelativeSource Self}}" />
-                    <r:RibbonButton Command="{Binding CreateMMMBSBathymetryFileCommand}"
-                                    Label="Export Bathymetry File"
-                                    SmallImageSource="..\Images\SmallIcons\export-icon.png"
-                                    ToolTipDescription="Create a bathymetry file that will be loaded by MMMBS"
-                                    ToolTipTitle="{Binding Label,
-                                                           RelativeSource={RelativeSource Self}}" />
+                <r:RibbonButton Command="{Binding LaunchMMMBSCommand}"
+                Label="MMMBS"
+                LargeImageSource="..\Images\3mbNewIcon.ico"
+                SmallImageSource="..\Images\3mbNewIcon.ico"
+                ToolTipDescription="Launch the Marine Mammal Movement and Behavior Simulator to define animat populations."
+                ToolTipTitle="{Binding Label,
+                RelativeSource={RelativeSource Self}}" />
+                <r:RibbonButton Command="{Binding CreateMMMBSBathymetryFileCommand}"
+                Label="Export Bathymetry File"
+                SmallImageSource="..\Images\SmallIcons\export-icon.png"
+                ToolTipDescription="Create a bathymetry file that will be loaded by MMMBS"
+                ToolTipTitle="{Binding Label,
+                RelativeSource={RelativeSource Self}}" />
                 </r:RibbonGroup>
-            </r:RibbonTab>
+                </r:RibbonTab>
             -->
         </r:Ribbon>
         <Grid>
@@ -274,7 +246,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" MinWidth="500" />
             </Grid.ColumnDefinitions>
-            <LocalControls:LayerTreeView Grid.Column="0" DataContext="{Binding LayerTreeViewModel}"/>
+            <LocalControls:LayerTreeView Grid.Column="0" DataContext="{Binding LayerTreeViewModel}" />
             <GridSplitter Grid.Column="1"
                           Width="2"
                           Margin="5,0,5,0"
@@ -283,7 +255,7 @@
                           Background="Black"
                           ResizeBehavior="BasedOnAlignment"
                           ResizeDirection="Columns" />
-            <LocalControls:MapView x:Name="MapView" Grid.Column="2" DataContext="{Binding MapViewModel}"/>
+            <LocalControls:MapView x:Name="MapView" Grid.Column="2" DataContext="{Binding MapViewModel}" />
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="Drop">
                     <ia:CallMethodAction MethodName="FilesDropped" TargetObject="{Binding}" />

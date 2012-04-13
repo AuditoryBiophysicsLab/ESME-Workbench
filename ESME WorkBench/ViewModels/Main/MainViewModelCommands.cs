@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Cinch;
 using ESME;
 using ESME.Data;
-using ESME.Mapping;
-using ESME.Views.LogFileViewer;
-using ESMEWorkbench.Properties;
-using ESMEWorkbench.ViewModels.NAVO;
 using ESMEWorkbench.ViewModels.TransmissionLoss;
 
 namespace ESMEWorkbench.ViewModels.Main
@@ -82,23 +76,8 @@ namespace ESMEWorkbench.ViewModels.Main
         #endregion
 
         #region ViewClosingCommand
-#if EXPERIMENTS_SUPPORTED
-
-        public SimpleCommand<object, EventToCommandArgs> ViewClosingCommand
-        {
-            get
-            {
-                return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(vcArgs =>
-                {
-                    var ea = (CancelEventArgs)vcArgs.EventArgs;
-                    //ScenarioMetadata = null;
-                    ESME.Globals.AppSettings.Save();
-                }));
-            }
-        }
-
-        SimpleCommand<object, EventToCommandArgs> _viewClosing;
-#endif
+        public SimpleCommand<object, object> ViewClosingCommand { get { return _viewClosing ?? (_viewClosing = new SimpleCommand<object, object>(o => ESME.Globals.AppSettings.Save())); } }
+        SimpleCommand<object, object> _viewClosing;
         #endregion
 
         #region RefreshMapCommand
@@ -108,79 +87,6 @@ namespace ESMEWorkbench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _refreshMap;
-        #endregion
-
-        #region ResetScenarioZoomLevelCommand
-#if EXPERIMENTS_SUPPORTED
-
-        public SimpleCommand<object, object> ResetScenarioZoomLevelCommand
-        {
-            get
-            {
-                return _resetScenarioZoomLevel ?? (_resetScenarioZoomLevel = new SimpleCommand<object, object>(
-                                                                                     obj => ((_experiment != null) && (_experiment.NemoFile != null)),
-                                                                                     obj =>
-                                                                                     MediatorMessage.Send(MediatorMessage.SetScenarioMapExtent, true)));
-            }
-        }
-
-        SimpleCommand<object, object> _resetScenarioZoomLevel;
-#endif
-        #endregion
-
-        #region AddShapefileCommand
-        public SimpleCommand<object, object> AddShapefileCommand
-        {
-            get
-            {
-                return _addShapefile ?? (_addShapefile = new SimpleCommand<object, object>(obj =>
-                {
-                    _openFile.Filter = "ESRI Shapefiles (*.shp)|*.shp";
-                    _openFile.InitialDirectory = Settings.Default.LastShapefileDirectory;
-                    _openFile.FileName = null;
-                    var result = _openFile.ShowDialog(null);
-                    if (!result.HasValue || !result.Value) return;
-                    Settings.Default.LastShapefileDirectory = Path.GetDirectoryName(_openFile.FileName);
-                    MediatorMessage.Send(MediatorMessage.AddFileCommand, _openFile.FileName);
-                }));
-            }
-        }
-
-        SimpleCommand<object, object> _addShapefile;
-        #endregion
-
-        #region AddOverlayFileCommand
-        public SimpleCommand<Object, Object> AddOverlayFileCommand
-        {
-            get
-            {
-                return _addOverlayFileCommand ?? (_addOverlayFileCommand = new SimpleCommand<object, object>(obj =>
-                {
-                    _openFile.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
-                    _openFile.InitialDirectory = Settings.Default.LastOverlayFileDirectory;
-                    _openFile.FileName = "";
-                    var result = _openFile.ShowDialog(null);
-                    if (!result.HasValue || !result.Value) return;
-                    Settings.Default.LastOverlayFileDirectory = Path.GetDirectoryName(_openFile.FileName);
-                    MediatorMessage.Send(MediatorMessage.AddFileCommand, _openFile.FileName);
-                }));
-            }
-        }
-
-        SimpleCommand<Object, Object> _addOverlayFileCommand;
-        #endregion
-
-        #region QuickLookCommand
-#if EXPERIMENTS_SUPPORTED
-
-        public SimpleCommand<object, object> QuickLookCommand
-        {
-            get { return _quickLookPoint ?? (_quickLookPoint = new SimpleCommand<object, object>(o => CanRunQuickLook(), obj => MediatorMessage.Send(MediatorMessage.QuickLookPointCommand))); }
-        }
-
-        bool CanRunQuickLook() { return (_experiment != null) && (_experiment.Bathymetry != null) && (_experiment.SoundSpeedField != null) && (_experiment.FileName != null); }
-        SimpleCommand<object, object> _quickLookPoint;
-#endif
         #endregion
         
         #region AnalysisPointCommand

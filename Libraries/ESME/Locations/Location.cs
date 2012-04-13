@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using ESME.Database;
+using ESME.Mapping;
 using ESME.Scenarios;
 using HRC.Aspects;
+using HRC.Navigation;
 
 namespace ESME.Locations
 {
@@ -15,9 +17,11 @@ namespace ESME.Locations
     public interface IHaveLayerSettings
     {
         LayerSettings LayerSettings { get; set; }
+        void CreateMapLayers();
+        //MapLayerViewModel MapLayer { get; set; }
     }
 
-    public class Location : IHaveGuid
+    public class Location : IHaveGuid//, IHaveLayerSettings
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
@@ -26,11 +30,18 @@ namespace ESME.Locations
         public DbGeoRect GeoRect { get; set; }
         public string StorageDirectory { get; set; }
 
+        //public virtual LayerSettings LayerSettings { get; set; }
+
         public virtual ICollection<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }
         //public virtual ICollection<Scenario> Scenarios { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
 
         [NotMapped] public static MasterDatabaseService Database { get; set; }
         [NotMapped] public static EnvironmentalCacheService Cache { get; set; }
+
+        MapLayerViewModel _mapLayer;
+        public void CreateMapLayers()
+        {
+        }
     }
 }

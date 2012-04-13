@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Markup;
-using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
 using ESME;
@@ -19,6 +13,7 @@ using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.Layers;
 using ESMEWorkbench.ViewModels.Main;
 using ESMEWorkbench.Views;
+using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 using MEFedMVVM.Common;
@@ -36,7 +31,6 @@ namespace ESMEWorkbench.ViewModels.Map
 
         readonly IViewAwareStatus _viewAwareStatus;
         readonly MainViewModel _mainViewModel;
-        Dispatcher _dispatcher;
         WpfMap _wpfMap;
 
         #endregion
@@ -98,9 +92,6 @@ namespace ESMEWorkbench.ViewModels.Map
             if (Designer.IsInDesignMode) return;
 
             _wpfMap = ((MainView)_viewAwareStatus.View).MapView.WpfMap;
-            _dispatcher = ((MainView)_viewAwareStatus.View).Dispatcher;
-
-            MapLayerViewModel.MapOverlay = _wpfMap.Overlays;
 
             MapDLLVersion = WpfMap.GetVersion();
             _wpfMap.MapUnit = GeographyUnit.DecimalDegree;
@@ -126,29 +117,16 @@ namespace ESMEWorkbench.ViewModels.Map
             _wpfMap.AdornmentOverlay.Layers["Scale"].IsVisible = Settings.Default.ShowScaleBar;
 
             _wpfMap.MapTools.PanZoomBar.Visibility = Settings.Default.ShowPanZoom ? Visibility.Visible : Visibility.Hidden;
-            WorldMapLayer = new ShapefileMapLayer
-            {
-                LayerType = LayerType.BaseMap,
-                AreaStyle = AreaStyles.Country2,
-                CanBeRemoved = false,
-                CanBeReordered = true,
-                CanChangeAreaColor = true,
-                CanChangeLineColor = true,
-                ShapefileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"),
-                Name = "World Map",
-            };
-            _wpfMap.Overlays.Add(WorldMapLayer.Overlay);
-            WorldMapLayer.Overlay.IsVisible = Settings.Default.ShowWorldMap;
             _mainViewModel.LayerTreeViewModel.MapViewModel = this;
         }
 
-        public MapLayerViewModel WorldMapLayer { get; private set; }
         public bool IsGridVisible
         {
             get { return Settings.Default.ShowGrid; }
             set
             {
                 _wpfMap.AdornmentOverlay.Layers["Grid"].IsVisible = value;
+                _wpfMap.AdornmentOverlay.Refresh();
                 Settings.Default.ShowGrid = value;
             }
         }
@@ -158,6 +136,7 @@ namespace ESMEWorkbench.ViewModels.Map
             set
             {
                 _wpfMap.AdornmentOverlay.Layers["Scale"].IsVisible = value;
+                _wpfMap.AdornmentOverlay.Refresh();
                 Settings.Default.ShowScaleBar = value;
             }
         }
@@ -170,227 +149,99 @@ namespace ESMEWorkbench.ViewModels.Map
                 Settings.Default.ShowPanZoom = value;
             }
         }
-        public bool IsWorldMapVisible
-        {
-            get { return Settings.Default.ShowWorldMap; }
-            set
-            {
-                WorldMapLayer.Overlay.IsVisible = value;
-                Settings.Default.ShowWorldMap = value;
-            }
-        }
 
-        #region public MapLayerCollection MapLayers { get; set; }
-
-        [MediatorMessageSink(MediatorMessage.SetMapLayers)]
-        void SetMapLayers(MapLayerCollection mapLayers)
-        {
-            MapLayers = mapLayers;
-        }
-
-        public MapLayerCollection MapLayers
-        {
-            get { return _mapLayers; }
-            set
-            {
-                if (_mapLayers == value) return;
-                if (_mapLayers != null)
-                {
-                    _mapLayers.CurrentExtent = _wpfMap.CurrentExtent;
-                    _mapLayers.CollectionChanged -= MapLayersCollectionChanged;
-                }
-                _wpfMap.Overlays.Clear();
-                _mapLayers = value;
-                if (_mapLayers != null)
-                {
-                    _wpfMap.CurrentExtent = _mapLayers.CurrentExtent;
-                    foreach (var layer in _mapLayers.Where(layer => layer.Overlay != null))
-                    {
-                        //if (layer.LayerType == LayerType.BathymetryRaster) continue;
-                        if (!_wpfMap.Overlays.Contains(layer.Name)) _wpfMap.Overlays.Add(layer.Name, layer.Overlay);
-                        try
-                        {
-                            _wpfMap.Refresh(layer.Overlay);
-                        }
-                        catch (Exception) {}
-                    }
-                }
-                if (_mapLayers != null) _mapLayers.CollectionChanged += MapLayersCollectionChanged;
-            }
-        }
-
-        MapLayerCollection _mapLayers;
-
-        void MapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            switch (e.Action)
-            {
-                case NotifyCollectionChangedAction.Add:
-                    //Debug.WriteLine("MapView: LayerCollection.Add");
-                    for (var itemIndex = 0; itemIndex < e.NewItems.Count; itemIndex++)
-                    {
-                        var index = itemIndex;
-                        _dispatcher.InvokeInBackgroundIfRequired(() => _wpfMap.Overlays.Add(((MapLayerViewModel)e.NewItems[index]).Overlay));
-                        _dispatcher.InvokeInBackgroundIfRequired(() => _wpfMap.Refresh(((MapLayerViewModel)e.NewItems[index]).Overlay));
-                    }
-                    break;
-                case NotifyCollectionChangedAction.Move:
-                    //Debug.WriteLine("MapView: LayerCollection.Move");
-                    for (var itemIndex = 0; itemIndex < e.NewItems.Count; itemIndex++)
-                    {
-                        _dispatcher.InvokeInBackgroundIfRequired(() => _wpfMap.Overlays.RemoveAt(e.OldStartingIndex));
-                        var index = itemIndex;
-                        _dispatcher.InvokeInBackgroundIfRequired(() =>  _wpfMap.Overlays.Insert(e.NewStartingIndex + index, ((MapLayerViewModel)e.NewItems[index]).Overlay));
-                    }
-                    _wpfMap.Refresh();
-                    break;
-                case NotifyCollectionChangedAction.Remove:
-                    //Debug.WriteLine("MapView: LayerCollection.Remove");
-                    for (var itemIndex = 0; itemIndex < e.OldItems.Count; itemIndex++)
-                    {
-                        var index = itemIndex;
-                        _dispatcher.InvokeInBackgroundIfRequired(() => _wpfMap.Overlays.Remove(((MapLayerViewModel)e.OldItems[index]).Overlay));
-                    }
-                    break;
-                case NotifyCollectionChangedAction.Replace:
-                    //Debug.WriteLine("MapView: LayerCollection.Replace (OldItemCount = {0}, OldStartIndex = {1}, NewItemCount = {2}, NewStartIndex = {3}", e.OldItems.Count, e.OldStartingIndex, e.NewItems.Count, e.NewStartingIndex);
-                    for (var itemIndex = 0; itemIndex < e.OldItems.Count; itemIndex++)
-                    {
-                        var index = itemIndex;
-                        _dispatcher.InvokeInBackgroundIfRequired(() => _wpfMap.Overlays.Remove(((MapLayerViewModel)e.OldItems[index]).Overlay));
-                    }
-                    for (var itemIndex = 0; itemIndex < e.NewItems.Count; itemIndex++)
-                    {
-                        var index = itemIndex;
-                        _dispatcher.InvokeInBackgroundIfRequired(() => _wpfMap.Overlays.Insert(e.NewStartingIndex + index - 1, ((MapLayerViewModel)e.NewItems[index]).Overlay));
-                    }
-                    //_wpfMap.Refresh();
-                    break;
-                case NotifyCollectionChangedAction.Reset:
-                    //Debug.WriteLine("MapView: LayerCollection.Reset");
-                    _wpfMap.Overlays.Clear();
-                    foreach (var layer in MapLayers) _wpfMap.Overlays.Add(layer.Overlay);
-                    break;
-            }
-        }
-
-        #endregion
-
-        [MediatorMessageSink(MediatorMessage.SetAnalysisPointMode)]
+        [MediatorMessageSink(MediatorMessage.SetAnalysisPointMode), UsedImplicitly]
         void SetAnalysisPointMode(bool mode)
         {
             IsInAnalysisPointMode = mode;
         }
 
-        [MediatorMessageSink(MediatorMessage.QuickLookPointCommand)]
-        void QuickLookPointCommand(bool dummy)
-        {
-            IsQuickLookPointMode = true;
-            Cursor = Cursors.Cross;
-        }
-
-        #region public RectangleShape CurrentExtent { get; set; }
-
-        [MediatorMessageSink(MediatorMessage.SetCurrentExtent)]
+        [MediatorMessageSink(MediatorMessage.SetCurrentExtent), UsedImplicitly]
         void SetCurrentExtent(RectangleShape currentExtent)
         {
-            CurrentExtent = currentExtent;
+            _wpfMap.CurrentExtent = currentExtent;
+            _wpfMap.Refresh();
         }
 
-        public RectangleShape CurrentExtent
-        {
-            get { return _currentExtent; }
-            set
-            {
-                if (_currentExtent == value) return;
-                _currentExtent = value;
-                _wpfMap.CurrentExtent = _currentExtent;
-                _wpfMap.Refresh();
-                if (MapLayers != null) MapLayers.CurrentExtent = _currentExtent;
-            }
-        }
-
-        RectangleShape _currentExtent;
-
-        #endregion
-
-        #region public double CurrentScale { get; set; }
-
-        [MediatorMessageSink(MediatorMessage.SetCurrentScale)]
-        void SetCurrentScale(double currentScale)
-        {
-            CurrentScale = currentScale;
-        }
-
-        public double CurrentScale
-        {
-            get { return _currentScale; }
-            set
-            {
-                if (_currentScale == value) return;
-                _currentScale = value;
-                _wpfMap.CurrentScale = _currentScale;
-                SetCurrentScale(_currentScale);
-            }
-        }
-
-        double _currentScale;
-
-        #endregion
-
-        [MediatorMessageSink(MediatorMessage.RemoveLayer)]
-        void RemoveLayer(MapLayerViewModel mapLayer) { MapLayers.Remove(mapLayer); }
-
-        [MediatorMessageSink(MediatorMessage.RefreshMap)]
-        void RefreshMap(bool dummy) { _wpfMap.Refresh(); }
-
-        [MediatorMessageSink(MediatorMessage.RefreshLayer)]
-        void RefreshLayer(MapLayerViewModel layer) { _wpfMap.Refresh(layer.LayerOverlay); }
-
-        [MediatorMessageSink(MediatorMessage.SetMapCursor)]
+        [MediatorMessageSink(MediatorMessage.SetMapCursor), UsedImplicitly]
         void SetMapCursor(Cursor cursor) { Cursor = cursor; }
 
-        [MediatorMessageSink(MediatorMessage.MoveLayerToTop)]
-        void MoveLayerToTop(MapLayerViewModel mapLayer)
+        [MediatorMessageSink(MediatorMessage.RefreshMap), UsedImplicitly]
+        void Refresh(bool dummy) { _wpfMap.Refresh(); }
+        public void Refresh() { _wpfMap.Refresh(); }
+
+        #region Add/Remove/Refresh map layer mediator message sinks
+        [MediatorMessageSink(MediatorMessage.AddMapLayer)]
+        public void Add(MapLayerViewModel layer) { _wpfMap.Overlays.Add(layer.LayerOverlay); }
+
+        [MediatorMessageSink(MediatorMessage.RemoveMapLayer)]
+        public void Remove(MapLayerViewModel layer) { _wpfMap.Overlays.Remove(layer.LayerOverlay); }
+
+        [MediatorMessageSink(MediatorMessage.ShowMapLayer), UsedImplicitly]
+        void ShowMapLayer(MapLayerViewModel layer) { SetIsVisible(layer, true); }
+
+        [MediatorMessageSink(MediatorMessage.HideMapLayer), UsedImplicitly]
+        void HideMapLayer(MapLayerViewModel layer) { SetIsVisible(layer, false); }
+
+        public void SetIsVisible(MapLayerViewModel layer, bool isVisible)
         {
-            //_wpfMap.Overlays.MoveToTop(mapLayer.Overlay);
-            //RefreshMap(true);
-            //MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
-            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerToTop: {0}", mapLayer.Name));
-            var curIndex = MapLayers.IndexOf(mapLayer);
-            MapLayers.Move(curIndex, MapLayers.Count);
+            layer.LayerOverlay.IsVisible = isVisible;
+            _wpfMap.Refresh(layer.LayerOverlay);
         }
 
-        [MediatorMessageSink(MediatorMessage.MoveLayerUp)]
-        void MoveLayerUp(MapLayerViewModel mapLayer)
+        [MediatorMessageSink(MediatorMessage.RefreshMapLayer)]
+        public void Refresh(MapLayerViewModel layer)
         {
-            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerUp: {0}", mapLayer.Name));
-            var curIndex = MapLayers.IndexOf(mapLayer);
-            MapLayers.Move(curIndex, curIndex + 1);
+            if (layer.LayerOverlay.Layers.Count <= 0) return;
+            if (layer.GetType() == typeof(ShapefileMapLayer))
+                ((ShapeFileFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = layer.AreaStyle;
+            else if (layer.GetType() == typeof(OverlayShapeMapLayer))
+            {
+                if (layer.CustomLineStyle != null)
+                {
+                    ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.CustomStyles.Clear();
+                    ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.CustomStyles.Add(layer.CustomLineStyle);
+                }
+                else
+                {
+                    if (layer.LineStyle != null) ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultLineStyle = layer.LineStyle;
+                    if (layer.PointStyle != null) ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultPointStyle = layer.PointStyle;
+                }
+            }
+            _wpfMap.Refresh(layer.LayerOverlay);
+        }
+        #endregion
+
+        #region Move layer top/up/down/bottom mediator message sinks
+        [MediatorMessageSink(MediatorMessage.MoveLayerToTop), UsedImplicitly]
+        void MoveLayerToTop(Overlay overlay)
+        {
+            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerToTop: {0}", overlay.Name));
+            _wpfMap.Overlays.MoveToTop(overlay);
         }
 
-        [MediatorMessageSink(MediatorMessage.MoveLayerDown)]
-        void MoveLayerDown(MapLayerViewModel mapLayer)
+        [MediatorMessageSink(MediatorMessage.MoveLayerUp), UsedImplicitly]
+        void MoveLayerUp(Overlay overlay)
         {
-            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerDown: {0}", mapLayer.Name));
-            var curIndex = MapLayers.IndexOf(mapLayer);
-            MapLayers.Move(curIndex, curIndex - 1);
+            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerUp: {0}", overlay.Name));
+            _wpfMap.Overlays.MoveUp(overlay);
         }
 
-        [MediatorMessageSink(MediatorMessage.MoveLayerToBottom)]
-        void MoveLayerToBottom(MapLayerViewModel mapLayer)
+        [MediatorMessageSink(MediatorMessage.MoveLayerDown), UsedImplicitly]
+        void MoveLayerDown(Overlay overlay)
         {
-            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerToBottom: {0}", mapLayer.Name));
-            var curIndex = MapLayers.IndexOf(mapLayer);
-            //if (curIndex == -1) return;
-            MapLayers.Move(curIndex, 0);
+            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerDown: {0}", overlay.Name));
+            _wpfMap.Overlays.MoveDown(overlay);
         }
 
-        [MediatorMessageSink(MediatorMessage.EnableGUI)]
-        void EnableGUI(bool enable)
+        [MediatorMessageSink(MediatorMessage.MoveLayerToBottom), UsedImplicitly]
+        void MoveLayerToBottom(Overlay overlay)
         {
-            ((UserControl)_viewAwareStatus.View).IsEnabled = enable;
+            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerToBottom: {0}", overlay.Name));
+            _wpfMap.Overlays.MoveToBottom(overlay);
         }
+        #endregion
+
         #region Mouse events
 
         #region MouseLeftButtonDownCommand
@@ -401,18 +252,18 @@ namespace ESMEWorkbench.ViewModels.Map
 
         SimpleCommand<object, object> _mouseLeftButtonDown;
 
-        void MouseLeftButtonDownHandler() { }
+        static void MouseLeftButtonDownHandler() { }
         #endregion
 
         #region MouseLeftButtonUpCommand
         public SimpleCommand<object, object> MouseLeftButtonUpCommand
         {
-            get { return _mouseLeftButtonUp ?? (_mouseLeftButtonUp = new SimpleCommand<object, object>(delegate { MouseLeftButtonUpHandler(); })); }
+            get { return _mouseLeftButtonUp ?? (_mouseLeftButtonUp = new SimpleCommand<object, object>(MouseLeftButtonUpHandler)); }
         }
 
         SimpleCommand<object, object> _mouseLeftButtonUp;
 
-        void MouseLeftButtonUpHandler()
+        void MouseLeftButtonUpHandler(object o)
         {
             if (IsInAnalysisPointMode)
             {
@@ -429,29 +280,29 @@ namespace ESMEWorkbench.ViewModels.Map
         #region MouseRightButtonDownCommand
         public SimpleCommand<object, object> MouseRightButtonDownCommand
         {
-            get { return _mouseRightButtonDown ?? (_mouseRightButtonDown = new SimpleCommand<object, object>(delegate { MouseRightButtonDownHandler(); })); }
+            get { return _mouseRightButtonDown ?? (_mouseRightButtonDown = new SimpleCommand<object, object>(MouseRightButtonDownHandler)); }
         }
 
         SimpleCommand<object, object> _mouseRightButtonDown;
 
-        void MouseRightButtonDownHandler() { }
+        static void MouseRightButtonDownHandler(object o) { }
         #endregion
 
         #region MouseRightButtonUpCommand
         public SimpleCommand<object, object> MouseRightButtonUpCommand
         {
-            get { return _mouseRightButtonUp ?? (_mouseRightButtonUp = new SimpleCommand<object, object>(delegate { MouseRightButtonUpHandler(); })); }
+            get { return _mouseRightButtonUp ?? (_mouseRightButtonUp = new SimpleCommand<object, object>(MouseRightButtonUpHandler)); }
         }
 
         SimpleCommand<object, object> _mouseRightButtonUp;
 
-        void MouseRightButtonUpHandler() { }
+        static void MouseRightButtonUpHandler(object o) { }
         #endregion
 
         #region MouseMoveCommand
         public SimpleCommand<object, EventToCommandArgs> MouseMoveCommand
         {
-            get { return _mouseMove ?? (_mouseMove = new SimpleCommand<object, EventToCommandArgs>(delegate(EventToCommandArgs arg) { MouseMoveHandler(arg); })); }
+            get { return _mouseMove ?? (_mouseMove = new SimpleCommand<object, EventToCommandArgs>(MouseMoveHandler)); }
         }
 
         SimpleCommand<object, EventToCommandArgs> _mouseMove;

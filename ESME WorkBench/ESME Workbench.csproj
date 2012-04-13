@@ -124,24 +124,18 @@
     <Compile Include="Controls\ScatterPlot.xaml.cs">
       <DependentUpon>ScatterPlot.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Data\ExperimentListeners.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="MediatorMessages.cs" />
     <Compile Include="ViewModels\Layers\CustomUnitScaleBarAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\LayerTreeViewModel.cs" />
     <Compile Include="ViewModels\Main\AboutViewModel.cs" />
-    <Compile Include="ViewModels\Main\EditableLabelListViewModel.cs" />
     <Compile Include="ViewModels\Main\EnvironmentTab.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModels\Main\HomeTab.cs" />
-    <Compile Include="ViewModels\Main\MainViewModelListeners.cs" />
     <Compile Include="ViewModels\Main\OverrideCursor.cs" />
     <Compile Include="ViewModels\Main\PleaseWaitViewModel.cs" />
-    <Compile Include="ViewModels\Main\SimulationViewModel.cs" />
-    <Compile Include="ViewModels\Main\SimulatorTab.cs" />
     <Compile Include="ViewModels\NAVO\ExportAllEnvironmentalDataProgressViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\AcousticEngineParameterViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticSimulatorOptionsViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointCalculationPreviewViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />
@@ -178,7 +172,6 @@
     <Compile Include="Controls\MapView.xaml.cs">
       <DependentUpon>MapView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Data\Experiment.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

@@ -13,7 +13,7 @@ namespace ESME.Mapping
 
         public CustomStartEndLineStyle(PointSymbolType startType, Color startColor, int startSize,
                                        PointSymbolType endType, Color endColor, int endSize,
-                                       Color lineColor, int lineSize)
+                                       Color lineColor, float lineSize)
             : this(new PointStyle(startType, new GeoSolidBrush(GeoColor.FromArgb(startColor.A, startColor.R, startColor.G, startColor.B)), startSize),
                    new PointStyle(endType, new GeoSolidBrush(GeoColor.FromArgb(endColor.A, endColor.R, endColor.G, endColor.B)), endSize),
                    new LineStyle(new GeoPen(GeoColor.FromArgb(lineColor.A, lineColor.R, lineColor.G, lineColor.B), lineSize)))
@@ -25,7 +25,6 @@ namespace ESME.Mapping
             _endPointStyle = endPointStyle;
             _lineStyle = lineStyle;
         }
-
 
         protected override void DrawCore(IEnumerable<Feature> features, GeoCanvas canvas, Collection<SimpleCandidate> labelsInThisLayer, Collection<SimpleCandidate> labelsInAllLayers)
         {

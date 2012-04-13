@@ -47,5 +47,6 @@ namespace ESME.Locations
                 }
             }
         }
+        public void CreateMapLayers() { throw new NotImplementedException(); }
     }
 }

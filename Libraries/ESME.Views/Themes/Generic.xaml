@@ -19,7 +19,8 @@
                                 <CheckBox Grid.Column="0"
                                           VerticalAlignment="Center"
                                           Focusable="False"
-                                          IsChecked="{TemplateBinding IsChecked}"
+                                          IsChecked="{Binding Path=IsChecked,
+                                                              RelativeSource={RelativeSource TemplatedParent}}"
                                           Visibility="{TemplateBinding CheckBoxVisibility}" />
                                 <ToggleButton x:Name="LineColorToggle"
                                               Grid.Column="1"
@@ -36,7 +37,7 @@
                                         <ControlTemplate>
                                             <Rectangle Width="12" Height="12" RadiusX="3" RadiusY="3">
                                                 <Rectangle.Fill>
-                                                    <SolidColorBrush Color="{Binding Path=LineOrSymbolColor, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:LayerControl}}, Mode=TwoWay}" />
+                                                    <SolidColorBrush Color="{Binding Path=LineOrSymbolColor, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:LayerControl}}}" />
                                                 </Rectangle.Fill>
                                             </Rectangle>
                                         </ControlTemplate>
@@ -55,8 +56,7 @@
                                                     TickFrequency="0.5"
                                                     ToolTip="Line weight"
                                                     Value="{Binding Path=LineOrSymbolSize,
-                                                                    RelativeSource={RelativeSource FindAncestor,
-                                                                                                   AncestorType={x:Type Controls:LayerControl}},
+                                                                    RelativeSource={RelativeSource TemplatedParent},
                                                                     Mode=TwoWay}" />
                                         </StackPanel>
                                     </Border>

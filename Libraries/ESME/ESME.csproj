@@ -192,18 +192,14 @@
     <Compile Include="Locations\EnvironmentalCacheService.cs" />
     <Compile Include="Locations\MasterDatabaseService.cs" />
     <Compile Include="Mapping\CustomStartEndLineStyle.cs" />
-    <Compile Include="Mapping\LayerListViewModel.cs" />
     <Compile Include="Mapping\LayerType.cs" />
     <Compile Include="Mapping\LineWeightMenuItemViewModel.cs" />
     <Compile Include="Mapping\MapLayerCollection.cs" />
     <Compile Include="Mapping\MapLayerViewModel.cs" />
-    <Compile Include="Mapping\MarkerLayerViewModel.cs" />
     <Compile Include="Mapping\OverlayFileMapLayer.cs" />
     <Compile Include="Mapping\PointSymbolTypeMenuItemViewModel.cs" />
     <Compile Include="Mapping\RasterMapLayer.cs" />
-    <Compile Include="Mapping\ScenarioTreeViewModel.cs" />
     <Compile Include="Mapping\ShapefileMapLayer.cs" />
-    <Compile Include="Mapping\TreeNode.cs" />
     <Compile Include="Metadata\PropertiesViewModel.cs" />
     <Compile Include="Environment\Sediment.cs" />
     <Compile Include="Environment\SoundSpeed.cs" />
@@ -213,7 +209,6 @@
     <Compile Include="Environment\UNESCO.cs" />
     <Compile Include="Environment\Wind.cs" />
     <Compile Include="MediatorMessages.cs" />
-    <Compile Include="Metadata\ScenarioMetadata.cs" />
     <Compile Include="Animats\AnimatInterface.cs" />
     <Compile Include="NEMO\Exceptions.cs" />
     <Compile Include="NEMO\Overlay\Exceptions.cs" />

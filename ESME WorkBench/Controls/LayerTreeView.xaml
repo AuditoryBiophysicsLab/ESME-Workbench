@@ -67,25 +67,28 @@
     <TreeView DockPanel.Dock="Top" Grid.IsSharedSizeScope="True" ItemsSource="{Binding RootNodes}">
         <TreeView.Resources>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Scenario}" ItemsSource="{Binding Platforms}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding Name, StringFormat=Scenario: {0}}" IsMapLayer="False" />
+                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" IsMapLayer="False" LayerName="{Binding Name, StringFormat=Scenario: {0}}" />
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding PlatformName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" />
+                <StackPanel Orientation="Vertical">
+                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding PlatformName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}" />
+                    <Controls:LayerControl IsChecked="{Binding Perimeter.LayerSettings.IsChecked}" LayerName="{Binding PlatformName, StringFormat={}{0} OpArea}" LineOrSymbolColor="{Binding Perimeter.LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding Perimeter.LayerSettings.LineOrSymbolSize}" />
+                </StackPanel>
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding SourceName}" IsMapLayer="False" />
+                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" IsMapLayer="False" LayerName="{Binding SourceName}" />
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Layers:EnvironmentNode}" ItemsSource="{Binding EnvironmentLayers}">
-                <Controls:LayerControl LayerName="Environment" IsMapLayer="False" />
+                <Controls:LayerControl IsMapLayer="False" LayerName="Environment" />
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding ModeName}" IsMapLayer="False" />
+                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" IsMapLayer="False" LayerName="{Binding ModeName}" />
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Layers:WorldMapNode}" ItemsSource="{Binding Features}">
-                <Controls:LayerControl IsChecked="{Binding IsChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LayerName="World Map" LineOrSymbolColor="{Binding LineColor}" LineOrSymbolSize="{Binding LineWeight}" />
+                <Controls:LayerControl IsChecked="{Binding IsVisible}" LayerName="World Map" LineOrSymbolColor="{Binding LineColor}" LineOrSymbolSize="{Binding LineWeight}" />
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Layers:SedimentNode}" ItemsSource="{Binding SedimentTypes}">
-                <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="Sediment" IsMapLayer="False" />
+                <Controls:LayerControl IsChecked="{Binding IsChecked}" IsMapLayer="False" LayerName="Sediment" />
             </HierarchicalDataTemplate>
             <DataTemplate DataType="{x:Type Scenarios:TransmissionLoss}">
                 <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" />

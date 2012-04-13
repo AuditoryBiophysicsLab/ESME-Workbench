@@ -6,7 +6,7 @@ using HRC.Aspects;
 
 namespace ESME.Scenarios
 {
-    public class Source : IHaveGuid, IHaveLayerSettings
+    public class Source : IHaveGuid
     {
         [Key, Initialize]
         public Guid Guid { get; set; }

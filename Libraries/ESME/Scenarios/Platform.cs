@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Windows.Media;
 using ESME.Database;
 using ESME.Locations;
+using ESME.Mapping;
 using HRC.Aspects;
+using HRC.Navigation;
+using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Scenarios
 {
@@ -37,5 +41,38 @@ namespace ESME.Scenarios
         public virtual LayerSettings LayerSettings { get; set; }
         public virtual ICollection<Source> Sources { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
+
+        OverlayShapeMapLayer _mapLayer;
+        public void CreateMapLayers()
+        {
+            _mapLayer = new OverlayShapeMapLayer
+            {
+                LayerType = LayerType.Track,
+                Name = string.Format("{0}", Guid),
+                CustomLineStyle = new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, LayerSettings.LineOrSymbolColor, (float)LayerSettings.LineOrSymbolSize)
+            };
+
+            _mapLayer.Add(new List<Geo> { Geo, ((Geo)Geo).Offset(HRC.Navigation.Geo.KilometersToRadians(25), HRC.Navigation.Geo.DegreesToRadians(90)) });
+            _mapLayer.Done();
+            if (Perimeter != null) Perimeter.CreateMapLayers();
+
+            LayerSettings.PropertyChanged += (s, e) =>
+            {
+                switch (e.PropertyName)
+                {
+                    case "IsChecked":
+                        MediatorMessage.Send(LayerSettings.IsChecked ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, _mapLayer);
+                        break;
+                    case "LineOrSymbolColor":
+                    case "LineOrSymbolSize":
+                        _mapLayer.CustomLineStyle = new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5,
+                                                                                PointSymbolType.Square, Colors.Red, 5,
+                                                                                LayerSettings.LineOrSymbolColor,
+                                                                                (float)LayerSettings.LineOrSymbolSize);
+                        MediatorMessage.Send(MediatorMessage.RefreshMapLayer, _mapLayer);
+                        break;
+                }
+            };
+        }
     }
 }

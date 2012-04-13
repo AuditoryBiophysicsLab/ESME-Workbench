@@ -4,9 +4,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
 using Cinch;
 using ESME;
 using ESME.Environment;
@@ -14,10 +12,10 @@ using ESME.Locations;
 using ESME.Mapping;
 using ESME.Plugins;
 using ESME.TransmissionLoss;
-using ESMEWorkbench.Data;
 using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.Map;
 using HRC;
+using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Services;
 using MEFedMVVM.Common;
@@ -26,6 +24,7 @@ using MEFedMVVM.ViewModelLocator;
 namespace ESMEWorkbench.ViewModels.Main
 {
     [ExportViewModel("MainViewModel")]
+    [NotifyPropertyChanged]
     public partial class MainViewModel : ViewModelBase
     {
         #region Private fields
@@ -38,11 +37,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [Import, UsedImplicitly] TransmissionLossCalculatorService _transmissionLoss;
         readonly IViewAwareStatus _viewAwareStatus;
         readonly IMessageBoxService _messageBox;
-#if EXPERIMENTS_SUPPORTED
-        Experiment _experiment;
-#endif
         //TransmissionLossQueueCalculatorViewModel _bellhopQueueCalculatorViewModel;
-        Dispatcher _dispatcher;
         public const bool ExperimentsCurrentlySupported = false;
         #endregion
 
@@ -50,6 +45,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [ImportingConstructor]
         public MainViewModel(IViewAwareStatus viewAwareStatus, MasterDatabaseService database, IMessageBoxService messageBox)
         {
+            MainWindowTitle = "ESME Workbench: <No scenario loaded>";
             try
             {
                 Mediator.Instance.Register(this);
@@ -64,11 +60,6 @@ namespace ESMEWorkbench.ViewModels.Main
             Database = database;
             MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this);
             if (Designer.IsInDesignMode) return;
-            _viewAwareStatus.ViewUnloaded += () =>
-            {
-                if (Designer.IsInDesignMode) return;
-                MediatorMessage.Send(MediatorMessage.ApplicationClosing);
-            };
             
             _viewAwareStatus.ViewLoaded += () =>
             {
@@ -76,10 +67,9 @@ namespace ESMEWorkbench.ViewModels.Main
 #if DEBUG
                 _plugins.PluginDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 #else
-                _pluginManagerService.PluginDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Plugins");
+                _plugins.PluginDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Plugins");
 #endif
 
-                _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 Globals.AppSettings.PluginManagerService = _plugins;
                 if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database")))
                     Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
@@ -136,6 +126,8 @@ namespace ESMEWorkbench.ViewModels.Main
         #endregion
 
         #region public string MouseLocationInfo { get; set; }
+        [MediatorMessageSink(MediatorMessage.SetMouseEarthCoordinate), UsedImplicitly]
+        void SetMouseEarthCoordinate(Geo mouseEarthCoordinate) { MouseGeo = mouseEarthCoordinate; }
 
         public string MouseLocationInfo
         {

@@ -179,6 +179,11 @@ namespace ESME.Scenarios
         [UsedImplicitly] public event PropertyChangedEventHandler PropertyChanged;
         [NotMapped] public static MasterDatabaseService Database { get; set; }
         [NotMapped] public static EnvironmentalCacheService Cache { get; set; }
+
+        public void CreateMapLayers()
+        {
+            foreach (var platform in Platforms) platform.CreateMapLayers();
+        }
     }
 
     public static class ScenarioExensions

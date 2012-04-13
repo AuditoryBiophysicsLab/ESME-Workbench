@@ -52,5 +52,7 @@ namespace ESME.Scenarios
             otherdepth += other.Source.Platform.Depth;
             return (Math.Abs(mydepth - otherdepth) < .001);
         }
+
+        public void CreateMapLayers() { throw new NotImplementedException(); }
     }
 }

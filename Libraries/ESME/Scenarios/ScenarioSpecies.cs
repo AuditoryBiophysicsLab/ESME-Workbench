@@ -17,5 +17,7 @@ namespace ESME.Scenarios
         public virtual LayerSettings LayerSettings { get; set; }
         public virtual ICollection<AnimatLocation> AnimatLocations { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
+
+        public void CreateMapLayers() { throw new NotImplementedException(); }
     }
 }

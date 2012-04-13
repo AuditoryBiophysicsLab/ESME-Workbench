@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Diagnostics;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 namespace ESME.Views.Controls
@@ -10,6 +12,12 @@ namespace ESME.Views.Controls
             DefaultStyleKeyProperty.OverrideMetadata(typeof(LayerControl), new FrameworkPropertyMetadata(typeof(LayerControl)));
         }
 
+        public LayerControl() {Debug.WriteLine(string.Format("{0}: LayerControl Constructor", DateTime.Now));}
+        static void OnPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            //Debug.WriteLine("{0}: LayerName = {1},  Property = {2}, OldValue = {3}, NewValue = {4}", DateTime.Now, ((LayerControl)sender).LayerName, args.Property.Name, args.OldValue, args.NewValue);
+        }
+
         #region dependency property bool IsMapLayer
 
         public static DependencyProperty IsMapLayerProperty = DependencyProperty.Register("IsMapLayer",
@@ -19,8 +27,10 @@ namespace ESME.Views.Controls
 
         static void IsMapLayerPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
+            OnPropertyChanged(sender, args);
             var layerControl = (LayerControl)sender;
             var isMapLayer = (bool)args.NewValue;
+            Debug.WriteLine("{0}: IsMapLayerPropertyChanged: LayerName = {1}, IsChecked(old) = {2}, IsChecked(new) = {3}", DateTime.Now, layerControl.LayerName, (bool)args.OldValue, (bool)args.NewValue);
             layerControl.CheckBoxVisibility = isMapLayer ? Visibility.Visible : Visibility.Collapsed;
             layerControl.LineColorVisibility = isMapLayer ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -38,8 +48,8 @@ namespace ESME.Views.Controls
         public static DependencyProperty IsCheckedProperty = DependencyProperty.Register("IsChecked",
                                                                                          typeof (bool),
                                                                                          typeof (LayerControl),
-                                                                                         new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-
+                                                                                         new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnPropertyChanged));
+        
         public bool IsChecked
         {
             get { return (bool)GetValue(IsCheckedProperty); }
@@ -83,7 +93,7 @@ namespace ESME.Views.Controls
         public static DependencyProperty LayerNameProperty = DependencyProperty.Register("LayerName",
                                                                                          typeof (string),
                                                                                          typeof (LayerControl),
-                                                                                         new FrameworkPropertyMetadata("LayerName"));
+                                                                                         new FrameworkPropertyMetadata("LayerName", OnPropertyChanged));
 
         public string LayerName
         {
@@ -98,7 +108,7 @@ namespace ESME.Views.Controls
         public static DependencyProperty CheckBoxVisibilityProperty = DependencyProperty.Register("CheckBoxVisibility",
                                                                                  typeof (Visibility),
                                                                                  typeof (LayerControl),
-                                                                                 new FrameworkPropertyMetadata(Visibility.Visible, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+                                                                                 new FrameworkPropertyMetadata(Visibility.Visible, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnPropertyChanged));
 
         public Visibility CheckBoxVisibility
         {
@@ -113,7 +123,7 @@ namespace ESME.Views.Controls
         public static DependencyProperty LineColorVisibilityProperty = DependencyProperty.Register("LineColorVisibility",
                                                                                                    typeof (Visibility),
                                                                                                    typeof (LayerControl),
-                                                                                                   new FrameworkPropertyMetadata(Visibility.Visible, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+                                                                                                   new FrameworkPropertyMetadata(Visibility.Visible, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnPropertyChanged));
 
         public Visibility LineColorVisibility
         {

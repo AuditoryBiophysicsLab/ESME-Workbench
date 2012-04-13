@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Xml.Serialization;
-using Cinch;
 using HRC.ViewModels;
 using ThinkGeo.MapSuite.Core;
 
@@ -12,33 +10,10 @@ namespace ESME.Mapping
     [Serializable]
     public class ShapefileMapLayer : MapLayerViewModel
     {
-        #region Menu Initializers
-
-        readonly MenuItemViewModelBase _areaColorMenu = new MenuItemViewModelBase
-        {
-            Header = "Area Color",
-        };
-
-        #endregion
-
         public ShapefileMapLayer()
         {
             LayerType = LayerType.Shapefile; 
             LayerOverlay.Layers.Clear();
-            _areaColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeAreaColor, obj =>
-            {
-                var result = ColorPickerService.ShowDialog();
-                if (!result.HasValue || !result.Value) return;
-                AreaColor = ColorPickerService.Color;
-                MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
-            });
-            AreaColorPickerMenu = new List<MenuItemViewModelBase>
-            {
-                                      _areaColorMenu,
-                                  };
-
-            ColorMenu.Children.Add(_areaColorMenu);
         }
 
         #region public string ShapefileName { get; set; }
@@ -68,7 +43,6 @@ namespace ESME.Mapping
                     using (var sr = new StreamReader(projectionFile)) projection = sr.ReadToEnd();
                 }
                 var newLayer = new ShapeFileFeatureLayer(_shapefileName);
-#if true
                 if (AreaStyle == null)
                 {
                     newLayer.ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = AreaStyles.County1;
@@ -79,7 +53,6 @@ namespace ESME.Mapping
                     newLayer.ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = AreaStyle;
                     newLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
                 }
-#endif
                 newLayer.RequireIndex = false;
                 if (projection != null)
                     newLayer.FeatureSource.Projection = new ManagedProj4Projection
@@ -95,21 +68,6 @@ namespace ESME.Mapping
 
         #endregion
 
-        #region public List<MenuItemViewModelBase> AreaColorPickerMenu { get; set; }
-        [XmlIgnore]
-        public List<MenuItemViewModelBase> AreaColorPickerMenu
-        {
-            get { return _areaColorPickerMenu; }
-            set
-            {
-                if (_areaColorPickerMenu == value) return;
-                _areaColorPickerMenu = value;
-                OnPropertyChanged(AreaColorPickerMenuChangedEventArgs);
-            }
-        }
-        static readonly PropertyChangedEventArgs AreaColorPickerMenuChangedEventArgs = ObservableHelper.CreateArgs<ShapefileMapLayer>(x => x.AreaColorPickerMenu);
-        List<MenuItemViewModelBase> _areaColorPickerMenu;
-
-        #endregion
+        public List<MenuItemViewModelBase> AreaColorPickerMenu { get; set; }
     }
 }

@@ -1,8 +1,12 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using System.Windows.Media;
 using ESME.Database;
 using ESME.Locations;
+using ESME.Mapping;
 using ESME.Scenarios;
+using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.Map;
 using HRC.Aspects;
 using HRC.Utility;
@@ -164,42 +168,81 @@ namespace ESMEWorkbench.ViewModels.Layers
     {
         public WorldMapNode(MapViewModel mapViewModel)
         {
-            _mapViewModel = mapViewModel;
-            Features.Add(new WorldMapFeatureNode { FeatureName = "Pan/Zoom" });
-            Features.Add(new WorldMapFeatureNode { FeatureName = "Lat/Lon Grid" });
-            Features.Add(new WorldMapFeatureNode { FeatureName = "Scale" });
-            IsInitialized = true;
+            MapViewModel = mapViewModel;
+            Features.Add(new WorldMapFeatureNode("Pan/Zoom", () => MapViewModel.IsPanZoomVisible, v => MapViewModel.IsPanZoomVisible = v));
+            Features.Add(new WorldMapFeatureNode("Lat/Lon Grid", () => MapViewModel.IsGridVisible, v => MapViewModel.IsGridVisible = v));
+            Features.Add(new WorldMapFeatureNode("Scale", () => MapViewModel.IsScaleVisible, v => MapViewModel.IsScaleVisible = v));
+            MapViewModel.Add(_worldMapLayer);
+            MapViewModel.SetIsVisible(_worldMapLayer, Settings.Default.ShowWorldMap);
         }
-        [Affects("LineColor", "LineWeight", "IsChecked", "Features")]
-        public bool IsInitialized { get; set; }
 
-        readonly MapViewModel _mapViewModel;
+        [Affects("LineColor", "LineWeight", "IsChecked", "Features")]
+        public MapViewModel MapViewModel { get; set; }
+
         public Color LineColor
         {
-            get { return _mapViewModel.WorldMapLayer.LineColor; }
-            set { _mapViewModel.WorldMapLayer.LineColor = value; }
+            get { return Settings.Default.WorldMapLineColor; }
+            set
+            {
+                _worldMapLayer.LineColor = value;
+                Settings.Default.WorldMapLineColor = value;
+            }
         }
 
         public double LineWeight
         {
-            get { return _mapViewModel.WorldMapLayer.LineWidth; }
-            set { _mapViewModel.WorldMapLayer.LineWidth = (float)value; }
+            get { return Settings.Default.WorldMapLineWeight; }
+            set
+            {
+                _worldMapLayer.LineWidth = (float)value;
+                Settings.Default.WorldMapLineWeight = value;
+            }
         }
 
-        public bool IsChecked
+        public bool IsVisible
         {
-            get { return _mapViewModel.IsWorldMapVisible; }
-            set { _mapViewModel.IsWorldMapVisible = value; }
+            get { return Settings.Default.ShowWorldMap; }
+            set
+            {
+                Settings.Default.ShowWorldMap = value;
+                MapViewModel.SetIsVisible(_worldMapLayer, value);
+            }
         }
-        [Initialize]
-        public ObservableList<WorldMapFeatureNode> Features { get; set; }
+
+        readonly MapLayerViewModel _worldMapLayer = new ShapefileMapLayer
+        {
+            LayerType = LayerType.BaseMap,
+            AreaColor = Colors.Transparent,
+            AreaStyle = MapLayerViewModel.CreateAreaStyle(Settings.Default.WorldMapLineColor, (float)Settings.Default.WorldMapLineWeight, Colors.Transparent),
+            CanBeRemoved = false,
+            CanBeReordered = true,
+            CanChangeAreaColor = true,
+            CanChangeLineColor = true,
+            ShapefileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"),
+            Name = "World Map",
+        };
+
+        [Initialize] public ObservableList<WorldMapFeatureNode> Features { get; set; }
     }
 
     [NotifyPropertyChanged]
     public class WorldMapFeatureNode
     {
-        [Initialize(true)]
-        public bool IsChecked { get; set; }
-        public string FeatureName { get; set; }
+        public WorldMapFeatureNode(string featureName, Func<bool> getter, Action<bool> setter)
+        {
+            FeatureName = featureName;
+            _getter = getter;
+            _setter = setter;
+        }
+
+        readonly Func<bool> _getter;
+        readonly Action<bool> _setter;
+        public bool IsChecked
+        {
+            get { return _getter(); }
+            set { _setter(value); }
+        }
+
+        public string FeatureName { get; private set; }
     }
 }
