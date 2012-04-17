@@ -193,7 +193,7 @@ namespace ESME.Scenarios
             set
             {
                 _minimumTransmissionLossValues = value;
-                DepthAxisBlob = _minimumTransmissionLossValues.ToBlob();
+                MinimumTransmissionLossBlob = _minimumTransmissionLossValues.ToBlob();
             }
         }
         float[] _minimumTransmissionLossValues;
@@ -205,7 +205,7 @@ namespace ESME.Scenarios
             set
             {
                 _maximumTransmissionLossValues = value;
-                DepthAxisBlob = _maximumTransmissionLossValues.ToBlob();
+                MaximumTransmissionLossBlob = _maximumTransmissionLossValues.ToBlob();
             }
         }
         float[] _maximumTransmissionLossValues;
@@ -217,7 +217,7 @@ namespace ESME.Scenarios
             set
             {
                 _meanTransmissionLossValues = value;
-                DepthAxisBlob = _meanTransmissionLossValues.ToBlob();
+                MeanTransmissionLossBlob = _meanTransmissionLossValues.ToBlob();
             }
         }
         float[] _meanTransmissionLossValues;

@@ -23,11 +23,11 @@ namespace ESME.Tests.Scenarios
     public class AnalysisPointTests
     {
 #if Dave
-        const string OverlayFile = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr";
+        const string OverlayFile = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\Jacksonville\Areas\Jax_Sim_Area.ovr";
         const string SimAreaDirectory = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas";
         const string NemoFile = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Jacksonville\BU Test Sample.nemo";
 #else
-        const string OverlayFile = @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr";
+        const string OverlayFile = @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Sim Areas\Jacksonville\Areas\Jax_Sim_Area.ovr";
         const string SimAreaDirectory = @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Sim Areas";
         const string NemoFile = @"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\Jacksonville\BU Test Sample.nemo";
 #endif

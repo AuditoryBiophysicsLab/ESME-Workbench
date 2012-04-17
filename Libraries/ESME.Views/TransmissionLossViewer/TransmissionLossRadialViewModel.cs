@@ -402,7 +402,7 @@ namespace ESME.Views.TransmissionLossViewer
             if (actualControlHeight == 0 || actualControlWidth == 0) return;
             
             var profile = Radial.BottomProfile;
-            var maxDepth = Radial.Depths.Last();
+            var maxDepth = Radial.Depths.Max();
             var maxRange = Radial.Ranges.Last();
             var sb = new StringBuilder();
             foreach (var point in profile)
