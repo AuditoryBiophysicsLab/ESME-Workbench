@@ -26,7 +26,7 @@ namespace InstallableNAVOPlugin
         public BST20ForESME()
         {
             SetPropertiesFromAttributes(GetType());
-            AvailableResolutions = new[] { 5f };
+            AvailableResolutions = new[] { 5f, 0.1f };
             IsTimeVariantData = false;
             AvailableTimePeriods = new[] { TimePeriod.Invalid };
 

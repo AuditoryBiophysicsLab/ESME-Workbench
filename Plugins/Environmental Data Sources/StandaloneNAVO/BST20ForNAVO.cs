@@ -35,7 +35,7 @@ namespace StandaloneNAVOPlugin
             FilenameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*";
 
             ConfigurationControl = new NAVOConfigurationControl { DataContext = this };
-            AvailableResolutions = new[] { 5f };
+            AvailableResolutions = new[] { 5f, 0.1f };
             IsTimeVariantData = false;
             AvailableTimePeriods = new[] { TimePeriod.Invalid };
 

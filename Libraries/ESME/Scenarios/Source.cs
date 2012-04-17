@@ -15,7 +15,6 @@ namespace ESME.Scenarios
         public string SourceType { get; set; }
 
         public virtual Platform Platform { get; set; }
-        public virtual LayerSettings LayerSettings { get; set; }
         public virtual ICollection<Mode> Modes { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
     }

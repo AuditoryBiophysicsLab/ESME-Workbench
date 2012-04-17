@@ -94,8 +94,6 @@ namespace ESME.Locations
         public void Add(Source source, bool saveChanges = false)
         {
             Context.Sources.Add(source);
-            if (source.LayerSettings == null) source.LayerSettings = new LayerSettings();
-            Context.LayerSettings.Add(source.LayerSettings);
             Log(source, "Added new source {0} to platform {1} in scenario {2} in location {3}", source.SourceName, source.Platform.Description, source.Platform.Scenario.Name, source.Platform.Scenario.Location.Name);
             if (saveChanges) SaveChanges();
         }
@@ -339,12 +337,69 @@ namespace ESME.Locations
         #endregion
 
         #region Delete operations
-        public void DeleteLocation(Location location) { }
-        protected void DeleteLocation(Location location, bool saveChanges)
+        public void DeleteLocation(Location location, bool saveChanges)
         {
             // todo: Handle the case where this location is used by one or more scenarios
-                foreach (var dataSet in location.EnvironmentalDataSets)
-                    Context.EnvironmentalDataSets.Remove(dataSet);
+            var scenarios = (from scenario in Context.Scenarios
+                             where scenario.Location.Guid == location.Guid
+                             select scenario).ToList();
+            foreach (var scenario in scenarios)
+            {
+                foreach (var platform in scenario.Platforms.ToList())
+                {
+                    foreach (var source in platform.Sources.ToList())
+                    {
+                        var modes = (from mode in Context.Modes
+                                         .Include(m => m.Source)
+                                         .Include(m => m.Source.Platform)
+                                     where mode.Source.Guid == source.Guid
+                                     select mode).ToList();
+                        foreach (var mode in modes) Context.Modes.Remove(mode);
+                        Context.Sources.Remove(source);
+                    }
+                    Context.LayerSettings.Remove(platform.LayerSettings);
+                    Context.Platforms.Remove(platform);
+                }
+                foreach (var analysisPoint in scenario.AnalysisPoints.ToList())
+                {
+                    foreach (var transmissionLoss in analysisPoint.TransmissionLosses.ToList())
+                    {
+                        foreach (var radial in transmissionLoss.Radials.ToList())
+                        {
+                            File.Delete(Path.Combine(MasterDatabaseDirectory, radial.Filename));
+                            Context.Radials.Remove(radial);
+                        }
+                        Context.LayerSettings.Remove(transmissionLoss.LayerSettings);
+                        Context.TransmissionLosses.Remove(transmissionLoss);
+                    }
+                    Context.LayerSettings.Remove(analysisPoint.LayerSettings);
+                    Context.AnalysisPoints.Remove(analysisPoint);
+                }
+                var perimeters = (from perimeter in Context.Perimeters
+                                  where perimeter.Scenario.Guid == scenario.Guid
+                                  select perimeter).ToList();
+                foreach (var perimeter in perimeters)
+                {
+                    foreach (var coordinate in perimeter.PerimeterCoordinates.ToList()) Context.PerimeterCoordinates.Remove(coordinate);
+                    Context.LayerSettings.Remove(perimeter.LayerSettings);
+                    Context.Perimeters.Remove(perimeter);
+                }
+                foreach (var species in scenario.ScenarioSpecies.ToList())
+                {
+                    Context.LayerSettings.Remove(species.LayerSettings);
+                    Context.ScenarioSpecies.Remove(species);
+                }
+                Context.Scenarios.Remove(scenario);
+            }
+            foreach (var dataSet in location.EnvironmentalDataSets.ToList())
+            {
+                var fileName = Path.Combine(MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
+                var filesToDelete = Directory.EnumerateFiles(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".*").ToList();
+                foreach (var file in filesToDelete) File.Delete(file);
+                Context.LayerSettings.Remove(dataSet.LayerSettings);
+                Context.EnvironmentalDataSets.Remove(dataSet);
+            }
+            Directory.Delete(Path.Combine(MasterDatabaseDirectory, location.StorageDirectory));
             Context.Locations.Remove(location);
             if (saveChanges) SaveChanges();
         }
@@ -353,7 +408,7 @@ namespace ESME.Locations
         {
             // todo: Handle the case where this data set is used by one or more scenarios
             var fileName = Path.Combine(MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
-            var filesToDelete = Directory.EnumerateFiles(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".*");
+            var filesToDelete = Directory.EnumerateFiles(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".*").ToList();
             foreach (var file in filesToDelete) File.Delete(file);
             Context.EnvironmentalDataSets.Remove(dataSet);
             if (saveChanges) SaveChanges();

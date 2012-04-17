@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
-using System.Windows.Media;
 using ESME.Database;
 using ESME.Environment;
 using ESME.Locations;
@@ -12,7 +11,6 @@ using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
 using HRC.Aspects;
 using HRC.Navigation;
-using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Scenarios
 {

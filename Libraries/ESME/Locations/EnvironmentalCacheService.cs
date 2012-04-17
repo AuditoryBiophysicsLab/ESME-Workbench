@@ -114,7 +114,7 @@ namespace ESME.Locations
                     var sediment = ((EnvironmentalDataSourcePluginBase<Sediment>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
                     dataSet.SampleCount = sediment.Samples.Count;
                     sediment.Serialize(fileName);
-                    ToBitmap(sediment.Samples, fileName, v => v == null ? 0 : v.Data.SampleValue, (data, minValue, maxValue) => Colormap.Sediment.ToPixelValues(data, 0, 22));
+                    ToBitmap(sediment.Samples, fileName, v => v == null ? 0 : v.Data.SampleValue, (data, minValue, maxValue) => Colormap.Sediment.ToPixelValues(data, 0, 23));
                     break;
                 case EnvironmentDataType.SoundSpeed:
                     var soundSpeed = ((EnvironmentalDataSourcePluginBase<SoundSpeed>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);

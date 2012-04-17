@@ -98,31 +98,33 @@ namespace HRC.Utility
             {
                 if (_sediment != null) return _sediment;
                 _sediment = new Colormap();
-                _sediment._map.AddRange(new List<Color>{
-                    Colors.Black,
-                    Gray(1, 23),    // Rough Rock
-                    Gray(2, 23),    // Rock
-                    Gray(3, 23),    // Cobble or Gravel or Pebble
-                    Gray(4, 23),    // Sandy Gravel
-                    Gray(5, 23),    // Very Coarse Sand
-                    Gray(6, 23),    // Muddy Sandy Gravel
-                    Gray(7, 23),    // Coarse Sand or Gravelly Sand
-                    Gray(8, 23),    // Gravelly Muddy Sand
-                    Colors.DarkGoldenrod,    // Medium Sand or Sand
-                    Gray(10, 23),   // Muddy Gravel
-                    Gray(11, 23),   // Fine Sand or Silty Sand
-                    Gray(12, 23),   // Muddy Sand
-                    Gray(13, 23),   // Very Fine Sand,
-                    Gray(14, 23),   // Clayey Sand
-                    Gray(15, 23),   // Coarse Silt
-                    Gray(16, 23),   // Gravelly Mud or Sandy Silt
-                    Gray(17, 23),   // Medium Silt or Sand-Silt-Clay
-                    Gray(18, 23),   // Sandy Mud or Silt
-                    Gray(19, 23),   // Fine Silt or Clayey Silt
-                    Gray(20, 23),   // Sandy Clay
-                    Gray(21, 23),   // Very Fine Silt
-                    Gray(22, 23),   // Silty Clay
-                    Colors.DarkOliveGreen,   // Clay
+                _sediment._map.AddRange(new List<Color>
+                {
+                    Colors.Pink,                            //  0 (should be invalid)
+                    Color.FromScRgb(1, 1, 0, 0),            //  1 Rough Rock
+                    Color.FromScRgb(1, .666f, 0, 0),        //  2 Rock
+                    Color.FromScRgb(1, .333f, 0, 0),        //  3 Cobble or Gravel or Pebble
+                    Color.FromScRgb(1, 1, .666f, 0),        //  4 Sandy Gravel
+                    Color.FromScRgb(1, .666f, .444f, 0),    //  5 Very Coarse Sand
+                    Color.FromScRgb(1, .333f, .222f, 0),    //  6 Muddy Sandy Gravel
+                    Color.FromScRgb(1, 1, 1, 0),            //  7 Coarse Sand or Gravelly Sand
+                    Color.FromScRgb(1, .666f, .666f, 0),    //  8 Gravelly Muddy Sand
+                    Color.FromScRgb(1, .333f, .333f, 0),    //  9 Medium Sand or Sand
+                    Color.FromScRgb(1, 0, 1, 0),            // 10 Muddy Gravel
+                    Color.FromScRgb(1, 0, .666f, 0),        // 11 Fine Sand or Silty Sand
+                    Color.FromScRgb(1, 0, .333f, 0),        // 12 Muddy Sand
+                    Color.FromScRgb(1, 0, 1, 1),            // 13 Very Fine Sand,
+                    Color.FromScRgb(1, 0, .666f, .666f),    // 14 Clayey Sand
+                    Color.FromScRgb(1, 0, .333f, .333f),    // 15 Coarse Silt
+                    Color.FromScRgb(1, 0, 0, 1),            // 16 Gravelly Mud or Sandy Silt
+                    Color.FromScRgb(1, 0, 0, .666f),        // 17 Medium Silt or Sand-Silt-Clay
+                    Color.FromScRgb(1, 0, 0, .333f),        // 18 Sandy Mud or Silt
+                    Color.FromScRgb(1, 1, 0, 1),            // 19 Fine Silt or Clayey Silt
+                    Color.FromScRgb(1, .666f, 0, .666f),    // 20 Sandy Clay
+                    Color.FromScRgb(1, .333f, 0, .333f),    // 21 Very Fine Silt
+                    Colors.Olive,                           // 22 Silty Clay
+                    Colors.OliveDrab,                       // 23 Clay
+                    Colors.Black,   
                 });
                 return _sediment;
             }

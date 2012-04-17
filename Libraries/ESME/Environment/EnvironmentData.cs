@@ -341,7 +341,7 @@ namespace ESME.Environment
 
         void Build2DIndex()
         {
-            Debug.WriteLine("{0}: EnvironmentData: About to calculate 2D index", DateTime.Now);
+            //Debug.WriteLine("{0}: EnvironmentData: About to calculate 2D index", DateTime.Now);
             if (_latitudes == null || _longitudes == null) CreateLatLonIndices();
             if (_latitudes == null || _longitudes == null) throw new ApplicationException("_latitudes or _longitudes is null");
             _twoDIndex = new T[_longitudes.Count, _latitudes.Count];
@@ -359,7 +359,7 @@ namespace ESME.Environment
                     _twoDIndex[curLonIndex, curLatIndex] = curLatHashBucket[lon];
                 }
             }
-            Debug.WriteLine("{0}: EnvironmentData: 2D index calculation complete", DateTime.Now);
+            //Debug.WriteLine("{0}: EnvironmentData: 2D index calculation complete", DateTime.Now);
         }
 
         public static EnvironmentData<T> Decimate(EnvironmentData<T> source, int outputWidth, int outputHeight)
@@ -526,15 +526,16 @@ namespace ESME.Environment
                 _longitudeHashTable = new HashDictionary<double, HashDictionary<double, T>>();
                 foreach (var lat in _latitudes) _latitudeHashTable[lat] = new HashDictionary<double, T>();
                 foreach (var lon in _longitudes) _longitudeHashTable[lon] = new HashDictionary<double, T>();
-                Debug.WriteLine("{0}: EnvironmentData: About to populate hash table", DateTime.Now);
+                //Debug.WriteLine("{0}: EnvironmentData: About to populate hash table", DateTime.Now);
                 foreach (var item in _arrayList)
                 {
+                    if (item == null) continue;
                     var lat = Math.Round(item.Latitude, _maxPrecision);
                     var lon = Math.Round(item.Longitude, _maxPrecision);
                     _latitudeHashTable[lat][lon] = item;
                     _longitudeHashTable[lon][lat] = item;
                 }
-                Debug.WriteLine("{0}: EnvironmentData: Hash table population complete", DateTime.Now);
+                //Debug.WriteLine("{0}: EnvironmentData: Hash table population complete", DateTime.Now);
             }
         }
 
@@ -550,6 +551,7 @@ namespace ESME.Environment
                 _longitudes = new HashedArrayList<double>();
                 foreach (var point in _arrayList)
                 {
+                    if (point == null) continue;
                     _latitudes.Add(Math.Round(point.Latitude, _maxPrecision));
                     _longitudes.Add(Math.Round(point.Longitude, _maxPrecision));
                 }

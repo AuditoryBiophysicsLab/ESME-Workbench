@@ -45,6 +45,7 @@ namespace ESME.Scenarios
             var mydepth=0f;
             if (Depth.HasValue)
                 mydepth = Depth.Value;
+            if ((Source == null || Source.Platform == null) && (other.Source == null || other.Source.Platform == null)) return true;
             mydepth += Source.Platform.Depth;
             var otherdepth = 0f;
             if (other.Depth.HasValue)
