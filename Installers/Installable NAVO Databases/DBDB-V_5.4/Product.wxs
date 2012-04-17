@@ -8,8 +8,6 @@
   <?define ProductAppFolder = "InstallLocation" ?>
   <?define OAMLRoot="S:\OAML Data Sources"?>
   <?define DBDBPath="$(var.OAMLRoot)\DBDBV_v5.4"?>
-  <?define DataPath="$(var.DBDBPath)\data"?>
-  <?define UtilPath="$(var.DBDBPath)\bin\windows"?>
   <?define ProductDisplayName = "$(var.ProductName)" ?>
   <?define ProductId = "43165055-2504-4D1B-9749-84357CD3CCCA" ?>
   <?define ProductUpgradeCode = "02E49857-286F-4C7E-8774-EB9151F12004" ?>
@@ -35,11 +33,11 @@
 					      <Component Id="DBDBFiles" Guid="c4a35581-7408-4973-b697-498b1ba7cd0e">
                   <File Id="dbdbv5_level0c_0.h5"
                         Name="dbdbv5_level0c_0.h5"
-                        Source="$(var.DataPath)\dbdbv5_level0c_0.h5"
+                        Source="$(var.DBDBPath)\dbdbv5_level0c_0.h5"
                         KeyPath="yes" />
                   <File Id="dbv5_command.exe"
                         Name="dbv5_command.exe"
-                        Source="$(var.UtilPath)\dbv5_command.exe" />
+                        Source="$(var.DBDBPath)\dbv5_command.exe" />
 					      </Component>
               </Directory>
             </Directory>

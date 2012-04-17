@@ -7,7 +7,7 @@
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
   <?define OAMLRoot="S:\OAML Data Sources"?>
-  <?define SMGCPath="$(var.OAMLRoot)\SMGC_Minimal"?>
+  <?define SMGCPath="$(var.OAMLRoot)\SMGC"?>
   <?define ProductDisplayName = "$(var.ProductName)" ?>
   <?define ProductId = "E82D4565-C1A2-49B3-9D1A-F9422705FCDF" ?>
   <?define ProductUpgradeCode = "DF0D9256-2D98-4FA9-AAB5-139697537F2F" ?>

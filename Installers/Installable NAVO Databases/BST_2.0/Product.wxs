@@ -8,7 +8,6 @@
   <?define ProductAppFolder = "InstallLocation" ?>
   <?define OAMLRoot="S:\OAML Data Sources"?>
   <?define BSTPath="$(var.OAMLRoot)\BST"?>
-  <?define DataPath="$(var.BSTPath)\Sediments2.0_QAV_Analysis\Sediments\Version2.0\databases"?>
   <?define ProductDisplayName = "$(var.ProductName)" ?>
   <?define ProductId = "{8AB90780-5D24-427C-9296-04F21B76732E}" ?>
   <?define ProductUpgradeCode = "{163FF6CE-1ADE-416B-80AB-CD3229738A66}" ?>
@@ -34,7 +33,7 @@
                 <Component Id="BSTFiles" Guid="AE149FEC-7C6E-41A9-96B9-79462197AF05">
                   <File Id="hfevav2.h5"
                         Name="hfevav2.h5"
-                        Source="$(var.DataPath)\hfevav2.h5"
+                        Source="$(var.BSTPath)\hfevav2.h5"
                         KeyPath="yes" />
                 </Component>
               </Directory>
