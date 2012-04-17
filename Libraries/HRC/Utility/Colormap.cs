@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using HRC.Aspects;
 using HRC.Navigation;
 using Color = System.Windows.Media.Color;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
@@ -18,7 +19,7 @@ namespace HRC.Utility
     // HRC.Resources.summer.map
     public class Colormap
     {
-        readonly List<Color> _map = new List<Color>();
+        [Initialize, UsedImplicitly] public List<Color> Map { get; private set; }
 
         /// <summary>
         /// Create a Colormap from a matrix of normalized values.
@@ -35,10 +36,42 @@ namespace HRC.Utility
             if (rgbNormalizedValues == null) throw new ArgumentException("Colormap: The color values list cannot be null");
 
             foreach (var curValue in rgbNormalizedValues)
-                _map.Add(curValue.Color);
+                Map.Add(curValue.Color);
         }
 
         private Colormap() {}
+
+        public Colormap(IList<ColormapComponent> components, int stepCount)
+        {
+            if (components[0].Fraction != 0.0) throw new ArgumentOutOfRangeException("components", "First component's fraction must be 0.0");
+            if (components.Last().Fraction != 1.0) throw new ArgumentOutOfRangeException("components", "Last component's fraction must be 1.0");
+            for (var componentIndex = 0; componentIndex < components.Count - 1; componentIndex++) if (components[componentIndex].Fraction >= components[componentIndex + 1].Fraction) throw new ArgumentException("Fraction values must increase with each entry in the component list", "components");
+
+            var curAlpha = components[0].Alpha;
+            var curRed = components[0].Red;
+            var curGreen = components[0].Green;
+            var curBlue = components[0].Blue;
+            for (var componentIndex = 1; componentIndex < components.Count; componentIndex++)
+            {
+                var numSteps = (int)((components[componentIndex].Fraction - components[componentIndex - 1].Fraction) * stepCount);
+                var deltaAlpha = (components[componentIndex].Alpha - curAlpha) / numSteps;
+                var deltaRed = (components[componentIndex].Red - curRed) / numSteps;
+                var deltaGreen = (components[componentIndex].Green - curGreen) / numSteps;
+                var deltaBlue = (components[componentIndex].Blue - curBlue) / numSteps;
+                for (var step = 0; step < numSteps; step++)
+                {
+                    Map.Add(Color.FromScRgb(curAlpha, curRed, curGreen, curBlue));
+                    curAlpha += deltaAlpha;
+                    curRed += deltaRed;
+                    curGreen += deltaGreen;
+                    curBlue += deltaBlue;
+                }
+                curAlpha = components[componentIndex].Alpha;
+                curRed = components[componentIndex].Red;
+                curGreen = components[componentIndex].Green;
+                curBlue = components[componentIndex].Blue;
+            }
+        }
 
         /// <summary>
         /// Create a colormap from a stream.
@@ -81,6 +114,37 @@ namespace HRC.Utility
             return FromStream(myAssembly.GetManifestResourceStream(embeddedResourceName));
         }
 
+        public readonly static ColormapComponent[] HotComponents = new[]
+        {
+            new ColormapComponent(0.00000f, 1.0000f, 0.0000f, 0.0000f, 0.0000f),
+            new ColormapComponent(0.37500f, 1.0000f, 1.0000f, 0.0000f, 0.0000f),
+            new ColormapComponent(0.75000f, 1.0000f, 1.0000f, 1.0000f, 0.0000f),
+            new ColormapComponent(1.00000f, 1.0000f, 1.0000f, 1.0000f, 1.0000f)
+        };
+        public readonly static ColormapComponent[] CopperComponents = new[]
+        {
+            new ColormapComponent(0.00000f, 1.0000f, 0.0000f, 0.0000f, 0.0000f),
+            new ColormapComponent(0.79690f, 1.0000f, 1.0000f, 0.6235f, 0.4000f),
+            new ColormapComponent(1.00000f, 1.0000f, 1.0000f, 0.7843f, 0.5020f)
+        };
+        public readonly static ColormapComponent[] CoolComponents = new[]
+        {
+            new ColormapComponent(0.00000f, 1.0000f, 1.0000f, 1.0000f, 0.0000f),
+            new ColormapComponent(1.00000f, 1.0000f, 1.0000f, 0.0000f, 1.0000f)
+        };
+        public readonly static ColormapComponent[] OceanComponents = new[]
+        {
+            new ColormapComponent(0.00000f, 1.0000f, 0.0000f, 0.0000f, 0.0000f),
+            new ColormapComponent(0.12500f, 1.0000f, 0.0000f, 0.0196f, 0.0980f),
+            new ColormapComponent(0.25000f, 1.0000f, 0.0000f, 0.0392f, 0.1961f),
+            new ColormapComponent(0.37500f, 1.0000f, 0.0000f, 0.3137f, 0.4902f),
+            new ColormapComponent(0.50000f, 1.0000f, 0.0000f, 0.5882f, 0.7843f),
+            new ColormapComponent(0.62500f, 1.0000f, 0.3373f, 0.7725f, 0.7216f),
+            new ColormapComponent(0.75000f, 1.0000f, 0.6745f, 0.9608f, 0.6588f),
+            new ColormapComponent(0.87500f, 1.0000f, 0.8275f, 0.9804f, 0.8275f),
+            new ColormapComponent(1.00000f, 1.0000f, 0.9804f, 1.0000f, 1.0000f),
+        };
+
         static Colormap _haxby;
         public static Colormap Haxby { get { return _haxby ?? (_haxby = FromEmbeddedResource("HRC.Resources.haxby.map")); } }
 
@@ -98,7 +162,7 @@ namespace HRC.Utility
             {
                 if (_sediment != null) return _sediment;
                 _sediment = new Colormap();
-                _sediment._map.AddRange(new List<Color>
+                _sediment.Map.AddRange(new List<Color>
                 {
                     Colors.Pink,                            //  0 (should be invalid)
                     Color.FromScRgb(1, 1, 0, 0),            //  1 Rough Rock
@@ -128,12 +192,6 @@ namespace HRC.Utility
                 });
                 return _sediment;
             }
-        }
-
-        static Color Gray(float value, float maxValue)
-        {
-            var white = 1.0f - ((1.0f - value) / (1.0f - maxValue));
-            return Color.FromScRgb(1, white, white, white);
         }
 
         // data[lats,lons]
@@ -179,15 +237,15 @@ namespace HRC.Utility
 
         internal Color Lookup(float value, float minValue, float maxValue, float dataRange)
         {
-            if (value >= maxValue) return _map.Last();
-            if (value <= minValue) return _map.First();
+            if (value >= maxValue) return Map.Last();
+            if (value <= minValue) return Map.First();
 
             if (Math.Abs(dataRange - 0.0) > 0.0001)
             {
                 double fraction = (value - minValue) / dataRange;
                 if (IsInverted) fraction = 1.0 - fraction;
-                var index = (int)(fraction * _map.Count);
-                return _map[index];
+                var index = (int)(fraction * Map.Count);
+                return Map[index];
             }
             return Colors.Black;
         }
@@ -371,5 +429,30 @@ namespace HRC.Utility
         {
             get { return Color.FromRgb((byte) (Red * 255.0), (byte) (Green * 255.0), (byte) (Blue * 255.0)); }
         }
+    }
+
+    public class ColormapComponent
+    {
+        public ColormapComponent(float fraction, float alpha, float red, float green, float blue)
+        {
+            const string rangeExceptionString = "Must be between 0.0 and 1.0, inclusive";
+            if (!RangeCheck(fraction)) throw new ArgumentOutOfRangeException("fraction", rangeExceptionString);
+            if (!RangeCheck(alpha)) throw new ArgumentOutOfRangeException("alpha", rangeExceptionString);
+            if (!RangeCheck(red)) throw new ArgumentOutOfRangeException("red", rangeExceptionString);
+            if (!RangeCheck(green)) throw new ArgumentOutOfRangeException("green", rangeExceptionString);
+            if (!RangeCheck(blue)) throw new ArgumentOutOfRangeException("blue", rangeExceptionString);
+            Fraction = fraction;
+            Alpha = alpha;
+            Red = red;
+            Green = green;
+            Blue = blue;
+        }
+
+        static bool RangeCheck(float value) { return 0f <= value && value <= 1f; }
+        public float Fraction { get; private set; }
+        public float Alpha { get; private set; }
+        public float Red { get; private set; }
+        public float Green { get; private set; }
+        public float Blue { get; private set; }
     }
 }

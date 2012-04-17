@@ -108,13 +108,17 @@ namespace ESME.Locations
                     var wind = ((EnvironmentalDataSourcePluginBase<Wind>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
                     dataSet.SampleCount = (from period in wind.TimePeriods select period.EnvironmentData.Count).Sum();
                     wind.Serialize(fileName);
-                    ToBitmap(wind[timePeriod].EnvironmentData, fileName, v => v == null ? 0 : v.Data, (data, minValue, maxValue) => Colormap.Summer.ToPixelValues(data, minValue, maxValue));
+                    var windColormap = new Colormap(Colormap.CoolComponents, 512);
+                    ToBitmap(wind[timePeriod].EnvironmentData, fileName, v => v == null ? 0 : v.Data, windColormap.ToPixelValues);
                     break;
                 case EnvironmentDataType.Sediment:
                     var sediment = ((EnvironmentalDataSourcePluginBase<Sediment>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
                     dataSet.SampleCount = sediment.Samples.Count;
                     sediment.Serialize(fileName);
-                    ToBitmap(sediment.Samples, fileName, v => v == null ? 0 : v.Data.SampleValue, (data, minValue, maxValue) => Colormap.Sediment.ToPixelValues(data, 0, 23));
+                    var sedimentColormap = new Colormap(Colormap.CopperComponents, 23);
+                    sedimentColormap.Map.Insert(0, Colors.Black);
+                    sedimentColormap.Map.Add(Colors.Black);
+                    ToBitmap(sediment.Samples, fileName, v => v == null ? 0 : v.Data.SampleValue, (data, minValue, maxValue) => sedimentColormap.ToPixelValues(data, 1, 23));
                     break;
                 case EnvironmentDataType.SoundSpeed:
                     var soundSpeed = ((EnvironmentalDataSourcePluginBase<SoundSpeed>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
@@ -125,6 +129,7 @@ namespace ESME.Locations
                     var bathymetry = ((EnvironmentalDataSourcePluginBase<Bathymetry>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
                     dataSet.SampleCount = bathymetry.Samples.Count;
                     bathymetry.Save(fileName);
+                    var bathymetryColormap = new Colormap(Colormap.OceanComponents, 1024);
                     var dualColormap = new DualColormap(Colormap.Summer, Colormap.Jet) { Threshold = 0 };
 #if true
                     ToBitmap(bathymetry.Samples, fileName, v => v.Data, (data, minValue, maxValue) => dualColormap.ToPixelValues(data, minValue, maxValue < 0 ? maxValue : 8000, Colors.Black));
