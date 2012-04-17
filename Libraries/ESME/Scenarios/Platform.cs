@@ -54,7 +54,6 @@ namespace ESME.Scenarios
 
             _mapLayer.Add(new List<Geo> { Geo, ((Geo)Geo).Offset(HRC.Navigation.Geo.KilometersToRadians(25), HRC.Navigation.Geo.DegreesToRadians(90)) });
             _mapLayer.Done();
-            if (Perimeter != null) Perimeter.CreateMapLayers();
 
             LayerSettings.PropertyChanged += (s, e) =>
             {
@@ -73,40 +72,7 @@ namespace ESME.Scenarios
                         break;
                 }
             };
-        }
-
-        public OverlayShapeMapLayer MapLayer
-        {
-            get
-            {
-                if (_mapLayer != null) return _mapLayer;
-                _mapLayer = new OverlayShapeMapLayer
-                {
-                    LayerType = LayerType.Track,
-                    Name = string.Format("{0}", Guid),
-                    CustomLineStyle = new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, LayerSettings.LineOrSymbolColor, (float)LayerSettings.LineOrSymbolSize)
-                };
-                _mapLayer.Add(new List<Geo> { Geo, ((Geo)Geo).Offset(HRC.Navigation.Geo.KilometersToRadians(25), HRC.Navigation.Geo.DegreesToRadians(90)) });
-                _mapLayer.Done();
-                LayerSettings.PropertyChanged += (s, e) =>
-                {
-                    switch (e.PropertyName)
-                    {
-                        case "IsChecked":
-                            MediatorMessage.Send(LayerSettings.IsChecked ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, _mapLayer);
-                            break;
-                        case "LineOrSymbolColor":
-                        case "LineOrSymbolSize":
-                            _mapLayer.CustomLineStyle = new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5,
-                                                                                    PointSymbolType.Square, Colors.Red, 5,
-                                                                                    LayerSettings.LineOrSymbolColor,
-                                                                                    (float)LayerSettings.LineOrSymbolSize);
-                            MediatorMessage.Send(MediatorMessage.RefreshMapLayer, _mapLayer);
-                            break;
-                    }
-                };
-                return _mapLayer;
-            } 
+            if (Perimeter != null) Perimeter.CreateMapLayers();
         }
     }
 }

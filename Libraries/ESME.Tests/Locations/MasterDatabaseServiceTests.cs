@@ -25,15 +25,15 @@ namespace ESME.Tests.Locations
             Assert.IsFalse(Directory.Exists(_masterDatabaseDirectory));
             var database = new MasterDatabaseService { MasterDatabaseDirectory = _masterDatabaseDirectory };
             Assert.IsTrue(Directory.Exists(_masterDatabaseDirectory));
-            Assert.AreEqual(0, database.Locations.Count());
+            Assert.AreEqual(0, database.Context.Locations.Local.Count());
 
             var plugins = new PluginManagerService { PluginDirectory = PluginDirectory };
 
             var location = database.CreateLocation("Mass Bay", "These are some comments", 44, 41, -69, -72);
-            Assert.AreEqual(1, database.Locations.Count());
+            Assert.AreEqual(1, database.Context.Locations.Local.Count());
             Assert.AreEqual("Mass Bay", location.Name);
             Assert.Throws(typeof(DuplicateNameException), () => database.CreateLocation("Mass Bay", "These are some comments", 44, 41, -69, -72));
-            Assert.AreEqual(1, database.Locations.Count());
+            Assert.AreEqual(1, database.Context.Locations.Local.Count());
             foreach (var month in NAVOConfiguration.AllMonths)
             {
                 // SoundSpeed dataset for each month

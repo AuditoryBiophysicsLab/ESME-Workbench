@@ -155,7 +155,7 @@ namespace ESME.Mapping
         }
 
         public static LineStyle CreateLineStyle(Color pen, float width) { return new LineStyle(new GeoPen(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B), width)); }
-        protected static PointStyle CreatePointStyle(PointSymbolType pointSymbolType, Color pen, int width)
+        public static PointStyle CreatePointStyle(PointSymbolType pointSymbolType, Color pen, int width)
         {
             return new PointStyle(pointSymbolType, new GeoSolidBrush(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B)),
                                   width);

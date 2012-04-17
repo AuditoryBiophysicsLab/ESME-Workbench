@@ -167,7 +167,7 @@ namespace ESME.Views.TransmissionLossViewer
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialColorMapChanged)]
         void TransmissionLossRadialColorMapChanged(ColorMapViewModel colorMapViewModel) { ColorMapViewModel = colorMapViewModel; }
 
-        readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME.AnalysisPoint Tests\Database"); //todo
+        readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME Workbench\Database"); //todo
         
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialChanged)]
         void TransmissionLossRadialChanged(Radial radial)

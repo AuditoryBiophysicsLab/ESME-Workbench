@@ -30,7 +30,6 @@ namespace ESME.Locations
         public DbSet<AnalysisPoint> AnalysisPoints { get; set; }
         public DbSet<Scenarios.TransmissionLoss> TransmissionLosses { get; set; }
         public DbSet<Radial> Radials { get; set; }
-        public DbSet<LevelRadius> LevelRadii { get; set; }
         public DbSet<LayerSettings> LayerSettings { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)

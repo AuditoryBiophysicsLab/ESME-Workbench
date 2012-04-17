@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Data;
@@ -40,12 +41,10 @@ namespace ESME.Locations
             }
         }
 
-        public ObservableCollection<Location> Locations { get { return Context == null ? null : Context.Locations.Local; } }
-        public Location FindLocation(string locationName) { return Locations == null ? null : Locations.FirstOrDefault(l => l.Name == locationName); }
+        public Location FindLocation(string locationName) { return Context == null ? null : Context.Locations.FirstOrDefault(l => l.Name == locationName); }
         public bool LocationExists(string locationName) { return FindLocation(locationName) != null; }
 
-        public ObservableCollection<Scenario> Scenarios { get { return Context == null ? null : Context.Scenarios.Local; } }
-        public Scenario FindScenario(string scenarioName) { return Scenarios == null ? null : Scenarios.FirstOrDefault(l => l.Name == scenarioName); }
+        public Scenario FindScenario(string scenarioName) { return Context == null ? null : Context.Scenarios.FirstOrDefault(l => l.Name == scenarioName); }
         public bool ScenarioExists(string scenarioName) { return FindScenario(scenarioName) != null; }
         #region Add operations
         public void Add(Location location, bool saveChanges = false)
@@ -186,6 +185,7 @@ namespace ESME.Locations
             if (analysisPoint.LayerSettings == null) analysisPoint.LayerSettings = new LayerSettings();
             Context.LayerSettings.Add(analysisPoint.LayerSettings);
             if (analysisPoint.Scenario == null) throw new ScenarioException(string.Format("Scenario for analysis point at {0} was not specified", analysisPoint.Geo));
+            Console.WriteLine("Adding analysis point at {0}", analysisPoint.Geo);
             var depthAtAnalysisPoint = -bathymetry.Samples.GetNearestPoint(analysisPoint.Geo).Data;
             foreach (var mode in analysisPoint.Scenario.GetAllModes())
             {
@@ -193,9 +193,10 @@ namespace ESME.Locations
                 if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
                 if (sourceDepth >= depthAtAnalysisPoint)
                 {
-                    Console.WriteLine("Skipping {0}:{1}:{2}, because the depth is below the bottom for this analysis point", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName);
+                    Console.WriteLine("  Skipping transmission loss for {0}:{1}:{2}, because the depth is below the bottom for this analysis point", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName);
                     continue;
                 }
+                Console.WriteLine("  Adding transmission loss for {0}:{1}:{2}", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName);
                 var transmissionLoss = new Scenarios.TransmissionLoss
                 {
                     AnalysisPoint = analysisPoint,
@@ -203,6 +204,7 @@ namespace ESME.Locations
                     Mode = mode,
                 };
                 var radialCount = mode.MaxPropagationRadius <= 10000 ? 8 : 16;
+                Console.WriteLine("    Radius: {0}m, radial count: {1}", mode.MaxPropagationRadius, radialCount);
                 for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
                 {
                     var radial = new Radial
@@ -215,10 +217,8 @@ namespace ESME.Locations
                         IsCalculated = false,
                     };
                     Add(radial);
-                    transmissionLoss.Radials.Add(radial);
                 }
                 Add(transmissionLoss);
-                analysisPoint.TransmissionLosses.Add(transmissionLoss);
             }
             Context.AnalysisPoints.Add(analysisPoint);
             Log(analysisPoint, "Added new analysis point at {0} to scenario {1} in location {2}", (Geo)analysisPoint.Geo, analysisPoint.Scenario, analysisPoint.Scenario.Location);
@@ -244,16 +244,6 @@ namespace ESME.Locations
             if (existing != null) throw new DuplicateNameException(String.Format("A radial with bearing {0} already exists in the transmission loss for mode {1} in analysis point at {2}", radial.Bearing, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo));
             Context.Radials.Add(radial);
             Log(radial, "Added new radial with bearing {0} and length {1} to transmission loss for mode {2} in analysis point at {3} to scenario {4} in location {5}", radial.Bearing, radial.Length, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo, radial.TransmissionLoss.AnalysisPoint.Scenario, radial.TransmissionLoss.AnalysisPoint.Scenario.Location);
-            if (saveChanges) SaveChanges();
-        }
-        public void Add(LevelRadius levelRadius, bool saveChanges = false)
-        {
-            var existing = (from lr in Context.LevelRadii
-                            where lr.Level == levelRadius.Level && lr.Radial.Guid == levelRadius.Radial.Guid
-                            select lr).FirstOrDefault();
-            if (existing != null) throw new DuplicateNameException(String.Format("A LevelRadius with level {0} already exists for radial with bearing {1} already exists in the transmission loss for mode {2} in analysis point at {3}", levelRadius.Level, levelRadius.Radial.Bearing, levelRadius.Radial.TransmissionLoss.Mode.ModeName, (Geo)levelRadius.Radial.TransmissionLoss.AnalysisPoint.Geo));
-            Context.LevelRadii.Add(levelRadius);
-            Log(levelRadius, "Added new radius at level {0} on radial with bearing {1} and length {2} in transmission loss for mode {3} in analysis point at {4} to scenario {5} in location {6}", levelRadius.Level, levelRadius.Radial.Bearing, levelRadius.Radial.Length, levelRadius.Radial.TransmissionLoss.Mode.ModeName, (Geo)levelRadius.Radial.TransmissionLoss.AnalysisPoint.Geo, levelRadius.Radial.TransmissionLoss.AnalysisPoint.Scenario, levelRadius.Radial.TransmissionLoss.AnalysisPoint.Scenario.Location);
             if (saveChanges) SaveChanges();
         }
         #endregion
@@ -396,8 +386,23 @@ namespace ESME.Locations
             };
             DbConnection connection = new SQLiteConnection(connectionStringBuilder.ToString());
             Context = new LocationContext(connection, true);
+            Context.Platforms.Load();
+            Context.Sources.Load();
+            Context.Modes.Load();
             Context.Locations.Load();
             Context.Scenarios.Load();
+            Context.LayerSettings.Load();
+            Context.Perimeters.Load();
+            Context.PerimeterCoordinates.Load();
+#if false
+            Context.EnvironmentalDataSets.Load();
+            Context.Platforms.Load();
+            Context.Sources.Load();
+            Context.ScenarioSpecies.Load();
+            Context.AnalysisPoints.Load();
+            Context.TransmissionLosses.Load();
+            Context.Radials.Load();
+#endif
             OnPropertyChanged("Locations");
             OnPropertyChanged("Scenarios");
         }
@@ -445,7 +450,6 @@ namespace ESME.Locations
         void Log(AnalysisPoint analysisPoint, string message, params object[] args) { LogBase(new LogEntry(analysisPoint) { Location = analysisPoint.Scenario.Location, Scenario = analysisPoint.Scenario, AnalysisPoint = analysisPoint }, message, args); }
         void Log(Scenarios.TransmissionLoss transmissionLoss, string message, params object[] args) { LogBase(new LogEntry(transmissionLoss) { Location = transmissionLoss.AnalysisPoint.Scenario.Location, Scenario = transmissionLoss.AnalysisPoint.Scenario, TransmissionLoss = transmissionLoss }, message, args); }
         void Log(Radial radial, string message, params object[] args) { LogBase(new LogEntry(radial) { Location = radial.TransmissionLoss.AnalysisPoint.Scenario.Location, Scenario = radial.TransmissionLoss.AnalysisPoint.Scenario, Radial = radial }, message, args); }
-        void Log(LevelRadius levelRadius, string message, params object[] args) { LogBase(new LogEntry(levelRadius) { Location = levelRadius.Radial.TransmissionLoss.AnalysisPoint.Scenario.Location, Scenario = levelRadius.Radial.TransmissionLoss.AnalysisPoint.Scenario, LevelRadius = levelRadius }, message, args); }
 #else
         internal void Log(Location location, string message) { LogBase(new LogEntry(location), message); }
         internal void Log(EnvironmentalDataSet dataSet, string message) { LogBase(new LogEntry(dataSet), message); }

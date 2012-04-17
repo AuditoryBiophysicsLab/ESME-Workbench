@@ -114,11 +114,16 @@ namespace ESME.Environment
         }
 
 #endif
-
+        bool _isExtended;
+        readonly object _lockObject = new object();
         public void Extend(Geo<float> deepestPoint)
         {
-            foreach (var soundSpeedField in SoundSpeedFields)
-                soundSpeedField.ExtendProfiles(deepestPoint);
+            lock (_lockObject)
+            {
+                if (_isExtended) return;
+                foreach (var soundSpeedField in SoundSpeedFields) soundSpeedField.ExtendProfiles(deepestPoint);
+                _isExtended = true;
+            }
         }
 
         public static SoundSpeed Average(SoundSpeed monthlySoundSpeeds, List<TimePeriod> timePeriods)

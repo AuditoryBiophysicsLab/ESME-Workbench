@@ -163,7 +163,7 @@ namespace ESME.Environment
                     job.SampleCount = (uint)bathymetry.Samples.Count;
                     job.CompletionTask.Start();
                     await job.CompletionTask;
-                    var colormap = new DualColormap(Colormap.Summer, Colormap.Haxby) { Threshold = 0 };
+                    var colormap = new DualColormap(Colormap.Summer, Colormap.Jet) { Threshold = 0 };
                     var bathysize = Math.Max(bathymetry.Samples.Longitudes.Count, bathymetry.Samples.Latitudes.Count);
                     var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
                     var displayValues = bathymetry.Samples;

@@ -182,7 +182,15 @@ namespace ESME.Scenarios
 
         public void CreateMapLayers()
         {
+            Wind.CreateMapLayers();
+            SoundSpeed.CreateMapLayers();
+            Bathymetry.CreateMapLayers();
+            Sediment.CreateMapLayers();
             foreach (var platform in Platforms) platform.CreateMapLayers();
+            var transmissionLosses = (from tl in Database.Context.TransmissionLosses
+                                      where tl.AnalysisPoint.Scenario.Guid == Guid
+                                      select tl).ToList();
+            foreach (var transmissionLoss in transmissionLosses) transmissionLoss.CreateMapLayers();
         }
     }
 

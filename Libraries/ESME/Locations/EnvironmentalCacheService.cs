@@ -37,7 +37,7 @@ namespace ESME.Locations
         public PercentProgressList<PercentProgressList<Location>> ImportMissingDatasets()
         {
             var result = new PercentProgressList<PercentProgressList<Location>>();
-            foreach (var locationProgress in _database.Locations.Select(ImportLocationDatasets).Where(l => l != null))
+            foreach (var locationProgress in _database.Context.Locations.Select(ImportLocationDatasets).Where(l => l != null))
                 result.Add(locationProgress);
             return result;
         }
@@ -108,11 +108,13 @@ namespace ESME.Locations
                     var wind = ((EnvironmentalDataSourcePluginBase<Wind>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
                     dataSet.SampleCount = (from period in wind.TimePeriods select period.EnvironmentData.Count).Sum();
                     wind.Serialize(fileName);
+                    ToBitmap(wind[timePeriod].EnvironmentData, fileName, v => v == null ? 0 : v.Data, (data, minValue, maxValue) => Colormap.Summer.ToPixelValues(data, minValue, maxValue));
                     break;
                 case EnvironmentDataType.Sediment:
                     var sediment = ((EnvironmentalDataSourcePluginBase<Sediment>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
                     dataSet.SampleCount = sediment.Samples.Count;
                     sediment.Serialize(fileName);
+                    ToBitmap(sediment.Samples, fileName, v => v == null ? 0 : v.Data.SampleValue, (data, minValue, maxValue) => Colormap.Sediment.ToPixelValues(data, 0, 22));
                     break;
                 case EnvironmentDataType.SoundSpeed:
                     var soundSpeed = ((EnvironmentalDataSourcePluginBase<SoundSpeed>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
@@ -123,7 +125,10 @@ namespace ESME.Locations
                     var bathymetry = ((EnvironmentalDataSourcePluginBase<Bathymetry>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
                     dataSet.SampleCount = bathymetry.Samples.Count;
                     bathymetry.Save(fileName);
-                    var colormap = new DualColormap(Colormap.Summer, Colormap.Haxby) { Threshold = 0 };
+                    var dualColormap = new DualColormap(Colormap.Summer, Colormap.Jet) { Threshold = 0 };
+#if true
+                    ToBitmap(bathymetry.Samples, fileName, v => v.Data, (data, minValue, maxValue) => dualColormap.ToPixelValues(data, minValue, maxValue < 0 ? maxValue : 8000, Colors.Black));
+#else
                     var bathysize = Math.Max(bathymetry.Samples.Longitudes.Count, bathymetry.Samples.Latitudes.Count);
                     var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
                     var displayValues = bathymetry.Samples;
@@ -141,12 +146,12 @@ namespace ESME.Locations
                     var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
                     for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
 
-                    var displayData = colormap.ToPixelValues(bitmapData,
+                    var displayData = dualColormap.ToPixelValues(bitmapData,
                                                              bathymetry.Minimum.Data,
                                                              bathymetry.Maximum.Data < 0
                                                                  ? bathymetry.Maximum.Data
-                                                                 : 8000);
-                                                             //Colors.Black);
+                                                                 : 8000, 
+                                                             Colors.Black);
                     BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
 
                     var sb = new StringBuilder();
@@ -157,6 +162,7 @@ namespace ESME.Locations
                     sb.AppendLine(bathymetry.Samples.GeoRect.West.ToString(CultureInfo.InvariantCulture));
                     sb.AppendLine(bathymetry.Samples.GeoRect.North.ToString(CultureInfo.InvariantCulture));
                     using (var writer = new StreamWriter(Path.Combine(imagePath, Path.GetFileNameWithoutExtension(imageFilename) + ".bpw"), false)) writer.Write(sb.ToString());
+#endif
                     break;
                 default:
                     throw new ApplicationException(string.Format("Unknown environmental data type {0}", sourcePlugin.EnvironmentDataType));
@@ -167,6 +173,37 @@ namespace ESME.Locations
             //Console.WriteLine("Importer: Finished importing {0} at resolution {1}", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, dataSet.Resolution);
             Interlocked.Decrement(ref _busyCount);
             _importJobsPending.TryRemove(dataSet.Guid, out progress);
+        }
+
+        public void ToBitmap<T>(EnvironmentData<T> data, string fileName, Func<T, float> valueFunc, Func<float[,], float, float, uint[,]> toPixelValuesFunc) where T: Geo, new()
+        {
+            var minValue = data.Min(valueFunc);
+            var maxValue = data.Max(valueFunc);
+            var bathysize = Math.Max(data.Longitudes.Count, data.Latitudes.Count);
+            var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
+            var displayValues = data;
+            if (bathysize > screenSize)
+            {
+                var scaleFactor = screenSize / bathysize;
+                displayValues = EnvironmentData<T>.Decimate(data, (int)(data.Longitudes.Count * scaleFactor), (int)(data.Latitudes.Count * scaleFactor));
+            }
+
+            var imageFilename = Path.GetFileNameWithoutExtension(fileName) + ".bmp";
+            var imagePath = Path.GetDirectoryName(fileName);
+
+            var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
+            for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = valueFunc(displayValues[(uint)lonIndex, (uint)latIndex]);
+            var displayData = toPixelValuesFunc(bitmapData, minValue, maxValue);
+            BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
+
+            var sb = new StringBuilder();
+            sb.AppendLine(data.Resolution.ToString(CultureInfo.InvariantCulture));
+            sb.AppendLine("0.0");
+            sb.AppendLine("0.0");
+            sb.AppendLine(data.Resolution.ToString(CultureInfo.InvariantCulture));
+            sb.AppendLine(data.GeoRect.West.ToString(CultureInfo.InvariantCulture));
+            sb.AppendLine(data.GeoRect.North.ToString(CultureInfo.InvariantCulture));
+            using (var writer = new StreamWriter(Path.Combine(imagePath, Path.GetFileNameWithoutExtension(imageFilename) + ".bpw"), false)) writer.Write(sb.ToString());
         }
 
         readonly ConcurrentDictionary<Guid, EnvironmentalCacheEntry> _cache = new ConcurrentDictionary<Guid, EnvironmentalCacheEntry>();

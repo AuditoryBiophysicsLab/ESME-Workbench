@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Windows.Media;
 using ESME.Database;
 using ESME.Environment;
 using ESME.Locations;
+using ESME.Mapping;
 using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
 using HRC.Aspects;
 using HRC.Navigation;
+using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Scenarios
 {
@@ -76,7 +79,43 @@ namespace ESME.Scenarios
         }
         string _validationErrorText;
 
-        public void CreateMapLayers() { throw new NotImplementedException(); }
+        OverlayShapeMapLayer _mapLayer;
+        public void CreateMapLayers()
+        {
+            _mapLayer = new OverlayShapeMapLayer
+            {
+                LayerType = LayerType.Track,
+                Name = string.Format("{0}", Guid),
+            };
+            var geos = new List<Geo>();
+            var startGeo = AnalysisPoint.Geo;
+            foreach (var radial in Radials)
+            {
+                geos.Add(startGeo);
+                geos.Add(((Geo)startGeo).Offset(Geo.KilometersToRadians(radial.Length / 1000), Geo.DegreesToRadians(radial.Bearing)));
+                geos.Add(startGeo);
+            }
+            _mapLayer.Add(geos);
+            _mapLayer.Done();
+
+            LayerSettings.PropertyChanged += (s, e) =>
+            {
+                switch (e.PropertyName)
+                {
+                    case "IsChecked":
+                        MediatorMessage.Send(LayerSettings.IsChecked ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, _mapLayer);
+                        break;
+                    case "LineOrSymbolColor":
+                        _mapLayer.LineColor = LayerSettings.LineOrSymbolColor;
+                        MediatorMessage.Send(MediatorMessage.RefreshMapLayer, _mapLayer);
+                        break;
+                    case "LineOrSymbolSize":
+                        _mapLayer.LineWidth = (float)LayerSettings.LineOrSymbolSize;
+                        MediatorMessage.Send(MediatorMessage.RefreshMapLayer, _mapLayer);
+                        break;
+                }
+            };
+        }
     }
 
     [NotifyPropertyChanged]
@@ -99,6 +138,11 @@ namespace ESME.Scenarios
         public byte[] RangeAxisBlob { get; set; }
         public byte[] DepthAxisBlob { get; set; }
         public byte[] BottomProfileBlob { get; set; }
+        public byte[] MinimumTransmissionLossBlob { get; set; }
+        public byte[] MaximumTransmissionLossBlob { get; set; }
+        public byte[] MeanTransmissionLossBlob { get; set; }
+
+        public virtual TransmissionLoss TransmissionLoss { get; set; }
         [NotMapped]
         public float[] Ranges
         {
@@ -142,20 +186,40 @@ namespace ESME.Scenarios
         }
         GeoSegment _segment;
 
+        [NotMapped]
+        public float[] MinimumTransmissionLossValues
+        {
+            get { return _minimumTransmissionLossValues ?? (_minimumTransmissionLossValues = MinimumTransmissionLossBlob.ToArray()); }
+            set
+            {
+                _minimumTransmissionLossValues = value;
+                DepthAxisBlob = _minimumTransmissionLossValues.ToBlob();
+            }
+        }
+        float[] _minimumTransmissionLossValues;
 
-        public virtual TransmissionLoss TransmissionLoss { get; set; }
-        public virtual ICollection<LevelRadius> LevelRadii { get; set; }
-    }
+        [NotMapped]
+        public float[] MaximumTransmissionLossValues
+        {
+            get { return _maximumTransmissionLossValues ?? (_maximumTransmissionLossValues = MaximumTransmissionLossBlob.ToArray()); }
+            set
+            {
+                _maximumTransmissionLossValues = value;
+                DepthAxisBlob = _maximumTransmissionLossValues.ToBlob();
+            }
+        }
+        float[] _maximumTransmissionLossValues;
 
-    [NotifyPropertyChanged]
-    public class LevelRadius : IHaveGuid
-    {
-        [Key, Initialize]
-        public Guid Guid { get; set; }
-
-        public double Level { get; set; }
-        public double Radius { get; set; }
-
-        public virtual Radial Radial { get; set; }
+        [NotMapped]
+        public float[] MeanTransmissionLossValues
+        {
+            get { return _meanTransmissionLossValues ?? (_meanTransmissionLossValues = MeanTransmissionLossBlob.ToArray()); }
+            set
+            {
+                _meanTransmissionLossValues = value;
+                DepthAxisBlob = _meanTransmissionLossValues.ToBlob();
+            }
+        }
+        float[] _meanTransmissionLossValues;
     }
 }

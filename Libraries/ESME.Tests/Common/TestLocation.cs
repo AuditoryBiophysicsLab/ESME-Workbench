@@ -51,7 +51,7 @@ namespace ESME.Tests.Common
 
         public static void Dump(MasterDatabaseService locationService, bool dumpLogs = false)
         {
-            foreach (var location in locationService.Locations)
+            foreach (var location in locationService.Context.Locations)
             {
                 DumpLocation(location);
                 if (dumpLogs) foreach (var logEntry in location.Logs) DumpLogEntry(logEntry);

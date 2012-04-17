@@ -75,26 +75,26 @@ namespace ESMEWorkbench.ViewModels.Layers
     {
         public EnvironmentNode(Scenario scenario)
         {
-            EnvironmentLayers.Add(scenario.Wind);
+            EnvironmentLayers.Add(new BitmapNode("Wind Speed", scenario.Wind));
             EnvironmentLayers.Add(scenario.SoundSpeed);
-            EnvironmentLayers.Add(new BathymetryNode(scenario.Bathymetry));
-            EnvironmentLayers.Add(new SedimentNode(scenario.Sediment));
+            EnvironmentLayers.Add(new BitmapNode("Bathymetry", scenario.Bathymetry));
+            EnvironmentLayers.Add(new BitmapNode("Sediment", scenario.Sediment));
             scenario.PropertyChanged += (s, e) =>
             {
                 var sender = (Scenario)s;
                 switch (e.PropertyName)
                 {
                     case "Wind":
-                        EnvironmentLayers[0] = sender.Wind;
+                        EnvironmentLayers[0] = new BitmapNode("Wind", sender.Wind);
                         break;
                     case "SoundSpeed":
                         EnvironmentLayers[1] = sender.SoundSpeed;
                         break;
                     case "Bathymetry":
-                        EnvironmentLayers[2] = new BathymetryNode(sender.Bathymetry);
+                        EnvironmentLayers[2] = new BitmapNode("Bathymetry", sender.Bathymetry);
                         break;
                     case "Sediment":
-                        EnvironmentLayers[3] = new SedimentNode(sender.Sediment);
+                        EnvironmentLayers[3] = new BitmapNode("Sediment", scenario.Sediment);
                         break;
                 }
             };
@@ -104,6 +104,7 @@ namespace ESMEWorkbench.ViewModels.Layers
         public ObservableList<object> EnvironmentLayers { get; set; }
     }
 
+#if false
     [NotifyPropertyChanged]
     public class BathymetryNode
     {
@@ -116,6 +117,26 @@ namespace ESMEWorkbench.ViewModels.Layers
         }
 
         public EnvironmentalDataSet Bathymetry { get; set; }
+    }
+#endif
+
+    [NotifyPropertyChanged]
+    public class BitmapNode
+    {
+        public BitmapNode(string layerName, EnvironmentalDataSet bitmapData)
+        {
+            LayerName = layerName;
+            BitmapData = bitmapData;
+        }
+
+        public string LayerName { get; private set; }
+        public bool IsChecked
+        {
+            get { return BitmapData.LayerSettings.IsChecked; }
+            set { BitmapData.LayerSettings.IsChecked = value; }
+        }
+
+        public EnvironmentalDataSet BitmapData { get; set; }
     }
 
     [NotifyPropertyChanged]

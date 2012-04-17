@@ -58,7 +58,7 @@
         <StackPanel Orientation="Vertical">
             <GroupBox Header="Scenarios">
                 <ListBox DisplayMemberPath="Name"
-                         ItemsSource="{Binding Database.Scenarios}"
+                         ItemsSource="{Binding Database.Context.Scenarios.Local}"
                          SelectedItem="{Binding SelectedScenario}" />
             </GroupBox>
             <GroupBox Header="Analysis Points">

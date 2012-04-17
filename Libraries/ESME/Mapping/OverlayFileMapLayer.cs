@@ -78,12 +78,12 @@ namespace ESME.Mapping
                                                 BaseShape.CreateShapeFromWellKnownData(overlayShape.WellKnownText)));
         }
 
-        static string WellKnownText(ICollection<Geo> geos)
+        static string WellKnownText(ICollection<Geo> geos, bool isPointData)
         {
             if (geos.Count < 1) return null;
             if (geos.Count == 1) return string.Format("POINT({0} {1})", geos.First().Latitude, geos.First().Longitude);
             var retval = new StringBuilder();
-            retval.Append("LINESTRING(");
+            retval.Append(isPointData ? "MULTIPOINT(" : "LINESTRING(");
             foreach (var geo in geos) retval.Append(string.Format("{0} {1}, ", geo.Longitude, geo.Latitude));
             retval.Remove(retval.Length - 2, 2); // Lose the last comma and space
             retval.Append(")");
@@ -91,10 +91,10 @@ namespace ESME.Mapping
         }
 
         public void Add(IEnumerable<OverlayShape> overlayShapes) { foreach (var shape in overlayShapes) Add(shape); }
-        public void Add(ICollection<Geo> geos)
+        public void Add(ICollection<Geo> geos, bool isPointData = false)
         {
             _layer = new InMemoryFeatureLayer();
-            _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText(geos))));
+            _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText(geos, isPointData))));
         }
 
         public void Clear() { if (_layer != null) _layer.InternalFeatures.Clear(); }

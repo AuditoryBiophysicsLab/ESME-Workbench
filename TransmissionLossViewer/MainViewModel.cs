@@ -21,7 +21,7 @@ namespace TransmissionLossViewer
     [NotifyPropertyChanged]
     class MainViewModel : IViewStatusAwareInjectionAware
     {
-        readonly string _databaseDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"ESME.AnalysisPoint Tests\Database");
+        readonly string _databaseDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"ESME Workbench\Database");
         IViewAwareStatus _viewAwareStatus;
         readonly IHRCSaveFileService _saveFileService;
         readonly IViewParameterService _viewParameterService;

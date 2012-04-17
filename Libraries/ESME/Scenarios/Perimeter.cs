@@ -16,6 +16,7 @@ namespace ESME.Scenarios
         public string Name { get; set; }
         public virtual Scenario Scenario { get; set; }
         public virtual LayerSettings LayerSettings { get; set; }
+        public virtual ICollection<Platform> Platforms { get; set; }
         public virtual ICollection<PerimeterCoordinate> PerimeterCoordinates { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
 

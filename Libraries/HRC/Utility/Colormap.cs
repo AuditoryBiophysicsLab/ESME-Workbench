@@ -38,6 +38,8 @@ namespace HRC.Utility
                 _map.Add(curValue.Color);
         }
 
+        private Colormap() {}
+
         /// <summary>
         /// Create a colormap from a stream.
         /// The stream is expected to contain ascii numeric data of N rows by 3 columns, which will be parsed
@@ -88,6 +90,50 @@ namespace HRC.Utility
         static Colormap _summer;
         public static Colormap Summer { get { return _summer ?? (_summer = FromEmbeddedResource("HRC.Resources.summer.map")); } }
 
+        static Colormap _sediment;
+
+        public static Colormap Sediment
+        {
+            get
+            {
+                if (_sediment != null) return _sediment;
+                _sediment = new Colormap();
+                _sediment._map.AddRange(new List<Color>{
+                    Colors.Black,
+                    Gray(1, 23),    // Rough Rock
+                    Gray(2, 23),    // Rock
+                    Gray(3, 23),    // Cobble or Gravel or Pebble
+                    Gray(4, 23),    // Sandy Gravel
+                    Gray(5, 23),    // Very Coarse Sand
+                    Gray(6, 23),    // Muddy Sandy Gravel
+                    Gray(7, 23),    // Coarse Sand or Gravelly Sand
+                    Gray(8, 23),    // Gravelly Muddy Sand
+                    Colors.DarkGoldenrod,    // Medium Sand or Sand
+                    Gray(10, 23),   // Muddy Gravel
+                    Gray(11, 23),   // Fine Sand or Silty Sand
+                    Gray(12, 23),   // Muddy Sand
+                    Gray(13, 23),   // Very Fine Sand,
+                    Gray(14, 23),   // Clayey Sand
+                    Gray(15, 23),   // Coarse Silt
+                    Gray(16, 23),   // Gravelly Mud or Sandy Silt
+                    Gray(17, 23),   // Medium Silt or Sand-Silt-Clay
+                    Gray(18, 23),   // Sandy Mud or Silt
+                    Gray(19, 23),   // Fine Silt or Clayey Silt
+                    Gray(20, 23),   // Sandy Clay
+                    Gray(21, 23),   // Very Fine Silt
+                    Gray(22, 23),   // Silty Clay
+                    Colors.DarkOliveGreen,   // Clay
+                });
+                return _sediment;
+            }
+        }
+
+        static Color Gray(float value, float maxValue)
+        {
+            var white = 1.0f - ((1.0f - value) / (1.0f - maxValue));
+            return Color.FromScRgb(1, white, white, white);
+        }
+
         // data[lats,lons]
         public Bitmap ToBitmap(float[,] data, float minValue, float maxValue)
         {
@@ -123,7 +169,7 @@ namespace HRC.Utility
         {
             if (data == null) throw new ApplicationException("ToBitmap: data cannot be null");
 
-            var minMaxSource = data.Cast<float>();
+            var minMaxSource = data.Cast<float>().ToList();
             var dataMin = minMaxSource.Min();
             var dataMax = minMaxSource.Max();
             return (ToBitmap(data, dataMin, dataMax));
@@ -145,6 +191,29 @@ namespace HRC.Utility
         }
 
         public bool IsInverted { set; get; }
+
+        // data[lats,lons]
+        public uint[,] ToPixelValues(float[,] data, float minValue, float maxValue)
+        {
+            if (data == null) throw new ApplicationException("ToBitmap: data cannot be null");
+
+            var height = data.GetLength(1);
+            var width = data.GetLength(0);
+            var dataRange = maxValue - minValue;
+            var pixelValues = new uint[width, height];
+
+            for (var y = 0; y < height; y++)
+            {
+                for (var x = 0; x < width; x++)
+                {
+                    var curColor = Lookup(data[x, height - 1 - y], minValue, maxValue, dataRange);
+                    // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
+                    // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
+                    pixelValues[x, y] = (uint)((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
+                }
+            }
+            return pixelValues;
+        }
     }
 
     public class DualColormap
@@ -250,9 +319,13 @@ namespace HRC.Utility
         {
             if (data == null) throw new ApplicationException("ToBitmap: data cannot be null");
 
-            var minMaxSource = data.Cast<float>();
-            var dataMin = minMaxSource.Min();
-            var dataMax = minMaxSource.Max();
+            var dataMin = float.MaxValue;
+            var dataMax = float.MinValue;
+            foreach (var d in data)
+            {
+                dataMin = Math.Min(d.Data, dataMin);
+                dataMax = Math.Max(d.Data, dataMax);
+            }
             return (ToBitmap(data, dataMin, dataMax));
         }
     }

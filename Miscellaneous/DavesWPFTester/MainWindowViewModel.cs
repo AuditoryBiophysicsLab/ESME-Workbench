@@ -34,7 +34,7 @@ namespace DavesWPFTester
             RootNodes.Clear();
             _database.Context.Scenarios.Load();
             _database.Context.EnvironmentalDataSets.Load();
-            var scenario = _database.Scenarios.First(); 
+            var scenario = _database.Context.Scenarios.Local.First(); 
             RootNodes.Add(scenario);
             RootNodes.Add(new EnvironmentNode(scenario));
             RootNodes.Add(new WorldMapNode());

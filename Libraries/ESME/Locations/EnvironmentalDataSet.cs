@@ -1,10 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Linq;
+using System.Windows.Media;
 using ESME.Database;
+using ESME.Environment;
+using ESME.Mapping;
 using ESME.Plugins;
 using ESME.Scenarios;
 using HRC.Aspects;
+using HRC.Navigation;
+using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Locations
 {
@@ -47,6 +54,65 @@ namespace ESME.Locations
                 }
             }
         }
-        public void CreateMapLayers() { throw new NotImplementedException(); }
+
+        MapLayerViewModel _mapLayer;
+        protected static readonly Random Random = new Random();
+        public void CreateMapLayers()
+        {
+            var dataType = ((PluginIdentifier)SourcePlugin).PluginSubtype;
+            switch (dataType)
+            {
+                case PluginSubtype.SoundSpeed:
+                    var pointLayer = new OverlayShapeMapLayer
+                    {
+                        LayerType = LayerType.SoundSpeed,
+                        Name = string.Format("{0}", Guid),
+                    };
+                    pointLayer.PointSymbolType = (PointSymbolType)(Random.Next(8));
+                    while (pointLayer.PointSymbolType == PointSymbolType.Cross) pointLayer.PointSymbolType = (PointSymbolType)(Random.Next(8));
+                    pointLayer.PointStyle = MapLayerViewModel.CreatePointStyle(pointLayer.PointSymbolType, LayerSettings.LineOrSymbolColor, (int)LayerSettings.LineOrSymbolSize);
+                    var geos = (from s in ((SoundSpeed)Location.Cache[this]).SoundSpeedFields[0].EnvironmentData
+                                select (Geo)s).ToArray();
+                    pointLayer.Clear();
+                    pointLayer.Add(geos, true);
+                    pointLayer.Done();
+                    _mapLayer = pointLayer;
+                    break;
+                case PluginSubtype.Wind:
+                case PluginSubtype.Bathymetry:
+                case PluginSubtype.Sediment:
+                    var rasterLayer = new RasterMapLayer
+                    {
+                        LayerType = dataType == PluginSubtype.Bathymetry ? LayerType.BathymetryRaster : dataType == PluginSubtype.Wind ? LayerType.WindSpeed : LayerType.BottomType,
+                        Name = string.Format("{0}", Guid),
+                        North = (float)Location.GeoRect.North,
+                        South = (float)Location.GeoRect.South,
+                        East = (float)Location.GeoRect.East,
+                        West = (float)Location.GeoRect.West,
+                        IsEnabled = true,
+                        RasterFilename = Path.Combine(Location.Database.MasterDatabaseDirectory, Location.StorageDirectory, Path.GetFileNameWithoutExtension(FileName) + ".bmp"),
+                    };
+                    MediatorMessage.Send(MediatorMessage.AddMapLayer, rasterLayer);
+                    _mapLayer = rasterLayer;
+                    break;
+                default:
+                    throw new ApplicationException(string.Format("Unknown layer type: {0}", ((PluginIdentifier)SourcePlugin).PluginSubtype));
+            }
+
+            LayerSettings.PropertyChanged += (s, e) =>
+            {
+                switch (e.PropertyName)
+                {
+                    case "IsChecked":
+                        MediatorMessage.Send(LayerSettings.IsChecked ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, _mapLayer);
+                        break;
+                    case "LineOrSymbolColor":
+                    case "LineOrSymbolSize":
+                        _mapLayer.PointStyle = MapLayerViewModel.CreatePointStyle(_mapLayer.PointSymbolType, LayerSettings.LineOrSymbolColor, (int)LayerSettings.LineOrSymbolSize);
+                        MediatorMessage.Send(MediatorMessage.RefreshMapLayer, _mapLayer);
+                        break;
+                }
+            };
+        }
     }
 }

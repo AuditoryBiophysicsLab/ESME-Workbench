@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using Cinch;
 using ESME;
@@ -14,6 +15,7 @@ using HRC.Aspects;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
+    [NotifyPropertyChanged]
     public partial class MainViewModel
     {
         public MapLayerCollection ScenarioMapLayers { get; set; }
@@ -21,7 +23,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [Initialize] public LayerTreeViewModel LayerTreeViewModel { get; set; }
         public MapViewModel MapViewModel { get; set; }
 
-        Scenario _scenario;
+        [Affects("IsScenarioLoaded")]
         public Scenario Scenario
         {
             get { return _scenario; }
@@ -33,6 +35,9 @@ namespace ESMEWorkbench.ViewModels.Main
                 if (_scenario != null) _scenario.CreateMapLayers();
             }
         }
+        Scenario _scenario;
+
+        public bool IsScenarioLoaded { get { return Scenario != null; } }
 
         public bool CanPlaceAnalysisPoint { get { return Scenario != null && Scenario.Wind != null && Scenario.SoundSpeed != null & Scenario.Bathymetry != null & Scenario.Sediment != null; } }
 
