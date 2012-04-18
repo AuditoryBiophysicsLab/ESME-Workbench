@@ -157,6 +157,7 @@
     <Compile Include="Database\PSMContext.cs" />
     <Compile Include="Locations\LocationContext.cs" />
     <Compile Include="Locations\LogEntry.cs" />
+    <Compile Include="Mapping\CustomEditOverlay.cs" />
     <Compile Include="Scenarios\AnalysisPoint.cs" />
     <Compile Include="Scenarios\AnimatLocation.cs" />
     <Compile Include="Scenarios\LayerSettings.cs" />
@@ -206,7 +207,6 @@
     <Compile Include="Environment\SoundSpeedField.cs" />
     <Compile Include="Environment\SoundSpeedProfileGeneric.cs" />
     <Compile Include="Environment\Transect.cs" />
-    <Compile Include="Environment\UNESCO.cs" />
     <Compile Include="Environment\Wind.cs" />
     <Compile Include="MediatorMessages.cs" />
     <Compile Include="Animats\AnimatInterface.cs" />
@@ -325,7 +325,6 @@
     <Compile Include="NEMO\Overlay\OverlayLineSegment.cs" />
     <Compile Include="NEMO\Overlay\Tokenizer.cs" />
     <Compile Include="TransmissionLoss\Bellhop\Bellhop.cs" />
-    <Compile Include="TransmissionLoss\TransmissionLossFieldCache.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -152,7 +152,6 @@
     <Compile Include="Navigation\MatchFilter.cs" />
     <Compile Include="Navigation\MatchParameters.cs" />
     <Compile Include="Navigation\MoreMath.cs" />
-    <Compile Include="Navigation\OldGeo.cs" />
     <Compile Include="Navigation\Course.cs" />
     <Compile Include="Navigation\Geo.cs" />
     <Compile Include="Navigation\GeoPath.cs" />

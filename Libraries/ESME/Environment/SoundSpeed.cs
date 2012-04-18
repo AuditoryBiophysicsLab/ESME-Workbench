@@ -75,45 +75,7 @@ namespace ESME.Environment
         {
             return TaskEx.Run(() => Load(filename));
         }
-#if false
-        public static SoundSpeed<T> Load(string temperatureFilename, string salinityFilename, EarthCoordinate<float> deepestPoint = null, GeoRect areaOfInterest = null)
-        {
-            var temperatureData = Load(temperatureFilename);
-            var salinityData = Load(salinityFilename);
-            VerifyThatTimePeriodsMatch(temperatureData, salinityData);
-            var soundSpeed = Create(temperatureData, salinityData);
-            if (deepestPoint == null) return soundSpeed;
-            soundSpeed.Extend(temperatureData, salinityData, deepestPoint, areaOfInterest);
-            foreach (var soundSpeedField in soundSpeed.SoundSpeedFields)
-                soundSpeedField.Extend(deepestPoint);
-            return soundSpeed;
-        }
 
-        public static SoundSpeed Create(SoundSpeed temperatureData, SoundSpeed salinityData, EarthCoordinate<float> deepestPoint = null, IProgress<float> progress = null)
-        {
-            var curProgress = 0f;
-            if (progress != null) lock (progress) progress.Report(curProgress);
-            VerifyThatTimePeriodsMatch(temperatureData, salinityData);
-            curProgress += 10f;
-            if (progress != null) lock (progress) progress.Report(curProgress);
-            var progressStep = 30f / temperatureData.SoundSpeedFields.Count;
-            var soundSpeedFile = new SoundSpeed();
-            foreach (var temperatureField in temperatureData.SoundSpeedFields)
-            {
-                var curField = SoundSpeedField.Create(temperatureField, salinityData[temperatureField.TimePeriod]);
-                curProgress += progressStep;
-                if (progress != null) lock (progress) progress.Report(curProgress);
-                if (deepestPoint != null) curField.Extend(temperatureField, salinityData[temperatureField.TimePeriod], deepestPoint);
-                curProgress += progressStep;
-                if (progress != null) lock (progress) progress.Report(curProgress);
-                soundSpeedFile.SoundSpeedFields.Add(curField);
-                curProgress += progressStep;
-                if (progress != null) lock (progress) progress.Report(curProgress);
-            }
-            return soundSpeedFile;
-        }
-
-#endif
         bool _isExtended;
         readonly object _lockObject = new object();
         public void Extend(Geo<float> deepestPoint)

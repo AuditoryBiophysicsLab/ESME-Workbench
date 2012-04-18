@@ -102,6 +102,7 @@ namespace ESMEWorkbench.ViewModels.Map
             _wpfMap.BackgroundOverlay.BackgroundBrush = new GeoSolidBrush(GeoColor.StandardColors.Black);
             _wpfMap.AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
             _wpfMap.AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
+            _wpfMap.EditOverlay = new CustomEditInteractiveOverlay();
             var localizedName = ((MainView)_viewAwareStatus.View).FontFamily.FamilyNames[XmlLanguage.GetLanguage(CultureInfo.CurrentUICulture.Name)];
 
             var customUnitScaleBarAdornmentLayer = new CustomUnitScaleBarAdornmentLayer
@@ -160,6 +161,32 @@ namespace ESMEWorkbench.ViewModels.Map
         void SetCurrentExtent(RectangleShape currentExtent)
         {
             _wpfMap.CurrentExtent = currentExtent;
+            _wpfMap.Refresh();
+        }
+
+        [MediatorMessageSink(MediatorMessage.SetEditMode), UsedImplicitly]
+        void SetEditMode(bool dummy)
+        {
+            _wpfMap.EditOverlay = new CustomEditInteractiveOverlay();
+
+            var rectangle = new Feature(new RectangleShape(-48, 0, 52, -40));
+            // Set the value of column "Edit" to "rectangle", so this shape will be editing by custom way.
+            rectangle.ColumnValues.Add("Edit", "rectangle");
+            _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Add(rectangle);
+
+            var polygon = new Feature(new PolygonShape("POLYGON((-120 49,-66 44,-81 26,-97 24,-119 33,-125 40,-120 49))"));
+            // Set the value of column "Edit" to "polygon" not "rectangle" so this shape will be editing by original way.
+            polygon.ColumnValues.Add("Edit", "polygon");
+            _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Add(polygon);
+
+            _wpfMap.EditOverlay.EditShapesLayer.Open();
+            _wpfMap.EditOverlay.EditShapesLayer.Columns.Add(new FeatureSourceColumn("Edit"));
+            _wpfMap.EditOverlay.EditShapesLayer.Close();
+            _wpfMap.EditOverlay.EditShapesLayer.ZoomLevelSet.ZoomLevel01.DefaultTextStyle = new TextStyle("Edit", new GeoFont("Arial", 18), new GeoSolidBrush(GeoColor.StandardColors.Black));
+            _wpfMap.EditOverlay.EditShapesLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
+            _wpfMap.EditOverlay.CalculateAllControlPoints();
+
+            // Draw the map image on the screen
             _wpfMap.Refresh();
         }
 

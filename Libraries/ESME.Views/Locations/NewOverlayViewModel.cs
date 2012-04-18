@@ -220,56 +220,5 @@ namespace ESME.Views.Locations
 
         #endregion
 
-#if false
-        #region public Visibility ErrorVisibility { get; set; }
-
-        public Visibility ErrorVisibility
-        {
-            get { return IsValid ? Visibility.Collapsed : Visibility.Visible; }
-        }
-
-        private static readonly PropertyChangedEventArgs ErrorVisibilityChangedEventArgs = ObservableHelper.CreateArgs<NewOverlayViewModel>(x => x.ErrorVisibility);
-
-        #endregion
-
-        #region public string ValidationErrorText { get; set; }
-
-        public string ValidationErrorText
-        {
-            get { return _validationErrorText; }
-            set
-            {
-                if (_validationErrorText == value) return;
-                _validationErrorText = value;
-                NotifyPropertyChanged(ErrorVisibilityChangedEventArgs);
-                NotifyPropertyChanged(ValidationErrorTextChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs = ObservableHelper.CreateArgs<NewOverlayViewModel>(x => x.ValidationErrorText);
-        string _validationErrorText;
-
-        #endregion
-         private GeoRect Bounds { get; set; }
-
-        public void Validate()
-        {
-            ValidationErrorText = "";
-            if (string.IsNullOrEmpty(OverlayName))
-                ValidationErrorText += "The Overlay file must have a name\n";
-            if (((OverlayName != null && File.Exists(Path.Combine(SimAreaFolder, LocationName, "Areas", OverlayName))) || File.Exists(Path.Combine(SimAreaFolder, LocationName, "Areas", OverlayName + ".ovr"))))
-                ValidationErrorText += "An overlay file with the specified file name already exists.\n";
-            if (string.IsNullOrEmpty(OverlayCoordinates))
-                ValidationErrorText += "No Overlay Coordinates have been entered\n";
-            if (!string.IsNullOrEmpty(ValidationErrorText)) return;
-            List<EarthCoordinate> coords;
-            string overlayError;
-            Bounds = OverlayFile.ValidateCoordinates(OverlayCoordinates, "Op Limits", out coords, out overlayError);
-            ValidationErrorText += overlayError;
-
-            if (Bounds != null) OverlayEarthCoordinates = coords;
-            NotifyPropertyChanged(ErrorVisibilityChangedEventArgs);
-        } 
-#endif
     }
 }

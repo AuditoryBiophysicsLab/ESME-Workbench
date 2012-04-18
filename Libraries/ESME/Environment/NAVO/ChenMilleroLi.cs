@@ -65,53 +65,6 @@ namespace ESME.Environment.NAVO
 
         #region Sound Speed calculation
 
-#if false
-        /// <summary>
-        ///   Calculates the OAML Navy sound speed profile for a given location
-        ///   Forumula ported from ChenMilleroLiAlgorithm.java by Dave Anderson on 22 Feb 2010
-        ///   Original Java source provided by Bill Sutphin of NUWC on 2 Dec 2010
-        ///   If any of the inputs at any vector location are NaN, the result at that vector location will also be NaN
-        /// </summary>
-        /// <param name = "location">Latitude and Longitude of the location of the Sound Speed Profile being calculated</param>
-        /// <param name = "depthVector">Depth, in meters, at each index of Temperature and Salinity vectors</param>
-        /// <param name = "temperatureVector">Temperature, in degrees Celsius, at each depth corresponding to the DepthVector.  NaN indicates no data at a given depth.</param>
-        /// <param name = "salinityVector">Salinity, in parts per thousand, at each depth corresponding to the DepthVector.  NaN indicates no data at a given depth.</param>
-        /// <returns></returns>
-        public static float[] SoundSpeed(EarthCoordinate location, ref float[] depthVector, ref float[] temperatureVector, ref float[] salinityVector)
-        {
-            if (temperatureVector.Length != salinityVector.Length) throw new ApplicationException("ChenMilleroLi.SoundSpeed: Unable to calculate sound speed if temperature and salinity vectors are of unequal length");
-            var results = new float[temperatureVector.Length];
-            for (var depth = 0; depth < results.Length; depth++)
-                results[depth] = SoundSpeed(location, depthVector[depth], temperatureVector[depth], salinityVector[depth]);
-            return results;
-        }
-
-        public static SoundSpeedProfile SoundSpeed(SoundSpeedProfile temperatureProfile, SoundSpeedProfile salinityProfile)
-        {
-            var results = new SoundSpeedProfile(temperatureProfile);
-            if (temperatureProfile.Data.Count != salinityProfile.Data.Count)
-            {
-                results.Messages.Add(string.Format("ChenMilleroLi.SoundSpeed: Temperature/salinity vector length mismatch.  Temperature vector length: {0}, Salinity vector length: {1}", temperatureProfile.Data.Count, salinityProfile.Data.Count));
-                results.Messages.Add("ChenMilleroLi.SoundSpeed: Sound speed will only be calculated to the depth of the shorter of the two vectors");
-                //throw new ApplicationException("ChenMilleroLi.SoundSpeed: Unable to calculate sound speed if temperature and salinity profiles are of unequal length");
-            }
-            var vectorLength = Math.Min(temperatureProfile.Data.Count, salinityProfile.Data.Count);
-            for (var index = 0; index < vectorLength; index++)
-            {
-                var temperature = temperatureProfile.Data[index];
-                var salinity = salinityProfile.Data[index];
-                if (temperature.Depth != salinity.Depth)
-                {
-                    results.Messages.Add(string.Format("ChenMilleroLi.SoundSpeed: Temperature/salinity depth mismatch at depth index {0}.  Temperature depth: {1}, Salinity depth: {2}", index, temperature.Depth, salinity.Depth));
-                    results.Messages.Add("ChenMilleroLi.SoundSpeed: Terminating the sound speed profile at the last depth that was calculated successfully");
-                    //throw new ApplicationException("ChenMilleroLi.SoundSpeed: Unable to calculate sound speed if temperature and salinity depths do not match");
-                    break;
-                }
-                results.Data.Add(new DepthValuePair<float>(temperature.Depth, SoundSpeed(temperatureProfile, (float)temperature.Depth, temperature.Value, salinity.Value)));
-            }
-            return results;
-        }
-#endif
         public static float SoundSpeed(Geo location, float depth, float temperature, float salinity)
         {
             var tempSq = temperature * temperature;

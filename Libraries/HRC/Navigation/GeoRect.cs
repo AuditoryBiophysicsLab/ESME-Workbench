@@ -65,7 +65,7 @@ namespace HRC.Navigation
         }
 
         /// <summary>
-        ///   Expands the current GeoRect exactly enough to contain the specified EarthCoordinate.
+        ///   Expands the current GeoRect exactly enough to contain the specified Geo.
         /// </summary>
         /// <param name = "geo"></param>
         public void Union(Geo geo)
@@ -89,7 +89,7 @@ namespace HRC.Navigation
         }
 
         /// <summary>
-        ///   Creates a GeoRect that is exactly large enough to include the specified GeoRect and the specified EarthCoordinate.
+        ///   Creates a GeoRect that is exactly large enough to include the specified GeoRect and the specified Geo.
         /// </summary>
         /// <param name = "geoRect"></param>
         /// <param name = "geo"></param>

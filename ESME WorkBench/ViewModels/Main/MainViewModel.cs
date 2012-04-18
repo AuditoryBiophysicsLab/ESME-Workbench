@@ -72,11 +72,7 @@ namespace ESMEWorkbench.ViewModels.Main
             _viewAwareStatus.ViewLoaded += () =>
             {
                 if (Designer.IsInDesignMode) return;
-#if DEBUG
-                _plugins.PluginDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-#else
-                _plugins.PluginDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Plugins");
-#endif
+                _plugins.PluginDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
                 Globals.AppSettings.PluginManagerService = _plugins;
 

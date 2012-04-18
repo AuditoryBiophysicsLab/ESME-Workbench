@@ -59,7 +59,7 @@ namespace NAVODatabaseAdapter
 #else
             for (var lat = south; lat <= north; lat++)
             {
-                Console.WriteLine("{0}: Processing latitude {1}", DateTime.Now, lat);
+                //Console.WriteLine("{0}: Processing latitude {1}", DateTime.Now, lat);
                 for (var lon = west; lon <= east; lon++)
                 {
                     var northSouth = (lat >= 0) ? "n" : "s";

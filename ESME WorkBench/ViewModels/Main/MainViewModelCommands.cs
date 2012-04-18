@@ -168,6 +168,17 @@ namespace ESMEWorkbench.ViewModels.Main
         }
         #endregion
 
+        #region TestEditOverlayCommand
+        public SimpleCommand<object, object> TestEditOverlayCommand
+        { get { return _testEditOverlay ?? (_testEditOverlay = new SimpleCommand<object, object>(TestEditOverlayHandler)); } }
+
+        SimpleCommand<object, object> _testEditOverlay;
+
+        static void TestEditOverlayHandler(object o)
+        {
+            MediatorMessage.Send(MediatorMessage.SetEditMode, true);
+        }
+        #endregion
         #endregion
     }
 }

@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using ESME.Environment;
@@ -138,7 +139,7 @@ namespace ESME.TransmissionLoss
                                               1500);
                 var bellhopProcess = new TransmissionLossProcess
                 {
-                    StartInfo = new ProcessStartInfo(@"C:\Projects\ESME Deliverables\Utilities\bellhop\Bellhop.exe", Path.GetFileName(baseFilename))
+                    StartInfo = new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "bellhop.exe"), Path.GetFileName(baseFilename))
                     {
                         CreateNoWindow = true,
                         UseShellExecute = false,

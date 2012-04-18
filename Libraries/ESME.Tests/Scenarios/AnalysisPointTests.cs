@@ -1,14 +1,8 @@
 ﻿#define Dave
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Threading;
 using ESME.Behaviors;
 using ESME.Database;
 using ESME.Environment;
@@ -17,7 +11,6 @@ using ESME.Locations;
 using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.Tests.Common;
-using ESME.TransmissionLoss;
 using HRC.Navigation;
 using NUnit.Framework;
 using AnalysisPoint = ESME.Scenarios.AnalysisPoint;

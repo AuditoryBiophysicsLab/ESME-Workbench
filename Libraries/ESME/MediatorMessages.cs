@@ -41,6 +41,7 @@ namespace ESME
         public const string CancelCurrentTransmissionLossCalculation = "CancelCurrentTransmissionLossCalculationMessage";
 
         public const string SetCurrentExtent = "SetCurrentExtentMessage";
+        public const string SetEditMode = "SetEditModeMessage";
 
         public const string SetMapCursor = "SetMapCursorMessage";
         public const string RefreshMap = "RefreshMapMessage";
