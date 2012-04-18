@@ -7,7 +7,6 @@ using System.Windows.Controls;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
-using ESME.Environment.Descriptors;
 using ESME.Locations;
 using ESME.NEMO;
 using HRC.Navigation;

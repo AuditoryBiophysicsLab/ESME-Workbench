@@ -15,15 +15,6 @@
             </ResourceDictionary.MergedDictionaries>
             </ResourceDictionary>
         -->
-        <EnvironmentBuilder:CollectionViewSortConverter x:Key="SortConverter" />
-        <Style x:Key="DataCachedDisplayStyle" TargetType="Control">
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding IsCached}" Value="False">
-                    <Setter Property="FontStyle" Value="Italic" />
-                    <Setter Property="ToolTip" Value="Data is not imported for this resolution" />
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
 
         <Style x:Key="DataAvailabilityStyle" TargetType="TextBlock">
             <Style.Triggers>

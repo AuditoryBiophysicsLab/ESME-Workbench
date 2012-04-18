@@ -4,13 +4,11 @@ using System.IO;
 using System.Windows;
 using System.Xml.Serialization;
 using ESME.Environment;
-using ESME.Environment.Descriptors;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.RAM;
 using HRC.Navigation;
 using HRC.Utility;
 using FileFormatException = System.IO.FileFormatException;
-using RangeComplex = ESME.Environment.Descriptors.RangeComplex;
 
 namespace ESME.TransmissionLoss
 {
@@ -21,62 +19,6 @@ namespace ESME.TransmissionLoss
         protected TransmissionLossRunFile()
         {
             TransmissionLossRunFileRadials = new List<TransmissionLossRunFileRadial>();
-        }
-
-        public static TransmissionLossRunFile Create(TransmissionLossAlgorithm algorithm, SoundSource soundSource, string rangeComplexName, RangeComplexes rangeComplexes, string platformName, string sourceName, string modeName, string timePeriodName, RangeComplex rangeComplex)
-        {
-            TransmissionLossRunFile result = null;
-            string fileType = null;
-            switch (algorithm)
-            {
-                case TransmissionLossAlgorithm.Bellhop:
-                    result = new BellhopRunFile
-                    {
-                        BellhopSettings = Globals.AppSettings.BellhopSettings,
-                        WaterDepthIncrement = Globals.AppSettings.BellhopSettings.DepthCellSize,
-                        RangeDistanceIncrement = Globals.AppSettings.BellhopSettings.RangeCellSize,
-                    };
-                    fileType = "bellhop";
-                    break;
-                case TransmissionLossAlgorithm.RAMGEO:
-                    result = new RamRunFile
-                    {
-                        RAMSettings = Globals.AppSettings.RAMSettings,
-                        WaterDepthIncrement = Globals.AppSettings.RAMSettings.DepthStepSize,
-                        RangeDistanceIncrement = Globals.AppSettings.RAMSettings.RangeStepSize,
-                    };
-                    fileType = "ramgeo";
-                    break;
-                case TransmissionLossAlgorithm.RAM:
-                case TransmissionLossAlgorithm.REFMS:
-                case TransmissionLossAlgorithm.CASS:
-                    throw new FileFormatException(string.Format("TransmissionLossRunFile.Create: Transmission loss algorithm {0} is not supported", algorithm));
-            }
-            if (result == null) throw new ApplicationException("Result is null");
-            result.TransmissionLossAlgorithm = algorithm;
-            //result.ScenarioDataDirectory = Globals.AppSettings.ScenarioDataDirectory;
-            result.TransmissionLossJob = new TransmissionLossJob
-            {
-                SoundSource = soundSource,
-                PlatformName = platformName,
-                SourceName = sourceName,
-                ModeName = modeName,
-                TimePeriodName = timePeriodName,
-            };
-            result.RangeComplexName = rangeComplexes.SelectedRangeComplex.Name;
-            result.TimePeriod = rangeComplexes.SelectedTimePeriod;
-            result.AreaName = rangeComplexes.SelectedArea.Name;
-            result.BathymetryResolution = rangeComplexes.SelectedBathymetry.Name;
-            result.ReferenceLocation = new Geo(rangeComplex.RangeComplexMetadata.Latitude, rangeComplex.RangeComplexMetadata.Longitude);
-            var lat = soundSource.Geo.Latitude;
-            var lon = soundSource.Geo.Longitude;
-            var locationString = string.Format("{0}{1:0.####}_{2}{3:0.####}",
-                                               lat >= 0 ? "n" : "s", Math.Abs(lat),
-                                               lon >= 0 ? "e" : "w", Math.Abs(lon));
-            result.Filename = string.Format("{0}_{1}_{2}_{3}_{4}_{5}.{6}", rangeComplexName, platformName, sourceName, modeName,
-                timePeriodName, locationString, fileType);
-
-            return result;
         }
 
         public static TransmissionLossRunFile Load(string filename)
@@ -107,32 +49,6 @@ namespace ESME.TransmissionLoss
         public float WaterDepthIncrement { get; set; }
         public float RangeDistanceIncrement { get; set; }
         public Geo ReferenceLocation { get; set; }
-#if false
-        public static TransmissionLossRunFile Create(TransmissionLossAlgorithm transmissionLossAlgorithm, TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, AppSettings appSettings)
-        {
-            var result = new TransmissionLossRunFile
-            {
-                TransmissionLossAlgorithm = transmissionLossAlgorithm,
-                TransmissionLossJob = transmissionLossJob,
-            };
-            switch (transmissionLossAlgorithm)
-            {
-                case TransmissionLossAlgorithm.Bellhop:
-                    result = BellhopRunFile.Create(transmissionLossJob, environmentInformation, appSettings);
-                    break;
-                case TransmissionLossAlgorithm.RAMGEO:
-                    result = RamRunFile.Create(transmissionLossJob, environmentInformation, appSettings);
-                    break;
-                case TransmissionLossAlgorithm.CASS:
-                case TransmissionLossAlgorithm.REFMS:
-                case TransmissionLossAlgorithm.RAM:
-                default:
-                    throw new NotImplementedException(string.Format("Creating a TransmissionLossRunFile using an algorithm of {0} is not currently supported", transmissionLossAlgorithm));
-            }
-            result.Filename = transmissionLossJob.Filename;
-            return result;
-        }
-#endif
 
         public abstract void Save(string fileName = null);
 

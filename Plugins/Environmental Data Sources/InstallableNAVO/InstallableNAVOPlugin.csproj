@@ -39,15 +39,6 @@
       <HintPath>..\..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="ESME, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>../../../Libraries/ESME/bin/Release/ESME.dll</HintPath>
-    </Reference>
-    <Reference Include="ESME.Views, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>../../../Libraries/ESME.Views/bin/Release/ESME.Views.dll</HintPath>
-    </Reference>
-    <Reference Include="HRC, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>../../../Libraries/HRC/bin/Release/HRC.dll</HintPath>
-    </Reference>
     <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -65,6 +56,18 @@
     <Compile Include="SMGC20ForESME.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Libraries\ESME.Views\ESME.Views.csproj">
+      <Project>{49221733-2EB6-468F-8833-06C0E36B3C83}</Project>
+      <Name>ESME.Views</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Libraries\ESME\ESME.csproj">
+      <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
+      <Name>ESME</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Libraries\HRC\HRC.csproj">
+      <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
+      <Name>HRC</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NAVODatabaseAdapter\NAVODatabaseAdapter.csproj">
       <Project>{409DC754-EEBD-4E49-8DDF-3960F2FFCE73}</Project>
       <Name>NAVODatabaseAdapter</Name>

@@ -6,189 +6,139 @@
 // 
 //-------------------------------------------------------------------------- 
 
-using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
 using System.Threading;
-using System.Windows.Threading;
-using System.Xml;
-using System.Xml.Schema;
-using System.Xml.Serialization;
-using Cinch;
 
 namespace HRC.Collections
 {
-    /// <summary>
-    ///   Provides a thread-safe dictionary for use with data binding.  
-    ///   Now XML Serializable, thanks to http://weblogs.asp.net/pwelter34/archive/2006/05/03/444961.aspx
-    /// </summary>
-    /// <typeparam name = "TKey">Specifies the type of the keys in this collection.</typeparam>
-    /// <typeparam name = "TValue">Specifies the type of the values in this collection.</typeparam>
-    [DebuggerDisplay("Count={Count}"), Serializable]
-    public class ObservableConcurrentDictionary<TKey, TValue> : IDictionary<TKey, TValue>, INotifyCollectionChanged,
-                                                                INotifyPropertyChanged, IDeserializationCallback, IXmlSerializable
+    /// <summary> 
+    /// Provides a thread-safe dictionary for use with data binding. 
+    /// </summary> 
+    /// <typeparam name="TKey">Specifies the type of the keys in this collection.</typeparam> 
+    /// <typeparam name="TValue">Specifies the type of the values in this collection.</typeparam> 
+    [DebuggerDisplay("Count={Count}")]
+    public class ObservableConcurrentDictionary<TKey, TValue> : IDictionary<TKey, TValue>, INotifyCollectionChanged, INotifyPropertyChanged
     {
-        [NonSerialized] SynchronizationContext _context;
-        readonly ConcurrentDictionary<TKey, TValue> _dictionary;
+        private readonly SynchronizationContext _context;
+        private readonly ConcurrentDictionary<TKey, TValue> _dictionary;
 
-        /// <summary>
-        ///   Initializes an instance of the ObservableConcurrentDictionary class.
-        /// </summary>
+        /// <summary> 
+        /// Initializes an instance of the ObservableConcurrentDictionary class. 
+        /// </summary> 
         public ObservableConcurrentDictionary()
         {
             _context = AsyncOperationManager.SynchronizationContext;
             _dictionary = new ConcurrentDictionary<TKey, TValue>();
         }
 
-        void IDeserializationCallback.OnDeserialization(Object sender) { _context = AsyncOperationManager.SynchronizationContext; }
+        /// <summary>Event raised when the collection changes.</summary> 
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+        /// <summary>Event raised when a property on the collection changes.</summary> 
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        /// <summary>
-        ///   Event raised when the collection changes.
-        /// </summary>
-        [NonSerialized]
-        private NotifyCollectionChangedEventHandler _collectionChanged;
-        public event NotifyCollectionChangedEventHandler CollectionChanged
+        /// <summary> 
+        /// Notifies observers of CollectionChanged or PropertyChanged of an update to the dictionary. 
+        /// </summary> 
+        private void NotifyObserversOfChange()
         {
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            add
+            var collectionHandler = CollectionChanged;
+            var propertyHandler = PropertyChanged;
+            if (collectionHandler != null || propertyHandler != null)
             {
-                _collectionChanged = (NotifyCollectionChangedEventHandler)Delegate.Combine(_collectionChanged, value);
-            }
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            remove
-            {
-                _collectionChanged = (NotifyCollectionChangedEventHandler)Delegate.Remove(_collectionChanged, value);
-            }
-        }
-        /// <summary>
-        ///   Event raised when a property on the collection changes.
-        /// </summary>
-        [NonSerialized]
-        private PropertyChangedEventHandler _propertyChanged;
-        public event PropertyChangedEventHandler PropertyChanged
-        {
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            add
-            {
-                _propertyChanged = (PropertyChangedEventHandler)Delegate.Combine(_propertyChanged, value);
-            }
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            remove
-            {
-                _propertyChanged = (PropertyChangedEventHandler)Delegate.Remove(_propertyChanged, value);
-            }
-        }
-
-        protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
-        {
-            //if (Name != null) Debug.WriteLine("{0} {1} [{2}]", DateTime.Now, Name, e.Action);
-            var handlers = _collectionChanged;
-            _context.Post(s =>
-            {
-                if (handlers != null)
+                _context.Post(s =>
                 {
-                    foreach (NotifyCollectionChangedEventHandler handler in handlers.GetInvocationList())
+                    if (collectionHandler != null)
                     {
-                        var localHandler = handler;
-                        try
-                        {
-                            if (handler.Target is DispatcherObject) ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, e));
-                            else handler(this, e);
-                        }
-// ReSharper disable EmptyGeneralCatchClause
-                        catch (Exception) {}
-// ReSharper restore EmptyGeneralCatchClause
+                        collectionHandler(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
                     }
-                }
-                if (_propertyChanged == null) return;
-                _propertyChanged(this, new PropertyChangedEventArgs("Count"));
-                _propertyChanged(this, new PropertyChangedEventArgs("Keys"));
-                _propertyChanged(this, new PropertyChangedEventArgs("Values"));
-            }, null);
+                    if (propertyHandler != null)
+                    {
+                        propertyHandler(this, new PropertyChangedEventArgs("Count"));
+                        propertyHandler(this, new PropertyChangedEventArgs("Keys"));
+                        propertyHandler(this, new PropertyChangedEventArgs("Values"));
+                    }
+                }, null);
+            }
         }
 
-        /// <summary>
-        ///   Attempts to add an item to the dictionary, notifying observers of any changes.
-        /// </summary>
-        /// <param name = "item">The item to be added.</param>
-        /// <returns>Whether the add was successful.</returns>
-        void TryAddWithNotification(KeyValuePair<TKey, TValue> item)
+        /// <summary>Attempts to add an item to the dictionary, notifying observers of any changes.</summary> 
+        /// <param name="item">The item to be added.</param> 
+        /// <returns>Whether the add was successful.</returns> 
+        private bool TryAddWithNotification(KeyValuePair<TKey, TValue> item)
         {
-            TryAddWithNotification(item.Key, item.Value);
+            return TryAddWithNotification(item.Key, item.Value);
         }
 
-        /// <summary>
-        ///   Attempts to add an item to the dictionary, notifying observers of any changes.
-        /// </summary>
-        /// <param name = "key">The key of the item to be added.</param>
-        /// <param name = "value">The value of the item to be added.</param>
-        /// <returns>Whether the add was successful.</returns>
-        void TryAddWithNotification(TKey key, TValue value)
+        /// <summary>Attempts to add an item to the dictionary, notifying observers of any changes.</summary> 
+        /// <param name="key">The key of the item to be added.</param> 
+        /// <param name="value">The value of the item to be added.</param> 
+        /// <returns>Whether the add was successful.</returns> 
+        private bool TryAddWithNotification(TKey key, TValue value)
         {
-            var result = _dictionary.TryAdd(key, value);
-            if (result) OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new KeyValuePair<TKey, TValue>(key, value)));
-        }
-
-        /// <summary>
-        ///   Attempts to remove an item from the dictionary, notifying observers of any changes.
-        /// </summary>
-        /// <param name = "key">The key of the item to be removed.</param>
-        /// <param name = "value">The value of the item removed.</param>
-        /// <returns>Whether the removal was successful.</returns>
-        bool TryRemoveWithNotification(TKey key, out TValue value)
-        {
-            var result = _dictionary.TryRemove(key, out value);
-            if (result) OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new KeyValuePair<TKey, TValue>(key, value)));
+            bool result = _dictionary.TryAdd(key, value);
+            if (result) NotifyObserversOfChange();
             return result;
         }
 
-        /// <summary>
-        ///   Attempts to add or update an item in the dictionary, notifying observers of any changes.
-        /// </summary>
-        /// <param name = "key">The key of the item to be updated.</param>
-        /// <param name = "value">The new value to set for the item.</param>
-        /// <returns>Whether the update was successful.</returns>
-        void UpdateWithNotification(TKey key, TValue value)
+        /// <summary>Attempts to remove an item from the dictionary, notifying observers of any changes.</summary> 
+        /// <param name="key">The key of the item to be removed.</param> 
+        /// <param name="value">The value of the item removed.</param> 
+        /// <returns>Whether the removal was successful.</returns> 
+        private bool TryRemoveWithNotification(TKey key, out TValue value)
         {
-            var oldItem = default(TValue);
-            var isReplace = _dictionary.ContainsKey(key);
-            if (isReplace) oldItem = _dictionary[key];
+            bool result = _dictionary.TryRemove(key, out value);
+            if (result) NotifyObserversOfChange();
+            return result;
+        }
+
+        /// <summary>Attempts to add or update an item in the dictionary, notifying observers of any changes.</summary> 
+        /// <param name="key">The key of the item to be updated.</param> 
+        /// <param name="value">The new value to set for the item.</param> 
+        /// <returns>Whether the update was successful.</returns> 
+        private void UpdateWithNotification(TKey key, TValue value)
+        {
             _dictionary[key] = value;
-            OnCollectionChanged(isReplace
-                                    ? new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, new KeyValuePair<TKey, TValue>(key, value), new KeyValuePair<TKey, TValue>(key, oldItem))
-                                    : new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new KeyValuePair<TKey, TValue>(key, value)));
+            NotifyObserversOfChange();
         }
 
         #region ICollection<KeyValuePair<TKey,TValue>> Members
-        void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) { TryAddWithNotification(item); }
-
-        public void Clear()
+        void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item)
         {
-            ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Clear();
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            TryAddWithNotification(item);
         }
 
-        public bool Contains(KeyValuePair<TKey, TValue> item) { return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Contains(item); }
+        void ICollection<KeyValuePair<TKey, TValue>>.Clear()
+        {
+            ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Clear();
+            NotifyObserversOfChange();
+        }
 
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) { ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).CopyTo(array, arrayIndex); }
+        bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
+        {
+            return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Contains(item);
+        }
 
-        public int Count
+        void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
+        {
+            ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).CopyTo(array, arrayIndex);
+        }
+
+        int ICollection<KeyValuePair<TKey, TValue>>.Count
         {
             get { return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Count; }
         }
 
-        public bool IsReadOnly
+        bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
         {
             get { return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).IsReadOnly; }
         }
 
-        public bool Remove(KeyValuePair<TKey, TValue> item)
+        bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
         {
             TValue temp;
             return TryRemoveWithNotification(item.Key, out temp);
@@ -196,17 +146,27 @@ namespace HRC.Collections
         #endregion
 
         #region IEnumerable<KeyValuePair<TKey,TValue>> Members
-        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() { return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).GetEnumerator(); }
+        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
+        {
+            return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).GetEnumerator();
+        }
 
-        IEnumerator IEnumerable.GetEnumerator() { return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).GetEnumerator(); }
-
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() { return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).GetEnumerator(); }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).GetEnumerator();
+        }
         #endregion
 
         #region IDictionary<TKey,TValue> Members
-        public void Add(TKey key, TValue value) { TryAddWithNotification(key, value); }
+        public void Add(TKey key, TValue value)
+        {
+            TryAddWithNotification(key, value);
+        }
 
-        public bool ContainsKey(TKey key) { return _dictionary.ContainsKey(key); }
+        public bool ContainsKey(TKey key)
+        {
+            return _dictionary.ContainsKey(key);
+        }
 
         public ICollection<TKey> Keys
         {
@@ -219,7 +179,10 @@ namespace HRC.Collections
             return TryRemoveWithNotification(key, out temp);
         }
 
-        public bool TryGetValue(TKey key, out TValue value) { return _dictionary.TryGetValue(key, out value); }
+        public bool TryGetValue(TKey key, out TValue value)
+        {
+            return _dictionary.TryGetValue(key, out value);
+        }
 
         public ICollection<TValue> Values
         {
@@ -232,59 +195,5 @@ namespace HRC.Collections
             set { UpdateWithNotification(key, value); }
         }
         #endregion
-
-        XmlSchema IXmlSerializable.GetSchema() { return null; }
-        void IXmlSerializable.ReadXml(XmlReader reader)
-        {
-            var keySerializer = new XmlSerializer(typeof(TKey));
-            var valueSerializer = new XmlSerializer(typeof(TValue));
-
-            var wasEmpty = reader.IsEmptyElement;
-            reader.Read();
-
-            if (wasEmpty)
-                return;
-
-            while (reader.NodeType != XmlNodeType.EndElement)
-            {
-                reader.ReadStartElement("item");
-
-                reader.ReadStartElement("key");
-                var key = (TKey)keySerializer.Deserialize(reader);
-                reader.ReadEndElement();
-
-                reader.ReadStartElement("value");
-                var value = (TValue)valueSerializer.Deserialize(reader);
-                reader.ReadEndElement();
-
-                Add(key, value);
-
-                reader.ReadEndElement();
-                reader.MoveToContent();
-            }
-            reader.ReadEndElement();
-        }
-        
-        void IXmlSerializable.WriteXml(XmlWriter writer) 
-        {
-            var keySerializer = new XmlSerializer(typeof(TKey));
-            var valueSerializer = new XmlSerializer(typeof(TValue));
-
-            foreach (var key in _dictionary.Keys)
-            {
-                writer.WriteStartElement("item");
-
-                writer.WriteStartElement("key");
-                keySerializer.Serialize(writer, key);
-                writer.WriteEndElement();
-
-                writer.WriteStartElement("value");
-                var value = this[key];
-                valueSerializer.Serialize(writer, value);
-                writer.WriteEndElement();
-
-                writer.WriteEndElement();
-            }
-        }
     }
 }

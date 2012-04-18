@@ -135,7 +135,6 @@
     <Compile Include="ViewModels\Main\HomeTab.cs" />
     <Compile Include="ViewModels\Main\OverrideCursor.cs" />
     <Compile Include="ViewModels\Main\PleaseWaitViewModel.cs" />
-    <Compile Include="ViewModels\NAVO\ExportAllEnvironmentalDataProgressViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticSimulatorOptionsViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointCalculationPreviewViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />

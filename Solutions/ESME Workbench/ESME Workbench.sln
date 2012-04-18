@@ -20,8 +20,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME.Views", "..\..\Librari
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cassdifftester", "..\..\Utilities\cassdifftester\cassdifftester.csproj", "{137AF68B-CDF3-4639-BA62-4398927191CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransmissionLossCalculator", "..\..\TransmissionLossCalculator\TransmissionLossCalculator.csproj", "{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectBuildInfo", "..\..\Utilities\ProjectBuildInfo\ProjectBuildInfo.csproj", "{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grahams_little_sandbox", "..\..\Miscellaneous\grahams_little_sandbox\grahams_little_sandbox.csproj", "{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}"
@@ -51,7 +49,6 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ESME Workbench", "..\..\Ins
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6} = {33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}
 		{7029F5D5-ABBB-4564-B170-39802AD65C62} = {7029F5D5-ABBB-4564-B170-39802AD65C62}
 		{A80510EA-31DD-41C4-B3BC-0C7DCB966F3B} = {A80510EA-31DD-41C4-B3BC-0C7DCB966F3B}
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C} = {DBCCF1ED-1425-4722-AF28-1F0620DCE19C}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HRC.Tests", "..\..\Libraries\HRC.Tests\HRC.Tests.csproj", "{5A858CD7-E722-4153-BA0B-BAD75EF957A5}"
@@ -231,34 +228,6 @@ Global
 		{137AF68B-CDF3-4639-BA62-4398927191CD}.Release|Win32.ActiveCfg = Release|Any CPU
 		{137AF68B-CDF3-4639-BA62-4398927191CD}.Release|x64.ActiveCfg = Release|Any CPU
 		{137AF68B-CDF3-4639-BA62-4398927191CD}.Release|x86.ActiveCfg = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Debug (x64)|Any CPU.ActiveCfg = Debug|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Debug (x64)|Any CPU.Build.0 = Debug|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Debug (x64)|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Debug (x64)|Mixed Platforms.Build.0 = Debug|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Debug (x64)|Win32.ActiveCfg = Debug|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Debug (x64)|x64.ActiveCfg = Debug|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Debug (x64)|x86.ActiveCfg = Debug|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release (x64)|Any CPU.ActiveCfg = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release (x64)|Any CPU.Build.0 = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release (x64)|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release (x64)|Mixed Platforms.Build.0 = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release (x64)|Win32.ActiveCfg = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release (x64)|x64.ActiveCfg = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release (x64)|x86.ActiveCfg = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release|Win32.ActiveCfg = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release|x64.ActiveCfg = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release|x64.Build.0 = Release|Any CPU
-		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release|x86.ActiveCfg = Release|Any CPU
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Debug (x64)|Any CPU.ActiveCfg = Debug|Any CPU
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Debug (x64)|Any CPU.Build.0 = Debug|Any CPU
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Debug (x64)|Mixed Platforms.ActiveCfg = Debug|Any CPU

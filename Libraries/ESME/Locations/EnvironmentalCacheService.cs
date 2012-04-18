@@ -1,6 +1,6 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using System.Collections.Concurrent;
+using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,7 +11,6 @@ using System.Threading.Tasks.Dataflow;
 using System.Windows;
 using System.Windows.Media;
 using ESME.Environment;
-using ESME.Environment.Descriptors;
 using ESME.Plugins;
 using ESME.Scenarios;
 using HRC.Navigation;

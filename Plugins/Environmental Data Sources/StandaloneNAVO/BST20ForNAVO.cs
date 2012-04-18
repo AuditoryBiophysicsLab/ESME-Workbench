@@ -7,7 +7,6 @@ using System.Linq;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
-using ESME.Environment.Descriptors;
 using ESME.Locations;
 using ESME.Plugins;
 using ESME.Views.Locations;

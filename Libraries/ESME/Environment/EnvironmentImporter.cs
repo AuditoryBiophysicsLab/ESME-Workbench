@@ -13,7 +13,6 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Cinch;
-using ESME.Environment.Descriptors;
 using ESME.Plugins;
 using HRC.Navigation;
 using ESME.Environment.NAVO;

@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Xml;
 using ESME.Environment;
-using ESME.Environment.Descriptors;
 using ESME.Locations;
 using ESME.Plugins;
-using ESME.Views.Locations;
 using HRC.Navigation;
 using HRC.Utility;
 

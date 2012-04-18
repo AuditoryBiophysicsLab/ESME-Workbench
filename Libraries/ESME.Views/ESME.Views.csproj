@@ -122,9 +122,6 @@
       <DependentUpon>BathymetryExtractionView.xaml</DependentUpon>
     </Compile>
     <Compile Include="EnvironmentBuilder\BathymetryExtractionViewModel.cs" />
-    <Compile Include="EnvironmentBuilder\RangeComplexTreeView.xaml.cs">
-      <DependentUpon>RangeComplexTreeView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="EnvironmentBuilder\EnvironmentBuilderView.xaml.cs">
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
     </Compile>
@@ -132,9 +129,6 @@
       <DependentUpon>ImportProgressListView.xaml</DependentUpon>
     </Compile>
     <Compile Include="EnvironmentBuilder\ImportProgressViewModel.cs" />
-    <Compile Include="EnvironmentBuilder\RangeComplexesViewModel.cs" />
-    <Compile Include="EnvironmentBuilder\RangeComplexTreeItem.cs" />
-    <Compile Include="EnvironmentBuilder\RangeComplexTreeViewModel.cs" />
     <Compile Include="InstallationWizard\WizardView.xaml.cs">
       <DependentUpon>WizardView.xaml</DependentUpon>
     </Compile>
@@ -164,10 +158,6 @@
       <DependentUpon>NewRangeComplexView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Locations\NewRangeComplexViewModel.cs" />
-    <Compile Include="Locations\OverlayExpandView.xaml.cs">
-      <DependentUpon>OverlayExpandView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Locations\OverlayExpandViewModel.cs" />
     <Compile Include="LogFileViewer\LogFileView.xaml.cs">
       <DependentUpon>LogFileView.xaml</DependentUpon>
     </Compile>
@@ -210,20 +200,9 @@
       <DependentUpon>TwoDimensionColorMapView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\TwoDimensionColorMapViewModel.cs" />
-    <Compile Include="TransmissionLoss\ModeAcousticModelSelectionView.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossMetadataView.xaml.cs">
       <DependentUpon>TransmissionLossMetadataView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TransmissionLoss\TransmissionLossQueueViewOld.xaml.cs">
-      <DependentUpon>TransmissionLossQueueViewOld.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TransmissionLoss\TransmissionLossQueueCalculatorViewModel.cs" />
-    <Compile Include="TransmissionLoss\BellhopRadialCalculatorViewModel.cs" />
-    <Compile Include="TransmissionLoss\ModeAcousticModelSelectionView.xaml.cs">
-      <DependentUpon>ModeAcousticModelSelectionView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TransmissionLoss\TransmissionLossFieldCalculatorViewModel.cs" />
-    <Compile Include="TransmissionLoss\TransmissionLossRadialCalculatorViewModel.cs" />
     <Compile Include="ValueConverters.cs" />
     <Compile Include="VirtualToggleButton.cs" />
     <Page Include="AcousticBuilder\AnalysisPointPropertiesView.xaml">
@@ -266,10 +245,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="EnvironmentBuilder\RangeComplexTreeView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="EnvironmentBuilder\EnvironmentBuilderView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -305,10 +280,6 @@
     <Page Include="Locations\NewRangeComplexView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Locations\OverlayExpandView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="LogFileViewer\LogFileView.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -357,14 +328,6 @@
     <Page Include="TransmissionLoss\TransmissionLossMetadataView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="TransmissionLoss\TransmissionLossQueueViewOld.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="TransmissionLoss\ModeAcousticModelSelectionView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>

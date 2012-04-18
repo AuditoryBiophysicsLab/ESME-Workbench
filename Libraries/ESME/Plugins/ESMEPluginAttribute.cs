@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel.Composition;
-using ESME.Environment.Descriptors;
+using ESME.Environment;
 
 namespace ESME.Plugins
 {

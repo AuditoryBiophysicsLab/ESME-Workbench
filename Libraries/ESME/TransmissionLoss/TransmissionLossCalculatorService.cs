@@ -52,10 +52,17 @@ namespace ESME.TransmissionLoss
             Start();
         }
 
+        static readonly object LockObject = new object();
+        bool _isStarted;
         public void Start()
         {
             if (float.IsNaN(RangeCellSize) || float.IsNaN(DepthCellSize)) return;
             //var foo = _databaseService.Context.Radials.Include(r => r.TransmissionLoss).Include(r => r.TransmissionLoss.AnalysisPoint).Where(r => !r.IsCalculated).ToList();
+            lock (LockObject)
+            {
+                if (_isStarted) return;
+                _isStarted = true;
+            }
             var radials = (from radial in _databaseService.Context.Radials
                                //.Include(r => r.TransmissionLoss)
                                //.Include(r => r.TransmissionLoss.Mode)
@@ -70,8 +77,7 @@ namespace ESME.TransmissionLoss
                            where radial.IsCalculated == false
                            select radial).ToList();
             Console.WriteLine("There are {0} radials to be calculated", radials.Count);
-            foreach (var radial in radials)
-                Add(radial);
+            foreach (var radial in radials) Add(radial);
         }
 
         public void Add(Radial radial)

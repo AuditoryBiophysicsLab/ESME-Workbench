@@ -3,7 +3,6 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using ESME.Environment;
-using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.Locations;
 using ESME.Plugins;
