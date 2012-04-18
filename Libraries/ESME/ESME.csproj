@@ -267,7 +267,6 @@
     <Compile Include="TransmissionLoss\REFMS\Interfaces.cs" />
     <Compile Include="TransmissionLoss\REFMS\SplineInterpolator.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopRunFileRadial.cs" />
-    <Compile Include="TransmissionLoss\Bellhop\FieldCalculator.cs" />
     <Compile Include="TransmissionLoss\Bellhop\RadialCalculator.cs" />
     <Compile Include="TransmissionLoss\AnalysisPoint.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopOutput.cs" />

@@ -56,33 +56,21 @@ namespace HRC.Collections
                     {
                         collectionHandler(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
                     }
-                    if (propertyHandler != null)
-                    {
-                        propertyHandler(this, new PropertyChangedEventArgs("Count"));
-                        propertyHandler(this, new PropertyChangedEventArgs("Keys"));
-                        propertyHandler(this, new PropertyChangedEventArgs("Values"));
-                    }
+                    if (propertyHandler == null) return;
+                    propertyHandler(this, new PropertyChangedEventArgs("Count"));
+                    propertyHandler(this, new PropertyChangedEventArgs("Keys"));
+                    propertyHandler(this, new PropertyChangedEventArgs("Values"));
                 }, null);
             }
         }
 
-        /// <summary>Attempts to add an item to the dictionary, notifying observers of any changes.</summary> 
-        /// <param name="item">The item to be added.</param> 
+        /// <summary>Attempts to add an item to the dictionary, notifying observers of any changes.</summary>
+        /// <param name="key">The key of the item to be added.</param>
+        /// <param name="value">The value of the item to be added.</param>
         /// <returns>Whether the add was successful.</returns> 
-        private bool TryAddWithNotification(KeyValuePair<TKey, TValue> item)
+        private void TryAddWithNotification(TKey key, TValue value)
         {
-            return TryAddWithNotification(item.Key, item.Value);
-        }
-
-        /// <summary>Attempts to add an item to the dictionary, notifying observers of any changes.</summary> 
-        /// <param name="key">The key of the item to be added.</param> 
-        /// <param name="value">The value of the item to be added.</param> 
-        /// <returns>Whether the add was successful.</returns> 
-        private bool TryAddWithNotification(TKey key, TValue value)
-        {
-            bool result = _dictionary.TryAdd(key, value);
-            if (result) NotifyObserversOfChange();
-            return result;
+            if (_dictionary.TryAdd(key, value)) NotifyObserversOfChange();
         }
 
         /// <summary>Attempts to remove an item from the dictionary, notifying observers of any changes.</summary> 
@@ -91,7 +79,7 @@ namespace HRC.Collections
         /// <returns>Whether the removal was successful.</returns> 
         private bool TryRemoveWithNotification(TKey key, out TValue value)
         {
-            bool result = _dictionary.TryRemove(key, out value);
+            var result = _dictionary.TryRemove(key, out value);
             if (result) NotifyObserversOfChange();
             return result;
         }
@@ -109,7 +97,7 @@ namespace HRC.Collections
         #region ICollection<KeyValuePair<TKey,TValue>> Members
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item)
         {
-            TryAddWithNotification(item);
+            TryAddWithNotification(item.Key, item.Value);
         }
 
         void ICollection<KeyValuePair<TKey, TValue>>.Clear()

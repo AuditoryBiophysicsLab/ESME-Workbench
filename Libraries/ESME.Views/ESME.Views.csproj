@@ -73,6 +73,9 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WpfDesktopEdition">
+      <HintPath>..\..\ESME WorkBench\External References\WpfDesktopEdition.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AcousticBuilder\AnalysisPointPropertiesView.xaml.cs">
@@ -203,6 +206,9 @@
     <Compile Include="TransmissionLoss\TransmissionLossMetadataView.xaml.cs">
       <DependentUpon>TransmissionLossMetadataView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="TransmissionLoss\TransmissionLossQueueView.xaml.cs">
+      <DependentUpon>TransmissionLossQueueView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ValueConverters.cs" />
     <Compile Include="VirtualToggleButton.cs" />
     <Page Include="AcousticBuilder\AnalysisPointPropertiesView.xaml">
@@ -326,6 +332,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="TransmissionLoss\TransmissionLossMetadataView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TransmissionLoss\TransmissionLossQueueView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

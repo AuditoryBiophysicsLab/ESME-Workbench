@@ -5,7 +5,9 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Cinch;
 using ESME;
 using ESME.Environment;
@@ -41,6 +43,7 @@ namespace ESMEWorkbench.ViewModels.Main
         readonly IMessageBoxService _messageBox;
         //TransmissionLossQueueCalculatorViewModel _bellhopQueueCalculatorViewModel;
         public const bool ExperimentsCurrentlySupported = false;
+        Dispatcher _dispatcher;
         #endregion
 
         #region Constructor
@@ -72,6 +75,7 @@ namespace ESMEWorkbench.ViewModels.Main
             _viewAwareStatus.ViewLoaded += () =>
             {
                 if (Designer.IsInDesignMode) return;
+                _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 _plugins.PluginDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
                 Globals.AppSettings.PluginManagerService = _plugins;
@@ -259,5 +263,40 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #endregion
 
+        [MediatorMessageSink(MediatorMessage.ShowTransmissionLossQueueView), UsedImplicitly]
+        void ShowTransmissionLossQueueView(bool isVisible)
+        {
+            if (_dispatcher == null) return;
+            lock (LockObject)
+            {
+                if (isVisible)
+                {
+                    if (_queueView == null)
+                    {
+                        _dispatcher.InvokeIfRequired(() => _queueView = _visualizer.ShowWindow("TransmissionLossQueueView",
+                                                                                               _transmissionLoss.WorkQueue,
+                                                                                               false,
+                                                                                               (sender, args) =>
+                                                                                               {
+                                                                                                   _queueView.Close();
+                                                                                                   _queueView = null;
+                                                                                               }));
+                    }
+                }
+                else
+                {
+                    if (_queueView != null)
+                    {
+                        _dispatcher.InvokeIfRequired(() =>
+                        {
+                            _queueView.Close();
+                            _queueView = null;
+                        });
+                    }
+                }
+            }
+        }
+        readonly static object LockObject = new object();
+        Window _queueView;
     }
 }

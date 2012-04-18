@@ -18,6 +18,7 @@ using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
+using HRC.Collections;
 
 namespace ESME.TransmissionLoss
 {
@@ -29,8 +30,10 @@ namespace ESME.TransmissionLoss
         {
             _calculator = new ActionBlock<Tuple<PercentProgress<Radial>, string>>(job =>
             {
+                if (WorkQueue.Any()) MediatorMessage.Send(MediatorMessage.ShowTransmissionLossQueueView, true);
                 Calculate(job.Item1, job.Item2);
-                lock (WorkQueue) WorkQueue.Remove(job.Item1);
+                WorkQueue.Remove(job.Item1.ProgressTarget.Guid);
+                if (!WorkQueue.Any()) MediatorMessage.Send(MediatorMessage.ShowTransmissionLossQueueView, false);
             }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
         }
 
@@ -43,7 +46,7 @@ namespace ESME.TransmissionLoss
         [Import] EnvironmentalCacheService _cacheService;
         [Initialize(float.NaN)] public float RangeCellSize { get; set; }
         [Initialize(float.NaN)] public float DepthCellSize { get; set; }
-        [Initialize, UsedImplicitly] public ObservableList<PercentProgress<Radial>> WorkQueue { get; private set; }
+        [Initialize, UsedImplicitly] public ObservableConcurrentDictionary<Guid, PercentProgress<Radial>> WorkQueue { get; private set; }
         readonly ActionBlock<Tuple<PercentProgress<Radial>, string>> _calculator;
 
         public void OnImportsSatisfied()
@@ -85,7 +88,7 @@ namespace ESME.TransmissionLoss
             //Debug.WriteLine("{0}: Queueing calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}", DateTime.Now, radial.Bearing, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo); 
             var directoryPath = Path.Combine(_databaseService.MasterDatabaseDirectory, radial.TransmissionLoss.AnalysisPoint.Scenario.StorageDirectory);
             var progress = new PercentProgress<Radial>(radial);
-            WorkQueue.Add(progress);
+            WorkQueue.Add(radial.Guid, progress);
             _calculator.Post(Tuple.Create(progress, directoryPath));
         }
 
