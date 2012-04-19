@@ -164,7 +164,7 @@ namespace ESMEWorkbench.ViewModels.Map
 
             var rectangle = new Feature(new RectangleShape(geoRect.West, geoRect.North, geoRect.East, geoRect.South));
             // Set the value of column "Edit" to "rectangle", so this shape will be editing by custom way.
-            rectangle.ColumnValues.Add("Edit", "rectangle");
+            rectangle.ColumnValues.Add("Edit", null);
             _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Add(rectangle);
 
             _wpfMap.EditOverlay.EditShapesLayer.Open();

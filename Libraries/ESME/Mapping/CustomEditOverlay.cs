@@ -11,19 +11,19 @@ namespace ESME.Mapping
         protected override Feature AddVertexCore(Feature targetFeature, PointShape targetPointShape, double searchingTolerance)
         {
             // Override the base method and disable the function of AddVertex if the shape is the "custom"
-            if (targetFeature.ColumnValues.ContainsKey("Edit") && targetFeature.ColumnValues["Edit"] == "rectangle") return new Feature();
+            if (targetFeature.ColumnValues.ContainsKey("Edit")) return new Feature();
             return base.AddVertexCore(targetFeature, targetPointShape, searchingTolerance);
         }
         protected override Feature RemoveVertexCore(Feature editShapeFeature, Vertex selectedVertex, double searchingTolerance)
         {
             // Override the base method and disable the function of RemoveVertex if the shape is the "custom"
-            if (editShapeFeature.ColumnValues.ContainsKey("Edit") && editShapeFeature.ColumnValues["Edit"] == "rectangle") return new Feature();
+            if (editShapeFeature.ColumnValues.ContainsKey("Edit")) return new Feature();
             return base.RemoveVertexCore(editShapeFeature, selectedVertex, searchingTolerance);
         }
         protected override IEnumerable<Feature> CalculateResizeControlPointsCore(Feature feature)
         {
             // Override the base method and modify the control points for resizing if the shape is the "custom"
-            if (feature.ColumnValues.ContainsKey("Edit") && feature.ColumnValues["Edit"] == "rectangle")
+            if (feature.ColumnValues.ContainsKey("Edit"))
             {
                 var resizeControlPoints = new Collection<Feature>();
                 var polygonShape = feature.GetShape() as PolygonShape;
@@ -39,7 +39,7 @@ namespace ESME.Mapping
         protected override Feature ResizeFeatureCore(Feature sourceFeature, PointShape sourceControlPoint, PointShape targetControlPoint)
         {
             // Override the base method and modify the logic for resizing if the shape is the "custom"
-            if (sourceFeature.ColumnValues.ContainsKey("Edit") && sourceFeature.ColumnValues["Edit"] == "rectangle")
+            if (sourceFeature.ColumnValues.ContainsKey("Edit"))
             {
                 var polygonShape = sourceFeature.GetShape() as PolygonShape;
                 if (polygonShape != null)
