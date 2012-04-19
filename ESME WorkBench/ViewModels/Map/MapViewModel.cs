@@ -102,7 +102,7 @@ namespace ESMEWorkbench.ViewModels.Map
             _wpfMap.BackgroundOverlay.BackgroundBrush = new GeoSolidBrush(GeoColor.StandardColors.Black);
             _wpfMap.AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
             _wpfMap.AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
-            _wpfMap.EditOverlay = new CustomEditInteractiveOverlay();
+            _wpfMap.CurrentExtent = new RectangleShape(-180, 90, 180, -90);
             var localizedName = ((MainView)_viewAwareStatus.View).FontFamily.FamilyNames[XmlLanguage.GetLanguage(CultureInfo.CurrentUICulture.Name)];
 
             var customUnitScaleBarAdornmentLayer = new CustomUnitScaleBarAdornmentLayer
@@ -157,27 +157,15 @@ namespace ESMEWorkbench.ViewModels.Map
             IsInAnalysisPointMode = mode;
         }
 
-        [MediatorMessageSink(MediatorMessage.SetCurrentExtent), UsedImplicitly]
-        void SetCurrentExtent(RectangleShape currentExtent)
-        {
-            _wpfMap.CurrentExtent = currentExtent;
-            _wpfMap.Refresh();
-        }
-
         [MediatorMessageSink(MediatorMessage.SetEditMode), UsedImplicitly]
-        void SetEditMode(bool dummy)
+        void SetEditMode(GeoRect geoRect)
         {
             _wpfMap.EditOverlay = new CustomEditInteractiveOverlay();
 
-            var rectangle = new Feature(new RectangleShape(-48, 0, 52, -40));
+            var rectangle = new Feature(new RectangleShape(geoRect.West, geoRect.North, geoRect.East, geoRect.South));
             // Set the value of column "Edit" to "rectangle", so this shape will be editing by custom way.
             rectangle.ColumnValues.Add("Edit", "rectangle");
             _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Add(rectangle);
-
-            var polygon = new Feature(new PolygonShape("POLYGON((-120 49,-66 44,-81 26,-97 24,-119 33,-125 40,-120 49))"));
-            // Set the value of column "Edit" to "polygon" not "rectangle" so this shape will be editing by original way.
-            polygon.ColumnValues.Add("Edit", "polygon");
-            _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Add(polygon);
 
             _wpfMap.EditOverlay.EditShapesLayer.Open();
             _wpfMap.EditOverlay.EditShapesLayer.Columns.Add(new FeatureSourceColumn("Edit"));
@@ -185,8 +173,29 @@ namespace ESMEWorkbench.ViewModels.Map
             _wpfMap.EditOverlay.EditShapesLayer.ZoomLevelSet.ZoomLevel01.DefaultTextStyle = new TextStyle("Edit", new GeoFont("Arial", 18), new GeoSolidBrush(GeoColor.StandardColors.Black));
             _wpfMap.EditOverlay.EditShapesLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
             _wpfMap.EditOverlay.CalculateAllControlPoints();
+            _wpfMap.EditOverlay.FeatureResized += (sender, args) =>
+            {
+                _wpfMap.EditOverlay.EditShapesLayer.Open();
+                var bounds = _wpfMap.EditOverlay.EditShapesLayer.GetBoundingBox();
+                _wpfMap.EditOverlay.EditShapesLayer.Close();
+                Debug.WriteLine("Resized: North {0} South {1} East {2} West {3}", bounds.UpperLeftPoint.Y, bounds.LowerRightPoint.Y, bounds.LowerRightPoint.X, bounds.UpperLeftPoint.X);
+            };
+            _wpfMap.EditOverlay.FeatureDragged += (sender, args) =>
+            {
+                _wpfMap.EditOverlay.EditShapesLayer.Open();
+                var bounds = _wpfMap.EditOverlay.EditShapesLayer.GetBoundingBox();
+                _wpfMap.EditOverlay.EditShapesLayer.Close();
+                Debug.WriteLine("Dragged: North {0} South {1} East {2} West {3}", bounds.UpperLeftPoint.Y, bounds.LowerRightPoint.Y, bounds.LowerRightPoint.X, bounds.UpperLeftPoint.X);
+            };
 
             // Draw the map image on the screen
+            _wpfMap.Refresh();
+        }
+
+        [MediatorMessageSink(MediatorMessage.SetMapExtent), UsedImplicitly]
+        void SetMapExtent(GeoRect geoRect)
+        {
+            _wpfMap.CurrentExtent = new RectangleShape(geoRect.West, geoRect.North, geoRect.East, geoRect.South);
             _wpfMap.Refresh();
         }
 

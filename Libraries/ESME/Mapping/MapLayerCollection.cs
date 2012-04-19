@@ -77,7 +77,6 @@ namespace ESME.Mapping
                 MapLayers = this,
             });
             MediatorMessage.Send(MediatorMessage.SetMapLayers, this);
-            MediatorMessage.Send(MediatorMessage.SetCurrentExtent, CurrentExtent);
         }
 
         public IEnumerable<MapLayerViewModel> Find(LayerType layerType)

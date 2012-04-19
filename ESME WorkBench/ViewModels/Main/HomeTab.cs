@@ -12,6 +12,7 @@ using ESME.Views.Locations;
 using ESMEWorkbench.ViewModels.Layers;
 using ESMEWorkbench.ViewModels.Map;
 using HRC.Aspects;
+using HRC.Navigation;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
@@ -32,7 +33,11 @@ namespace ESMEWorkbench.ViewModels.Main
                 _scenario = value;
                 LayerTreeViewModel.Scenario = _scenario;
                 MainWindowTitle = string.Format("ESME Workbench: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name   );
-                if (_scenario != null) _scenario.CreateMapLayers();
+                if (_scenario != null)
+                {
+                    _scenario.CreateMapLayers();
+                    MediatorMessage.Send(MediatorMessage.SetMapExtent, (GeoRect)_scenario.Location.GeoRect);
+                }
             }
         }
         Scenario _scenario;

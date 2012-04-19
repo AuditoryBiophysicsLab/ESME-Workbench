@@ -32,6 +32,10 @@ namespace ESME.Mapping
             }
             return base.CalculateResizeControlPointsCore(feature);
         }
+        protected override IEnumerable<Feature> CalculateRotateControlPointsCore(Feature feature)
+        {
+            return new Collection<Feature>();
+        }
         protected override Feature ResizeFeatureCore(Feature sourceFeature, PointShape sourceControlPoint, PointShape targetControlPoint)
         {
             // Override the base method and modify the logic for resizing if the shape is the "custom"

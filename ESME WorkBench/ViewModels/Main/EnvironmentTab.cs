@@ -5,6 +5,7 @@ using ESME;
 using ESME.Locations;
 using ESME.Views.Locations;
 using HRC.Aspects;
+using HRC.Navigation;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkbench.ViewModels.Main
@@ -64,15 +65,14 @@ namespace ESMEWorkbench.ViewModels.Main
         #region ZoomToWorldMapCommand
         public SimpleCommand<object, object> ZoomToWorldMapCommand
         {
-            get { return _zoomToWorldMap ?? (_zoomToWorldMap = new SimpleCommand<object, object>(delegate { ZoomToWorldMap(); })); }
+            get { return _zoomToWorldMap ?? (_zoomToWorldMap = new SimpleCommand<object, object>(ZoomToWorldMap)); }
         }
 
         SimpleCommand<object, object> _zoomToWorldMap;
 
-        static void ZoomToWorldMap()
+        static void ZoomToWorldMap(object o)
         {
-            var mapExtent = new RectangleShape(-180, 90, 180, -90);
-            MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
+            MediatorMessage.Send(MediatorMessage.SetMapExtent, new GeoRect(90, -90, 180, -180));
         }
         #endregion
 

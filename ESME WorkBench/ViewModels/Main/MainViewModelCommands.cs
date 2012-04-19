@@ -6,6 +6,7 @@ using Cinch;
 using ESME;
 using ESME.Data;
 using ESMEWorkbench.ViewModels.TransmissionLoss;
+using HRC.Navigation;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
@@ -174,9 +175,20 @@ namespace ESMEWorkbench.ViewModels.Main
 
         SimpleCommand<object, object> _testEditOverlay;
 
-        static void TestEditOverlayHandler(object o)
+        void TestEditOverlayHandler(object o)
         {
-            MediatorMessage.Send(MediatorMessage.SetEditMode, true);
+            GeoRect extent;
+            if (Scenario == null) extent = new GeoRect(20, -20, 20, -20);
+            else
+            {
+                var bounds = (GeoRect)Scenario.Location.GeoRect;
+                var north = (bounds.North + bounds.Center.Latitude) / 2;
+                var south = (bounds.Center.Latitude + bounds.South) / 2;
+                var east = (bounds.East + bounds.Center.Longitude) / 2;
+                var west = (bounds.Center.Longitude + bounds.West) / 2;
+                extent = new GeoRect(north, south, east, west);
+            }
+            MediatorMessage.Send(MediatorMessage.SetEditMode, extent);
         }
         #endregion
         #endregion
