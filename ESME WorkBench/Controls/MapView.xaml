@@ -28,6 +28,12 @@
                 <i:EventTrigger EventName="MouseMove">
                     <cinch:EventToCommandTrigger Command="{Binding MouseMoveCommand}" />
                 </i:EventTrigger>
+                <i:EventTrigger EventName="MapClick">
+                    <cinch:EventToCommandTrigger Command="{Binding MapClickCommand}" />
+                </i:EventTrigger>
+                <i:EventTrigger EventName="MapDoubleClick">
+                    <cinch:EventToCommandTrigger Command="{Binding MapDoubleClickCommand}" />
+                </i:EventTrigger>
             </i:Interaction.Triggers>
         </WpfDesktopEdition:WpfMap>
     </DockPanel>

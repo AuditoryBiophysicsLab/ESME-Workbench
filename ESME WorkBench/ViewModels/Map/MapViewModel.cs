@@ -5,10 +5,10 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Markup;
-using System.Xml.Serialization;
 using Cinch;
 using ESME;
 using ESME.Mapping;
+using ESME.NEMO;
 using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.Layers;
 using ESMEWorkbench.ViewModels.Main;
@@ -57,6 +57,37 @@ namespace ESMEWorkbench.ViewModels.Map
             Cursor = Cursors.Arrow;
         }
 
+        enum MouseModeEnum
+        {
+            Normal,
+            AnalysisPoint,
+            SelectionRectangle,
+        }
+
+        MouseModeEnum MouseMode
+        {
+            get { return _mouseMode; }
+            set
+            {
+                _mouseMode = value;
+                switch (_mouseMode)
+                {
+                    case MouseModeEnum.Normal:
+                        Cursor = Cursors.Arrow;
+                        break;
+                    case MouseModeEnum.AnalysisPoint:
+                        Cursor = Cursors.Cross;
+                        break;
+                    case MouseModeEnum.SelectionRectangle:
+                        Cursor = Cursors.Cross;
+                        break;
+                    default:
+                        throw new ParameterOutOfRangeException(string.Format("Unknown enum value {0} for MouseMode", _mouseMode));
+                }
+            }
+        }
+        MouseModeEnum _mouseMode = MouseModeEnum.Normal;
+
         public bool IsInAnalysisPointMode
         {
             get { return _isInAnalysisPointMode; }
@@ -67,9 +98,6 @@ namespace ESMEWorkbench.ViewModels.Map
             }
         }
         bool _isInAnalysisPointMode;
-
-        [XmlIgnore]
-        public bool IsQuickLookPointMode { get; set; }
 
         #region public Cursor Cursor { get; set; }
 
@@ -154,7 +182,7 @@ namespace ESMEWorkbench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.SetAnalysisPointMode), UsedImplicitly]
         void SetAnalysisPointMode(bool mode)
         {
-            IsInAnalysisPointMode = mode;
+            MouseMode = MouseModeEnum.AnalysisPoint;
         }
 
         [MediatorMessageSink(MediatorMessage.SetEditMode), UsedImplicitly]
@@ -189,6 +217,42 @@ namespace ESMEWorkbench.ViewModels.Map
             };
 
             // Draw the map image on the screen
+            _wpfMap.Refresh();
+        }
+
+        void CreateEditOverlay()
+        {
+            _wpfMap.EditOverlay = new CustomEditInteractiveOverlay
+            {
+                CanAddVertex = false,
+                CanRemoveVertex = false,
+                CanRotate = false
+            };
+            _wpfMap.Refresh();
+        }
+
+        double _north, _south, _east, _west;
+        void UpdateEditOverlay()
+        {
+            _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Clear();
+            var rectangle = new Feature(new RectangleShape(_west, _north, _east, _south));
+            rectangle.ColumnValues.Add("Edit", null);
+            _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Add(rectangle);
+            _wpfMap.EditOverlay.EditShapesLayer.Open();
+            _wpfMap.EditOverlay.EditShapesLayer.Columns.Add(new FeatureSourceColumn("Edit"));
+            _wpfMap.EditOverlay.EditShapesLayer.Close();
+            _wpfMap.EditOverlay.EditShapesLayer.ZoomLevelSet.ZoomLevel01.DefaultTextStyle = new TextStyle("Edit", new GeoFont("Arial", 18), new GeoSolidBrush(GeoColor.StandardColors.Black));
+            _wpfMap.EditOverlay.EditShapesLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
+            _wpfMap.EditOverlay.CalculateAllControlPoints();
+            _wpfMap.Refresh();
+        }
+
+        void DeleteEditOverlay()
+        {
+            _wpfMap.EditOverlay.EditShapesLayer.Open();
+            _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Clear();
+            _wpfMap.EditOverlay.EditShapesLayer.Close();
+            _wpfMap.EditOverlay = null;
             _wpfMap.Refresh();
         }
 
@@ -281,59 +345,116 @@ namespace ESMEWorkbench.ViewModels.Map
         #region Mouse events
 
         #region MouseLeftButtonDownCommand
-        public SimpleCommand<object, object> MouseLeftButtonDownCommand
+        public SimpleCommand<object, EventToCommandArgs> MouseLeftButtonDownCommand
         {
-            get { return _mouseLeftButtonDown ?? (_mouseLeftButtonDown = new SimpleCommand<object, object>(delegate { MouseLeftButtonDownHandler(); })); }
+            get { return _mouseLeftButtonDown ?? (_mouseLeftButtonDown = new SimpleCommand<object, EventToCommandArgs>(MouseLeftButtonDownHandler)); }
         }
 
-        SimpleCommand<object, object> _mouseLeftButtonDown;
+        SimpleCommand<object, EventToCommandArgs> _mouseLeftButtonDown;
 
-        static void MouseLeftButtonDownHandler() { }
+        void MouseLeftButtonDownHandler(EventToCommandArgs arg)
+        {
+            var geo = GetMouseEventArgsGeo((MouseButtonEventArgs)arg.EventArgs);
+            Debug.WriteLine("Mouse left button down at {0}", geo);
+            switch (MouseMode)
+            {
+                case MouseModeEnum.Normal:
+                case MouseModeEnum.AnalysisPoint:
+                    break;
+                case MouseModeEnum.SelectionRectangle:
+                    _isMouseCaptured = Mouse.Capture(_wpfMap, CaptureMode.Element);
+                    if (_isMouseCaptured)
+                    {
+                        CreateEditOverlay();
+                        _north = _south = geo.Latitude;
+                        _east = _west = geo.Longitude;
+                    }
+                    break;
+                default:
+                    throw new ParameterOutOfRangeException(string.Format("Unknown enum value {0} for MouseMode", _mouseMode));
+            }
+        }
+
+        bool _isMouseCaptured;
         #endregion
 
         #region MouseLeftButtonUpCommand
-        public SimpleCommand<object, object> MouseLeftButtonUpCommand
+        public SimpleCommand<object, EventToCommandArgs> MouseLeftButtonUpCommand
         {
-            get { return _mouseLeftButtonUp ?? (_mouseLeftButtonUp = new SimpleCommand<object, object>(MouseLeftButtonUpHandler)); }
+            get { return _mouseLeftButtonUp ?? (_mouseLeftButtonUp = new SimpleCommand<object, EventToCommandArgs>(MouseLeftButtonUpHandler)); }
         }
 
-        SimpleCommand<object, object> _mouseLeftButtonUp;
+        SimpleCommand<object, EventToCommandArgs> _mouseLeftButtonUp;
 
-        void MouseLeftButtonUpHandler(object o)
+        void MouseLeftButtonUpHandler(EventToCommandArgs arg)
         {
-            if (IsInAnalysisPointMode)
+            var geo = GetMouseEventArgsGeo((MouseButtonEventArgs)arg.EventArgs);
+            Debug.WriteLine("Mouse left button up at {0}", geo);
+            switch (MouseMode)
             {
-                IsInAnalysisPointMode = false;
-                MediatorMessage.Send(MediatorMessage.SetAnalysisPointMode, false);
-                MediatorMessage.Send(MediatorMessage.PlaceAnalysisPoint);
+                case MouseModeEnum.Normal:
+                    break;
+                case MouseModeEnum.AnalysisPoint:
+                    MouseMode = MouseModeEnum.Normal;
+                    if (Cursor == Cursors.No) return;
+                    MediatorMessage.Send(MediatorMessage.SetAnalysisPointMode, false);
+                    MediatorMessage.Send(MediatorMessage.PlaceAnalysisPoint);
+                    break;
+                case MouseModeEnum.SelectionRectangle:
+                    if (_isMouseCaptured)
+                    {
+                        _north = Math.Max(_north, geo.Latitude);
+                        _south = Math.Max(_south, geo.Latitude);
+                        _east = Math.Max(_east, geo.Longitude);
+                        _west = Math.Min(_west, geo.Longitude);
+                        UpdateEditOverlay();
+                        Mouse.Capture(null);
+                        _isMouseCaptured = false;
+                    }
+                    MouseMode = MouseModeEnum.Normal;
+                    break;
+                default:
+                        throw new ParameterOutOfRangeException(string.Format("Unknown enum value {0} for MouseMode", _mouseMode));
             }
-            if (!IsQuickLookPointMode) return;
-            IsQuickLookPointMode = false;
-            MediatorMessage.Send(MediatorMessage.SetupAndRunQuickLookPoint);
         }
         #endregion
 
         #region MouseRightButtonDownCommand
-        public SimpleCommand<object, object> MouseRightButtonDownCommand
+        public SimpleCommand<object, EventToCommandArgs> MouseRightButtonDownCommand
         {
-            get { return _mouseRightButtonDown ?? (_mouseRightButtonDown = new SimpleCommand<object, object>(MouseRightButtonDownHandler)); }
+            get { return _mouseRightButtonDown ?? (_mouseRightButtonDown = new SimpleCommand<object, EventToCommandArgs>(MouseRightButtonDownHandler)); }
         }
 
-        SimpleCommand<object, object> _mouseRightButtonDown;
+        SimpleCommand<object, EventToCommandArgs> _mouseRightButtonDown;
 
-        static void MouseRightButtonDownHandler(object o) { }
+        void MouseRightButtonDownHandler(EventToCommandArgs arg)
+        {
+            var geo = GetMouseEventArgsGeo((MouseButtonEventArgs)arg.EventArgs);
+            Debug.WriteLine("Mouse right button down at {0}", geo);
+        }
         #endregion
 
         #region MouseRightButtonUpCommand
-        public SimpleCommand<object, object> MouseRightButtonUpCommand
+        public SimpleCommand<object, EventToCommandArgs> MouseRightButtonUpCommand
         {
-            get { return _mouseRightButtonUp ?? (_mouseRightButtonUp = new SimpleCommand<object, object>(MouseRightButtonUpHandler)); }
+            get { return _mouseRightButtonUp ?? (_mouseRightButtonUp = new SimpleCommand<object, EventToCommandArgs>(MouseRightButtonUpHandler)); }
         }
 
-        SimpleCommand<object, object> _mouseRightButtonUp;
+        SimpleCommand<object, EventToCommandArgs> _mouseRightButtonUp;
 
-        static void MouseRightButtonUpHandler(object o) { }
+        void MouseRightButtonUpHandler(EventToCommandArgs arg)
+        {
+            var geo = GetMouseEventArgsGeo((MouseButtonEventArgs)arg.EventArgs);
+            Debug.WriteLine("Mouse right button up at {0}", geo);
+        }
         #endregion
+
+        Geo GetMouseEventArgsGeo(MouseEventArgs e)
+        {
+            var point = e.GetPosition(_wpfMap);
+            var pointShape = ExtentHelper.ToWorldCoordinate(_wpfMap.CurrentExtent, (float)point.X, (float)point.Y, (float)_wpfMap.ActualWidth, (float)_wpfMap.ActualHeight);
+            return new Geo(pointShape.Y, pointShape.X);
+        }
 
         #region MouseMoveCommand
         public SimpleCommand<object, EventToCommandArgs> MouseMoveCommand
@@ -349,6 +470,55 @@ namespace ESMEWorkbench.ViewModels.Map
             var point = e.MouseDevice.GetPosition(_wpfMap);
             var pointShape = ExtentHelper.ToWorldCoordinate(_wpfMap.CurrentExtent, (float)point.X, (float)point.Y, (float)_wpfMap.ActualWidth, (float)_wpfMap.ActualHeight);
             MediatorMessage.Send(MediatorMessage.SetMouseEarthCoordinate, new Geo(pointShape.Y, pointShape.X));
+            switch (MouseMode)
+            {
+                case MouseModeEnum.Normal:
+                case MouseModeEnum.AnalysisPoint:
+                    break;
+                case MouseModeEnum.SelectionRectangle:
+                    if (_isMouseCaptured)
+                    {
+                        _north = Math.Max(_north, pointShape.Y);
+                        _south = Math.Max(_south, pointShape.Y);
+                        _east = Math.Max(_east, pointShape.X);
+                        _west = Math.Min(_west, pointShape.X);
+                        UpdateEditOverlay();
+                    }
+
+                    break;
+                default:
+                    throw new ParameterOutOfRangeException(string.Format("Unknown enum value {0} for MouseMode", _mouseMode));
+            }
+        }
+        #endregion
+
+        #region MapClickCommand
+        public SimpleCommand<object, EventToCommandArgs> MapClickCommand
+        {
+            get { return _mapClick ?? (_mapClick = new SimpleCommand<object, EventToCommandArgs>(MapClickHandler)); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _mapClick;
+
+        static void MapClickHandler(EventToCommandArgs arg)
+        {
+            var e = (MapClickWpfMapEventArgs)arg.EventArgs;
+            MediatorMessage.Send(MediatorMessage.MapClick, new Geo(e.WorldY, e.WorldX));
+        }
+        #endregion
+
+        #region MapDoubleClickCommand
+        public SimpleCommand<object, EventToCommandArgs> MapDoubleClickCommand
+        {
+            get { return _mapDoubleClick ?? (_mapDoubleClick = new SimpleCommand<object, EventToCommandArgs>(MapDoubleClickHandler)); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _mapDoubleClick;
+
+        static void MapDoubleClickHandler(EventToCommandArgs arg)
+        {
+            var e = (MapClickWpfMapEventArgs)arg.EventArgs;
+            MediatorMessage.Send(MediatorMessage.MapDoubleClick, new Geo(e.WorldY, e.WorldX));
         }
         #endregion
         #endregion

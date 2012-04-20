@@ -64,6 +64,8 @@ namespace ESME
         public const string RunExperimentCommand = "RunExperimentCommandMessage";
 
         public const string SetMouseEarthCoordinate = "SetMouseEarthCoordinateMessage";
+        public const string MapClick = "MapClickMessage";
+        public const string MapDoubleClick = "MapDoubleClickMessage";
 
         public const string QueueTransmissionLossJob = "QueueTransmissionLossJobMessage";
 

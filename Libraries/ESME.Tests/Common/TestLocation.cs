@@ -20,7 +20,11 @@ namespace ESME.Tests.Common
             cacheService = new EnvironmentalCacheService(pluginService, databaseService);
             Console.WriteLine(string.Format("Looking for test location '{0}'...", locationName));
             var location = databaseService.FindLocation(locationName);
-            if (location != null) return location;
+            if (location != null)
+            {
+                Console.WriteLine(string.Format("Test location '{0}' already exists.  Deleting the existing location.", locationName));
+                databaseService.DeleteLocation(location, true);
+            }
             Console.WriteLine(string.Format("Creating test location '{0}'...", locationName));
             location = databaseService.ImportLocationFromOverlayFile(overlayFile, locationName);
             foreach (var month in NAVOConfiguration.AllMonths)

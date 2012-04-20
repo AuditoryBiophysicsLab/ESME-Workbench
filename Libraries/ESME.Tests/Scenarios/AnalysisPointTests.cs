@@ -57,10 +57,10 @@ namespace ESME.Tests.Scenarios
             database.Add(new AnalysisPoint { Geo = northEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
             var southEast = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(135));
             database.Add(new AnalysisPoint { Geo = southEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
-            var southWest = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(225));
-            database.Add(new AnalysisPoint { Geo = southWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
-            var northWest = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(315));
-            database.Add(new AnalysisPoint { Geo = northWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
+            //var southWest = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(225));
+            //database.Add(new AnalysisPoint { Geo = southWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
+            //var northWest = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(315));
+            //database.Add(new AnalysisPoint { Geo = northWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
         }
 
         [Test, RequiresSTA]

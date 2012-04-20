@@ -298,5 +298,17 @@ namespace ESMEWorkbench.ViewModels.Main
         }
         readonly static object LockObject = new object();
         Window _queueView;
+
+        [MediatorMessageSink(MediatorMessage.MapClick), UsedImplicitly]
+        void MapClick(Geo geo)
+        {
+            Debug.WriteLine("Map click at {0}", geo);
+        }
+
+        [MediatorMessageSink(MediatorMessage.MapDoubleClick), UsedImplicitly]
+        void MapDoubleClick(Geo geo)
+        {
+            Debug.WriteLine("Map double click at {0}", geo);
+        }
     }
 }
