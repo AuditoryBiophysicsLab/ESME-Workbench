@@ -4,21 +4,22 @@
              xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
              xmlns:controls="clr-namespace:ESME.Views.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:Environment="clr-namespace:ESME.Views.Environment"
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
+             Width="{Binding MyWidth,
+                             Mode=OneWayToSource}"
+             Height="{Binding MyHeight,
+                              Mode=OneWayToSource}"
+             d:DataContext="{d:DesignInstance Environment:SoundSpeedProfileViewModel}"
              d:DesignHeight="300"
              d:DesignWidth="300"
-             mef:ViewModelLocator.ViewModel="SoundSpeedProfileViewModel"
              mc:Ignorable="d">
     <DockPanel>
-        <StackPanel Height="22"
-                    DockPanel.Dock="Top"
-                    Orientation="Horizontal">            
-        </StackPanel>
+        <StackPanel Height="22" DockPanel.Dock="Top" Orientation="Horizontal" />
         <DockPanel DockPanel.Dock="Left">
             <DockPanel>
-                <TextBlock Height="{Binding ActualHeight, ElementName=RangeAxis, Mode=OneWay}" DockPanel.Dock="Bottom" />
+                <TextBlock Height="{Binding ActualHeight, ElementName=SSPAxis, Mode=OneWay}" DockPanel.Dock="Bottom" />
                 <controls:DataAxis x:Name="DepthAxis"
                                    VerticalAlignment="Top"
                                    AxisLabel="Depth (m)"
@@ -49,13 +50,9 @@
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition />
-            </Grid.RowDefinitions>            
-            <Canvas x:Name="OverlayCanvas"
-                    Grid.Row="0"
-                    Grid.Column="0">
-                <Path Data="{Binding SoundSpeedGeometry}"
-                      Stroke="Black"
-                      StrokeThickness="3" />
+            </Grid.RowDefinitions>
+            <Canvas x:Name="OverlayCanvas" Grid.Row="0" Grid.Column="0">
+                <Path Data="{Binding SoundSpeedGeometry}" Stroke="Black" StrokeThickness="3" />
             </Canvas>
 
         </Grid>

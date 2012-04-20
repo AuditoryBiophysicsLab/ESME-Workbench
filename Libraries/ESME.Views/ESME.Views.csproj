@@ -136,6 +136,9 @@
       <DependentUpon>SoundSpeedProfileView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Environment\SoundSpeedProfileViewModel.cs" />
+    <Compile Include="Environment\SoundSpeedProfileWindowView.xaml.cs">
+      <DependentUpon>SoundSpeedProfileWindowView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="InstallationWizard\WizardView.xaml.cs">
       <DependentUpon>WizardView.xaml</DependentUpon>
     </Compile>
@@ -264,6 +267,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Environment\SoundSpeedProfileView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Environment\SoundSpeedProfileWindowView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

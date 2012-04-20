@@ -1,12 +1,13 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Markup;
 using Cinch;
 using ESME;
+using ESME.Environment;
 using ESME.Mapping;
 using ESME.NEMO;
 using ESMEWorkbench.Properties;
@@ -20,6 +21,7 @@ using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
+using ESME.Views.Environment;
 
 namespace ESMEWorkbench.ViewModels.Map
 {
@@ -32,15 +34,15 @@ namespace ESMEWorkbench.ViewModels.Map
         readonly IViewAwareStatus _viewAwareStatus;
         readonly MainViewModel _mainViewModel;
         WpfMap _wpfMap;
+        readonly IUIVisualizerService _visualizer;
 
         #endregion
 
         public string MapDLLVersion { get; private set; }
-
-        [ImportingConstructor]
-        public MapViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBox, MainViewModel mainViewModel)
+        public MapViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBox, MainViewModel mainViewModel, IUIVisualizerService visualizer)
         {
             _mainViewModel = mainViewModel;
+            _visualizer = visualizer;
             viewAwareStatus.ViewLoaded += ViewLoaded;
             try
             {
@@ -120,7 +122,7 @@ namespace ESMEWorkbench.ViewModels.Map
             if (Designer.IsInDesignMode) return;
 
             _wpfMap = ((MainView)_viewAwareStatus.View).MapView.WpfMap;
-
+            //SoundSpeedProfileViewModel = new SoundSpeedProfileViewModel(((MainView)_viewAwareStatus.View).MapView.SoundSpeedProfileView);
             MapDLLVersion = WpfMap.GetVersion();
             _wpfMap.MapUnit = GeographyUnit.DecimalDegree;
             _wpfMap.MapTools.PanZoomBar.HorizontalAlignment = HorizontalAlignment.Left;
@@ -255,6 +257,10 @@ namespace ESMEWorkbench.ViewModels.Map
             _wpfMap.EditOverlay = null;
             _wpfMap.Refresh();
         }
+
+        public SoundSpeedProfile MouseSoundSpeedProfile { get; set; }
+        public bool IsSoundSpeedProfilePopupOpen { get; set; }
+        public SoundSpeedProfileViewModel SoundSpeedProfileViewModel { get; set; }
 
         [MediatorMessageSink(MediatorMessage.SetMapExtent), UsedImplicitly]
         void SetMapExtent(GeoRect geoRect)
@@ -515,12 +521,26 @@ namespace ESMEWorkbench.ViewModels.Map
 
         SimpleCommand<object, EventToCommandArgs> _mapDoubleClick;
 
-        static void MapDoubleClickHandler(EventToCommandArgs arg)
+        void MapDoubleClickHandler(EventToCommandArgs arg)
         {
             var e = (MapClickWpfMapEventArgs)arg.EventArgs;
             MediatorMessage.Send(MediatorMessage.MapDoubleClick, new Geo(e.WorldY, e.WorldX));
+            if (MouseSoundSpeedProfile != null)
+            {
+                if (SoundSpeedProfileViewModel == null) SoundSpeedProfileViewModel = new SoundSpeedProfileViewModel();
+                if (_soundSpeedProfileWindowView == null)
+                {
+                    _soundSpeedProfileWindowView = (SoundSpeedProfileWindowView)_visualizer.ShowWindow("SoundSpeedProfileWindowView", SoundSpeedProfileViewModel, false, (sender, args) => { _soundSpeedProfileWindowView = null; });
+                    SoundSpeedProfileViewModel.View = _soundSpeedProfileWindowView.FindChildren<SoundSpeedProfileView>().First();
+                }
+                SoundSpeedProfileViewModel.SoundSpeedProfile = MouseSoundSpeedProfile;
+            }
+            IsSoundSpeedProfilePopupOpen = true;
         }
+
+        SoundSpeedProfileWindowView _soundSpeedProfileWindowView;
         #endregion
+
         #endregion
     }
 }

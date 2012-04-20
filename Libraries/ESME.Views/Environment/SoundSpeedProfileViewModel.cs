@@ -1,28 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using Cinch;
 using ESME.Environment;
 using HRC.Aspects;
-using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Views.Environment
 {
-    [ExportViewModel("SoundSpeedProfileViewModel")]
     [NotifyPropertyChanged]
-    class SoundSpeedProfileViewModel
+    public class SoundSpeedProfileViewModel
     {
-        private readonly SoundSpeedProfile _profile;
-        private readonly SoundSpeedProfileView _view;
-        
+        public SoundSpeedProfileView View { get; set; }
+
         public float SSPMax { get; set; }
         public float SSPMin { get; set; }
         public float DepthMin { get; set; }
         public float DepthMax { get; set; }
         #region public string SoundSpeedGeometry { get; private set; }
-        private string _soundSpeedGeometry = "M 0,0";   
+        private string _soundSpeedGeometry = "M 0,0";
         public string SoundSpeedGeometry
         {
             get { return _soundSpeedGeometry; }
@@ -34,31 +28,34 @@ namespace ESME.Views.Environment
         } 
         #endregion
 
-        [ImportingConstructor]
-        public SoundSpeedProfileViewModel(SoundSpeedProfile profile, SoundSpeedProfileView view )
+        SoundSpeedProfile _soundSpeedProfile;
+        public SoundSpeedProfile SoundSpeedProfile
         {
-            _profile = profile;
-            _view = view;
-            var speeds = (from p in profile.Data
-                      orderby p.SoundSpeed
-                      select p.SoundSpeed).ToArray();
+            get { return _soundSpeedProfile; }
+            set
+            {
+                _soundSpeedProfile = value;
+                var speeds = (from p in _soundSpeedProfile.Data
+                              orderby p.SoundSpeed
+                              select p.SoundSpeed).ToArray();
 
-            SSPMin = speeds.First();
-            SSPMax = speeds.Last();
-            DepthMin = profile.Data.First().Depth;
-            DepthMax = profile.Data.Last().Depth;
-            CalculateSoundSpeedProfileGeometry();
+                SSPMin = speeds.First();
+                SSPMax = speeds.Last();
+                DepthMin = _soundSpeedProfile.Data.First().Depth;
+                DepthMax = _soundSpeedProfile.Data.Last().Depth;
+                CalculateSoundSpeedProfileGeometry();
+            }
         }
 
         void CalculateSoundSpeedProfileGeometry()
         {
-            if (_profile == null) return;
-            var actualControlHeight = _view.OverlayCanvas.ActualHeight;
-            var actualControlWidth = _view.OverlayCanvas.ActualWidth;
+            if (SoundSpeedProfile == null) return;
+            var actualControlHeight = View.OverlayCanvas.ActualHeight;
+            var actualControlWidth = View.OverlayCanvas.ActualWidth;
             if (actualControlHeight == 0 || actualControlWidth == 0) return;
             
             var sb = new StringBuilder();
-            foreach (var t in _profile.Data)
+            foreach (var t in SoundSpeedProfile.Data)
             {
                 var y = t.Depth * (actualControlHeight / DepthMax);
                 var x = t.SoundSpeed * (actualControlWidth / SSPMax);
@@ -70,9 +67,9 @@ namespace ESME.Views.Environment
         void DrawGrid()
         {
 
-            if (_profile == null) return;
-            var actualControlHeight = _view.OverlayCanvas.ActualHeight;
-            var actualControlWidth = _view.OverlayCanvas.ActualWidth;
+            if (SoundSpeedProfile == null) return;
+            var actualControlHeight = View.OverlayCanvas.ActualHeight;
+            var actualControlWidth = View.OverlayCanvas.ActualWidth;
             if (actualControlHeight == 0 || actualControlWidth == 0) return;
 
             var sb = new StringBuilder();

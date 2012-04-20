@@ -35,12 +35,12 @@ namespace ESMEWorkbench.ViewModels.Main
 
         [Import, UsedImplicitly] IHRCOpenFileService _openFile;
         [Import, UsedImplicitly] IHRCSaveFileService _saveFile;
-        [Import, UsedImplicitly] IUIVisualizerService _visualizer;
         [Import, UsedImplicitly] IPluginManagerService _plugins;
         [Import, UsedImplicitly] EnvironmentalCacheService _cache;
         [Import, UsedImplicitly] TransmissionLossCalculatorService _transmissionLoss;
         readonly IViewAwareStatus _viewAwareStatus;
         readonly IMessageBoxService _messageBox;
+        readonly IUIVisualizerService _visualizer;
         //TransmissionLossQueueCalculatorViewModel _bellhopQueueCalculatorViewModel;
         public const bool ExperimentsCurrentlySupported = false;
         Dispatcher _dispatcher;
@@ -48,7 +48,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #region Constructor
         [ImportingConstructor]
-        public MainViewModel(IViewAwareStatus viewAwareStatus, MasterDatabaseService database, IMessageBoxService messageBox)
+        public MainViewModel(IViewAwareStatus viewAwareStatus, MasterDatabaseService database, IMessageBoxService messageBox, IUIVisualizerService visualizer)
         {
             MainWindowTitle = "ESME Workbench: <No scenario loaded>";
             try
@@ -63,7 +63,8 @@ namespace ESMEWorkbench.ViewModels.Main
             _viewAwareStatus = viewAwareStatus;
             _messageBox = messageBox;
             Database = database;
-            MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this);
+            _visualizer = visualizer;
+            MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer);
             if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database")))
                 Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
             Database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
@@ -124,28 +125,15 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #endregion
 
-        #region public Geo MouseGeo { get; set; }
+        [Affects("MouseLocationInfo")]
+        public Geo MouseGeo { get; set; }
 
-        public Geo MouseGeo
-        {
-            get { return _mouseGeo; }
-            set
-            {
-                if (_mouseGeo == value) return;
-                _mouseGeo = value;
-                NotifyPropertyChanged(MouseEarthCoordinateChangedEventArgs);
-                NotifyPropertyChanged(MouseLocationInfoChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs MouseEarthCoordinateChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MouseGeo);
-        Geo _mouseGeo;
-
-        #endregion
-
-        #region public string MouseLocationInfo { get; set; }
         [MediatorMessageSink(MediatorMessage.SetMouseEarthCoordinate), UsedImplicitly]
-        void SetMouseEarthCoordinate(Geo mouseEarthCoordinate) { MouseGeo = mouseEarthCoordinate; }
+        void SetMouseEarthCoordinate(Geo mouseEarthCoordinate)
+        {
+            MouseGeo = mouseEarthCoordinate;
+            var foo = MouseSoundSpeed;
+        }
 
         public string MouseLocationInfo
         {
@@ -173,9 +161,22 @@ namespace ESMEWorkbench.ViewModels.Main
             }
         }
 
-        static readonly PropertyChangedEventArgs MouseLocationInfoChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MouseLocationInfo);
-
-        #endregion
+        public SoundSpeedProfile MouseSoundSpeed
+        {
+            get
+            {
+                if (MouseGeo == null) return null;
+                var lat = MouseGeo.Latitude;
+                var lon = MouseGeo.Longitude;
+                if (-90 > lat || lat > 90) return null;
+                if (-180 > lon || lon > 180) return null;
+                SoundSpeedProfile mouseSoundSpeedProfile = null;
+                if (Scenario != null && Scenario.SoundSpeed != null && ((SoundSpeed)_cache[Scenario.SoundSpeed])[Scenario.TimePeriod].EnvironmentData.GeoRect.Contains(MouseGeo))
+                    mouseSoundSpeedProfile = ((SoundSpeed)_cache[Scenario.SoundSpeed])[Scenario.TimePeriod].EnvironmentData.GetNearestPoint(MouseGeo);
+                MapViewModel.MouseSoundSpeedProfile = mouseSoundSpeedProfile;
+                return mouseSoundSpeedProfile;
+            }
+        }
 
         public float? MouseDepth { get; set; }
 
