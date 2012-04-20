@@ -19,7 +19,7 @@ using ESME.Plugins;
 using ESME.Scenarios;
 using HRC.Navigation;
 using HRC.Utility;
-using MEFedMVVM.ViewModelLocator;
+using MEFedMVVM.ViewModelLocator;   
 
 namespace ESME.Locations
 {

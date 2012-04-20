@@ -132,6 +132,10 @@
       <DependentUpon>ImportProgressListView.xaml</DependentUpon>
     </Compile>
     <Compile Include="EnvironmentBuilder\ImportProgressViewModel.cs" />
+    <Compile Include="Environment\SoundSpeedProfileView.xaml.cs">
+      <DependentUpon>SoundSpeedProfileView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Environment\SoundSpeedProfileViewModel.cs" />
     <Compile Include="InstallationWizard\WizardView.xaml.cs">
       <DependentUpon>WizardView.xaml</DependentUpon>
     </Compile>
@@ -259,6 +263,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Environment\SoundSpeedProfileView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="InstallationWizard\WizardView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -383,9 +391,7 @@
   <ItemGroup>
     <Resource Include="InstallationWizard\dlgbmp.bmp" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="NewFolder1\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESME.Views -class BuildInformation -svnversion "$(ProjectDir) " -output "$(ProjectDir)BuildInformation.cs"
