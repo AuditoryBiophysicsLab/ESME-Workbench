@@ -16,7 +16,12 @@
              d:DesignWidth="300"
              mc:Ignorable="d">
     <DockPanel>
-        <StackPanel Height="22" DockPanel.Dock="Top" Orientation="Horizontal" />
+        <StackPanel Height="22"
+                    DockPanel.Dock="Top"
+                    Orientation="Horizontal" />
+        <StackPanel Width="22"
+                    DockPanel.Dock="Right"
+                    Orientation="Vertical" />
         <DockPanel DockPanel.Dock="Left">
             <DockPanel>
                 <TextBlock Height="{Binding ActualHeight, ElementName=SSPAxis, Mode=OneWay}" DockPanel.Dock="Bottom" />
@@ -51,8 +56,16 @@
             <Grid.RowDefinitions>
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <Canvas x:Name="OverlayCanvas" Grid.Row="0" Grid.Column="0">
-                <Path Data="{Binding SoundSpeedGeometry}" Stroke="Black" StrokeThickness="3" />
+            <Canvas x:Name="OverlayCanvas"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    UseLayoutRounding="True">
+                <Path Data="{Binding SoundSpeedGeometry}"
+                      Stroke="Black"
+                      StrokeThickness="1" />
+                <Path Data="{Binding SoundSpeedDataPoints}"
+                      Stroke="Blue"
+                      StrokeThickness="1" />
             </Canvas>
 
         </Grid>

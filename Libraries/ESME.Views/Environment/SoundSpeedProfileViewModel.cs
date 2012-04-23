@@ -15,21 +15,11 @@ namespace ESME.Views.Environment
         public float SSPMin { get; set; }
         public float DepthMin { get; set; }
         public float DepthMax { get; set; }
-        #region public string SoundSpeedGeometry { get; private set; }
-        private string _soundSpeedGeometry = "M 0,0";
-        public string SoundSpeedGeometry
-        {
-            get { return _soundSpeedGeometry; }
-            private set
-            {
-                if (_soundSpeedGeometry == value) return;
-                _soundSpeedGeometry = value;
-            }
-        } 
-        #endregion
-
+        public string SoundSpeedGeometry { get; private set; }
+        public string SoundSpeedDataPoints { get; private set; }
         public string WindowTitle { get; set; }
 
+        #region public SoundSpeedProfile SoundSpeedProfile {get; set; }
         SoundSpeedProfile _soundSpeedProfile;
         public SoundSpeedProfile SoundSpeedProfile
         {
@@ -37,19 +27,11 @@ namespace ESME.Views.Environment
             set
             {
                 _soundSpeedProfile = value;
-                var speeds = (from p in _soundSpeedProfile.Data
-                              select p.SoundSpeed).ToArray();
-                var depths = (from d in _soundSpeedProfile.Data
-                              select d.Depth).ToArray();
-
-                SSPMin = speeds.Min();
-                SSPMax = speeds.Max();
-                DepthMin = depths.Min();
-                DepthMax = depths.Max();
                 CalculateSoundSpeedProfileGeometry();
                 WindowTitle = string.Format("Sound Speed Profile ({0:0.000}, {1:0.000})", _soundSpeedProfile.Latitude, _soundSpeedProfile.Longitude);
             }
         }
+        #endregion
 
         void CalculateSoundSpeedProfileGeometry()
         {
@@ -57,30 +39,54 @@ namespace ESME.Views.Environment
             var actualControlHeight = View.OverlayCanvas.ActualHeight;
             var actualControlWidth = View.OverlayCanvas.ActualWidth;
             if (actualControlHeight == 0 || actualControlWidth == 0) return;
-            
-            var sb = new StringBuilder();
+
+            var speeds = (from p in SoundSpeedProfile.Data
+                          select p.SoundSpeed).ToArray();
+            var depths = (from d in SoundSpeedProfile.Data
+                          select d.Depth).ToArray();
+            SSPMin = speeds.Min();
+            SSPMax = speeds.Max();
+            var diff = SSPMax - SSPMin;
+            SSPMin -= (float).1 * diff;
+            SSPMax += (float).1 * diff;
+            diff = SSPMax - SSPMin;
+            DepthMin = depths.Min();
+            DepthMax = depths.Max();
+
             var orderedData = (from d in SoundSpeedProfile.Data
                                orderby d.Depth
                                select d);
+            var sb = new StringBuilder();
+            var pb = new StringBuilder();
             foreach (var t in orderedData)
             {
                 var y = t.Depth * (actualControlHeight / DepthMax);
-                var x = t.SoundSpeed * (actualControlWidth / SSPMax);
-                sb.Append(sb.Length == 0 ? string.Format("M 0,{0} ", y) : string.Format("L {0},{1} ", x, y));
+                var x = (t.SoundSpeed - SSPMin) * (actualControlWidth / diff);
+                sb.Append(sb.Length == 0 ? string.Format("M {0},{1} ", x, y) : string.Format("L {0},{1} ", x, y));
+                pb.Append(pb.Length == 0 ? string.Format("M {0},{1} ", x, y) : CircleAt(x, y, 5));
             }
             SoundSpeedGeometry = sb.ToString();
+            SoundSpeedDataPoints = pb.ToString();
         }
 
-        void DrawGrid()
+        string CircleAt(double x, double y, double d)
         {
-
-            if (SoundSpeedProfile == null) return;
-            var actualControlHeight = View.OverlayCanvas.ActualHeight;
-            var actualControlWidth = View.OverlayCanvas.ActualWidth;
-            if (actualControlHeight == 0 || actualControlWidth == 0) return;
-
             var sb = new StringBuilder();
+            sb.Append(string.Format("M {0},{1} ", x - (d / 2), y));
+            sb.Append(string.Format("A {0},{0} 180 1 1 {1},{2} ", d / 2, x + (d / 2), y));
+            sb.Append(string.Format("A {0},{0} 180 1 1 {1},{2} ", d / 2, x - (d / 2), y));
+            sb.Append(string.Format("M {0},{1} ", x, y));
+            return sb.ToString();
+        }
 
+        string SquareAt(double x, double y, double d)
+        {
+            var sb = new StringBuilder();
+            sb.Append(string.Format("M {0},{1} ", x - (d / 2), y));
+            sb.Append(string.Format("A {0},{0} 180 1 1 {1},{2} ", d / 2, x + (d / 2), y));
+            sb.Append(string.Format("A {0},{0} 180 1 1 {1},{2} ", d / 2, x - (d / 2), y));
+            sb.Append(string.Format("M {0},{1} ", x, y));
+            return sb.ToString();
         }
 
         #region GridSizeChangedCommand
