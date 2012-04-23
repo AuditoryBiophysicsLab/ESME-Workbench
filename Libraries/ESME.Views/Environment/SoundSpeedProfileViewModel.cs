@@ -38,13 +38,14 @@ namespace ESME.Views.Environment
             {
                 _soundSpeedProfile = value;
                 var speeds = (from p in _soundSpeedProfile.Data
-                              orderby p.SoundSpeed
                               select p.SoundSpeed).ToArray();
+                var depths = (from d in _soundSpeedProfile.Data
+                              select d.Depth).ToArray();
 
-                SSPMin = speeds.First();
-                SSPMax = speeds.Last();
-                DepthMin = _soundSpeedProfile.Data.First().Depth;
-                DepthMax = _soundSpeedProfile.Data.Last().Depth;
+                SSPMin = speeds.Min();
+                SSPMax = speeds.Max();
+                DepthMin = depths.Min();
+                DepthMax = depths.Max();
                 CalculateSoundSpeedProfileGeometry();
                 WindowTitle = string.Format("Sound Speed Profile ({0:0.000}, {1:0.000})", _soundSpeedProfile.Latitude, _soundSpeedProfile.Longitude);
             }
@@ -58,7 +59,10 @@ namespace ESME.Views.Environment
             if (actualControlHeight == 0 || actualControlWidth == 0) return;
             
             var sb = new StringBuilder();
-            foreach (var t in SoundSpeedProfile.Data)
+            var orderedData = (from d in SoundSpeedProfile.Data
+                               orderby d.Depth
+                               select d);
+            foreach (var t in orderedData)
             {
                 var y = t.Depth * (actualControlHeight / DepthMax);
                 var x = t.SoundSpeed * (actualControlWidth / SSPMax);
