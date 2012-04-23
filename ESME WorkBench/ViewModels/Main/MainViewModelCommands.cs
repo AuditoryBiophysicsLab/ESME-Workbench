@@ -77,7 +77,18 @@ namespace ESMEWorkbench.ViewModels.Main
         #endregion
 
         #region ViewClosingCommand
-        public SimpleCommand<object, object> ViewClosingCommand { get { return _viewClosing ?? (_viewClosing = new SimpleCommand<object, object>(o => ESME.Globals.AppSettings.Save())); } }
+        public SimpleCommand<object, object> ViewClosingCommand
+        {
+            get
+            {
+                return _viewClosing ?? (_viewClosing = new SimpleCommand<object, object>(o =>
+                {
+                    MediatorMessage.Send(MediatorMessage.ApplicationClosing, true);
+                    ESME.Globals.AppSettings.Save();
+                }));
+            }
+        }
+
         SimpleCommand<object, object> _viewClosing;
         #endregion
 

@@ -5,6 +5,7 @@ namespace ESME
 {
     public static class MediatorMessage
     {
+        public const string ApplicationClosing = "ApplicationClosingMessage";
         public const string CancelCurrentCommand = "CancelCurrentCommandMessage";
         public const string SetAnalysisPointMode = "AnalysisPointCommandMessage";
 

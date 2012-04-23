@@ -181,6 +181,8 @@ namespace ESMEWorkbench.ViewModels.Map
             }
         }
 
+        [MediatorMessageSink(MediatorMessage.ApplicationClosing), UsedImplicitly] void ApplicationClosing(bool mode) { if (_soundSpeedProfileWindowView != null) _soundSpeedProfileWindowView.Close(); }
+
         [MediatorMessageSink(MediatorMessage.SetAnalysisPointMode), UsedImplicitly]
         void SetAnalysisPointMode(bool mode)
         {

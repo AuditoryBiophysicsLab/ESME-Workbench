@@ -28,6 +28,8 @@ namespace ESME.Views.Environment
         } 
         #endregion
 
+        public string WindowTitle { get; set; }
+
         SoundSpeedProfile _soundSpeedProfile;
         public SoundSpeedProfile SoundSpeedProfile
         {
@@ -44,6 +46,7 @@ namespace ESME.Views.Environment
                 DepthMin = _soundSpeedProfile.Data.First().Depth;
                 DepthMax = _soundSpeedProfile.Data.Last().Depth;
                 CalculateSoundSpeedProfileGeometry();
+                WindowTitle = string.Format("Sound Speed Profile ({0:0.000}, {1:0.000})", _soundSpeedProfile.Latitude, _soundSpeedProfile.Longitude);
             }
         }
 
