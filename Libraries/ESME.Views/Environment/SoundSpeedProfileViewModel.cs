@@ -73,8 +73,8 @@ namespace ESME.Views.Environment
         {
             var sb = new StringBuilder();
             sb.Append(string.Format("M {0},{1} ", x - (d / 2), y));
-            sb.Append(string.Format("A {0},{0} 180 1 1 {1},{2} ", d / 2, x + (d / 2), y));
-            sb.Append(string.Format("A {0},{0} 180 1 1 {1},{2} ", d / 2, x - (d / 2), y));
+            sb.Append(string.Format("a {0},{0} 180 1 1 {1},0 ", d / 2, d));
+            sb.Append(string.Format("{0},{0} 180 1 1 {1},0 ", d / 2, -d));
             sb.Append(string.Format("M {0},{1} ", x, y));
             return sb.ToString();
         }
