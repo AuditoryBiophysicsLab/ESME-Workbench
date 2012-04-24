@@ -105,7 +105,6 @@
                 <TextBlock Text="{Binding TransmissionLossActivity}" />
             </StatusBarItem>
         </StatusBar>
-        <!--  SelectedIndex="{Binding Source={x:Static p:Settings.Default}, Path=SelectedRibbonTabIndex, Mode=TwoWay}"  -->
         <r:Ribbon x:Name="Ribbon" DockPanel.Dock="Top" SelectedIndex="{Binding SelectedRibbonTabIndex}">
             <r:Ribbon.ApplicationMenu>
                 <Controls:SlimRibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
@@ -139,25 +138,6 @@
                 </Controls:SlimRibbonApplicationMenu>
             </r:Ribbon.ApplicationMenu>
             <r:RibbonTab Header="Home" KeyTip="H">
-                <!--
-                    <r:RibbonGroup Header="Overlays">
-                    <r:RibbonCheckBox IsChecked="{Binding IsLatLonGridVisible}"
-                    Label="Lat/Lon Grid"
-                    ToolTipDescription="Shows and hides the latitude/longitude grid overlay on the map"
-                    ToolTipTitle="{Binding Label,
-                    RelativeSource={RelativeSource Self}}" />
-                    <r:RibbonCheckBox IsChecked="{Binding IsPanZoomVisible}"
-                    Label="Pan &amp; Zoom"
-                    ToolTipDescription="Shows and hides the pan/zoom control overlay on the map"
-                    ToolTipTitle="{Binding Label,
-                    RelativeSource={RelativeSource Self}}" />
-                    <r:RibbonCheckBox IsChecked="{Binding IsScaleBarVisible}"
-                    Label="Scale Bar"
-                    ToolTipDescription="Shows and hides the scale bar overlay on the map"
-                    ToolTipTitle="{Binding Label,
-                    RelativeSource={RelativeSource Self}}" />
-                    </r:RibbonGroup>
-                -->
                 <r:RibbonGroup Header="Map">
                     <r:RibbonButton Command="{Binding ZoomToWorldMapCommand}" Label="World Map" LargeImageSource="..\Images\LargeIcons\globe-icon.png" SmallImageSource="..\Images\SmallIcons\globe-icon.png" />
                 </r:RibbonGroup>
@@ -245,7 +225,7 @@
                                     Label="Zoom"
                                     SmallImageSource="..\Images\SmallIcons\application_form_magnify.png"
                                     ToolTipDescription="Not yet implemented"
-                                    ToolTipTitle="Resets the map position to the current scenario"/>
+                                    ToolTipTitle="Resets the map position to the current scenario" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Acoustics">
                     <r:RibbonToggleButton IsChecked="{Binding IsInAnalysisPointMode}"
@@ -257,30 +237,6 @@
                                                                  RelativeSource={RelativeSource Self}}" />
                 </r:RibbonGroup>
             </r:RibbonTab>
-            <!--
-                <r:RibbonTab Header="Environment" KeyTip="V">
-                
-                </r:RibbonTab>
-                
-                <r:RibbonTab Header="Simulation" KeyTip="S">
-                
-                <r:RibbonGroup Header="Animals">
-                <r:RibbonButton Command="{Binding LaunchMMMBSCommand}"
-                Label="MMMBS"
-                LargeImageSource="..\Images\3mbNewIcon.ico"
-                SmallImageSource="..\Images\3mbNewIcon.ico"
-                ToolTipDescription="Launch the Marine Mammal Movement and Behavior Simulator to define animat populations."
-                ToolTipTitle="{Binding Label,
-                RelativeSource={RelativeSource Self}}" />
-                <r:RibbonButton Command="{Binding CreateMMMBSBathymetryFileCommand}"
-                Label="Export Bathymetry File"
-                SmallImageSource="..\Images\SmallIcons\export-icon.png"
-                ToolTipDescription="Create a bathymetry file that will be loaded by MMMBS"
-                ToolTipTitle="{Binding Label,
-                RelativeSource={RelativeSource Self}}" />
-                </r:RibbonGroup>
-                </r:RibbonTab>
-            -->
         </r:Ribbon>
         <Grid>
             <Grid.ColumnDefinitions>
