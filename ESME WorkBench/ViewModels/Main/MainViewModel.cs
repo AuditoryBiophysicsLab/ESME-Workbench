@@ -33,7 +33,7 @@ namespace ESMEWorkbench.ViewModels.Main
         #region Private fields
 
         [Import, UsedImplicitly] IHRCOpenFileService _openFile;
-        [Import, UsedImplicitly] IHRCSaveFileService _saveFile;
+        readonly IHRCSaveFileService _saveFile;
         [Import, UsedImplicitly] IPluginManagerService _plugins;
         [Import, UsedImplicitly] EnvironmentalCacheService _cache;
         [Import, UsedImplicitly] TransmissionLossCalculatorService _transmissionLoss;
@@ -47,7 +47,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #region Constructor
         [ImportingConstructor]
-        public MainViewModel(IViewAwareStatus viewAwareStatus, MasterDatabaseService database, IMessageBoxService messageBox, IUIVisualizerService visualizer)
+        public MainViewModel(IViewAwareStatus viewAwareStatus, MasterDatabaseService database, IMessageBoxService messageBox, IUIVisualizerService visualizer, IHRCSaveFileService saveFile)
         {
             MainWindowTitle = "ESME Workbench: <No scenario loaded>";
             try
@@ -63,7 +63,8 @@ namespace ESMEWorkbench.ViewModels.Main
             _messageBox = messageBox;
             Database = database;
             _visualizer = visualizer;
-            MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer);
+            _saveFile = saveFile;
+            MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
             if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database")))
                 Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
             Database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");

@@ -36,14 +36,16 @@ namespace ESMEWorkbench.ViewModels.Map
         readonly MainViewModel _mainViewModel;
         WpfMap _wpfMap;
         readonly IUIVisualizerService _visualizer;
+        private readonly IHRCSaveFileService _saveFile;
 
         #endregion
 
         public string MapDLLVersion { get; private set; }
-        public MapViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBox, MainViewModel mainViewModel, IUIVisualizerService visualizer)
+        public MapViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBox, MainViewModel mainViewModel, IUIVisualizerService visualizer, IHRCSaveFileService saveFile)
         {
             _mainViewModel = mainViewModel;
             _visualizer = visualizer;
+            _saveFile = saveFile;
             viewAwareStatus.ViewLoaded += ViewLoaded;
             try
             {
@@ -55,6 +57,7 @@ namespace ESMEWorkbench.ViewModels.Map
                 throw;
             }
             _viewAwareStatus = viewAwareStatus;
+            
             //_synchronizationContext = synchronizationContext;
 
             Cursor = Cursors.Arrow;
@@ -532,11 +535,12 @@ namespace ESMEWorkbench.ViewModels.Map
             MediatorMessage.Send(MediatorMessage.MapDoubleClick, new Geo(e.WorldY, e.WorldX));
             if (MouseSoundSpeedProfile != null)
             {
-                if (SoundSpeedProfileViewModel == null) SoundSpeedProfileViewModel = new SoundSpeedProfileViewModel();
+                if (SoundSpeedProfileViewModel == null) SoundSpeedProfileViewModel = new SoundSpeedProfileViewModel(_saveFile);
                 if (_soundSpeedProfileWindowView == null)
                 {
                     _soundSpeedProfileWindowView = (SoundSpeedProfileWindowView)_visualizer.ShowWindow("SoundSpeedProfileWindowView", SoundSpeedProfileViewModel, false, (sender, args) => { _soundSpeedProfileWindowView = null; });
                     SoundSpeedProfileViewModel.View = _soundSpeedProfileWindowView.FindChildren<SoundSpeedProfileView>().First();
+                    SoundSpeedProfileViewModel.WindowView = _soundSpeedProfileWindowView;
                 }
                 SoundSpeedProfileViewModel.SoundSpeedProfile = MouseSoundSpeedProfile;
             }

@@ -1,14 +1,18 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Text;
+using System.Windows;
 using ESME.Environment;
+using HRC.Services;
 using HRC.ViewModels;
 
 namespace ESME.Views.Environment
 {
     public class SoundSpeedProfileViewModel : ViewModelBase
     {
+        private readonly IHRCSaveFileService _saveFileService;
         public SoundSpeedProfileView View { get; set; }
-
+        public SoundSpeedProfileWindowView WindowView { get; set; }
         public float SSPMax { get; set; }
         public float SSPMin { get; set; }
         public float DepthMin { get; set; }
@@ -30,6 +34,11 @@ namespace ESME.Views.Environment
             }
         }
         #endregion
+
+        public SoundSpeedProfileViewModel(IHRCSaveFileService saveFile)
+        {
+            _saveFileService = saveFile;
+        }
 
         void CalculateSoundSpeedProfileGeometry()
         {
@@ -86,6 +95,53 @@ namespace ESME.Views.Environment
             sb.Append(string.Format("M {0},{1} ", x, y));
             return sb.ToString();
         }
+
+
+        #region SaveToCSVCommand
+
+        public SimpleCommand<object, object> SaveToCSVCommand
+        {
+            get
+            {
+                return _saveToCSV ??
+                       (_saveToCSV =
+                        new SimpleCommand<object, object>(delegate { return IsSaveToCSVCommandEnabled; },
+                                                          delegate
+                                                          {
+                                                              _saveFileService.Filter = "Comma-Separated Value (*.csv)|*.csv";
+                                                              _saveFileService.OverwritePrompt = true;
+                                                              
+                                                              var result = _saveFileService.ShowDialog(WindowView);
+                                                              if (result.HasValue && result.Value)
+                                                              {
+                                                                  SaveToCSVHandler(_saveFileService.FileName);
+                                                              }
+                                                          }));
+            }
+        }
+
+        private SimpleCommand<object, object> _saveToCSV;
+
+        private bool IsSaveToCSVCommandEnabled
+        {
+            get { return SoundSpeedProfile != null; }
+        }
+
+        private void SaveToCSVHandler(string fileName)
+        {
+            using (var writer = new StreamWriter(fileName))
+            {
+                writer.WriteLine(string.Format("#Sound Speed Profile ({0:0.000} {1:0.000})", SoundSpeedProfile.Latitude, SoundSpeedProfile.Longitude));
+                writer.WriteLine("Depth (m),SoundSpeed (m/s)");
+                foreach (var point in (from d in SoundSpeedProfile.Data orderby d.Depth select d))
+                {
+                    writer.WriteLine(string.Format("{0:0.00},{1:0.000}", point.Depth, point.SoundSpeed));
+                }
+            }
+        }
+
+        #endregion 
+
 
         #region GridSizeChangedCommand
 
