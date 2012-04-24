@@ -4,6 +4,7 @@ using System.Text;
 using System.Windows;
 using ESME.Environment;
 using HRC.Services;
+using HRC.Utility;
 using HRC.ViewModels;
 
 namespace ESME.Views.Environment
@@ -35,6 +36,10 @@ namespace ESME.Views.Environment
         }
         #endregion
 
+        public ObservableList<double> DepthAxisMajorTicks { get; set; }
+        public ObservableList<double> DepthAxisMinorTicks { get; set; }
+        public ObservableList<double> SpeedAxisMajorTicks { get; set; }
+        public ObservableList<double> SpeedAxisMinorTicks { get; set; }
         public SoundSpeedProfileViewModel(IHRCSaveFileService saveFile)
         {
             _saveFileService = saveFile;

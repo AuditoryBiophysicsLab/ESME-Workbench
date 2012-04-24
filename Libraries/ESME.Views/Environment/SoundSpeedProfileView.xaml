@@ -16,13 +16,9 @@
              d:DesignWidth="300"
              mc:Ignorable="d">
     <DockPanel>
-        <StackPanel Height="22"
-                    DockPanel.Dock="Top"
-                    Orientation="Horizontal" />
-        <StackPanel Width="22"
-                    DockPanel.Dock="Right"
-                    Orientation="Vertical" />
-       
+        <StackPanel Height="22" DockPanel.Dock="Top" Orientation="Horizontal" />
+        <StackPanel Width="22" DockPanel.Dock="Right" Orientation="Vertical" />
+
         <DockPanel DockPanel.Dock="Left">
             <DockPanel>
                 <TextBlock Height="{Binding ActualHeight, ElementName=SSPAxis, Mode=OneWay}" DockPanel.Dock="Bottom" />
@@ -31,6 +27,10 @@
                                    AxisLabel="Depth (m)"
                                    AxisLocation="Right"
                                    EndValue="{Binding DepthMax}"
+                                   MajorTicks="{Binding DepthAxisMajorTicks,
+                                                        Mode=OneWayToSource}"
+                                   MinorTicks="{Binding DepthAxisMinorTicks,
+                                                        Mode=OneWayToSource}"
                                    StartValue="{Binding DepthMin}"
                                    TickValueFormat="0" />
             </DockPanel>
@@ -41,6 +41,10 @@
                                AxisLabel="Sound Speed (m/s)"
                                AxisLocation="Top"
                                EndValue="{Binding SSPMax}"
+                               MajorTicks="{Binding SpeedAxisMajorTicks,
+                                                    Mode=OneWayToSource}"
+                               MinorTicks="{Binding SpeedAxisMinorTicks,
+                                                    Mode=OneWayToSource}"
                                StartValue="{Binding SSPMin}"
                                TickValueFormat="0" />
         </DockPanel>
@@ -57,16 +61,9 @@
             <Grid.RowDefinitions>
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <Canvas x:Name="OverlayCanvas"
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    UseLayoutRounding="True">
-                <Path Data="{Binding SoundSpeedGeometry}"
-                      Stroke="Black"
-                      StrokeThickness="1" />
-                <Path Data="{Binding SoundSpeedDataPoints}"
-                      Stroke="Blue"
-                      StrokeThickness="1" />
+            <Canvas x:Name="OverlayCanvas" Grid.Row="0" Grid.Column="0" UseLayoutRounding="True">
+                <Path Data="{Binding SoundSpeedGeometry}" Stroke="Black" StrokeThickness="1" />
+                <Path Data="{Binding SoundSpeedDataPoints}" Stroke="Blue" StrokeThickness="1" />
             </Canvas>
 
         </Grid>

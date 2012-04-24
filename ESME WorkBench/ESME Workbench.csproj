@@ -152,7 +152,6 @@
     <Compile Include="Controls\ColorBarView.xaml.cs">
       <DependentUpon>ColorBarView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\DataAxis.cs" />
     <Compile Include="Controls\LayerTreeView.xaml.cs">
       <DependentUpon>LayerTreeView.xaml</DependentUpon>
     </Compile>

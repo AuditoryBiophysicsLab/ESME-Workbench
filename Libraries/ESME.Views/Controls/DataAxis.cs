@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using HRC.Utility;
 
 namespace ESME.Views.Controls
 {
@@ -53,6 +54,37 @@ namespace ESME.Views.Controls
 
         static DataAxis() { DefaultStyleKeyProperty.OverrideMetadata(typeof (DataAxis), new FrameworkPropertyMetadata(typeof (DataAxis))); }
 
+        #region dependency property ObservableList<double> MajorTicks
+
+        public static DependencyProperty MajorTicksProperty = DependencyProperty.Register("MajorTicks",
+                                                                                 typeof (ObservableList<double>),
+                                                                                 typeof (DataAxis),
+                                                                                 new FrameworkPropertyMetadata(new ObservableList<double>()));
+
+        public ObservableList<double> MajorTicks
+        {
+            get { return (ObservableList<double>)GetValue(MajorTicksProperty); }
+            set { SetValue(MajorTicksProperty, value); }
+        }
+
+        #endregion
+
+        #region dependency property ObservableList<double> MinorTicks
+
+        public static DependencyProperty MinorTicksProperty = DependencyProperty.Register("MinorTicks",
+                                                                                 typeof (ObservableList<double>),
+                                                                                 typeof (DataAxis),
+                                                                                 new FrameworkPropertyMetadata(new ObservableList<double>()));
+
+        public ObservableList<double> MinorTicks
+        {
+            get { return (ObservableList<double>)GetValue(MinorTicksProperty); }
+            set { SetValue(MinorTicksProperty, value); }
+        }
+
+        #endregion
+
+
         public DataAxis()
         {
             _lineThickness = 1;
@@ -96,7 +128,7 @@ namespace ESME.Views.Controls
             var sizes = new List<double>();
             var sizeToContent = new Size(Double.PositiveInfinity, Double.PositiveInfinity);
             _axis.Measure(sizeToContent);
-            foreach (AxisTick tick in _ticks)
+            foreach (var tick in _ticks)
             {
                 if (tick.Label != null)
                 {
@@ -112,7 +144,7 @@ namespace ESME.Views.Controls
                 axisLabelSize = _axisLabel.DesiredSize.Height;
             }
 
-            Size desiredSize = _isVertical ? new Size(sizes.Max() + _majorTickLength + TickLabelSpacing + axisLabelSize + TickLabelSpacing, _endLocation) : new Size(_endLocation, sizes.Max() + TickLabelSpacing + _majorTickLength + TickLabelSpacing + axisLabelSize);
+            var desiredSize = _isVertical ? new Size(sizes.Max() + _majorTickLength + TickLabelSpacing + axisLabelSize + TickLabelSpacing, _endLocation) : new Size(_endLocation, sizes.Max() + TickLabelSpacing + _majorTickLength + TickLabelSpacing + axisLabelSize);
 
             // desiredSize = ... computed sum of children's DesiredSize ...;
             // IMPORTANT: do not allow PositiveInfinity to be returned, that will raise an exception in the caller!
@@ -167,8 +199,8 @@ namespace ESME.Views.Controls
                 if (tick.Label != null)
                 {
                     var size = tick.Label.DesiredSize;
-                    double width = tick.Label.DesiredSize.Width;
-                    double height = tick.Label.DesiredSize.Height;
+                    var width = tick.Label.DesiredSize.Width;
+                    var height = tick.Label.DesiredSize.Height;
                     double left;
                     double top;
                     switch (AxisLocation)
@@ -209,9 +241,9 @@ namespace ESME.Views.Controls
         Path CreateAxis()
         {
             double x;
-            double valueStep = (EndValue - StartValue)/(_endLocation - _startLocation);
+            var valueStep = (EndValue - StartValue)/(_endLocation - _startLocation);
             var newTicks = new AxisTicks();
-            string format = string.Format("{0}:{1}{2}", "{0", TickValueFormat, "}");
+            var format = string.Format("{0}:{1}{2}", "{0", TickValueFormat, "}");
 
             switch (AxisLocation)
             {
@@ -233,23 +265,41 @@ namespace ESME.Views.Controls
                     throw new ApplicationException("DataAxis: Unknown AxisLocation value.");
             }
 
+            var tickCache = new List<double>();
             // Add minor ticks
-            for (x = _startLocation + _minorTickSpacing; x < _endLocation - 1; x += _minorTickSpacing) newTicks.Add(new AxisTick(x, _minorTickLength, null, null));
+            for (x = _startLocation + _minorTickSpacing; x < _endLocation - 1; x += _minorTickSpacing)
+            {
+                newTicks.Add(new AxisTick(x, _minorTickLength, null, null));
+                tickCache.Add(x);
+            }
+            tickCache.Sort();
+            MinorTicks.Clear();
+            MinorTicks.AddRange(tickCache);
 
+            tickCache.Clear();
             // Add a major at the start
             var value = StartValue;
             if (DisplayAbsoluteValue) value = Math.Abs(value);
             newTicks.Add(new AxisTick(_startLocation + (_lineThickness/2), _majorTickLength, value, format));
+            tickCache.Add(_startLocation + (_lineThickness / 2));
 
             // Add the interior major ticks
             value = StartValue + (valueStep*_majorTickSpacing);
             if (DisplayAbsoluteValue) value = Math.Abs(value);
-            for (x = _startLocation + _majorTickSpacing; x < _endLocation - 1; x += _majorTickSpacing, value += (valueStep * _majorTickSpacing)) newTicks.Add(new AxisTick(x, _majorTickLength, value, format));
+            for (x = _startLocation + _majorTickSpacing; x < _endLocation - 1; x += _majorTickSpacing, value += (valueStep * _majorTickSpacing))
+            {
+                newTicks.Add(new AxisTick(x, _majorTickLength, value, format));
+                tickCache.Add(x);
+            }
 
             // Add a major tick at the end
             value = EndValue;
             if (DisplayAbsoluteValue) value = Math.Abs(value);
             newTicks.Add(new AxisTick(_endLocation - (_lineThickness / 2), _majorTickLength, value, format));
+            tickCache.Add(_endLocation - (_lineThickness / 2));
+            tickCache.Sort();
+            MajorTicks.Clear();
+            MajorTicks.AddRange(tickCache);
 
             // Make sure all the ticks are in order
             newTicks.Sort();
@@ -267,13 +317,13 @@ namespace ESME.Views.Controls
 
             // Open a StreamGeometryContext that can be used to describe this StreamGeometry 
             // object's contents.
-            using (StreamGeometryContext ctx = geometry.Open())
+            using (var ctx = geometry.Open())
             {
                 // Begin the triangle at the point specified. Notice that the shape is set to 
                 // be closed so only two lines need to be specified below to make the triangle.
                 ctx.BeginFigure(TransformedPoint(_startLocation + (_lineThickness/2), _lineThickness/2), false, false);
 
-                foreach (AxisTick tick in _ticks)
+                foreach (var tick in _ticks)
                 {
                     ctx.LineTo(TransformedPoint(tick.Location, _lineThickness/2), true, true);
                     ctx.LineTo(TransformedPoint(tick.Location, tick.Length + _lineThickness), true, true);
@@ -467,7 +517,7 @@ namespace ESME.Views.Controls
     {
         public void AddLabels(DataAxis parent)
         {
-            foreach (AxisTick tick in this)
+            foreach (var tick in this)
                 if (tick.Label != null)
                 {
                     parent.Children.Add(tick.Label);
