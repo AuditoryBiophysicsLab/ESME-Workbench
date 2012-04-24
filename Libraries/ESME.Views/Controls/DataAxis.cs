@@ -59,7 +59,7 @@ namespace ESME.Views.Controls
         public static DependencyProperty MajorTicksProperty = DependencyProperty.Register("MajorTicks",
                                                                                  typeof (ObservableList<double>),
                                                                                  typeof (DataAxis),
-                                                                                 new FrameworkPropertyMetadata(new ObservableList<double>()));
+                                                                                 new FrameworkPropertyMetadata(null));
 
         public ObservableList<double> MajorTicks
         {
@@ -74,7 +74,7 @@ namespace ESME.Views.Controls
         public static DependencyProperty MinorTicksProperty = DependencyProperty.Register("MinorTicks",
                                                                                  typeof (ObservableList<double>),
                                                                                  typeof (DataAxis),
-                                                                                 new FrameworkPropertyMetadata(new ObservableList<double>()));
+                                                                                 new FrameworkPropertyMetadata(null));
 
         public ObservableList<double> MinorTicks
         {
@@ -93,6 +93,8 @@ namespace ESME.Views.Controls
             _majorTickSpacing = 100;
             _minorTickSpacing = 10;
             AxisLocation = AxisLocationEnum.Right;
+            MajorTicks = new ObservableList<double>();
+            MinorTicks = new ObservableList<double>();
         }
 
         #region Layout and drawing code
