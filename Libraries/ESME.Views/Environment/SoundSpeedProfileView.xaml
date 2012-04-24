@@ -7,10 +7,6 @@
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
-             Width="{Binding MyWidth,
-                             Mode=OneWayToSource}"
-             Height="{Binding MyHeight,
-                              Mode=OneWayToSource}"
              d:DataContext="{d:DesignInstance Environment:SoundSpeedProfileViewModel}"
              d:DesignHeight="300"
              d:DesignWidth="300"

@@ -19,10 +19,10 @@ namespace ESME.Views.Environment
         public float SSPMin { get; set; }
         public float DepthMin { get; set; }
         public float DepthMax { get; set; }
-        public string SoundSpeedGeometry { get; private set; }
-        public string SoundSpeedDataPoints { get; private set; }
-        public string MajorGrid { get; private set; }
-        public string MinorGrid { get; private set; }
+        [Initialize("M 0,0")] public string SoundSpeedGeometry { get; private set; }
+        [Initialize("M 0,0")] public string SoundSpeedDataPoints { get; private set; }
+        [Initialize("M 0,0")] public string MajorGrid { get; private set; }
+        [Initialize("M 0,0")] public string MinorGrid { get; private set; }
         [Initialize("Sound Speed Profile")] public string WindowTitle { get; set; }
 
         #region public SoundSpeedProfile SoundSpeedProfile {get; set; }
