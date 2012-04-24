@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
-using Cinch;
 using DavesWPFTester.Properties;
+using HRC;
 
 namespace DavesWPFTester
 {
@@ -13,23 +13,10 @@ namespace DavesWPFTester
     /// </summary>
     public partial class App
     {
-        public static readonly string Logfile, DumpFile;
         public const string Name = "ESME Workbench";
-
-        static App()
-        {
-            //Logfile = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Name), "app.log");
-            //if (File.Exists(Logfile)) File.Delete(Logfile);
-            //Trace.Listeners.Add(new TextWriterTraceListener(Logfile, "logfile") { TraceOutputOptions = TraceOptions.None });
-            //Trace.AutoFlush = true;
-            //Trace.WriteLine(Name + " initializing");
-        }
 
         #region Initialization
 
-        /// <summary>
-        ///   Initialize Cinch using the CinchBootStrapper.
-        /// </summary>
         public App()
         {
             // You must close or flush the trace to empty the output buffer.
@@ -39,7 +26,7 @@ namespace DavesWPFTester
             {
                 //ExperimentData.Test();
 
-                CinchBootStrapper.Initialise(new List<Assembly>
+                HRCBootstrapper.Initialise(new List<Assembly>
                                              {
                                                  typeof (App).Assembly,
                                              });
@@ -47,7 +34,7 @@ namespace DavesWPFTester
             catch (Exception e)
             {
                 Trace.Indent();
-                Trace.TraceError("CinchBootStrapper threw an exception: {0}", e.Message);
+                Trace.TraceError("HRCBootstrapper threw an exception: {0}", e.Message);
                 var inner = e.InnerException;
                 while (inner != null)
                 {

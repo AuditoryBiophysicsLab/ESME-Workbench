@@ -4,9 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows;
-using Cinch;
 using ESME.Views;
 using ESMEWorkbench.Properties;
+using HRC;
 using HRC.Utility;
 
 #if DEBUG
@@ -50,9 +50,6 @@ namespace ESMEWorkbench
 
         #region Initialization
 
-        /// <summary>
-        ///   Initialize Cinch using the CinchBootStrapper.
-        /// </summary>
         public App()
         {
             // You must close or flush the trace to empty the output buffer.
@@ -72,7 +69,7 @@ namespace ESMEWorkbench
             {
                 //ExperimentData.Test();
 
-                CinchBootStrapper.Initialise(new List<Assembly>
+                HRCBootstrapper.Initialise(new List<Assembly>
                                              {
                                                  typeof (App).Assembly,
                                                  typeof (TestView).Assembly,
@@ -124,18 +121,5 @@ namespace ESMEWorkbench
 
             MiniDump.Write(DumpFile, MiniDump.Option.WithoutAuxiliaryState | MiniDump.Option.WithoutOptionalData, MiniDump.ExceptionInfo.Present);
         }
-
-#if DEBUG
-        private static bool IsAdministrator
-        {
-            get
-            {
-                var wi = WindowsIdentity.GetCurrent();
-                if (wi == null) return false;
-                var wp = new WindowsPrincipal(wi);
-                return wp.IsInRole(WindowsBuiltInRole.Administrator);
-            }
-        }
-#endif
     }
 }

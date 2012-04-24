@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
-using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Mapping;
@@ -13,10 +11,10 @@ using ESMEWorkbench.ViewModels.Layers;
 using ESMEWorkbench.ViewModels.Map;
 using HRC.Aspects;
 using HRC.Navigation;
+using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
-    [NotifyPropertyChanged]
     public partial class MainViewModel
     {
         public MapLayerCollection ScenarioMapLayers { get; set; }

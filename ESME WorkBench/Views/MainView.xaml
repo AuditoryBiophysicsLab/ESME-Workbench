@@ -1,7 +1,6 @@
 ﻿<r:RibbonWindow x:Class="ESMEWorkbench.Views.MainView"
                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
                 xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
@@ -44,13 +43,13 @@
     </r:RibbonWindow.InputBindings>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
-            <cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
+            <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
         </i:EventTrigger>
         <i:EventTrigger EventName="Activated">
-            <cinch:EventToCommandTrigger Command="{Binding ViewActivatedCommand}" />
+            <WPF:EventToCommandTrigger Command="{Binding ViewActivatedCommand}" />
         </i:EventTrigger>
         <i:EventTrigger EventName="PreviewKeyDown">
-            <cinch:EventToCommandTrigger Command="{Binding PreviewKeyDownCommand}" />
+            <WPF:EventToCommandTrigger Command="{Binding PreviewKeyDownCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <DockPanel LastChildFill="True">
@@ -132,10 +131,10 @@
                     </ListView>
                     <r:RibbonMenuButton Label="Add" SmallImageSource="..\Images\SmallIcons\layer_add.png" ToolTipDescription="Add a new location through one of several available means" ToolTipTitle="Add location">
                         <r:RibbonMenuItem Command="{Binding CreateLocationFromBoundingBoxCommand}"
-                                          Header="Enter boundaries..."
+                                          Header="Select boundaries..."
                                           ImageSource="..\Images\SmallIcons\layer_command.png"
-                                          ToolTipDescription="Create a new location by entering its northern, southern, eastern and western boundaries"
-                                          ToolTipTitle="Create a new location by specifying its boundaries" />
+                                          ToolTipDescription="An adjustable rectangle will appear on the map. It can be moved by dragging the control at the rectangle's center and its size can be adjusted by dragging one of the controls at the rectangle's corners.  The bounds of the new location can also be entered directly if you prefer."
+                                          ToolTipTitle="Create a new location by drawing a rectangle on the map" />
                         <r:RibbonMenuItem Command="{Binding TestEditOverlayCommand}" Header="Test edit overlay" ImageSource="..\Images\SmallIcons\layer_command.png" ToolTipTitle="Test edit overlay" />
                         <!--
                             <r:RibbonMenuItem Command="{Binding CreateLocationFromOverlayFileCommand}"

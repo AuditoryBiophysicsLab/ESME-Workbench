@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Windows;
-using Cinch;
 
 namespace HRC.ViewModels
 {
@@ -17,11 +15,9 @@ namespace HRC.ViewModels
             {
                 if (_isCheckable == value) return;
                 _isCheckable = value;
-                NotifyPropertyChanged(IsCheckableChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs IsCheckableChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModelBase>(x => x.IsCheckable);
         bool _isCheckable;
 
         #endregion
@@ -35,11 +31,9 @@ namespace HRC.ViewModels
             {
                 if (_isChecked == value) return;
                 _isChecked = value;
-                NotifyPropertyChanged(IsCheckedChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModelBase>(x => x.IsChecked);
         bool _isChecked;
 
         #endregion
@@ -53,11 +47,9 @@ namespace HRC.ViewModels
             {
                 if (_icon == value) return;
                 _icon = value;
-                NotifyPropertyChanged(IconChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs IconChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModelBase>(x => x.Icon);
         Object _icon;
 
         #endregion
@@ -71,11 +63,9 @@ namespace HRC.ViewModels
             {
                 if (_header == value) return;
                 _header = value;
-                NotifyPropertyChanged(HeaderChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs HeaderChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModelBase>(x => x.Header);
         string _header;
 
         #endregion
@@ -89,11 +79,9 @@ namespace HRC.ViewModels
             {
                 if (_commandParameter == value) return;
                 _commandParameter = value;
-                NotifyPropertyChanged(CommandParameterChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs CommandParameterChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModelBase>(x => x.CommandParameter);
         Object _commandParameter;
 
         #endregion
@@ -107,11 +95,9 @@ namespace HRC.ViewModels
             {
                 if (_visibility == value) return;
                 _visibility = value;
-                NotifyPropertyChanged(VisibilityChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs VisibilityChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModelBase>(x => x.Visibility);
         Visibility _visibility = Visibility.Visible;
 
         #endregion
@@ -122,24 +108,10 @@ namespace HRC.ViewModels
 
         public IList<MenuItemViewModelBase> Children
         {
-            get
-            {
-                if (_children == null)
-                {
-                    _children = new List<MenuItemViewModelBase>();
-                    NotifyPropertyChanged(ChildrenChangedEventArgs);
-                }
-                return _children;
-            }
-            set
-            {
-                if (_children == value) return;
-                _children = value;
-                NotifyPropertyChanged(ChildrenChangedEventArgs);
-            }
+            get { return _children ?? (_children = new List<MenuItemViewModelBase>()); }
+            set { _children = value; }
         }
 
-        static readonly PropertyChangedEventArgs ChildrenChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModelBase>(x => x.Children);
         IList<MenuItemViewModelBase> _children;
 
         #endregion

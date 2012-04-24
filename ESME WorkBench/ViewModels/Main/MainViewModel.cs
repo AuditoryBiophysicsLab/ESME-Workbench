@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
-using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Locations;
@@ -22,6 +21,8 @@ using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Services;
+using HRC.ViewModels;
+using HRC.WPF;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 
@@ -107,23 +108,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #endregion
 
-        #region public string DecoratedExperimentName { get; set; }
-
-        static readonly PropertyChangedEventArgs DecoratedExperimentNameChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.DecoratedExperimentName);
-        string _decoratedExperimentName;
-
-        public string DecoratedExperimentName
-        {
-            get { return _decoratedExperimentName; }
-            set
-            {
-                if (_decoratedExperimentName == value) return;
-                _decoratedExperimentName = value;
-                NotifyPropertyChanged(DecoratedExperimentNameChangedEventArgs);
-            }
-        }
-
-        #endregion
+        public string DecoratedExperimentName { get; set; }
 
         [Affects("MouseLocationInfo")]
         public Geo MouseGeo { get; set; }
@@ -213,14 +198,11 @@ namespace ESMEWorkbench.ViewModels.Main
             get { return _isInAnalysisPointMode; }
             set
             {
-                if (_isInAnalysisPointMode == value) return;
                 _isInAnalysisPointMode = value;
-                NotifyPropertyChanged(IsInAnalysisPointModeChangedEventArgs);
                 MediatorMessage.Send(MediatorMessage.SetAnalysisPointMode, _isInAnalysisPointMode);
             }
         }
 
-        static readonly PropertyChangedEventArgs IsInAnalysisPointModeChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsInAnalysisPointMode);
         bool _isInAnalysisPointMode;
 
         [MediatorMessageSink(MediatorMessage.SetAnalysisPointMode), UsedImplicitly]

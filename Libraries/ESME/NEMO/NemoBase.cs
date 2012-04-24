@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Text;
 using System.Xml;
-using Cinch;
 using HRC.Navigation;
 using HRC.Utility;
 
@@ -80,24 +78,7 @@ namespace ESME.NEMO
 
         protected string GetString(string childElementName) { return GetInnerText(childElementName); }
 
-        #region public string PropertyViewName { get; set; }
-
-        public string PropertyViewName
-        {
-            get { return _propertyViewName; }
-            protected set
-            {
-                if (_propertyViewName == value) return;
-                _propertyViewName = value;
-                OnPropertyChanged(PropertyViewNameChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs PropertyViewNameChangedEventArgs = ObservableHelper.CreateArgs<NemoBase>(x => x.PropertyViewName);
-        string _propertyViewName;
-
-        #endregion
-
+        public string PropertyViewName { get; protected set; }
 
         string GetInnerText(string childElementName)
         {

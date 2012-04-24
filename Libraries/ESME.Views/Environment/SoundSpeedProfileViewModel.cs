@@ -1,13 +1,11 @@
 ﻿using System.Linq;
 using System.Text;
-using Cinch;
 using ESME.Environment;
-using HRC.Aspects;
+using HRC.ViewModels;
 
 namespace ESME.Views.Environment
 {
-    [NotifyPropertyChanged]
-    public class SoundSpeedProfileViewModel
+    public class SoundSpeedProfileViewModel : ViewModelBase
     {
         public SoundSpeedProfileView View { get; set; }
 

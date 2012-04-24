@@ -1,5 +1,5 @@
 ﻿using System;
-using Cinch;
+using HRC.ViewModels;
 
 namespace ESME
 {

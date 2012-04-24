@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using Cinch;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Locations;
@@ -91,12 +89,10 @@ namespace StandaloneNAVOPlugin
                 _dataLocation = value;
                 if (_dataLocation != null && (File.Exists(_dataLocation) || Directory.Exists(_dataLocation)) && (File.GetAttributes(_dataLocation) & FileAttributes.Directory) != FileAttributes.Directory) 
                     _dataLocation = Path.GetDirectoryName(_dataLocation);
-                NotifyPropertyChanged(DataLocationChangedEventArgs);
                 Save();
             }
         }
 
-        static readonly PropertyChangedEventArgs DataLocationChangedEventArgs = ObservableHelper.CreateArgs<GDEM3ForNAVO>(x => x.DataLocation);
         string _dataLocation;
 
         #endregion

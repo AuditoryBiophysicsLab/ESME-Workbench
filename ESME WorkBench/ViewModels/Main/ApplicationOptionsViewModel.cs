@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
-using Cinch;
 using ESME.Data;
 using ESME.Environment;
+using HRC.Services;
+using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
@@ -14,9 +14,6 @@ namespace ESMEWorkbench.ViewModels.Main
             _messageBoxService = messageBoxService;
             Globals.AppSettings = AppSettings.Load();
             AppSettings = Globals.AppSettings;
-#if !UseAspects
-            AppSettings.SetDefaults();
-#endif
         }
 
         public void DesignTimeInitialization() { AppSettings = AppSettings.Load(); }

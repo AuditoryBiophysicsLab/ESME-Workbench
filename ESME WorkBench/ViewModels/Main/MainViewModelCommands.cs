@@ -2,11 +2,11 @@
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using Cinch;
 using ESME;
 using ESME.Data;
 using ESMEWorkbench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
+using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Main
 {

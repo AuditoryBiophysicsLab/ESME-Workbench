@@ -110,12 +110,9 @@
     <Compile Include="Simulator\SimulationTests.cs" />
     <Compile Include="Simulator\SimulatorServiceTests.cs" />
     <Compile Include="SQLite\SQLiteTests.cs" />
-    <Compile Include="TransmissionLoss\TransmissionLossJobTests.cs" />
-    <Compile Include="TransmissionLoss\TransmissionLossRunFileTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Databases\" />
-    <Folder Include="TransmissionLoss\Calculator\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Plugins\Environmental Data Sources\InstallableNAVO\InstallableNAVOPlugin.csproj">

@@ -158,9 +158,6 @@
                   Source="$(var.ExternalsPath)\WpfDesktopEdition.dll" />
 
             <!-- MVVM assemblies -->
-            <File Id="Cinch.WPF.dll"
-                  Name="Cinch.WPF.dll"
-                  Source="$(var.ExternalsPath)\Cinch.WPF.dll" />
             <File Id="MEFedMVVM.WPF.dll"
                   Name="MEFedMVVM.WPF.dll"
                   Source="$(var.ExternalsPath)\MEFedMVVM.WPF.dll" />

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Windows.Threading;
-using Cinch;
+using HRC.WPF;
 
 namespace HRC.Utility
 {

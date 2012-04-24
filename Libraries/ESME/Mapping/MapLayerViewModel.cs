@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
-using Cinch;
 using ESME.Model;
 using HRC.Aspects;
 using HRC.Services;
@@ -133,8 +132,6 @@ namespace ESME.Mapping
         };
 
         #endregion
-
-        int _index = -1;
 
         #region Helpers
         protected static Color RandomColor

@@ -5,9 +5,9 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Windows;
-using Cinch;
-using ESME;
 using ESME.Views.Misc;
+using HRC.Services;
+using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Main
 {

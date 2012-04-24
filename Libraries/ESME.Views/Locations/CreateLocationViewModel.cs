@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Windows;
 using System.Windows.Data;
-using Cinch;
-using ESME.Environment.NAVO;
 using ESME.Locations;
 using ESME.Plugins;
 using HRC.Aspects;
 using HRC.Collections;
 using System.Linq;
-using HRC.Navigation;
 using HRC.Validation;
+using HRC.ViewModels;
 
 namespace ESME.Views.Locations
 {
@@ -20,33 +17,20 @@ namespace ESME.Views.Locations
     public sealed class CreateLocationViewModel : ValidatingViewModel
     {
         #region Constructor
-        public CreateLocationViewModel(IPluginManagerService plugins, MasterDatabaseService database, EnvironmentalCacheService cache)
+        public CreateLocationViewModel(IPluginManagerService plugins, MasterDatabaseService database, EnvironmentalCacheService cache, EditOverlayViewModel editOverlayViewModel)
         {
             _plugins = plugins;
             _database = database;
             _cache = cache;
+            EditOverlayViewModel = editOverlayViewModel;
             EnvironmentDataSourceViews = new Dictionary<PluginSubtype, ICollectionView>();
             SelectedPlugins = new ObservableConcurrentDictionary<PluginSubtype, EnvironmentalDataSourcePluginBase>();
-            SelectedPlugins.CollectionChanged += (s, e) =>
-            {
-                switch (e.Action)
-                {
-                    case NotifyCollectionChangedAction.Add:
-                        break;
-                    case NotifyCollectionChangedAction.Replace:
-                        var newItem = (KeyValuePair<PluginSubtype, EnvironmentalDataSourcePluginBase>)e.NewItems[e.NewItems.Count - 1];
-                        PluginManager[PluginType.EnvironmentalDataSource, newItem.Key] = newItem.Value;
-                        break;
-                    default:
-                        throw new NotImplementedException(string.Format("The CollectionChanged action {0} is not implemented here", e.Action));
-                }
-            };
             
             AddEnvironmentDataSourceView(PluginSubtype.Wind);
             AddEnvironmentDataSourceView(PluginSubtype.SoundSpeed);
             AddEnvironmentDataSourceView(PluginSubtype.Sediment);
             AddEnvironmentDataSourceView(PluginSubtype.Bathymetry);
-            ValidationRules.AddRange(new List<ValidationRule> { NorthValidationRule, SouthValidationRule, EastValidationRule, WestValidationRule });
+            ValidationRules.AddRange(new List<ValidationRule> { LocationNameValidationRule });
         }
 
         readonly EnvironmentalCacheService _cache;
@@ -70,54 +54,23 @@ namespace ESME.Views.Locations
         }
         #endregion
 
+        public EditOverlayViewModel EditOverlayViewModel { get; private set; }
+
         public string LocationName { get; set; }
-        public string Comments { get; set; }
-        public double North { get; set; }
-        public double South { get; set; }
-        public double East { get; set; }
-        public double West { get; set; }
         #region Validation Rules
-        static readonly ValidationRule NorthValidationRule = new ValidationRule
+        static readonly ValidationRule LocationNameValidationRule = new ValidationRule
         {
-            PropertyName = "North",
-            Description = "Must be between -90 and +90 and be greater than South",
+            PropertyName = "LocationName",
+            Description = "Must be unique and cannot be null or empty",
             RuleDelegate = (o, r) =>
             {
                 var target = (CreateLocationViewModel)o;
-                return target.North >= -90 && target.North <= 90 && target.North > target.South;
-            },
-        };
-        static readonly ValidationRule SouthValidationRule = new ValidationRule
-        {
-            PropertyName = "South",
-            Description = "Must be between -90 and +90 and be less than North",
-            RuleDelegate = (sender, eventArgs) =>
-            {
-                var target = (CreateLocationViewModel)sender;
-                return target.South >= -90 && target.South <= 90 && target.North > target.South;
-            },
-        };
-        static readonly ValidationRule EastValidationRule = new ValidationRule
-        {
-            PropertyName = "East",
-            Description = "Must be between -180 and +180 and be greater than West",
-            RuleDelegate = (sender, eventArgs) =>
-            {
-                var target = (CreateLocationViewModel)sender;
-                return target.East >= -180 && target.East <= 180 && target.East > target.West;
-            },
-        };
-        static readonly ValidationRule WestValidationRule = new ValidationRule
-        {
-            PropertyName = "West",
-            Description = "Must be between -180 and +180 and be less than East",
-            RuleDelegate = (sender, eventArgs) =>
-            {
-                var target = (CreateLocationViewModel)sender;
-                return target.West >= -180 && target.West <= 180 && target.East > target.West;
+                return !string.IsNullOrEmpty(target.LocationName);
             },
         };
         #endregion
+
+        public string Comments { get; set; }
 
         #region Commands
         #region OkCommand
@@ -134,7 +87,7 @@ namespace ESME.Views.Locations
             {
                 Name = LocationName,
                 Comments = Comments,
-                GeoRect = new GeoRect(North, South, East, West),
+                GeoRect = EditOverlayViewModel.GeoRect
             };
             _database.Add(location, true);
             foreach (var dataSet in from pluginSubtype in new[] { PluginSubtype.Wind, PluginSubtype.SoundSpeed, PluginSubtype.Sediment, PluginSubtype.Bathymetry }
@@ -148,22 +101,19 @@ namespace ESME.Views.Locations
                 _cache.ImportDataset(dataSet);
             }
             Globals.AppSettings.Save();
-            CloseActivePopUpCommand.Execute(true);
+            Window.Close();
         }
         #endregion
+
+        public Window Window { get; set; }
 
         #region CancelCommand
         public SimpleCommand<object, object> CancelCommand
         {
-            get { return _cancel ?? (_cancel = new SimpleCommand<object, object>(delegate { CancelHandler(); })); }
+            get { return _cancel ?? (_cancel = new SimpleCommand<object, object>(o => Window.Close())); }
         }
-
         SimpleCommand<object, object> _cancel;
 
-        void CancelHandler()
-        {
-            CloseActivePopUpCommand.Execute(true);
-        }
         #endregion
         #endregion
     }

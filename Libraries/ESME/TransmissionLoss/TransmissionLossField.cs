@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using ESME.NEMO;
+using ESME.Scenarios;
 using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
 using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.TransmissionLoss
 {
-    public class TransmissionLossField : IEquatable<SoundSource>
+    public class TransmissionLossField : IEquatable<Mode>
     {
         public string Name { get; set; }
         public string Metadata { get; set; }
@@ -90,25 +91,6 @@ namespace ESME.TransmissionLoss
             throw new ApplicationException(string.Format("Error looking up value in TransmissionLossField: This field does not contain bearing {0}, range {1}, depth {2}", bearing, range, depth));
         }
 
-        public TransmissionLossField(TransmissionLossRunFile runFile)
-        {
-            Metadata = runFile.Metadata ?? "";
-            SourceLevel = runFile.TransmissionLossJob.SoundSource.SourceLevel;
-            Latitude = (float)runFile.TransmissionLossJob.SoundSource.Geo.Latitude;
-            Longitude = (float)runFile.TransmissionLossJob.SoundSource.Geo.Longitude;
-            Geo = new Geo(Latitude, Longitude);
-            SourceDepth = runFile.TransmissionLossJob.SoundSource.AcousticProperties.SourceDepth;
-            VerticalBeamWidth = runFile.TransmissionLossJob.SoundSource.AcousticProperties.VerticalBeamWidth;
-            DepressionElevationAngle = runFile.TransmissionLossJob.SoundSource.AcousticProperties.DepressionElevationAngle;
-            LowFrequency = runFile.TransmissionLossJob.SoundSource.AcousticProperties.LowFrequency;
-            HighFrequency = runFile.TransmissionLossJob.SoundSource.AcousticProperties.HighFrequency;
-            MaxCalculationDepth = runFile.TransmissionLossJob.MaxDepth;
-            Radius = runFile.TransmissionLossJob.SoundSource.Radius;
-            //Depths = runFile.
-            //Ranges = runFile.
-            //Filename = Path.Combine(Field.DataDirectoryPath, Field.BinaryFileName);
-        }
-        
         public TransmissionLossField() {  }
 
         public static TransmissionLossField FromCASS(string cassFileName, bool headerOnly)
@@ -273,10 +255,9 @@ namespace ESME.TransmissionLoss
         bool _dataIsLoaded;
         bool _saved;
 
-        public bool Equals(SoundSource soundSource)
+        public bool Equals(Mode mode)
         {
-            var location = new Geo(Latitude, Longitude);
-            return (SourceLevel.Equals(soundSource.SourceLevel) && location.Equals(soundSource) && soundSource.AcousticProperties.Equals(this));
+            throw new NotImplementedException("TransmissionLossField.Equals");
         }
     }
 }

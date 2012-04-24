@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
-using Cinch;
-using ESME;
 using ESME.Views.Misc;
+using HRC.Services;
+using HRC.ViewModels;
 
 namespace TransmissionLossViewer
 {

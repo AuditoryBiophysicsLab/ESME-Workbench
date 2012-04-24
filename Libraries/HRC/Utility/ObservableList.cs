@@ -8,8 +8,8 @@ using System.Runtime.Serialization;
 using System.Windows.Data;
 using System.Windows.Threading;
 using System.Xml.Serialization;
-using Cinch;
 using HRC.Collections;
+using HRC.WPF;
 
 namespace HRC.Utility
 {
@@ -50,9 +50,9 @@ namespace HRC.Utility
                             {
                                 var oldItem = (KeyValuePair<TKey, TValue>)e.OldItems[i];
                                 var newItem = (KeyValuePair<TKey, TValue>)e.NewItems[i];
-                                var listIndex = list.IndexOf(list.Where(listItem => equate(oldItem, listItem)).Single());
+                                var listIndex = list.IndexOf(list.Single(listItem => equate(oldItem, listItem)));
                                 if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: About to replace \"{1}\" with \"{2}\" at index {3}, Count={4}", list.Name, log(oldItem), log(newItem), listIndex, list.Count);
-                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: Before replace, list[{0}] is currently \"{1}\"", list.Name, listIndex, list[listIndex]);
+                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: Before replace, list[{0}] is currently \"{1}\"", list.Name, listIndex);
                                 list[listIndex] = convert(newItem);
                                 if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: After replacing \"{1}\" with \"{2}\", Count={3}", list.Name, log(oldItem), log(newItem), list.Count);
                                 if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: After replace, list[{1}] is currently \"{2}\"", list.Name, listIndex, list[listIndex]);
@@ -85,10 +85,6 @@ namespace HRC.Utility
         }
 
         void IDeserializationCallback.OnDeserialization(Object sender) { _lockObject = new object(); }
-
-// ReSharper disable StaticFieldInGenericType
-        static readonly PropertyChangedEventArgs ObservableListCountChangedEventArgs = ObservableHelper.CreateArgs<ObservableList<T>>(x => x.Count);
-// ReSharper restore StaticFieldInGenericType
 
         public new void AddRange(IEnumerable<T> items)
         {
@@ -248,7 +244,7 @@ namespace HRC.Utility
                 catch (Exception)
                 {}
             }
-            NotifyPropertyChanged(ObservableListCountChangedEventArgs);
+            NotifyPropertyChanged(new PropertyChangedEventArgs("Count"));
         }
 
         protected virtual void OnCollectionChangedMultiItem(NotifyCollectionChangedEventArgs e)
@@ -263,7 +259,7 @@ namespace HRC.Utility
                 else
                     handler(this, e);
             }
-            NotifyPropertyChanged(ObservableListCountChangedEventArgs);
+            NotifyPropertyChanged(new PropertyChangedEventArgs("Count"));
         }
 
         void CollectionChangedHandler(object sender, NotifyCollectionChangedEventArgs e)

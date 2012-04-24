@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Media;
 using ESME.Animats;
 using ESME.NEMO.Overlay;
+using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
@@ -196,15 +197,6 @@ namespace ESME.Mapping
         public void DisplayAnalysisPoint(AnalysisPoint curPoint)
         {
             var oldIndex = -1;
-            if (curPoint.OldLocation != null)
-            {
-                var oldName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.OldLocation.Latitude, curPoint.OldLocation.Longitude);
-                var oldLayer = Find<OverlayShapeMapLayer>(LayerType.AnalysisPoint, oldName);
-                oldIndex = IndexOf(oldLayer);
-                //if (oldLayer != null) Remove(oldLayer);
-                //oldIndex--;
-                curPoint.OldLocation = null;
-            }
             var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Geo.Latitude, curPoint.Geo.Longitude);
             var analysisPointLayer = Find<AnalysisPointLayer>(LayerType.AnalysisPoint, analysisPointName);
             if (analysisPointLayer == null)
@@ -228,20 +220,20 @@ namespace ESME.Mapping
             analysisPointLayer.Validate();
 
             analysisPointLayer.Clear();
-            foreach (var soundSource in curPoint.SoundSources)
+            foreach (var transmissionLoss in curPoint.TransmissionLosses)
             {
                 var sourcePoints = new List<Geo>();
                 var circlePoints = new List<Geo>();
-                if (!soundSource.ShouldBeCalculated) continue;
+                if (!transmissionLoss.IsReadyToCalculate) continue;
                 sourcePoints.Add(curPoint.Geo);
-                foreach (var radialBearing in soundSource.RadialBearings)
+                foreach (var radial in transmissionLoss.Radials)
                 {
-                    sourcePoints.Add(curPoint.Geo.Offset(Geo.KilometersToRadians(soundSource.Radius / 1000f), Geo.DegreesToRadians(radialBearing)));
+                    sourcePoints.Add(((Geo)curPoint.Geo).Offset(Geo.KilometersToRadians(transmissionLoss.Mode.MaxPropagationRadius / 1000f), Geo.DegreesToRadians(radial.Bearing)));
                     sourcePoints.Add(curPoint.Geo);
                 }
 
                 for (var angle = 0; angle <= 360; angle++)
-                    circlePoints.Add(curPoint.Geo.Offset(Geo.KilometersToRadians(soundSource.Radius / 1000f), Geo.DegreesToRadians(angle)));
+                    circlePoints.Add(((Geo)curPoint.Geo).Offset(Geo.KilometersToRadians(transmissionLoss.Mode.MaxPropagationRadius / 1000f), Geo.DegreesToRadians(angle)));
 
                 analysisPointLayer.Add(new OverlayLineSegments(sourcePoints.ToArray(), Colors.Red, 5));
                 analysisPointLayer.Add(new OverlayLineSegments(circlePoints.ToArray(), Colors.Red, 5));

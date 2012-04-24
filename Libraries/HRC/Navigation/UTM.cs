@@ -1,11 +1,9 @@
 ﻿using System;
-using System.ComponentModel;
-using Cinch;
-using HRC.Utility;
+using HRC.ViewModels;
 
 namespace HRC.Navigation
 {
-    public class UTM : PropertyChangedBase
+    public class UTM : ViewModelBase
     {
         #region WGS84 geoid parameters
         const double A = 6378137;    // Equatorial radius (meters)
@@ -79,58 +77,8 @@ namespace HRC.Navigation
         }
         #endregion
 
-        #region public double Easting { get; set; }
-
-        public double Easting
-        {
-            get { return _easting; }
-            set
-            {
-                if (Math.Abs(_easting - value) < .5) return;
-                _easting = value;
-                OnPropertyChanged(EastingChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs EastingChangedEventArgs = ObservableHelper.CreateArgs<UTM>(x => x.Easting);
-        double _easting;
-
-        #endregion
-
-        #region public double Northing { get; set; }
-
-        public double Northing
-        {
-            get { return _northing; }
-            set
-            {
-                if (Math.Abs(_northing - value) < 0.5) return;
-                _northing = value;
-                OnPropertyChanged(NorthingChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs NorthingChangedEventArgs = ObservableHelper.CreateArgs<UTM>(x => x.Northing);
-        double _northing;
-
-        #endregion
-
-        #region public int Zone { get; set; }
-
-        public int Zone
-        {
-            get { return _zone; }
-            set
-            {
-                if (_zone == value) return;
-                _zone = value;
-                OnPropertyChanged(ZoneChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ZoneChangedEventArgs = ObservableHelper.CreateArgs<UTM>(x => x.Zone);
-        int _zone;
-
-        #endregion
+        public double Easting { get; set; }
+        public double Northing { get; set; }
+        public int Zone { get; set; }
     }
 }

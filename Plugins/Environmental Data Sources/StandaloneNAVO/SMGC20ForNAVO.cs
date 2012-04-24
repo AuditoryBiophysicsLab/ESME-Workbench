@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using Cinch;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Locations;
@@ -105,12 +103,10 @@ namespace StandaloneNAVOPlugin
                     // If the directory still is not valid, set it back to the user's original choice
                     if (!string.IsNullOrEmpty(_dataLocation) && Directory.Exists(_dataLocation)) if (!IsDirectoryValid(_dataLocation)) _dataLocation = value;
                 }
-                NotifyPropertyChanged(DataLocationChangedEventArgs);
                 Save();
             }
         }
 
-        static readonly PropertyChangedEventArgs DataLocationChangedEventArgs = ObservableHelper.CreateArgs<SMGC20ForNAVO>(x => x.DataLocation);
         string _dataLocation;
 
         #endregion

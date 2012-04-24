@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using Cinch;
+﻿using HRC.ViewModels;
 
 namespace ESME.Views
 {
@@ -10,23 +9,6 @@ namespace ESME.Views
             TestString = "Test View";
         }
 
-        #region public string TestString { get; set; }
-
-        public string TestString
-        {
-            get { return _testString; }
-            set
-            {
-                if (_testString == value) return;
-                _testString = value;
-                NotifyPropertyChanged(TestStringChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs TestStringChangedEventArgs = ObservableHelper.CreateArgs<TestViewModel>(x => x.TestString);
-        string _testString;
-
-        #endregion
-
+        public string TestString { get; set; }
     }
 }

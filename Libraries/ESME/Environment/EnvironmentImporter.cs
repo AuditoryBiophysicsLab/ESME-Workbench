@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -12,12 +11,13 @@ using System.Threading.Tasks.Dataflow;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Cinch;
 using ESME.Plugins;
 using HRC.Navigation;
 using ESME.Environment.NAVO;
 using HRC.NetCDF;
 using HRC.Utility;
+using HRC.ViewModels;
+using HRC.WPF;
 
 namespace ESME.Environment
 {
@@ -366,185 +366,17 @@ namespace ESME.Environment
             ToolTip = IsWorkInProgress ? string.Format("{0} jobs completed\r\n{1} jobs in queue\r\n{2} jobs running", Completed, Submitted - Completed, Running) : null;
         }
 
-        #region public string ToolTip { get; set; }
+        public string ToolTip { get; set; }
 
-        public string ToolTip
-        {
-            get { return _toolTip; }
-            set
-            {
-                if (_toolTip == value) return;
-                _toolTip = value;
-                NotifyPropertyChanged(ToolTipChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ToolTipChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.ToolTip);
-        string _toolTip;
-
-        #endregion
-
-        #region public string Name { get; private set; }
-
-        public string Name
-        {
-            get { return _name; }
-            private set
-            {
-                if (_name == value) return;
-                _name = value;
-                NotifyPropertyChanged(NameChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.Name);
-        string _name;
-
-        #endregion
-
-        #region public bool IsWorkInProgress { get; private set; }
-
-        public bool IsWorkInProgress
-        {
-            get { return _isWorkInProgress; }
-            private set
-            {
-                if (_isWorkInProgress == value) return;
-                _isWorkInProgress = value;
-                NotifyPropertyChanged(IsWorkInProgressChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsWorkInProgressChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.IsWorkInProgress);
-        bool _isWorkInProgress;
-
-        #endregion
-
-        #region public int Submitted { get; private set; }
-
-        public int Submitted
-        {
-            get { return _submitted; }
-            private set
-            {
-                if (_submitted == value) return;
-                _submitted = value;
-                NotifyPropertyChanged(JobsSubmittedChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs JobsSubmittedChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.Submitted);
-        int _submitted;
-
-        #endregion
-
-        #region public int Completed { get; private set; }
-
-        public int Completed
-        {
-            get { return _completed; }
-            private set
-            {
-                if (_completed == value) return;
-                _completed = value;
-                NotifyPropertyChanged(JobsCompletedChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs JobsCompletedChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.Completed);
-        int _completed;
-
-        #endregion
-
-        #region public int Running { get; private set; }
-
-        public int Running
-        {
-            get { return _running; }
-            private set
-            {
-                if (_running == value) return;
-                _running = value;
-                NotifyPropertyChanged(JobsInFlightChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs JobsInFlightChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.Running);
-        int _running;
-
-        #endregion
-
-        #region public string Status { get; private set; }
-
-        public string Status
-        {
-            get { return _status; }
-            private set
-            {
-                if (_status == value) return;
-                _status = value;
-                NotifyPropertyChanged(CurrentJobChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs CurrentJobChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.Status);
-        string _status;
-
-        #endregion
-
-        #region public bool IsCompleted { get; set; }
-
-        public bool IsCompleted
-        {
-            get { return _isCompleted; }
-            set
-            {
-                if (_isCompleted == value) return;
-                _isCompleted = value;
-                NotifyPropertyChanged(IsCompletedChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsCompletedChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.IsCompleted);
-        bool _isCompleted;
-
-        #endregion
-
-        #region public bool IsCanceled { get; set; }
-
-        public bool IsCanceled
-        {
-            get { return _isCanceled; }
-            set
-            {
-                if (_isCanceled == value) return;
-                _isCanceled = value;
-                NotifyPropertyChanged(IsCanceledChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsCanceledChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.IsCanceled);
-        bool _isCanceled;
-
-        #endregion
-
-        #region public bool IsFaulted { get; set; }
-
-        public bool IsFaulted
-        {
-            get { return _isFaulted; }
-            set
-            {
-                if (_isFaulted == value) return;
-                _isFaulted = value;
-                NotifyPropertyChanged(IsFaultedChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsFaultedChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.IsFaulted);
-        bool _isFaulted;
-
-        #endregion
+        public string Name { get; private set; }
+        public bool IsWorkInProgress { get; private set; }
+        public int Submitted { get; private set; }
+        public int Completed { get; private set; }
+        public int Running { get; private set; }
+        public string Status { get; private set; }
+        public bool IsCompleted { get; set; }
+        public bool IsCanceled { get; set; }
+        public bool IsFaulted { get; set; }
 
         readonly ActionBlock<ImportJobDescriptor> _importer;
         readonly BufferBlock<ImportJobDescriptor> _buffer;

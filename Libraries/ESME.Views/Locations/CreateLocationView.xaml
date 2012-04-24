@@ -9,6 +9,7 @@
         d:DataContext="{d:DesignInstance Locations:CreateLocationViewModel}"
         Grid.IsSharedSizeScope="True"
         SizeToContent="WidthAndHeight"
+        WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <DockPanel LastChildFill="True">
         <Grid Margin="5" DockPanel.Dock="Top">
@@ -28,65 +29,33 @@
                        VerticalAlignment="Center"
                        Text="Location name"
                        TextAlignment="Right" />
-            <TextBox Grid.Row="0"
-                     Grid.Column="1"
-                     Text="{Binding LocationName,
-                                    ValidatesOnDataErrors=True,
-                                    ValidatesOnExceptions=True,
-                                    NotifyOnValidationError=True,
-                                    UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding LocationName, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock Grid.Row="1"
                        Grid.Column="0"
                        VerticalAlignment="Center"
                        Text="North"
                        TextAlignment="Right" />
-            <TextBox Grid.Row="1"
-                     Grid.Column="1"
-                     Text="{Binding North,
-                                    ValidatesOnDataErrors=True,
-                                    ValidatesOnExceptions=True,
-                                    NotifyOnValidationError=True,
-                                    UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Row="1" Grid.Column="1" DataContext="{Binding EditOverlayViewModel}" Text="{Binding North, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
             <TextBlock Grid.Row="2"
                        Grid.Column="0"
                        VerticalAlignment="Center"
                        Text="South"
                        TextAlignment="Right" />
-            <TextBox Grid.Row="2"
-                     Grid.Column="1"
-                     Text="{Binding South,
-                                    ValidatesOnDataErrors=True,
-                                    ValidatesOnExceptions=True,
-                                    NotifyOnValidationError=True,
-                                    UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Row="2" Grid.Column="1" DataContext="{Binding EditOverlayViewModel}" Text="{Binding South, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
             <TextBlock Grid.Row="3"
                        Grid.Column="0"
                        VerticalAlignment="Center"
                        Text="East"
                        TextAlignment="Right" />
-            <TextBox Grid.Row="3"
-                     Grid.Column="1"
-                     Text="{Binding East,
-                                    ValidatesOnDataErrors=True,
-                                    ValidatesOnExceptions=True,
-                                    NotifyOnValidationError=True,
-                                    UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Row="3" Grid.Column="1" DataContext="{Binding EditOverlayViewModel}" Text="{Binding East, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
             <TextBlock Grid.Row="4"
                        Grid.Column="0"
                        VerticalAlignment="Center"
                        Text="West"
                        TextAlignment="Right" />
-            <TextBox Grid.Row="4"
-                     Grid.Column="1"
-                     Text="{Binding West,
-                                    ValidatesOnDataErrors=True,
-                                    ValidatesOnExceptions=True,
-                                    NotifyOnValidationError=True,
-                                    UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Row="4" Grid.Column="1" DataContext="{Binding EditOverlayViewModel}" Text="{Binding West, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
         </Grid>
-        <StackPanel HorizontalAlignment="Right"
-                    DockPanel.Dock="Bottom"
-                    Orientation="Horizontal">
+        <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
             <Button Width="75"
                     Margin="5"
                     Command="{Binding OkCommand}"
@@ -94,34 +63,19 @@
                     IsDefault="True" />
             <Button Width="75"
                     Margin="5"
+                    Command="{Binding CancelCommand}"
                     Content="Cancel"
                     IsCancel="True" />
         </StackPanel>
-        <Expander Header="Environmental Data Sources"
-                  IsEnabled="{Binding IsValid}"
-                  IsExpanded="False">
-            <StackPanel Margin="5"
-                        DockPanel.Dock="Left"
-                        Orientation="Vertical">
-                <Controls:PluginSelector Grid.Row="0"
-                                         ItemsSource="{Binding EnvironmentDataSourceViews[Wind]}"
-                                         PluginTypeName="Wind"
-                                         SelectedItem="{Binding SelectedPlugins[Wind]}" />
+        <Expander Header="Environmental Data Sources" IsEnabled="{Binding IsValid}" IsExpanded="False">
+            <StackPanel Margin="5" DockPanel.Dock="Left" Orientation="Vertical">
+                <Controls:PluginSelector Grid.Row="0" ItemsSource="{Binding EnvironmentDataSourceViews[Wind]}" PluginTypeName="Wind" SelectedItem="{Binding SelectedPlugins[Wind]}" />
                 <Separator Margin="0 5 0 10" />
-                <Controls:PluginSelector Grid.Row="1"
-                                         ItemsSource="{Binding EnvironmentDataSourceViews[SoundSpeed]}"
-                                         PluginTypeName="Sound Speed"
-                                         SelectedItem="{Binding SelectedPlugins[SoundSpeed]}" />
+                <Controls:PluginSelector Grid.Row="1" ItemsSource="{Binding EnvironmentDataSourceViews[SoundSpeed]}" PluginTypeName="Sound Speed" SelectedItem="{Binding SelectedPlugins[SoundSpeed]}" />
                 <Separator Margin="0 5 0 10" />
-                <Controls:PluginSelector Grid.Row="2"
-                                         ItemsSource="{Binding EnvironmentDataSourceViews[Sediment]}"
-                                         PluginTypeName="Sediment"
-                                         SelectedItem="{Binding SelectedPlugins[Sediment]}" />
+                <Controls:PluginSelector Grid.Row="2" ItemsSource="{Binding EnvironmentDataSourceViews[Sediment]}" PluginTypeName="Sediment" SelectedItem="{Binding SelectedPlugins[Sediment]}" />
                 <Separator Margin="0 5 0 10" />
-                <Controls:PluginSelector Grid.Row="3"
-                                         ItemsSource="{Binding EnvironmentDataSourceViews[Bathymetry]}"
-                                         PluginTypeName="Bathymetry"
-                                         SelectedItem="{Binding SelectedPlugins[Bathymetry]}" />
+                <Controls:PluginSelector Grid.Row="3" ItemsSource="{Binding EnvironmentDataSourceViews[Bathymetry]}" PluginTypeName="Bathymetry" SelectedItem="{Binding SelectedPlugins[Bathymetry]}" />
             </StackPanel>
         </Expander>
     </DockPanel>

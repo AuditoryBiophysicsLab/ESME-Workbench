@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.Windows;
-using Cinch;
 using MEFedMVVM.ViewModelLocator;
 using Microsoft.Win32;
 

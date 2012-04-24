@@ -1,91 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using Cinch;
 using ESME.Environment;
 using ESME.Model;
+using HRC.Aspects;
 using HRC.Navigation;
-using HRC.Utility;
+using HRC.ViewModels;
 
 namespace ESME.TransmissionLoss.CASS
 {
-    public class NAEMOEnvironmentFile : PropertyChangedBase 
+    public class NAEMOEnvironmentFile : ViewModelBase
     {
-        #region public string OverlayFileName { get; set; }
-
-        public string OverlayFileName
-        {
-            get { return _overlayFileName; }
-            set
-            {
-                if (_overlayFileName == value) return;
-                _overlayFileName = value;
-                OnPropertyChanged(OverlayFileNameChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs OverlayFileNameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOEnvironmentFile>(x => x.OverlayFileName);
-        string _overlayFileName;
-
-        #endregion
-
-        #region public string BathymetryFilename { get; set; }
-
-        public string BathymetryFilename
-        {
-            get { return _bathymetryFilename; }
-            set
-            {
-                if (_bathymetryFilename == value) return;
-                _bathymetryFilename = value;
-                OnPropertyChanged(BathymetryFilenameChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs BathymetryFilenameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOEnvironmentFile>(x => x.BathymetryFilename);
-        string _bathymetryFilename;
-
-        #endregion
-
-        #region public TimePeriod TimePeriod { get; set; }
-
-        public TimePeriod TimePeriod
-        {
-            get { return _timePeriod; }
-            set
-            {
-                if (_timePeriod == value) return;
-                _timePeriod = value;
-                OnPropertyChanged(TimePeriodChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs TimePeriodChangedEventArgs = ObservableHelper.CreateArgs<NAEMOEnvironmentFile>(x => x.TimePeriod);
-        TimePeriod _timePeriod;
-
-        #endregion
-
-        #region public List<NAEMOEnvironmentLocation> Locations { get; set; }
-
-        public List<NAEMOEnvironmentLocation> Locations
-        {
-            get { return _locations ?? (_locations = new List<NAEMOEnvironmentLocation>()); }
-            set
-            {
-                if (_locations == value) return;
-                _locations = value;
-                OnPropertyChanged(LocationsChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs LocationsChangedEventArgs = ObservableHelper.CreateArgs<NAEMOEnvironmentFile>(x => x.Locations);
-        List<NAEMOEnvironmentLocation> _locations;
-
-        #endregion
+        public string OverlayFileName { get; set; }
+        public string BathymetryFilename { get; set; }
+        public TimePeriod TimePeriod { get; set; }
+        [Initialize] public List<NAEMOEnvironmentLocation> Locations { get; set; }
 
         #region public Dictionary<string, List<Geo>> SedimentTypes { get; set; }
         [XmlIgnore]
@@ -208,7 +140,7 @@ namespace ESME.TransmissionLoss.CASS
                         break;
                 }
                 double wind;
-                if (!double.TryParse(packet[curGroupLineIndex++].Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out wind)) throw new DataException("");
+                if (!double.TryParse(packet[curGroupLineIndex].Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out wind)) throw new DataException("");
                 retpacket.WindSpeed = wind;
                 result.Locations.Add(retpacket);
             }

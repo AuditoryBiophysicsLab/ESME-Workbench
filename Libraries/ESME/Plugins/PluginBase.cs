@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Controls;
 using System.Xml.Serialization;
-using Cinch;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.NEMO;
+using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
 using HRC.Validation;
@@ -35,7 +34,6 @@ namespace ESME.Plugins
                     case "IsConfigured":
                         return;
                 }
-                NotifyPropertyChanged(IsConfiguredChangedEventArgs);
             };
         }
 
@@ -60,68 +58,11 @@ namespace ESME.Plugins
             }
         }
 
-        #region public Control ConfigurationControl { get; protected set; }
-        [XmlIgnore]
-        public Control ConfigurationControl
-        {
-            get { return _configurationControl; }
-            protected set
-            {
-                if (_configurationControl == value) return;
-                _configurationControl = value;
-                NotifyPropertyChanged(ConfigurationControlChangedEventArgs);
-                NotifyPropertyChanged(IsConfigurableChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ConfigurationControlChangedEventArgs = ObservableHelper.CreateArgs<PluginBase>(x => x.ConfigurationControl);
-        Control _configurationControl;
-
-        #endregion
-        #region public bool IsConfigurable { get; }
-        [XmlIgnore] 
-        public bool IsConfigurable
-        {
-            get { return ConfigurationControl != null; }
-        }
-
-        static readonly PropertyChangedEventArgs IsConfigurableChangedEventArgs = ObservableHelper.CreateArgs<PluginBase>(x => x.IsConfigurable);
-
-        #endregion
-        #region public bool IsSelectable { get; protected set; }
-        [XmlIgnore] 
-        public bool IsSelectable
-        {
-            get { return _isSelectable; }
-            protected set
-            {
-                if (_isSelectable == value) return;
-                _isSelectable = value;
-                NotifyPropertyChanged(IsAvailableChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsAvailableChangedEventArgs = ObservableHelper.CreateArgs<PluginBase>(x => x.IsSelectable);
-        bool _isSelectable;
-
-        #endregion
-        #region public bool IsConfigured { get; protected set; }
-        [XmlIgnore] 
-        public virtual bool IsConfigured
-        {
-            get { return _isConfigured; }
-            protected set
-            {
-                if (_isConfigured == value) return;
-                _isConfigured = value;
-                NotifyPropertyChanged(IsConfiguredChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsConfiguredChangedEventArgs = ObservableHelper.CreateArgs<PluginBase>(x => x.IsConfigured);
-        bool _isConfigured;
-
-        #endregion
+        [Affects("IsConfigurable")]
+        [XmlIgnore] public Control ConfigurationControl { get; protected set; }
+        [XmlIgnore] public bool IsConfigurable { get { return ConfigurationControl != null; } }
+        [XmlIgnore] public bool IsSelectable { get; protected set; }
+        [XmlIgnore] public virtual bool IsConfigured { get; protected set; }
 
         protected abstract void Save();
         public abstract void LoadSettings();

@@ -124,8 +124,8 @@
     <Compile Include="Controls\ScatterPlot.xaml.cs">
       <DependentUpon>ScatterPlot.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EventToCommandTrigger.cs" />
     <Compile Include="Exceptions.cs" />
-    <Compile Include="MediatorMessages.cs" />
     <Compile Include="ViewModels\Layers\CustomUnitScaleBarAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\LayerTreeViewModel.cs" />
     <Compile Include="ViewModels\Main\AboutViewModel.cs" />
@@ -134,15 +134,7 @@
     </Compile>
     <Compile Include="ViewModels\Main\HomeTab.cs" />
     <Compile Include="ViewModels\Main\OverrideCursor.cs" />
-    <Compile Include="ViewModels\Main\PleaseWaitViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticSimulatorOptionsViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\AnalysisPointCalculationPreviewViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\AnalysisPointVisualizerViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\ExportOptionsViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\LabeledDataWrapper.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelFieldViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelRadialViewModel.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>
@@ -157,9 +149,6 @@
     </Compile>
     <Compile Include="Views\AnalysisPointCalculationPreviewView.xaml.cs">
       <DependentUpon>AnalysisPointCalculationPreviewView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\AnalysisPointView.xaml.cs">
-      <DependentUpon>AnalysisPointView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\ColorBarView.xaml.cs">
       <DependentUpon>ColorBarView.xaml</DependentUpon>
@@ -201,51 +190,20 @@
     <Compile Include="Views\SimulationView.xaml.cs">
       <DependentUpon>SimulationView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\TransmissionLossJobView.xaml.cs">
-      <DependentUpon>TransmissionLossJobView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\AnalysisPointVisualizerView.xaml.cs">
-      <DependentUpon>AnalysisPointVisualizerView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ViewModels\Layers\GraphicLogoAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\GraticuleAdornmentLayer.cs" />
-    <Compile Include="ViewModels\Layers\OverlayShapesLayerViewModel.cs" />
     <Compile Include="ViewModels\Main\MainViewModelCommands.cs" />
     <Compile Include="ViewModels\Main\FileOrDirectorySettingsViewModel.cs" />
     <Compile Include="ViewModels\Main\MainViewModel.cs" />
     <Compile Include="ViewModels\Layers\OffsetProjection.cs" />
     <Compile Include="ViewModels\Layers\RotatingAdornmentLayer.cs" />
     <Compile Include="ViewModels\Map\MapViewModel.cs" />
-    <Compile Include="ViewModels\Main\MenuItemViewModel.cs" />
     <Compile Include="ViewModels\Main\ApplicationOptionsViewModel.cs" />
     <Compile Include="ViewModels\RecentFiles\ApplicationAttributes.cs" />
     <Compile Include="ViewModels\RecentFiles\IPersist.cs" />
     <Compile Include="ViewModels\RecentFiles\RecentFileList.cs" />
     <Compile Include="ViewModels\RecentFiles\RegistryPersister.cs" />
     <Compile Include="ViewModels\RecentFiles\XmlPersister.cs" />
-    <Compile Include="ViewModels\Ribbon\ApplicationMenuItemDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\ApplicationSplitMenuItemDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\ButtonDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\CheckBoxDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\ComboBoxDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\ContextualTabGroupData.cs" />
-    <Compile Include="ViewModels\Ribbon\ControlDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\DelegateCommand.cs" />
-    <Compile Include="ViewModels\Ribbon\GalleryCategoryDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\GalleryDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\GalleryItemDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\GroupDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\MenuButtonDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\MenuItemDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\RadioButtonDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\RibbonListClasses.cs" />
-    <Compile Include="ViewModels\Ribbon\SeparatorDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\SplitButtonDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\SplitMenuItemDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\TabDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\TextBoxDataViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\ToggleButtonDataViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossJobViewModel.cs" />
     <Page Include="Controls\LayerListView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -287,10 +245,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\AnalysisPointCalculationPreviewView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\AnalysisPointView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -387,14 +341,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\SimulationView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\TransmissionLossJobView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\AnalysisPointVisualizerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

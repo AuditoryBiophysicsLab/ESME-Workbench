@@ -6,6 +6,7 @@ using System.Text;
 using System.Windows;
 using System.Xml.Serialization;
 using ESME.NEMO.Overlay;
+using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using HRC.Navigation;
 using ThinkGeo.MapSuite.Core;

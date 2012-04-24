@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Xml.Serialization;
-using Cinch;
+using HRC.ViewModels;
 
 namespace HRC.Validation
 {
@@ -60,20 +59,16 @@ namespace HRC.Validation
             get { return _isValid; }
             private set
             {
-                if (_isValid == value) return;
                 _isValid = value;
-                Debug.WriteLine("{0}: IsValid property is now : {1}", DateTime.Now, _isValid);
-                NotifyPropertyChanged(IsValidChangedEventArgs);
                 CommandManager.InvalidateRequerySuggested();
             }
         }
 
-        static readonly PropertyChangedEventArgs IsValidChangedEventArgs = ObservableHelper.CreateArgs<ValidatingViewModel>(x => x.IsValid);
         bool _isValid;
 
         #endregion
 
-        #region public string Error { get; private set; }
+
         /// <summary>
         /// Gets an error message indicating what is wrong with this object.
         /// </summary>
@@ -81,22 +76,7 @@ namespace HRC.Validation
         /// An error message indicating what is wrong with this object. The default is an empty string ("").
         /// </returns>
         [XmlIgnore]
-        public string Error
-        {
-            get { return _error; }
-            private set
-            {
-                if (_error == value) return;
-                _error = value;
-                //Debug.WriteLine("{0}: Error property is now : {1}", DateTime.Now, !string.IsNullOrEmpty(_error) ? _error : _error == string.Empty ? "(empty)" : "(null)");
-                NotifyPropertyChanged(ErrorChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ErrorChangedEventArgs = ObservableHelper.CreateArgs<ValidatingViewModel>(x => x.Error);
-        string _error;
-
-        #endregion
+        public string Error { get; private set; }
 
         #endregion
 
@@ -147,35 +127,6 @@ namespace HRC.Validation
             if (includeEndpoints)
                 return ((valueToCheck >= minimum)) && (valueToCheck <= maximum);
             return ((valueToCheck > minimum)) && (valueToCheck < maximum);
-        }
-
-        public static bool AllAreFull(params string[] fields)
-        {
-            return EmptyCount(fields) == 0;
-        }
-
-        public static bool AllAreEmpty(params string[] fields)
-        {
-            return FullCount(fields) == 0;
-        }
-        public static bool OnlyOneIsFull(params string[] fields)
-        {
-            return FullCount(fields) == 1;
-        }
-        public static bool OnlyOneIsEmpty(params string[] fields)
-        {
-            return EmptyCount(fields) == 1;
-        }
-        public static int FullCount(params string[] fields)
-        {
-            var nonEmptyCount = fields.Count(field => !string.IsNullOrEmpty(field));
-            return nonEmptyCount;
-        }
-
-        public static int EmptyCount(params string[] fields)
-        {
-            var emptyCount = fields.Where(string.IsNullOrEmpty).Count();
-            return emptyCount;
         }
     }
 }

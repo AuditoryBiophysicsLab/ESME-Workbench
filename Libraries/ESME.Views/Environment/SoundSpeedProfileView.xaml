@@ -1,12 +1,12 @@
 ﻿<UserControl x:Class="ESME.Views.Environment.SoundSpeedProfileView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
              xmlns:controls="clr-namespace:ESME.Views.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:Environment="clr-namespace:ESME.Views.Environment"
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
              Width="{Binding MyWidth,
                              Mode=OneWayToSource}"
              Height="{Binding MyHeight,
@@ -47,7 +47,7 @@
         <Grid>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SizeChanged">
-                    <cinch:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
+                    <WPF:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <Grid.ColumnDefinitions>

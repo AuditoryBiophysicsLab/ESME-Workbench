@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using Cinch;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
@@ -85,14 +83,11 @@ namespace StandaloneNAVOPlugin
             get { return _dataLocation; }
             set
             {
-                if (_dataLocation == value) return;
                 _dataLocation = value;
-                NotifyPropertyChanged(DataLocationChangedEventArgs);
                 Save();
             }
         }
 
-        static readonly PropertyChangedEventArgs DataLocationChangedEventArgs = ObservableHelper.CreateArgs<BST20ForNAVO>(x => x.DataLocation);
         string _dataLocation;
 
         #endregion

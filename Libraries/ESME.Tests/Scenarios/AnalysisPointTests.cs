@@ -13,7 +13,6 @@ using ESME.Scenarios;
 using ESME.Tests.Common;
 using HRC.Navigation;
 using NUnit.Framework;
-using AnalysisPoint = ESME.Scenarios.AnalysisPoint;
 
 namespace ESME.Tests.Scenarios
 {

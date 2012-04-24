@@ -1,5 +1,5 @@
-﻿using Cinch;
-using ESME.Data;
+﻿using ESME.Data;
+using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {

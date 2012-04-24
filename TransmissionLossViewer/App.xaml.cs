@@ -5,8 +5,8 @@ using System.IO;
 using System.Reflection;
 using System.Security.Principal;
 using System.Windows;
-using Cinch;
 using ESME.Views;
+using HRC;
 using HRC.Utility;
 using TransmissionLossViewer.Properties;
 
@@ -42,9 +42,6 @@ namespace TransmissionLossViewer
 
         #region Initialization
 
-        /// <summary>
-        ///   Initialize Cinch using the CinchBootStrapper.
-        /// </summary>
         public App()
         {
             // You must close or flush the trace to empty the output buffer.
@@ -59,13 +56,11 @@ namespace TransmissionLossViewer
             }
             try
             {
-                //ExperimentData.Test();
-
-                CinchBootStrapper.Initialise(new List<Assembly>
-                                             {
-                                                 typeof (App).Assembly,
-                                                 typeof (TestView).Assembly,
-                                             });
+                HRCBootstrapper.Initialise(new List<Assembly>
+                {
+                    typeof (App).Assembly,
+                    typeof (TestView).Assembly,
+                });
             }
             catch (Exception e)
             {

@@ -5,11 +5,11 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Markup;
-using Cinch;
 using ESME;
 using ESME.Environment;
 using ESME.Mapping;
 using ESME.NEMO;
+using ESME.Views.Locations;
 using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.Layers;
 using ESMEWorkbench.ViewModels.Main;
@@ -17,6 +17,9 @@ using ESMEWorkbench.Views;
 using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
+using HRC.Services;
+using HRC.ViewModels;
+using HRC.WPF;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ThinkGeo.MapSuite.Core;
@@ -122,6 +125,7 @@ namespace ESMEWorkbench.ViewModels.Map
             if (Designer.IsInDesignMode) return;
 
             _wpfMap = ((MainView)_viewAwareStatus.View).MapView.WpfMap;
+            EditOverlayViewModel = new EditOverlayViewModel(_wpfMap);
             //SoundSpeedProfileViewModel = new SoundSpeedProfileViewModel(((MainView)_viewAwareStatus.View).MapView.SoundSpeedProfileView);
             MapDLLVersion = WpfMap.GetVersion();
             _wpfMap.MapUnit = GeographyUnit.DecimalDegree;
@@ -265,10 +269,11 @@ namespace ESMEWorkbench.ViewModels.Map
         public SoundSpeedProfileViewModel SoundSpeedProfileViewModel { get; set; }
 
         [MediatorMessageSink(MediatorMessage.SetMapExtent), UsedImplicitly]
-        void SetMapExtent(GeoRect geoRect)
+        void SetMapExtent(GeoRect geoRect) { CurrentExtent = geoRect; }
+        public GeoRect CurrentExtent
         {
-            _wpfMap.CurrentExtent = new RectangleShape(geoRect.West, geoRect.North, geoRect.East, geoRect.South);
-            _wpfMap.Refresh();
+            get { return new GeoRect(_wpfMap.CurrentExtent.UpperLeftPoint.Y, _wpfMap.CurrentExtent.LowerRightPoint.Y, _wpfMap.CurrentExtent.LowerRightPoint.X, _wpfMap.CurrentExtent.UpperLeftPoint.X); }
+            set { _wpfMap.CurrentExtent = new RectangleShape(value.West, value.North, value.East, value.South); _wpfMap.Refresh();}
         }
 
         [MediatorMessageSink(MediatorMessage.SetMapCursor), UsedImplicitly]
@@ -544,5 +549,7 @@ namespace ESMEWorkbench.ViewModels.Map
         #endregion
 
         #endregion
+
+        public EditOverlayViewModel EditOverlayViewModel { get; set; }
     }
 }

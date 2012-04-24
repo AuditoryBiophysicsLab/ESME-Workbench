@@ -1,12 +1,11 @@
 ﻿<Window x:Class="TransmissionLossViewer.MainView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
         xmlns:Properties="clr-namespace:TransmissionLossViewer.Properties"
-        xmlns:TransmissionLoss="clr-namespace:ESME.Views.TransmissionLoss;assembly=ESME.Views"
         xmlns:View="clr-namespace:ESME.Views.TransmissionLossViewer;assembly=ESME.Views"
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
         Title="{Binding TitleString,
                         Mode=TwoWay}"
         Width="{Binding Source={x:Static Properties:Settings.Default},
@@ -24,16 +23,12 @@
                       Path=WindowTop,
                       Mode=TwoWay}">
     <Window.InputBindings>
-        <KeyBinding Key="S"
-                    Command="{Binding SaveAsCommand}"
-                    Modifiers="Control" />
-        <KeyBinding Key="E"
-                    Command="{Binding ExportAsCommand}"
-                    Modifiers="Control" />
+        <KeyBinding Key="S" Command="{Binding SaveAsCommand}" Modifiers="Control" />
+        <KeyBinding Key="E" Command="{Binding ExportAsCommand}" Modifiers="Control" />
     </Window.InputBindings>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
-            <cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
+            <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <DockPanel LastChildFill="True">
@@ -44,32 +39,20 @@
               BorderThickness="1"
               DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Command="{Binding SaveAsCommand}"
-                          Header="Save As"
-                          InputGestureText="Ctrl+S" />
-                <MenuItem Command="{Binding ExportAsCommand}"
-                          Header="Export to CSV"
-                          InputGestureText="Ctrl+E" />
-                <MenuItem Command="{Binding CloseWindowCommand}"
-                          Header="Exit"
-                          InputGestureText="Ctrl+W" />
+                <MenuItem Command="{Binding SaveAsCommand}" Header="Save As" InputGestureText="Ctrl+S" />
+                <MenuItem Command="{Binding ExportAsCommand}" Header="Export to CSV" InputGestureText="Ctrl+E" />
+                <MenuItem Command="{Binding CloseWindowCommand}" Header="Exit" InputGestureText="Ctrl+W" />
             </MenuItem>
         </Menu>
         <StackPanel Orientation="Vertical">
             <GroupBox Header="Scenarios">
-                <ListBox DisplayMemberPath="Name"
-                         ItemsSource="{Binding Database.Context.Scenarios.Local}"
-                         SelectedItem="{Binding SelectedScenario}" />
+                <ListBox DisplayMemberPath="Name" ItemsSource="{Binding Database.Context.Scenarios.Local}" SelectedItem="{Binding SelectedScenario}" />
             </GroupBox>
             <GroupBox Header="Analysis Points">
-                <ListBox DisplayMemberPath="Geo"
-                         ItemsSource="{Binding AnalysisPoints}"
-                         SelectedItem="{Binding SelectedAnalysisPoint}" />
+                <ListBox DisplayMemberPath="Geo" ItemsSource="{Binding AnalysisPoints}" SelectedItem="{Binding SelectedAnalysisPoint}" />
             </GroupBox>
             <GroupBox Header="Transmission Losses">
-                <ListBox DisplayMemberPath="Item1"
-                         ItemsSource="{Binding AnalysisPointModes}"
-                         SelectedItem="{Binding SelectedMode}" />
+                <ListBox DisplayMemberPath="Item1" ItemsSource="{Binding AnalysisPointModes}" SelectedItem="{Binding SelectedMode}" />
             </GroupBox>
         </StackPanel>
         <DockPanel DockPanel.Dock="Bottom">

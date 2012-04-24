@@ -11,11 +11,11 @@ using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
 using HRC.Aspects;
 using HRC.Navigation;
+using HRC.ViewModels;
 
 namespace ESME.Scenarios
 {
-    [NotifyPropertyChanged]
-    public class AnalysisPoint : IHaveGuid, IHaveLayerSettings
+    public class AnalysisPoint : ViewModelBase, IHaveGuid, IHaveLayerSettings, ISupportValidation
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
@@ -27,6 +27,18 @@ namespace ESME.Scenarios
         public virtual ICollection<TransmissionLoss> TransmissionLosses { get; set; }
 
         public void CreateMapLayers() { throw new NotImplementedException(); }
+
+        public bool IsValid
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public string ValidationErrorText
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public void Validate() { throw new NotImplementedException(); }
     }
 
     [NotifyPropertyChanged]

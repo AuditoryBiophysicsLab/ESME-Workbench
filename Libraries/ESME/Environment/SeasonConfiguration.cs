@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using Cinch;
+using HRC.Aspects;
 using HRC.Validation;
 
 namespace ESME.Environment
@@ -53,108 +52,12 @@ namespace ESME.Environment
             });
         }
 
-        #region public TimePeriod SpringStartMonth { get; set; }
-
-        public TimePeriod SpringStartMonth
-        {
-            get { return _springStartMonth; }
-            set
-            {
-                if (_springStartMonth == value) return;
-                _springStartMonth = value;
-                NotifyPropertyChanged(SpringStartMonthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SpringStartMonthChangedEventArgs = ObservableHelper.CreateArgs<SeasonConfiguration>(x => x.SpringStartMonth);
-        TimePeriod _springStartMonth = TimePeriod.March;
-
-        #endregion
-        #region public TimePeriod SummerStartMonth { get; set; }
-
-        public TimePeriod SummerStartMonth
-        {
-            get { return _summerStartMonth; }
-            set
-            {
-                if (_summerStartMonth == value) return;
-                _summerStartMonth = value;
-                NotifyPropertyChanged(SummerStartMonthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SummerStartMonthChangedEventArgs = ObservableHelper.CreateArgs<SeasonConfiguration>(x => x.SummerStartMonth);
-        TimePeriod _summerStartMonth = TimePeriod.June;
-
-        #endregion
-        #region public TimePeriod FallStartMonth { get; set; }
-
-        public TimePeriod FallStartMonth
-        {
-            get { return _fallStartMonth; }
-            set
-            {
-                if (_fallStartMonth == value) return;
-                _fallStartMonth = value;
-                NotifyPropertyChanged(FallStartMonthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs FallStartMonthChangedEventArgs = ObservableHelper.CreateArgs<SeasonConfiguration>(x => x.FallStartMonth);
-        TimePeriod _fallStartMonth = TimePeriod.September;
-
-        #endregion
-        #region public TimePeriod WinterStartMonth { get; set; }
-
-        public TimePeriod WinterStartMonth
-        {
-            get { return _winterStartMonth; }
-            set
-            {
-                if (_winterStartMonth == value) return;
-                _winterStartMonth = value;
-                NotifyPropertyChanged(WinterStartMonthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs WinterStartMonthChangedEventArgs = ObservableHelper.CreateArgs<SeasonConfiguration>(x => x.WinterStartMonth);
-        TimePeriod _winterStartMonth = TimePeriod.December;
-
-        #endregion
-        #region public TimePeriod ColdSeasonStartMonth { get; set; }
-
-        public TimePeriod ColdSeasonStartMonth
-        {
-            get { return _coldSeasonStartMonth; }
-            set
-            {
-                if (_coldSeasonStartMonth == value) return;
-                _coldSeasonStartMonth = value;
-                NotifyPropertyChanged(ColdSeasonStartMonthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ColdSeasonStartMonthChangedEventArgs = ObservableHelper.CreateArgs<SeasonConfiguration>(x => x.ColdSeasonStartMonth);
-        TimePeriod _coldSeasonStartMonth = TimePeriod.December;
-
-        #endregion
-        #region public TimePeriod WarmSeasonStartMonth { get; set; }
-
-        public TimePeriod WarmSeasonStartMonth
-        {
-            get { return _warmSeasonStartMonth; }
-            set
-            {
-                if (_warmSeasonStartMonth == value) return;
-                _warmSeasonStartMonth = value;
-                NotifyPropertyChanged(WarmSeasonStartMonthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs WarmSeasonStartMonthChangedEventArgs = ObservableHelper.CreateArgs<SeasonConfiguration>(x => x.WarmSeasonStartMonth);
-        TimePeriod _warmSeasonStartMonth = TimePeriod.June;
-
-        #endregion
+        [Initialize(TimePeriod.March)]     public TimePeriod SpringStartMonth { get; set; }
+        [Initialize(TimePeriod.June)]      public TimePeriod SummerStartMonth { get; set; }
+        [Initialize(TimePeriod.September)] public TimePeriod FallStartMonth { get; set; }
+        [Initialize(TimePeriod.December)]  public TimePeriod WinterStartMonth { get; set; }
+        [Initialize(TimePeriod.December)]  public TimePeriod ColdSeasonStartMonth { get; set; }
+        [Initialize(TimePeriod.June)]      public TimePeriod WarmSeasonStartMonth { get; set; }
 
         #region Static helper properties
         static readonly TimePeriod[] MonthMap = new[]
@@ -177,7 +80,7 @@ namespace ESME.Environment
             TimePeriod.March,
             TimePeriod.April,
             TimePeriod.May,
-            TimePeriod.June,
+            TimePeriod.June
         };
 
         public static IEnumerable<TimePeriod> AllMonths

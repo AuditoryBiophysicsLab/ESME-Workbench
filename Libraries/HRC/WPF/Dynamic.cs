@@ -208,9 +208,9 @@ namespace HRC.WPF
 
         public Signature(IEnumerable<DynamicProperty> properties)
         {
-            properties = properties.ToArray();
+            Properties = properties.ToArray();
             HashCode = 0;
-            foreach (var p in properties) HashCode ^= p.Name.GetHashCode() ^ p.Type.GetHashCode();
+            foreach (var p in Properties) HashCode ^= p.Name.GetHashCode() ^ p.Type.GetHashCode();
         }
 
         public override int GetHashCode() { return HashCode; }

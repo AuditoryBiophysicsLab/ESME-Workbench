@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Cinch;
+using HRC.Utility;
+using HRC.ViewModels;
 
 namespace ESME.Views.Controls
 {
@@ -14,37 +12,26 @@ namespace ESME.Views.Controls
     {
         #region public properties
 
-        static readonly PropertyChangedEventArgs ColorsChangedEventArgs = ObservableHelper.CreateArgs<ColorMapViewModel>(x => x.Colors);
-        static readonly PropertyChangedEventArgs MaxValueChangedEventArgs = ObservableHelper.CreateArgs<ColorMapViewModel>(x => x.MaxValue);
-        static readonly PropertyChangedEventArgs MinValueChangedEventArgs = ObservableHelper.CreateArgs<ColorMapViewModel>(x => x.MinValue);
-        static readonly PropertyChangedEventArgs CurMaxValueChangedEventArgs = ObservableHelper.CreateArgs<ColorMapViewModel>(x => x.CurMaxValue);
-        static readonly PropertyChangedEventArgs CurMinValueChangedEventArgs = ObservableHelper.CreateArgs<ColorMapViewModel>(x => x.CurMinValue);
-        static readonly PropertyChangedEventArgs ColorBitmapChangedEventArgs = ObservableHelper.CreateArgs<ColorMapViewModel>(x => x.ColorBitmap);
-
-        public List<Color> Colors
+        public ObservableList<Color> Colors
         {
             get { return _colors; }
             set
             {
-                if (_colors == value) return;
-
                 _colors = value;
                 _firstColor = _colors.First();
                 _lastColor = _colors.Last();
                 _colorCount = _colors.Count();
-                NotifyPropertyChanged(ColorsChangedEventArgs);
                 RenderColorBitmap();
             }
         }
+        ObservableList<Color> _colors;
 
         public double MaxValue
         {
             get { return _maxValue; }
             set
             {
-                if (_maxValue == value) return;
                 _maxValue = value;
-                NotifyPropertyChanged(MaxValueChangedEventArgs);
                 CurMaxValue = _maxValue;
             }
         }
@@ -54,9 +41,7 @@ namespace ESME.Views.Controls
             get { return _minValue; }
             set
             {
-                if (_minValue == value) return;
                 _minValue = value;
-                NotifyPropertyChanged(MinValueChangedEventArgs);
                 CurMinValue = _minValue;
             }
         }
@@ -66,11 +51,8 @@ namespace ESME.Views.Controls
             get { return _curMaxValue; }
             set
             {
-                if (_curMaxValue == value) return;
                 _curMaxValue = value;
                 _curRange = _curMaxValue - _curMinValue;
-                NotifyPropertyChanged(CurMaxValueChangedEventArgs);
-                Debug.WriteLine("New CurMax equals" + _curMaxValue);
             }
         }
 
@@ -79,22 +61,17 @@ namespace ESME.Views.Controls
             get { return _curMinValue; }
             set
             {
-                if (_curMinValue == value) return;
                 _curMinValue = value;
                 _curRange = _curMaxValue - _curMinValue;
-
-                NotifyPropertyChanged(CurMinValueChangedEventArgs);
-                Debug.WriteLine("New CurMin equals" + _curMinValue);
             }
         }
 
         public void Reverse()
         {
-            _colors.Reverse();
+            Colors.Reverse();
             _firstColor = _colors.First();
             _lastColor = _colors.Last();
             _colorCount = _colors.Count();
-            NotifyPropertyChanged(ColorsChangedEventArgs);
             RenderColorBitmap();
         }
 
@@ -112,11 +89,11 @@ namespace ESME.Views.Controls
         {
             if (value >= _curMaxValue) return _firstColor;
             if (value <= _curMinValue) return _lastColor;
-            if (_curRange == 0.0) _curRange = _curMaxValue - _curMinValue;
+            if (Math.Abs(_curRange) < 0.000001) _curRange = _curMaxValue - _curMinValue;
 
-            if (_curRange != 0.0)
+            if (Math.Abs(_curRange) > 0)
             {
-                double fraction = 1.0 - (value - _curMinValue) / _curRange;
+                var fraction = 1.0 - (value - _curMinValue) / _curRange;
                 var index = (int) (fraction*_colorCount);
                 return Colors[index];
             }
@@ -125,12 +102,12 @@ namespace ESME.Views.Controls
 
         public void RenderColorBitmap()
         {
-            if (ColorBitmap == null) ColorBitmap = new WriteableBitmap(1, Colors.Count, 96, 96, PixelFormats.Bgr32, null);
+            var colorBitmap = ColorBitmap ?? new WriteableBitmap(1, Colors.Count, 96, 96, PixelFormats.Bgr32, null);
 
-            ColorBitmap.Lock();
+            colorBitmap.Lock();
             unsafe
             {
-                var curOffset = (int) ColorBitmap.BackBuffer;
+                var curOffset = (int)colorBitmap.BackBuffer;
                 for (var y = 0; y < Colors.Count; y++)
                 {
                     // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
@@ -140,9 +117,9 @@ namespace ESME.Views.Controls
                     curOffset += sizeof (Int32);
                 }
             }
-            ColorBitmap.AddDirtyRect(new Int32Rect(0, 0, 1, Colors.Count));
-            ColorBitmap.Unlock();
-            NotifyPropertyChanged(ColorBitmapChangedEventArgs);
+            colorBitmap.AddDirtyRect(new Int32Rect(0, 0, 1, Colors.Count));
+            colorBitmap.Unlock();
+            ColorBitmap = ColorBitmap;
         }
 
         #region public static default ColorMapViewModel creation method
@@ -157,7 +134,7 @@ namespace ESME.Views.Controls
                            MinValue = 0.0,
                            CurMaxValue = 1.0,
                            CurMinValue = 0.0,
-                           Colors = new List<Color>
+                           Colors = new ObservableList<Color>
                                     {
                                         Color.FromArgb(255, 0, 0, 143),
                                         Color.FromArgb(255, 0, 0, 147),
@@ -422,7 +399,6 @@ namespace ESME.Views.Controls
         #region private fields
 
         int _colorCount;
-        List<Color> _colors;
 
         double _curMaxValue,
                _curMinValue,

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Cinch;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Locations;
@@ -10,6 +9,7 @@ using ESME.Plugins;
 using ESME.Scenarios;
 using HRC.Aspects;
 using HRC.Validation;
+using HRC.ViewModels;
 
 namespace ESME.Views.Locations
 {

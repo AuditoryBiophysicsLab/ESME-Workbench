@@ -5,16 +5,17 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using Cinch;
 using ESME;
 using ESME.Scenarios;
 using ESME.Views.Services;
 using HRC.Aspects;
 using HRC.Services;
 using HRC.Utility;
+using HRC.ViewModels;
+using HRC.WPF;
 using MEFedMVVM.ViewModelLocator;
 using ESME.Locations;
-using AnalysisPoint = ESME.Scenarios.AnalysisPoint;
+
 namespace TransmissionLossViewer
 {
     [ExportViewModel("TransmissionLossViewerMainViewModel")]
@@ -99,7 +100,6 @@ namespace TransmissionLossViewer
         {
             get
             {
-                if (SelectedRadial == null) return null;
                 var sb = new StringBuilder();
                 const double radius = 8;
                 double x, y;

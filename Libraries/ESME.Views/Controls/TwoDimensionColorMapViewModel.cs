@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
@@ -7,10 +6,9 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Cinch;
 using ESME.TransmissionLoss;
-using ESME.Views.TransmissionLossViewer;
-using HRC.Navigation;
+using HRC.Services;
+using HRC.ViewModels;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Views.Controls
@@ -18,111 +16,24 @@ namespace ESME.Views.Controls
     [ExportViewModel("TwoDimensionColorMapViewModel")]
     public class TwoDimensionColorMapViewModel : ViewModelBase
     {
-        private static readonly PropertyChangedEventArgs WriteableBitmapChangedEventArgs =
-            ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.WriteableBitmap);
-
         #region public float RangeMin { get; set; }
-
-        private static readonly PropertyChangedEventArgs RangeMinChangedEventArgs =
-            ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.RangeMin);
-
-        private float _rangeMin;
-
-        public float RangeMin
-        {
-            get { return _rangeMin; }
-            set
-            {
-                if (_rangeMin == value) return;
-                _rangeMin = value;
-                NotifyPropertyChanged(RangeMinChangedEventArgs);
-                //CenterX = (RangeMax - RangeMin) / 2;
-            }
-        }
-
+        public float RangeMin { get; set; }
         #endregion
 
         #region public float  RangeMax { get; set; }
-
-        private static readonly PropertyChangedEventArgs RangeMaxChangedEventArgs =
-            ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.RangeMax);
-
-        private float _rangeMax;
-
-        public float RangeMax
-        {
-            get { return _rangeMax; }
-            set
-            {
-                if (_rangeMax == value) return;
-                _rangeMax = value;
-                NotifyPropertyChanged(RangeMaxChangedEventArgs);
-                //CenterX = (RangeMax - RangeMin) / 2;
-            }
-        }
-
+        public float RangeMax { get; set; }
         #endregion
 
         #region public float DepthMin { get; set; }
-
-        private static readonly PropertyChangedEventArgs DepthMinChangedEventArgs =
-            ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.DepthMin);
-
-        private float _depthMin;
-
-        public float DepthMin
-        {
-            get { return _depthMin; }
-            set
-            {
-                if (_depthMin == value) return;
-                _depthMin = value;
-                NotifyPropertyChanged(DepthMinChangedEventArgs);
-                //CenterY = (DepthMax - DepthMin) / 2;
-            }
-        }
-
+        public float DepthMin { get; set; }
         #endregion
 
         #region public float  DepthMax { get; set; }
-
-        private static readonly PropertyChangedEventArgs DepthMaxChangedEventArgs =
-            ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.DepthMax);
-
-        private float _depthMax;
-
-        public float DepthMax
-        {
-            get { return _depthMax; }
-            set
-            {
-                if (_depthMax == value) return;
-                _depthMax = value;
-                NotifyPropertyChanged(DepthMaxChangedEventArgs);
-                // CenterY = (DepthMax - DepthMin) / 2;
-            }
-        }
-
+        public float DepthMax { get; set; }
         #endregion
 
         #region public TransmissionLossField TransmissionLossField { get; set; }
-
-        private static readonly PropertyChangedEventArgs TransmissionLossFieldChangedEventArgs =
-            ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.TransmissionLossField);
-
-        private TransmissionLossField _transmissionLossField;
-
-        public TransmissionLossField TransmissionLossField
-        {
-            get { return _transmissionLossField; }
-            set
-            {
-                if (_transmissionLossField == value) return;
-                _transmissionLossField = value;
-                NotifyPropertyChanged(TransmissionLossFieldChangedEventArgs);
-            }
-        }
-
+        public TransmissionLossField TransmissionLossField { get; set; }
         #endregion
 
         private readonly Dispatcher _dispatcher;
@@ -205,21 +116,20 @@ namespace ESME.Views.Controls
 
             // var width = TransmissionLossRadial.Ranges.Length;
             //var height = TransmissionLossRadial.Depths.Length;
-            int radius = TransmissionLossField.Ranges.Count;
-            if (_writeableBitmap == null)
-                _writeableBitmap = new WriteableBitmap(radius, radius, 96, 96, PixelFormats.Bgr32, null);
+            var radius = TransmissionLossField.Ranges.Count;
+            if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(radius, radius, 96, 96, PixelFormats.Bgr32, null);
 
             _writeableBitmap.Lock();
             unsafe
             {
                 var curOffset = (int) _writeableBitmap.BackBuffer;
-                for (int y = 0; y < radius; y++)
+                for (var y = 0; y < radius; y++)
                 {
-                    for (int x = 0; x < radius; x++)
+                    for (var x = 0; x < radius; x++)
                     {
                         // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
                         // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
-                        Color curColor = _colorMapViewModel.Lookup(SliceData[y, x]);
+                        var curColor = _colorMapViewModel.Lookup(SliceData[y, x]);
                         *((int*) curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) |
                                                (curColor.B));
                         curOffset += sizeof (Int32);
@@ -234,13 +144,10 @@ namespace ESME.Views.Controls
 
         private void RenderFinished()
         {
-            NotifyPropertyChanged(WriteableBitmapChangedEventArgs);
+            OnPropertyChanged("WritableBitmap");
         }
 
         #region public ColorMapViewModel ColorMapViewModel { get; set; }
-
-        private static readonly PropertyChangedEventArgs ColorMapViewModelChangedEventArgs =
-            ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.ColorMapViewModel);
 
         private ColorMapViewModel _colorMapViewModel;
 
@@ -249,31 +156,23 @@ namespace ESME.Views.Controls
             get { return _colorMapViewModel; }
             set
             {
-                if (_colorMapViewModel == value) return;
                 _colorMapViewModel = value;
-                _colorMapViewModel.PropertyChanged += ColorMapViewModelPropertyChanged;
-                NotifyPropertyChanged(ColorMapViewModelChangedEventArgs);
+                _colorMapViewModel.PropertyChanged += (s, e) =>
+                {
+                    switch (e.PropertyName)
+                    {
+                        case "CurMinValue":
+                        case "CurMaxValue":
+                            _isRendered = false;
+                            OnPropertyChanged("WritableBitmap");
+                            break;
+                    }
+                };
             }
         }
-
-        private void ColorMapViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case "CurMinValue":
-                case "CurMaxValue":
-                    _isRendered = false;
-                    NotifyPropertyChanged(WriteableBitmapChangedEventArgs);
-                    break;
-            }
-        }
-
         #endregion
 
         #region public float[,] SliceData { get; set; }
-
-        private static readonly PropertyChangedEventArgs SliceDataChangedEventArgs =
-            ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.SliceData);
 
         private float[,] _sliceData;
 
@@ -284,7 +183,6 @@ namespace ESME.Views.Controls
             {
                 _sliceData = value;
                 _isRendered = false;
-                NotifyPropertyChanged(SliceDataChangedEventArgs);
             }
         }
 

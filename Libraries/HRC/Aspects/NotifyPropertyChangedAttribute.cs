@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Windows.Threading;
+using HRC.WPF;
 using PostSharp.Aspects;
 using PostSharp.Aspects.Advices;
 using PostSharp.Aspects.Dependencies;
@@ -38,8 +40,18 @@ namespace HRC.Aspects
         //[ProvideAspectRole(StandardRoles.DataBinding)]
         public void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(Instance, new PropertyChangedEventArgs(propertyName));
+            var handlers = PropertyChanged;
+            if (handlers == null) return;
+            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                {
+                    var localHandler = handler;
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(Instance, new PropertyChangedEventArgs(propertyName)));
+                }
+                else
+                    handler(Instance, new PropertyChangedEventArgs(propertyName));
+            }
         }
 
         /// <summary>
@@ -59,7 +71,9 @@ namespace HRC.Aspects
         {
             // Don't go further if the new value is equal to the old one.
             // (Possibly use object.Equals here).
-            if (args.Value == args.GetCurrentValue()) return;
+            var currentValue = args.GetCurrentValue();
+            if (args.Value == null && currentValue == null) return;
+            if (args.Value == currentValue) return;
 
             // Actually sets the value.
             args.ProceedSetValue();

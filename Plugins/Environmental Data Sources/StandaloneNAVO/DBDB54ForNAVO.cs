@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using Cinch;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
@@ -105,14 +103,11 @@ namespace StandaloneNAVOPlugin
             get { return _databaseLocation; }
             set
             {
-                if (_databaseLocation == value) return;
                 _databaseLocation = value;
-                NotifyPropertyChanged(DataLocationChangedEventArgs);
                 Save();
             }
         }
 
-        static readonly PropertyChangedEventArgs DataLocationChangedEventArgs = ObservableHelper.CreateArgs<DBDB54ForNAVO>(x => x.DatabaseLocation);
         string _databaseLocation;
 
         #endregion
@@ -123,14 +118,11 @@ namespace StandaloneNAVOPlugin
             get { return _extractorLocation; }
             set
             {
-                if (_extractorLocation == value) return;
                 _extractorLocation = value;
-                NotifyPropertyChanged(ExtractionProgramLocationChangedEventArgs);
                 Save();
             }
         }
 
-        static readonly PropertyChangedEventArgs ExtractionProgramLocationChangedEventArgs = ObservableHelper.CreateArgs<DBDB54ForNAVO>(x => x.ExtractorLocation);
         string _extractorLocation;
 
         #endregion

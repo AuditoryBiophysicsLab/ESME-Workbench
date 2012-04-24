@@ -8,6 +8,7 @@ namespace ESME.TransmissionLoss.RAM
 {
     public class Ram
     {
+#if false
         /// <summary>
         /// RAM Runfile format:
         /// TITLE
@@ -117,5 +118,6 @@ namespace ESME.TransmissionLoss.RAM
                 return sw.ToString();
             }
         }
+#endif
     }
 }

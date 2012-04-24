@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
@@ -10,98 +9,34 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Cinch;
-using ESME.Environment;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.Views.Controls;
-using HRC.Aspects;
-using HRC.Navigation;
+using HRC.Services;
+using HRC.ViewModels;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Views.TransmissionLossViewer
 {
     [ExportViewModel("TransmissionLossRadialViewModel")]
-    [NotifyPropertyChanged]
     public class TransmissionLossRadialViewModel : ViewModelBase
     {
-        static readonly PropertyChangedEventArgs WriteableBitmapChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.WriteableBitmap);
 
         #region public float RangeMin { get; set; }
-
-        static readonly PropertyChangedEventArgs RangeMinChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.RangeMin);
-        float _rangeMin;
-
-        public float RangeMin
-        {
-            get { return _rangeMin; }
-            set
-            {
-                if (_rangeMin == value) return;
-                _rangeMin = value;
-                NotifyPropertyChanged(RangeMinChangedEventArgs);
-                //CenterX = (RangeMax - RangeMin) / 2;
-            }
-        }
-
+        public float RangeMin { get; set; }
         #endregion
 
         #region public float  RangeMax { get; set; }
-
-        static readonly PropertyChangedEventArgs RangeMaxChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.RangeMax);
-        float _rangeMax;
-
-        public float RangeMax
-        {
-            get { return _rangeMax; }
-            set
-            {
-                if (_rangeMax == value) return;
-                _rangeMax = value;
-                NotifyPropertyChanged(RangeMaxChangedEventArgs);
-                //CenterX = (RangeMax - RangeMin) / 2;
-            }
-        }
-
+        public float RangeMax { get; set; }
         #endregion
         
         #region public float DepthMin { get; set; }
-
-        static readonly PropertyChangedEventArgs DepthMinChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.DepthMin);
-        float _depthMin;
-
-        public float DepthMin
-        {
-            get { return _depthMin; }
-            set
-            {
-                if (_depthMin == value) return;
-                _depthMin = value;
-                NotifyPropertyChanged(DepthMinChangedEventArgs);
-                //CenterY = (DepthMax - DepthMin) / 2;
-            }
-        }
-
+        public float DepthMin { get; set; }
         #endregion
 
         #region public float  DepthMax { get; set; }
-
-        static readonly PropertyChangedEventArgs DepthMaxChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.DepthMax);
-        float _depthMax;
-
-        public float DepthMax
-        {
-            get { return _depthMax; }
-            set
-            {
-                if (_depthMax == value) return;
-                _depthMax = value;
-                NotifyPropertyChanged(DepthMaxChangedEventArgs);
-               // CenterY = (DepthMax - DepthMin) / 2;
-            }
-        }
-
+        public float DepthMax { get; set; }
         #endregion
 
         #region GridSizeChangedCommand
@@ -180,7 +115,7 @@ namespace ESME.Views.TransmissionLossViewer
                 _writeableBitmap = null;
                 if (Radial == null)
                 {
-                    NotifyPropertyChanged(WriteableBitmapChangedEventArgs);
+                    OnPropertyChanged("WriteableBitmap");
                     return;
                 }
                 RangeMin = Radial.Ranges.First();
@@ -191,7 +126,7 @@ namespace ESME.Views.TransmissionLossViewer
                                             Radial.Filename)));
                 ColorMapViewModel.MaxValue =TransmissionLossRadial.StatMax;
                 ColorMapViewModel.MinValue =TransmissionLossRadial.StatMin;
-                NotifyPropertyChanged(TransmissionLossRadialChangedEventArgs);
+                OnPropertyChanged("TransmissionLossRadial");
                 CalculateBottomProfileGeometry();
                 RenderBitmap();
             }
@@ -268,8 +203,8 @@ namespace ESME.Views.TransmissionLossViewer
 
             var theView = ((TransmissionLossRadialView)_viewAwareStatus.View);
             var m = PresentationSource.FromVisual(Application.Current.MainWindow).CompositionTarget.TransformToDevice;
-            double dx = 96*m.M11;
-            double dy = 96*m.M22;
+            var dx = 96*m.M11;
+            var dy = 96*m.M22;
             var bmp = CaptureScreen(theView, dx, dy);
             encoder.Frames.Add(BitmapFrame.Create(bmp));
             using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream);
@@ -305,8 +240,8 @@ namespace ESME.Views.TransmissionLossViewer
             var height = TransmissionLossRadial.Depths.Count;
 
             var m = PresentationSource.FromVisual(Application.Current.MainWindow).CompositionTarget.TransformToDevice;
-            double dx = m.M11;
-            double dy = m.M22;
+            var dx = m.M11;
+            var dy = m.M22;
 
             if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(width, height, dx, dy, PixelFormats.Bgr32, null);
             var infinityColor = _colorMapViewModel.Colors[0];
@@ -333,12 +268,11 @@ namespace ESME.Views.TransmissionLossViewer
             _dispatcher.BeginInvoke(new VoidDelegate(RenderFinished), DispatcherPriority.ApplicationIdle);
         }
 
-        void RenderFinished() { NotifyPropertyChanged(WriteableBitmapChangedEventArgs); } 
+        void RenderFinished() { OnPropertyChanged("WriteableBitmap"); } 
         #endregion
 
         #region public ColorMapViewModel ColorMapViewModel { get; set; }
 
-        static readonly PropertyChangedEventArgs ColorMapViewModelChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.ColorMapViewModel);
         ColorMapViewModel _colorMapViewModel;
 
         public ColorMapViewModel ColorMapViewModel
@@ -346,22 +280,18 @@ namespace ESME.Views.TransmissionLossViewer
             get { return _colorMapViewModel; }
             set
             {
-                if (_colorMapViewModel == value) return;
                 _colorMapViewModel = value;
-                _colorMapViewModel.PropertyChanged += ColorMapViewModelPropertyChanged;
-                NotifyPropertyChanged(ColorMapViewModelChangedEventArgs);
-            }
-        }
-
-        void ColorMapViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case "CurMinValue":
-                case "CurMaxValue":
-                    _isRendered = false;
-                    NotifyPropertyChanged(WriteableBitmapChangedEventArgs);
-                    break;
+                _colorMapViewModel.PropertyChanged += (s, e) =>
+                {
+                    switch (e.PropertyName)
+                    {
+                        case "CurMinValue":
+                        case "CurMaxValue":
+                            _isRendered = false;
+                            OnPropertyChanged("WriteableBitmap");
+                            break;
+                    }
+                };
             }
         }
 
@@ -369,7 +299,6 @@ namespace ESME.Views.TransmissionLossViewer
 
         #region public TransmissionLossRadial TransmissionLossRadial { get; set; }
 
-        static readonly PropertyChangedEventArgs TransmissionLossRadialChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.TransmissionLossRadial);
         private TransmissionLossRadial TransmissionLossRadial { get; set; }
         
         public Radial Radial { get; set; }
@@ -380,7 +309,6 @@ namespace ESME.Views.TransmissionLossViewer
 
         #region public string BottomProfileGeometry { get; set; }
 
-        static readonly PropertyChangedEventArgs BottomProfileGeometryChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.BottomProfileGeometry);
         string _bottomProfileGeometry = "M 0,0";
 
         public string BottomProfileGeometry
@@ -388,9 +316,7 @@ namespace ESME.Views.TransmissionLossViewer
             get { return _bottomProfileGeometry; }
             private set
             {
-                if (_bottomProfileGeometry == value) return;
                 _bottomProfileGeometry = value;
-                NotifyPropertyChanged(BottomProfileGeometryChangedEventArgs);
             }
         }
 

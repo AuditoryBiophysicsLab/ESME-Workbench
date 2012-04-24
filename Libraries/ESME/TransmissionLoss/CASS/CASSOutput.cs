@@ -1,23 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Cinch;
 using ESME.Environment;
 using ESME.Model;
 using HRC.Navigation;
 using HRC.Utility;
+using HRC.Validation;
 using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.TransmissionLoss.CASS
 {
-    public class CASSOutput : ValidatingViewModelBase, IEquatable<AcousticProperties>, ISupportValidation
+    public class CASSOutput : ValidatingViewModel, IEquatable<AcousticProperties>, ISupportValidation
     {
         #region Public Properties
 
@@ -192,13 +191,10 @@ namespace ESME.TransmissionLoss.CASS
             }
             private set
             {
-                if (_validationErrorText == value) return;
                 _validationErrorText = value;
-                NotifyPropertyChanged(ValidationErrorTextChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPoint>(x => x.ValidationErrorText);
         string _validationErrorText;
 
         #endregion

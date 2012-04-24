@@ -1,8 +1,6 @@
 ﻿using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.IO;
-using Cinch;
+using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.RecentFiles
 {
@@ -37,15 +35,10 @@ namespace ESMEWorkbench.ViewModels.RecentFiles
             set
             {
                 if (_list == value) return;
-                if (_list != null) _list.CollectionChanged -= ListCollectionChanged;
                 _list = value;
-                if (_list != null) _list.CollectionChanged += ListCollectionChanged;
-                NotifyPropertyChanged(ListChangedEventArgs);
             }
         }
 
-        void ListCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(ListChangedEventArgs); }
-        static readonly PropertyChangedEventArgs ListChangedEventArgs = ObservableHelper.CreateArgs<RecentFileList>(x => x.List);
         ObservableCollection<RecentFileDescriptor> _list;
 
         #endregion

@@ -166,7 +166,6 @@
     <Compile Include="Scenarios\PerimeterCoordinate.cs" />
     <Compile Include="Scenarios\Platform.cs" />
     <Compile Include="Scenarios\Scenario.cs" />
-    <Compile Include="Data\AppSettings%28pre-aspect%29.cs" />
     <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Data\WorkDirectories.cs" />
     <Compile Include="Delegates.cs" />
@@ -175,7 +174,6 @@
     <Compile Include="Environment\EnvironmentData.cs" />
     <Compile Include="Environment\EnvironmentDataSetBase.cs" />
     <Compile Include="Environment\EnvironmentImporter.cs" />
-    <Compile Include="Environment\EnvironmentMetadata.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeTable.cs" />
     <Compile Include="Environment\NAVO\ChenMilleroLi.cs" />
     <Compile Include="Environment\NAVO\NAVOConfiguration.cs" />
@@ -266,9 +264,6 @@
     <Compile Include="TransmissionLoss\REFMS\PolynomialSplineFunction.cs" />
     <Compile Include="TransmissionLoss\REFMS\Interfaces.cs" />
     <Compile Include="TransmissionLoss\REFMS\SplineInterpolator.cs" />
-    <Compile Include="TransmissionLoss\Bellhop\BellhopRunFileRadial.cs" />
-    <Compile Include="TransmissionLoss\Bellhop\RadialCalculator.cs" />
-    <Compile Include="TransmissionLoss\AnalysisPoint.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopOutput.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
     <Compile Include="TransmissionLoss\Bellhop\TransmissionLossSettings.cs" />
@@ -276,11 +271,8 @@
     <Compile Include="TransmissionLoss\RAM\Ram.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="TransmissionLoss\RAM\RamRunFile.cs" />
-    <Compile Include="TransmissionLoss\RAM\RamRunFileRadial.cs" />
     <Compile Include="TransmissionLoss\SoundPressureLevelField.cs" />
     <Compile Include="TransmissionLoss\SoundPressureLevelRadial.cs" />
-    <Compile Include="TransmissionLoss\SoundSource.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossAlgorithm.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossCalculatorService.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossField.cs" />
@@ -288,11 +280,7 @@
     <Compile Include="TransmissionLoss\TransmissionLossProcess.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="TransmissionLoss\TransmissionLossJob.cs" />
-    <Compile Include="TransmissionLoss\TransmissionLossRunFile.cs" />
-    <Compile Include="TransmissionLoss\TransmissionLossRunFileRadial.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossSlice.cs" />
-    <Compile Include="Validation\TransmissionLossValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -303,7 +291,6 @@
     <Compile Include="Interfaces.cs" />
     <Compile Include="TransmissionLoss\AcousticProperties.cs" />
     <Compile Include="Animats\Animat.cs" />
-    <Compile Include="TransmissionLoss\Bellhop\BellhopRunFile.cs" />
     <Compile Include="Model\EnvironmentInformation.cs" />
     <Compile Include="Model\Exceptions.cs" />
     <Compile Include="Simulator\HistogramBins.cs" />

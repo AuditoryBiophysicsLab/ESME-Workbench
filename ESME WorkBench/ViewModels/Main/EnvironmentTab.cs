@@ -1,16 +1,12 @@
 ﻿using System;
-using System.ComponentModel;
-using Cinch;
-using ESME;
 using ESME.Locations;
 using ESME.Views.Locations;
 using HRC.Aspects;
 using HRC.Navigation;
-using ThinkGeo.MapSuite.Core;
+using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
-    [NotifyPropertyChanged]
     public partial class MainViewModel
     {
         #region CreateLocationCommand
@@ -30,12 +26,14 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             try
             {
-                var vm = new CreateLocationViewModel(_plugins, Database, _cache);
-                var result = _visualizer.ShowDialog("CreateLocationView", vm);
-                if ((result.HasValue) && (result.Value))
-                {
-                    
-                }
+                var currentExtent = MapViewModel.CurrentExtent;
+                MapViewModel.EditOverlayViewModel.North = (currentExtent.North + currentExtent.Center.Latitude) / 2;
+                MapViewModel.EditOverlayViewModel.South = (currentExtent.South + currentExtent.Center.Latitude) / 2;
+                MapViewModel.EditOverlayViewModel.East = (currentExtent.East + currentExtent.Center.Longitude) / 2;
+                MapViewModel.EditOverlayViewModel.West = (currentExtent.West + currentExtent.Center.Longitude) / 2;
+                MapViewModel.EditOverlayViewModel.IsVisible = true;
+                var vm = new CreateLocationViewModel(_plugins, Database, _cache, MapViewModel.EditOverlayViewModel);
+                vm.Window = _visualizer.ShowWindow("CreateLocationView", vm, true, null);
             }
             catch (Exception e) { _messageBox.ShowError(e.Message); }
         }
@@ -44,36 +42,14 @@ namespace ESMEWorkbench.ViewModels.Main
         public int SelectedLocationIndex { get; set; }
         public Location SelectedLocation { get; set; }
 
-        #region public bool AreAllViewModelsReady { get; set; }
-
-        public bool AreAllViewModelsReady
-        {
-            get { return _areAllViewModelsReady; }
-            set
-            {
-                if (_areAllViewModelsReady == value) return;
-                _areAllViewModelsReady = value;
-                NotifyPropertyChanged(AreAllViewModelsReadyChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs AreAllViewModelsReadyChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.AreAllViewModelsReady);
-        bool _areAllViewModelsReady;
-
-        #endregion
-
         #region ZoomToWorldMapCommand
         public SimpleCommand<object, object> ZoomToWorldMapCommand
         {
-            get { return _zoomToWorldMap ?? (_zoomToWorldMap = new SimpleCommand<object, object>(ZoomToWorldMap)); }
+            get { return _zoomToWorldMap ?? (_zoomToWorldMap = new SimpleCommand<object, object>(o => { MapViewModel.CurrentExtent = new GeoRect(90, -90, 180, -180); })); }
         }
 
         SimpleCommand<object, object> _zoomToWorldMap;
 
-        static void ZoomToWorldMap(object o)
-        {
-            MediatorMessage.Send(MediatorMessage.SetMapExtent, new GeoRect(90, -90, 180, -180));
-        }
         #endregion
 
         #region ViewActivatedCommand
@@ -89,15 +65,9 @@ namespace ESMEWorkbench.ViewModels.Main
             if (_viewIsActivated) return;
             Console.WriteLine("The window has been activated!");
             _viewIsActivated = true;
-            //_dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
-            //_dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
-            //_dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
-            //_dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
         }
         bool _viewIsActivated;
         #endregion
-
-
 
 #if false
         void DisplayWorldMap()
@@ -243,8 +213,8 @@ namespace ESMEWorkbench.ViewModels.Main
                 _messageBox.ShowError(error);
                 return;
             }
-            var result = _messageBox.ShowYesNo(string.Format("Are you sure you want to delete the overlay \"{0}\"?\r\nThis operation cannot be undone.", RangeComplexes.SelectedArea.Name), CustomDialogIcons.Exclamation);
-            if (result == CustomDialogResults.No) return;
+            var result = _messageBox.ShowYesNo(string.Format("Are you sure you want to delete the overlay \"{0}\"?\r\nThis operation cannot be undone.", RangeComplexes.SelectedArea.Name), MessageBoxImage.Exclamation);
+            if (result == MessageBoxResult.No) return;
             RangeComplexes.SelectedRangeComplex.RemoveArea(RangeComplexes.SelectedArea.Name);
             RangeComplexes.SelectedArea = null;
         }

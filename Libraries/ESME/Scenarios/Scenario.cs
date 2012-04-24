@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -9,12 +8,12 @@ using ESME.Behaviors;
 using ESME.Database;
 using ESME.Environment;
 using ESME.Locations;
-using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 
 namespace ESME.Scenarios
 {
+    [NotifyPropertyChanged]
     public class Scenario : IHaveGuid, IHaveLayerSettings
     {
         [Key, Initialize]
@@ -176,7 +175,6 @@ namespace ESME.Scenarios
         }
         #endregion
 
-        [UsedImplicitly] public event PropertyChangedEventHandler PropertyChanged;
         [NotMapped] public static MasterDatabaseService Database { get; set; }
         [NotMapped] public static EnvironmentalCacheService Cache { get; set; }
 

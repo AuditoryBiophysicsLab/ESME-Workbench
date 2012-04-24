@@ -2,7 +2,6 @@
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Text;
-using Cinch;
 using ESME.Data;
 using HRC.Services;
 

@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.Composition;
-using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Views.Services
@@ -10,23 +9,7 @@ namespace ESME.Views.Services
 
     public class ViewParameterService : IViewParameterService  
     {
-        #region public double TransmissionLayersWidth { get; set; }
-
-        public double TransmissionLayersWidth
-        {
-            get { return _transmissionLayersWidth; }
-            set
-            {
-                if (_transmissionLayersWidth == value) return;
-                _transmissionLayersWidth = value;
-                NotifyPropertyChanged(TransmissionLayersWidthChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs TransmissionLayersWidthChangedEventArgs = ObservableHelper.CreateArgs<ViewParameterService>(x => x.TransmissionLayersWidth);
-        double _transmissionLayersWidth;
-
-        #endregion
+        public double TransmissionLayersWidth { get; set; }
 
         #region INotifyPropertyChanged Members
 

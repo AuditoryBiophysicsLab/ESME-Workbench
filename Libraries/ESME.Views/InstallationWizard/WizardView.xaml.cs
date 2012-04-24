@@ -1,4 +1,5 @@
-﻿using Cinch;
+﻿
+using HRC.ViewModels;
 
 namespace ESME.Views.InstallationWizard
 {
