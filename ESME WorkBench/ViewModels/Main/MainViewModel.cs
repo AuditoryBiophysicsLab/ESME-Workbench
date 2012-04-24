@@ -93,11 +93,11 @@ namespace ESMEWorkbench.ViewModels.Main
             _importsSatisfied = true;
             _cache.PropertyChanged += (s, e) =>
             {
-                CacheActivity = _cache.BusyCount > 0 ? string.Format("Cache: {0} importing", _cache.BusyCount) : "Cache: idle";
+                if (e.PropertyName == "BusyCount") CacheActivity = _cache.BusyCount > 0 ? string.Format("Cache: {0} importing", _cache.BusyCount) : "Cache: idle";
             };
-            _transmissionLoss.PropertyChanged += (s, e) =>
+            _transmissionLoss.WorkQueue.PropertyChanged += (s, e) =>
             {
-                TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0 ? string.Format("TL: {0} running", _transmissionLoss.WorkQueue.Keys.Count) : "TL: idle";
+                if (e.PropertyName == "Count") TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0 ? string.Format("TL: {0} queued", _transmissionLoss.WorkQueue.Keys.Count) : "TL: idle";
             };
             if (Database.MasterDatabaseDirectory != null) _transmissionLoss.Start();
         }
