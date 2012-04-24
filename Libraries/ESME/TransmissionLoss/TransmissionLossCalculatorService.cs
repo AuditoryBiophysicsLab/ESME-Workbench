@@ -17,6 +17,7 @@ using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
+using HRC.ViewModels;
 using MEFedMVVM.ViewModelLocator;
 using HRC.Collections;
 
@@ -24,7 +25,7 @@ namespace ESME.TransmissionLoss
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ExportService(ServiceType.Both, typeof(TransmissionLossCalculatorService))]
-    public class TransmissionLossCalculatorService: IPartImportsSatisfiedNotification
+    public class TransmissionLossCalculatorService: ViewModelBase, IPartImportsSatisfiedNotification
     {
         public TransmissionLossCalculatorService()
         {
@@ -35,6 +36,8 @@ namespace ESME.TransmissionLoss
                 WorkQueue.Remove(job.Item1.ProgressTarget.Guid);
                 if (!WorkQueue.Any()) MediatorMessage.Send(MediatorMessage.ShowTransmissionLossQueueView, false);
             }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
+            _queue = new BufferBlock<Tuple<PercentProgress<Radial>, string>>(new DataflowBlockOptions { BoundedCapacity = -1 });
+            _queue.LinkTo(_calculator);
         }
 
         public TransmissionLossCalculatorService(MasterDatabaseService databaseService, IPluginManagerService pluginService, EnvironmentalCacheService cacheService) : this()
@@ -48,6 +51,7 @@ namespace ESME.TransmissionLoss
         [Initialize(float.NaN)] public float DepthCellSize { get; set; }
         [Initialize, UsedImplicitly] public ObservableConcurrentDictionary<Guid, PercentProgress<Radial>> WorkQueue { get; private set; }
         readonly ActionBlock<Tuple<PercentProgress<Radial>, string>> _calculator;
+        readonly BufferBlock<Tuple<PercentProgress<Radial>, string>> _queue;
 
         public void OnImportsSatisfied()
         {
@@ -89,7 +93,7 @@ namespace ESME.TransmissionLoss
             var directoryPath = Path.Combine(_databaseService.MasterDatabaseDirectory, radial.TransmissionLoss.AnalysisPoint.Scenario.StorageDirectory);
             var progress = new PercentProgress<Radial>(radial);
             WorkQueue.Add(radial.Guid, progress);
-            _calculator.Post(Tuple.Create(progress, directoryPath));
+            _queue.Post(Tuple.Create(progress, directoryPath));
         }
 
         public void TestAdd(Radial radial, string directoryPath)

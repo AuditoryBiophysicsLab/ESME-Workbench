@@ -102,7 +102,7 @@ namespace ESME.Locations
             var timePeriod = dataSet.TimePeriod;
             var fileName = Path.Combine(_database.MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
             progress.Report(0);
-            Debug.WriteLine("Importer: About to import {0}[{1}] from plugin {2}", dataSet.SourcePlugin.PluginSubtype, dataSet.Resolution, sourcePlugin.PluginName);
+            Debug.WriteLine("Importer: About to import {0}[{1}] from plugin {2}", (PluginSubtype)dataSet.SourcePlugin.PluginSubtype, dataSet.Resolution, sourcePlugin.PluginName);
             switch (sourcePlugin.EnvironmentDataType)
             {
                 case EnvironmentDataType.Wind:
@@ -139,7 +139,7 @@ namespace ESME.Locations
             }
             dataSet.FileSize = new FileInfo(fileName).Length;
             progress.Report(100);
-            Debug.WriteLine("Importer: Imported {0}[{1}] from plugin {2}", dataSet.SourcePlugin.PluginSubtype, dataSet.Resolution, sourcePlugin.PluginName);
+            Debug.WriteLine("Importer: Imported {0}[{1}] from plugin {2}", (PluginSubtype)dataSet.SourcePlugin.PluginSubtype, dataSet.Resolution, sourcePlugin.PluginName);
             Interlocked.Decrement(ref _busyCount);
             OnPropertyChanged("BusyCount");
             _importJobsPending.TryRemove(dataSet.Guid, out progress);

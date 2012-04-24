@@ -93,7 +93,11 @@ namespace ESMEWorkbench.ViewModels.Main
             _importsSatisfied = true;
             _cache.PropertyChanged += (s, e) =>
             {
-                if (_cache.BusyCount > 0) CacheActivity = string.Format("Cache: {0} imports active", _cache.BusyCount);
+                CacheActivity = _cache.BusyCount > 0 ? string.Format("Cache: {0} importing", _cache.BusyCount) : "Cache: idle";
+            };
+            _transmissionLoss.PropertyChanged += (s, e) =>
+            {
+                TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0 ? string.Format("TL: {0} running", _transmissionLoss.WorkQueue.Keys.Count) : "TL: idle";
             };
             if (Database.MasterDatabaseDirectory != null) _transmissionLoss.Start();
         }
@@ -110,7 +114,10 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #endregion
 
+        [Initialize("Cache: idle")]
         public string CacheActivity { get; set; }
+        [Initialize("TL: idle")]
+        public string TransmissionLossActivity { get; set; }
         public string DecoratedExperimentName { get; set; }
 
         [Affects("MouseLocationInfo")]
