@@ -11,7 +11,7 @@ using HRC.Validation;
 
 namespace ESME.Data
 {
-    [Serializable, NotifyPropertyChanged]
+    [Serializable]
     public class AppSettings : ValidatingViewModel
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>
@@ -55,56 +55,6 @@ namespace ESME.Data
         [Initialize]
         public SerializableDictionary<string, string> OpenFileServiceDirectories { get; set; }
 
-#if false
-        #region public string ScenarioDataDirectory { get; set; }
-
-        static readonly PropertyChangedEventArgs ScenarioDataDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioDataDirectory);
-        string _scenarioDataDirectory;
-
-        public string ScenarioDataDirectory
-        {
-            get { return _scenarioDataDirectory; }
-            set
-            {
-                if (_scenarioDataDirectory == value) return;
-                _scenarioDataDirectory = value;
-                NotifyPropertyChanged(ScenarioDataDirectoryChangedEventArgs);
-            }
-        }
-        public bool ValidateScenarioDataDirectory(string simAreaFile, IMessageBoxService messageBoxService = null)
-        {
-            if (string.IsNullOrEmpty(simAreaFile) || !File.Exists(simAreaFile))
-            {
-                if (messageBoxService != null) messageBoxService.ShowError(string.Format("Scenario data directory must point to a valid file or directory"));
-                return false;
-            }
-
-            var standardFilenames = new[]
-            {
-                "SimAreas.csv", "Species.csv", "PSM.csv"
-            };
-            var simAreaDirectory = Path.GetDirectoryName(simAreaFile);
-            var files = Directory.GetFiles(simAreaDirectory, "*.csv");
-            if (files.Length < 3)
-            {
-                if (messageBoxService != null) messageBoxService.ShowError(string.Format("Error validating scenario data directory \"{0}\": Expected file(s) not found in this directory", simAreaDirectory));
-                return false;
-            }
-            foreach (var file in files)
-            {
-                var curFile = Path.GetFileName(file).ToLower();
-                var foundMatch = standardFilenames.Any(standardFile => curFile == standardFile.ToLower());
-                if (foundMatch) continue;
-                if (messageBoxService != null) messageBoxService.ShowError(string.Format("Error validating scenario data directory \"{0}\": Expected file(s) not found in this directory", simAreaDirectory));
-                return false;
-            }
-            ScenarioDataDirectory = simAreaDirectory;
-            return true;
-        }
-
-        #endregion
-#endif
-
         [Initialize]
         public BellhopSettings BellhopSettings { get; set; }
 
@@ -113,51 +63,6 @@ namespace ESME.Data
 
         [Initialize]
         public NAVOConfiguration NAVOConfiguration { get; set; }
-#if false
-        #region public List<string> ExperimentFiles { get; set; }
-#if UseAspects
-        [Initialize]
-        public List<string> ExperimentFiles { get; set; }
-#else
-        // This list is maintained by the ESME Workbench.  When a new experiment is saved, the path to the experiment directory is added to this list
-        // Periodically, the VerifyExperimentsStillExist() method is called, which will prune directories that no longer exist.
-
-        public List<string> ExperimentFiles
-        {
-            get { return _experimentFiles ?? (_experimentFiles = new List<string>()); }
-            set
-            {
-                if (_experimentFiles == value) return;
-                _experimentFiles = value;
-                NotifyPropertyChanged(ExperimentDirectoriesChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ExperimentDirectoriesChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ExperimentFiles);
-        List<string> _experimentFiles;
-#endif
-
-        /// <summary>
-        /// Add the current experiment to the list for the Transmission Loss Calculator to keep track of
-        /// </summary>
-        /// <param name="curExperimentFile"></param>
-        public void AddExperiment(string curExperimentFile)
-        {
-            if (ExperimentFiles.Any(experimentFile => experimentFile == curExperimentFile)) return;
-            ExperimentFiles.Add(curExperimentFile);
-            Save();
-        }
-
-        public void VerifyExperimentsStillExist()
-        {
-            //var tmpList = ExperimentFiles.Where(File.Exists).ToList();
-            //ExperimentFiles.Clear();
-            //ExperimentFiles.AddRange(tmpList);
-            //Save();
-        }
-
-        #endregion
-#endif
 
         [Initialize(true)]
         public bool DisplayContoursOnTransmissionLoss { get; set; }
@@ -207,7 +112,6 @@ namespace ESME.Data
         public string DatabaseDirectory { get; set; }
     }
 
-    [NotifyPropertyChanged]
     public sealed class PluginSelection : ValidatingViewModel
     {
         public string DllFilename { get; set; }
@@ -215,7 +119,6 @@ namespace ESME.Data
         public string ClassName { get; set; }
     }
 
-    [NotifyPropertyChanged]
     public sealed class RAMSettings : ValidatingViewModel
     {
         public RAMSettings()
@@ -279,7 +182,6 @@ namespace ESME.Data
         public float RangeStepSize { get; set; }
     }
 
-    [NotifyPropertyChanged]
     public sealed class BellhopSettings : ValidatingViewModel
     {
         public BellhopSettings()

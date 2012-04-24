@@ -42,10 +42,6 @@
       <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Cinch.WPF">
-      <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="MapSuiteCore">
       <HintPath>..\..\ESME WorkBench\External References\MapSuiteCore.dll</HintPath>
     </Reference>
@@ -121,10 +117,6 @@
     <Compile Include="Environment\SoundSpeedProfileWindowView.xaml.cs">
       <DependentUpon>SoundSpeedProfileWindowView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="InstallationWizard\WizardView.xaml.cs">
-      <DependentUpon>WizardView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="InstallationWizard\WizardViewModel.cs" />
     <Compile Include="LabelValuePair.cs" />
     <Compile Include="Locations\EditOverlayViewModel.cs" />
     <Compile Include="Locations\ImportScenarioFileView.xaml.cs">
@@ -205,10 +197,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Environment\SoundSpeedProfileWindowView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="InstallationWizard\WizardView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -300,9 +288,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Wave.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="InstallationWizard\dlgbmp.bmp" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

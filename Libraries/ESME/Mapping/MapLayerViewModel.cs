@@ -13,8 +13,7 @@ using ThinkGeo.MapSuite.WpfDesktopEdition;
 namespace ESME.Mapping
 {
     [Serializable]
-    [NotifyPropertyChanged]
-    public class MapLayerViewModel : ISupportValidation, IHaveAName
+    public class MapLayerViewModel : ViewModelBase, ISupportValidation, IHaveAName
     {
         protected static readonly Random Random;
         static readonly Color[] Palette;

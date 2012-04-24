@@ -8,12 +8,14 @@ using System.Runtime.Serialization;
 using System.Windows.Data;
 using System.Windows.Threading;
 using System.Xml.Serialization;
+using HRC.Aspects;
 using HRC.Collections;
 using HRC.WPF;
 
 namespace HRC.Utility
 {
     [Serializable]
+    [NotifyPropertyChanged]
     public class ObservableList<T> : List<T>, ICollection<T>, INotifyCollectionChanged, INotifyPropertyChanged, IDeserializationCallback
     {
         object _lockObject = new object();
@@ -241,10 +243,9 @@ namespace HRC.Utility
                     else
                         handler(this, e);
                 }
-                catch (Exception)
-                {}
+                catch (Exception) {}
             }
-            NotifyPropertyChanged(new PropertyChangedEventArgs("Count"));
+            OnPropertyChanged(new PropertyChangedEventArgs("Count"));
         }
 
         protected virtual void OnCollectionChangedMultiItem(NotifyCollectionChangedEventArgs e)
@@ -259,9 +260,9 @@ namespace HRC.Utility
                 else
                     handler(this, e);
             }
-            NotifyPropertyChanged(new PropertyChangedEventArgs("Count"));
+            OnPropertyChanged(new PropertyChangedEventArgs("Count"));
         }
-
+#if false
         void CollectionChangedHandler(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
@@ -293,11 +294,12 @@ namespace HRC.Utility
                     break;
             }
         }
+#endif
 
         #region INotifyPropertyChanged Members
 
         public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs e)
+        protected void OnPropertyChanged(PropertyChangedEventArgs e)
         {
             var handlers = PropertyChanged;
             if (handlers == null) return;

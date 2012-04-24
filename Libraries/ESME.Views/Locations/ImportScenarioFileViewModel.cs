@@ -7,13 +7,11 @@ using ESME.Environment.NAVO;
 using ESME.Locations;
 using ESME.Plugins;
 using ESME.Scenarios;
-using HRC.Aspects;
 using HRC.Validation;
 using HRC.ViewModels;
 
 namespace ESME.Views.Locations
 {
-    [NotifyPropertyChanged]
     public class ImportScenarioFileViewModel : ValidatingViewModel
     {
         public ImportScenarioFileViewModel(MasterDatabaseService database, EnvironmentalCacheService cache, IPluginManagerService plugins)

@@ -59,9 +59,6 @@
     <Reference Include="AsyncCtpLibrary, Version=1.0.4107.18181, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="Cinch.WPF">
-      <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
-    </Reference>
     <Reference Include="Devart.Data, Version=5.0.401.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <Private>True</Private>
     </Reference>

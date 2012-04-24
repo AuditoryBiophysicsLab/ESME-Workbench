@@ -17,7 +17,6 @@ using System.ComponentModel.Composition;
 namespace DavesWPFTester
 {
     [ExportViewModel("MainWindowViewModel")]
-    [NotifyPropertyChanged]
     public class MainWindowViewModel : ViewModelBase
     {
         readonly IPluginManagerService _plugins;

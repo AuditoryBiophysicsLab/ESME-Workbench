@@ -44,9 +44,6 @@
     <CodeAnalysisFailOnMissingRules>true</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Cinch.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
-    </Reference>
     <Reference Include="EntityFramework, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
     <Reference Include="FileHelpers">
       <HintPath>..\ESME WorkBench\External References\FileHelpers.dll</HintPath>

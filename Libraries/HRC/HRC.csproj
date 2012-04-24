@@ -56,10 +56,6 @@
     <Reference Include="AsyncCtpLibrary">
       <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="Cinch.WPF">
-      <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="MEFedMVVM.WPF">
       <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
       <Private>False</Private>

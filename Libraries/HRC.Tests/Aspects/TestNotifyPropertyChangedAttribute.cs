@@ -192,7 +192,7 @@ namespace HRC.Tests.Aspects
         }
     }
 
-    [Serializable, NotifyPropertyChanged]
+    [Serializable]
     public abstract class SettingsBase : ValidatingViewModel, ISettingsBase
     {
         public abstract void Save(string fileName);

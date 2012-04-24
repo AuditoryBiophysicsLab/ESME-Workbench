@@ -34,9 +34,6 @@
     <Reference Include="AsyncCtpLibrary">
       <HintPath>..\..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="Cinch.WPF">
-      <HintPath>..\..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
-    </Reference>
     <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />

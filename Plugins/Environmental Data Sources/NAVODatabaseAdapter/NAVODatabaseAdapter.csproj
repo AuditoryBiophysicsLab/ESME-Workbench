@@ -39,10 +39,6 @@
       <HintPath>..\..\..\Libraries\C5\bin\Debug\C5.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Cinch.WPF">
-      <HintPath>..\..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="HDF5DotNet">
       <HintPath>..\..\..\ESME WorkBench\External References\HDF5DotNet.dll</HintPath>
       <Private>False</Private>

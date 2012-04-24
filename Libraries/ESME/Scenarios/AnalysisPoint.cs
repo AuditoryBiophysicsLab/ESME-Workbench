@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -11,11 +12,11 @@ using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
 using HRC.Aspects;
 using HRC.Navigation;
-using HRC.ViewModels;
 
 namespace ESME.Scenarios
 {
-    public class AnalysisPoint : ViewModelBase, IHaveGuid, IHaveLayerSettings, ISupportValidation
+    [NotifyPropertyChanged]
+    public class AnalysisPoint : IHaveGuid, IHaveLayerSettings, ISupportValidation, INotifyPropertyChanged
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
@@ -39,6 +40,7 @@ namespace ESME.Scenarios
         }
 
         public void Validate() { throw new NotImplementedException(); }
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 
     [NotifyPropertyChanged]

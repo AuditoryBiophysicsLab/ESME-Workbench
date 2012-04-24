@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
+using HRC.Aspects;
 
 namespace ESME.TransmissionLoss
 {
-    public class TransmissionLossProcess : Process, INotifyPropertyChanged
+    [NotifyPropertyChanged]
+    public class TransmissionLossProcess : Process
     {
         public BackgroundWorker BackgroundWorker { get; set; }
         public int BeamCount { get; set; }
@@ -25,14 +27,11 @@ namespace ESME.TransmissionLoss
             get { return _curBeam; }
             set
             {
-                if (_curBeam == value) return;
                 _curBeam = value;
                 ProgressPercent = (int)((_curBeam / (float)BeamCount) * 95.0f);
-                NotifyPropertyChanged(CurBeamChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs CurBeamChangedEventArgs = new PropertyChangedEventArgs("CurBeam");
         int _curBeam;
 
         #endregion
@@ -44,22 +43,15 @@ namespace ESME.TransmissionLoss
             get { return _progressPercent; }
             set
             {
-                if (_progressPercent == value) return;
                 _progressPercent = value;
                 if (_progressPercent < 0) _progressPercent = 0;
                 if (_progressPercent > 100) _progressPercent = 100;
                 if ((!HasExited) && (BackgroundWorker != null)) BackgroundWorker.ReportProgress(_progressPercent);
-                NotifyPropertyChanged(ProgressPercentChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs ProgressPercentChangedEventArgs = new PropertyChangedEventArgs("ProgressPercent");
         int _progressPercent;
 
         #endregion
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
     }
 }

@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Windows.Media;
 using ESME.Database;
 using ESME.Locations;
-using HRC;
 using HRC.Aspects;
 using HRC.WPF;
 

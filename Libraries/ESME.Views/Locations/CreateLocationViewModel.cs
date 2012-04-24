@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Data;
 using ESME.Locations;
 using ESME.Plugins;
-using HRC.Aspects;
 using HRC.Collections;
 using System.Linq;
 using HRC.Validation;
@@ -13,7 +12,6 @@ using HRC.ViewModels;
 
 namespace ESME.Views.Locations
 {
-    [NotifyPropertyChanged]
     public sealed class CreateLocationViewModel : ValidatingViewModel
     {
         #region Constructor

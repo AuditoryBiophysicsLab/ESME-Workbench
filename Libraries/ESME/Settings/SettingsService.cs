@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using HRC.Aspects;
 using HRC.Utility;
 using System.Linq;
 using MEFedMVVM.ViewModelLocator;
@@ -16,7 +17,7 @@ namespace ESME.Settings
 
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ExportService(ServiceType.Both, typeof (ISettingsService))]
-    //[NotifyPropertyChanged]
+    [NotifyPropertyChanged]
     public class SettingsService : ISettingsService
     {
         public string SettingsRootDirectory { get; set; }

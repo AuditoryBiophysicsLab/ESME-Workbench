@@ -33,9 +33,6 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Cinch.WPF">
-      <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
-    </Reference>
     <Reference Include="Devart.Data, Version=5.0.401.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <HintPath>..\..\..\Program Files (x86)\Devart\dotConnect\SQLite\Devart.Data.dll</HintPath>
     </Reference>

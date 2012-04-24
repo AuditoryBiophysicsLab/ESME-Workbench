@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -14,7 +15,7 @@ using HRC.Navigation;
 namespace ESME.Scenarios
 {
     [NotifyPropertyChanged]
-    public class Scenario : IHaveGuid, IHaveLayerSettings
+    public class Scenario : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
@@ -190,6 +191,8 @@ namespace ESME.Scenarios
                                       select tl).ToList();
             foreach (var transmissionLoss in transmissionLosses) transmissionLoss.CreateMapLayers();
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 
     public static class ScenarioExensions

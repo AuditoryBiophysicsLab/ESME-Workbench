@@ -1,6 +1,5 @@
 using System;
 using System.Xml.Serialization;
-using HRC.Aspects;
 using HRC.Utility;
 using HRC.Validation;
 
@@ -12,7 +11,7 @@ namespace ESME.Settings
         string SettingsFilename { get; }
     }
 
-    [Serializable, NotifyPropertyChanged]
+    [Serializable]
     public abstract class SettingsBase : ValidatingViewModel, ISettingsBase
     {
         protected virtual void SaveBase<T>(T settings, string fileName = null) where T: class, new()

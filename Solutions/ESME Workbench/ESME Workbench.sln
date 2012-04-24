@@ -55,8 +55,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HRC.Tests", "..\..\Librarie
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreateBellhopEnvironmentFiles", "..\..\Utilities\CreateBellhopEnvironmentFiles\CreateBellhopEnvironmentFiles.csproj", "{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransmissionLossCalculator.Tests", "..\..\TransmissionLossCalculator.Tests\TransmissionLossCalculator.Tests.csproj", "{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME.Tests", "..\..\Libraries\ESME.Tests\ESME.Tests.csproj", "{30119915-93B3-4B5F-8678-9FB7B0CF8FC2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundSpeedProfile", "..\..\Utilities\SoundSpeedProfile\SoundSpeedProfile.csproj", "{CFCFE8CC-125F-43EC-B9B9-D5D8A400F280}"
@@ -525,30 +523,6 @@ Global
 		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Release|Win32.ActiveCfg = Release|Any CPU
 		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Release|x64.ActiveCfg = Release|Any CPU
 		{55E70902-CDB8-469E-A0CC-A3749A8DD1C7}.Release|x86.ActiveCfg = Release|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Debug (x64)|Any CPU.ActiveCfg = Debug|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Debug (x64)|Any CPU.Build.0 = Debug|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Debug (x64)|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Debug (x64)|Mixed Platforms.Build.0 = Debug|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Debug (x64)|Win32.ActiveCfg = Debug|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Debug (x64)|x64.ActiveCfg = Debug|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Debug (x64)|x86.ActiveCfg = Debug|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Release (x64)|Any CPU.ActiveCfg = Release|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Release (x64)|Any CPU.Build.0 = Release|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Release (x64)|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Release (x64)|Mixed Platforms.Build.0 = Release|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Release (x64)|Win32.ActiveCfg = Release|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Release (x64)|x64.ActiveCfg = Release|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Release (x64)|x86.ActiveCfg = Release|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Release|Win32.ActiveCfg = Release|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Release|x64.ActiveCfg = Release|Any CPU
-		{6EEDB5E3-2E11-4FC0-8C51-516B973FB57B}.Release|x86.ActiveCfg = Release|Any CPU
 		{30119915-93B3-4B5F-8678-9FB7B0CF8FC2}.Debug (x64)|Any CPU.ActiveCfg = Debug|Any CPU
 		{30119915-93B3-4B5F-8678-9FB7B0CF8FC2}.Debug (x64)|Any CPU.Build.0 = Debug|Any CPU
 		{30119915-93B3-4B5F-8678-9FB7B0CF8FC2}.Debug (x64)|Mixed Platforms.ActiveCfg = Debug|Any CPU

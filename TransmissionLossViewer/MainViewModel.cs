@@ -19,8 +19,7 @@ using ESME.Locations;
 namespace TransmissionLossViewer
 {
     [ExportViewModel("TransmissionLossViewerMainViewModel")]
-    [NotifyPropertyChanged]
-    class MainViewModel : IViewStatusAwareInjectionAware
+    class MainViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         readonly string _databaseDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"ESME Workbench\Database");
         IViewAwareStatus _viewAwareStatus;

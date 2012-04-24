@@ -32,9 +32,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AsyncCtpLibrary, Version=1.0.4107.18181, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="Cinch.WPF">
-      <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
-    </Reference>
     <Reference Include="MEFedMVVM.WPF">
       <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
     </Reference>
