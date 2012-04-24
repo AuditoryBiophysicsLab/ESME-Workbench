@@ -178,6 +178,13 @@ namespace ESME.Locations
 
         readonly ConcurrentDictionary<Guid, EnvironmentalCacheEntry> _cache = new ConcurrentDictionary<Guid, EnvironmentalCacheEntry>();
 
+        public bool IsCached(EnvironmentalDataSet dataSet)
+        {
+            EnvironmentalCacheEntry requestedData;
+            var isCached = _cache.TryGetValue(dataSet.Guid, out requestedData);
+            return isCached;
+        }
+
         public EnvironmentDataSetBase this[EnvironmentalDataSet dataSet]
         {
             get
@@ -206,6 +213,7 @@ namespace ESME.Locations
                     return requestedData.Data;
                 }
                 if (string.IsNullOrEmpty(_database.MasterDatabaseDirectory)) throw new ServiceNotFoundException("Required service MasterDatabaseService is not properly configured.");
+                Debug.WriteLine(string.Format("Cache: Loading {0}", (PluginSubtype)dataSet.SourcePlugin.PluginSubtype));
                 _cache[dataSet.Guid] = EnvironmentalCacheEntry.Load(_database.MasterDatabaseDirectory, dataSet);
                 _cache[dataSet.Guid].LastAccessed = DateTime.Now;
                 return _cache[dataSet.Guid].Data;

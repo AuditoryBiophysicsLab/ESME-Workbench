@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows;
 using ESME;
 using ESME.Environment;
@@ -33,6 +35,14 @@ namespace ESMEWorkbench.ViewModels.Main
                 MainWindowTitle = string.Format("ESME Workbench: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name   );
                 if (_scenario != null)
                 {
+                    Debug.WriteLine(string.Format("Wind contains {0} samples", ((Wind)_cache[_scenario.Wind])[_scenario.TimePeriod].EnvironmentData.Count));
+                    Debug.WriteLine(string.Format("SoundSpeed contains {0} samples", ((SoundSpeed)_cache[_scenario.SoundSpeed])[_scenario.TimePeriod].EnvironmentData.Count));
+                    Debug.WriteLine(string.Format("Bathymetry contains {0} samples", ((Bathymetry)_cache[_scenario.Bathymetry]).Samples));
+                    Debug.WriteLine(string.Format("Sediment contains {0} samples", ((Sediment)_cache[_scenario.Sediment]).Samples));
+                    //if (_scenario.Bathymetry != null) TaskEx.Run(() => { var bathy = _cache[_scenario.Bathymetry]; });
+                    //if (_scenario.SoundSpeed != null) TaskEx.Run(() => { var soundSpeed = _cache[_scenario.SoundSpeed]; });
+                    //if (_scenario.Sediment != null) TaskEx.Run(() => { var sediment = _cache[_scenario.Sediment]; });
+                    //if (_scenario.Wind != null) TaskEx.Run(() => { var wind = _cache[_scenario.Wind]; });
                     _scenario.CreateMapLayers();
                     MediatorMessage.Send(MediatorMessage.SetMapExtent, (GeoRect)_scenario.Location.GeoRect);
                 }

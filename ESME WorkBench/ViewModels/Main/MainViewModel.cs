@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using ESME;
 using ESME.Environment;
+using ESME.Environment.NAVO;
 using ESME.Locations;
 using ESME.Mapping;
 using ESME.Plugins;
@@ -115,66 +116,93 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #endregion
 
-        [Initialize("Cache: idle")]
-        public string CacheActivity { get; set; }
-        [Initialize("TL: idle")]
-        public string TransmissionLossActivity { get; set; }
-        public string DecoratedExperimentName { get; set; }
-
-        [Affects("MouseLocationInfo")]
         public Geo MouseGeo { get; set; }
 
         [MediatorMessageSink(MediatorMessage.SetMouseEarthCoordinate), UsedImplicitly]
         void SetMouseEarthCoordinate(Geo mouseEarthCoordinate)
         {
             MouseGeo = mouseEarthCoordinate;
-            var foo = MouseSoundSpeed;
-        }
-
-        public string MouseLocationInfo
-        {
-            get
+            if (mouseEarthCoordinate != null)
             {
-                if (MouseGeo == null) return null;
-                var lat = MouseGeo.Latitude;
-                var lon = MouseGeo.Longitude;
-                if (-90 > lat || lat > 90) return null;
-                if (-180 > lon || lon > 180) return null;
-                var northSouth = lat >= 0 ? "N" : "S";
-                var eastWest = lon >= 0 ? "E" : "W";
-                if (Scenario != null && Scenario.Bathymetry != null && ((Bathymetry)_cache[Scenario.Bathymetry]).Samples.GeoRect.Contains(MouseGeo))
+                var lat = mouseEarthCoordinate.Latitude;
+                var lon = mouseEarthCoordinate.Longitude;
+                if ((-90 > lat || lat > 90) || (-180 > lon || lon > 180))
                 {
-                    MouseDepth = ((Bathymetry)_cache[Scenario.Bathymetry]).Samples.GetNearestPoint(MouseGeo).Data;
-                    return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3} Elevation: {4:0.#}m",
-                                         Math.Abs(lat),
-                                         northSouth,
-                                         Math.Abs(lon),
-                                         eastWest,
-                                         MouseDepth);
+                    var northSouth = lat >= 0 ? "N" : "S";
+                    var eastWest = lon >= 0 ? "E" : "W";
+                    MouseLocationInfo = string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3}", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest);
                 }
-                MouseDepth = null;
-                return string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3}", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest);
             }
-        }
-
-        public SoundSpeedProfile MouseSoundSpeed
-        {
-            get
+            else MouseLocationInfo = "Lat: N/A Lon: N/A";
+#if true
+            if (Scenario != null && Scenario.Bathymetry != null && _cache.IsCached(Scenario.Bathymetry))
             {
-                if (MouseGeo == null) return null;
-                var lat = MouseGeo.Latitude;
-                var lon = MouseGeo.Longitude;
-                if (-90 > lat || lat > 90) return null;
-                if (-180 > lon || lon > 180) return null;
-                SoundSpeedProfile mouseSoundSpeedProfile = null;
-                if (Scenario != null && Scenario.SoundSpeed != null && ((SoundSpeed)_cache[Scenario.SoundSpeed])[Scenario.TimePeriod].EnvironmentData.GeoRect.Contains(MouseGeo))
-                    mouseSoundSpeedProfile = ((SoundSpeed)_cache[Scenario.SoundSpeed])[Scenario.TimePeriod].EnvironmentData.GetNearestPoint(MouseGeo);
-                MapViewModel.MouseSoundSpeedProfile = mouseSoundSpeedProfile;
-                return mouseSoundSpeedProfile;
+                MouseDepth = ((Bathymetry)_cache[Scenario.Bathymetry]).Samples.GetNearestPoint(MouseGeo).Data;
+                MouseDepthInfo = string.Format("Depth: {0:0.#}m", -MouseDepth);
             }
+            else
+            {
+                MouseDepth = null;
+                MouseDepthInfo = string.Format("Depth: N/A");
+            }
+            if (Scenario != null && Scenario.Wind != null && _cache.IsCached(Scenario.Wind))
+            {
+                MouseWindSpeed = ((Wind)_cache[Scenario.Wind])[Scenario.TimePeriod].EnvironmentData.GetNearestPoint(MouseGeo).Data;
+                MouseWindSpeedInfo = string.Format("Wind Speed: {0:0.#}m/s", MouseWindSpeed);
+            }
+            else
+            {
+                MouseWindSpeed = null;
+                MouseWindSpeedInfo = string.Format("Wind Speed: N/A");
+            }
+            if (Scenario != null && Scenario.SoundSpeed != null && _cache.IsCached(Scenario.SoundSpeed))
+            {
+                MouseSoundSpeed = ((SoundSpeed)_cache[Scenario.SoundSpeed])[Scenario.TimePeriod].EnvironmentData.GetNearestPoint(MouseGeo);
+                MouseSoundSpeedInfo = string.Format("Sound Speed: {0} samples", MouseSoundSpeed.Data.Count);
+            }
+            else
+            {
+                MouseSoundSpeed = null;
+                MouseSoundSpeedInfo = string.Format("Sound Speed: N/A");
+            }
+            MapViewModel.MouseSoundSpeedProfile = MouseSoundSpeed;
+
+            if (Scenario != null && Scenario.Sediment != null && _cache.IsCached(Scenario.Sediment))
+            {
+                MouseSediment = ((Sediment)_cache[Scenario.Sediment]).Samples.GetNearestPoint(MouseGeo);
+                MouseSedimentInfo = string.Format("Sediment: {0}", BottomSedimentTypeTable.SedimentNames[MouseSediment.Data.SampleValue]);
+            }
+            else
+            {
+                MouseSediment = null;
+                MouseSedimentInfo = string.Format("Sediment: N/A");
+            }
+#endif
         }
 
-        public float? MouseDepth { get; set; }
+        [Initialize("Cache: idle")]
+        public string CacheActivity { get; set; }
+        [Initialize("TL: idle")]
+        public string TransmissionLossActivity { get; set; }
+
+        [Initialize("Lat: N/A Lon: N/A")]
+        public string MouseLocationInfo { get; private set; }
+
+        public float? MouseDepth { get; private set; }
+        [Initialize("Depth: N/A")]
+        public string MouseDepthInfo { get; private set; }
+
+        public SedimentSample MouseSediment { get; private set; }
+        [Initialize("Sediment: N/A")]
+        public string MouseSedimentInfo { get; private set; }
+
+        public float? MouseWindSpeed { get; private set; }
+        [Initialize("Wind Speed: N/A")]
+        public string MouseWindSpeedInfo { get; private set; }
+
+        public SoundSpeedProfile MouseSoundSpeed { get; private set; }
+        [Initialize("Sound Speed: N/A")]
+        public string MouseSoundSpeedInfo { get; private set; }
 
         public bool IsDebugMode
         {

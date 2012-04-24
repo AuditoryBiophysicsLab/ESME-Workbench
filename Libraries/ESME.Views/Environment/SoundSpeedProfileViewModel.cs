@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using ESME.Environment;
+using HRC.Aspects;
 using HRC.Services;
 using HRC.Utility;
 using HRC.ViewModels;
@@ -22,7 +23,7 @@ namespace ESME.Views.Environment
         public string SoundSpeedDataPoints { get; private set; }
         public string MajorGrid { get; private set; }
         public string MinorGrid { get; private set; }
-        public string WindowTitle { get; set; }
+        [Initialize("Sound Speed Profile")] public string WindowTitle { get; set; }
 
         #region public SoundSpeedProfile SoundSpeedProfile {get; set; }
         SoundSpeedProfile _soundSpeedProfile;

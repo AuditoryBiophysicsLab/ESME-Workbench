@@ -15,6 +15,12 @@
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="SizeChanged">
+            <WPF:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
     <DockPanel>
         <StackPanel Height="22" DockPanel.Dock="Top" Orientation="Horizontal" />
         <StackPanel Width="22" DockPanel.Dock="Right" Orientation="Vertical" />
@@ -32,7 +38,7 @@
                                TickValueFormat="0" />
         </DockPanel>
         <DockPanel DockPanel.Dock="Left">
-            <DockPanel>                
+            <DockPanel>
                 <controls:DataAxis x:Name="DepthAxis"
                                    VerticalAlignment="Top"
                                    AxisLabel="Depth (m)"
@@ -47,14 +53,9 @@
             </DockPanel>
         </DockPanel>
 
-       
+
 
         <Grid>
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="SizeChanged">
-                    <WPF:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
-                </i:EventTrigger>               
-            </i:Interaction.Triggers>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
@@ -65,7 +66,7 @@
                 <Path Data="{Binding MajorGrid}" Stroke="DarkGray" StrokeDashArray="5 1" StrokeThickness="1" />
                 <Path Data="{Binding MinorGrid}" Stroke="DarkGray" StrokeDashArray="2 1" StrokeThickness=".5" />
                 <Path Data="{Binding SoundSpeedGeometry}" Stroke="Black" StrokeThickness="1" />
-                <Path Data="{Binding SoundSpeedDataPoints}" Stroke="Blue" StrokeThickness="1" />                
+                <Path Data="{Binding SoundSpeedDataPoints}" Stroke="Blue" StrokeThickness="1" />
             </Canvas>
 
         </Grid>
