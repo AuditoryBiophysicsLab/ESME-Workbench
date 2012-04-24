@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
@@ -29,7 +28,6 @@ using MEFedMVVM.ViewModelLocator;
 namespace ESMEWorkbench.ViewModels.Main
 {
     [ExportViewModel("MainViewModel")]
-    [NotifyPropertyChanged]
     public partial class MainViewModel : ViewModelBase, IPartImportsSatisfiedNotification
     {
         #region Private fields

@@ -129,23 +129,5 @@ namespace ESMEWorkbench.ViewModels.Main
         Dictionary<string, int> _maxImportThreadCountChoices;
 
         #endregion
-
-#if false
-        #region public string ScenarioDataDirectory { get; set; }
-
-        public string ScenarioDataDirectory
-        {
-            get { return Globals.AppSettings.ScenarioDataDirectory; }
-            set
-            {
-                Globals.AppSettings.ValidateScenarioDataDirectory(value, _messageBoxService);
-                NotifyPropertyChanged(ScenarioDataDirectoryChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ScenarioDataDirectoryChangedEventArgs = ObservableHelper.CreateArgs<ApplicationOptionsViewModel>(x => x.ScenarioDataDirectory);
-
-        #endregion
-#endif
     }
 }
