@@ -57,14 +57,24 @@ namespace ESME.Views.Environment
             var sb = new StringBuilder();
             foreach (var tick in DepthAxisMajorTicks)
             {
-                sb.Append(string.Format("M {0},0 V {1}", tick, actualControlHeight));
+                sb.Append(string.Format("M 0,{0} H {1}", tick, actualControlWidth)); 
             }
             foreach (var tick in SpeedAxisMajorTicks)
             {
-                sb.Append(string.Format("M 0,{0} H {1}", tick, actualControlWidth));    
+                sb.Append(string.Format("M {0},0 V {1}", tick, actualControlHeight));
             }
-            
             MajorGrid = sb.ToString();
+
+            var mb = new StringBuilder();
+            foreach (var tick in DepthAxisMinorTicks)
+            {
+                sb.Append(string.Format("M 0,{0} H {1}", tick, actualControlWidth));
+            }
+            foreach (var tick in SpeedAxisMinorTicks)
+            {
+                sb.Append(string.Format("M {0},0 V {1}", tick, actualControlHeight));
+            }
+            MinorGrid = mb.ToString();
         }
         void CalculateSoundSpeedProfileGeometry()
         {
@@ -186,7 +196,6 @@ namespace ESME.Views.Environment
         {
             DrawGrid();
             CalculateSoundSpeedProfileGeometry();
-            
         }
 
         #endregion

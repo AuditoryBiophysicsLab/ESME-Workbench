@@ -53,7 +53,7 @@
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SizeChanged">
                     <WPF:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
-                </i:EventTrigger>
+                </i:EventTrigger>               
             </i:Interaction.Triggers>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
@@ -62,8 +62,8 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
             <Canvas x:Name="OverlayCanvas" Grid.Row="0" Grid.Column="0" UseLayoutRounding="True">
-                <Path Data="{Binding MajorGrid}" Stroke="DarkGray" StrokeDashArray="2 1" StrokeThickness="1" />
-                <Path Data="{Binding MinorGrid}" Stroke="DarkGray" StrokeDashArray="1 1" StrokeThickness=".5" />
+                <Path Data="{Binding MajorGrid}" Stroke="DarkGray" StrokeDashArray="5 1" StrokeThickness="1" />
+                <Path Data="{Binding MinorGrid}" Stroke="DarkGray" StrokeDashArray="2 1" StrokeThickness=".5" />
                 <Path Data="{Binding SoundSpeedGeometry}" Stroke="Black" StrokeThickness="1" />
                 <Path Data="{Binding SoundSpeedDataPoints}" Stroke="Blue" StrokeThickness="1" />                
             </Canvas>

@@ -266,7 +266,8 @@ namespace ESME.Views.Controls
                 default:
                     throw new ApplicationException("DataAxis: Unknown AxisLocation value.");
             }
-
+            MajorTicks = MajorTicks ?? new ObservableList<double>();
+            MinorTicks = MinorTicks ?? new ObservableList<double>();
             var tickCache = new List<double>();
             // Add minor ticks
             for (x = _startLocation + _minorTickSpacing; x < _endLocation - 1; x += _minorTickSpacing)
