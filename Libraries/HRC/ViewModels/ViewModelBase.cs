@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Windows.Threading;
 using System.Xml.Serialization;
@@ -16,7 +17,8 @@ namespace HRC.ViewModels
         /// <summary>
         /// CloseActivePopUpCommand : Close popup command
         /// </summary>
-        [XmlIgnore] public SimpleCommand<object, bool> CloseActivePopUpCommand { get; private set; }
+        [XmlIgnore, NotMapped]
+        public SimpleCommand<object, bool> CloseActivePopUpCommand { get; private set; }
 
         #region Private Methods
 
@@ -66,7 +68,7 @@ namespace HRC.ViewModels
         /// The default value is false, but subclasses used by unit tests might 
         /// override this property's getter to return true.
         /// </summary>
-        [XmlIgnore, UsedImplicitly] protected virtual bool ThrowOnInvalidPropertyName { get; private set; }
+        [XmlIgnore, UsedImplicitly, NotMapped] protected virtual bool ThrowOnInvalidPropertyName { get; private set; }
 
         #endregion // Debugging Aides
 

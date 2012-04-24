@@ -13,34 +13,39 @@ namespace ESME.Views.Locations
     public class EditOverlayViewModel : ValidatingViewModel, INotifyPropertyChanged
     {
         readonly WpfMap _wpfMap;
-        CustomEditInteractiveOverlay _editOverlay;
+        EditInteractiveOverlay _editOverlay;
 
         public EditOverlayViewModel(WpfMap wpfMap)
         {
             _wpfMap = wpfMap;
-            PropertyChanged += (s, e) =>
-            {
-                switch (e.PropertyName)
-                {
-                    case "North":
-                    case "South":
-                    case "East":
-                    case "West":
-                        if (!_isVisible) return;
-
-                        _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Clear();
-                        var rectangle = new Feature(new RectangleShape(West, North, East, South));
-                        rectangle.ColumnValues.Add("Edit", null);
-                        _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Add(rectangle);
-                        _wpfMap.EditOverlay.EditShapesLayer.Open();
-                        _wpfMap.EditOverlay.EditShapesLayer.Columns.Add(new FeatureSourceColumn("Edit"));
-                        _wpfMap.EditOverlay.EditShapesLayer.Close();
-                        _wpfMap.EditOverlay.CalculateAllControlPoints();
-                        _wpfMap.Refresh();
-                        break;
-                }
-            };
             ValidationRules.AddRange(new List<ValidationRule> { NorthValidationRule, SouthValidationRule, EastValidationRule, WestValidationRule });
+        }
+
+        void UpdateOverlay()
+        {
+            CheckForBrokenRules();
+            if (!_isVisible || !IsValid) return;
+            _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Clear();
+            var rectangle = new Feature(new RectangleShape(West, North, East, South));
+            rectangle.ColumnValues.Add("Edit", null);
+            _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Add(rectangle);
+            _wpfMap.EditOverlay.EditShapesLayer.Open();
+            _wpfMap.EditOverlay.EditShapesLayer.Columns.Add(new FeatureSourceColumn("Edit"));
+            _wpfMap.EditOverlay.EditShapesLayer.Close();
+            _wpfMap.EditOverlay.CalculateAllControlPoints();
+            _wpfMap.Refresh();
+        }
+
+        void UpdateCoordinates(RectangleShape bounds)
+        {
+            _north = bounds.UpperLeftPoint.Y;
+            OnPropertyChanged("North");
+            _south = bounds.LowerRightPoint.Y;
+            OnPropertyChanged("South");
+            _east = bounds.LowerRightPoint.X;
+            OnPropertyChanged("East");
+            _west = bounds.UpperLeftPoint.X;
+            OnPropertyChanged("West");
         }
 
         void FeatureDraggedHandler(object sender, FeatureDraggedEditInteractiveOverlayEventArgs featureDraggedEditInteractiveOverlayEventArgs) 
@@ -48,10 +53,7 @@ namespace ESME.Views.Locations
             _editOverlay.EditShapesLayer.Open();
             var bounds = _editOverlay.EditShapesLayer.GetBoundingBox();
             _editOverlay.EditShapesLayer.Close();
-            North = bounds.UpperLeftPoint.Y;
-            South = bounds.LowerRightPoint.Y;
-            East = bounds.LowerRightPoint.X;
-            West = bounds.UpperLeftPoint.X;
+            UpdateCoordinates(bounds);
             Debug.WriteLine("Dragged: North {0} South {1} East {2} West {3}", bounds.UpperLeftPoint.Y, bounds.LowerRightPoint.Y, bounds.LowerRightPoint.X, bounds.UpperLeftPoint.X);
         }
 
@@ -60,10 +62,7 @@ namespace ESME.Views.Locations
             _editOverlay.EditShapesLayer.Open();
             var bounds = _editOverlay.EditShapesLayer.GetBoundingBox();
             _editOverlay.EditShapesLayer.Close();
-            North = bounds.UpperLeftPoint.Y;
-            South = bounds.LowerRightPoint.Y;
-            East = bounds.LowerRightPoint.X;
-            West = bounds.UpperLeftPoint.X;
+            UpdateCoordinates(bounds);
             Debug.WriteLine("Resized: North {0} South {1} East {2} West {3}", bounds.UpperLeftPoint.Y, bounds.LowerRightPoint.Y, bounds.LowerRightPoint.X, bounds.UpperLeftPoint.X);
         }
 
@@ -78,11 +77,11 @@ namespace ESME.Views.Locations
                 {
                     _editOverlay.FeatureResized -= FeatureResizedHandler;
                     _editOverlay.FeatureDragged -= FeatureDraggedHandler;
-                    _wpfMap.EditOverlay = null;
-                    _editOverlay = null;
+                    _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Clear();
+                    _wpfMap.Refresh();
                     return;
                 }
-                _editOverlay = new CustomEditInteractiveOverlay();
+                _editOverlay = new CustomEditInteractiveOverlay {CanAddVertex = false, CanRotate = false};
                 var rectangle = new Feature(new RectangleShape(West, North, East, South));
                 rectangle.ColumnValues.Add("Edit", null);
                 _editOverlay.EditShapesLayer.InternalFeatures.Add(rectangle);
@@ -98,10 +97,50 @@ namespace ESME.Views.Locations
             }
         }
 
-        [Initialize( 10.0)] public double North { get; set; }
-        [Initialize(-10.0)] public double South { get; set; }
-        [Initialize( 10.0)] public double East { get; set; }
-        [Initialize(-10.0)] public double West { get; set; }
+        double _north;
+        [Initialize( 10.0)] public double North
+        {
+            get { return _north; }
+            set
+            {
+                _north = value;
+                UpdateOverlay();
+            }
+        }
+
+        double _south;
+        [Initialize(-10.0)] public double South
+        {
+            get { return _south; }
+            set
+            {
+                _south = value;
+                UpdateOverlay();
+            }
+        }
+
+        double _east;
+        [Initialize( 10.0)] public double East
+        {
+            get { return _east; }
+            set
+            {
+                _east = value;
+                UpdateOverlay();
+            }
+        }
+
+        double _west;
+        [Initialize(-10.0)] public double West
+        {
+            get { return _west; }
+            set
+            {
+                _west = value;
+                UpdateOverlay();
+            }
+        }
+
         public GeoRect GeoRect { get { return new GeoRect(North, South, East, West); } }
 
         #region Validation Rules

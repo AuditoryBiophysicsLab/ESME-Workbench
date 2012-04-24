@@ -81,6 +81,7 @@ namespace ESME.Views.Locations
 
         void OkHandler()
         {
+            EditOverlayViewModel.IsVisible = false;
             var location = new Location
             {
                 Name = LocationName,
@@ -108,7 +109,14 @@ namespace ESME.Views.Locations
         #region CancelCommand
         public SimpleCommand<object, object> CancelCommand
         {
-            get { return _cancel ?? (_cancel = new SimpleCommand<object, object>(o => Window.Close())); }
+            get
+            {
+                return _cancel ?? (_cancel = new SimpleCommand<object, object>(o =>
+                {
+                    EditOverlayViewModel.IsVisible = false;
+                    Window.Close();
+                }));
+            }
         }
         SimpleCommand<object, object> _cancel;
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -15,13 +16,14 @@ using ESME.Plugins;
 using ESME.Scenarios;
 using HRC.Navigation;
 using HRC.Utility;
+using HRC.ViewModels;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Locations
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ExportService(ServiceType.Both, typeof(EnvironmentalCacheService))]
-    public class EnvironmentalCacheService
+    public class EnvironmentalCacheService : ViewModelBase
     {
         public EnvironmentalCacheService() { Location.Cache = this; Scenario.Cache = this; }
         public EnvironmentalCacheService(IPluginManagerService plugins, MasterDatabaseService database) : this()
@@ -91,6 +93,7 @@ namespace ESME.Locations
         void Import(PercentProgress<EnvironmentalDataSet> job)
         {
             Interlocked.Increment(ref _busyCount);
+            OnPropertyChanged("BusyCount");
             var dataSet = job.ProgressTarget;
             var progress = job;
             var sourcePlugin = (EnvironmentalDataSourcePluginBase)_plugins[dataSet.SourcePlugin];
@@ -99,8 +102,7 @@ namespace ESME.Locations
             var timePeriod = dataSet.TimePeriod;
             var fileName = Path.Combine(_database.MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
             progress.Report(0);
-            //Console.WriteLine("Importer: About to import {0}[{1}] from region {2} {3} {4} {5}", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, dataSet.Resolution, geoRect.North, geoRect.South, geoRect.East, geoRect.West);
-            //Console.WriteLine("Importer: About to invoke {0} plugin [{1}]", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, sourcePlugin.PluginName);
+            Debug.WriteLine("Importer: About to import {0}[{1}] from plugin {2}", dataSet.SourcePlugin.PluginSubtype, dataSet.Resolution, sourcePlugin.PluginName);
             switch (sourcePlugin.EnvironmentDataType)
             {
                 case EnvironmentDataType.Wind:
@@ -128,54 +130,18 @@ namespace ESME.Locations
                     var bathymetry = ((EnvironmentalDataSourcePluginBase<Bathymetry>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
                     dataSet.SampleCount = bathymetry.Samples.Count;
                     bathymetry.Save(fileName);
-                    var bathymetryColormap = new Colormap(Colormap.OceanComponents, 1024);
+                    //var bathymetryColormap = new Colormap(Colormap.OceanComponents, 1024);
                     var dualColormap = new DualColormap(Colormap.Summer, Colormap.Jet) { Threshold = 0 };
-#if true
                     ToBitmap(bathymetry.Samples, fileName, v => v.Data, (data, minValue, maxValue) => dualColormap.ToPixelValues(data, minValue, maxValue < 0 ? maxValue : 8000, Colors.Black));
-#else
-                    var bathysize = Math.Max(bathymetry.Samples.Longitudes.Count, bathymetry.Samples.Latitudes.Count);
-                    var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
-                    var displayValues = bathymetry.Samples;
-                    if (bathysize > screenSize)
-                    {
-                        var scaleFactor = screenSize / bathysize;
-                        displayValues = EnvironmentData<Geo<float>>.Decimate(bathymetry.Samples,
-                                                                             (int)(bathymetry.Samples.Longitudes.Count * scaleFactor),
-                                                                             (int)(bathymetry.Samples.Latitudes.Count * scaleFactor));
-                    }
-
-                    var imageFilename = Path.GetFileNameWithoutExtension(fileName) + ".bmp";
-                    var imagePath = Path.GetDirectoryName(fileName);
-
-                    var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
-                    for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
-
-                    var displayData = dualColormap.ToPixelValues(bitmapData,
-                                                             bathymetry.Minimum.Data,
-                                                             bathymetry.Maximum.Data < 0
-                                                                 ? bathymetry.Maximum.Data
-                                                                 : 8000, 
-                                                             Colors.Black);
-                    BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
-
-                    var sb = new StringBuilder();
-                    sb.AppendLine(dataSet.Resolution.ToString(CultureInfo.InvariantCulture));
-                    sb.AppendLine("0.0");
-                    sb.AppendLine("0.0");
-                    sb.AppendLine(dataSet.Resolution.ToString(CultureInfo.InvariantCulture));
-                    sb.AppendLine(bathymetry.Samples.GeoRect.West.ToString(CultureInfo.InvariantCulture));
-                    sb.AppendLine(bathymetry.Samples.GeoRect.North.ToString(CultureInfo.InvariantCulture));
-                    using (var writer = new StreamWriter(Path.Combine(imagePath, Path.GetFileNameWithoutExtension(imageFilename) + ".bpw"), false)) writer.Write(sb.ToString());
-#endif
                     break;
                 default:
                     throw new ApplicationException(string.Format("Unknown environmental data type {0}", sourcePlugin.EnvironmentDataType));
             }
-            //Console.WriteLine("Importer: {0} plugin returned {1} samples", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, dataSet.SampleCount);
             dataSet.FileSize = new FileInfo(fileName).Length;
             progress.Report(100);
-            //Console.WriteLine("Importer: Finished importing {0} at resolution {1}", dataSet.EnvironmentalDataSetCollection.SourcePlugin.PluginSubtype, dataSet.Resolution);
+            Debug.WriteLine("Importer: Imported {0}[{1}] from plugin {2}", dataSet.SourcePlugin.PluginSubtype, dataSet.Resolution, sourcePlugin.PluginName);
             Interlocked.Decrement(ref _busyCount);
+            OnPropertyChanged("BusyCount");
             _importJobsPending.TryRemove(dataSet.Guid, out progress);
         }
 

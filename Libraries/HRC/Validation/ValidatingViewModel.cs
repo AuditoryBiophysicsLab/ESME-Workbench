@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -13,6 +14,7 @@ namespace HRC.Validation
     {
         protected ValidatingViewModel() { ValidationRules = new List<ValidationRule>(); }
 
+        [XmlIgnore, NotMapped]
         protected List<ValidationRule> ValidationRules { get; set; }
 
         #region Implementation of IDataErrorInfo
@@ -23,7 +25,7 @@ namespace HRC.Validation
         /// The error message for the property. The default is an empty string ("").
         /// </returns>
         /// <param name="columnName">The name of the property whose error message to get. </param>
-        [XmlIgnore]
+        [XmlIgnore, NotMapped]
         public virtual string this[string columnName]
         {
             get
@@ -38,11 +40,17 @@ namespace HRC.Validation
                     if (!ruleIsBroken) continue;
                     allRulesValid = false;
                     Debug.WriteLine("{0}: Broken rule on {1} : {2}{3}", DateTime.Now, rule.PropertyName, rule.Description, !string.IsNullOrEmpty(rule.ValidationErrorMessage) ? "\n" + rule.ValidationErrorMessage : "");
-                    if (!string.IsNullOrEmpty(rule.Description)) errStr += rule.Description + Environment.NewLine;
-                    if (!string.IsNullOrEmpty(rule.ValidationErrorMessage)) errStr += rule.ValidationErrorMessage + Environment.NewLine;
+                    if (!string.IsNullOrEmpty(rule.Description))
+                    {
+                        errStr += rule.Description + Environment.NewLine;
+                        result += rule.Description + Environment.NewLine;
+                    }
+                    if (!string.IsNullOrEmpty(rule.ValidationErrorMessage))
+                    {
+                        errStr += rule.ValidationErrorMessage + Environment.NewLine;
+                        result += rule.ValidationErrorMessage + Environment.NewLine;
+                    }
                     if (string.IsNullOrEmpty(rule.PropertyName) || (rule.PropertyName != columnName)) continue;
-                    if (!string.IsNullOrEmpty(rule.Description)) result += rule.Description + Environment.NewLine;
-                    if (!string.IsNullOrEmpty(rule.ValidationErrorMessage)) result += rule.ValidationErrorMessage + Environment.NewLine;
                 }
                 IsValid = allRulesValid;
                 Error = !string.IsNullOrEmpty(errStr) ? errStr.Remove(errStr.Length - 2, 2) : errStr;
@@ -51,9 +59,22 @@ namespace HRC.Validation
             }
         }
 
+        protected void CheckForBrokenRules()
+        {
+            var allRulesValid = true;
+            foreach (var rule in ValidationRules)
+            {
+                rule.ValidationErrorMessage = null;
+                var ruleIsBroken = !rule.Validate(this, rule);
+                if (!ruleIsBroken) continue;
+                allRulesValid = false;
+            }
+            IsValid = allRulesValid;
+        }
+
         #region public virtual bool IsValid { get; private set; }
 
-        [XmlIgnore]
+        [XmlIgnore, NotMapped]
         public virtual bool IsValid
         {
             get { return _isValid; }
@@ -75,7 +96,7 @@ namespace HRC.Validation
         /// <returns>
         /// An error message indicating what is wrong with this object. The default is an empty string ("").
         /// </returns>
-        [XmlIgnore]
+        [XmlIgnore, NotMapped]
         public string Error { get; private set; }
 
         #endregion

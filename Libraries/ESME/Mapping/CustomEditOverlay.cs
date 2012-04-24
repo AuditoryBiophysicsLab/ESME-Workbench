@@ -8,18 +8,6 @@ namespace ESME.Mapping
 {
     public class CustomEditInteractiveOverlay : EditInteractiveOverlay
     {
-        protected override Feature AddVertexCore(Feature targetFeature, PointShape targetPointShape, double searchingTolerance)
-        {
-            // Override the base method and disable the function of AddVertex if the shape is the "custom"
-            if (targetFeature.ColumnValues.ContainsKey("Edit")) return new Feature();
-            return base.AddVertexCore(targetFeature, targetPointShape, searchingTolerance);
-        }
-        protected override Feature RemoveVertexCore(Feature editShapeFeature, Vertex selectedVertex, double searchingTolerance)
-        {
-            // Override the base method and disable the function of RemoveVertex if the shape is the "custom"
-            if (editShapeFeature.ColumnValues.ContainsKey("Edit")) return new Feature();
-            return base.RemoveVertexCore(editShapeFeature, selectedVertex, searchingTolerance);
-        }
         protected override IEnumerable<Feature> CalculateResizeControlPointsCore(Feature feature)
         {
             // Override the base method and modify the control points for resizing if the shape is the "custom"
@@ -31,10 +19,6 @@ namespace ESME.Mapping
                 return resizeControlPoints;
             }
             return base.CalculateResizeControlPointsCore(feature);
-        }
-        protected override IEnumerable<Feature> CalculateRotateControlPointsCore(Feature feature)
-        {
-            return new Collection<Feature>();
         }
         protected override Feature ResizeFeatureCore(Feature sourceFeature, PointShape sourceControlPoint, PointShape targetControlPoint)
         {
@@ -50,7 +34,7 @@ namespace ESME.Mapping
                         var fixedPointIndex = GetFixedPointIndex(polygonShape, sourceControlPoint);
                         var fixedPointShape = new PointShape(polygonShape.OuterRing.Vertices[fixedPointIndex]);
                         var newRectangleShape = new LineShape(new[] { new Vertex(fixedPointShape), new Vertex(targetControlPoint) }).GetBoundingBox();
-                        return new Feature(newRectangleShape.GetWellKnownBinary(), sourceFeature.Id, sourceFeature.ColumnValues);
+                        return base.ResizeFeatureCore(new Feature(newRectangleShape.GetWellKnownBinary(), sourceFeature.Id, sourceFeature.ColumnValues), targetControlPoint, targetControlPoint);
                     }
                 }
             }

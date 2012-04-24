@@ -56,6 +56,10 @@
     <Reference Include="AsyncCtpLibrary">
       <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
     </Reference>
+    <Reference Include="EntityFramework, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ESME WorkBench\External References\EntityFramework.dll</HintPath>
+    </Reference>
     <Reference Include="MEFedMVVM.WPF">
       <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
       <Private>False</Private>

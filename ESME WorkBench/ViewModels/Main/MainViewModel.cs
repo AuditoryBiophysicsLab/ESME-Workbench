@@ -91,6 +91,10 @@ namespace ESMEWorkbench.ViewModels.Main
             _transmissionLoss.RangeCellSize = Globals.AppSettings.BellhopSettings.RangeCellSize;
             _transmissionLoss.DepthCellSize = Globals.AppSettings.BellhopSettings.DepthCellSize;
             _importsSatisfied = true;
+            _cache.PropertyChanged += (s, e) =>
+            {
+                if (_cache.BusyCount > 0) CacheActivity = string.Format("Cache: {0} imports active", _cache.BusyCount);
+            };
             if (Database.MasterDatabaseDirectory != null) _transmissionLoss.Start();
         }
 
@@ -106,6 +110,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #endregion
 
+        public string CacheActivity { get; set; }
         public string DecoratedExperimentName { get; set; }
 
         [Affects("MouseLocationInfo")]
