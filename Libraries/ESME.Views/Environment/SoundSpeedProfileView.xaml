@@ -18,10 +18,21 @@
     <DockPanel>
         <StackPanel Height="22" DockPanel.Dock="Top" Orientation="Horizontal" />
         <StackPanel Width="22" DockPanel.Dock="Right" Orientation="Vertical" />
-
+        <DockPanel DockPanel.Dock="Bottom">
+            <TextBlock Width="{Binding ActualWidth, ElementName=DepthAxis, Mode=OneWay}" DockPanel.Dock="Left" />
+            <controls:DataAxis x:Name="SSPAxis"
+                               AxisLabel="Sound Speed (m/s)"
+                               AxisLocation="Top"
+                               EndValue="{Binding SSPMax}"
+                               MajorTicks="{Binding SpeedAxisMajorTicks,
+                                                    Mode=OneWayToSource}"
+                               MinorTicks="{Binding SpeedAxisMinorTicks,
+                                                    Mode=OneWayToSource}"
+                               StartValue="{Binding SSPMin}"
+                               TickValueFormat="0" />
+        </DockPanel>
         <DockPanel DockPanel.Dock="Left">
-            <DockPanel>
-                <TextBlock Height="{Binding ActualHeight, ElementName=SSPAxis, Mode=OneWay}" DockPanel.Dock="Bottom" />
+            <DockPanel>                
                 <controls:DataAxis x:Name="DepthAxis"
                                    VerticalAlignment="Top"
                                    AxisLabel="Depth (m)"
@@ -36,18 +47,7 @@
             </DockPanel>
         </DockPanel>
 
-        <DockPanel DockPanel.Dock="Bottom">
-            <controls:DataAxis x:Name="SSPAxis"
-                               AxisLabel="Sound Speed (m/s)"
-                               AxisLocation="Top"
-                               EndValue="{Binding SSPMax}"
-                               MajorTicks="{Binding SpeedAxisMajorTicks,
-                                                    Mode=OneWayToSource}"
-                               MinorTicks="{Binding SpeedAxisMinorTicks,
-                                                    Mode=OneWayToSource}"
-                               StartValue="{Binding SSPMin}"
-                               TickValueFormat="0" />
-        </DockPanel>
+       
 
         <Grid>
             <i:Interaction.Triggers>
@@ -62,8 +62,10 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
             <Canvas x:Name="OverlayCanvas" Grid.Row="0" Grid.Column="0" UseLayoutRounding="True">
+                <Path Data="{Binding MajorGrid}" Stroke="DarkGray" StrokeDashArray="2 1" StrokeThickness="1" />
+                <Path Data="{Binding MinorGrid}" Stroke="DarkGray" StrokeDashArray="1 1" StrokeThickness=".5" />
                 <Path Data="{Binding SoundSpeedGeometry}" Stroke="Black" StrokeThickness="1" />
-                <Path Data="{Binding SoundSpeedDataPoints}" Stroke="Blue" StrokeThickness="1" />
+                <Path Data="{Binding SoundSpeedDataPoints}" Stroke="Blue" StrokeThickness="1" />                
             </Canvas>
 
         </Grid>

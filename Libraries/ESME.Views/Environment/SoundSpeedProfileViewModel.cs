@@ -20,6 +20,8 @@ namespace ESME.Views.Environment
         public float DepthMax { get; set; }
         public string SoundSpeedGeometry { get; private set; }
         public string SoundSpeedDataPoints { get; private set; }
+        public string MajorGrid { get; private set; }
+        public string MinorGrid { get; private set; }
         public string WindowTitle { get; set; }
 
         #region public SoundSpeedProfile SoundSpeedProfile {get; set; }
@@ -30,6 +32,7 @@ namespace ESME.Views.Environment
             set
             {
                 _soundSpeedProfile = value;
+                DrawGrid();
                 CalculateSoundSpeedProfileGeometry();
                 WindowTitle = string.Format("Sound Speed Profile ({0:0.000}, {1:0.000})", _soundSpeedProfile.Latitude, _soundSpeedProfile.Longitude);
             }
@@ -44,7 +47,25 @@ namespace ESME.Views.Environment
         {
             _saveFileService = saveFile;
         }
+        void DrawGrid()
+        {
+            if (SoundSpeedProfile == null) return;
+            var actualControlHeight = View.OverlayCanvas.ActualHeight;
+            var actualControlWidth = View.OverlayCanvas.ActualWidth;
+            if (actualControlHeight == 0 || actualControlWidth == 0) return;
 
+            var sb = new StringBuilder();
+            foreach (var tick in DepthAxisMajorTicks)
+            {
+                sb.Append(string.Format("M {0},0 V {1}", tick, actualControlHeight));
+            }
+            foreach (var tick in SpeedAxisMajorTicks)
+            {
+                sb.Append(string.Format("M 0,{0} H {1}", tick, actualControlWidth));    
+            }
+            
+            MajorGrid = sb.ToString();
+        }
         void CalculateSoundSpeedProfileGeometry()
         {
             if (SoundSpeedProfile == null) return;
@@ -147,7 +168,6 @@ namespace ESME.Views.Environment
 
         #endregion 
 
-
         #region GridSizeChangedCommand
 
         public SimpleCommand<object, object> GridSizeChangedCommand
@@ -164,7 +184,9 @@ namespace ESME.Views.Environment
 
         private void GridSizeChangedHandler()
         {
+            DrawGrid();
             CalculateSoundSpeedProfileGeometry();
+            
         }
 
         #endregion
