@@ -232,6 +232,7 @@
     <Compile Include="WPF\TriggerTracing.cs" />
     <Compile Include="WPF\ValueConverters.cs" />
     <Compile Include="WPF\ViewPropertyBinding.cs" />
+    <Compile Include="WPF\VisualExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

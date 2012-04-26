@@ -15,6 +15,7 @@ using ESME.TransmissionLoss.Bellhop;
 using ESME.Views.Controls;
 using HRC.Services;
 using HRC.ViewModels;
+using HRC.WPF;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Views.TransmissionLossViewer
@@ -179,7 +180,6 @@ namespace ESME.Views.TransmissionLossViewer
         void SaveRadialBitmap(string fileName)
         {
             BitmapEncoder encoder = null;
-
             switch (Path.GetExtension(fileName).ToLower())
             {
                 case ".jpg":
@@ -196,10 +196,8 @@ namespace ESME.Views.TransmissionLossViewer
 
                     break;
             }
-
-
             if (encoder == null) return;
-
+#if false
 
             var theView = ((TransmissionLossRadialView)_viewAwareStatus.View);
             var m = PresentationSource.FromVisual(Application.Current.MainWindow).CompositionTarget.TransformToDevice;
@@ -208,7 +206,12 @@ namespace ESME.Views.TransmissionLossViewer
             var bmp = CaptureScreen(theView, dx, dy);
             encoder.Frames.Add(BitmapFrame.Create(bmp));
             using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream);
+#endif
+            encoder.Frames.Add(BitmapFrame.Create(((TransmissionLossRadialView) _viewAwareStatus.View).ToBitmapSource()));
+            using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream);
+
         }
+#if false
         // from http://blogs.msdn.com/b/jaimer/archive/2009/07/03/rendertargetbitmap-tips.aspx
         private static BitmapSource CaptureScreen(Visual target, double dpiX, double dpiY)
         {
@@ -231,7 +234,8 @@ namespace ESME.Views.TransmissionLossViewer
             rtb.Render(dv);
             return rtb;
         }
-
+        
+#endif
         void RenderBitmap()
         {
             if (TransmissionLossRadial == null || ColorMapViewModel == null) return;
