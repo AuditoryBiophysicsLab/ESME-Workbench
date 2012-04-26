@@ -9,6 +9,7 @@
         Title="{Binding WindowTitle}"
         Width="300"
         Height="300"
+        Background="White"
         d:DataContext="{d:DesignInstance Environment:SoundSpeedProfileViewModel}"
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
