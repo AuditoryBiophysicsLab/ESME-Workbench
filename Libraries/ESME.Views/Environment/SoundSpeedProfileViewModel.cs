@@ -32,6 +32,7 @@ namespace ESME.Views.Environment
         public string MinorGrid { get; private set; }
         [Initialize("Sound Speed Profile")]
         public string WindowTitle { get; set; }
+        public string OutputFileName { get; set; }
         public ObservableList<double> DepthAxisMajorTicks { get; set; }
         public ObservableList<double> DepthAxisMinorTicks { get; set; }
         public ObservableList<double> SpeedAxisMajorTicks { get; set; }
@@ -50,6 +51,7 @@ namespace ESME.Views.Environment
                 SSPMax = value.Data.Max(d => d.SoundSpeed);
                 RenderCanvas();
                 WindowTitle = string.Format("Sound Speed Profile ({0:0.000}, {1:0.000})", _soundSpeedProfile.Latitude, _soundSpeedProfile.Longitude);
+                OutputFileName=string.Format("Sound Speed Profile lat {0:0.000} lon {1:0.000}", _soundSpeedProfile.Latitude, _soundSpeedProfile.Longitude);
             }
         }
         #endregion
@@ -89,7 +91,7 @@ namespace ESME.Views.Environment
                                                           {
                                                               _saveFileService.Filter = "Comma-Separated Value (*.csv)|*.csv";
                                                               _saveFileService.OverwritePrompt = true;
-
+                                                              _saveFileService.FileName = OutputFileName;
                                                               var result = _saveFileService.ShowDialog(WindowView);
                                                               if (result.HasValue && result.Value)
                                                               {
@@ -129,7 +131,7 @@ namespace ESME.Views.Environment
                                                           {
                                                               _saveFileService.Filter = "Bitmap (*.bmp)|*.bmp|GIF (*.gif)|*.gif|JPEG (*.jpg)|*.jpg|Portable Network Graphics (*.png)|*.png|TIFF (*.tiff)|*.tiff";
                                                               _saveFileService.OverwritePrompt = true;
-
+                                                              _saveFileService.FileName = OutputFileName;
                                                               var result = _saveFileService.ShowDialog(WindowView);
                                                               if (result.HasValue && result.Value)
                                                               {

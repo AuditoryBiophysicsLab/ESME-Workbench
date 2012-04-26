@@ -23,24 +23,24 @@
             <ToolBar Band="0" BandIndex="0">
                 <Button Command="{Binding SaveToCSVCommand}"
                         ToolBar.OverflowMode="Never"
-                        ToolTip="Save the displayed Sound Speed Profile to a CSV file">
+                        ToolTip="Save to CSV">
                     <Image Source="..\Images\CSV_16.png" />
                 </Button>
                 <Button Command="{Binding SaveToImageCommand}"
                         ToolBar.OverflowMode="AsNeeded"
-                        ToolTip="Save the displayed Sound Speed Profile to an image file">
+                        ToolTip="Save to Image">
                     <Image Source="..\Images\PNG_16.png" />
                 </Button>
             </ToolBar>
             <ToolBar Band="0" BandIndex="1">
                 <Button Command="{Binding CopyTextToClipboardCommand}"
                         ToolBar.OverflowMode="Never"
-                        ToolTip="Copy the displayed Sound Speed Profile data to the clipboard as text">
+                        ToolTip="Copy text to clipboard">
                     <Image Source="..\Images\clipboard_add_16.png" />
                 </Button>
                 <Button Command="{Binding CopyImageToClipboardCommand}"
                         ToolBar.OverflowMode="AsNeeded"
-                        ToolTip="Copy a bitmap of the displayed Sound Speed Profile data to the clipboard">
+                        ToolTip="Copy image to clipboard">
                     <Image Source="..\Images\clipboard_add_16.png" />
                 </Button>
             </ToolBar>
