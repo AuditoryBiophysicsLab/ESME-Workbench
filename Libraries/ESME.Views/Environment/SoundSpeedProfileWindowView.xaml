@@ -3,9 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:Environment="clr-namespace:ESME.Views.Environment"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC" Title="{Binding WindowTitle}"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+        Title="{Binding WindowTitle}"
         Width="300"
         Height="300"
         d:DataContext="{d:DesignInstance Environment:SoundSpeedProfileViewModel}"
@@ -18,13 +19,42 @@
     </i:Interaction.Triggers>
 
     <DockPanel LastChildFill="True">
-        <DockPanel Height="22" DockPanel.Dock="Top">
-            <Button HorizontalAlignment="Right"
-                    Command="{Binding SaveToCSVCommand}"
-                    Content="CSV"
-                    DockPanel.Dock="Right"
-                    ToolTip="Save the displayed Sound Speed Profile to a CSV file" />
-        </DockPanel>
+        <ToolBarTray Height="22" DockPanel.Dock="Top">
+            <ToolBar Band="0" BandIndex="0">
+                <Button Command="{Binding SaveToCSVCommand}"
+                        ToolBar.OverflowMode="Never"
+                        ToolTip="Save the displayed Sound Speed Profile to a CSV file">
+                    <Image Source="..\Images\CSV_16.png" />
+                </Button>
+                <Button Command="{Binding SaveToPNGCommand}"
+                        ToolBar.OverflowMode="AsNeeded"
+                        ToolTip="Save the displayed Sound Speed Profile to a PNG file">
+                    <Image Source="..\Images\PNG_16.png" />
+                </Button>
+                <Button Command="{Binding SaveToJPGCommand}"
+                        ToolBar.OverflowMode="AsNeeded"
+                        ToolTip="Save the displayed Sound Speed Profile to a JPG file">
+                    <Image Source="..\Images\JPG_16.png" />
+                </Button>
+                <Button Command="{Binding SaveToGIFCommand}"
+                        ToolBar.OverflowMode="AsNeeded"
+                        ToolTip="Save the displayed Sound Speed Profile to a PNG file">
+                    <Image Source="..\Images\GIF_16.png" />
+                </Button>
+            </ToolBar>
+            <ToolBar Band="0" BandIndex="1">
+                <Button Command="{Binding CopyTextToClipboardCommand}"
+                        ToolBar.OverflowMode="Never"
+                        ToolTip="Copy the displayed Sound Speed Profile data to the clipboard as text">
+                    <Image Source="..\Images\clipboard_add_16.png" />
+                </Button>
+                <Button Command="{Binding CopyImageToClipboardCommand}"
+                        ToolBar.OverflowMode="AsNeeded"
+                        ToolTip="Copy a bitmap of the displayed Sound Speed Profile data to the clipboard">
+                    <Image Source="..\Images\clipboard_add_16.png" />
+                </Button>
+            </ToolBar>
+        </ToolBarTray>
         <Environment:SoundSpeedProfileView x:Name="SoundSpeedProfile" />
     </DockPanel>
 </Window>
