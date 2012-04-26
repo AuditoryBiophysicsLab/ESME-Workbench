@@ -11,7 +11,7 @@ namespace ESME.Environment
         {
             var speeds = (from p in profile.Data select p.SoundSpeed).ToArray();
             var depths = (from d in profile.Data select d.Depth).ToArray();
-            var sMin = speeds.Min();
+            var sMin = speeds.Min(); 
             var sMax = speeds.Max();
             var sDiff = sMax - sMin;
             sMin -= (float).1 * sDiff;
