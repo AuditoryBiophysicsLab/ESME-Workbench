@@ -26,20 +26,10 @@
                         ToolTip="Save the displayed Sound Speed Profile to a CSV file">
                     <Image Source="..\Images\CSV_16.png" />
                 </Button>
-                <Button Command="{Binding SaveToPNGCommand}"
+                <Button Command="{Binding SaveToImageCommand}"
                         ToolBar.OverflowMode="AsNeeded"
-                        ToolTip="Save the displayed Sound Speed Profile to a PNG file">
+                        ToolTip="Save the displayed Sound Speed Profile to an image file">
                     <Image Source="..\Images\PNG_16.png" />
-                </Button>
-                <Button Command="{Binding SaveToJPGCommand}"
-                        ToolBar.OverflowMode="AsNeeded"
-                        ToolTip="Save the displayed Sound Speed Profile to a JPG file">
-                    <Image Source="..\Images\JPG_16.png" />
-                </Button>
-                <Button Command="{Binding SaveToGIFCommand}"
-                        ToolBar.OverflowMode="AsNeeded"
-                        ToolTip="Save the displayed Sound Speed Profile to a PNG file">
-                    <Image Source="..\Images\GIF_16.png" />
                 </Button>
             </ToolBar>
             <ToolBar Band="0" BandIndex="1">

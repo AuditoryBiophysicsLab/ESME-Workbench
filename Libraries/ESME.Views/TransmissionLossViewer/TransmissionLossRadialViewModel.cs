@@ -174,68 +174,33 @@ namespace ESME.Views.TransmissionLossViewer
                 } // for i
             } // using sw
         }
-
-        #region RenderBitmap
+        
         [MediatorMessageSink(MediatorMessage.SaveRadialBitmap)]
         void SaveRadialBitmap(string fileName)
         {
+#if false
             BitmapEncoder encoder = null;
             switch (Path.GetExtension(fileName).ToLower())
             {
                 case ".jpg":
                 case ".jpeg":
                     encoder = new JpegBitmapEncoder();
-
                     break;
                 case ".png":
                     encoder = new PngBitmapEncoder();
-
                     break;
                 case ".bmp":
                     encoder = new BmpBitmapEncoder();
-
                     break;
             }
             if (encoder == null) return;
-#if false
-
-            var theView = ((TransmissionLossRadialView)_viewAwareStatus.View);
-            var m = PresentationSource.FromVisual(Application.Current.MainWindow).CompositionTarget.TransformToDevice;
-            var dx = 96*m.M11;
-            var dy = 96*m.M22;
-            var bmp = CaptureScreen(theView, dx, dy);
-            encoder.Frames.Add(BitmapFrame.Create(bmp));
-            using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream);
+            encoder.Frames.Add(BitmapFrame.Create(((TransmissionLossRadialView)_viewAwareStatus.View).ToBitmapSource()));
+            using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream); 
 #endif
-            encoder.Frames.Add(BitmapFrame.Create(((TransmissionLossRadialView) _viewAwareStatus.View).ToBitmapSource()));
-            using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream);
+            ((TransmissionLossRadialView)_viewAwareStatus.View).ToImageFile(fileName);
+        }
 
-        }
-#if false
-        // from http://blogs.msdn.com/b/jaimer/archive/2009/07/03/rendertargetbitmap-tips.aspx
-        private static BitmapSource CaptureScreen(Visual target, double dpiX, double dpiY)
-        {
-            if (target == null)
-            {
-                return null;
-            }
-            var bounds = VisualTreeHelper.GetDescendantBounds(target);
-            var rtb = new RenderTargetBitmap((int)(bounds.Width * dpiX / 96.0),
-                                                            (int)(bounds.Height * dpiY / 96.0),
-                                                            dpiX,
-                                                            dpiY,
-                                                            PixelFormats.Pbgra32);
-            var dv = new DrawingVisual();
-            using (var ctx = dv.RenderOpen())
-            {
-                var vb = new VisualBrush(target);
-                ctx.DrawRectangle(vb, null, new Rect(new Point(), bounds.Size));
-            }
-            rtb.Render(dv);
-            return rtb;
-        }
-        
-#endif
+        #region RenderBitmap
         void RenderBitmap()
         {
             if (TransmissionLossRadial == null || ColorMapViewModel == null) return;
@@ -271,7 +236,6 @@ namespace ESME.Views.TransmissionLossViewer
             _isRendered = true;
             _dispatcher.BeginInvoke(new VoidDelegate(RenderFinished), DispatcherPriority.ApplicationIdle);
         }
-
         void RenderFinished() { OnPropertyChanged("WriteableBitmap"); } 
         #endregion
 

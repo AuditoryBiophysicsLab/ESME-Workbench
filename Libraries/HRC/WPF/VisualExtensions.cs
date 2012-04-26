@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Text;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -29,6 +31,34 @@ namespace HRC.WPF
             }
             rtb.Render(dv);
             return rtb;
+        }
+
+        public static void ToImageFile(this Visual theVisual, string fileName)
+        {
+            BitmapEncoder encoder;
+            switch (Path.GetExtension(fileName).ToLower())
+            {
+                case ".jpg":
+                case ".jpeg":
+                    encoder = new JpegBitmapEncoder();
+                    break;
+                case ".png":
+                    encoder = new PngBitmapEncoder();
+                    break;
+                case ".bmp":
+                    encoder = new BmpBitmapEncoder();
+                    break;
+                case ".gif":
+                    encoder = new GifBitmapEncoder();
+                    break;
+                case ".tiff":
+                    encoder = new TiffBitmapEncoder();
+                    break;
+                default:
+                    throw new EncoderFallbackException("The Specified Filename is not a known image type.  Supported image formats are jpeg, png, bmp, gif, and tiff.");
+            }
+            encoder.Frames.Add(BitmapFrame.Create(theVisual.ToBitmapSource()));
+            using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream);
         }
     }
 }

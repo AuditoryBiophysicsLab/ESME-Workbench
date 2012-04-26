@@ -7,6 +7,7 @@ using ESME.Environment;
 using HRC.Aspects;
 using HRC.Services;
 using HRC.Utility;
+using HRC.WPF;
 using HRC.ViewModels;
 
 namespace ESME.Views.Environment
@@ -83,7 +84,7 @@ namespace ESME.Views.Environment
             {
                 return _saveToCSV ??
                        (_saveToCSV =
-                        new SimpleCommand<object, object>(delegate { return IsSaveToCSVCommandEnabled; },
+                        new SimpleCommand<object, object>(delegate { return SoundSpeedProfile != null; },
                                                           delegate
                                                           {
                                                               _saveFileService.Filter = "Comma-Separated Value (*.csv)|*.csv";
@@ -100,11 +101,6 @@ namespace ESME.Views.Environment
 
         private SimpleCommand<object, object> _saveToCSV;
 
-        private bool IsSaveToCSVCommandEnabled
-        {
-            get { return SoundSpeedProfile != null; }
-        }
-
         private void SaveToCSVHandler(string fileName)
         {
             using (var writer = new StreamWriter(fileName))
@@ -120,85 +116,30 @@ namespace ESME.Views.Environment
 
         #endregion
 
-        #region SavetoPNGCommand
+        #region SaveToImageCommand
 
-        public SimpleCommand<object, object> SavetoPNGCommand
+        public SimpleCommand<object, object> SaveToImageCommand
         {
             get
             {
-                return _savetoPNG ??
-                       (_savetoPNG =
-                        new SimpleCommand<object, object>(delegate { return IsSavetoPNGCommandEnabled; },
-                                                          delegate { SavetoPNGHandler(); }));
+                return _saveToImage ??
+                       (_saveToImage =
+                        new SimpleCommand<object, object>(delegate { return SoundSpeedProfile != null; },
+                                                          delegate
+                                                          {
+                                                              _saveFileService.Filter = "Bitmap (*.bmp)|*.bmp|GIF (*.gif)|*.gif|JPEG (*.jpg)|*.jpg|Portable Network Graphics (*.png)|*.png|TIFF (*.tiff)|*.tiff";
+                                                              _saveFileService.OverwritePrompt = true;
+
+                                                              var result = _saveFileService.ShowDialog(WindowView);
+                                                              if (result.HasValue && result.Value)
+                                                              {
+                                                                 View.ToImageFile(_saveFileService.FileName);
+                                                              }
+                                                          }));
             }
         }
 
-        private SimpleCommand<object, object> _savetoPNG;
-
-        private bool IsSavetoPNGCommandEnabled
-        {
-            get { return SoundSpeedProfile != null; }
-        }
-
-        private void SavetoPNGHandler()
-        {
-
-        }
-
-        #endregion
-
-        #region SaveToGIFCommand
-
-        public SimpleCommand<object, object> SaveToGIFCommand
-        {
-            get
-            {
-                return _saveToGIF ??
-                       (_saveToGIF =
-                        new SimpleCommand<object, object>(delegate { return IsSaveToGIFCommandEnabled; },
-                                                          delegate { SaveToGIFHandler(); }));
-            }
-        }
-
-        private SimpleCommand<object, object> _saveToGIF;
-
-        private bool IsSaveToGIFCommandEnabled
-        {
-            get { return SoundSpeedProfile != null; }
-        }
-
-        private void SaveToGIFHandler()
-        {
-
-        }
-
-        #endregion
-
-        #region SavetoJPGCommand
-
-        public SimpleCommand<object, object> SavetoJPGCommand
-        {
-            get
-            {
-                return _savetoJPG ??
-                       (_savetoJPG =
-                        new SimpleCommand<object, object>(delegate { return IsSavetoJPGCommandEnabled; },
-                                                          delegate { SavetoJPGHandler(); }));
-            }
-        }
-
-        private SimpleCommand<object, object> _savetoJPG;
-
-        private bool IsSavetoJPGCommandEnabled
-        {
-            get { return SoundSpeedProfile != null; }
-        }
-
-        private void SavetoJPGHandler()
-        {
-
-        }
-
+        private SimpleCommand<object, object> _saveToImage;
         #endregion
 
         #region CopyTextToClipboardCommand
@@ -209,17 +150,12 @@ namespace ESME.Views.Environment
             {
                 return _copyTextToClipboard ??
                        (_copyTextToClipboard =
-                        new SimpleCommand<object, object>(delegate { return IsCopyTextToClipboardCommandEnabled; },
+                        new SimpleCommand<object, object>(delegate { return SoundSpeedProfile != null; },
                                                           delegate { CopyTextToClipboardHandler(); }));
             }
         }
 
         private SimpleCommand<object, object> _copyTextToClipboard;
-
-        private bool IsCopyTextToClipboardCommandEnabled
-        {
-            get { return SoundSpeedProfile != null; }
-        }
 
         private void CopyTextToClipboardHandler()
         {
@@ -244,23 +180,12 @@ namespace ESME.Views.Environment
             {
                 return _copyImageToClipboard ??
                        (_copyImageToClipboard =
-                        new SimpleCommand<object, object>(delegate { return IsCopyImageToClipboardCommandEnabled; },
-                                                          delegate { CopyImageToClipboardHandler(); }));
+                        new SimpleCommand<object, object>(delegate { return SoundSpeedProfile != null; },
+                                                          delegate { Clipboard.SetImage(View.ToBitmapSource()); }));
             }
         }
 
         private SimpleCommand<object, object> _copyImageToClipboard;
-
-        private bool IsCopyImageToClipboardCommandEnabled
-        {
-            get { return SoundSpeedProfile != null; }
-        }
-
-        private void CopyImageToClipboardHandler()
-        {
-
-        }
-
         #endregion
 
         #region GridSizeChangedCommand
