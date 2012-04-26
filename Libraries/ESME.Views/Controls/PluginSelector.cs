@@ -19,7 +19,7 @@ namespace ESME.Views.Controls
         public string PluginTypeName
         {
             get { return (string)GetValue(PluginTypeNameProperty); }
-            set { SetValue(PluginTypeNameProperty, value); }
+            set { SetCurrentValue(PluginTypeNameProperty, value); }
         }
 
         #endregion
@@ -34,7 +34,7 @@ namespace ESME.Views.Controls
         public IESMEPlugin SelectedPlugin
         {
             get { return (IESMEPlugin)GetValue(SelectedPluginProperty); }
-            set { SetValue(SelectedPluginProperty, value); }
+            set { SetCurrentValue(SelectedPluginProperty, value); }
         }
 
         #endregion
@@ -48,7 +48,7 @@ namespace ESME.Views.Controls
         public IEnumerable ItemsSource
         {
             get { return (IEnumerable)GetValue(ItemsSourceProperty); }
-            set { SetValue(ItemsSourceProperty, value); }
+            set { SetCurrentValue(ItemsSourceProperty, value); }
         }
 
         #endregion
@@ -63,7 +63,7 @@ namespace ESME.Views.Controls
         public object SelectedItem
         {
             get { return GetValue(SelectedItemProperty); }
-            set { SetValue(SelectedItemProperty, value); }
+            set { SetCurrentValue(SelectedItemProperty, value); }
         }
 
         static void OnSelectedItemChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

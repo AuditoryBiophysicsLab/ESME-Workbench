@@ -20,7 +20,7 @@ namespace ESME.Views.Controls
         public bool AutoScrollingEnabled
         {
             get { return (bool)GetValue(AutoScrollingEnabledProperty); }
-            set { SetValue(AutoScrollingEnabledProperty, value); }
+            set { SetCurrentValue(AutoScrollingEnabledProperty, value); }
         }
 
         #endregion
@@ -33,7 +33,7 @@ namespace ESME.Views.Controls
         public string Text
         {
             get { return (string)GetValue(TextProperty); }
-            set { SetValue(TextProperty, value); }
+            set { SetCurrentValue(TextProperty, value); }
         }
 
         public static void TextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

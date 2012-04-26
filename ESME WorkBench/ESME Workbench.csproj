@@ -126,7 +126,10 @@
     <Compile Include="EventToCommandTrigger.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="ViewModels\Layers\CustomUnitScaleBarAdornmentLayer.cs" />
-    <Compile Include="ViewModels\Layers\LayerTreeViewModel.cs" />
+    <Compile Include="ViewModels\Tree\AnalysisPointsNode.cs" />
+    <Compile Include="ViewModels\Tree\BitmapNode.cs" />
+    <Compile Include="ViewModels\Tree\EnvironmentNode.cs" />
+    <Compile Include="ViewModels\Tree\LayerTreeViewModel.cs" />
     <Compile Include="ViewModels\Main\AboutViewModel.cs" />
     <Compile Include="ViewModels\Main\EnvironmentTab.cs">
       <SubType>Code</SubType>
@@ -134,6 +137,14 @@
     <Compile Include="ViewModels\Main\HomeTab.cs" />
     <Compile Include="ViewModels\Main\OverrideCursor.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticSimulatorOptionsViewModel.cs" />
+    <Compile Include="ViewModels\Tree\LocationsNode.cs" />
+    <Compile Include="ViewModels\Tree\PerimetersNode.cs" />
+    <Compile Include="ViewModels\Tree\ScenarioNode.cs" />
+    <Compile Include="ViewModels\Tree\SedimentNode.cs" />
+    <Compile Include="ViewModels\Tree\SedimentTypeNode.cs" />
+    <Compile Include="ViewModels\Tree\SpeciesNode.cs" />
+    <Compile Include="ViewModels\Tree\WorldMapFeatureNode.cs" />
+    <Compile Include="ViewModels\Tree\WorldMapNode.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>

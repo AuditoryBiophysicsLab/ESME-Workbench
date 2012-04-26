@@ -56,7 +56,7 @@ namespace ESME.Views.Controls
         public Button BrowserButton
         {
             get { return (Button)GetValue(BrowserButtonProperty); }
-            set { SetValue(BrowserButtonProperty, value); }
+            set { SetCurrentValue(BrowserButtonProperty, value); }
         }
 
         #endregion
@@ -66,7 +66,7 @@ namespace ESME.Views.Controls
         public string Caption
         {
             get { return (string)GetValue(CaptionProperty); }
-            set { SetValue(CaptionProperty, value); }
+            set { SetCurrentValue(CaptionProperty, value); }
         }
 
         public static DependencyProperty DialogTitleProperty = DependencyProperty.Register("DialogTitle", typeof(string), typeof(FileOrDirectorySetting), new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
@@ -74,7 +74,7 @@ namespace ESME.Views.Controls
         public string DialogTitle
         {
             get { return (string)GetValue(DialogTitleProperty); }
-            set { SetValue(DialogTitleProperty, value); }
+            set { SetCurrentValue(DialogTitleProperty, value); }
         }
 
         public static DependencyProperty FileNameProperty = DependencyProperty.Register("FileName", typeof(string), typeof(FileOrDirectorySetting), new FrameworkPropertyMetadata("FileOrDirectorySetting", FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnFileNameChanged));
@@ -82,7 +82,7 @@ namespace ESME.Views.Controls
         public string FileName
         {
             get { return (string)GetValue(FileNameProperty); }
-            set { SetValue(FileNameProperty, value); }
+            set { SetCurrentValue(FileNameProperty, value); }
         }
 
         public static void OnFileNameChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
@@ -96,7 +96,7 @@ namespace ESME.Views.Controls
         public string FileNameFilter
         {
             get { return (string)GetValue(FileNameFilterProperty); }
-            set { SetValue(FileNameFilterProperty, value); }
+            set { SetCurrentValue(FileNameFilterProperty, value); }
         }
 
         public static DependencyProperty IsDirectoryBrowserProperty = DependencyProperty.Register("IsDirectoryBrowser", typeof(bool), typeof(FileOrDirectorySetting), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
@@ -106,7 +106,7 @@ namespace ESME.Views.Controls
             get { return (bool)GetValue(IsDirectoryBrowserProperty); }
             set
             {
-                SetValue(IsDirectoryBrowserProperty, value);
+                SetCurrentValue(IsDirectoryBrowserProperty, value);
                 FileNameProperty.DefaultMetadata.DefaultValue = IsDirectoryBrowser ? "DirectoryName" : "FileName";
             }
         }
@@ -116,7 +116,7 @@ namespace ESME.Views.Controls
         public bool ShowNewFolderButton
         {
             get { return (bool)GetValue(ShowNewFolderButtonProperty); }
-            set { SetValue(ShowNewFolderButtonProperty, value); }
+            set { SetCurrentValue(ShowNewFolderButtonProperty, value); }
         }
 
         public static DependencyProperty UseSaveFileDialogProperty = DependencyProperty.Register("UseSaveFileDialog", typeof(bool), typeof(FileOrDirectorySetting), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
@@ -124,7 +124,7 @@ namespace ESME.Views.Controls
         public bool UseSaveFileDialog
         {
             get { return (bool)GetValue(UseSaveFileDialogProperty); }
-            set { SetValue(UseSaveFileDialogProperty, value); }
+            set { SetCurrentValue(UseSaveFileDialogProperty, value); }
         }
 
         void OpenFileClick(object sender, RoutedEventArgs e)

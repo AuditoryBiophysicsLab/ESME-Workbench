@@ -31,7 +31,7 @@ namespace ESMEWorkbench.Controls
         public string Text
         {
             get { return (string) GetValue(TextProperty); }
-            set { SetValue(TextProperty, value); }
+            set { SetCurrentValue(TextProperty, value); }
         }
 
         public static readonly DependencyProperty TextProperty = DependencyProperty.Register("Text", typeof (string), typeof (EditableTextBlock), new PropertyMetadata(""));
@@ -39,7 +39,7 @@ namespace ESMEWorkbench.Controls
         public bool IsEditable
         {
             get { return (bool) GetValue(IsEditableProperty); }
-            set { SetValue(IsEditableProperty, value); }
+            set { SetCurrentValue(IsEditableProperty, value); }
         }
 
         public static readonly DependencyProperty IsEditableProperty = DependencyProperty.Register("IsEditable", typeof (bool), typeof (EditableTextBlock), new PropertyMetadata(true));
@@ -55,7 +55,7 @@ namespace ESMEWorkbench.Controls
             {
                 if (!IsEditable) return;
                 if (value) _oldText = Text;
-                SetValue(IsInEditModeProperty, value);
+                SetCurrentValue(IsInEditModeProperty, value);
             }
         }
 
@@ -67,7 +67,7 @@ namespace ESMEWorkbench.Controls
             set
             {
                 if (value == "") value = "{0}";
-                SetValue(TextFormatProperty, value);
+                SetCurrentValue(TextFormatProperty, value);
             }
         }
 

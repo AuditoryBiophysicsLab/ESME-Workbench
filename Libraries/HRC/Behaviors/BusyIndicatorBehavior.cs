@@ -54,7 +54,7 @@ namespace HRC.Behaviors
 
 		public static void SetDimmerOpacity(DependencyObject obj, double value)
 		{
-			obj.SetValue(DimmerOpacityProperty, value);
+            obj.SetCurrentValue(DimmerOpacityProperty, value);
 		}
 
 		public static bool GetAddMargins(DependencyObject obj)
@@ -64,7 +64,7 @@ namespace HRC.Behaviors
 
 		public static void SetAddMargins(DependencyObject obj, bool value)
 		{
-			obj.SetValue(AddMarginsProperty, value);
+            obj.SetCurrentValue(AddMarginsProperty, value);
 		}
 
 		public static Duration GetDimTransitionDuration(DependencyObject obj)
@@ -74,7 +74,7 @@ namespace HRC.Behaviors
 
 		public static void SetDimTransitionDuration(DependencyObject obj, Duration value)
 		{
-			obj.SetValue(DimTransitionDurationProperty, value);
+            obj.SetCurrentValue(DimTransitionDurationProperty, value);
 		}
 
 		public static Brush GetDimmerBrush(DependencyObject obj)
@@ -84,7 +84,7 @@ namespace HRC.Behaviors
 
 		public static void SetDimmerBrush(DependencyObject obj, Brush value)
 		{
-			obj.SetValue(DimmerBrushProperty, value);
+            obj.SetCurrentValue(DimmerBrushProperty, value);
 		}
 
 		public static bool GetDimBackground(DependencyObject obj)
@@ -94,7 +94,7 @@ namespace HRC.Behaviors
 
 		public static void SetDimBackground(DependencyObject obj, bool value)
 		{
-			obj.SetValue(DimBackgroundProperty, value);
+            obj.SetCurrentValue(DimBackgroundProperty, value);
 		}
 
 		public static UIElement GetTargetVisual(DependencyObject obj)
@@ -104,7 +104,7 @@ namespace HRC.Behaviors
 
 		public static void SetTargetVisual(DependencyObject obj, UIElement value)
 		{
-			obj.SetValue(TargetVisualProperty, value);
+            obj.SetCurrentValue(TargetVisualProperty, value);
 		}
 
 		public static bool GetBusyState(DependencyObject obj)
@@ -114,7 +114,7 @@ namespace HRC.Behaviors
 
 		public static void SetBusyState(DependencyObject obj, bool value)
 		{
-			obj.SetValue(BusyStateProperty, value);
+            obj.SetCurrentValue(BusyStateProperty, value);
 		}
 
 		#endregion
@@ -233,20 +233,20 @@ namespace HRC.Behaviors
 				              		StretchDirection = StretchDirection.Both,
 				              		Child = new CircularProgressBar()
 				              	};
-				grid.SetValue(Panel.ZIndexProperty, 1000);
-				grid.SetValue(Grid.RowSpanProperty, Math.Max(1, hostGrid.RowDefinitions.Count));
-				grid.SetValue(Grid.ColumnSpanProperty, Math.Max(1, hostGrid.ColumnDefinitions.Count));
+				grid.SetCurrentValue(Panel.ZIndexProperty, 1000);
+				grid.SetCurrentValue(Grid.RowSpanProperty, Math.Max(1, hostGrid.RowDefinitions.Count));
+				grid.SetCurrentValue(Grid.ColumnSpanProperty, Math.Max(1, hostGrid.ColumnDefinitions.Count));
 				if (GetAddMargins(d))
 				{
-					viewbox.SetValue(Grid.RowProperty, 1);
-					viewbox.SetValue(Grid.ColumnProperty, 1);
+					viewbox.SetCurrentValue(Grid.RowProperty, 1);
+					viewbox.SetCurrentValue(Grid.ColumnProperty, 1);
 				}
 				else
 				{
-					viewbox.SetValue(Grid.RowSpanProperty, 3);
-					viewbox.SetValue(Grid.ColumnSpanProperty, 3);
+					viewbox.SetCurrentValue(Grid.RowSpanProperty, 3);
+					viewbox.SetCurrentValue(Grid.ColumnSpanProperty, 3);
 				}
-				viewbox.SetValue(Panel.ZIndexProperty, 1);
+				viewbox.SetCurrentValue(Panel.ZIndexProperty, 1);
 
 				var dimmer = new Rectangle
 				             	{
@@ -255,9 +255,9 @@ namespace HRC.Behaviors
 				             		Fill = GetDimmerBrush(d),
 				             		Visibility = (dimBackground ? Visibility.Visible : Visibility.Collapsed)
 				             	};
-				dimmer.SetValue(Grid.RowSpanProperty, 3);
-				dimmer.SetValue(Grid.ColumnSpanProperty, 3);
-				dimmer.SetValue(Panel.ZIndexProperty, 0);
+				dimmer.SetCurrentValue(Grid.RowSpanProperty, 3);
+				dimmer.SetCurrentValue(Grid.ColumnSpanProperty, 3);
+				dimmer.SetCurrentValue(Panel.ZIndexProperty, 0);
 				grid.Children.Add(dimmer);
 
 				grid.Children.Add(viewbox);

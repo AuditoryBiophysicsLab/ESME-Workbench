@@ -27,7 +27,7 @@ namespace HRC.Interactivity
         public ICommand Command
         {
             get { return (ICommand)GetValue(CommandProperty); }
-            set { SetValue(CommandProperty, value); }
+            set { SetCurrentValue(CommandProperty, value); }
         }
 
         public static readonly DependencyProperty CommandProperty = DependencyProperty.Register(
@@ -37,7 +37,7 @@ namespace HRC.Interactivity
         public object CommandParameter
         {
             get { return GetValue(CommandParameterProperty); }
-            set { SetValue(CommandParameterProperty, value); }
+            set { SetCurrentValue(CommandParameterProperty, value); }
         }
 
         public static readonly DependencyProperty CommandParameterProperty = DependencyProperty.Register(
@@ -47,7 +47,7 @@ namespace HRC.Interactivity
         public IInputElement CommandTarget
         {
             get { return (IInputElement)GetValue(CommandTargetProperty); }
-            set { SetValue(CommandTargetProperty, value); }
+            set { SetCurrentValue(CommandTargetProperty, value); }
         }
 
         public static readonly DependencyProperty CommandTargetProperty = DependencyProperty.Register(
@@ -57,7 +57,7 @@ namespace HRC.Interactivity
         public bool SyncOwnerIsEnabled
         {
             get { return (bool)GetValue(SyncOwnerIsEnabledProperty); }
-            set { SetValue(SyncOwnerIsEnabledProperty, value); }
+            set { SetCurrentValue(SyncOwnerIsEnabledProperty, value); }
         }
 
         /// <summary>

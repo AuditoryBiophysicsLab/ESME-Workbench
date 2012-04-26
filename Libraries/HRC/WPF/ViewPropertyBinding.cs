@@ -14,7 +14,7 @@ namespace HRC.WPF
 
         public static void SetViewPropertyBindings(DependencyObject o, ViewPropertyCollection value)
         {
-            o.SetValue(ViewPropertyBindingsProperty, value);
+            o.SetCurrentValue(ViewPropertyBindingsProperty, value);
         }
 
         public static ViewPropertyCollection GetViewPropertyBindings(DependencyObject o)
@@ -37,7 +37,7 @@ namespace HRC.WPF
         public object Source
         {
             get { return GetValue(SourceProperty); }
-            set { SetValue(SourceProperty, value); }
+            set { SetCurrentValue(SourceProperty, value); }
         }
         public static readonly DependencyProperty SourceProperty =
             DependencyProperty.Register("Source", typeof(object), typeof(ViewProperty),
@@ -60,7 +60,7 @@ namespace HRC.WPF
         public object Target
         {
             get { return GetValue(TargetProperty); }
-            set { SetValue(TargetProperty, value); }
+            set { SetCurrentValue(TargetProperty, value); }
         }
         public static readonly DependencyProperty TargetProperty =
             DependencyProperty.Register("Target", typeof(object), typeof(ViewProperty),

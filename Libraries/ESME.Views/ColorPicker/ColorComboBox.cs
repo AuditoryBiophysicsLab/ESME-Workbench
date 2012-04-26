@@ -24,7 +24,7 @@ namespace ESME.Views.ColorPicker
         public bool IsDropDownOpen
         {
             get { return (bool)GetValue(IsDropDownOpenProperty); }
-            set { SetValue(IsDropDownOpenProperty, value); }
+            set { SetCurrentValue(IsDropDownOpenProperty, value); }
         }
 
         public static readonly DependencyProperty IsDropDownOpenProperty =
@@ -34,7 +34,7 @@ namespace ESME.Views.ColorPicker
         public Color SelectedColor
         {
             get { return (Color)GetValue(SelectedColorProperty); }
-            set { SetValue(SelectedColorProperty, value); }
+            set { SetCurrentValue(SelectedColorProperty, value); }
         }
         public static readonly DependencyProperty SelectedColorProperty =
             DependencyProperty.Register("SelectedColor", typeof(Color), typeof(ColorComboBox),

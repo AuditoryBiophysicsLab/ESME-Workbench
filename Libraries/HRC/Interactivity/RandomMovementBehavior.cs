@@ -23,7 +23,7 @@ namespace HRC.Interactivity
         public double Speed
         {
             get { return (double)GetValue(SpeedProperty); }
-            set { SetValue(SpeedProperty, value); }
+            set { SetCurrentValue(SpeedProperty, value); }
         }
 
         public static readonly DependencyProperty SpeedProperty = DependencyProperty.Register("Movement speed", typeof(double), typeof(RandomMovementBehavior), new PropertyMetadata(5.0));

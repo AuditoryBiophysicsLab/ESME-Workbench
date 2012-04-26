@@ -21,7 +21,7 @@ namespace ESME.Views.Controls
         public string BoundField
         {
             get { return (string)GetValue(BoundFieldProperty); }
-            set { SetValue(BoundFieldProperty, value); }
+            set { SetCurrentValue(BoundFieldProperty, value); }
         }
 
         public static void BoundFieldPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

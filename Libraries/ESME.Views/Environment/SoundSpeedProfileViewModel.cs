@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -66,8 +67,8 @@ namespace ESME.Views.Environment
             if (actualControlHeight == 0 || actualControlWidth == 0) return;
             // ReSharper restore CompareOfFloatsByEqualityOperator
 
-            MajorGrid = this.GetMajorGrid(actualControlHeight, actualControlWidth);
-            MinorGrid = this.GetMinorGrid(actualControlHeight, actualControlWidth);
+            MajorGrid = GetGrid(DepthAxisMajorTicks, SpeedAxisMajorTicks, 1, actualControlHeight, actualControlWidth);
+            MinorGrid = GetGrid(DepthAxisMinorTicks, SpeedAxisMinorTicks, 0, actualControlHeight, actualControlWidth);
 
             SoundSpeedGeometry = SoundSpeedProfile.GetGeometry(actualControlHeight, actualControlWidth);
             SoundSpeedDataPoints = SoundSpeedProfile.GetGeometry(actualControlHeight, actualControlWidth, glyphStyle: GlyphStyle.Circle);
@@ -283,39 +284,14 @@ namespace ESME.Views.Environment
 
         #endregion
         #endregion
-    }
 
-    internal static class SoundSpeedViewModelExtensions
-    {
-        public static string GetMajorGrid(this SoundSpeedProfileViewModel profile, double height, double width)
+        public static string GetGrid(ICollection<double> horizontal, ICollection<double> vertical, int skipFactor, double height, double width)
         {
             var sb = new StringBuilder();
-            //skip the first (don't draw on the axis)
-            for (var i = 0; i < profile.DepthAxisMajorTicks.Count - 1; i++)
-            {
-                var tick = profile.DepthAxisMajorTicks[i];
+            foreach (var tick in horizontal.Take(horizontal.Count - skipFactor))
                 sb.Append(string.Format("M 0,{0} H {1}", tick, width));
-            }
-            //skip the last(don't draw on the axis)
-            for (var i = 1; i < profile.SpeedAxisMajorTicks.Count; i++)
-            {
-                var tick = profile.SpeedAxisMajorTicks[i];
+            foreach (var tick in vertical.Skip(skipFactor))
                 sb.Append(string.Format("M {0},0 V {1}", tick, height));
-            }
-            return sb.ToString();
-        }
-
-        public static string GetMinorGrid(this SoundSpeedProfileViewModel profile, double height, double width)
-        {
-            var sb = new StringBuilder();
-            foreach (var tick in profile.DepthAxisMinorTicks)
-            {
-                sb.Append(string.Format("M 0,{0} H {1}", tick, width));
-            }
-            foreach (var tick in profile.SpeedAxisMinorTicks)
-            {
-                sb.Append(string.Format("M {0},0 V {1}", tick, height));
-            }
             return sb.ToString();
         }
     }

@@ -20,7 +20,7 @@ namespace ESME.Views.ColorPicker
         public Color LeftColor
         {
             get { return (Color)GetValue(LeftColorProperty); }
-            set { SetValue(LeftColorProperty, value); }
+            set { SetCurrentValue(LeftColorProperty, value); }
         }
         public static readonly DependencyProperty LeftColorProperty =
             DependencyProperty.Register("LeftColor", typeof(Color), typeof(ColorSlider), new UIPropertyMetadata(Colors.Black));
@@ -28,7 +28,7 @@ namespace ESME.Views.ColorPicker
         public Color RightColor
         {
             get { return (Color)GetValue(RightColorProperty); }
-            set { SetValue(RightColorProperty, value); }
+            set { SetCurrentValue(RightColorProperty, value); }
         }
         public static readonly DependencyProperty RightColorProperty =
             DependencyProperty.Register("RightColor", typeof(Color), typeof(ColorSlider), new UIPropertyMetadata(Colors.White));
@@ -38,7 +38,7 @@ namespace ESME.Views.ColorPicker
         //public System.String Text
         //{
         //    get { return (System.String)GetValue(TextProperty); }
-        //    set { SetValue(TextProperty, value); }
+        //    set { SetCurrentValue(TextProperty, value); }
         //}
 
         //// Using a DependencyProperty as the backing store for Text.  This enables animation, styling, binding, etc...

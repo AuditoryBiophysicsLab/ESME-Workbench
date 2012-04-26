@@ -15,7 +15,7 @@ namespace HRC.Interactivity
         public string ElementName
         {
             get { return (string)GetValue(ElementNameProperty); }
-            set { SetValue(ElementNameProperty, value); }
+            set { SetCurrentValue(ElementNameProperty, value); }
         }
 
         public static readonly DependencyProperty ElementNameProperty = DependencyProperty.Register("Element Name", typeof(string), typeof(RemoveElementAction), new PropertyMetadata(ElementNamePropertyPropertyChanged));

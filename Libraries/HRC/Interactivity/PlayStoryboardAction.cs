@@ -13,7 +13,7 @@ namespace HRC.Interactivity
         public string StoryboardName
         {
             get { return (string)GetValue(StoryboardNameProperty); }
-            set { SetValue(StoryboardNameProperty, value); }
+            set { SetCurrentValue(StoryboardNameProperty, value); }
         }
 
         public static readonly DependencyProperty StoryboardNameProperty = DependencyProperty.Register("Storyboard Name", typeof(string), typeof(PlayStoryboardAction), new PropertyMetadata(StoryboardNamePropertyChanged));

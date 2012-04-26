@@ -30,7 +30,7 @@ namespace ESME.Views
         /// </summary>
         public static void SetIsChecked(DependencyObject d, bool? value)
         {
-            d.SetValue(IsCheckedProperty, value);
+            d.SetCurrentValue(IsCheckedProperty, value);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace ESME.Views
         /// </summary>
         public static void SetIsThreeState(DependencyObject d, bool value)
         {
-            d.SetValue(IsThreeStateProperty, value);
+            d.SetCurrentValue(IsThreeStateProperty, value);
         }
 
         #endregion
@@ -106,7 +106,7 @@ namespace ESME.Views
         /// </summary>
         public static void SetIsVirtualToggleButton(DependencyObject d, bool value)
         {
-            d.SetValue(IsVirtualToggleButtonProperty, value);
+            d.SetCurrentValue(IsVirtualToggleButtonProperty, value);
         }
 
         /// <summary>

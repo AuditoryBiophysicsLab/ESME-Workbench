@@ -64,7 +64,7 @@ namespace ESME.Views.Controls
         public ObservableList<double> MajorTicks
         {
             get { return (ObservableList<double>)GetValue(MajorTicksProperty); }
-            set { SetValue(MajorTicksProperty, value); }
+            set { SetCurrentValue(MajorTicksProperty, value); }
         }
 
         #endregion
@@ -79,7 +79,7 @@ namespace ESME.Views.Controls
         public ObservableList<double> MinorTicks
         {
             get { return (ObservableList<double>)GetValue(MinorTicksProperty); }
-            set { SetValue(MinorTicksProperty, value); }
+            set { SetCurrentValue(MinorTicksProperty, value); }
         }
 
         #endregion
@@ -405,7 +405,7 @@ namespace ESME.Views.Controls
         public AxisLocationEnum AxisLocation
         {
             get { return (AxisLocationEnum) GetValue(AxisLocationProperty); }
-            set { SetValue(AxisLocationProperty, value); }
+            set { SetCurrentValue(AxisLocationProperty, value); }
         }
 
         static void AxisLocationPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis) obj).AxisLocationPropertyChanged(); }
@@ -441,7 +441,7 @@ namespace ESME.Views.Controls
         public string AxisLabel
         {
             get { return (string)GetValue(AxisLabelProperty); }
-            set { SetValue(AxisLabelProperty, value); }
+            set { SetCurrentValue(AxisLabelProperty, value); }
         }
 
         static void AxisLabelPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).AxisLabelPropertyChanged(); }
@@ -456,7 +456,7 @@ namespace ESME.Views.Controls
         public bool DisplayAbsoluteValue
         {
             get { return (bool)GetValue(DisplayAbsoluteValueProperty); }
-            set { SetValue(DisplayAbsoluteValueProperty, value); }
+            set { SetCurrentValue(DisplayAbsoluteValueProperty, value); }
         }
 
         static void DisplayAbsoluteValuePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).DisplayAbsoluteValuePropertyChanged(); }
@@ -471,7 +471,7 @@ namespace ESME.Views.Controls
         public double StartValue
         {
             get { return (double) GetValue(StartValueProperty); }
-            set { SetValue(StartValueProperty, value); }
+            set { SetCurrentValue(StartValueProperty, value); }
         }
 
         static void StartValuePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis) obj).StartValuePropertyChanged(); }
@@ -486,7 +486,7 @@ namespace ESME.Views.Controls
         public double EndValue
         {
             get { return (double) GetValue(EndValueProperty); }
-            set { SetValue(EndValueProperty, value); }
+            set { SetCurrentValue(EndValueProperty, value); }
         }
 
         static void EndValuePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis) obj).EndValuePropertyChanged(); }
@@ -501,7 +501,7 @@ namespace ESME.Views.Controls
         public string TickValueFormat
         {
             get { return (string) GetValue(TickValueFormatProperty); }
-            set { SetValue(TickValueFormatProperty, value); }
+            set { SetCurrentValue(TickValueFormatProperty, value); }
         }
 
         static void TickValueFormatPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis) obj).TickValueFormatPropertyChanged(); }

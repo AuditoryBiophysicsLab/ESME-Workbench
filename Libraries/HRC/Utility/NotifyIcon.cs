@@ -68,31 +68,31 @@ namespace HRC.Utility
         public BalloonTipIcon BalloonTipIcon
         {
             get { return (BalloonTipIcon)this.GetValue(BalloonTipIconProperty); }
-            set { this.SetValue(BalloonTipIconProperty, value); }
+            set { this.SetCurrentValue(BalloonTipIconProperty, value); }
         }
 
         public string BalloonTipText
         {
             get { return (string)this.GetValue(BalloonTipTextProperty); }
-            set { this.SetValue(BalloonTipTextProperty, value); }
+            set { this.SetCurrentValue(BalloonTipTextProperty, value); }
         }
 
         public string BalloonTipTitle
         {
             get { return (string)this.GetValue(BalloonTipTitleProperty); }
-            set { this.SetValue(BalloonTipTitleProperty, value); }
+            set { this.SetCurrentValue(BalloonTipTitleProperty, value); }
         }
 
         public ImageSource Icon
         {
             get { return (ImageSource)this.GetValue(IconProperty); }
-            set { this.SetValue(IconProperty, value); }
+            set { this.SetCurrentValue(IconProperty, value); }
         }
 
         public string Text
         {
             get { return (string)this.GetValue(TextProperty); }
-            set { this.SetValue(TextProperty, value); }
+            set { this.SetCurrentValue(TextProperty, value); }
         }
 
         public override void BeginInit()

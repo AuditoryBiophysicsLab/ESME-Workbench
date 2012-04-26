@@ -7,7 +7,8 @@
              xmlns:Locations="clr-namespace:ESME.Locations;assembly=ESME"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:Scenarios="clr-namespace:ESME.Scenarios;assembly=ESME"
-             d:DataContext="{d:DesignInstance Layers:LayerTreeViewModel}"
+             xmlns:Tree="clr-namespace:ESMEWorkbench.ViewModels.Tree" xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+             d:DataContext="{d:DesignInstance Tree:LayerTreeViewModel}"
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
@@ -63,6 +64,13 @@
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Background" Value="Gray" />
         </Style>
+        <Style TargetType="{x:Type TreeViewItem}">
+            <Style.Triggers>
+                <Trigger Property="WPF:TreeViewHelper.IsMouseDirectlyOverItem" Value="True">
+                    <Setter Property="Background" Value="#FFC0FFC0" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <TreeView DockPanel.Dock="Top"
               Grid.IsSharedSizeScope="True"
@@ -88,11 +96,11 @@
                 </StackPanel>
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
                                        IsMapLayer="False"
                                        LayerName="{Binding SourceName}" />
             </HierarchicalDataTemplate>
-            <HierarchicalDataTemplate DataType="{x:Type Layers:EnvironmentNode}" ItemsSource="{Binding EnvironmentLayers}">
+            <HierarchicalDataTemplate DataType="{x:Type Tree:EnvironmentNode}" ItemsSource="{Binding EnvironmentLayers}">
                 <Controls:LayerControl IsMapLayer="False" LayerName="Environment" />
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
@@ -100,13 +108,13 @@
                                        IsMapLayer="False"
                                        LayerName="{Binding ModeName}" />
             </HierarchicalDataTemplate>
-            <HierarchicalDataTemplate DataType="{x:Type Layers:WorldMapNode}" ItemsSource="{Binding Features}">
+            <HierarchicalDataTemplate DataType="{x:Type Tree:WorldMapNode}" ItemsSource="{Binding Features}">
                 <Controls:LayerControl IsChecked="{Binding IsVisible}"
                                        LayerName="World Map"
                                        LineOrSymbolColor="{Binding LineColor}"
                                        LineOrSymbolSize="{Binding LineWeight}" />
             </HierarchicalDataTemplate>
-            <HierarchicalDataTemplate DataType="{x:Type Layers:SedimentNode}" ItemsSource="{Binding SedimentTypes}">
+            <HierarchicalDataTemplate DataType="{x:Type Tree:SedimentNode}" ItemsSource="{Binding SedimentTypes}">
                 <Controls:LayerControl IsChecked="{Binding IsChecked}"
                                        IsMapLayer="False"
                                        LayerName="Sediment" />
@@ -123,12 +131,12 @@
                                        LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" 
                                        LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}"/>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type Layers:WorldMapFeatureNode}">
+            <DataTemplate DataType="{x:Type Tree:WorldMapFeatureNode}">
                 <Controls:LayerControl IsChecked="{Binding IsChecked}"
                                        LayerName="{Binding FeatureName}"
                                        LineColorVisibility="Collapsed" />
             </DataTemplate>
-            <DataTemplate DataType="{x:Type Layers:BitmapNode}">
+            <DataTemplate DataType="{x:Type Tree:BitmapNode}">
                 <Controls:LayerControl IsChecked="{Binding IsChecked}"
                                        LayerName="{Binding LayerName}"
                                        LineColorVisibility="Collapsed" />

@@ -45,7 +45,7 @@ namespace ESME.Views.ColorPicker
         public double Hue
         {
             get { return (double)GetValue(HueProperty); }
-            set { SetValue(HueProperty, value); }
+            set { SetCurrentValue(HueProperty, value); }
         }
 
         public static readonly DependencyProperty HueProperty = 
@@ -55,7 +55,7 @@ namespace ESME.Views.ColorPicker
         public double Saturation
         {
             get { return (double)GetValue(SaturationProperty); }
-            set { SetValue(SaturationProperty, value); }
+            set { SetCurrentValue(SaturationProperty, value); }
         }
 
         public static readonly DependencyProperty SaturationProperty = 
@@ -65,7 +65,7 @@ namespace ESME.Views.ColorPicker
         public double Value
         {
             get { return (double)GetValue(ValueProperty); }
-            set { SetValue(ValueProperty, value); }
+            set { SetCurrentValue(ValueProperty, value); }
         }
 
         public static readonly DependencyProperty ValueProperty = 
@@ -75,7 +75,7 @@ namespace ESME.Views.ColorPicker
         public Color SelectedColor
         {
             get { return (Color)GetValue(SelectedColorProperty); }
-            set { SetValue(SelectedColorProperty, value); }
+            set { SetCurrentValue(SelectedColorProperty, value); }
         }
 
         public static readonly DependencyProperty SelectedColorProperty =

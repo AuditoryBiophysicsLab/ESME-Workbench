@@ -32,7 +32,7 @@ namespace ESMEWorkbench.Controls
         public WriteableBitmap ColorBarImage
         {
             get { return (WriteableBitmap) GetValue(ColorBarImageProperty); }
-            set { SetValue(ColorBarImageProperty, value); }
+            set { SetCurrentValue(ColorBarImageProperty, value); }
         }
 
         static void ColorBarImagePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarView) obj).ColorBarImagePropertyChanged(args); }
@@ -52,7 +52,7 @@ namespace ESMEWorkbench.Controls
         public double Maximum
         {
             get { return (double) GetValue(MaximumProperty); }
-            set { SetValue(MaximumProperty, value); }
+            set { SetCurrentValue(MaximumProperty, value); }
         }
 
         static void MinMaxPropertiesChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarView) obj).MinMaxPropertiesChanged(); }
@@ -73,7 +73,7 @@ namespace ESMEWorkbench.Controls
         public double Minimum
         {
             get { return (double) GetValue(MinimumProperty); }
-            set { SetValue(MinimumProperty, value); }
+            set { SetCurrentValue(MinimumProperty, value); }
         }
 
         #endregion
@@ -85,7 +85,7 @@ namespace ESMEWorkbench.Controls
         public double CurrentMaximum
         {
             get { return (double) GetValue(CurrentMaximumProperty); }
-            set { SetValue(CurrentMaximumProperty, value); }
+            set { SetCurrentValue(CurrentMaximumProperty, value); }
         }
 
         static void CurMaximumPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarView) obj).CurMaximumPropertyChanged(args); }
@@ -119,7 +119,7 @@ namespace ESMEWorkbench.Controls
         public double CurrentMinimum
         {
             get { return (double) GetValue(CurrentMinimumProperty); }
-            set { SetValue(CurrentMinimumProperty, value); }
+            set { SetCurrentValue(CurrentMinimumProperty, value); }
         }
 
         static void CurMinimumPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarView) obj).CurMinimumPropertyChanged(args); }

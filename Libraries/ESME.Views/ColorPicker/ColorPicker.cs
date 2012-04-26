@@ -52,7 +52,7 @@ namespace ESME.Views.ColorPicker
         public Color SelectedColor
         {
             get { return (Color)GetValue(SelectedColorProperty); }
-            set { SetValue(SelectedColorProperty, value); }
+            set { SetCurrentValue(SelectedColorProperty, value); }
         }
         public static readonly DependencyProperty SelectedColorProperty =
             DependencyProperty.Register("SelectedColor", typeof(Color), typeof(ColorPicker), 
@@ -61,7 +61,7 @@ namespace ESME.Views.ColorPicker
         public bool FixedSliderColor
         {
             get { return (bool)GetValue(FixedSliderColorProperty); }
-            set { SetValue(FixedSliderColorProperty, value); }
+            set { SetCurrentValue(FixedSliderColorProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for FixedSliderColor.  This enables animation, styling, binding, etc...

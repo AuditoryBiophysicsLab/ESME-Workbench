@@ -11,7 +11,7 @@ namespace ESME.Views.Controls
         public double PopupWidth
         {
             get { return (double)GetValue(PopupWidthProperty); }
-            set { SetValue(PopupWidthProperty, value); }
+            set { SetCurrentValue(PopupWidthProperty, value); }
         }
 
         public static readonly DependencyProperty PopupWidthProperty =

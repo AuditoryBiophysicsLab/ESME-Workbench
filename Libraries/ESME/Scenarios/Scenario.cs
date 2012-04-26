@@ -15,7 +15,7 @@ using HRC.Navigation;
 namespace ESME.Scenarios
 {
     [NotifyPropertyChanged]
-    public class Scenario : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
+    public class Scenario : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged, IMouseOverAware
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
@@ -193,6 +193,9 @@ namespace ESME.Scenarios
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotMapped]
+        public bool IsMouseOver { get; set; }
     }
 
     public static class ScenarioExensions

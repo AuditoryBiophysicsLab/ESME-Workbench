@@ -88,7 +88,7 @@ namespace ESME.Views.ColorPicker
         public double Hue
         {
             get { return (double)GetValue(HueProperty); }
-            set { SetValue(HueProperty, value); }
+            set { SetCurrentValue(HueProperty, value); }
         }
 
         public static readonly DependencyProperty HueProperty =

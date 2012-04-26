@@ -12,7 +12,7 @@ namespace HRC.Interactivity
         public string MessageBoxText
         {
             get { return (string)GetValue(MessageBoxTextProperty); }
-            set { SetValue(MessageBoxTextProperty, value); }
+            set { SetCurrentValue(MessageBoxTextProperty, value); }
         }
 
         public static readonly DependencyProperty MessageBoxTextProperty = 

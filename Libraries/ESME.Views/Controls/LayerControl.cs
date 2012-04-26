@@ -38,7 +38,7 @@ namespace ESME.Views.Controls
         public bool IsMapLayer
         {
             get { return (bool)GetValue(IsMapLayerProperty); }
-            set { SetValue(IsMapLayerProperty, value); }
+            set { SetCurrentValue(IsMapLayerProperty, value); }
         }
 
         #endregion
@@ -53,7 +53,7 @@ namespace ESME.Views.Controls
         public bool IsChecked
         {
             get { return (bool)GetValue(IsCheckedProperty); }
-            set { SetValue(IsCheckedProperty, value); }
+            set { SetCurrentValue(IsCheckedProperty, value); }
         }
 
         #endregion
@@ -68,7 +68,7 @@ namespace ESME.Views.Controls
         public Color LineOrSymbolColor
         {
             get { return (Color)GetValue(LineOrSymbolColorProperty); }
-            set { SetValue(LineOrSymbolColorProperty, value); }
+            set { SetCurrentValue(LineOrSymbolColorProperty, value); }
         }
 
         #endregion
@@ -83,7 +83,7 @@ namespace ESME.Views.Controls
         public double LineOrSymbolSize
         {
             get { return (double)GetValue(LineOrSymbolSizeProperty); }
-            set { SetValue(LineOrSymbolSizeProperty, value); }
+            set { SetCurrentValue(LineOrSymbolSizeProperty, value); }
         }
 
         #endregion
@@ -98,7 +98,7 @@ namespace ESME.Views.Controls
         public string LayerName
         {
             get { return (string)GetValue(LayerNameProperty); }
-            set { SetValue(LayerNameProperty, value); }
+            set { SetCurrentValue(LayerNameProperty, value); }
         }
 
         #endregion
@@ -113,7 +113,7 @@ namespace ESME.Views.Controls
         public Visibility CheckBoxVisibility
         {
             get { return (Visibility)GetValue(CheckBoxVisibilityProperty); }
-            set { SetValue(CheckBoxVisibilityProperty, value); }
+            set { SetCurrentValue(CheckBoxVisibilityProperty, value); }
         }
 
         #endregion
@@ -128,7 +128,7 @@ namespace ESME.Views.Controls
         public Visibility LineColorVisibility
         {
             get { return (Visibility)GetValue(LineColorVisibilityProperty); }
-            set { SetValue(LineColorVisibilityProperty, value); }
+            set { SetCurrentValue(LineColorVisibilityProperty, value); }
         }
 
         #endregion

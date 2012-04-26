@@ -59,7 +59,7 @@ namespace HRC.Behaviors
         public double LowerLimit
         {
             get { return (double)GetValue(LowerLimitProperty); }
-            set { SetValue(LowerLimitProperty, value); }
+            set { SetCurrentValue(LowerLimitProperty, value); }
         }
 
         #endregion
@@ -72,7 +72,7 @@ namespace HRC.Behaviors
         public double UpperLimit
         {
             get { return (double)GetValue(UpperLimitProperty); }
-            set { SetValue(UpperLimitProperty, value); }
+            set { SetCurrentValue(UpperLimitProperty, value); }
         }
 
         #endregion
@@ -85,7 +85,7 @@ namespace HRC.Behaviors
         public bool IsInteger
         {
             get { return (bool)GetValue(IsIntegerProperty); }
-            set { SetValue(IsIntegerProperty, value); }
+            set { SetCurrentValue(IsIntegerProperty, value); }
         }
 
         #endregion

@@ -13,7 +13,7 @@ namespace HRC.Interactivity
         public string Url
         {
             get { return (string)GetValue(UrlProperty); }
-            set { SetValue(UrlProperty, value); }
+            set { SetCurrentValue(UrlProperty, value); }
         }
 
         public static readonly DependencyProperty UrlProperty = DependencyProperty.Register("Hyperlink URL", typeof(string), typeof(HyperlinkAction), new PropertyMetadata("http://www.live.com"));
@@ -22,7 +22,7 @@ namespace HRC.Interactivity
         public string TargetURL
         {
             get { return (string)GetValue(TargetURLProperty); }
-            set { SetValue(TargetURLProperty, value); }
+            set { SetCurrentValue(TargetURLProperty, value); }
         }
 
         public static readonly DependencyProperty TargetURLProperty = DependencyProperty.Register("TargetURL", typeof(string), typeof(HyperlinkAction), new PropertyMetadata("_self"));

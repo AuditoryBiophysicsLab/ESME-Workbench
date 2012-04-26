@@ -29,6 +29,7 @@ namespace ESME.TransmissionLoss
     {
         public TransmissionLossCalculatorService()
         {
+            WorkQueue = new ObservableConcurrentDictionary<Guid, PercentProgress<Radial>>();
             _calculator = new ActionBlock<Tuple<PercentProgress<Radial>, string>>(job =>
             {
                 if (WorkQueue.Any()) MediatorMessage.Send(MediatorMessage.ShowTransmissionLossQueueView, true);
@@ -49,7 +50,7 @@ namespace ESME.TransmissionLoss
         [Import] EnvironmentalCacheService _cacheService;
         [Initialize(float.NaN)] public float RangeCellSize { get; set; }
         [Initialize(float.NaN)] public float DepthCellSize { get; set; }
-        [Initialize, UsedImplicitly] public ObservableConcurrentDictionary<Guid, PercentProgress<Radial>> WorkQueue { get; private set; }
+        public ObservableConcurrentDictionary<Guid, PercentProgress<Radial>> WorkQueue { get; private set; }
         readonly ActionBlock<Tuple<PercentProgress<Radial>, string>> _calculator;
         readonly BufferBlock<Tuple<PercentProgress<Radial>, string>> _queue;
 

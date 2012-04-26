@@ -37,18 +37,17 @@ namespace ESMEWorkbench.ViewModels.Main
         readonly IHRCSaveFileService _saveFile;
         [Import, UsedImplicitly] IPluginManagerService _plugins;
         [Import, UsedImplicitly] EnvironmentalCacheService _cache;
-        [Import, UsedImplicitly] TransmissionLossCalculatorService _transmissionLoss;
+        readonly TransmissionLossCalculatorService _transmissionLoss;
         readonly IViewAwareStatus _viewAwareStatus;
         readonly IMessageBoxService _messageBox;
         readonly IUIVisualizerService _visualizer;
-        //TransmissionLossQueueCalculatorViewModel _bellhopQueueCalculatorViewModel;
         public const bool ExperimentsCurrentlySupported = false;
         Dispatcher _dispatcher;
         #endregion
 
         #region Constructor
         [ImportingConstructor]
-        public MainViewModel(IViewAwareStatus viewAwareStatus, MasterDatabaseService database, IMessageBoxService messageBox, IUIVisualizerService visualizer, IHRCSaveFileService saveFile)
+        public MainViewModel(IViewAwareStatus viewAwareStatus, MasterDatabaseService database, IMessageBoxService messageBox, IUIVisualizerService visualizer, IHRCSaveFileService saveFile, TransmissionLossCalculatorService transmissionLoss)
         {
             MainWindowTitle = "ESME Workbench: <No scenario loaded>";
             try
@@ -65,6 +64,7 @@ namespace ESMEWorkbench.ViewModels.Main
             Database = database;
             _visualizer = visualizer;
             _saveFile = saveFile;
+            _transmissionLoss = transmissionLoss;
             MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
             if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database")))
                 Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));

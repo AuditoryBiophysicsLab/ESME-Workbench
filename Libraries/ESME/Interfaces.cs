@@ -51,6 +51,11 @@ namespace ESME
         T Load(string fileName);
     }
 
+    public interface IMouseOverAware
+    {
+        bool IsMouseOver { get; set; }
+    }
+
     public interface IEnvironmentFile<out T> : ICanSave, ICanLoad<T>
     { }
 

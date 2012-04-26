@@ -41,7 +41,7 @@ namespace HRC.Utility
 	    /// <returns></returns>
 	    public static void SetTriggerName(TriggerBase trigger, string value)
 		{
-			trigger.SetValue(TriggerNameProperty, value);
+			trigger.SetCurrentValue(TriggerNameProperty, value);
 		}
 
 		public static readonly DependencyProperty TriggerNameProperty =
@@ -72,7 +72,7 @@ namespace HRC.Utility
 		/// <param name="value"></param>
 		public static void SetTraceEnabled(TriggerBase trigger, bool value)
 		{
-			trigger.SetValue(TraceEnabledProperty, value);
+			trigger.SetCurrentValue(TraceEnabledProperty, value);
 		}
 
 		public static readonly DependencyProperty TraceEnabledProperty =

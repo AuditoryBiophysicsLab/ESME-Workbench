@@ -230,6 +230,7 @@
     <Compile Include="WPF\Palette.cs" />
     <Compile Include="WPF\TreeHelper.cs" />
     <Compile Include="WPF\TriggerTracing.cs" />
+    <Compile Include="WPF\TreeViewHelper.cs" />
     <Compile Include="WPF\ValueConverters.cs" />
     <Compile Include="WPF\ViewPropertyBinding.cs" />
     <Compile Include="WPF\VisualExtensions.cs" />

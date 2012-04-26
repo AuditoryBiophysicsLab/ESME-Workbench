@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Windows;
 using ESME;
 using ESME.Environment;
@@ -9,8 +8,8 @@ using ESME.Mapping;
 using ESME.Model;
 using ESME.Scenarios;
 using ESME.Views.Locations;
-using ESMEWorkbench.ViewModels.Layers;
 using ESMEWorkbench.ViewModels.Map;
+using ESMEWorkbench.ViewModels.Tree;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.ViewModels;
