@@ -7,7 +7,6 @@ using System.Windows.Media;
 using ESME.Model;
 using ESME.NEMO.Overlay;
 using HRC.Navigation;
-using mbs;
 
 namespace ESME.Animats
 {
@@ -30,39 +29,6 @@ namespace ESME.Animats
 
     public class AnimatLocationFile
     {
-        #region Static factories
-
-        /// <summary>
-        /// creates a new animat location file.  Opens said file exclusively, with write access.  Will not allow duplicate file names to be created.
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="timeStepLength"></param>
-        /// <param name="simulationDuration"></param>
-        /// <param name="animatList"></param>
-        /// <returns> animatlocationfile object.</returns>
-        public static AnimatLocationFile Create(string fileName, TimeSpan timeStepLength, TimeSpan simulationDuration,
-                                                AnimatList animatList)
-        {
-            if (animatList.Count() == 0)
-                throw new ApplicationException(
-                    "AnimatLocationFile::Create : at least one species must be present in speciesDescriptor");
-
-            var result = new AnimatLocationFile();
-
-            foreach (var s in animatList.SpeciesList.ReferencedSpecies)
-                result.SpeciesDescriptors.Add(new SpeciesDescriptor { Species = s });
-
-            result.Duration = simulationDuration;
-            result._timeStepLength = timeStepLength;
-            result._totalAnimatCount = animatList.Count();
-            result._totalTimeRecords = (int)(simulationDuration.TotalSeconds / timeStepLength.TotalSeconds);
-            // number of animats times number of earthcoordinate3ds in the simulation.  the cast is ok because never noninteger seconds.
-            result._writer =
-                new BinaryWriter(File.Open(fileName, FileMode.CreateNew, FileAccess.Write, FileShare.ReadWrite));
-            result.WriteHeader();
-            return result;
-        }
-
         /// <summary>
         /// opens a preexisting animat location file, and reads the header into the created object.
         /// </summary>
@@ -93,8 +59,6 @@ namespace ESME.Animats
             _reader.Close();
             _reader = null;
         }
-
-        #endregion
 
         #region Public utility methods and properties
         /// <summary>
@@ -244,28 +208,6 @@ namespace ESME.Animats
                 _writer.Write(location.Data);
             }
         }
-
-        /// <summary>
-        /// overloads addtimerecords to deal with 3mb output directly.
-        /// </summary>
-        /// <param name="animatLocations"></param>
-        public void AddTimeRecord(mbsPosition[] animatLocations)
-        {
-            CheckCanWrite();
-
-            if (animatLocations.Length != _totalAnimatCount)
-                throw new IndexOutOfRangeException("AnimatLocationFile: Animat count mismatch in AddTimeRecord()");
-
-            _totalTimeRecords++;
-            _writer.BaseStream.Seek(0, SeekOrigin.End);
-            foreach (var location in animatLocations)
-            {
-                _writer.Write(location.latitude);
-                _writer.Write(location.longitude);
-                _writer.Write(-location.depth);
-            }
-        }
-        
 
         /// <summary>
         /// test code to dump basic header information to the console. 

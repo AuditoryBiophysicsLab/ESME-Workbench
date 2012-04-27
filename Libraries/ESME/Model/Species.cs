@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 using ESME.Simulator;
-using mbs;
 
 namespace ESME.Model
 {
@@ -68,17 +67,6 @@ namespace ESME.Model
         internal int ReferenceCount { get; set; }
         internal string Filename { get; set; }
 
-        internal void AddToSimulationEnvironment(C3mbs simulationEnvironment)
-        {
-            mbsRESULT result = simulationEnvironment.AddSpecies(Filename);
-            if (mbsRESULT.OK != result)
-            {
-                //System.Diagnostics.Debug.WriteLine("AddSpecies FAILED: " + C3mbs.MbsResultToString(result));
-                throw new ApplicationException("C3mbs::AddSpecies(" + Filename + ") FATAL error " +
-                                               _mmmbs.MbsResultToString(result));
-            }
-        }
-
         #endregion
 
         #region IEquatable<Species> Members
@@ -99,7 +87,6 @@ namespace ESME.Model
 
         #region private data members
 
-        private readonly C3mbs _mmmbs = new C3mbs();
         [XmlIgnore] private double _soundPressureLevel;
 
         #endregion

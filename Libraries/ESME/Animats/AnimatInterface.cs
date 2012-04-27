@@ -3,10 +3,10 @@ using System.IO;
 using System.Threading;
 using ESME.Environment;
 using ESME.Model;
-using mbs;
 
 namespace ESME.Animats
 {
+#if false
     public class AnimatInterface
     {
         #region public properties
@@ -517,4 +517,5 @@ namespace ESME.Animats
 
         #endregion
     }
+#endif
 }
