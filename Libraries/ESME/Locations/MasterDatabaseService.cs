@@ -17,6 +17,7 @@ using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.Plugins;
 using ESME.Scenarios;
+using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;   
@@ -25,6 +26,7 @@ namespace ESME.Locations
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ExportService(ServiceType.Both, typeof(MasterDatabaseService))]
+    [NotifyPropertyChanged]
     public class MasterDatabaseService : PropertyChangedBase, IDisposable
     {
         #region Public methods and properties

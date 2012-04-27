@@ -101,6 +101,8 @@ namespace TransmissionLossViewer
             get
             {
                 var sb = new StringBuilder();
+                var bearing = 0.0;
+                if (SelectedRadial != null) bearing = SelectedRadial.Bearing;
                 const double radius = 8;
                 double x, y;
                 for (double angle = 0; angle <= 2 * Math.PI; angle += Math.PI / 32.0)
@@ -111,8 +113,8 @@ namespace TransmissionLossViewer
                     sb.Append(string.Format(" {0:0.###},{1:0.###} ", x, y));
                 }
                 sb.Append(string.Format("M {0:0.###}, {0:0.###} ", radius));
-                x = (Math.Sin(SelectedRadial.Bearing * (Math.PI / 180)) * radius) + radius;
-                y = (-Math.Cos(SelectedRadial.Bearing * (Math.PI / 180)) * radius) + radius;
+                x = (Math.Sin(bearing * (Math.PI / 180)) * radius) + radius;
+                y = (-Math.Cos(bearing * (Math.PI / 180)) * radius) + radius;
                 sb.Append(string.Format("L {0:0.###},{1:0.###} ", x, y));
                 return sb.ToString();
             }
@@ -159,6 +161,9 @@ namespace TransmissionLossViewer
         public MainViewModel(IHRCSaveFileService saveFileService, IHRCOpenFileService openFileService, IViewParameterService viewParameterService, IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IUIVisualizerService visualizerService, MasterDatabaseService database)
         {
             RegisterMediator();
+            AnalysisPoints = new ObservableList<AnalysisPoint>();
+            AnalysisPointModes = new ObservableList<Tuple<string, TransmissionLoss>>();
+            Radials = new ObservableList<Radial>();
             Database = database;
             _saveFileService = saveFileService;
             _viewParameterService = viewParameterService;
