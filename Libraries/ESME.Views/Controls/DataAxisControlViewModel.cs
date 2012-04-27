@@ -5,6 +5,7 @@ using MEFedMVVM.ViewModelLocator;
 namespace ESME.Views.Controls
 {
     [ExportViewModel("DataAxisControlViewModel")]
+    [NotifyPropertyChanged]
     public class DataAxisControlViewModel : ViewModelBase, IDesignTimeAware
     {
         public string Label { get; set; }

@@ -1,9 +1,11 @@
 ﻿using System.Windows;
+using HRC.Aspects;
 using HRC.Services;
 using HRC.ViewModels;
 
 namespace ESME.Views.Misc
 {
+    [NotifyPropertyChanged]
     public class UtilitiesViewModel : ViewModelBase
     {
         readonly IMessageBoxService _messageBoxService;

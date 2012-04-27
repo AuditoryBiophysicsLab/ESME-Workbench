@@ -1,7 +1,9 @@
-﻿using HRC.ViewModels;
+﻿using HRC.Aspects;
+using HRC.ViewModels;
 
 namespace ESME.Views
 {
+    [NotifyPropertyChanged]
     public class TestViewModel : ViewModelBase
     {
         public TestViewModel()

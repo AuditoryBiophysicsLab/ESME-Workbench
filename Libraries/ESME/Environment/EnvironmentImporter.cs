@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using ESME.Plugins;
+using HRC.Aspects;
 using HRC.Navigation;
 using ESME.Environment.NAVO;
 using HRC.NetCDF;
@@ -278,6 +279,7 @@ namespace ESME.Environment
         ImportProgressCollection() : base(Importers) { }
     }
 
+    [NotifyPropertyChanged]
     public class ImportProgressViewModel : ViewModelBase
     {
         readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;

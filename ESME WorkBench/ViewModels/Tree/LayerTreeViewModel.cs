@@ -8,6 +8,7 @@ using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Tree
 {
+    [NotifyPropertyChanged]
     public class LayerTreeViewModel : ViewModelBase
     {
         MapViewModel _mapViewModel;
@@ -64,6 +65,7 @@ namespace ESMEWorkbench.ViewModels.Tree
         [Initialize] public ObservableList<IMouseOverAware> RootNodes { get; set; }
     }
 
+    [NotifyPropertyChanged]
     public class TreeNodeBase : ViewModelBase, IMouseOverAware
     {
         public bool IsMouseOver { get; set; }

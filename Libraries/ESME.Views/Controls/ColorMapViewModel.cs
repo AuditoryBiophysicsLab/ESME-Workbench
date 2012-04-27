@@ -3,11 +3,13 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using HRC.Aspects;
 using HRC.Utility;
 using HRC.ViewModels;
 
 namespace ESME.Views.Controls
 {
+    [NotifyPropertyChanged]
     public class ColorMapViewModel : ViewModelBase
     {
         #region public properties

@@ -15,6 +15,7 @@ using ESMEWorkbench.ViewModels.Layers;
 using ESMEWorkbench.ViewModels.Main;
 using ESMEWorkbench.Views;
 using HRC;
+using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Services;
 using HRC.ViewModels;
@@ -28,6 +29,7 @@ using ESME.Views.Environment;
 namespace ESMEWorkbench.ViewModels.Map
 {
     [ExportViewModel("MapViewModel")]
+    [NotifyPropertyChanged]
     public class MapViewModel : ViewModelBase
     {
         #region Private fields

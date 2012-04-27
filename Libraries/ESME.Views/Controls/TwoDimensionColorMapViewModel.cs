@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using ESME.TransmissionLoss;
+using HRC.Aspects;
 using HRC.Services;
 using HRC.ViewModels;
 using MEFedMVVM.ViewModelLocator;
@@ -14,6 +15,7 @@ using MEFedMVVM.ViewModelLocator;
 namespace ESME.Views.Controls
 {
     [ExportViewModel("TwoDimensionColorMapViewModel")]
+    [NotifyPropertyChanged]
     public class TwoDimensionColorMapViewModel : ViewModelBase
     {
         #region public float RangeMin { get; set; }

@@ -17,7 +17,7 @@ namespace HRC.Aspects
     /// </summary>
     [Serializable]
     [IntroduceInterface(typeof(INotifyPropertyChanged), OverrideAction = InterfaceOverrideAction.Ignore)]
-    [MulticastAttributeUsage(MulticastTargets.Class, Inheritance = MulticastInheritance.Strict)]
+    [MulticastAttributeUsage(MulticastTargets.Class, Inheritance = MulticastInheritance.Multicast)]
     [ProvideAspectRole(StandardRoles.DataBinding)]
     [ProvideAspectRole(StandardEffects.InterfaceIntroduction)]
     [ProvideAspectRole(StandardEffects.MemberIntroduction)]

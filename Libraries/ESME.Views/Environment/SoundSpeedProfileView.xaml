@@ -19,12 +19,8 @@
     </i:Interaction.Triggers>
 
     <DockPanel>
-        <StackPanel Height="22"
-                    DockPanel.Dock="Top"
-                    Orientation="Horizontal" />
-        <StackPanel Width="22"
-                    DockPanel.Dock="Right"
-                    Orientation="Vertical" />
+        <StackPanel Height="22" DockPanel.Dock="Top" Orientation="Horizontal" />
+        <StackPanel Width="22" DockPanel.Dock="Right" Orientation="Vertical" />
         <DockPanel DockPanel.Dock="Bottom">
             <TextBlock Width="{Binding ActualWidth, ElementName=DepthAxis, Mode=OneWay}" DockPanel.Dock="Left" />
             <controls:DataAxis x:Name="SSPAxis"
@@ -63,24 +59,11 @@
             <Grid.RowDefinitions>
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <Canvas x:Name="OverlayCanvas"
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    UseLayoutRounding="True">
-                <Path Data="{Binding MajorGrid}"
-                      Stroke="DarkGray"
-                      StrokeDashArray="5 1"
-                      StrokeThickness="1" />
-                <Path Data="{Binding MinorGrid}"
-                      Stroke="DarkGray"
-                      StrokeDashArray="2 1"
-                      StrokeThickness=".5" />
-                <Path Data="{Binding SoundSpeedGeometry}"
-                      Stroke="Black"
-                      StrokeThickness="1" />
-                <Path Data="{Binding SoundSpeedDataPoints}"
-                      Stroke="Blue"
-                      StrokeThickness="1" />
+            <Canvas x:Name="OverlayCanvas" Grid.Row="0" Grid.Column="0" UseLayoutRounding="True">
+                <Path Data="{Binding MajorGrid}" Stroke="DarkGray" StrokeDashArray="5 1" StrokeThickness="1" />
+                <Path Data="{Binding MinorGrid}" Stroke="DarkGray" StrokeDashArray="2 1" StrokeThickness=".5" />
+                <Path Data="{Binding SoundSpeedGeometry}" Stroke="Black" StrokeThickness="1" />
+                <Path Data="{Binding SoundSpeedDataPoints}" Stroke="Blue" StrokeThickness="1" />
             </Canvas>
 
         </Grid>

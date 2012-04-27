@@ -13,6 +13,7 @@ using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.Views.Controls;
+using HRC.Aspects;
 using HRC.Services;
 using HRC.ViewModels;
 using HRC.WPF;
@@ -21,6 +22,7 @@ using MEFedMVVM.ViewModelLocator;
 namespace ESME.Views.TransmissionLossViewer
 {
     [ExportViewModel("TransmissionLossRadialViewModel")]
+    [NotifyPropertyChanged]
     public class TransmissionLossRadialViewModel : ViewModelBase
     {
 

@@ -25,7 +25,8 @@ namespace ESME.TransmissionLoss
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ExportService(ServiceType.Both, typeof(TransmissionLossCalculatorService))]
-    public class TransmissionLossCalculatorService: ViewModelBase, IPartImportsSatisfiedNotification
+    [NotifyPropertyChanged]
+    public class TransmissionLossCalculatorService : ViewModelBase, IPartImportsSatisfiedNotification
     {
         public TransmissionLossCalculatorService()
         {

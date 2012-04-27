@@ -4,11 +4,13 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
 using ESME.Views.Misc;
+using HRC.Aspects;
 using HRC.Services;
 using HRC.ViewModels;
 
 namespace TransmissionLossViewer
 {
+    [NotifyPropertyChanged]
     public class AboutViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         IViewAwareStatus _viewAwareStatus;

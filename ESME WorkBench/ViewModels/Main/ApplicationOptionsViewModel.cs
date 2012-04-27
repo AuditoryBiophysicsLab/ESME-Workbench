@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using ESME.Data;
 using ESME.Environment;
+using HRC.Aspects;
 using HRC.Services;
 using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
+    [NotifyPropertyChanged]
     public class ApplicationOptionsViewModel : ViewModelBase
     {
         readonly IMessageBoxService _messageBoxService;

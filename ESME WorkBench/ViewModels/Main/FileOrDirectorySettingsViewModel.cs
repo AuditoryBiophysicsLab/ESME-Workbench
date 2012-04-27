@@ -1,9 +1,11 @@
-﻿using HRC.ViewModels;
+﻿using HRC.Aspects;
+using HRC.ViewModels;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
     [ExportViewModel("FileOrDirectorySettingsViewModel")]
+    [NotifyPropertyChanged]
     internal class FileOrDirectorySettingsViewModel : ViewModelBase
     {
         public string Caption { get; set; }

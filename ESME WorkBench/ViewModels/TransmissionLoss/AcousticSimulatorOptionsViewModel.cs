@@ -1,8 +1,10 @@
 ﻿using ESME.Data;
+using HRC.Aspects;
 using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.TransmissionLoss
 {
+    [NotifyPropertyChanged]
     public class AcousticSimulatorOptionsViewModel : ViewModelBase
     {
         #region OkCommand

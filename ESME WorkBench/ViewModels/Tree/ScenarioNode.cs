@@ -5,6 +5,7 @@ using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Tree
 {
+    [NotifyPropertyChanged]
     public class ScenarioNode : ViewModelBase
     {
         public Scenario Scenario { get; private set; }

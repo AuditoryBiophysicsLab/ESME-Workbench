@@ -6,11 +6,13 @@ using System.Reflection;
 using System.Text;
 using System.Windows;
 using ESME.Views.Misc;
+using HRC.Aspects;
 using HRC.Services;
 using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
+    [NotifyPropertyChanged]
     public class AboutViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         public AboutViewModel()

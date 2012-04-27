@@ -6,10 +6,12 @@ using System.Diagnostics;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Xml.Serialization;
+using HRC.Aspects;
 using HRC.ViewModels;
 
 namespace HRC.Validation
 {
+    [NotifyPropertyChanged]
     public abstract class ValidatingViewModel : ViewModelBase, IDataErrorInfo
     {
         protected ValidatingViewModel() { ValidationRules = new List<ValidationRule>(); }

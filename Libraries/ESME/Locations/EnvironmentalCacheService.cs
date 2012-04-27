@@ -14,6 +14,7 @@ using System.Windows.Media;
 using ESME.Environment;
 using ESME.Plugins;
 using ESME.Scenarios;
+using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
 using HRC.ViewModels;
@@ -23,6 +24,7 @@ namespace ESME.Locations
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ExportService(ServiceType.Both, typeof(EnvironmentalCacheService))]
+    [NotifyPropertyChanged]
     public class EnvironmentalCacheService : ViewModelBase
     {
         public EnvironmentalCacheService() { Location.Cache = this; Scenario.Cache = this; }
