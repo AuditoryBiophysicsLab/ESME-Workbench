@@ -178,25 +178,6 @@ namespace ESME.Views.TransmissionLossViewer
         [MediatorMessageSink(MediatorMessage.SaveRadialBitmap)]
         void SaveRadialBitmap(string fileName)
         {
-#if false
-            BitmapEncoder encoder = null;
-            switch (Path.GetExtension(fileName).ToLower())
-            {
-                case ".jpg":
-                case ".jpeg":
-                    encoder = new JpegBitmapEncoder();
-                    break;
-                case ".png":
-                    encoder = new PngBitmapEncoder();
-                    break;
-                case ".bmp":
-                    encoder = new BmpBitmapEncoder();
-                    break;
-            }
-            if (encoder == null) return;
-            encoder.Frames.Add(BitmapFrame.Create(((TransmissionLossRadialView)_viewAwareStatus.View).ToBitmapSource()));
-            using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream); 
-#endif
             ((TransmissionLossRadialView)_viewAwareStatus.View).ToImageFile(fileName);
         }
 

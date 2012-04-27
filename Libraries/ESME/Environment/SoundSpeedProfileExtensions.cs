@@ -1,7 +1,6 @@
-﻿using System;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
+using HRC.WPF;
 
 namespace ESME.Environment
 {
@@ -11,16 +10,17 @@ namespace ESME.Environment
         {
             var speeds = (from p in profile.Data select p.SoundSpeed).ToArray();
             var depths = (from d in profile.Data select d.Depth).ToArray();
-            var sMin = speeds.Min(); 
+            var sMin = speeds.Min();
             var sMax = speeds.Max();
             var sDiff = sMax - sMin;
             sMin -= (float).1 * sDiff;
             sMax += (float).1 * sDiff;
             sDiff = sMax - sMin;
             var dMax = depths.Max();
-            var orderedData = (from d in profile.Data orderby d.Depth select d);
-
-            Func<double, double, double, string> renderFunc;
+            var orderedData = (from d in profile.Data orderby d.Depth select d).ToList();
+#if false
+		
+            //Func<double, double, double, string> renderFunc;
             switch (glyphStyle)
             {
                 case GlyphStyle.Line:
@@ -38,24 +38,29 @@ namespace ESME.Environment
                 default:
                     throw new InvalidEnumArgumentException();
             }
-
+  
+#endif
+            var renderFunc = PlotHelpers.GetGlyphRenderFunc(glyphStyle);
             var sb = new StringBuilder();
+            
             foreach (var t in orderedData)
             {
                 var y = t.Depth * (height / dMax);
                 var x = (t.SoundSpeed - sMin) * (width / sDiff);
-                sb.Append(sb.Length == 0 ? string.Format("M {0},{1} ", x, y) : renderFunc(x, y, glyphSize));    
+                sb.Append(sb.Length == 0 ? string.Format("M {0},{1} ", x, y) : renderFunc(x, y, glyphSize));
             }
             return sb.ToString();
-
+            //PlotHelpers.GetGlyphGeometry(orderedData )
         }
     }
 
+#if false
     public enum GlyphStyle
     {
         Line,
         Triangle,
         Circle,
         Square,
-    }
+    } 
+#endif
 }

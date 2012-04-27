@@ -228,6 +228,7 @@
     <Compile Include="WPF\EventToCommandTrigger.cs" />
     <Compile Include="WPF\LambdaExtension.cs" />
     <Compile Include="WPF\Palette.cs" />
+    <Compile Include="WPF\PlotHelpers.cs" />
     <Compile Include="WPF\TreeHelper.cs" />
     <Compile Include="WPF\TriggerTracing.cs" />
     <Compile Include="WPF\TreeViewHelper.cs" />

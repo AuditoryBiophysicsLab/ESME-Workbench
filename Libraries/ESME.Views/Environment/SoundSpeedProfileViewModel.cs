@@ -70,8 +70,8 @@ namespace ESME.Views.Environment
             if (actualControlHeight == 0 || actualControlWidth == 0) return;
             // ReSharper restore CompareOfFloatsByEqualityOperator
 
-            MajorGrid = GetGrid(DepthAxisMajorTicks, SpeedAxisMajorTicks, 1, actualControlHeight, actualControlWidth);
-            MinorGrid = GetGrid(DepthAxisMinorTicks, SpeedAxisMinorTicks, 0, actualControlHeight, actualControlWidth);
+            MajorGrid = PlotHelpers.GetGrid(DepthAxisMajorTicks, SpeedAxisMajorTicks, 1, actualControlHeight, actualControlWidth);
+            MinorGrid = PlotHelpers.GetGrid(DepthAxisMinorTicks, SpeedAxisMinorTicks, 0, actualControlHeight, actualControlWidth);
 
             SoundSpeedGeometry = SoundSpeedProfile.GetGeometry(actualControlHeight, actualControlWidth);
             SoundSpeedDataPoints = SoundSpeedProfile.GetGeometry(actualControlHeight, actualControlWidth, glyphStyle: GlyphStyle.Circle);
@@ -211,15 +211,5 @@ namespace ESME.Views.Environment
 
         #endregion
         #endregion
-
-        public static string GetGrid(ICollection<double> horizontal, ICollection<double> vertical, int skipFactor, double height, double width)
-        {
-            var sb = new StringBuilder();
-            foreach (var tick in horizontal.Take(horizontal.Count - skipFactor))
-                sb.Append(string.Format("M 0,{0} H {1}", tick, width));
-            foreach (var tick in vertical.Skip(skipFactor))
-                sb.Append(string.Format("M {0},0 V {1}", tick, height));
-            return sb.ToString();
-        }
     }
 }
