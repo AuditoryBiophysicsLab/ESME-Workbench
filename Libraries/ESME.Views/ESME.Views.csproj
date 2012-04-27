@@ -101,6 +101,7 @@
       <DependentUpon>HeaderedPropertyDisplayPopup.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\HiddenIfNull.cs" />
+    <Compile Include="Controls\ImageToggleButton.cs" />
     <Compile Include="Controls\LayerControl.cs" />
     <Compile Include="Controls\PluginSelector.cs" />
     <Compile Include="Controls\ScatterPlot.xaml.cs">

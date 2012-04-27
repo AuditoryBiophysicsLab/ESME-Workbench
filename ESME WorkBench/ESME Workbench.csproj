@@ -448,6 +448,10 @@
     <Content Include="External References\System.Data.SQLite.dll" />
     <Content Include="External References\System.Data.SQLite.Linq.dll" />
     <Content Include="External References\System.Threading.Tasks.Dataflow.dll" />
+    <Resource Include="Images\SmallIcons\draw_line.png" />
+    <Resource Include="Images\SmallIcons\delete.png" />
+    <Resource Include="Images\SmallIcons\add.png" />
+    <Resource Include="Images\SmallIcons\color_wheel.png" />
     <Resource Include="Images\SmallIcons\application_form_magnify.png" />
     <Resource Include="Images\SmallIcons\application_put.png" />
     <Resource Include="Images\SmallIcons\application_get.png" />

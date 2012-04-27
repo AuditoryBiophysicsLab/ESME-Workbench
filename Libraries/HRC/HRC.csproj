@@ -226,6 +226,7 @@
     <Compile Include="WPF\Dynamic.cs" />
     <Compile Include="WPF\EventToCommandArgs.cs" />
     <Compile Include="WPF\EventToCommandTrigger.cs" />
+    <Compile Include="WPF\IsMouseOverTemplateSelector.cs" />
     <Compile Include="WPF\LambdaExtension.cs" />
     <Compile Include="WPF\Palette.cs" />
     <Compile Include="WPF\PlotHelpers.cs" />

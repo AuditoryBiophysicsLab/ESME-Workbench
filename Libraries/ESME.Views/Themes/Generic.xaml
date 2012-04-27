@@ -2,8 +2,23 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:colorPicker="clr-namespace:ESME.Views.ColorPicker"
                     xmlns:Controls="clr-namespace:ESME.Views.Controls"
+                    xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
                     xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC">
     <WPF:BooleanInverter x:Key="BooleanInverter" />
+    <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed" FalseValue="Collapsed" TrueValue="Visible" />
+    <Style TargetType="{x:Type Controls:ImageToggleButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Controls:ImageToggleButton}">
+                    <Rectangle Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
+                        <Rectangle.Fill>
+                            <ImageBrush ImageSource="{Binding Path=ImageSource, RelativeSource={RelativeSource TemplatedParent}}" />
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
     <Style TargetType="{x:Type Controls:LayerControl}">
         <Setter Property="Template">
             <Setter.Value>
@@ -11,18 +26,24 @@
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
                         <StackPanel Orientation="Horizontal">
                             <Grid DockPanel.Dock="Top">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <CheckBox Grid.Column="0"
+                                <CheckBox Grid.Row="0"
+                                          Grid.Column="0"
                                           VerticalAlignment="Center"
                                           Focusable="False"
                                           IsChecked="{Binding Path=IsChecked,
                                                               RelativeSource={RelativeSource TemplatedParent}}"
                                           Visibility="{TemplateBinding CheckBoxVisibility}" />
                                 <ToggleButton x:Name="LineColorToggle"
+                                              Grid.Row="0"
                                               Grid.Column="1"
                                               Width="16"
                                               VerticalAlignment="Center"
@@ -61,7 +82,14 @@
                                         </StackPanel>
                                     </Border>
                                 </Popup>
-                                <TextBlock x:Name="LayerName" Grid.Column="2" Text="{TemplateBinding LayerName}" />
+                                <TextBlock x:Name="LayerName" Grid.Row="0" Grid.Column="2" Text="{TemplateBinding LayerName}" />
+                                <ContentPresenter x:Name="ContextControls"
+                                                  Grid.Row="1"
+                                                  Grid.Column="2"
+                                                  Content="{TemplateBinding ContextControl}"
+                                                  Visibility="{Binding Path=IsSelected,
+                                                                       RelativeSource={RelativeSource TemplatedParent},
+                                                                       Converter={StaticResource TrueVisibleFalseCollapsed}}" />
                             </Grid>
                         </StackPanel>
                     </Border>

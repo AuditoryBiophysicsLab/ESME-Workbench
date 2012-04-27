@@ -133,6 +133,36 @@ namespace ESME.Views.Controls
 
         #endregion
 
+        #region dependency property object ContextControl
+
+        public static DependencyProperty ContextControlProperty = DependencyProperty.Register("ContextControl",
+                                                                                 typeof (object),
+                                                                                 typeof (LayerControl),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+        public object ContextControl
+        {
+            get { return GetValue(ContextControlProperty); }
+            set { SetCurrentValue(ContextControlProperty, value); }
+        }
+
+        #endregion
+
+        #region dependency property bool IsSelected
+
+        public static DependencyProperty IsSelectedProperty = DependencyProperty.Register("IsSelected",
+                                                                                 typeof (bool),
+                                                                                 typeof (LayerControl),
+                                                                                 new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+        public bool IsSelected
+        {
+            get { return (bool)GetValue(IsSelectedProperty); }
+            set { SetCurrentValue(IsSelectedProperty, value); }
+        }
+
+        #endregion
+
 
     }
 }
