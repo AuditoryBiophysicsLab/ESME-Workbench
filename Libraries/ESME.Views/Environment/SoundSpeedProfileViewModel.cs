@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -12,6 +11,7 @@ using HRC.ViewModels;
 
 namespace ESME.Views.Environment
 {
+    [NotifyPropertyChanged]
     public class SoundSpeedProfileViewModel : ViewModelBase
     {
         private readonly IHRCSaveFileService _saveFileService;
