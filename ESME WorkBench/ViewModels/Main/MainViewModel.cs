@@ -33,10 +33,10 @@ namespace ESMEWorkbench.ViewModels.Main
     {
         #region Private fields
 
-        [Import, UsedImplicitly] IHRCOpenFileService _openFile;
+        readonly IHRCOpenFileService _openFile;
         readonly IHRCSaveFileService _saveFile;
-        [Import, UsedImplicitly] IPluginManagerService _plugins;
-        [Import, UsedImplicitly] EnvironmentalCacheService _cache;
+        readonly IPluginManagerService _plugins;
+        readonly EnvironmentalCacheService _cache;
         readonly TransmissionLossCalculatorService _transmissionLoss;
         readonly IViewAwareStatus _viewAwareStatus;
         readonly IMessageBoxService _messageBox;
@@ -47,7 +47,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #region Constructor
         [ImportingConstructor]
-        public MainViewModel(IViewAwareStatus viewAwareStatus, MasterDatabaseService database, IMessageBoxService messageBox, IUIVisualizerService visualizer, IHRCSaveFileService saveFile, TransmissionLossCalculatorService transmissionLoss)
+        public MainViewModel(IViewAwareStatus viewAwareStatus, MasterDatabaseService database, IMessageBoxService messageBox, IUIVisualizerService visualizer, IHRCSaveFileService saveFile, TransmissionLossCalculatorService transmissionLoss, IHRCOpenFileService openFile, IPluginManagerService plugins, EnvironmentalCacheService cache)
         {
             MainWindowTitle = "ESME Workbench: <No scenario loaded>";
             try
@@ -65,6 +65,9 @@ namespace ESMEWorkbench.ViewModels.Main
             _visualizer = visualizer;
             _saveFile = saveFile;
             _transmissionLoss = transmissionLoss;
+            _openFile = openFile;
+            _plugins = plugins;
+            _cache = cache;
             MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
             if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database")))
                 Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));

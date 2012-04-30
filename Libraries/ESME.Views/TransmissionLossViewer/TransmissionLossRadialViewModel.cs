@@ -13,7 +13,6 @@ using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.Views.Controls;
-using HRC.Aspects;
 using HRC.Services;
 using HRC.ViewModels;
 using HRC.WPF;
