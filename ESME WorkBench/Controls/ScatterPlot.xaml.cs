@@ -17,7 +17,7 @@ using System.Windows.Shapes;
 namespace ESMEWorkbench.Controls
 {
     /// <summary>
-    /// Interaction logic for ScatterPlot.xaml
+    /// Interaction logic for DataPlot.xaml
     /// </summary>
     public partial class ScatterPlot : UserControl
     {

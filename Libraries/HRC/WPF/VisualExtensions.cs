@@ -1,8 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Xml.Xsl;
 
 namespace HRC.WPF
 {
@@ -11,9 +13,7 @@ namespace HRC.WPF
         // adapted from http://blogs.msdn.com/b/jaimer/archive/2009/07/03/rendertargetbitmap-tips.aspx
         public static BitmapSource ToBitmapSource(this Visual thevisual)
         {
-            // ReSharper disable PossibleNullReferenceException
             var m = PresentationSource.FromVisual(thevisual).CompositionTarget.TransformToDevice;
-            // ReSharper restore PossibleNullReferenceException
             var dpiX = 96 * m.M11;
             var dpiY = 96 * m.M22;
 
@@ -59,6 +59,15 @@ namespace HRC.WPF
             }
             encoder.Frames.Add(BitmapFrame.Create(theVisual.ToBitmapSource()));
             using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream);
+        }
+
+        public static void ToSVG(this Visual theVisual, string fileName)
+        {
+           throw new NotImplementedException(""); 
+            var transform = new XslTransform();
+            transform.Load("xaml2svg.xsl");
+            //transform.Transform(sourceXML, fileName);
+
         }
     }
 }

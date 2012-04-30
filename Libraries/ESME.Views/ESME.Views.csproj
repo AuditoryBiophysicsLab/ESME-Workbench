@@ -96,6 +96,7 @@
       <DependentUpon>DataAxisControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\DataAxisControlViewModel.cs" />
+    <Compile Include="Controls\DataPlotViewModel.cs" />
     <Compile Include="Controls\FileOrDirectorySetting.cs" />
     <Compile Include="Controls\HeaderedPropertyDisplayPopup.xaml.cs">
       <DependentUpon>HeaderedPropertyDisplayPopup.xaml</DependentUpon>
@@ -104,8 +105,8 @@
     <Compile Include="Controls\ImageToggleButton.cs" />
     <Compile Include="Controls\LayerControl.cs" />
     <Compile Include="Controls\PluginSelector.cs" />
-    <Compile Include="Controls\ScatterPlot.xaml.cs">
-      <DependentUpon>ScatterPlot.xaml</DependentUpon>
+    <Compile Include="Controls\DataPlot.xaml.cs">
+      <DependentUpon>DataPlot.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\SlimRibbonApplicationMenu.cs" />
     <Compile Include="Controls\TimePeriodComboBox.xaml.cs">
@@ -184,7 +185,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\ScatterPlot.xaml">
+    <Page Include="Controls\DataPlot.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

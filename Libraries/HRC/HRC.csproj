@@ -277,6 +277,16 @@
   <ItemGroup>
     <Compile Include="Utility\TaskProgressInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="WPF\xaml2svg.xsl" />
+    <Content Include="WPF\xaml2svg\animation.xsl" />
+    <Content Include="WPF\xaml2svg\brushes.xsl" />
+    <Content Include="WPF\xaml2svg\canvas.xsl" />
+    <Content Include="WPF\xaml2svg\geometry.xsl" />
+    <Content Include="WPF\xaml2svg\properties.xsl" />
+    <Content Include="WPF\xaml2svg\shapes.xsl" />
+    <Content Include="WPF\xaml2svg\transform.xsl" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace HRC -class BuildInformation -svnversion "$(ProjectDir) " -output "$(ProjectDir)BuildInformation.cs"

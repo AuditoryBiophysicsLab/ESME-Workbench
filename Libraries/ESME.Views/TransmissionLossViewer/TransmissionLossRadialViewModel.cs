@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
@@ -287,6 +288,11 @@ namespace ESME.Views.TransmissionLossViewer
                 sb.Append(sb.Length == 0 ? string.Format("M 0,{0} ", y) : string.Format("L {0},{1} ", x, y));
             }
             BottomProfileGeometry = sb.ToString();
+#if false
+            var ty = profile.Select(point => point.Depth).ToList();
+            var tx = profile.Select(point => point.Range * 1000).ToList();
+            BottomProfileGeometry = PlotHelpers.GetGlyphedGeometry(tx, ty, actualControlHeight, actualControlWidth); 
+#endif
             //todo ; later try to subtract half a depth cell from each depth (off-by-1/2 error on display)
             //todo: Dave changed the bottom profile format on 13 Aug 2011.  New format is a list of range/depth pairs where depth changes by more than 1cm
         }

@@ -36,6 +36,7 @@ namespace ESME.Views.Environment
         public ObservableList<double> DepthAxisMinorTicks { get; set; }
         public ObservableList<double> SpeedAxisMajorTicks { get; set; }
         public ObservableList<double> SpeedAxisMinorTicks { get; set; }
+       
         #region public SoundSpeedProfile SoundSpeedProfile {get; set; }
         SoundSpeedProfile _soundSpeedProfile;
         public SoundSpeedProfile SoundSpeedProfile
@@ -50,7 +51,7 @@ namespace ESME.Views.Environment
                 SSPMax = value.Data.Max(d => d.SoundSpeed);
                 RenderCanvas();
                 WindowTitle = string.Format("Sound Speed Profile ({0:0.000}, {1:0.000})", _soundSpeedProfile.Latitude, _soundSpeedProfile.Longitude);
-                OutputFileName=string.Format("Sound Speed Profile lat {0:0.000} lon {1:0.000}", _soundSpeedProfile.Latitude, _soundSpeedProfile.Longitude);
+                OutputFileName = string.Format("Sound Speed Profile lat {0:0.000} lon {1:0.000}", _soundSpeedProfile.Latitude, _soundSpeedProfile.Longitude);
             }
         }
         #endregion
@@ -63,17 +64,17 @@ namespace ESME.Views.Environment
         void RenderCanvas()
         {
             if (SoundSpeedProfile == null) return;
-            var actualControlHeight = View.OverlayCanvas.ActualHeight;
-            var actualControlWidth = View.OverlayCanvas.ActualWidth;
+            var height = View.OverlayCanvas.ActualHeight;
+            var width = View.OverlayCanvas.ActualWidth;
             // ReSharper disable CompareOfFloatsByEqualityOperator
-            if (actualControlHeight == 0 || actualControlWidth == 0) return;
+            if (height == 0 || width == 0) return;
             // ReSharper restore CompareOfFloatsByEqualityOperator
 
-            MajorGrid = PlotHelpers.GetGrid(DepthAxisMajorTicks, SpeedAxisMajorTicks, 1, actualControlHeight, actualControlWidth);
-            MinorGrid = PlotHelpers.GetGrid(DepthAxisMinorTicks, SpeedAxisMinorTicks, 0, actualControlHeight, actualControlWidth);
+            MajorGrid = PlotHelpers.GetGrid(DepthAxisMajorTicks, SpeedAxisMajorTicks, 1, height, width);
+            MinorGrid = PlotHelpers.GetGrid(DepthAxisMinorTicks, SpeedAxisMinorTicks, 0, height, width);
 
-            SoundSpeedGeometry = SoundSpeedProfile.GetGeometry(actualControlHeight, actualControlWidth);
-            SoundSpeedDataPoints = SoundSpeedProfile.GetGeometry(actualControlHeight, actualControlWidth, glyphStyle: GlyphStyle.Circle);
+            SoundSpeedGeometry = SoundSpeedProfile.GetGeometry(height, width);
+            SoundSpeedDataPoints = SoundSpeedProfile.GetGeometry(height, width, glyphStyle: GlyphStyle.Circle);
         }
 
         #region commands
@@ -134,7 +135,7 @@ namespace ESME.Views.Environment
                                                               var result = _saveFileService.ShowDialog(WindowView);
                                                               if (result.HasValue && result.Value)
                                                               {
-                                                                 View.ToImageFile(_saveFileService.FileName);
+                                                                  View.ToImageFile(_saveFileService.FileName);
                                                               }
                                                           }));
             }

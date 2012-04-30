@@ -13,7 +13,7 @@ namespace HRC.WPF
             switch (glyphStyle)
             {
                 case GlyphStyle.Line:
-                    return (x, y, size) => String.Format("L {0},{1} ", x, y);
+                    return (x, y, size) => String.Format("L {0},{1} ", x, y);  //todo: needs M ? 
                 case GlyphStyle.Circle:
                     return (x, y, size) => String.Format("M {0},{1} m -{2},0 a {2},{2} 180 1 1 {3},0 {2},{2} 180 1 1 -{3},0 ", x, y, size / 2, size);
                 case GlyphStyle.Square:
@@ -25,13 +25,36 @@ namespace HRC.WPF
             }
         }
 
-        public static string GetGrid(ICollection<double> horizontal, ICollection<double> vertical, int skipFactor, double height, double width)
+        public static string GetGrid(ICollection<double> horizontalTicks, ICollection<double> verticalTicks, int skipFactor, double height, double width)
         {
             var sb = new StringBuilder();
-            foreach (var tick in horizontal.Take(horizontal.Count - skipFactor))
+            foreach (var tick in horizontalTicks.Take(horizontalTicks.Count - skipFactor))
                 sb.Append(String.Format("M 0,{0} H {1}", tick, width));
-            foreach (var tick in vertical.Skip(skipFactor))
+            foreach (var tick in verticalTicks.Skip(skipFactor))
                 sb.Append(String.Format("M {0},0 V {1}", tick, height));
+            return sb.ToString();
+        }
+
+        public static string GetGlyphedGeometry(List<double> x, List<double> y, double height, double width, double glyphSize = 5, GlyphStyle glyphStyle = GlyphStyle.Line  )
+        {
+            var xMin = x.Min();
+            var xMax = x.Max();
+            var diff = xMax - xMin;
+            xMin -= (float).1 * diff;
+            xMax += (float).1 * diff;
+            diff = xMax - xMin;
+            var yMax = y.Max();
+            var renderFunc = GetGlyphRenderFunc(glyphStyle);
+            var sb = new StringBuilder();
+            foreach (var xa in x)
+            {
+                foreach (var ya in y)
+                {
+                    var thisy = ya*(height/yMax);
+                    var thisx = (xa - xMin)*(width/diff);
+                    sb.Append(sb.Length == 0 ? string.Format("M {0},{1} ", thisx, thisy) : renderFunc(thisx, thisy, glyphSize));
+                }
+            }
             return sb.ToString();
         }
     }
