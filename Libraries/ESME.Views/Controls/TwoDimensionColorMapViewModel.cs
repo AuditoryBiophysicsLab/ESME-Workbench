@@ -15,7 +15,6 @@ using MEFedMVVM.ViewModelLocator;
 namespace ESME.Views.Controls
 {
     [ExportViewModel("TwoDimensionColorMapViewModel")]
-    [NotifyPropertyChanged]
     public class TwoDimensionColorMapViewModel : ViewModelBase
     {
         #region public float RangeMin { get; set; }

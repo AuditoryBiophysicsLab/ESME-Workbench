@@ -11,7 +11,6 @@ using HRC.ViewModels;
 
 namespace ESME.Views.Environment
 {
-    [NotifyPropertyChanged]
     public class SoundSpeedProfileViewModel : ViewModelBase
     {
         private readonly IHRCSaveFileService _saveFileService;

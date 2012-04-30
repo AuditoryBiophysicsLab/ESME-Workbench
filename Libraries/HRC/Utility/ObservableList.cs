@@ -15,7 +15,6 @@ using HRC.WPF;
 namespace HRC.Utility
 {
     [Serializable]
-    [NotifyPropertyChanged]
     public class ObservableList<T> : List<T>, ICollection<T>, INotifyCollectionChanged, INotifyPropertyChanged, IDeserializationCallback
     {
         object _lockObject = new object();

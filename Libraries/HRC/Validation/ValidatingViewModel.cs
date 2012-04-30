@@ -11,7 +11,6 @@ using HRC.ViewModels;
 
 namespace HRC.Validation
 {
-    [NotifyPropertyChanged]
     public abstract class ValidatingViewModel : ViewModelBase, IDataErrorInfo
     {
         protected ValidatingViewModel() { ValidationRules = new List<ValidationRule>(); }

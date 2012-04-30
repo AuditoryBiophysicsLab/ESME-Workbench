@@ -9,7 +9,6 @@ using HRC.ViewModels;
 
 namespace ESME.Views.Controls
 {
-    [NotifyPropertyChanged]
     public class ColorMapViewModel : ViewModelBase
     {
         #region public properties

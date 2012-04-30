@@ -17,7 +17,6 @@ using System.ComponentModel.Composition;
 namespace DavesWPFTester
 {
     [ExportViewModel("MainWindowViewModel")]
-    [NotifyPropertyChanged]
     public class MainWindowViewModel : ViewModelBase
     {
         readonly IPluginManagerService _plugins;
@@ -64,8 +63,7 @@ namespace DavesWPFTester
         #endregion
     }
 
-    [NotifyPropertyChanged]
-    public class EnvironmentNode
+    public class EnvironmentNode : ViewModelBase
     {
         public EnvironmentNode(Scenario scenario)
         {
@@ -100,8 +98,7 @@ namespace DavesWPFTester
         public bool? IsChecked { get; set; }
     }
 
-    [NotifyPropertyChanged]
-    public class BathymetryNode
+    public class BathymetryNode : ViewModelBase
     {
         public BathymetryNode(EnvironmentalDataSet bathymetry) { Bathymetry = bathymetry; }
         [Initialize(true)]
@@ -109,8 +106,7 @@ namespace DavesWPFTester
         public EnvironmentalDataSet Bathymetry { get; set; }
     }
 
-    [NotifyPropertyChanged]
-    public class SedimentNode
+    public class SedimentNode : ViewModelBase
     {
         public SedimentNode(EnvironmentalDataSet sediment)
         {
@@ -126,8 +122,7 @@ namespace DavesWPFTester
         public ObservableList<SedimentTypeNode> SedimentTypes { get; set; }
     }
 
-    [NotifyPropertyChanged]
-    public class SedimentTypeNode
+    public class SedimentTypeNode : ViewModelBase
     {
         public static Random Random = new Random();
         public SedimentTypeNode()
@@ -145,8 +140,7 @@ namespace DavesWPFTester
         public string SedimentType { get; set; }
     }
 
-    [NotifyPropertyChanged]
-    public class WorldMapNode
+    public class WorldMapNode : ViewModelBase
     {
         public WorldMapNode()
         {
@@ -165,8 +159,7 @@ namespace DavesWPFTester
         public ObservableList<WorldMapFeatureNode> Features { get; set; }
     }
 
-    [NotifyPropertyChanged]
-    public class WorldMapFeatureNode
+    public class WorldMapFeatureNode : ViewModelBase
     {
         [Initialize(true)]
         public bool IsChecked { get; set; }

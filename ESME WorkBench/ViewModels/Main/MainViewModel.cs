@@ -29,7 +29,6 @@ using MEFedMVVM.ViewModelLocator;
 namespace ESMEWorkbench.ViewModels.Main
 {
     [ExportViewModel("MainViewModel")]
-    [NotifyPropertyChanged]
     public partial class MainViewModel : ViewModelBase, IPartImportsSatisfiedNotification
     {
         #region Private fields

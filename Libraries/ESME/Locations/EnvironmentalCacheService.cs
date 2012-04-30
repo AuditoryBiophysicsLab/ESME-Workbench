@@ -24,7 +24,6 @@ namespace ESME.Locations
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ExportService(ServiceType.Both, typeof(EnvironmentalCacheService))]
-    [NotifyPropertyChanged]
     public class EnvironmentalCacheService : ViewModelBase
     {
         public EnvironmentalCacheService() { Location.Cache = this; Scenario.Cache = this; }

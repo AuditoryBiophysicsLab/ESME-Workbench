@@ -1,10 +1,8 @@
 using ESME.Locations;
-using HRC.Aspects;
 using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Tree
 {
-    [NotifyPropertyChanged]
     public class BitmapNode : ViewModelBase
     {
         public BitmapNode(string layerName, EnvironmentalDataSet bitmapData)

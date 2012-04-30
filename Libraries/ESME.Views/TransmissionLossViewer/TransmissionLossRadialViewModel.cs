@@ -22,7 +22,6 @@ using MEFedMVVM.ViewModelLocator;
 namespace ESME.Views.TransmissionLossViewer
 {
     [ExportViewModel("TransmissionLossRadialViewModel")]
-    [NotifyPropertyChanged]
     public class TransmissionLossRadialViewModel : ViewModelBase
     {
 

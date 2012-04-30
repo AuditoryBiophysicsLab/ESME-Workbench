@@ -5,7 +5,6 @@ using HRC.ViewModels;
 
 namespace ESME.Views.Misc
 {
-    [NotifyPropertyChanged]
     public class UtilitiesViewModel : ViewModelBase
     {
         readonly IMessageBoxService _messageBoxService;

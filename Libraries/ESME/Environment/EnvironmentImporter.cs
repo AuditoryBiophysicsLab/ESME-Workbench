@@ -279,7 +279,6 @@ namespace ESME.Environment
         ImportProgressCollection() : base(Importers) { }
     }
 
-    [NotifyPropertyChanged]
     public class ImportProgressViewModel : ViewModelBase
     {
         readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;

@@ -5,7 +5,6 @@ using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.RecentFiles
 {
-    [NotifyPropertyChanged]
     public class RecentFileList : ViewModelBase
     {
         public int MaxNumberOfFiles { get; set; }

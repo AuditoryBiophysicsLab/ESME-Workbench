@@ -5,7 +5,6 @@ using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Tree
 {
-    [NotifyPropertyChanged]
     public class SedimentNode : ViewModelBase
     {
         public SedimentNode(EnvironmentalDataSet sediment)

@@ -4,7 +4,6 @@ using HRC.ViewModels;
 
 namespace HRC.Navigation
 {
-    [NotifyPropertyChanged]
     public class UTM : ViewModelBase
     {
         #region WGS84 geoid parameters

@@ -4,7 +4,6 @@ using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Tree
 {
-    [NotifyPropertyChanged]
     public class WorldMapFeatureNode : ViewModelBase
     {
         public WorldMapFeatureNode(string featureName, Func<bool> getter, Action<bool> setter)

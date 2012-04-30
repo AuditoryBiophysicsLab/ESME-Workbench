@@ -8,7 +8,6 @@ namespace ESME.Views.Services
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ExportService(ServiceType.Both, typeof(IViewParameterService))]
-    [NotifyPropertyChanged]
     public class ViewParameterService : ViewModelBase, IViewParameterService  
     {
         public double TransmissionLayersWidth { get; set; }

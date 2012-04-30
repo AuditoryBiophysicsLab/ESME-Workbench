@@ -7,7 +7,6 @@ using HRC.WPF;
 
 namespace ESMEWorkbench.ViewModels.Tree
 {
-    [NotifyPropertyChanged]
     public class SedimentTypeNode : ViewModelBase
     {
         public static Random Random = new Random();

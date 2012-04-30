@@ -38,7 +38,6 @@ namespace ESME.Views.Locations
         [Initialize] public ObservableList<SimpleSelectionViewModel<T>> SimpleSelectionViewModels { get; set; }
     }
 
-    [NotifyPropertyChanged]
     public class SimpleSelectionViewModel<T> : ViewModelBase
     {
         public string Header { get; set; }

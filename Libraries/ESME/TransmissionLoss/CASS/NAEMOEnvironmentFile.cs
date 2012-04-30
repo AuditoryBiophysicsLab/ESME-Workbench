@@ -12,7 +12,6 @@ using HRC.ViewModels;
 
 namespace ESME.TransmissionLoss.CASS
 {
-    [NotifyPropertyChanged]
     public class NAEMOEnvironmentFile : ViewModelBase
     {
         public string OverlayFileName { get; set; }

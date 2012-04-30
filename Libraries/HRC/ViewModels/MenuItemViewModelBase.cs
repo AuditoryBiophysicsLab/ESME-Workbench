@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Windows;
-using HRC.Aspects;
 
 namespace HRC.ViewModels
 {
-    [NotifyPropertyChanged]
     public class MenuItemViewModelBase : ViewModelBase
     {
         #region public bool IsCheckable { get; set; }

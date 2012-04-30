@@ -4,7 +4,6 @@ using HRC.ViewModels;
 
 namespace ESME.Metadata
 {
-    [NotifyPropertyChanged]
     public class PropertiesViewModel : ViewModelBase
     {
         public string WindowTitle { get; set; }

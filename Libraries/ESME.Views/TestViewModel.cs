@@ -3,7 +3,6 @@ using HRC.ViewModels;
 
 namespace ESME.Views
 {
-    [NotifyPropertyChanged]
     public class TestViewModel : ViewModelBase
     {
         public TestViewModel()

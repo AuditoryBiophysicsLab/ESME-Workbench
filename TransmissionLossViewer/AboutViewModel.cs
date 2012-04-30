@@ -10,7 +10,6 @@ using HRC.ViewModels;
 
 namespace TransmissionLossViewer
 {
-    [NotifyPropertyChanged]
     public class AboutViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         IViewAwareStatus _viewAwareStatus;

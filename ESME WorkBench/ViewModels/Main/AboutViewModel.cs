@@ -12,7 +12,6 @@ using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
-    [NotifyPropertyChanged]
     public class AboutViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         public AboutViewModel()
