@@ -5,7 +5,6 @@ using HRC.ViewModels;
 
 namespace ESME.Views.Locations
 {
-    [NotifyPropertyChanged]
     public class MultipleSelectionsViewModel<T> : ViewModelBase
     {
         #region public IList<float> AvailableSelections { get; set; }
