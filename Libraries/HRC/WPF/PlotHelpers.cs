@@ -34,29 +34,6 @@ namespace HRC.WPF
                 sb.Append(String.Format("M {0},0 V {1}", tick, height));
             return sb.ToString();
         }
-
-        public static string GetGlyphedGeometry(List<double> x, List<double> y, double height, double width, double glyphSize = 5, GlyphStyle glyphStyle = GlyphStyle.Line  )
-        {
-            var xMin = x.Min();
-            var xMax = x.Max();
-            var diff = xMax - xMin;
-            xMin -= (float).1 * diff;
-            xMax += (float).1 * diff;
-            diff = xMax - xMin;
-            var yMax = y.Max();
-            var renderFunc = GetGlyphRenderFunc(glyphStyle);
-            var sb = new StringBuilder();
-            foreach (var xa in x)
-            {
-                foreach (var ya in y)
-                {
-                    var thisy = ya*(height/yMax);
-                    var thisx = (xa - xMin)*(width/diff);
-                    sb.Append(sb.Length == 0 ? string.Format("M {0},{1} ", thisx, thisy) : renderFunc(thisx, thisy, glyphSize));
-                }
-            }
-            return sb.ToString();
-        }
     }
 
     public enum GlyphStyle

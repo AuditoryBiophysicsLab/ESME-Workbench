@@ -18,31 +18,8 @@ namespace ESME.Environment
             sDiff = sMax - sMin;
             var dMax = depths.Max();
             var orderedData = (from d in profile.Data orderby d.Depth select d).ToList();
-#if false
-		
-            //Func<double, double, double, string> renderFunc;
-            switch (glyphStyle)
-            {
-                case GlyphStyle.Line:
-                    renderFunc = (x, y, size) => string.Format("L {0},{1} ", x, y);
-                    break;
-                case GlyphStyle.Circle:
-                    renderFunc = (x, y, size) => string.Format("M {0},{1} m -{2},0 a {2},{2} 180 1 1 {3},0 {2},{2} 180 1 1 -{3},0 ", x, y, size / 2, size);
-                    break;
-                case GlyphStyle.Square:
-                    renderFunc = (x, y, size) => string.Format("M {0},{1} m {2},{2} h {3} v {3} h -{3} v -{3}", x, y, -size / 2, size);
-                    break;
-                case GlyphStyle.Triangle:
-                    renderFunc = (x, y, size) => string.Format("M {0},{1} m {2},{3} l {4},{5} l {6},{7} z ", x, y, -Math.Cos(Math.PI / 6) * (size / 2), Math.Sin(Math.PI / 6) * (size / 2), Math.Cos(Math.PI / 3) * size, -Math.Sin(Math.PI / 3) * size, Math.Cos(Math.PI / 3) * size, Math.Sin(Math.PI / 3) * size);
-                    break;
-                default:
-                    throw new InvalidEnumArgumentException();
-            }
-  
-#endif
             var renderFunc = PlotHelpers.GetGlyphRenderFunc(glyphStyle);
             var sb = new StringBuilder();
-            
             foreach (var t in orderedData)
             {
                 var y = t.Depth * (height / dMax);
@@ -50,17 +27,7 @@ namespace ESME.Environment
                 sb.Append(sb.Length == 0 ? string.Format("M {0},{1} ", x, y) : renderFunc(x, y, glyphSize));
             }
             return sb.ToString();
-            //PlotHelpers.GetGlyphGeometry(orderedData )
         }
     }
 
-#if false
-    public enum GlyphStyle
-    {
-        Line,
-        Triangle,
-        Circle,
-        Square,
-    } 
-#endif
 }
