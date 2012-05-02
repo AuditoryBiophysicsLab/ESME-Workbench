@@ -281,11 +281,12 @@ namespace ESME.Views.TransmissionLossViewer
             var maxDepth = Radial.Depths.Max();
             var maxRange = Radial.Ranges.Last();
             var sb = new StringBuilder();
+            var lineFunc = PlotHelpers.GetGlyphRenderFunc(GlyphStyle.Line);
             foreach (var point in profile)
             {
                 var y = point.Depth*(actualControlHeight/maxDepth);
                 var x = point.Range*1000*(actualControlWidth/maxRange);
-                sb.Append(sb.Length == 0 ? string.Format("M 0,{0} ", y) : string.Format("L {0},{1} ", x, y));
+                sb.Append(sb.Length == 0 ? string.Format("M 0,{0} ", y) : lineFunc(x,y,1));
             }
             BottomProfileGeometry = sb.ToString();
 #if false
