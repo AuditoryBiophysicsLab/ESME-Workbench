@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Windows.Media;
+using System.Windows.Data;
 using ESME.Database;
 using ESME.Environment;
 using ESME.Mapping;
@@ -67,8 +68,8 @@ namespace ESME.Locations
                     {
                         LayerType = LayerType.SoundSpeed,
                         Name = string.Format("{0}", Guid),
+                        PointSymbolType = (PointSymbolType)(Random.Next(8)),
                     };
-                    pointLayer.PointSymbolType = (PointSymbolType)(Random.Next(8));
                     while (pointLayer.PointSymbolType == PointSymbolType.Cross) pointLayer.PointSymbolType = (PointSymbolType)(Random.Next(8));
                     pointLayer.PointStyle = MapLayerViewModel.CreatePointStyle(pointLayer.PointSymbolType, LayerSettings.LineOrSymbolColor, (int)LayerSettings.LineOrSymbolSize);
                     var geos = (from s in ((SoundSpeed)Location.Cache[this]).SoundSpeedFields[0].EnvironmentData
@@ -115,4 +116,16 @@ namespace ESME.Locations
             };
         }
     }
+
+    public class EnvironmentalDataSetGroupByTypeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var environmentalDataSet = value as EnvironmentalDataSet;
+            return environmentalDataSet != null ? (environmentalDataSet).LayerName : null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) { throw new NotImplementedException(); }
+    }
+
 }

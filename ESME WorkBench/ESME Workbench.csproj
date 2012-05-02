@@ -120,6 +120,9 @@
     <Compile Include="Controls\EditableTextBlock.xaml.cs">
       <DependentUpon>EditableTextBlock.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\LocationsTreeView.xaml.cs">
+      <DependentUpon>LocationsTreeView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ProgressMarker.xaml.cs">
       <DependentUpon>ProgressMarker.xaml</DependentUpon>
     </Compile>
@@ -141,6 +144,7 @@
     <Compile Include="ViewModels\Main\OverrideCursor.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticSimulatorOptionsViewModel.cs" />
     <Compile Include="ViewModels\Tree\LocationsNode.cs" />
+    <Compile Include="ViewModels\Tree\LocationsTreeViewModel.cs" />
     <Compile Include="ViewModels\Tree\PerimetersNode.cs" />
     <Compile Include="ViewModels\Tree\ScenarioNode.cs" />
     <Compile Include="ViewModels\Tree\SedimentNode.cs" />
@@ -211,6 +215,10 @@
     <Page Include="Controls\EditableTextBlock.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\LocationsTreeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ProgressMarker.xaml">
       <SubType>Designer</SubType>
