@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -14,7 +12,6 @@ using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.Views.Controls;
-using HRC.Services;
 using HRC.ViewModels;
 using HRC.WPF;
 using MEFedMVVM.ViewModelLocator;
@@ -24,6 +21,8 @@ namespace ESME.Views.TransmissionLossViewer
     [ExportViewModel("TransmissionLossRadialViewModel")]
     public class TransmissionLossRadialViewModel : ViewModelBase
     {
+        private readonly TransmissionLossRadialView _view;
+
 
         #region public float RangeMin { get; set; }
         public float RangeMin { get; set; }
@@ -32,7 +31,7 @@ namespace ESME.Views.TransmissionLossViewer
         #region public float  RangeMax { get; set; }
         public float RangeMax { get; set; }
         #endregion
-        
+
         #region public float DepthMin { get; set; }
         public float DepthMin { get; set; }
         #endregion
@@ -51,10 +50,10 @@ namespace ESME.Views.TransmissionLossViewer
             {
                 return _gridSizeChanged ?? (_gridSizeChanged = new SimpleCommand<object, object>(delegate
                                                                                                  {
-                                                                                                     
-                                                                                                         if (TransmissionLossRadial != null) CalculateBottomProfileGeometry();
-                                                                                                     
-                                                                                                    
+
+                                                                                                     if (TransmissionLossRadial != null) CalculateBottomProfileGeometry();
+
+
                                                                                                  }));
             }
         }
@@ -62,21 +61,19 @@ namespace ESME.Views.TransmissionLossViewer
         #endregion
 
         readonly Dispatcher _dispatcher;
-        readonly IViewAwareStatus _viewAwareStatus;
-        bool _iAmInitialized;
+
+
         bool _isRendered;
-        TransmissionLossRadial _tempRadial;
+
         WriteableBitmap _writeableBitmap;
 
         [ImportingConstructor]
-        public TransmissionLossRadialViewModel(IViewAwareStatus viewAwareStatus)
+        public TransmissionLossRadialViewModel(TransmissionLossRadialView view)
         {
-            RegisterMediator();
-            _viewAwareStatus = viewAwareStatus;
+            _view = view;
             _dispatcher = Dispatcher.CurrentDispatcher;
-            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialColorMapChanged, ColorMapViewModel.Default);
-            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialViewInitialized, true);
-            _viewAwareStatus.ViewLoaded += () => ((Control)_viewAwareStatus.View).SizeChanged += (s, e) => CalculateBottomProfileGeometry();
+            ColorMapViewModel = ColorMapViewModel.Default;
+            view.SizeChanged += (s, e) => CalculateBottomProfileGeometry();
         }
 
         public WriteableBitmap WriteableBitmap
@@ -88,71 +85,13 @@ namespace ESME.Views.TransmissionLossViewer
             }
         }
 
-        void RegisterMediator()
-        {
-            try
-            {
-                Mediator.Instance.Register(this);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("***********\nTransmissionLossRadialViewModel: Mediator registration failed: " + ex.Message + "\n***********");
-                throw;
-            }
-        }
-
-        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialColorMapChanged)]
-        void TransmissionLossRadialColorMapChanged(ColorMapViewModel colorMapViewModel) { ColorMapViewModel = colorMapViewModel; }
+       
 
         readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME Workbench\Database"); //todo
-        
-        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialChanged)]
-        void TransmissionLossRadialChanged(Radial radial)
-        {
-            if (_iAmInitialized)
-            {
-                Debug.WriteLine("TransmissionLossRadialViewModel: Initializing transmission loss radial");
-                Radial = radial;
-                _isRendered = false;
-                _writeableBitmap = null;
-                if (Radial == null)
-                {
-                    OnPropertyChanged("WriteableBitmap");
-                    return;
-                }
-                RangeMin = Radial.Ranges.First();
-                RangeMax = Radial.Ranges.Last();
-                DepthMin = Radial.Depths.First();
-                DepthMax = Radial.Depths.Last();
-                TransmissionLossRadial = new TransmissionLossRadial((float)Radial.Bearing, new BellhopOutput(Path.Combine(_databaseDirectory, Radial.TransmissionLoss.AnalysisPoint.Scenario.StorageDirectory,
-                                            Radial.Filename)));
-                ColorMapViewModel.MaxValue =TransmissionLossRadial.StatMax;
-                ColorMapViewModel.MinValue =TransmissionLossRadial.StatMin;
-                OnPropertyChanged("TransmissionLossRadial");
-                CalculateBottomProfileGeometry();
-                RenderBitmap();
-            }
-            else
-            {
-                Debug.WriteLine("TransmissionLossRadialViewModel: Deferring initialization of transmission loss radial");
-                //_tempRadial = transmissionLossRadial;
-                throw new NotImplementedException("waugh!");
-            }
-        }
 
-        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialViewInitialized)]
-        void TransmissionLossRadialViewInitialized(bool dummy)
-        {
-            _iAmInitialized = true;
-            if (_tempRadial != null)
-            {
-                TransmissionLossRadial = _tempRadial;
-                Debug.WriteLine("TransmissionLossRadialViewModel: Deferred initialization of transmission loss field radial");
-                MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry,true);
-                
-            }
-        }
-        [MediatorMessageSink(MediatorMessage.SaveRadial)]
+
+
+        
         public void SaveAsCSV(string fileName)
         {
             using (var sw = new StreamWriter(fileName))
@@ -175,11 +114,10 @@ namespace ESME.Views.TransmissionLossViewer
                 } // for i
             } // using sw
         }
-        
-        [MediatorMessageSink(MediatorMessage.SaveRadialBitmap)]
-        void SaveRadialBitmap(string fileName)
+
+        public void SaveRadialBitmap(string fileName)
         {
-            ((TransmissionLossRadialView)_viewAwareStatus.View).ToImageFile(fileName);
+            _view.ToImageFile(fileName);
         }
 
         #region RenderBitmap
@@ -211,14 +149,15 @@ namespace ESME.Views.TransmissionLossViewer
                         *((int*)curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
                         curOffset += sizeof(Int32);
                     }
-                }  
+                }
             }
             _writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
             _writeableBitmap.Unlock();
             _isRendered = true;
-            _dispatcher.BeginInvoke(new VoidDelegate(RenderFinished), DispatcherPriority.ApplicationIdle);
+            //_dispatcher.BeginInvoke(new VoidDelegate(RenderFinished), DispatcherPriority.ApplicationIdle);
+            _dispatcher.InvokeIfRequired(RenderFinished,DispatcherPriority.ApplicationIdle);
         }
-        void RenderFinished() { OnPropertyChanged("WriteableBitmap"); } 
+        void RenderFinished() { OnPropertyChanged("WriteableBitmap"); }
         #endregion
 
         #region public ColorMapViewModel ColorMapViewModel { get; set; }
@@ -250,16 +189,42 @@ namespace ESME.Views.TransmissionLossViewer
         #region public TransmissionLossRadial TransmissionLossRadial { get; set; }
 
         private TransmissionLossRadial TransmissionLossRadial { get; set; }
-        
-        public Radial Radial { get; set; }
 
-        
+        private Radial _radial;
+        public Radial Radial
+        {
+            get { return _radial; }
+            set
+            {
+                _radial = value;
+                Debug.WriteLine("TransmissionLossRadialViewModel: Initializing transmission loss radial");
+                _isRendered = false;
+                _writeableBitmap = null;
+                if (_radial == null)
+                {
+                    OnPropertyChanged("WriteableBitmap");
+                    return;
+                }
+                RangeMin = _radial.Ranges.First();
+                RangeMax = _radial.Ranges.Last();
+                DepthMin = _radial.Depths.First();
+                DepthMax = _radial.Depths.Last();
+                TransmissionLossRadial = new TransmissionLossRadial((float)_radial.Bearing, new BellhopOutput(Path.Combine(_databaseDirectory, _radial.TransmissionLoss.AnalysisPoint.Scenario.StorageDirectory, _radial.Filename)));
+                ColorMapViewModel.MaxValue = TransmissionLossRadial.StatMax;
+                ColorMapViewModel.MinValue = TransmissionLossRadial.StatMin;
+                OnPropertyChanged("TransmissionLossRadial");
+                CalculateBottomProfileGeometry();
+                RenderBitmap();
+
+            }
+        }
 
         #endregion
 
         #region public string BottomProfileGeometry { get; set; }
 
         string _bottomProfileGeometry = "M 0,0";
+        
 
         public string BottomProfileGeometry
         {
@@ -272,11 +237,11 @@ namespace ESME.Views.TransmissionLossViewer
 
         void CalculateBottomProfileGeometry()
         {
-            if (_viewAwareStatus == null || Radial == null) return;
-            var actualControlHeight = ((TransmissionLossRadialView)_viewAwareStatus.View).OverlayCanvas.ActualHeight;
-            var actualControlWidth = ((TransmissionLossRadialView)_viewAwareStatus.View).OverlayCanvas.ActualWidth;
+            if (Radial == null) return;
+            var actualControlHeight = _view.OverlayCanvas.ActualHeight;
+            var actualControlWidth = _view.OverlayCanvas.ActualWidth;
             if (actualControlHeight == 0 || actualControlWidth == 0) return;
-            
+
             var profile = Radial.BottomProfile;
             var maxDepth = Radial.Depths.Max();
             var maxRange = Radial.Ranges.Last();
@@ -284,32 +249,14 @@ namespace ESME.Views.TransmissionLossViewer
             var lineFunc = PlotHelpers.GetGlyphRenderFunc(GlyphStyle.Line);
             foreach (var point in profile)
             {
-                var y = point.Depth*(actualControlHeight/maxDepth);
-                var x = point.Range*1000*(actualControlWidth/maxRange);
-                sb.Append(sb.Length == 0 ? string.Format("M 0,{0} ", y) : lineFunc(x,y,1));
+                var y = point.Depth * (actualControlHeight / maxDepth);
+                var x = point.Range * 1000 * (actualControlWidth / maxRange);
+                sb.Append(sb.Length == 0 ? string.Format("M 0,{0} ", y) : lineFunc(x, y, 1));
             }
             BottomProfileGeometry = sb.ToString();
-#if false
-            var ty = profile.Select(point => point.Depth).ToList();
-            var tx = profile.Select(point => point.Range * 1000).ToList();
-            BottomProfileGeometry = PlotHelpers.GetGlyphedGeometry(tx, ty, actualControlHeight, actualControlWidth); 
-#endif
             //todo ; later try to subtract half a depth cell from each depth (off-by-1/2 error on display)
             //todo: Dave changed the bottom profile format on 13 Aug 2011.  New format is a list of range/depth pairs where depth changes by more than 1cm
         }
-
         #endregion
-        
-        #region Nested type: VoidDelegate
-
-        delegate void VoidDelegate();
-
-        #endregion
-
-        //public TransmissionLossRadial TransmissionLossRadial { get; private set; }
-        //public float RangeMin { get; private set; }
-        //public float RangeMax { get; private set; }
-        //public float DepthMin { get; private set; }
-        //public float DepthMax { get; private set; }
     }
 }

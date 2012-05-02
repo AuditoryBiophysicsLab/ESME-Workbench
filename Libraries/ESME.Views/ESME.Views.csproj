@@ -150,7 +150,6 @@
       <DependentUpon>UtilitiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Misc\UtilitiesViewModel.cs" />
-    <Compile Include="Services\ViewParameterService.cs" />
     <Compile Include="TestView.xaml.cs">
       <DependentUpon>TestView.xaml</DependentUpon>
     </Compile>

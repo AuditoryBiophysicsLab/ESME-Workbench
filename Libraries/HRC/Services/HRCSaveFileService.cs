@@ -30,7 +30,7 @@ namespace HRC.Services
         /// </summary>
         /// <param name = "owner">The owner window of the dialog</param>
         /// <returns>A bool from the ShowDialog call</returns>
-        public bool? ShowDialog(Window owner)
+        public bool? ShowDialog(Window owner=null)
         {
             //Set embedded SaveFileDialog.Filter
             if (!String.IsNullOrEmpty(Filter)) _sfd.Filter = Filter;
@@ -42,7 +42,7 @@ namespace HRC.Services
             _sfd.OverwritePrompt = OverwritePrompt;
 
             //return results
-            return _sfd.ShowDialog(owner);
+            return owner !=null ? _sfd.ShowDialog(owner) : _sfd.ShowDialog();
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace HRC.Services
         string FileName { get; set; }
         string Filter { get; set; }
         string InitialDirectory { get; set; }
-        bool? ShowDialog(Window owner);
+        bool? ShowDialog(Window owner=null);
         string Title { get; set; }
     }
 

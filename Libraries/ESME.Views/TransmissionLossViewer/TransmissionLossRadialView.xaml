@@ -4,13 +4,11 @@
              xmlns:controls="clr-namespace:ESME.Views.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"             
              xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
              Background="White"
              d:DesignHeight="300"
-             d:DesignWidth="300"
-             mef:ViewModelLocator.ViewModel="TransmissionLossRadialViewModel"
+             d:DesignWidth="300"             
              mc:Ignorable="d">
 
     <DockPanel x:Name="RadialView">

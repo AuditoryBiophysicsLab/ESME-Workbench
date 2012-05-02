@@ -20,26 +20,7 @@ namespace ESME
         public const string SetExperiment = "SetExperimentMessage";
         public const string SetMapLayers = "SetMapLayersMessage";
         public const string SetTreeRoots = "SetTreeRootsMessage";
-
-        public const string AnalysisPointViewInitialized = "AnalysisPointViewInitializedMessage";
-        public const string TransmissionLossFieldViewInitialized = "TransmissionLossFieldViewInitializedMessage";
-        public const string TransmissionLossRadialViewInitialized = "TransmissionLossRadialViewInitializedMessage";
-        public const string AnalysisPointChanged = "AnalysisPointChangedMessage";
-        public const string TransmissionLossFieldChanged = "TransmissionLossFieldChangedMessage";
-        public const string TransmissionLossRadialColorMapChanged = "TransmissionLossRadialColorMapChangedMessage";
-        public const string TransmissionLossRadialChanged = "TransmissionLossRadialChangedMessage";
-        public const string SaveRadialAsCSV = "SaveRadialAsCSVMessage";
-        public const string SaveRadial = "SaveRadialMessage";
-        public const string SaveRadialBitmap = "SaveRadialBitmapMessage";
-        public const string SetSelectedRadialBearing = "SetSelectedRadialBearingMessage";
-        public const string SetSelectedDepth = "SetSelectedDepthMessage";
-        public const string SetSelectedTransmissionLossFieldName = "SetSelectedTransmissionLossFieldNameMessage";
-        public const string ResetSelectedField = "ResetSelectedFieldMessage";
-        public const string AcousticOptions = "AcousticOptionsMessage";
-        public const string SetTransmissionLossBathymetry = "SetTransmissionLossBathymetryMessage";
-        public const string RequestTransmissionLossBathymetry = "RequestTransmissionLossBathymetryMessage";
-        public const string TransmissionLossRadialEarthCoordinate = "TransmissionLossRadialEarthCoordinateMessage";
-        public const string CancelCurrentTransmissionLossCalculation = "CancelCurrentTransmissionLossCalculationMessage";
+        
         public const string ViewTransmissionLoss = "ViewTransmissionLossMessage";
 
         public const string ShowTransmissionLossQueueView = "ShowTransmissionLossQueueViewMessage";

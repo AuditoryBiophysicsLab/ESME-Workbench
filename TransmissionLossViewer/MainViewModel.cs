@@ -7,7 +7,7 @@ using System.Text;
 using System.Windows;
 using ESME;
 using ESME.Scenarios;
-using ESME.Views.Services;
+using ESME.Views.TransmissionLossViewer;
 using HRC.Aspects;
 using HRC.Services;
 using HRC.Utility;
@@ -19,12 +19,10 @@ using ESME.Locations;
 namespace TransmissionLossViewer
 {
     [ExportViewModel("TransmissionLossViewerMainViewModel")]
-    class MainViewModel : ViewModelBase, IViewStatusAwareInjectionAware
+    class MainViewModel : ViewModelBase
     {
         readonly string _databaseDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"ESME Workbench\Database");
-        IViewAwareStatus _viewAwareStatus;
         readonly IHRCSaveFileService _saveFileService;
-        readonly IViewParameterService _viewParameterService;
         public MasterDatabaseService Database { get; private set; }
         [Initialize]
         public ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
@@ -32,6 +30,8 @@ namespace TransmissionLossViewer
         public ObservableList<Tuple<string, TransmissionLoss>> AnalysisPointModes { get; set; }
         [Initialize]
         public ObservableList<Radial> Radials { get; set; }
+
+        public TransmissionLossRadialViewModel TransmissionLossRadialViewModel { get; set; }
 
         #region public Scenario SelectedScenario {get; set;}
         private Scenario _selectedScenario;
@@ -99,6 +99,7 @@ namespace TransmissionLossViewer
         {
             get
             {
+                Debug.WriteLine("SelectedBearingGeometry Updated");
                 var sb = new StringBuilder();
                 var bearing = 0.0;
                 if (SelectedRadial != null) bearing = SelectedRadial.Bearing;
@@ -122,7 +123,7 @@ namespace TransmissionLossViewer
 
         #region public Radial SelectedRadial {get; set;}
         private Radial _selectedRadial;
-        [Affects("SelectBearingGeometry")]
+        [Affects("SelectedBearingGeometry")]
         public Radial SelectedRadial
         {
             get { return _selectedRadial; }
@@ -135,7 +136,7 @@ namespace TransmissionLossViewer
                     return;
                 }
                 TitleString = string.Format("Transmission Loss Viewer: radial bearing {0:000.0} degrees", _selectedRadial.Bearing);
-                MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, _selectedRadial);
+                TransmissionLossRadialViewModel.Radial = _selectedRadial;
             }
         }
         #endregion
@@ -157,29 +158,15 @@ namespace TransmissionLossViewer
         public int RadialCount { get; set; }
 
         [ImportingConstructor]
-        public MainViewModel(IHRCSaveFileService saveFileService, IHRCOpenFileService openFileService, IViewParameterService viewParameterService, IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IUIVisualizerService visualizerService, MasterDatabaseService database)
+        public MainViewModel(IHRCSaveFileService saveFileService, IViewAwareStatus viewAwareStatus, MasterDatabaseService database)
         {
             RegisterMediator();
-            AnalysisPoints = new ObservableList<AnalysisPoint>();
-            AnalysisPointModes = new ObservableList<Tuple<string, TransmissionLoss>>();
-            Radials = new ObservableList<Radial>();
             Database = database;
-            _saveFileService = saveFileService;
-            _viewParameterService = viewParameterService;
-            _viewParameterService.TransmissionLayersWidth = Properties.Settings.Default.TransmissionLayersWidth;
-            _viewParameterService.PropertyChanged += (s, e) =>
-                                                     {
-                                                         switch (e.PropertyName)
-                                                         {
-                                                             case "TransmissionLayersWidth":
-                                                                 Properties.Settings.Default.TransmissionLayersWidth = _viewParameterService.TransmissionLayersWidth;
-                                                                 break;
-                                                         }
-                                                     };
-            _viewAwareStatus = viewAwareStatus;
             Database.MasterDatabaseDirectory = _databaseDirectory;
+            _saveFileService = saveFileService;
+            viewAwareStatus.ViewLoaded += () => { TransmissionLossRadialViewModel = new TransmissionLossRadialViewModel(((MainView)viewAwareStatus.View).TransmissionLossRadialView); };
         }
-     
+
         #region Commands
         #region ViewClosingCommand
 
@@ -201,7 +188,7 @@ namespace TransmissionLossViewer
 
         #region SaveAsCommand
 
-        
+
         public string OutputFileName
         {
             get
@@ -209,9 +196,9 @@ namespace TransmissionLossViewer
                 lock (this)
                 {
                     if (SelectedRadial == null) return null;
-                    return Path.Combine(Properties.Settings.Default.ExperimentReportDirectory, string.Format("{0} {1} {2} bearing {3} degrees", SelectedRadial.TransmissionLoss.Mode.ModeName, SelectedRadial.TransmissionLoss.Mode.Source.SourceName, SelectedRadial.TransmissionLoss.Mode.Source.Platform.PlatformName,SelectedRadial.Bearing));
+                    return Path.Combine(Properties.Settings.Default.ExperimentReportDirectory, string.Format("{0} {1} {2} bearing {3} degrees", SelectedRadial.TransmissionLoss.Mode.ModeName, SelectedRadial.TransmissionLoss.Mode.Source.SourceName, SelectedRadial.TransmissionLoss.Mode.Source.Platform.PlatformName, SelectedRadial.Bearing));
                 }
-                
+
             }
         }
 
@@ -229,13 +216,13 @@ namespace TransmissionLossViewer
                     //if (OutputFileName == null) return;
                     _saveFileService.FileName = OutputFileName;
 
-                    var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
+                    var result = _saveFileService.ShowDialog();
                     if (result.HasValue && result.Value)
                     {
                         Properties.Settings.Default.LastImageExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-                        MediatorMessage.Send(MediatorMessage.SaveRadialBitmap, _saveFileService.FileName);
+                        TransmissionLossRadialViewModel.SaveRadialBitmap(_saveFileService.FileName);
                     }
-                    MediatorMessage.Send(MediatorMessage.ResetSelectedField, true);
+                    
                     //Keyboard.Focus((Window)_viewAwareStatus.View);
                 }));
             }
@@ -255,14 +242,13 @@ namespace TransmissionLossViewer
                     _saveFileService.OverwritePrompt = true;
                     _saveFileService.FileName = OutputFileName;
 
-                    var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
+                    var result = _saveFileService.ShowDialog();
                     if (result.HasValue && result.Value)
                     {
                         Properties.Settings.Default.LastCSVExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-                        MediatorMessage.Send(MediatorMessage.SaveRadial, _saveFileService.FileName);
-
+                        TransmissionLossRadialViewModel.SaveAsCSV(_saveFileService.FileName);
                     }
-                    MediatorMessage.Send(MediatorMessage.ResetSelectedField, true);
+                    
                     //Keyboard.Focus((Window)_viewAwareStatus.View);
                 }));
             }
@@ -270,11 +256,11 @@ namespace TransmissionLossViewer
 
         SimpleCommand<object, object> _exportAs;
 
-        #endregion 
+        #endregion
         #endregion
 
         #region aging viewaware and mediator registrations
-        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService) { _viewAwareStatus = viewAwareStatusService; }
+        //public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService) { _viewAwareStatus = viewAwareStatusService; }
 
         void RegisterMediator()
         {
@@ -287,7 +273,7 @@ namespace TransmissionLossViewer
                 Debug.WriteLine("***********\nMainViewModel: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
-        } 
+        }
         #endregion
     }
 }

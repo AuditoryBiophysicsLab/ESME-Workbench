@@ -21,7 +21,10 @@
         mef:ViewModelLocator.ViewModel="TransmissionLossViewerMainViewModel"
         Top="{Binding Source={x:Static Properties:Settings.Default},
                       Path=WindowTop,
-                      Mode=TwoWay}">
+                      Mode=TwoWay}"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:TransmissionLossViewer="clr-namespace:TransmissionLossViewer" mc:Ignorable="d" d:DataContext="{d:DesignInstance TransmissionLossViewer:MainViewModel}">
     <Window.InputBindings>
         <KeyBinding Key="S" Command="{Binding SaveAsCommand}" Modifiers="Control" />
         <KeyBinding Key="E" Command="{Binding ExportAsCommand}" Modifiers="Control" />
@@ -86,6 +89,6 @@
                                         Mode=TwoWay}" />
             </StackPanel>
         </DockPanel>
-        <View:TransmissionLossRadialView />
+        <View:TransmissionLossRadialView x:Name="TransmissionLossRadialView" DataContext="{Binding TransmissionLossRadialViewModel}"/>
     </DockPanel>
 </Window>

@@ -77,7 +77,7 @@ namespace ESME.Views.Controls
             }
         }
 
-        [MediatorMessageSink(MediatorMessage.SaveRadialBitmap)]
+        
         private void SaveRadialBitmap(string fileName)
         {
             BitmapEncoder encoder = null;
