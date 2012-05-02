@@ -159,10 +159,6 @@
       <DependentUpon>TransmissionLossRadialView.xaml</DependentUpon>
     </Compile>
     <Compile Include="TransmissionLossViewer\TransmissionLossRadialViewModel.cs" />
-    <Compile Include="Controls\TwoDimensionColorMapView.xaml.cs">
-      <DependentUpon>TwoDimensionColorMapView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\TwoDimensionColorMapViewModel.cs" />
     <Compile Include="ValueConverters.cs" />
     <Compile Include="VirtualToggleButton.cs" />
     <Page Include="Controls\AutoScrollingTextBlock.xaml">
@@ -240,10 +236,6 @@
     <Page Include="TransmissionLossViewer\TransmissionLossRadialView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Controls\TwoDimensionColorMapView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

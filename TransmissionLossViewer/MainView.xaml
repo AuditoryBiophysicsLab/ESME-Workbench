@@ -28,6 +28,7 @@
     <Window.InputBindings>
         <KeyBinding Key="S" Command="{Binding SaveAsCommand}" Modifiers="Control" />
         <KeyBinding Key="E" Command="{Binding ExportAsCommand}" Modifiers="Control" />
+        <KeyBinding Key="W" Command="{Binding CloseCommand}" Modifiers="Control" />
     </Window.InputBindings>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
@@ -44,7 +45,7 @@
             <MenuItem Header="_File">
                 <MenuItem Command="{Binding SaveAsCommand}" Header="Save As" InputGestureText="Ctrl+S" />
                 <MenuItem Command="{Binding ExportAsCommand}" Header="Export to CSV" InputGestureText="Ctrl+E" />
-                <MenuItem Command="{Binding CloseWindowCommand}" Header="Exit" InputGestureText="Ctrl+W" />
+                <MenuItem Command="{Binding CloseCommand}" Header="Exit" InputGestureText="Ctrl+W" />
             </MenuItem>
         </Menu>
         <StackPanel Orientation="Vertical">

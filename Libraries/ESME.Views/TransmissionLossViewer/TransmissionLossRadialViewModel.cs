@@ -14,68 +14,22 @@ using ESME.TransmissionLoss.Bellhop;
 using ESME.Views.Controls;
 using HRC.ViewModels;
 using HRC.WPF;
-using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Views.TransmissionLossViewer
 {
-    [ExportViewModel("TransmissionLossRadialViewModel")]
     public class TransmissionLossRadialViewModel : ViewModelBase
     {
+        private readonly string _databaseDirectory;
         private readonly TransmissionLossRadialView _view;
-
-
-        #region public float RangeMin { get; set; }
         public float RangeMin { get; set; }
-        #endregion
-
-        #region public float  RangeMax { get; set; }
         public float RangeMax { get; set; }
-        #endregion
-
-        #region public float DepthMin { get; set; }
         public float DepthMin { get; set; }
-        #endregion
-
-        #region public float  DepthMax { get; set; }
         public float DepthMax { get; set; }
-        #endregion
-
-        #region GridSizeChangedCommand
-
-        SimpleCommand<object, object> _gridSizeChanged;
-
-        public SimpleCommand<object, object> GridSizeChangedCommand
-        {
-            get
-            {
-                return _gridSizeChanged ?? (_gridSizeChanged = new SimpleCommand<object, object>(delegate
-                                                                                                 {
-
-                                                                                                     if (TransmissionLossRadial != null) CalculateBottomProfileGeometry();
-
-
-                                                                                                 }));
-            }
-        }
-
-        #endregion
-
         readonly Dispatcher _dispatcher;
-
-
         bool _isRendered;
-
-        WriteableBitmap _writeableBitmap;
-
-        [ImportingConstructor]
-        public TransmissionLossRadialViewModel(TransmissionLossRadialView view)
-        {
-            _view = view;
-            _dispatcher = Dispatcher.CurrentDispatcher;
-            ColorMapViewModel = ColorMapViewModel.Default;
-            view.SizeChanged += (s, e) => CalculateBottomProfileGeometry();
-        }
-
+        
+        #region public WriteableBitmap WriteableBitmap {get; }
+        private WriteableBitmap _writeableBitmap;
         public WriteableBitmap WriteableBitmap
         {
             get
@@ -83,81 +37,7 @@ namespace ESME.Views.TransmissionLossViewer
                 if (!_isRendered) RenderBitmap();
                 return _writeableBitmap;
             }
-        }
-
-       
-
-        readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME Workbench\Database"); //todo
-
-
-
-        
-        public void SaveAsCSV(string fileName)
-        {
-            using (var sw = new StreamWriter(fileName))
-            {
-                // Write the X axis values out first
-                sw.WriteLine("Vertical Transmission Loss (dB)");
-                sw.Write(",Range (m),");
-
-                foreach (var t in TransmissionLossRadial.Ranges) sw.Write(t + ","); //write out the X axis values.
-                sw.WriteLine(); // Terminate the line
-                sw.WriteLine("Depth (m)");
-                // Write the slice data
-                for (var i = 0; i < TransmissionLossRadial.Depths.Count; i++)
-                {
-                    // Write out the Y axis value
-                    sw.Write(TransmissionLossRadial.Depths[i] + ",,");
-                    for (var j = 0; j < TransmissionLossRadial.Ranges.Count; j++)
-                        sw.Write(TransmissionLossRadial.TransmissionLoss[i, j] + ",");
-                    sw.WriteLine(); // Terminate the line
-                } // for i
-            } // using sw
-        }
-
-        public void SaveRadialBitmap(string fileName)
-        {
-            _view.ToImageFile(fileName);
-        }
-
-        #region RenderBitmap
-        void RenderBitmap()
-        {
-            if (TransmissionLossRadial == null || ColorMapViewModel == null) return;
-
-            var width = TransmissionLossRadial.Ranges.Count;
-            var height = TransmissionLossRadial.Depths.Count;
-
-            var m = PresentationSource.FromVisual(Application.Current.MainWindow).CompositionTarget.TransformToDevice;
-            var dx = m.M11;
-            var dy = m.M22;
-
-            if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(width, height, dx, dy, PixelFormats.Bgr32, null);
-            var infinityColor = _colorMapViewModel.Colors[0];
-            _writeableBitmap.Lock();
-            unsafe
-            {
-                var curOffset = (int)_writeableBitmap.BackBuffer;
-                for (var y = 0; y < height; y++)
-                {
-                    for (var x = 0; x < width; x++)
-                    {
-                        // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
-                        // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
-                        var curValue = TransmissionLossRadial.TransmissionLoss[y, x];
-                        var curColor = float.IsInfinity(curValue) ? infinityColor : ColorMapViewModel.Lookup(curValue);
-                        *((int*)curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
-                        curOffset += sizeof(Int32);
-                    }
-                }
-            }
-            _writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
-            _writeableBitmap.Unlock();
-            _isRendered = true;
-            //_dispatcher.BeginInvoke(new VoidDelegate(RenderFinished), DispatcherPriority.ApplicationIdle);
-            _dispatcher.InvokeIfRequired(RenderFinished,DispatcherPriority.ApplicationIdle);
-        }
-        void RenderFinished() { OnPropertyChanged("WriteableBitmap"); }
+        } 
         #endregion
 
         #region public ColorMapViewModel ColorMapViewModel { get; set; }
@@ -224,7 +104,7 @@ namespace ESME.Views.TransmissionLossViewer
         #region public string BottomProfileGeometry { get; set; }
 
         string _bottomProfileGeometry = "M 0,0";
-        
+
 
         public string BottomProfileGeometry
         {
@@ -257,6 +137,94 @@ namespace ESME.Views.TransmissionLossViewer
             //todo ; later try to subtract half a depth cell from each depth (off-by-1/2 error on display)
             //todo: Dave changed the bottom profile format on 13 Aug 2011.  New format is a list of range/depth pairs where depth changes by more than 1cm
         }
+        #endregion
+
+        [ImportingConstructor]
+        public TransmissionLossRadialViewModel(TransmissionLossRadialView view, string databaseDirectory)
+        {
+            _databaseDirectory = databaseDirectory;
+            _view = view;
+            _dispatcher = Dispatcher.CurrentDispatcher;
+            ColorMapViewModel = ColorMapViewModel.Default;
+            view.SizeChanged += (s, e) => CalculateBottomProfileGeometry();
+        }
+
+        public void SaveAsCSV(string fileName)
+        {
+            using (var sw = new StreamWriter(fileName))
+            {
+                // Write the X axis values out first
+                sw.WriteLine("Vertical Transmission Loss (dB)");
+                sw.Write(",Range (m),");
+
+                foreach (var t in TransmissionLossRadial.Ranges) sw.Write(t + ","); //write out the X axis values.
+                sw.WriteLine(); // Terminate the line
+                sw.WriteLine("Depth (m)");
+                // Write the slice data
+                for (var i = 0; i < TransmissionLossRadial.Depths.Count; i++)
+                {
+                    // Write out the Y axis value
+                    sw.Write(TransmissionLossRadial.Depths[i] + ",,");
+                    for (var j = 0; j < TransmissionLossRadial.Ranges.Count; j++)
+                        sw.Write(TransmissionLossRadial.TransmissionLoss[i, j] + ",");
+                    sw.WriteLine();
+                }
+            } 
+        }
+
+        public void SaveRadialBitmap(string fileName) { _view.ToImageFile(fileName);}
+
+        #region RenderBitmap
+        void RenderBitmap()
+        {
+            if (TransmissionLossRadial == null || ColorMapViewModel == null) return;
+
+            var width = TransmissionLossRadial.Ranges.Count;
+            var height = TransmissionLossRadial.Depths.Count;
+
+            var m = PresentationSource.FromVisual(Application.Current.MainWindow).CompositionTarget.TransformToDevice;
+            var dx = m.M11;
+            var dy = m.M22;
+
+            if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(width, height, dx, dy, PixelFormats.Bgr32, null);
+            var infinityColor = _colorMapViewModel.Colors[0];
+            _writeableBitmap.Lock();
+            unsafe
+            {
+                var curOffset = (int)_writeableBitmap.BackBuffer;
+                for (var y = 0; y < height; y++)
+                {
+                    for (var x = 0; x < width; x++)
+                    {
+                        // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
+                        // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
+                        var curValue = TransmissionLossRadial.TransmissionLoss[y, x];
+                        var curColor = float.IsInfinity(curValue) ? infinityColor : ColorMapViewModel.Lookup(curValue);
+                        *((int*)curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
+                        curOffset += sizeof(Int32);
+                    }
+                }
+            }
+            _writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
+            _writeableBitmap.Unlock();
+            _isRendered = true;
+            _dispatcher.InvokeIfRequired(RenderFinished, DispatcherPriority.ApplicationIdle);
+        }
+        void RenderFinished() { OnPropertyChanged("WriteableBitmap"); }
+        #endregion
+
+        #region GridSizeChangedCommand
+
+        SimpleCommand<object, object> _gridSizeChanged;
+
+        public SimpleCommand<object, object> GridSizeChangedCommand
+        {
+            get
+            {
+                return _gridSizeChanged ?? (_gridSizeChanged = new SimpleCommand<object, object>(delegate { if (TransmissionLossRadial != null) CalculateBottomProfileGeometry(); }));
+            }
+        }
+
         #endregion
     }
 }
