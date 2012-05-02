@@ -37,11 +37,13 @@ namespace ESMEWorkbench.ViewModels.Tree
                     {
                         case 1:
                             RootNodes.Insert(0, _scenario);
-                            RootNodes.Insert(1, new EnvironmentNode(_scenario));
+                            RootNodes.Insert(1, new AnalysisPointsNode(_scenario));
+                            RootNodes.Insert(2, new EnvironmentNode(_scenario));
                             break;
-                        case 3:
+                        case 4:
                             RootNodes[0] = _scenario;
-                            RootNodes[1] = new EnvironmentNode(_scenario);
+                            RootNodes[1] = new AnalysisPointsNode(_scenario);
+                            RootNodes[2] = new EnvironmentNode(_scenario);
                             break;
                         default:
                             throw new ApplicationException(string.Format("LayerTreeViewModel is in an illegal state.  RootNodes.Count = {0}", RootNodes.Count));
@@ -53,7 +55,8 @@ namespace ESMEWorkbench.ViewModels.Tree
                     {
                         case 1:
                             break;
-                        case 3:
+                        case 4:
+                            RootNodes.RemoveAt(0);
                             RootNodes.RemoveAt(0);
                             RootNodes.RemoveAt(0);
                             break;

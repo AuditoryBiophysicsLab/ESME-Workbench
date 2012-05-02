@@ -41,6 +41,7 @@ namespace ESME.Scenarios
             get { throw new NotImplementedException(); }
         }
 
+        [NotMapped] public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", Geo.Latitude, Geo.Longitude); } }
         public void Validate() { throw new NotImplementedException(); }
         public event PropertyChangedEventHandler PropertyChanged;
         #region ViewAnalysisPointCommand
