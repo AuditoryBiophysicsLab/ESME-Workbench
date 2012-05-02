@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Windows.Input;
 using ESME;
 using ESME.Scenarios;
 using ESMEWorkbench.ViewModels.Map;
 using HRC.Aspects;
+using HRC.Services;
 using HRC.Utility;
 using HRC.ViewModels;
+using HRC.WPF;
 
 namespace ESMEWorkbench.ViewModels.Tree
 {

@@ -12,6 +12,8 @@ using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
 using HRC.Aspects;
 using HRC.Navigation;
+using HRC.ViewModels;
+using HRC.WPF;
 
 namespace ESME.Scenarios
 {
@@ -41,6 +43,15 @@ namespace ESME.Scenarios
 
         public void Validate() { throw new NotImplementedException(); }
         public event PropertyChangedEventHandler PropertyChanged;
+        #region ViewAnalysisPointCommand
+        public SimpleCommand<object, EventToCommandArgs> ViewAnalysisPointCommand
+        {
+            get { return _viewAnalysisPoint ?? (_viewAnalysisPoint = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ViewAnalysisPoint, this))); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _viewAnalysisPoint;
+        #endregion
+
     }
 
     [NotifyPropertyChanged]
@@ -81,6 +92,14 @@ namespace ESME.Scenarios
 
         [NotMapped]
         public bool IsValid { get { return string.IsNullOrEmpty(ValidationErrorText); } }
+        #region ViewTransmissionLossCommand
+        public SimpleCommand<object, EventToCommandArgs> ViewTransmissionLossCommand
+        {
+            get { return _viewTransmissionLoss ?? (_viewTransmissionLoss = new SimpleCommand<object, EventToCommandArgs>(o =>  MediatorMessage.Send(MediatorMessage.ViewTransmissionLoss, this))); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _viewTransmissionLoss;
+        #endregion
 
         [Affects("IsValid")]
         [NotMapped]

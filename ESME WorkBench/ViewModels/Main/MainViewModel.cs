@@ -335,5 +335,17 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             Debug.WriteLine("Map double click at {0}", geo);
         }
+
+        [MediatorMessageSink(MediatorMessage.ViewTransmissionLoss), UsedImplicitly]
+        void ViewTransmissionLoss(ESME.Scenarios.TransmissionLoss transmissionLoss)
+        {
+            _messageBox.ShowInformation("ViewTransmissionLoss");
+        }
+
+        [MediatorMessageSink(MediatorMessage.ViewAnalysisPoint), UsedImplicitly]
+        void ViewAnalysisPoint(AnalysisPoint analysisPoint)
+        {
+            _messageBox.ShowInformation("ViewAnalysisPoint");
+        }
     }
 }

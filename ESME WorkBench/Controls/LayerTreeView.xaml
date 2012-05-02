@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:Locations="clr-namespace:ESME.Locations;assembly=ESME"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:Scenarios="clr-namespace:ESME.Scenarios;assembly=ESME"
@@ -80,19 +81,23 @@
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
                 <StackPanel Orientation="Vertical">
-                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding PlatformName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}" IsSelected="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TreeViewItem}}, Path=IsSelected}">
+                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                                           IsSelected="{Binding RelativeSource={RelativeSource FindAncestor,
+                                                                                               AncestorType={x:Type TreeViewItem}},
+                                                                Path=IsSelected}"
+                                           LayerName="{Binding PlatformName}"
+                                           LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
+                                           LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
                         <Controls:LayerControl.ContextControl>
                             <StackPanel Orientation="Horizontal">
-                                <Controls:ImageToggleButton Width="16" Height="16" ToolTip="Change line color" ImageSource="..\..\Images\SmallIcons\color_wheel.png"/>
-                                <Controls:ImageToggleButton Width="16" Height="16" ToolTip="Change line width" ImageSource="..\..\Images\SmallIcons\draw_line.png"/>
-                                <Controls:ImageToggleButton Width="16" Height="16" ToolTip="Add source" ImageSource="..\..\Images\SmallIcons\add.png"/>
-                                <Controls:ImageToggleButton Width="16" Height="16" ToolTip="Remove platform" ImageSource="..\..\Images\SmallIcons\delete.png"/>
+                                <Controls:ImageToggleButton Width="16" Height="16" ImageSource="..\..\Images\SmallIcons\color_wheel.png" ToolTip="Change line color" />
+                                <Controls:ImageToggleButton Width="16" Height="16" ImageSource="..\..\Images\SmallIcons\draw_line.png" ToolTip="Change line width" />
+                                <Controls:ImageToggleButton Width="16" Height="16" ImageSource="..\..\Images\SmallIcons\add.png" ToolTip="Add source" />
+                                <Controls:ImageToggleButton Width="16" Height="16" ImageSource="..\..\Images\SmallIcons\delete.png" ToolTip="Remove platform" />
                             </StackPanel>
                         </Controls:LayerControl.ContextControl>
                     </Controls:LayerControl>
-                    <!-- 
-                    <Controls:LayerControl IsChecked="{Binding Perimeter.LayerSettings.IsChecked}" LayerName="{Binding PlatformName, StringFormat={}{0} OpArea}" LineOrSymbolColor="{Binding Perimeter.LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding Perimeter.LayerSettings.LineOrSymbolSize}" />
-                    -->
+                    <!--  <Controls:LayerControl IsChecked="{Binding Perimeter.LayerSettings.IsChecked}" LayerName="{Binding PlatformName, StringFormat={}{0} OpArea}" LineOrSymbolColor="{Binding Perimeter.LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding Perimeter.LayerSettings.LineOrSymbolSize}" />  -->
                 </StackPanel>
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
@@ -111,7 +116,13 @@
                 <Controls:LayerControl IsChecked="{Binding IsChecked}" IsMapLayer="False" LayerName="Sediment" />
             </HierarchicalDataTemplate>
             <DataTemplate DataType="{x:Type Scenarios:TransmissionLoss}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}" />
+                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <WPF:EventToCommandTrigger Command="{Binding ViewTransmissionLossCommand}" CommandParameter="{Binding}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </Controls:LayerControl>
             </DataTemplate>
             <DataTemplate DataType="{x:Type Locations:EnvironmentalDataSet}">
                 <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}" />

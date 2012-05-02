@@ -40,6 +40,7 @@ namespace ESME
         public const string RequestTransmissionLossBathymetry = "RequestTransmissionLossBathymetryMessage";
         public const string TransmissionLossRadialEarthCoordinate = "TransmissionLossRadialEarthCoordinateMessage";
         public const string CancelCurrentTransmissionLossCalculation = "CancelCurrentTransmissionLossCalculationMessage";
+        public const string ViewTransmissionLoss = "ViewTransmissionLossMessage";
 
         public const string ShowTransmissionLossQueueView = "ShowTransmissionLossQueueViewMessage";
         public const string SetEditMode = "SetEditModeMessage";

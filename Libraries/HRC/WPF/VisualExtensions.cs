@@ -64,8 +64,8 @@ namespace HRC.WPF
         public static void ToSVG(this Visual theVisual, string fileName)
         {
            throw new NotImplementedException(""); 
-            var transform = new XslTransform();
-            transform.Load("xaml2svg.xsl");
+            //var transform = new XslTransform();
+            //transform.Load("xaml2svg.xsl");
             //transform.Transform(sourceXML, fileName);
 
         }
