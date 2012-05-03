@@ -29,7 +29,7 @@ using MEFedMVVM.ViewModelLocator;
 namespace ESMEWorkbench.ViewModels.Main
 {
     [ExportViewModel("MainViewModel")]
-    public partial class MainViewModel : ViewModelBase, IPartImportsSatisfiedNotification
+    public partial class MainViewModel : ViewModelBase
     {
         #region Private fields
 
@@ -75,6 +75,16 @@ namespace ESMEWorkbench.ViewModels.Main
             Locations = Database.Context.Locations.Local;
             Scenarios = Database.Context.Scenarios.Local;
             Cursor = Cursors.Arrow;
+            _transmissionLoss.RangeCellSize = Globals.AppSettings.BellhopSettings.RangeCellSize;
+            _transmissionLoss.DepthCellSize = Globals.AppSettings.BellhopSettings.DepthCellSize;
+            _cache.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == "BusyCount") CacheActivity = _cache.BusyCount > 0 ? string.Format("Cache: {0} importing", _cache.BusyCount) : "Cache: idle";
+            };
+            _transmissionLoss.WorkQueue.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == "Count") TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0 ? string.Format("TL: {0} queued", _transmissionLoss.WorkQueue.Keys.Count) : "TL: idle";
+            };
 
             if (Designer.IsInDesignMode) return;
 
@@ -86,26 +96,9 @@ namespace ESMEWorkbench.ViewModels.Main
 
                 Globals.AppSettings.PluginManagerService = _plugins;
 
-                if (_importsSatisfied) _transmissionLoss.Start();
+                _transmissionLoss.Start();
                 NAVOImporter.PluginManagerService = _plugins;
             };
-        }
-
-        bool _importsSatisfied;
-        public void OnImportsSatisfied()
-        {
-            _transmissionLoss.RangeCellSize = Globals.AppSettings.BellhopSettings.RangeCellSize;
-            _transmissionLoss.DepthCellSize = Globals.AppSettings.BellhopSettings.DepthCellSize;
-            _importsSatisfied = true;
-            _cache.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == "BusyCount") CacheActivity = _cache.BusyCount > 0 ? string.Format("Cache: {0} importing", _cache.BusyCount) : "Cache: idle";
-            };
-            _transmissionLoss.WorkQueue.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == "Count") TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0 ? string.Format("TL: {0} queued", _transmissionLoss.WorkQueue.Keys.Count) : "TL: idle";
-            };
-            if (Database.MasterDatabaseDirectory != null) _transmissionLoss.Start();
         }
 
         public ObservableCollection<Location> Locations { get; private set; }
@@ -321,7 +314,6 @@ namespace ESMEWorkbench.ViewModels.Main
                     var analysisPoint = new AnalysisPoint {Geo = MouseGeo, Scenario = Scenario};
                     Scenario.AnalysisPoints.Add(analysisPoint);
                     Database.Add(analysisPoint, (Bathymetry)_cache[Scenario.Bathymetry], true);
-                    _transmissionLoss.Start();
                 }
                 IsInAnalysisPointMode = false;
             }

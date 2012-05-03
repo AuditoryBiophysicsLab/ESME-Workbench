@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace ESME.TransmissionLoss.Bellhop
 {
@@ -10,6 +11,12 @@ namespace ESME.TransmissionLoss.Bellhop
     {
         public BellhopOutput(string bellhopFilename)
         {
+            var retry = 20;
+            while (!File.Exists(bellhopFilename) && retry > 0)
+            {
+                Thread.Sleep(50);
+                retry--;
+            }
             using (var reader = new BinaryReader(new FileStream(bellhopFilename, FileMode.Open, FileAccess.Read)))
             {
                 var recordLength = reader.ReadInt32()*4;

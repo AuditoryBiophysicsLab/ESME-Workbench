@@ -29,14 +29,14 @@ namespace ESME.TransmissionLoss
         public TransmissionLossCalculatorService()
         {
             WorkQueue = new ObservableConcurrentDictionary<Guid, PercentProgress<Radial>>();
-            _calculator = new ActionBlock<Tuple<PercentProgress<Radial>, string>>(job =>
+            _calculator = new ActionBlock<PercentProgress<Radial>>(job =>
             {
                 if (WorkQueue.Any()) MediatorMessage.Send(MediatorMessage.ShowTransmissionLossQueueView, true);
-                Calculate(job.Item1, job.Item2);
-                WorkQueue.Remove(job.Item1.ProgressTarget.Guid);
+                Calculate(job);
+                WorkQueue.Remove(job.ProgressTarget.Guid);
                 if (!WorkQueue.Any()) MediatorMessage.Send(MediatorMessage.ShowTransmissionLossQueueView, false);
             }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
-            _queue = new BufferBlock<Tuple<PercentProgress<Radial>, string>>(new DataflowBlockOptions { BoundedCapacity = -1 });
+            _queue = new BufferBlock<PercentProgress<Radial>>(new DataflowBlockOptions { BoundedCapacity = -1 });
             _queue.LinkTo(_calculator);
         }
 
@@ -50,8 +50,8 @@ namespace ESME.TransmissionLoss
         [Initialize(float.NaN)] public float RangeCellSize { get; set; }
         [Initialize(float.NaN)] public float DepthCellSize { get; set; }
         public ObservableConcurrentDictionary<Guid, PercentProgress<Radial>> WorkQueue { get; private set; }
-        readonly ActionBlock<Tuple<PercentProgress<Radial>, string>> _calculator;
-        readonly BufferBlock<Tuple<PercentProgress<Radial>, string>> _queue;
+        readonly ActionBlock<PercentProgress<Radial>> _calculator;
+        readonly BufferBlock<PercentProgress<Radial>> _queue;
 
         public void OnImportsSatisfied()
         {
@@ -88,18 +88,17 @@ namespace ESME.TransmissionLoss
         public void Add(Radial radial)
         {
             //Debug.WriteLine("{0}: Queueing calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}", DateTime.Now, radial.Bearing, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo); 
-            var directoryPath = Path.Combine(_databaseService.MasterDatabaseDirectory, radial.TransmissionLoss.AnalysisPoint.Scenario.StorageDirectory);
             var progress = new PercentProgress<Radial>(radial);
             WorkQueue.Add(radial.Guid, progress);
-            _queue.Post(Tuple.Create(progress, directoryPath));
+            _queue.Post(progress);
         }
 
-        public void TestAdd(Radial radial, string directoryPath)
+        public void TestAdd(Radial radial)
         {
-            Calculate(new PercentProgress<Radial>(radial), directoryPath);
+            Calculate(new PercentProgress<Radial>(radial));
         }
 
-        void Calculate(PercentProgress<Radial> item, string directoryPath)
+        void Calculate(PercentProgress<Radial> item)
         {
             var radial = item.ProgressTarget;
             try
@@ -121,19 +120,16 @@ namespace ESME.TransmissionLoss
                 var bathymetry = (Bathymetry)_cacheService[scenario.Bathymetry];
                 var deepestPoint = bathymetry.DeepestPoint;
                 var deepestProfile = soundSpeed[scenario.TimePeriod].GetDeepestSSP(deepestPoint).Extend(deepestPoint.Data);
-                WindSample windSample;
-                windSample = wind[timePeriod].EnvironmentData.GetNearestPoint(radial.Segment.Center);
-                SoundSpeedProfile soundSpeedProfile;
-                soundSpeedProfile = soundSpeed[timePeriod].EnvironmentData.GetNearestPoint(radial.Segment.Center).Extend(deepestProfile);
-                SedimentSample sedimentSample;
-                sedimentSample = sediment.Samples.GetNearestPoint(radial.Segment.Center);
-                BottomProfile bottomProfile;
-                bottomProfile = new BottomProfile(100, radial.Segment, bathymetry);
+                var windSample = wind[timePeriod].EnvironmentData.GetNearestPoint(radial.Segment.Center);
+                var soundSpeedProfile = soundSpeed[timePeriod].EnvironmentData.GetNearestPoint(radial.Segment.Center).Extend(deepestProfile);
+                var sedimentSample = sediment.Samples.GetNearestPoint(radial.Segment.Center);
+                var bottomProfile = new BottomProfile(100, radial.Segment, bathymetry);
                 var sourceDepth = platform.Depth;
                 if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
+
+                var directoryPath = Path.GetDirectoryName(radial.BasePath);
                 if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
-                var baseFilename = Path.Combine(directoryPath, Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
-                CreateBellhopEnvironmentFiles(baseFilename,
+                CreateBellhopEnvironmentFiles(radial.BasePath,
                                               soundSpeedProfile,
                                               sedimentSample,
                                               bottomProfile,
@@ -151,7 +147,7 @@ namespace ESME.TransmissionLoss
                                               1500);
                 var bellhopProcess = new TransmissionLossProcess
                 {
-                    StartInfo = new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "bellhop.exe"), Path.GetFileName(baseFilename))
+                    StartInfo = new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "bellhop.exe"), radial.Filename)
                     {
                         CreateNoWindow = true,
                         UseShellExecute = false,
@@ -198,8 +194,7 @@ namespace ESME.TransmissionLoss
                 bellhopProcess.BeginOutputReadLine();
                 while (!bellhopProcess.HasExited) Thread.Sleep(100);
                 radial.CalculationCompleted = DateTime.Now;
-                var output = new TransmissionLossRadial((float)radial.Bearing, new BellhopOutput(baseFilename + ".shd"));
-                radial.Filename = Path.GetFileName(baseFilename + ".shd");
+                var output = new TransmissionLossRadial((float)radial.Bearing, new BellhopOutput(radial.BasePath + ".shd"));
                 radial.Ranges = output.Ranges.ToArray();
                 radial.Depths = output.Depths.ToArray();
                 radial.IsCalculated = true;
