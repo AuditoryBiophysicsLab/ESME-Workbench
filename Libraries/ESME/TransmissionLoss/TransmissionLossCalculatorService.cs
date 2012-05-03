@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.Data.Entity;
 using System.Diagnostics;
@@ -83,14 +84,25 @@ namespace ESME.TransmissionLoss
                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Sediment)
                            select radial);
             foreach (var radial in radials) if (!File.Exists(radial.BasePath + ".shd")) Add(radial);
+            _databaseService.Context.Radials.Local.CollectionChanged += (sender, args) =>
+            {
+                switch (args.Action)
+                {
+                    case NotifyCollectionChangedAction.Add:
+                        foreach (Radial radial in args.NewItems) if (!File.Exists(radial.BasePath + ".shd")) Add(radial);
+                        break;
+                }
+            };
         }
 
         public void Add(Radial radial)
         {
             //Debug.WriteLine("{0}: Queueing calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}", DateTime.Now, radial.Bearing, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo); 
-            var progress = new PercentProgress<Radial>(radial);
-            WorkQueue.Add(radial.Guid, progress);
-            _queue.Post(progress);
+            PercentProgress<Radial> radialProgress;
+            if (WorkQueue.TryGetValue(radial.Guid, out radialProgress)) return;
+            radialProgress = new PercentProgress<Radial>(radial);
+            WorkQueue.Add(radial.Guid, radialProgress);
+            _queue.Post(radialProgress);
         }
 
         public void TestAdd(Radial radial)
