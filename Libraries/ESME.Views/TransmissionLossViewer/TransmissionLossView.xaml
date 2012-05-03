@@ -35,7 +35,8 @@
                         Maximum="{Binding RadialCount}"
                         Minimum="0"
                         TickPlacement="BottomRight"
-                        Value="{Binding SelectedRadialIndex}" />
+                        Value="{Binding SelectedRadialIndex,
+                                        Mode=TwoWay}" />
             </StackPanel>
         </DockPanel>
         <View:RadialView x:Name="TransmissionLossRadialView" DataContext="{Binding RadialViewModel}" />

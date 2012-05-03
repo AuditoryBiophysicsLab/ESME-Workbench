@@ -28,15 +28,9 @@
                       Mode=TwoWay}"
         mc:Ignorable="d">
     <Window.InputBindings>
-        <KeyBinding Key="S"
-                    Command="{Binding SaveAsCommand}"
-                    Modifiers="Control" />
-        <KeyBinding Key="E"
-                    Command="{Binding ExportAsCommand}"
-                    Modifiers="Control" />
-        <KeyBinding Key="W"
-                    Command="{Binding CloseCommand}"
-                    Modifiers="Control" />
+        <KeyBinding Key="S" Command="{Binding SaveAsCommand}" Modifiers="Control" />
+        <KeyBinding Key="E" Command="{Binding ExportAsCommand}" Modifiers="Control" />
+        <KeyBinding Key="W" Command="{Binding CloseCommand}" Modifiers="Control" />
     </Window.InputBindings>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
@@ -51,32 +45,20 @@
               BorderThickness="1"
               DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Command="{Binding SaveAsCommand}"
-                          Header="Save As"
-                          InputGestureText="Ctrl+S" />
-                <MenuItem Command="{Binding ExportAsCommand}"
-                          Header="Export to CSV"
-                          InputGestureText="Ctrl+E" />
-                <MenuItem Command="{Binding CloseCommand}"
-                          Header="Exit"
-                          InputGestureText="Ctrl+W" />
+                <MenuItem Command="{Binding SaveAsCommand}" Header="Save As" InputGestureText="Ctrl+S" />
+                <MenuItem Command="{Binding ExportAsCommand}" Header="Export to CSV" InputGestureText="Ctrl+E" />
+                <MenuItem Command="{Binding CloseCommand}" Header="Exit" InputGestureText="Ctrl+W" />
             </MenuItem>
         </Menu>
         <StackPanel Orientation="Vertical">
             <GroupBox Header="Scenarios">
-                <ListBox DisplayMemberPath="Name"
-                         ItemsSource="{Binding Database.Context.Scenarios.Local}"
-                         SelectedItem="{Binding SelectedScenario}" />
+                <ListBox DisplayMemberPath="Name" ItemsSource="{Binding Database.Context.Scenarios.Local}" SelectedItem="{Binding Scenario}" />
             </GroupBox>
             <GroupBox Header="Analysis Points">
-                <ListBox DisplayMemberPath="Geo"
-                         ItemsSource="{Binding AnalysisPoints}"
-                         SelectedItem="{Binding SelectedAnalysisPoint}" />
+                <ListBox DisplayMemberPath="Geo" ItemsSource="{Binding Scenario.AnalysisPoints}" SelectedItem="{Binding AnalysisPoint}" />
             </GroupBox>
             <GroupBox Header="Transmission Losses">
-                <ListBox DisplayMemberPath="Item1"
-                         ItemsSource="{Binding AnalysisPointModes}"
-                         SelectedItem="{Binding SelectedAnalysisPointMode}" />
+                <ListBox DisplayMemberPath="Mode.PSMName" ItemsSource="{Binding AnalysisPoint.TransmissionLosses}" SelectedItem="{Binding TransmissionLossViewModel.TransmissionLoss}" />
             </GroupBox>
         </StackPanel>
         <!--
@@ -113,8 +95,6 @@
             </DockPanel>
             <View:RadialView x:Name="TransmissionLossRadialView" DataContext="{Binding RadialViewModel}"/>
         -->
-        <View:TransmissionLossView x:Name="TransmissionLossView"
-                                   DataContext="{Binding TransmissionLossViewModel}"
-                                   DockPanel.Dock="Bottom" />
+        <View:TransmissionLossView x:Name="TransmissionLossView" DataContext="{Binding TransmissionLossViewModel}" DockPanel.Dock="Bottom" />
     </DockPanel>
 </Window>

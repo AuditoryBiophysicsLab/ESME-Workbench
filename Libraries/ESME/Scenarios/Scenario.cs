@@ -194,8 +194,8 @@ namespace ESME.Scenarios
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        [NotMapped]
-        public bool IsMouseOver { get; set; }
+        [NotMapped] public bool IsMouseOver { get; set; }
+        [NotMapped] public GeoRect GeoRect { get { return Location.GeoRect; } }
     }
 
     public static class ScenarioExensions

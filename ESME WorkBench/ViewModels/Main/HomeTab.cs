@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Input;
 using ESME;
 using ESME.Environment;
 using ESME.Mapping;
@@ -23,7 +24,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [Initialize] public LayerTreeViewModel LayerTreeViewModel { get; set; }
         public MapViewModel MapViewModel { get; set; }
 
-        [Affects("IsScenarioLoaded")]
+        [Affects("IsScenarioLoaded", "CanPlaceAnalysisPoint")]
         public Scenario Scenario
         {
             get { return _scenario; }
@@ -51,7 +52,10 @@ namespace ESMEWorkbench.ViewModels.Main
 
         public bool IsScenarioLoaded { get { return Scenario != null; } }
 
-        public bool CanPlaceAnalysisPoint { get { return Scenario != null && Scenario.Wind != null && Scenario.SoundSpeed != null & Scenario.Bathymetry != null & Scenario.Sediment != null; } }
+        public bool CanPlaceAnalysisPoint
+        {
+            get { return Scenario != null && Scenario.Wind != null && Scenario.SoundSpeed != null && Scenario.Bathymetry != null && Scenario.Sediment != null; }
+        }
 
         public string MainWindowTitle { get; set; }
 

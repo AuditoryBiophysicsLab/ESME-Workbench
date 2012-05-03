@@ -32,6 +32,8 @@ namespace ESME.Scenarios
         public virtual ICollection<LogEntry> Logs { get; set; }
         public virtual ICollection<TransmissionLoss> TransmissionLosses { get; set; }
 
+        [NotMapped] public string PSMName { get { return string.Format("{0}:{1}:{2}", Source.Platform.PlatformName, Source.SourceName, ModeName); } }
+
         /// <summary>
         /// Indicates whether the current object is equal to another object of the same type.
         /// </summary>

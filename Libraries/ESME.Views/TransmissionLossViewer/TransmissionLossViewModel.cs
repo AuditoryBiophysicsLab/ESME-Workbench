@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.IO;
 using System.Text;
 using ESME.Scenarios;
 using HRC.Aspects;
@@ -12,11 +11,8 @@ namespace ESME.Views.TransmissionLossViewer
 {
     public class TransmissionLossViewModel : ViewModelBase
     {
-        private ObservableList<Radial> _radials;
-        public ObservableList<Radial> Radials
-        {
-            get { return _radials ?? (_radials = new ObservableList<Radial>(TransmissionLoss.Radials)); }
-        }
+        [Affects("RadialCount")]
+        public ObservableList<Radial> Radials { get; set; }
 
         public int RadialCount
         {
@@ -28,20 +24,16 @@ namespace ESME.Views.TransmissionLossViewer
         }
 
         #region public int SelectedRadialIndex {get; set;}
+        int _selectedRadialIndex;
 
         [Affects("SelectedBearingGeometry","SelectedRadial")]
-        public int SelectedRadialIndex { get; set; }
-
-        #endregion
-
-        #region public Radial SelectedRadial {get; set;}
-
-        public Radial SelectedRadial
+        public int SelectedRadialIndex
         {
-            get
+            get { return _selectedRadialIndex; }
+            set
             {
-                if (TransmissionLoss == null) return null;
-                return Radials[SelectedRadialIndex];
+                _selectedRadialIndex = value;
+                RadialViewModel.Radial = Radials[_selectedRadialIndex];
             }
         }
         #endregion
@@ -54,7 +46,8 @@ namespace ESME.Views.TransmissionLossViewer
                 Debug.WriteLine("SelectedBearingGeometry Updated");
                 var sb = new StringBuilder();
                 var bearing = 0.0;
-                if (SelectedRadial != null) bearing = SelectedRadial.Bearing;
+                if (RadialViewModel == null || RadialViewModel.Radial == null) return null;
+                bearing = RadialViewModel.Radial.Bearing;
                 const double radius = 8;
                 double x, y;
                 for (double angle = 0; angle <= 2 * Math.PI; angle += Math.PI / 32.0)
@@ -76,14 +69,14 @@ namespace ESME.Views.TransmissionLossViewer
         public RadialViewModel RadialViewModel { get; set; }
 
         private Scenarios.TransmissionLoss _transmissionLoss;
-        [Affects("Radials", "RadialCount", "SelectedRadialIndex", "SelectedRadial","SelectedBearingGeometry")]
+        [Affects("Radials", "RadialCount", "SelectedRadialIndex", "SelectedRadial", "SelectedBearingGeometry")]
         public Scenarios.TransmissionLoss TransmissionLoss
         {
             get { return _transmissionLoss; }
             set
             {
                 _transmissionLoss = value;
-                _radials = null;
+                Radials = _transmissionLoss == null ? null : new ObservableList<Radial>(_transmissionLoss.Radials);
                 SelectedRadialIndex = 0;
             }
         }

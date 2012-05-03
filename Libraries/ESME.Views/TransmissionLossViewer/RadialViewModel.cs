@@ -226,5 +226,8 @@ namespace ESME.Views.TransmissionLossViewer
         }
 
         #endregion
+
+        public string OutputFileName { get { lock (this) return Radial == null ? null : Path.Combine(Properties.Settings.Default.ExperimentReportDirectory, string.Format("{0} {1} {2} bearing {3} degrees", Radial.TransmissionLoss.Mode.ModeName, Radial.TransmissionLoss.Mode.Source.SourceName, Radial.TransmissionLoss.Mode.Source.Platform.PlatformName, Radial.Bearing)); } }
+
     }
 }

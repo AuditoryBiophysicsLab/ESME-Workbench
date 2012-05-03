@@ -24,10 +24,41 @@ using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Locations
 {
+    public interface IMasterDatabaseService : IDisposable
+    {
+        string MasterDatabaseDirectory { get; set; }
+        LocationContext Context { get; }
+        Location FindLocation(string locationName);
+        bool LocationExists(string locationName);
+        Scenario FindScenario(string scenarioName);
+        bool ScenarioExists(string scenarioName);
+        void Refresh();
+        void Add(Location location, bool saveChanges = false);
+        void Add(EnvironmentalDataSet dataSet, bool saveChanges = false);
+        void Add(Scenario scenario, bool saveChanges = false);
+        void Add(Platform platform, bool saveChanges = false);
+        void Add(Source source, bool saveChanges = false);
+        void Add(Mode mode, bool saveChanges = false);
+        void Add(Scenario scenario, EnvironmentalDataSet dataSet, bool replaceExisting = false, bool saveChanges = false);
+        void Add(Perimeter perimeter, bool saveChanges = false);
+        void Add(PerimeterCoordinate coordinate, bool replaceExisting = false, bool saveChanges = false);
+        void Add(ScenarioSpecies species, bool saveChanges = false);
+        void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry, bool saveChanges = false);
+        void Add(Scenarios.TransmissionLoss transmissionLoss, bool saveChanges = false);
+        void Add(Radial radial, bool saveChanges = false);
+        Location CreateLocation(string locationName, string comments, double north, double south, double east, double west);
+        Location ImportLocationFromOverlayFile(string overlayFilename, string locationName);
+        EnvironmentalDataSet CreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin);
+        Scenario CreateScenario(string scenarioName, string comments, TimeSpan startTime, TimeSpan duration, TimePeriod timePeriod, Location location);
+        void SetEnvironmentalData(Scenario scenario, EnvironmentalDataSet data);
+        void DeleteLocation(Location location, bool saveChanges);
+        void DeleteEnvironmentalDataSet(EnvironmentalDataSet dataSet);
+    }
+
     [PartCreationPolicy(CreationPolicy.Shared)]
-    [ExportService(ServiceType.Both, typeof(MasterDatabaseService))]
+    [ExportService(ServiceType.Both, typeof(IMasterDatabaseService))]
     [NotifyPropertyChanged]
-    public class MasterDatabaseService : PropertyChangedBase, IDisposable
+    public class MasterDatabaseService : PropertyChangedBase, IMasterDatabaseService
     {
         #region Public methods and properties
         string _masterDatabaseDirectory;
@@ -48,6 +79,28 @@ namespace ESME.Locations
 
         public Scenario FindScenario(string scenarioName) { return Context == null ? null : Context.Scenarios.FirstOrDefault(l => l.Name == scenarioName); }
         public bool ScenarioExists(string scenarioName) { return FindScenario(scenarioName) != null; }
+
+        public void Refresh()
+        {
+            Context.Platforms.Load();
+            Context.Sources.Load();
+            Context.Modes.Load();
+            Context.Locations.Load();
+            Context.Scenarios.Load();
+            Context.LayerSettings.Load();
+            Context.Perimeters.Load();
+            Context.PerimeterCoordinates.Load();
+#if false
+            Context.EnvironmentalDataSets.Load();
+            Context.Platforms.Load();
+            Context.Sources.Load();
+            Context.ScenarioSpecies.Load();
+            Context.AnalysisPoints.Load();
+            Context.TransmissionLosses.Load();
+            Context.Radials.Load();
+#endif
+        }
+
         #region Add operations
         public void Add(Location location, bool saveChanges = false)
         {
@@ -443,23 +496,7 @@ namespace ESME.Locations
             };
             DbConnection connection = new SQLiteConnection(connectionStringBuilder.ToString());
             Context = new LocationContext(connection, true);
-            Context.Platforms.Load();
-            Context.Sources.Load();
-            Context.Modes.Load();
-            Context.Locations.Load();
-            Context.Scenarios.Load();
-            Context.LayerSettings.Load();
-            Context.Perimeters.Load();
-            Context.PerimeterCoordinates.Load();
-#if false
-            Context.EnvironmentalDataSets.Load();
-            Context.Platforms.Load();
-            Context.Sources.Load();
-            Context.ScenarioSpecies.Load();
-            Context.AnalysisPoints.Load();
-            Context.TransmissionLosses.Load();
-            Context.Radials.Load();
-#endif
+            Refresh();
             OnPropertyChanged("Locations");
             OnPropertyChanged("Scenarios");
         }

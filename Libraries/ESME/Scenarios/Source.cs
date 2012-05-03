@@ -17,5 +17,6 @@ namespace ESME.Scenarios
         public virtual Platform Platform { get; set; }
         public virtual ICollection<Mode> Modes { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
+        [NotMapped] public string PSMName { get { return string.Format("{0}:{1}", Platform.PlatformName, SourceName); } }
     }
 }
