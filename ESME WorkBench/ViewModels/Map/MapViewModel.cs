@@ -8,7 +8,6 @@ using System.Windows.Markup;
 using ESME;
 using ESME.Environment;
 using ESME.Mapping;
-using ESME.NEMO;
 using ESME.Views.Locations;
 using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.Layers;
@@ -57,69 +56,7 @@ namespace ESMEWorkbench.ViewModels.Map
                 throw;
             }
             _viewAwareStatus = viewAwareStatus;
-            
-            //_synchronizationContext = synchronizationContext;
-
-            Cursor = Cursors.Arrow;
         }
-
-        enum MouseModeEnum
-        {
-            Normal,
-            AnalysisPoint,
-            SelectionRectangle,
-        }
-
-        MouseModeEnum MouseMode
-        {
-            get { return _mouseMode; }
-            set
-            {
-                _mouseMode = value;
-                switch (_mouseMode)
-                {
-                    case MouseModeEnum.Normal:
-                        Cursor = Cursors.Arrow;
-                        break;
-                    case MouseModeEnum.AnalysisPoint:
-                        Cursor = Cursors.Cross;
-                        break;
-                    case MouseModeEnum.SelectionRectangle:
-                        Cursor = Cursors.Cross;
-                        break;
-                    default:
-                        throw new ParameterOutOfRangeException(string.Format("Unknown enum value {0} for MouseMode", _mouseMode));
-                }
-            }
-        }
-        MouseModeEnum _mouseMode = MouseModeEnum.Normal;
-
-        public bool IsInAnalysisPointMode
-        {
-            get { return _isInAnalysisPointMode; }
-            set
-            {
-                _isInAnalysisPointMode = value;
-                Cursor = _isInAnalysisPointMode ? Cursors.Cross : Cursors.Arrow;
-            }
-        }
-        bool _isInAnalysisPointMode;
-
-        #region public Cursor Cursor { get; set; }
-
-        Cursor _cursor;
-
-        public Cursor Cursor
-        {
-            get { return _cursor; }
-            set
-            {
-                if (_cursor == value) return;
-                _cursor = value;
-            }
-        }
-
-        #endregion
 
         void ViewLoaded()
         {
@@ -188,12 +125,6 @@ namespace ESMEWorkbench.ViewModels.Map
 
         [MediatorMessageSink(MediatorMessage.ApplicationClosing), UsedImplicitly] void ApplicationClosing(bool mode) { if (_soundSpeedProfileWindowView != null) _soundSpeedProfileWindowView.Close(); }
 
-        [MediatorMessageSink(MediatorMessage.SetAnalysisPointMode), UsedImplicitly]
-        void SetAnalysisPointMode(bool mode)
-        {
-            MouseMode = MouseModeEnum.AnalysisPoint;
-        }
-
         [MediatorMessageSink(MediatorMessage.SetEditMode), UsedImplicitly]
         void SetEditMode(GeoRect geoRect)
         {
@@ -229,42 +160,6 @@ namespace ESMEWorkbench.ViewModels.Map
             _wpfMap.Refresh();
         }
 
-        void CreateEditOverlay()
-        {
-            _wpfMap.EditOverlay = new CustomEditInteractiveOverlay
-            {
-                CanAddVertex = false,
-                CanRemoveVertex = false,
-                CanRotate = false
-            };
-            _wpfMap.Refresh();
-        }
-
-        double _north, _south, _east, _west;
-        void UpdateEditOverlay()
-        {
-            _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Clear();
-            var rectangle = new Feature(new RectangleShape(_west, _north, _east, _south));
-            rectangle.ColumnValues.Add("Edit", null);
-            _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Add(rectangle);
-            _wpfMap.EditOverlay.EditShapesLayer.Open();
-            _wpfMap.EditOverlay.EditShapesLayer.Columns.Add(new FeatureSourceColumn("Edit"));
-            _wpfMap.EditOverlay.EditShapesLayer.Close();
-            _wpfMap.EditOverlay.EditShapesLayer.ZoomLevelSet.ZoomLevel01.DefaultTextStyle = new TextStyle("Edit", new GeoFont("Arial", 18), new GeoSolidBrush(GeoColor.StandardColors.Black));
-            _wpfMap.EditOverlay.EditShapesLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
-            _wpfMap.EditOverlay.CalculateAllControlPoints();
-            _wpfMap.Refresh();
-        }
-
-        void DeleteEditOverlay()
-        {
-            _wpfMap.EditOverlay.EditShapesLayer.Open();
-            _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Clear();
-            _wpfMap.EditOverlay.EditShapesLayer.Close();
-            _wpfMap.EditOverlay = null;
-            _wpfMap.Refresh();
-        }
-
         public SoundSpeedProfile MouseSoundSpeedProfile { get; set; }
         public bool IsSoundSpeedProfilePopupOpen { get; set; }
         public SoundSpeedProfileViewModel SoundSpeedProfileViewModel { get; set; }
@@ -276,9 +171,6 @@ namespace ESMEWorkbench.ViewModels.Map
             get { return new GeoRect(_wpfMap.CurrentExtent.UpperLeftPoint.Y, _wpfMap.CurrentExtent.LowerRightPoint.Y, _wpfMap.CurrentExtent.LowerRightPoint.X, _wpfMap.CurrentExtent.UpperLeftPoint.X); }
             set { _wpfMap.CurrentExtent = new RectangleShape(value.West, value.North, value.East, value.South); _wpfMap.Refresh();}
         }
-
-        [MediatorMessageSink(MediatorMessage.SetMapCursor), UsedImplicitly]
-        void SetMapCursor(Cursor cursor) { Cursor = cursor; }
 
         [MediatorMessageSink(MediatorMessage.RefreshMap), UsedImplicitly]
         void Refresh(bool dummy) { _wpfMap.Refresh(); }
@@ -370,26 +262,9 @@ namespace ESMEWorkbench.ViewModels.Map
         {
             var geo = GetMouseEventArgsGeo((MouseButtonEventArgs)arg.EventArgs);
             Debug.WriteLine("Mouse left button down at {0}", geo);
-            switch (MouseMode)
-            {
-                case MouseModeEnum.Normal:
-                case MouseModeEnum.AnalysisPoint:
-                    break;
-                case MouseModeEnum.SelectionRectangle:
-                    _isMouseCaptured = Mouse.Capture(_wpfMap, CaptureMode.Element);
-                    if (_isMouseCaptured)
-                    {
-                        CreateEditOverlay();
-                        _north = _south = geo.Latitude;
-                        _east = _west = geo.Longitude;
-                    }
-                    break;
-                default:
-                    throw new ParameterOutOfRangeException(string.Format("Unknown enum value {0} for MouseMode", _mouseMode));
-            }
+            MediatorMessage.Send(MediatorMessage.MapLeftButtonDown, geo);
         }
 
-        bool _isMouseCaptured;
         #endregion
 
         #region MouseLeftButtonUpCommand
@@ -404,32 +279,7 @@ namespace ESMEWorkbench.ViewModels.Map
         {
             var geo = GetMouseEventArgsGeo((MouseButtonEventArgs)arg.EventArgs);
             Debug.WriteLine("Mouse left button up at {0}", geo);
-            switch (MouseMode)
-            {
-                case MouseModeEnum.Normal:
-                    break;
-                case MouseModeEnum.AnalysisPoint:
-                    MouseMode = MouseModeEnum.Normal;
-                    if (Cursor == Cursors.No) return;
-                    MediatorMessage.Send(MediatorMessage.SetAnalysisPointMode, false);
-                    MediatorMessage.Send(MediatorMessage.PlaceAnalysisPoint);
-                    break;
-                case MouseModeEnum.SelectionRectangle:
-                    if (_isMouseCaptured)
-                    {
-                        _north = Math.Max(_north, geo.Latitude);
-                        _south = Math.Max(_south, geo.Latitude);
-                        _east = Math.Max(_east, geo.Longitude);
-                        _west = Math.Min(_west, geo.Longitude);
-                        UpdateEditOverlay();
-                        Mouse.Capture(null);
-                        _isMouseCaptured = false;
-                    }
-                    MouseMode = MouseModeEnum.Normal;
-                    break;
-                default:
-                        throw new ParameterOutOfRangeException(string.Format("Unknown enum value {0} for MouseMode", _mouseMode));
-            }
+            MediatorMessage.Send(MediatorMessage.MapLeftButtonUp, geo);
         }
         #endregion
 
@@ -445,6 +295,7 @@ namespace ESMEWorkbench.ViewModels.Map
         {
             var geo = GetMouseEventArgsGeo((MouseButtonEventArgs)arg.EventArgs);
             Debug.WriteLine("Mouse right button down at {0}", geo);
+            MediatorMessage.Send(MediatorMessage.MapRightButtonDown, geo);
         }
         #endregion
 
@@ -460,6 +311,7 @@ namespace ESMEWorkbench.ViewModels.Map
         {
             var geo = GetMouseEventArgsGeo((MouseButtonEventArgs)arg.EventArgs);
             Debug.WriteLine("Mouse right button up at {0}", geo);
+            MediatorMessage.Send(MediatorMessage.MapRightButtonUp, geo);
         }
         #endregion
 
@@ -484,25 +336,6 @@ namespace ESMEWorkbench.ViewModels.Map
             var point = e.MouseDevice.GetPosition(_wpfMap);
             var pointShape = ExtentHelper.ToWorldCoordinate(_wpfMap.CurrentExtent, (float)point.X, (float)point.Y, (float)_wpfMap.ActualWidth, (float)_wpfMap.ActualHeight);
             MediatorMessage.Send(MediatorMessage.SetMouseEarthCoordinate, new Geo(pointShape.Y, pointShape.X));
-            switch (MouseMode)
-            {
-                case MouseModeEnum.Normal:
-                case MouseModeEnum.AnalysisPoint:
-                    break;
-                case MouseModeEnum.SelectionRectangle:
-                    if (_isMouseCaptured)
-                    {
-                        _north = Math.Max(_north, pointShape.Y);
-                        _south = Math.Max(_south, pointShape.Y);
-                        _east = Math.Max(_east, pointShape.X);
-                        _west = Math.Min(_west, pointShape.X);
-                        UpdateEditOverlay();
-                    }
-
-                    break;
-                default:
-                    throw new ParameterOutOfRangeException(string.Format("Unknown enum value {0} for MouseMode", _mouseMode));
-            }
         }
         #endregion
 

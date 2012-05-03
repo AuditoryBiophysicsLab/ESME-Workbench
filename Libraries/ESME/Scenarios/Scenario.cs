@@ -41,7 +41,7 @@ namespace ESME.Scenarios
         public virtual ICollection<LogEntry> Logs { get; set; }
 
         #region Importer for NEMO files
-        public static Scenario FromNemoFile(MasterDatabaseService masterDatabase, Location location, string nemoFilePath, string scenarioDataDirectory)
+        public static Scenario FromNemoFile(IMasterDatabaseService masterDatabase, Location location, string nemoFilePath, string scenarioDataDirectory)
         {
             var nemoFile = new NEMO.NemoFile(nemoFilePath, scenarioDataDirectory);
             Scenario scenario;
@@ -176,7 +176,7 @@ namespace ESME.Scenarios
         }
         #endregion
 
-        [NotMapped] public static MasterDatabaseService Database { get; set; }
+        [NotMapped] public static IMasterDatabaseService Database { get; set; }
         [NotMapped] public static EnvironmentalCacheService Cache { get; set; }
 
         public void CreateMapLayers()

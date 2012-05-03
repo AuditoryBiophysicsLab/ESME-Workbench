@@ -20,10 +20,10 @@ namespace DavesWPFTester
     public class MainWindowViewModel : ViewModelBase
     {
         readonly IPluginManagerService _plugins;
-        readonly MasterDatabaseService _database;
+        readonly IMasterDatabaseService _database;
         readonly EnvironmentalCacheService _cache;
         [ImportingConstructor]
-        public MainWindowViewModel(MasterDatabaseService database, IPluginManagerService plugins, EnvironmentalCacheService cache)
+        public MainWindowViewModel(IMasterDatabaseService database, IPluginManagerService plugins, EnvironmentalCacheService cache)
         {
             _plugins = plugins;
             _plugins.PluginDirectory = PluginDirectory;

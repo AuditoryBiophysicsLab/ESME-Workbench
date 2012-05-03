@@ -27,14 +27,14 @@ namespace ESME.Locations
     public class EnvironmentalCacheService : ViewModelBase
     {
         public EnvironmentalCacheService() { Location.Cache = this; Scenario.Cache = this; }
-        public EnvironmentalCacheService(IPluginManagerService plugins, MasterDatabaseService database) : this()
+        public EnvironmentalCacheService(IPluginManagerService plugins, IMasterDatabaseService database) : this()
         {
             _plugins = plugins;
             _database = database;
         }
 
         [Import] IPluginManagerService _plugins;
-        [Import] MasterDatabaseService _database;
+        [Import] IMasterDatabaseService _database;
 
         public PercentProgressList<PercentProgressList<Location>> ImportMissingDatasets()
         {

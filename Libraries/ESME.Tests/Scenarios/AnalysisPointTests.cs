@@ -45,7 +45,7 @@ namespace ESME.Tests.Scenarios
                     retry--;
                 }
             }
-            MasterDatabaseService database;
+            IMasterDatabaseService database;
             EnvironmentalCacheService cache;
             PluginManagerService plugins;
             var location = TestLocation.LoadOrCreate("Jacksonville", OverlayFile, _databaseDirectory, PluginDirectory, out database, out cache, out plugins);
@@ -65,7 +65,7 @@ namespace ESME.Tests.Scenarios
         [Test, RequiresSTA]
         public void CreateAnalysisPoints()
         {
-            MasterDatabaseService database;
+            IMasterDatabaseService database;
             EnvironmentalCacheService cache;
             PluginManagerService plugins;
             var location = TestLocation.LoadOrCreate("Jacksonville", OverlayFile, _databaseDirectory, PluginDirectory, out database, out cache, out plugins);

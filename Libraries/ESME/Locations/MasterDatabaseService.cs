@@ -231,10 +231,6 @@ namespace ESME.Locations
 
         public void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry, bool saveChanges = false)
         {
-            var existing = (from a in Context.AnalysisPoints.Local
-                            where a.Geo == analysisPoint.Geo
-                            select a).FirstOrDefault();
-            if (existing != null) throw new DuplicateNameException(String.Format("An analysis point already exists at {0}, choose another location or edit the existing point", (Geo)analysisPoint.Geo));
             if (analysisPoint.LayerSettings == null) analysisPoint.LayerSettings = new LayerSettings();
             Context.LayerSettings.Add(analysisPoint.LayerSettings);
             if (analysisPoint.Scenario == null) throw new ScenarioException(string.Format("Scenario for analysis point at {0} was not specified", analysisPoint.Geo));

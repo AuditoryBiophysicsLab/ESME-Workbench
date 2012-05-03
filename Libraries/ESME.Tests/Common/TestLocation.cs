@@ -11,7 +11,7 @@ namespace ESME.Tests.Common
 {
     public static class TestLocation
     {
-        public static Location LoadOrCreate(string locationName, string overlayFile, string databaseDirectory, string pluginDirectory, out MasterDatabaseService databaseService, out EnvironmentalCacheService cacheService, out PluginManagerService pluginService)
+        public static Location LoadOrCreate(string locationName, string overlayFile, string databaseDirectory, string pluginDirectory, out IMasterDatabaseService databaseService, out EnvironmentalCacheService cacheService, out PluginManagerService pluginService)
         {
             Console.WriteLine("Creating database service...");
             databaseService = new MasterDatabaseService {MasterDatabaseDirectory = databaseDirectory};
@@ -53,7 +53,7 @@ namespace ESME.Tests.Common
             return location;
         }
 
-        public static void Dump(MasterDatabaseService locationService, bool dumpLogs = false)
+        public static void Dump(IMasterDatabaseService locationService, bool dumpLogs = false)
         {
             foreach (var location in locationService.Context.Locations)
             {
@@ -99,7 +99,7 @@ namespace ESME.Tests.Common
 
     public static class TestScenario
     {
-        public static Scenario LoadOrCreate(MasterDatabaseService databaseService, Location location, string simAreaFolder, string scenarioFile)
+        public static Scenario LoadOrCreate(IMasterDatabaseService databaseService, Location location, string simAreaFolder, string scenarioFile)
         {
             var scenarioName = Path.GetFileNameWithoutExtension(scenarioFile);
             Console.WriteLine(string.Format("Looking for test scenario '{0}'...", scenarioName));

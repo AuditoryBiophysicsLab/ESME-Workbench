@@ -56,6 +56,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             get { return Scenario != null && Scenario.Wind != null && Scenario.SoundSpeed != null && Scenario.Bathymetry != null && Scenario.Sediment != null; }
         }
+        public bool IsInAnalysisPointMode { get; set; }
 
         public string MainWindowTitle { get; set; }
 

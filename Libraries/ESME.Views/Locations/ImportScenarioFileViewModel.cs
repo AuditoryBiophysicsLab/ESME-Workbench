@@ -14,7 +14,7 @@ namespace ESME.Views.Locations
 {
     public class ImportScenarioFileViewModel : ValidatingViewModel
     {
-        public ImportScenarioFileViewModel(MasterDatabaseService database, EnvironmentalCacheService cache, IPluginManagerService plugins)
+        public ImportScenarioFileViewModel(IMasterDatabaseService database, EnvironmentalCacheService cache, IPluginManagerService plugins)
         {
             _database = database;
             _cache = cache;
@@ -23,7 +23,7 @@ namespace ESME.Views.Locations
         }
 
         readonly EnvironmentalCacheService _cache;
-        readonly MasterDatabaseService _database;
+        readonly IMasterDatabaseService _database;
         readonly IPluginManagerService _plugins;
         public string ScenarioFilename { get; set; }
 

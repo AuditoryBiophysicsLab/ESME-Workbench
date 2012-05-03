@@ -13,6 +13,11 @@
                 xmlns:r="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
                 xmlns:Utility="clr-namespace:HRC.Utility;assembly=HRC"
                 xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+                mc:Ignorable="d"
+                d:DataContext="{d:DesignInstance Type=Main:MainViewModel}"
+                d:DesignHeight="500"
+                d:DesignWidth="900"
+                Cursor="{Binding Cursor}"
                 Title="{Binding MainWindowTitle}"
                 Width="{Binding Source={x:Static p:Settings.Default},
                                 Path=WindowWidth,
@@ -20,9 +25,6 @@
                 Height="{Binding Source={x:Static p:Settings.Default},
                                  Path=WindowHeight,
                                  Mode=TwoWay}"
-                d:DataContext="{d:DesignInstance Type=Main:MainViewModel}"
-                d:DesignHeight="500"
-                d:DesignWidth="900"
                 Icon="..\Wave.ico"
                 Left="{Binding Source={x:Static p:Settings.Default},
                                Path=WindowLeft,
@@ -31,8 +33,7 @@
                 SnapsToDevicePixels="True"
                 Top="{Binding Source={x:Static p:Settings.Default},
                               Path=WindowTop,
-                              Mode=TwoWay}"
-                mc:Ignorable="d">
+                              Mode=TwoWay}">
     <r:RibbonWindow.Resources>
         <WPF:GridLengthConverter x:Key="GridLengthConverter" />
         <Utility:NotNullConverter x:Key="NotNull" />

@@ -13,7 +13,6 @@ using ESME.Model;
 using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.TransmissionLoss.Bellhop;
-using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
@@ -41,12 +40,12 @@ namespace ESME.TransmissionLoss
             _queue.LinkTo(_calculator);
         }
 
-        public TransmissionLossCalculatorService(MasterDatabaseService databaseService, IPluginManagerService pluginService, EnvironmentalCacheService cacheService) : this()
+        public TransmissionLossCalculatorService(IMasterDatabaseService databaseService, IPluginManagerService pluginService, EnvironmentalCacheService cacheService) : this()
         {
             _databaseService = databaseService;
             _cacheService = cacheService;
         }
-        [Import] MasterDatabaseService _databaseService;
+        [Import] IMasterDatabaseService _databaseService;
         [Import] EnvironmentalCacheService _cacheService;
         [Initialize(float.NaN)] public float RangeCellSize { get; set; }
         [Initialize(float.NaN)] public float DepthCellSize { get; set; }

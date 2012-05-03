@@ -47,7 +47,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #region Constructor
         [ImportingConstructor]
-        public MainViewModel(IViewAwareStatus viewAwareStatus, MasterDatabaseService database, IMessageBoxService messageBox, IUIVisualizerService visualizer, IHRCSaveFileService saveFile, TransmissionLossCalculatorService transmissionLoss, IHRCOpenFileService openFile, IPluginManagerService plugins, EnvironmentalCacheService cache)
+        public MainViewModel(IViewAwareStatus viewAwareStatus, IMasterDatabaseService database, IMessageBoxService messageBox, IUIVisualizerService visualizer, IHRCSaveFileService saveFile, TransmissionLossCalculatorService transmissionLoss, IHRCOpenFileService openFile, IPluginManagerService plugins, EnvironmentalCacheService cache)
         {
             MainWindowTitle = "ESME Workbench: <No scenario loaded>";
             try
@@ -74,6 +74,7 @@ namespace ESMEWorkbench.ViewModels.Main
             Database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
             Locations = Database.Context.Locations.Local;
             Scenarios = Database.Context.Scenarios.Local;
+            Cursor = Cursors.Arrow;
 
             if (Designer.IsInDesignMode) return;
 
@@ -109,7 +110,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         public ObservableCollection<Location> Locations { get; private set; }
         public ObservableCollection<Scenario> Scenarios { get; private set; }
-        public MasterDatabaseService Database { get; private set; }
+        public IMasterDatabaseService Database { get; private set; }
 
         protected override void OnDispose()
         {
@@ -137,6 +138,11 @@ namespace ESMEWorkbench.ViewModels.Main
                 }
             }
             else MouseLocationInfo = "Lat: N/A Lon: N/A";
+            if (IsInAnalysisPointMode)
+            {
+                if (Scenario != null) Cursor = Scenario.GeoRect.Contains(MouseGeo) ? Cursors.Cross : Cursors.No;
+                else IsInAnalysisPointMode = false;
+            }
 #if true
             if (Scenario != null && Scenario.Bathymetry != null && _cache.IsCached(Scenario.Bathymetry))
             {
@@ -233,28 +239,6 @@ namespace ESMEWorkbench.ViewModels.Main
             _visualizer.ShowDialog("AboutView", aboutViewModel);
         }
 
-        #region public bool IsInAnalysisPointMode { get; set; }
-
-        public bool IsInAnalysisPointMode
-        {
-            get { return _isInAnalysisPointMode; }
-            set
-            {
-                _isInAnalysisPointMode = value;
-                MediatorMessage.Send(MediatorMessage.SetAnalysisPointMode, _isInAnalysisPointMode);
-            }
-        }
-
-        bool _isInAnalysisPointMode;
-
-        [MediatorMessageSink(MediatorMessage.SetAnalysisPointMode), UsedImplicitly]
-        void SetAnalysisPointMode(bool mode)
-        {
-            IsInAnalysisPointMode = mode;
-        }
-
-        #endregion
-
         #region PreviewKeyDownCommand
 
         public SimpleCommand<object, EventToCommandArgs> PreviewKeyDownCommand
@@ -324,10 +308,23 @@ namespace ESMEWorkbench.ViewModels.Main
         readonly static object LockObject = new object();
         Window _queueView;
 
+        public Cursor Cursor { get; set; }
+
         [MediatorMessageSink(MediatorMessage.MapClick), UsedImplicitly]
         void MapClick(Geo geo)
         {
             Debug.WriteLine("Map click at {0}", geo);
+            if (IsInAnalysisPointMode)
+            {
+                if (Scenario != null && Scenario.GeoRect.Contains(MouseGeo))
+                {
+                    var analysisPoint = new AnalysisPoint {Geo = MouseGeo, Scenario = Scenario};
+                    Scenario.AnalysisPoints.Add(analysisPoint);
+                    Database.Add(analysisPoint, (Bathymetry)_cache[Scenario.Bathymetry], true);
+                    _transmissionLoss.Start();
+                }
+                IsInAnalysisPointMode = false;
+            }
         }
 
         [MediatorMessageSink(MediatorMessage.MapDoubleClick), UsedImplicitly]

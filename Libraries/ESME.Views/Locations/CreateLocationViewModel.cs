@@ -15,7 +15,7 @@ namespace ESME.Views.Locations
     public sealed class CreateLocationViewModel : ValidatingViewModel
     {
         #region Constructor
-        public CreateLocationViewModel(IPluginManagerService plugins, MasterDatabaseService database, EnvironmentalCacheService cache, EditOverlayViewModel editOverlayViewModel)
+        public CreateLocationViewModel(IPluginManagerService plugins, IMasterDatabaseService database, EnvironmentalCacheService cache, EditOverlayViewModel editOverlayViewModel)
         {
             _plugins = plugins;
             _database = database;
@@ -32,7 +32,7 @@ namespace ESME.Views.Locations
         }
 
         readonly EnvironmentalCacheService _cache;
-        readonly MasterDatabaseService _database;
+        readonly IMasterDatabaseService _database;
         #endregion
         #region PluginManager stuff
         readonly IPluginManagerService _plugins;

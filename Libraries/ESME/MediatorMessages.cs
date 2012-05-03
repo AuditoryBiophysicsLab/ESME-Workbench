@@ -47,6 +47,10 @@ namespace ESME
         public const string RunExperimentCommand = "RunExperimentCommandMessage";
 
         public const string SetMouseEarthCoordinate = "SetMouseEarthCoordinateMessage";
+        public const string MapLeftButtonDown = "MapLeftButtonDownMessage";
+        public const string MapLeftButtonUp = "MapLeftButtonUpMessage";
+        public const string MapRightButtonDown = "MapRightButtonDownMessage";
+        public const string MapRightButtonUp = "MapRightButtonUpMessage";
         public const string MapClick = "MapClickMessage";
         public const string MapDoubleClick = "MapDoubleClickMessage";
 
