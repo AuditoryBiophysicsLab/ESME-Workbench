@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Windows.Data;
 using System.Windows.Threading;
 using System.Xml.Serialization;
-using HRC.Aspects;
-using HRC.Collections;
 using HRC.WPF;
 
 namespace HRC.Utility
@@ -19,64 +15,16 @@ namespace HRC.Utility
     {
         object _lockObject = new object();
 
-        public static ObservableList<T> FromObservableConcurrentDictionary<TKey, TValue>(ObservableConcurrentDictionary<TKey, TValue> dict, Func<KeyValuePair<TKey, TValue>, T> convert, Func<KeyValuePair<TKey, TValue>, T, bool> equate, Func<KeyValuePair<TKey, TValue>, string> log = null, string listName = null)
+        public ObservableList(IEnumerable<T> source )
         {
-            var list = new ObservableList<T>();
-            if (listName != null) list.Name = listName;
-            foreach (var item in dict) list.Add(convert(item));
-            ((INotifyCollectionChanged)dict).CollectionChanged += (s, e) =>
-            {
-                lock (list)
-                {
-                    switch (e.Action)
-                    {
-                        case NotifyCollectionChangedAction.Add:
-                            foreach (KeyValuePair<TKey, TValue> newItem in e.NewItems)
-                            {
-                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: About to add \"{1}\", Count={2}", list.Name, log(newItem), list.Count); 
-                                list.Add(convert(newItem));
-                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: After adding \"{1}\", Count={2}", list.Name, log(newItem), list.Count);
-                            }
-                            break;
-                        case NotifyCollectionChangedAction.Remove:
-                            foreach (KeyValuePair<TKey, TValue> oldItem in e.OldItems)
-                            {
-                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: About to remove \"{1}\", Count={2}", list.Name, log(oldItem), list.Count);
-                                list.RemoveAll(listItem => equate(oldItem, listItem));
-                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: After removing \"{1}\", Count={2}", list.Name, log(oldItem), list.Count);
-                            }
-                            break;
-                        case NotifyCollectionChangedAction.Replace:
-                            for (var i = 0; i < e.OldItems.Count; i++)
-                            {
-                                var oldItem = (KeyValuePair<TKey, TValue>)e.OldItems[i];
-                                var newItem = (KeyValuePair<TKey, TValue>)e.NewItems[i];
-                                var listIndex = list.IndexOf(list.Single(listItem => equate(oldItem, listItem)));
-                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: About to replace \"{1}\" with \"{2}\" at index {3}, Count={4}", list.Name, log(oldItem), log(newItem), listIndex, list.Count);
-                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: Before replace, list[{0}] is currently \"{1}\"", list.Name, listIndex);
-                                list[listIndex] = convert(newItem);
-                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: After replacing \"{1}\" with \"{2}\", Count={3}", list.Name, log(oldItem), log(newItem), list.Count);
-                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: After replace, list[{1}] is currently \"{2}\"", list.Name, listIndex, list[listIndex]);
-                            }
-                            break;
-                        case NotifyCollectionChangedAction.Reset:
-                            if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: About to reset, Count={1}", list.Name, list.Count);
-                            list.Clear();
-#if false
-                            foreach (var item in dict)
-                            {
-                                list.Add(convert(item));
-                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: Added \"{1}\", Count={2}", list.Name, log(item), list.Count);
-                            }
-#endif
-                            if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: After reset, Count={1}", list.Name, list.Count);
-                            break;
-                    }
-                }
-            };
-            return list;
+            AddRange(source);
         }
 
+        public ObservableList()
+        {
+            
+        }
+      
         public string Name { get; set; }
 
         public new void Add(T item)

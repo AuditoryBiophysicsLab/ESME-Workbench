@@ -155,10 +155,17 @@
     </Compile>
     <Compile Include="TestViewModel.cs" />
     <Compile Include="Controls\ColorMapViewModel.cs" />
-    <Compile Include="TransmissionLossViewer\TransmissionLossRadialView.xaml.cs">
-      <DependentUpon>TransmissionLossRadialView.xaml</DependentUpon>
+    <Compile Include="TransmissionLossViewer\AnalysisPointView.xaml.cs">
+      <DependentUpon>AnalysisPointView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TransmissionLossViewer\TransmissionLossRadialViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\RadialView.xaml.cs">
+      <DependentUpon>RadialView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionLossViewer\RadialViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\TransmissionLossView.xaml.cs">
+      <DependentUpon>TransmissionLossView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionLossViewer\TransmissionLossViewModel.cs" />
     <Compile Include="ValueConverters.cs" />
     <Compile Include="VirtualToggleButton.cs" />
     <Page Include="Controls\AutoScrollingTextBlock.xaml">
@@ -233,9 +240,17 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TransmissionLossViewer\TransmissionLossRadialView.xaml">
+    <Page Include="TransmissionLossViewer\AnalysisPointView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TransmissionLossViewer\RadialView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TransmissionLossViewer\TransmissionLossView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

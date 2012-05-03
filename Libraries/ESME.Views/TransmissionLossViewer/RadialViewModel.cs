@@ -17,10 +17,10 @@ using HRC.WPF;
 
 namespace ESME.Views.TransmissionLossViewer
 {
-    public class TransmissionLossRadialViewModel : ViewModelBase
+    public class RadialViewModel : ViewModelBase
     {
         private readonly string _databaseDirectory;
-        private readonly TransmissionLossRadialView _view;
+        private readonly RadialView _view;
         public float RangeMin { get; set; }
         public float RangeMax { get; set; }
         public float DepthMin { get; set; }
@@ -140,7 +140,7 @@ namespace ESME.Views.TransmissionLossViewer
         #endregion
 
         [ImportingConstructor]
-        public TransmissionLossRadialViewModel(TransmissionLossRadialView view, string databaseDirectory)
+        public RadialViewModel(RadialView view, string databaseDirectory)
         {
             _databaseDirectory = databaseDirectory;
             _view = view;

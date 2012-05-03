@@ -12,6 +12,7 @@ using HRC.Services;
 using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
+using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ESME.Locations;
 
@@ -28,7 +29,7 @@ namespace TransmissionLossViewer
         [Initialize] public ObservableList<Radial> Radials { get; set; }
         public string TitleString { get; set; }
         public int RadialCount { get; set; }
-        public TransmissionLossRadialViewModel TransmissionLossRadialViewModel { get; set; }
+        [Initialize] public TransmissionLossViewModel TransmissionLossViewModel { get; set; }
 
         #region public Scenario SelectedScenario {get; set;}
         private Scenario _selectedScenario;
@@ -67,21 +68,21 @@ namespace TransmissionLossViewer
         #endregion
 
         #region public Tuple<string,TransmissionLoss> SelectedMode {get;set;}
-        private Tuple<string, TransmissionLoss> _selectedMode;
-        public Tuple<string, TransmissionLoss> SelectedMode
+        private Tuple<string, TransmissionLoss> _selectedAnalysisPointMode;
+        public Tuple<string, TransmissionLoss> SelectedAnalysisPointMode
         {
-            get { return _selectedMode; }
+            get { return _selectedAnalysisPointMode; }
             set
             {
-                _selectedMode = value;
-                if (_selectedMode == null)
+                _selectedAnalysisPointMode = value;
+                if (_selectedAnalysisPointMode == null)
                 {
                     SelectedRadial = null;
                     return;
                 }
                 Radials.Clear();
                 Radials.AddRange(from r in Database.Context.Radials
-                                 where r.TransmissionLoss.Guid == _selectedMode.Item2.Guid
+                                 where r.TransmissionLoss.Guid == _selectedAnalysisPointMode.Item2.Guid
                                  orderby r.Bearing
                                  select r);
                 RadialCount = Radials.Count - 1;
@@ -106,7 +107,7 @@ namespace TransmissionLossViewer
                     return;
                 }
                 TitleString = string.Format("Transmission Loss Viewer: radial bearing {0:000.0} degrees", _selectedRadial.Bearing);
-                TransmissionLossRadialViewModel.Radial = _selectedRadial;
+                TransmissionLossViewModel.RadialViewModel.Radial = _selectedRadial;
             }
         }
         #endregion
@@ -170,7 +171,13 @@ namespace TransmissionLossViewer
             Database = database;
             Database.MasterDatabaseDirectory = _databaseDirectory;
             _saveFileService = saveFileService;
-            viewAwareStatus.ViewLoaded += () => { TransmissionLossRadialViewModel = new TransmissionLossRadialViewModel(((MainView)viewAwareStatus.View).TransmissionLossRadialView, _databaseDirectory); };
+            if (!Designer.IsInDesignMode) viewAwareStatus.ViewLoaded += () =>
+                                                                            {
+                                                                                var radialViews =((Window) viewAwareStatus.View).FindChildren<RadialView>().ToList();
+                                                                                TransmissionLossViewModel.RadialViewModel = new RadialViewModel(radialViews[0], _databaseDirectory);
+                                                                                
+                                                                                
+                                                                            };
         }
 
         #region Commands
@@ -198,7 +205,7 @@ namespace TransmissionLossViewer
             {
                 return _saveAs ?? (_saveAs = new SimpleCommand<object, object>(delegate
                 {
-                    _saveFileService.Filter = "Bitmap (*.bmp)|*.bmp|GIF (*.gif)|*.gif|JPEG (*.jpg)|*.jpg|Portable Network Graphics (*.png)|*.png|TIFF (*.tiff)|*.tiff";
+                    _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png|Bitmap (*.bmp)|*.bmp|GIF (*.gif)|*.gif|JPEG (*.jpg)|*.jpg|TIFF (*.tiff)|*.tiff";
                     _saveFileService.OverwritePrompt = true;
                     _saveFileService.FileName = OutputFileName;
 
@@ -206,7 +213,7 @@ namespace TransmissionLossViewer
                     if (result.HasValue && result.Value)
                     {
                         Properties.Settings.Default.LastImageExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-                        TransmissionLossRadialViewModel.SaveRadialBitmap(_saveFileService.FileName);
+                        TransmissionLossViewModel.RadialViewModel.SaveRadialBitmap(_saveFileService.FileName);
                     }
                 }));
             }
@@ -229,7 +236,7 @@ namespace TransmissionLossViewer
                     if (result.HasValue && result.Value)
                     {
                         Properties.Settings.Default.LastCSVExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-                        TransmissionLossRadialViewModel.SaveAsCSV(_saveFileService.FileName);
+                        TransmissionLossViewModel.RadialViewModel.SaveAsCSV(_saveFileService.FileName);
                     }
                 }));
             }

@@ -340,6 +340,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void ViewTransmissionLoss(ESME.Scenarios.TransmissionLoss transmissionLoss)
         {
             _messageBox.ShowInformation("ViewTransmissionLoss");
+            
         }
 
         [MediatorMessageSink(MediatorMessage.ViewAnalysisPoint), UsedImplicitly]
