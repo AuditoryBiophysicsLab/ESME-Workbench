@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Text;
 using ESME.Database;
@@ -153,6 +154,7 @@ namespace ESME.Scenarios
     [NotifyPropertyChanged]
     public class Radial : IHaveGuid
     {
+        public Radial() { Filename = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()); }
         [Key, Initialize]
         public Guid Guid { get; set; }
         public bool IsCalculated { get; set; }
@@ -175,6 +177,17 @@ namespace ESME.Scenarios
         public byte[] MeanTransmissionLossBlob { get; set; }
 
         public virtual TransmissionLoss TransmissionLoss { get; set; }
+
+        [NotMapped]
+        public string BasePath
+        {
+            get
+            {
+                if (Filename == null) Filename = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+                return Path.Combine(TransmissionLoss.AnalysisPoint.Scenario.StorageDirectoryPath, Filename);
+            }
+        }
+
         [NotMapped]
         public float[] Ranges
         {

@@ -75,7 +75,7 @@ namespace ESME.Environment
         {
             return TaskEx.Run(() => Load(filename));
         }
-
+#if false
         bool _isExtended;
         readonly object _lockObject = new object();
         public void Extend(Geo<float> deepestPoint)
@@ -87,6 +87,7 @@ namespace ESME.Environment
                 _isExtended = true;
             }
         }
+#endif
 
         public static SoundSpeed Average(SoundSpeed monthlySoundSpeeds, List<TimePeriod> timePeriods)
         {

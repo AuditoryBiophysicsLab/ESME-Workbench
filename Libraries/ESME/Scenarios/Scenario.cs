@@ -40,6 +40,7 @@ namespace ESME.Scenarios
         public virtual ICollection<AnalysisPoint> AnalysisPoints { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
 
+        [NotMapped] public string StorageDirectoryPath { get { return Path.Combine(Database.MasterDatabaseDirectory, StorageDirectory); } }
         #region Importer for NEMO files
         public static Scenario FromNemoFile(IMasterDatabaseService masterDatabase, Location location, string nemoFilePath, string scenarioDataDirectory)
         {

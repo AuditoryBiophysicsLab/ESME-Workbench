@@ -71,20 +71,18 @@ namespace ESME.TransmissionLoss
                 _isStarted = true;
             }
             var radials = (from radial in _databaseService.Context.Radials
-                               //.Include(r => r.TransmissionLoss)
+                               .Include(r => r.TransmissionLoss)
                                //.Include(r => r.TransmissionLoss.Mode)
                                //.Include(r => r.TransmissionLoss.Mode.Source)
                                //.Include(r => r.TransmissionLoss.Mode.Source.Platform)
-                               //.Include(r => r.TransmissionLoss.AnalysisPoint.Scenario)
-                               //.Include(r => r.TransmissionLoss.AnalysisPoint)
+                               .Include(r => r.TransmissionLoss.AnalysisPoint)
+                               .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario)
                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Wind)
                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.SoundSpeed)
                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Bathymetry)
                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Sediment)
-                           where radial.IsCalculated == false
-                           select radial).ToList();
-            Console.WriteLine("There are {0} radials to be calculated", radials.Count);
-            foreach (var radial in radials) Add(radial);
+                           select radial);
+            foreach (var radial in radials) if (!File.Exists(radial.BasePath + ".shd")) Add(radial);
         }
 
         public void Add(Radial radial)
@@ -121,15 +119,16 @@ namespace ESME.TransmissionLoss
                 var soundSpeed = (SoundSpeed)_cacheService[scenario.SoundSpeed];
                 var sediment = (Sediment)_cacheService[scenario.Sediment];
                 var bathymetry = (Bathymetry)_cacheService[scenario.Bathymetry];
-                soundSpeed.Extend(bathymetry.DeepestPoint);
+                var deepestPoint = bathymetry.DeepestPoint;
+                var deepestProfile = soundSpeed[scenario.TimePeriod].GetDeepestSSP(deepestPoint).Extend(deepestPoint.Data);
                 WindSample windSample;
-                lock (wind[timePeriod].EnvironmentData) windSample = wind[timePeriod].EnvironmentData.GetNearestPoint(radial.Segment.Center);
+                windSample = wind[timePeriod].EnvironmentData.GetNearestPoint(radial.Segment.Center);
                 SoundSpeedProfile soundSpeedProfile;
-                lock (soundSpeed[timePeriod].EnvironmentData) soundSpeedProfile = soundSpeed[timePeriod].EnvironmentData.GetNearestPoint(radial.Segment.Center);
+                soundSpeedProfile = soundSpeed[timePeriod].EnvironmentData.GetNearestPoint(radial.Segment.Center).Extend(deepestProfile);
                 SedimentSample sedimentSample;
-                lock (sediment.Samples) sedimentSample = sediment.Samples.GetNearestPoint(radial.Segment.Center);
+                sedimentSample = sediment.Samples.GetNearestPoint(radial.Segment.Center);
                 BottomProfile bottomProfile;
-                lock (bathymetry) bottomProfile = new BottomProfile(100, radial.Segment, bathymetry);
+                bottomProfile = new BottomProfile(100, radial.Segment, bathymetry);
                 var sourceDepth = platform.Depth;
                 if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
                 if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);

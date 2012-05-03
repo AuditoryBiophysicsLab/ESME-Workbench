@@ -48,7 +48,7 @@ namespace ESME.Environment
                         select ssp;
             return step2.First();
         }
-
+#if false
         public void ExtendProfiles(Geo<float> deepestPoint)
         {
             if (deepestPoint == null) throw new ArgumentNullException("deepestPoint", "SoundSpeedField: Unable to extend to max bathymetry depth. deepestPoint is null.");
@@ -59,6 +59,7 @@ namespace ESME.Environment
             foreach (var profile in EnvironmentData.Where(profile => profile != deepestSSP))
                 profile.Extend(deepestSSP);
         }
+#endif
 
         public static SoundSpeedField Deserialize(BinaryReader reader)
         {

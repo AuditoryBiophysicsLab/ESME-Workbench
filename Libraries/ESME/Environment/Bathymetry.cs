@@ -93,30 +93,54 @@ namespace ESME.Environment
         {
             get
             {
-                var minPoint = Samples[0];
-                foreach (var sample in Samples.Where(sample => sample.Data < minPoint.Data)) minPoint = sample;
-                return minPoint;
+                if (_minimum != null) return _minimum;
+                lock (_minLockObject)
+                {
+                    if (_minimum != null) return _minimum;
+                    var minPoint = Samples[0];
+                    foreach (var sample in Samples.Where(sample => sample.Data < minPoint.Data)) minPoint = sample;
+                    _minimum = minPoint;
+                    return _minimum;
+                }
             }
         }
+        Geo<float> _minimum;
+        readonly object _minLockObject = new object();
 
         public Geo<float> Maximum
         {
             get
             {
-                var maxPoint = Samples[0];
-                foreach (var sample in Samples.Where(sample => sample.Data > maxPoint.Data)) maxPoint = sample;
-                return maxPoint;
+                if (_maximum != null) return _maximum;
+                lock (_maxLockObject)
+                {
+                    if (_maximum != null) return _maximum;
+                    var maxPoint = Samples[0];
+                    foreach (var sample in Samples.Where(sample => sample.Data > maxPoint.Data)) maxPoint = sample;
+                    _maximum = maxPoint;
+                    return _maximum;
+                }
             }
         }
+        Geo<float> _maximum;
+        readonly object _maxLockObject = new object();
 
         public Geo<float> DeepestPoint
         {
             get
             {
-                var minimum = Minimum;
-                return new Geo<float>(minimum.Data, Math.Abs(minimum.Data));
+                if (_deepestPoint != null) return _deepestPoint;
+                lock (_deepestPointLockObject)
+                {
+                    if (_deepestPoint != null) return _deepestPoint;
+                    var minimum = Minimum;
+                    _deepestPoint = new Geo<float>(minimum, Math.Abs(minimum.Data));
+                    return _deepestPoint;
+                }
             }
         }
+        Geo<float> _deepestPoint;
+        readonly object _deepestPointLockObject = new object();
     }
 
     public static class BathymetryExtensionMethods
