@@ -155,9 +155,10 @@
     </Compile>
     <Compile Include="TestViewModel.cs" />
     <Compile Include="Controls\ColorMapViewModel.cs" />
-    <Compile Include="TransmissionLossViewer\AnalysisPointView.xaml.cs">
-      <DependentUpon>AnalysisPointView.xaml</DependentUpon>
+    <Compile Include="TransmissionLossViewer\AnalysisPointWindowView.xaml.cs">
+      <DependentUpon>AnalysisPointWindowView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="TransmissionLossViewer\AnalysisPointViewModel.cs" />
     <Compile Include="TransmissionLossViewer\RadialView.xaml.cs">
       <DependentUpon>RadialView.xaml</DependentUpon>
     </Compile>
@@ -166,6 +167,9 @@
       <DependentUpon>TransmissionLossView.xaml</DependentUpon>
     </Compile>
     <Compile Include="TransmissionLossViewer\TransmissionLossViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\TransmissionLossWindowView.xaml.cs">
+      <DependentUpon>TransmissionLossWindowView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ValueConverters.cs" />
     <Compile Include="VirtualToggleButton.cs" />
     <Page Include="Controls\AutoScrollingTextBlock.xaml">
@@ -240,7 +244,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TransmissionLossViewer\AnalysisPointView.xaml">
+    <Page Include="TransmissionLossViewer\AnalysisPointWindowView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -249,6 +253,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="TransmissionLossViewer\TransmissionLossView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TransmissionLossViewer\TransmissionLossWindowView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1,18 +1,27 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
+using System.Linq;
 using System.Text;
+using System.Windows;
 using ESME.Scenarios;
 using HRC.Aspects;
+using HRC.Services;
 using HRC.Utility;
 using HRC.ViewModels;
+using HRC.WPF;
 
 namespace ESME.Views.TransmissionLossViewer
 {
-    public class TransmissionLossViewModel : ViewModelBase
+    public class TransmissionLossViewModel : ViewModelBase,IViewStatusAwareInjectionAware
     {
         [Affects("RadialCount")]
         public ObservableList<Radial> Radials { get; set; }
+
+        private string _titleString = "<no radial selected>";
+        public string TitleString
+        {
+            get { return _titleString; }
+            set { _titleString = value; }
+        }
 
         public int RadialCount
         {
@@ -26,14 +35,15 @@ namespace ESME.Views.TransmissionLossViewer
         #region public int SelectedRadialIndex {get; set;}
         int _selectedRadialIndex;
 
-        [Affects("SelectedBearingGeometry","SelectedRadial")]
+        [Affects("SelectedBearingGeometry","SelectedRadial","TitleString")]
         public int SelectedRadialIndex
         {
             get { return _selectedRadialIndex; }
             set
             {
                 _selectedRadialIndex = value;
-                RadialViewModel.Radial = Radials[_selectedRadialIndex];
+                TitleString = Radials == null ? "<no radial selected>" : string.Format("Radial bearing: {0:000.0} degrees", Radials[_selectedRadialIndex].Bearing);
+                if(RadialViewModel!=null) RadialViewModel.Radial = Radials == null ? null:Radials[_selectedRadialIndex];
             }
         }
         #endregion
@@ -43,11 +53,9 @@ namespace ESME.Views.TransmissionLossViewer
         {
             get
             {
-                Debug.WriteLine("SelectedBearingGeometry Updated");
                 var sb = new StringBuilder();
-                var bearing = 0.0;
                 if (RadialViewModel == null || RadialViewModel.Radial == null) return null;
-                bearing = RadialViewModel.Radial.Bearing;
+                var bearing = RadialViewModel.Radial.Bearing;
                 const double radius = 8;
                 double x, y;
                 for (double angle = 0; angle <= 2 * Math.PI; angle += Math.PI / 32.0)
@@ -67,6 +75,20 @@ namespace ESME.Views.TransmissionLossViewer
         #endregion
 
         public RadialViewModel RadialViewModel { get; set; }
+        private Window _window;
+        public Window Window
+        {
+            get { return _window; }
+            set
+            {
+                _window = value;
+                if (RadialViewModel == null)
+                {
+                    RadialViewModel = new RadialViewModel(_window.FindChildren<RadialView>().First())
+                                          {Radial = Radials == null ? null : Radials[_selectedRadialIndex]};
+                }
+            }
+        }
 
         private Scenarios.TransmissionLoss _transmissionLoss;
         [Affects("Radials", "RadialCount", "SelectedRadialIndex", "SelectedRadial", "SelectedBearingGeometry")]
@@ -76,9 +98,15 @@ namespace ESME.Views.TransmissionLossViewer
             set
             {
                 _transmissionLoss = value;
-                Radials = _transmissionLoss == null ? null : new ObservableList<Radial>(_transmissionLoss.Radials);
+                Radials = _transmissionLoss == null ? null : new ObservableList<Radial>(from r in _transmissionLoss.Radials orderby r.Bearing select r);
                 SelectedRadialIndex = 0;
             }
+        }
+
+        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
+        {
+            if (RadialViewModel == null)
+                RadialViewModel =new RadialViewModel(((Window) viewAwareStatusService.View).FindChildren<RadialView>().First());
         }
     }
 }

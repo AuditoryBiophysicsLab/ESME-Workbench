@@ -1,0 +1,20 @@
+﻿<Window x:Class="ESME.Views.TransmissionLossViewer.AnalysisPointWindowView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Scenarios="clr-namespace:ESME.Scenarios;assembly=ESME"
+        xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
+        d:DataContext="{d:DesignInstance TransmissionLossViewer:AnalysisPointViewModel}"
+        d:DesignHeight="300"
+        d:DesignWidth="300"
+        WindowStyle="ToolWindow"
+        mc:Ignorable="d">
+    <DockPanel LastChildFill="True">
+        <ComboBox DisplayMemberPath="Mode.PSMName"
+                  DockPanel.Dock="Bottom"
+                  ItemsSource="{Binding AnalysisPoint.TransmissionLosses}"
+                  SelectedItem="{Binding TransmissionLossViewModel.TransmissionLoss}" />
+        <TransmissionLossViewer:TransmissionLossView DataContext="{Binding TransmissionLossViewModel}" DockPanel.Dock="Top" />
+    </DockPanel>
+</Window>

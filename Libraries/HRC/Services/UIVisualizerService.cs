@@ -245,8 +245,7 @@ namespace HRC.Services
         bool Show(string key, object state, bool setOwner,
             EventHandler<UICompletedEventArgs> completedProc);
 
-        Window ShowWindow(string key, object state, bool setOwner,
-            EventHandler<UICompletedEventArgs> completedProc);
+        Window ShowWindow(string key, object state, bool setOwner=false, EventHandler<UICompletedEventArgs> completedProc=null);
 
         /// <summary>
         /// This method displays a modal dialog associated with the given key.

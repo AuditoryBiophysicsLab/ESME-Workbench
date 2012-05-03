@@ -29,8 +29,31 @@ namespace TransmissionLossViewer
         public int RadialCount { get; set; }
         [Initialize] public TransmissionLossViewModel TransmissionLossViewModel { get; set; }
 
-        public Scenario Scenario { get; set; }
-        public AnalysisPoint AnalysisPoint { get; set; }
+        #region public Scenario Scenario { get; set; }
+        private Scenario _scenario;
+        public Scenario Scenario
+        {
+            get { return _scenario; }
+            set
+            {
+                _scenario = value;
+                if (_scenario != null) AnalysisPoint = _scenario.AnalysisPoints.FirstOrDefault();
+            }
+        } 
+        #endregion
+
+        #region public AnalysisPoint AnalysisPoint { get; set; }
+        private AnalysisPoint _analysisPoint;
+        public AnalysisPoint AnalysisPoint
+        {
+            get { return _analysisPoint; }
+            set
+            {
+                _analysisPoint = value;
+                if (_analysisPoint != null) TransmissionLossViewModel.TransmissionLoss = _analysisPoint.TransmissionLosses.First();
+            }
+        } 
+        #endregion
 
         [ImportingConstructor]
         public MainViewModel(IHRCSaveFileService saveFileService, IViewAwareStatus viewAwareStatus, IMasterDatabaseService database)
@@ -40,11 +63,7 @@ namespace TransmissionLossViewer
             _saveFileService = saveFileService;
             if (!Designer.IsInDesignMode)
             {
-                viewAwareStatus.ViewLoaded += () =>
-                {
-                    var radialViews =((Window) viewAwareStatus.View).FindChildren<RadialView>().ToList();
-                    TransmissionLossViewModel.RadialViewModel = new RadialViewModel(radialViews[0], _databaseDirectory);
-                };
+                viewAwareStatus.ViewLoaded += () => { TransmissionLossViewModel.RadialViewModel = new RadialViewModel(((Window) viewAwareStatus.View).FindChildren<RadialView>().First()); };
                 viewAwareStatus.ViewActivated += () => Database.Refresh();
             }
         }
@@ -74,6 +93,9 @@ namespace TransmissionLossViewer
             {
                 return _saveAs ?? (_saveAs = new SimpleCommand<object, object>(delegate
                 {
+                    return Scenario != null;
+                }, delegate
+                {
                     _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png|Bitmap (*.bmp)|*.bmp|GIF (*.gif)|*.gif|JPEG (*.jpg)|*.jpg|TIFF (*.tiff)|*.tiff";
                     _saveFileService.OverwritePrompt = true;
                     _saveFileService.FileName = TransmissionLossViewModel.RadialViewModel.OutputFileName;
@@ -82,7 +104,7 @@ namespace TransmissionLossViewer
                     if (result.HasValue && result.Value)
                     {
                         Properties.Settings.Default.LastImageExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-                        TransmissionLossViewModel.RadialViewModel.SaveRadialBitmap(_saveFileService.FileName);
+                        TransmissionLossViewModel.RadialViewModel.SaveAsImage(_saveFileService.FileName);
                     }
                 }));
             }
@@ -97,6 +119,9 @@ namespace TransmissionLossViewer
             get
             {
                 return _exportAs ?? (_exportAs = new SimpleCommand<object, object>(delegate
+                {
+                    return Scenario != null;
+                }, delegate
                 {
                     _saveFileService.Filter = "Comma-Separated Value (*.csv)|*.csv";
                     _saveFileService.OverwritePrompt = true;
@@ -113,6 +138,41 @@ namespace TransmissionLossViewer
 
         SimpleCommand<object, object> _exportAs;
 
+        #endregion
+
+        #region CopyTextToClipboardCommand
+
+        public SimpleCommand<object, object> CopyTextToClipboardCommand
+        {
+            get
+            {
+                return _copyTextToClipboard ??
+                       (_copyTextToClipboard =
+                        new SimpleCommand<object, object>(delegate
+                                                              {
+                                                                  return Scenario !=null;
+                                                              },
+                                                          delegate { Clipboard.SetText(TransmissionLossViewModel.RadialViewModel.ToCSV()); }));
+            }
+        }
+
+        private SimpleCommand<object, object> _copyTextToClipboard;
+        #endregion
+
+        #region CopyImageToClipboardCommand
+
+        public SimpleCommand<object, object> CopyImageToClipboardCommand
+        {
+            get
+            {
+                return _copyImageToClipboard ??
+                       (_copyImageToClipboard =
+                        new SimpleCommand<object, object>(delegate { return Scenario !=null; },
+                                                          delegate { Clipboard.SetImage(TransmissionLossViewModel.RadialViewModel.ToBitmapSource()); }));
+            }
+        }
+
+        private SimpleCommand<object, object> _copyImageToClipboard;
         #endregion
 
         #region CloseCommand

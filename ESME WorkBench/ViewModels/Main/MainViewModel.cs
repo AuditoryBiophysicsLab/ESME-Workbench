@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
@@ -15,6 +16,7 @@ using ESME.Mapping;
 using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
+using ESME.Views.TransmissionLossViewer;
 using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.Map;
 using HRC;
@@ -328,14 +330,24 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.ViewTransmissionLoss), UsedImplicitly]
         void ViewTransmissionLoss(ESME.Scenarios.TransmissionLoss transmissionLoss)
         {
-            _messageBox.ShowInformation("ViewTransmissionLoss");
+           var transmissionLossViewModel = new TransmissionLossViewModel
+                                                {
+                                                    TransmissionLoss = transmissionLoss,
+                                                };
             
+            
+            var window = _visualizer.ShowWindow("TransmissionLossWindowView", transmissionLossViewModel);
+            transmissionLossViewModel.Window = window;
+            transmissionLossViewModel.SelectedRadialIndex = 0;
         }
 
         [MediatorMessageSink(MediatorMessage.ViewAnalysisPoint), UsedImplicitly]
         void ViewAnalysisPoint(AnalysisPoint analysisPoint)
         {
-            _messageBox.ShowInformation("ViewAnalysisPoint");
+            var analysisPointViewModel = new AnalysisPointViewModel(analysisPoint);
+            var window = _visualizer.ShowWindow("AnalysisPointWindowView", analysisPointViewModel);
+            analysisPointViewModel.TransmissionLossViewModel.Window = window;
+            analysisPointViewModel.TransmissionLossViewModel.SelectedRadialIndex = 0;
         }
     }
 }

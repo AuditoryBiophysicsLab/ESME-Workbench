@@ -19,7 +19,6 @@ namespace ESME.Views.TransmissionLossViewer
 {
     public class RadialViewModel : ViewModelBase
     {
-        private readonly string _databaseDirectory;
         private readonly RadialView _view;
         public float RangeMin { get; set; }
         public float RangeMax { get; set; }
@@ -89,7 +88,7 @@ namespace ESME.Views.TransmissionLossViewer
                 RangeMax = _radial.Ranges.Last();
                 DepthMin = _radial.Depths.First();
                 DepthMax = _radial.Depths.Last();
-                TransmissionLossRadial = new TransmissionLossRadial((float)_radial.Bearing, new BellhopOutput(Path.Combine(_databaseDirectory, _radial.TransmissionLoss.AnalysisPoint.Scenario.StorageDirectory, _radial.Filename)));
+                TransmissionLossRadial = new TransmissionLossRadial((float)_radial.Bearing, new BellhopOutput(_radial.BasePath+".shd"));
                 ColorMapViewModel.MaxValue = TransmissionLossRadial.StatMax;
                 ColorMapViewModel.MinValue = TransmissionLossRadial.StatMin;
                 OnPropertyChanged("TransmissionLossRadial");
@@ -140,39 +139,53 @@ namespace ESME.Views.TransmissionLossViewer
         #endregion
 
         [ImportingConstructor]
-        public RadialViewModel(RadialView view, string databaseDirectory)
+        public RadialViewModel(RadialView view)
         {
-            _databaseDirectory = databaseDirectory;
             _view = view;
             _dispatcher = Dispatcher.CurrentDispatcher;
             ColorMapViewModel = ColorMapViewModel.Default;
             view.SizeChanged += (s, e) => CalculateBottomProfileGeometry();
         }
 
+        public string ToCSV()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("Vertical Transmission Loss (dB)");
+            sb.Append(",Range (m),");
+
+            foreach (var t in TransmissionLossRadial.Ranges) sb.Append(t + ","); //write out the X axis values.
+            sb.AppendLine(); // Terminate the line
+            sb.AppendLine("Depth (m)");
+            // Write the slice data
+            for (var i = 0; i < TransmissionLossRadial.Depths.Count; i++)
+            {
+                // Write out the Y axis value
+                sb.Append(TransmissionLossRadial.Depths[i] + ",,");
+                for (var j = 0; j < TransmissionLossRadial.Ranges.Count; j++)
+                {
+                    var tl = TransmissionLossRadial.TransmissionLoss[i, j];
+                    sb.Append(float.IsInfinity(tl) ? "," : tl + ",");
+                }
+                sb.AppendLine();
+            }
+            return sb.ToString();
+        }
+
         public void SaveAsCSV(string fileName)
         {
             using (var sw = new StreamWriter(fileName))
             {
-                // Write the X axis values out first
-                sw.WriteLine("Vertical Transmission Loss (dB)");
-                sw.Write(",Range (m),");
-
-                foreach (var t in TransmissionLossRadial.Ranges) sw.Write(t + ","); //write out the X axis values.
-                sw.WriteLine(); // Terminate the line
-                sw.WriteLine("Depth (m)");
-                // Write the slice data
-                for (var i = 0; i < TransmissionLossRadial.Depths.Count; i++)
-                {
-                    // Write out the Y axis value
-                    sw.Write(TransmissionLossRadial.Depths[i] + ",,");
-                    for (var j = 0; j < TransmissionLossRadial.Ranges.Count; j++)
-                        sw.Write(TransmissionLossRadial.TransmissionLoss[i, j] + ",");
-                    sw.WriteLine();
-                }
+                sw.Write(ToCSV());
             } 
         }
 
-        public void SaveRadialBitmap(string fileName) { _view.ToImageFile(fileName);}
+        public void SaveAsImage(string fileName) { _view.ToImageFile(fileName);}
+
+        public BitmapSource ToBitmapSource() { return _view.ToBitmapSource(); }
+
+        public void CopyTextToClipboard(){ Clipboard.SetText(ToCSV()); }
+
+        public void CopyImageToClipboard() { Clipboard.SetImage(_view.ToBitmapSource());}
 
         #region RenderBitmap
         void RenderBitmap()

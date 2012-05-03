@@ -162,6 +162,18 @@
   <ItemGroup>
     <Resource Include="gnome_sound_recorder.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\clipboard_add.png" />
+    <Resource Include="Images\clipboard_add_16.png" />
+    <Resource Include="Images\CSV.png" />
+    <Resource Include="Images\CSV_16.png" />
+    <Resource Include="Images\GIF.png" />
+    <Resource Include="Images\GIF_16.png" />
+    <Resource Include="Images\JPG.png" />
+    <Resource Include="Images\JPG_16.png" />
+    <Resource Include="Images\PNG.png" />
+    <Resource Include="Images\PNG_16.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace TransmissionLossViewer -class BuildInformation -svnversion "$(ProjectDir) " -output "$(ProjectDir)BuildInformation.cs"</PreBuildEvent>

@@ -78,13 +78,23 @@
             <Grid.RowDefinitions>
                 <RowDefinition />
             </Grid.RowDefinitions>
+            <TextBlock Text="Please wait ..."
+                    Background="Transparent"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       FontSize="24"
+                    Grid.Row="0"
+                    Grid.Column="0"/>
             <Image Grid.Row="0"
                    Grid.Column="0"
                    Source="{Binding WriteableBitmap}"
                    Stretch="Fill" />
+            
             <Canvas x:Name="OverlayCanvas"
+                    Background="Transparent"
                     Grid.Row="0"
                     Grid.Column="0">
+                
                 <!--
                     <Canvas.RenderTransform>
                     <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}"/>
@@ -94,6 +104,7 @@
                       Stroke="BlanchedAlmond"
                       StrokeThickness="3" />
             </Canvas>
+            
 
         </Grid>
     </DockPanel>

@@ -129,7 +129,7 @@ namespace ESME.Views.Environment
                         new SimpleCommand<object, object>(delegate { return SoundSpeedProfile != null; },
                                                           delegate
                                                           {
-                                                              _saveFileService.Filter = "Bitmap (*.bmp)|*.bmp|GIF (*.gif)|*.gif|JPEG (*.jpg)|*.jpg|Portable Network Graphics (*.png)|*.png|TIFF (*.tiff)|*.tiff";
+                                                              _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png|Bitmap (*.bmp)|*.bmp|GIF (*.gif)|*.gif|JPEG (*.jpg)|*.jpg|TIFF (*.tiff)|*.tiff";
                                                               _saveFileService.OverwritePrompt = true;
                                                               _saveFileService.FileName = OutputFileName;
                                                               var result = _saveFileService.ShowDialog(WindowView);

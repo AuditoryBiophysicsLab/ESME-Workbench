@@ -14,7 +14,7 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Grid.Row="0" Grid.Column="0">
                         <Run Text="Selected radial bearing: " />
-                        <Run Text="{Binding SelectedRadial.Bearing, StringFormat={}{0:0.###}}" />
+                        <Run Text="{Binding RadialViewModel.Radial.Bearing, StringFormat={}{0:0.###}}" />
                         <Run Text="deg" />
                     </TextBlock>
                     <Path Grid.Row="0"
