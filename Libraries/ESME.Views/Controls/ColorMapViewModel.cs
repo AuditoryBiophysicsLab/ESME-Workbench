@@ -120,7 +120,7 @@ namespace ESME.Views.Controls
             }
             colorBitmap.AddDirtyRect(new Int32Rect(0, 0, 1, Colors.Count));
             colorBitmap.Unlock();
-            ColorBitmap = ColorBitmap;
+            ColorBitmap = colorBitmap;
         }
 
         #region public static default ColorMapViewModel creation method
