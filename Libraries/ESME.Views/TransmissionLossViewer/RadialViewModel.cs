@@ -68,10 +68,10 @@ namespace ESME.Views.TransmissionLossViewer
 
         #endregion
 
-        #region public TransmissionLossRadial TransmissionLossRadial { get; set; }
+       
 
         private TransmissionLossRadial TransmissionLossRadial { get; set; }
-
+        #region public Radial Radial { get; set; }
         private Radial _radial;
         public Radial Radial
         {
