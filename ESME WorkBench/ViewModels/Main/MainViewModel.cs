@@ -340,6 +340,7 @@ namespace ESMEWorkbench.ViewModels.Main
             transmissionLossViewModel.Window = window;
             transmissionLossViewModel.SaveFileService = _saveFile;
             transmissionLossViewModel.SelectedRadialIndex = 0;
+            transmissionLossViewModel.RadialViewModel.WaitToRenderText = "Please Wait ...";
         }
 
         [MediatorMessageSink(MediatorMessage.ViewAnalysisPoint), UsedImplicitly]
@@ -350,6 +351,7 @@ namespace ESMEWorkbench.ViewModels.Main
             analysisPointViewModel.TransmissionLossViewModel.Window = window;
             analysisPointViewModel.TransmissionLossViewModel.SaveFileService = _saveFile;
             analysisPointViewModel.TransmissionLossViewModel.SelectedRadialIndex = 0;
+            analysisPointViewModel.TransmissionLossViewModel.RadialViewModel.WaitToRenderText = "Please Wait ...";
         }
     }
 }

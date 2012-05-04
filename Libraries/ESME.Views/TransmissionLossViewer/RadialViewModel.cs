@@ -24,9 +24,12 @@ namespace ESME.Views.TransmissionLossViewer
         public float RangeMax { get; set; }
         public float DepthMin { get; set; }
         public float DepthMax { get; set; }
+        public string WaitToRenderText { get; set; }
         readonly Dispatcher _dispatcher;
         bool _isRendered;
         
+        
+
         #region public WriteableBitmap WriteableBitmap {get; }
         private WriteableBitmap _writeableBitmap;
         public WriteableBitmap WriteableBitmap

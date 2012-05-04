@@ -131,7 +131,7 @@ namespace ESME.Scenarios
             }
             _mapLayer.Add(geos);
             _mapLayer.Done();
-            _mapLayer.IsChecked = LayerSettings.IsChecked;
+            //_mapLayer.IsChecked = LayerSettings.IsChecked;
 
             LayerSettings.PropertyChanged += (s, e) =>
             {

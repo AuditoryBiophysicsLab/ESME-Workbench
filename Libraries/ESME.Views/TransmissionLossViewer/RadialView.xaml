@@ -78,7 +78,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <TextBlock Text="Please wait ..."
+            <TextBlock Text="{Binding WaitToRenderText}"
                     Background="Transparent"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
