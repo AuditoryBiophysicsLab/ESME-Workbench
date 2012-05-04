@@ -12,7 +12,7 @@ namespace ESME.Views.TransmissionLossViewer
         public AnalysisPointViewModel(AnalysisPoint analysisPoint)
         {
             AnalysisPoint = analysisPoint;
-            TransmissionLossViewModel = new TransmissionLossViewModel { TransmissionLoss = analysisPoint.TransmissionLosses.First()};
+            TransmissionLossViewModel = new TransmissionLossViewModel {TransmissionLoss = analysisPoint.TransmissionLosses.First()};
         }
     }
 }

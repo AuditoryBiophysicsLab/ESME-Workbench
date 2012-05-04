@@ -6,14 +6,14 @@ using ESME.Environment;
 using HRC.Aspects;
 using HRC.Services;
 using HRC.Utility;
-using HRC.WPF;
 using HRC.ViewModels;
+using HRC.WPF;
 
 namespace ESME.Views.Environment
 {
     public class SoundSpeedProfileViewModel : ViewModelBase
     {
-        private readonly IHRCSaveFileService _saveFileService;
+        readonly IHRCSaveFileService _saveFileService;
 
         public SoundSpeedProfileView View { get; set; }
         public SoundSpeedProfileWindowView WindowView { get; set; }
@@ -21,24 +21,20 @@ namespace ESME.Views.Environment
         public float SSPMin { get; set; }
         public float DepthMin { get; set; }
         public float DepthMax { get; set; }
-        [Initialize("M 0,0")]
-        public string SoundSpeedGeometry { get; private set; }
-        [Initialize("M 0,0")]
-        public string SoundSpeedDataPoints { get; private set; }
-        [Initialize("M 0,0")]
-        public string MajorGrid { get; private set; }
-        [Initialize("M 0,0")]
-        public string MinorGrid { get; private set; }
-        [Initialize("Sound Speed Profile")]
-        public string WindowTitle { get; set; }
+        [Initialize("M 0,0")] public string SoundSpeedGeometry { get; private set; }
+        [Initialize("M 0,0")] public string SoundSpeedDataPoints { get; private set; }
+        [Initialize("M 0,0")] public string MajorGrid { get; private set; }
+        [Initialize("M 0,0")] public string MinorGrid { get; private set; }
+        [Initialize("Sound Speed Profile")] public string WindowTitle { get; set; }
         public string OutputFileName { get; set; }
         public ObservableList<double> DepthAxisMajorTicks { get; set; }
         public ObservableList<double> DepthAxisMinorTicks { get; set; }
         public ObservableList<double> SpeedAxisMajorTicks { get; set; }
         public ObservableList<double> SpeedAxisMinorTicks { get; set; }
-       
+
         #region public SoundSpeedProfile SoundSpeedProfile {get; set; }
         SoundSpeedProfile _soundSpeedProfile;
+
         public SoundSpeedProfile SoundSpeedProfile
         {
             get { return _soundSpeedProfile; }
@@ -56,10 +52,7 @@ namespace ESME.Views.Environment
         }
         #endregion
 
-        public SoundSpeedProfileViewModel(IHRCSaveFileService saveFile)
-        {
-            _saveFileService = saveFile;
-        }
+        public SoundSpeedProfileViewModel(IHRCSaveFileService saveFile) { _saveFileService = saveFile; }
 
         void RenderCanvas()
         {
@@ -74,12 +67,12 @@ namespace ESME.Views.Environment
             MinorGrid = PlotHelpers.GetGrid(DepthAxisMinorTicks, SpeedAxisMinorTicks, 0, height, width);
 
             SoundSpeedGeometry = SoundSpeedProfile.GetGeometry(height, width);
-            SoundSpeedDataPoints = SoundSpeedProfile.GetGeometry(height, width, glyphStyle: GlyphStyle.Circle);
+            SoundSpeedDataPoints = SoundSpeedProfile.GetGeometry(height, width, glyphStyle:GlyphStyle.Circle);
         }
 
         #region commands
-        #region SaveToCSVCommand
 
+        #region SaveToCSVCommand
         public SimpleCommand<object, object> SaveToCSVCommand
         {
             get
@@ -101,9 +94,9 @@ namespace ESME.Views.Environment
             }
         }
 
-        private SimpleCommand<object, object> _saveToCSV;
+        SimpleCommand<object, object> _saveToCSV;
 
-        private void SaveToCSVHandler(string fileName)
+        void SaveToCSVHandler(string fileName)
         {
             using (var writer = new StreamWriter(fileName))
             {
@@ -115,11 +108,9 @@ namespace ESME.Views.Environment
                 }
             }
         }
-
         #endregion
 
         #region SaveToImageCommand
-
         public SimpleCommand<object, object> SaveToImageCommand
         {
             get
@@ -129,7 +120,8 @@ namespace ESME.Views.Environment
                         new SimpleCommand<object, object>(delegate { return SoundSpeedProfile != null; },
                                                           delegate
                                                           {
-                                                              _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png|Bitmap (*.bmp)|*.bmp|GIF (*.gif)|*.gif|JPEG (*.jpg)|*.jpg|TIFF (*.tiff)|*.tiff";
+                                                              _saveFileService.Filter =
+                                                                  "Portable Network Graphics (*.png)|*.png|Bitmap (*.bmp)|*.bmp|GIF (*.gif)|*.gif|JPEG (*.jpg)|*.jpg|TIFF (*.tiff)|*.tiff";
                                                               _saveFileService.OverwritePrompt = true;
                                                               _saveFileService.FileName = OutputFileName;
                                                               var result = _saveFileService.ShowDialog(WindowView);
@@ -141,11 +133,10 @@ namespace ESME.Views.Environment
             }
         }
 
-        private SimpleCommand<object, object> _saveToImage;
+        SimpleCommand<object, object> _saveToImage;
         #endregion
 
         #region CopyTextToClipboardCommand
-
         public SimpleCommand<object, object> CopyTextToClipboardCommand
         {
             get
@@ -157,12 +148,13 @@ namespace ESME.Views.Environment
             }
         }
 
-        private SimpleCommand<object, object> _copyTextToClipboard;
+        SimpleCommand<object, object> _copyTextToClipboard;
 
-        private void CopyTextToClipboardHandler()
+        void CopyTextToClipboardHandler()
         {
             var sb = new StringBuilder();
-            sb.AppendLine(string.Format("#Sound Speed Profile ({0:0.000},{1:0.000})", SoundSpeedProfile.Latitude,
+            sb.AppendLine(string.Format("#Sound Speed Profile ({0:0.000},{1:0.000})",
+                                        SoundSpeedProfile.Latitude,
                                         SoundSpeedProfile.Longitude));
             sb.AppendLine("Depth (m),SoundSpeed (m/s)");
             foreach (var point in (from d in SoundSpeedProfile.Data orderby d.Depth select d))
@@ -171,11 +163,9 @@ namespace ESME.Views.Environment
             }
             Clipboard.SetText(sb.ToString());
         }
-
         #endregion
 
         #region CopyImageToClipboardCommand
-
         public SimpleCommand<object, object> CopyImageToClipboardCommand
         {
             get
@@ -187,7 +177,7 @@ namespace ESME.Views.Environment
             }
         }
 
-        private SimpleCommand<object, object> _copyImageToClipboard;
+        SimpleCommand<object, object> _copyImageToClipboard;
         #endregion
 
         #region ViewClosingCommand
@@ -197,7 +187,6 @@ namespace ESME.Views.Environment
         #endregion
 
         #region GridSizeChangedCommand
-
         public SimpleCommand<object, object> GridSizeChangedCommand
         {
             get
@@ -208,14 +197,11 @@ namespace ESME.Views.Environment
             }
         }
 
-        private SimpleCommand<object, object> _gridSizeChanged;
+        SimpleCommand<object, object> _gridSizeChanged;
 
-        private void GridSizeChangedHandler()
-        {
-            RenderCanvas();
-        }
-
+        void GridSizeChangedHandler() { RenderCanvas(); }
         #endregion
+
         #endregion
     }
 }

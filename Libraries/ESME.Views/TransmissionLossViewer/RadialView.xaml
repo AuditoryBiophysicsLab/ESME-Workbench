@@ -5,21 +5,18 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
              xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
-             xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer" Background="White"
+             Background="White"
+             d:DataContext="{d:DesignInstance TransmissionLossViewer:RadialViewModel}"
              d:DesignHeight="300"
              d:DesignWidth="300"
-             mc:Ignorable="d" d:DataContext="{d:DesignInstance TransmissionLossViewer:RadialViewModel }">
+             mc:Ignorable="d">
 
     <DockPanel>
         <StackPanel Height="22"
                     DockPanel.Dock="Top"
-                    Orientation="Horizontal">
-            <!--
-                <TextBlock Text="{Binding ColorMapViewModel.CurMinValue, StringFormat=CurMin: {0.000}}" />
-                <TextBlock Text="{Binding ColorMapViewModel.CurMaxValue, StringFormat=CurMax: {0.000}}" />
-            -->
-        </StackPanel>
+                    Orientation="Horizontal" />
         <DockPanel DockPanel.Dock="Left">
             <DockPanel>
                 <TextBlock Height="{Binding ActualHeight, ElementName=RangeAxis, Mode=OneWay}" DockPanel.Dock="Bottom" />
@@ -35,7 +32,9 @@
         <DockPanel DockPanel.Dock="Right">
             <DockPanel Width="80">
                 <TextBlock Height="{Binding ActualHeight, ElementName=RangeAxis, Mode=OneWay}" DockPanel.Dock="Bottom" />
-                <DockPanel Margin="5 0 0 0" LastChildFill="False" DataContext="{Binding ColorMapViewModel}">
+                <DockPanel Margin="5 0 0 0"
+                           DataContext="{Binding ColorMapViewModel}"
+                           LastChildFill="False">
                     <controls:DataAxis AxisLabel="Transmission Loss (dB)"
                                        AxisLocation="Left"
                                        DockPanel.Dock="Right"
@@ -43,12 +42,12 @@
                                        StartValue="{Binding MaxValue}"
                                        TickValueFormat="0.#" />
                     <controls:ColorBarView MinWidth="50"
-                                           DockPanel.Dock="Right"                                           
                                            ColorBarImage="{Binding ColorBitmap}"
                                            CurrentMaximum="{Binding CurMaxValue}"
-                                           CurrentMinimum="{Binding CurMinValue}"                                           
+                                           CurrentMinimum="{Binding CurMinValue}"
+                                           DockPanel.Dock="Right"
                                            Maximum="{Binding MaxValue}"
-                                           Minimum="{Binding MinValue}"  />
+                                           Minimum="{Binding MinValue}" />
                 </DockPanel>
             </DockPanel>
         </DockPanel>
@@ -66,11 +65,6 @@
                 <i:EventTrigger EventName="SizeChanged">
                     <WPF:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
                 </i:EventTrigger>
-                <!--
-                    <i:EventTrigger EventName="SourceUpdated">
-                    <WPF:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
-                    </i:EventTrigger>
-                -->
             </i:Interaction.Triggers>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
@@ -78,34 +72,26 @@
             <Grid.RowDefinitions>
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <TextBlock Text="{Binding WaitToRenderText}"
-                    Background="Transparent"
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
+                       Background="Transparent"
                        FontSize="24"
-                    Grid.Row="0"
-                    Grid.Column="0"/>
+                       Text="{Binding WaitToRenderText}" />
             <Image Grid.Row="0"
                    Grid.Column="0"
                    Source="{Binding WriteableBitmap}"
                    Stretch="Fill" />
-            
+
             <Canvas x:Name="OverlayCanvas"
-                    Background="Transparent"
                     Grid.Row="0"
-                    Grid.Column="0">
-                
-                <!--
-                    <Canvas.RenderTransform>
-                    <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}"/>
-                    </Canvas.RenderTransform>
-                -->
+                    Grid.Column="0"
+                    Background="Transparent">
                 <Path Data="{Binding BottomProfileGeometry}"
                       Stroke="BlanchedAlmond"
                       StrokeThickness="3" />
             </Canvas>
-            
-
         </Grid>
     </DockPanel>
 </UserControl>
