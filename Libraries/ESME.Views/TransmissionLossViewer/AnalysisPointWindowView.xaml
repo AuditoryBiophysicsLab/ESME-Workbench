@@ -9,8 +9,35 @@
         d:DesignHeight="300"
         d:DesignWidth="300"
         WindowStyle="ToolWindow"
+        Title="{Binding TransmissionLossViewModel.TitleString}"
         mc:Ignorable="d">
     <DockPanel LastChildFill="True">
+        <ToolBarTray Height="22" DockPanel.Dock="Top">
+            <ToolBar Band="0" BandIndex="0">
+                <Button Command="{Binding TransmissionLossViewModel.SaveAsCSVCommand }"
+                        ToolBar.OverflowMode="Never"
+                        ToolTip="Save to CSV">
+                    <Image Source="..\Images\CSV_16.png" />
+                </Button>
+                <Button Command="{Binding TransmissionLossViewModel.SaveAsImageCommand}"
+                        ToolBar.OverflowMode="AsNeeded"
+                        ToolTip="Save to Image">
+                    <Image Source="..\Images\PNG_16.png" />
+                </Button>
+            </ToolBar>
+            <ToolBar Band="0" BandIndex="1">
+                <Button Command="{Binding TransmissionLossViewModel.CopyCSVToClipboardCommand}"
+                        ToolBar.OverflowMode="Never"
+                        ToolTip="Copy text to clipboard">
+                    <Image Source="..\Images\clipboard_add_16.png" />
+                </Button>
+                <Button Command="{Binding TransmissionLossViewModel.CopyImageToClipboardCommand}"
+                        ToolBar.OverflowMode="AsNeeded"
+                        ToolTip="Copy image to clipboard">
+                    <Image Source="..\Images\clipboard_add_16.png" />
+                </Button>
+            </ToolBar>
+        </ToolBarTray>
         <ComboBox DisplayMemberPath="Mode.PSMName"
                   DockPanel.Dock="Bottom"
                   ItemsSource="{Binding AnalysisPoint.TransmissionLosses}"

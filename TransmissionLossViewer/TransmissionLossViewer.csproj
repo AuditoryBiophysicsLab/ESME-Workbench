@@ -174,6 +174,10 @@
     <Resource Include="Images\PNG.png" />
     <Resource Include="Images\PNG_16.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\clipboard_text.png" />
+    <Resource Include="Images\clipboard_text_16.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace TransmissionLossViewer -class BuildInformation -svnversion "$(ProjectDir) " -output "$(ProjectDir)BuildInformation.cs"</PreBuildEvent>

@@ -153,7 +153,7 @@ namespace TransmissionLossViewer
                                                               {
                                                                   return Scenario !=null;
                                                               },
-                                                          delegate { Clipboard.SetText(TransmissionLossViewModel.RadialViewModel.ToCSV()); }));
+                                                          delegate {  }));
             }
         }
 

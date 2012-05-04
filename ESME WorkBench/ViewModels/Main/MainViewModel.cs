@@ -338,6 +338,7 @@ namespace ESMEWorkbench.ViewModels.Main
             
             var window = _visualizer.ShowWindow("TransmissionLossWindowView", transmissionLossViewModel);
             transmissionLossViewModel.Window = window;
+            transmissionLossViewModel.SaveFileService = _saveFile;
             transmissionLossViewModel.SelectedRadialIndex = 0;
         }
 
@@ -347,6 +348,7 @@ namespace ESMEWorkbench.ViewModels.Main
             var analysisPointViewModel = new AnalysisPointViewModel(analysisPoint);
             var window = _visualizer.ShowWindow("AnalysisPointWindowView", analysisPointViewModel);
             analysisPointViewModel.TransmissionLossViewModel.Window = window;
+            analysisPointViewModel.TransmissionLossViewModel.SaveFileService = _saveFile;
             analysisPointViewModel.TransmissionLossViewModel.SelectedRadialIndex = 0;
         }
     }

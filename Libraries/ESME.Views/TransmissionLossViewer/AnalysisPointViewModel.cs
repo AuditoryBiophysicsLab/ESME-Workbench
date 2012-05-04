@@ -1,6 +1,7 @@
 ﻿using System.Linq;
+using System.Windows;
 using ESME.Scenarios;
-using HRC.Aspects;
+using HRC.ViewModels;
 
 namespace ESME.Views.TransmissionLossViewer
 {
@@ -14,6 +15,5 @@ namespace ESME.Views.TransmissionLossViewer
             AnalysisPoint = analysisPoint;
             TransmissionLossViewModel = new TransmissionLossViewModel { TransmissionLoss = analysisPoint.TransmissionLosses.First()};
         }
-        
     }
 }

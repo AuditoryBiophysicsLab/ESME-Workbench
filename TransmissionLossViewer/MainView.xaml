@@ -68,7 +68,7 @@
                 <Button Command="{Binding CopyTextToClipboardCommand}"
                         ToolBar.OverflowMode="Never"
                         ToolTip="Copy text to clipboard">
-                    <Image Source="..\Images\clipboard_add_16.png" />
+                    <Image Source="..\Images\clipboard_text_16.png" />
                 </Button>
                 <Button Command="{Binding CopyImageToClipboardCommand}"
                         ToolBar.OverflowMode="AsNeeded"
