@@ -121,7 +121,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Behaviors\ActivityTimelineTests.cs" />
-    <Compile Include="Class1.cs" />
     <Compile Include="Common\TestLocation.cs" />
     <Compile Include="Environment\EnvironmentDataTests.cs" />
     <Compile Include="Locations\MasterDatabaseServiceTests.cs" />
