@@ -106,5 +106,53 @@ namespace ESME.Views.Properties {
                 this["TLWidth"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double SSPTop {
+            get {
+                return ((double)(this["SSPTop"]));
+            }
+            set {
+                this["SSPTop"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double SSPLeft {
+            get {
+                return ((double)(this["SSPLeft"]));
+            }
+            set {
+                this["SSPLeft"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("600")]
+        public double SSPHeight {
+            get {
+                return ((double)(this["SSPHeight"]));
+            }
+            set {
+                this["SSPHeight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300")]
+        public double SSPWidth {
+            get {
+                return ((double)(this["SSPWidth"]));
+            }
+            set {
+                this["SSPWidth"] = value;
+            }
+        }
     }
 }

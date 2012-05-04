@@ -190,6 +190,12 @@ namespace ESME.Views.Environment
         private SimpleCommand<object, object> _copyImageToClipboard;
         #endregion
 
+        #region ViewClosingCommand
+        public SimpleCommand<object, object> ViewClosingCommand { get { return _viewClosing ?? (_viewClosing = new SimpleCommand<object, object>(ViewClosingHandler)); } }
+        SimpleCommand<object, object> _viewClosing;
+        static void ViewClosingHandler(object o) { Properties.Settings.Default.Save(); }
+        #endregion
+
         #region GridSizeChangedCommand
 
         public SimpleCommand<object, object> GridSizeChangedCommand

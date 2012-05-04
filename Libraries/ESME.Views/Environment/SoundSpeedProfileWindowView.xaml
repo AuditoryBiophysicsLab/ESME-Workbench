@@ -5,10 +5,20 @@
         xmlns:Environment="clr-namespace:ESME.Views.Environment"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC" xmlns:Properties="clr-namespace:ESME.Views.Properties"
         Title="{Binding WindowTitle}"
-        Width="300"
-        Height="300"
+        Width="{Binding Source={x:Static Properties:Settings.Default},
+                        Path=SSPWidth,
+                        Mode=TwoWay}"
+        Height="{Binding Source={x:Static Properties:Settings.Default},
+                         Path=SSPHeight,
+                         Mode=TwoWay}"
+         Left="{Binding Source={x:Static Properties:Settings.Default},
+                       Path=SSPLeft,
+                       Mode=TwoWay}"
+        Top="{Binding Source={x:Static Properties:Settings.Default},
+                      Path=SSPTop,
+                      Mode=TwoWay}"
         Background="White"
         d:DataContext="{d:DesignInstance Environment:SoundSpeedProfileViewModel}"
         WindowStyle="ToolWindow"
@@ -16,6 +26,9 @@
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="ContentRendered">
             <WPF:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
+        </i:EventTrigger>
+        <i:EventTrigger EventName="Closing">
+            <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
 
@@ -32,12 +45,10 @@
                         ToolTip="Save to Image">
                     <Image Source="..\Images\PNG_16.png" />
                 </Button>
-            </ToolBar>
-            <ToolBar Band="0" BandIndex="1">
                 <Button Command="{Binding CopyTextToClipboardCommand}"
                         ToolBar.OverflowMode="Never"
                         ToolTip="Copy text to clipboard">
-                    <Image Source="..\Images\clipboard_add_16.png" />
+                    <Image Source="..\Images\clipboard_text_16.png" />
                 </Button>
                 <Button Command="{Binding CopyImageToClipboardCommand}"
                         ToolBar.OverflowMode="AsNeeded"

@@ -23,5 +23,17 @@
     <Setting Name="TLWidth" Type="System.Double" Scope="User">
       <Value Profile="(Default)">800</Value>
     </Setting>
+    <Setting Name="SSPTop" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="SSPLeft" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="SSPHeight" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">600</Value>
+    </Setting>
+    <Setting Name="SSPWidth" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">300</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

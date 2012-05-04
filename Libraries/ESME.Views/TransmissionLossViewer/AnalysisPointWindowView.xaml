@@ -5,7 +5,6 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Properties="clr-namespace:ESME.Views.Properties"
-        xmlns:Scenarios="clr-namespace:ESME.Scenarios;assembly=ESME"
         xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
         xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
         Title="{Binding TransmissionLossViewModel.TitleString}"
