@@ -12,7 +12,6 @@ namespace ESME.Views.Controls
             DefaultStyleKeyProperty.OverrideMetadata(typeof(LayerControl), new FrameworkPropertyMetadata(typeof(LayerControl)));
         }
 
-        public LayerControl() {Debug.WriteLine(string.Format("{0}: LayerControl Constructor", DateTime.Now));}
         static void OnPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
             //Debug.WriteLine("{0}: LayerName = {1},  Property = {2}, OldValue = {3}, NewValue = {4}", DateTime.Now, ((LayerControl)sender).LayerName, args.Property.Name, args.OldValue, args.NewValue);

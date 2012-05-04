@@ -111,6 +111,7 @@ namespace ESME.Locations
                     wind.Serialize(fileName);
                     var windColormap = new Colormap(Colormap.CoolComponents, 512);
                     ToBitmap(wind[timePeriod].EnvironmentData, fileName, v => v == null ? 0 : v.Data, windColormap.ToPixelValues);
+                    Debug.WriteLine("Importer: Imported {0}min Wind [{1}] from plugin {2}", dataSet.Resolution, dataSet.TimePeriod, sourcePlugin.PluginName);
                     break;
                 case EnvironmentDataType.Sediment:
                     var sediment = ((EnvironmentalDataSourcePluginBase<Sediment>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
@@ -120,11 +121,13 @@ namespace ESME.Locations
                     sedimentColormap.Map.Insert(0, Colors.Black);
                     sedimentColormap.Map.Add(Colors.Black);
                     ToBitmap(sediment.Samples, fileName, v => v == null ? 0 : v.Data.SampleValue, (data, minValue, maxValue) => sedimentColormap.ToPixelValues(data, 1, 23));
+                    Debug.WriteLine("Importer: Imported {0}min Sediment from plugin {1}", dataSet.Resolution, sourcePlugin.PluginName);
                     break;
                 case EnvironmentDataType.SoundSpeed:
                     var soundSpeed = ((EnvironmentalDataSourcePluginBase<SoundSpeed>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
                     dataSet.SampleCount = (from field in soundSpeed.SoundSpeedFields select field.EnvironmentData.Count).Sum();
                     soundSpeed.Serialize(fileName);
+                    Debug.WriteLine("Importer: Imported {0}min Sound Speed [{1}] from plugin {2}", dataSet.Resolution, dataSet.TimePeriod, sourcePlugin.PluginName);
                     break;
                 case EnvironmentDataType.Bathymetry:
                     var bathymetry = ((EnvironmentalDataSourcePluginBase<Bathymetry>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
@@ -133,13 +136,13 @@ namespace ESME.Locations
                     //var bathymetryColormap = new Colormap(Colormap.OceanComponents, 1024);
                     var dualColormap = new DualColormap(Colormap.Summer, Colormap.Jet) { Threshold = 0 };
                     ToBitmap(bathymetry.Samples, fileName, v => v.Data, (data, minValue, maxValue) => dualColormap.ToPixelValues(data, minValue, maxValue < 0 ? maxValue : 8000, Colors.Black));
+                    Debug.WriteLine("Importer: Imported {0}min Bathymetry from plugin {1}", dataSet.Resolution, sourcePlugin.PluginName);
                     break;
                 default:
                     throw new ApplicationException(string.Format("Unknown environmental data type {0}", sourcePlugin.EnvironmentDataType));
             }
             dataSet.FileSize = new FileInfo(fileName).Length;
             progress.Report(100);
-            Debug.WriteLine("Importer: Imported {0}[{1}] from plugin {2}", (PluginSubtype)dataSet.SourcePlugin.PluginSubtype, dataSet.Resolution, sourcePlugin.PluginName);
             Interlocked.Decrement(ref _busyCount);
             OnPropertyChanged("BusyCount");
             _importJobsPending.TryRemove(dataSet.Guid, out progress);

@@ -24,7 +24,6 @@ namespace ESME
         public const string ViewTransmissionLoss = "ViewTransmissionLossMessage";
 
         public const string ShowTransmissionLossQueueView = "ShowTransmissionLossQueueViewMessage";
-        public const string SetEditMode = "SetEditModeMessage";
 
         public const string SetMapExtent = "SetMapExtentMessage";
         public const string SetMapCursor = "SetMapCursorMessage";

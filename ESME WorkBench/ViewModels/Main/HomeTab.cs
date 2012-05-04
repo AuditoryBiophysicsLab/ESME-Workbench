@@ -14,6 +14,7 @@ using ESMEWorkbench.ViewModels.Tree;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.ViewModels;
+using HRC.WPF;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
@@ -60,6 +61,24 @@ namespace ESMEWorkbench.ViewModels.Main
 
         public string MainWindowTitle { get; set; }
 
+        #region CreateScenarioCommand
+        public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand
+        {
+            get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => IsCreateScenarioCommandEnabled, CreateScenarioHandler)); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _createScenario;
+
+        static bool IsCreateScenarioCommandEnabled
+        {
+            get { return true; }
+        }
+
+        static void CreateScenarioHandler(EventToCommandArgs args)
+        {
+            //var parameter = args.CommandParameter;
+        }
+        #endregion
         readonly List<Tuple<IHaveProperties, Window>> _openPropertyWindows = new List<Tuple<IHaveProperties, Window>>();
         [MediatorMessageSink(MediatorMessage.ShowProperties)]
         public void ShowProperties(IHaveProperties propertyViewModel)

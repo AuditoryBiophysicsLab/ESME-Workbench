@@ -125,41 +125,6 @@ namespace ESMEWorkbench.ViewModels.Map
 
         [MediatorMessageSink(MediatorMessage.ApplicationClosing), UsedImplicitly] void ApplicationClosing(bool mode) { if (_soundSpeedProfileWindowView != null) _soundSpeedProfileWindowView.Close(); }
 
-        [MediatorMessageSink(MediatorMessage.SetEditMode), UsedImplicitly]
-        void SetEditMode(GeoRect geoRect)
-        {
-            _wpfMap.EditOverlay = new CustomEditInteractiveOverlay();
-
-            var rectangle = new Feature(new RectangleShape(geoRect.West, geoRect.North, geoRect.East, geoRect.South));
-            // Set the value of column "Edit" to "rectangle", so this shape will be editing by custom way.
-            rectangle.ColumnValues.Add("Edit", null);
-            _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Add(rectangle);
-
-            _wpfMap.EditOverlay.EditShapesLayer.Open();
-            _wpfMap.EditOverlay.EditShapesLayer.Columns.Add(new FeatureSourceColumn("Edit"));
-            _wpfMap.EditOverlay.EditShapesLayer.Close();
-            _wpfMap.EditOverlay.EditShapesLayer.ZoomLevelSet.ZoomLevel01.DefaultTextStyle = new TextStyle("Edit", new GeoFont("Arial", 18), new GeoSolidBrush(GeoColor.StandardColors.Black));
-            _wpfMap.EditOverlay.EditShapesLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
-            _wpfMap.EditOverlay.CalculateAllControlPoints();
-            _wpfMap.EditOverlay.FeatureResized += (sender, args) =>
-            {
-                _wpfMap.EditOverlay.EditShapesLayer.Open();
-                var bounds = _wpfMap.EditOverlay.EditShapesLayer.GetBoundingBox();
-                _wpfMap.EditOverlay.EditShapesLayer.Close();
-                Debug.WriteLine("Resized: North {0} South {1} East {2} West {3}", bounds.UpperLeftPoint.Y, bounds.LowerRightPoint.Y, bounds.LowerRightPoint.X, bounds.UpperLeftPoint.X);
-            };
-            _wpfMap.EditOverlay.FeatureDragged += (sender, args) =>
-            {
-                _wpfMap.EditOverlay.EditShapesLayer.Open();
-                var bounds = _wpfMap.EditOverlay.EditShapesLayer.GetBoundingBox();
-                _wpfMap.EditOverlay.EditShapesLayer.Close();
-                Debug.WriteLine("Dragged: North {0} South {1} East {2} West {3}", bounds.UpperLeftPoint.Y, bounds.LowerRightPoint.Y, bounds.LowerRightPoint.X, bounds.UpperLeftPoint.X);
-            };
-
-            // Draw the map image on the screen
-            _wpfMap.Refresh();
-        }
-
         public SoundSpeedProfile MouseSoundSpeedProfile { get; set; }
         public bool IsSoundSpeedProfilePopupOpen { get; set; }
         public SoundSpeedProfileViewModel SoundSpeedProfileViewModel { get; set; }

@@ -76,6 +76,7 @@ namespace TransmissionLossViewer
             {
                 return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(vcArgs =>
                 {
+                    Database.Context.SaveChanges();
                     Properties.Settings.Default.Save();
                     Database.Dispose();
                 }));

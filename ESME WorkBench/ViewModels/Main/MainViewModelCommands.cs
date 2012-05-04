@@ -180,28 +180,6 @@ namespace ESMEWorkbench.ViewModels.Main
         }
         #endregion
 
-        #region TestEditOverlayCommand
-        public SimpleCommand<object, object> TestEditOverlayCommand
-        { get { return _testEditOverlay ?? (_testEditOverlay = new SimpleCommand<object, object>(TestEditOverlayHandler)); } }
-
-        SimpleCommand<object, object> _testEditOverlay;
-
-        void TestEditOverlayHandler(object o)
-        {
-            GeoRect extent;
-            if (Scenario == null) extent = new GeoRect(20, -20, 20, -20);
-            else
-            {
-                var bounds = (GeoRect)Scenario.Location.GeoRect;
-                var north = (bounds.North + bounds.Center.Latitude) / 2;
-                var south = (bounds.Center.Latitude + bounds.South) / 2;
-                var east = (bounds.East + bounds.Center.Longitude) / 2;
-                var west = (bounds.Center.Longitude + bounds.West) / 2;
-                extent = new GeoRect(north, south, east, west);
-            }
-            MediatorMessage.Send(MediatorMessage.SetEditMode, extent);
-        }
-        #endregion
         #endregion
     }
 }
