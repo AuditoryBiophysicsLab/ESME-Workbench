@@ -241,13 +241,6 @@ namespace ESME.Mapping
             analysisPointLayer.Done();
         }
 
-        public void RemovePropagationPoint(CASSOutput curPoint)
-        {
-            var layerName = string.Format("Prop {0}|{1}|{2}: [{3:0.###}, {4:0.###}]", curPoint.PlatformName, curPoint.SourceName, curPoint.ModeName, curPoint.Geo.Latitude, curPoint.Geo.Longitude);
-            var propagationPointLayer = Find<PropagationLayer>(LayerType.Propagation, layerName);
-            if (propagationPointLayer != null) Remove(propagationPointLayer);
-        }
-
         public void DisplayPropagationPoint(Scenarios.TransmissionLoss curPoint)
         {
             var geo = (Geo)curPoint.AnalysisPoint.Geo;

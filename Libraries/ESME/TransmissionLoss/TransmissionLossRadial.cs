@@ -203,46 +203,6 @@ namespace ESME.TransmissionLoss
             IsSaved = true;
         }
 
-        public void SaveAsCSV(string fileName, TransmissionLossField transmissionLossField)
-        {
-            using (var sw = new StreamWriter(fileName))
-            {
-                // Write the X axis values out first
-                sw.WriteLine("Vertical Transmission Loss (dB)");
-                sw.Write(",Range (m),");
-
-                foreach (var t in Ranges) sw.Write(t + ","); //write out the X axis values.
-                sw.WriteLine(); // Terminate the line
-                sw.WriteLine("Depth (m)");
-                // Write the slice data
-                for (var i = 0; i < Depths.Count; i++)
-                {
-                    // Write out the Y axis value
-                    sw.Write(Depths[i] + ",,");
-                    for (var j = 0; j < Ranges.Count; j++)
-                        sw.Write(TransmissionLoss[i, j] + ","); 
-                    sw.WriteLine(); // Terminate the line
-                } // for i
-                sw.WriteLine();
-                //sw.Write(",Bottom depth:,");
-                //for (var i = 0; i < Ranges.Length; i++)
-                //    sw.Write(bottomProfile.Profile[i].ToString() + ",");
-                sw.WriteLine();
-                sw.WriteLine();
-                sw.WriteLine("Sound Source information");
-                sw.WriteLine("Source Latitude," + transmissionLossField.Latitude);
-                sw.WriteLine("Source Longitude," + transmissionLossField.Longitude);
-                sw.WriteLine("Depth (m)," + transmissionLossField.SourceDepth);
-                sw.WriteLine("High Frequency (Hz)," + transmissionLossField.HighFrequency);
-                sw.WriteLine("Low Frequency (Hz)," + transmissionLossField.LowFrequency);
-                sw.WriteLine("Depression/elevation angle (deg)" + transmissionLossField.DepressionElevationAngle);
-                sw.WriteLine("Vertical beam width (deg)" + transmissionLossField.VerticalBeamWidth);
-                var radialEnd = new Geo(transmissionLossField.Latitude, transmissionLossField.Longitude);
-                radialEnd.Offset(Geo.KilometersToRadians(transmissionLossField.Radius / 1000f), Geo.DegreesToRadians(BearingFromSource));
-                sw.WriteLine("Receiver Latitude," + radialEnd.Latitude);
-                sw.WriteLine("Receiver Longitude," + radialEnd.Longitude);
-                sw.WriteLine();
-            } // using sw
-        }
+        
     }
 }

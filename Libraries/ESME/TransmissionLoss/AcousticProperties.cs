@@ -5,7 +5,7 @@ using ESME.NEMO;
 namespace ESME.TransmissionLoss
 {
     [Serializable]
-    public class AcousticProperties : IEquatable<AcousticProperties>, IEquatable<TransmissionLossField>, IEquatable<NemoMode>
+    public class AcousticProperties : IEquatable<AcousticProperties>, IEquatable<NemoMode>
     {
         public AcousticProperties() { }
 
@@ -85,16 +85,6 @@ namespace ESME.TransmissionLoss
         }
 
         #endregion
-
-        public bool Equals(TransmissionLossField other) 
-        {
-            if (SourceDepth != other.SourceDepth) return false;
-            if (VerticalBeamWidth != other.VerticalBeamWidth) return false;
-            if (DepressionElevationAngle != other.DepressionElevationAngle) return false;
-            if (LowFrequency != other.LowFrequency) return false;
-            if (HighFrequency != other.HighFrequency) return false;
-            return true;
-        }
 
         public bool Equals(NemoMode other) { return Equals(other.AcousticProperties); }
 
