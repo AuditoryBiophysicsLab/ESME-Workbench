@@ -87,6 +87,11 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "TestManagedBootstrapper", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LASPlugin", "LASPlugin\LASPlugin.csproj", "{D1640B4C-4997-4978-9FE7-C358B8A5B84B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AD4A2B74-260A-480E-8C5C-770188C16D19}"
+	ProjectSection(SolutionItems) = preProject
+		ESME Workbench.sln.DotSettings = ESME Workbench.sln.DotSettings
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
