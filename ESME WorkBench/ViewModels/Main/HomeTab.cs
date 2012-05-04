@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
-using System.Windows.Input;
 using ESME;
 using ESME.Environment;
 using ESME.Mapping;
@@ -20,20 +19,23 @@ namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {
+        private readonly List<Tuple<IHaveProperties, Window>> _openPropertyWindows = new List<Tuple<IHaveProperties, Window>>();
+
+        private Scenario _scenario;
+
         public MapLayerCollection ScenarioMapLayers { get; set; }
 
         [Initialize] public LayerTreeViewModel LayerTreeViewModel { get; set; }
         public MapViewModel MapViewModel { get; set; }
 
-        [Affects("IsScenarioLoaded", "CanPlaceAnalysisPoint")]
-        public Scenario Scenario
+        [Affects("IsScenarioLoaded", "CanPlaceAnalysisPoint")] public Scenario Scenario
         {
             get { return _scenario; }
             set
             {
                 _scenario = value;
                 LayerTreeViewModel.Scenario = _scenario;
-                MainWindowTitle = string.Format("ESME Workbench: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name   );
+                MainWindowTitle = string.Format("ESME Workbench: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name);
                 if (_scenario != null)
                 {
                     Debug.WriteLine(string.Format("Wind contains {0} samples", ((Wind)_cache[_scenario.Wind])[_scenario.TimePeriod].EnvironmentData.Count));
@@ -49,44 +51,38 @@ namespace ESMEWorkbench.ViewModels.Main
                 }
             }
         }
-        Scenario _scenario;
 
         public bool IsScenarioLoaded { get { return Scenario != null; } }
 
-        public bool CanPlaceAnalysisPoint
-        {
-            get { return Scenario != null && Scenario.Wind != null && Scenario.SoundSpeed != null && Scenario.Bathymetry != null && Scenario.Sediment != null; }
-        }
+        public bool CanPlaceAnalysisPoint { get { return Scenario != null && Scenario.Wind != null && Scenario.SoundSpeed != null && Scenario.Bathymetry != null && Scenario.Sediment != null; } }
+
         public bool IsInAnalysisPointMode { get; set; }
 
         public string MainWindowTitle { get; set; }
 
         #region CreateScenarioCommand
-        public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand
-        {
-            get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => IsCreateScenarioCommandEnabled, CreateScenarioHandler)); }
-        }
+        private SimpleCommand<object, EventToCommandArgs> _createScenario;
 
-        SimpleCommand<object, EventToCommandArgs> _createScenario;
+        public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand { get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => IsCreateScenarioCommandEnabled, CreateScenarioHandler)); } }
 
-        static bool IsCreateScenarioCommandEnabled
-        {
-            get { return true; }
-        }
+        private static bool IsCreateScenarioCommandEnabled { get { return true; } }
 
-        static void CreateScenarioHandler(EventToCommandArgs args)
+        private static void CreateScenarioHandler(EventToCommandArgs args)
         {
             //var parameter = args.CommandParameter;
         }
         #endregion
-        readonly List<Tuple<IHaveProperties, Window>> _openPropertyWindows = new List<Tuple<IHaveProperties, Window>>();
+
         [MediatorMessageSink(MediatorMessage.ShowProperties)]
         public void ShowProperties(IHaveProperties propertyViewModel)
         {
             var target = _openPropertyWindows.Find(property => property.Item1 == propertyViewModel);
             if (target == null)
             {
-                var window = _visualizer.ShowWindow(propertyViewModel.PropertyViewName, propertyViewModel, true, (s, e) => _openPropertyWindows.Remove(_openPropertyWindows.Find(property => property.Item1 == (IHaveProperties)e.State)));
+                var window = _visualizer.ShowWindow(propertyViewModel.PropertyViewName,
+                                                    propertyViewModel,
+                                                    true,
+                                                    (s, e) => _openPropertyWindows.Remove(_openPropertyWindows.Find(property => property.Item1 == (IHaveProperties)e.State)));
                 _openPropertyWindows.Add(new Tuple<IHaveProperties, Window>(propertyViewModel, window));
             }
             else
@@ -100,23 +96,20 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (MouseDepth > 0) throw new AnalysisPointLocationException("Analysis Points cannot be placed on land.");
             if (Scenario == null || Scenario.Bathymetry == null) return;
-            Database.Add(new AnalysisPoint { Geo = MouseGeo, Scenario = Scenario }, (Bathymetry)_cache[Scenario.Bathymetry], true);
+            Database.Add(new AnalysisPoint {Geo = MouseGeo, Scenario = Scenario}, (Bathymetry)_cache[Scenario.Bathymetry], true);
         }
+
         #region ImportScenarioFileCommand
-        public SimpleCommand<object, object> ImportScenarioFileCommand
-        {
-            get { return _importScenarioFile ?? (_importScenarioFile = new SimpleCommand<object, object>(ImportScenarioFileHandler)); }
-        }
+        private SimpleCommand<object, object> _importScenarioFile;
 
-        SimpleCommand<object, object> _importScenarioFile;
+        public SimpleCommand<object, object> ImportScenarioFileCommand { get { return _importScenarioFile ?? (_importScenarioFile = new SimpleCommand<object, object>(ImportScenarioFileHandler)); } }
 
-        void ImportScenarioFileHandler(object o)
+        private void ImportScenarioFileHandler(object o)
         {
             var vm = new ImportScenarioFileViewModel(Database, _cache, _plugins);
             var result = _visualizer.ShowDialog("ImportScenarioFileView", vm);
             if (result.HasValue && result.Value) Scenario = vm.Scenario;
         }
         #endregion
-
     }
 }

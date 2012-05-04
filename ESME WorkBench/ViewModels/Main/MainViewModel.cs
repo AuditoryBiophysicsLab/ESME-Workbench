@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
@@ -34,8 +33,6 @@ namespace ESMEWorkbench.ViewModels.Main
     public partial class MainViewModel : ViewModelBase
     {
         #region Private fields
-
-        readonly IHRCOpenFileService _openFile;
         readonly IHRCSaveFileService _saveFile;
         readonly IPluginManagerService _plugins;
         readonly EnvironmentalCacheService _cache;
@@ -49,7 +46,14 @@ namespace ESMEWorkbench.ViewModels.Main
 
         #region Constructor
         [ImportingConstructor]
-        public MainViewModel(IViewAwareStatus viewAwareStatus, IMasterDatabaseService database, IMessageBoxService messageBox, IUIVisualizerService visualizer, IHRCSaveFileService saveFile, TransmissionLossCalculatorService transmissionLoss, IHRCOpenFileService openFile, IPluginManagerService plugins, EnvironmentalCacheService cache)
+        public MainViewModel(IViewAwareStatus viewAwareStatus,
+                             IMasterDatabaseService database,
+                             IMessageBoxService messageBox,
+                             IUIVisualizerService visualizer,
+                             IHRCSaveFileService saveFile,
+                             TransmissionLossCalculatorService transmissionLoss,
+                             IPluginManagerService plugins,
+                             EnvironmentalCacheService cache)
         {
             MainWindowTitle = "ESME Workbench: <No scenario loaded>";
             try
@@ -67,26 +71,19 @@ namespace ESMEWorkbench.ViewModels.Main
             _visualizer = visualizer;
             _saveFile = saveFile;
             _transmissionLoss = transmissionLoss;
-            _openFile = openFile;
             _plugins = plugins;
             _cache = cache;
             MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
-            if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database")))
-                Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
+            if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"))) Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
             Database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
             Locations = Database.Context.Locations.Local;
             Scenarios = Database.Context.Scenarios.Local;
             Cursor = Cursors.Arrow;
             _transmissionLoss.RangeCellSize = Globals.AppSettings.BellhopSettings.RangeCellSize;
             _transmissionLoss.DepthCellSize = Globals.AppSettings.BellhopSettings.DepthCellSize;
-            _cache.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == "BusyCount") CacheActivity = _cache.BusyCount > 0 ? string.Format("Cache: {0} importing", _cache.BusyCount) : "Cache: idle";
-            };
-            _transmissionLoss.WorkQueue.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == "Count") TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0 ? string.Format("TL: {0} queued", _transmissionLoss.WorkQueue.Keys.Count) : "TL: idle";
-            };
+            _cache.PropertyChanged += (s, e) => { if (e.PropertyName == "BusyCount") CacheActivity = _cache.BusyCount > 0 ? string.Format("Cache: {0} importing", _cache.BusyCount) : "Cache: idle"; };
+            _transmissionLoss.WorkQueue.PropertyChanged +=
+                (s, e) => { if (e.PropertyName == "Count") TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0 ? string.Format("TL: {0} queued", _transmissionLoss.WorkQueue.Keys.Count) : "TL: idle"; };
 
             if (Designer.IsInDesignMode) return;
 
@@ -112,7 +109,6 @@ namespace ESMEWorkbench.ViewModels.Main
             base.OnDispose();
             Mediator.Instance.Unregister(this);
         }
-
         #endregion
 
         public Geo MouseGeo { get; set; }
@@ -184,29 +180,22 @@ namespace ESMEWorkbench.ViewModels.Main
 #endif
         }
 
-        [Initialize("Cache: idle")]
-        public string CacheActivity { get; set; }
-        [Initialize("TL: idle")]
-        public string TransmissionLossActivity { get; set; }
+        [Initialize("Cache: idle")] public string CacheActivity { get; set; }
+        [Initialize("TL: idle")] public string TransmissionLossActivity { get; set; }
 
-        [Initialize("Lat: N/A Lon: N/A")]
-        public string MouseLocationInfo { get; private set; }
+        [Initialize("Lat: N/A Lon: N/A")] public string MouseLocationInfo { get; private set; }
 
         public float? MouseDepth { get; private set; }
-        [Initialize("Depth: N/A")]
-        public string MouseDepthInfo { get; private set; }
+        [Initialize("Depth: N/A")] public string MouseDepthInfo { get; private set; }
 
         public SedimentSample MouseSediment { get; private set; }
-        [Initialize("Sediment: N/A")]
-        public string MouseSedimentInfo { get; private set; }
+        [Initialize("Sediment: N/A")] public string MouseSedimentInfo { get; private set; }
 
         public float? MouseWindSpeed { get; private set; }
-        [Initialize("Wind Speed: N/A")]
-        public string MouseWindSpeedInfo { get; private set; }
+        [Initialize("Wind Speed: N/A")] public string MouseWindSpeedInfo { get; private set; }
 
         public SoundSpeedProfile MouseSoundSpeed { get; private set; }
-        [Initialize("Sound Speed: N/A")]
-        public string MouseSoundSpeedInfo { get; private set; }
+        [Initialize("Sound Speed: N/A")] public string MouseSoundSpeedInfo { get; private set; }
 
         public bool IsDebugMode
         {
@@ -222,11 +211,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         public MapLayerCollection CurrentMapLayers { get; set; }
 
-        public int SelectedRibbonTabIndex
-        {
-            get { return Settings.Default.SelectedRibbonTabIndex; }
-            set { Settings.Default.SelectedRibbonTabIndex = value; }
-        }
+        public int SelectedRibbonTabIndex { get { return Settings.Default.SelectedRibbonTabIndex; } set { Settings.Default.SelectedRibbonTabIndex = value; } }
 
         void ShowAboutView()
         {
@@ -235,7 +220,6 @@ namespace ESMEWorkbench.ViewModels.Main
         }
 
         #region PreviewKeyDownCommand
-
         public SimpleCommand<object, EventToCommandArgs> PreviewKeyDownCommand
         {
             get
@@ -249,7 +233,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
                     // get KeyEventArgs
                     var keyEventArgs = (KeyEventArgs)args.EventArgs;
-                    
+
                     // get the orginal event sender
                     // var sender = args.Sender; 
                     switch (keyEventArgs.Key)
@@ -264,7 +248,6 @@ namespace ESMEWorkbench.ViewModels.Main
         }
 
         SimpleCommand<object, EventToCommandArgs> _previewKeyDown;
-
         #endregion
 
         [MediatorMessageSink(MediatorMessage.ShowTransmissionLossQueueView), UsedImplicitly]
@@ -300,7 +283,8 @@ namespace ESMEWorkbench.ViewModels.Main
                 }
             }
         }
-        readonly static object LockObject = new object();
+
+        static readonly object LockObject = new object();
         Window _queueView;
 
         public Cursor Cursor { get; set; }
@@ -322,20 +306,13 @@ namespace ESMEWorkbench.ViewModels.Main
         }
 
         [MediatorMessageSink(MediatorMessage.MapDoubleClick), UsedImplicitly]
-        void MapDoubleClick(Geo geo)
-        {
-            Debug.WriteLine("Map double click at {0}", geo);
-        }
+        void MapDoubleClick(Geo geo) { Debug.WriteLine("Map double click at {0}", geo); }
 
         [MediatorMessageSink(MediatorMessage.ViewTransmissionLoss), UsedImplicitly]
         void ViewTransmissionLoss(ESME.Scenarios.TransmissionLoss transmissionLoss)
         {
-           var transmissionLossViewModel = new TransmissionLossViewModel
-                                                {
-                                                    TransmissionLoss = transmissionLoss,
-                                                };
-            
-            
+            var transmissionLossViewModel = new TransmissionLossViewModel {TransmissionLoss = transmissionLoss,};
+
             var window = _visualizer.ShowWindow("TransmissionLossWindowView", transmissionLossViewModel);
             transmissionLossViewModel.Window = window;
             transmissionLossViewModel.SaveFileService = _saveFile;
