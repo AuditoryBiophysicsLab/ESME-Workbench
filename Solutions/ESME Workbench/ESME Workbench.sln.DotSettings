@@ -170,7 +170,7 @@
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=71B7F0A870607A47B2BC307B4D98B556/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/@KeyIndexDefined">True</s:Boolean>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=71B7F0A870607A47B2BC307B4D98B556/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">4.0</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=71B7F0A870607A47B2BC307B4D98B556/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/Type/@EntryValue">InCSharpTypeMember</s:String>
-	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=71B7F0A870607A47B2BC307B4D98B556/Shortcut/@EntryValue">vmc1</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=71B7F0A870607A47B2BC307B4D98B556/Shortcut/@EntryValue">vmcc</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=71B7F0A870607A47B2BC307B4D98B556/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=71B7F0A870607A47B2BC307B4D98B556/Text/@EntryValue">#region $COMMANDNAME$Command&#xD;
 public SimpleCommand&lt;object, object&gt; $COMMANDNAME$Command&#xD;
@@ -329,7 +329,7 @@ public $Type$ $Name$&#xD;
 	
 	
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=EAFFFAD131357C42AEAC3908D67083DE/@KeyIndexDefined">True</s:Boolean>
-	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=EAFFFAD131357C42AEAC3908D67083DE/Shortcut/@EntryValue">vmcc</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=EAFFFAD131357C42AEAC3908D67083DE/Shortcut/@EntryValue">vmc1</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=EAFFFAD131357C42AEAC3908D67083DE/Description/@EntryValue">ViewModel conditional command (has an IsCommandEnabled property)</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=EAFFFAD131357C42AEAC3908D67083DE/Text/@EntryValue">#region $COMMANDNAME$Command&#xD;
 public SimpleCommand&lt;object, EventToCommandArgs&gt; $COMMANDNAME$Command&#xD;

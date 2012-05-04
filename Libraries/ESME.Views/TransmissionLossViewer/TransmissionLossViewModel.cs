@@ -104,9 +104,10 @@ namespace ESME.Views.TransmissionLossViewer
         #endregion
 
         #region public Scenario Scenario { get; set; }
-        Scenarios.TransmissionLoss _transmissionLoss;
+        ESME.Scenarios.TransmissionLoss _transmissionLoss;
 
-        [Affects("Radials", "RadialCount", "SelectedRadialIndex", "SelectedRadial", "SelectedBearingGeometry")] public Scenarios.TransmissionLoss TransmissionLoss
+        [Affects("Radials", "RadialCount", "SelectedRadialIndex", "SelectedRadial", "SelectedBearingGeometry")]
+        public ESME.Scenarios.TransmissionLoss TransmissionLoss
         {
             get { return _transmissionLoss; }
             set

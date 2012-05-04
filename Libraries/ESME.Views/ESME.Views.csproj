@@ -150,6 +150,10 @@
       <DependentUpon>UtilitiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Misc\UtilitiesViewModel.cs" />
+    <Compile Include="Scenarios\CreateScenarioView.xaml.cs">
+      <DependentUpon>CreateScenarioView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\CreateScenarioViewModel.cs" />
     <Compile Include="TestView.xaml.cs">
       <DependentUpon>TestView.xaml</DependentUpon>
     </Compile>
@@ -233,6 +237,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Misc\UtilitiesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\CreateScenarioView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -322,6 +330,7 @@
     <Resource Include="Images\clipboard_text.png" />
     <Resource Include="Images\clipboard_text_16.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESME.Views -class BuildInformation -svnversion "$(ProjectDir) " -output "$(ProjectDir)BuildInformation.cs"
