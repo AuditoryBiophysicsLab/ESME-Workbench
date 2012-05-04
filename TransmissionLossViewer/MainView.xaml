@@ -35,12 +35,6 @@
         </Style>
     </Window.Resources>
     <Window.InputBindings>
-        <KeyBinding Key="S"
-                    Command="{Binding SaveAsCommand}"
-                    Modifiers="Control" />
-        <KeyBinding Key="E"
-                    Command="{Binding ExportAsCommand}"
-                    Modifiers="Control" />
         <KeyBinding Key="W"
                     Command="{Binding CloseCommand}"
                     Modifiers="Control" />
@@ -63,8 +57,6 @@
                         ToolTip="Save to Image">
                     <Image Source="..\Images\PNG_16.png" />
                 </Button>
-            </ToolBar>
-            <ToolBar Band="0" BandIndex="1">
                 <Button Command="{Binding TransmissionLossViewModel.CopyCSVToClipboardCommand}"
                         ToolBar.OverflowMode="Never"
                         ToolTip="Copy text to clipboard">

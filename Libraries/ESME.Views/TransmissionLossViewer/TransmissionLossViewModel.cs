@@ -12,20 +12,26 @@ using HRC.WPF;
 
 namespace ESME.Views.TransmissionLossViewer
 {
-    public class TransmissionLossViewModel : ViewModelBase,IViewStatusAwareInjectionAware
+    public class TransmissionLossViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         public IHRCSaveFileService SaveFileService { get; set; }
-        [Affects("RadialCount")]
-        public ObservableList<Radial> Radials { get; set; }
-        public RadialViewModel RadialViewModel { get; set; }
-        
-        #region public string TitleString { get; set; }
-        private string _titleString = "<no radial selected>";
-        public string TitleString
+        [Affects("RadialCount")] public ObservableList<Radial> Radials { get; set; }
+
+        RadialViewModel _radialViewModel;
+
+        public RadialViewModel RadialViewModel
         {
-            get { return _titleString; }
-            set { _titleString = value; }
-        } 
+            get { return _radialViewModel; }
+            set
+            {
+                _radialViewModel = value;
+                _radialViewModel.PropertyChanged += (s, e) => { if (e.PropertyName == "WriteableBitmap") Window.Activate(); };
+            }
+        }
+
+        #region public string TitleString { get; set; }
+        string _titleString = "<no radial selected>";
+        public string TitleString { get { return _titleString; } set { _titleString = value; } }
         #endregion
 
         #region public int RadialCount { get; }
@@ -36,21 +42,20 @@ namespace ESME.Views.TransmissionLossViewer
                 if (TransmissionLoss == null) return 0;
                 return Radials.Count - 1;
             }
-        } 
+        }
         #endregion
 
         #region public int SelectedRadialIndex {get; set;}
         int _selectedRadialIndex;
 
-        [Affects("SelectedBearingGeometry","SelectedRadial","TitleString")]
-        public int SelectedRadialIndex
+        [Affects("SelectedBearingGeometry", "SelectedRadial", "TitleString")] public int SelectedRadialIndex
         {
             get { return _selectedRadialIndex; }
             set
             {
                 _selectedRadialIndex = value;
                 TitleString = Radials == null ? "<no radial selected>" : string.Format("Radial bearing: {0:000.0} degrees", Radials[_selectedRadialIndex].Bearing);
-                if(RadialViewModel!=null) RadialViewModel.Radial = Radials == null ? null:Radials[_selectedRadialIndex];
+                if (RadialViewModel != null) RadialViewModel.Radial = Radials == null ? null : Radials[_selectedRadialIndex];
             }
         }
         #endregion
@@ -82,7 +87,8 @@ namespace ESME.Views.TransmissionLossViewer
         #endregion
 
         #region public Window Window { get; set; }
-        private Window _window;
+        Window _window;
+
         public Window Window
         {
             get { return _window; }
@@ -91,16 +97,16 @@ namespace ESME.Views.TransmissionLossViewer
                 _window = value;
                 if (RadialViewModel == null)
                 {
-                    RadialViewModel = new RadialViewModel(_window.FindChildren<RadialView>().First()) { Radial = Radials == null ? null : Radials[_selectedRadialIndex] };
+                    RadialViewModel = new RadialViewModel(_window.FindChildren<RadialView>().First()) {Radial = Radials == null ? null : Radials[_selectedRadialIndex]};
                 }
             }
-        } 
+        }
         #endregion
 
         #region public Scenario Scenario { get; set; }
-        private Scenarios.TransmissionLoss _transmissionLoss;
-        [Affects("Radials", "RadialCount", "SelectedRadialIndex", "SelectedRadial", "SelectedBearingGeometry")]
-        public Scenarios.TransmissionLoss TransmissionLoss
+        Scenarios.TransmissionLoss _transmissionLoss;
+
+        [Affects("Radials", "RadialCount", "SelectedRadialIndex", "SelectedRadial", "SelectedBearingGeometry")] public Scenarios.TransmissionLoss TransmissionLoss
         {
             get { return _transmissionLoss; }
             set
@@ -109,21 +115,18 @@ namespace ESME.Views.TransmissionLossViewer
                 Radials = _transmissionLoss == null ? null : new ObservableList<Radial>(from r in _transmissionLoss.Radials orderby r.Bearing select r);
                 SelectedRadialIndex = 0;
             }
-        } 
+        }
         #endregion
 
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
         {
             if (RadialViewModel == null)
-                RadialViewModel =new RadialViewModel(((Window) viewAwareStatusService.View).FindChildren<RadialView>().First());
+                RadialViewModel = new RadialViewModel(((Window)viewAwareStatusService.View).FindChildren<RadialView>().First());
         }
 
         #region commands
-        private bool AreSaveCommandsEnabled
-        {
-            get { return RadialViewModel != null && RadialViewModel.Radial != null; }
-        }
-        
+        bool AreSaveCommandsEnabled { get { return RadialViewModel != null && RadialViewModel.Radial != null; } }
+
         #region SaveAsImageCommand
         public SimpleCommand<object, object> SaveAsImageCommand
         {
@@ -136,10 +139,9 @@ namespace ESME.Views.TransmissionLossViewer
             }
         }
 
-        private SimpleCommand<object, object> _saveAsImage;
-        
+        SimpleCommand<object, object> _saveAsImage;
 
-        private void SaveAsImageHandler()
+        void SaveAsImageHandler()
         {
             SaveFileService.Filter = "Portable Network Graphics (*.png)|*.png|JPEG (*.jpg)|*.jpg|TIFF (*.tiff)|*.tiff|Bitmap (*.bmp)|*.bmp|GIF (*.gif)|*.gif";
             SaveFileService.OverwritePrompt = true;
@@ -155,7 +157,6 @@ namespace ESME.Views.TransmissionLossViewer
         #endregion
 
         #region SaveAsCSVCommand
-
         public SimpleCommand<object, object> SaveAsCSVCommand
         {
             get
@@ -167,9 +168,9 @@ namespace ESME.Views.TransmissionLossViewer
             }
         }
 
-        private SimpleCommand<object, object> _saveAsCSV;
+        SimpleCommand<object, object> _saveAsCSV;
 
-        private void SaveAsCSVHandler()
+        void SaveAsCSVHandler()
         {
             SaveFileService.Filter = "Comma-Separated Value (*.csv)|*.csv";
             SaveFileService.OverwritePrompt = true;
@@ -181,11 +182,9 @@ namespace ESME.Views.TransmissionLossViewer
                 RadialViewModel.SaveAsCSV(SaveFileService.FileName);
             }
         }
-
         #endregion
 
         #region CopyImageToClipboardCommand
-
         public SimpleCommand<object, object> CopyImageToClipboardCommand
         {
             get
@@ -197,17 +196,12 @@ namespace ESME.Views.TransmissionLossViewer
             }
         }
 
-        private SimpleCommand<object, object> _copyImageToClipboard;
+        SimpleCommand<object, object> _copyImageToClipboard;
 
-        private void CopyImageToClipboardHandler()
-        {
-            Clipboard.SetImage(RadialViewModel.ToBitmapSource());
-        }
-
+        void CopyImageToClipboardHandler() { Clipboard.SetImage(RadialViewModel.ToBitmapSource()); }
         #endregion
 
         #region CopyCSVToClipboardCommand
-
         public SimpleCommand<object, object> CopyCSVToClipboardCommand
         {
             get
@@ -219,14 +213,19 @@ namespace ESME.Views.TransmissionLossViewer
             }
         }
 
-        private SimpleCommand<object, object> _copyCSVToClipboard;
-        
-        private void CopyCSVToClipboardHandler()
-        {
-            Clipboard.SetText(RadialViewModel.ToCSV());
-        }
+        SimpleCommand<object, object> _copyCSVToClipboard;
 
+        void CopyCSVToClipboardHandler() { Clipboard.SetText(RadialViewModel.ToCSV()); }
         #endregion
+
+        #region InternalViewClosingCommand
+        public SimpleCommand<object, object> InternalViewClosingCommand { get { return _internalViewClosing ?? (_internalViewClosing = new SimpleCommand<object, object>(InternalViewClosingHandler)); } }
+
+        SimpleCommand<object, object> _internalViewClosing;
+
+        static void InternalViewClosingHandler(object o) { Properties.Settings.Default.Save(); }
+        #endregion
+
         #endregion
     }
 }

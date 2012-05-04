@@ -1,13 +1,36 @@
 ﻿<Window x:Class="ESME.Views.TransmissionLossViewer.TransmissionLossWindowView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer" Title="{Binding TitleString}" Height="600" Width="800"
-        WindowStyle="ToolWindow" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" mc:Ignorable="d" d:DataContext="{d:DesignInstance TransmissionLossViewer:TransmissionLossViewModel}">
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Properties="clr-namespace:ESME.Views.Properties"
+        xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC" Title="{Binding TitleString}"
+        Width="{Binding Source={x:Static Properties:Settings.Default},
+                        Path=TLWidth,
+                        Mode=TwoWay}"
+        Height="{Binding Source={x:Static Properties:Settings.Default},
+                         Path=TLHeight,
+                         Mode=TwoWay}"
+        d:DataContext="{d:DesignInstance TransmissionLossViewer:TransmissionLossViewModel}"
+        Left="{Binding Source={x:Static Properties:Settings.Default},
+                       Path=TLLeft,
+                       Mode=TwoWay}"
+        Top="{Binding Source={x:Static Properties:Settings.Default},
+                      Path=TLTop,
+                      Mode=TwoWay}"
+        WindowStyle="ToolWindow"
+        mc:Ignorable="d">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <WPF:EventToCommandTrigger Command="{Binding InternalViewClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <DockPanel>
         <ToolBarTray Height="22" DockPanel.Dock="Top">
             <ToolBar Band="0" BandIndex="0">
-                <Button Command="{Binding SaveAsCSVCommand }"
+                <Button Command="{Binding SaveAsCSVCommand}"
                         ToolBar.OverflowMode="Never"
                         ToolTip="Save to CSV">
                     <Image Source="..\Images\CSV_16.png" />
@@ -17,20 +40,18 @@
                         ToolTip="Save to Image">
                     <Image Source="..\Images\PNG_16.png" />
                 </Button>
-            </ToolBar>
-            <ToolBar Band="0" BandIndex="1">
                 <Button Command="{Binding CopyCSVToClipboardCommand}"
-                        ToolBar.OverflowMode="Never"
+                        ToolBar.OverflowMode="AsNeeded"
                         ToolTip="Copy text to clipboard">
                     <Image Source="..\Images\clipboard_text_16.png" />
                 </Button>
                 <Button Command="{Binding CopyImageToClipboardCommand}"
-                        ToolBar.OverflowMode="AsNeeded"
+                        ToolBar.OverflowMode="Never"
                         ToolTip="Copy image to clipboard">
                     <Image Source="..\Images\clipboard_add_16.png" />
                 </Button>
             </ToolBar>
         </ToolBarTray>
-        <TransmissionLossViewer:TransmissionLossView DockPanel.Dock="Bottom"/>
+        <TransmissionLossViewer:TransmissionLossView DockPanel.Dock="Bottom" />
     </DockPanel>
 </Window>

@@ -20,12 +20,12 @@ namespace TransmissionLossViewer
     class MainViewModel : ViewModelBase
     {
         readonly string _databaseDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"ESME Workbench\Database");
+        public string TitleString { get; set; }
+        public int RadialCount { get; set; }
         public IMasterDatabaseService Database { get; private set; }
         [Initialize] public ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
         [Initialize] public ObservableList<Tuple<string, TransmissionLoss>> AnalysisPointModes { get; set; }
         [Initialize] public ObservableList<Radial> Radials { get; set; }
-        public string TitleString { get; set; }
-        public int RadialCount { get; set; }
         [Initialize] public TransmissionLossViewModel TransmissionLossViewModel { get; set; }
 
         #region public Scenario Scenario { get; set; }

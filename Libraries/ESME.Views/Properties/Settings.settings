@@ -2,9 +2,6 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ESME.Views.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="TransmissionLayersWidth" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">400</Value>
-    </Setting>
     <Setting Name="ExperimentReportDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
@@ -13,6 +10,18 @@
     </Setting>
     <Setting Name="LastCSVExportFileDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TLTop" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="TLLeft" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="TLHeight" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">600</Value>
+    </Setting>
+    <Setting Name="TLWidth" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">800</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Input;
 using ESME.Database;
 using ESME.Environment;
 using ESME.Locations;
@@ -49,7 +50,11 @@ namespace ESME.Scenarios
         #region ViewAnalysisPointCommand
         public SimpleCommand<object, EventToCommandArgs> ViewAnalysisPointCommand
         {
-            get { return _viewAnalysisPoint ?? (_viewAnalysisPoint = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ViewAnalysisPoint, this))); }
+            get { return _viewAnalysisPoint ?? (_viewAnalysisPoint = new SimpleCommand<object, EventToCommandArgs>(o =>
+            {
+                MediatorMessage.Send(MediatorMessage.ViewAnalysisPoint, this);
+                ((MouseEventArgs)o.EventArgs).Handled = true;
+            })); }
         }
 
         SimpleCommand<object, EventToCommandArgs> _viewAnalysisPoint;

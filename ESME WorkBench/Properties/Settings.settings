@@ -26,74 +26,11 @@
     <Setting Name="ShowPanZoom" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="LastShapefileDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="LastOverlayFileDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="LastScenarioFileDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="LastExperimentFileDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="LastEnvironmentFileDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="TLTop" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">0</Value>
-    </Setting>
-    <Setting Name="TLLeft" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">0</Value>
-    </Setting>
-    <Setting Name="TLWidth" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">800</Value>
-    </Setting>
-    <Setting Name="TLHeight" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">600</Value>
-    </Setting>
-    <Setting Name="LastCSVExportFileDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="LastImageExportFileDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="ShowScaleBar" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="LastBathymetryFileDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="LastAnimatPopulationDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="SecondsPerTimeStep" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
-    </Setting>
-    <Setting Name="ExperimentReportDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="TransmissionLayersWidth" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">150</Value>
-    </Setting>
-    <Setting Name="LogViewTop" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">0</Value>
-    </Setting>
-    <Setting Name="LogViewLeft" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">0</Value>
-    </Setting>
-    <Setting Name="LogViewHeight" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">500</Value>
-    </Setting>
-    <Setting Name="LogViewWidth" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">800</Value>
-    </Setting>
-    <Setting Name="LogLastDir" Type="System.String" Scope="User">
-      <Value Profile="(Default)">C:\</Value>
-    </Setting>
-    <Setting Name="LogListWidth" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">200</Value>
     </Setting>
     <Setting Name="SelectedRibbonTabIndex" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
