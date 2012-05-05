@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Controls;
@@ -37,6 +36,7 @@ namespace ESME.Plugins
             };
         }
 
+        [XmlIgnore] public Control SelectionControl { get; protected set; }
         [XmlIgnore] public string PluginName { get; protected set; }
         [XmlIgnore] public string PluginDescription { get; protected set; }
         [XmlIgnore] public PluginType PluginType { get; protected set; }
@@ -79,9 +79,8 @@ namespace ESME.Plugins
         [XmlIgnore] public bool IsTimeVariantData { get; protected set; }
         [XmlIgnore] public TimePeriod[] AvailableTimePeriods { get; protected set; }
         [XmlIgnore] public EnvironmentDataType EnvironmentDataType { get; protected set; }
-        [XmlIgnore] public Control SelectionControl { get; protected set; }
         [XmlIgnore] public object SelectionControlViewModel { get; protected set; }
-        [XmlIgnore] public abstract IEnumerable<EnvironmentalDataSet> SelectedDataSets { get; }
+        [XmlIgnore] public abstract EnvironmentalDataSet SelectedDataSet { get; }
 
         protected void CheckResolutionAndTimePeriod(float resolution, TimePeriod timePeriod)
         {

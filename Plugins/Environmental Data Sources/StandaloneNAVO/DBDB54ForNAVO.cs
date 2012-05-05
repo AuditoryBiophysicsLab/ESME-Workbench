@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Windows.Controls;
 using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Locations;
@@ -10,9 +11,9 @@ using ESME.Plugins;
 using ESME.Views.Locations;
 using HRC.Navigation;
 using HRC.Utility;
-using HRC.Validation;
 using NAVODatabaseAdapter;
 using StandaloneNAVOPlugin.Controls;
+using ValidationRule = HRC.Validation.ValidationRule;
 
 namespace StandaloneNAVOPlugin
 {
@@ -132,18 +133,13 @@ namespace StandaloneNAVOPlugin
             CheckResolutionAndTimePeriod(resolution, timePeriod);
             return DBDB.Extract(DatabaseLocation, ExtractorLocation, resolution, geoRect, progress);
         }
-        public override IEnumerable<EnvironmentalDataSet> SelectedDataSets
+
+        public override EnvironmentalDataSet SelectedDataSet
         {
             get
             {
-                return from simpleSelection in ((MultipleSelectionsViewModel<float>)SelectionControlViewModel).SimpleSelectionViewModels
-                       where simpleSelection.IsSelected
-                       select new EnvironmentalDataSet
-                       {
-                           SourcePlugin = PluginIdentifier,
-                           Resolution = simpleSelection.Value,
-                           TimePeriod = TimePeriod.Invalid,
-                       };
+                var selectedItem = ((MultipleSelectionsViewModel<float>)SelectionControlViewModel).SelectedItem;
+                return new EnvironmentalDataSet { SourcePlugin = PluginIdentifier, Resolution = selectedItem.Value, TimePeriod = TimePeriod.Invalid };
             }
         }
     }

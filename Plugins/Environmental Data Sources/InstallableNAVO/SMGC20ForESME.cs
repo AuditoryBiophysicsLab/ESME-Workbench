@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.Composition;
+﻿using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using ESME.Environment;
@@ -75,19 +74,13 @@ namespace InstallableNAVOPlugin
             result.TimePeriods.Add(timePeriodData);
             return result;
         }
-        public override IEnumerable<EnvironmentalDataSet> SelectedDataSets
+
+        public override EnvironmentalDataSet SelectedDataSet
         {
             get
             {
-                return from simpleSelectionViewModel in ((MultipleSelectionsViewModel<float>)SelectionControlViewModel).SimpleSelectionViewModels
-                       where simpleSelectionViewModel.IsSelected
-                       from month in NAVOConfiguration.AllMonths
-                       select new EnvironmentalDataSet
-                       {
-                           SourcePlugin = PluginIdentifier,
-                           Resolution = simpleSelectionViewModel.Value,
-                           TimePeriod = month,
-                       };
+                var selectedItem = ((MultipleSelectionsViewModel<float>)SelectionControlViewModel).SelectedItem;
+                return new EnvironmentalDataSet { SourcePlugin = PluginIdentifier, Resolution = selectedItem.Value, TimePeriod = TimePeriod.Invalid };
             }
         }
     }

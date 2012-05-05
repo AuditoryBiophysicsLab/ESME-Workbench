@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using ESME;
 using ESME.Environment;
@@ -8,6 +9,7 @@ using ESME.Mapping;
 using ESME.Model;
 using ESME.Scenarios;
 using ESME.Views.Locations;
+using ESME.Views.Scenarios;
 using ESMEWorkbench.ViewModels.Map;
 using ESMEWorkbench.ViewModels.Tree;
 using HRC.Aspects;
@@ -19,9 +21,9 @@ namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {
-        private readonly List<Tuple<IHaveProperties, Window>> _openPropertyWindows = new List<Tuple<IHaveProperties, Window>>();
+        readonly List<Tuple<IHaveProperties, Window>> _openPropertyWindows = new List<Tuple<IHaveProperties, Window>>();
 
-        private Scenario _scenario;
+        Scenario _scenario;
 
         public MapLayerCollection ScenarioMapLayers { get; set; }
 
@@ -61,15 +63,19 @@ namespace ESMEWorkbench.ViewModels.Main
         public string MainWindowTitle { get; set; }
 
         #region CreateScenarioCommand
-        private SimpleCommand<object, EventToCommandArgs> _createScenario;
+        SimpleCommand<object, EventToCommandArgs> _createScenario;
 
         public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand { get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => IsCreateScenarioCommandEnabled, CreateScenarioHandler)); } }
 
-        private static bool IsCreateScenarioCommandEnabled { get { return true; } }
+        static bool IsCreateScenarioCommandEnabled { get { return true; } }
 
-        private static void CreateScenarioHandler(EventToCommandArgs args)
+        void CreateScenarioHandler(EventToCommandArgs args)
         {
             //var parameter = args.CommandParameter;
+            var vm = new CreateScenarioViewModel { Locations = Database.Context.Locations.Local, PluginManager = _plugins, Location = Database.Context.Locations.Local.First() };
+            var result = _visualizer.ShowDialog("CreateScenarioView", vm);
+            if ((!result.HasValue) || (!result.Value)) return;
+            //Database.Add(new Scenario{});
         }
         #endregion
 
@@ -96,15 +102,15 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (MouseDepth > 0) throw new AnalysisPointLocationException("Analysis Points cannot be placed on land.");
             if (Scenario == null || Scenario.Bathymetry == null) return;
-            Database.Add(new AnalysisPoint {Geo = MouseGeo, Scenario = Scenario}, (Bathymetry)_cache[Scenario.Bathymetry], true);
+            Database.Add(new AnalysisPoint { Geo = MouseGeo, Scenario = Scenario }, (Bathymetry)_cache[Scenario.Bathymetry], true);
         }
 
         #region ImportScenarioFileCommand
-        private SimpleCommand<object, object> _importScenarioFile;
+        SimpleCommand<object, object> _importScenarioFile;
 
         public SimpleCommand<object, object> ImportScenarioFileCommand { get { return _importScenarioFile ?? (_importScenarioFile = new SimpleCommand<object, object>(ImportScenarioFileHandler)); } }
 
-        private void ImportScenarioFileHandler(object o)
+        void ImportScenarioFileHandler(object o)
         {
             var vm = new ImportScenarioFileViewModel(Database, _cache, _plugins);
             var result = _visualizer.ShowDialog("ImportScenarioFileView", vm);

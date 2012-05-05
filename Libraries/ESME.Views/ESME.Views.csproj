@@ -330,7 +330,6 @@
     <Resource Include="Images\clipboard_text.png" />
     <Resource Include="Images\clipboard_text_16.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESME.Views -class BuildInformation -svnversion "$(ProjectDir) " -output "$(ProjectDir)BuildInformation.cs"

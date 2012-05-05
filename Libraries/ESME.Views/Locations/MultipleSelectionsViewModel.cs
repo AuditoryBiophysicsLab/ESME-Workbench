@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using HRC.Aspects;
 using HRC.Utility;
 using HRC.ViewModels;
@@ -7,8 +8,7 @@ namespace ESME.Views.Locations
 {
     public class MultipleSelectionsViewModel<T> : ViewModelBase
     {
-        #region public IList<float> AvailableSelections { get; set; }
-
+        [Affects("IsSingleItem")]
         public IList<T> AvailableSelections
         {
             get { return _availableSelections; }
@@ -25,16 +25,15 @@ namespace ESME.Views.Locations
                         IsEnabled = true,
                         Value = selection,
                     });
+                SelectedItem = SimpleSelectionViewModels.First();
             }
         }
-
         IList<T> _availableSelections;
 
-        #endregion
-
         public string UnitName { get; set; }
-
+        public bool IsSingleItem { get { return _availableSelections == null || _availableSelections.Count <= 1; } }
         [Initialize] public ObservableList<SimpleSelectionViewModel<T>> SimpleSelectionViewModels { get; set; }
+        public SimpleSelectionViewModel<T> SelectedItem { get; set; }
     }
 
     public class SimpleSelectionViewModel<T> : ViewModelBase

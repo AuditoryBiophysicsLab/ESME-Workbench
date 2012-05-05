@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Windows.Controls;
 using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Environment.NAVO;
@@ -11,9 +12,9 @@ using ESME.Plugins;
 using ESME.Views.Locations;
 using HRC.Navigation;
 using HRC.Utility;
-using HRC.Validation;
 using NAVODatabaseAdapter;
 using StandaloneNAVOPlugin.Controls;
+using ValidationRule = HRC.Validation.ValidationRule;
 
 namespace StandaloneNAVOPlugin
 {
@@ -104,19 +105,13 @@ namespace StandaloneNAVOPlugin
             result.Add(GDEM.ReadFile(DataLocation, timePeriod, geoRect));
             return result;
         }
-        public override IEnumerable<EnvironmentalDataSet> SelectedDataSets
+
+        public override EnvironmentalDataSet SelectedDataSet
         {
             get
             {
-                return from simpleSelectionViewModel in ((MultipleSelectionsViewModel<float>)SelectionControlViewModel).SimpleSelectionViewModels
-                       where simpleSelectionViewModel.IsSelected
-                       from month in NAVOConfiguration.AllMonths
-                       select new EnvironmentalDataSet
-                       {
-                           SourcePlugin = PluginIdentifier,
-                           Resolution = simpleSelectionViewModel.Value,
-                           TimePeriod = month,
-                       };
+                var selectedItem = ((MultipleSelectionsViewModel<float>)SelectionControlViewModel).SelectedItem;
+                return new EnvironmentalDataSet { SourcePlugin = PluginIdentifier, Resolution = selectedItem.Value, TimePeriod = TimePeriod.Invalid };
             }
         }
     }

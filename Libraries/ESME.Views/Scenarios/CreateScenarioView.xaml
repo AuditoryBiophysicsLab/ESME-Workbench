@@ -1,41 +1,86 @@
 ﻿<Window x:Class="ESME.Views.Scenarios.CreateScenarioView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Controls="clr-namespace:ESME.Views.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:l="clr-namespace:ESME.Views.Scenarios"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         Title="Create Scenario"
         d:DataContext="{d:DesignInstance l:CreateScenarioViewModel}"
+        Grid.IsSharedSizeScope="True"
+        SizeToContent="WidthAndHeight"
         mc:Ignorable="d">
+    <Window.Resources>
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <DockPanel LastChildFill="True">
+                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
+                                <AdornedElementPlaceholder />
+                            </Border>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
     <DockPanel>
-        <Grid Margin="5" DockPanel.Dock="Top">
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Row="0"
-                       Grid.Column="0"
-                       VerticalAlignment="Center"
-                       Text="Scenario name"
-                       TextAlignment="Right" />
-            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ScenarioName, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock Grid.Row="1"
-                       Grid.Column="0"
-                       VerticalAlignment="Center"
-                       Text="Location"
-                       TextAlignment="Right" />
-            <ComboBox Grid.Row="1" Grid.Column="1" DisplayMemberPath="LocationName" ItemsSource="{Binding Locations}" />
-        </Grid>
+        <Border BorderThickness="0" DockPanel.Dock="Top" Padding="5">
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           Margin="0 0 5 0"
+                           VerticalAlignment="Center"
+                           Text="Scenario name"
+                           TextAlignment="Right" />
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ScenarioName, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
+                <Separator Grid.Row="1" Grid.ColumnSpan="2" Margin="0 5 0 5" />
+                <TextBlock Grid.Row="2"
+                           Grid.Column="0"
+                           Margin="0 0 5 0"
+                           VerticalAlignment="Center"
+                           Text="Location"
+                           TextAlignment="Right" />
+                <ComboBox Grid.Row="2"
+                          Grid.Column="1"
+                          DisplayMemberPath="Name"
+                          ItemsSource="{Binding Locations}"
+                          SelectedItem="{Binding Location}" />
+            </Grid>
+        </Border>
+        <GroupBox DockPanel.Dock="Top" Header="Environmental Data Sources" IsEnabled="{Binding IsValid}">
+            <StackPanel Margin="5" DockPanel.Dock="Left" Orientation="Vertical">
+                <Controls:PluginSelector Grid.Row="0" ItemsSource="{Binding EnvironmentDataSourceViews[Wind]}" PluginTypeName="Wind" SelectedItem="{Binding SelectedPlugins[Wind]}" />
+                <Separator Margin="0 5 0 10" />
+                <Controls:PluginSelector Grid.Row="1" ItemsSource="{Binding EnvironmentDataSourceViews[SoundSpeed]}" PluginTypeName="Sound Speed" SelectedItem="{Binding SelectedPlugins[SoundSpeed]}" />
+                <Separator Margin="0 5 0 10" />
+                <Controls:PluginSelector Grid.Row="2" ItemsSource="{Binding EnvironmentDataSourceViews[Sediment]}" PluginTypeName="Sediment" SelectedItem="{Binding SelectedPlugins[Sediment]}" />
+                <Separator Margin="0 5 0 10" />
+                <Controls:PluginSelector Grid.Row="3" ItemsSource="{Binding EnvironmentDataSourceViews[Bathymetry]}" PluginTypeName="Bathymetry" SelectedItem="{Binding SelectedPlugins[Bathymetry]}" />
+            </StackPanel>
+        </GroupBox>
         <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
             <Button Width="75"
                     Margin="5"
                     Command="{Binding OkCommand}"
                     Content="OK"
-                    IsDefault="True" />
+                    IsDefault="True"
+                    IsEnabled="{Binding IsValid}" />
             <Button Width="75"
                     Margin="5"
                     Command="{Binding CancelCommand}"

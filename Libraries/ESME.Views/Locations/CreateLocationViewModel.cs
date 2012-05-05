@@ -28,7 +28,7 @@ namespace ESME.Views.Locations
             AddEnvironmentDataSourceView(PluginSubtype.SoundSpeed);
             AddEnvironmentDataSourceView(PluginSubtype.Sediment);
             AddEnvironmentDataSourceView(PluginSubtype.Bathymetry);
-            ValidationRules.AddRange(new List<ValidationRule> { LocationNameValidationRule });
+            ValidationRules.Add(LocationNameValidationRule);
         }
 
         readonly EnvironmentalCacheService _cache;
@@ -89,6 +89,7 @@ namespace ESME.Views.Locations
                 GeoRect = EditOverlayViewModel.GeoRect
             };
             _database.Add(location, true);
+#if false
             foreach (var dataSet in from pluginSubtype in new[] { PluginSubtype.Wind, PluginSubtype.SoundSpeed, PluginSubtype.Sediment, PluginSubtype.Bathymetry }
                                     where SelectedPlugins[pluginSubtype] != null
                                     from dataSet in SelectedPlugins[pluginSubtype].SelectedDataSets
@@ -99,6 +100,7 @@ namespace ESME.Views.Locations
                 _database.Add(dataSet, true);
                 _cache.ImportDataset(dataSet);
             }
+#endif
             Globals.AppSettings.Save();
             Window.Close();
         }

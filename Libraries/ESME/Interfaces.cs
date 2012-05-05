@@ -1,4 +1,6 @@
 ﻿using System.Drawing;
+using System.Windows.Controls;
+using System.Xml.Serialization;
 using ESME.Plugins;
 using HRC;
 
@@ -64,6 +66,7 @@ namespace ESME
         PluginType PluginType { get; }
         PluginSubtype PluginSubtype { get; }
         PluginIdentifier PluginIdentifier { get; }
+        Control SelectionControl { get; }
         void LoadSettings();
     }
 }

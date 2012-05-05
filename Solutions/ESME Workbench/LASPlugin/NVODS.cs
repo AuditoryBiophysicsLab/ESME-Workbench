@@ -30,7 +30,7 @@ namespace LASPlugin
             throw new NotImplementedException();
         }
 
-        public override IEnumerable<EnvironmentalDataSet> SelectedDataSets
+        public override EnvironmentalDataSet SelectedDataSet
         {
             get { throw new NotImplementedException(); }
         }

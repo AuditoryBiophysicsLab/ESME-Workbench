@@ -1,8 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Windows.Controls;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
@@ -52,16 +51,12 @@ namespace InstallableNAVOPlugin
             return BST.Extract(Path.Combine(_dataDirectory, RequiredBSTFilename), geoRect, resolution, progress);
         }
 
-        public override IEnumerable<EnvironmentalDataSet> SelectedDataSets
+        public override EnvironmentalDataSet SelectedDataSet
         {
             get
             {
-                return from simpleSelection in ((MultipleSelectionsViewModel<float>)SelectionControlViewModel).SimpleSelectionViewModels where simpleSelection.IsSelected select new EnvironmentalDataSet
-                {
-                    SourcePlugin = PluginIdentifier,
-                    Resolution = simpleSelection.Value,
-                    TimePeriod = TimePeriod.Invalid,
-                };
+                var selectedItem = ((MultipleSelectionsViewModel<float>)SelectionControlViewModel).SelectedItem;
+                return new EnvironmentalDataSet { SourcePlugin = PluginIdentifier, Resolution = selectedItem.Value, TimePeriod = TimePeriod.Invalid };
             }
         }
     }

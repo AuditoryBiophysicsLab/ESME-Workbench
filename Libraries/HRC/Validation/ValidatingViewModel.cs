@@ -13,10 +13,7 @@ namespace HRC.Validation
 {
     public abstract class ValidatingViewModel : ViewModelBase, IDataErrorInfo
     {
-        protected ValidatingViewModel() { ValidationRules = new List<ValidationRule>(); }
-
-        [XmlIgnore, NotMapped]
-        protected List<ValidationRule> ValidationRules { get; set; }
+        [XmlIgnore, NotMapped, Initialize] protected List<ValidationRule> ValidationRules { get; set; }
 
         #region Implementation of IDataErrorInfo
         /// <summary>
@@ -40,7 +37,7 @@ namespace HRC.Validation
                     var ruleIsBroken = !rule.Validate(this, rule);
                     if (!ruleIsBroken) continue;
                     allRulesValid = false;
-                    Debug.WriteLine("{0}: Broken rule on {1} : {2}{3}", DateTime.Now, rule.PropertyName, rule.Description, !string.IsNullOrEmpty(rule.ValidationErrorMessage) ? "\n" + rule.ValidationErrorMessage : "");
+                    //Debug.WriteLine("{0}: Broken rule on {1} : {2}{3}", DateTime.Now, rule.PropertyName, rule.Description, !string.IsNullOrEmpty(rule.ValidationErrorMessage) ? "\n" + rule.ValidationErrorMessage : "");
                     if (!string.IsNullOrEmpty(rule.Description))
                     {
                         errStr += rule.Description + Environment.NewLine;
@@ -51,11 +48,10 @@ namespace HRC.Validation
                         errStr += rule.ValidationErrorMessage + Environment.NewLine;
                         result += rule.ValidationErrorMessage + Environment.NewLine;
                     }
-                    if (string.IsNullOrEmpty(rule.PropertyName) || (rule.PropertyName != columnName)) continue;
                 }
                 IsValid = allRulesValid;
                 Error = !string.IsNullOrEmpty(errStr) ? errStr.Remove(errStr.Length - 2, 2) : errStr;
-                Debug.WriteLine("{0}: this[{1}] : {2}", DateTime.Now, columnName, !string.IsNullOrEmpty(result) ? result.Remove(result.Length - 2, 2) : result == string.Empty ? "(empty)" : "(null)");
+                //Debug.WriteLine("{0}: this[{1}] : {2}", DateTime.Now, columnName, !string.IsNullOrEmpty(result) ? result.Remove(result.Length - 2, 2) : result == string.Empty ? "(empty)" : "(null)");
                 return !string.IsNullOrEmpty(result) ? result.Remove(result.Length - 2, 2) : result;
             }
         }
