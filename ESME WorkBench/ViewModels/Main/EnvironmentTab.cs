@@ -1,7 +1,6 @@
 ﻿using System;
 using ESME.Locations;
 using ESME.Views.Locations;
-using HRC.Aspects;
 using HRC.Navigation;
 using HRC.ViewModels;
 
@@ -10,19 +9,14 @@ namespace ESMEWorkbench.ViewModels.Main
     public partial class MainViewModel
     {
         #region CreateLocationCommand
-        public SimpleCommand<object, object> CreateLocationFromBoundingBoxCommand
+        public SimpleCommand<object, object> CreateLocationCommand
         {
-            get { return _createLocation ?? (_createLocation = new SimpleCommand<object, object>(delegate { return IsCreateLocationCommandEnabled; }, delegate { CreateLocationHandler(); })); }
+            get { return _createLocation ?? (_createLocation = new SimpleCommand<object, object>(CreateLocationHandler)); }
         }
 
         SimpleCommand<object, object> _createLocation;
 
-        static bool IsCreateLocationCommandEnabled
-        {
-            get { return true; }
-        }
-
-        void CreateLocationHandler()
+        void CreateLocationHandler(object o)
         {
             try
             {
@@ -32,8 +26,22 @@ namespace ESMEWorkbench.ViewModels.Main
                 MapViewModel.EditOverlayViewModel.East = (currentExtent.East + currentExtent.Center.Longitude) / 2;
                 MapViewModel.EditOverlayViewModel.West = (currentExtent.West + currentExtent.Center.Longitude) / 2;
                 MapViewModel.EditOverlayViewModel.IsVisible = true;
-                var vm = new CreateLocationViewModel(_plugins, Database, _cache, MapViewModel.EditOverlayViewModel);
-                vm.Window = _visualizer.ShowWindow("CreateLocationView", vm, true, null);
+
+                _visualizer.ShowWindow("CreateLocationView",
+                                       new CreateLocationViewModel { EditOverlayViewModel = MapViewModel.EditOverlayViewModel },
+                                       true,
+                                       (sender, args) =>
+                                       {
+                                           MapViewModel.EditOverlayViewModel.IsVisible = false;
+                                           var vm = (CreateLocationViewModel)args.State;
+                                           if (vm.IsCanceled) return;
+                                           Database.Add(new Location
+                                           {
+                                               Name = vm.LocationName,
+                                               Comments = vm.Comments,
+                                               GeoRect = MapViewModel.EditOverlayViewModel.GeoRect
+                                           }, true);
+                                       }); 
             }
             catch (Exception e) { _messageBox.ShowError(e.Message); }
         }
