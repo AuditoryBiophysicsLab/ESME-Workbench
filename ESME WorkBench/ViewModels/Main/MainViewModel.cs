@@ -137,7 +137,7 @@ namespace ESMEWorkbench.ViewModels.Main
 #if true
             if (Scenario != null && Scenario.Bathymetry != null && _cache.IsCached(Scenario.Bathymetry))
             {
-                MouseDepth = ((Bathymetry)_cache[Scenario.Bathymetry]).Samples.GetNearestPoint(MouseGeo).Data;
+                MouseDepth = ((Bathymetry)_cache[Scenario.Bathymetry].Result).Samples.GetNearestPoint(MouseGeo).Data;
                 MouseDepthInfo = string.Format("Depth: {0:0.#}m", -MouseDepth);
             }
             else
@@ -147,7 +147,7 @@ namespace ESMEWorkbench.ViewModels.Main
             }
             if (Scenario != null && Scenario.Wind != null && _cache.IsCached(Scenario.Wind))
             {
-                MouseWindSpeed = ((Wind)_cache[Scenario.Wind])[Scenario.TimePeriod].EnvironmentData.GetNearestPoint(MouseGeo).Data;
+                MouseWindSpeed = ((Wind)_cache[Scenario.Wind].Result)[Scenario.TimePeriod].EnvironmentData.GetNearestPoint(MouseGeo).Data;
                 MouseWindSpeedInfo = string.Format("Wind Speed: {0:0.#}m/s", MouseWindSpeed);
             }
             else
@@ -157,7 +157,7 @@ namespace ESMEWorkbench.ViewModels.Main
             }
             if (Scenario != null && Scenario.SoundSpeed != null && _cache.IsCached(Scenario.SoundSpeed))
             {
-                MouseSoundSpeed = ((SoundSpeed)_cache[Scenario.SoundSpeed])[Scenario.TimePeriod].EnvironmentData.GetNearestPoint(MouseGeo);
+                MouseSoundSpeed = ((SoundSpeed)_cache[Scenario.SoundSpeed].Result)[Scenario.TimePeriod].EnvironmentData.GetNearestPoint(MouseGeo);
                 MouseSoundSpeedInfo = string.Format("Sound Speed: {0} samples", MouseSoundSpeed.Data.Count);
             }
             else
@@ -169,7 +169,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
             if (Scenario != null && Scenario.Sediment != null && _cache.IsCached(Scenario.Sediment))
             {
-                MouseSediment = ((Sediment)_cache[Scenario.Sediment]).Samples.GetNearestPoint(MouseGeo);
+                MouseSediment = ((Sediment)_cache[Scenario.Sediment].Result).Samples.GetNearestPoint(MouseGeo);
                 MouseSedimentInfo = string.Format("Sediment: {0}", BottomSedimentTypeTable.SedimentNames[MouseSediment.Data.SampleValue]);
             }
             else
@@ -299,7 +299,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 {
                     var analysisPoint = new AnalysisPoint {Geo = MouseGeo, Scenario = Scenario};
                     Scenario.AnalysisPoints.Add(analysisPoint);
-                    Database.Add(analysisPoint, (Bathymetry)_cache[Scenario.Bathymetry], true);
+                    Database.Add(analysisPoint, (Bathymetry)_cache[Scenario.Bathymetry].Result, true);
                 }
                 IsInAnalysisPointMode = false;
             }

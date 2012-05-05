@@ -126,10 +126,10 @@ namespace ESME.TransmissionLoss
                 var analysisPoint = transmissionLoss.AnalysisPoint;
                 var scenario = analysisPoint.Scenario;
                 var timePeriod = scenario.TimePeriod;
-                var wind = (Wind)_cacheService[scenario.Wind];
-                var soundSpeed = (SoundSpeed)_cacheService[scenario.SoundSpeed];
-                var sediment = (Sediment)_cacheService[scenario.Sediment];
-                var bathymetry = (Bathymetry)_cacheService[scenario.Bathymetry];
+                var wind = (Wind)_cacheService[scenario.Wind].Result;
+                var soundSpeed = (SoundSpeed)_cacheService[scenario.SoundSpeed].Result;
+                var sediment = (Sediment)_cacheService[scenario.Sediment].Result;
+                var bathymetry = (Bathymetry)_cacheService[scenario.Bathymetry].Result;
                 var deepestPoint = bathymetry.DeepestPoint;
                 var deepestProfile = soundSpeed[scenario.TimePeriod].GetDeepestSSP(deepestPoint).Extend(deepestPoint.Data);
                 var windSample = wind[timePeriod].EnvironmentData.GetNearestPoint(radial.Segment.Center);

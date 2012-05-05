@@ -51,11 +51,11 @@ namespace ESME.Tests.Scenarios
             var location = TestLocation.LoadOrCreate("Jacksonville", OverlayFile, _databaseDirectory, PluginDirectory, out database, out cache, out plugins);
             var scenario = TestScenario.LoadOrCreate(database, location, SimAreaDirectory, NemoFile);
             var center = new Geo((location.GeoRect.North + location.GeoRect.South) / 2, (location.GeoRect.East + location.GeoRect.West) / 2);
-            database.Add(new AnalysisPoint { Geo = center, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
+            database.Add(new AnalysisPoint { Geo = center, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry].Result, true);
             var northEast = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(45));
-            database.Add(new AnalysisPoint { Geo = northEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
+            database.Add(new AnalysisPoint { Geo = northEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry].Result, true);
             var southEast = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(135));
-            database.Add(new AnalysisPoint { Geo = southEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
+            database.Add(new AnalysisPoint { Geo = southEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry].Result, true);
             //var southWest = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(225));
             //database.Add(new AnalysisPoint { Geo = southWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
             //var northWest = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(315));
@@ -71,15 +71,15 @@ namespace ESME.Tests.Scenarios
             var location = TestLocation.LoadOrCreate("Jacksonville", OverlayFile, _databaseDirectory, PluginDirectory, out database, out cache, out plugins);
             var scenario = TestScenario.LoadOrCreate(database, location, SimAreaDirectory, NemoFile);
             var center = new Geo((location.GeoRect.North + location.GeoRect.South) / 2, (location.GeoRect.East + location.GeoRect.West) / 2);
-            database.Add(new AnalysisPoint { Geo = center, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
+            database.Add(new AnalysisPoint { Geo = center, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry].Result, true);
             var northEast = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(45));
-            database.Add(new AnalysisPoint { Geo = northEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
+            database.Add(new AnalysisPoint { Geo = northEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry].Result, true);
             var southEast = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(135));
-            database.Add(new AnalysisPoint { Geo = southEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
+            database.Add(new AnalysisPoint { Geo = southEast, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry].Result, true);
             var southWest = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(225));
-            database.Add(new AnalysisPoint { Geo = southWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
+            database.Add(new AnalysisPoint { Geo = southWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry].Result, true);
             var northWest = center.Offset(Geo.KilometersToRadians(25), Geo.DegreesToRadians(315));
-            database.Add(new AnalysisPoint { Geo = northWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry], true);
+            database.Add(new AnalysisPoint { Geo = northWest, Scenario = scenario }, (Bathymetry)cache[scenario.Bathymetry].Result, true);
         }
 
         [RequiresSTA]

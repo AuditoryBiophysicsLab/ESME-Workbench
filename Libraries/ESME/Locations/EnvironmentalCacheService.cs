@@ -122,50 +122,67 @@ namespace ESME.Locations
             var fileName = Path.Combine(_database.MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
             job.Report(0);
             Debug.WriteLine("Importer: About to import {0}[{1}] from plugin {2}", (PluginSubtype)dataSet.SourcePlugin.PluginSubtype, dataSet.Resolution, sourcePlugin.PluginName);
+            var curJob = job;
             switch (sourcePlugin.EnvironmentDataType)
             {
                 case EnvironmentDataType.Wind:
-                    var wind = ((EnvironmentalDataSourcePluginBase<Wind>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, dataSet.TimePeriod, job);
-                    cacheEntry.Data = wind;
-                    dataSet.SampleCount = (from period in wind.TimePeriods select period.EnvironmentData.Count).Sum();
-                    wind.Serialize(fileName);
-                    var windColormap = new Colormap(Colormap.CoolComponents, 512);
-                    ToBitmap(wind[dataSet.TimePeriod].EnvironmentData, fileName, v => v == null ? 0 : v.Data, windColormap.ToPixelValues);
-                    Debug.WriteLine("Importer: Imported {0}min Wind [{1}] from plugin {2}", dataSet.Resolution, (TimePeriod)dataSet.TimePeriod, sourcePlugin.PluginName);
+                    cacheEntry.Data = new Task<EnvironmentDataSetBase>(() =>
+                    {
+                        var wind = ((EnvironmentalDataSourcePluginBase<Wind>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, dataSet.TimePeriod, curJob);
+                        dataSet.SampleCount = (from period in wind.TimePeriods select period.EnvironmentData.Count).Sum();
+                        wind.Serialize(fileName);
+                        dataSet.FileSize = new FileInfo(fileName).Length;
+                        var windColormap = new Colormap(Colormap.CoolComponents, 512);
+                        ToBitmap(wind[dataSet.TimePeriod].EnvironmentData, fileName, v => v == null ? 0 : v.Data, windColormap.ToPixelValues);
+                        Debug.WriteLine("Importer: Imported {0}min Wind [{1}] from plugin {2}", dataSet.Resolution, (TimePeriod)dataSet.TimePeriod, sourcePlugin.PluginName);
+                        return wind;
+                    });
                     break;
                 case EnvironmentDataType.Sediment:
-                    var sediment = ((EnvironmentalDataSourcePluginBase<Sediment>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, TimePeriod.Invalid, job);
-                    cacheEntry.Data = sediment;
-                    dataSet.SampleCount = sediment.Samples.Count;
-                    sediment.Serialize(fileName);
-                    var sedimentColormap = new Colormap(Colormap.CopperComponents, 23);
-                    sedimentColormap.Map.Insert(0, Colors.Black);
-                    sedimentColormap.Map.Add(Colors.Black);
-                    ToBitmap(sediment.Samples, fileName, v => v == null ? 0 : v.Data.SampleValue, (data, minValue, maxValue) => sedimentColormap.ToPixelValues(data, 1, 23));
-                    Debug.WriteLine("Importer: Imported {0}min Sediment from plugin {1}", dataSet.Resolution, sourcePlugin.PluginName);
+                    cacheEntry.Data = new Task<EnvironmentDataSetBase>(() =>
+                    {
+                        var sediment = ((EnvironmentalDataSourcePluginBase<Sediment>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, TimePeriod.Invalid, curJob);
+                        dataSet.SampleCount = sediment.Samples.Count;
+                        sediment.Serialize(fileName);
+                        dataSet.FileSize = new FileInfo(fileName).Length;
+                        var sedimentColormap = new Colormap(Colormap.CopperComponents, 23);
+                        sedimentColormap.Map.Insert(0, Colors.Black);
+                        sedimentColormap.Map.Add(Colors.Black);
+                        ToBitmap(sediment.Samples, fileName, v => v == null ? 0 : v.Data.SampleValue, (data, minValue, maxValue) => sedimentColormap.ToPixelValues(data, 1, 23));
+                        Debug.WriteLine("Importer: Imported {0}min Sediment from plugin {1}", dataSet.Resolution, sourcePlugin.PluginName);
+                        return sediment;
+                    });
                     break;
                 case EnvironmentDataType.SoundSpeed:
-                    var soundSpeed = ((EnvironmentalDataSourcePluginBase<SoundSpeed>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, dataSet.TimePeriod, job);
-                    cacheEntry.Data = soundSpeed;
-                    dataSet.SampleCount = (from field in soundSpeed.SoundSpeedFields select field.EnvironmentData.Count).Sum();
-                    soundSpeed.Serialize(fileName);
-                    Debug.WriteLine("Importer: Imported {0}min Sound Speed [{1}] from plugin {2}", dataSet.Resolution, (TimePeriod)dataSet.TimePeriod, sourcePlugin.PluginName);
+                    cacheEntry.Data = new Task<EnvironmentDataSetBase>(() =>
+                    {
+                        var soundSpeed = ((EnvironmentalDataSourcePluginBase<SoundSpeed>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, dataSet.TimePeriod, curJob);
+                        dataSet.SampleCount = (from field in soundSpeed.SoundSpeedFields select field.EnvironmentData.Count).Sum();
+                        soundSpeed.Serialize(fileName);
+                        dataSet.FileSize = new FileInfo(fileName).Length;
+                        Debug.WriteLine("Importer: Imported {0}min Sound Speed [{1}] from plugin {2}", dataSet.Resolution, (TimePeriod)dataSet.TimePeriod, sourcePlugin.PluginName);
+                        return soundSpeed;
+                    });
                     break;
                 case EnvironmentDataType.Bathymetry:
-                    var bathymetry = ((EnvironmentalDataSourcePluginBase<Bathymetry>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, TimePeriod.Invalid, job);
-                    cacheEntry.Data = bathymetry;
-                    dataSet.SampleCount = bathymetry.Samples.Count;
-                    bathymetry.Save(fileName);
-                    //var bathymetryColormap = new Colormap(Colormap.OceanComponents, 1024);
-                    var dualColormap = new DualColormap(Colormap.Summer, Colormap.Jet) { Threshold = 0 };
-                    ToBitmap(bathymetry.Samples, fileName, v => v.Data, (data, minValue, maxValue) => dualColormap.ToPixelValues(data, minValue, maxValue < 0 ? maxValue : 8000, Colors.Black));
-                    Debug.WriteLine("Importer: Imported {0}min Bathymetry from plugin {1}", dataSet.Resolution, sourcePlugin.PluginName);
+                    cacheEntry.Data = new Task<EnvironmentDataSetBase>(() =>
+                    {
+                        var bathymetry = ((EnvironmentalDataSourcePluginBase<Bathymetry>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, TimePeriod.Invalid, curJob);
+                        dataSet.SampleCount = bathymetry.Samples.Count;
+                        bathymetry.Save(fileName);
+                        dataSet.FileSize = new FileInfo(fileName).Length;
+                        //var bathymetryColormap = new Colormap(Colormap.OceanComponents, 1024);
+                        var dualColormap = new DualColormap(Colormap.Summer, Colormap.Jet) { Threshold = 0 };
+                        ToBitmap(bathymetry.Samples, fileName, v => v.Data, (data, minValue, maxValue) => dualColormap.ToPixelValues(data, minValue, maxValue < 0 ? maxValue : 8000, Colors.Black));
+                        Debug.WriteLine("Importer: Imported {0}min Bathymetry from plugin {1}", dataSet.Resolution, sourcePlugin.PluginName);
+                        return bathymetry;
+                    });
                     break;
                 default:
                     throw new ApplicationException(string.Format("Unknown environmental data type {0}", sourcePlugin.EnvironmentDataType));
             }
+            cacheEntry.Data.Start();
             cacheEntry.Loaded = DateTime.Now;
-            dataSet.FileSize = new FileInfo(fileName).Length;
             job.Report(100);
             Interlocked.Decrement(ref _busyCount);
             //OnPropertyChanged("BusyCount");
@@ -187,6 +204,7 @@ namespace ESME.Locations
 
             var imageFilename = Path.GetFileNameWithoutExtension(fileName) + ".bmp";
             var imagePath = Path.GetDirectoryName(fileName);
+            if (imagePath == null) throw new ArgumentException("Must be a fully specified path", "fileName");
 
             var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
             for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) 
@@ -214,7 +232,7 @@ namespace ESME.Locations
             return isCached;
         }
 
-        public EnvironmentDataSetBase this[EnvironmentalDataSet dataSet]
+        public Task<EnvironmentDataSetBase> this[EnvironmentalDataSet dataSet]
         {
             get
             {
@@ -254,7 +272,7 @@ namespace ESME.Locations
     {
         public DateTime Loaded { get; internal set; }
         public DateTime LastAccessed { get; internal set; }
-        public EnvironmentDataSetBase Data { get; internal set; }
+        public Task<EnvironmentDataSetBase> Data { get; internal set; }
         public static EnvironmentalCacheEntry Load(string databaseDirectory, EnvironmentalDataSet dataSet, EnvironmentalCacheService cache)
         {
             var locationStorageDirectory = Path.Combine(databaseDirectory, dataSet.Location.StorageDirectory);
@@ -271,35 +289,42 @@ namespace ESME.Locations
                     Debug.WriteLine("Exception caught: {0}", e.Message);
                 }
             }
+            EnvironmentalCacheEntry result;
             switch ((PluginSubtype)dataSet.SourcePlugin.PluginSubtype)
             {
                 case PluginSubtype.Wind:
-                    return new EnvironmentalCacheEntry
+                    result = new EnvironmentalCacheEntry
                     {
                         Loaded = DateTime.Now,
-                        Data = Wind.Load(Path.Combine(locationStorageDirectory, dataSet.FileName)),
+                        Data = new Task<EnvironmentDataSetBase>(() => Wind.Load(Path.Combine(locationStorageDirectory, dataSet.FileName))),
                     };
+                    break;
                 case PluginSubtype.SoundSpeed:
-                    return new EnvironmentalCacheEntry
+                    result = new EnvironmentalCacheEntry
                     {
                         Loaded = DateTime.Now,
-                        Data = SoundSpeed.Load(Path.Combine(locationStorageDirectory, dataSet.FileName)),
+                        Data = new Task<EnvironmentDataSetBase>(() => SoundSpeed.Load(Path.Combine(locationStorageDirectory, dataSet.FileName))),
                     };
+                    break;
                 case PluginSubtype.Sediment:
-                    return new EnvironmentalCacheEntry
+                    result = new EnvironmentalCacheEntry
                     {
                         Loaded = DateTime.Now,
-                        Data = Sediment.Load(Path.Combine(locationStorageDirectory, dataSet.FileName)),
+                        Data = new Task<EnvironmentDataSetBase>(() => Sediment.Load(Path.Combine(locationStorageDirectory, dataSet.FileName))),
                     };
+                    break;
                 case PluginSubtype.Bathymetry:
-                    return new EnvironmentalCacheEntry
+                    result = new EnvironmentalCacheEntry
                     {
                         Loaded = DateTime.Now,
-                        Data = Bathymetry.Load(Path.Combine(locationStorageDirectory, dataSet.FileName)),
+                        Data = new Task<EnvironmentDataSetBase>(() => Bathymetry.Load(Path.Combine(locationStorageDirectory, dataSet.FileName))),
                     };
+                    break;
                 default:
                     throw new ApplicationException(string.Format("Unknown environmental data type: {0}", dataSet.SourcePlugin.PluginSubtype));
             }
+            result.Data.Start();
+            return result;
         }
     }
 }

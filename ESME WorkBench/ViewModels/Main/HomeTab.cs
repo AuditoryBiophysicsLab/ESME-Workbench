@@ -36,22 +36,29 @@ namespace ESMEWorkbench.ViewModels.Main
             get { return _scenario; }
             set
             {
+                if (_scenario != null)
+                {
+                    // todo: Remove any existing map layers here
+                }
                 _scenario = value;
                 LayerTreeViewModel.Scenario = _scenario;
                 MainWindowTitle = string.Format("ESME Workbench: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name);
-                if (_scenario != null)
-                {
-                    Debug.WriteLine(string.Format("Wind contains {0} samples", ((Wind)_cache[_scenario.Wind])[_scenario.TimePeriod].EnvironmentData.Count));
-                    Debug.WriteLine(string.Format("SoundSpeed contains {0} samples", ((SoundSpeed)_cache[_scenario.SoundSpeed])[_scenario.TimePeriod].EnvironmentData.Count));
-                    Debug.WriteLine(string.Format("Bathymetry contains {0} samples", ((Bathymetry)_cache[_scenario.Bathymetry]).Samples.Count));
-                    Debug.WriteLine(string.Format("Sediment contains {0} samples", ((Sediment)_cache[_scenario.Sediment]).Samples.Count));
-                    //if (_scenario.Bathymetry != null) TaskEx.Run(() => { var bathy = _cache[_scenario.Bathymetry]; });
-                    //if (_scenario.SoundSpeed != null) TaskEx.Run(() => { var soundSpeed = _cache[_scenario.SoundSpeed]; });
-                    //if (_scenario.Sediment != null) TaskEx.Run(() => { var sediment = _cache[_scenario.Sediment]; });
-                    //if (_scenario.Wind != null) TaskEx.Run(() => { var wind = _cache[_scenario.Wind]; });
-                    _scenario.CreateMapLayers();
-                    MediatorMessage.Send(MediatorMessage.SetMapExtent, (GeoRect)_scenario.Location.GeoRect);
-                }
+                if (_scenario == null) return;
+                //Debug.WriteLine(string.Format("Wind contains {0} samples", ((Wind)_cache[_scenario.Wind].Result)[_scenario.TimePeriod].EnvironmentData.Count));
+                //Debug.WriteLine(string.Format("SoundSpeed contains {0} samples", ((SoundSpeed)_cache[_scenario.SoundSpeed].Result)[_scenario.TimePeriod].EnvironmentData.Count));
+                //Debug.WriteLine(string.Format("Bathymetry contains {0} samples", ((Bathymetry)_cache[_scenario.Bathymetry].Result).Samples.Count));
+                //Debug.WriteLine(string.Format("Sediment contains {0} samples", ((Sediment)_cache[_scenario.Sediment].Result).Samples.Count));
+                //if (_scenario.Bathymetry != null) TaskEx.Run(() => { var bathy = _cache[_scenario.Bathymetry]; });
+                //if (_scenario.SoundSpeed != null) TaskEx.Run(() => { var soundSpeed = _cache[_scenario.SoundSpeed]; });
+                //if (_scenario.Sediment != null) TaskEx.Run(() => { var sediment = _cache[_scenario.Sediment]; });
+                //if (_scenario.Wind != null) TaskEx.Run(() => { var wind = _cache[_scenario.Wind]; });
+                _cache[_scenario.Wind].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() => _scenario.Wind.CreateMapLayers()));
+                _cache[_scenario.SoundSpeed].ContinueWith(t =>  _dispatcher.InvokeInBackgroundIfRequired(() => _scenario.SoundSpeed.CreateMapLayers()));
+                _cache[_scenario.Bathymetry].ContinueWith(t =>  _dispatcher.InvokeInBackgroundIfRequired(() => _scenario.Bathymetry.CreateMapLayers()));
+                _cache[_scenario.Sediment].ContinueWith(t =>  _dispatcher.InvokeInBackgroundIfRequired(() => _scenario.Sediment.CreateMapLayers()));
+
+                _scenario.CreateMapLayers();
+                MediatorMessage.Send(MediatorMessage.SetMapExtent, (GeoRect)_scenario.Location.GeoRect);
             }
         }
 
@@ -91,10 +98,6 @@ namespace ESMEWorkbench.ViewModels.Main
                 Comments = vm.Comments,
                 TimePeriod = vm.TimePeriod,
             }, true);
-            _cache.ImportDataset(wind);
-            _cache.ImportDataset(soundSpeed);
-            _cache.ImportDataset(bathymetry);
-            _cache.ImportDataset(sediment);
         }
         #endregion
 
@@ -121,7 +124,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (MouseDepth > 0) throw new AnalysisPointLocationException("Analysis Points cannot be placed on land.");
             if (Scenario == null || Scenario.Bathymetry == null) return;
-            Database.Add(new AnalysisPoint { Geo = MouseGeo, Scenario = Scenario }, (Bathymetry)_cache[Scenario.Bathymetry], true);
+            Database.Add(new AnalysisPoint { Geo = MouseGeo, Scenario = Scenario }, (Bathymetry)_cache[Scenario.Bathymetry].Result, true);
         }
 
         #region ImportScenarioFileCommand

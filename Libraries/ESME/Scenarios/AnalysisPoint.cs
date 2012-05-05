@@ -85,7 +85,7 @@ namespace ESME.Scenarios
                 ValidationErrorText = "Unable to validate";
                 return;
             }
-            var geoRect = ((Bathymetry)Scenario.Cache[AnalysisPoint.Scenario.Bathymetry]).Samples.GeoRect;
+            var geoRect = ((Bathymetry)Scenario.Cache[AnalysisPoint.Scenario.Bathymetry].Result).Samples.GeoRect;
 
             if (!geoRect.Contains(AnalysisPoint.Geo))
             {

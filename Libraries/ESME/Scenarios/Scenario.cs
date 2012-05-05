@@ -40,10 +40,10 @@ namespace ESME.Scenarios
         public virtual ICollection<AnalysisPoint> AnalysisPoints { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
 
-        [NotMapped] public Wind WindData { get { return ((Wind)Cache[Wind]); } }
-        [NotMapped] public SoundSpeed SoundSpeedData { get { return ((SoundSpeed)Cache[SoundSpeed]); } }
-        [NotMapped] public Bathymetry BathymetryData { get { return ((Bathymetry)Cache[Bathymetry]); } }
-        [NotMapped] public Sediment SedimentData { get { return ((Sediment)Cache[Sediment]); } }
+        [NotMapped] public Wind WindData { get { return ((Wind)Cache[Wind].Result); } }
+        [NotMapped] public SoundSpeed SoundSpeedData { get { return ((SoundSpeed)Cache[SoundSpeed].Result); } }
+        [NotMapped] public Bathymetry BathymetryData { get { return ((Bathymetry)Cache[Bathymetry].Result); } }
+        [NotMapped] public Sediment SedimentData { get { return ((Sediment)Cache[Sediment].Result); } }
 
         [NotMapped] public string StorageDirectoryPath { get { return Path.Combine(Database.MasterDatabaseDirectory, StorageDirectory); } }
         
@@ -188,10 +188,6 @@ namespace ESME.Scenarios
 
         public void CreateMapLayers()
         {
-            Wind.CreateMapLayers();
-            SoundSpeed.CreateMapLayers();
-            Bathymetry.CreateMapLayers();
-            Sediment.CreateMapLayers();
             if (Platforms != null) foreach (var platform in Platforms) platform.CreateMapLayers();
             var transmissionLosses = (from tl in Database.Context.TransmissionLosses
                                       where tl.AnalysisPoint.Scenario.Guid == Guid

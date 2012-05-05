@@ -73,7 +73,7 @@ namespace ESME.Locations
                     };
                     while (pointLayer.PointSymbolType == PointSymbolType.Cross) pointLayer.PointSymbolType = (PointSymbolType)(Random.Next(8));
                     pointLayer.PointStyle = MapLayerViewModel.CreatePointStyle(pointLayer.PointSymbolType, LayerSettings.LineOrSymbolColor, (int)LayerSettings.LineOrSymbolSize);
-                    var geos = (from s in ((SoundSpeed)Location.Cache[this]).SoundSpeedFields[0].EnvironmentData
+                    var geos = (from s in ((SoundSpeed)Location.Cache[this].Result).SoundSpeedFields[0].EnvironmentData
                                 select (Geo)s).ToArray();
                     pointLayer.Clear();
                     pointLayer.Add(geos, true);
