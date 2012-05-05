@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Windows;
 using ESME;
@@ -44,8 +43,8 @@ namespace ESMEWorkbench.ViewModels.Main
                 {
                     Debug.WriteLine(string.Format("Wind contains {0} samples", ((Wind)_cache[_scenario.Wind])[_scenario.TimePeriod].EnvironmentData.Count));
                     Debug.WriteLine(string.Format("SoundSpeed contains {0} samples", ((SoundSpeed)_cache[_scenario.SoundSpeed])[_scenario.TimePeriod].EnvironmentData.Count));
-                    Debug.WriteLine(string.Format("Bathymetry contains {0} samples", ((Bathymetry)_cache[_scenario.Bathymetry]).Samples));
-                    Debug.WriteLine(string.Format("Sediment contains {0} samples", ((Sediment)_cache[_scenario.Sediment]).Samples));
+                    Debug.WriteLine(string.Format("Bathymetry contains {0} samples", ((Bathymetry)_cache[_scenario.Bathymetry]).Samples.Count));
+                    Debug.WriteLine(string.Format("Sediment contains {0} samples", ((Sediment)_cache[_scenario.Sediment]).Samples.Count));
                     //if (_scenario.Bathymetry != null) TaskEx.Run(() => { var bathy = _cache[_scenario.Bathymetry]; });
                     //if (_scenario.SoundSpeed != null) TaskEx.Run(() => { var soundSpeed = _cache[_scenario.SoundSpeed]; });
                     //if (_scenario.Sediment != null) TaskEx.Run(() => { var sediment = _cache[_scenario.Sediment]; });
@@ -77,10 +76,10 @@ namespace ESMEWorkbench.ViewModels.Main
             var vm = new CreateScenarioViewModel { Locations = Database.Context.Locations.Local, PluginManager = _plugins, Location = Database.Context.Locations.Local.First(), TimePeriod = (TimePeriod)DateTime.Today.Month };
             var result = _visualizer.ShowDialog("CreateScenarioView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
-            var wind = Database.CreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet.Resolution, vm.TimePeriod, vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet.SourcePlugin);
-            var soundSpeed = Database.CreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet.Resolution, vm.TimePeriod, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet.SourcePlugin);
-            var bathymetry = Database.CreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet.Resolution, TimePeriod.Invalid, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet.SourcePlugin);
-            var sediment = Database.CreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet.Resolution, TimePeriod.Invalid, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet.SourcePlugin);
+            var wind = Database.LoadOrCreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet.Resolution, vm.TimePeriod, vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet.SourcePlugin);
+            var soundSpeed = Database.LoadOrCreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet.Resolution, vm.TimePeriod, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet.SourcePlugin);
+            var bathymetry = Database.LoadOrCreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet.Resolution, TimePeriod.Invalid, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet.SourcePlugin);
+            var sediment = Database.LoadOrCreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet.Resolution, TimePeriod.Invalid, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet.SourcePlugin);
             Database.Add(new Scenario
             {
                 Wind = wind,

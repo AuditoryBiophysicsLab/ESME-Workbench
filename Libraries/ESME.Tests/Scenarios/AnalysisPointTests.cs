@@ -101,33 +101,40 @@ namespace ESME.Tests.Scenarios
             }
             Console.WriteLine(string.Format("Creating test location '{0}'...", locationName));
             var geoRect = new GeoRect(north, south, east, west);
-            location = database.CreateLocation(locationName, null, geoRect.North, geoRect.South, geoRect.East, geoRect.West);
+            location = new Location
+            {
+                Name = locationName,
+                Comments = null,
+                GeoRect = geoRect
+            };
+            database.Add(location, true);
+
             foreach (var month in NAVOConfiguration.AllMonths)
             {
                 // SoundSpeed dataset for each month
                 Console.WriteLine(string.Format("Importing soundspeed for {0}", month));
-                cache.ImportDatasetTest(database.CreateEnvironmentalDataSet(location, 15, month, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed].PluginIdentifier));
+                cache.ImportDatasetTest(database.LoadOrCreateEnvironmentalDataSet(location, 15, month, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed].PluginIdentifier));
 
                 // Wind dataset for each month
                 Console.WriteLine(string.Format("Importing wind for {0}", month));
-                cache.ImportDatasetTest(database.CreateEnvironmentalDataSet(location, 60, month, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Wind].PluginIdentifier));
+                cache.ImportDatasetTest(database.LoadOrCreateEnvironmentalDataSet(location, 60, month, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Wind].PluginIdentifier));
             }
             
             // Sediment dataset
             Console.WriteLine("Importing 5min sediment");
-            cache.ImportDatasetTest(database.CreateEnvironmentalDataSet(location, 5f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment].PluginIdentifier));
+            cache.ImportDatasetTest(database.LoadOrCreateEnvironmentalDataSet(location, 5f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment].PluginIdentifier));
             Console.WriteLine("Importing 0.1min sediment");
-            cache.ImportDatasetTest(database.CreateEnvironmentalDataSet(location, 0.1f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment].PluginIdentifier));
+            cache.ImportDatasetTest(database.LoadOrCreateEnvironmentalDataSet(location, 0.1f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment].PluginIdentifier));
 
             // Bathymetry dataset at 2min resolution
             Console.WriteLine("Importing 2min bathymetry");
-            cache.ImportDatasetTest(database.CreateEnvironmentalDataSet(location, 2f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
+            cache.ImportDatasetTest(database.LoadOrCreateEnvironmentalDataSet(location, 2f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
             // Bathymetry dataset at 1min resolution
             Console.WriteLine("Importing 1min bathymetry");
-            cache.ImportDatasetTest(database.CreateEnvironmentalDataSet(location, 1f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
+            cache.ImportDatasetTest(database.LoadOrCreateEnvironmentalDataSet(location, 1f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
             // Bathymetry dataset at 0.5min resolution
             Console.WriteLine("Importing 0.5min bathymetry");
-            cache.ImportDatasetTest(database.CreateEnvironmentalDataSet(location, 0.5f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
+            cache.ImportDatasetTest(database.LoadOrCreateEnvironmentalDataSet(location, 0.5f, TimePeriod.Invalid, plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
             Scenario scenario;
             database.Add(scenario = new Scenario
             {

@@ -75,25 +75,25 @@ namespace ESME.Views.Locations
             {
                 // SoundSpeed dataset for each month
                 Console.WriteLine(string.Format("Importing soundspeed for {0}", month));
-                _cache.ImportDataset(_database.CreateEnvironmentalDataSet(location, 15, month, _plugins[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed].PluginIdentifier));
+                _cache.ImportDataset(_database.LoadOrCreateEnvironmentalDataSet(location, 15, month, _plugins[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed].PluginIdentifier));
 
                 // Wind dataset for each month
                 Console.WriteLine(string.Format("Importing wind for {0}", month));
-                _cache.ImportDataset(_database.CreateEnvironmentalDataSet(location, 60, month, _plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Wind].PluginIdentifier));
+                _cache.ImportDataset(_database.LoadOrCreateEnvironmentalDataSet(location, 60, month, _plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Wind].PluginIdentifier));
             }
             // Sediment dataset
             Console.WriteLine("Importing sediment");
-            _cache.ImportDataset(_database.CreateEnvironmentalDataSet(location, 5f, TimePeriod.Invalid, _plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment].PluginIdentifier));
+            _cache.ImportDataset(_database.LoadOrCreateEnvironmentalDataSet(location, 5f, TimePeriod.Invalid, _plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment].PluginIdentifier));
 
             // Bathymetry dataset at 2min resolution
             Console.WriteLine("Importing 2min bathymetry");
-            _cache.ImportDataset(_database.CreateEnvironmentalDataSet(location, 2f, TimePeriod.Invalid, _plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
+            _cache.ImportDataset(_database.LoadOrCreateEnvironmentalDataSet(location, 2f, TimePeriod.Invalid, _plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
             // Bathymetry dataset at 1min resolution
             Console.WriteLine("Importing 1min bathymetry");
-            _cache.ImportDataset(_database.CreateEnvironmentalDataSet(location, 1f, TimePeriod.Invalid, _plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
+            _cache.ImportDataset(_database.LoadOrCreateEnvironmentalDataSet(location, 1f, TimePeriod.Invalid, _plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
             // Bathymetry dataset at 0.5min resolution
             Console.WriteLine("Importing 0.5min bathymetry");
-            _cache.ImportDataset(_database.CreateEnvironmentalDataSet(location, 0.5f, TimePeriod.Invalid, _plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
+            _cache.ImportDataset(_database.LoadOrCreateEnvironmentalDataSet(location, 0.5f, TimePeriod.Invalid, _plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
             Scenario = Scenario.FromNemoFile(_database, location, ScenarioFilename, simAreaFolder);
             _database.SetEnvironmentalData(Scenario,
                                            (from data in location.EnvironmentalDataSets

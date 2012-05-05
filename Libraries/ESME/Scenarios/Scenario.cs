@@ -40,7 +40,13 @@ namespace ESME.Scenarios
         public virtual ICollection<AnalysisPoint> AnalysisPoints { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
 
+        [NotMapped] public Wind WindData { get { return ((Wind)Cache[Wind]); } }
+        [NotMapped] public SoundSpeed SoundSpeedData { get { return ((SoundSpeed)Cache[SoundSpeed]); } }
+        [NotMapped] public Bathymetry BathymetryData { get { return ((Bathymetry)Cache[Bathymetry]); } }
+        [NotMapped] public Sediment SedimentData { get { return ((Sediment)Cache[Sediment]); } }
+
         [NotMapped] public string StorageDirectoryPath { get { return Path.Combine(Database.MasterDatabaseDirectory, StorageDirectory); } }
+        
         #region Importer for NEMO files
         public static Scenario FromNemoFile(IMasterDatabaseService masterDatabase, Location location, string nemoFilePath, string scenarioDataDirectory)
         {
@@ -186,7 +192,7 @@ namespace ESME.Scenarios
             SoundSpeed.CreateMapLayers();
             Bathymetry.CreateMapLayers();
             Sediment.CreateMapLayers();
-            foreach (var platform in Platforms) platform.CreateMapLayers();
+            if (Platforms != null) foreach (var platform in Platforms) platform.CreateMapLayers();
             var transmissionLosses = (from tl in Database.Context.TransmissionLosses
                                       where tl.AnalysisPoint.Scenario.Guid == Guid
                                       select tl).ToList();

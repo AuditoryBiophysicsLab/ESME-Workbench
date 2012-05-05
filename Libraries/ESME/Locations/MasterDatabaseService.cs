@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Data;
 using System.Data.Common;
@@ -17,6 +15,7 @@ using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.Plugins;
 using ESME.Scenarios;
+using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
@@ -34,7 +33,6 @@ namespace ESME.Locations
         bool ScenarioExists(string scenarioName);
         void Refresh();
         void Add(Location location, bool saveChanges = false);
-        void Add(EnvironmentalDataSet dataSet, bool saveChanges = false);
         void Add(Scenario scenario, bool saveChanges = false);
         void Add(Platform platform, bool saveChanges = false);
         void Add(Source source, bool saveChanges = false);
@@ -46,9 +44,8 @@ namespace ESME.Locations
         void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry, bool saveChanges = false);
         void Add(Scenarios.TransmissionLoss transmissionLoss, bool saveChanges = false);
         void Add(Radial radial, bool saveChanges = false);
-        Location CreateLocation(string locationName, string comments, double north, double south, double east, double west);
         Location ImportLocationFromOverlayFile(string overlayFilename, string locationName);
-        EnvironmentalDataSet CreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin);
+        EnvironmentalDataSet LoadOrCreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin);
         Scenario CreateScenario(string scenarioName, string comments, TimeSpan startTime, TimeSpan duration, TimePeriod timePeriod, Location location);
         void SetEnvironmentalData(Scenario scenario, EnvironmentalDataSet data);
         void DeleteLocation(Location location, bool saveChanges);
@@ -106,19 +103,11 @@ namespace ESME.Locations
         {
             if (LocationExists(location.Name)) throw new DuplicateNameException(String.Format("A location named {0} already exists, choose another name", location.Name));
             if (location.StorageDirectory == null)
-                location.StorageDirectory = Path.Combine("locations", Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
+                location.StorageDirectory = Path.Combine("locations", RandomFilenameWithoutExension);
             var storageDirectoryPath = Path.Combine(MasterDatabaseDirectory, location.StorageDirectory);
             if (!Directory.Exists(storageDirectoryPath)) Directory.CreateDirectory(storageDirectoryPath);
             Context.Locations.Add(location);
             Log(location, "Added location {0}", location.Name);
-            if (saveChanges) SaveChanges();
-        }
-        public void Add(EnvironmentalDataSet dataSet, bool saveChanges = false)
-        {
-            if (dataSet.LayerSettings == null) dataSet.LayerSettings = new LayerSettings();
-            Context.LayerSettings.Add(dataSet.LayerSettings);
-            Context.EnvironmentalDataSets.Add(dataSet);
-            Log(dataSet, "Added new data set to location {0}. Data type: {1}, resolution: {2}{3}", dataSet.Location.Name, dataSet.SourcePlugin.PluginSubtype, dataSet.Resolution, (TimePeriod)dataSet.TimePeriod != TimePeriod.Invalid ? String.Format("  TimePeriod: {0}", (TimePeriod)dataSet.TimePeriod) : "");
             if (saveChanges) SaveChanges();
         }
         public void Add(Scenario scenario, bool saveChanges = false)
@@ -130,7 +119,7 @@ namespace ESME.Locations
             if (scenario.LayerSettings == null) scenario.LayerSettings = new LayerSettings();
             Context.LayerSettings.Add(scenario.LayerSettings);
             if (scenario.StorageDirectory == null)
-                scenario.StorageDirectory = Path.Combine("scenarios", Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
+                scenario.StorageDirectory = Path.Combine("scenarios", RandomFilenameWithoutExension);
             var storageDirectoryPath = Path.Combine(MasterDatabaseDirectory, scenario.StorageDirectory);
             if (!Directory.Exists(storageDirectoryPath)) Directory.CreateDirectory(storageDirectoryPath);
 
@@ -298,36 +287,30 @@ namespace ESME.Locations
         #endregion
 
         #region Create operations for Locations
-        public Location CreateLocation(string locationName, string comments, double north, double south, double east, double west)
-        {
-            if (LocationExists(locationName)) throw new DuplicateNameException(String.Format("A location named {0} already exists, choose another name", locationName));
-            var result = new Location
-                             {
-                                 Name = locationName,
-                                 Comments = comments,
-                                 GeoRect = new GeoRect(north, south, east, west),
-                                 StorageDirectory = Path.Combine("locations", Path.GetFileNameWithoutExtension(Path.GetRandomFileName())),
-                             };
-            Context.Locations.Add(result);
-            Log(result, "Created");
-            Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, result.StorageDirectory));
-            SaveChanges();
-            return result;
-        }
-
         public Location ImportLocationFromOverlayFile(string overlayFilename, string locationName)
         {
             var geoRect = new OverlayFile(overlayFilename).Shapes[0].GeoRect;
-            return FindLocation(locationName) ?? CreateLocation(locationName,
-                                                                String.Format("Imported from {0} on {1} by {2} on {3}", overlayFilename, System.Environment.UserName, DateTime.Now, System.Environment.MachineName),
-                                                                geoRect.North,
-                                                                geoRect.South,
-                                                                geoRect.East,
-                                                                geoRect.West);
+            var location = FindLocation(locationName);
+            if (location != null) return location;
+            location = new Location
+            {
+                Name = locationName,
+                Comments = String.Format("Imported from {0} on {1} by {2} on {3}", overlayFilename, System.Environment.UserName, DateTime.Now, System.Environment.MachineName),
+                GeoRect = geoRect
+            };
+            Add(location);
+            return location;
         }
 
-        public EnvironmentalDataSet CreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin)
+        public EnvironmentalDataSet LoadOrCreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin)
         {
+            var existing = (from e in Context.EnvironmentalDataSets
+                            where e.Location.Guid == location.Guid && 
+                            e.SourcePlugin.Type == sourcePlugin.Type && 
+                            e.Resolution == resolution
+                            select e).FirstOrDefault();
+            if (existing != null) return existing;
+
             var environmentalDataSet = new EnvironmentalDataSet
             {
                 FileName = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + "." + sourcePlugin.PluginSubtype.ToString().ToLower(),
@@ -335,8 +318,8 @@ namespace ESME.Locations
                 TimePeriod = timePeriod,
                 Location = location,
                 SourcePlugin = sourcePlugin,
+                LayerSettings = new LayerSettings { IsChecked = false },
             };
-            if (environmentalDataSet.LayerSettings == null) environmentalDataSet.LayerSettings = new LayerSettings();
             Context.LayerSettings.Add(environmentalDataSet.LayerSettings);
             Context.EnvironmentalDataSets.Add(environmentalDataSet);
             Log(environmentalDataSet, "Added new data set to {0}. Data type: {1}, resolution: {2}{3}", location.Name, sourcePlugin.PluginSubtype, resolution, timePeriod != TimePeriod.Invalid ? String.Format("  TimePeriod: {0}", timePeriod) : "");
@@ -356,7 +339,7 @@ namespace ESME.Locations
             scenario.Duration = duration;
             scenario.TimePeriod = timePeriod;
             scenario.Location = location;
-            scenario.StorageDirectory = Path.Combine("scenarios", Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
+            scenario.StorageDirectory = Path.Combine("scenarios", RandomFilenameWithoutExension);
             Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, scenario.StorageDirectory));
             if (scenario.LayerSettings == null) scenario.LayerSettings = new LayerSettings();
             Context.LayerSettings.Add(scenario.LayerSettings);
@@ -470,6 +453,17 @@ namespace ESME.Locations
         #region Private helper methods, properties and fields
 
         public LocationContext Context { get; private set; }
+
+        [NotNull] 
+        string RandomFilenameWithoutExension
+        {
+            get
+            {
+                var result = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+                if (result == null) throw new NullReferenceException("RandomFileName returned null!  Inconceivable!");
+                return result;
+            }
+        }
 
         void Initialize()
         {

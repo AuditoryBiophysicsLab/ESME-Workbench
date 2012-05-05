@@ -31,25 +31,25 @@ namespace ESME.Tests.Common
             {
                 // SoundSpeed dataset for each month
                 Console.WriteLine(string.Format("Importing soundspeed for {0}", month));
-                cacheService.ImportDatasetTest(databaseService.CreateEnvironmentalDataSet(location, 15, month, pluginService[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed].PluginIdentifier));
+                cacheService.ImportDatasetTest(databaseService.LoadOrCreateEnvironmentalDataSet(location, 15, month, pluginService[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed].PluginIdentifier));
 
                 // Wind dataset for each month
                 Console.WriteLine(string.Format("Importing wind for {0}", month));
-                cacheService.ImportDatasetTest(databaseService.CreateEnvironmentalDataSet(location, 60, month, pluginService[PluginType.EnvironmentalDataSource, PluginSubtype.Wind].PluginIdentifier));
+                cacheService.ImportDatasetTest(databaseService.LoadOrCreateEnvironmentalDataSet(location, 60, month, pluginService[PluginType.EnvironmentalDataSource, PluginSubtype.Wind].PluginIdentifier));
             }
             // Sediment dataset
             Console.WriteLine("Importing sediment");
-            cacheService.ImportDatasetTest(databaseService.CreateEnvironmentalDataSet(location, 5f, TimePeriod.Invalid, pluginService[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment].PluginIdentifier));
+            cacheService.ImportDatasetTest(databaseService.LoadOrCreateEnvironmentalDataSet(location, 5f, TimePeriod.Invalid, pluginService[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment].PluginIdentifier));
 
             // Bathymetry dataset at 2min resolution
             Console.WriteLine("Importing 2min bathymetry");
-            cacheService.ImportDatasetTest(databaseService.CreateEnvironmentalDataSet(location, 2f, TimePeriod.Invalid, pluginService[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
+            cacheService.ImportDatasetTest(databaseService.LoadOrCreateEnvironmentalDataSet(location, 2f, TimePeriod.Invalid, pluginService[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
             // Bathymetry dataset at 1min resolution
             Console.WriteLine("Importing 1min bathymetry");
-            cacheService.ImportDatasetTest(databaseService.CreateEnvironmentalDataSet(location, 1f, TimePeriod.Invalid, pluginService[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
+            cacheService.ImportDatasetTest(databaseService.LoadOrCreateEnvironmentalDataSet(location, 1f, TimePeriod.Invalid, pluginService[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
             // Bathymetry dataset at 0.5min resolution
             Console.WriteLine("Importing 0.5min bathymetry");
-            cacheService.ImportDatasetTest(databaseService.CreateEnvironmentalDataSet(location, 0.5f, TimePeriod.Invalid, pluginService[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
+            cacheService.ImportDatasetTest(databaseService.LoadOrCreateEnvironmentalDataSet(location, 0.5f, TimePeriod.Invalid, pluginService[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
             return location;
         }
 

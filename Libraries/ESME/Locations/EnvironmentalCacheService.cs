@@ -60,11 +60,26 @@ namespace ESME.Locations
             return job;
         }
 
+        internal Task<EnvironmentalCacheEntry> CreateImportDatasetTask(EnvironmentalDataSet dataSet)
+        {
+            var job = new PercentProgress<EnvironmentalDataSet> { ProgressTarget = dataSet };
+            if (!_importJobsPending.TryAdd(dataSet.Guid, job)) return null;
+            var task = new Task<EnvironmentalCacheEntry>(() =>
+            {
+                EnvironmentalCacheEntry result;
+                Import(job, out result);
+                return result;
+            });
+            task.Start();
+            return task;
+        }
+
         public void ImportDatasetTest(EnvironmentalDataSet dataSet)
         {
             var job = new PercentProgress<EnvironmentalDataSet> { ProgressTarget = dataSet };
             if (!_importJobsPending.TryAdd(dataSet.Guid, job)) return;
-            Import(job);
+            EnvironmentalCacheEntry result;
+            Import(job, out result);
         }
 
         readonly ConcurrentDictionary<Guid, PercentProgress<EnvironmentalDataSet>> _importJobsPending = new ConcurrentDictionary<Guid, PercentProgress<EnvironmentalDataSet>>();
@@ -80,41 +95,47 @@ namespace ESME.Locations
             if (_plugins == null) throw new ServiceNotFoundException("Required service PluginManager was not found");
             if (_database == null) throw new ServiceNotFoundException("Required service MasterDatabaseService was not found");
             if (string.IsNullOrEmpty(_database.MasterDatabaseDirectory)) throw new ServiceNotFoundException("Required service MasterDatabaseService is not properly configured.");
-            var newImporter = new ActionBlock<PercentProgress<EnvironmentalDataSet>>(job => Import(job),
-                                                                                     new ExecutionDataflowBlockOptions
-                                                                                     {
-                                                                                         TaskScheduler = taskScheduler,
-                                                                                         BoundedCapacity = boundedCapacity,
-                                                                                         MaxDegreeOfParallelism = maxDegreeOfParallelism,
-                                                                                     });
+            var newImporter = new ActionBlock<PercentProgress<EnvironmentalDataSet>>
+                (
+                    job =>
+                    {
+                        EnvironmentalCacheEntry cacheEntry;
+                        Import(job, out cacheEntry);
+                    },
+                    new ExecutionDataflowBlockOptions
+                    {
+                        TaskScheduler = taskScheduler,
+                        BoundedCapacity = boundedCapacity,
+                        MaxDegreeOfParallelism = maxDegreeOfParallelism,
+                    }
+                );
             return newImporter;
         }
 
-        void Import(PercentProgress<EnvironmentalDataSet> job)
+        void Import(PercentProgress<EnvironmentalDataSet> job, out EnvironmentalCacheEntry cacheEntry)
         {
+            cacheEntry = new EnvironmentalCacheEntry();
             Interlocked.Increment(ref _busyCount);
-            OnPropertyChanged("BusyCount");
+            //OnPropertyChanged("BusyCount");
             var dataSet = job.ProgressTarget;
-            var progress = job;
             var sourcePlugin = (EnvironmentalDataSourcePluginBase)_plugins[dataSet.SourcePlugin];
-            var geoRect = dataSet.Location.GeoRect;
-            var resolution = dataSet.Resolution;
-            var timePeriod = dataSet.TimePeriod;
             var fileName = Path.Combine(_database.MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
-            progress.Report(0);
+            job.Report(0);
             Debug.WriteLine("Importer: About to import {0}[{1}] from plugin {2}", (PluginSubtype)dataSet.SourcePlugin.PluginSubtype, dataSet.Resolution, sourcePlugin.PluginName);
             switch (sourcePlugin.EnvironmentDataType)
             {
                 case EnvironmentDataType.Wind:
-                    var wind = ((EnvironmentalDataSourcePluginBase<Wind>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
+                    var wind = ((EnvironmentalDataSourcePluginBase<Wind>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, dataSet.TimePeriod, job);
+                    cacheEntry.Data = wind;
                     dataSet.SampleCount = (from period in wind.TimePeriods select period.EnvironmentData.Count).Sum();
                     wind.Serialize(fileName);
                     var windColormap = new Colormap(Colormap.CoolComponents, 512);
-                    ToBitmap(wind[timePeriod].EnvironmentData, fileName, v => v == null ? 0 : v.Data, windColormap.ToPixelValues);
-                    Debug.WriteLine("Importer: Imported {0}min Wind [{1}] from plugin {2}", dataSet.Resolution, dataSet.TimePeriod, sourcePlugin.PluginName);
+                    ToBitmap(wind[dataSet.TimePeriod].EnvironmentData, fileName, v => v == null ? 0 : v.Data, windColormap.ToPixelValues);
+                    Debug.WriteLine("Importer: Imported {0}min Wind [{1}] from plugin {2}", dataSet.Resolution, (TimePeriod)dataSet.TimePeriod, sourcePlugin.PluginName);
                     break;
                 case EnvironmentDataType.Sediment:
-                    var sediment = ((EnvironmentalDataSourcePluginBase<Sediment>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
+                    var sediment = ((EnvironmentalDataSourcePluginBase<Sediment>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, TimePeriod.Invalid, job);
+                    cacheEntry.Data = sediment;
                     dataSet.SampleCount = sediment.Samples.Count;
                     sediment.Serialize(fileName);
                     var sedimentColormap = new Colormap(Colormap.CopperComponents, 23);
@@ -124,13 +145,15 @@ namespace ESME.Locations
                     Debug.WriteLine("Importer: Imported {0}min Sediment from plugin {1}", dataSet.Resolution, sourcePlugin.PluginName);
                     break;
                 case EnvironmentDataType.SoundSpeed:
-                    var soundSpeed = ((EnvironmentalDataSourcePluginBase<SoundSpeed>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
+                    var soundSpeed = ((EnvironmentalDataSourcePluginBase<SoundSpeed>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, dataSet.TimePeriod, job);
+                    cacheEntry.Data = soundSpeed;
                     dataSet.SampleCount = (from field in soundSpeed.SoundSpeedFields select field.EnvironmentData.Count).Sum();
                     soundSpeed.Serialize(fileName);
-                    Debug.WriteLine("Importer: Imported {0}min Sound Speed [{1}] from plugin {2}", dataSet.Resolution, dataSet.TimePeriod, sourcePlugin.PluginName);
+                    Debug.WriteLine("Importer: Imported {0}min Sound Speed [{1}] from plugin {2}", dataSet.Resolution, (TimePeriod)dataSet.TimePeriod, sourcePlugin.PluginName);
                     break;
                 case EnvironmentDataType.Bathymetry:
-                    var bathymetry = ((EnvironmentalDataSourcePluginBase<Bathymetry>)sourcePlugin).Extract(geoRect, resolution, timePeriod, progress);
+                    var bathymetry = ((EnvironmentalDataSourcePluginBase<Bathymetry>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, TimePeriod.Invalid, job);
+                    cacheEntry.Data = bathymetry;
                     dataSet.SampleCount = bathymetry.Samples.Count;
                     bathymetry.Save(fileName);
                     //var bathymetryColormap = new Colormap(Colormap.OceanComponents, 1024);
@@ -141,11 +164,12 @@ namespace ESME.Locations
                 default:
                     throw new ApplicationException(string.Format("Unknown environmental data type {0}", sourcePlugin.EnvironmentDataType));
             }
+            cacheEntry.Loaded = DateTime.Now;
             dataSet.FileSize = new FileInfo(fileName).Length;
-            progress.Report(100);
+            job.Report(100);
             Interlocked.Decrement(ref _busyCount);
-            OnPropertyChanged("BusyCount");
-            _importJobsPending.TryRemove(dataSet.Guid, out progress);
+            //OnPropertyChanged("BusyCount");
+            _importJobsPending.TryRemove(dataSet.Guid, out job);
         }
 
         public void ToBitmap<T>(EnvironmentData<T> data, string fileName, Func<T, float> valueFunc, Func<float[,], float, float, uint[,]> toPixelValuesFunc) where T: Geo, new()
@@ -165,7 +189,9 @@ namespace ESME.Locations
             var imagePath = Path.GetDirectoryName(fileName);
 
             var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
-            for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) bitmapData[lonIndex, latIndex] = valueFunc(displayValues[(uint)lonIndex, (uint)latIndex]);
+            for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++) 
+                for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++) 
+                    bitmapData[lonIndex, latIndex] = valueFunc(displayValues[(uint)lonIndex, (uint)latIndex]);
             var displayData = toPixelValuesFunc(bitmapData, minValue, maxValue);
             BitmapWriter.Write(Path.Combine(imagePath, imageFilename), displayData);
 
@@ -217,7 +243,7 @@ namespace ESME.Locations
                 }
                 if (string.IsNullOrEmpty(_database.MasterDatabaseDirectory)) throw new ServiceNotFoundException("Required service MasterDatabaseService is not properly configured.");
                 Debug.WriteLine(string.Format("Cache: Loading {0}", (PluginSubtype)dataSet.SourcePlugin.PluginSubtype));
-                _cache[dataSet.Guid] = EnvironmentalCacheEntry.Load(_database.MasterDatabaseDirectory, dataSet);
+                _cache[dataSet.Guid] = EnvironmentalCacheEntry.Load(_database.MasterDatabaseDirectory, dataSet, this);
                 _cache[dataSet.Guid].LastAccessed = DateTime.Now;
                 return _cache[dataSet.Guid].Data;
             } 
@@ -226,12 +252,25 @@ namespace ESME.Locations
 
     internal class EnvironmentalCacheEntry
     {
-        public DateTime Loaded { get; protected set; }
+        public DateTime Loaded { get; internal set; }
         public DateTime LastAccessed { get; internal set; }
-        public EnvironmentDataSetBase Data { get; protected set; }
-        public static EnvironmentalCacheEntry Load(string databaseDirectory, EnvironmentalDataSet dataSet)
+        public EnvironmentDataSetBase Data { get; internal set; }
+        public static EnvironmentalCacheEntry Load(string databaseDirectory, EnvironmentalDataSet dataSet, EnvironmentalCacheService cache)
         {
             var locationStorageDirectory = Path.Combine(databaseDirectory, dataSet.Location.StorageDirectory);
+            var fileName = Path.Combine(locationStorageDirectory, dataSet.FileName);
+            if (!File.Exists(fileName))
+            {
+                try
+                {
+                    var importTask = cache.CreateImportDatasetTask(dataSet);
+                    return importTask.Result;
+                }
+                catch (AggregateException e)
+                {
+                    Debug.WriteLine("Exception caught: {0}", e.Message);
+                }
+            }
             switch ((PluginSubtype)dataSet.SourcePlugin.PluginSubtype)
             {
                 case PluginSubtype.Wind:
