@@ -5,13 +5,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:l="clr-namespace:ESME.Views.Scenarios"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        Title="Create Scenario"
+        xmlns:NAVO="clr-namespace:ESME.Environment.NAVO;assembly=ESME" Title="Create Scenario"
         d:DataContext="{d:DesignInstance l:CreateScenarioViewModel}"
         Grid.IsSharedSizeScope="True"
         SizeToContent="WidthAndHeight"
         mc:Ignorable="d">
     <Window.Resources>
-        <Style TargetType="{x:Type TextBox}">
+        <Style x:Key="ValidationStyle" TargetType="{x:Type Control}" >
             <Setter Property="Validation.ErrorTemplate">
                 <Setter.Value>
                     <ControlTemplate>
@@ -32,38 +32,64 @@
     </Window.Resources>
     <DockPanel>
         <Border BorderThickness="0" DockPanel.Dock="Top" Padding="5">
-            <Grid Margin="5">
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Row="0"
-                           Grid.Column="0"
-                           Margin="0 0 5 0"
-                           VerticalAlignment="Center"
-                           Text="Scenario name"
-                           TextAlignment="Right" />
-                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ScenarioName, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
-                <Separator Grid.Row="1" Grid.ColumnSpan="2" Margin="0 5 0 5" />
-                <TextBlock Grid.Row="2"
-                           Grid.Column="0"
-                           Margin="0 0 5 0"
-                           VerticalAlignment="Center"
-                           Text="Location"
-                           TextAlignment="Right" />
-                <ComboBox Grid.Row="2"
-                          Grid.Column="1"
-                          DisplayMemberPath="Name"
-                          ItemsSource="{Binding Locations}"
-                          SelectedItem="{Binding Location}" />
-            </Grid>
+            <StackPanel Orientation="Vertical">
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Center"
+                               Text="Scenario name"
+                               TextAlignment="Right" />
+                    <TextBox Grid.Column="1" ToolTip="This field is required" Style="{StaticResource ValidationStyle}" Text="{Binding ScenarioName, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Center"
+                               Text="Location"
+                               TextAlignment="Right" />
+                    <ComboBox Grid.Column="1"
+                              DisplayMemberPath="Name"
+                              ItemsSource="{Binding Locations}"
+                              SelectedItem="{Binding Location}" />
+                </Grid>
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Center"
+                               Text="Time Period"
+                               TextAlignment="Right" />
+                    <ComboBox Grid.Column="1"
+                              ToolTip="This field is required"
+                              ItemsSource="{x:Static NAVO:NAVOConfiguration.AllTimePeriods}"
+                              SelectedItem="{Binding TimePeriod}" />
+                </Grid>
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Center"
+                               Text="Comments"
+                               TextAlignment="Right" />
+                    <TextBox Grid.Column="1" TextWrapping="Wrap" AcceptsReturn="True" Height="Auto" Text="{Binding Comments}" ToolTip="This field is optional"/>
+                </Grid>
+            </StackPanel>
         </Border>
-        <GroupBox DockPanel.Dock="Top" Header="Environmental Data Sources" IsEnabled="{Binding IsValid}">
+        <GroupBox DockPanel.Dock="Top" Margin="0 10 0 0" Header="Environmental Data Sources" IsEnabled="{Binding IsValid}">
             <StackPanel Margin="5" DockPanel.Dock="Left" Orientation="Vertical">
                 <Controls:PluginSelector Grid.Row="0" ItemsSource="{Binding EnvironmentDataSourceViews[Wind]}" PluginTypeName="Wind" SelectedItem="{Binding SelectedPlugins[Wind]}" />
                 <Separator Margin="0 5 0 10" />

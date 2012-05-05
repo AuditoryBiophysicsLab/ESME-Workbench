@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using ESME;
 using ESME.Environment;
 using ESME.Mapping;
 using ESME.Model;
+using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.Views.Locations;
 using ESME.Views.Scenarios;
@@ -72,10 +74,20 @@ namespace ESMEWorkbench.ViewModels.Main
         void CreateScenarioHandler(EventToCommandArgs args)
         {
             //var parameter = args.CommandParameter;
-            var vm = new CreateScenarioViewModel { Locations = Database.Context.Locations.Local, PluginManager = _plugins, Location = Database.Context.Locations.Local.First() };
+            var vm = new CreateScenarioViewModel { Locations = Database.Context.Locations.Local, PluginManager = _plugins, Location = Database.Context.Locations.Local.First(), TimePeriod = (TimePeriod)DateTime.Today.Month };
             var result = _visualizer.ShowDialog("CreateScenarioView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
-            //Database.Add(new Scenario{});
+            Database.Add(new Scenario
+            {
+                Wind = vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet,
+                SoundSpeed = vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet,
+                Bathymetry = vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet,
+                Sediment = vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet,
+                Name = vm.ScenarioName,
+                Location = vm.Location,
+                Comments = vm.Comments,
+                TimePeriod = vm.TimePeriod,
+            });
         }
         #endregion
 

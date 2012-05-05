@@ -3,9 +3,9 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Data;
+using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
-using ESME.Views.Locations;
 using HRC.Aspects;
 using HRC.Collections;
 using HRC.Validation;
@@ -40,6 +40,8 @@ namespace ESME.Views.Scenarios
             },
         };
         public Location Location { get; set; }
+        public string Comments { get; set; }
+        public TimePeriod TimePeriod { get; set; }
 
         #region PluginManager stuff
         IPluginManagerService _pluginManager;
