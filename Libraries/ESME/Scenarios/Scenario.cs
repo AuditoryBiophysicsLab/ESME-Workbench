@@ -23,9 +23,9 @@ namespace ESME.Scenarios
         public string Name { get; set; }
         public string Comments { get; set; }
         public string StorageDirectory { get; set; }
-        public DbTimeSpan StartTime { get; set; }
-        public DbTimeSpan Duration { get; set; }
-        public DbTimePeriod TimePeriod { get; set; }
+        [Initialize] public DbTimeSpan StartTime { get; set; }
+        [Initialize] public DbTimeSpan Duration { get; set; }
+        [Initialize] public DbTimePeriod TimePeriod { get; set; }
 
         public virtual Location Location { get; set; }
         public virtual LayerSettings LayerSettings { get; set; }

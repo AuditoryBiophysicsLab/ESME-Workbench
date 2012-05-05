@@ -77,17 +77,25 @@ namespace ESMEWorkbench.ViewModels.Main
             var vm = new CreateScenarioViewModel { Locations = Database.Context.Locations.Local, PluginManager = _plugins, Location = Database.Context.Locations.Local.First(), TimePeriod = (TimePeriod)DateTime.Today.Month };
             var result = _visualizer.ShowDialog("CreateScenarioView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
+            var wind = Database.CreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet.Resolution, vm.TimePeriod, vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet.SourcePlugin);
+            var soundSpeed = Database.CreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet.Resolution, vm.TimePeriod, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet.SourcePlugin);
+            var bathymetry = Database.CreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet.Resolution, TimePeriod.Invalid, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet.SourcePlugin);
+            var sediment = Database.CreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet.Resolution, TimePeriod.Invalid, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet.SourcePlugin);
             Database.Add(new Scenario
             {
-                Wind = vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet,
-                SoundSpeed = vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet,
-                Bathymetry = vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet,
-                Sediment = vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet,
+                Wind = wind,
+                SoundSpeed = soundSpeed,
+                Bathymetry = bathymetry,
+                Sediment = sediment,
                 Name = vm.ScenarioName,
                 Location = vm.Location,
                 Comments = vm.Comments,
                 TimePeriod = vm.TimePeriod,
-            });
+            }, true);
+            _cache.ImportDataset(wind);
+            _cache.ImportDataset(soundSpeed);
+            _cache.ImportDataset(bathymetry);
+            _cache.ImportDataset(sediment);
         }
         #endregion
 
