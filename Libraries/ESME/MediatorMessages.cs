@@ -15,6 +15,15 @@ namespace ESME
         public const string ViewAnalysisPoint = "ViewAnalysisPointMessage";
         public const string CalculateAnalysisPoint = "CalculateAnalysisPointMessage";
 
+        public const string AddPlatform = "AddPlatformMessage";
+        public const string DeletePlatform = "DeletePlatformMessage";
+
+        public const string AddSource = "AddSourceMessage";
+        public const string DeleteSource = "DeleteSourceMessage";
+
+        public const string AddMode = "AddModeMessage";
+        public const string DeleteMode = "DeleteModeMessage";
+
         public const string ShowProperties = "ShowPropertiesMessage";
 
         public const string SetExperiment = "SetExperimentMessage";

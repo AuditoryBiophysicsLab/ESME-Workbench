@@ -7,6 +7,8 @@ using ESME.Locations;
 using ESME.Mapping;
 using HRC.Aspects;
 using HRC.Navigation;
+using HRC.ViewModels;
+using HRC.WPF;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Scenarios
@@ -42,6 +44,27 @@ namespace ESME.Scenarios
         public virtual ICollection<Source> Sources { get; set; }
         public virtual ICollection<LogEntry> Logs { get; set; }
 
+        #region DeletePlatformCommand
+        public SimpleCommand<object, EventToCommandArgs> DeletePlatformCommand { get { return _deletePlatform ?? (_deletePlatform = new SimpleCommand<object, EventToCommandArgs>(DeletePlatformHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _deletePlatform;
+
+        void DeletePlatformHandler(EventToCommandArgs args)
+        {
+            //var parameter = args.CommandParameter;
+            MediatorMessage.Send(MediatorMessage.DeletePlatform, this);
+        }
+        #endregion
+
+        #region AddSourceCommand
+        public SimpleCommand<object, EventToCommandArgs> AddSourceCommand { get { return _addSource ?? (_addSource = new SimpleCommand<object, EventToCommandArgs>(AddSourceHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _addSource;
+
+        void AddSourceHandler(EventToCommandArgs args)
+        {
+            //var parameter = args.CommandParameter;
+            MediatorMessage.Send(MediatorMessage.AddSource, this);
+        }
+        #endregion
         OverlayShapeMapLayer _mapLayer;
         public void CreateMapLayers()
         {

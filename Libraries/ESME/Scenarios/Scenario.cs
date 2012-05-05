@@ -11,6 +11,8 @@ using ESME.Environment;
 using ESME.Locations;
 using HRC.Aspects;
 using HRC.Navigation;
+using HRC.ViewModels;
+using HRC.WPF;
 
 namespace ESME.Scenarios
 {
@@ -199,6 +201,17 @@ namespace ESME.Scenarios
 
         [NotMapped] public bool IsMouseOver { get; set; }
         [NotMapped] public GeoRect GeoRect { get { return Location.GeoRect; } }
+        #region AddPlatformCommand
+        public SimpleCommand<object, EventToCommandArgs> AddPlatformCommand { get { return _addPlatform ?? (_addPlatform = new SimpleCommand<object, EventToCommandArgs>(AddPlatformHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _addPlatform;
+
+        void AddPlatformHandler(EventToCommandArgs args)
+        {
+            //var parameter = args.CommandParameter;
+            MediatorMessage.Send(MediatorMessage.AddPlatform, this);
+        }
+        #endregion
+
     }
 
     public static class ScenarioExensions

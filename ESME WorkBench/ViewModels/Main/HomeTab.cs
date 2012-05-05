@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using ESME;
+using ESME.Behaviors;
 using ESME.Environment;
 using ESME.Mapping;
 using ESME.Model;
@@ -13,6 +14,7 @@ using ESME.Views.Locations;
 using ESME.Views.Scenarios;
 using ESMEWorkbench.ViewModels.Map;
 using ESMEWorkbench.ViewModels.Tree;
+using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.ViewModels;
@@ -100,6 +102,37 @@ namespace ESMEWorkbench.ViewModels.Main
             }, true);
         }
         #endregion
+
+        [MediatorMessageSink(MediatorMessage.AddPlatform), UsedImplicitly]
+        void AddPlatform(Scenario scenario)
+        {
+            //var parameter = args.CommandParameter;
+            var vm = new CreatePlatformViewModel();
+            var result = _visualizer.ShowDialog("CreatePlatformView", vm);
+            if (!result.HasValue || !result.Value) return;
+            var platform = new Platform
+            {
+                Scenario = scenario,
+                Course = 0,
+                Depth = 0,
+                Description = vm.Description,
+                Geo = ((GeoRect)Scenario.Location.GeoRect).Center,
+                PlatformName = vm.PlatformName,
+                IsRandom = false,
+                Launches = false,
+                TrackType = TrackType.Stationary,
+            };
+            Database.Add(platform, true);
+        }
+
+        [MediatorMessageSink(MediatorMessage.DeletePlatform), UsedImplicitly]
+        void DeletePlatform(Platform platform)
+        {
+            //var parameter = args.CommandParameter;
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the platform \"{0}\"", platform.PlatformName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            Database.Context.Platforms.Remove(platform);
+            Database.Context.SaveChanges();
+        }
 
         [MediatorMessageSink(MediatorMessage.ShowProperties)]
         public void ShowProperties(IHaveProperties propertyViewModel)

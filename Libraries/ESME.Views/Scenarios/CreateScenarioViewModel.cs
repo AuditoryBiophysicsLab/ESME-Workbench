@@ -26,19 +26,21 @@ namespace ESME.Views.Scenarios
     /// </summary>
     public class CreateScenarioViewModel : ValidatingViewModel
     {
-        public CreateScenarioViewModel() { ValidationRules.Add(ScenarioNameValidationRule); }
+        public CreateScenarioViewModel()
+        {
+            ValidationRules.Add(new ValidationRule
+            {
+                PropertyName = "ScenarioName",
+                Description = "Must be unique within the selected location and cannot be null or empty",
+                RuleDelegate = (o, r) =>
+                {
+                    var target = (CreateScenarioViewModel)o;
+                    return !string.IsNullOrEmpty(target.ScenarioName);
+                },
+            });
+        }
         public ObservableCollection<Location> Locations { get; set; }
         public string ScenarioName { get; set; }
-        static readonly ValidationRule ScenarioNameValidationRule = new ValidationRule
-        {
-            PropertyName = "ScenarioName",
-            Description = "Must be unique within the selected location and cannot be null or empty",
-            RuleDelegate = (o, r) =>
-            {
-                var target = (CreateScenarioViewModel)o;
-                return !string.IsNullOrEmpty(target.ScenarioName);
-            },
-        };
         public Location Location { get; set; }
         public string Comments { get; set; }
         public TimePeriod TimePeriod { get; set; }
