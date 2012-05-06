@@ -72,7 +72,7 @@
                         <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" />
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type app:WorldMapFeatureNode}">
-                        <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="{Binding FeatureName}" LineColorVisibility="Collapsed" />
+                        <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="{Binding FeatureName, Mode=OneWay}" LineColorVisibility="Collapsed" />
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type app:BathymetryNode}">
                         <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="Bathymetry" LineColorVisibility="Collapsed" />

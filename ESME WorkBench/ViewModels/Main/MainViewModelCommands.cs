@@ -83,6 +83,7 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 return _viewClosing ?? (_viewClosing = new SimpleCommand<object, object>(o =>
                 {
+                    Database.Context.SaveChanges();
                     MediatorMessage.Send(MediatorMessage.ApplicationClosing, true);
                     ESME.Globals.AppSettings.Save();
                 }));

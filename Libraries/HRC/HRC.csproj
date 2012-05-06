@@ -116,6 +116,7 @@
     <Compile Include="Collections\Node.cs" />
     <Compile Include="Collections\NodeList.cs" />
     <Compile Include="Collections\ObservableConcurrentDictionary.cs" />
+    <Compile Include="Collections\ObservableHashset.cs" />
     <Compile Include="Collections\ParallelExtensionMethods.cs" />
     <Compile Include="Collections\RedBlack.cs" />
     <Compile Include="Collections\RedBlackEnumerator.cs" />
@@ -231,7 +232,7 @@
     <Compile Include="WPF\Dynamic.cs" />
     <Compile Include="WPF\EventToCommandArgs.cs" />
     <Compile Include="WPF\EventToCommandTrigger.cs" />
-    <Compile Include="WPF\IsMouseOverTemplateSelector.cs" />
+    <Compile Include="WPF\BooleanTemplateSelector.cs" />
     <Compile Include="WPF\LambdaExtension.cs" />
     <Compile Include="WPF\Palette.cs" />
     <Compile Include="WPF\PlotHelpers.cs" />

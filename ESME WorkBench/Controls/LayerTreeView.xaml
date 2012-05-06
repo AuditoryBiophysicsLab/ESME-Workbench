@@ -86,15 +86,11 @@
                                                             Path=IsSelected}"
                                        LayerName="{Binding Name,
                                                            StringFormat=Scenario: {0}}">
-                    <Controls:LayerControl.ContextControl>
-                        <StackPanel Orientation="Horizontal">
-                            <Controls:ImageToggleButton Width="16"
-                                                        Height="16"
-                                                        Command="{Binding AddPlatformCommand}"
-                                                        ImageSource="..\..\Images\SmallIcons\add.png"
-                                                        ToolTip="Add platform" />
-                        </StackPanel>
-                    </Controls:LayerControl.ContextControl>
+                    <Controls:LayerControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding AddPlatformCommand}" Header="Add platform" />
+                        </ContextMenu>
+                    </Controls:LayerControl.ContextMenu>
                 </Controls:LayerControl>
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
@@ -104,77 +100,77 @@
                                                             Path=IsSelected}"
                                        LayerName="{Binding PlatformName}"
                                        LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
-                                       LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
-                    <Controls:LayerControl.ContextControl>
+                                       LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}"
+                                       IsLayerNameEditable="True">
+                    <Controls:LayerControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding DeletePlatformCommand}" Header="Remove this platform" />
+                            <MenuItem Command="{Binding AddSourceCommand}" Header="Add source" />
+                            <MenuItem Command="{Binding PlatformPropertiesCommand}" Header="Properties" />
+                        </ContextMenu>
+                    </Controls:LayerControl.ContextMenu>
+                    <!--
+                        <Controls:LayerControl.ContextControl>
                         <StackPanel Orientation="Horizontal">
-                            <!--
-                                <Controls:ImageToggleButton Width="16"
-                                Height="16"
-                                ImageSource="..\..\Images\SmallIcons\color_wheel.png"
-                                ToolTip="Change line color" />
-                                <Controls:ImageToggleButton Width="16"
-                                Height="16"
-                                ImageSource="..\..\Images\SmallIcons\draw_line.png"
-                                ToolTip="Change line width" />
-                            -->
-                            <Controls:ImageToggleButton Width="16"
-                                                        Height="16"
-                                                        Command="{Binding AddSourceCommand}"
-                                                        ImageSource="..\..\Images\SmallIcons\add.png"
-                                                        ToolTip="Add source" />
-                            <Controls:ImageToggleButton Width="16"
-                                                        Height="16"
-                                                        Command="{Binding DeletePlatformCommand}"
-                                                        ImageSource="..\..\Images\SmallIcons\delete.png"
-                                                        ToolTip="Remove platform" />
+                        <Controls:ImageToggleButton Width="16"
+                        Height="16"
+                        ImageSource="..\..\Images\SmallIcons\color_wheel.png"
+                        ToolTip="Change line color" />
+                        <Controls:ImageToggleButton Width="16"
+                        Height="16"
+                        ImageSource="..\..\Images\SmallIcons\draw_line.png"
+                        ToolTip="Change line width" />
+                        <Controls:ImageToggleButton Width="16"
+                        Height="16"
+                        Command="{Binding AddSourceCommand}"
+                        ImageSource="..\..\Images\SmallIcons\add.png"
+                        ToolTip="Add source" />
+                        <Controls:ImageToggleButton Width="16"
+                        Height="16"
+                        Command="{Binding DeletePlatformCommand}"
+                        ImageSource="..\..\Images\SmallIcons\delete.png"
+                        ToolTip="Remove platform" />
                         </StackPanel>
-                    </Controls:LayerControl.ContextControl>
+                        </Controls:LayerControl.ContextControl>
+                    -->
                 </Controls:LayerControl>
             </HierarchicalDataTemplate>
-            <!-- Source -->
+            <!--  Source  -->
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
                 <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
+                                       IsMapLayer="False"
                                        IsSelected="{Binding RelativeSource={RelativeSource FindAncestor,
                                                                                            AncestorType={x:Type TreeViewItem}},
                                                             Path=IsSelected}"
-                                       IsMapLayer="False"
-                                       LayerName="{Binding SourceName}">
-                    <Controls:LayerControl.ContextControl>
-                        <StackPanel Orientation="Horizontal">
-                            <Controls:ImageToggleButton Width="16"
-                                                        Height="16"
-                                                        Command="{Binding AddModeCommand}"
-                                                        ImageSource="..\..\Images\SmallIcons\add.png"
-                                                        ToolTip="Add source" />
-                            <Controls:ImageToggleButton Width="16"
-                                                        Height="16"
-                                                        Command="{Binding DeleteSourceCommand}"
-                                                        ImageSource="..\..\Images\SmallIcons\delete.png"
-                                                        ToolTip="Remove platform" />
-                        </StackPanel>
-                    </Controls:LayerControl.ContextControl>
+                                       LayerName="{Binding SourceName}"
+                                       IsLayerNameEditable="True">
+                    <Controls:LayerControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding DeleteSourceCommand}" Header="Remove this source" />
+                            <MenuItem Command="{Binding AddModeCommand}" Header="Add mode" />
+                            <MenuItem Command="{Binding SourcePropertiesCommand}" Header="Properties" />
+                        </ContextMenu>
+                    </Controls:LayerControl.ContextMenu>
                 </Controls:LayerControl>
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Tree:EnvironmentNode}" ItemsSource="{Binding EnvironmentLayers}">
                 <Controls:LayerControl IsMapLayer="False" LayerName="Environment" />
             </HierarchicalDataTemplate>
-            <!-- Mode -->
+            <!--  Mode  -->
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
                 <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                                       IsMapLayer="False"
                                        IsSelected="{Binding RelativeSource={RelativeSource FindAncestor,
                                                                                            AncestorType={x:Type TreeViewItem}},
                                                             Path=IsSelected}"
-                                       IsMapLayer="False"
-                                       LayerName="{Binding ModeName}">
-                    <Controls:LayerControl.ContextControl>
-                        <StackPanel Orientation="Horizontal">
-                            <Controls:ImageToggleButton Width="16"
-                                                        Height="16"
-                                                        Command="{Binding DeleteModeCommand}"
-                                                        ImageSource="..\..\Images\SmallIcons\delete.png"
-                                                        ToolTip="Remove platform" />
-                        </StackPanel>
-                    </Controls:LayerControl.ContextControl>
+                                       LayerName="{Binding ModeName}"
+                                       IsLayerNameEditable="True">
+                    <Controls:LayerControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding DeleteModeCommand}" Header="Remove this mode" />
+                            <MenuItem Command="{Binding ModePropertiesCommand}" Header="Properties" />
+                        </ContextMenu>
+                    </Controls:LayerControl.ContextMenu>
                 </Controls:LayerControl>
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Tree:WorldMapNode}" ItemsSource="{Binding Features}">
@@ -223,7 +219,7 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type Tree:WorldMapFeatureNode}">
                 <Controls:LayerControl IsChecked="{Binding IsChecked}"
-                                       LayerName="{Binding FeatureName}"
+                                       LayerName="{Binding FeatureName, Mode=OneWay}"
                                        LineColorVisibility="Collapsed" />
             </DataTemplate>
             <DataTemplate DataType="{x:Type Tree:BitmapNode}">

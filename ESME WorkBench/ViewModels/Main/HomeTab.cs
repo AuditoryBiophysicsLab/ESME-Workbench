@@ -89,7 +89,7 @@ namespace ESMEWorkbench.ViewModels.Main
             var soundSpeed = Database.LoadOrCreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet.Resolution, vm.TimePeriod, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet.SourcePlugin);
             var bathymetry = Database.LoadOrCreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet.Resolution, TimePeriod.Invalid, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet.SourcePlugin);
             var sediment = Database.LoadOrCreateEnvironmentalDataSet(vm.Location, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet.Resolution, TimePeriod.Invalid, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet.SourcePlugin);
-            Database.Add(new Scenario
+            var scenario = new Scenario
             {
                 Wind = wind,
                 SoundSpeed = soundSpeed,
@@ -99,29 +99,33 @@ namespace ESMEWorkbench.ViewModels.Main
                 Location = vm.Location,
                 Comments = vm.Comments,
                 TimePeriod = vm.TimePeriod,
-            }, true);
+            };
+            Database.Add(scenario, true);
         }
         #endregion
 
         [MediatorMessageSink(MediatorMessage.AddPlatform), UsedImplicitly]
         void AddPlatform(Scenario scenario)
         {
-            var vm = new CreatePlatformViewModel();
-            var result = _visualizer.ShowDialog("CreatePlatformView", vm);
-            if (!result.HasValue || !result.Value) return;
+            //var vm = new CreatePlatformViewModel();
+            //var result = _visualizer.ShowDialog("CreatePlatformView", vm);
+            //if (!result.HasValue || !result.Value) return;
             var platform = new Platform
             {
                 Scenario = scenario,
                 Course = 0,
                 Depth = 0,
-                Description = vm.Description,
+                Description = null,
                 Geo = ((GeoRect)Scenario.Location.GeoRect).Center,
-                PlatformName = vm.PlatformName,
+                PlatformName = "New Platform",
                 IsRandom = false,
                 Launches = false,
                 TrackType = TrackType.Stationary,
+                LayerSettings = new LayerSettings(),
             };
-            Database.Add(platform, true);
+            Scenario.Platforms.Add(platform);
+            Database.Context.SaveChanges();
+            platform.CreateMapLayers();
         }
 
         [MediatorMessageSink(MediatorMessage.DeletePlatform), UsedImplicitly]
@@ -134,16 +138,17 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.AddSource), UsedImplicitly]
         void AddSource(Platform platform)
         {
-            var vm = new CreateSourceViewModel();
-            var result = _visualizer.ShowDialog("CreateSourceView", vm);
-            if (!result.HasValue || !result.Value) return;
+            //var vm = new CreateSourceViewModel();
+            //var result = _visualizer.ShowDialog("CreateSourceView", vm);
+            //if (!result.HasValue || !result.Value) return;
             var source = new Source
             {
                 Platform = platform,
-                SourceName = vm.SourceName,
+                SourceName = "New Source",
                 SourceType = null,
             };
             Database.Add(source, true);
+            LayerTreeViewModel.Refresh();
         }
         [MediatorMessageSink(MediatorMessage.DeleteSource), UsedImplicitly]
         void DeleteSource(Source source)
@@ -151,31 +156,33 @@ namespace ESMEWorkbench.ViewModels.Main
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the source \"{0}\"?", source.SourceName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             Database.Context.Sources.Remove(source);
             Database.Context.SaveChanges();
+            LayerTreeViewModel.Refresh();
         }
         [MediatorMessageSink(MediatorMessage.AddMode), UsedImplicitly]
         void AddMode(Source source)
         {
-            var vm = new CreateModeViewModel();
-            var result = _visualizer.ShowDialog("CreateModeView", vm);
-            if (!result.HasValue || !result.Value) return;
+            //var vm = new CreateModeViewModel();
+            //var result = _visualizer.ShowDialog("CreateModeView", vm);
+            //if (!result.HasValue || !result.Value) return;
             var mode = new Mode
             {
                 ActiveTime = 1f,
-                Depth = vm.Depth,
-                DepressionElevationAngle = vm.DepressionElevationAngle,
-                HighFrequency = vm.Frequency,
-                LowFrequency = vm.Frequency,
-                MaxPropagationRadius = vm.MaxPropagationRadius,
-                ModeName = vm.ModeName,
+                Depth = 0f,
+                DepressionElevationAngle = 0f,
+                HighFrequency = 1000f,
+                LowFrequency = 1000f,
+                MaxPropagationRadius = 25000f,
+                ModeName = "New Mode",
                 ModeType = null,
                 PulseInterval = new TimeSpan(0, 0, 0, 30),
                 PulseLength = new TimeSpan(0, 0, 0, 0, 500),
                 RelativeBeamAngle = 0,
                 Source = source,
-                SourceLevel = vm.SourceLevel,
-                VerticalBeamWidth = vm.VerticalBeamWidth,
+                SourceLevel = 200,
+                VerticalBeamWidth = 180f,
             };
             Database.Add(mode, true);
+            LayerTreeViewModel.Refresh();
         }
         [MediatorMessageSink(MediatorMessage.DeleteMode), UsedImplicitly]
         void DeleteMode(Mode mode)
@@ -183,6 +190,7 @@ namespace ESMEWorkbench.ViewModels.Main
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             Database.Context.Modes.Remove(mode);
             Database.Context.SaveChanges();
+            LayerTreeViewModel.Refresh();
         }
 
         [MediatorMessageSink(MediatorMessage.ShowProperties)]

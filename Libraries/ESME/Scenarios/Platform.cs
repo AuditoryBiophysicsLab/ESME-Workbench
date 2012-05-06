@@ -67,6 +67,7 @@ namespace ESME.Scenarios
         #endregion
         public void CreateMapLayers()
         {
+            if (LayerSettings == null) LayerSettings = new LayerSettings();
             var mapLayer = new OverlayShapeMapLayer
             {
                 LayerType = LayerType.Track,
