@@ -40,6 +40,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 if (_scenario != null)
                 {
                     // todo: Remove any existing map layers here
+                    _scenario.RemoveMapLayers();
                 }
                 _scenario = value;
                 LayerTreeViewModel.Scenario = _scenario;
@@ -60,6 +61,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
                 _scenario.CreateMapLayers();
                 MediatorMessage.Send(MediatorMessage.SetMapExtent, (GeoRect)_scenario.Location.GeoRect);
+                MediatorMessage.Send(MediatorMessage.RefreshMap, true);
             }
         }
 

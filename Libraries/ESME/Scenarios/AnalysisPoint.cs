@@ -33,6 +33,7 @@ namespace ESME.Scenarios
         public virtual ICollection<TransmissionLoss> TransmissionLosses { get; set; }
 
         public void CreateMapLayers() { throw new NotImplementedException(); }
+        public void RemoveMapLayers() { throw new NotImplementedException(); }
 
         public bool IsValid
         {
@@ -118,10 +119,9 @@ namespace ESME.Scenarios
         }
         string _validationErrorText;
 
-        OverlayShapeMapLayer _mapLayer;
         public void CreateMapLayers()
         {
-            _mapLayer = new OverlayShapeMapLayer
+            var mapLayer = new OverlayShapeMapLayer
             {
                 LayerType = LayerType.Track,
                 Name = string.Format("{0}", Guid),
@@ -134,28 +134,12 @@ namespace ESME.Scenarios
                 geos.Add(((Geo)startGeo).Offset(Geo.KilometersToRadians(radial.Length / 1000), Geo.DegreesToRadians(radial.Bearing)));
                 geos.Add(startGeo);
             }
-            _mapLayer.Add(geos);
-            _mapLayer.Done();
-            //_mapLayer.IsChecked = LayerSettings.IsChecked;
-
-            LayerSettings.PropertyChanged += (s, e) =>
-            {
-                switch (e.PropertyName)
-                {
-                    case "IsChecked":
-                        MediatorMessage.Send(LayerSettings.IsChecked ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, _mapLayer);
-                        break;
-                    case "LineOrSymbolColor":
-                        _mapLayer.LineColor = LayerSettings.LineOrSymbolColor;
-                        MediatorMessage.Send(MediatorMessage.RefreshMapLayer, _mapLayer);
-                        break;
-                    case "LineOrSymbolSize":
-                        _mapLayer.LineWidth = (float)LayerSettings.LineOrSymbolSize;
-                        MediatorMessage.Send(MediatorMessage.RefreshMapLayer, _mapLayer);
-                        break;
-                }
-            };
+            mapLayer.Add(geos);
+            mapLayer.Done();
+            LayerSettings.MapLayerViewModel = mapLayer;
         }
+
+        public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
     }
 
     [NotifyPropertyChanged]

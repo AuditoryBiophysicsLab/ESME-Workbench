@@ -59,6 +59,7 @@ namespace ESME.Scenarios
         }
 
         public void CreateMapLayers() { throw new NotImplementedException(); }
+        public void RemoveMapLayers() { throw new NotImplementedException(); }
 
         #region DeleteModeCommand
         public SimpleCommand<object, EventToCommandArgs> DeleteModeCommand { get { return _deleteMode ?? (_deleteMode = new SimpleCommand<object, EventToCommandArgs>(DeleteModeHandler)); } }

@@ -197,6 +197,19 @@ namespace ESME.Scenarios
             foreach (var transmissionLoss in transmissionLosses) transmissionLoss.CreateMapLayers();
         }
 
+        public void RemoveMapLayers()
+        {
+            Wind.RemoveMapLayers();
+            SoundSpeed.RemoveMapLayers();
+            Bathymetry.RemoveMapLayers();
+            Sediment.RemoveMapLayers();
+            if (Platforms != null) foreach (var platform in Platforms) platform.RemoveMapLayers();
+            var transmissionLosses = (from tl in Database.Context.TransmissionLosses
+                                      where tl.AnalysisPoint.Scenario.Guid == Guid
+                                      select tl).ToList();
+            foreach (var transmissionLoss in transmissionLosses) transmissionLoss.RemoveMapLayers();
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotMapped] public bool IsMouseOver { get; set; }

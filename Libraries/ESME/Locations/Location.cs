@@ -18,7 +18,7 @@ namespace ESME.Locations
     {
         LayerSettings LayerSettings { get; set; }
         void CreateMapLayers();
-        //MapLayerViewModel MapLayer { get; set; }
+        void RemoveMapLayers();
     }
 
     public class Location : IHaveGuid//, IHaveLayerSettings

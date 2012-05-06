@@ -19,5 +19,6 @@ namespace ESME.Scenarios
         public virtual ICollection<LogEntry> Logs { get; set; }
 
         public void CreateMapLayers() { throw new NotImplementedException(); }
+        public void RemoveMapLayers() { throw new NotImplementedException(); }
     }
 }

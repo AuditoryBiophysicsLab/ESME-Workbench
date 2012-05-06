@@ -65,37 +65,21 @@ namespace ESME.Scenarios
             MediatorMessage.Send(MediatorMessage.AddSource, this);
         }
         #endregion
-        OverlayShapeMapLayer _mapLayer;
         public void CreateMapLayers()
         {
-            _mapLayer = new OverlayShapeMapLayer
+            var mapLayer = new OverlayShapeMapLayer
             {
                 LayerType = LayerType.Track,
                 Name = string.Format("{0}", Guid),
                 CustomLineStyle = new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, LayerSettings.LineOrSymbolColor, (float)LayerSettings.LineOrSymbolSize)
             };
 
-            _mapLayer.Add(new List<Geo> { Geo, ((Geo)Geo).Offset(HRC.Navigation.Geo.KilometersToRadians(25), HRC.Navigation.Geo.DegreesToRadians(90)) });
-            _mapLayer.Done();
-
-            LayerSettings.PropertyChanged += (s, e) =>
-            {
-                switch (e.PropertyName)
-                {
-                    case "IsChecked":
-                        MediatorMessage.Send(LayerSettings.IsChecked ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, _mapLayer);
-                        break;
-                    case "LineOrSymbolColor":
-                    case "LineOrSymbolSize":
-                        _mapLayer.CustomLineStyle = new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5,
-                                                                                PointSymbolType.Square, Colors.Red, 5,
-                                                                                LayerSettings.LineOrSymbolColor,
-                                                                                (float)LayerSettings.LineOrSymbolSize);
-                        MediatorMessage.Send(MediatorMessage.RefreshMapLayer, _mapLayer);
-                        break;
-                }
-            };
+            mapLayer.Add(new List<Geo> { Geo, ((Geo)Geo).Offset(HRC.Navigation.Geo.KilometersToRadians(25), HRC.Navigation.Geo.DegreesToRadians(90)) });
+            mapLayer.Done();
+            LayerSettings.MapLayerViewModel = mapLayer;
             if (Perimeter != null) Perimeter.CreateMapLayers();
         }
+
+        public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +6,6 @@ using System.Windows;
 using System.Xml.Serialization;
 using ESME.NEMO.Overlay;
 using ESME.Scenarios;
-using ESME.TransmissionLoss;
 using HRC.Navigation;
 using ThinkGeo.MapSuite.Core;
 
@@ -112,7 +110,7 @@ namespace ESME.Mapping
 
             _layer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
             LayerOverlay.Layers.Add(_layer);
-            MediatorMessage.Send(MediatorMessage.AddMapLayer, this);
+            //MediatorMessage.Send(MediatorMessage.AddMapLayer, this);
             //MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
         }
 

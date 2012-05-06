@@ -57,10 +57,10 @@ namespace ESME.Locations
             }
         }
 
-        MapLayerViewModel _mapLayer;
         protected static readonly Random Random = new Random();
         public void CreateMapLayers()
         {
+            MapLayerViewModel mapLayer;
             var dataType = ((PluginIdentifier)SourcePlugin).PluginSubtype;
             switch (dataType)
             {
@@ -78,7 +78,7 @@ namespace ESME.Locations
                     pointLayer.Clear();
                     pointLayer.Add(geos, true);
                     pointLayer.Done();
-                    _mapLayer = pointLayer;
+                    LayerSettings.MapLayerViewModel = pointLayer;
                     break;
                 case PluginSubtype.Wind:
                 case PluginSubtype.Bathymetry:
@@ -94,28 +94,14 @@ namespace ESME.Locations
                         IsEnabled = true,
                         RasterFilename = Path.Combine(Location.Database.MasterDatabaseDirectory, Location.StorageDirectory, Path.GetFileNameWithoutExtension(FileName) + ".bmp"),
                     };
-                    MediatorMessage.Send(MediatorMessage.AddMapLayer, rasterLayer);
-                    _mapLayer = rasterLayer;
+                    LayerSettings.MapLayerViewModel = rasterLayer;
                     break;
                 default:
                     throw new ApplicationException(string.Format("Unknown layer type: {0}", ((PluginIdentifier)SourcePlugin).PluginSubtype));
             }
-
-            LayerSettings.PropertyChanged += (s, e) =>
-            {
-                switch (e.PropertyName)
-                {
-                    case "IsChecked":
-                        MediatorMessage.Send(LayerSettings.IsChecked ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, _mapLayer);
-                        break;
-                    case "LineOrSymbolColor":
-                    case "LineOrSymbolSize":
-                        _mapLayer.PointStyle = MapLayerViewModel.CreatePointStyle(_mapLayer.PointSymbolType, LayerSettings.LineOrSymbolColor, (int)LayerSettings.LineOrSymbolSize);
-                        MediatorMessage.Send(MediatorMessage.RefreshMapLayer, _mapLayer);
-                        break;
-                }
-            };
         }
+        public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
+
     }
 
     public class EnvironmentalDataSetGroupByTypeConverter : IValueConverter
