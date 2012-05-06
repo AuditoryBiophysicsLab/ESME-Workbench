@@ -131,18 +131,51 @@
                     </Controls:LayerControl.ContextControl>
                 </Controls:LayerControl>
             </HierarchicalDataTemplate>
+            <!-- Source -->
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
                 <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
+                                       IsSelected="{Binding RelativeSource={RelativeSource FindAncestor,
+                                                                                           AncestorType={x:Type TreeViewItem}},
+                                                            Path=IsSelected}"
                                        IsMapLayer="False"
-                                       LayerName="{Binding SourceName}" />
+                                       LayerName="{Binding SourceName}">
+                    <Controls:LayerControl.ContextControl>
+                        <StackPanel Orientation="Horizontal">
+                            <Controls:ImageToggleButton Width="16"
+                                                        Height="16"
+                                                        Command="{Binding AddModeCommand}"
+                                                        ImageSource="..\..\Images\SmallIcons\add.png"
+                                                        ToolTip="Add source" />
+                            <Controls:ImageToggleButton Width="16"
+                                                        Height="16"
+                                                        Command="{Binding DeleteSourceCommand}"
+                                                        ImageSource="..\..\Images\SmallIcons\delete.png"
+                                                        ToolTip="Remove platform" />
+                        </StackPanel>
+                    </Controls:LayerControl.ContextControl>
+                </Controls:LayerControl>
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Tree:EnvironmentNode}" ItemsSource="{Binding EnvironmentLayers}">
                 <Controls:LayerControl IsMapLayer="False" LayerName="Environment" />
             </HierarchicalDataTemplate>
+            <!-- Mode -->
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
                 <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                                       IsSelected="{Binding RelativeSource={RelativeSource FindAncestor,
+                                                                                           AncestorType={x:Type TreeViewItem}},
+                                                            Path=IsSelected}"
                                        IsMapLayer="False"
-                                       LayerName="{Binding ModeName}" />
+                                       LayerName="{Binding ModeName}">
+                    <Controls:LayerControl.ContextControl>
+                        <StackPanel Orientation="Horizontal">
+                            <Controls:ImageToggleButton Width="16"
+                                                        Height="16"
+                                                        Command="{Binding DeleteModeCommand}"
+                                                        ImageSource="..\..\Images\SmallIcons\delete.png"
+                                                        ToolTip="Remove platform" />
+                        </StackPanel>
+                    </Controls:LayerControl.ContextControl>
+                </Controls:LayerControl>
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Tree:WorldMapNode}" ItemsSource="{Binding Features}">
                 <Controls:LayerControl IsChecked="{Binding IsVisible}"

@@ -106,7 +106,7 @@
                                TextAlignment="Right" />
                     <TextBox Grid.Column="1"
                              Style="{StaticResource ValidationStyle}"
-                             Text="{Binding Depth,
+                             Text="{Binding Frequency,
                                             ValidatesOnDataErrors=True,
                                             ValidatesOnExceptions=True,
                                             NotifyOnValidationError=True,

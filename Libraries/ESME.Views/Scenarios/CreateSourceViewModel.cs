@@ -21,7 +21,7 @@ namespace ESME.Views.Scenarios
             ValidationRules.Add(new ValidationRule
             {
                 PropertyName = "SourceName",
-                Description = "Must be unique within the selected scenario and cannot be null or empty",
+                Description = "Must be unique within the containing platform and cannot be null or empty",
                 RuleDelegate = (o, r) =>
                 {
                     var target = (CreateSourceViewModel)o;

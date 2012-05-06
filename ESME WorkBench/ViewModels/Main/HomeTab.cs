@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using ESME;
@@ -81,7 +80,6 @@ namespace ESMEWorkbench.ViewModels.Main
 
         void CreateScenarioHandler(EventToCommandArgs args)
         {
-            //var parameter = args.CommandParameter;
             var vm = new CreateScenarioViewModel { Locations = Database.Context.Locations.Local, PluginManager = _plugins, Location = Database.Context.Locations.Local.First(), TimePeriod = (TimePeriod)DateTime.Today.Month };
             var result = _visualizer.ShowDialog("CreateScenarioView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
@@ -106,7 +104,6 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.AddPlatform), UsedImplicitly]
         void AddPlatform(Scenario scenario)
         {
-            //var parameter = args.CommandParameter;
             var vm = new CreatePlatformViewModel();
             var result = _visualizer.ShowDialog("CreatePlatformView", vm);
             if (!result.HasValue || !result.Value) return;
@@ -128,9 +125,61 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.DeletePlatform), UsedImplicitly]
         void DeletePlatform(Platform platform)
         {
-            //var parameter = args.CommandParameter;
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the platform \"{0}\"", platform.PlatformName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the platform \"{0}\"?", platform.PlatformName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             Database.Context.Platforms.Remove(platform);
+            Database.Context.SaveChanges();
+        }
+        [MediatorMessageSink(MediatorMessage.AddSource), UsedImplicitly]
+        void AddSource(Platform platform)
+        {
+            var vm = new CreateSourceViewModel();
+            var result = _visualizer.ShowDialog("CreateSourceView", vm);
+            if (!result.HasValue || !result.Value) return;
+            var source = new Source
+            {
+                Platform = platform,
+                SourceName = vm.SourceName,
+                SourceType = null,
+            };
+            Database.Add(source, true);
+        }
+        [MediatorMessageSink(MediatorMessage.DeleteSource), UsedImplicitly]
+        void DeleteSource(Source source)
+        {
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the source \"{0}\"?", source.SourceName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            Database.Context.Sources.Remove(source);
+            Database.Context.SaveChanges();
+        }
+        [MediatorMessageSink(MediatorMessage.AddMode), UsedImplicitly]
+        void AddMode(Source source)
+        {
+            var vm = new CreateModeViewModel();
+            var result = _visualizer.ShowDialog("CreateModeView", vm);
+            if (!result.HasValue || !result.Value) return;
+            var mode = new Mode
+            {
+                ActiveTime = 1f,
+                Depth = vm.Depth,
+                DepressionElevationAngle = vm.DepressionElevationAngle,
+                HighFrequency = vm.Frequency,
+                LowFrequency = vm.Frequency,
+                MaxPropagationRadius = vm.MaxPropagationRadius,
+                ModeName = vm.ModeName,
+                ModeType = null,
+                PulseInterval = new TimeSpan(0, 0, 0, 30),
+                PulseLength = new TimeSpan(0, 0, 0, 0, 500),
+                RelativeBeamAngle = 0,
+                Source = source,
+                SourceLevel = vm.SourceLevel,
+                VerticalBeamWidth = vm.VerticalBeamWidth,
+            };
+            Database.Add(mode, true);
+        }
+        [MediatorMessageSink(MediatorMessage.DeleteMode), UsedImplicitly]
+        void DeleteMode(Mode mode)
+        {
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            Database.Context.Modes.Remove(mode);
             Database.Context.SaveChanges();
         }
 

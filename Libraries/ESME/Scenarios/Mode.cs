@@ -4,6 +4,8 @@ using System.ComponentModel.DataAnnotations;
 using ESME.Database;
 using ESME.Locations;
 using HRC.Aspects;
+using HRC.ViewModels;
+using HRC.WPF;
 
 namespace ESME.Scenarios
 {
@@ -57,5 +59,16 @@ namespace ESME.Scenarios
         }
 
         public void CreateMapLayers() { throw new NotImplementedException(); }
+
+        #region DeleteModeCommand
+        public SimpleCommand<object, EventToCommandArgs> DeleteModeCommand { get { return _deleteMode ?? (_deleteMode = new SimpleCommand<object, EventToCommandArgs>(DeleteModeHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _deleteMode;
+
+        void DeleteModeHandler(EventToCommandArgs args)
+        {
+            //var parameter = args.CommandParameter;
+            MediatorMessage.Send(MediatorMessage.DeleteMode, this);
+        }
+        #endregion
     }
 }
