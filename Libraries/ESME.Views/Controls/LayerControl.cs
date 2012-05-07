@@ -13,17 +13,29 @@ namespace ESME.Views.Controls
         public LayerControl()
         {
             LayerNameContentControl = _textBlock;
+            //var border = _textBox.Template.FindName("Border", _textBox);
+            //var style = new Style(typeof(TextBox));
+            //style.Setters.Add(new Setter { Property = BorderThicknessProperty, Value = 0.0 });
+            //style.Setters.Add(new Setter { Property = PaddingProperty, Value = 0 });
+            //_textBox.Style = style;
+            _textBlock.MouseLeftButtonDown += (s, e) =>
+            {
+                if (!IsLayerNameEditable || !IsSelected) return;
+                //_textBox.Height = _textBlock.ActualHeight;
+                LayerNameContentControl = _textBox;
+                _textBox.SelectAll();
+            };
             _textBox.SetBinding(TextBox.TextProperty, new Binding("LayerName") { Source = this, Mode = BindingMode.TwoWay });
             _textBlock.SetBinding(TextBlock.TextProperty, new Binding("LayerName") { Source = this });
         }
-        readonly TextBox _textBox = new TextBox();
+
+        readonly TextBox _textBox = new TextBox { VerticalAlignment = VerticalAlignment.Top, VerticalContentAlignment = VerticalAlignment.Top };
         readonly TextBlock _textBlock = new TextBlock();
 
         static void OnPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
             var layerControl = (LayerControl)sender;
-            if (layerControl.IsLayerNameEditable && layerControl.IsSelected) layerControl.LayerNameContentControl = layerControl._textBox;
-            else layerControl.LayerNameContentControl = layerControl._textBlock;
+            if (!layerControl.IsLayerNameEditable || !layerControl.IsSelected) layerControl.LayerNameContentControl = layerControl._textBlock;
         }
 
         #region dependency property bool IsMapLayer
@@ -81,7 +93,7 @@ namespace ESME.Views.Controls
         public static DependencyProperty LayerNameProperty = DependencyProperty.Register("LayerName",
                                                                                          typeof(string),
                                                                                          typeof(LayerControl),
-                                                                                         new FrameworkPropertyMetadata("LayerName", FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnPropertyChanged));
+                                                                                         new FrameworkPropertyMetadata("LayerName", OnPropertyChanged));
 
         public string LayerName { get { return (string)GetValue(LayerNameProperty); } set { SetCurrentValue(LayerNameProperty, value); } }
         #endregion
@@ -122,6 +134,14 @@ namespace ESME.Views.Controls
                                                                                           new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnPropertyChanged));
 
         public bool IsSelected { get { return (bool)GetValue(IsSelectedProperty); } set { SetCurrentValue(IsSelectedProperty, value); } }
+        #endregion
+
+        #region dependency property bool IsExpanded
+
+        public static DependencyProperty IsExpandedProperty = DependencyProperty.Register("IsExpanded", typeof(bool), typeof(LayerControl), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+        public bool IsExpanded { get { return (bool)GetValue(IsExpandedProperty); } set { SetValue(IsExpandedProperty, value); } }
+
         #endregion
 
         #region dependency property bool IsLayerNameEditable

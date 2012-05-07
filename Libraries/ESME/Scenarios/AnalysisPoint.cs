@@ -139,6 +139,7 @@ namespace ESME.Scenarios
             }
             mapLayer.Add(geos);
             mapLayer.Done();
+            if (LayerSettings == null) LayerSettings = new LayerSettings();
             LayerSettings.MapLayerViewModel = mapLayer;
         }
 

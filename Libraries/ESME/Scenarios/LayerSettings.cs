@@ -104,6 +104,10 @@ namespace ESME.Scenarios
                 if (_mapLayerViewModel == null) return;
                 MediatorMessage.Send(MediatorMessage.AddMapLayer, _mapLayerViewModel);
                 MediatorMessage.Send(IsChecked ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, _mapLayerViewModel);
+                _mapLayerViewModel.AreaColor = AreaColor;
+                _mapLayerViewModel.LineColor = LineOrSymbolColor;
+                _mapLayerViewModel.PointSymbolType = SymbolType;
+                _mapLayerViewModel.LineWidth = (float)LineOrSymbolSize;
             }
         }
         MapLayerViewModel _mapLayerViewModel;

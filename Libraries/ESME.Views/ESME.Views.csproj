@@ -97,6 +97,9 @@
     </Compile>
     <Compile Include="Controls\DataAxisControlViewModel.cs" />
     <Compile Include="Controls\DataPlotViewModel.cs" />
+    <Compile Include="Controls\EditableTextBlock.xaml.cs">
+      <DependentUpon>EditableTextBlock.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\FileOrDirectorySetting.cs" />
     <Compile Include="Controls\HeaderedPropertyDisplayPopup.xaml.cs">
       <DependentUpon>HeaderedPropertyDisplayPopup.xaml</DependentUpon>
@@ -197,6 +200,10 @@
     <Page Include="Controls\DataAxisControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\EditableTextBlock.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\HeaderedPropertyDisplayPopup.xaml">
       <SubType>Designer</SubType>
