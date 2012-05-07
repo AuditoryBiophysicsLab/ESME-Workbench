@@ -11,6 +11,7 @@ namespace ESME.TransmissionLoss.Bellhop
 {
     public class BottomProfile
     {
+        private BottomProfile() {}
         public BottomProfile(int numberOfPointsInTransect, GeoSegment geoSegment , Bathymetry bathymetry)
         {
             MaxDepth = double.MinValue;
@@ -71,6 +72,19 @@ namespace ESME.TransmissionLoss.Bellhop
             sb.AppendFormat("{0} \n", Profile.Count);
             foreach (var point in Profile) sb.AppendFormat("{0:0.#####} {1:0.#####} \n", point.Range, point.Depth);
             return sb.ToString();
+        }
+
+        public static BottomProfilePoint[] FromBellhopFile(string profileFile)
+        {
+            var lines = File.ReadAllLines(profileFile);
+            var result = new List<BottomProfilePoint>();
+            var lineCount = int.Parse(lines[1]);
+            for (var line = 0; line < lineCount; line++)
+            {
+                var fields = lines[line + 2].Split(' ');
+                result.Add(new BottomProfilePoint{Range = float.Parse(fields[0]), Depth = float.Parse(fields[1])});
+            }
+            return result.ToArray();
         }
 
         public static double TwoDBilinearApproximation(Bathymetry bathymetry, Geo pt)

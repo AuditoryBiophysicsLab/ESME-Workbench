@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace ESME.Views.Controls
@@ -13,17 +14,43 @@ namespace ESME.Views.Controls
         public LayerControl()
         {
             LayerNameContentControl = _textBlock;
-            //var border = _textBox.Template.FindName("Border", _textBox);
-            //var style = new Style(typeof(TextBox));
-            //style.Setters.Add(new Setter { Property = BorderThicknessProperty, Value = 0.0 });
-            //style.Setters.Add(new Setter { Property = PaddingProperty, Value = 0 });
-            //_textBox.Style = style;
             _textBlock.MouseLeftButtonDown += (s, e) =>
             {
-                if (!IsLayerNameEditable || !IsSelected) return;
-                //_textBox.Height = _textBlock.ActualHeight;
+                if (!IsLayerNameEditable)
+                {
+                    if (IsSelected)
+                    {
+                        IsSelected = false;
+                        e.Handled = true;
+                    }
+                    return;
+                }
+                if (!IsSelected) return;
                 LayerNameContentControl = _textBox;
+                _textBox.Focus();
                 _textBox.SelectAll();
+                e.Handled = true;
+            };
+            BindingOperations.SetBinding(this,
+                                         IsSelectedProperty,
+                                         new Binding("IsSelected")
+                                         {
+                                             RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(TreeViewItem), 1),
+                                             Path = new PropertyPath("IsSelected"),
+                                             Mode = BindingMode.TwoWay,
+                                         });
+            BindingOperations.SetBinding(this,
+                                         IsExpandedProperty,
+                                         new Binding("IsExpanded")
+                                         {
+                                             RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(TreeViewItem), 1),
+                                             Path = new PropertyPath("IsExpanded"),
+                                             Mode = BindingMode.TwoWay,
+                                         });
+            _textBox.KeyDown += (s, e) =>
+            {
+                if (e.Key == Key.Enter) IsSelected = false;
+                e.Handled = true;
             };
             _textBox.SetBinding(TextBox.TextProperty, new Binding("LayerName") { Source = this, Mode = BindingMode.TwoWay });
             _textBlock.SetBinding(TextBlock.TextProperty, new Binding("LayerName") { Source = this });

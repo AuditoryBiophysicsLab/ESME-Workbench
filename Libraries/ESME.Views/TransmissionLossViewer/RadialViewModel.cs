@@ -84,11 +84,14 @@ namespace ESME.Views.TransmissionLossViewer
                     OnPropertyChanged("WriteableBitmap");
                     return;
                 }
+                TransmissionLossRadial = new TransmissionLossRadial((float)_radial.Bearing, new BellhopOutput(_radial.BasePath + ".shd"));
+                if (_radial.Ranges == null) _radial.Ranges = TransmissionLossRadial.Ranges.ToArray();
+                if (_radial.Depths == null) _radial.Depths = TransmissionLossRadial.Depths.ToArray();
+                if (_radial.BottomProfile == null) _radial.BottomProfile = BottomProfile.FromBellhopFile(_radial.BasePath + ".bty");
                 RangeMin = _radial.Ranges.First();
                 RangeMax = _radial.Ranges.Last();
                 DepthMin = _radial.Depths.First();
                 DepthMax = _radial.Depths.Last();
-                TransmissionLossRadial = new TransmissionLossRadial((float)_radial.Bearing, new BellhopOutput(_radial.BasePath + ".shd"));
                 ColorMapViewModel.MaxValue = TransmissionLossRadial.StatMax;
                 ColorMapViewModel.MinValue = TransmissionLossRadial.StatMin;
                 OnPropertyChanged("TransmissionLossRadial");

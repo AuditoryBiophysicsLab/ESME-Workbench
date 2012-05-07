@@ -74,18 +74,10 @@
             <Setter Property="Background" Value="Gray" />
         </Style>
     </UserControl.Resources>
-    <TreeView DockPanel.Dock="Top"
-              Grid.IsSharedSizeScope="True"
-              ItemsSource="{Binding RootNodes}">
+    <TreeView DockPanel.Dock="Top" Grid.IsSharedSizeScope="True" ItemsSource="{Binding RootNodes}">
         <TreeView.Resources>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Scenario}" ItemsSource="{Binding Platforms}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
-                                       IsMapLayer="False"
-                                       IsSelected="{Binding RelativeSource={RelativeSource FindAncestor,
-                                                                                           AncestorType={x:Type TreeViewItem}},
-                                                            Path=IsSelected}"
-                                       LayerName="{Binding Name,
-                                                           StringFormat=Scenario: {0}}">
+                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" IsMapLayer="False" LayerName="{Binding Name, StringFormat=Scenario: {0}}">
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding AddPlatformCommand}" Header="Add platform" />
@@ -96,10 +88,8 @@
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
                 <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
                                        IsLayerNameEditable="True"
-                                       IsSelected="{Binding RelativeSource={RelativeSource FindAncestor,
-                                                                                           AncestorType={x:Type TreeViewItem}},
-                                                            Path=IsSelected}"
-                                       LayerName="{Binding PlatformName, Mode=TwoWay}"
+                                       LayerName="{Binding PlatformName,
+                                                           Mode=TwoWay}"
                                        LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
                                        LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
                     <Controls:LayerControl.ContextMenu>
@@ -137,13 +127,7 @@
             </HierarchicalDataTemplate>
             <!--  Source  -->
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
-                <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
-                                       IsLayerNameEditable="True"
-                                       IsMapLayer="False"
-                                       IsSelected="{Binding RelativeSource={RelativeSource FindAncestor,
-                                                                                           AncestorType={x:Type TreeViewItem}},
-                                                            Path=IsSelected}"
-                                       LayerName="{Binding SourceName, Mode=TwoWay}">
+                <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}" IsLayerNameEditable="True" IsMapLayer="False" LayerName="{Binding SourceName, Mode=TwoWay}">
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding DeleteSourceCommand}" Header="Remove this source" />
@@ -158,13 +142,7 @@
             </HierarchicalDataTemplate>
             <!--  Mode  -->
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
-                                       IsLayerNameEditable="True"
-                                       IsMapLayer="False"
-                                       IsSelected="{Binding RelativeSource={RelativeSource FindAncestor,
-                                                                                           AncestorType={x:Type TreeViewItem}},
-                                                            Path=IsSelected}"
-                                       LayerName="{Binding ModeName, Mode=TwoWay}">
+                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" IsLayerNameEditable="True" IsMapLayer="False" LayerName="{Binding ModeName, Mode=TwoWay}">
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding DeleteModeCommand}" Header="Remove this mode" />
@@ -174,24 +152,16 @@
                 </Controls:LayerControl>
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Tree:WorldMapNode}" ItemsSource="{Binding Features}">
-                <Controls:LayerControl IsChecked="{Binding IsVisible}"
-                                       LayerName="World Map"
-                                       LineOrSymbolColor="{Binding LineColor}"
-                                       LineOrSymbolSize="{Binding LineWeight}" />
+                <Controls:LayerControl IsChecked="{Binding IsVisible}" LayerName="World Map" LineOrSymbolColor="{Binding LineColor}" LineOrSymbolSize="{Binding LineWeight}" />
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Tree:SedimentNode}" ItemsSource="{Binding SedimentTypes}">
-                <Controls:LayerControl IsChecked="{Binding IsChecked}"
-                                       IsMapLayer="False"
-                                       LayerName="Sediment" />
+                <Controls:LayerControl IsChecked="{Binding IsChecked}" IsMapLayer="False" LayerName="Sediment" />
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Tree:AnalysisPointsNode}" ItemsSource="{Binding Scenario.AnalysisPoints}">
                 <Controls:LayerControl IsMapLayer="False" LayerName="Analysis Points" />
             </HierarchicalDataTemplate>
             <DataTemplate DataType="{x:Type Scenarios:TransmissionLoss}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
-                                       LayerName="{Binding LayerName}"
-                                       LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
-                                       LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
+                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseDoubleClick">
                             <WPF:EventToCommandTrigger Command="{Binding ViewTransmissionLossCommand}" CommandParameter="{Binding}" />
@@ -200,10 +170,7 @@
                 </Controls:LayerControl>
             </DataTemplate>
             <DataTemplate DataType="{x:Type Scenarios:AnalysisPoint}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
-                                       LayerName="{Binding LayerName}"
-                                       LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
-                                       LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
+                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseDoubleClick">
                             <WPF:EventToCommandTrigger Command="{Binding ViewAnalysisPointCommand}" CommandParameter="{Binding}" />
@@ -212,20 +179,13 @@
                 </Controls:LayerControl>
             </DataTemplate>
             <DataTemplate DataType="{x:Type Locations:EnvironmentalDataSet}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
-                                       LayerName="{Binding LayerName}"
-                                       LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
-                                       LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}" />
+                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}" />
             </DataTemplate>
             <DataTemplate DataType="{x:Type Tree:WorldMapFeatureNode}">
-                <Controls:LayerControl IsChecked="{Binding IsChecked}"
-                                       LayerName="{Binding FeatureName}"
-                                       LineColorVisibility="Collapsed" />
+                <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="{Binding FeatureName}" LineColorVisibility="Collapsed" />
             </DataTemplate>
             <DataTemplate DataType="{x:Type Tree:BitmapNode}">
-                <Controls:LayerControl IsChecked="{Binding IsChecked}"
-                                       LayerName="{Binding LayerName}"
-                                       LineColorVisibility="Collapsed" />
+                <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="{Binding LayerName}" LineColorVisibility="Collapsed" />
             </DataTemplate>
         </TreeView.Resources>
     </TreeView>
