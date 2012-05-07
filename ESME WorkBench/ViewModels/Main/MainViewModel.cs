@@ -132,7 +132,11 @@ namespace ESMEWorkbench.ViewModels.Main
             if (IsInAnalysisPointMode)
             {
                 if (Scenario != null) Cursor = Scenario.GeoRect.Contains(MouseGeo) ? Cursors.Cross : Cursors.No;
-                else IsInAnalysisPointMode = false;
+                else
+                {
+                    IsInAnalysisPointMode = false;
+                    Cursor = Cursors.Arrow;
+                }
             }
 #if true
             if (Scenario != null && Scenario.Bathymetry != null && _cache.IsCached(Scenario.Bathymetry))
@@ -302,6 +306,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     Database.Add(analysisPoint, (Bathymetry)_cache[Scenario.Bathymetry].Result, true);
                 }
                 IsInAnalysisPointMode = false;
+                Cursor = Cursors.Arrow;
             }
         }
 
