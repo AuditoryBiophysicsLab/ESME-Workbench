@@ -1,11 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using ESME.Locations;
 using ESME.Mapping;
 using HRC.Aspects;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.Scenarios
 {
@@ -16,9 +16,12 @@ namespace ESME.Scenarios
         public string Name { get; set; }
         public virtual Scenario Scenario { get; set; }
         public virtual LayerSettings LayerSettings { get; set; }
-        public virtual ICollection<Platform> Platforms { get; set; }
-        public virtual ICollection<PerimeterCoordinate> PerimeterCoordinates { get; set; }
-        public virtual ICollection<LogEntry> Logs { get; set; }
+        [Initialize]
+        public virtual ObservableList<Platform> Platforms { get; set; }
+        [Initialize]
+        public virtual ObservableList<PerimeterCoordinate> PerimeterCoordinates { get; set; }
+        [Initialize]
+        public virtual ObservableList<LogEntry> Logs { get; set; }
 
         public void CreateMapLayers()
         {

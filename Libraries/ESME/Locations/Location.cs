@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Windows.Data;
 using ESME.Database;
-using ESME.Mapping;
 using ESME.Scenarios;
 using HRC.Aspects;
+using HRC.Utility;
 
 namespace ESME.Locations
 {
@@ -32,9 +31,11 @@ namespace ESME.Locations
 
         //public virtual LayerSettings LayerSettings { get; set; }
 
-        public virtual ICollection<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }
-        //public virtual ICollection<Scenario> Scenarios { get; set; }
-        public virtual ICollection<LogEntry> Logs { get; set; }
+        [Initialize]
+        public virtual ObservableList<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }
+        //public virtual ObservableList<Scenario> Scenarios { get; set; }
+        [Initialize]
+        public virtual ObservableList<LogEntry> Logs { get; set; }
 
         [NotMapped]
         public CollectionViewSource DataSetTypes
@@ -52,7 +53,6 @@ namespace ESME.Locations
         [NotMapped] public static EnvironmentalCacheService Cache { get; set; }
 
 
-        MapLayerViewModel _mapLayer;
         public void CreateMapLayers()
         {
         }

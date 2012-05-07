@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using ESME.Locations;
 using HRC.Aspects;
+using HRC.Utility;
 
 namespace ESME.Scenarios
 {
@@ -15,8 +15,10 @@ namespace ESME.Scenarios
 
         public virtual Scenario Scenario { get; set; }
         public virtual LayerSettings LayerSettings { get; set; }
-        public virtual ICollection<AnimatLocation> AnimatLocations { get; set; }
-        public virtual ICollection<LogEntry> Logs { get; set; }
+        [Initialize]
+        public virtual ObservableList<AnimatLocation> AnimatLocations { get; set; }
+        [Initialize]
+        public virtual ObservableList<LogEntry> Logs { get; set; }
 
         public void CreateMapLayers() { throw new NotImplementedException(); }
         public void RemoveMapLayers() { throw new NotImplementedException(); }

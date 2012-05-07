@@ -116,7 +116,6 @@
     <Compile Include="Collections\Node.cs" />
     <Compile Include="Collections\NodeList.cs" />
     <Compile Include="Collections\ObservableConcurrentDictionary.cs" />
-    <Compile Include="Collections\ObservableHashset.cs" />
     <Compile Include="Collections\ParallelExtensionMethods.cs" />
     <Compile Include="Collections\RedBlack.cs" />
     <Compile Include="Collections\RedBlackEnumerator.cs" />

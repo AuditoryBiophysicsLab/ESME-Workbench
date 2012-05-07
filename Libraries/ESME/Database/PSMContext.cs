@@ -1,8 +1,8 @@
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
 using HRC.Aspects;
+using HRC.Utility;
 
 namespace ESME.Database
 {
@@ -25,7 +25,7 @@ namespace ESME.Database
         public string Guid { get; set; }
         public string PlatformName { get; set; }
         public string PlatformType { get; set; }
-        public virtual ICollection<PSMSource> PSMSources { get; set; }
+        public virtual ObservableList<PSMSource> PSMSources { get; set; }
     }
 
     public class PSMSource
@@ -35,7 +35,8 @@ namespace ESME.Database
         public string SourceName { get; set; }
         public string SourceType { get; set; }
         public virtual PSMPlatform PSMPlatform { get; set; }
-        public virtual ICollection<PSMMode> PSMModes { get; set; }
+        [Initialize]
+        public virtual ObservableList<PSMMode> PSMModes { get; set; }
     }
 
     public class PSMMode

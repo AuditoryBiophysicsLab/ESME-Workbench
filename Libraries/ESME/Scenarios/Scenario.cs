@@ -10,8 +10,8 @@ using ESME.Database;
 using ESME.Environment;
 using ESME.Locations;
 using HRC.Aspects;
-using HRC.Collections;
 using HRC.Navigation;
+using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -38,10 +38,14 @@ namespace ESME.Scenarios
         public virtual EnvironmentalDataSet Sediment { get; set; }
         public virtual EnvironmentalDataSet Bathymetry { get; set; }
 
-        public virtual ObservableHashSet<Platform> Platforms { get; set; }
-        public virtual ICollection<ScenarioSpecies> ScenarioSpecies { get; set; }
-        public virtual ICollection<AnalysisPoint> AnalysisPoints { get; set; }
-        public virtual ICollection<LogEntry> Logs { get; set; }
+        [Initialize]
+        public virtual ObservableList<Platform> Platforms { get; set; }
+        [Initialize]
+        public virtual ObservableList<ScenarioSpecies> ScenarioSpecies { get; set; }
+        [Initialize]
+        public virtual ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
+        [Initialize]
+        public virtual ObservableList<LogEntry> Logs { get; set; }
 
         [NotMapped] public Wind WindData { get { return ((Wind)Cache[Wind].Result); } }
         [NotMapped] public SoundSpeed SoundSpeedData { get { return ((SoundSpeed)Cache[SoundSpeed].Result); } }

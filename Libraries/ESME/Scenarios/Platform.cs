@@ -7,6 +7,7 @@ using ESME.Locations;
 using ESME.Mapping;
 using HRC.Aspects;
 using HRC.Navigation;
+using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
 using ThinkGeo.MapSuite.Core;
@@ -41,8 +42,10 @@ namespace ESME.Scenarios
         public virtual Scenario Scenario { get; set; }
         public virtual Perimeter Perimeter { get; set; }
         public virtual LayerSettings LayerSettings { get; set; }
-        public virtual ICollection<Source> Sources { get; set; }
-        public virtual ICollection<LogEntry> Logs { get; set; }
+        [Initialize]
+        public virtual ObservableList<Source> Sources { get; set; }
+        [Initialize]
+        public virtual ObservableList<LogEntry> Logs { get; set; }
 
         #region DeletePlatformCommand
         public SimpleCommand<object, EventToCommandArgs> DeletePlatformCommand { get { return _deletePlatform ?? (_deletePlatform = new SimpleCommand<object, EventToCommandArgs>(DeletePlatformHandler)); } }

@@ -1,9 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using ESME.Database;
 using ESME.Locations;
 using HRC.Aspects;
+using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -31,8 +31,10 @@ namespace ESME.Scenarios
 
         public virtual Source Source { get; set; }
         public virtual LayerSettings LayerSettings { get; set; }
-        public virtual ICollection<LogEntry> Logs { get; set; }
-        public virtual ICollection<TransmissionLoss> TransmissionLosses { get; set; }
+        [Initialize]
+        public virtual ObservableList<LogEntry> Logs { get; set; }
+        [Initialize]
+        public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
 
         [NotMapped] public string PSMName { get { return string.Format("{0}:{1}:{2}", Source.Platform.PlatformName, Source.SourceName, ModeName); } }
 

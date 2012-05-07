@@ -15,6 +15,7 @@ using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
 using HRC.Aspects;
 using HRC.Navigation;
+using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -30,7 +31,8 @@ namespace ESME.Scenarios
         public virtual Scenario Scenario { get; set; }
         public virtual LayerSettings LayerSettings { get; set; }
 
-        public virtual ICollection<TransmissionLoss> TransmissionLosses { get; set; }
+        [Initialize]
+        public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
 
         public void CreateMapLayers() { throw new NotImplementedException(); }
         public void RemoveMapLayers() { throw new NotImplementedException(); }
@@ -74,7 +76,8 @@ namespace ESME.Scenarios
         public virtual Mode Mode { get; set; }
         public virtual LayerSettings LayerSettings { get; set; }
 
-        public virtual ICollection<Radial> Radials { get; set; }
+        [Initialize]
+        public virtual ObservableList<Radial> Radials { get; set; }
 
         [NotMapped]
         public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", AnalysisPoint.Geo.Latitude, AnalysisPoint.Geo.Longitude); } }

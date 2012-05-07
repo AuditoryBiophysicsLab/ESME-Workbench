@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using ESME.Database;
 using ESME.Environment;
@@ -13,6 +11,7 @@ using ESME.Plugins;
 using ESME.Scenarios;
 using HRC.Aspects;
 using HRC.Navigation;
+using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Locations
@@ -34,7 +33,8 @@ namespace ESME.Locations
         public virtual Location Location { get; set; }
         public virtual LayerSettings LayerSettings { get; set; }
 
-        public virtual ICollection<LogEntry> Logs { get; set; }
+        [Initialize]
+        public virtual ObservableList<LogEntry> Logs { get; set; }
 
         [NotMapped]
         public string LayerName

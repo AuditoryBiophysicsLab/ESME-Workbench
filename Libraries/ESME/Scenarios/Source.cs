@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using ESME.Locations;
 using HRC.Aspects;
+using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -17,8 +17,10 @@ namespace ESME.Scenarios
         public string SourceType { get; set; }
 
         public virtual Platform Platform { get; set; }
-        public virtual ICollection<Mode> Modes { get; set; }
-        public virtual ICollection<LogEntry> Logs { get; set; }
+        [Initialize]
+        public virtual ObservableList<Mode> Modes { get; set; }
+        [Initialize]
+        public virtual ObservableList<LogEntry> Logs { get; set; }
         [NotMapped] public string PSMName { get { return string.Format("{0}:{1}", Platform.PlatformName, SourceName); } }
 
         #region AddModeCommand
@@ -42,6 +44,5 @@ namespace ESME.Scenarios
             MediatorMessage.Send(MediatorMessage.DeleteSource, this);
         }
         #endregion
-
     }
 }

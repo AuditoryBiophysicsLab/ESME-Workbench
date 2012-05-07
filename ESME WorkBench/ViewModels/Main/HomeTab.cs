@@ -124,7 +124,6 @@ namespace ESMEWorkbench.ViewModels.Main
                 LayerSettings = new LayerSettings(),
             };
             Scenario.Platforms.Add(platform);
-            Database.Context.SaveChanges();
             platform.CreateMapLayers();
         }
 
@@ -132,8 +131,8 @@ namespace ESMEWorkbench.ViewModels.Main
         void DeletePlatform(Platform platform)
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the platform \"{0}\"?", platform.PlatformName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            Scenario.Platforms.Remove(platform);
             Database.Context.Platforms.Remove(platform);
-            Database.Context.SaveChanges();
         }
         [MediatorMessageSink(MediatorMessage.AddSource), UsedImplicitly]
         void AddSource(Platform platform)
@@ -147,16 +146,14 @@ namespace ESMEWorkbench.ViewModels.Main
                 SourceName = "New Source",
                 SourceType = null,
             };
-            Database.Add(source, true);
-            LayerTreeViewModel.Refresh();
+            platform.Sources.Add(source);
         }
         [MediatorMessageSink(MediatorMessage.DeleteSource), UsedImplicitly]
         void DeleteSource(Source source)
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the source \"{0}\"?", source.SourceName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            source.Platform.Sources.Remove(source);
             Database.Context.Sources.Remove(source);
-            Database.Context.SaveChanges();
-            LayerTreeViewModel.Refresh();
         }
         [MediatorMessageSink(MediatorMessage.AddMode), UsedImplicitly]
         void AddMode(Source source)
@@ -181,16 +178,14 @@ namespace ESMEWorkbench.ViewModels.Main
                 SourceLevel = 200,
                 VerticalBeamWidth = 180f,
             };
-            Database.Add(mode, true);
-            LayerTreeViewModel.Refresh();
+            source.Modes.Add(mode);
         }
         [MediatorMessageSink(MediatorMessage.DeleteMode), UsedImplicitly]
         void DeleteMode(Mode mode)
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            mode.Source.Modes.Remove(mode);
             Database.Context.Modes.Remove(mode);
-            Database.Context.SaveChanges();
-            LayerTreeViewModel.Refresh();
         }
 
         [MediatorMessageSink(MediatorMessage.ShowProperties)]
