@@ -107,9 +107,6 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.AddPlatform), UsedImplicitly]
         void AddPlatform(Scenario scenario)
         {
-            //var vm = new CreatePlatformViewModel();
-            //var result = _visualizer.ShowDialog("CreatePlatformView", vm);
-            //if (!result.HasValue || !result.Value) return;
             var platform = new Platform
             {
                 Scenario = scenario,
@@ -134,6 +131,14 @@ namespace ESMEWorkbench.ViewModels.Main
             Scenario.Platforms.Remove(platform);
             Database.Context.Platforms.Remove(platform);
         }
+
+        [MediatorMessageSink(MediatorMessage.PlatformProperties), UsedImplicitly]
+        void PlatformProperties(Platform platform)
+        {
+            var vm = new PropertiesViewModel { PropertyObject = platform, WindowTitle = "Platform Properties: " + platform.PlatformName };
+            _visualizer.ShowDialog("PlatformPropertiesView", vm);
+        }
+
         [MediatorMessageSink(MediatorMessage.AddSource), UsedImplicitly]
         void AddSource(Platform platform)
         {
@@ -155,6 +160,14 @@ namespace ESMEWorkbench.ViewModels.Main
             source.Platform.Sources.Remove(source);
             Database.Context.Sources.Remove(source);
         }
+
+        [MediatorMessageSink(MediatorMessage.SourceProperties), UsedImplicitly]
+        void SourceProperties(Source source)
+        {
+            var vm = new PropertiesViewModel { PropertyObject = source, WindowTitle = "Source Properties: " + source.SourceName };
+            _visualizer.ShowDialog("SourcePropertiesView", vm);
+        }
+
         [MediatorMessageSink(MediatorMessage.AddMode), UsedImplicitly]
         void AddMode(Source source)
         {
@@ -186,6 +199,14 @@ namespace ESMEWorkbench.ViewModels.Main
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             mode.Source.Modes.Remove(mode);
             Database.Context.Modes.Remove(mode);
+        }
+
+        [MediatorMessageSink(MediatorMessage.ModeProperties), UsedImplicitly]
+        void ModeProperties(Mode mode)
+        {
+            var vm = new PropertiesViewModel { PropertyObject = mode, WindowTitle = "Mode Properties: " + mode.ModeName };
+            _visualizer.ShowDialog("ModePropertiesView", vm);
+            mode.LowFrequency = mode.HighFrequency;
         }
 
         [MediatorMessageSink(MediatorMessage.ShowProperties)]

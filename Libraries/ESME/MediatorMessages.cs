@@ -17,12 +17,15 @@ namespace ESME
 
         public const string AddPlatform = "AddPlatformMessage";
         public const string DeletePlatform = "DeletePlatformMessage";
+        public const string PlatformProperties = "PlatformPropertiesMessage";
 
         public const string AddSource = "AddSourceMessage";
         public const string DeleteSource = "DeleteSourceMessage";
+        public const string SourceProperties = "SourcePropertiesMessage";
 
         public const string AddMode = "AddModeMessage";
         public const string DeleteMode = "DeleteModeMessage";
+        public const string ModeProperties = "ModePropertiesMessage";
 
         public const string ShowProperties = "ShowPropertiesMessage";
 

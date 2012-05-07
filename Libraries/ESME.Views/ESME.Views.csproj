@@ -150,20 +150,20 @@
       <DependentUpon>UtilitiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Misc\UtilitiesViewModel.cs" />
-    <Compile Include="Scenarios\CreateModeView.xaml.cs">
-      <DependentUpon>CreateModeView.xaml</DependentUpon>
+    <Compile Include="Scenarios\ModePropertiesView.xaml.cs">
+      <DependentUpon>ModePropertiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scenarios\CreateModeViewModel.cs" />
-    <Compile Include="Scenarios\CreatePlatformView.xaml.cs">
-      <DependentUpon>CreatePlatformView.xaml</DependentUpon>
+    <Compile Include="Scenarios\PlatformPropertiesView.xaml.cs">
+      <DependentUpon>PlatformPropertiesView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Scenarios\CreatePlatformViewModel.cs" />
+    <Compile Include="Scenarios\PropertiesViewModel.cs" />
     <Compile Include="Scenarios\CreateScenarioView.xaml.cs">
       <DependentUpon>CreateScenarioView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scenarios\CreateScenarioViewModel.cs" />
-    <Compile Include="Scenarios\CreateSourceView.xaml.cs">
-      <DependentUpon>CreateSourceView.xaml</DependentUpon>
+    <Compile Include="Scenarios\SourcePropertiesView.xaml.cs">
+      <DependentUpon>SourcePropertiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scenarios\CreateSourceViewModel.cs" />
     <Compile Include="TestView.xaml.cs">
@@ -252,11 +252,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Scenarios\CreateModeView.xaml">
+    <Page Include="Scenarios\ModePropertiesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Scenarios\CreatePlatformView.xaml">
+    <Page Include="Scenarios\PlatformPropertiesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -264,7 +264,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Scenarios\CreateSourceView.xaml">
+    <Page Include="Scenarios\SourcePropertiesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

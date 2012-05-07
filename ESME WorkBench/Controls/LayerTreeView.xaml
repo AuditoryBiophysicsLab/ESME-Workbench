@@ -213,7 +213,7 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type Locations:EnvironmentalDataSet}">
                 <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
-                                       LayerName="{Binding LayerName}"
+                                       LayerName="{Binding LayerName, Mode=OneWay}"
                                        LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
                                        LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}" />
             </DataTemplate>
@@ -225,7 +225,7 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type Tree:BitmapNode}">
                 <Controls:LayerControl IsChecked="{Binding IsChecked}"
-                                       LayerName="{Binding LayerName}"
+                                       LayerName="{Binding LayerName, Mode=OneWay}"
                                        LineColorVisibility="Collapsed" />
             </DataTemplate>
         </TreeView.Resources>

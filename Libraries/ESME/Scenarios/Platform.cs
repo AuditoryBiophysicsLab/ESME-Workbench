@@ -16,8 +16,7 @@ namespace ESME.Scenarios
 {
     public class Platform : IHaveGuid, IHaveLayerSettings
     {
-        [Key, Initialize]
-        public Guid Guid { get; set; }
+        [Key, Initialize] public Guid Guid { get; set; }
         public string Description { get; set; }
         public bool Launches { get; set; }
         public bool Tows { get; set; }
@@ -35,39 +34,31 @@ namespace ESME.Scenarios
         public float Course { get; set; }
 
         /// <summary>
-        /// Speed in knots (nautical miles per hour)
+        ///   Speed in knots (nautical miles per hour)
         /// </summary>
         public float Speed { get; set; }
 
         public virtual Scenario Scenario { get; set; }
         public virtual Perimeter Perimeter { get; set; }
         public virtual LayerSettings LayerSettings { get; set; }
-        [Initialize]
-        public virtual ObservableList<Source> Sources { get; set; }
-        [Initialize]
-        public virtual ObservableList<LogEntry> Logs { get; set; }
+        [Initialize] public virtual ObservableList<Source> Sources { get; set; }
+        [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
+
+        #region PlatformPropertiesCommand
+        public SimpleCommand<object, EventToCommandArgs> PlatformPropertiesCommand { get { return _platformProperties ?? (_platformProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.PlatformProperties, this))); } }
+        SimpleCommand<object, EventToCommandArgs> _platformProperties;
+        #endregion
 
         #region DeletePlatformCommand
-        public SimpleCommand<object, EventToCommandArgs> DeletePlatformCommand { get { return _deletePlatform ?? (_deletePlatform = new SimpleCommand<object, EventToCommandArgs>(DeletePlatformHandler)); } }
+        public SimpleCommand<object, EventToCommandArgs> DeletePlatformCommand { get { return _deletePlatform ?? (_deletePlatform = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeletePlatform, this))); } }
         SimpleCommand<object, EventToCommandArgs> _deletePlatform;
-
-        void DeletePlatformHandler(EventToCommandArgs args)
-        {
-            //var parameter = args.CommandParameter;
-            MediatorMessage.Send(MediatorMessage.DeletePlatform, this);
-        }
         #endregion
 
         #region AddSourceCommand
-        public SimpleCommand<object, EventToCommandArgs> AddSourceCommand { get { return _addSource ?? (_addSource = new SimpleCommand<object, EventToCommandArgs>(AddSourceHandler)); } }
+        public SimpleCommand<object, EventToCommandArgs> AddSourceCommand { get { return _addSource ?? (_addSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.AddSource, this))); } }
         SimpleCommand<object, EventToCommandArgs> _addSource;
-
-        void AddSourceHandler(EventToCommandArgs args)
-        {
-            //var parameter = args.CommandParameter;
-            MediatorMessage.Send(MediatorMessage.AddSource, this);
-        }
         #endregion
+
         public void CreateMapLayers()
         {
             if (LayerSettings == null) LayerSettings = new LayerSettings();
@@ -75,7 +66,8 @@ namespace ESME.Scenarios
             {
                 LayerType = LayerType.Track,
                 Name = string.Format("{0}", Guid),
-                CustomLineStyle = new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, LayerSettings.LineOrSymbolColor, (float)LayerSettings.LineOrSymbolSize)
+                CustomLineStyle =
+                    new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, LayerSettings.LineOrSymbolColor, (float)LayerSettings.LineOrSymbolSize)
             };
 
             mapLayer.Add(new List<Geo> { Geo, ((Geo)Geo).Offset(HRC.Navigation.Geo.KilometersToRadians(25), HRC.Navigation.Geo.DegreesToRadians(90)) });

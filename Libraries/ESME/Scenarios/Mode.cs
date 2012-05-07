@@ -64,14 +64,13 @@ namespace ESME.Scenarios
         public void RemoveMapLayers() { throw new NotImplementedException(); }
 
         #region DeleteModeCommand
-        public SimpleCommand<object, EventToCommandArgs> DeleteModeCommand { get { return _deleteMode ?? (_deleteMode = new SimpleCommand<object, EventToCommandArgs>(DeleteModeHandler)); } }
+        public SimpleCommand<object, EventToCommandArgs> DeleteModeCommand { get { return _deleteMode ?? (_deleteMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteMode, this))); } }
         SimpleCommand<object, EventToCommandArgs> _deleteMode;
+        #endregion
 
-        void DeleteModeHandler(EventToCommandArgs args)
-        {
-            //var parameter = args.CommandParameter;
-            MediatorMessage.Send(MediatorMessage.DeleteMode, this);
-        }
+        #region ModePropertiesCommand
+        public SimpleCommand<object, EventToCommandArgs> ModePropertiesCommand { get { return _modeProperties ?? (_modeProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ModeProperties, this))); } }
+        SimpleCommand<object, EventToCommandArgs> _modeProperties;
         #endregion
     }
 }
