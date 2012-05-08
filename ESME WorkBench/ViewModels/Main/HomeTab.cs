@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using ESME;
 using ESME.Behaviors;
@@ -121,17 +122,26 @@ namespace ESMEWorkbench.ViewModels.Main
                 Launches = false,
                 TrackType = TrackType.Stationary,
                 LayerSettings = new LayerSettings(),
-                IsEditable = true,
+                IsNew = true,
             };
             Scenario.Platforms.Add(platform);
             platform.CreateMapLayers();
+        }
+        [MediatorMessageSink(MediatorMessage.PlatformBoundToLayer), UsedImplicitly]
+        async void PlatformBoundToLayer(Platform platform)
+        {
+            if (!platform.IsNew) return;
+            platform.IsNew = false;
+            ((LayerControl)platform.LayerControl).Select();
+            await TaskEx.Delay(50);
+            ((LayerControl)platform.LayerControl).Edit();
         }
 
         [MediatorMessageSink(MediatorMessage.DeletePlatform), UsedImplicitly]
         void DeletePlatform(Platform platform)
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the platform \"{0}\"?", platform.PlatformName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-            Scenario.Platforms.Remove(platform);
+            platform.Delete();
         }
 
         [MediatorMessageSink(MediatorMessage.PlatformProperties), UsedImplicitly]
@@ -153,15 +163,25 @@ namespace ESMEWorkbench.ViewModels.Main
                 Platform = platform,
                 SourceName = "New Source",
                 SourceType = null,
-                IsEditable = true,
+                IsNew = true,
             };
             platform.Sources.Add(source);
         }
+        [MediatorMessageSink(MediatorMessage.SourceBoundToLayer), UsedImplicitly]
+        async void SourceBoundToLayer(Source source)
+        {
+            if (!source.IsNew) return;
+            source.IsNew = false;
+            ((LayerControl)source.LayerControl).Select();
+            await TaskEx.Delay(50);
+            ((LayerControl)source.LayerControl).Edit();
+        }
+
         [MediatorMessageSink(MediatorMessage.DeleteSource), UsedImplicitly]
         void DeleteSource(Source source)
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the source \"{0}\"?", source.SourceName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-            source.Platform.Sources.Remove(source);
+            source.Delete();
         }
 
         [MediatorMessageSink(MediatorMessage.SourceProperties), UsedImplicitly]
@@ -194,15 +214,25 @@ namespace ESMEWorkbench.ViewModels.Main
                 Source = source,
                 SourceLevel = 200,
                 VerticalBeamWidth = 180f,
-                IsEditable = true,
+                IsNew = true,
             };
             source.Modes.Add(mode);
         }
+        [MediatorMessageSink(MediatorMessage.ModeBoundToLayer), UsedImplicitly]
+        async void ModeBoundToLayer(Mode mode)
+        {
+            if (!mode.IsNew) return;
+            mode.IsNew = false;
+            ((LayerControl)mode.LayerControl).Select();
+            await TaskEx.Delay(50);
+            ((LayerControl)mode.LayerControl).Edit();
+        }
+
         [MediatorMessageSink(MediatorMessage.DeleteMode), UsedImplicitly]
         void DeleteMode(Mode mode)
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-            mode.Source.Modes.Remove(mode);
+            mode.Delete();
         }
 
         [MediatorMessageSink(MediatorMessage.ModeProperties), UsedImplicitly]

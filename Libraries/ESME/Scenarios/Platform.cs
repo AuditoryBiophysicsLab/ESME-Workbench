@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Windows.Media;
 using ESME.Database;
 using ESME.Locations;
@@ -43,8 +44,19 @@ namespace ESME.Scenarios
         public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<Source> Sources { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
-        [NotMapped] public bool IsEditable { get; set; }
-        [NotMapped] public object LayerControl { get; set; }
+        [NotMapped] public bool IsNew { get; set; }
+        [NotMapped] public object LayerControl
+        {
+            get { return _layerControl; }
+            set
+            {
+                _layerControl = value;
+                MediatorMessage.Send(MediatorMessage.PlatformBoundToLayer, this);
+            }
+        }
+        object _layerControl;
+
+
         #region PlatformPropertiesCommand
         public SimpleCommand<object, EventToCommandArgs> PlatformPropertiesCommand { get { return _platformProperties ?? (_platformProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.PlatformProperties, this))); } }
         SimpleCommand<object, EventToCommandArgs> _platformProperties;
@@ -54,6 +66,12 @@ namespace ESME.Scenarios
         public SimpleCommand<object, EventToCommandArgs> DeletePlatformCommand { get { return _deletePlatform ?? (_deletePlatform = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeletePlatform, this))); } }
         SimpleCommand<object, EventToCommandArgs> _deletePlatform;
         #endregion
+
+        public void Delete()
+        {
+            foreach (var source in Sources.ToList()) source.Delete();
+            Scenario.Platforms.Remove(this);
+        }
 
         #region AddSourceCommand
         public SimpleCommand<object, EventToCommandArgs> AddSourceCommand { get { return _addSource ?? (_addSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.AddSource, this))); } }

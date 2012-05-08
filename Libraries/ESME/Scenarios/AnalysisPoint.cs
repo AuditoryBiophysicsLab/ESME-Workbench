@@ -145,6 +145,13 @@ namespace ESME.Scenarios
         }
 
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
+        public void Delete()
+        {
+            foreach (var radial in Radials.ToList()) radial.Delete();
+            AnalysisPoint.TransmissionLosses.Remove(this);
+            if (AnalysisPoint.TransmissionLosses.Count == 0) AnalysisPoint.Scenario.AnalysisPoints.Remove(AnalysisPoint);
+        }
+
     }
 
     [NotifyPropertyChanged]
@@ -174,7 +181,7 @@ namespace ESME.Scenarios
             get
             {
                 if (Filename == null || Filename.EndsWith(".shd")) Filename = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
-                if (TransmissionLoss == null) Debugger.Break();
+                if (TransmissionLoss == null) return null;
                 return Path.Combine(TransmissionLoss.AnalysisPoint.Scenario.StorageDirectoryPath, Filename);
             }
         }
@@ -200,6 +207,13 @@ namespace ESME.Scenarios
             }
         }
         float[] _depths;
+
+        public void Delete()
+        {
+            var files = Directory.GetFiles(Path.GetDirectoryName(BasePath), Path.GetFileNameWithoutExtension(BasePath) + ".*");
+            foreach (var file in files) File.Delete(file);
+            TransmissionLoss.Radials.Remove(this);
+        }
 
         [NotMapped]
         public BottomProfilePoint[] BottomProfile

@@ -192,7 +192,18 @@ namespace ESME.Scenarios
 
         [NotMapped] public static IMasterDatabaseService Database { get; set; }
         [NotMapped] public static EnvironmentalCacheService Cache { get; set; }
-        [NotMapped] public object LayerControl { get; set; }
+        [NotMapped] public bool IsNew { get; set; }
+        [NotMapped] public object LayerControl
+        {
+            get { return _layerControl; }
+            set
+            {
+                _layerControl = value;
+                MediatorMessage.Send(MediatorMessage.ScenarioBoundToLayer, this);
+            }
+        }
+        object _layerControl;
+
 
         public void CreateMapLayers()
         {
@@ -230,7 +241,11 @@ namespace ESME.Scenarios
             MediatorMessage.Send(MediatorMessage.AddPlatform, this);
         }
         #endregion
-
+        public void Delete()
+        {
+            foreach (var platform in Platforms.ToArray()) platform.Delete();
+            Database.Context.Scenarios.Remove(this);
+        }
     }
 
     public static class ScenarioExensions

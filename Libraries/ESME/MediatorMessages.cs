@@ -15,17 +15,22 @@ namespace ESME
         public const string ViewAnalysisPoint = "ViewAnalysisPointMessage";
         public const string CalculateAnalysisPoint = "CalculateAnalysisPointMessage";
 
+        public const string ScenarioBoundToLayer = "ScenarioBoundToLayerMessage";
+
         public const string AddPlatform = "AddPlatformMessage";
         public const string DeletePlatform = "DeletePlatformMessage";
         public const string PlatformProperties = "PlatformPropertiesMessage";
+        public const string PlatformBoundToLayer = "PlatformBoundToLayerMessage";
 
         public const string AddSource = "AddSourceMessage";
         public const string DeleteSource = "DeleteSourceMessage";
         public const string SourceProperties = "SourcePropertiesMessage";
+        public const string SourceBoundToLayer = "SourceBoundToLayerMessage";
 
         public const string AddMode = "AddModeMessage";
         public const string DeleteMode = "DeleteModeMessage";
         public const string ModeProperties = "ModePropertiesMessage";
+        public const string ModeBoundToLayer = "ModeBoundToLayerMessage";
 
         public const string ShowProperties = "ShowPropertiesMessage";
 

@@ -83,7 +83,15 @@ namespace ESME.TransmissionLoss
                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Bathymetry)
                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Sediment)
                            select radial);
-            foreach (var radial in radials) if (!File.Exists(radial.BasePath + ".shd")) Add(radial);
+            foreach (var radial in radials)
+            {
+                if (radial.BasePath == null)
+                {
+                    _databaseService.Context.Radials.Remove(radial);
+                    continue;
+                }
+                if (!File.Exists(radial.BasePath + ".shd")) Add(radial);
+            }
             _databaseService.Context.Radials.Local.CollectionChanged += (sender, args) =>
             {
                 switch (args.Action)

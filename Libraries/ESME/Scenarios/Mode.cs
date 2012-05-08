@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using ESME.Database;
 using ESME.Locations;
 using HRC.Aspects;
@@ -37,8 +38,19 @@ namespace ESME.Scenarios
         public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
 
         [NotMapped] public string PSMName { get { return string.Format("{0}:{1}:{2}", Source.Platform.PlatformName, Source.SourceName, ModeName); } }
-        [NotMapped] public bool IsEditable { get; set; }
-        [NotMapped] public object LayerControl { get; set; }
+        [NotMapped] public bool IsNew { get; set; }
+        [NotMapped]
+        public object LayerControl
+        {
+            get { return _layerControl; }
+            set
+            {
+                _layerControl = value;
+                MediatorMessage.Send(MediatorMessage.ModeBoundToLayer, this);
+            }
+        }
+        object _layerControl;
+
 
         /// <summary>
         /// Indicates whether the current object is equal to another object of the same type.
@@ -74,5 +86,11 @@ namespace ESME.Scenarios
         public SimpleCommand<object, EventToCommandArgs> ModePropertiesCommand { get { return _modeProperties ?? (_modeProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ModeProperties, this))); } }
         SimpleCommand<object, EventToCommandArgs> _modeProperties;
         #endregion
+        public void Delete()
+        {
+            foreach (var tl in TransmissionLosses.ToList()) tl.Delete();
+            Source.Modes.Remove(this);
+        }
+
     }
 }

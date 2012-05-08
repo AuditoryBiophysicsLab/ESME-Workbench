@@ -87,7 +87,6 @@ namespace ESME.Views.Controls
         void EndEdit(bool restoreOriginalContent)
         {
             if (restoreOriginalContent) _textBox.Text = _originalContent;
-            if (IsEditable) IsEditable = false;
             IsTreeViewItemSelected = false;
             LayerNameContentControl = _textBlock;
         }
@@ -95,7 +94,6 @@ namespace ESME.Views.Controls
         {
             var layerControl = (LayerControl)sender;
             Debug.WriteLine("OnPropertyChanged: IsLayerNameEditable: {0}, IsTreeViewItemSelected: {1}", layerControl.IsLayerNameEditable, layerControl.IsTreeViewItemSelected );
-            if (layerControl.IsEditable) return;
             if (!layerControl.IsLayerNameEditable || !layerControl.IsTreeViewItemSelected) layerControl.LayerNameContentControl = layerControl._textBlock;
         }
 
@@ -220,30 +218,6 @@ namespace ESME.Views.Controls
 
         #endregion
 
-        #region dependency property bool IsEditable
-
-        public static DependencyProperty IsEditableProperty = DependencyProperty.Register("IsEditable", typeof(bool), typeof(LayerControl), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, IsEditablePropertyChanged));
-        static void IsEditablePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
-        {
-            Debug.WriteLine("IsEditablePropertyChanged");
-            var layerControl = (LayerControl)sender;
-            if (layerControl.IsEditable)
-            {
-                Debug.WriteLine("IsEditablePropertyChanged: TreeViewItem: {0}", layerControl.TreeViewItem == null ? "NULL" : "Ok");
-                if (layerControl.TreeViewItem != null)
-                {
-                    Debug.WriteLine("IsEditablePropertyChanged TreeViewItem: Ok");
-                    layerControl.TreeViewItem.IsSelected = true;
-                    layerControl.BeginEdit();
-                    layerControl.SetFocus(true);
-                }
-            }
-        }
-        public bool IsEditable { get { return (bool)GetValue(IsEditableProperty); } set { SetValue(IsEditableProperty, value); } }
-
-        #endregion
-
-
         #region dependency property bool IsTreeViewItemExpanded
 
         public static DependencyProperty IsTreeViewItemExpandedProperty = DependencyProperty.Register("IsTreeViewItemExpanded", typeof(bool), typeof(LayerControl), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
@@ -277,24 +251,17 @@ namespace ESME.Views.Controls
             var layerControl = (LayerControl)sender;
             if (layerControl.TreeViewItem != null) layerControl.TreeViewItem.KeyDown += (s, e) =>
             {
-                if (e.Key != Key.F2 || !layerControl.IsLayerNameEditable || !layerControl.IsTreeViewItemSelected) return;
-                layerControl.LayerNameContentControl = layerControl._textBox;
-                layerControl._originalContent = layerControl._textBlock.Text;
-                layerControl.UpdateLayout();
-                layerControl._textBox.Dispatcher.InvokeIfRequired(() =>
+                switch (e.Key)
                 {
-                    layerControl._textBox.Focus();
-                    layerControl._textBox.SelectAll();
-                },
-                    DispatcherPriority.Input);
+                    case Key.F2:
+                        layerControl.BeginEditIfEnabled();
+                        layerControl.SetFocus(true);
+                        e.Handled = true;
+                        break;
+                    case Key.Delete:
+                        break;
+                }
             };
-            if (layerControl.IsEditable && layerControl.TreeViewItem != null)
-            {
-                Debug.WriteLine("OnTreeViewItemPropertyChanged IsEditable = true;");
-                layerControl.TreeViewItem.IsSelected = true;
-                layerControl.BeginEdit();
-                layerControl.SetFocus(true);
-            }
         }
 
         public TreeViewItem TreeViewItem { get { return (TreeViewItem)GetValue(TreeViewItemProperty); } set { SetValue(TreeViewItemProperty, value); } }
@@ -316,6 +283,11 @@ namespace ESME.Views.Controls
         }
         public void Expand() { if (TreeViewItem != null) TreeViewItem.IsExpanded = true; }
         public void Select() { if (TreeViewItem != null) TreeViewItem.IsSelected = true; }
+        public void Edit()
+        {
+            BeginEdit();
+            SetFocus(true);
+        }
 
         public Control TheLayerControl { get { return (Control)GetValue(TheLayerControlProperty); } set { SetValue(TheLayerControlProperty, value); } }
 

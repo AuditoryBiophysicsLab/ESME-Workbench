@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using ESME.Locations;
 using HRC.Aspects;
 using HRC.Utility;
@@ -22,8 +23,19 @@ namespace ESME.Scenarios
         [Initialize]
         public virtual ObservableList<LogEntry> Logs { get; set; }
         [NotMapped] public string PSMName { get { return string.Format("{0}:{1}", Platform.PlatformName, SourceName); } }
-        [NotMapped] public bool IsEditable { get; set; }
-        [NotMapped] public object LayerControl { get; set; }
+        [NotMapped] public bool IsNew { get; set; }
+        [NotMapped]
+        public object LayerControl
+        {
+            get { return _layerControl; }
+            set
+            {
+                _layerControl = value;
+                MediatorMessage.Send(MediatorMessage.SourceBoundToLayer, this);
+            }
+        }
+        object _layerControl;
+
 
         #region AddModeCommand
         public SimpleCommand<object, EventToCommandArgs> AddModeCommand { get { return _addMode ?? (_addMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.AddMode, this))); } }
@@ -39,5 +51,11 @@ namespace ESME.Scenarios
         public SimpleCommand<object, EventToCommandArgs> SourcePropertiesCommand { get { return _sourceProperties ?? (_sourceProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.SourceProperties, this))); } }
         SimpleCommand<object, EventToCommandArgs> _sourceProperties;
         #endregion
+
+        public void Delete()
+        {
+            foreach (var mode in Modes.ToList()) mode.Delete();
+            Platform.Sources.Remove(this);
+        }
     }
 }

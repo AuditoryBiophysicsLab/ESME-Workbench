@@ -26,7 +26,6 @@
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
                 <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
-                                       IsEditable="{Binding IsEditable}"
                                        TheLayerControl="{Binding LayerControl}"
                                        IsLayerNameEditable="True"
                                        LayerName="{Binding PlatformName,
@@ -69,7 +68,6 @@
             <!--  Source  -->
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
                 <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
-                                       IsEditable="{Binding IsEditable}"
                                        TheLayerControl="{Binding LayerControl}"
                                        IsLayerNameEditable="True"
                                        IsMapLayer="False"
@@ -90,7 +88,6 @@
             <!--  Mode  -->
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
                 <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
-                                       IsEditable="{Binding IsEditable}"
                                        TheLayerControl="{Binding LayerControl}"
                                        IsLayerNameEditable="True"
                                        IsMapLayer="False"
