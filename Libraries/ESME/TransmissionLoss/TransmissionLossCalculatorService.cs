@@ -206,21 +206,8 @@ namespace ESME.TransmissionLoss
                 bellhopProcess.BeginOutputReadLine();
                 while (!bellhopProcess.HasExited) Thread.Sleep(100);
                 radial.CalculationCompleted = DateTime.Now;
-                var output = new TransmissionLossRadial((float)radial.Bearing, new BellhopOutput(radial.BasePath + ".shd"));
-                radial.Ranges = output.Ranges.ToArray();
-                radial.Depths = output.Depths.ToArray();
-                radial.IsCalculated = true;
-                radial.BottomProfile = bottomProfile.Profile.ToArray();
-                radial.MinimumTransmissionLossValues = new float[output.Ranges.Count];
-                radial.MaximumTransmissionLossValues = new float[output.Ranges.Count];
-                radial.MeanTransmissionLossValues = new float[output.Ranges.Count];
-                for (var rangeIndex = 0; rangeIndex < output.Ranges.Count; rangeIndex++)
-                {
-                    radial.MinimumTransmissionLossValues[rangeIndex] = output[rangeIndex].Min();
-                    radial.MaximumTransmissionLossValues[rangeIndex] = output[rangeIndex].Max();
-                    radial.MeanTransmissionLossValues[rangeIndex] = output[rangeIndex].Average();
-                }
-                lock (_databaseService.Context) _databaseService.Context.SaveChanges();
+                radial.ReadBellhopShadeFile();
+                //lock (_databaseService.Context) _databaseService.Context.SaveChanges();
                 Debug.WriteLine("{0}: Finished calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}",
                                 DateTime.Now,
                                 radial.Bearing,

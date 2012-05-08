@@ -13,71 +13,10 @@
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
-    <UserControl.Resources>
-        <Style x:Key="{x:Type TreeViewItem}" TargetType="{x:Type TreeViewItem}">
-            <Style.Triggers>
-                <Trigger Property="WPF:UIElementHelper.IsMouseDirectlyOverItem" Value="True">
-                    <Setter Property="Background" Value="#FFC0FFC0" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <!--
-            <Style x:Key="ContextMenuItemStyle">
-            <Setter Property="MenuItem.Header" Value="{Binding Header}" />
-            <Setter Property="MenuItem.ItemsSource" Value="{Binding Children}" />
-            <Setter Property="MenuItem.Command" Value="{Binding Command}" />
-            <Setter Property="MenuItem.Icon" Value="{Binding Icon}" />
-            <Setter Property="MenuItem.IsCheckable" Value="{Binding IsCheckable}" />
-            <Setter Property="MenuItem.IsChecked" Value="{Binding IsChecked}" />
-            <Setter Property="MenuItem.Visibility" Value="{Binding Visibility}" />
-            <Setter Property="MenuItem.CommandParameter" Value="{Binding}" />
-            </Style>
-            <Style x:Key="LayersViewItemStyle" TargetType="TreeViewItem">
-            <Setter Property="KeyboardNavigation.AcceptsReturn" Value="True" />
-            <Setter Property="views:VirtualToggleButton.IsVirtualToggleButton" Value="True" />
-            <Setter Property="views:VirtualToggleButton.IsChecked" Value="{Binding IsChecked}" />
-            <Setter Property="ToolTip" Value="{Binding ToolTip}" />
-            <Style.Triggers>
-            <Trigger Property="IsSelected" Value="True">
-            <Setter Property="FontWeight" Value="Bold" />
-            </Trigger>
-            </Style.Triggers>
-            </Style>
-        -->
-        <Style x:Key="ToolTipStyle" TargetType="Control">
-            <Setter Property="Background" Value="Gainsboro" />
-            <Setter Property="Foreground" Value="Black" />
-        </Style>
-        <Style x:Key="ToolTipLefthandListViewStyle" TargetType="TextBlock">
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="TextAlignment" Value="Right" />
-            <Setter Property="Margin" Value="5 2 5 0" />
-            <Setter Property="Grid.Column" Value="0" />
-        </Style>
-        <Style x:Key="ToolTipRighthandListViewStyle" TargetType="TextBlock">
-            <Setter Property="TextAlignment" Value="Left" />
-            <Setter Property="Margin" Value="0 2 5 0" />
-            <Setter Property="Grid.Column" Value="1" />
-        </Style>
-        <Style x:Key="ToolTipListViewStyle" TargetType="Control">
-            <Setter Property="Background" Value="Gainsboro" />
-            <Setter Property="Foreground" Value="Black" />
-            <Setter Property="Margin" Value="5" />
-            <Setter Property="BorderThickness" Value="0" />
-        </Style>
-        <Style x:Key="ToolTipHeaderStyle" TargetType="TextBlock">
-            <Setter Property="TextAlignment" Value="Center" />
-            <Setter Property="FontSize" Value="14" />
-            <Setter Property="Margin" Value="-5 -1 -5 0" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="Background" Value="Gray" />
-        </Style>
-    </UserControl.Resources>
     <TreeView DockPanel.Dock="Top" Grid.IsSharedSizeScope="True" ItemsSource="{Binding RootNodes}">
         <TreeView.Resources>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Scenario}" ItemsSource="{Binding Platforms}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" IsMapLayer="False" LayerName="{Binding Name, StringFormat=Scenario: {0}}">
+                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" TheLayerControl="{Binding LayerControl}" IsMapLayer="False" LayerName="{Binding Name, StringFormat=Scenario: {0}}">
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding AddPlatformCommand}" Header="Add platform" />
@@ -87,6 +26,8 @@
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
                 <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                                       IsEditable="{Binding IsEditable}"
+                                       TheLayerControl="{Binding LayerControl}"
                                        IsLayerNameEditable="True"
                                        LayerName="{Binding PlatformName,
                                                            Mode=TwoWay}"
@@ -127,7 +68,13 @@
             </HierarchicalDataTemplate>
             <!--  Source  -->
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
-                <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}" IsLayerNameEditable="True" IsMapLayer="False" LayerName="{Binding SourceName, Mode=TwoWay}">
+                <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
+                                       IsEditable="{Binding IsEditable}"
+                                       TheLayerControl="{Binding LayerControl}"
+                                       IsLayerNameEditable="True"
+                                       IsMapLayer="False"
+                                       LayerName="{Binding SourceName,
+                                                           Mode=TwoWay}">
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding DeleteSourceCommand}" Header="Remove this source" />
@@ -142,7 +89,13 @@
             </HierarchicalDataTemplate>
             <!--  Mode  -->
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" IsLayerNameEditable="True" IsMapLayer="False" LayerName="{Binding ModeName, Mode=TwoWay}">
+                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                                       IsEditable="{Binding IsEditable}"
+                                       TheLayerControl="{Binding LayerControl}"
+                                       IsLayerNameEditable="True"
+                                       IsMapLayer="False"
+                                       LayerName="{Binding ModeName,
+                                                           Mode=TwoWay}">
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding DeleteModeCommand}" Header="Remove this mode" />

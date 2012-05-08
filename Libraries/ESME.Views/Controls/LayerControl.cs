@@ -5,6 +5,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
+using HRC.WPF;
 
 namespace ESME.Views.Controls
 {
@@ -14,55 +16,87 @@ namespace ESME.Views.Controls
         public LayerControl()
         {
             LayerNameContentControl = _textBlock;
-            _textBlock.MouseLeftButtonDown += (s, e) =>
+            _textBlock.MouseLeftButtonDown += (s, e) => BeginEditIfEnabled();
+            _textBox.MouseLeftButtonUp += (s, e) => SetFocus(false);
+            _textBox.KeyDown += (s, e) =>
             {
-                if (!IsLayerNameEditable)
+                switch (e.Key)
                 {
-                    if (IsSelected)
-                    {
-                        IsSelected = false;
+                    case Key.Enter:
+                        EndEdit(false);
                         e.Handled = true;
-                    }
-                    return;
+                        break;
+                    case Key.Escape:
+                        EndEdit(true);
+                        e.Handled = true;
+                        break;
                 }
-                if (!IsSelected) return;
-                LayerNameContentControl = _textBox;
-                _textBox.Focus();
-                _textBox.SelectAll();
-                e.Handled = true;
             };
             BindingOperations.SetBinding(this,
-                                         IsSelectedProperty,
-                                         new Binding("IsSelected")
+                                         IsTreeViewItemSelectedProperty,
+                                         new Binding("IsTreeViewItemSelected")
                                          {
                                              RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(TreeViewItem), 1),
                                              Path = new PropertyPath("IsSelected"),
                                              Mode = BindingMode.TwoWay,
                                          });
             BindingOperations.SetBinding(this,
-                                         IsExpandedProperty,
-                                         new Binding("IsExpanded")
+                                         IsTreeViewItemExpandedProperty,
+                                         new Binding("IsTreeViewItemExpanded")
                                          {
                                              RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(TreeViewItem), 1),
                                              Path = new PropertyPath("IsExpanded"),
                                              Mode = BindingMode.TwoWay,
                                          });
-            _textBox.KeyDown += (s, e) =>
-            {
-                if (e.Key == Key.Enter) IsSelected = false;
-                e.Handled = true;
-            };
+            BindingOperations.SetBinding(this,
+                                         TreeViewItemProperty,
+                                         new Binding { RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(TreeViewItem), 1) });
             _textBox.SetBinding(TextBox.TextProperty, new Binding("LayerName") { Source = this, Mode = BindingMode.TwoWay });
             _textBlock.SetBinding(TextBlock.TextProperty, new Binding("LayerName") { Source = this });
+            SetCurrentValue(TheLayerControlProperty, this);
         }
 
         readonly TextBox _textBox = new TextBox { VerticalAlignment = VerticalAlignment.Top, VerticalContentAlignment = VerticalAlignment.Top };
         readonly TextBlock _textBlock = new TextBlock();
+        string _originalContent;
 
+        void BeginEditIfEnabled()
+        {
+            if (!IsLayerNameEditable || !IsTreeViewItemSelected) return;
+            BeginEdit();
+        }
+        void BeginEdit()
+        {
+            _originalContent = _textBlock.Text;
+            LayerNameContentControl = _textBox;
+            UpdateLayout();
+        }
+        void SetFocus(bool invokeIfRequired)
+        {
+            if (invokeIfRequired) _textBox.Dispatcher.InvokeIfRequired(() =>
+            {
+                _textBox.Focus();
+                _textBox.SelectAll();
+            }, DispatcherPriority.Input);
+            else
+            {
+                _textBox.Focus();
+                _textBox.SelectAll();
+            }
+        }
+        void EndEdit(bool restoreOriginalContent)
+        {
+            if (restoreOriginalContent) _textBox.Text = _originalContent;
+            if (IsEditable) IsEditable = false;
+            IsTreeViewItemSelected = false;
+            LayerNameContentControl = _textBlock;
+        }
         static void OnPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
             var layerControl = (LayerControl)sender;
-            if (!layerControl.IsLayerNameEditable || !layerControl.IsSelected) layerControl.LayerNameContentControl = layerControl._textBlock;
+            Debug.WriteLine("OnPropertyChanged: IsLayerNameEditable: {0}, IsTreeViewItemSelected: {1}", layerControl.IsLayerNameEditable, layerControl.IsTreeViewItemSelected );
+            if (layerControl.IsEditable) return;
+            if (!layerControl.IsLayerNameEditable || !layerControl.IsTreeViewItemSelected) layerControl.LayerNameContentControl = layerControl._textBlock;
         }
 
         #region dependency property bool IsMapLayer
@@ -120,8 +154,12 @@ namespace ESME.Views.Controls
         public static DependencyProperty LayerNameProperty = DependencyProperty.Register("LayerName",
                                                                                          typeof(string),
                                                                                          typeof(LayerControl),
-                                                                                         new FrameworkPropertyMetadata("LayerName", OnPropertyChanged));
+                                                                                         new FrameworkPropertyMetadata(null, LayerNamePropertyChanged));
 
+        static void LayerNamePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            Debug.WriteLine("LayerNamePropertyChanged");
+        }
         public string LayerName { get { return (string)GetValue(LayerNameProperty); } set { SetCurrentValue(LayerNameProperty, value); } }
         #endregion
 
@@ -145,29 +183,72 @@ namespace ESME.Views.Controls
         public Visibility LineColorVisibility { get { return (Visibility)GetValue(LineColorVisibilityProperty); } set { SetCurrentValue(LineColorVisibilityProperty, value); } }
         #endregion
 
-        #region dependency property object ContextControl
-        public static DependencyProperty ContextControlProperty = DependencyProperty.Register("ContextControl",
-                                                                                              typeof(object),
-                                                                                              typeof(LayerControl),
-                                                                                              new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+        #region dependency property bool IsSelected
 
-        public object ContextControl { get { return GetValue(ContextControlProperty); } set { SetCurrentValue(ContextControlProperty, value); } }
+        public static DependencyProperty IsSelectedProperty = DependencyProperty.Register("IsSelected", typeof(bool), typeof(LayerControl), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, IsSelectedPropertyChanged));
+        static void IsSelectedPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            var layerControl = (LayerControl)sender;
+            layerControl.IsTreeViewItemSelected = layerControl.IsSelected;
+        }
+
+        public bool IsSelected { get { return (bool)GetValue(IsSelectedProperty); } set { SetValue(IsSelectedProperty, value); } }
+
         #endregion
 
-        #region dependency property bool IsSelected
-        public static DependencyProperty IsSelectedProperty = DependencyProperty.Register("IsSelected",
-                                                                                          typeof(bool),
-                                                                                          typeof(LayerControl),
-                                                                                          new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnPropertyChanged));
+        #region dependency property bool IsTreeViewItemSelected
+        public static DependencyProperty IsTreeViewItemSelectedProperty = DependencyProperty.Register("IsTreeViewItemSelected",
+                                                                                                      typeof(bool),
+                                                                                                      typeof(LayerControl),
+                                                                                                      new FrameworkPropertyMetadata(false,
+                                                                                                                                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                                                                                                                                    OnPropertyChanged));
 
-        public bool IsSelected { get { return (bool)GetValue(IsSelectedProperty); } set { SetCurrentValue(IsSelectedProperty, value); } }
+        public bool IsTreeViewItemSelected { get { return (bool)GetValue(IsTreeViewItemSelectedProperty); } set { SetCurrentValue(IsTreeViewItemSelectedProperty, value); } }
         #endregion
 
         #region dependency property bool IsExpanded
 
-        public static DependencyProperty IsExpandedProperty = DependencyProperty.Register("IsExpanded", typeof(bool), typeof(LayerControl), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+        public static DependencyProperty IsExpandedProperty = DependencyProperty.Register("IsExpanded", typeof(bool), typeof(LayerControl), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, IsExpandedPropertyChanged));
+        static void IsExpandedPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            var layerControl = (LayerControl)sender;
+            layerControl.IsTreeViewItemExpanded = layerControl.IsExpanded;
+        }
 
         public bool IsExpanded { get { return (bool)GetValue(IsExpandedProperty); } set { SetValue(IsExpandedProperty, value); } }
+
+        #endregion
+
+        #region dependency property bool IsEditable
+
+        public static DependencyProperty IsEditableProperty = DependencyProperty.Register("IsEditable", typeof(bool), typeof(LayerControl), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, IsEditablePropertyChanged));
+        static void IsEditablePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            Debug.WriteLine("IsEditablePropertyChanged");
+            var layerControl = (LayerControl)sender;
+            if (layerControl.IsEditable)
+            {
+                Debug.WriteLine("IsEditablePropertyChanged: TreeViewItem: {0}", layerControl.TreeViewItem == null ? "NULL" : "Ok");
+                if (layerControl.TreeViewItem != null)
+                {
+                    Debug.WriteLine("IsEditablePropertyChanged TreeViewItem: Ok");
+                    layerControl.TreeViewItem.IsSelected = true;
+                    layerControl.BeginEdit();
+                    layerControl.SetFocus(true);
+                }
+            }
+        }
+        public bool IsEditable { get { return (bool)GetValue(IsEditableProperty); } set { SetValue(IsEditableProperty, value); } }
+
+        #endregion
+
+
+        #region dependency property bool IsTreeViewItemExpanded
+
+        public static DependencyProperty IsTreeViewItemExpandedProperty = DependencyProperty.Register("IsTreeViewItemExpanded", typeof(bool), typeof(LayerControl), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+        public bool IsTreeViewItemExpanded { get { return (bool)GetValue(IsTreeViewItemExpandedProperty); } set { SetValue(IsTreeViewItemExpandedProperty, value); } }
 
         #endregion
 
@@ -187,21 +268,58 @@ namespace ESME.Views.Controls
 
         public FrameworkElement LayerNameContentControl { get { return (FrameworkElement)GetValue(LayerNameContentControlProperty); } set { SetValue(LayerNameContentControlProperty, value); } }
         #endregion
-    }
 
-    class IsLayerNameEditableTemplateSelector : DataTemplateSelector
-    {
-        public DataTemplate TrueTemplate { get; set; }
-        public DataTemplate FalseTemplate { get; set; }
+        #region dependency property TreeViewItem TreeViewItem
 
-        public override DataTemplate SelectTemplate(object item, DependencyObject container)
+        public static DependencyProperty TreeViewItemProperty = DependencyProperty.Register("TreeViewItem", typeof(TreeViewItem), typeof(LayerControl), new FrameworkPropertyMetadata(null, OnTreeViewItemPropertyChanged));
+        static void OnTreeViewItemPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            //Debug.WriteLine(string.Format("item is {0}", item == null ? "NULL" : item.GetType().ToString()));
-            var layerControl = item as LayerControl;
-            Debug.WriteLine(string.Format("LayerControl is {0}", layerControl == null ? "NULL" : "NOT NULL"));
-            if (layerControl == null) return null;
-            Debug.WriteLine(string.Format("  LayerName = {0}, IsLayerNameEditable = {1}, IsSelected = {2}", layerControl.LayerName, layerControl.IsLayerNameEditable, layerControl.IsSelected));
-            return layerControl.IsLayerNameEditable && layerControl.IsSelected ? TrueTemplate : FalseTemplate;
+            var layerControl = (LayerControl)sender;
+            if (layerControl.TreeViewItem != null) layerControl.TreeViewItem.KeyDown += (s, e) =>
+            {
+                if (e.Key != Key.F2 || !layerControl.IsLayerNameEditable || !layerControl.IsTreeViewItemSelected) return;
+                layerControl.LayerNameContentControl = layerControl._textBox;
+                layerControl._originalContent = layerControl._textBlock.Text;
+                layerControl.UpdateLayout();
+                layerControl._textBox.Dispatcher.InvokeIfRequired(() =>
+                {
+                    layerControl._textBox.Focus();
+                    layerControl._textBox.SelectAll();
+                },
+                    DispatcherPriority.Input);
+            };
+            if (layerControl.IsEditable && layerControl.TreeViewItem != null)
+            {
+                Debug.WriteLine("OnTreeViewItemPropertyChanged IsEditable = true;");
+                layerControl.TreeViewItem.IsSelected = true;
+                layerControl.BeginEdit();
+                layerControl.SetFocus(true);
+            }
         }
+
+        public TreeViewItem TreeViewItem { get { return (TreeViewItem)GetValue(TreeViewItemProperty); } set { SetValue(TreeViewItemProperty, value); } }
+
+        #endregion
+
+        #region dependency property Control TheLayerControl
+
+        public static DependencyProperty TheLayerControlProperty = DependencyProperty.Register("TheLayerControl", typeof(Control), typeof(LayerControl), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TheLayerControlPropertyChanged));
+        static void TheLayerControlPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            Debug.WriteLine("TheLayerControlPropertyChanged");
+            var layerControl = (LayerControl)sender;
+            if (layerControl.TheLayerControl != layerControl)
+            {
+                Debug.WriteLine("TheLayerControlPropertyChanged, restoring proper value");
+                layerControl.TheLayerControl = layerControl;
+            }
+        }
+        public void Expand() { if (TreeViewItem != null) TreeViewItem.IsExpanded = true; }
+        public void Select() { if (TreeViewItem != null) TreeViewItem.IsSelected = true; }
+
+        public Control TheLayerControl { get { return (Control)GetValue(TheLayerControlProperty); } set { SetValue(TheLayerControlProperty, value); } }
+
+        #endregion
+
     }
 }

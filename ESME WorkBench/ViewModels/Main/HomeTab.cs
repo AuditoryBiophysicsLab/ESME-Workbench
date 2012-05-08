@@ -9,6 +9,7 @@ using ESME.Mapping;
 using ESME.Model;
 using ESME.Plugins;
 using ESME.Scenarios;
+using ESME.Views.Controls;
 using ESME.Views.Locations;
 using ESME.Views.Scenarios;
 using ESMEWorkbench.ViewModels.Map;
@@ -107,6 +108,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.AddPlatform), UsedImplicitly]
         void AddPlatform(Scenario scenario)
         {
+            ((LayerControl)scenario.LayerControl).Expand();
             var platform = new Platform
             {
                 Scenario = scenario,
@@ -119,6 +121,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 Launches = false,
                 TrackType = TrackType.Stationary,
                 LayerSettings = new LayerSettings(),
+                IsEditable = true,
             };
             Scenario.Platforms.Add(platform);
             platform.CreateMapLayers();
@@ -129,7 +132,6 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the platform \"{0}\"?", platform.PlatformName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             Scenario.Platforms.Remove(platform);
-            Database.Context.Platforms.Remove(platform);
         }
 
         [MediatorMessageSink(MediatorMessage.PlatformProperties), UsedImplicitly]
@@ -145,11 +147,13 @@ namespace ESMEWorkbench.ViewModels.Main
             //var vm = new CreateSourceViewModel();
             //var result = _visualizer.ShowDialog("CreateSourceView", vm);
             //if (!result.HasValue || !result.Value) return;
+            ((LayerControl)platform.LayerControl).Expand();
             var source = new Source
             {
                 Platform = platform,
                 SourceName = "New Source",
                 SourceType = null,
+                IsEditable = true,
             };
             platform.Sources.Add(source);
         }
@@ -158,7 +162,6 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the source \"{0}\"?", source.SourceName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             source.Platform.Sources.Remove(source);
-            Database.Context.Sources.Remove(source);
         }
 
         [MediatorMessageSink(MediatorMessage.SourceProperties), UsedImplicitly]
@@ -174,6 +177,7 @@ namespace ESMEWorkbench.ViewModels.Main
             //var vm = new CreateModeViewModel();
             //var result = _visualizer.ShowDialog("CreateModeView", vm);
             //if (!result.HasValue || !result.Value) return;
+            ((LayerControl)source.LayerControl).Expand();
             var mode = new Mode
             {
                 ActiveTime = 1f,
@@ -190,6 +194,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 Source = source,
                 SourceLevel = 200,
                 VerticalBeamWidth = 180f,
+                IsEditable = true,
             };
             source.Modes.Add(mode);
         }
@@ -198,7 +203,6 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             mode.Source.Modes.Remove(mode);
-            Database.Context.Modes.Remove(mode);
         }
 
         [MediatorMessageSink(MediatorMessage.ModeProperties), UsedImplicitly]

@@ -22,6 +22,8 @@ namespace ESME.Scenarios
         [Initialize]
         public virtual ObservableList<LogEntry> Logs { get; set; }
         [NotMapped] public string PSMName { get { return string.Format("{0}:{1}", Platform.PlatformName, SourceName); } }
+        [NotMapped] public bool IsEditable { get; set; }
+        [NotMapped] public object LayerControl { get; set; }
 
         #region AddModeCommand
         public SimpleCommand<object, EventToCommandArgs> AddModeCommand { get { return _addMode ?? (_addMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.AddMode, this))); } }

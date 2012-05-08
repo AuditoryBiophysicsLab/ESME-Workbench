@@ -37,6 +37,8 @@ namespace ESME.Scenarios
         public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
 
         [NotMapped] public string PSMName { get { return string.Format("{0}:{1}:{2}", Source.Platform.PlatformName, Source.SourceName, ModeName); } }
+        [NotMapped] public bool IsEditable { get; set; }
+        [NotMapped] public object LayerControl { get; set; }
 
         /// <summary>
         /// Indicates whether the current object is equal to another object of the same type.

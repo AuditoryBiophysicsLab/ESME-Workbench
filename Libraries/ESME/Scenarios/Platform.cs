@@ -43,7 +43,8 @@ namespace ESME.Scenarios
         public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<Source> Sources { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
-
+        [NotMapped] public bool IsEditable { get; set; }
+        [NotMapped] public object LayerControl { get; set; }
         #region PlatformPropertiesCommand
         public SimpleCommand<object, EventToCommandArgs> PlatformPropertiesCommand { get { return _platformProperties ?? (_platformProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.PlatformProperties, this))); } }
         SimpleCommand<object, EventToCommandArgs> _platformProperties;

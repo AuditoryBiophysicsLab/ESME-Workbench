@@ -12,6 +12,7 @@ using ESME.Environment;
 using ESME.Locations;
 using ESME.Mapping;
 using ESME.Model;
+using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using HRC.Aspects;
 using HRC.Navigation;
@@ -164,12 +165,6 @@ namespace ESME.Scenarios
         /// In meters
         /// </summary>
         public double Length { get; set; }
-        public byte[] RangeAxisBlob { get; set; }
-        public byte[] DepthAxisBlob { get; set; }
-        public byte[] BottomProfileBlob { get; set; }
-        public byte[] MinimumTransmissionLossBlob { get; set; }
-        public byte[] MaximumTransmissionLossBlob { get; set; }
-        public byte[] MeanTransmissionLossBlob { get; set; }
 
         public virtual TransmissionLoss TransmissionLoss { get; set; }
 
@@ -187,11 +182,10 @@ namespace ESME.Scenarios
         [NotMapped]
         public float[] Ranges
         {
-            get { return _ranges ?? (_ranges = RangeAxisBlob.ToArray()); }
-            set
+            get
             {
-                _ranges = value;
-                RangeAxisBlob = _ranges.ToBlob();
+                if (_ranges == null) ReadAxisFile();
+                return _ranges;
             }
         }
         float[] _ranges;
@@ -199,11 +193,10 @@ namespace ESME.Scenarios
         [NotMapped]
         public float[] Depths
         {
-            get { return _depths ?? (_depths = DepthAxisBlob.ToArray()); }
-            set
+            get
             {
-                _depths = value;
-                DepthAxisBlob = _depths.ToBlob();
+                if (_depths == null) ReadAxisFile();
+                return _depths;
             }
         }
         float[] _depths;
@@ -211,12 +204,7 @@ namespace ESME.Scenarios
         [NotMapped]
         public BottomProfilePoint[] BottomProfile
         {
-            get { return _bottomProfile ?? (_bottomProfile = BottomProfileBlob.ToBottomProfileArray()); }
-            set
-            {
-                _bottomProfile = value;
-                BottomProfileBlob = _bottomProfile.ToBlob();
-            }
+            get { return _bottomProfile ?? (_bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty")); }
         }
         BottomProfilePoint[] _bottomProfile;
 
@@ -230,11 +218,10 @@ namespace ESME.Scenarios
         [NotMapped]
         public float[] MinimumTransmissionLossValues
         {
-            get { return _minimumTransmissionLossValues ?? (_minimumTransmissionLossValues = MinimumTransmissionLossBlob.ToArray()); }
-            set
+            get
             {
-                _minimumTransmissionLossValues = value;
-                MinimumTransmissionLossBlob = _minimumTransmissionLossValues.ToBlob();
+                if (_minimumTransmissionLossValues == null) ReadAxisFile();
+                return _minimumTransmissionLossValues;
             }
         }
         float[] _minimumTransmissionLossValues;
@@ -242,11 +229,10 @@ namespace ESME.Scenarios
         [NotMapped]
         public float[] MaximumTransmissionLossValues
         {
-            get { return _maximumTransmissionLossValues ?? (_maximumTransmissionLossValues = MaximumTransmissionLossBlob.ToArray()); }
-            set
+            get
             {
-                _maximumTransmissionLossValues = value;
-                MaximumTransmissionLossBlob = _maximumTransmissionLossValues.ToBlob();
+                if (_maximumTransmissionLossValues == null) ReadAxisFile();
+                return _maximumTransmissionLossValues;
             }
         }
         float[] _maximumTransmissionLossValues;
@@ -254,13 +240,72 @@ namespace ESME.Scenarios
         [NotMapped]
         public float[] MeanTransmissionLossValues
         {
-            get { return _meanTransmissionLossValues ?? (_meanTransmissionLossValues = MeanTransmissionLossBlob.ToArray()); }
-            set
+            get
             {
-                _meanTransmissionLossValues = value;
-                MeanTransmissionLossBlob = _meanTransmissionLossValues.ToBlob();
+                if (_meanTransmissionLossValues == null) ReadAxisFile();
+                return _meanTransmissionLossValues;
             }
         }
         float[] _meanTransmissionLossValues;
+
+        public void ReadBellhopShadeFile()
+        {
+            ExtractAxisData(new TransmissionLossRadial((float)Bearing, new BellhopOutput(BasePath + ".shd")));
+        }
+
+        public void ExtractAxisData(TransmissionLossRadial transmissionLoss)
+        {
+            _ranges = transmissionLoss.Ranges.ToArray();
+            _depths = transmissionLoss.Depths.ToArray();
+            IsCalculated = true;
+            _bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty");
+            _minimumTransmissionLossValues = new float[Ranges.Length];
+            _maximumTransmissionLossValues = new float[Ranges.Length];
+            _meanTransmissionLossValues = new float[Ranges.Length];
+            for (var rangeIndex = 0; rangeIndex < Ranges.Length; rangeIndex++)
+            {
+                MinimumTransmissionLossValues[rangeIndex] = transmissionLoss[rangeIndex].Min();
+                MaximumTransmissionLossValues[rangeIndex] = transmissionLoss[rangeIndex].Max();
+                MeanTransmissionLossValues[rangeIndex] = transmissionLoss[rangeIndex].Average();
+            }
+            WriteAxisFile();
+        }
+
+        void WriteAxisFile()
+        {
+            using (var writer = new BinaryWriter(new FileStream(BasePath + ".axs", FileMode.Create)))
+            {
+                writer.Write(_ranges.Length);
+                foreach (var range in _ranges) writer.Write(range);
+                writer.Write(_depths.Length);
+                foreach (var depth in _depths) writer.Write(depth);
+                writer.Write(_minimumTransmissionLossValues.Length);
+                foreach (var tl in _minimumTransmissionLossValues) writer.Write(tl);
+                writer.Write(_maximumTransmissionLossValues.Length);
+                foreach (var tl in _maximumTransmissionLossValues) writer.Write(tl);
+                writer.Write(_meanTransmissionLossValues.Length);
+                foreach (var tl in _meanTransmissionLossValues) writer.Write(tl);
+            }
+        }
+
+        void ReadAxisFile()
+        {
+            using (var reader = new BinaryReader(new FileStream(BasePath + ".axs", FileMode.Open)))
+            {
+                _ranges = new float[reader.ReadInt32()];
+                for (var i = 0; i < _ranges.Length; i++) _ranges[i] = reader.ReadSingle();
+                _depths = new float[reader.ReadInt32()];
+                for (var i = 0; i < _depths.Length; i++) _depths[i] = reader.ReadSingle();
+
+                _minimumTransmissionLossValues = new float[reader.ReadInt32()];
+                for (var i = 0; i < _minimumTransmissionLossValues.Length; i++) _minimumTransmissionLossValues[i] = reader.ReadSingle();
+
+                _maximumTransmissionLossValues = new float[reader.ReadInt32()];
+                for (var i = 0; i < _maximumTransmissionLossValues.Length; i++) _maximumTransmissionLossValues[i] = reader.ReadSingle();
+
+                _meanTransmissionLossValues = new float[reader.ReadInt32()];
+                for (var i = 0; i < _meanTransmissionLossValues.Length; i++) _meanTransmissionLossValues[i] = reader.ReadSingle();
+            }
+        }
     }
 }

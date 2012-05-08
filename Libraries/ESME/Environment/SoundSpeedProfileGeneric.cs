@@ -85,7 +85,8 @@ namespace ESME.Environment
         /// <param name="newMaxDepth"></param>
         public SoundSpeedProfile Extend(float newMaxDepth)
         {
-            if (newMaxDepth < MaxDepth) throw new ApplicationException(string.Format("SoundSpeedProfile.Extend: Given depth {0} is less than current maximum depth {1}", newMaxDepth, MaxDepth));
+            //if (newMaxDepth < MaxDepth) throw new ApplicationException(string.Format("SoundSpeedProfile.Extend: Given depth {0} is less than current maximum depth {1}", newMaxDepth, MaxDepth));
+            if (newMaxDepth < MaxDepth) return new SoundSpeedProfile(this);
             var result = new SoundSpeedProfile(this);
             //System.Diagnostics.Debug.WriteLine("Extrapolating SSP {0} from data depth of {1}m to bathymetry depth of {2}m", this, MaxDepth, newMaxDepth);
             //System.Diagnostics.Debug.WriteLine("  Initial depth vector length: {0}", Depths.Length);

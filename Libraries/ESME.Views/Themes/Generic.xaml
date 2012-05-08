@@ -8,15 +8,6 @@
     <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed"
                                       FalseValue="Collapsed"
                                       TrueValue="Visible" />
-    <DataTemplate x:Key="EditableLayerNameTemplate" DataType="{x:Type Controls:LayerControl}">
-        <TextBox Text="{Binding LayerName}" />
-    </DataTemplate>
-    <DataTemplate x:Key="NonEditableLayerNameTemplate" DataType="{x:Type Controls:LayerControl}">
-        <TextBlock Text="{Binding LayerName}" />
-    </DataTemplate>
-    <Controls:IsLayerNameEditableTemplateSelector x:Key="IsLayerNameEditableTemplateSelector"
-                                                  FalseTemplate="{StaticResource NonEditableLayerNameTemplate}"
-                                                  TrueTemplate="{StaticResource EditableLayerNameTemplate}" />
     <Style TargetType="{x:Type Controls:ImageToggleButton}">
         <Setter Property="Template">
             <Setter.Value>
@@ -110,6 +101,7 @@
                                                   Grid.Row="0"
                                                   Grid.Column="2"
                                                   Content="{TemplateBinding LayerNameContentControl}" />
+                                <!-- 
                                 <ContentPresenter x:Name="ContextControls"
                                                   Grid.Row="1"
                                                   Grid.Column="2"
@@ -117,6 +109,7 @@
                                                   Visibility="{Binding Path=IsSelected,
                                                                        RelativeSource={RelativeSource TemplatedParent},
                                                                        Converter={StaticResource TrueVisibleFalseCollapsed}}" />
+                                -->
                             </Grid>
                         </StackPanel>
                     </Border>

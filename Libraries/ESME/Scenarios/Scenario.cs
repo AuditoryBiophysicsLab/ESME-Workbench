@@ -192,6 +192,7 @@ namespace ESME.Scenarios
 
         [NotMapped] public static IMasterDatabaseService Database { get; set; }
         [NotMapped] public static EnvironmentalCacheService Cache { get; set; }
+        [NotMapped] public object LayerControl { get; set; }
 
         public void CreateMapLayers()
         {
