@@ -123,6 +123,13 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _viewTransmissionLoss;
         #endregion
 
+        #region DeleteTransmissionLossCommand
+        public SimpleCommand<object, EventToCommandArgs> DeleteTransmissionLossCommand { get { return _deleteTransmissionLoss ?? (_deleteTransmissionLoss = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteTransmissionLoss, this))); } }
+        SimpleCommand<object, EventToCommandArgs> _deleteTransmissionLoss;
+
+       
+        #endregion
+
         [Affects("IsValid")]
         [NotMapped]
         public string ValidationErrorText

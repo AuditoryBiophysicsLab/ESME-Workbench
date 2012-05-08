@@ -39,6 +39,7 @@ namespace ESME
         public const string SetTreeRoots = "SetTreeRootsMessage";
         
         public const string ViewTransmissionLoss = "ViewTransmissionLossMessage";
+        public const string DeleteTransmissionLoss = "DeleteTransmissionLossMessage";
 
         public const string ShowTransmissionLossQueueView = "ShowTransmissionLossQueueViewMessage";
 

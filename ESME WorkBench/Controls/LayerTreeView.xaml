@@ -118,6 +118,11 @@
                             <WPF:EventToCommandTrigger Command="{Binding ViewTransmissionLossCommand}" CommandParameter="{Binding}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
+                    <Controls:LayerControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding DeleteTransmissionLossCommand}" Header="Remove this transmission loss" />
+                        </ContextMenu>
+                    </Controls:LayerControl.ContextMenu>
                 </Controls:LayerControl>
             </DataTemplate>
             <DataTemplate DataType="{x:Type Scenarios:AnalysisPoint}">
