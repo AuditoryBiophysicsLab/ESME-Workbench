@@ -64,6 +64,15 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _viewAnalysisPoint;
         #endregion
 
+        #region DeleteAnalysisPointCommand
+        public SimpleCommand<object, EventToCommandArgs> DeleteAnalysisPointCommand { get { return _deleteAnalysisPoint ?? (_deleteAnalysisPoint = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteAnalysisPoint, this))); } }
+        SimpleCommand<object, EventToCommandArgs> _deleteAnalysisPoint;
+        #endregion
+        public void Delete()
+        {
+            foreach (var tl in TransmissionLosses.ToList()) tl.Delete();
+            if (Scenario.AnalysisPoints.Contains(this)) Scenario.AnalysisPoints.Remove(this);
+        }
     }
 
     [NotifyPropertyChanged]
@@ -148,6 +157,7 @@ namespace ESME.Scenarios
         public void Delete()
         {
             foreach (var radial in Radials.ToList()) radial.Delete();
+            Mode.TransmissionLosses.Remove(this);
             AnalysisPoint.TransmissionLosses.Remove(this);
             if (AnalysisPoint.TransmissionLosses.Count == 0) AnalysisPoint.Scenario.AnalysisPoints.Remove(AnalysisPoint);
         }

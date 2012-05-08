@@ -105,6 +105,12 @@ namespace ESMEWorkbench.ViewModels.Main
             Database.Add(scenario, true);
         }
         #endregion
+        [MediatorMessageSink(MediatorMessage.DeleteAnalysisPoint), UsedImplicitly]
+        void DeleteAnalysisPoint(AnalysisPoint analysisPoint)
+        {
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete this analysis point \"{0}\"?", analysisPoint.Geo), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            analysisPoint.Delete();
+        }
 
         [MediatorMessageSink(MediatorMessage.AddPlatform), UsedImplicitly]
         void AddPlatform(Scenario scenario)

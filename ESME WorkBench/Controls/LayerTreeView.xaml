@@ -108,7 +108,8 @@
                 <Controls:LayerControl IsChecked="{Binding IsChecked}" IsMapLayer="False" LayerName="Sediment" />
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Tree:AnalysisPointsNode}" ItemsSource="{Binding Scenario.AnalysisPoints}">
-                <Controls:LayerControl IsMapLayer="False" LayerName="Analysis Points" />
+                <Controls:LayerControl IsMapLayer="False" LayerName="Analysis Points" >
+                </Controls:LayerControl>
             </HierarchicalDataTemplate>
             <DataTemplate DataType="{x:Type Scenarios:TransmissionLoss}">
                 <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
@@ -126,6 +127,11 @@
                             <WPF:EventToCommandTrigger Command="{Binding ViewAnalysisPointCommand}" CommandParameter="{Binding}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
+                    <Controls:LayerControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding DeleteAnalysisPointCommand}" Header="Remove this analysis point" />
+                        </ContextMenu>
+                    </Controls:LayerControl.ContextMenu>
                 </Controls:LayerControl>
             </DataTemplate>
             <DataTemplate DataType="{x:Type Locations:EnvironmentalDataSet}">
