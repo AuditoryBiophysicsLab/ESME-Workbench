@@ -144,6 +144,7 @@ namespace ESME.TransmissionLoss
                                                   .Include(s => s.SoundSpeed)
                                                   .Include(s => s.Bathymetry)
                                                   .Include(s => s.Sediment)
+                                                  where s.Guid == radial.TransmissionLoss.AnalysisPoint.Scenario.Guid
                                               select s).Single();
                 var mode = radial.TransmissionLoss.Mode;
                 var platform = mode.Source.Platform;

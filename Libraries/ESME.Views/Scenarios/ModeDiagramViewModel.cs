@@ -1,6 +1,4 @@
-﻿using System.Windows.Media;
-using System.Windows.Shapes;
-using ESME.Scenarios;
+﻿using ESME.Scenarios;
 using HRC.Aspects;
 using HRC.ViewModels;
 using HRC.WPF;
@@ -16,7 +14,8 @@ namespace ESME.Views.Scenarios
         public double Depth { get; set; }
 
         Mode _mode;
-        [Affects("RangeMin","RangeMax","DepthMin","DepthMax") ]public Mode Mode
+        [Affects("RangeMin", "RangeMax", "DepthMin", "DepthMax")]
+        public Mode Mode
         {
             get { return _mode; }
             set
