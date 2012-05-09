@@ -3,20 +3,33 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Controls="clr-namespace:ESME.Views.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:l="clr-namespace:ESME.Views.Scenarios"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:NAVO="clr-namespace:ESME.Environment.NAVO;assembly=ESME" Title="Create Scenario"
+        xmlns:NAVO="clr-namespace:ESME.Environment.NAVO;assembly=ESME"
+        xmlns:Properties="clr-namespace:ESME.Views.Properties"
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+        Title="Create Scenario"
         d:DataContext="{d:DesignInstance l:CreateScenarioViewModel}"
         Grid.IsSharedSizeScope="True"
+        Left="{Binding Source={x:Static Properties:Settings.Default},
+                       Path=CreateScenarioLeft,
+                       Mode=TwoWay}"
         SizeToContent="WidthAndHeight"
+        Top="{Binding Source={x:Static Properties:Settings.Default},
+                      Path=CreateScenarioTop,
+                      Mode=TwoWay}"
+        WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <Window.Resources>
-        <Style x:Key="ValidationStyle" TargetType="{x:Type Control}" >
+        <Style x:Key="ValidationStyle" TargetType="{x:Type Control}">
             <Setter Property="Validation.ErrorTemplate">
                 <Setter.Value>
                     <ControlTemplate>
                         <DockPanel LastChildFill="True">
-                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
+                            <Border BorderBrush="Red"
+                                    BorderThickness="1"
+                                    DockPanel.Dock="Left">
                                 <AdornedElementPlaceholder />
                             </Border>
                         </DockPanel>
@@ -30,8 +43,15 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <DockPanel>
-        <Border BorderThickness="0" DockPanel.Dock="Top" Padding="5">
+        <Border BorderThickness="0"
+                DockPanel.Dock="Top"
+                Padding="5">
             <StackPanel Orientation="Vertical">
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -43,7 +63,14 @@
                                VerticalAlignment="Center"
                                Text="Scenario name"
                                TextAlignment="Right" />
-                    <TextBox Grid.Column="1" ToolTip="This field is required" Style="{StaticResource ValidationStyle}" Text="{Binding ScenarioName, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Grid.Column="1"
+                             Style="{StaticResource ValidationStyle}"
+                             Text="{Binding ScenarioName,
+                                            ValidatesOnDataErrors=True,
+                                            ValidatesOnExceptions=True,
+                                            NotifyOnValidationError=True,
+                                            UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="This field is required" />
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -71,9 +98,9 @@
                                Text="Time Period"
                                TextAlignment="Right" />
                     <ComboBox Grid.Column="1"
-                              ToolTip="This field is required"
                               ItemsSource="{x:Static NAVO:NAVOConfiguration.AllTimePeriods}"
-                              SelectedItem="{Binding TimePeriod}" />
+                              SelectedItem="{Binding TimePeriod}"
+                              ToolTip="This field is required" />
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -85,22 +112,46 @@
                                VerticalAlignment="Center"
                                Text="Comments"
                                TextAlignment="Right" />
-                    <TextBox Grid.Column="1" TextWrapping="Wrap" AcceptsReturn="True" Height="Auto" Text="{Binding Comments}" ToolTip="This field is optional"/>
+                    <TextBox Grid.Column="1"
+                             Height="Auto"
+                             AcceptsReturn="True"
+                             Text="{Binding Comments}"
+                             TextWrapping="Wrap"
+                             ToolTip="This field is optional" />
                 </Grid>
             </StackPanel>
         </Border>
-        <GroupBox DockPanel.Dock="Top" Margin="0 10 0 0" Header="Environmental Data Sources" IsEnabled="{Binding IsValid}">
-            <StackPanel Margin="5" DockPanel.Dock="Left" Orientation="Vertical">
-                <Controls:PluginSelector Grid.Row="0" ItemsSource="{Binding EnvironmentDataSourceViews[Wind]}" PluginTypeName="Wind" SelectedItem="{Binding SelectedPlugins[Wind]}" />
+        <GroupBox Margin="0 10 0 0"
+                  DockPanel.Dock="Top"
+                  Header="Environmental Data Sources"
+                  IsEnabled="{Binding IsValid}">
+            <StackPanel Margin="5"
+                        DockPanel.Dock="Left"
+                        Orientation="Vertical">
+                <Controls:PluginSelector Grid.Row="0"
+                                         ItemsSource="{Binding EnvironmentDataSourceViews[Wind]}"
+                                         PluginTypeName="Wind"
+                                         SelectedItem="{Binding SelectedPlugins[Wind]}" />
                 <Separator Margin="0 5 0 10" />
-                <Controls:PluginSelector Grid.Row="1" ItemsSource="{Binding EnvironmentDataSourceViews[SoundSpeed]}" PluginTypeName="Sound Speed" SelectedItem="{Binding SelectedPlugins[SoundSpeed]}" />
+                <Controls:PluginSelector Grid.Row="1"
+                                         ItemsSource="{Binding EnvironmentDataSourceViews[SoundSpeed]}"
+                                         PluginTypeName="Sound Speed"
+                                         SelectedItem="{Binding SelectedPlugins[SoundSpeed]}" />
                 <Separator Margin="0 5 0 10" />
-                <Controls:PluginSelector Grid.Row="2" ItemsSource="{Binding EnvironmentDataSourceViews[Sediment]}" PluginTypeName="Sediment" SelectedItem="{Binding SelectedPlugins[Sediment]}" />
+                <Controls:PluginSelector Grid.Row="2"
+                                         ItemsSource="{Binding EnvironmentDataSourceViews[Sediment]}"
+                                         PluginTypeName="Sediment"
+                                         SelectedItem="{Binding SelectedPlugins[Sediment]}" />
                 <Separator Margin="0 5 0 10" />
-                <Controls:PluginSelector Grid.Row="3" ItemsSource="{Binding EnvironmentDataSourceViews[Bathymetry]}" PluginTypeName="Bathymetry" SelectedItem="{Binding SelectedPlugins[Bathymetry]}" />
+                <Controls:PluginSelector Grid.Row="3"
+                                         ItemsSource="{Binding EnvironmentDataSourceViews[Bathymetry]}"
+                                         PluginTypeName="Bathymetry"
+                                         SelectedItem="{Binding SelectedPlugins[Bathymetry]}" />
             </StackPanel>
         </GroupBox>
-        <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
+        <StackPanel HorizontalAlignment="Right"
+                    DockPanel.Dock="Bottom"
+                    Orientation="Horizontal">
             <Button Width="75"
                     Margin="5"
                     Command="{Binding OkCommand}"

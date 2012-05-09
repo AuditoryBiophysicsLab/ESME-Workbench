@@ -35,5 +35,17 @@
     <Setting Name="SSPWidth" Type="System.Double" Scope="User">
       <Value Profile="(Default)">300</Value>
     </Setting>
+    <Setting Name="CreateLocationTop" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="CreateLocationLeft" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="CreateScenarioTop" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="CreateScenarioLeft" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

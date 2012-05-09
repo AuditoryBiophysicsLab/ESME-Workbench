@@ -154,5 +154,53 @@ namespace ESME.Views.Properties {
                 this["SSPWidth"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double CreateLocationTop {
+            get {
+                return ((double)(this["CreateLocationTop"]));
+            }
+            set {
+                this["CreateLocationTop"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double CreateLocationLeft {
+            get {
+                return ((double)(this["CreateLocationLeft"]));
+            }
+            set {
+                this["CreateLocationLeft"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double CreateScenarioTop {
+            get {
+                return ((double)(this["CreateScenarioTop"]));
+            }
+            set {
+                this["CreateScenarioTop"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double CreateScenarioLeft {
+            get {
+                return ((double)(this["CreateScenarioLeft"]));
+            }
+            set {
+                this["CreateScenarioLeft"] = value;
+            }
+        }
     }
 }

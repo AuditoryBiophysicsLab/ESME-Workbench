@@ -50,6 +50,11 @@ namespace ESME.Views.Locations
         SimpleCommand<object, object> _cancel;
 
         #endregion
+
+        #region ViewClosingCommand
+        public SimpleCommand<object, object> ViewClosingCommand { get { return _viewClosing ?? (_viewClosing = new SimpleCommand<object, object>(o=>Properties.Settings.Default.Save())); } }
+        SimpleCommand<object, object> _viewClosing;
+        #endregion
         #endregion
     }
 }
