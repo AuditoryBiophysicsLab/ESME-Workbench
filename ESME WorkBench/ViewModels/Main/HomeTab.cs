@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -111,6 +112,36 @@ namespace ESMEWorkbench.ViewModels.Main
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete this analysis point \"{0}\"?", analysisPoint.Geo), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             analysisPoint.Delete();
         }
+        [MediatorMessageSink(MediatorMessage.DeleteAllAnalysisPoints)]
+        void DeleteAllAnalysisPoints(bool dummy)
+        {
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete all analysis points from the scenario {0} ?",Scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            foreach (var analysisPoint in Scenario.AnalysisPoints.ToList())
+                analysisPoint.Delete();
+        }
+
+        [MediatorMessageSink(MediatorMessage.RecalculateAnalysisPoint),UsedImplicitly]
+        void RecalculateAnalysisPoint(AnalysisPoint analysisPoint)
+        {
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to recalculate this analysis point \"{0}\"?", analysisPoint.Geo), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            foreach (var radial in analysisPoint.TransmissionLosses.SelectMany(tl => tl.Radials)) {
+                radial.IsCalculated = false;
+                File.Delete(radial.BasePath+".shd");
+                _transmissionLoss.Add(radial);
+            }
+        }
+
+        [MediatorMessageSink(MediatorMessage.RecalculateAllAnalysisPoints)]
+        void RecalculateAllAnalysisPoints(bool dummy)
+        {
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to recalculate all analysis points from the scenario {0} ?", Scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            foreach (var radial in from point in Scenario.AnalysisPoints from transmissionLoss in point.TransmissionLosses from radial in transmissionLoss.Radials select radial) {
+                radial.IsCalculated = false;
+                File.Delete(radial.BasePath + ".shd");
+                _transmissionLoss.Add(radial);
+            }
+        }
+
         [MediatorMessageSink(MediatorMessage.DeleteTransmissionLoss),UsedImplicitly]
         void DeleteTransmissionLoss(ESME.Scenarios.TransmissionLoss transmissionLoss)
         {

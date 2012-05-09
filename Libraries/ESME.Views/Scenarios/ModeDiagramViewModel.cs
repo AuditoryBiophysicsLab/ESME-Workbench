@@ -11,7 +11,6 @@ namespace ESME.Views.Scenarios
         public double RangeMax { get; set; }
         public double DepthMax { get; set; }
         public double DepthMin { get; set; }
-        public double Depth { get; set; }
 
         Mode _mode;
         [Affects("RangeMin", "RangeMax", "DepthMin", "DepthMax")]

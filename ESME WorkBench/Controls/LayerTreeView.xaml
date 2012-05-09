@@ -115,6 +115,12 @@
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Tree:AnalysisPointsNode}" ItemsSource="{Binding Scenario.AnalysisPoints}">
                 <Controls:LayerControl IsMapLayer="False" LayerName="Analysis Points" >
+                    <Controls:LayerControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding DeleteAllCommand}" Header="Remove all analysis points"/>
+                            <MenuItem Command="{Binding RecalculateAllCommand}" Header="Recalculate all analysis points"/>
+                        </ContextMenu>
+                    </Controls:LayerControl.ContextMenu>
                 </Controls:LayerControl>
             </HierarchicalDataTemplate>
             <DataTemplate DataType="{x:Type Scenarios:TransmissionLoss}">
@@ -141,6 +147,7 @@
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding DeleteAnalysisPointCommand}" Header="Remove this analysis point" />
+                            <MenuItem Command="{Binding RecalculateAnalysisPointCommand}" Header="Recalculate this analysis point" />
                         </ContextMenu>
                     </Controls:LayerControl.ContextMenu>
                 </Controls:LayerControl>

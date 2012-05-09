@@ -79,6 +79,11 @@ namespace ESME.Scenarios
         public SimpleCommand<object, EventToCommandArgs> DeleteAnalysisPointCommand { get { return _deleteAnalysisPoint ?? (_deleteAnalysisPoint = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteAnalysisPoint, this))); } }
         SimpleCommand<object, EventToCommandArgs> _deleteAnalysisPoint;
         #endregion
+
+        #region RecalculateAnalysisPointCommand
+        public SimpleCommand<object, EventToCommandArgs> RecalculateAnalysisPointCommand { get { return _recalculateAnalysisPoint ?? (_recalculateAnalysisPoint = new SimpleCommand<object, EventToCommandArgs>(o=>MediatorMessage.Send(MediatorMessage.RecalculateAnalysisPoint,this))); } }
+        SimpleCommand<object, EventToCommandArgs> _recalculateAnalysisPoint;
+        #endregion
         public void Delete()
         {
             RemoveMapLayers();

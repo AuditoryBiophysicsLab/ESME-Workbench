@@ -14,6 +14,9 @@ namespace ESME
         public const string DeleteAnalysisPoint = "DeleteAnalysisPointMessage";
         public const string ViewAnalysisPoint = "ViewAnalysisPointMessage";
         public const string CalculateAnalysisPoint = "CalculateAnalysisPointMessage";
+        public const string DeleteAllAnalysisPoints = "DeleteAllAnalysisPointsMessage";
+        public const string RecalculateAllAnalysisPoints = "RecalculateAllAnalysisPointsMessage";
+        public const string RecalculateAnalysisPoint = "RecalculateAnalysisPointMessage";
 
         public const string ScenarioBoundToLayer = "ScenarioBoundToLayerMessage";
 
