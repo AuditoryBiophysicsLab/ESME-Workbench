@@ -22,11 +22,11 @@ namespace ESME.Tests.Environment
             Assert.AreEqual(0, _list.Count);
             Assert.Throws(typeof(ArgumentOutOfRangeException), () => Debug.WriteLine(_list[0]));
             Assert.Throws(typeof(IndexOutOfRangeException), () => Debug.WriteLine(_list[0, 0]));
-            Assert.Throws(typeof(ArgumentOutOfRangeException), () => Debug.WriteLine(_list.GetNearestPoint(new Geo(0, 0))));
-            Assert.Throws(typeof(ArgumentOutOfRangeException), () => Debug.WriteLine(_list.GetExactPoint(0, 0)));
-            Geo result;
-            Assert.IsFalse(_list.TryGetExactPoint(0, 0, out result));
-            Assert.IsFalse(_list.TryGetNearestPoint(0, 0, out result));
+            Assert.Throws(typeof(ArgumentOutOfRangeException), () => Debug.WriteLine(_list.GetNearestPointAsync(new Geo(0, 0))));
+            Assert.Throws(typeof(ArgumentOutOfRangeException), () => Debug.WriteLine(_list.GetExactPointAsync(0, 0)));
+            //Geo result;
+            //Assert.IsFalse(_list.TryGetExactPoint(0, 0, out result));
+            //Assert.IsFalse(_list.TryGetNearestPoint(0, 0, out result));
         }
 
 
@@ -34,32 +34,32 @@ namespace ESME.Tests.Environment
         public void OneEntry()
         {
             var zeroZero = new Geo(0, 0);
-            var oneOne = new Geo(1, 1);
-            Geo result;
+            //var oneOne = new Geo(1, 1);
+            //Geo result;
 
             _list.Add(zeroZero);
             Assert.AreEqual(1, _list.Count);
             Assert.AreSame(zeroZero, _list[0]);
             Assert.AreSame(zeroZero, _list[0, 0]);
             
-            Assert.IsTrue(_list.TryGetNearestPoint(oneOne, out result));
-            Assert.AreSame(result, zeroZero);
+            //Assert.IsTrue(_list.TryGetNearestPoint(oneOne, out result));
+            //Assert.AreSame(result, zeroZero);
             
-            Assert.IsFalse(_list.TryGetNearestPoint(oneOne, out result, 100));
-            Assert.IsTrue(_list.TryGetNearestPoint(oneOne, out result, 200));
-            Assert.AreSame(result, zeroZero);
+            //Assert.IsFalse(_list.TryGetNearestPoint(oneOne, out result, 100));
+            //Assert.IsTrue(_list.TryGetNearestPoint(oneOne, out result, 200));
+            //Assert.AreSame(result, zeroZero);
             
-            Assert.IsTrue(_list.TryGetExactPoint(zeroZero, out result));
+            //Assert.IsTrue(_list.TryGetExactPoint(zeroZero, out result));
+            //Assert.AreSame(result, zeroZero);
+
+            var result = _list.GetExactPointAsync(0, 0).Result;
             Assert.AreSame(result, zeroZero);
 
-            result = _list.GetExactPoint(0, 0);
-            Assert.AreSame(result, zeroZero);
+            //result = _list.GetNearestPoint(0, 1);
+            //Assert.AreSame(result, zeroZero);
 
-            result = _list.GetNearestPoint(0, 1);
-            Assert.AreSame(result, zeroZero);
-
-            result = _list.GetNearestPoint(0, 0, 0);
-            Assert.AreSame(result, zeroZero);
+            //result = _list.GetNearestPoint(0, 0, 0);
+            //Assert.AreSame(result, zeroZero);
         }
 
         [Test]
@@ -142,28 +142,28 @@ namespace ESME.Tests.Environment
         {
             Geo result;
 
-            Assert.IsTrue(_list.TryGetNearestPoint(latitude, longitude, out result));
+            //Assert.IsTrue(_list.TryGetNearestPoint(new Geo(latitude, longitude), out result).Result);
+            //Assert.AreSame(result, nearest);
+
+            //Assert.IsTrue(_list.TryGetNearestPoint(new Geo(latitude, longitude), out result).Result);
+            //Assert.AreSame(result, nearest);
+
+            result = _list.GetNearestPointAsync(latitude, longitude).Result;
             Assert.AreSame(result, nearest);
 
-            Assert.IsTrue(_list.TryGetNearestPoint(new Geo(latitude, longitude), out result));
-            Assert.AreSame(result, nearest);
-
-            result = _list.GetNearestPoint(latitude, longitude);
-            Assert.AreSame(result, nearest);
-
-            result = _list.GetNearestPoint(new Geo(latitude, longitude));
+            result = _list.GetNearestPointAsync(new Geo(latitude, longitude)).Result;
             Assert.AreSame(result, nearest);
             
-            Assert.IsTrue(_list.TryGetExactPoint(nearest.Latitude, nearest.Longitude, out result));
-            Assert.AreSame(result, nearest);
+            //Assert.IsTrue(_list.TryGetExactPoint(nearest.Latitude, nearest.Longitude, out result));
+            //Assert.AreSame(result, nearest);
             
-            Assert.IsTrue(_list.TryGetExactPoint(nearest, out result));
+            //Assert.IsTrue(_list.TryGetExactPoint(nearest, out result));
+            //Assert.AreSame(result, nearest);
+
+            result = _list.GetExactPointAsync(nearest.Latitude, nearest.Longitude).Result;
             Assert.AreSame(result, nearest);
 
-            result = _list.GetExactPoint(nearest.Latitude, nearest.Longitude);
-            Assert.AreSame(result, nearest);
-
-            result = _list.GetExactPoint(nearest);
+            result = _list.GetExactPointAsync(nearest).Result;
             Assert.AreSame(result, nearest);
 
         }

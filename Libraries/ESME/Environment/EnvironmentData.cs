@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using C5;
-using HRC;
 using HRC.Collections;
 using HRC.LinqStatistics;
 using HRC.Navigation;
@@ -54,6 +54,7 @@ namespace ESME.Environment
         readonly List<T> _arrayList = new List<T>();
 
         public T this[int index] { get { return _arrayList[index]; } }
+        public bool IsFast2DLookupAvailable { get { return _twoDIndex != null; } }
 
         /// <summary>
         /// Returns the nearest point in the data set, optionally within a maximum distance from the requested point
@@ -62,7 +63,7 @@ namespace ESME.Environment
         /// <param name="maxDistance">The maximum distance, in kilometers, within which to find the nearest point.  
         /// Default value is double.NaN, which means any distance is acceptable</param>
         /// <returns>The nearest point that satisfies the distance criteria</returns>
-        public T GetNearestPoint(Geo location, double maxDistance = double.NaN)
+        public async Task<T> GetNearestPointAsync(Geo location, double maxDistance = double.NaN)
         {
             if (!double.IsNaN(maxDistance) && (maxDistance < 0)) throw new ArgumentOutOfRangeException("maxDistance", "Must be double.NaN or a non-negative value");
             var maxIndexRange = Math.Max(Latitudes.Count, Longitudes.Count);
@@ -80,7 +81,7 @@ namespace ESME.Environment
                 // Find the minimum range to search within the longitude axis, within the current search window
                 GetSearchRange(_longitudes, location.Longitude, out lonStartIndex, out lonEndIndex, searchWindow);
                 T matchingPoint;
-                if (_twoDIndex == null) Build2DIndex();
+                if (_twoDIndex == null) await Build2DIndexAsync();
                 for (var curLatIndex = latStartIndex; curLatIndex <= latEndIndex; curLatIndex++)
                 {
                     var lat = _latitudes[curLatIndex];
@@ -113,6 +114,21 @@ namespace ESME.Environment
             throw new ArgumentOutOfRangeException("location", "No matching data found, or data set is empty");
         }
 
+        public T GetNearestPoint(Geo location, double maxDistance = double.NaN)
+        {
+            var minDistance = double.MaxValue;
+            T nearestPoint = null;
+            foreach (var cur in _arrayList)
+            {
+                var curDistance = location.DistanceKilometers(cur);
+                if (curDistance >= minDistance) continue;
+                minDistance = curDistance;
+                nearestPoint = cur;
+            }
+            if (!double.IsNaN(maxDistance)) return minDistance <= maxDistance ? nearestPoint : null;
+            return nearestPoint;
+        }
+
         /// <summary>
         /// Returns the nearest point in the data set, optionally within a maximum distance from the requested point
         /// </summary>
@@ -121,40 +137,7 @@ namespace ESME.Environment
         /// <param name="maxDistance">The maximum distance, in kilometers, within which to find the nearest point.  
         /// Default value is double.NaN, which means any distance is acceptable</param>
         /// <returns>The nearest point that satisfies the distance criteria</returns>
-        public T GetNearestPoint(double latitude, double longitude, double maxDistance = double.NaN) { return GetNearestPoint(new Geo(latitude, longitude), maxDistance); }
-
-        /// <summary>
-        /// Tries to point in the data set that is nearest to a requested point, optionally within a distance constraint from the requested point.
-        /// </summary>
-        /// <param name="location">The location of interest</param>
-        /// <param name="result">The point in the data set closest to the requested point.  This value is only meaningful if the method returns true.</param>
-        /// <param name="maxDistance">The maximum distance, in kilometers, within which to find the nearest point.  
-        /// Default value is double.NaN, which means any distance is acceptable</param>
-        /// <returns>true if a point was found within the distance constraint, false otherwise</returns>
-        public bool TryGetNearestPoint(Geo location, out T result, double maxDistance = double.NaN)
-        {
-            result = default(T);
-            try
-            {
-                result = GetNearestPoint(location, maxDistance);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Tries to point in the data set that is nearest to a requested point, optionally within a distance constraint from the requested point.
-        /// </summary>
-        /// <param name="latitude">The latitude of the requested point</param>
-        /// <param name="longitude">The longitude of the requested point</param>
-        /// <param name="result">The point in the data set closest to the requested point.  This value is only meaningful if the method returns true.</param>
-        /// <param name="maxDistance">The maximum distance, in kilometers, within which to find the nearest point.  
-        /// Default value is double.NaN, which means any distance is acceptable</param>
-        /// <returns>true if a point was found within the distance constraint, false otherwise</returns>
-        public bool TryGetNearestPoint(double latitude, double longitude, out T result, double maxDistance = double.NaN) { return TryGetNearestPoint(new Geo(latitude, longitude), out result, maxDistance); }
+        public Task<T> GetNearestPointAsync(double latitude, double longitude, double maxDistance = double.NaN) { return GetNearestPointAsync(new Geo(latitude, longitude), maxDistance); }
 
         /// <summary>
         /// Returns the requested point from the data set
@@ -162,11 +145,11 @@ namespace ESME.Environment
         /// <param name="latitude">The latitude of the requested point</param>
         /// <param name="longitude">The longitude of the requested point</param>
         /// <returns>The requested point</returns>
-        public T GetExactPoint(double latitude, double longitude)
+        public async Task<T> GetExactPointAsync(double latitude, double longitude)
         {
             if (_longitudes == null) CreateLatLonIndices();
             if (_latitudes == null || _longitudes == null) throw new InvalidOperationException("_latitudes or _longitudes is null");
-            if (_longitudeHashTable == null) CreateHashTables();
+            if (_longitudeHashTable == null) await CreateHashTablesAsync();
             if (_latitudeHashTable == null || _longitudeHashTable == null) throw new InvalidOperationException("One or both hash tables are null");
             longitude = Math.Round(longitude, _maxPrecision);
             latitude = Math.Round(latitude, _maxPrecision);
@@ -180,36 +163,7 @@ namespace ESME.Environment
         /// </summary>
         /// <param name="location">The location of the requested point</param>
         /// <returns>The requested point</returns>
-        public T GetExactPoint(Geo location) { return GetExactPoint(location.Latitude, location.Longitude); }
-
-        /// <summary>
-        /// Tries to retrieve the requested point from the data set
-        /// </summary>
-        /// <param name="latitude">The latitude of the requested point</param>
-        /// <param name="longitude">The longitude of the requested point</param>
-        /// <param name="result">The requested point.  This value is only meaningful if the function returns true</param>
-        /// <returns>true if the data set contains the requested point, false otherwise</returns>
-        public bool TryGetExactPoint(double latitude, double longitude, out T result)
-        {
-            result = null;
-            try
-            {
-                result = GetExactPoint(latitude, longitude);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Tries to retrieve the requested point from the data set
-        /// </summary>
-        /// <param name="location">The location of the requested point</param>
-        /// <param name="result">The requested point.  This value is only meaningful if the function returns true</param>
-        /// <returns>true if the data set contains the requested point, false otherwise</returns>
-        public bool TryGetExactPoint(Geo location, out T result) { return TryGetExactPoint(location.Latitude, location.Longitude, out result); }
+        public Task<T> GetExactPointAsync(Geo location) { return GetExactPointAsync(location.Latitude, location.Longitude); }
 
         /// <summary>
         /// Return a range of indices in a given list that contain a target value (does not to have to be an exact match), with an optional range of indices to search.
@@ -307,36 +261,46 @@ namespace ESME.Environment
         {
             get
             {
-                if (_twoDIndex == null) Build2DIndex();
+                if (_twoDIndex == null) Build2DIndexAsync().Wait();
                 if (_twoDIndex != null) return _twoDIndex[lonIndex, latIndex];
                 throw new InvalidOperationException("_twoDIndex should not be null at this point!");
             }
         }
         [NonSerialized] T[,] _twoDIndex;
         readonly object _2DindexLockObject = new object();
-        void Build2DIndex()
+        volatile Task _2DindexTask;
+        async Task<bool> Build2DIndexAsync()
         {
             //Debug.WriteLine("{0}: EnvironmentData: About to calculate 2D index", DateTime.Now);
-            if (_longitudeHashTable == null) CreateHashTables();
-            if (_latitudeHashTable == null || _longitudeHashTable == null) throw new ApplicationException("One or both hash tables are null");
-            lock (_2DindexLockObject)
+            if (_longitudeHashTable == null)
             {
-                if (_twoDIndex != null) return;
-                _twoDIndex = new T[Longitudes.Count, Latitudes.Count];
-                for (var curLatIndex = 0; curLatIndex < Latitudes.Count; curLatIndex++)
-                {
-                    var lat = Latitudes[curLatIndex];
-                    if (!_latitudeHashTable.Contains(lat)) continue;
-                    var curLatHashBucket = _latitudeHashTable[lat];
-                    for (var curLonIndex = 0; curLonIndex < Longitudes.Count; curLonIndex++)
-                    {
-                        var lon = Longitudes[curLonIndex];
-                        if (!curLatHashBucket.Contains(lon)) continue;
-                        _twoDIndex[curLonIndex, curLatIndex] = curLatHashBucket[lon];
-                    }
-                }
-                //Debug.WriteLine("{0}: EnvironmentData: 2D index calculation complete", DateTime.Now);
+                var hashTableTask = CreateHashTablesAsync();
+                await hashTableTask;
             }
+            if (_latitudeHashTable == null || _longitudeHashTable == null) throw new ApplicationException("One or both hash tables are null");
+            if (_2DindexTask == null)
+                lock (_2DindexLockObject)
+                    if (_2DindexTask == null)
+                        _2DindexTask = Task.Factory.StartNew(() =>
+                        {
+                            var twoDIndex = new T[Longitudes.Count, Latitudes.Count];
+                            for (var curLatIndex = 0; curLatIndex < Latitudes.Count; curLatIndex++)
+                            {
+                                var lat = Latitudes[curLatIndex];
+                                if (!_latitudeHashTable.Contains(lat)) continue;
+                                var curLatHashBucket = _latitudeHashTable[lat];
+                                for (var curLonIndex = 0; curLonIndex < Longitudes.Count; curLonIndex++)
+                                {
+                                    var lon = Longitudes[curLonIndex];
+                                    if (!curLatHashBucket.Contains(lon)) continue;
+                                    twoDIndex[curLonIndex, curLatIndex] = curLatHashBucket[lon];
+                                }
+                            }
+                            //Debug.WriteLine("{0}: EnvironmentData: 2D index calculation complete", DateTime.Now);
+                            _twoDIndex = twoDIndex;
+                        });
+            await _2DindexTask;
+            return true;
         }
 
         public static EnvironmentData<T> Decimate(EnvironmentData<T> source, int outputWidth, int outputHeight)
@@ -492,31 +456,34 @@ namespace ESME.Environment
         [NonSerialized] HashDictionary<double, HashDictionary<double, T>> _latitudeHashTable;
 
         readonly object _hashLockObject = new object();
-        void CreateHashTables()
+        volatile Task _hashCreationTask;
+        Task CreateHashTablesAsync()
         {
-            if (_longitudeHashTable != null) return;
-            lock (_hashLockObject)
-            {
-                if (_longitudeHashTable != null) return;
-                var latitudeHashTable = new HashDictionary<double, HashDictionary<double, T>>();
-                var longitudeHashTable = new HashDictionary<double, HashDictionary<double, T>>();
-                //foreach (var lat in Latitudes) _latitudeHashTable[lat] = new HashDictionary<double, T>();
-                //foreach (var lon in Longitudes) _longitudeHashTable[lon] = new HashDictionary<double, T>();
-                //Debug.WriteLine("{0}: EnvironmentData: About to populate hash table", DateTime.Now);
-                foreach (var item in _arrayList)
-                {
-                    if (item == null) continue;
-                    var lat = Math.Round(item.Latitude, _maxPrecision);
-                    var lon = Math.Round(item.Longitude, _maxPrecision);
-                    if (!latitudeHashTable.Keys.Contains(lat)) latitudeHashTable[lat] = new HashDictionary<double, T>();
-                    latitudeHashTable[lat][lon] = item;
-                    if (!longitudeHashTable.Keys.Contains(lon)) longitudeHashTable[lon] = new HashDictionary<double, T>();
-                    longitudeHashTable[lon][lat] = item;
-                }
-                //Debug.WriteLine("{0}: EnvironmentData: Hash table population complete", DateTime.Now);
-                _latitudeHashTable = latitudeHashTable;
-                _longitudeHashTable = longitudeHashTable;
-            }
+            if (_hashCreationTask == null)
+                lock (_hashLockObject)
+                    if (_hashCreationTask == null)
+                        _hashCreationTask = Task.Factory.StartNew(() =>
+                        {
+                            var latitudeHashTable = new HashDictionary<double, HashDictionary<double, T>>();
+                            var longitudeHashTable = new HashDictionary<double, HashDictionary<double, T>>();
+                            //foreach (var lat in Latitudes) _latitudeHashTable[lat] = new HashDictionary<double, T>();
+                            //foreach (var lon in Longitudes) _longitudeHashTable[lon] = new HashDictionary<double, T>();
+                            //Debug.WriteLine("{0}: EnvironmentData: About to populate hash table", DateTime.Now);
+                            foreach (var item in _arrayList)
+                            {
+                                if (item == null) continue;
+                                var lat = Math.Round(item.Latitude, _maxPrecision);
+                                var lon = Math.Round(item.Longitude, _maxPrecision);
+                                if (!latitudeHashTable.Keys.Contains(lat)) latitudeHashTable[lat] = new HashDictionary<double, T>();
+                                latitudeHashTable[lat][lon] = item;
+                                if (!longitudeHashTable.Keys.Contains(lon)) longitudeHashTable[lon] = new HashDictionary<double, T>();
+                                longitudeHashTable[lon][lat] = item;
+                            }
+                            //Debug.WriteLine("{0}: EnvironmentData: Hash table population complete", DateTime.Now);
+                            _latitudeHashTable = latitudeHashTable;
+                            _longitudeHashTable = longitudeHashTable;
+                        });
+            return _hashCreationTask;
         }
 
         readonly object _indexLockObject = new object();

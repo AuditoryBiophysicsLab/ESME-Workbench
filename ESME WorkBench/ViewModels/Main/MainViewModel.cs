@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -121,12 +122,9 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 var lat = mouseEarthCoordinate.Latitude;
                 var lon = mouseEarthCoordinate.Longitude;
-                if ((-90 > lat || lat > 90) || (-180 > lon || lon > 180))
-                {
-                    var northSouth = lat >= 0 ? "N" : "S";
-                    var eastWest = lon >= 0 ? "E" : "W";
-                    MouseLocationInfo = string.Format("Lat: {0:0.0000}{1} Lon: {2:0.0000}{3}", Math.Abs(lat), northSouth, Math.Abs(lon), eastWest);
-                }
+                var latInfo = Math.Abs(lat) <= 90 ? string.Format("Lat: {0:0.0000}{1}", Math.Abs(lat), lat >= 0 ? "N" : "S") : "Lat: ??";
+                var lonInfo = Math.Abs(lon) <= 180 ? string.Format("Lon: {0:0.0000}{1}", Math.Abs(lon), lon >= 0 ? "E" : "W") : "Lon: ??";
+                MouseLocationInfo = latInfo + " " + lonInfo;
             }
             else MouseLocationInfo = "Lat: N/A Lon: N/A";
             if (IsInAnalysisPointMode)
@@ -138,11 +136,26 @@ namespace ESMEWorkbench.ViewModels.Main
                     Cursor = Cursors.Arrow;
                 }
             }
-#if true
             if (Scenario != null && Scenario.Bathymetry != null && _cache.IsCached(Scenario.Bathymetry))
             {
-                MouseDepth = ((Bathymetry)_cache[Scenario.Bathymetry].Result).Samples.GetNearestPoint(MouseGeo).Data;
-                MouseDepthInfo = string.Format("Depth: {0:0.#}m", -MouseDepth);
+                if (_bathymetryTask == null)
+                {
+                    _bathymetryTask = Scenario.BathymetryData.Samples.GetNearestPointAsync(MouseGeo);
+                    if (!_bathymetryTask.IsCompleted)
+                    {
+                        MouseDepthInfo = string.Format("Depth: <loading>");
+                        _bathymetryTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                        {
+                            MouseDepthInfo = string.Format("Depth: <loaded>");
+                            _bathymetryTask = null;
+                        }));
+                    } else _bathymetryTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    {
+                        MouseDepth = t.Result.Data;
+                        MouseDepthInfo = string.Format("Depth: {0:0.#}m", -MouseDepth);
+                        _bathymetryTask = null;
+                    }));
+                }
             }
             else
             {
@@ -151,8 +164,24 @@ namespace ESMEWorkbench.ViewModels.Main
             }
             if (Scenario != null && Scenario.Wind != null && _cache.IsCached(Scenario.Wind))
             {
-                MouseWindSpeed = ((Wind)_cache[Scenario.Wind].Result)[Scenario.TimePeriod].EnvironmentData.GetNearestPoint(MouseGeo).Data;
-                MouseWindSpeedInfo = string.Format("Wind Speed: {0:0.#}m/s", MouseWindSpeed);
+                if (_windTask == null)
+                {
+                    _windTask = Scenario.WindData[Scenario.TimePeriod].EnvironmentData.GetNearestPointAsync(MouseGeo);
+                    if (!_windTask.IsCompleted)
+                    {
+                        MouseWindSpeedInfo = string.Format("Wind Speed: <loading>");
+                        _windTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                        {
+                            MouseWindSpeedInfo = string.Format("Wind Speed: <loaded>");
+                            _windTask = null;
+                        }));
+                    } else _windTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    {
+                        MouseWindSpeed = t.Result.Data;
+                        MouseWindSpeedInfo = string.Format("Wind Speed: {0:0.#}m/s", MouseWindSpeed);
+                        _windTask = null;
+                    }));
+                }
             }
             else
             {
@@ -161,28 +190,65 @@ namespace ESMEWorkbench.ViewModels.Main
             }
             if (Scenario != null && Scenario.SoundSpeed != null && _cache.IsCached(Scenario.SoundSpeed))
             {
-                MouseSoundSpeed = ((SoundSpeed)_cache[Scenario.SoundSpeed].Result)[Scenario.TimePeriod].EnvironmentData.GetNearestPoint(MouseGeo);
-                MouseSoundSpeedInfo = string.Format("Sound Speed: {0} samples", MouseSoundSpeed.Data.Count);
+                if (_soundSpeedTask == null)
+                {
+                    _soundSpeedTask = Scenario.SoundSpeedData[Scenario.TimePeriod].EnvironmentData.GetNearestPointAsync(MouseGeo);
+                    if (!_soundSpeedTask.IsCompleted)
+                    {
+                        MouseSoundSpeedInfo = string.Format("Sound Speed: <loading>");
+                        _soundSpeedTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                        {
+                            MouseSoundSpeedInfo = string.Format("Sound Speed: <loaded>");
+                            _soundSpeedTask = null;
+                        }));
+                    } else _soundSpeedTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    {
+                        MouseSoundSpeed = t.Result;
+                        MouseSoundSpeedInfo = string.Format("Sound Speed: {0} samples", MouseSoundSpeed.Data.Count);
+                        MapViewModel.MouseSoundSpeedProfile = MouseSoundSpeed;
+                        _soundSpeedTask = null;
+                    }));
+                }
             }
             else
             {
                 MouseSoundSpeed = null;
                 MouseSoundSpeedInfo = string.Format("Sound Speed: N/A");
+                MapViewModel.MouseSoundSpeedProfile = MouseSoundSpeed;
             }
-            MapViewModel.MouseSoundSpeedProfile = MouseSoundSpeed;
 
             if (Scenario != null && Scenario.Sediment != null && _cache.IsCached(Scenario.Sediment))
             {
-                MouseSediment = ((Sediment)_cache[Scenario.Sediment].Result).Samples.GetNearestPoint(MouseGeo);
-                MouseSedimentInfo = string.Format("Sediment: {0}", BottomSedimentTypeTable.SedimentNames[MouseSediment.Data.SampleValue]);
+                if (_sedimentTask == null)
+                {
+                    _sedimentTask = Scenario.SedimentData.Samples.GetNearestPointAsync(MouseGeo);
+                    if (!_sedimentTask.IsCompleted)
+                    {
+                        MouseSedimentInfo = string.Format("Sediment: <loading>");
+                        _sedimentTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                        {
+                            MouseSedimentInfo = string.Format("Sediment: <loaded>");
+                            _sedimentTask = null;
+                        }));
+                    } else _sedimentTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    {
+                        MouseSediment = t.Result;
+                        MouseSedimentInfo = string.Format("Sediment: {0}", BottomSedimentTypeTable.SedimentNames[MouseSediment.Data.SampleValue]);
+                        _sedimentTask = null;
+                    }));
+                }
             }
             else
             {
                 MouseSediment = null;
                 MouseSedimentInfo = string.Format("Sediment: N/A");
             }
-#endif
         }
+
+        Task<Geo<float>> _bathymetryTask;
+        Task<WindSample> _windTask;
+        Task<SoundSpeedProfile> _soundSpeedTask;
+        Task<SedimentSample> _sedimentTask;
 
         [Initialize("Cache: idle")] public string CacheActivity { get; set; }
         [Initialize("TL: idle")] public string TransmissionLossActivity { get; set; }

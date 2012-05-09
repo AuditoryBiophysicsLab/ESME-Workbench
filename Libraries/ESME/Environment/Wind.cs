@@ -141,9 +141,9 @@ namespace ESME.Environment
                 sourceList.Clear();
                 foreach (var source in requiredSources)
                 {
-                    WindSample sample;
                     // If a given source month contains data for the current location, add the data to the list
-                    if (source.EnvironmentData.TryGetExactPoint(location, out sample)) sourceList.Add(sample.Data);
+                    var sample = source.EnvironmentData.GetExactPointAsync(location).Result;
+                    if (sample != null) sourceList.Add(sample.Data);
                 }
                 // Set the resulting data to the average of the sample values that are present for the current location in the specified source months
                 if (sourceList.Count > 0) location.Data = sourceList.Average();

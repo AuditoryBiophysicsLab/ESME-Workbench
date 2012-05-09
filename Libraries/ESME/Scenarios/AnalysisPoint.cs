@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -35,9 +34,21 @@ namespace ESME.Scenarios
         [Initialize]
         public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
 
-        public void CreateMapLayers() { throw new NotImplementedException(); }
-        public void RemoveMapLayers() { throw new NotImplementedException(); }
+        public void CreateMapLayers()
+        {
+            if (LayerSettings == null) LayerSettings = new LayerSettings();
+            LayerSettings.PropertyChanged += LayerSettingsChanged;
+            foreach (var transmissionLoss in TransmissionLosses) transmissionLoss.CreateMapLayers();
+        }
 
+        public void RemoveMapLayers() { LayerSettings.PropertyChanged -= LayerSettingsChanged; }
+
+        void LayerSettingsChanged(object sender, PropertyChangedEventArgs args)
+        {
+            if (args.PropertyName != "IsChecked") return;
+            var checkState = LayerSettings.IsChecked;
+            foreach (var transmissionLoss in TransmissionLosses) transmissionLoss.LayerSettings.IsChecked = checkState;
+        }
         public bool IsValid
         {
             get { throw new NotImplementedException(); }
@@ -70,6 +81,7 @@ namespace ESME.Scenarios
         #endregion
         public void Delete()
         {
+            RemoveMapLayers();
             foreach (var tl in TransmissionLosses.ToList()) tl.Delete();
             if (Scenario.AnalysisPoints.Contains(this)) Scenario.AnalysisPoints.Remove(this);
         }
@@ -126,8 +138,6 @@ namespace ESME.Scenarios
         #region DeleteTransmissionLossCommand
         public SimpleCommand<object, EventToCommandArgs> DeleteTransmissionLossCommand { get { return _deleteTransmissionLoss ?? (_deleteTransmissionLoss = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteTransmissionLoss, this))); } }
         SimpleCommand<object, EventToCommandArgs> _deleteTransmissionLoss;
-
-       
         #endregion
 
         [Affects("IsValid")]
@@ -159,16 +169,16 @@ namespace ESME.Scenarios
             if (LayerSettings == null) LayerSettings = new LayerSettings();
             LayerSettings.MapLayerViewModel = mapLayer;
         }
-
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
+
         public void Delete()
         {
+            RemoveMapLayers();
             foreach (var radial in Radials.ToList()) radial.Delete();
             Mode.TransmissionLosses.Remove(this);
             AnalysisPoint.TransmissionLosses.Remove(this);
             if (AnalysisPoint.TransmissionLosses.Count == 0) AnalysisPoint.Scenario.AnalysisPoints.Remove(AnalysisPoint);
         }
-
     }
 
     [NotifyPropertyChanged]
@@ -279,13 +289,9 @@ namespace ESME.Scenarios
         }
         float[] _meanTransmissionLossValues;
 
-        public void ReadBellhopShadeFile()
+        public void ExtractAxisData(TransmissionLossRadial transmissionLoss = null)
         {
-            ExtractAxisData(new TransmissionLossRadial((float)Bearing, new BellhopOutput(BasePath + ".shd")));
-        }
-
-        public void ExtractAxisData(TransmissionLossRadial transmissionLoss)
-        {
+            if (transmissionLoss == null) transmissionLoss = new TransmissionLossRadial((float)Bearing, new BellhopOutput(BasePath + ".shd"));
             _ranges = transmissionLoss.Ranges.ToArray();
             _depths = transmissionLoss.Depths.ToArray();
             IsCalculated = true;
@@ -299,11 +305,6 @@ namespace ESME.Scenarios
                 MaximumTransmissionLossValues[rangeIndex] = transmissionLoss[rangeIndex].Max();
                 MeanTransmissionLossValues[rangeIndex] = transmissionLoss[rangeIndex].Average();
             }
-            WriteAxisFile();
-        }
-
-        void WriteAxisFile()
-        {
             using (var writer = new BinaryWriter(new FileStream(BasePath + ".axs", FileMode.Create)))
             {
                 writer.Write(_ranges.Length);
@@ -317,6 +318,7 @@ namespace ESME.Scenarios
                 writer.Write(_meanTransmissionLossValues.Length);
                 foreach (var tl in _meanTransmissionLossValues) writer.Write(tl);
             }
+            MediatorMessage.Send(MediatorMessage.TransmissionLossLayerChanged, TransmissionLoss);
         }
 
         void ReadAxisFile()

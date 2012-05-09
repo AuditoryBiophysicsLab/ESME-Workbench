@@ -1,17 +1,18 @@
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Windows.Media;
 using ESME.Database;
 using ESME.Locations;
 using ESME.Mapping;
 using HRC.Aspects;
+using HRC.ViewModels;
 using HRC.WPF;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Scenarios
 {
-    [NotifyPropertyChanged]
-    public class LayerSettings : IHaveGuid
+    public class LayerSettings : ViewModelBase, IHaveGuid
     {
         public static Random Random = new Random();
         public LayerSettings()

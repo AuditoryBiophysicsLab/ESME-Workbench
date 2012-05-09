@@ -140,9 +140,21 @@ namespace ESME.TransmissionLoss
                 var bathymetry = (Bathymetry)_cacheService[scenario.Bathymetry].Result;
                 var deepestPoint = bathymetry.DeepestPoint;
                 var deepestProfile = soundSpeed[scenario.TimePeriod].GetDeepestSSP(deepestPoint).Extend(deepestPoint.Data);
-                var windSample = wind[timePeriod].EnvironmentData.GetNearestPoint(radial.Segment.Center);
-                var soundSpeedProfile = soundSpeed[timePeriod].EnvironmentData.GetNearestPoint(radial.Segment.Center).Extend(deepestProfile);
-                var sedimentSample = sediment.Samples.GetNearestPoint(radial.Segment.Center);
+
+                var windData = wind[timePeriod].EnvironmentData;
+                var windSample = windData.IsFast2DLookupAvailable
+                                     ? windData.GetNearestPointAsync(radial.Segment.Center).Result
+                                     : windData.GetNearestPoint(radial.Segment.Center);
+
+                var soundSpeedData = soundSpeed[timePeriod].EnvironmentData;
+                var soundSpeedProfile = soundSpeedData.IsFast2DLookupAvailable
+                                            ? soundSpeedData.GetNearestPointAsync(radial.Segment.Center).Result.Extend(deepestProfile)
+                                            : soundSpeedData.GetNearestPoint(radial.Segment.Center).Extend(deepestProfile);
+
+                var sedimentSample = sediment.Samples.IsFast2DLookupAvailable
+                                         ? sediment.Samples.GetNearestPointAsync(radial.Segment.Center).Result
+                                         : sediment.Samples.GetNearestPoint(radial.Segment.Center);
+                
                 var bottomProfile = new BottomProfile(100, radial.Segment, bathymetry);
                 var sourceDepth = platform.Depth;
                 if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
@@ -214,7 +226,7 @@ namespace ESME.TransmissionLoss
                 bellhopProcess.BeginOutputReadLine();
                 while (!bellhopProcess.HasExited) Thread.Sleep(100);
                 radial.CalculationCompleted = DateTime.Now;
-                radial.ReadBellhopShadeFile();
+                radial.ExtractAxisData();
                 //lock (_databaseService.Context) _databaseService.Context.SaveChanges();
                 Debug.WriteLine("{0}: Finished calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}",
                                 DateTime.Now,

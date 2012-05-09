@@ -224,7 +224,9 @@ namespace ESME.Locations
             Context.LayerSettings.Add(analysisPoint.LayerSettings);
             if (analysisPoint.Scenario == null) throw new ScenarioException(string.Format("Scenario for analysis point at {0} was not specified", analysisPoint.Geo));
             Console.WriteLine("Adding analysis point at {0}", analysisPoint.Geo);
-            var depthAtAnalysisPoint = -bathymetry.Samples.GetNearestPoint(analysisPoint.Geo).Data;
+            var depthAtAnalysisPoint = bathymetry.Samples.IsFast2DLookupAvailable
+                                           ? -bathymetry.Samples.GetNearestPointAsync(analysisPoint.Geo).Result.Data
+                                           : -bathymetry.Samples.GetNearestPoint(analysisPoint.Geo).Data;
             foreach (var mode in analysisPoint.Scenario.GetAllModes())
             {
                 var sourceDepth = mode.Source.Platform.Depth;

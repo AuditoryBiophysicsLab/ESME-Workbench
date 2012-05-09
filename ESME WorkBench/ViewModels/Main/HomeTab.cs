@@ -117,6 +117,15 @@ namespace ESMEWorkbench.ViewModels.Main
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete this transmission loss \"{0}\"?", transmissionLoss.AnalysisPoint.Geo), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             transmissionLoss.Delete();
         }
+        [MediatorMessageSink(MediatorMessage.TransmissionLossLayerChanged), UsedImplicitly]
+        void TransmissionLossLayerChanged(ESME.Scenarios.TransmissionLoss transmissionLoss)
+        {
+            _dispatcher.InvokeInBackgroundIfRequired(() =>
+            {
+                transmissionLoss.RemoveMapLayers();
+                transmissionLoss.CreateMapLayers();
+            });
+        }
 
         [MediatorMessageSink(MediatorMessage.AddPlatform), UsedImplicitly]
         void AddPlatform(Scenario scenario)

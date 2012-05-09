@@ -208,10 +208,7 @@ namespace ESME.Scenarios
         public void CreateMapLayers()
         {
             if (Platforms != null) foreach (var platform in Platforms) platform.CreateMapLayers();
-            var transmissionLosses = (from tl in Database.Context.TransmissionLosses
-                                      where tl.AnalysisPoint.Scenario.Guid == Guid
-                                      select tl).ToList();
-            foreach (var transmissionLoss in transmissionLosses) transmissionLoss.CreateMapLayers();
+            foreach (var analysisPoint in AnalysisPoints) analysisPoint.CreateMapLayers();
         }
 
         public void RemoveMapLayers()

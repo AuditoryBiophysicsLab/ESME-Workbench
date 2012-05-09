@@ -40,6 +40,7 @@ namespace ESME
         
         public const string ViewTransmissionLoss = "ViewTransmissionLossMessage";
         public const string DeleteTransmissionLoss = "DeleteTransmissionLossMessage";
+        public const string TransmissionLossLayerChanged = "TransmissionLossLayerChangedMessage";
 
         public const string ShowTransmissionLossQueueView = "ShowTransmissionLossQueueViewMessage";
 
