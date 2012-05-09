@@ -107,7 +107,9 @@ namespace ESME.TransmissionLoss
                 switch (args.Action)
                 {
                     case NotifyCollectionChangedAction.Add:
-                        foreach (var radial in args.NewItems.Cast<Radial>().Where(radial => !File.Exists(radial.BasePath + ".shd"))) Add(radial);
+                        foreach (var radial in from Radial radial in args.NewItems
+                                               where !radial.IsCalculated && !File.Exists(radial.BasePath + ".shd")
+                                               select radial) Add(radial);
                         break;
                 }
             };
