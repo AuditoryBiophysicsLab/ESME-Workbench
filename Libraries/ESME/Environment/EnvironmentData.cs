@@ -38,7 +38,11 @@ namespace ESME.Environment
         {
             var result = new EnvironmentData<T>();
             var itemCount = reader.ReadInt32();
-            for (var i = 0; i < itemCount; i++) result._arrayList.Add(readFunc(reader));
+            for (var i = 0; i < itemCount; i++)
+            {
+                var item = readFunc(reader);
+                if (item != null) result._arrayList.Add(item);
+            }
             result.ClearHelperIndices();
             return result;
         }
@@ -66,6 +70,7 @@ namespace ESME.Environment
         public async Task<T> GetNearestPointAsync(Geo location, double maxDistance = double.NaN)
         {
             if (!double.IsNaN(maxDistance) && (maxDistance < 0)) throw new ArgumentOutOfRangeException("maxDistance", "Must be double.NaN or a non-negative value");
+            if (_twoDIndex == null) await Build2DIndexAsync();
             var maxIndexRange = Math.Max(Latitudes.Count, Longitudes.Count);
             // Start with a minimum search window (the next-lowest to the next-highest value in both latitude and longitude), 
             // expanding the search window if no points are found within the smaller window values
@@ -81,7 +86,6 @@ namespace ESME.Environment
                 // Find the minimum range to search within the longitude axis, within the current search window
                 GetSearchRange(_longitudes, location.Longitude, out lonStartIndex, out lonEndIndex, searchWindow);
                 T matchingPoint;
-                if (_twoDIndex == null) await Build2DIndexAsync();
                 for (var curLatIndex = latStartIndex; curLatIndex <= latEndIndex; curLatIndex++)
                 {
                     var lat = _latitudes[curLatIndex];
@@ -147,8 +151,6 @@ namespace ESME.Environment
         /// <returns>The requested point</returns>
         public async Task<T> GetExactPointAsync(double latitude, double longitude)
         {
-            if (_longitudes == null) CreateLatLonIndices();
-            if (_latitudes == null || _longitudes == null) throw new InvalidOperationException("_latitudes or _longitudes is null");
             if (_longitudeHashTable == null) await CreateHashTablesAsync();
             if (_latitudeHashTable == null || _longitudeHashTable == null) throw new InvalidOperationException("One or both hash tables are null");
             longitude = Math.Round(longitude, _maxPrecision);
@@ -234,7 +236,7 @@ namespace ESME.Environment
             var array = _arrayList.ToArray();
             array.ParallelSort();
             _arrayList.Clear();
-            _arrayList.AddRange(array);
+            _arrayList.AddRange(array.Where(i => i != null));
             // System.Diagnostics.Debug.WriteLine("{0}: Returned from ParallelSort", DateTime.Now);
             IsSorted = true;
         }
@@ -342,6 +344,7 @@ namespace ESME.Environment
         #region List<T> overrides
         public void Add(T item)
         {
+            if (item == null) return;
             _arrayList.Add(item);
             ClearHelperIndices();
         }
@@ -356,7 +359,7 @@ namespace ESME.Environment
         public void AddRange(IEnumerable<T> collection)
         {
             foreach (var item in collection)
-                _arrayList.Add(item);
+                if (item != null) _arrayList.Add(item);
             ClearHelperIndices();
         }
 
@@ -466,8 +469,8 @@ namespace ESME.Environment
                         {
                             var latitudeHashTable = new HashDictionary<double, HashDictionary<double, T>>();
                             var longitudeHashTable = new HashDictionary<double, HashDictionary<double, T>>();
-                            //foreach (var lat in Latitudes) _latitudeHashTable[lat] = new HashDictionary<double, T>();
-                            //foreach (var lon in Longitudes) _longitudeHashTable[lon] = new HashDictionary<double, T>();
+                            foreach (var lat in Latitudes) latitudeHashTable[lat] = new HashDictionary<double, T>();
+                            foreach (var lon in Longitudes) longitudeHashTable[lon] = new HashDictionary<double, T>();
                             //Debug.WriteLine("{0}: EnvironmentData: About to populate hash table", DateTime.Now);
                             foreach (var item in _arrayList)
                             {
@@ -487,25 +490,28 @@ namespace ESME.Environment
         }
 
         readonly object _indexLockObject = new object();
-        void CreateLatLonIndices()
+        volatile Task _indexCreationTask;
+        Task CreateLatLonIndices()
         {
-            if (_longitudes != null) return;
-            lock (_indexLockObject)
-            {
-                if (_longitudes != null) return;
-                var latitudes = new HashedArrayList<double>();
-                var longitudes = new HashedArrayList<double>();
-                foreach (var point in _arrayList)
-                {
-                    if (point == null) continue;
-                    latitudes.Add(Math.Round(point.Latitude, _maxPrecision));
-                    longitudes.Add(Math.Round(point.Longitude, _maxPrecision));
-                }
-                latitudes.Sort();
-                longitudes.Sort();
-                _latitudes = latitudes;
-                _longitudes = longitudes;
-            }
+            if (_indexCreationTask == null)
+                lock (_indexLockObject)
+                    if (_indexCreationTask == null)
+                        _indexCreationTask = Task.Factory.StartNew(() =>
+                        {
+                            if (_longitudes != null) return;
+                            var latitudes = new HashedArrayList<double>();
+                            var longitudes = new HashedArrayList<double>();
+                            foreach (var point in _arrayList)
+                            {
+                                latitudes.Add(Math.Round(point.Latitude, _maxPrecision));
+                                longitudes.Add(Math.Round(point.Longitude, _maxPrecision));
+                            }
+                            latitudes.Sort();
+                            longitudes.Sort();
+                            _latitudes = latitudes;
+                            _longitudes = longitudes;
+                        });
+            return _indexCreationTask;
         }
 
         HashedArrayList<double> _latitudes;
@@ -514,7 +520,7 @@ namespace ESME.Environment
         {
             get
             {
-                if (_longitudes == null) CreateLatLonIndices();
+                if (_latitudes == null) CreateLatLonIndices().Wait();
                 return _latitudes;
             }
         }
@@ -523,7 +529,7 @@ namespace ESME.Environment
         {
             get
             {
-                if (_longitudes == null) CreateLatLonIndices();
+                if (_longitudes == null) CreateLatLonIndices().Wait();
                 return _longitudes;
             }
         }
@@ -535,7 +541,7 @@ namespace ESME.Environment
         {
             get
             {
-                if (_longitudes == null) CreateLatLonIndices();
+                if (_latitudes == null || _longitudes == null) CreateLatLonIndices().Wait();
                 if (_latitudes == null || _longitudes == null) throw new ApplicationException("_latitudes or _longitudes is null");
                 return new GeoRect(_latitudes.Last(), _latitudes.First(), _longitudes.Last(), _longitudes.First());
             }

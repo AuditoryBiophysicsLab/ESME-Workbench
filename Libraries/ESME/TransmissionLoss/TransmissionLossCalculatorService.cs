@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
+using System.Data.Common;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.IO;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
+using Devart.Data.SQLite;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Model;
@@ -62,32 +64,40 @@ namespace ESME.TransmissionLoss
 
         static readonly object LockObject = new object();
         bool _isStarted;
+        LocationContext _dbContext;
         public void Start()
         {
             if (float.IsNaN(RangeCellSize) || float.IsNaN(DepthCellSize)) return;
-            //var foo = _databaseService.Context.Radials.Include(r => r.TransmissionLoss).Include(r => r.TransmissionLoss.AnalysisPoint).Where(r => !r.IsCalculated).ToList();
+
             lock (LockObject)
             {
                 if (_isStarted) return;
                 _isStarted = true;
             }
-            var radials = (from radial in _databaseService.Context.Radials
-                               .Include(r => r.TransmissionLoss)
-                               //.Include(r => r.TransmissionLoss.Mode)
-                               //.Include(r => r.TransmissionLoss.Mode.Source)
-                               //.Include(r => r.TransmissionLoss.Mode.Source.Platform)
-                               .Include(r => r.TransmissionLoss.AnalysisPoint)
-                               .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario)
-                               .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Wind)
-                               .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.SoundSpeed)
-                               .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Bathymetry)
-                               .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Sediment)
-                           select radial);
+
+            var connectionStringBuilder = new SQLiteConnectionStringBuilder
+            {
+                FailIfMissing = false,
+                DataSource = Path.Combine(_databaseService.MasterDatabaseDirectory, "esme.db"),
+                BinaryGUID = true,
+            };
+            DbConnection connection = new SQLiteConnection(connectionStringBuilder.ToString());
+            _dbContext = new LocationContext(connection, true);
+            IQueryable<Radial> radials;
+            lock (_dbContext)
+                radials = (from radial in _dbContext.Radials
+                                .Include(r => r.TransmissionLoss)
+                                .Include(r => r.TransmissionLoss.Mode)
+                                .Include(r => r.TransmissionLoss.Mode.Source)
+                                .Include(r => r.TransmissionLoss.Mode.Source.Platform)
+                                .Include(r => r.TransmissionLoss.AnalysisPoint)
+                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario)
+                            select radial);
             foreach (var radial in radials)
             {
                 if (radial.BasePath == null)
                 {
-                    _databaseService.Context.Radials.Remove(radial);
+                    _dbContext.Radials.Remove(radial);
                     continue;
                 }
                 if (!File.Exists(radial.BasePath + ".shd")) Add(radial);
@@ -97,7 +107,7 @@ namespace ESME.TransmissionLoss
                 switch (args.Action)
                 {
                     case NotifyCollectionChangedAction.Add:
-                        foreach (Radial radial in args.NewItems) if (!File.Exists(radial.BasePath + ".shd")) Add(radial);
+                        foreach (var radial in args.NewItems.Cast<Radial>().Where(radial => !File.Exists(radial.BasePath + ".shd"))) Add(radial);
                         break;
                 }
             };
@@ -128,18 +138,22 @@ namespace ESME.TransmissionLoss
                                 radial.Bearing,
                                 radial.TransmissionLoss.Mode.ModeName,
                                 (Geo)radial.TransmissionLoss.AnalysisPoint.Geo);
-                var transmissionLoss = radial.TransmissionLoss;
-                var mode = transmissionLoss.Mode;
+                Scenario scenario;
+                lock (_dbContext) scenario = (from s in _dbContext.Scenarios
+                                                  .Include(s => s.Wind)
+                                                  .Include(s => s.SoundSpeed)
+                                                  .Include(s => s.Bathymetry)
+                                                  .Include(s => s.Sediment)
+                                              select s).Single();
+                var mode = radial.TransmissionLoss.Mode;
                 var platform = mode.Source.Platform;
-                var analysisPoint = transmissionLoss.AnalysisPoint;
-                var scenario = analysisPoint.Scenario;
-                var timePeriod = scenario.TimePeriod;
+                var timePeriod = platform.Scenario.TimePeriod;
                 var wind = (Wind)_cacheService[scenario.Wind].Result;
                 var soundSpeed = (SoundSpeed)_cacheService[scenario.SoundSpeed].Result;
-                var sediment = (Sediment)_cacheService[scenario.Sediment].Result;
                 var bathymetry = (Bathymetry)_cacheService[scenario.Bathymetry].Result;
+                var sediment = (Sediment)_cacheService[scenario.Sediment].Result;
                 var deepestPoint = bathymetry.DeepestPoint;
-                var deepestProfile = soundSpeed[scenario.TimePeriod].GetDeepestSSP(deepestPoint).Extend(deepestPoint.Data);
+                var deepestProfile = soundSpeed[timePeriod].GetDeepestSSP(deepestPoint).Extend(deepestPoint.Data);
 
                 var windData = wind[timePeriod].EnvironmentData;
                 var windSample = windData.IsFast2DLookupAvailable
@@ -160,6 +174,7 @@ namespace ESME.TransmissionLoss
                 if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
 
                 var directoryPath = Path.GetDirectoryName(radial.BasePath);
+                if (directoryPath == null) return;
                 if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
                 CreateBellhopEnvironmentFiles(radial.BasePath,
                                               soundSpeedProfile,
@@ -179,7 +194,7 @@ namespace ESME.TransmissionLoss
                                               1500);
                 var bellhopProcess = new TransmissionLossProcess
                 {
-                    StartInfo = new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "bellhop.exe"), radial.Filename)
+                    StartInfo = new ProcessStartInfo(Path.Combine(AssemblyLocation, "bellhop.exe"), radial.Filename)
                     {
                         CreateNoWindow = true,
                         UseShellExecute = false,
@@ -227,7 +242,7 @@ namespace ESME.TransmissionLoss
                 while (!bellhopProcess.HasExited) Thread.Sleep(100);
                 radial.CalculationCompleted = DateTime.Now;
                 radial.ExtractAxisData();
-                //lock (_databaseService.Context) _databaseService.Context.SaveChanges();
+                lock (_dbContext) _dbContext.SaveChanges();
                 Debug.WriteLine("{0}: Finished calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}",
                                 DateTime.Now,
                                 radial.Bearing,
@@ -243,6 +258,8 @@ namespace ESME.TransmissionLoss
                                 (Geo)radial.TransmissionLoss.AnalysisPoint.Geo, e.Message);
             }
         }
+        static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+
 
         public static void CreateBellhopEnvironmentFiles(string baseFilename, SoundSpeedProfile ssp, SedimentType sediment, BottomProfile bottomProfile, float windSpeed, float frequency, float sourceDepth, float radius, float verticalBeamWidth, float depressionElevationAngle, float maxCalculationDepthMeters, float rangeCellSize, float depthCellSize, bool useSurfaceReflection, bool generateArrivalsFile, int beamCount)
         {
