@@ -217,7 +217,7 @@
                                     SmallImageSource="..\Images\SmallIcons\application_form_delete.png"
                                     ToolTipDescription="Not yet implemented"
                                     ToolTipTitle="Delete scenarioDelete the currently selected scenario" />
-                    <r:RibbonButton Command="{Binding ImportScenarioFileCommand}"
+                    <r:RibbonButton Command="{Binding DisabledCommand}"
                                     Label="Import"
                                     SmallImageSource="..\Images\SmallIcons\application_get.png"
                                     ToolTipDescription="Not yet implemented"

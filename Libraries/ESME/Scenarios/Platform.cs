@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Windows.Input;
 using System.Windows.Media;
 using ESME.Database;
 using ESME.Locations;
@@ -77,6 +78,27 @@ namespace ESME.Scenarios
         #region AddSourceCommand
         public SimpleCommand<object, EventToCommandArgs> AddSourceCommand { get { return _addSource ?? (_addSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.AddSource, this))); } }
         SimpleCommand<object, EventToCommandArgs> _addSource;
+        #endregion
+
+        #region KeyUpCommand
+        public SimpleCommand<object, EventToCommandArgs> KeyUpCommand { get { return _keyUp ?? (_keyUp = new SimpleCommand<object, EventToCommandArgs>(KeyUpHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _keyUp;
+
+        void KeyUpHandler(EventToCommandArgs args)
+        {
+            var parameter = (KeyEventArgs)args.EventArgs;
+            switch(parameter.Key)
+            {
+                case Key.Delete:
+                    MediatorMessage.Send(MediatorMessage.DeletePlatform, this);
+                    break;
+                case Key.Insert:
+                    MediatorMessage.Send(MediatorMessage.AddSource,this);
+                    break;
+                default:
+                    return;
+            }
+        }
         #endregion
 
         public void CreateMapLayers()

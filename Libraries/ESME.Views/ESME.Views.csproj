@@ -153,6 +153,10 @@
       <DependentUpon>UtilitiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Misc\UtilitiesViewModel.cs" />
+    <Compile Include="Scenarios\ModeDiagramView.xaml.cs">
+      <DependentUpon>ModeDiagramView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\ModeDiagramViewModel.cs" />
     <Compile Include="Scenarios\ModePropertiesView.xaml.cs">
       <DependentUpon>ModePropertiesView.xaml</DependentUpon>
     </Compile>
@@ -254,6 +258,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Misc\UtilitiesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\ModeDiagramView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -16,7 +16,7 @@
     <TreeView DockPanel.Dock="Top" Grid.IsSharedSizeScope="True" ItemsSource="{Binding RootNodes}">
         <TreeView.Resources>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Scenario}" ItemsSource="{Binding Platforms}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" TheLayerControl="{Binding LayerControl}" IsMapLayer="False" LayerName="{Binding Name, StringFormat=Scenario: {0}}">
+                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" TheLayerControl="{Binding LayerControl}" IsMapLayer="False" LayerName="{Binding Name, StringFormat=Scenario: {0}}">                    
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding AddPlatformCommand}" Header="Add platform" />
@@ -32,6 +32,12 @@
                                                            Mode=TwoWay}"
                                        LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
                                        LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
+                    <!--  Should work, doesn't.  KeyUp is handled by TreeviewItem, not layercontrol. 
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="KeyUp">
+                            <WPF:EventToCommandTrigger Command="{Binding KeyUpCommand}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>-->
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding DeletePlatformCommand}" Header="Remove this platform" />
