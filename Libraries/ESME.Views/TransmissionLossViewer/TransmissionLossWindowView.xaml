@@ -1,12 +1,14 @@
 ﻿<Window x:Class="ESME.Views.TransmissionLossViewer.TransmissionLossWindowView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Controls="clr-namespace:ESME.Views.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Properties="clr-namespace:ESME.Views.Properties"
         xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC" Title="{Binding TitleString}"
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+        Title="{Binding TitleString}"
         Width="{Binding Source={x:Static Properties:Settings.Default},
                         Path=TLWidth,
                         Mode=TwoWay}"
@@ -28,6 +30,9 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <DockPanel>
+        <DockPanel DockPanel.Dock="Bottom">
+            <Controls:TLStatusBar DataContext="{Binding RadialViewModel}" DockPanel.Dock="Bottom" />
+        </DockPanel>
         <ToolBarTray Height="22" DockPanel.Dock="Top">
             <ToolBar Band="0" BandIndex="0">
                 <Button Command="{Binding SaveAsCSVCommand}"

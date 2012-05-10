@@ -16,7 +16,7 @@ namespace ESME.Views.TransmissionLossViewer
     {
         public IHRCSaveFileService SaveFileService { get; set; }
         [Affects("RadialCount")] public ObservableList<Radial> Radials { get; set; }
-
+        
         #region RadialViewModel RadialViewModel { get; set; }
         RadialViewModel _radialViewModel;
         public RadialViewModel RadialViewModel
@@ -24,8 +24,8 @@ namespace ESME.Views.TransmissionLossViewer
             get { return _radialViewModel; }
             set
             {
-                _radialViewModel = value;
-                _radialViewModel.PropertyChanged += (s, e) => { if (e.PropertyName == "WriteableBitmap") Window.Activate(); };
+                _radialViewModel = value;                
+                _radialViewModel.PropertyChanged += (s, e) => { if (e.PropertyName == "WriteableBitmap" && Window!=null) Window.Activate(); };
             }
         } 
         #endregion
@@ -103,7 +103,7 @@ namespace ESME.Views.TransmissionLossViewer
             }
         }
         #endregion
-
+        
         #region public Scenario Scenario { get; set; }
         ESME.Scenarios.TransmissionLoss _transmissionLoss;
 

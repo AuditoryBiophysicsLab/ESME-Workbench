@@ -449,8 +449,11 @@ namespace ESME.Environment
         {
             get
             {
-                var lonRes = CalculateResolution(_longitudes);
-                var latRes = CalculateResolution(_latitudes);
+                var lonRes = double.NaN;
+                var latRes = double.NaN;
+                if(_longitudes.Count > 1) lonRes = CalculateResolution(_longitudes);
+                if(_latitudes.Count > 1 ) latRes = CalculateResolution(_latitudes);
+                if (double.IsNaN(lonRes) || double.IsNaN(latRes)) return double.NaN;
                 return Math.Abs(lonRes - latRes) < 0.0001 ? lonRes : double.NaN;
             }
         }

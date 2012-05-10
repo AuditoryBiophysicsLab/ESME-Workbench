@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -12,6 +13,7 @@ using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.Views.Controls;
+using HRC.Aspects;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -148,6 +150,11 @@ namespace ESME.Views.TransmissionLossViewer
         }
         #endregion
 
+        [Initialize("Range: N/A")] public string MouseRange { get; set; }
+        [Initialize("Depth: N/A")] public string MouseDepth { get; set; }
+        [Initialize("Transmission Loss: N/A")] public string MouseTLInfo { get; set; }
+        [Initialize("Sound Pressure: N/A")] public string MouseSPLInfo { get; set; }
+
         [ImportingConstructor]
         public RadialViewModel(RadialView view)
         {
@@ -241,6 +248,35 @@ namespace ESME.Views.TransmissionLossViewer
         SimpleCommand<object, object> _gridSizeChanged;
 
         public SimpleCommand<object, object> GridSizeChangedCommand { get { return _gridSizeChanged ?? (_gridSizeChanged = new SimpleCommand<object, object>(delegate { if (TransmissionLossRadial != null) CalculateBottomProfileGeometry(); })); } }
+        #endregion
+
+        #region MouseMoveCommand
+        public SimpleCommand<object, EventToCommandArgs> MouseMoveCommand { get { return _mouseMove ?? (_mouseMove = new SimpleCommand<object, EventToCommandArgs>(MouseMoveHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _mouseMove;
+
+        void MouseMoveHandler(EventToCommandArgs args)
+        {
+            if (_view.OverlayCanvas.IsMouseOver && TransmissionLossRadial != null)
+            {
+                var e = (MouseEventArgs)args.EventArgs;
+                var point = e.MouseDevice.GetPosition(_view.OverlayCanvas);
+                var px = point.X / _view.OverlayCanvas.ActualWidth;
+                var py = point.Y / _view.OverlayCanvas.ActualHeight;
+                var rangeIndex = Math.Min((int)(TransmissionLossRadial.Ranges.Count * px), TransmissionLossRadial.Ranges.Count - 1);
+                var depthIndex = Math.Min((int)(TransmissionLossRadial.Depths.Count * py), TransmissionLossRadial.Depths.Count - 1);
+                MouseRange = string.Format("Range: {0:0.0}m", TransmissionLossRadial.Ranges.Last() * px);
+                MouseDepth = string.Format("Depth: {0:0.0}m", TransmissionLossRadial.Depths.Last() * py);
+                MouseTLInfo = string.Format("Transmission Loss: {0:0.0}dB", TransmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
+                MouseSPLInfo = string.Format("Sound Pressure: {0:0.0}dB", Radial.TransmissionLoss.Mode.SourceLevel - TransmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
+            }
+            else
+            {
+                MouseRange = "Range: N/A";
+                MouseDepth = "Depth: N/A";
+                MouseTLInfo = "Transmission Loss: N/A";
+                MouseSPLInfo = "Sound Pressure: N/A";
+            }
+        }
         #endregion
     }
 }

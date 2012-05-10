@@ -12,7 +12,11 @@
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
-
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="MouseMove">
+            <WPF:EventToCommandTrigger Command="{Binding MouseMoveCommand}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <DockPanel>
         <StackPanel Height="22"
                     DockPanel.Dock="Top"

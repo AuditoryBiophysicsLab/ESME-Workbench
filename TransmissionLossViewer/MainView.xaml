@@ -9,6 +9,7 @@
         xmlns:TransmissionLossViewer="clr-namespace:TransmissionLossViewer"
         xmlns:View="clr-namespace:ESME.Views.TransmissionLossViewer;assembly=ESME.Views"
         xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+        xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         Title="{Binding TransmissionLossViewModel.TitleString,
                         Mode=TwoWay}"
         Width="{Binding Source={x:Static Properties:Settings.Default},
@@ -45,6 +46,9 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <DockPanel LastChildFill="True">
+        <DockPanel DockPanel.Dock="Bottom">
+            <Controls:TLStatusBar DockPanel.Dock="Bottom" DataContext="{Binding TransmissionLossViewModel.RadialViewModel}"/>                
+        </DockPanel>
         <ToolBarTray Height="22" DockPanel.Dock="Top">
             <ToolBar Band="0" BandIndex="0">
                 <Button Command="{Binding TransmissionLossViewModel.SaveAsCSVCommand}"

@@ -115,6 +115,9 @@
     <Compile Include="Controls\TimePeriodComboBox.xaml.cs">
       <DependentUpon>TimePeriodComboBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\TLStatusBar.xaml.cs">
+      <DependentUpon>TLStatusBar.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ValidatingTextBox.xaml.cs">
       <DependentUpon>ValidatingTextBox.xaml</DependentUpon>
     </Compile>
@@ -218,6 +221,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\TimePeriodComboBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TLStatusBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
