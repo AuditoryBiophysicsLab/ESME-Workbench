@@ -21,6 +21,7 @@ namespace ESME.Views.Scenarios
     /// </summary>
     public class AnalysisPointPropertiesViewModel : ViewModelBase
     {
+        #region public AnalysisPoint AnalysisPoint { get; set; }
         AnalysisPoint _analysisPoint;
         public AnalysisPoint AnalysisPoint
         {
@@ -31,35 +32,27 @@ namespace ESME.Views.Scenarios
                 GenerateProperties();
             }
         }
+        #endregion
 
         void GenerateProperties()
         {
-            AnalysisPointProperties.Add(new EditableKeyValuePair<string, string>
-            {
-                Key = "hello",
-                Value = "world",
-                IsEditable = false,
-            });
-            AnalysisPointProperties.Add(new EditableKeyValuePair<string, string>
-            {
-                Key = "Zarro",
-                Value = "boogs",
-                IsEditable = true,
-            });
-            
+            WindowTitle = "Analysis Point Properties";
+            Properties.Add(new EditableKeyValuePair<string, string>("Location: ", AnalysisPoint.Geo.ToString()));
         }
 
         [Initialize]
-        public List<EditableKeyValuePair<string, string>> AnalysisPointProperties { get; set; }
+        public List<EditableKeyValuePair<string, string>> Properties { get; set; }
+
+        public string WindowTitle { get; set; }
 
         #region commands
         #region OkCommand
-        public SimpleCommand<object, EventToCommandArgs> OkCommand { get { return _ok ?? (_ok = new SimpleCommand<object, EventToCommandArgs>(o => CloseDialog(null))); } }
+        public SimpleCommand<object, EventToCommandArgs> OkCommand { get { return _ok ?? (_ok = new SimpleCommand<object, EventToCommandArgs>(o => CloseDialog(true))); } }
         SimpleCommand<object, EventToCommandArgs> _ok;
         #endregion
 
         #region ViewClosingCommand
-        public SimpleCommand<object, EventToCommandArgs> ViewClosingCommand { get { return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(o => Properties.Settings.Default.Save())); } }
+        public SimpleCommand<object, EventToCommandArgs> ViewClosingCommand { get { return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(o => Views.Properties.Settings.Default.Save())); } }
         SimpleCommand<object, EventToCommandArgs> _viewClosing;
         #endregion
         #endregion
@@ -75,6 +68,16 @@ namespace ESME.Views.Scenarios
         public TKey Key { get; set; }
         public TValue Value { get; set; }
         public bool IsEditable { get; set; }
+
+        public EditableKeyValuePair() {
+            
+        }
+        public EditableKeyValuePair(TKey key, TValue value, bool isEditable = false)
+        {
+            Key = key;
+            Value = value;
+            IsEditable = isEditable;
+        }
     }
 
     public class EditableKeyValuePairTemplateSelector : DataTemplateSelector

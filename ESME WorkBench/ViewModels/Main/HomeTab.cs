@@ -161,9 +161,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.ViewAnalysisPointProperties), UsedImplicitly]
         void ViewAnalysisPointProperties(AnalysisPoint analysisPoint)
         {
-            var vm = new AnalysisPointPropertiesViewModel {AnalysisPoint = analysisPoint};
-            var window = _visualizer.ShowDialog("AnalysisPointPropertiesView", vm);
-            
+            _visualizer.ShowDialog("AnalysisPointPropertiesView",  new AnalysisPointPropertiesViewModel {AnalysisPoint = analysisPoint});
         }
 
         [MediatorMessageSink(MediatorMessage.RecalculateAllAnalysisPoints)]
