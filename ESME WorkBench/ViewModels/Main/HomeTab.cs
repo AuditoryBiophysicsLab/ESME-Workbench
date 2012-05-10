@@ -161,6 +161,19 @@ namespace ESMEWorkbench.ViewModels.Main
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete this transmission loss \"{0}\"?", transmissionLoss.AnalysisPoint.Geo), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             transmissionLoss.Delete();
         }
+
+        [MediatorMessageSink(MediatorMessage.RecalculateTransmissionLoss), UsedImplicitly]
+        void RecalculateTransmissionLoss(ESME.Scenarios.TransmissionLoss transmissionLoss)
+        {
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to recalculate this transmission loss \"{0}\"?", transmissionLoss.AnalysisPoint.Geo), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            foreach (var radial in transmissionLoss.Radials)
+            {
+                radial.IsCalculated = false;
+                File.Delete(radial.BasePath + ".shd");
+                _transmissionLoss.Add(radial);
+            }
+        }
+
         [MediatorMessageSink(MediatorMessage.TransmissionLossLayerChanged), UsedImplicitly]
         void TransmissionLossLayerChanged(ESME.Scenarios.TransmissionLoss transmissionLoss)
         {
@@ -302,6 +315,18 @@ namespace ESMEWorkbench.ViewModels.Main
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             mode.Delete();
             OnPropertyChanged("CanPlaceAnalysisPoint");
+        }
+
+        [MediatorMessageSink(MediatorMessage.RecalculateMode), UsedImplicitly]
+        void RecalculateMode(Mode mode)
+        {
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to recalculate all transmission losses for the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            foreach (var radial in mode.TransmissionLosses.SelectMany(tl => tl.Radials))
+            {
+                radial.IsCalculated = false;
+                File.Delete(radial.BasePath +".shd");
+                _transmissionLoss.Add(radial);
+            }
         }
 
         [MediatorMessageSink(MediatorMessage.ModeProperties), UsedImplicitly]

@@ -80,7 +80,8 @@
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding DeleteModeCommand}" Header="Remove this mode" />
-                            <MenuItem Command="{Binding ModePropertiesCommand}" Header="Properties" />
+                            <MenuItem Command="{Binding RecalculateModeCommand}" Header="Recalculate this mode"/>
+                            <MenuItem Command="{Binding ModePropertiesCommand}" Header="Properties" />                            
                         </ContextMenu>
                     </Controls:LayerControl.ContextMenu>
                 </Controls:LayerControl>
@@ -111,6 +112,7 @@
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding DeleteTransmissionLossCommand}" Header="Remove this transmission loss" />
+                            <MenuItem Command="{Binding RecalculateTransmissionLossCommand}" Header="Recalculate this transmission loss" />
                         </ContextMenu>
                     </Controls:LayerControl.ContextMenu>
                 </Controls:LayerControl>

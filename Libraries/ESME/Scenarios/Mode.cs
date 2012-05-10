@@ -82,6 +82,11 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _deleteMode;
         #endregion
 
+        #region RecalculateModeCommand
+        public SimpleCommand<object, EventToCommandArgs> RecalculateModeCommand { get { return _recalculateMode ?? (_recalculateMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.RecalculateMode,this))); } }
+        SimpleCommand<object, EventToCommandArgs> _recalculateMode;
+        #endregion
+
         #region ModePropertiesCommand
         public SimpleCommand<object, EventToCommandArgs> ModePropertiesCommand { get { return _modeProperties ?? (_modeProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ModeProperties, this))); } }
         SimpleCommand<object, EventToCommandArgs> _modeProperties;

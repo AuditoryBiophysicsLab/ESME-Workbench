@@ -227,6 +227,11 @@ namespace ESME.Views.TransmissionLossViewer
         static void InternalViewClosingHandler(object o) { Properties.Settings.Default.Save(); }
         #endregion
 
+        #region CloseCommand
+        public SimpleCommand<object, EventToCommandArgs> CloseCommand { get { return _close ?? (_close = new SimpleCommand<object, EventToCommandArgs>(o => CloseDialog(null))); } }
+        SimpleCommand<object, EventToCommandArgs> _close;
+        #endregion
+
         #endregion
     }
 }

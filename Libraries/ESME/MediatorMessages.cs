@@ -32,6 +32,7 @@ namespace ESME
 
         public const string AddMode = "AddModeMessage";
         public const string DeleteMode = "DeleteModeMessage";
+        public const string RecalculateMode = "RecalculateModeMessage";
         public const string ModeProperties = "ModePropertiesMessage";
         public const string ModeBoundToLayer = "ModeBoundToLayerMessage";
 
@@ -43,6 +44,7 @@ namespace ESME
         
         public const string ViewTransmissionLoss = "ViewTransmissionLossMessage";
         public const string DeleteTransmissionLoss = "DeleteTransmissionLossMessage";
+        public const string RecalculateTransmissionLoss = "RecalculateTransmissionLossMessage";
         public const string TransmissionLossLayerChanged = "TransmissionLossLayerChangedMessage";
 
         public const string ShowTransmissionLossQueueView = "ShowTransmissionLossQueueViewMessage";

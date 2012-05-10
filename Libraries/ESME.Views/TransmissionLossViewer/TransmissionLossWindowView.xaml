@@ -29,6 +29,11 @@
             <WPF:EventToCommandTrigger Command="{Binding InternalViewClosingCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
+    <Window.InputBindings>
+        <KeyBinding Key="W"
+                    Command="{Binding CloseCommand}"
+                    Modifiers="Control" />
+    </Window.InputBindings>
     <DockPanel>
         <DockPanel DockPanel.Dock="Bottom">
             <Controls:TLStatusBar DataContext="{Binding RadialViewModel}" DockPanel.Dock="Bottom" />

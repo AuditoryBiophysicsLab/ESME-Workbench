@@ -145,6 +145,11 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _deleteTransmissionLoss;
         #endregion
 
+        #region RecalculateTransmissionLossCommand
+        public SimpleCommand<object, EventToCommandArgs> RecalculateTransmissionLossCommand { get { return _recalculateTransmissionLoss ?? (_recalculateTransmissionLoss = new SimpleCommand<object, EventToCommandArgs>(o=>MediatorMessage.Send(MediatorMessage.RecalculateTransmissionLoss,this))); } }
+        SimpleCommand<object, EventToCommandArgs> _recalculateTransmissionLoss;
+        #endregion
+
         [Affects("IsValid")]
         [NotMapped]
         public string ValidationErrorText
