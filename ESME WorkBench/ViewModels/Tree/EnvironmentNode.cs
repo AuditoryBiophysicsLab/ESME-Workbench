@@ -1,7 +1,7 @@
+using ESME.Locations;
 using ESME.Scenarios;
 using HRC.Aspects;
 using HRC.Utility;
-using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Tree
 {
@@ -9,6 +9,7 @@ namespace ESMEWorkbench.ViewModels.Tree
     {
         public EnvironmentNode(Scenario scenario)
         {
+            Location = scenario.Location;
             EnvironmentLayers.Add(new BitmapNode("Wind Speed", scenario.Wind));
             EnvironmentLayers.Add(scenario.SoundSpeed);
             EnvironmentLayers.Add(new BitmapNode("Bathymetry", scenario.Bathymetry));
@@ -33,6 +34,8 @@ namespace ESMEWorkbench.ViewModels.Tree
                 }
             };
         }
+
+        public Location Location { get; set; }
 
         [Initialize]
         public ObservableList<object> EnvironmentLayers { get; set; }

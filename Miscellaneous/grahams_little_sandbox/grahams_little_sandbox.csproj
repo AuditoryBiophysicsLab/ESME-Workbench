@@ -43,9 +43,9 @@
     <Reference Include="Devart.Data.SQLite.Entity, Version=3.70.302.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
     <Reference Include="Devart.Data.SQLite.Entity.Migrations, Version=3.70.302.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
     <Reference Include="Devart.Data.SQLite.Linq, Version=3.1.34.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
-    <Reference Include="EntityFramework, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+    <Reference Include="EntityFramework, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\EntityFramework.4.3.0\lib\net40\EntityFramework.dll</HintPath>
+      <HintPath>..\..\ESME WorkBench\External References\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="FileHelpers">
       <HintPath>..\..\ESME WorkBench\External References\FileHelpers.dll</HintPath>

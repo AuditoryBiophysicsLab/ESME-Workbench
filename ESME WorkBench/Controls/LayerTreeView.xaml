@@ -16,7 +16,7 @@
     <TreeView DockPanel.Dock="Top" Grid.IsSharedSizeScope="True" ItemsSource="{Binding RootNodes}">
         <TreeView.Resources>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Scenario}" ItemsSource="{Binding Platforms}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" TheLayerControl="{Binding LayerControl}" IsMapLayer="False" LayerName="{Binding Name, StringFormat=Scenario: {0}}">                    
+                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" IsMapLayer="False" LayerName="{Binding Name, StringFormat=Scenario: {0}}" TheLayerControl="{Binding LayerControl}">
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding AddPlatformCommand}" Header="Add platform" />
@@ -26,18 +26,20 @@
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
                 <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
-                                       TheLayerControl="{Binding LayerControl}"
                                        IsLayerNameEditable="True"
                                        LayerName="{Binding PlatformName,
                                                            Mode=TwoWay}"
                                        LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
-                                       LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
-                    <!--  Should work, doesn't.  KeyUp is handled by TreeviewItem, not layercontrol. 
-                    <i:Interaction.Triggers>
+                                       LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}"
+                                       TheLayerControl="{Binding LayerControl}">
+                    <!--
+                        Should work, doesn't.  KeyUp is handled by TreeviewItem, not layercontrol.
+                        <i:Interaction.Triggers>
                         <i:EventTrigger EventName="KeyUp">
-                            <WPF:EventToCommandTrigger Command="{Binding KeyUpCommand}" />
+                        <WPF:EventToCommandTrigger Command="{Binding KeyUpCommand}" />
                         </i:EventTrigger>
-                    </i:Interaction.Triggers>-->
+                        </i:Interaction.Triggers>
+                    -->
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding DeletePlatformCommand}" Header="Remove this platform" />
@@ -45,40 +47,16 @@
                             <MenuItem Command="{Binding PlatformPropertiesCommand}" Header="Properties" />
                         </ContextMenu>
                     </Controls:LayerControl.ContextMenu>
-                    <!--
-                        <Controls:LayerControl.ContextControl>
-                        <StackPanel Orientation="Horizontal">
-                        <Controls:ImageToggleButton Width="16"
-                        Height="16"
-                        ImageSource="..\..\Images\SmallIcons\color_wheel.png"
-                        ToolTip="Change line color" />
-                        <Controls:ImageToggleButton Width="16"
-                        Height="16"
-                        ImageSource="..\..\Images\SmallIcons\draw_line.png"
-                        ToolTip="Change line width" />
-                        <Controls:ImageToggleButton Width="16"
-                        Height="16"
-                        Command="{Binding AddSourceCommand}"
-                        ImageSource="..\..\Images\SmallIcons\add.png"
-                        ToolTip="Add source" />
-                        <Controls:ImageToggleButton Width="16"
-                        Height="16"
-                        Command="{Binding DeletePlatformCommand}"
-                        ImageSource="..\..\Images\SmallIcons\delete.png"
-                        ToolTip="Remove platform" />
-                        </StackPanel>
-                        </Controls:LayerControl.ContextControl>
-                    -->
                 </Controls:LayerControl>
             </HierarchicalDataTemplate>
             <!--  Source  -->
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
                 <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
-                                       TheLayerControl="{Binding LayerControl}"
                                        IsLayerNameEditable="True"
                                        IsMapLayer="False"
                                        LayerName="{Binding SourceName,
-                                                           Mode=TwoWay}">
+                                                           Mode=TwoWay}"
+                                       TheLayerControl="{Binding LayerControl}">
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding DeleteSourceCommand}" Header="Remove this source" />
@@ -89,16 +67,16 @@
                 </Controls:LayerControl>
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Tree:EnvironmentNode}" ItemsSource="{Binding EnvironmentLayers}">
-                <Controls:LayerControl IsMapLayer="False" LayerName="Environment" />
+                <Controls:LayerControl IsChecked="{Binding Location.LayerSettings.IsChecked}" LayerName="Environment" LineOrSymbolColor="{Binding Location.LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding Location.LayerSettings.LineOrSymbolSize}" />
             </HierarchicalDataTemplate>
             <!--  Mode  -->
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
                 <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
-                                       TheLayerControl="{Binding LayerControl}"
                                        IsLayerNameEditable="True"
                                        IsMapLayer="False"
                                        LayerName="{Binding ModeName,
-                                                           Mode=TwoWay}">
+                                                           Mode=TwoWay}"
+                                       TheLayerControl="{Binding LayerControl}">
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding DeleteModeCommand}" Header="Remove this mode" />
@@ -114,11 +92,11 @@
                 <Controls:LayerControl IsChecked="{Binding IsChecked}" IsMapLayer="False" LayerName="Sediment" />
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Tree:AnalysisPointsNode}" ItemsSource="{Binding Scenario.AnalysisPoints}">
-                <Controls:LayerControl IsMapLayer="False" LayerName="Analysis Points" >
+                <Controls:LayerControl IsMapLayer="False" LayerName="Analysis Points">
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Command="{Binding DeleteAllCommand}" Header="Remove all analysis points"/>
-                            <MenuItem Command="{Binding RecalculateAllCommand}" Header="Recalculate all analysis points"/>
+                            <MenuItem Command="{Binding DeleteAllCommand}" Header="Remove all analysis points" />
+                            <MenuItem Command="{Binding RecalculateAllCommand}" Header="Recalculate all analysis points" />
                         </ContextMenu>
                     </Controls:LayerControl.ContextMenu>
                 </Controls:LayerControl>
@@ -138,7 +116,7 @@
                 </Controls:LayerControl>
             </DataTemplate>
             <DataTemplate DataType="{x:Type Scenarios:AnalysisPoint}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
+                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineColorVisibility="Collapsed">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseDoubleClick">
                             <WPF:EventToCommandTrigger Command="{Binding ViewAnalysisPointCommand}" CommandParameter="{Binding}" />

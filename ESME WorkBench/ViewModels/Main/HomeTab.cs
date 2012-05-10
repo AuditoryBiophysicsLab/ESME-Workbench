@@ -44,6 +44,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 {
                     // todo: Remove any existing map layers here
                     _scenario.RemoveMapLayers();
+                    _scenario.Location.RemoveMapLayers();
                 }
                 _scenario = value;
                 LayerTreeViewModel.Scenario = _scenario;
@@ -63,6 +64,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 _cache[_scenario.Sediment].ContinueWith(t =>  _dispatcher.InvokeInBackgroundIfRequired(() => _scenario.Sediment.CreateMapLayers()));
 
                 _scenario.CreateMapLayers();
+                _scenario.Location.CreateMapLayers();
                 MediatorMessage.Send(MediatorMessage.SetMapExtent, (GeoRect)_scenario.Location.GeoRect);
                 MediatorMessage.Send(MediatorMessage.RefreshMap, true);
             }
@@ -311,14 +313,6 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 target.Item2.Activate();
             }
-        }
-
-        [MediatorMessageSink(MediatorMessage.PlaceAnalysisPoint)]
-        public void PlaceAnalysisPoint(bool dummy)
-        {
-            if (MouseDepth > 0) throw new AnalysisPointLocationException("Analysis Points cannot be placed on land.");
-            if (Scenario == null || Scenario.Bathymetry == null) return;
-            Database.Add(new AnalysisPoint { Geo = MouseGeo, Scenario = Scenario }, (Bathymetry)_cache[Scenario.Bathymetry].Result, true);
         }
 
         #region ImportScenarioFileCommand

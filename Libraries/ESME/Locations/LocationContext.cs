@@ -1,10 +1,11 @@
 using System.Data.Common;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using ESME.Scenarios;
 
 namespace ESME.Locations
 {
-    public class LocationContext : DbContext
+    public class LocationContext : DbContext, IDbConnectionFactory
     {
         public LocationContext(DbConnection connection, bool contextOwnsConnection)
             : base(connection, contextOwnsConnection)
@@ -118,5 +119,7 @@ namespace ESME.Locations
                 //context.Database.ExecuteSqlCommand("");
             }
         }
+
+        public DbConnection CreateConnection(string nameOrConnectionString) { throw new System.NotImplementedException(); }
     }
 }

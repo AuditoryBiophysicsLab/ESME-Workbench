@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Windows.Data;
 using ESME.Database;
+using ESME.Mapping;
 using ESME.Scenarios;
 using HRC.Aspects;
+using HRC.Navigation;
 using HRC.Utility;
 
 namespace ESME.Locations
@@ -20,7 +23,7 @@ namespace ESME.Locations
         void RemoveMapLayers();
     }
 
-    public class Location : IHaveGuid//, IHaveLayerSettings
+    public class Location : IHaveGuid, IHaveLayerSettings
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
@@ -29,7 +32,7 @@ namespace ESME.Locations
         public DbGeoRect GeoRect { get; set; }
         public string StorageDirectory { get; set; }
 
-        //public virtual LayerSettings LayerSettings { get; set; }
+        public virtual LayerSettings LayerSettings { get; set; }
 
         [Initialize]
         public virtual ObservableList<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }
@@ -52,9 +55,20 @@ namespace ESME.Locations
         [NotMapped] public static IMasterDatabaseService Database { get; set; }
         [NotMapped] public static EnvironmentalCacheService Cache { get; set; }
 
-
         public void CreateMapLayers()
         {
+            var mapLayer = new OverlayShapeMapLayer
+            {
+                LayerType = LayerType.Track,
+                Name = string.Format("{0}", Guid),
+            };
+            var geoRect = (GeoRect)GeoRect;
+            mapLayer.Add(new List<Geo> { geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest });
+            mapLayer.Done();
+            if (LayerSettings == null) LayerSettings = new LayerSettings();
+            LayerSettings.MapLayerViewModel = mapLayer;
         }
+
+        public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
     }
 }

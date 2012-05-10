@@ -14,11 +14,17 @@ namespace HRC.Navigation
         public GeoSegment(Geo start, Geo end) { Segment = new GeoArray(start, end); Initialize(); }
         public GeoSegment(GeoSegment geoSegment) { Segment = new GeoArray(geoSegment[0], geoSegment[1]); Initialize(); }
         public GeoSegment(double startLat, double startLon, double endLat, double endLon) { Segment = new GeoArray(new Geo(startLat, startLon), new Geo(endLat, endLon)); Initialize(); }
-        static readonly double _oneMeterInRadians = Geo.KilometersToRadians(0.001);
+        static readonly double OneMeterInRadians = Geo.KilometersToRadians(0.001);
+        /// <summary>
+        /// Create a GeoSegment
+        /// </summary>
+        /// <param name="start">Geo at the start of the segment</param>
+        /// <param name="length">Length of the segment IN METERS</param>
+        /// <param name="azimuth">Azimuth of the segment IN DEGREES</param>
         public GeoSegment(Geo start, double length, double azimuth)
         {
-            var oneMeterSegment = new GeoSegment(start, start.Offset(_oneMeterInRadians, Geo.DegreesToRadians(azimuth)));
-            var segment = oneMeterSegment.Scale(length / _oneMeterInRadians);
+            var oneMeterSegment = new GeoSegment(start, start.Offset(OneMeterInRadians, Geo.DegreesToRadians(azimuth)));
+            var segment = oneMeterSegment.Scale(length);
             Segment = new GeoArray(segment[0], segment[1]); 
             Initialize();
         }

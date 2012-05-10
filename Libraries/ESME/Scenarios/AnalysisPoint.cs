@@ -165,10 +165,10 @@ namespace ESME.Scenarios
             var startGeo = AnalysisPoint.Geo;
             foreach (var radial in Radials)
             {
-                geos.Add(startGeo);
-                geos.Add(((Geo)startGeo).Offset(Geo.KilometersToRadians(radial.Length / 1000), Geo.DegreesToRadians(radial.Bearing)));
-                geos.Add(startGeo);
+                geos.Add(radial.Segment[0]);
+                geos.Add(radial.Segment[1]);
             }
+            geos.Add(startGeo);
             mapLayer.Add(geos);
             mapLayer.Done();
             if (LayerSettings == null) LayerSettings = new LayerSettings();
@@ -257,7 +257,7 @@ namespace ESME.Scenarios
         [NotMapped]
         public GeoSegment Segment
         {
-            get { return _segment ?? (_segment = new GeoSegment(TransmissionLoss.AnalysisPoint.Geo, Geo.KilometersToRadians(Length / 1000f), Geo.DegreesToRadians(Bearing))); }
+            get { return _segment ?? (_segment = new GeoSegment(TransmissionLoss.AnalysisPoint.Geo, Length, Bearing)); }
         }
         GeoSegment _segment;
 

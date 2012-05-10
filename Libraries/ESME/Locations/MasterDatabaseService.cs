@@ -11,7 +11,6 @@ using Devart.Data.SQLite;
 using Devart.Data.SQLite.Entity.Configuration;
 using ESME.Database;
 using ESME.Environment;
-using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.Plugins;
 using ESME.Scenarios;
@@ -41,9 +40,7 @@ namespace ESME.Locations
         void Add(Perimeter perimeter, bool saveChanges = false);
         void Add(PerimeterCoordinate coordinate, bool replaceExisting = false, bool saveChanges = false);
         void Add(ScenarioSpecies species, bool saveChanges = false);
-        void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry, bool saveChanges = false);
-        void Add(Scenarios.TransmissionLoss transmissionLoss, bool saveChanges = false);
-        void Add(Radial radial, bool saveChanges = false);
+        void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry);
         Location ImportLocationFromOverlayFile(string overlayFilename, string locationName);
         EnvironmentalDataSet LoadOrCreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin);
         Scenario CreateScenario(string scenarioName, string comments, TimeSpan startTime, TimeSpan duration, TimePeriod timePeriod, Location location);
@@ -218,11 +215,9 @@ namespace ESME.Locations
             if (saveChanges) SaveChanges();
         }
 
-        public void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry, bool saveChanges = false)
+        public void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry)
         {
             if (analysisPoint.LayerSettings == null) analysisPoint.LayerSettings = new LayerSettings();
-            Context.LayerSettings.Add(analysisPoint.LayerSettings);
-            if (analysisPoint.Scenario == null) throw new ScenarioException(string.Format("Scenario for analysis point at {0} was not specified", analysisPoint.Geo));
             Console.WriteLine("Adding analysis point at {0}", analysisPoint.Geo);
             var depthAtAnalysisPoint = bathymetry.Samples.IsFast2DLookupAvailable
                                            ? -bathymetry.Samples.GetNearestPointAsync(analysisPoint.Geo).Result.Data
@@ -243,6 +238,8 @@ namespace ESME.Locations
                     IsReadyToCalculate = false,
                     Mode = mode,
                 };
+                analysisPoint.TransmissionLosses.Add(transmissionLoss);
+                Log(transmissionLoss, "Added new transmission loss for mode {0} to analysis point at {1} to scenario {2} in location {3}", transmissionLoss.Mode.ModeName, (Geo)transmissionLoss.AnalysisPoint.Geo, transmissionLoss.AnalysisPoint.Scenario, transmissionLoss.AnalysisPoint.Scenario.Location); 
                 var radialCount = mode.MaxPropagationRadius <= 10000 ? 8 : 16;
                 Console.WriteLine("    Radius: {0}m, radial count: {1}", mode.MaxPropagationRadius, radialCount);
                 for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
@@ -256,35 +253,11 @@ namespace ESME.Locations
                         Length = transmissionLoss.Mode.MaxPropagationRadius,
                         IsCalculated = false,
                     };
-                    Add(radial);
+                    transmissionLoss.Radials.Add(radial);
+                    Log(radial, "Added new radial with bearing {0} and length {1} to transmission loss for mode {2} in analysis point at {3} to scenario {4} in location {5}", radial.Bearing, radial.Length, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo, radial.TransmissionLoss.AnalysisPoint.Scenario, radial.TransmissionLoss.AnalysisPoint.Scenario.Location);
                 }
-                Add(transmissionLoss);
             }
-            Context.AnalysisPoints.Add(analysisPoint);
             Log(analysisPoint, "Added new analysis point at {0} to scenario {1} in location {2}", (Geo)analysisPoint.Geo, analysisPoint.Scenario, analysisPoint.Scenario.Location);
-            if (saveChanges) SaveChanges();
-        }
-        public void Add(Scenarios.TransmissionLoss transmissionLoss, bool saveChanges = false)
-        {
-            var existing = (from t in Context.TransmissionLosses
-                            where t.Mode.Guid == transmissionLoss.Mode.Guid && t.AnalysisPoint.Guid == transmissionLoss.AnalysisPoint.Guid
-                            select t).FirstOrDefault();
-            if (existing != null) throw new DuplicateNameException(String.Format("A transmission loss for mode {0} already exists for the analysis point at {1}", transmissionLoss.Mode.ModeName, (Geo)transmissionLoss.AnalysisPoint.Geo));
-            if (transmissionLoss.LayerSettings == null) transmissionLoss.LayerSettings = new LayerSettings();
-            Context.LayerSettings.Add(transmissionLoss.LayerSettings);
-            Context.TransmissionLosses.Add(transmissionLoss);
-            Log(transmissionLoss, "Added new transmission loss for mode {0} to analysis point at {1} to scenario {2} in location {3}", transmissionLoss.Mode.ModeName, (Geo)transmissionLoss.AnalysisPoint.Geo, transmissionLoss.AnalysisPoint.Scenario, transmissionLoss.AnalysisPoint.Scenario.Location);
-            if (saveChanges) SaveChanges();
-        }
-        public void Add(Radial radial, bool saveChanges = false)
-        {
-            var existing = (from r in Context.Radials
-                            where r.Bearing == radial.Bearing && r.TransmissionLoss.Guid == radial.TransmissionLoss.Guid
-                            select r).FirstOrDefault();
-            if (existing != null) throw new DuplicateNameException(String.Format("A radial with bearing {0} already exists in the transmission loss for mode {1} in analysis point at {2}", radial.Bearing, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo));
-            Context.Radials.Add(radial);
-            Log(radial, "Added new radial with bearing {0} and length {1} to transmission loss for mode {2} in analysis point at {3} to scenario {4} in location {5}", radial.Bearing, radial.Length, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo, radial.TransmissionLoss.AnalysisPoint.Scenario, radial.TransmissionLoss.AnalysisPoint.Scenario.Location);
-            if (saveChanges) SaveChanges();
         }
         #endregion
 

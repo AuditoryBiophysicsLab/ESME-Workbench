@@ -369,7 +369,11 @@ namespace ESMEWorkbench.ViewModels.Main
                 {
                     var analysisPoint = new AnalysisPoint {Geo = MouseGeo, Scenario = Scenario};
                     Scenario.AnalysisPoints.Add(analysisPoint);
-                    Database.Add(analysisPoint, (Bathymetry)_cache[Scenario.Bathymetry].Result, true);
+                    TaskEx.Run(() =>
+                    {
+                        Database.Add(analysisPoint, (Bathymetry)_cache[Scenario.Bathymetry].Result);
+                        _dispatcher.InvokeInBackgroundIfRequired(analysisPoint.CreateMapLayers);
+                    });
                 }
                 IsInAnalysisPointMode = false;
                 Cursor = Cursors.Arrow;
