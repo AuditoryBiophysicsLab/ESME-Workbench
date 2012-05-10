@@ -162,14 +162,13 @@ namespace ESME.Scenarios
                 Name = string.Format("{0}", Guid),
             };
             var geos = new List<Geo>();
-            var startGeo = AnalysisPoint.Geo;
             foreach (var radial in Radials)
             {
                 geos.Add(radial.Segment[0]);
                 geos.Add(radial.Segment[1]);
             }
-            geos.Add(startGeo);
-            mapLayer.Add(geos);
+            geos.Add(geos[0]);
+            mapLayer.AddLines(geos);
             mapLayer.Done();
             if (LayerSettings == null) LayerSettings = new LayerSettings();
             LayerSettings.MapLayerViewModel = mapLayer;

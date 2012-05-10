@@ -175,7 +175,11 @@ namespace ESMEWorkbench.ViewModels.Map
                 }
                 else
                 {
-                    if (layer.LineStyle != null) ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultLineStyle = layer.LineStyle;
+                    if (layer.LineStyle != null)
+                    {
+                        ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultLineStyle = layer.LineStyle;
+                        ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = layer.AreaStyle;
+                    }
                     if (layer.PointStyle != null) ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultPointStyle = layer.PointStyle;
                 }
             }

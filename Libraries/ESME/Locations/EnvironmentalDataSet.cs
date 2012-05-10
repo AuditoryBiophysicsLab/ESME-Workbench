@@ -76,7 +76,7 @@ namespace ESME.Locations
                     var geos = (from s in ((SoundSpeed)Location.Cache[this].Result).SoundSpeedFields[0].EnvironmentData
                                 select (Geo)s).ToArray();
                     pointLayer.Clear();
-                    pointLayer.Add(geos, true);
+                    pointLayer.AddPoints(geos);
                     pointLayer.Done();
                     LayerSettings.MapLayerViewModel = pointLayer;
                     break;

@@ -6,8 +6,6 @@ using System.Windows.Media;
 using ESME.Animats;
 using ESME.NEMO.Overlay;
 using ESME.Scenarios;
-using ESME.TransmissionLoss;
-using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
@@ -69,13 +67,8 @@ namespace ESME.Mapping
             {
                 LayerType = LayerType.BaseMap,
                 AreaStyle = AreaStyles.Country2,
-                CanBeRemoved = false,
-                CanBeReordered = true,
-                CanChangeAreaColor = true,
-                CanChangeLineColor = true,
                 ShapefileName = baseMapShapefileName,
                 Name = baseMapLayerName,
-                MapLayers = this,
             });
             MediatorMessage.Send(MediatorMessage.SetMapLayers, this);
         }
@@ -104,7 +97,6 @@ namespace ESME.Mapping
 
         public new void Add(MapLayerViewModel item)
         {
-            if (item.MapLayers == null) item.MapLayers = this;
             if (IndexOf(item) != -1) return;
             base.Add(item);
         }
@@ -121,12 +113,7 @@ namespace ESME.Mapping
                 LayerType = LayerType.BaseMap,
                 Name = layerName,
                 AreaStyle = areaStyle,
-                CanBeRemoved = canBeRemoved,
-                CanBeReordered = canBeReordered,
-                CanChangeAreaColor = canChangeAreaColor,
-                CanChangeLineColor = canChangeLineColor,
                 ShapefileName = shapeFileName,
-                MapLayers = this,
             };
             if (lineColor != Colors.Transparent) shapeFileLayer.LineColor = lineColor;
             shapeFileLayer.IsChecked = isVisible;
@@ -150,11 +137,6 @@ namespace ESME.Mapping
             {
                 LayerType = layerType,
                 Name = layerName,
-                CanBeRemoved = canBeRemoved,
-                CanBeReordered = canBeReordered,
-                CanChangeAreaColor = false,
-                CanChangeLineColor = canChangeLineColor,
-                MapLayers = this,
             };
             if (lineColor != Colors.Transparent) overlayShapeLayer.LineColor = lineColor;
             if (Math.Abs(lineWidth - 0f) > 0.0001) overlayShapeLayer.LineWidth = lineWidth;
@@ -174,10 +156,6 @@ namespace ESME.Mapping
             var bitmapLayer = Find<RasterMapLayer>(LayerType.BathymetryRaster, layerName) ?? new RasterMapLayer
             {
                 Name = layerName,
-                CanBeReordered = canBeReordered,
-                CanChangeLineColor = false,
-                CanChangeLineWidth = false,
-                CanBeRemoved = canBeRemoved,
                 LayerType = LayerType.BathymetryRaster,
             };
             if (bounds != null)
@@ -196,7 +174,6 @@ namespace ESME.Mapping
 
         public void DisplayAnalysisPoint(AnalysisPoint curPoint)
         {
-            var oldIndex = -1;
             var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Geo.Latitude, curPoint.Geo.Longitude);
             var analysisPointLayer = Find<AnalysisPointLayer>(LayerType.AnalysisPoint, analysisPointName);
             if (analysisPointLayer == null)
@@ -205,19 +182,12 @@ namespace ESME.Mapping
                 {
                     Name = analysisPointName,
                     LineWidth = 1,
-                    CanBeRemoved = true,
-                    CanBeReordered = true,
-                    CanChangeLineColor = true,
-                    CanChangeLineWidth = true,
-                    CanChangeAreaColor = false,
                 };
-                if (oldIndex < 0) Add(analysisPointLayer);
-                else this[oldIndex] = analysisPointLayer;
+                Add(analysisPointLayer);
             }
             analysisPointLayer.IsEnabled = true;
 
             analysisPointLayer.AnalysisPoint = curPoint;
-            analysisPointLayer.Validate();
 
             analysisPointLayer.Clear();
             foreach (var transmissionLoss in curPoint.TransmissionLosses)
@@ -253,22 +223,15 @@ namespace ESME.Mapping
                     Name = layerName,
                     LayerType = LayerType.Propagation,
                     LineWidth = 1,
-                    CanBeRemoved = false,
-                    CanBeReordered = true,
-                    CanChangeLineColor = true,
-                    CanChangeLineWidth = true,
-                    CanChangeAreaColor = false,
                     IsChecked = false,
                 };
                 Add(propagationPointLayer);
             }
             propagationPointLayer.IsEnabled = true;
             propagationPointLayer.TransmissionLoss = curPoint;
-            propagationPointLayer.Validate();
 
             propagationPointLayer.Clear();
             var displayPoints = new List<Geo>();
-            var circlePoints = new List<Geo>();
             var radialCount = curPoint.Radials.Count();
             var radials = curPoint.Radials.ToArray();
             var maxRange = curPoint.Radials.Max(r => r.Ranges.Last());
@@ -323,17 +286,11 @@ namespace ESME.Mapping
                     Name = speciesLayerName,
                     LayerType = LayerType.Animal,
                     LineWidth = 1,
-                    CanBeRemoved = false,
-                    CanBeReordered = true,
-                    CanChangeLineColor = true,
-                    CanChangeLineWidth = true,
-                    CanChangeAreaColor = false,
                     IsChecked = false,
                 };
                 Add(speciesLayer);
             }
             var startPoints = animatFile.AnimatStartPoints.Select(startPoint => new OverlayPoint(startPoint));
-            speciesLayer.ToolTip = String.Format("Layer contains {0} animats", animatFile.TotalAnimats);
             speciesLayer.IsEnabled = true;
             speciesLayer.Clear();
             speciesLayer.Add(startPoints);

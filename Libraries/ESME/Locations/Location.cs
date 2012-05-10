@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Windows.Data;
+using System.Windows.Media;
 using ESME.Database;
 using ESME.Mapping;
 using ESME.Scenarios;
@@ -63,9 +64,10 @@ namespace ESME.Locations
                 Name = string.Format("{0}", Guid),
             };
             var geoRect = (GeoRect)GeoRect;
-            mapLayer.Add(new List<Geo> { geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest });
+            mapLayer.AddPolygon(new List<Geo> { geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest });
             mapLayer.Done();
             if (LayerSettings == null) LayerSettings = new LayerSettings();
+            LayerSettings.AreaColor = Colors.Transparent;
             LayerSettings.MapLayerViewModel = mapLayer;
         }
 

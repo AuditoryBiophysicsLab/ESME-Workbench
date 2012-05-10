@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Xml.Serialization;
 using ESME.NEMO.Overlay;
@@ -49,6 +48,7 @@ namespace ESME.Mapping
 
         public OverlayShapeMapLayer()
         {
+            _layer = new InMemoryFeatureLayer();
             LayerOverlay.Layers.Clear();
             PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
             while (PointSymbolType == PointSymbolType.Cross) PointSymbolType = (PointSymbolType)(Random.Next(8));
@@ -77,23 +77,31 @@ namespace ESME.Mapping
                                                 BaseShape.CreateShapeFromWellKnownData(overlayShape.WellKnownText)));
         }
 
-        static string WellKnownText(ICollection<Geo> geos, bool isPointData)
+        static string WellKnownText(string openTag, ICollection<Geo> geos, string closeTag)
         {
             if (geos.Count < 1) return null;
-            if (geos.Count == 1) return string.Format("POINT({0} {1})", geos.First().Latitude, geos.First().Longitude);
-            var retval = new StringBuilder();
-            retval.Append(isPointData ? "MULTIPOINT(" : "LINESTRING(");
-            foreach (var geo in geos) retval.Append(string.Format("{0} {1}, ", geo.Longitude, geo.Latitude));
-            retval.Remove(retval.Length - 2, 2); // Lose the last comma and space
-            retval.Append(")");
-            return retval.ToString();
+            return geos.Count == 1 ? string.Format("POINT({0})", GeosToStrings(geos)) : string.Format("{0}{1}{2}", openTag, string.Join(", ", GeosToStrings(geos)), closeTag);
+        }
+        static IEnumerable<string> GeosToStrings(IEnumerable<Geo> geos) 
+        {
+            return geos.Select(geo => string.Format("{0} {1}", geo.Longitude, geo.Latitude));
         }
 
         public void Add(IEnumerable<OverlayShape> overlayShapes) { foreach (var shape in overlayShapes) Add(shape); }
-        public void Add(ICollection<Geo> geos, bool isPointData = false)
+
+        public void AddLines(ICollection<Geo> geos)
         {
-            _layer = new InMemoryFeatureLayer();
-            _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText(geos, isPointData))));
+            _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText("LINESTRING(", geos, ")"))));
+        }
+
+        public void AddPoints(ICollection<Geo> geos)
+        {
+            _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText("MULTIPOINT(", geos, ")"))));
+        }
+
+        public void AddPolygon(ICollection<Geo> geos)
+        {
+            _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText("POLYGON((", geos, "))"))));
         }
 
         public void Clear() { if (_layer != null) _layer.InternalFeatures.Clear(); }
@@ -131,34 +139,7 @@ namespace ESME.Mapping
             LayerType = LayerType.AnalysisPoint;
         }
 
-        AnalysisPoint _analysisPoint;
-
-        [XmlIgnore]
-        public AnalysisPoint AnalysisPoint
-        {
-            get { return _analysisPoint; }
-            set
-            {
-                _analysisPoint = value;
-                if (_analysisPoint != null) _analysisPoint.PropertyChanged += (s, e) =>
-                {
-                    var ap = (AnalysisPoint)s;
-                    ap.Validate();
-                    ValidationErrorText = ap.ValidationErrorText;
-                };
-            }
-        }
-
-        public override void Validate()
-        {
-            if (AnalysisPoint == null)
-            {
-                ValidationErrorText = "Unable to validate - AnalysisPoint is null";
-                return;
-            }
-            AnalysisPoint.Validate();
-            ValidationErrorText = AnalysisPoint.ValidationErrorText;
-        }
+        [XmlIgnore] public AnalysisPoint AnalysisPoint { get; set; }
     }
 
     [Serializable]
@@ -169,28 +150,6 @@ namespace ESME.Mapping
             LayerType = LayerType.Propagation;
         }
 
-        Scenarios.TransmissionLoss _transmissionLoss;
-
-        [XmlIgnore]
-        public Scenarios.TransmissionLoss TransmissionLoss
-        {
-            get { return _transmissionLoss; }
-            set
-            {
-                _transmissionLoss = value;
-                Validate();
-            }
-        }
-
-        public override void Validate()
-        {
-            if (TransmissionLoss == null)
-            {
-                ValidationErrorText = "Unable to validate - TransmissionLoss is null";
-                return;
-            }
-            TransmissionLoss.Validate();
-            ValidationErrorText = TransmissionLoss.ValidationErrorText;
-        }
+        [XmlIgnore] public Scenarios.TransmissionLoss TransmissionLoss { get; set; }
     }
 }

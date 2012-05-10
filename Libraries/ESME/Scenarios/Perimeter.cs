@@ -35,7 +35,7 @@ namespace ESME.Scenarios
             var geos = (from p in PerimeterCoordinates
                         orderby p.Order
                         select (Geo)p.Geo).ToList();
-            mapLayer.Add(geos);
+            mapLayer.AddPolygon(geos);
             mapLayer.Done();
             LayerSettings.MapLayerViewModel = mapLayer;
         }

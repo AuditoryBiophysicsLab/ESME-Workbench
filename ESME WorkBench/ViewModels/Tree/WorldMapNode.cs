@@ -60,10 +60,6 @@ namespace ESMEWorkbench.ViewModels.Tree
             LayerType = LayerType.BaseMap,
             AreaColor = Colors.Transparent,
             AreaStyle = MapLayerViewModel.CreateAreaStyle(Settings.Default.WorldMapLineColor, (float)Settings.Default.WorldMapLineWeight, Colors.Transparent),
-            CanBeRemoved = false,
-            CanBeReordered = true,
-            CanChangeAreaColor = true,
-            CanChangeLineColor = true,
             ShapefileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"),
             Name = "World Map",
         };

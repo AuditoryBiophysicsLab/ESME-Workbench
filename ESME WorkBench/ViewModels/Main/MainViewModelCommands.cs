@@ -5,7 +5,6 @@ using System.Reflection;
 using ESME;
 using ESME.Data;
 using ESMEWorkbench.ViewModels.TransmissionLoss;
-using HRC.Navigation;
 using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Main
@@ -83,6 +82,7 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 return _viewClosing ?? (_viewClosing = new SimpleCommand<object, object>(o =>
                 {
+                    //if (Database.Context.ChangeTracker.Entries())
                     Database.Context.SaveChanges();
                     MediatorMessage.Send(MediatorMessage.ApplicationClosing, true);
                     ESME.Globals.AppSettings.Save();

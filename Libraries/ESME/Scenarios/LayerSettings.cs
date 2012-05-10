@@ -19,7 +19,7 @@ namespace ESME.Scenarios
         {
             PointSymbolType = new DbPointSymbolType {PointSymbolTypeAsInt = Random.Next(8)};
             LineOrSymbolDbColor = new DbColor(ColorExtensions.GetRandomNamedColor());
-            AreaDbColor = new DbColor(ColorExtensions.GetRandomNamedColor());
+            AreaDbColor = new DbColor(Colors.Transparent);
         }
         [Key, Initialize] public Guid Guid { get; set; }
         bool _isChecked;

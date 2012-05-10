@@ -112,7 +112,7 @@ namespace ESME.Scenarios
                     new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, LayerSettings.LineOrSymbolColor, (float)LayerSettings.LineOrSymbolSize)
             };
 
-            mapLayer.Add(new List<Geo> { Geo, ((Geo)Geo).Offset(HRC.Navigation.Geo.KilometersToRadians(25), HRC.Navigation.Geo.DegreesToRadians(90)) });
+            mapLayer.AddLines(new List<Geo> { Geo, ((Geo)Geo).Offset(HRC.Navigation.Geo.KilometersToRadians(25), HRC.Navigation.Geo.DegreesToRadians(90)) });
             mapLayer.Done();
             LayerSettings.MapLayerViewModel = mapLayer;
             if (Perimeter != null) Perimeter.CreateMapLayers();

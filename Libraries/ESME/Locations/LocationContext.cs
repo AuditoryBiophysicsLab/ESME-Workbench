@@ -1,7 +1,10 @@
+using System.Data;
 using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
+using System.Linq;
 using ESME.Scenarios;
+using HRC.Aspects;
 
 namespace ESME.Locations
 {
@@ -15,6 +18,15 @@ namespace ESME.Locations
             Configuration.LazyLoadingEnabled = true;
             Configuration.ValidateOnSaveEnabled = true;
             System.Data.Entity.Database.SetInitializer(new LocationDatabaseInitializer());
+        }
+
+        public bool IsModified
+        {
+            get
+            {
+                ChangeTracker.DetectChanges();
+                return ChangeTracker.Entries().Any(e => e.State != EntityState.Unchanged);
+            }
         }
 
         public DbSet<Location> Locations { get; set; }
