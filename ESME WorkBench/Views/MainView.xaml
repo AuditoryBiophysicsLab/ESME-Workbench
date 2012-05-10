@@ -71,6 +71,7 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
@@ -80,29 +81,33 @@
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
             <StatusBarItem Grid.Column="0">
-                <TextBlock Text="{Binding MouseLocationInfo}" />
+                <TextBlock Text="{Binding MouseLatitude}" MinWidth="75"/>
             </StatusBarItem>
             <Separator Grid.Column="1" />
             <StatusBarItem Grid.Column="2">
-                <TextBlock Text="{Binding MouseDepthInfo}" />
+                <TextBlock Text="{Binding MouseLongitude}" MinWidth="85"/>
             </StatusBarItem>
             <Separator Grid.Column="3" />
             <StatusBarItem Grid.Column="4">
-                <TextBlock Text="{Binding MouseSedimentInfo}" />
+                <TextBlock Text="{Binding MouseDepthInfo}" MinWidth="85"/>
             </StatusBarItem>
             <Separator Grid.Column="5" />
             <StatusBarItem Grid.Column="6">
-                <TextBlock Text="{Binding MouseSoundSpeedInfo}" />
+                <TextBlock Text="{Binding MouseWindSpeedInfo}" MinWidth="75"/>
             </StatusBarItem>
             <Separator Grid.Column="7" />
             <StatusBarItem Grid.Column="8">
-                <TextBlock Text="{Binding MouseWindSpeedInfo}" />
+                <TextBlock Text="{Binding MouseSoundSpeedInfo}" MinWidth="135"/>
             </StatusBarItem>
+            <Separator Grid.Column="9" />
             <StatusBarItem Grid.Column="10">
+                <TextBlock Text="{Binding MouseSedimentInfo}" />
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="11">
                 <TextBlock Text="{Binding CacheActivity}" />
             </StatusBarItem>
-            <Separator Grid.Column="11" />
-            <StatusBarItem Grid.Column="12">
+            <Separator Grid.Column="12" />
+            <StatusBarItem Grid.Column="13">
                 <TextBlock Text="{Binding TransmissionLossActivity}" />
             </StatusBarItem>
         </StatusBar>

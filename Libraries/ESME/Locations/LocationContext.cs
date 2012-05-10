@@ -4,7 +4,6 @@ using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using ESME.Scenarios;
-using HRC.Aspects;
 
 namespace ESME.Locations
 {
