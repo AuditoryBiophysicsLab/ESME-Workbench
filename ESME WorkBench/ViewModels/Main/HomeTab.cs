@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
@@ -43,6 +44,19 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 if (_scenario != null)
                 {
+                    if (Database.Context.IsModified)
+                    {
+                        var result = _messageBox.ShowYesNoCancel("The experiment has been modified.  Would you like to save your changes before switching experiments?", MessageBoxImage.Question);
+                        switch (result)
+                        {
+                            case MessageBoxResult.Yes:
+                                Database.SaveChanges();
+                                break;
+                            case MessageBoxResult.Cancel:
+                                return;
+                        }
+                    }
+
                     // todo: Remove any existing map layers here
                     _scenario.RemoveMapLayers();
                     _scenario.Location.RemoveMapLayers();
@@ -116,7 +130,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 Comments = vm.Comments,
                 TimePeriod = vm.TimePeriod,
             };
-            Database.Add(scenario, true);
+            Database.Add(scenario);
         }
         #endregion
         [MediatorMessageSink(MediatorMessage.DeleteAnalysisPoint), UsedImplicitly]

@@ -219,7 +219,6 @@ namespace ESMEWorkbench.ViewModels.Main
                 MouseSoundSpeedInfo = string.Format("Sound Speed: N/A");
                 MapViewModel.MouseSoundSpeedProfile = MouseSoundSpeed;
             }
-
             if (Scenario != null && Scenario.Sediment != null && _cache.IsCached(Scenario.Sediment))
             {
                 if (_sedimentTask == null)

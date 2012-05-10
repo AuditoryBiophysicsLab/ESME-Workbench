@@ -31,22 +31,23 @@ namespace ESME.Locations
         Scenario FindScenario(string scenarioName);
         bool ScenarioExists(string scenarioName);
         void Refresh();
-        void Add(Location location, bool saveChanges = false);
-        void Add(Scenario scenario, bool saveChanges = false);
-        void Add(Platform platform, bool saveChanges = false);
-        void Add(Source source, bool saveChanges = false);
-        void Add(Mode mode, bool saveChanges = false);
-        void Add(Scenario scenario, EnvironmentalDataSet dataSet, bool replaceExisting = false, bool saveChanges = false);
-        void Add(Perimeter perimeter, bool saveChanges = false);
-        void Add(PerimeterCoordinate coordinate, bool replaceExisting = false, bool saveChanges = false);
-        void Add(ScenarioSpecies species, bool saveChanges = false);
+        void Add(Location location);
+        void Add(Scenario scenario);
+        void Add(Platform platform);
+        void Add(Source source);
+        void Add(Mode mode);
+        void Add(Scenario scenario, EnvironmentalDataSet dataSet, bool replaceExisting = false);
+        void Add(Perimeter perimeter);
+        void Add(PerimeterCoordinate coordinate, bool replaceExisting = false);
+        void Add(ScenarioSpecies species);
         void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry);
         Location ImportLocationFromOverlayFile(string overlayFilename, string locationName);
         EnvironmentalDataSet LoadOrCreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin);
         Scenario CreateScenario(string scenarioName, string comments, TimeSpan startTime, TimeSpan duration, TimePeriod timePeriod, Location location);
         void SetEnvironmentalData(Scenario scenario, EnvironmentalDataSet data);
-        void DeleteLocation(Location location, bool saveChanges);
+        void DeleteLocation(Location location);
         void DeleteEnvironmentalDataSet(EnvironmentalDataSet dataSet);
+        void SaveChanges();
     }
 
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -96,7 +97,7 @@ namespace ESME.Locations
         }
 
         #region Add operations
-        public void Add(Location location, bool saveChanges = false)
+        public void Add(Location location)
         {
             if (LocationExists(location.Name)) throw new DuplicateNameException(String.Format("A location named {0} already exists, choose another name", location.Name));
             if (location.StorageDirectory == null)
@@ -105,9 +106,8 @@ namespace ESME.Locations
             if (!Directory.Exists(storageDirectoryPath)) Directory.CreateDirectory(storageDirectoryPath);
             Context.Locations.Add(location);
             Log(location, "Added location {0}", location.Name);
-            if (saveChanges) SaveChanges();
         }
-        public void Add(Scenario scenario, bool saveChanges = false)
+        public void Add(Scenario scenario)
         {
             var existing = (from s in Context.Scenarios.Local
                             where s.Name == scenario.Name && s.Location == scenario.Location
@@ -122,31 +122,27 @@ namespace ESME.Locations
 
             Context.Scenarios.Add(scenario);
             Log(scenario, "Added new scenario {0} to data set to location {1}", scenario.Name, scenario.Location.Name);
-            if (saveChanges) SaveChanges();
         }
-        public void Add(Platform platform, bool saveChanges = false)
+        public void Add(Platform platform)
         {
             Context.Platforms.Add(platform);
             if (platform.LayerSettings == null) platform.LayerSettings = new LayerSettings();
             Context.LayerSettings.Add(platform.LayerSettings);
             Log(platform, "Added new platform {0} to scenario {1} in location {2}", platform.Description, platform.Scenario.Name, platform.Scenario.Location.Name);
-            if (saveChanges) SaveChanges();
         }
-        public void Add(Source source, bool saveChanges = false)
+        public void Add(Source source)
         {
             Context.Sources.Add(source);
             Log(source, "Added new source {0} to platform {1} in scenario {2} in location {3}", source.SourceName, source.Platform.Description, source.Platform.Scenario.Name, source.Platform.Scenario.Location.Name);
-            if (saveChanges) SaveChanges();
         }
-        public void Add(Mode mode, bool saveChanges = false)
+        public void Add(Mode mode)
         {
             Context.Modes.Add(mode);
             if (mode.LayerSettings == null) mode.LayerSettings = new LayerSettings();
             Context.LayerSettings.Add(mode.LayerSettings);
             Log(mode, "Added new mode {0} to source {1} of platform {2} in scenario {3} in location {4}", mode.ModeName, mode.Source.SourceName, mode.Source.Platform.Description, mode.Source.Platform.Scenario.Name, mode.Source.Platform.Scenario.Location.Name);
-            if (saveChanges) SaveChanges();
         }
-        public void Add(Scenario scenario, EnvironmentalDataSet dataSet, bool replaceExisting = false, bool saveChanges = false)
+        public void Add(Scenario scenario, EnvironmentalDataSet dataSet, bool replaceExisting = false)
         {
             EnvironmentalDataSet oldData = null;
             // todo: Check to see if replacing any of these datasets might invalidate any transmission losses we have previously calculated
@@ -178,9 +174,8 @@ namespace ESME.Locations
                 Log(scenario, dataSet, "Added new {0} data set to scenario {1} (source {2})", dataSet.SourcePlugin.PluginSubtype, scenario.Name, dataSet.SourcePlugin.Type);
             else
                 Log(scenario, dataSet, "Replaced old {0} data set in scenario {1} (old source {2}) with data from source {3}", oldData.SourcePlugin.PluginSubtype, scenario.Name, oldData.SourcePlugin.Type, dataSet.SourcePlugin.Type);
-            if (saveChanges) SaveChanges();
         }
-        public void Add(Perimeter perimeter, bool saveChanges = false)
+        public void Add(Perimeter perimeter)
         {
             var existing = (from p in Context.Perimeters
                             where p.Name == perimeter.Name && p.Scenario.Guid == perimeter.Scenario.Guid
@@ -190,9 +185,8 @@ namespace ESME.Locations
             Context.LayerSettings.Add(perimeter.LayerSettings);
             Context.Perimeters.Add(perimeter);
             Log(perimeter, "Added new perimeter {0} to scenario {1} in location {2}", perimeter.Name, perimeter.Scenario.Name, perimeter.Scenario.Location.Name);
-            if (saveChanges) SaveChanges();
         }
-        public void Add(PerimeterCoordinate coordinate, bool replaceExisting = false, bool saveChanges = false)
+        public void Add(PerimeterCoordinate coordinate, bool replaceExisting = false)
         {
             var existing = (from c in Context.PerimeterCoordinates.Local
                             where c.Perimeter == coordinate.Perimeter && c.Order == coordinate.Order
@@ -200,9 +194,8 @@ namespace ESME.Locations
             if (existing != null && !replaceExisting) throw new ArgumentException(string.Format("Perimeter {0} already has a point at index {1}.  Did you intend to replace it?", coordinate.Perimeter.Name, coordinate.Order), "coordinate");
             if (existing != null) Context.PerimeterCoordinates.Remove(existing);
             Context.PerimeterCoordinates.Add(coordinate);
-            if (saveChanges) SaveChanges();
         }
-        public void Add(ScenarioSpecies species, bool saveChanges = false)
+        public void Add(ScenarioSpecies species)
         {
             var existing = (from s in Context.ScenarioSpecies.Local
                             where s.LatinName == species.LatinName && s.Scenario == species.Scenario
@@ -212,7 +205,6 @@ namespace ESME.Locations
             Context.LayerSettings.Add(species.LayerSettings);
             Context.ScenarioSpecies.Add(species);
             Log(species, "Added new species {0} to scenario {1} in location {2}", species.LatinName, species.Scenario.Name, species.Scenario.Location.Name);
-            if (saveChanges) SaveChanges();
         }
 
         public void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry)
@@ -298,7 +290,6 @@ namespace ESME.Locations
             Context.LayerSettings.Add(environmentalDataSet.LayerSettings);
             Context.EnvironmentalDataSets.Add(environmentalDataSet);
             Log(environmentalDataSet, "Added new data set to {0}. Data type: {1}, resolution: {2}{3}", location.Name, sourcePlugin.PluginSubtype, resolution, timePeriod != TimePeriod.Invalid ? String.Format("  TimePeriod: {0}", timePeriod) : "");
-            SaveChanges();
             return environmentalDataSet;
         }
         #endregion
@@ -320,7 +311,6 @@ namespace ESME.Locations
             Context.LayerSettings.Add(scenario.LayerSettings);
             Context.Scenarios.Add(scenario);
             Log(scenario, "Created");
-            SaveChanges();
             return scenario;
         }
 
@@ -341,12 +331,11 @@ namespace ESME.Locations
                     scenario.Bathymetry = data;
                     break;
             }
-            SaveChanges();
         }
         #endregion
 
         #region Delete operations
-        public void DeleteLocation(Location location, bool saveChanges)
+        public void DeleteLocation(Location location)
         {
             // todo: Handle the case where this location is used by one or more scenarios
             var scenarios = (from scenario in Context.Scenarios
@@ -410,17 +399,14 @@ namespace ESME.Locations
             }
             Directory.Delete(Path.Combine(MasterDatabaseDirectory, location.StorageDirectory));
             Context.Locations.Remove(location);
-            if (saveChanges) SaveChanges();
         }
-        public void DeleteEnvironmentalDataSet(EnvironmentalDataSet dataSet) { DeleteEnvironmentalDataSet(dataSet, true); }
-        protected void DeleteEnvironmentalDataSet(EnvironmentalDataSet dataSet, bool saveChanges)
+        public void DeleteEnvironmentalDataSet(EnvironmentalDataSet dataSet)
         {
             // todo: Handle the case where this data set is used by one or more scenarios
             var fileName = Path.Combine(MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
             var filesToDelete = Directory.EnumerateFiles(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".*").ToList();
             foreach (var file in filesToDelete) File.Delete(file);
             Context.EnvironmentalDataSets.Remove(dataSet);
-            if (saveChanges) SaveChanges();
         }
         #endregion
 
@@ -466,7 +452,7 @@ namespace ESME.Locations
             OnPropertyChanged("Scenarios");
         }
 
-        void SaveChanges()
+        public void SaveChanges()
         {
             lock (Context)
             {

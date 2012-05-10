@@ -1,11 +1,14 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Windows;
 using ESME;
 using ESME.Data;
 using ESMEWorkbench.ViewModels.TransmissionLoss;
 using HRC.ViewModels;
+using HRC.WPF;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
@@ -76,21 +79,32 @@ namespace ESMEWorkbench.ViewModels.Main
         #endregion
 
         #region ViewClosingCommand
-        public SimpleCommand<object, object> ViewClosingCommand
+        public SimpleCommand<object, EventToCommandArgs> ViewClosingCommand
         {
             get
             {
-                return _viewClosing ?? (_viewClosing = new SimpleCommand<object, object>(o =>
+                return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(o =>
                 {
-                    //if (Database.Context.ChangeTracker.Entries())
-                    Database.Context.SaveChanges();
+                    if (Database.Context.IsModified)
+                    {
+                        var result = _messageBox.ShowYesNoCancel("The experiment has been modified.  Would you like to save your changes before exiting?", MessageBoxImage.Question);
+                        switch (result)
+                        {
+                            case MessageBoxResult.Yes:
+                                Database.SaveChanges();
+                                break;
+                            case MessageBoxResult.Cancel:
+                                ((CancelEventArgs)o.EventArgs).Cancel = true;
+                                return;
+                        }
+                    }
                     MediatorMessage.Send(MediatorMessage.ApplicationClosing, true);
                     ESME.Globals.AppSettings.Save();
                 }));
             }
         }
 
-        SimpleCommand<object, object> _viewClosing;
+        SimpleCommand<object, EventToCommandArgs> _viewClosing;
         #endregion
 
         #region RefreshMapCommand

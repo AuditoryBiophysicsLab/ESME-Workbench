@@ -234,7 +234,6 @@ namespace ESME.Simulator
             }
             using (var transaction = new TransactionScope())
             {
-                SaveChanges();
                 transaction.Complete();
             }
             return newScenario;

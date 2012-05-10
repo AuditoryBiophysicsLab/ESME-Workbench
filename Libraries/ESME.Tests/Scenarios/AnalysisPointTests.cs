@@ -79,7 +79,7 @@ namespace ESME.Tests.Scenarios
             if (location != null)
             {
                 Console.WriteLine(string.Format("Test location '{0}' already exists.  Deleting the existing location.", locationName));
-                database.DeleteLocation(location, true);
+                database.DeleteLocation(location);
             }
             Console.WriteLine(string.Format("Creating test location '{0}'...", locationName));
             var geoRect = new GeoRect(north, south, east, west);
@@ -89,7 +89,7 @@ namespace ESME.Tests.Scenarios
                 Comments = null,
                 GeoRect = geoRect
             };
-            database.Add(location, true);
+            database.Add(location);
 
             foreach (var month in NAVOConfiguration.AllMonths)
             {
@@ -190,7 +190,7 @@ namespace ESME.Tests.Scenarios
                                            where data.SourcePlugin.PluginSubtype == PluginSubtype.Bathymetry
                                            orderby data.Resolution
                                            select data).FirstOrDefault());
-            database.Context.SaveChanges();
+            database.SaveChanges();
         }
 #if false
         [Test, RequiresSTA]

@@ -36,7 +36,7 @@ namespace ESME.Tests.Locations
                 Comments = "These are some comments",
                 GeoRect = new GeoRect(44, 41, -69, -72),
             };
-            database.Add(location, true);
+            database.Add(location);
 
             Assert.AreEqual(1, database.Context.Locations.Local.Count());
             Assert.AreEqual("Mass Bay", location.Name);
@@ -45,7 +45,7 @@ namespace ESME.Tests.Locations
                 Name = "Mass Bay",
                 Comments = "These are some comments",
                 GeoRect = new GeoRect(44, 41, -69, -72),
-            }, true));
+            }));
             Assert.AreEqual(1, database.Context.Locations.Local.Count());
             foreach (var month in NAVOConfiguration.AllMonths)
             {

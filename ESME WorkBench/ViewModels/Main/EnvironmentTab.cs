@@ -40,7 +40,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                                Name = vm.LocationName,
                                                Comments = vm.Comments,
                                                GeoRect = MapViewModel.EditOverlayViewModel.GeoRect
-                                           }, true);
+                                           });
                                        }); 
             }
             catch (Exception e) { _messageBox.ShowError(e.Message); }

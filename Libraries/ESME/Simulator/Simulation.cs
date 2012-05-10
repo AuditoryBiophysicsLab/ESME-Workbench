@@ -49,7 +49,6 @@ namespace ESME.Simulator
                 foreach (var animat in animatDataTask.Result.AnimatStartPoints)
                     _database.Actors.Add(new Actor { AnimatLocation = new AnimatLocation { Geo = animat, Depth = animat.Data } });
             }
-            _database.SaveChanges();
             _log = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), timeStepCount, timeStepSize);
         }
     }

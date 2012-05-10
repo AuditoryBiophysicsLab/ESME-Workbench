@@ -23,7 +23,7 @@ namespace ESME.Tests.Common
             if (location != null)
             {
                 Console.WriteLine(string.Format("Test location '{0}' already exists.  Deleting the existing location.", locationName));
-                databaseService.DeleteLocation(location, true);
+                databaseService.DeleteLocation(location);
             }
             Console.WriteLine(string.Format("Creating test location '{0}'...", locationName));
             location = databaseService.ImportLocationFromOverlayFile(overlayFile, locationName);

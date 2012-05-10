@@ -60,7 +60,6 @@ namespace ESME.Locations
         protected static readonly Random Random = new Random();
         public void CreateMapLayers()
         {
-            MapLayerViewModel mapLayer;
             var dataType = ((PluginIdentifier)SourcePlugin).PluginSubtype;
             switch (dataType)
             {

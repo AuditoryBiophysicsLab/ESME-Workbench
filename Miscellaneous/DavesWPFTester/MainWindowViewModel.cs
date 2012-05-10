@@ -52,7 +52,6 @@ namespace DavesWPFTester
                 return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(vcArgs =>
                 {
                     Properties.Settings.Default.Save();
-                    _database.Context.SaveChanges();
                     _database.Dispose();
                 }));
             }

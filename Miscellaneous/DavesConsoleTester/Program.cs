@@ -56,7 +56,6 @@ namespace DavesConsoleTester
                             if (curField.EnvironmentData[batchIndex].Data.Count > 0)
                                 ImportProfile(newField, curField.EnvironmentData[batchIndex], context);
                         }
-                        context.SaveChanges();
                         scope.Complete();
                     }
                     Console.WriteLine("{0}: Imported {1} ({2} elapsed)", DateTime.Now, sourceFile, DateTime.Now - fieldStartTime);

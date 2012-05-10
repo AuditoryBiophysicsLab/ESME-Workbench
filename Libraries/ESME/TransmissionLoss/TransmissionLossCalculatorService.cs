@@ -245,7 +245,6 @@ namespace ESME.TransmissionLoss
                 while (!bellhopProcess.HasExited) Thread.Sleep(100);
                 radial.CalculationCompleted = DateTime.Now;
                 radial.ExtractAxisData();
-                lock (_dbContext) _dbContext.SaveChanges();
                 Debug.WriteLine("{0}: Finished calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}",
                                 DateTime.Now,
                                 radial.Bearing,

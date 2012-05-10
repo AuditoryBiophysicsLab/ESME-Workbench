@@ -165,7 +165,6 @@ namespace ESME.Scenarios
                         });
                     }
                 }
-                masterDatabase.Context.SaveChanges();
             }
             foreach (var nemoAnimals in nemoFile.Scenario.Animals)
             {
@@ -183,7 +182,6 @@ namespace ESME.Scenarios
             }
             using (var transaction = new TransactionScope())
             {
-                masterDatabase.Context.SaveChanges();
                 transaction.Complete();
             }
             return scenario;
@@ -207,6 +205,7 @@ namespace ESME.Scenarios
 
         public void CreateMapLayers()
         {
+            if (LayerSettings == null) LayerSettings = new LayerSettings();
             if (Platforms != null) foreach (var platform in Platforms) platform.CreateMapLayers();
             foreach (var analysisPoint in AnalysisPoints) analysisPoint.CreateMapLayers();
         }

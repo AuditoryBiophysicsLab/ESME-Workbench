@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Controls;
 using ESME.Scenarios;
 using HRC.Aspects;
 using HRC.Services;
@@ -64,12 +65,28 @@ namespace ESME.Views.Scenarios
         #endregion
     }
 
-    public class EditableKeyValuePair<TKey, TValue>
+    public interface IIsEditable
+    {
+        bool IsEditable { get; set; }
+    }
+
+    public class EditableKeyValuePair<TKey, TValue> : IIsEditable
     {
         public TKey Key { get; set; }
         public TValue Value { get; set; }
         public bool IsEditable { get; set; }
     }
 
+    public class EditableKeyValuePairTemplateSelector : DataTemplateSelector
+    {
+        public DataTemplate TrueTemplate { get; set; }
+        public DataTemplate FalseTemplate { get; set; }
 
+        public override DataTemplate SelectTemplate(object item, DependencyObject container)
+        {
+            var isEditable = item as IIsEditable;
+            if (isEditable == null) return null;
+            return isEditable.IsEditable ? TrueTemplate : FalseTemplate;
+        }
+    }
 }
