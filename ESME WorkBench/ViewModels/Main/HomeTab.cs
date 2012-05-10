@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -72,7 +73,17 @@ namespace ESMEWorkbench.ViewModels.Main
 
         public bool IsScenarioLoaded { get { return Scenario != null; } }
 
-        public bool CanPlaceAnalysisPoint { get { return Scenario != null && Scenario.Wind != null && Scenario.SoundSpeed != null && Scenario.Bathymetry != null && Scenario.Sediment != null; } }
+        public bool CanPlaceAnalysisPoint
+        {
+            get
+            {
+                if (Scenario == null) return false;
+                if (Scenario.Platforms.Count == 0) return false;
+                var modes = (from platform in Scenario.Platforms from source in platform.Sources from mode in source.Modes select mode).ToList();
+                if (modes.Count == 0) return false;
+                return Scenario.Wind != null && Scenario.SoundSpeed != null && Scenario.Bathymetry != null && Scenario.Sediment != null;
+            }
+        }
 
         public bool IsInAnalysisPointMode { get; set; }
 
@@ -83,7 +94,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand { get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => IsCreateScenarioCommandEnabled, CreateScenarioHandler)); } }
 
-        static bool IsCreateScenarioCommandEnabled { get { return true; } }
+        bool IsCreateScenarioCommandEnabled { get { return Database.Context.Locations.Local.Count > 0; } }
 
         void CreateScenarioHandler(EventToCommandArgs args)
         {
@@ -196,6 +207,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the platform \"{0}\"?", platform.PlatformName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             platform.Delete();
+            OnPropertyChanged("CanPlaceAnalysisPoint");
         }
 
         [MediatorMessageSink(MediatorMessage.PlatformProperties), UsedImplicitly]
@@ -236,6 +248,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the source \"{0}\"?", source.SourceName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             source.Delete();
+            OnPropertyChanged("CanPlaceAnalysisPoint");
         }
 
         [MediatorMessageSink(MediatorMessage.SourceProperties), UsedImplicitly]
@@ -271,6 +284,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 IsNew = true,
             };
             source.Modes.Add(mode);
+            OnPropertyChanged("CanPlaceAnalysisPoint");
         }
         [MediatorMessageSink(MediatorMessage.ModeBoundToLayer), UsedImplicitly]
         async void ModeBoundToLayer(Mode mode)
@@ -287,6 +301,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             mode.Delete();
+            OnPropertyChanged("CanPlaceAnalysisPoint");
         }
 
         [MediatorMessageSink(MediatorMessage.ModeProperties), UsedImplicitly]
