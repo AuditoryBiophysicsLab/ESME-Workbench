@@ -93,7 +93,7 @@
                 <Controls:LayerControl IsChecked="{Binding IsChecked}" IsMapLayer="False" LayerName="Sediment" />
             </HierarchicalDataTemplate>
             <HierarchicalDataTemplate DataType="{x:Type Tree:AnalysisPointsNode}" ItemsSource="{Binding Scenario.AnalysisPoints}">
-                <Controls:LayerControl IsMapLayer="False" LayerName="Analysis Points">
+                <Controls:LayerControl IsChecked="{Binding Scenario.ShowAllAnalysisPoints}" LayerName="Analysis Points" LineColorVisibility="Collapsed">
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding DeleteAllCommand}" Header="Remove all analysis points" />

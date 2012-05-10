@@ -9,6 +9,7 @@ using System.Windows;
 using ESME;
 using ESME.Behaviors;
 using ESME.Environment;
+using ESME.Locations;
 using ESME.Mapping;
 using ESME.Model;
 using ESME.Plugins;
@@ -131,6 +132,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 TimePeriod = vm.TimePeriod,
             };
             Database.Add(scenario);
+            Database.SaveChanges();
         }
         #endregion
         [MediatorMessageSink(MediatorMessage.DeleteAnalysisPoint), UsedImplicitly]
@@ -195,7 +197,7 @@ namespace ESMEWorkbench.ViewModels.Main
         }
 
         [MediatorMessageSink(MediatorMessage.TransmissionLossLayerChanged), UsedImplicitly]
-        void TransmissionLossLayerChanged(ESME.Scenarios.TransmissionLoss transmissionLoss)
+        void TransmissionLossLayerChanged(IHaveLayerSettings transmissionLoss)
         {
             _dispatcher.InvokeInBackgroundIfRequired(() =>
             {
@@ -207,7 +209,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.AddPlatform), UsedImplicitly]
         void AddPlatform(Scenario scenario)
         {
-            ((LayerControl)scenario.LayerControl).Expand();
+            if (scenario.LayerControl != null) ((LayerControl)scenario.LayerControl).Expand();
             var platform = new Platform
             {
                 Scenario = scenario,

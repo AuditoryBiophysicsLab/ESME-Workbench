@@ -26,6 +26,18 @@ namespace ESME.Scenarios
         public string Name { get; set; }
         public string Comments { get; set; }
         public string StorageDirectory { get; set; }
+        bool _showAllAnalysisPoints;
+
+        public bool ShowAllAnalysisPoints
+        {
+            get { return _showAllAnalysisPoints; }
+            set
+            {
+                _showAllAnalysisPoints = value;
+                foreach (var analysisPoint in AnalysisPoints) analysisPoint.LayerSettings.IsChecked = _showAllAnalysisPoints;
+            }
+        }
+
         [Initialize] public DbTimeSpan StartTime { get; set; }
         [Initialize] public DbTimeSpan Duration { get; set; }
         [Initialize] public DbTimePeriod TimePeriod { get; set; }
@@ -38,14 +50,10 @@ namespace ESME.Scenarios
         public virtual EnvironmentalDataSet Sediment { get; set; }
         public virtual EnvironmentalDataSet Bathymetry { get; set; }
 
-        [Initialize]
-        public virtual ObservableList<Platform> Platforms { get; set; }
-        [Initialize]
-        public virtual ObservableList<ScenarioSpecies> ScenarioSpecies { get; set; }
-        [Initialize]
-        public virtual ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
-        [Initialize]
-        public virtual ObservableList<LogEntry> Logs { get; set; }
+        [Initialize] public virtual ObservableList<Platform> Platforms { get; set; }
+        [Initialize] public virtual ObservableList<ScenarioSpecies> ScenarioSpecies { get; set; }
+        [Initialize] public virtual ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
+        [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
 
         [NotMapped] public Wind WindData { get { return ((Wind)Cache[Wind].Result); } }
         [NotMapped] public SoundSpeed SoundSpeedData { get { return ((SoundSpeed)Cache[SoundSpeed].Result); } }

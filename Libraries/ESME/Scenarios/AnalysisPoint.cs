@@ -37,6 +37,7 @@ namespace ESME.Scenarios
         public void CreateMapLayers()
         {
             if (LayerSettings == null) LayerSettings = new LayerSettings();
+            if (Scenario.ShowAllAnalysisPoints) LayerSettings.IsChecked = true;
             LayerSettings.PropertyChanged += LayerSettingsChanged;
             foreach (var transmissionLoss in TransmissionLosses) transmissionLoss.CreateMapLayers();
         }
@@ -166,6 +167,7 @@ namespace ESME.Scenarios
 
         public void CreateMapLayers()
         {
+            if (LayerSettings == null) LayerSettings = new LayerSettings();
             var mapLayer = new OverlayShapeMapLayer
             {
                 LayerType = LayerType.Track,
@@ -180,8 +182,8 @@ namespace ESME.Scenarios
             geos.Add(geos[0]);
             mapLayer.AddLines(geos);
             mapLayer.Done();
-            if (LayerSettings == null) LayerSettings = new LayerSettings();
             LayerSettings.MapLayerViewModel = mapLayer;
+            if (AnalysisPoint.LayerSettings.IsChecked) LayerSettings.IsChecked = true;
         }
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
 
