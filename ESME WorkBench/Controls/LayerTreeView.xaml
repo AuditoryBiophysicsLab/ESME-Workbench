@@ -128,6 +128,7 @@
                         <ContextMenu>
                             <MenuItem Command="{Binding DeleteAnalysisPointCommand}" Header="Remove this analysis point" />
                             <MenuItem Command="{Binding RecalculateAnalysisPointCommand}" Header="Recalculate this analysis point" />
+                            <MenuItem Command="{Binding AnalysisPointPropertiesCommand}" Header="Properties"/>
                         </ContextMenu>
                     </Controls:LayerControl.ContextMenu>
                 </Controls:LayerControl>

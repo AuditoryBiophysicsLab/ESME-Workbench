@@ -13,6 +13,7 @@ namespace ESME
         public const string EditAnalysisPoint = "EditAnalysisPointMessage";
         public const string DeleteAnalysisPoint = "DeleteAnalysisPointMessage";
         public const string ViewAnalysisPoint = "ViewAnalysisPointMessage";
+        public const string ViewAnalysisPointProperties = "ViewAnalysisPointPropertiesMessage";
         public const string CalculateAnalysisPoint = "CalculateAnalysisPointMessage";
         public const string DeleteAllAnalysisPoints = "DeleteAllAnalysisPointsMessage";
         public const string RecalculateAllAnalysisPoints = "RecalculateAllAnalysisPointsMessage";

@@ -202,5 +202,29 @@ namespace ESME.Views.Properties {
                 this["CreateScenarioLeft"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double APTop {
+            get {
+                return ((double)(this["APTop"]));
+            }
+            set {
+                this["APTop"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double APLeft {
+            get {
+                return ((double)(this["APLeft"]));
+            }
+            set {
+                this["APLeft"] = value;
+            }
+        }
     }
 }

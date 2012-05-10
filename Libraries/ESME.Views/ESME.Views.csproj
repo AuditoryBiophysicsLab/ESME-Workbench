@@ -97,6 +97,9 @@
     </Compile>
     <Compile Include="Controls\DataAxisControlViewModel.cs" />
     <Compile Include="Controls\DataPlotViewModel.cs" />
+    <Compile Include="Controls\EditableKeyValuePairListView.xaml.cs">
+      <DependentUpon>EditableKeyValuePairListView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\EditableTextBlock.xaml.cs">
       <DependentUpon>EditableTextBlock.xaml</DependentUpon>
     </Compile>
@@ -156,6 +159,10 @@
       <DependentUpon>UtilitiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Misc\UtilitiesViewModel.cs" />
+    <Compile Include="Scenarios\AnalysisPointPropertiesView.xaml.cs">
+      <DependentUpon>AnalysisPointPropertiesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\AnalysisPointPropertiesViewModel.cs" />
     <Compile Include="Scenarios\ModeDiagramView.xaml.cs">
       <DependentUpon>ModeDiagramView.xaml</DependentUpon>
     </Compile>
@@ -205,6 +212,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\DataAxisControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\EditableKeyValuePairListView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -265,6 +276,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Misc\UtilitiesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\AnalysisPointPropertiesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
