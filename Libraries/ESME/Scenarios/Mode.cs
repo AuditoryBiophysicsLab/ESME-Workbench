@@ -10,7 +10,7 @@ using HRC.WPF;
 
 namespace ESME.Scenarios
 {
-    public class Mode : IHaveGuid, IHaveLayerSettings, IEquatable<Mode>
+    public class Mode : IHaveGuid, IEquatable<Mode>
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
@@ -31,11 +31,8 @@ namespace ESME.Scenarios
         public float MaxPropagationRadius { get; set; }
 
         public virtual Source Source { get; set; }
-        public virtual LayerSettings LayerSettings { get; set; }
-        [Initialize]
-        public virtual ObservableList<LogEntry> Logs { get; set; }
-        [Initialize]
-        public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
+        [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
+        [Initialize] public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
 
         [NotMapped] public string PSMName { get { return string.Format("{0}:{1}:{2}", Source.Platform.PlatformName, Source.SourceName, ModeName); } }
         [NotMapped] public bool IsNew { get; set; }

@@ -6,7 +6,6 @@ using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.Map;
 using HRC.Aspects;
 using HRC.Utility;
-using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Tree
 {
@@ -57,7 +56,6 @@ namespace ESMEWorkbench.ViewModels.Tree
 
         readonly MapLayerViewModel _worldMapLayer = new ShapefileMapLayer
         {
-            LayerType = LayerType.BaseMap,
             AreaColor = Colors.Transparent,
             AreaStyle = MapLayerViewModel.CreateAreaStyle(Settings.Default.WorldMapLineColor, (float)Settings.Default.WorldMapLineWeight, Colors.Transparent),
             ShapefileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"),

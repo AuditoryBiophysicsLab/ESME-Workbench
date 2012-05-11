@@ -113,11 +113,31 @@ namespace ESMEWorkbench.ViewModels.Main
         #endregion
 
         public Geo MouseGeo { get; set; }
+        AnalysisPoint _fakeAnalysisPoint;
 
         [MediatorMessageSink(MediatorMessage.SetMouseEarthCoordinate), UsedImplicitly]
         void SetMouseEarthCoordinate(Geo mouseEarthCoordinate)
         {
             MouseGeo = mouseEarthCoordinate;
+#if false
+            if (IsInAnalysisPointMode)
+            {
+                if (_fakeAnalysisPoint == null)
+                {
+                    _fakeAnalysisPoint = new AnalysisPoint { Geo = MouseGeo, Scenario = Scenario };
+                    Database.AddFakeMapLayer(_fakeAnalysisPoint);
+                    _fakeAnalysisPoint.CreateMapLayers();
+                    _fakeAnalysisPoint.LayerSettings.IsChecked = true;
+                }
+                else
+                {
+                    _fakeAnalysisPoint.Geo = MouseGeo;
+                    MediatorMessage.Send(MediatorMessage.RemoveMapLayer, _fakeAnalysisPoint.LayerSettings.MapLayerViewModel);
+                    ((OverlayShapeMapLayer)_fakeAnalysisPoint.LayerSettings.MapLayerViewModel).DrawAction();
+                    MediatorMessage.Send(MediatorMessage.AddMapLayer, _fakeAnalysisPoint.LayerSettings.MapLayerViewModel);
+                }
+            }
+#endif
             if (mouseEarthCoordinate != null)
             {
                 var lat = mouseEarthCoordinate.Latitude;
@@ -286,8 +306,6 @@ namespace ESMEWorkbench.ViewModels.Main
             }
         }
 
-        public MapLayerCollection CurrentMapLayers { get; set; }
-
         public int SelectedRibbonTabIndex { get { return Settings.Default.SelectedRibbonTabIndex; } set { Settings.Default.SelectedRibbonTabIndex = value; } }
 
         void ShowAboutView()
@@ -365,7 +383,6 @@ namespace ESMEWorkbench.ViewModels.Main
         Window _queueView;
 
         public Cursor Cursor { get; set; }
-
         [MediatorMessageSink(MediatorMessage.MapClick), UsedImplicitly]
         void MapClick(Geo geo)
         {
@@ -384,6 +401,11 @@ namespace ESMEWorkbench.ViewModels.Main
                 }
                 IsInAnalysisPointMode = false;
                 Cursor = Cursors.Arrow;
+            }
+            if (_fakeAnalysisPoint != null)
+            {
+                _fakeAnalysisPoint.RemoveMapLayers();
+                _fakeAnalysisPoint = null;
             }
         }
 

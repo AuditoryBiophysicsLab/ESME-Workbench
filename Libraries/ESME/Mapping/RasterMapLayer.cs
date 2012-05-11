@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Xml.Serialization;
@@ -69,12 +70,12 @@ namespace ESME.Mapping
             get
             {
                 var sb = new StringBuilder();
-                sb.AppendLine(PixelSize.ToString());
+                sb.AppendLine(PixelSize.ToString(CultureInfo.InvariantCulture));
                 sb.AppendLine("0.0");
                 sb.AppendLine("0.0");
-                sb.AppendLine(PixelSize.ToString());
-                sb.AppendLine(West.ToString());
-                sb.AppendLine(North.ToString());
+                sb.AppendLine(PixelSize.ToString(CultureInfo.InvariantCulture));
+                sb.AppendLine(West.ToString(CultureInfo.InvariantCulture));
+                sb.AppendLine(North.ToString(CultureInfo.InvariantCulture));
                 return sb.ToString();
             }
         }

@@ -4,10 +4,8 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows.Input;
 using ESME.Database;
-using ESME.Environment;
 using ESME.Locations;
 using ESME.Mapping;
 using ESME.Model;
@@ -29,14 +27,11 @@ namespace ESME.Scenarios
         public DbGeo Geo { get; set; }
 
         public virtual Scenario Scenario { get; set; }
-        public virtual LayerSettings LayerSettings { get; set; }
-
-        [Initialize]
-        public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
+        [Initialize] public virtual LayerSettings LayerSettings { get; set; }
+        [Initialize] public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
 
         public void CreateMapLayers()
         {
-            if (LayerSettings == null) LayerSettings = new LayerSettings();
             if (Scenario.ShowAllAnalysisPoints) LayerSettings.IsChecked = true;
             LayerSettings.PropertyChanged += LayerSettingsChanged;
             foreach (var transmissionLoss in TransmissionLosses) transmissionLoss.CreateMapLayers();
@@ -99,7 +94,7 @@ namespace ESME.Scenarios
     }
 
     [NotifyPropertyChanged]
-    public class TransmissionLoss : IHaveGuid, IHaveLayerSettings, ISupportValidation
+    public class TransmissionLoss : IHaveGuid, IHaveLayerSettings
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
@@ -107,36 +102,12 @@ namespace ESME.Scenarios
         public bool IsReadyToCalculate { get; set; }
         public virtual AnalysisPoint AnalysisPoint { get; set; }
         public virtual Mode Mode { get; set; }
-        public virtual LayerSettings LayerSettings { get; set; }
-
-        [Initialize]
-        public virtual ObservableList<Radial> Radials { get; set; }
+        [Initialize] public virtual LayerSettings LayerSettings { get; set; }
+        [Initialize] public virtual ObservableList<Radial> Radials { get; set; }
 
         [NotMapped]
         public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", AnalysisPoint.Geo.Latitude, AnalysisPoint.Geo.Longitude); } }
 
-        public void Validate()
-        {
-            if (Scenario.Database == null || Scenario.Cache == null || AnalysisPoint == null || AnalysisPoint.Scenario.Bathymetry == null)
-            {
-                ValidationErrorText = "Unable to validate";
-                return;
-            }
-            var geoRect = ((Bathymetry)Scenario.Cache[AnalysisPoint.Scenario.Bathymetry].Result).Samples.GeoRect;
-
-            if (!geoRect.Contains(AnalysisPoint.Geo))
-            {
-                ValidationErrorText = "Propagation point not contained within bathymetry bounds";
-                return;
-            }
-            var errors = new StringBuilder();
-
-            foreach (var radial in Radials.Where(radial => !geoRect.Contains(radial.Segment[1]))) errors.AppendLine(string.Format("Radial with bearing {0} extends beyond bathymetry bounds", radial.Bearing));
-            ValidationErrorText = errors.ToString().Trim();
-        }
-
-        [NotMapped]
-        public bool IsValid { get { return string.IsNullOrEmpty(ValidationErrorText); } }
         #region ViewTransmissionLossCommand
         public SimpleCommand<object, EventToCommandArgs> ViewTransmissionLossCommand
         {
@@ -156,32 +127,23 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _recalculateTransmissionLoss;
         #endregion
 
-        [Affects("IsValid")]
-        [NotMapped]
-        public string ValidationErrorText
-        {
-            get { Validate(); return _validationErrorText; }
-            private set { _validationErrorText = value; }
-        }
-        string _validationErrorText;
-
         public void CreateMapLayers()
         {
-            if (LayerSettings == null) LayerSettings = new LayerSettings();
-            var mapLayer = new OverlayShapeMapLayer
+            var mapLayer = new OverlayShapeMapLayer { Name = string.Format("{0}", Guid) };
+            mapLayer.DrawAction = () =>
             {
-                LayerType = LayerType.Track,
-                Name = string.Format("{0}", Guid),
+                mapLayer.Clear();
+                var geos = new List<Geo>();
+                foreach (var radial in Radials)
+                {
+                    geos.Add(AnalysisPoint.Geo);
+                    geos.Add(((Geo)AnalysisPoint.Geo).Offset(Geo.KilometersToRadians(Mode.MaxPropagationRadius / 1000), Geo.DegreesToRadians(radial.Bearing)));
+                }
+                geos.Add(AnalysisPoint.Geo);
+                mapLayer.AddLines(geos);
+                mapLayer.Done();
             };
-            var geos = new List<Geo>();
-            foreach (var radial in Radials)
-            {
-                geos.Add(radial.Segment[0]);
-                geos.Add(radial.Segment[1]);
-            }
-            geos.Add(geos[0]);
-            mapLayer.AddLines(geos);
-            mapLayer.Done();
+            mapLayer.DrawAction();
             LayerSettings.MapLayerViewModel = mapLayer;
             if (AnalysisPoint.LayerSettings.IsChecked) LayerSettings.IsChecked = true;
         }

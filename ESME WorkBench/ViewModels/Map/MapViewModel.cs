@@ -163,11 +163,13 @@ namespace ESMEWorkbench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.RefreshMapLayer)]
         public void Refresh(MapLayerViewModel layer)
         {
-            if (layer.LayerOverlay.Layers.Count <= 0) return;
+            if (layer == null || layer.LayerOverlay == null || layer.LayerOverlay.Layers == null || layer.LayerOverlay.Layers.Count <= 0) return;
             if (layer.GetType() == typeof(ShapefileMapLayer))
                 ((ShapeFileFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = layer.AreaStyle;
             else if (layer.GetType() == typeof(OverlayShapeMapLayer))
             {
+                var overlayShapeMapLayer = (OverlayShapeMapLayer)layer;
+                if (overlayShapeMapLayer.DrawAction != null) overlayShapeMapLayer.DrawAction();
                 if (layer.CustomLineStyle != null)
                 {
                     ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.CustomStyles.Clear();

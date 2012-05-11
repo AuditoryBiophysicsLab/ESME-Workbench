@@ -42,7 +42,7 @@ namespace ESME.Scenarios
 
         public virtual Scenario Scenario { get; set; }
         public virtual Perimeter Perimeter { get; set; }
-        public virtual LayerSettings LayerSettings { get; set; }
+        [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<Source> Sources { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
         [NotMapped] public bool IsNew { get; set; }
@@ -103,10 +103,8 @@ namespace ESME.Scenarios
 
         public void CreateMapLayers()
         {
-            if (LayerSettings == null) LayerSettings = new LayerSettings();
             var mapLayer = new OverlayShapeMapLayer
             {
-                LayerType = LayerType.Track,
                 Name = string.Format("{0}", Guid),
                 CustomLineStyle =
                     new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, LayerSettings.LineOrSymbolColor, (float)LayerSettings.LineOrSymbolSize)

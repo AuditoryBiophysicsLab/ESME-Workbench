@@ -48,6 +48,7 @@ namespace ESME.Locations
         void DeleteLocation(Location location);
         void DeleteEnvironmentalDataSet(EnvironmentalDataSet dataSet);
         void SaveChanges();
+        void AddFakeMapLayer(AnalysisPoint analysisPoint);
     }
 
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -104,7 +105,6 @@ namespace ESME.Locations
                 location.StorageDirectory = Path.Combine("locations", RandomFilenameWithoutExension);
             var storageDirectoryPath = Path.Combine(MasterDatabaseDirectory, location.StorageDirectory);
             if (!Directory.Exists(storageDirectoryPath)) Directory.CreateDirectory(storageDirectoryPath);
-            Context.Locations.Add(location);
             Log(location, "Added location {0}", location.Name);
         }
         public void Add(Scenario scenario)
@@ -113,10 +113,7 @@ namespace ESME.Locations
                             where s.Name == scenario.Name && s.Location == scenario.Location
                             select s).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A scenario named {0} already exists in location {1}, choose another name", scenario.Name, scenario.Location.Name));
-            if (scenario.LayerSettings == null) scenario.LayerSettings = new LayerSettings();
-            Context.LayerSettings.Add(scenario.LayerSettings);
-            if (scenario.StorageDirectory == null)
-                scenario.StorageDirectory = Path.Combine("scenarios", RandomFilenameWithoutExension);
+            if (scenario.StorageDirectory == null) scenario.StorageDirectory = Path.Combine("scenarios", RandomFilenameWithoutExension);
             var storageDirectoryPath = Path.Combine(MasterDatabaseDirectory, scenario.StorageDirectory);
             if (!Directory.Exists(storageDirectoryPath)) Directory.CreateDirectory(storageDirectoryPath);
 
@@ -125,21 +122,14 @@ namespace ESME.Locations
         }
         public void Add(Platform platform)
         {
-            Context.Platforms.Add(platform);
-            if (platform.LayerSettings == null) platform.LayerSettings = new LayerSettings();
-            Context.LayerSettings.Add(platform.LayerSettings);
             Log(platform, "Added new platform {0} to scenario {1} in location {2}", platform.Description, platform.Scenario.Name, platform.Scenario.Location.Name);
         }
         public void Add(Source source)
         {
-            Context.Sources.Add(source);
             Log(source, "Added new source {0} to platform {1} in scenario {2} in location {3}", source.SourceName, source.Platform.Description, source.Platform.Scenario.Name, source.Platform.Scenario.Location.Name);
         }
         public void Add(Mode mode)
         {
-            Context.Modes.Add(mode);
-            if (mode.LayerSettings == null) mode.LayerSettings = new LayerSettings();
-            Context.LayerSettings.Add(mode.LayerSettings);
             Log(mode, "Added new mode {0} to source {1} of platform {2} in scenario {3} in location {4}", mode.ModeName, mode.Source.SourceName, mode.Source.Platform.Description, mode.Source.Platform.Scenario.Name, mode.Source.Platform.Scenario.Location.Name);
         }
         public void Add(Scenario scenario, EnvironmentalDataSet dataSet, bool replaceExisting = false)
@@ -181,9 +171,6 @@ namespace ESME.Locations
                             where p.Name == perimeter.Name && p.Scenario.Guid == perimeter.Scenario.Guid
                             select p).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A perimeter named {0} already exists in scenario {1}, choose another name", perimeter.Name, perimeter.Scenario.Name));
-            if (perimeter.LayerSettings == null) perimeter.LayerSettings = new LayerSettings();
-            Context.LayerSettings.Add(perimeter.LayerSettings);
-            Context.Perimeters.Add(perimeter);
             Log(perimeter, "Added new perimeter {0} to scenario {1} in location {2}", perimeter.Name, perimeter.Scenario.Name, perimeter.Scenario.Location.Name);
         }
         public void Add(PerimeterCoordinate coordinate, bool replaceExisting = false)
@@ -201,15 +188,11 @@ namespace ESME.Locations
                             where s.LatinName == species.LatinName && s.Scenario == species.Scenario
                             select s).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A species named {0} already exists in scenario {1}, choose another name", species.LatinName, species.Scenario.Name));
-            if (species.LayerSettings == null) species.LayerSettings = new LayerSettings();
-            Context.LayerSettings.Add(species.LayerSettings);
-            Context.ScenarioSpecies.Add(species);
             Log(species, "Added new species {0} to scenario {1} in location {2}", species.LatinName, species.Scenario.Name, species.Scenario.Location.Name);
         }
 
         public void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry)
         {
-            if (analysisPoint.LayerSettings == null) analysisPoint.LayerSettings = new LayerSettings();
             Console.WriteLine("Adding analysis point at {0}", analysisPoint.Geo);
             var depthAtAnalysisPoint = bathymetry.Samples.IsFast2DLookupAvailable
                                            ? -bathymetry.Samples.GetNearestPointAsync(analysisPoint.Geo).Result.Data
@@ -251,6 +234,31 @@ namespace ESME.Locations
             }
             Log(analysisPoint, "Added new analysis point at {0} to scenario {1} in location {2}", (Geo)analysisPoint.Geo, analysisPoint.Scenario, analysisPoint.Scenario.Location);
         }
+
+        public void AddFakeMapLayer(AnalysisPoint analysisPoint)
+        {
+            foreach (var mode in analysisPoint.Scenario.GetAllModes())
+            {
+                var transmissionLoss = new Scenarios.TransmissionLoss
+                {
+                    AnalysisPoint = analysisPoint,
+                    IsReadyToCalculate = false,
+                    Mode = mode,
+                };
+                analysisPoint.TransmissionLosses.Add(transmissionLoss);
+                var radialCount = mode.MaxPropagationRadius <= 10000 ? 8 : 16;
+                for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
+                {
+                    var radial = new Radial
+                    {
+                        TransmissionLoss = transmissionLoss,
+                        Bearing = (360.0 / radialCount) * radialIndex,
+                        Length = transmissionLoss.Mode.MaxPropagationRadius,
+                    };
+                    transmissionLoss.Radials.Add(radial);
+                }
+            }
+        }
         #endregion
 
         #region Create operations for Locations
@@ -285,9 +293,8 @@ namespace ESME.Locations
                 TimePeriod = timePeriod,
                 Location = location,
                 SourcePlugin = sourcePlugin,
-                LayerSettings = new LayerSettings { IsChecked = false },
             };
-            Context.LayerSettings.Add(environmentalDataSet.LayerSettings);
+            location.EnvironmentalDataSets.Add(environmentalDataSet);
             Context.EnvironmentalDataSets.Add(environmentalDataSet);
             Log(environmentalDataSet, "Added new data set to {0}. Data type: {1}, resolution: {2}{3}", location.Name, sourcePlugin.PluginSubtype, resolution, timePeriod != TimePeriod.Invalid ? String.Format("  TimePeriod: {0}", timePeriod) : "");
             return environmentalDataSet;
@@ -307,8 +314,6 @@ namespace ESME.Locations
             scenario.Location = location;
             scenario.StorageDirectory = Path.Combine("scenarios", RandomFilenameWithoutExension);
             Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, scenario.StorageDirectory));
-            if (scenario.LayerSettings == null) scenario.LayerSettings = new LayerSettings();
-            Context.LayerSettings.Add(scenario.LayerSettings);
             Context.Scenarios.Add(scenario);
             Log(scenario, "Created");
             return scenario;
@@ -510,7 +515,7 @@ namespace ESME.Locations
         {
             logEntry.Message = string.Format(message, args);
             logEntry.MessageSource = new DbWhoWhenWhere(true);
-            Context.Log.Add(logEntry);
+            Context.Log.Local.Add(logEntry);
         }
 
         #endregion

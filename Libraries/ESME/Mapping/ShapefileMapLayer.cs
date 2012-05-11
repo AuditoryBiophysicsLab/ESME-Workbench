@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
-using HRC.ViewModels;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Mapping
@@ -10,13 +8,6 @@ namespace ESME.Mapping
     [Serializable]
     public class ShapefileMapLayer : MapLayerViewModel
     {
-        public ShapefileMapLayer()
-        {
-            LayerType = LayerType.Shapefile; 
-            LayerOverlay.Layers.Clear();
-        }
-
-        #region public string ShapefileName { get; set; }
         [XmlElement]
         public string ShapefileName
         {
@@ -26,16 +17,6 @@ namespace ESME.Mapping
                 if (_shapefileName == value) return;
                 _shapefileName = value;
 
-                switch (LayerType)
-                {
-                    case LayerType.Shapefile:
-                        Name = Path.GetFileNameWithoutExtension(_shapefileName);
-                        break;
-                    case LayerType.BaseMap:
-                        Name = "Base Map";
-                        break;
-                }
-                    
                 string projection = null;
                 var projectionFile = Path.Combine(Path.GetDirectoryName(_shapefileName), "projection.txt");
                 if (File.Exists(projectionFile))
@@ -63,11 +44,6 @@ namespace ESME.Mapping
                 LayerOverlay.Layers.Add(newLayer);
             }
         }
-
         string _shapefileName;
-
-        #endregion
-
-        public List<MenuItemViewModelBase> AreaColorPickerMenu { get; set; }
     }
 }

@@ -31,10 +31,8 @@ namespace ESME.Locations
         public DbPluginIdentifier SourcePlugin { get; set; }
 
         public virtual Location Location { get; set; }
-        public virtual LayerSettings LayerSettings { get; set; }
-
-        [Initialize]
-        public virtual ObservableList<LogEntry> Logs { get; set; }
+        [Initialize] public virtual LayerSettings LayerSettings { get; set; }
+        [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
 
         [NotMapped]
         public string LayerName
@@ -66,7 +64,6 @@ namespace ESME.Locations
                 case PluginSubtype.SoundSpeed:
                     var pointLayer = new OverlayShapeMapLayer
                     {
-                        LayerType = LayerType.SoundSpeed,
                         Name = string.Format("{0}", Guid),
                         PointSymbolType = (PointSymbolType)(Random.Next(8)),
                     };
@@ -84,13 +81,11 @@ namespace ESME.Locations
                 case PluginSubtype.Sediment:
                     var rasterLayer = new RasterMapLayer
                     {
-                        LayerType = dataType == PluginSubtype.Bathymetry ? LayerType.BathymetryRaster : dataType == PluginSubtype.Wind ? LayerType.WindSpeed : LayerType.BottomType,
                         Name = string.Format("{0}", Guid),
                         North = (float)Location.GeoRect.North,
                         South = (float)Location.GeoRect.South,
                         East = (float)Location.GeoRect.East,
                         West = (float)Location.GeoRect.West,
-                        IsEnabled = true,
                         RasterFilename = Path.Combine(Location.Database.MasterDatabaseDirectory, Location.StorageDirectory, Path.GetFileNameWithoutExtension(FileName) + ".bmp"),
                     };
                     LayerSettings.MapLayerViewModel = rasterLayer;

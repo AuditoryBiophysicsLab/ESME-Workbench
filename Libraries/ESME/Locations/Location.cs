@@ -33,13 +33,9 @@ namespace ESME.Locations
         public DbGeoRect GeoRect { get; set; }
         public string StorageDirectory { get; set; }
 
-        public virtual LayerSettings LayerSettings { get; set; }
-
-        [Initialize]
-        public virtual ObservableList<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }
-        //public virtual ObservableList<Scenario> Scenarios { get; set; }
-        [Initialize]
-        public virtual ObservableList<LogEntry> Logs { get; set; }
+        [Initialize] public virtual LayerSettings LayerSettings { get; set; }
+        [Initialize] public virtual ObservableList<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }
+        [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
 
         [NotMapped]
         public CollectionViewSource DataSetTypes
@@ -60,13 +56,11 @@ namespace ESME.Locations
         {
             var mapLayer = new OverlayShapeMapLayer
             {
-                LayerType = LayerType.Track,
                 Name = string.Format("{0}", Guid),
             };
             var geoRect = (GeoRect)GeoRect;
             mapLayer.AddPolygon(new List<Geo> { geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest });
             mapLayer.Done();
-            if (LayerSettings == null) LayerSettings = new LayerSettings();
             LayerSettings.AreaColor = Colors.Transparent;
             LayerSettings.MapLayerViewModel = mapLayer;
         }

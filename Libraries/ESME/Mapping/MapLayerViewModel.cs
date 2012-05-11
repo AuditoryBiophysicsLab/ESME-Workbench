@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Windows;
 using System.Windows.Media;
-using HRC.Services;
-using HRC.Utility;
 using HRC.ViewModels;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
@@ -12,20 +9,7 @@ namespace ESME.Mapping
     [Serializable]
     public class MapLayerViewModel : ViewModelBase
     {
-        protected static readonly Random Random;
-        static readonly Color[] Palette;
-        static int _paletteIndex;
         #region Helpers
-        protected static Color RandomColor
-        {
-            get
-            {
-                var color = Palette[_paletteIndex++];
-                _paletteIndex %= Palette.Length;
-                return color;
-            }
-        }
-
         public static AreaStyle CreateAreaStyle(Color pen, float width, Color brush)
         {
             if (brush == Colors.Transparent) return new AreaStyle(new GeoPen(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B), width));
@@ -39,114 +23,21 @@ namespace ESME.Mapping
             return new PointStyle(pointSymbolType, new GeoSolidBrush(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B)),
                                   width);
         }
-
-
         #endregion
-
-        static MapLayerViewModel()
-        {
-            Random = new Random();
-            Palette = ExtensionMethods.CreateHSVPalette(60);
-        }
 
         public MapLayerViewModel()
         {
-            LayerOverlay = new LayerOverlay
-            {
-                TileType = TileType.SingleTile,
-            };
-            LineColorBrush = new SolidColorBrush(_lineColor);
+            LayerOverlay = new LayerOverlay { TileType = TileType.SingleTile };
             AreaColor = Colors.Transparent;
             AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
             LineStyle = CreateLineStyle(LineColor, LineWidth);
         }
 
         public string Name { get; set; }
-        public static IHRCColorPickerService ColorPickerService { get; set; }
-        public static GeoCollection<Overlay> MapOverlay { get; set; }
 
         public LayerOverlay LayerOverlay { get; set; }
 
-        public virtual Visibility IsLineColorVisible
-        {
-            get
-            {
-                switch (LayerType)
-                {
-                    default:
-                        return Visibility.Hidden;
-                    case LayerType.BaseMap:
-                    case LayerType.Shapefile:
-                    case LayerType.SimArea:
-                    case LayerType.OpArea:
-                    case LayerType.Bathymetry:
-                    case LayerType.Animal:
-                    case LayerType.SoundSpeed:
-                    case LayerType.BottomType:
-                    case LayerType.WindSpeed:
-                    case LayerType.Pressure:
-                        return Visibility.Visible;
-                }
-            }
-        }
-
-        public Visibility IsAreaColorVisible
-        {
-            get
-            {
-                switch (LayerType)
-                {
-                    default:
-                        return Visibility.Hidden;
-                    case LayerType.BaseMap:
-                    case LayerType.Shapefile:
-                        return Visibility.Visible;
-                }
-            }
-        }
-
-        public bool IsFeatureLayer
-        {
-            get
-            {
-                switch (LayerType)
-                {
-                    default:
-                        return false;
-                    case LayerType.Animal:
-                    case LayerType.SoundSpeed:
-                    case LayerType.BottomType:
-                    case LayerType.WindSpeed:
-                        return true;
-                }
-            }
-        }
-
-        public LayerType LayerType { get; set; }
-
-        bool _isEnabled = true;
-        public bool IsEnabled
-        {
-            get { return _isEnabled; }
-            set
-            {
-                _isEnabled = value;
-                if (!_isEnabled) IsChecked = false;
-            }
-        }
-        bool _isChecked;
-        public bool IsChecked
-        {
-            get { return _isChecked; }
-            set
-            {
-                _isChecked = value;
-                if (LayerOverlay != null) MediatorMessage.Send(_isChecked ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, LayerOverlay);
-            }
-        }
-
-        public Brush LineColorBrush { get; set; }
-
+        #region AreaStyle AreaStyle { get; set; }
         AreaStyle _areaStyle;
         public AreaStyle AreaStyle
         {
@@ -170,7 +61,9 @@ namespace ESME.Mapping
                 MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
             }
         }
+        #endregion
 
+        #region public LineStyle LineStyle { get; set; }
         LineStyle _lineStyle;
         public LineStyle LineStyle
         {
@@ -186,6 +79,7 @@ namespace ESME.Mapping
                 MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
             }
         }
+        #endregion
 
         #region public LineStyle CustomLineStyle { get; set; }
         LineStyle _customLineStyle;
@@ -226,7 +120,7 @@ namespace ESME.Mapping
         #endregion
 
         #region public float LineWidth { get; set; }
-        float _lineWidth = Random.Next(2, 10) / 2.0f;
+        float _lineWidth;
         public float LineWidth
         {
             get { return _lineWidth; }
@@ -241,7 +135,8 @@ namespace ESME.Mapping
         }
         #endregion
 
-        Color _areaColor = RandomColor;
+        #region public Color AreaColor { get; set; }
+        Color _areaColor;
         public Color AreaColor
         {
             get { return _areaColor; }
@@ -252,26 +147,26 @@ namespace ESME.Mapping
                 MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
             }
         }
+        #endregion
 
-        Color _lineColor = RandomColor;
+        #region public Color LineColor { get; set; }
+        Color _lineColor;
         public Color LineColor
         {
             get { return _lineColor; }
             set
             {
-                if (_lineColor == value) return;
                 _lineColor = value;
                 _areaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
                 _lineStyle = CreateLineStyle(LineColor, LineWidth);
                 _pointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)Math.Max(1, LineWidth));
-                LineColorBrush = new SolidColorBrush(_lineColor);
                 MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
             }
         }
+        #endregion
 
         #region public PointSymbolType PointSymbolType { get; set; }
-
-        PointSymbolType _pointSymbolType = (PointSymbolType)(Random.Next(8));
+        PointSymbolType _pointSymbolType;
         public PointSymbolType PointSymbolType
         {
             get { return _pointSymbolType; }

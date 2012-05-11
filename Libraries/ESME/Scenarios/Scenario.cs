@@ -18,7 +18,7 @@ using HRC.WPF;
 namespace ESME.Scenarios
 {
     [NotifyPropertyChanged]
-    public class Scenario : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged, IMouseOverAware
+    public class Scenario : IHaveGuid, INotifyPropertyChanged, IMouseOverAware
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
@@ -43,7 +43,6 @@ namespace ESME.Scenarios
         [Initialize] public DbTimePeriod TimePeriod { get; set; }
 
         public virtual Location Location { get; set; }
-        public virtual LayerSettings LayerSettings { get; set; }
 
         public virtual EnvironmentalDataSet Wind { get; set; }
         public virtual EnvironmentalDataSet SoundSpeed { get; set; }
@@ -213,7 +212,6 @@ namespace ESME.Scenarios
 
         public void CreateMapLayers()
         {
-            if (LayerSettings == null) LayerSettings = new LayerSettings();
             if (Platforms != null) foreach (var platform in Platforms) platform.CreateMapLayers();
             foreach (var analysisPoint in AnalysisPoints) analysisPoint.CreateMapLayers();
         }
