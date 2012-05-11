@@ -152,15 +152,6 @@ namespace ESMEWorkbench.ViewModels.Main
                 MouseLatitude = "Lat: N/A";
                 MouseLongitude = "Lon: N/A";
             }
-            if (IsInAnalysisPointMode)
-            {
-                if (Scenario != null) Cursor = Scenario.GeoRect.Contains(MouseGeo) ? Cursors.Cross : Cursors.No;
-                else
-                {
-                    IsInAnalysisPointMode = false;
-                    Cursor = Cursors.Arrow;
-                }
-            }
             if (Scenario == null || MouseGeo == null || !Scenario.GeoRect.Contains(MouseGeo))
             {
                 MouseDepth = null;
@@ -173,6 +164,15 @@ namespace ESMEWorkbench.ViewModels.Main
                 MouseSediment = null;
                 MouseSedimentInfo = string.Format("Sediment: N/A");
                 return;
+            }
+            if (IsInAnalysisPointMode)
+            {
+                if (Scenario != null) Cursor = Scenario.GeoRect.Contains(MouseGeo) ? Cursors.Cross : Cursors.No;
+                else
+                {
+                    IsInAnalysisPointMode = false;
+                    Cursor = Cursors.Arrow;
+                }
             }
             if (Scenario != null && Scenario.Bathymetry != null && _cache.IsCached(Scenario.Bathymetry))
             {
@@ -404,7 +404,7 @@ namespace ESMEWorkbench.ViewModels.Main
             Debug.WriteLine("Map click at {0}", geo);
             if (IsInAnalysisPointMode)
             {
-                if (Scenario != null && Scenario.GeoRect.Contains(MouseGeo))
+                if (Scenario != null && MouseGeo != null && Scenario.GeoRect.Contains(MouseGeo))
                 {
                     var analysisPoint = new AnalysisPoint {Geo = MouseGeo, Scenario = Scenario};
                     Scenario.AnalysisPoints.Add(analysisPoint);

@@ -1,18 +1,35 @@
 ﻿<UserControl x:Class="ESMEWorkbench.Controls.LocationsTreeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:Locations="clr-namespace:ESME.Locations;assembly=ESME"
-             xmlns:Tree="clr-namespace:ESMEWorkbench.ViewModels.Tree" mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             xmlns:Tree="clr-namespace:ESMEWorkbench.ViewModels.Tree">
     <DockPanel LastChildFill="True">
-        <TreeView DockPanel.Dock="Bottom" ItemsSource="{Binding Locations}"
-                  d:DataContext="{d:DesignInstance Tree:LocationsTreeViewModel}">
+        <ToolBarTray Background="Transparent" DockPanel.Dock="Top">
+            <ToolBar Band="1" BandIndex="1">
+                <Button Command="{Binding CreateLocationCommand}" ToolTip="Create a new location by drawing a rectangle on the map. An adjustable rectangle will appear on the map. It can be moved by dragging the control at the rectangle's center and its size can be adjusted by dragging one of the controls at the rectangle's corners.  The bounds of the new location can also be entered directly if you prefer.">
+                    <Image Source="..\Images\SmallIcons\layer_create.png" Width="16" Height="16"/>
+                </Button>
+                <Button Command="{Binding DisabledCommand}"
+                                    ToolTip="Edit the boundaries and/or cached environmental data of the selected location">
+                    <Image Source="..\Images\SmallIcons\layer_edit.png" Width="16" Height="16"/>
+                </Button>
+                <Button Command="{Binding DisabledCommand}"
+                                    ToolTip="Delete an existing location, along with all cached data and all scenarios that depend upon it">
+                    <Image Source="..\Images\SmallIcons\layer_delete.png" Width="16" Height="16"/>
+                </Button>
+            </ToolBar>
+        </ToolBarTray>
+        <TreeView DockPanel.Dock="Bottom" ItemsSource="{Binding Locations}">
             <TreeView.Resources>
-                <HierarchicalDataTemplate DataType="{x:Type Locations:Location}" ItemsSource="{Binding DataSetTypes}">
+                <HierarchicalDataTemplate DataType="{x:Type Locations:Location}" ItemsSource="{Binding DataSetTypes.View.Groups}">
                     <TextBlock Text="{Binding Name}" />
                 </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type CollectionViewGroup}" ItemsSource="{Binding Items}">
+                    <TextBlock Text="{Binding Name}"/>
+                </HierarchicalDataTemplate>
+                <DataTemplate DataType="{x:Type Locations:EnvironmentalDataSet}">
+                    <TextBlock Text="{Binding Resolution}"/>
+                </DataTemplate>
             </TreeView.Resources>
         </TreeView>
     </DockPanel>
