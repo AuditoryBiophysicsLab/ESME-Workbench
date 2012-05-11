@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
+using System.Windows.Threading;
 using ESME.Database;
 using ESME.Locations;
 using ESME.Mapping;
@@ -22,8 +23,7 @@ namespace ESME.Scenarios
     [NotifyPropertyChanged]
     public class AnalysisPoint : IHaveGuid, IHaveLayerSettings, ISupportValidation, INotifyPropertyChanged
     {
-        [Key, Initialize]
-        public Guid Guid { get; set; }
+        [Key, Initialize] public Guid Guid { get; set; }
         public DbGeo Geo { get; set; }
 
         public virtual Scenario Scenario { get; set; }
@@ -45,27 +45,43 @@ namespace ESME.Scenarios
             var checkState = LayerSettings.IsChecked;
             foreach (var transmissionLoss in TransmissionLosses) transmissionLoss.LayerSettings.IsChecked = checkState;
         }
-        public bool IsValid
-        {
-            get { throw new NotImplementedException(); }
-        }
 
-        public string ValidationErrorText
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public bool IsValid { get { throw new NotImplementedException(); } }
+
+        public string ValidationErrorText { get { throw new NotImplementedException(); } }
 
         [NotMapped] public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", Geo.Latitude, Geo.Longitude); } }
         public void Validate() { throw new NotImplementedException(); }
         public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            var handlers = PropertyChanged;
+            if (handlers == null) return;
+            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                {
+                    var localHandler = handler;
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new PropertyChangedEventArgs(propertyName)));
+                }
+                else
+                    handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        [NotMapped] public bool IsDeleted { get; set; }
+
         #region ViewAnalysisPointCommand
         public SimpleCommand<object, EventToCommandArgs> ViewAnalysisPointCommand
         {
-            get { return _viewAnalysisPoint ?? (_viewAnalysisPoint = new SimpleCommand<object, EventToCommandArgs>(o =>
+            get
             {
-                MediatorMessage.Send(MediatorMessage.ViewAnalysisPoint, this);
-                ((MouseEventArgs)o.EventArgs).Handled = true;
-            })); }
+                return _viewAnalysisPoint ?? (_viewAnalysisPoint = new SimpleCommand<object, EventToCommandArgs>(o =>
+                {
+                    MediatorMessage.Send(MediatorMessage.ViewAnalysisPoint, this);
+                    ((MouseEventArgs)o.EventArgs).Handled = true;
+                }));
+            }
         }
 
         SimpleCommand<object, EventToCommandArgs> _viewAnalysisPoint;
@@ -77,16 +93,34 @@ namespace ESME.Scenarios
         #endregion
 
         #region RecalculateAnalysisPointCommand
-        public SimpleCommand<object, EventToCommandArgs> RecalculateAnalysisPointCommand { get { return _recalculateAnalysisPoint ?? (_recalculateAnalysisPoint = new SimpleCommand<object, EventToCommandArgs>(o=>MediatorMessage.Send(MediatorMessage.RecalculateAnalysisPoint,this))); } }
+        public SimpleCommand<object, EventToCommandArgs> RecalculateAnalysisPointCommand
+        {
+            get
+            {
+                return _recalculateAnalysisPoint ??
+                       (_recalculateAnalysisPoint = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.RecalculateAnalysisPoint, this)));
+            }
+        }
+
         SimpleCommand<object, EventToCommandArgs> _recalculateAnalysisPoint;
         #endregion
 
         #region AnalysisPointPropertiesCommand
-        public SimpleCommand<object, EventToCommandArgs> AnalysisPointPropertiesCommand { get { return _analysisPointProperties ?? (_analysisPointProperties = new SimpleCommand<object, EventToCommandArgs>(o=>MediatorMessage.Send(MediatorMessage.ViewAnalysisPointProperties,this))); } }
+        public SimpleCommand<object, EventToCommandArgs> AnalysisPointPropertiesCommand
+        {
+            get
+            {
+                return _analysisPointProperties ??
+                       (_analysisPointProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ViewAnalysisPointProperties, this)));
+            }
+        }
+
         SimpleCommand<object, EventToCommandArgs> _analysisPointProperties;
         #endregion
+
         public void Delete()
         {
+            IsDeleted = true;
             RemoveMapLayers();
             foreach (var tl in TransmissionLosses.ToList()) tl.Delete();
             if (Scenario.AnalysisPoints.Contains(this)) Scenario.AnalysisPoints.Remove(this);
@@ -96,23 +130,33 @@ namespace ESME.Scenarios
     [NotifyPropertyChanged]
     public class TransmissionLoss : IHaveGuid, IHaveLayerSettings
     {
-        [Key, Initialize]
-        public Guid Guid { get; set; }
+        [Key, Initialize] public Guid Guid { get; set; }
 
         public bool IsReadyToCalculate { get; set; }
         public virtual AnalysisPoint AnalysisPoint { get; set; }
         public virtual Mode Mode { get; set; }
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<Radial> Radials { get; set; }
-
-        [NotMapped]
-        public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", AnalysisPoint.Geo.Latitude, AnalysisPoint.Geo.Longitude); } }
-
-        #region ViewTransmissionLossCommand
-        public SimpleCommand<object, EventToCommandArgs> ViewTransmissionLossCommand
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
         {
-            get { return _viewTransmissionLoss ?? (_viewTransmissionLoss = new SimpleCommand<object, EventToCommandArgs>(o =>  MediatorMessage.Send(MediatorMessage.ViewTransmissionLoss, this))); }
+            var handlers = PropertyChanged;
+            if (handlers == null) return;
+            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                {
+                    var localHandler = handler;
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new PropertyChangedEventArgs(propertyName)));
+                }
+                else
+                    handler(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
+        [NotMapped] public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", AnalysisPoint.Geo.Latitude, AnalysisPoint.Geo.Longitude); } }
+        [NotMapped] public bool IsDeleted { get; set; }
+        #region ViewTransmissionLossCommand
+        public SimpleCommand<object, EventToCommandArgs> ViewTransmissionLossCommand { get { return _viewTransmissionLoss ?? (_viewTransmissionLoss = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ViewTransmissionLoss, this))); } }
 
         SimpleCommand<object, EventToCommandArgs> _viewTransmissionLoss;
         #endregion
@@ -123,7 +167,15 @@ namespace ESME.Scenarios
         #endregion
 
         #region RecalculateTransmissionLossCommand
-        public SimpleCommand<object, EventToCommandArgs> RecalculateTransmissionLossCommand { get { return _recalculateTransmissionLoss ?? (_recalculateTransmissionLoss = new SimpleCommand<object, EventToCommandArgs>(o=>MediatorMessage.Send(MediatorMessage.RecalculateTransmissionLoss,this))); } }
+        public SimpleCommand<object, EventToCommandArgs> RecalculateTransmissionLossCommand
+        {
+            get
+            {
+                return _recalculateTransmissionLoss ??
+                       (_recalculateTransmissionLoss = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.RecalculateTransmissionLoss, this)));
+            }
+        }
+
         SimpleCommand<object, EventToCommandArgs> _recalculateTransmissionLoss;
         #endregion
 
@@ -147,15 +199,17 @@ namespace ESME.Scenarios
             LayerSettings.MapLayerViewModel = mapLayer;
             if (AnalysisPoint.LayerSettings.IsChecked) LayerSettings.IsChecked = true;
         }
+
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
 
         public void Delete()
         {
+            IsDeleted = true;
             RemoveMapLayers();
             foreach (var radial in Radials.ToList()) radial.Delete();
             Mode.TransmissionLosses.Remove(this);
             AnalysisPoint.TransmissionLosses.Remove(this);
-            if (AnalysisPoint.TransmissionLosses.Count == 0) AnalysisPoint.Scenario.AnalysisPoints.Remove(AnalysisPoint);
+            if (AnalysisPoint.TransmissionLosses.Count == 0) AnalysisPoint.Delete();
         }
     }
 
@@ -163,25 +217,25 @@ namespace ESME.Scenarios
     public class Radial : IHaveGuid
     {
         public Radial() { Filename = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()); }
-        [Key, Initialize]
-        public Guid Guid { get; set; }
+        [Key, Initialize] public Guid Guid { get; set; }
         public bool IsCalculated { get; set; }
         public string Filename { get; set; }
         public DbDateTime CalculationStarted { get; set; }
         public DbDateTime CalculationCompleted { get; set; }
+
         /// <summary>
-        /// In degrees, clockwise from true north
+        ///   In degrees, clockwise from true north
         /// </summary>
         public double Bearing { get; set; }
+
         /// <summary>
-        /// In meters
+        ///   In meters
         /// </summary>
         public double Length { get; set; }
 
         public virtual TransmissionLoss TransmissionLoss { get; set; }
 
-        [NotMapped]
-        public string BasePath
+        [NotMapped] public string BasePath
         {
             get
             {
@@ -190,8 +244,7 @@ namespace ESME.Scenarios
             }
         }
 
-        [NotMapped]
-        public float[] Ranges
+        [NotMapped] public float[] Ranges
         {
             get
             {
@@ -199,10 +252,10 @@ namespace ESME.Scenarios
                 return _ranges;
             }
         }
+
         float[] _ranges;
 
-        [NotMapped]
-        public float[] Depths
+        [NotMapped] public float[] Depths
         {
             get
             {
@@ -210,6 +263,7 @@ namespace ESME.Scenarios
                 return _depths;
             }
         }
+
         float[] _depths;
 
         public void Delete()
@@ -219,22 +273,13 @@ namespace ESME.Scenarios
             TransmissionLoss.Radials.Remove(this);
         }
 
-        [NotMapped]
-        public BottomProfilePoint[] BottomProfile
-        {
-            get { return _bottomProfile ?? (_bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty")); }
-        }
+        [NotMapped] public BottomProfilePoint[] BottomProfile { get { return _bottomProfile ?? (_bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty")); } }
         BottomProfilePoint[] _bottomProfile;
 
-        [NotMapped]
-        public GeoSegment Segment
-        {
-            get { return _segment ?? (_segment = new GeoSegment(TransmissionLoss.AnalysisPoint.Geo, Length, Bearing)); }
-        }
+        [NotMapped] public GeoSegment Segment { get { return _segment ?? (_segment = new GeoSegment(TransmissionLoss.AnalysisPoint.Geo, Length, Bearing)); } }
         GeoSegment _segment;
 
-        [NotMapped]
-        public float[] MinimumTransmissionLossValues
+        [NotMapped] public float[] MinimumTransmissionLossValues
         {
             get
             {
@@ -242,10 +287,10 @@ namespace ESME.Scenarios
                 return _minimumTransmissionLossValues;
             }
         }
+
         float[] _minimumTransmissionLossValues;
 
-        [NotMapped]
-        public float[] MaximumTransmissionLossValues
+        [NotMapped] public float[] MaximumTransmissionLossValues
         {
             get
             {
@@ -253,10 +298,10 @@ namespace ESME.Scenarios
                 return _maximumTransmissionLossValues;
             }
         }
+
         float[] _maximumTransmissionLossValues;
 
-        [NotMapped]
-        public float[] MeanTransmissionLossValues
+        [NotMapped] public float[] MeanTransmissionLossValues
         {
             get
             {
@@ -264,6 +309,7 @@ namespace ESME.Scenarios
                 return _meanTransmissionLossValues;
             }
         }
+
         float[] _meanTransmissionLossValues;
 
         public void ExtractAxisData(TransmissionLossRadial transmissionLoss = null)
@@ -300,6 +346,7 @@ namespace ESME.Scenarios
 
         void ReadAxisFile()
         {
+            if (!File.Exists(BasePath + ".axs")) return;
             using (var reader = new BinaryReader(new FileStream(BasePath + ".axs", FileMode.Open)))
             {
                 _ranges = new float[reader.ReadInt32()];

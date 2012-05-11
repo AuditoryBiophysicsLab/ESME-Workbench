@@ -406,7 +406,7 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 if (Scenario != null && MouseGeo != null && Scenario.GeoRect.Contains(MouseGeo))
                 {
-                    var analysisPoint = new AnalysisPoint {Geo = MouseGeo, Scenario = Scenario};
+                    var analysisPoint = new AnalysisPoint {Geo = new Geo(MouseGeo), Scenario = Scenario};
                     Scenario.AnalysisPoints.Add(analysisPoint);
                     TaskEx.Run(() =>
                     {

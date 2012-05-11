@@ -26,6 +26,7 @@ namespace ESME.Views.TransmissionLossViewer
             {
                 _radialViewModel = value;                
                 _radialViewModel.PropertyChanged += (s, e) => { if (e.PropertyName == "WriteableBitmap" && Window!=null) Window.Activate(); };
+
             }
         } 
         #endregion
@@ -115,6 +116,14 @@ namespace ESME.Views.TransmissionLossViewer
                 _transmissionLoss = value;
                 Radials = _transmissionLoss == null ? null : new ObservableList<Radial>(from r in _transmissionLoss.Radials orderby r.Bearing select r);
                 SelectedRadialIndex = 0;
+                if (_transmissionLoss != null)
+                    _transmissionLoss.PropertyChanged += (s, e) =>
+                    {
+                        if (e.PropertyName == "IsDeleted" && Window != null)
+                        {
+                            CloseDialog(null);
+                        }
+                    };
             }
         }
         #endregion

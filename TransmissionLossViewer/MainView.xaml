@@ -49,7 +49,7 @@
         <DockPanel DockPanel.Dock="Bottom">
             <Controls:TLStatusBar DockPanel.Dock="Bottom" DataContext="{Binding TransmissionLossViewModel.RadialViewModel}"/>                
         </DockPanel>
-        <ToolBarTray Height="22" DockPanel.Dock="Top">
+        <ToolBarTray Height="22" DockPanel.Dock="Top" IsLocked="True">
             <ToolBar Band="0" BandIndex="0">
                 <Button Command="{Binding TransmissionLossViewModel.SaveAsCSVCommand}"
                         ToolBar.OverflowMode="Never"

@@ -16,12 +16,6 @@
                          Path=TLHeight,
                          Mode=TwoWay}"
         d:DataContext="{d:DesignInstance TransmissionLossViewer:TransmissionLossViewModel}"
-        Left="{Binding Source={x:Static Properties:Settings.Default},
-                       Path=TLLeft,
-                       Mode=TwoWay}"
-        Top="{Binding Source={x:Static Properties:Settings.Default},
-                      Path=TLTop,
-                      Mode=TwoWay}"
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <i:Interaction.Triggers>
@@ -38,7 +32,9 @@
         <DockPanel DockPanel.Dock="Bottom">
             <Controls:TLStatusBar DataContext="{Binding RadialViewModel}" DockPanel.Dock="Bottom" />
         </DockPanel>
-        <ToolBarTray Height="22" DockPanel.Dock="Top">
+        <ToolBarTray Height="22"
+                     DockPanel.Dock="Top"
+                     IsLocked="True">
             <ToolBar Band="0" BandIndex="0">
                 <Button Command="{Binding SaveAsCSVCommand}"
                         ToolBar.OverflowMode="Never"
