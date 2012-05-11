@@ -7,26 +7,19 @@ using System.Windows;
 using System.Windows.Controls;
 using ESME.Scenarios;
 using HRC.Aspects;
-using HRC.Services;
 using HRC.ViewModels;
 using HRC.WPF;
 
 namespace ESME.Views.Scenarios
 {
     /// <summary>
-    /// To create and show the view as a dialog:
-    /// var vm = new AnalysisPointPropertiesViewModel {...};
-    /// var result = _visualizerService.ShowDialog("AnalysisPointPropertiesView", vm);
-    /// if ((!result.HasValue) || (!result.Value)) return;
-    /// 
-    /// To create and show the view as a window:
-    /// var vm = new AnalysisPointPropertiesViewModel {...};
-    /// var window = _visualizerService.ShowWindow("AnalysisPointPropertiesView", vm);
+    ///   To create and show the view as a dialog: var vm = new AnalysisPointPropertiesViewModel {...}; var result = _visualizerService.ShowDialog("AnalysisPointPropertiesView", vm); if ((!result.HasValue) || (!result.Value)) return; To create and show the view as a window: var vm = new AnalysisPointPropertiesViewModel {...}; var window = _visualizerService.ShowWindow("AnalysisPointPropertiesView", vm);
     /// </summary>
     public class AnalysisPointPropertiesViewModel : ViewModelBase
     {
         #region public AnalysisPoint AnalysisPoint { get; set; }
         AnalysisPoint _analysisPoint;
+
         public AnalysisPoint AnalysisPoint
         {
             get { return _analysisPoint; }
@@ -44,7 +37,8 @@ namespace ESME.Views.Scenarios
             Properties.Add(new EditableKeyValuePair<string, string>("Location:", AnalysisPoint.Geo.ToString()));
             Properties.Add(new EditableKeyValuePair<string, string>("Number of Platforms:", AnalysisPoint.Scenario.Platforms.Count.ToString(CultureInfo.InvariantCulture)));
             Properties.Add(new EditableKeyValuePair<string, string>("Number of Transmission Losses:", AnalysisPoint.TransmissionLosses.Count.ToString(CultureInfo.InvariantCulture)));
-            Properties.Add(new EditableKeyValuePair<string, string>("Number of Computed Radials:", AnalysisPoint.TransmissionLosses.SelectMany(r => r.Radials).Count().ToString(CultureInfo.InvariantCulture)));
+            Properties.Add(new EditableKeyValuePair<string, string>("Number of Computed Radials:",
+                                                                    AnalysisPoint.TransmissionLosses.SelectMany(r => r.Radials).Count().ToString(CultureInfo.InvariantCulture)));
             Properties.Add(new EditableKeyValuePair<string, string>("Size on Disk:", AnalysisPointSize));
         }
 
@@ -52,7 +46,12 @@ namespace ESME.Views.Scenarios
         {
             get
             {
-                //var size = AnalysisPoint.TransmissionLosses.Sum(transmissionLoss => transmissionLoss.Radials.Select(radial => Directory.GetFiles(Path.GetDirectoryName(radial.BasePath),Path.GetFileName(radial.BasePath + ".*"))).Select(files => files.Select(file => new FileInfo(file)).Select(info => info.Length).Sum()).Sum());
+                var size =
+                    AnalysisPoint.TransmissionLosses.Sum(
+                        tl =>
+                        tl.Radials.Select(radial => Directory.GetFiles(Path.GetDirectoryName(radial.BasePath), Path.GetFileName(radial.BasePath + ".*"))).Select(
+                            files => files.Select(file => new FileInfo(file)).Select(fi => fi.Length).Sum()).Sum());
+#if false 
                 long size = 0;
                 foreach (var tl in AnalysisPoint.TransmissionLosses)
                 {
@@ -65,9 +64,9 @@ namespace ESME.Views.Scenarios
                             size += fi.Length;
                         }
                     }
-                }
-                
-                switch((int)Math.Log10(size))
+                } 
+#endif
+                switch ((int)Math.Log10(size))
                 {
                     case 0:
                     case 1:
@@ -76,7 +75,7 @@ namespace ESME.Views.Scenarios
                     case 3:
                     case 4:
                     case 5:
-                        return string.Format("{0}K", size>>10);
+                        return string.Format("{0}K", size >> 10);
                     case 6:
                     case 7:
                     case 8:
@@ -95,12 +94,12 @@ namespace ESME.Views.Scenarios
             }
         }
 
-        [Initialize]
-        public List<EditableKeyValuePair<string, string>> Properties { get; set; }
+        [Initialize] public List<EditableKeyValuePair<string, string>> Properties { get; set; }
 
         public string WindowTitle { get; set; }
 
         #region commands
+
         #region OkCommand
         public SimpleCommand<object, EventToCommandArgs> OkCommand { get { return _ok ?? (_ok = new SimpleCommand<object, EventToCommandArgs>(o => CloseDialog(true))); } }
         SimpleCommand<object, EventToCommandArgs> _ok;
@@ -110,6 +109,7 @@ namespace ESME.Views.Scenarios
         public SimpleCommand<object, EventToCommandArgs> ViewClosingCommand { get { return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(o => Views.Properties.Settings.Default.Save())); } }
         SimpleCommand<object, EventToCommandArgs> _viewClosing;
         #endregion
+
         #endregion
     }
 
@@ -124,10 +124,8 @@ namespace ESME.Views.Scenarios
         public TValue Value { get; set; }
         public bool IsEditable { get; set; }
 
-        public EditableKeyValuePair()
-        {
+        public EditableKeyValuePair() { }
 
-        }
         public EditableKeyValuePair(TKey key, TValue value, bool isEditable = false)
         {
             Key = key;
