@@ -97,6 +97,7 @@
     </Compile>
     <Compile Include="Controls\DataAxisControlViewModel.cs" />
     <Compile Include="Controls\DataPlotViewModel.cs" />
+    <Compile Include="Controls\EditableKeyValuePair.cs" />
     <Compile Include="Controls\EditableKeyValuePairListView.xaml.cs">
       <DependentUpon>EditableKeyValuePairListView.xaml</DependentUpon>
     </Compile>

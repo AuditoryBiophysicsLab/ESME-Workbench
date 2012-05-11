@@ -1,7 +1,7 @@
 ﻿<ListView x:Class="ESME.Views.Controls.EditableKeyValuePairListView"
           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-          xmlns:Scenarios="clr-namespace:ESME.Views.Scenarios"
+          xmlns:Controls="clr-namespace:ESME.Views.Controls"
           Grid.IsSharedSizeScope="True">
     <ListView.Resources>
         <DataTemplate x:Key="NotEditableTemplate">
@@ -43,6 +43,6 @@
         </DataTemplate>
     </ListView.Resources>
     <ListView.ItemTemplateSelector>
-        <Scenarios:EditableKeyValuePairTemplateSelector FalseTemplate="{StaticResource NotEditableTemplate}" TrueTemplate="{StaticResource EditableTemplate}" />
+        <Controls:EditableKeyValuePairTemplateSelector FalseTemplate="{StaticResource NotEditableTemplate}" TrueTemplate="{StaticResource EditableTemplate}" />
     </ListView.ItemTemplateSelector>
 </ListView>
