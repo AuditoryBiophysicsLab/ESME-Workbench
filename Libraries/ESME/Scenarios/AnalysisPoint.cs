@@ -155,6 +155,7 @@ namespace ESME.Scenarios
         }
         [NotMapped] public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", AnalysisPoint.Geo.Latitude, AnalysisPoint.Geo.Longitude); } }
         [NotMapped] public bool IsDeleted { get; set; }
+
         #region ViewTransmissionLossCommand
         public SimpleCommand<object, EventToCommandArgs> ViewTransmissionLossCommand { get { return _viewTransmissionLoss ?? (_viewTransmissionLoss = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ViewTransmissionLoss, this))); } }
 
@@ -346,7 +347,7 @@ namespace ESME.Scenarios
 
         void ReadAxisFile()
         {
-            if (!File.Exists(BasePath + ".axs")) return;
+            if (!File.Exists(BasePath + ".axs")) ExtractAxisData();
             using (var reader = new BinaryReader(new FileStream(BasePath + ".axs", FileMode.Open)))
             {
                 _ranges = new float[reader.ReadInt32()];

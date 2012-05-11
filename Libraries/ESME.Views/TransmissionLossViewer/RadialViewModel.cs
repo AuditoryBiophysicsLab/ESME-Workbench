@@ -87,7 +87,6 @@ namespace ESME.Views.TransmissionLossViewer
                     return;
                 }
                 TransmissionLossRadial = new TransmissionLossRadial((float)_radial.Bearing, new BellhopOutput(_radial.BasePath + ".shd"));
-                if (_radial.Ranges == null) _radial.ExtractAxisData(TransmissionLossRadial);
                 RangeMin = _radial.Ranges.First();
                 RangeMax = _radial.Ranges.Last();
                 DepthMin = _radial.Depths.First();

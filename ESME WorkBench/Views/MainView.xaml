@@ -265,7 +265,7 @@
                               Background="Black"
                               ResizeBehavior="BasedOnAlignment"
                               ResizeDirection="Rows" />
-                <LocalControls:LocationsTreeView Grid.Row="2" DataContext="{Binding LocationsTreeViewModel}" />
+                <LocalControls:LocationsTreeView Grid.Row="2" DataContext="{Binding}" />
             </Grid>
             <GridSplitter Grid.Column="1"
                           Width="2"
