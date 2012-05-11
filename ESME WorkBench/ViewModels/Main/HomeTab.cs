@@ -160,7 +160,7 @@ namespace ESMEWorkbench.ViewModels.Main
         }
 
         [MediatorMessageSink(MediatorMessage.ViewAnalysisPointProperties), UsedImplicitly]
-        void ViewAnalysisPointProperties(AnalysisPoint analysisPoint) { _visualizer.ShowDialog("AnalysisPointPropertiesView", new AnalysisPointPropertiesViewModel { AnalysisPoint = analysisPoint }); }
+        void ViewAnalysisPointProperties(AnalysisPoint analysisPoint) { _visualizer.ShowDialog("TreeViewItemPropertiesView", new AnalysisPointPropertiesViewModel { AnalysisPoint = analysisPoint }); }
 
         [MediatorMessageSink(MediatorMessage.RecalculateAllAnalysisPoints), UsedImplicitly]
         void RecalculateAllAnalysisPoints(bool dummy)
@@ -250,6 +250,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             var vm = new PropertiesViewModel { PropertyObject = platform, WindowTitle = "Platform Properties: " + platform.PlatformName };
             _visualizer.ShowDialog("PlatformPropertiesView", vm);
+            //_visualizer.ShowDialog("TreeViewItemPropertiesView", new PlatformPropertiesViewModel { Platform = platform });
         }
 
         [MediatorMessageSink(MediatorMessage.AddSource), UsedImplicitly]
@@ -290,6 +291,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.SourceProperties), UsedImplicitly]
         void SourceProperties(Source source)
         {
+            //_visualizer.ShowDialog("TreeViewItemPropertiesView", new SourcePropertiesViewModel { Source = source });
             var vm = new PropertiesViewModel { PropertyObject = source, WindowTitle = "Source Properties: " + source.SourceName };
             _visualizer.ShowDialog("SourcePropertiesView", vm);
         }
@@ -359,6 +361,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             var vm = new PropertiesViewModel { PropertyObject = mode, WindowTitle = "Mode Properties: " + mode.ModeName };
             _visualizer.ShowDialog("ModePropertiesView", vm);
+            //_visualizer.ShowDialog("TreeViewItemPropertiesView", new ModePropertiesViewModel() { Mode = mode, });
             mode.LowFrequency = mode.HighFrequency;
         }
 

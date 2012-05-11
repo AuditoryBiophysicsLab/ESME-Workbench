@@ -33,6 +33,7 @@
                            Text="{Binding Key}"
                            TextAlignment="Right" />
                 <TextBox Grid.Column="1"
+                         MinWidth="100"
                          VerticalAlignment="Top"
                          AcceptsReturn="True"
                          Text="{Binding Value}"

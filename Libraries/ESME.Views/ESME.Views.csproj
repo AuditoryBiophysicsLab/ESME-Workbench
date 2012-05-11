@@ -160,10 +160,10 @@
       <DependentUpon>UtilitiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Misc\UtilitiesViewModel.cs" />
-    <Compile Include="Scenarios\AnalysisPointPropertiesView.xaml.cs">
-      <DependentUpon>AnalysisPointPropertiesView.xaml</DependentUpon>
+    <Compile Include="Scenarios\TreeViewItemPropertiesView.xaml.cs">
+      <DependentUpon>TreeViewItemPropertiesView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Scenarios\AnalysisPointPropertiesViewModel.cs" />
+    <Compile Include="Scenarios\TreeViewItemPropertiesViewModel.cs" />
     <Compile Include="Scenarios\ModeDiagramView.xaml.cs">
       <DependentUpon>ModeDiagramView.xaml</DependentUpon>
     </Compile>
@@ -280,7 +280,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Scenarios\AnalysisPointPropertiesView.xaml">
+    <Page Include="Scenarios\TreeViewItemPropertiesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
