@@ -1,6 +1,7 @@
 ﻿using System;
 using ESME.Locations;
 using ESME.Views.Locations;
+using ESMEWorkbench.ViewModels.Tree;
 using HRC.Navigation;
 using HRC.ViewModels;
 
@@ -77,6 +78,8 @@ namespace ESMEWorkbench.ViewModels.Main
         }
         bool _viewIsActivated;
         #endregion
+
+        public LocationsTreeViewModel LocationsTreeViewModel { get; set; }
 
 #if false
         void DisplayWorldMap()

@@ -19,6 +19,7 @@ using ESME.TransmissionLoss;
 using ESME.Views.TransmissionLossViewer;
 using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.Map;
+using ESMEWorkbench.ViewModels.Tree;
 using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
@@ -79,6 +80,7 @@ namespace ESMEWorkbench.ViewModels.Main
             Database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
             Locations = Database.Context.Locations.Local;
             Scenarios = Database.Context.Scenarios.Local;
+            LocationsTreeViewModel = new LocationsTreeViewModel(Database.Context.Locations.Local);
             Cursor = Cursors.Arrow;
             _transmissionLoss.RangeCellSize = Globals.AppSettings.BellhopSettings.RangeCellSize;
             _transmissionLoss.DepthCellSize = Globals.AppSettings.BellhopSettings.DepthCellSize;

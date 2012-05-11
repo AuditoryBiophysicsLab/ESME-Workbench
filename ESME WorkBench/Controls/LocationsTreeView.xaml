@@ -3,12 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:Locations="clr-namespace:ESME.Locations;assembly=ESME" mc:Ignorable="d" 
+             xmlns:Locations="clr-namespace:ESME.Locations;assembly=ESME"
+             xmlns:Tree="clr-namespace:ESMEWorkbench.ViewModels.Tree" mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <DockPanel LastChildFill="True">
-        <TreeView DockPanel.Dock="Bottom" ItemsSource="{Binding LocationsTreeViewModel}">
+        <TreeView DockPanel.Dock="Bottom" ItemsSource="{Binding Locations}"
+                  d:DataContext="{d:DesignInstance Tree:LocationsTreeViewModel}">
             <TreeView.Resources>
-                <HierarchicalDataTemplate DataType="{x:Type Locations:Location}" ItemsSource="{Binding EnvironmentalDataSets}"></HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type Locations:Location}" ItemsSource="{Binding DataSetTypes}">
+                    <TextBlock Text="{Binding Name}" />
+                </HierarchicalDataTemplate>
             </TreeView.Resources>
         </TreeView>
     </DockPanel>

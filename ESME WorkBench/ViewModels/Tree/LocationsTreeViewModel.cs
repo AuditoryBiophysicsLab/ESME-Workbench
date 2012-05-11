@@ -11,6 +11,5 @@ namespace ESMEWorkbench.ViewModels.Tree
             Locations = locations;
         }
         public ObservableCollection<Location> Locations { get; private set; }
-
     }
 }
