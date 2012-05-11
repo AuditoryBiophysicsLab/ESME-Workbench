@@ -351,6 +351,7 @@ namespace ESMEWorkbench.ViewModels.Main
                         case Key.Escape:
                             // Anything else that is to be canceled by the user hitting the ESC key must be put here
                             IsInAnalysisPointMode = false;
+                            Cursor = Cursors.Arrow;
                             break;
                     }
                 }));
@@ -398,6 +399,7 @@ namespace ESMEWorkbench.ViewModels.Main
         Window _queueView;
 
         public Cursor Cursor { get; set; }
+
         [MediatorMessageSink(MediatorMessage.MapClick), UsedImplicitly]
         void MapClick(Geo geo)
         {

@@ -40,7 +40,7 @@
         <Utility:BooleanNegatingConverter x:Key="NegatingConverter" />
     </r:RibbonWindow.Resources>
     <r:RibbonWindow.InputBindings>
-        <KeyBinding Key="Escape" Command="{Binding CancelCurrentCommand}" />
+        <KeyBinding Gesture="CTRL+S" Command="{Binding SaveCommand}" />
     </r:RibbonWindow.InputBindings>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
@@ -146,47 +146,6 @@
             <r:RibbonTab Header="Home" KeyTip="H">
                 <r:RibbonGroup Header="Map">
                     <r:RibbonButton Command="{Binding ZoomToWorldMapCommand}" Label="World Map" LargeImageSource="..\Images\LargeIcons\globe-icon.png" SmallImageSource="..\Images\SmallIcons\globe-icon.png" />
-                </r:RibbonGroup>
-                <r:RibbonGroup Header="Location">
-                    <ListView Width="150"
-                              Height="66"
-                              DisplayMemberPath="Name"
-                              ItemsSource="{Binding Locations}"
-                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                              SelectedIndex="{Binding SelectedLocationIndex}"
-                              SelectedItem="{Binding SelectedLocation}"
-                              SelectionMode="Single">
-                        <ListView.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel />
-                            </ItemsPanelTemplate>
-                        </ListView.ItemsPanel>
-                    </ListView>
-                    <r:RibbonButton Command="{Binding CreateLocationCommand}"
-                                    Label="Create"
-                                    SmallImageSource="..\Images\SmallIcons\layer_create.png"
-                                    ToolTipDescription="An adjustable rectangle will appear on the map. It can be moved by dragging the control at the rectangle's center and its size can be adjusted by dragging one of the controls at the rectangle's corners.  The bounds of the new location can also be entered directly if you prefer."
-                                    ToolTipTitle="Create a new location by drawing a rectangle on the map" />
-                    <r:RibbonButton Command="{Binding DisabledCommand}"
-                                    Label="Edit"
-                                    SmallImageSource="..\Images\SmallIcons\layer_edit.png"
-                                    ToolTipDescription="Edit the boundaries and/or cached environmental data of the selected location"
-                                    ToolTipTitle="Edit location" />
-                    <r:RibbonButton Command="{Binding DisabledCommand}"
-                                    Label="Delete"
-                                    SmallImageSource="..\Images\SmallIcons\layer_delete.png"
-                                    ToolTipDescription="Delete an existing location, along with all cached data and all scenarios that depend upon it"
-                                    ToolTipTitle="Delete location" />
-                    <r:RibbonButton Command="{Binding DisabledCommand}"
-                                    Label="Import"
-                                    SmallImageSource="..\Images\SmallIcons\layer_import.png"
-                                    ToolTipDescription="This feature is not yet implemented"
-                                    ToolTipTitle="Import a location file" />
-                    <r:RibbonButton Command="{Binding DisabledCommand}"
-                                    Label="Export"
-                                    SmallImageSource="..\Images\SmallIcons\layer_export.png"
-                                    ToolTipDescription="This feature is not yet implemented"
-                                    ToolTipTitle="Export the selected location to a location file" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Scenario">
                     <ListView Width="150"

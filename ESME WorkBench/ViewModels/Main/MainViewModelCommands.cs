@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Input;
 using ESME;
 using ESME.Data;
 using ESMEWorkbench.ViewModels.TransmissionLoss;
@@ -69,13 +70,11 @@ namespace ESMEWorkbench.ViewModels.Main
         SimpleCommand<object, object> _disabled;
         #endregion
 
-        #region CancelCurrentCommand
-        public SimpleCommand<Object, Object> CancelCurrentCommand
-        {
-            get { return _cancelCurrentCommand ?? (_cancelCurrentCommand = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.CancelCurrentCommand))); }
-        }
-
-        SimpleCommand<Object, Object> _cancelCurrentCommand;
+        #region SaveCommand
+        public SimpleCommand<object, object> SaveCommand { get { return _save ?? (_save = new SimpleCommand<object, object>(o => IsSaveCommandEnabled, SaveHandler)); } }
+        SimpleCommand<object, object> _save;
+        bool IsSaveCommandEnabled { get { return Scenario != null; } }
+        void SaveHandler(object o) { Database.SaveChanges(); }
         #endregion
 
         #region ViewClosingCommand
