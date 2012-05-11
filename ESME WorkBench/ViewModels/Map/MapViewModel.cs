@@ -293,6 +293,11 @@ namespace ESMEWorkbench.ViewModels.Map
             return new Geo(pointShape.Y, pointShape.X);
         }
 
+        #region MouseLeaveCommand
+        public SimpleCommand<object, EventToCommandArgs> MouseLeaveCommand { get { return _mouseLeave ?? (_mouseLeave = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.SetMouseGeo, (Geo)null))); } }
+        SimpleCommand<object, EventToCommandArgs> _mouseLeave;
+        #endregion
+
         #region MouseMoveCommand
         public SimpleCommand<object, EventToCommandArgs> MouseMoveCommand
         {
@@ -306,7 +311,7 @@ namespace ESMEWorkbench.ViewModels.Map
             var e = (MouseEventArgs)arg.EventArgs;
             var point = e.MouseDevice.GetPosition(_wpfMap);
             var pointShape = ExtentHelper.ToWorldCoordinate(_wpfMap.CurrentExtent, (float)point.X, (float)point.Y, (float)_wpfMap.ActualWidth, (float)_wpfMap.ActualHeight);
-            MediatorMessage.Send(MediatorMessage.SetMouseEarthCoordinate, new Geo(pointShape.Y, pointShape.X));
+            MediatorMessage.Send(MediatorMessage.SetMouseGeo, new Geo(pointShape.Y, pointShape.X));
         }
         #endregion
 

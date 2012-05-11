@@ -1,31 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ESME.Data;
-using ESME.TransmissionLoss;
+﻿using ESME.Data;
 using HRC.Services;
 
 namespace ESME
 {
     public static class Globals
     {
-        static Globals()
-        {
-        }
-
-        public static string Filter(this string s, Func<char, bool> trueIfKeep)
-        {
-            if (!string.IsNullOrEmpty(s))
-            {
-                var sb = new StringBuilder(s.Length);
-                foreach (var c in s.Where(trueIfKeep)) sb.Append(c);
-
-                return sb.ToString();
-            }
-            return s;
-        }
-
         static AppSettings _appSettings;
         public static AppSettings AppSettings
         {
@@ -37,7 +16,5 @@ namespace ESME
                 HRCOpenFileService.InitialDirectories = _appSettings.OpenFileServiceDirectories;
             }
         }
-
-        public static WorkDirectories WorkDirectories { get; set; }
     }
 }

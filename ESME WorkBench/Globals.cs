@@ -12,11 +12,8 @@ namespace ESMEWorkbench
         static Globals()
         {
             AppSettings.ApplicationName = App.Name;
-            WorkDirectories.ApplicationName = App.Name;
-            WorkDirectories = WorkDirectories.Load();
             AppSettings = AppSettings.Load(AppSettings.AppSettingsFile);
             AppSettings.Save();
-            ESME.Globals.WorkDirectories = WorkDirectories;
             ESME.Globals.AppSettings = AppSettings;
         }
 
@@ -32,8 +29,6 @@ namespace ESMEWorkbench
                 HRCOpenFileService.InitialDirectories = _appSettings.OpenFileServiceDirectories;
             }
         }
-
-        public static WorkDirectories WorkDirectories { get; set; }
 
         public static void DisplayException(IMessageBoxService messageBoxService, Exception ex, string format, params object[] args)
         {

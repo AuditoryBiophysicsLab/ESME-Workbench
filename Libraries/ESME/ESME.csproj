@@ -164,7 +164,6 @@
     <Compile Include="Scenarios\Platform.cs" />
     <Compile Include="Scenarios\Scenario.cs" />
     <Compile Include="Data\AppSettings.cs" />
-    <Compile Include="Data\WorkDirectories.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="Environment\Bathymetry.cs" />
     <Compile Include="Environment\BottomLoss.cs" />

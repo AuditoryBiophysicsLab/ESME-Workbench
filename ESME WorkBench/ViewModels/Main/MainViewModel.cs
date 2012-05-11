@@ -115,10 +115,10 @@ namespace ESMEWorkbench.ViewModels.Main
         public Geo MouseGeo { get; set; }
         AnalysisPoint _fakeAnalysisPoint;
 
-        [MediatorMessageSink(MediatorMessage.SetMouseEarthCoordinate), UsedImplicitly]
-        void SetMouseEarthCoordinate(Geo mouseEarthCoordinate)
+        [MediatorMessageSink(MediatorMessage.SetMouseGeo), UsedImplicitly]
+        void SetMouseEarthCoordinate(Geo mouseGeo)
         {
-            MouseGeo = mouseEarthCoordinate;
+            MouseGeo = mouseGeo;
 #if false
             if (IsInAnalysisPointMode)
             {
@@ -138,10 +138,10 @@ namespace ESMEWorkbench.ViewModels.Main
                 }
             }
 #endif
-            if (mouseEarthCoordinate != null)
+            if (MouseGeo != null)
             {
-                var lat = mouseEarthCoordinate.Latitude;
-                var lon = mouseEarthCoordinate.Longitude;
+                var lat = mouseGeo.Latitude;
+                var lon = mouseGeo.Longitude;
                 MouseLatitude = Math.Abs(lat) <= 90 ? string.Format("Lat: {0:0.0000}{1}", Math.Abs(lat), lat >= 0 ? "N" : "S") : "Lat: N/A";
                 MouseLongitude = Math.Abs(lon) <= 180 ? string.Format("Lon: {0:0.0000}{1}", Math.Abs(lon), lon >= 0 ? "E" : "W") : "Lon: N/A";
             }
@@ -158,6 +158,19 @@ namespace ESMEWorkbench.ViewModels.Main
                     IsInAnalysisPointMode = false;
                     Cursor = Cursors.Arrow;
                 }
+            }
+            if (Scenario == null || MouseGeo == null || !Scenario.GeoRect.Contains(MouseGeo))
+            {
+                MouseDepth = null;
+                MouseDepthInfo = string.Format("Depth: N/A");
+                MouseWindSpeed = null;
+                MouseWindSpeedInfo = string.Format("Wind: N/A");
+                MouseSoundSpeed = null;
+                MouseSoundSpeedInfo = string.Format("Sound Speed: N/A");
+                MapViewModel.MouseSoundSpeedProfile = MouseSoundSpeed;
+                MouseSediment = null;
+                MouseSedimentInfo = string.Format("Sediment: N/A");
+                return;
             }
             if (Scenario != null && Scenario.Bathymetry != null && _cache.IsCached(Scenario.Bathymetry))
             {

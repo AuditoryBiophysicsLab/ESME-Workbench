@@ -28,6 +28,9 @@
                 <i:EventTrigger EventName="MouseMove">
                     <WPF:EventToCommandTrigger Command="{Binding MouseMoveCommand}" />
                 </i:EventTrigger>
+                <i:EventTrigger EventName="MouseLeave">
+                    <WPF:EventToCommandTrigger Command="{Binding MouseLeaveCommand}" />
+                </i:EventTrigger>
                 <i:EventTrigger EventName="MapClick">
                     <WPF:EventToCommandTrigger Command="{Binding MapClickCommand}" />
                 </i:EventTrigger>
