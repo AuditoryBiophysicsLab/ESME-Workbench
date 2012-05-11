@@ -47,6 +47,6 @@
                     IsCancel="True"
                     IsDefault="False" />
         </StackPanel>
-        <Controls:EditableKeyValuePairListView ItemsSource="{Binding Properties}" />
+        <Controls:EditableKeyValuePairListView ItemsSource="{Binding Properties}" Padding="5" />
     </DockPanel>
 </Window>

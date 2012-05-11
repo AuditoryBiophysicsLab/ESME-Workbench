@@ -16,10 +16,11 @@
     <TreeView DockPanel.Dock="Top" Grid.IsSharedSizeScope="True" ItemsSource="{Binding RootNodes}">
         <TreeView.Resources>
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Scenario}" ItemsSource="{Binding Platforms}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" IsMapLayer="False" LayerName="{Binding Name, StringFormat=Scenario: {0}}" TheLayerControl="{Binding LayerControl}">
+                <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}" IsMapLayer="False" LayerName="{Binding Name, StringFormat=Scenario: {0}}" TheLayerControl="{Binding LayerControl}">
                     <Controls:LayerControl.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding AddPlatformCommand}" Header="Add platform" />
+                            <MenuItem Command="{Binding ViewScenarioPropertiesCommand}" Header="Properties"/>
                         </ContextMenu>
                     </Controls:LayerControl.ContextMenu>
                 </Controls:LayerControl>
@@ -71,7 +72,7 @@
             </HierarchicalDataTemplate>
             <!--  Mode  -->
             <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
                                        IsLayerNameEditable="True"
                                        IsMapLayer="False"
                                        LayerName="{Binding ModeName,

@@ -234,14 +234,13 @@ namespace ESME.Scenarios
         [NotMapped] public bool IsMouseOver { get; set; }
         [NotMapped] public GeoRect GeoRect { get { return Location.GeoRect; } }
         #region AddPlatformCommand
-        public SimpleCommand<object, EventToCommandArgs> AddPlatformCommand { get { return _addPlatform ?? (_addPlatform = new SimpleCommand<object, EventToCommandArgs>(AddPlatformHandler)); } }
+        public SimpleCommand<object, EventToCommandArgs> AddPlatformCommand { get { return _addPlatform ?? (_addPlatform = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.AddPlatform, this))); } }
         SimpleCommand<object, EventToCommandArgs> _addPlatform;
+        #endregion
 
-        void AddPlatformHandler(EventToCommandArgs args)
-        {
-            //var parameter = args.CommandParameter;
-            MediatorMessage.Send(MediatorMessage.AddPlatform, this);
-        }
+        #region ViewScenarioPropertiesCommand
+        public SimpleCommand<object, EventToCommandArgs> ViewScenarioPropertiesCommand { get { return _viewScenarioProperties ?? (_viewScenarioProperties = new SimpleCommand<object, EventToCommandArgs>(o =>MediatorMessage.Send(MediatorMessage.ViewScenarioProperties,this))); } }
+        SimpleCommand<object, EventToCommandArgs> _viewScenarioProperties;
         #endregion
         public void Delete()
         {

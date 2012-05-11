@@ -20,6 +20,7 @@ namespace ESME
         public const string RecalculateAnalysisPoint = "RecalculateAnalysisPointMessage";
 
         public const string ScenarioBoundToLayer = "ScenarioBoundToLayerMessage";
+        public const string ViewScenarioProperties = "ViewScenarioPropertiesMessage";
 
         public const string AddPlatform = "AddPlatformMessage";
         public const string DeletePlatform = "DeletePlatformMessage";

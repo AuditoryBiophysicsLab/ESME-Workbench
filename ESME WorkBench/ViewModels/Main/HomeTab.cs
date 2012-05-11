@@ -160,7 +160,7 @@ namespace ESMEWorkbench.ViewModels.Main
         }
 
         [MediatorMessageSink(MediatorMessage.ViewAnalysisPointProperties), UsedImplicitly]
-        void ViewAnalysisPointProperties(AnalysisPoint analysisPoint) { _visualizer.ShowDialog("TreeViewItemPropertiesView", new AnalysisPointPropertiesViewModel { AnalysisPoint = analysisPoint }); }
+        void ViewAnalysisPointProperties(AnalysisPoint analysisPoint) { _visualizer.ShowDialog("TreeViewItemPropertiesView", new AnalysisPointPropertiesViewModel { PropertyObject = analysisPoint }); }
 
         [MediatorMessageSink(MediatorMessage.RecalculateAllAnalysisPoints), UsedImplicitly]
         void RecalculateAllAnalysisPoints(bool dummy)
@@ -226,6 +226,9 @@ namespace ESMEWorkbench.ViewModels.Main
             Scenario.Platforms.Add(platform);
             platform.CreateMapLayers();
         }
+
+        [MediatorMessageSink(MediatorMessage.ViewScenarioProperties),UsedImplicitly]
+        void ViewScenarioProperties(Scenario scenario) { _visualizer.ShowDialog("TreeViewItemPropertiesView", new ScenarioPropertiesViewModel { PropertyObject = scenario }); }
 
         [MediatorMessageSink(MediatorMessage.PlatformBoundToLayer), UsedImplicitly]
         async void PlatformBoundToLayer(Platform platform)
