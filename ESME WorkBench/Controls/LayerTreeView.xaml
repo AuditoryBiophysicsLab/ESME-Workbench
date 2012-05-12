@@ -9,31 +9,76 @@
              xmlns:Scenarios="clr-namespace:ESME.Scenarios;assembly=ESME"
              xmlns:Tree="clr-namespace:ESMEWorkbench.ViewModels.Tree"
              xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
-             d:DataContext="{d:DesignInstance Tree:LayerTreeViewModel}"
+             xmlns:r="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
+             xmlns:Main="clr-namespace:ESMEWorkbench.ViewModels.Main"
+             d:DataContext="{d:DesignInstance Main:MainViewModel}"
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
-    <TreeView DockPanel.Dock="Top" Grid.IsSharedSizeScope="True" ItemsSource="{Binding RootNodes}">
-        <TreeView.Resources>
-            <HierarchicalDataTemplate DataType="{x:Type Scenarios:Scenario}" ItemsSource="{Binding Platforms}">
-                <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}" IsMapLayer="False" LayerName="{Binding Name, StringFormat=Scenario: {0}}" TheLayerControl="{Binding LayerControl}">
-                    <Controls:LayerControl.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Command="{Binding AddPlatformCommand}" Header="Add platform" />
-                            <MenuItem Command="{Binding ViewScenarioPropertiesCommand}" Header="Properties"/>
-                        </ContextMenu>
-                    </Controls:LayerControl.ContextMenu>
-                </Controls:LayerControl>
-            </HierarchicalDataTemplate>
-            <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+    <DockPanel LastChildFill="True">
+        <Border Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"
+                BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}"
+                BorderThickness="1 1 1 0"
+                Padding="5 5 5 0"
+                DockPanel.Dock="Top">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Scenario" />
+                <Line Margin="-5,5,-5,2"
+                      SnapsToDevicePixels="True"
+                      Stretch="Fill"
+                      Stroke="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}"
+                      X1="0"
+                      X2="1" />
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                    <r:RibbonButton Command="{Binding CreateScenarioCommand}"
+                                    SmallImageSource="..\Images\SmallIcons\application_form_add.png"
+                                    ToolTipDescription="Creates a new scenario"
+                                    ToolTipTitle="New scenario" />
+                    <r:RibbonButton Command="{Binding DisabledCommand}"
+                                    SmallImageSource="..\Images\SmallIcons\application_form_edit.png"
+                                    ToolTipDescription="Not yet implemented"
+                                    ToolTipTitle="Edit the currently selected scenario" />
+                    <r:RibbonButton Command="{Binding DisabledCommand}"
+                                    SmallImageSource="..\Images\SmallIcons\application_form_delete.png"
+                                    ToolTipDescription="Not yet implemented"
+                                    ToolTipTitle="Delete scenarioDelete the currently selected scenario" />
+                    <r:RibbonButton Command="{Binding DisabledCommand}"
+                                    SmallImageSource="..\Images\SmallIcons\application_get.png"
+                                    ToolTipDescription="Not yet implemented"
+                                    ToolTipTitle="Import a scenario file" />
+                    <r:RibbonButton Command="{Binding DisabledCommand}"
+                                    SmallImageSource="..\Images\SmallIcons\application_put.png"
+                                    ToolTipDescription="Not yet implemented"
+                                    ToolTipTitle="Export the currently selected scenario to a scenario file" />
+                    <r:RibbonButton Command="{Binding DisabledCommand}"
+                                    SmallImageSource="..\Images\SmallIcons\application_form_magnify.png"
+                                    ToolTipDescription="Not yet implemented"
+                                    ToolTipTitle="Resets the map position to the current scenario" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <TreeView DockPanel.Dock="Top" Grid.IsSharedSizeScope="True" ItemsSource="{Binding LayerTreeViewModel.RootNodes}">
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type Scenarios:Scenario}" ItemsSource="{Binding Platforms}">
+                    <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}" IsMapLayer="False" LayerName="{Binding Name, StringFormat=Scenario: {0}}" TheLayerControl="{Binding LayerControl}">
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding AddPlatformCommand}" Header="Add platform" />
+                                <MenuItem Command="{Binding ViewScenarioPropertiesCommand}" Header="Properties"/>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
+                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
                                        IsLayerNameEditable="True"
                                        LayerName="{Binding PlatformName,
                                                            Mode=TwoWay}"
                                        LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
                                        LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}"
                                        TheLayerControl="{Binding LayerControl}">
-                    <!--
+                        <!--
                         Should work, doesn't.  KeyUp is handled by TreeviewItem, not layercontrol.
                         <i:Interaction.Triggers>
                         <i:EventTrigger EventName="KeyUp">
@@ -41,108 +86,109 @@
                         </i:EventTrigger>
                         </i:Interaction.Triggers>
                     -->
-                    <Controls:LayerControl.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Command="{Binding DeletePlatformCommand}" Header="Remove this platform" />
-                            <MenuItem Command="{Binding AddSourceCommand}" Header="Add source" />
-                            <MenuItem Command="{Binding PlatformPropertiesCommand}" Header="Properties" />
-                        </ContextMenu>
-                    </Controls:LayerControl.ContextMenu>
-                </Controls:LayerControl>
-            </HierarchicalDataTemplate>
-            <!--  Source  -->
-            <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
-                <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeletePlatformCommand}" Header="Remove this platform" />
+                                <MenuItem Command="{Binding AddSourceCommand}" Header="Add source" />
+                                <MenuItem Command="{Binding PlatformPropertiesCommand}" Header="Properties" />
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+                <!--  Source  -->
+                <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
+                    <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
                                        IsLayerNameEditable="True"
                                        IsMapLayer="False"
                                        LayerName="{Binding SourceName,
                                                            Mode=TwoWay}"
                                        TheLayerControl="{Binding LayerControl}">
-                    <Controls:LayerControl.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Command="{Binding DeleteSourceCommand}" Header="Remove this source" />
-                            <MenuItem Command="{Binding AddModeCommand}" Header="Add mode" />
-                            <MenuItem Command="{Binding SourcePropertiesCommand}" Header="Properties" />
-                        </ContextMenu>
-                    </Controls:LayerControl.ContextMenu>
-                </Controls:LayerControl>
-            </HierarchicalDataTemplate>
-            <HierarchicalDataTemplate DataType="{x:Type Tree:EnvironmentNode}" ItemsSource="{Binding EnvironmentLayers}">
-                <Controls:LayerControl IsChecked="{Binding Location.LayerSettings.IsChecked}" LayerName="Environment" LineOrSymbolColor="{Binding Location.LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding Location.LayerSettings.LineOrSymbolSize}" />
-            </HierarchicalDataTemplate>
-            <!--  Mode  -->
-            <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
-                <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeleteSourceCommand}" Header="Remove this source" />
+                                <MenuItem Command="{Binding AddModeCommand}" Header="Add mode" />
+                                <MenuItem Command="{Binding SourcePropertiesCommand}" Header="Properties" />
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type Tree:EnvironmentNode}" ItemsSource="{Binding EnvironmentLayers}">
+                    <Controls:LayerControl IsChecked="{Binding Location.LayerSettings.IsChecked}" LayerName="Environment" LineOrSymbolColor="{Binding Location.LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding Location.LayerSettings.LineOrSymbolSize}" />
+                </HierarchicalDataTemplate>
+                <!--  Mode  -->
+                <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
+                    <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
                                        IsLayerNameEditable="True"
                                        IsMapLayer="False"
                                        LayerName="{Binding ModeName,
                                                            Mode=TwoWay}"
                                        TheLayerControl="{Binding LayerControl}">
-                    <Controls:LayerControl.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Command="{Binding DeleteModeCommand}" Header="Remove this mode" />
-                            <MenuItem Command="{Binding RecalculateModeCommand}" Header="Recalculate this mode"/>
-                            <MenuItem Command="{Binding ModePropertiesCommand}" Header="Properties" />                            
-                        </ContextMenu>
-                    </Controls:LayerControl.ContextMenu>
-                </Controls:LayerControl>
-            </HierarchicalDataTemplate>
-            <HierarchicalDataTemplate DataType="{x:Type Tree:WorldMapNode}" ItemsSource="{Binding Features}">
-                <Controls:LayerControl IsChecked="{Binding IsVisible}" LayerName="World Map" LineOrSymbolColor="{Binding LineColor}" LineOrSymbolSize="{Binding LineWeight}" />
-            </HierarchicalDataTemplate>
-            <HierarchicalDataTemplate DataType="{x:Type Tree:SedimentNode}" ItemsSource="{Binding SedimentTypes}">
-                <Controls:LayerControl IsChecked="{Binding IsChecked}" IsMapLayer="False" LayerName="Sediment" />
-            </HierarchicalDataTemplate>
-            <HierarchicalDataTemplate DataType="{x:Type Tree:AnalysisPointsNode}" ItemsSource="{Binding Scenario.AnalysisPoints}">
-                <Controls:LayerControl IsChecked="{Binding Scenario.ShowAllAnalysisPoints}" LayerName="Analysis Points" LineColorVisibility="Collapsed">
-                    <Controls:LayerControl.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Command="{Binding DeleteAllCommand}" Header="Remove all analysis points" />
-                            <MenuItem Command="{Binding RecalculateAllCommand}" Header="Recalculate all analysis points" />
-                        </ContextMenu>
-                    </Controls:LayerControl.ContextMenu>
-                </Controls:LayerControl>
-            </HierarchicalDataTemplate>
-            <DataTemplate DataType="{x:Type Scenarios:TransmissionLoss}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseDoubleClick">
-                            <WPF:EventToCommandTrigger Command="{Binding ViewTransmissionLossCommand}" CommandParameter="{Binding}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                    <Controls:LayerControl.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Command="{Binding DeleteTransmissionLossCommand}" Header="Remove this transmission loss" />
-                            <MenuItem Command="{Binding RecalculateTransmissionLossCommand}" Header="Recalculate this transmission loss" />
-                        </ContextMenu>
-                    </Controls:LayerControl.ContextMenu>
-                </Controls:LayerControl>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type Scenarios:AnalysisPoint}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineColorVisibility="Collapsed">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseDoubleClick">
-                            <WPF:EventToCommandTrigger Command="{Binding ViewAnalysisPointCommand}" CommandParameter="{Binding}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                    <Controls:LayerControl.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Command="{Binding DeleteAnalysisPointCommand}" Header="Remove this analysis point" />
-                            <MenuItem Command="{Binding RecalculateAnalysisPointCommand}" Header="Recalculate this analysis point" />
-                            <MenuItem Command="{Binding AnalysisPointPropertiesCommand}" Header="Properties"/>
-                        </ContextMenu>
-                    </Controls:LayerControl.ContextMenu>
-                </Controls:LayerControl>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type Locations:EnvironmentalDataSet}">
-                <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}" />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type Tree:WorldMapFeatureNode}">
-                <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="{Binding FeatureName}" LineColorVisibility="Collapsed" />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type Tree:BitmapNode}">
-                <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="{Binding LayerName}" LineColorVisibility="Collapsed" />
-            </DataTemplate>
-        </TreeView.Resources>
-    </TreeView>
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeleteModeCommand}" Header="Remove this mode" />
+                                <MenuItem Command="{Binding RecalculateModeCommand}" Header="Recalculate this mode"/>
+                                <MenuItem Command="{Binding ModePropertiesCommand}" Header="Properties" />
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type Tree:WorldMapNode}" ItemsSource="{Binding Features}">
+                    <Controls:LayerControl IsChecked="{Binding IsVisible}" LayerName="World Map" LineOrSymbolColor="{Binding LineColor}" LineOrSymbolSize="{Binding LineWeight}" />
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type Tree:SedimentNode}" ItemsSource="{Binding SedimentTypes}">
+                    <Controls:LayerControl IsChecked="{Binding IsChecked}" IsMapLayer="False" LayerName="Sediment" />
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type Tree:AnalysisPointsNode}" ItemsSource="{Binding Scenario.AnalysisPoints}">
+                    <Controls:LayerControl IsChecked="{Binding Scenario.ShowAllAnalysisPoints}" LayerName="Analysis Points" LineColorVisibility="Collapsed">
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeleteAllCommand}" Header="Remove all analysis points" />
+                                <MenuItem Command="{Binding RecalculateAllCommand}" Header="Recalculate all analysis points" />
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+                <DataTemplate DataType="{x:Type Scenarios:TransmissionLoss}">
+                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <WPF:EventToCommandTrigger Command="{Binding ViewTransmissionLossCommand}" CommandParameter="{Binding}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeleteTransmissionLossCommand}" Header="Remove this transmission loss" />
+                                <MenuItem Command="{Binding RecalculateTransmissionLossCommand}" Header="Recalculate this transmission loss" />
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type Scenarios:AnalysisPoint}">
+                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineColorVisibility="Collapsed">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <WPF:EventToCommandTrigger Command="{Binding ViewAnalysisPointCommand}" CommandParameter="{Binding}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeleteAnalysisPointCommand}" Header="Remove this analysis point" />
+                                <MenuItem Command="{Binding RecalculateAnalysisPointCommand}" Header="Recalculate this analysis point" />
+                                <MenuItem Command="{Binding AnalysisPointPropertiesCommand}" Header="Properties"/>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type Locations:EnvironmentalDataSet}">
+                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}" />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type Tree:WorldMapFeatureNode}">
+                    <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="{Binding FeatureName}" LineColorVisibility="Collapsed" />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type Tree:BitmapNode}">
+                    <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="{Binding LayerName}" LineColorVisibility="Collapsed" />
+                </DataTemplate>
+            </TreeView.Resources>
+        </TreeView>
+    </DockPanel>
 </UserControl>

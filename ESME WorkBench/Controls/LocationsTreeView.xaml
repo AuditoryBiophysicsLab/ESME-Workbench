@@ -6,6 +6,7 @@
              xmlns:Main="clr-namespace:ESMEWorkbench.ViewModels.Main"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:r="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
+             xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
              d:DataContext="{d:DesignInstance Main:MainViewModel}"
              mc:Ignorable="d">
     <DockPanel LastChildFill="True">
@@ -34,7 +35,7 @@
         <TreeView DockPanel.Dock="Bottom" ItemsSource="{Binding LocationsTreeViewModel.Locations}">
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type Locations:Location}" ItemsSource="{Binding DataSetTypes.View.Groups}">
-                    <TextBlock Text="{Binding Name}" />
+                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding Name}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}" />
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type CollectionViewGroup}" ItemsSource="{Binding Items}">
                     <TextBlock Text="{Binding Name}" />

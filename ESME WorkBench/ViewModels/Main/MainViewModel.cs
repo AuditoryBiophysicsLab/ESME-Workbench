@@ -12,7 +12,6 @@ using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Locations;
-using ESME.Mapping;
 using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
@@ -78,7 +77,6 @@ namespace ESMEWorkbench.ViewModels.Main
             MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
             if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"))) Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
             Database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
-            Locations = Database.Context.Locations.Local;
             Scenarios = Database.Context.Scenarios.Local;
             LocationsTreeViewModel = new LocationsTreeViewModel(Database.Context.Locations.Local);
             Cursor = Cursors.Arrow;
@@ -100,6 +98,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
                 _transmissionLoss.Start();
                 NAVOImporter.PluginManagerService = _plugins;
+                foreach (var locations in Database.Context.Locations.Local) locations.CreateMapLayers();
             };
         }
 
