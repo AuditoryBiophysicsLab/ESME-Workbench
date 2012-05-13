@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
 using System.Windows.Media;
 using ESME.Database;
 using ESME.Locations;
@@ -97,7 +98,9 @@ namespace ESME.Scenarios
         [NotMapped] 
         public MapLayerViewModel MapLayerViewModel
         {
+            [MethodImpl(MethodImplOptions.Synchronized)]
             get { return _mapLayerViewModel; }
+            [MethodImpl(MethodImplOptions.Synchronized)]
             set
             {
                 if (value == null && _mapLayerViewModel != null) MediatorMessage.Send(MediatorMessage.RemoveMapLayer, _mapLayerViewModel);

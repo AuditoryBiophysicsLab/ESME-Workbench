@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Devart.Data.SQLite;
@@ -214,7 +215,7 @@ namespace ESME.Locations
                     Mode = mode,
                 };
                 analysisPoint.TransmissionLosses.Add(transmissionLoss);
-                Log(transmissionLoss, "Added new transmission loss for mode {0} to analysis point at {1} to scenario {2} in location {3}", transmissionLoss.Mode.ModeName, (Geo)transmissionLoss.AnalysisPoint.Geo, transmissionLoss.AnalysisPoint.Scenario, transmissionLoss.AnalysisPoint.Scenario.Location); 
+                Log(transmissionLoss, "Added new transmission loss for mode {0} to analysis point at {1} to scenario {2} in location {3}", transmissionLoss.Mode.ModeName, (Geo)transmissionLoss.AnalysisPoint.Geo, transmissionLoss.AnalysisPoint.Scenario.Name, transmissionLoss.AnalysisPoint.Scenario.Location.Name); 
                 var radialCount = mode.MaxPropagationRadius <= 10000 ? 8 : 16;
                 Console.WriteLine("    Radius: {0}m, radial count: {1}", mode.MaxPropagationRadius, radialCount);
                 for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
@@ -229,10 +230,10 @@ namespace ESME.Locations
                         IsCalculated = false,
                     };
                     transmissionLoss.Radials.Add(radial);
-                    Log(radial, "Added new radial with bearing {0} and length {1} to transmission loss for mode {2} in analysis point at {3} to scenario {4} in location {5}", radial.Bearing, radial.Length, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo, radial.TransmissionLoss.AnalysisPoint.Scenario, radial.TransmissionLoss.AnalysisPoint.Scenario.Location);
+                    Log(radial, "Added new radial with bearing {0} and length {1} to transmission loss for mode {2} in analysis point at {3} to scenario {4} in location {5}", radial.Bearing, radial.Length, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo, radial.TransmissionLoss.AnalysisPoint.Scenario.Name, radial.TransmissionLoss.AnalysisPoint.Scenario.Location.Name);
                 }
             }
-            Log(analysisPoint, "Added new analysis point at {0} to scenario {1} in location {2}", (Geo)analysisPoint.Geo, analysisPoint.Scenario, analysisPoint.Scenario.Location);
+            Log(analysisPoint, "Added new analysis point at {0} to scenario {1} in location {2}", (Geo)analysisPoint.Geo, analysisPoint.Scenario.Name, analysisPoint.Scenario.Location.Name);
         }
 
         public void AddFakeMapLayer(AnalysisPoint analysisPoint)
@@ -515,7 +516,15 @@ namespace ESME.Locations
         {
             logEntry.Message = string.Format(message, args);
             logEntry.MessageSource = new DbWhoWhenWhere(true);
-            Context.Log.Local.Add(logEntry);
+            try
+            {
+                Context.Log.Local.Add(logEntry);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(string.Format("{0}: Caught (and discarded) exception from LogBase: {1}", DateTime.Now, e.Message));
+                Debug.WriteLine(string.Format("{0}:   Log message causing exception: {1}", DateTime.Now, logEntry.Message));
+            }
         }
 
         #endregion

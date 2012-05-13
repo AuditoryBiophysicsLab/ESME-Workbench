@@ -9,7 +9,6 @@ using System.Windows.Threading;
 using ESME.Database;
 using ESME.Locations;
 using ESME.Mapping;
-using ESME.Model;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using HRC.Aspects;
@@ -21,7 +20,7 @@ using HRC.WPF;
 namespace ESME.Scenarios
 {
     [NotifyPropertyChanged]
-    public class AnalysisPoint : IHaveGuid, IHaveLayerSettings, ISupportValidation, INotifyPropertyChanged
+    public class AnalysisPoint : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
     {
         [Key, Initialize] public Guid Guid { get; set; }
         public DbGeo Geo { get; set; }
@@ -30,28 +29,8 @@ namespace ESME.Scenarios
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
 
-        public void CreateMapLayers()
-        {
-            if (Scenario.ShowAllAnalysisPoints) LayerSettings.IsChecked = true;
-            LayerSettings.PropertyChanged += LayerSettingsChanged;
-            foreach (var transmissionLoss in TransmissionLosses) transmissionLoss.CreateMapLayers();
-        }
-
-        public void RemoveMapLayers() { LayerSettings.PropertyChanged -= LayerSettingsChanged; }
-
-        void LayerSettingsChanged(object sender, PropertyChangedEventArgs args)
-        {
-            if (args.PropertyName != "IsChecked") return;
-            var checkState = LayerSettings.IsChecked;
-            foreach (var transmissionLoss in TransmissionLosses) transmissionLoss.LayerSettings.IsChecked = checkState;
-        }
-
-        public bool IsValid { get { throw new NotImplementedException(); } }
-
-        public string ValidationErrorText { get { throw new NotImplementedException(); } }
-
         [NotMapped] public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", Geo.Latitude, Geo.Longitude); } }
-        public void Validate() { throw new NotImplementedException(); }
+        #region INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {
@@ -68,8 +47,7 @@ namespace ESME.Scenarios
                     handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-
-        [NotMapped] public bool IsDeleted { get; set; }
+        #endregion
 
         #region ViewAnalysisPointCommand
         public SimpleCommand<object, EventToCommandArgs> ViewAnalysisPointCommand
@@ -118,9 +96,30 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _analysisPointProperties;
         #endregion
 
+        [NotMapped] public bool IsDeleted { get; set; }
+
+        public void CreateMapLayers()
+        {
+            if (IsDeleted) return;
+            if (Scenario.ShowAllAnalysisPoints) LayerSettings.IsChecked = true;
+            LayerSettings.PropertyChanged += LayerSettingsChanged;
+            foreach (var transmissionLoss in TransmissionLosses) transmissionLoss.CreateMapLayers();
+        }
+
+        public void RemoveMapLayers() { LayerSettings.PropertyChanged -= LayerSettingsChanged; }
+
+        void LayerSettingsChanged(object sender, PropertyChangedEventArgs args)
+        {
+            if (args.PropertyName != "IsChecked") return;
+            var checkState = LayerSettings.IsChecked;
+            foreach (var transmissionLoss in TransmissionLosses) transmissionLoss.LayerSettings.IsChecked = checkState;
+        }
+
         public void Delete()
         {
             IsDeleted = true;
+            LayerSettings.IsChecked = false;
+            foreach (var transmissionLoss in TransmissionLosses) transmissionLoss.LayerSettings.IsChecked = false;
             RemoveMapLayers();
             foreach (var tl in TransmissionLosses.ToList()) tl.Delete();
             if (Scenario.AnalysisPoints.Contains(this)) Scenario.AnalysisPoints.Remove(this);
@@ -128,7 +127,7 @@ namespace ESME.Scenarios
     }
 
     [NotifyPropertyChanged]
-    public class TransmissionLoss : IHaveGuid, IHaveLayerSettings
+    public class TransmissionLoss : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
     {
         [Key, Initialize] public Guid Guid { get; set; }
 
@@ -137,6 +136,7 @@ namespace ESME.Scenarios
         public virtual Mode Mode { get; set; }
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<Radial> Radials { get; set; }
+        #region INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {
@@ -153,7 +153,9 @@ namespace ESME.Scenarios
                     handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-        [NotMapped] public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", AnalysisPoint.Geo.Latitude, AnalysisPoint.Geo.Longitude); } }
+        #endregion
+        [NotMapped]
+        public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", AnalysisPoint.Geo.Latitude, AnalysisPoint.Geo.Longitude); } }
         [NotMapped] public bool IsDeleted { get; set; }
 
         #region ViewTransmissionLossCommand
@@ -180,11 +182,15 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _recalculateTransmissionLoss;
         #endregion
 
+        volatile object _createMapLayerLock = new object();
         public void CreateMapLayers()
         {
-            var mapLayer = new OverlayShapeMapLayer { Name = string.Format("{0}", Guid) };
-            mapLayer.DrawAction = () =>
+            if (IsDeleted) return;
+            lock (_createMapLayerLock)
             {
+                if (IsDeleted) return;
+                LayerSettings.IsChecked = false;
+                var mapLayer = new OverlayShapeMapLayer { Name = string.Format("{0}", Guid) };
                 mapLayer.Clear();
                 var geos = new List<Geo>();
                 foreach (var radial in Radials)
@@ -195,18 +201,20 @@ namespace ESME.Scenarios
                 geos.Add(AnalysisPoint.Geo);
                 mapLayer.AddLines(geos);
                 mapLayer.Done();
-            };
-            mapLayer.DrawAction();
-            LayerSettings.MapLayerViewModel = mapLayer;
-            if (AnalysisPoint.LayerSettings.IsChecked) LayerSettings.IsChecked = true;
+                LayerSettings.MapLayerViewModel = mapLayer;
+                if (AnalysisPoint.LayerSettings.IsChecked) LayerSettings.IsChecked = true;
+            }
         }
 
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
 
         public void Delete()
         {
-            IsDeleted = true;
-            RemoveMapLayers();
+            lock (_createMapLayerLock)
+            {
+                IsDeleted = true;
+                RemoveMapLayers();
+            }
             foreach (var radial in Radials.ToList()) radial.Delete();
             Mode.TransmissionLosses.Remove(this);
             AnalysisPoint.TransmissionLosses.Remove(this);
@@ -253,7 +261,6 @@ namespace ESME.Scenarios
                 return _ranges;
             }
         }
-
         float[] _ranges;
 
         [NotMapped] public float[] Depths
@@ -264,21 +271,24 @@ namespace ESME.Scenarios
                 return _depths;
             }
         }
-
         float[] _depths;
 
         public void Delete()
         {
+            IsDeleted = true;
             var files = Directory.GetFiles(Path.GetDirectoryName(BasePath), Path.GetFileNameWithoutExtension(BasePath) + ".*");
             foreach (var file in files) File.Delete(file);
             TransmissionLoss.Radials.Remove(this);
         }
 
+        [NotMapped, Initialize] public ObservableList<string> Errors { get; set; }
         [NotMapped] public BottomProfilePoint[] BottomProfile { get { return _bottomProfile ?? (_bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty")); } }
         BottomProfilePoint[] _bottomProfile;
 
         [NotMapped] public GeoSegment Segment { get { return _segment ?? (_segment = new GeoSegment(TransmissionLoss.AnalysisPoint.Geo, Length, Bearing)); } }
         GeoSegment _segment;
+
+        [NotMapped] public bool IsDeleted { get; set; }
 
         [NotMapped] public float[] MinimumTransmissionLossValues
         {

@@ -67,7 +67,6 @@ namespace ESME.Mapping
         public void AddPoints(ICollection<Geo> geos) { _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText("MULTIPOINT(", geos, ")")))); }
         public void AddPolygon(ICollection<Geo> geos) { _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText("POLYGON((", geos, "))")))); }
         public void Clear() { _layer.InternalFeatures.Clear(); }
-        public Action DrawAction { get; set; }
 
         public void Done()
         {

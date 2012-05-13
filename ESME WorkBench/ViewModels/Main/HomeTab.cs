@@ -137,6 +137,9 @@ namespace ESMEWorkbench.ViewModels.Main
         void DeleteAnalysisPoint(AnalysisPoint analysisPoint)
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete this analysis point \"{0}\"?", analysisPoint.Geo), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            //analysisPoint.LayerSettings.IsChecked = false;
+            //analysisPoint.RemoveMapLayers();
+            //await TaskEx.Delay(50);
             analysisPoint.Delete();
         }
 
@@ -144,6 +147,9 @@ namespace ESMEWorkbench.ViewModels.Main
         void DeleteAllAnalysisPoints(bool dummy)
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete all analysis points from the scenario {0} ?", Scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            //foreach (var analysisPoint in Scenario.AnalysisPoints) analysisPoint.LayerSettings.IsChecked = false;
+            //foreach (var analysisPoint in Scenario.AnalysisPoints) analysisPoint.RemoveMapLayers();
+            //await TaskEx.Delay(50);
             foreach (var analysisPoint in Scenario.AnalysisPoints.ToList()) analysisPoint.Delete();
         }
 
@@ -179,6 +185,9 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete this transmission loss \"{0}\"?", transmissionLoss.AnalysisPoint.Geo), MessageBoxImage.Warning) !=
                 MessageBoxResult.Yes) return;
+            //transmissionLoss.LayerSettings.IsChecked = false;
+            //transmissionLoss.RemoveMapLayers();
+            //await TaskEx.Delay(50);
             transmissionLoss.Delete();
         }
 
@@ -201,7 +210,7 @@ namespace ESMEWorkbench.ViewModels.Main
             _dispatcher.InvokeInBackgroundIfRequired(() =>
             {
                 transmissionLoss.RemoveMapLayers();
-                transmissionLoss.CreateMapLayers();
+                if (!transmissionLoss.IsDeleted) transmissionLoss.CreateMapLayers();
             });
         }
 

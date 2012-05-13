@@ -22,6 +22,7 @@ namespace ESME.Locations
         LayerSettings LayerSettings { get; set; }
         void CreateMapLayers();
         void RemoveMapLayers();
+        bool IsDeleted { get; }
     }
 
     public class Location : IHaveGuid, IHaveLayerSettings
@@ -51,6 +52,7 @@ namespace ESME.Locations
         CollectionViewSource _collectionView;
         [NotMapped] public static IMasterDatabaseService Database { get; set; }
         [NotMapped] public static EnvironmentalCacheService Cache { get; set; }
+        [NotMapped] public bool IsDeleted { get; set; }
 
         public void CreateMapLayers()
         {

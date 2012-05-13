@@ -169,7 +169,6 @@ namespace ESMEWorkbench.ViewModels.Map
             else if (layer.GetType() == typeof(OverlayShapeMapLayer))
             {
                 var overlayShapeMapLayer = (OverlayShapeMapLayer)layer;
-                if (overlayShapeMapLayer.DrawAction != null) overlayShapeMapLayer.DrawAction();
                 if (layer.CustomLineStyle != null)
                 {
                     ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.CustomStyles.Clear();

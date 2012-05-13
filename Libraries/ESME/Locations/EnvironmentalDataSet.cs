@@ -54,6 +54,7 @@ namespace ESME.Locations
                 }
             }
         }
+        [NotMapped] public bool IsDeleted { get; set; }
 
         protected static readonly Random Random = new Random();
         public void CreateMapLayers()

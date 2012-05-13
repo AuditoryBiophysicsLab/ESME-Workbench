@@ -82,9 +82,11 @@
                        VerticalAlignment="Center"
                        Background="Transparent"
                        FontSize="24"
+                       TextWrapping="Wrap"
                        Text="{Binding WaitToRenderText}" />
             <Image Grid.Row="0"
                    Grid.Column="0"
+                   Visibility="{Binding WriteableBitmapVisibility}"
                    Source="{Binding WriteableBitmap}"
                    Stretch="Fill" />
 

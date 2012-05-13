@@ -405,9 +405,9 @@ namespace ESMEWorkbench.ViewModels.Main
             Debug.WriteLine("Map click at {0}", geo);
             if (IsInAnalysisPointMode)
             {
-                if (Scenario != null && MouseGeo != null && Scenario.GeoRect.Contains(MouseGeo))
+                if (Scenario != null && geo != null && Scenario.GeoRect.Contains(geo))
                 {
-                    var analysisPoint = new AnalysisPoint {Geo = new Geo(MouseGeo), Scenario = Scenario};
+                    var analysisPoint = new AnalysisPoint { Geo = new Geo(geo), Scenario = Scenario };
                     Scenario.AnalysisPoints.Add(analysisPoint);
                     TaskEx.Run(() =>
                     {
@@ -437,7 +437,7 @@ namespace ESMEWorkbench.ViewModels.Main
             transmissionLossViewModel.Window = window;
             transmissionLossViewModel.SaveFileService = _saveFile;
             transmissionLossViewModel.SelectedRadialIndex = 0;
-            transmissionLossViewModel.RadialViewModel.WaitToRenderText = "Please Wait ...";
+            transmissionLossViewModel.RadialViewModel.WaitToRenderText = "Please wait...";
         }
 
         [MediatorMessageSink(MediatorMessage.ViewAnalysisPoint), UsedImplicitly]
@@ -448,7 +448,7 @@ namespace ESMEWorkbench.ViewModels.Main
             analysisPointViewModel.TransmissionLossViewModel.Window = window;
             analysisPointViewModel.TransmissionLossViewModel.SaveFileService = _saveFile;
             analysisPointViewModel.TransmissionLossViewModel.SelectedRadialIndex = 0;
-            analysisPointViewModel.TransmissionLossViewModel.RadialViewModel.WaitToRenderText = "Please Wait ...";
+            analysisPointViewModel.TransmissionLossViewModel.RadialViewModel.WaitToRenderText = "Please wait...";
         }
     }
 }

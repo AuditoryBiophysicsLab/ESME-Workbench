@@ -1,7 +1,9 @@
+using System;
 using System.Data;
 using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
+using System.Diagnostics;
 using System.Linq;
 using ESME.Scenarios;
 
@@ -12,7 +14,7 @@ namespace ESME.Locations
         public LocationContext(DbConnection connection, bool contextOwnsConnection)
             : base(connection, contextOwnsConnection)
         {
-            Configuration.AutoDetectChangesEnabled = true;
+            Configuration.AutoDetectChangesEnabled = false;
             Configuration.ProxyCreationEnabled = true;
             Configuration.LazyLoadingEnabled = true;
             Configuration.ValidateOnSaveEnabled = true;
@@ -23,8 +25,16 @@ namespace ESME.Locations
         {
             get
             {
-                ChangeTracker.DetectChanges();
-                return ChangeTracker.Entries().Any(e => e.State != EntityState.Unchanged);
+                try
+                {
+                    ChangeTracker.DetectChanges();
+                    return ChangeTracker.Entries().Any(e => e.State != EntityState.Unchanged);
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(string.Format("{0}: Caught (and discarded) exception in LocationContext.IsModified: {1}", DateTime.Now, e.Message));
+                    return true;
+                }
             }
         }
 

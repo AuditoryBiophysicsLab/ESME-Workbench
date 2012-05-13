@@ -17,6 +17,7 @@ namespace ESME.Scenarios
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<AnimatLocation> AnimatLocations { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
+        [NotMapped] public bool IsDeleted { get; set; }
 
         public void CreateMapLayers() { throw new NotImplementedException(); }
         public void RemoveMapLayers() { throw new NotImplementedException(); }

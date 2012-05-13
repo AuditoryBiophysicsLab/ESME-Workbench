@@ -19,6 +19,7 @@ namespace ESME.Scenarios
         [Initialize] public virtual ObservableList<Platform> Platforms { get; set; }
         [Initialize] public virtual ObservableList<PerimeterCoordinate> PerimeterCoordinates { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
+        [NotMapped] public bool IsDeleted { get; set; }
 
         public void CreateMapLayers()
         {

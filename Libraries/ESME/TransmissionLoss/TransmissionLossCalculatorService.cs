@@ -34,10 +34,8 @@ namespace ESME.TransmissionLoss
             WorkQueue = new ObservableConcurrentDictionary<Guid, PercentProgress<Radial>>();
             _calculator = new ActionBlock<PercentProgress<Radial>>(job =>
             {
-                if (WorkQueue.Any()) MediatorMessage.Send(MediatorMessage.ShowTransmissionLossQueueView, true);
-                Calculate(job);
+                if (!job.ProgressTarget.IsDeleted) Calculate(job);
                 WorkQueue.Remove(job.ProgressTarget.Guid);
-                if (!WorkQueue.Any()) MediatorMessage.Send(MediatorMessage.ShowTransmissionLossQueueView, false);
             }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
             _queue = new BufferBlock<PercentProgress<Radial>>(new DataflowBlockOptions { BoundedCapacity = -1 });
             _queue.LinkTo(_calculator);
@@ -74,7 +72,7 @@ namespace ESME.TransmissionLoss
                 if (_isStarted) return;
                 _isStarted = true;
             }
-
+#if false
             var connectionStringBuilder = new SQLiteConnectionStringBuilder
             {
                 FailIfMissing = false,
@@ -83,6 +81,8 @@ namespace ESME.TransmissionLoss
             };
             DbConnection connection = new SQLiteConnection(connectionStringBuilder.ToString());
             _dbContext = new LocationContext(connection, true);
+#endif
+            _dbContext = _databaseService.Context;
             IQueryable<Radial> radials;
             lock (_dbContext)
                 radials = (from radial in _dbContext.Radials
@@ -92,6 +92,7 @@ namespace ESME.TransmissionLoss
                                 .Include(r => r.TransmissionLoss.Mode.Source.Platform)
                                 .Include(r => r.TransmissionLoss.AnalysisPoint)
                                 .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario)
+                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Location)
                             select radial);
             foreach (var radial in radials)
             {
@@ -117,6 +118,12 @@ namespace ESME.TransmissionLoss
 
         public void Add(Radial radial)
         {
+            var geoRect = (GeoRect)radial.TransmissionLoss.AnalysisPoint.Scenario.Location.GeoRect;
+            if (!geoRect.Contains(radial.Segment[0]) || !geoRect.Contains(radial.Segment[1]))
+            {
+                radial.Errors.Add("This radial extends beyond the location boundaries");
+                return;
+            }
             //Debug.WriteLine("{0}: Queueing calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}", DateTime.Now, radial.Bearing, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo); 
             PercentProgress<Radial> radialProgress;
             if (WorkQueue.TryGetValue(radial.Guid, out radialProgress)) return;
@@ -135,11 +142,12 @@ namespace ESME.TransmissionLoss
             var radial = item.ProgressTarget;
             try
             {
-                Debug.WriteLine("{0}: Starting calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}",
-                                DateTime.Now,
-                                radial.Bearing,
-                                radial.TransmissionLoss.Mode.ModeName,
-                                (Geo)radial.TransmissionLoss.AnalysisPoint.Geo);
+                if (radial.IsDeleted) return;
+                //Debug.WriteLine("{0}: Starting calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}",
+                //                DateTime.Now,
+                //                radial.Bearing,
+                //                radial.TransmissionLoss.Mode.ModeName,
+                //                (Geo)radial.TransmissionLoss.AnalysisPoint.Geo);
                 Scenario scenario;
                 lock (_dbContext) scenario = (from s in _dbContext.Scenarios
                                                   .Include(s => s.Wind)
@@ -151,10 +159,15 @@ namespace ESME.TransmissionLoss
                 var mode = radial.TransmissionLoss.Mode;
                 var platform = mode.Source.Platform;
                 var timePeriod = platform.Scenario.TimePeriod;
+                if (radial.IsDeleted) return;
                 var wind = (Wind)_cacheService[scenario.Wind].Result;
+                if (radial.IsDeleted) return;
                 var soundSpeed = (SoundSpeed)_cacheService[scenario.SoundSpeed].Result;
+                if (radial.IsDeleted) return;
                 var bathymetry = (Bathymetry)_cacheService[scenario.Bathymetry].Result;
+                if (radial.IsDeleted) return;
                 var sediment = (Sediment)_cacheService[scenario.Sediment].Result;
+                if (radial.IsDeleted) return;
                 var deepestPoint = bathymetry.DeepestPoint;
                 var deepestProfile = soundSpeed[timePeriod].GetDeepestSSP(deepestPoint).Extend(deepestPoint.Data);
 
@@ -238,18 +251,36 @@ namespace ESME.TransmissionLoss
                 }
             };
 #endif
+                if (radial.IsDeleted) return;
                 bellhopProcess.Start();
                 radial.CalculationStarted = DateTime.Now;
                 bellhopProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
                 bellhopProcess.BeginOutputReadLine();
-                while (!bellhopProcess.HasExited) Thread.Sleep(100);
+                while (!bellhopProcess.HasExited)
+                {
+                    if (radial.IsDeleted)
+                    {
+                        bellhopProcess.Kill();
+                        return;
+                    }
+                    Thread.Sleep(100);
+                }
                 radial.CalculationCompleted = DateTime.Now;
-                radial.ExtractAxisData();
-                Debug.WriteLine("{0}: Finished calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}",
-                                DateTime.Now,
-                                radial.Bearing,
-                                radial.TransmissionLoss.Mode.ModeName,
-                                (Geo)radial.TransmissionLoss.AnalysisPoint.Geo);
+                if (radial.IsDeleted) return;
+                try
+                {
+                    radial.ExtractAxisData();
+                }
+                catch (Exception e)
+                {
+                    if (radial.IsDeleted) return;
+                    Debug.WriteLine(string.Format("{0}: Caught (and discarded) exception in Transmission Loss Calculator: {1}", DateTime.Now, e.Message));
+                }
+                //Debug.WriteLine("{0}: Finished calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}",
+                //                DateTime.Now,
+                //                radial.Bearing,
+                //                radial.TransmissionLoss.Mode.ModeName,
+                //                (Geo)radial.TransmissionLoss.AnalysisPoint.Geo);
             }
             catch (ArgumentOutOfRangeException e)
             {
