@@ -95,6 +95,11 @@ namespace ESME.Scenarios
             }
         }
 
+        public void MoveLayerToFront() { if (_mapLayerViewModel != null) MediatorMessage.Send(MediatorMessage.MoveLayerToFront, _mapLayerViewModel); }
+        public void MoveLayerForward() { if (_mapLayerViewModel != null) MediatorMessage.Send(MediatorMessage.MoveLayerForward, _mapLayerViewModel); }
+        public void MoveLayerBackward() { if (_mapLayerViewModel != null) MediatorMessage.Send(MediatorMessage.MoveLayerBackward, _mapLayerViewModel); }
+        public void MoveLayerToBack() { if (_mapLayerViewModel != null) MediatorMessage.Send(MediatorMessage.MoveLayerToBack, _mapLayerViewModel); }
+
         [NotMapped] 
         public MapLayerViewModel MapLayerViewModel
         {

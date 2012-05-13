@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
-using System.Data.Common;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.IO;
@@ -9,7 +8,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
-using Devart.Data.SQLite;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Model;
@@ -72,16 +70,6 @@ namespace ESME.TransmissionLoss
                 if (_isStarted) return;
                 _isStarted = true;
             }
-#if false
-            var connectionStringBuilder = new SQLiteConnectionStringBuilder
-            {
-                FailIfMissing = false,
-                DataSource = Path.Combine(_databaseService.MasterDatabaseDirectory, "esme.db"),
-                BinaryGUID = true,
-            };
-            DbConnection connection = new SQLiteConnection(connectionStringBuilder.ToString());
-            _dbContext = new LocationContext(connection, true);
-#endif
             _dbContext = _databaseService.Context;
             IQueryable<Radial> radials;
             lock (_dbContext)

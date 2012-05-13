@@ -213,7 +213,7 @@ namespace ESME.Scenarios
         public void CreateMapLayers()
         {
             if (Platforms != null) foreach (var platform in Platforms) platform.CreateMapLayers();
-            foreach (var analysisPoint in AnalysisPoints) analysisPoint.CreateMapLayers();
+            foreach (var analysisPoint in AnalysisPoints.ToList()) analysisPoint.CreateMapLayers();
         }
 
         public void RemoveMapLayers()

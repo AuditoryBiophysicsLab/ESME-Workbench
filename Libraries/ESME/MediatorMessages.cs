@@ -59,10 +59,10 @@ namespace ESME
         public const string ShowMapLayer = "ShowMapLayerMessage";
         public const string HideMapLayer = "HideMapLayerMessage";
 
-        public const string MoveLayerToTop = "MoveLayerToTopMessage";
-        public const string MoveLayerUp = "MoveLayerUpMessage";
-        public const string MoveLayerDown = "MoveLayerDownMessage";
-        public const string MoveLayerToBottom = "MoveLayerToBottomMessage";
+        public const string MoveLayerToFront = "MoveLayerToTopMessage";
+        public const string MoveLayerForward = "MoveLayerUpMessage";
+        public const string MoveLayerBackward = "MoveLayerDownMessage";
+        public const string MoveLayerToBack = "MoveLayerToBottomMessage";
         
         public const string ToggleLayerVisibility = "ToggleLayerVisibilityMessage";
 

@@ -103,7 +103,7 @@ namespace ESME.Scenarios
             if (IsDeleted) return;
             if (Scenario.ShowAllAnalysisPoints) LayerSettings.IsChecked = true;
             LayerSettings.PropertyChanged += LayerSettingsChanged;
-            foreach (var transmissionLoss in TransmissionLosses) transmissionLoss.CreateMapLayers();
+            foreach (var transmissionLoss in TransmissionLosses.ToList()) transmissionLoss.CreateMapLayers();
         }
 
         public void RemoveMapLayers() { LayerSettings.PropertyChanged -= LayerSettingsChanged; }
@@ -124,6 +124,27 @@ namespace ESME.Scenarios
             foreach (var tl in TransmissionLosses.ToList()) tl.Delete();
             if (Scenario.AnalysisPoints.Contains(this)) Scenario.AnalysisPoints.Remove(this);
         }
+        #region Layer Move commands
+        #region MoveLayerToFrontCommand
+        public SimpleCommand<object, EventToCommandArgs> MoveLayerToFrontCommand { get { return _moveLayerToFront ?? (_moveLayerToFront = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerToFront(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }
+        SimpleCommand<object, EventToCommandArgs> _moveLayerToFront;
+        #endregion
+
+        #region MoveLayerForwardCommand
+        public SimpleCommand<object, EventToCommandArgs> MoveLayerForwardCommand { get { return _moveLayerForward ?? (_moveLayerForward = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerForward(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }
+        SimpleCommand<object, EventToCommandArgs> _moveLayerForward;
+        #endregion
+
+        #region MoveLayerBackwardCommand
+        public SimpleCommand<object, EventToCommandArgs> MoveLayerBackwardCommand { get { return _moveLayerBackward ?? (_moveLayerBackward = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerBackward(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }
+        SimpleCommand<object, EventToCommandArgs> _moveLayerBackward;
+        #endregion
+
+        #region MoveLayerToBackCommand
+        public SimpleCommand<object, EventToCommandArgs> MoveLayerToBackCommand { get { return _moveLayerToBack ?? (_moveLayerToBack = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerToBack(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }
+        SimpleCommand<object, EventToCommandArgs> _moveLayerToBack;
+        #endregion
+        #endregion
     }
 
     [NotifyPropertyChanged]
@@ -185,6 +206,11 @@ namespace ESME.Scenarios
         volatile object _createMapLayerLock = new object();
         public void CreateMapLayers()
         {
+            if (Mode == null)
+            {
+                Delete();
+                return;
+            }
             if (IsDeleted) return;
             lock (_createMapLayerLock)
             {
@@ -216,10 +242,31 @@ namespace ESME.Scenarios
                 RemoveMapLayers();
             }
             foreach (var radial in Radials.ToList()) radial.Delete();
-            Mode.TransmissionLosses.Remove(this);
+            if (Mode != null) Mode.TransmissionLosses.Remove(this);
             AnalysisPoint.TransmissionLosses.Remove(this);
             if (AnalysisPoint.TransmissionLosses.Count == 0) AnalysisPoint.Delete();
         }
+        #region Layer Move commands
+        #region MoveLayerToFrontCommand
+        public SimpleCommand<object, EventToCommandArgs> MoveLayerToFrontCommand { get { return _moveLayerToFront ?? (_moveLayerToFront = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerToFront(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }
+        SimpleCommand<object, EventToCommandArgs> _moveLayerToFront;
+        #endregion
+
+        #region MoveLayerForwardCommand
+        public SimpleCommand<object, EventToCommandArgs> MoveLayerForwardCommand { get { return _moveLayerForward ?? (_moveLayerForward = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerForward(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }
+        SimpleCommand<object, EventToCommandArgs> _moveLayerForward;
+        #endregion
+
+        #region MoveLayerBackwardCommand
+        public SimpleCommand<object, EventToCommandArgs> MoveLayerBackwardCommand { get { return _moveLayerBackward ?? (_moveLayerBackward = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerBackward(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }
+        SimpleCommand<object, EventToCommandArgs> _moveLayerBackward;
+        #endregion
+
+        #region MoveLayerToBackCommand
+        public SimpleCommand<object, EventToCommandArgs> MoveLayerToBackCommand { get { return _moveLayerToBack ?? (_moveLayerToBack = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerToBack(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }
+        SimpleCommand<object, EventToCommandArgs> _moveLayerToBack;
+        #endregion
+        #endregion
     }
 
     [NotifyPropertyChanged]
