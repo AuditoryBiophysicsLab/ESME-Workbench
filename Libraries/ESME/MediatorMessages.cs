@@ -18,6 +18,15 @@ namespace ESME
         public const string RecalculateAllAnalysisPoints = "RecalculateAllAnalysisPointsMessage";
         public const string RecalculateAnalysisPoint = "RecalculateAnalysisPointMessage";
 
+        public const string CreateLocation = "CreateLocationMessage";
+        public const string DeleteLocation = "DeleteLocationMessage";
+
+        public const string CreateScenario = "CreateScenarioMessage";
+        public const string DeleteScenario = "DeleteScenarioMessage";
+        public const string LoadScenario = "LoadScenarioMessage";
+        public const string DeleteAllScenarios = "DeleteAllScenariosMessage";
+        public const string ScenarioProperties = "ScenarioPropertiesMessage";
+
         public const string ScenarioBoundToLayer = "ScenarioBoundToLayerMessage";
         public const string ViewScenarioProperties = "ViewScenarioPropertiesMessage";
 
@@ -59,10 +68,10 @@ namespace ESME
         public const string ShowMapLayer = "ShowMapLayerMessage";
         public const string HideMapLayer = "HideMapLayerMessage";
 
-        public const string MoveLayerToFront = "MoveLayerToTopMessage";
-        public const string MoveLayerForward = "MoveLayerUpMessage";
-        public const string MoveLayerBackward = "MoveLayerDownMessage";
-        public const string MoveLayerToBack = "MoveLayerToBottomMessage";
+        public const string MoveLayerToFront = "MoveLayerToFrontMessage";
+        public const string MoveLayerForward = "MoveLayerForwardMessage";
+        public const string MoveLayerBackward = "MoveLayerBackwardMessage";
+        public const string MoveLayerToBack = "MoveLayerToBackMessage";
         
         public const string ToggleLayerVisibility = "ToggleLayerVisibilityMessage";
 

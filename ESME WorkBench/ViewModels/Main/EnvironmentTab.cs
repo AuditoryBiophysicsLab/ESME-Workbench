@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Windows;
+using ESME;
 using ESME.Locations;
 using ESME.Views.Locations;
 using ESMEWorkbench.ViewModels.Tree;
+using HRC;
 using HRC.Navigation;
 using HRC.ViewModels;
 
@@ -9,6 +12,13 @@ namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {
+        [MediatorMessageSink(MediatorMessage.DeleteLocation), UsedImplicitly]
+        void DeleteLocation(Location location)
+        {
+            if (_messageBox.ShowYesNo(string.Format("Deleting a location also deletes all scenarios defined in that location.\n\nAre you sure you want to delete the location \"{0}\"?", location.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            Database.Context.Locations.Remove(location);
+        }
+
         #region CreateLocationCommand
         public SimpleCommand<object, object> CreateLocationCommand
         {
@@ -36,16 +46,25 @@ namespace ESMEWorkbench.ViewModels.Main
                                            MapViewModel.EditOverlayViewModel.IsVisible = false;
                                            var vm = (CreateLocationViewModel)args.State;
                                            if (vm.IsCanceled) return;
-                                           Database.Add(new Location
-                                           {
-                                               Name = vm.LocationName,
-                                               Comments = vm.Comments,
-                                               GeoRect = MapViewModel.EditOverlayViewModel.GeoRect
-                                           });
-                                           Database.SaveChanges();
+                                           CreateLocation(vm.LocationName, vm.Comments, MapViewModel.EditOverlayViewModel.GeoRect);
                                        }); 
             }
             catch (Exception e) { _messageBox.ShowError(e.Message); }
+        }
+
+        Location CreateLocation(string locationName, string comments, GeoRect geoRect)
+        {
+            var location = new Location
+            {
+                Name = locationName,
+                Comments = comments,
+                GeoRect = geoRect,
+                LayerSettings = { IsChecked = true }
+            };
+            Database.Add(location);
+            Database.SaveChanges();
+            location.CreateMapLayers();
+            return location;
         }
         #endregion
 

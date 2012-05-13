@@ -37,7 +37,7 @@ namespace ESMEWorkbench.ViewModels.Tree
         SimpleCommand<object, EventToCommandArgs> _moveLayerForward;
         void MoveLayerForward(EventToCommandArgs args)
         {
-            BitmapData.LayerSettings.MoveLayerToFront();
+            BitmapData.LayerSettings.MoveLayerForward();
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
         #endregion
@@ -47,7 +47,7 @@ namespace ESMEWorkbench.ViewModels.Tree
         SimpleCommand<object, EventToCommandArgs> _moveLayerBackward;
         void MoveLayerBackward(EventToCommandArgs args)
         {
-            BitmapData.LayerSettings.MoveLayerToFront();
+            BitmapData.LayerSettings.MoveLayerBackward();
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
         #endregion
@@ -57,7 +57,7 @@ namespace ESMEWorkbench.ViewModels.Tree
         SimpleCommand<object, EventToCommandArgs> _moveLayerToBack;
         void MoveLayerToBack(EventToCommandArgs args)
         {
-            BitmapData.LayerSettings.MoveLayerToFront();
+            BitmapData.LayerSettings.MoveLayerToBack();
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
         #endregion

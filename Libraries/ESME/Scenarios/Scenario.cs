@@ -52,6 +52,7 @@ namespace ESME.Scenarios
         [Initialize] public virtual ObservableList<Platform> Platforms { get; set; }
         [Initialize] public virtual ObservableList<ScenarioSpecies> ScenarioSpecies { get; set; }
         [Initialize] public virtual ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
+        [Initialize] public virtual ObservableList<Perimeter> Perimeters { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
 
         [NotMapped] public Wind WindData { get { return ((Wind)Cache[Wind].Result); } }
@@ -75,6 +76,7 @@ namespace ESME.Scenarios
                 Duration = nemoFile.Scenario.Duration,
                 TimePeriod = (TimePeriod)Enum.Parse(typeof(TimePeriod), nemoFile.Scenario.TimeFrame),
             });
+            location.Scenarios.Add(scenario);
             foreach (var nemoPlatform in nemoFile.Scenario.Platforms)
             {
                 Perimeter perimeter = null;
@@ -244,9 +246,26 @@ namespace ESME.Scenarios
         #endregion
         public void Delete()
         {
-            foreach (var platform in Platforms.ToArray()) platform.Delete();
+            foreach (var platform in Platforms.ToList()) platform.Delete();
+            foreach (var analysisPoint in AnalysisPoints.ToList()) analysisPoint.Delete();
+            foreach (var species in ScenarioSpecies.ToList()) species.Delete();
+            foreach (var perimeter in Perimeters.ToList()) perimeter.Delete();
             Database.Context.Scenarios.Remove(this);
         }
+        #region LoadScenarioCommand
+        public SimpleCommand<object, EventToCommandArgs> LoadScenarioCommand { get { return _loadScenario ?? (_loadScenario = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.LoadScenario, this))); } }
+        SimpleCommand<object, EventToCommandArgs> _loadScenario;
+        #endregion
+
+        #region DeleteScenarioCommand
+        public SimpleCommand<object, EventToCommandArgs> DeleteScenarioCommand { get { return _deleteScenario ?? (_deleteScenario = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteScenario, this))); } }
+        SimpleCommand<object, EventToCommandArgs> _deleteScenario;
+        #endregion
+
+        #region ScenarioPropertiesCommand
+        public SimpleCommand<object, EventToCommandArgs> ScenarioPropertiesCommand { get { return _scenarioProperties ?? (_scenarioProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ScenarioProperties, this))); } }
+        SimpleCommand<object, EventToCommandArgs> _scenarioProperties;
+        #endregion
     }
 
     public static class ScenarioExensions

@@ -17,12 +17,9 @@ namespace ESME.Scenarios
 
         public virtual Scenario Scenario { get; set; }
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
-        [Initialize] public virtual ObservableList<AnimatLocation> AnimatLocations { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
         [NotMapped] public bool IsDeleted { get; set; }
 
-        public void CreateMapLayers() { throw new NotImplementedException(); }
-        public void RemoveMapLayers() { throw new NotImplementedException(); }
         #region Layer Move commands
         #region MoveLayerToFrontCommand
         public SimpleCommand<object, EventToCommandArgs> MoveLayerToFrontCommand { get { return _moveLayerToFront ?? (_moveLayerToFront = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerToFront(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }
@@ -44,5 +41,14 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _moveLayerToBack;
         #endregion
         #endregion
+
+        public void CreateMapLayers() { throw new NotImplementedException(); }
+        public void RemoveMapLayers() { throw new NotImplementedException(); }
+        public void Delete()
+        {
+            IsDeleted = true;
+            Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
+            Scenario.Database.Context.ScenarioSpecies.Remove(this);
+        }
     }
 }

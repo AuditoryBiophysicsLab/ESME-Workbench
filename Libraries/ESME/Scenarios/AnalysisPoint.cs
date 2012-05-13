@@ -123,6 +123,8 @@ namespace ESME.Scenarios
             RemoveMapLayers();
             foreach (var tl in TransmissionLosses.ToList()) tl.Delete();
             if (Scenario.AnalysisPoints.Contains(this)) Scenario.AnalysisPoints.Remove(this);
+            Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
+            Scenario.Database.Context.AnalysisPoints.Remove(this);
         }
         #region Layer Move commands
         #region MoveLayerToFrontCommand
@@ -245,6 +247,8 @@ namespace ESME.Scenarios
             if (Mode != null) Mode.TransmissionLosses.Remove(this);
             AnalysisPoint.TransmissionLosses.Remove(this);
             if (AnalysisPoint.TransmissionLosses.Count == 0) AnalysisPoint.Delete();
+            Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
+            Scenario.Database.Context.TransmissionLosses.Remove(this);
         }
         #region Layer Move commands
         #region MoveLayerToFrontCommand
@@ -326,6 +330,7 @@ namespace ESME.Scenarios
             var files = Directory.GetFiles(Path.GetDirectoryName(BasePath), Path.GetFileNameWithoutExtension(BasePath) + ".*");
             foreach (var file in files) File.Delete(file);
             TransmissionLoss.Radials.Remove(this);
+            Scenario.Database.Context.Radials.Remove(this);
         }
 
         [NotMapped, Initialize] public ObservableList<string> Errors { get; set; }

@@ -82,21 +82,35 @@ namespace ESME.Locations
                 case PluginSubtype.Wind:
                 case PluginSubtype.Bathymetry:
                 case PluginSubtype.Sediment:
-                    var rasterLayer = new RasterMapLayer
+                    var rasterFilename = Path.Combine(Location.Database.MasterDatabaseDirectory, Location.StorageDirectory, Path.GetFileNameWithoutExtension(FileName) + ".bmp");
+                    if (File.Exists(rasterFilename))
                     {
-                        Name = string.Format("{0}", Guid),
-                        North = (float)Location.GeoRect.North,
-                        South = (float)Location.GeoRect.South,
-                        East = (float)Location.GeoRect.East,
-                        West = (float)Location.GeoRect.West,
-                        RasterFilename = Path.Combine(Location.Database.MasterDatabaseDirectory, Location.StorageDirectory, Path.GetFileNameWithoutExtension(FileName) + ".bmp"),
-                    };
-                    LayerSettings.MapLayerViewModel = rasterLayer;
+                        var rasterLayer = new RasterMapLayer
+                        {
+                            Name = string.Format("{0}", Guid),
+                            North = (float)Location.GeoRect.North,
+                            South = (float)Location.GeoRect.South,
+                            East = (float)Location.GeoRect.East,
+                            West = (float)Location.GeoRect.West,
+                            RasterFilename = Path.Combine(Location.Database.MasterDatabaseDirectory, Location.StorageDirectory, Path.GetFileNameWithoutExtension(FileName) + ".bmp"),
+                        };
+                        LayerSettings.MapLayerViewModel = rasterLayer;
+                    }
                     break;
                 default:
                     throw new ApplicationException(string.Format("Unknown layer type: {0}", ((PluginIdentifier)SourcePlugin).PluginSubtype));
             }
         }
+
+        public void Delete()
+        {
+            var fileName = Path.Combine(Location.Database.MasterDatabaseDirectory, Location.StorageDirectory, FileName);
+            var files = Directory.GetFiles(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".*");
+            foreach (var file in files) File.Delete(file);
+            Location.Database.Context.LayerSettings.Remove(LayerSettings);
+            Location.Database.Context.EnvironmentalDataSets.Remove(this);
+        }
+
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
         #region Layer Move commands
         #region MoveLayerToFrontCommand
@@ -118,6 +132,11 @@ namespace ESME.Locations
         public SimpleCommand<object, EventToCommandArgs> MoveLayerToBackCommand { get { return _moveLayerToBack ?? (_moveLayerToBack = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerToBack(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }
         SimpleCommand<object, EventToCommandArgs> _moveLayerToBack;
         #endregion
+        #endregion
+
+        #region ZoomToLocationCommand
+        public SimpleCommand<object, EventToCommandArgs> ZoomToLocationCommand { get { return _zoomToLocation ?? (_zoomToLocation = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.SetMapExtent, (GeoRect)Location.GeoRect))); } }
+        SimpleCommand<object, EventToCommandArgs> _zoomToLocation;
         #endregion
     }
 

@@ -272,8 +272,9 @@ namespace ESME.Locations
             {
                 Name = locationName,
                 Comments = String.Format("Imported from {0} on {1} by {2} on {3}", overlayFilename, System.Environment.UserName, DateTime.Now, System.Environment.MachineName),
-                GeoRect = geoRect
+                GeoRect = geoRect,
             };
+            location.LayerSettings.IsChecked = true;
             Add(location);
             return location;
         }

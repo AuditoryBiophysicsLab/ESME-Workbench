@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -9,6 +10,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using ESME;
+using ESME.Database;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Locations;
@@ -98,8 +100,45 @@ namespace ESMEWorkbench.ViewModels.Main
 
                 _transmissionLoss.Start();
                 NAVOImporter.PluginManagerService = _plugins;
-                foreach (var locations in Database.Context.Locations.Local) locations.CreateMapLayers();
+                if (!Database.Context.Locations.Any()) _dispatcher.InvokeInBackgroundIfRequired(async () =>
+                {
+                    var wind = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Wind];
+                    var soundSpeed = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed];
+                    var bathymetry = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry];
+                    var sediment = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment];
+                    foreach (var locations in Database.Context.Locations.Local) locations.CreateMapLayers();
+                    if (wind == null || soundSpeed == null || bathymetry == null || sediment == null) return;
+                    var windData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(wind.PluginIdentifier), Resolution = wind.AvailableResolutions.Max() };
+                    var soundSpeedData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(soundSpeed.PluginIdentifier), Resolution = soundSpeed.AvailableResolutions.Max() };
+                    var bathymetryData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(bathymetry.PluginIdentifier), Resolution = bathymetry.AvailableResolutions.Max() };
+                    var sedimentData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(sediment.PluginIdentifier), Resolution = sediment.AvailableResolutions.Max() };
+                    MediatorMessage.Send(MediatorMessage.SetMapExtent, new GeoRect(45, 22, -70, -120));
+                    await CreateSample("Gulf of Maine", "Maine Sample", new GeoRect(44, 41, -65, -71), (TimePeriod)DateTime.Today.Month, windData, soundSpeedData, bathymetryData, sedimentData);
+                    await CreateSample("Carolina Coast", "Carolina Sample", new GeoRect(36, 33, -75, -78), (TimePeriod)DateTime.Today.Month, windData, soundSpeedData, bathymetryData, sedimentData);
+                    await CreateSample("Florida Atlantic Coast", "Florida Atlantic Sample", new GeoRect(32, 27, -76, -81.5), (TimePeriod)DateTime.Today.Month, windData, soundSpeedData, bathymetryData, sedimentData);
+                    await CreateSample("Florida Gulf Coast", "Florida Gulf Sample", new GeoRect(30.5, 25, -81, -87), (TimePeriod)DateTime.Today.Month, windData, soundSpeedData, bathymetryData, sedimentData);
+                    await CreateSample("Southern California", "Southern California Sample", new GeoRect(34, 32, -117.5, -120), (TimePeriod)DateTime.Today.Month, windData, soundSpeedData, bathymetryData, sedimentData);
+                    await CreateSample("Bahamas", "Bahamas Sample", new GeoRect(27, 22, -73.5, -79), (TimePeriod)DateTime.Today.Month, windData, soundSpeedData, bathymetryData, sedimentData);
+
+                    Database.SaveChanges();
+                });
+                else foreach (var locations in Database.Context.Locations.Local) locations.CreateMapLayers();
             };
+        }
+
+        async Task CreateSample(string locationName, string scenarioName, GeoRect locationGeoRect, TimePeriod timePeriod, EnvironmentalDataSet windData, EnvironmentalDataSet soundSpeedData, EnvironmentalDataSet bathymetryData, EnvironmentalDataSet sedimentData)
+        {
+            var location = CreateLocation(locationName, "Created as a sample location", locationGeoRect);
+            location.CreateMapLayers();
+            var scenario = CreateScenario(location, scenarioName, "Created as a sample scenario", timePeriod, windData, soundSpeedData, bathymetryData, sedimentData);
+            AddMode(AddSource(AddPlatform(scenario, "Sample Platform", false), "Sample Source", false), "1 KHz mode", false);
+            await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]).ContinueWith(t =>
+            {
+                scenario.ShowAllAnalysisPoints = true;
+                var analysisPoint = new AnalysisPoint { Geo = new Geo(((GeoRect)location.GeoRect).Center), Scenario = scenario };
+                scenario.AnalysisPoints.Add(analysisPoint);
+                Database.Add(analysisPoint, (Bathymetry)_cache[scenario.Bathymetry].Result);
+            });            
         }
 
         public ObservableCollection<Location> Locations { get; private set; }

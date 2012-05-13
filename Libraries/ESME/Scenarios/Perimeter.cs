@@ -61,5 +61,12 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _moveLayerToBack;
         #endregion
         #endregion
+
+        public void Delete()
+        {
+            RemoveMapLayers();
+            Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
+            foreach (var point in PerimeterCoordinates.ToList()) Scenario.Database.Context.PerimeterCoordinates.Remove(point);
+        }
     }
 }

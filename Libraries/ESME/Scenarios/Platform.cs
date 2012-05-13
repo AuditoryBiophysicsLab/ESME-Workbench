@@ -74,7 +74,9 @@ namespace ESME.Scenarios
         {
             RemoveMapLayers();
             foreach (var source in Sources.ToList()) source.Delete();
+            Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
             Scenario.Platforms.Remove(this);
+            Scenario.Database.Context.Platforms.Remove(this);
         }
 
         #region AddSourceCommand

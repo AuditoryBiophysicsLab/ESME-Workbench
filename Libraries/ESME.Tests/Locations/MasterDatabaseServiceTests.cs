@@ -36,6 +36,7 @@ namespace ESME.Tests.Locations
                 Comments = "These are some comments",
                 GeoRect = new GeoRect(44, 41, -69, -72),
             };
+            location.LayerSettings.IsChecked = true;
             database.Add(location);
 
             Assert.AreEqual(1, database.Context.Locations.Local.Count());

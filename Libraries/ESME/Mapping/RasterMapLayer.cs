@@ -46,6 +46,7 @@ namespace ESME.Mapping
             {
                 LayerOverlay.Layers.Clear();
                 _rasterFilename = value;
+                if (!File.Exists(_rasterFilename)) return;
                 _worldFilename = Path.Combine(Path.GetDirectoryName(_rasterFilename), Path.GetFileNameWithoutExtension(_rasterFilename)) + ".bpw";
                 if (!File.Exists(_worldFilename)) using (var writer = new StreamWriter(_worldFilename, false)) writer.Write(WorldFileContents);
 

@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows;
 using System.Windows.Data;
 using ESME.Environment;
 using ESME.Locations;
@@ -44,7 +45,7 @@ namespace ESME.Views.Scenarios
         public Location Location { get; set; }
         public string Comments { get; set; }
         public TimePeriod TimePeriod { get; set; }
-
+        public bool IsLocationSelectable { get; set; }
         #region PluginManager stuff
         IPluginManagerService _pluginManager;
         public IPluginManagerService PluginManager

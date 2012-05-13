@@ -89,6 +89,7 @@ namespace ESME.Tests.Scenarios
                 Comments = null,
                 GeoRect = geoRect
             };
+            location.LayerSettings.IsChecked = true;
             database.Add(location);
 
             foreach (var month in NAVOConfiguration.AllMonths)
@@ -127,6 +128,7 @@ namespace ESME.Tests.Scenarios
                 Duration = new DbTimeSpan(new TimeSpan(0, 1, 0, 0)),
                 TimePeriod = TimePeriod.April,
             });
+            location.Scenarios.Add(scenario);
             Platform platform;
             database.Add(platform = new Platform
             {

@@ -157,7 +157,15 @@ namespace ESMEWorkbench.ViewModels.Map
         public void SetIsVisible(MapLayerViewModel layer, bool isVisible)
         {
             layer.LayerOverlay.IsVisible = isVisible;
-            _wpfMap.Refresh(layer.LayerOverlay);
+            try
+            {
+                _wpfMap.Refresh(layer.LayerOverlay);
+            }
+            catch (Exception e)
+            {
+                _wpfMap.Overlays.Remove(layer.LayerOverlay);
+                _wpfMap.Refresh();
+            }
         }
 
         [MediatorMessageSink(MediatorMessage.RefreshMapLayer)]

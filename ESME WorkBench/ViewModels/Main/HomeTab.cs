@@ -91,16 +91,21 @@ namespace ESMEWorkbench.ViewModels.Main
         #region CreateScenarioCommand
         SimpleCommand<object, EventToCommandArgs> _createScenario;
 
-        public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand { get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => IsCreateScenarioCommandEnabled, CreateScenarioHandler)); } }
+        public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand { get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => IsCreateScenarioCommandEnabled, o => CreateScenarioHandler())); } }
 
         bool IsCreateScenarioCommandEnabled { get { return Database.Context.Locations.Local.Count > 0; } }
 
-        void CreateScenarioHandler(EventToCommandArgs args)
+        Location _lastCreateScenarioLocation;
+        [MediatorMessageSink(MediatorMessage.CreateScenario)]
+        void CreateScenarioHandler(Location location = null)
         {
-            var vm = new CreateScenarioViewModel
-            { Locations = Database.Context.Locations.Local, PluginManager = _plugins, Location = Database.Context.Locations.Local.First(), TimePeriod = (TimePeriod)DateTime.Today.Month };
+            if (_lastCreateScenarioLocation == null) _lastCreateScenarioLocation = Database.Context.Locations.Local.First();
+            var vm = new CreateScenarioViewModel { Locations = Database.Context.Locations.Local, PluginManager = _plugins, Location = location ?? _lastCreateScenarioLocation, TimePeriod = (TimePeriod)DateTime.Today.Month, IsLocationSelectable = location == null };
             var result = _visualizer.ShowDialog("CreateScenarioView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
+            if (location == null) _lastCreateScenarioLocation = vm.Location;
+            CreateScenario(vm.Location, vm.ScenarioName, vm.Comments, vm.TimePeriod, vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet);
+#if false
             var wind = Database.LoadOrCreateEnvironmentalDataSet(vm.Location,
                                                                  vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet.Resolution,
                                                                  vm.TimePeriod,
@@ -128,8 +133,29 @@ namespace ESMEWorkbench.ViewModels.Main
                 Comments = vm.Comments,
                 TimePeriod = vm.TimePeriod,
             };
+            vm.Location.Scenarios.Add(scenario);
             Database.Add(scenario);
             Database.SaveChanges();
+#endif
+        }
+
+        Scenario CreateScenario(Location location, string scenarioName, string comments, TimePeriod timePeriod, EnvironmentalDataSet wind, EnvironmentalDataSet soundSpeed, EnvironmentalDataSet bathymetry, EnvironmentalDataSet sediment)
+        {
+            var scenario = new Scenario
+            {
+                Wind = Database.LoadOrCreateEnvironmentalDataSet(location, wind.Resolution, timePeriod, wind.SourcePlugin),
+                SoundSpeed = Database.LoadOrCreateEnvironmentalDataSet(location, soundSpeed.Resolution, timePeriod, soundSpeed.SourcePlugin),
+                Bathymetry = Database.LoadOrCreateEnvironmentalDataSet(location, bathymetry.Resolution, TimePeriod.Invalid, bathymetry.SourcePlugin),
+                Sediment = Database.LoadOrCreateEnvironmentalDataSet(location, sediment.Resolution, TimePeriod.Invalid, sediment.SourcePlugin),
+                Name = scenarioName,
+                Location = location,
+                Comments = comments,
+                TimePeriod = timePeriod,
+            };
+            location.Scenarios.Add(scenario);
+            Database.Add(scenario);
+            Database.SaveChanges();
+            return scenario;
         }
         #endregion
 
@@ -218,22 +244,28 @@ namespace ESMEWorkbench.ViewModels.Main
         void AddPlatform(Scenario scenario)
         {
             if (scenario.LayerControl != null) ((LayerControl)scenario.LayerControl).Expand();
+            AddPlatform(scenario, "New Platform", true);
+        }
+
+        static Platform AddPlatform(Scenario scenario, string name, bool isNew)
+        {
             var platform = new Platform
             {
                 Scenario = scenario,
                 Course = 0,
                 Depth = 0,
                 Description = null,
-                Geo = ((GeoRect)Scenario.Location.GeoRect).Center,
-                PlatformName = "New Platform",
+                Geo = ((GeoRect)scenario.Location.GeoRect).Center,
+                PlatformName = name,
                 IsRandom = false,
                 Launches = false,
                 TrackType = TrackType.Stationary,
                 LayerSettings = new LayerSettings(),
-                IsNew = true,
+                IsNew = isNew,
             };
-            Scenario.Platforms.Add(platform);
+            scenario.Platforms.Add(platform);
             platform.CreateMapLayers();
+            return platform;
         }
 
         [MediatorMessageSink(MediatorMessage.ViewScenarioProperties),UsedImplicitly]
@@ -272,14 +304,20 @@ namespace ESMEWorkbench.ViewModels.Main
             //var result = _visualizer.ShowDialog("CreateSourceView", vm);
             //if (!result.HasValue || !result.Value) return;
             ((LayerControl)platform.LayerControl).Expand();
+            AddSource(platform, "New Source", true);
+        }
+
+        static Source AddSource(Platform platform, string name, bool isNew)
+        {
             var source = new Source
             {
                 Platform = platform,
-                SourceName = "New Source",
+                SourceName = name,
                 SourceType = null,
-                IsNew = true,
+                IsNew = isNew,
             };
             platform.Sources.Add(source);
+            return source;
         }
 
         [MediatorMessageSink(MediatorMessage.SourceBoundToLayer), UsedImplicitly]
@@ -315,6 +353,12 @@ namespace ESMEWorkbench.ViewModels.Main
             //var result = _visualizer.ShowDialog("CreateModeView", vm);
             //if (!result.HasValue || !result.Value) return;
             ((LayerControl)source.LayerControl).Expand();
+            AddMode(source, "New Mode", true);
+            OnPropertyChanged("CanPlaceAnalysisPoint");
+        }
+
+        static Mode AddMode(Source source, string name, bool isNew)
+        {
             var mode = new Mode
             {
                 ActiveTime = 1f,
@@ -323,7 +367,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 HighFrequency = 1000f,
                 LowFrequency = 1000f,
                 MaxPropagationRadius = 25000f,
-                ModeName = "New Mode",
+                ModeName = name,
                 ModeType = null,
                 PulseInterval = new TimeSpan(0, 0, 0, 30),
                 PulseLength = new TimeSpan(0, 0, 0, 0, 500),
@@ -331,10 +375,10 @@ namespace ESMEWorkbench.ViewModels.Main
                 Source = source,
                 SourceLevel = 200,
                 VerticalBeamWidth = 180f,
-                IsNew = true,
+                IsNew = isNew,
             };
             source.Modes.Add(mode);
-            OnPropertyChanged("CanPlaceAnalysisPoint");
+            return mode;
         }
 
         [MediatorMessageSink(MediatorMessage.ModeBoundToLayer), UsedImplicitly]

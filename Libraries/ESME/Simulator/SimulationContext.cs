@@ -61,6 +61,7 @@ namespace ESME.Simulator
                 GeoRect = new GeoRect(scenario.Location.GeoRect),
                 StorageDirectory = scenario.Location.StorageDirectory,
             };
+            newLocation.LayerSettings.IsChecked = true;
             Locations.Add(newLocation);
 
             EnvironmentalDataSet wind = null;
@@ -133,6 +134,7 @@ namespace ESME.Simulator
                 Bathymetry = bathymetry,
             };
             Scenarios.Add(newScenario);
+            newLocation.Scenarios.Add(scenario);
 
             foreach (var platform in scenario.Platforms)
             {

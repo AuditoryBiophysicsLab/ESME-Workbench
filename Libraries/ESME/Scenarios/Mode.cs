@@ -92,6 +92,7 @@ namespace ESME.Scenarios
         {
             foreach (var tl in TransmissionLosses.ToList()) tl.Delete();
             Source.Modes.Remove(this);
+            Scenario.Database.Context.Modes.Remove(this);
         }
         #region Layer Move commands
         #region MoveLayerToFrontCommand

@@ -72,7 +72,7 @@
                                             UpdateSourceTrigger=PropertyChanged}"
                              ToolTip="This field is required" />
                 </Grid>
-                <Grid Margin="5 5 5 0">
+                <Grid Margin="5 5 5 0" >
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
                         <ColumnDefinition />
@@ -84,6 +84,7 @@
                                TextAlignment="Right" />
                     <ComboBox Grid.Column="1"
                               DisplayMemberPath="Name"
+                              IsEnabled="{Binding IsLocationSelectable}"
                               ItemsSource="{Binding Locations}"
                               SelectedItem="{Binding Location}" />
                 </Grid>

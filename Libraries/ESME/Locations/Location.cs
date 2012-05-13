@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Windows.Data;
 using System.Windows.Media;
 using ESME.Database;
@@ -41,6 +42,7 @@ namespace ESME.Locations
         public string StorageDirectory { get; set; }
 
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
+        [Initialize] public virtual ObservableList<Scenario> Scenarios { get; set; }
         [Initialize] public virtual ObservableList<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
 
@@ -93,8 +95,16 @@ namespace ESME.Locations
             mapLayer.Done();
             LayerSettings.AreaColor = Colors.Transparent;
             LayerSettings.MapLayerViewModel = mapLayer;
+            foreach (var dataSet in EnvironmentalDataSets) dataSet.CreateMapLayers();
         }
 
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
+        public void Delete()
+        {
+            foreach (var scenario in Scenarios.ToList()) scenario.Delete();
+            foreach (var dataSet in EnvironmentalDataSets.ToList()) dataSet.Delete();
+            Database.Context.Locations.Remove(this);
+        }
+
     }
 }

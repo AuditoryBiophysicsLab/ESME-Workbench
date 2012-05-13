@@ -142,7 +142,8 @@
     <Compile Include="ViewModels\Main\HomeTab.cs" />
     <Compile Include="ViewModels\Main\OverrideCursor.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticSimulatorOptionsViewModel.cs" />
-    <Compile Include="ViewModels\Tree\LocationsNode.cs" />
+    <Compile Include="ViewModels\Tree\LocationNode.cs" />
+    <Compile Include="ViewModels\Tree\LocationEnvironmentNode.cs" />
     <Compile Include="ViewModels\Tree\LocationsTreeViewModel.cs" />
     <Compile Include="ViewModels\Tree\PerimetersNode.cs" />
     <Compile Include="ViewModels\Tree\ScenarioNode.cs" />
@@ -454,6 +455,8 @@
     <Content Include="External References\System.Data.SQLite.dll" />
     <Content Include="External References\System.Data.SQLite.Linq.dll" />
     <Content Include="External References\System.Threading.Tasks.Dataflow.dll" />
+    <Resource Include="Images\SmallIcons\zoom_layer.png" />
+    <Resource Include="Images\SmallIcons\layer_open.png" />
     <Resource Include="Images\SmallIcons\sound_delete.png" />
     <Resource Include="Images\SmallIcons\arrow_rotate_clockwise.png" />
     <Resource Include="Images\SmallIcons\shape_move_back.png" />
