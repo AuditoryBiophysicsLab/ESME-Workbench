@@ -73,10 +73,10 @@ namespace ESME.Scenarios
         public void Delete()
         {
             RemoveMapLayers();
+            Scenario.Platforms.Remove(this);
             foreach (var source in Sources.ToList()) source.Delete();
             if (LayerSettings != null) Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
             LayerSettings = null;
-            Scenario.Platforms.Remove(this);
             Scenario.Database.Context.Platforms.Remove(this);
         }
 

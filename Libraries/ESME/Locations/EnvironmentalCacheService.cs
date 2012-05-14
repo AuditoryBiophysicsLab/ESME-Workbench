@@ -119,7 +119,7 @@ namespace ESME.Locations
             //OnPropertyChanged("BusyCount");
             var dataSet = job.ProgressTarget;
             var sourcePlugin = (EnvironmentalDataSourcePluginBase)_plugins[dataSet.SourcePlugin];
-            var fileName = Path.Combine(_database.MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
+            var fileName = Path.Combine(dataSet.Location.StorageDirectoryPath, dataSet.FileName);
             job.Report(0);
             Debug.WriteLine("Importer: About to import {0}[{1}] from plugin {2}", (PluginSubtype)dataSet.SourcePlugin.PluginSubtype, dataSet.Resolution, sourcePlugin.PluginName);
             var curJob = job;
@@ -275,8 +275,7 @@ namespace ESME.Locations
         public Task<EnvironmentDataSetBase> Data { get; internal set; }
         public static EnvironmentalCacheEntry Load(string databaseDirectory, EnvironmentalDataSet dataSet, EnvironmentalCacheService cache)
         {
-            var locationStorageDirectory = Path.Combine(databaseDirectory, dataSet.Location.StorageDirectory);
-            var fileName = Path.Combine(locationStorageDirectory, dataSet.FileName);
+            var fileName = Path.Combine(dataSet.Location.StorageDirectoryPath, dataSet.FileName);
             if (!File.Exists(fileName))
             {
                 try
@@ -296,28 +295,28 @@ namespace ESME.Locations
                     result = new EnvironmentalCacheEntry
                     {
                         Loaded = DateTime.Now,
-                        Data = new Task<EnvironmentDataSetBase>(() => Wind.Load(Path.Combine(locationStorageDirectory, dataSet.FileName))),
+                        Data = new Task<EnvironmentDataSetBase>(() => Wind.Load(Path.Combine(dataSet.Location.StorageDirectoryPath, dataSet.FileName))),
                     };
                     break;
                 case PluginSubtype.SoundSpeed:
                     result = new EnvironmentalCacheEntry
                     {
                         Loaded = DateTime.Now,
-                        Data = new Task<EnvironmentDataSetBase>(() => SoundSpeed.Load(Path.Combine(locationStorageDirectory, dataSet.FileName))),
+                        Data = new Task<EnvironmentDataSetBase>(() => SoundSpeed.Load(Path.Combine(dataSet.Location.StorageDirectoryPath, dataSet.FileName))),
                     };
                     break;
                 case PluginSubtype.Sediment:
                     result = new EnvironmentalCacheEntry
                     {
                         Loaded = DateTime.Now,
-                        Data = new Task<EnvironmentDataSetBase>(() => Sediment.Load(Path.Combine(locationStorageDirectory, dataSet.FileName))),
+                        Data = new Task<EnvironmentDataSetBase>(() => Sediment.Load(Path.Combine(dataSet.Location.StorageDirectoryPath, dataSet.FileName))),
                     };
                     break;
                 case PluginSubtype.Bathymetry:
                     result = new EnvironmentalCacheEntry
                     {
                         Loaded = DateTime.Now,
-                        Data = new Task<EnvironmentDataSetBase>(() => Bathymetry.Load(Path.Combine(locationStorageDirectory, dataSet.FileName))),
+                        Data = new Task<EnvironmentDataSetBase>(() => Bathymetry.Load(Path.Combine(dataSet.Location.StorageDirectoryPath, dataSet.FileName))),
                     };
                     break;
                 default:

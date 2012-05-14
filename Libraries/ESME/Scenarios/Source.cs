@@ -54,8 +54,8 @@ namespace ESME.Scenarios
 
         public void Delete()
         {
-            foreach (var mode in Modes.ToList()) mode.Delete();
             Platform.Sources.Remove(this);
+            foreach (var mode in Modes.ToList()) mode.Delete();
             Scenario.Database.Context.Sources.Remove(this);
         }
     }

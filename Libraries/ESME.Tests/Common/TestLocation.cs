@@ -11,6 +11,7 @@ namespace ESME.Tests.Common
 {
     public static class TestLocation
     {
+#if false
         public static Location LoadOrCreate(string locationName, string overlayFile, string databaseDirectory, string pluginDirectory, out IMasterDatabaseService databaseService, out EnvironmentalCacheService cacheService, out PluginManagerService pluginService)
         {
             Console.WriteLine("Creating database service...");
@@ -52,6 +53,7 @@ namespace ESME.Tests.Common
             cacheService.ImportDatasetTest(databaseService.LoadOrCreateEnvironmentalDataSet(location, 0.5f, TimePeriod.Invalid, pluginService[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry].PluginIdentifier));
             return location;
         }
+#endif
 
         public static void Dump(IMasterDatabaseService locationService, bool dumpLogs = false)
         {
@@ -96,7 +98,7 @@ namespace ESME.Tests.Common
             Console.WriteLine("           Source Guid: {0}", logEntry.SourceGuid);
         }
     }
-
+#if false
     public static class TestScenario
     {
         public static Scenario LoadOrCreate(IMasterDatabaseService databaseService, Location location, string simAreaFolder, string scenarioFile)
@@ -126,4 +128,5 @@ namespace ESME.Tests.Common
             return scenario;
         }
     }
+#endif
 }

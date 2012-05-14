@@ -16,6 +16,7 @@ using NUnit.Framework;
 
 namespace ESME.Tests.Scenarios
 {
+#if false
     public class AnalysisPointTests
     {
 #if Dave
@@ -229,4 +230,5 @@ namespace ESME.Tests.Scenarios
         }
 #endif
     }
+#endif
 }

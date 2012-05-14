@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
+using System.Windows.Threading;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Model;
@@ -48,46 +49,56 @@ namespace ESME.TransmissionLoss
         [Import] EnvironmentalCacheService _cacheService;
         [Initialize(float.NaN)] public float RangeCellSize { get; set; }
         [Initialize(float.NaN)] public float DepthCellSize { get; set; }
+        public Dispatcher Dispatcher { get; set; }
         public ObservableConcurrentDictionary<Guid, PercentProgress<Radial>> WorkQueue { get; private set; }
         readonly ActionBlock<PercentProgress<Radial>> _calculator;
         readonly BufferBlock<PercentProgress<Radial>> _queue;
 
         public void OnImportsSatisfied()
         {
-            if (float.IsNaN(RangeCellSize) || float.IsNaN(DepthCellSize) || _databaseService.MasterDatabaseDirectory == null) return;
+            if (Dispatcher == null || float.IsNaN(RangeCellSize) || float.IsNaN(DepthCellSize) || _databaseService.MasterDatabaseDirectory == null) return;
             Start();
         }
 
         static readonly object LockObject = new object();
         bool _isStarted;
-        LocationContext _dbContext;
         public void Start()
         {
-            if (float.IsNaN(RangeCellSize) || float.IsNaN(DepthCellSize)) return;
+            if (Dispatcher == null || float.IsNaN(RangeCellSize) || float.IsNaN(DepthCellSize)) return;
 
             lock (LockObject)
             {
                 if (_isStarted) return;
                 _isStarted = true;
             }
-            _dbContext = _databaseService.Context;
-            IQueryable<Radial> radials;
-            lock (_dbContext)
-                radials = (from radial in _dbContext.Radials
-                                .Include(r => r.TransmissionLoss)
-                                .Include(r => r.TransmissionLoss.Mode)
-                                .Include(r => r.TransmissionLoss.Mode.Source)
-                                .Include(r => r.TransmissionLoss.Mode.Source.Platform)
-                                .Include(r => r.TransmissionLoss.AnalysisPoint)
-                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario)
-                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Location)
-                            select radial);
+            var radials = (from radial in _databaseService.Context.Radials
+                               .Include(r => r.TransmissionLoss)
+                               .Include(r => r.TransmissionLoss.Mode)
+                               .Include(r => r.TransmissionLoss.Mode.Source)
+                               .Include(r => r.TransmissionLoss.Mode.Source.Platform)
+                               .Include(r => r.TransmissionLoss.AnalysisPoint)
+                               .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario)
+                               .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Location)
+                           select radial);
             foreach (var radial in radials)
             {
                 if (radial.BasePath == null)
                 {
-                    _dbContext.Radials.Remove(radial);
+                    _databaseService.Context.Radials.Remove(radial);
                     continue;
+                }
+                if (radial.TransmissionLoss.AnalysisPoint.Scenario.Wind == null ||
+                    radial.TransmissionLoss.AnalysisPoint.Scenario.SoundSpeed == null ||
+                    radial.TransmissionLoss.AnalysisPoint.Scenario.Bathymetry == null ||
+                    radial.TransmissionLoss.AnalysisPoint.Scenario.Sediment == null)
+                {
+                    var scenario = (from s in _databaseService.Context.Scenarios
+                                        .Include(s => s.Wind)
+                                        .Include(s => s.SoundSpeed)
+                                        .Include(s => s.Bathymetry)
+                                        .Include(s => s.Sediment)
+                                    where s.Guid == radial.TransmissionLoss.AnalysisPoint.Scenario.Guid
+                                    select s).Single();
                 }
                 if (!File.Exists(radial.BasePath + ".shd")) Add(radial);
             }
@@ -135,14 +146,15 @@ namespace ESME.TransmissionLoss
                 //                radial.Bearing,
                 //                radial.TransmissionLoss.Mode.ModeName,
                 //                (Geo)radial.TransmissionLoss.AnalysisPoint.Geo);
-                Scenario scenario;
-                lock (_dbContext) scenario = (from s in _dbContext.Scenarios
-                                                  .Include(s => s.Wind)
-                                                  .Include(s => s.SoundSpeed)
-                                                  .Include(s => s.Bathymetry)
-                                                  .Include(s => s.Sediment)
-                                                  where s.Guid == radial.TransmissionLoss.AnalysisPoint.Scenario.Guid
-                                              select s).Single();
+                //Scenario scenario = null;
+                //Dispatcher.InvokeIfRequired(() => scenario = (from s in _databaseService.Context.Scenarios
+                //                                                  .Include(s => s.Wind)
+                //                                                  .Include(s => s.SoundSpeed)
+                //                                                  .Include(s => s.Bathymetry)
+                //                                                  .Include(s => s.Sediment)
+                //                                              where s.Guid == radial.TransmissionLoss.AnalysisPoint.Scenario.Guid
+                //                                              select s).Single());
+                var scenario = radial.TransmissionLoss.AnalysisPoint.Scenario;
                 var mode = radial.TransmissionLoss.Mode;
                 var platform = mode.Source.Platform;
                 var timePeriod = platform.Scenario.TimePeriod;

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data;
+using System.Linq;
 using System.Windows;
 using ESME;
 using ESME.Locations;
@@ -55,6 +57,10 @@ namespace ESMEWorkbench.ViewModels.Main
 
         Location CreateLocation(string locationName, string comments, GeoRect geoRect)
         {
+            var existing = (from l in Database.Context.Locations
+                            where l.Name == locationName
+                            select l).FirstOrDefault();
+            if (existing != null) throw new DuplicateNameException(String.Format("A location named {0} already exists, choose another name", locationName));
             var location = new Location
             {
                 Name = locationName,
@@ -62,8 +68,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 GeoRect = geoRect,
                 LayerSettings = { IsChecked = true }
             };
-            Database.Add(location);
-            Database.SaveChanges();
+            Database.Context.Locations.Local.Add(location);
             location.CreateMapLayers();
             return location;
         }

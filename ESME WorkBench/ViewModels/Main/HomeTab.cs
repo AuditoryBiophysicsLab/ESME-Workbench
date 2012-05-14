@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -165,8 +166,12 @@ namespace ESMEWorkbench.ViewModels.Main
                 Comments = comments,
                 TimePeriod = timePeriod,
             };
+            var existing = (from s in location.Scenarios
+                            where s.Name == scenario.Name && s.Location == scenario.Location
+                            select s).FirstOrDefault();
+            if (existing != null) throw new DuplicateNameException(String.Format("A scenario named {0} already exists in location {1}, choose another name", scenario.Name, scenario.Location.Name));
             location.Scenarios.Add(scenario);
-            Database.Add(scenario);
+            //Database.Add(scenario);
             return scenario;
         }
         #endregion
@@ -431,18 +436,5 @@ namespace ESMEWorkbench.ViewModels.Main
             //_visualizer.ShowDialog("TreeViewItemPropertiesView", new ModePropertiesViewModel() { Mode = mode, });
             mode.LowFrequency = mode.HighFrequency;
         }
-
-        #region ImportScenarioFileCommand
-        SimpleCommand<object, object> _importScenarioFile;
-
-        public SimpleCommand<object, object> ImportScenarioFileCommand { get { return _importScenarioFile ?? (_importScenarioFile = new SimpleCommand<object, object>(ImportScenarioFileHandler)); } }
-
-        void ImportScenarioFileHandler(object o)
-        {
-            var vm = new ImportScenarioFileViewModel(Database, _cache, _plugins);
-            var result = _visualizer.ShowDialog("ImportScenarioFileView", vm);
-            if (result.HasValue && result.Value) Scenario = vm.Scenario;
-        }
-        #endregion
     }
 }

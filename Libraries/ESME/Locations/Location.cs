@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -34,6 +35,11 @@ namespace ESME.Locations
 
     public class Location : IHaveGuid, IHaveLayerSettings
     {
+        public Location()
+        {
+            StorageDirectory = Path.Combine("locations", MasterDatabaseService.RandomFilenameWithoutExension);
+        }
+
         [Key, Initialize]
         public Guid Guid { get; set; }
         public string Name { get; set; }
@@ -61,6 +67,18 @@ namespace ESME.Locations
         [NotMapped] public static IMasterDatabaseService Database { get; set; }
         [NotMapped] public static EnvironmentalCacheService Cache { get; set; }
         [NotMapped] public bool IsDeleted { get; set; }
+        [NotMapped] public string StorageDirectoryPath
+        {
+            get
+            {
+                if (_storageDirectoryPath != null) return _storageDirectoryPath;
+                if (Database == null || Database.MasterDatabaseDirectory == null) throw new ApplicationException("Database or Database.MasterDatabaseDirectory is null");
+                _storageDirectoryPath = Path.Combine(Database.MasterDatabaseDirectory, StorageDirectory);
+                if (!Directory.Exists(_storageDirectoryPath)) Directory.CreateDirectory(_storageDirectoryPath);
+                return _storageDirectoryPath;
+            }
+        }
+        string _storageDirectoryPath;
 
         #region Layer Move commands
         #region MoveLayerToFrontCommand
@@ -105,6 +123,7 @@ namespace ESME.Locations
             foreach (var scenario in Scenarios.ToList()) scenario.Delete();
             foreach (var dataSet in EnvironmentalDataSets.ToList()) dataSet.Delete();
             Database.Context.Locations.Remove(this);
+            Directory.Delete(StorageDirectoryPath, true);
         }
 
     }

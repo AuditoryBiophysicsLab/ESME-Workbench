@@ -8,16 +8,15 @@ using System.Data.Entity.Validation;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Devart.Data.SQLite;
 using Devart.Data.SQLite.Entity.Configuration;
 using ESME.Database;
 using ESME.Environment;
-using ESME.NEMO.Overlay;
 using ESME.Plugins;
 using ESME.Scenarios;
 using HRC;
 using HRC.Aspects;
-using HRC.Navigation;
 using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;   
 
@@ -27,29 +26,13 @@ namespace ESME.Locations
     {
         string MasterDatabaseDirectory { get; set; }
         LocationContext Context { get; }
-        Location FindLocation(string locationName);
-        bool LocationExists(string locationName);
-        Scenario FindScenario(string scenarioName);
-        bool ScenarioExists(string scenarioName);
         void Refresh();
-        void Add(Location location);
-        void Add(Scenario scenario);
-        void Add(Platform platform);
-        void Add(Source source);
-        void Add(Mode mode);
-        void Add(Scenario scenario, EnvironmentalDataSet dataSet, bool replaceExisting = false);
         void Add(Perimeter perimeter);
         void Add(PerimeterCoordinate coordinate, bool replaceExisting = false);
         void Add(ScenarioSpecies species);
         void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry);
-        Location ImportLocationFromOverlayFile(string overlayFilename, string locationName);
         EnvironmentalDataSet LoadOrCreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin);
-        Scenario CreateScenario(string scenarioName, string comments, TimeSpan startTime, TimeSpan duration, TimePeriod timePeriod, Location location);
-        void SetEnvironmentalData(Scenario scenario, EnvironmentalDataSet data);
-        void DeleteLocation(Location location);
-        void DeleteEnvironmentalDataSet(EnvironmentalDataSet dataSet);
         void SaveChanges();
-        void AddFakeMapLayer(AnalysisPoint analysisPoint);
     }
 
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -70,12 +53,6 @@ namespace ESME.Locations
                 Scenario.Database = this;
             }
         }
-
-        public Location FindLocation(string locationName) { return Context == null ? null : Context.Locations.FirstOrDefault(l => l.Name == locationName); }
-        public bool LocationExists(string locationName) { return FindLocation(locationName) != null; }
-
-        public Scenario FindScenario(string scenarioName) { return Context == null ? null : Context.Scenarios.FirstOrDefault(l => l.Name == scenarioName); }
-        public bool ScenarioExists(string scenarioName) { return FindScenario(scenarioName) != null; }
 
         public void Refresh()
         {
@@ -99,73 +76,6 @@ namespace ESME.Locations
         }
 
         #region Add operations
-        public void Add(Location location)
-        {
-            if (LocationExists(location.Name)) throw new DuplicateNameException(String.Format("A location named {0} already exists, choose another name", location.Name));
-            if (location.StorageDirectory == null)
-                location.StorageDirectory = Path.Combine("locations", RandomFilenameWithoutExension);
-            var storageDirectoryPath = Path.Combine(MasterDatabaseDirectory, location.StorageDirectory);
-            if (!Directory.Exists(storageDirectoryPath)) Directory.CreateDirectory(storageDirectoryPath);
-            Log(location, "Added location {0}", location.Name);
-        }
-        public void Add(Scenario scenario)
-        {
-            var existing = (from s in Context.Scenarios.Local
-                            where s.Name == scenario.Name && s.Location == scenario.Location
-                            select s).FirstOrDefault();
-            if (existing != null) throw new DuplicateNameException(String.Format("A scenario named {0} already exists in location {1}, choose another name", scenario.Name, scenario.Location.Name));
-            if (scenario.StorageDirectory == null) scenario.StorageDirectory = Path.Combine("scenarios", RandomFilenameWithoutExension);
-            var storageDirectoryPath = Path.Combine(MasterDatabaseDirectory, scenario.StorageDirectory);
-            if (!Directory.Exists(storageDirectoryPath)) Directory.CreateDirectory(storageDirectoryPath);
-
-            Context.Scenarios.Add(scenario);
-            Log(scenario, "Added new scenario {0} to data set to location {1}", scenario.Name, scenario.Location.Name);
-        }
-        public void Add(Platform platform)
-        {
-            Log(platform, "Added new platform {0} to scenario {1} in location {2}", platform.Description, platform.Scenario.Name, platform.Scenario.Location.Name);
-        }
-        public void Add(Source source)
-        {
-            Log(source, "Added new source {0} to platform {1} in scenario {2} in location {3}", source.SourceName, source.Platform.Description, source.Platform.Scenario.Name, source.Platform.Scenario.Location.Name);
-        }
-        public void Add(Mode mode)
-        {
-            Log(mode, "Added new mode {0} to source {1} of platform {2} in scenario {3} in location {4}", mode.ModeName, mode.Source.SourceName, mode.Source.Platform.Description, mode.Source.Platform.Scenario.Name, mode.Source.Platform.Scenario.Location.Name);
-        }
-        public void Add(Scenario scenario, EnvironmentalDataSet dataSet, bool replaceExisting = false)
-        {
-            EnvironmentalDataSet oldData = null;
-            // todo: Check to see if replacing any of these datasets might invalidate any transmission losses we have previously calculated
-            switch ((PluginSubtype)dataSet.SourcePlugin.PluginSubtype)
-            {
-                case PluginSubtype.Wind:
-                    if (scenario.Wind != null && !replaceExisting) throw new ArgumentException(string.Format("Scenario {0} already has a wind dataset.  Did you intend to replace it?", scenario.Name), "dataSet");
-                    oldData = scenario.Wind;
-                    scenario.Wind = dataSet;
-                    break;
-                case PluginSubtype.SoundSpeed:
-                    if (scenario.SoundSpeed != null && !replaceExisting) throw new ArgumentException(string.Format("Scenario {0} already has a sound speed dataset.  Did you intend to replace it?", scenario.Name), "dataSet");
-                    oldData = scenario.SoundSpeed;
-                    scenario.SoundSpeed = dataSet;
-                    break;
-                case PluginSubtype.Sediment:
-                    if (scenario.Sediment != null && !replaceExisting) throw new ArgumentException(string.Format("Scenario {0} already has a sediment dataset.  Did you intend to replace it?", scenario.Name), "dataSet");
-                    oldData = scenario.Sediment;
-                    scenario.Sediment = dataSet;
-                    break;
-                case PluginSubtype.Bathymetry:
-                    if (scenario.Bathymetry != null && !replaceExisting) throw new ArgumentException(string.Format("Scenario {0} already has a bathymetry dataset.  Did you intend to replace it?", scenario.Name), "dataSet");
-                    oldData = scenario.Bathymetry;
-                    scenario.Bathymetry = dataSet;
-                    break;
-            }
-            // todo: enhance these messages to include resolution and time period
-            if (oldData == null)
-                Log(scenario, dataSet, "Added new {0} data set to scenario {1} (source {2})", dataSet.SourcePlugin.PluginSubtype, scenario.Name, dataSet.SourcePlugin.Type);
-            else
-                Log(scenario, dataSet, "Replaced old {0} data set in scenario {1} (old source {2}) with data from source {3}", oldData.SourcePlugin.PluginSubtype, scenario.Name, oldData.SourcePlugin.Type, dataSet.SourcePlugin.Type);
-        }
         public void Add(Perimeter perimeter)
         {
             var existing = (from p in Context.Perimeters
@@ -194,7 +104,7 @@ namespace ESME.Locations
 
         public void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry)
         {
-            Console.WriteLine("Adding analysis point at {0}", analysisPoint.Geo);
+            //Console.WriteLine("Adding analysis point at {0}", analysisPoint.Geo);
             var depthAtAnalysisPoint = bathymetry.Samples.IsFast2DLookupAvailable
                                            ? -bathymetry.Samples.GetNearestPointAsync(analysisPoint.Geo).Result.Data
                                            : -bathymetry.Samples.GetNearestPoint(analysisPoint.Geo).Data;
@@ -204,10 +114,10 @@ namespace ESME.Locations
                 if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
                 if (sourceDepth >= depthAtAnalysisPoint)
                 {
-                    Console.WriteLine("  Skipping transmission loss for {0}:{1}:{2}, because the depth is below the bottom for this analysis point", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName);
+                    //Console.WriteLine("  Skipping transmission loss for {0}:{1}:{2}, because the depth is below the bottom for this analysis point", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName);
                     continue;
                 }
-                Console.WriteLine("  Adding transmission loss for {0}:{1}:{2}", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName);
+                //Console.WriteLine("  Adding transmission loss for {0}:{1}:{2}", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName);
                 var transmissionLoss = new Scenarios.TransmissionLoss
                 {
                     AnalysisPoint = analysisPoint,
@@ -215,9 +125,9 @@ namespace ESME.Locations
                     Mode = mode,
                 };
                 analysisPoint.TransmissionLosses.Add(transmissionLoss);
-                Log(transmissionLoss, "Added new transmission loss for mode {0} to analysis point at {1} to scenario {2} in location {3}", transmissionLoss.Mode.ModeName, (Geo)transmissionLoss.AnalysisPoint.Geo, transmissionLoss.AnalysisPoint.Scenario.Name, transmissionLoss.AnalysisPoint.Scenario.Location.Name); 
+                //Log(transmissionLoss, "Added new transmission loss for mode {0} to analysis point at {1} to scenario {2} in location {3}", transmissionLoss.Mode.ModeName, (Geo)transmissionLoss.AnalysisPoint.Geo, transmissionLoss.AnalysisPoint.Scenario.Name, transmissionLoss.AnalysisPoint.Scenario.Location.Name); 
                 var radialCount = mode.MaxPropagationRadius <= 10000 ? 8 : 16;
-                Console.WriteLine("    Radius: {0}m, radial count: {1}", mode.MaxPropagationRadius, radialCount);
+                //Console.WriteLine("    Radius: {0}m, radial count: {1}", mode.MaxPropagationRadius, radialCount);
                 for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
                 {
                     var radial = new Radial
@@ -230,55 +140,14 @@ namespace ESME.Locations
                         IsCalculated = false,
                     };
                     transmissionLoss.Radials.Add(radial);
-                    Log(radial, "Added new radial with bearing {0} and length {1} to transmission loss for mode {2} in analysis point at {3} to scenario {4} in location {5}", radial.Bearing, radial.Length, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo, radial.TransmissionLoss.AnalysisPoint.Scenario.Name, radial.TransmissionLoss.AnalysisPoint.Scenario.Location.Name);
+                    //Log(radial, "Added new radial with bearing {0} and length {1} to transmission loss for mode {2} in analysis point at {3} to scenario {4} in location {5}", radial.Bearing, radial.Length, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo, radial.TransmissionLoss.AnalysisPoint.Scenario.Name, radial.TransmissionLoss.AnalysisPoint.Scenario.Location.Name);
                 }
             }
-            Log(analysisPoint, "Added new analysis point at {0} to scenario {1} in location {2}", (Geo)analysisPoint.Geo, analysisPoint.Scenario.Name, analysisPoint.Scenario.Location.Name);
-        }
-
-        public void AddFakeMapLayer(AnalysisPoint analysisPoint)
-        {
-            foreach (var mode in analysisPoint.Scenario.GetAllModes())
-            {
-                var transmissionLoss = new Scenarios.TransmissionLoss
-                {
-                    AnalysisPoint = analysisPoint,
-                    IsReadyToCalculate = false,
-                    Mode = mode,
-                };
-                analysisPoint.TransmissionLosses.Add(transmissionLoss);
-                var radialCount = mode.MaxPropagationRadius <= 10000 ? 8 : 16;
-                for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
-                {
-                    var radial = new Radial
-                    {
-                        TransmissionLoss = transmissionLoss,
-                        Bearing = (360.0 / radialCount) * radialIndex,
-                        Length = transmissionLoss.Mode.MaxPropagationRadius,
-                    };
-                    transmissionLoss.Radials.Add(radial);
-                }
-            }
+            //Log(analysisPoint, "Added new analysis point at {0} to scenario {1} in location {2}", (Geo)analysisPoint.Geo, analysisPoint.Scenario.Name, analysisPoint.Scenario.Location.Name);
         }
         #endregion
 
         #region Create operations for Locations
-        public Location ImportLocationFromOverlayFile(string overlayFilename, string locationName)
-        {
-            var geoRect = new OverlayFile(overlayFilename).Shapes[0].GeoRect;
-            var location = FindLocation(locationName);
-            if (location != null) return location;
-            location = new Location
-            {
-                Name = locationName,
-                Comments = String.Format("Imported from {0} on {1} by {2} on {3}", overlayFilename, System.Environment.UserName, DateTime.Now, System.Environment.MachineName),
-                GeoRect = geoRect,
-            };
-            location.LayerSettings.IsChecked = true;
-            Add(location);
-            return location;
-        }
-
         public EnvironmentalDataSet LoadOrCreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin)
         {
             var existing = (from e in Context.EnvironmentalDataSets
@@ -303,119 +172,6 @@ namespace ESME.Locations
         }
         #endregion
 
-        #region Create operations for Scenarios
-        public Scenario CreateScenario(string scenarioName, string comments, TimeSpan startTime, TimeSpan duration, TimePeriod timePeriod, Location location)
-        {
-            if (ScenarioExists(scenarioName)) throw new DuplicateNameException(String.Format("A scenario named {0} already exists, choose another name", scenarioName));
-            var scenario = Context.Scenarios.Create();
-            scenario.Name = scenarioName;
-            scenario.Comments = comments;
-            scenario.StartTime = startTime;
-            scenario.Duration = duration;
-            scenario.TimePeriod = timePeriod;
-            scenario.Location = location;
-            scenario.StorageDirectory = Path.Combine("scenarios", RandomFilenameWithoutExension);
-            Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, scenario.StorageDirectory));
-            Context.Scenarios.Add(scenario);
-            Log(scenario, "Created");
-            return scenario;
-        }
-
-        public void SetEnvironmentalData(Scenario scenario, EnvironmentalDataSet data)
-        {
-            switch ((PluginSubtype)data.SourcePlugin.PluginSubtype)
-            {
-                case PluginSubtype.Wind:
-                    scenario.Wind = data;
-                    break;
-                case PluginSubtype.SoundSpeed:
-                    scenario.SoundSpeed = data;
-                    break;
-                case PluginSubtype.Sediment:
-                    scenario.Sediment = data;
-                    break;
-                case PluginSubtype.Bathymetry:
-                    scenario.Bathymetry = data;
-                    break;
-            }
-        }
-        #endregion
-
-        #region Delete operations
-        public void DeleteLocation(Location location)
-        {
-            // todo: Handle the case where this location is used by one or more scenarios
-            var scenarios = (from scenario in Context.Scenarios
-                             where scenario.Location.Guid == location.Guid
-                             select scenario).ToList();
-            foreach (var scenario in scenarios)
-            {
-                foreach (var platform in scenario.Platforms.ToList())
-                {
-                    foreach (var source in platform.Sources.ToList())
-                    {
-                        var modes = (from mode in Context.Modes
-                                         .Include(m => m.Source)
-                                         .Include(m => m.Source.Platform)
-                                     where mode.Source.Guid == source.Guid
-                                     select mode).ToList();
-                        foreach (var mode in modes) Context.Modes.Remove(mode);
-                        Context.Sources.Remove(source);
-                    }
-                    Context.LayerSettings.Remove(platform.LayerSettings);
-                    Context.Platforms.Remove(platform);
-                }
-                foreach (var analysisPoint in scenario.AnalysisPoints.ToList())
-                {
-                    foreach (var transmissionLoss in analysisPoint.TransmissionLosses.ToList())
-                    {
-                        foreach (var radial in transmissionLoss.Radials.ToList())
-                        {
-                            File.Delete(Path.Combine(MasterDatabaseDirectory, radial.Filename));
-                            Context.Radials.Remove(radial);
-                        }
-                        Context.LayerSettings.Remove(transmissionLoss.LayerSettings);
-                        Context.TransmissionLosses.Remove(transmissionLoss);
-                    }
-                    Context.LayerSettings.Remove(analysisPoint.LayerSettings);
-                    Context.AnalysisPoints.Remove(analysisPoint);
-                }
-                var perimeters = (from perimeter in Context.Perimeters
-                                  where perimeter.Scenario.Guid == scenario.Guid
-                                  select perimeter).ToList();
-                foreach (var perimeter in perimeters)
-                {
-                    foreach (var coordinate in perimeter.PerimeterCoordinates.ToList()) Context.PerimeterCoordinates.Remove(coordinate);
-                    Context.LayerSettings.Remove(perimeter.LayerSettings);
-                    Context.Perimeters.Remove(perimeter);
-                }
-                foreach (var species in scenario.ScenarioSpecies.ToList())
-                {
-                    Context.LayerSettings.Remove(species.LayerSettings);
-                    Context.ScenarioSpecies.Remove(species);
-                }
-                Context.Scenarios.Remove(scenario);
-            }
-            foreach (var dataSet in location.EnvironmentalDataSets.ToList())
-            {
-                var fileName = Path.Combine(MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
-                var filesToDelete = Directory.EnumerateFiles(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".*").ToList();
-                foreach (var file in filesToDelete) File.Delete(file);
-                Context.LayerSettings.Remove(dataSet.LayerSettings);
-                Context.EnvironmentalDataSets.Remove(dataSet);
-            }
-            Directory.Delete(Path.Combine(MasterDatabaseDirectory, location.StorageDirectory));
-            Context.Locations.Remove(location);
-        }
-        public void DeleteEnvironmentalDataSet(EnvironmentalDataSet dataSet)
-        {
-            // todo: Handle the case where this data set is used by one or more scenarios
-            var fileName = Path.Combine(MasterDatabaseDirectory, dataSet.Location.StorageDirectory, dataSet.FileName);
-            var filesToDelete = Directory.EnumerateFiles(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".*").ToList();
-            foreach (var file in filesToDelete) File.Delete(file);
-            Context.EnvironmentalDataSets.Remove(dataSet);
-        }
-        #endregion
 
         #endregion
         #region Private helper methods, properties and fields
@@ -423,7 +179,7 @@ namespace ESME.Locations
         public LocationContext Context { get; private set; }
 
         [NotNull] 
-        string RandomFilenameWithoutExension
+        public static string RandomFilenameWithoutExension
         {
             get
             {
@@ -461,47 +217,52 @@ namespace ESME.Locations
 
         public void SaveChanges()
         {
-            lock (Context)
+            var retry = 20;
+            while (retry > 0)
             {
-                try
+                lock (Context)
                 {
-                    Context.SaveChanges();
+                    try
+                    {
+                        Context.SaveChanges();
+                        return;
+                    }
+                    catch (DbEntityValidationException dbEntityValidationException)
+                    {
+                        Console.WriteLine("SaveChanges caught DbEntityValidationException");
+                        foreach (var innerError in dbEntityValidationException.EntityValidationErrors.SelectMany(validationError => validationError.ValidationErrors)) Console.WriteLine("  {0}: {1}", innerError.PropertyName, innerError.ErrorMessage);
+                        if (retry <= 0) throw;
+                    }
+                    catch (DbUpdateException dbUpdateException)
+                    {
+                        Console.WriteLine("SaveChanges caught DbUpdateException");
+                        Console.WriteLine("  {0}", dbUpdateException.InnerException.Message);
+                        if (dbUpdateException.InnerException.InnerException != null) Console.WriteLine("    {0}", dbUpdateException.InnerException.InnerException.Message);
+                        if (retry <= 0) throw;
+                    }
+                    catch (Exception exception)
+                    {
+                        Console.WriteLine("SaveChanges caught Exception: {0}", exception.Message);
+                        if (retry <= 0) throw;
+                    }
                 }
-                catch (DbEntityValidationException dbEntityValidationException)
-                {
-                    Console.WriteLine("SaveChanges caught DbEntityValidationException");
-                    foreach (var innerError in dbEntityValidationException.EntityValidationErrors.SelectMany(validationError => validationError.ValidationErrors))
-                        Console.WriteLine("  {0}: {1}", innerError.PropertyName, innerError.ErrorMessage);
-                    throw;
-                }
-                catch (DbUpdateException dbUpdateException)
-                {
-                    Console.WriteLine("SaveChanges caught DbUpdateException");
-                    Console.WriteLine("  {0}", dbUpdateException.InnerException.Message);
-                    if (dbUpdateException.InnerException.InnerException != null)
-                        Console.WriteLine("    {0}", dbUpdateException.InnerException.InnerException.Message);
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    Console.WriteLine("SaveChanges caught Exception: {0}", exception.Message);
-                    throw;
-                }
+                Thread.Sleep(50);
+                retry--;
             }
         }
 #if true
-        void Log(Location location, string message, params object[] args) { LogBase(new LogEntry(location) { Location = location }, message, args); }
+        //void Log(Location location, string message, params object[] args) { LogBase(new LogEntry(location) { Location = location }, message, args); }
         void Log(EnvironmentalDataSet dataSet, string message, params object[] args) { LogBase(new LogEntry(dataSet) { Location = dataSet.Location, EnvironmentalDataSet = dataSet }, message, args); }
-        void Log(Scenario scenario, string message, params object[] args) { LogBase(new LogEntry(scenario) { Location = scenario.Location, Scenario = scenario }, message, args); }
-        void Log(Scenario scenario, EnvironmentalDataSet dataSet, string message, params object[] args) { LogBase(new LogEntry(dataSet) { Location = scenario.Location, EnvironmentalDataSet = dataSet, Scenario = scenario }, message, args); }
-        void Log(Platform platform, string message, params object[] args) { LogBase(new LogEntry(platform) { Location = platform.Scenario.Location, Scenario = platform.Scenario, Platform = platform }, message, args); }
-        void Log(Source source, string message, params object[] args) { LogBase(new LogEntry(source) { Location = source.Platform.Scenario.Location, Scenario = source.Platform.Scenario, Platform = source.Platform, Source = source }, message, args); }
-        void Log(Mode mode, string message, params object[] args) { LogBase(new LogEntry(mode) { Location = mode.Source.Platform.Scenario.Location, Scenario = mode.Source.Platform.Scenario, Platform = mode.Source.Platform, Source = mode.Source, Mode = mode }, message, args); }
+        //void Log(Scenario scenario, string message, params object[] args) { LogBase(new LogEntry(scenario) { Location = scenario.Location, Scenario = scenario }, message, args); }
+        //void Log(Scenario scenario, EnvironmentalDataSet dataSet, string message, params object[] args) { LogBase(new LogEntry(dataSet) { Location = scenario.Location, EnvironmentalDataSet = dataSet, Scenario = scenario }, message, args); }
+        //void Log(Platform platform, string message, params object[] args) { LogBase(new LogEntry(platform) { Location = platform.Scenario.Location, Scenario = platform.Scenario, Platform = platform }, message, args); }
+        //void Log(Source source, string message, params object[] args) { LogBase(new LogEntry(source) { Location = source.Platform.Scenario.Location, Scenario = source.Platform.Scenario, Platform = source.Platform, Source = source }, message, args); }
+        //void Log(Mode mode, string message, params object[] args) { LogBase(new LogEntry(mode) { Location = mode.Source.Platform.Scenario.Location, Scenario = mode.Source.Platform.Scenario, Platform = mode.Source.Platform, Source = mode.Source, Mode = mode }, message, args); }
         void Log(Perimeter perimeter, string message, params object[] args) { LogBase(new LogEntry(perimeter) { Location = perimeter.Scenario.Location, Scenario = perimeter.Scenario, Perimeter = perimeter }, message, args); }
         void Log(ScenarioSpecies species, string message, params object[] args) { LogBase(new LogEntry(species) { Location = species.Scenario.Location, Scenario = species.Scenario, ScenarioSpecies = species }, message, args); }
-        void Log(AnalysisPoint analysisPoint, string message, params object[] args) { LogBase(new LogEntry(analysisPoint) { Location = analysisPoint.Scenario.Location, Scenario = analysisPoint.Scenario, AnalysisPoint = analysisPoint }, message, args); }
-        void Log(Scenarios.TransmissionLoss transmissionLoss, string message, params object[] args) { LogBase(new LogEntry(transmissionLoss) { Location = transmissionLoss.AnalysisPoint.Scenario.Location, Scenario = transmissionLoss.AnalysisPoint.Scenario, TransmissionLoss = transmissionLoss }, message, args); }
-        void Log(Radial radial, string message, params object[] args) { LogBase(new LogEntry(radial) { Location = radial.TransmissionLoss.AnalysisPoint.Scenario.Location, Scenario = radial.TransmissionLoss.AnalysisPoint.Scenario, Radial = radial }, message, args); }
+        //void Log(AnalysisPoint analysisPoint, string message, params object[] args) { LogBase(new LogEntry(analysisPoint) { Location = analysisPoint.Scenario.Location, Scenario = analysisPoint.Scenario, AnalysisPoint = analysisPoint }, message, args); }
+        //void Log(Scenarios.TransmissionLoss transmissionLoss, string message, params object[] args) { LogBase(new LogEntry(transmissionLoss) { Location = transmissionLoss.AnalysisPoint.Scenario.Location, Scenario = transmissionLoss.AnalysisPoint.Scenario, TransmissionLoss = transmissionLoss }, message, args); }
+        //void Log(Radial radial, string message, params object[] args) { LogBase(new LogEntry(radial) { Location = radial.TransmissionLoss.AnalysisPoint.Scenario.Location, Scenario = radial.TransmissionLoss.AnalysisPoint.Scenario, Radial = radial }, message, args); }
 #else
         internal void Log(Location location, string message) { LogBase(new LogEntry(location), message); }
         internal void Log(EnvironmentalDataSet dataSet, string message) { LogBase(new LogEntry(dataSet), message); }

@@ -97,7 +97,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 _plugins.PluginDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
                 Globals.AppSettings.PluginManagerService = _plugins;
-
+                _transmissionLoss.Dispatcher = _dispatcher;
                 _transmissionLoss.Start();
                 NAVOImporter.PluginManagerService = _plugins;
                 GeoRect locationsExtent = null;
@@ -139,7 +139,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
                     progress.ProgressMessage = string.Format("Updating database...");
                     progress.CurrentItem++;
-                    Database.SaveChanges();
+                    //Database.SaveChanges();
                     window.Close();
                 });
                 else foreach (var location in Database.Context.Locations.Local)
@@ -163,17 +163,21 @@ namespace ESMEWorkbench.ViewModels.Main
             await TaskEx.Delay(10);
             var scenario = CreateScenario(location, scenarioName, "Created as a sample scenario", timePeriod, windData, soundSpeedData, bathymetryData, sedimentData);
             AddMode(AddSource(AddPlatform(scenario, "Sample Platform", false), "Sample Source", false), "1 KHz mode", false);
-            Database.SaveChanges();
-            await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]).ContinueWith(async t =>
+            //Database.SaveChanges();
+            await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
+            _dispatcher.InvokeInBackgroundIfRequired(() =>
             {
                 progress.ProgressMessage = string.Format("Adding analysis point to scenario \"{0}\"", scenarioName);
                 progress.CurrentItem++;
-                await TaskEx.Delay(10);
                 scenario.ShowAllAnalysisPoints = true;
-                var analysisPoint = new AnalysisPoint { Geo = new Geo(((GeoRect)location.GeoRect).Center), Scenario = scenario };
+                var analysisPoint = new AnalysisPoint
+                {
+                    Geo = new Geo(((GeoRect)location.GeoRect).Center),
+                    Scenario = scenario
+                };
                 scenario.AnalysisPoints.Add(analysisPoint);
                 Database.Add(analysisPoint, (Bathymetry)_cache[scenario.Bathymetry].Result);
-            });            
+            });
         }
 
         public ObservableCollection<Scenario> Scenarios { get; private set; }

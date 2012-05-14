@@ -82,7 +82,7 @@ namespace ESME.Locations
                 case PluginSubtype.Wind:
                 case PluginSubtype.Bathymetry:
                 case PluginSubtype.Sediment:
-                    var rasterFilename = Path.Combine(Location.Database.MasterDatabaseDirectory, Location.StorageDirectory, Path.GetFileNameWithoutExtension(FileName) + ".bmp");
+                    var rasterFilename = Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp");
                     if (File.Exists(rasterFilename))
                     {
                         var rasterLayer = new RasterMapLayer
@@ -92,7 +92,7 @@ namespace ESME.Locations
                             South = (float)Location.GeoRect.South,
                             East = (float)Location.GeoRect.East,
                             West = (float)Location.GeoRect.West,
-                            RasterFilename = Path.Combine(Location.Database.MasterDatabaseDirectory, Location.StorageDirectory, Path.GetFileNameWithoutExtension(FileName) + ".bmp"),
+                            RasterFilename = Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"),
                         };
                         LayerSettings.MapLayerViewModel = rasterLayer;
                     }
@@ -104,7 +104,7 @@ namespace ESME.Locations
 
         public void Delete()
         {
-            var fileName = Path.Combine(Location.Database.MasterDatabaseDirectory, Location.StorageDirectory, FileName);
+            var fileName = Path.Combine(Location.StorageDirectoryPath, FileName);
             var files = Directory.GetFiles(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".*");
             foreach (var file in files) File.Delete(file);
             Location.Database.Context.LayerSettings.Remove(LayerSettings);

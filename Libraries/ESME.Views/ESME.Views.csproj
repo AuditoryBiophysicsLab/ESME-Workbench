@@ -134,10 +134,6 @@
     </Compile>
     <Compile Include="LabelValuePair.cs" />
     <Compile Include="Locations\EditOverlayViewModel.cs" />
-    <Compile Include="Locations\ImportScenarioFileView.xaml.cs">
-      <DependentUpon>ImportScenarioFileView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Locations\ImportScenarioFileViewModel.cs" />
     <Compile Include="Locations\MultipleSelectionsView.xaml.cs">
       <DependentUpon>MultipleSelectionsView.xaml</DependentUpon>
     </Compile>
@@ -245,10 +241,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Environment\SoundSpeedProfileWindowView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Locations\ImportScenarioFileView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

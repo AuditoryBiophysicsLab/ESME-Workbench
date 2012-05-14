@@ -13,6 +13,7 @@ using NUnit.Framework;
 
 namespace ESME.Tests.Locations
 {
+#if false
     public class MasterDatabaseServiceTests
     {
         readonly string _masterDatabaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME.MasterDatabaseService Tests");
@@ -67,6 +68,7 @@ namespace ESME.Tests.Locations
             TestLocation.Dump(database);
         }
     }
+#endif
 
     public class TestProgress : IProgress<float>
     {

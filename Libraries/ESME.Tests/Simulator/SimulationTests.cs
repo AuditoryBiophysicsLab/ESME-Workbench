@@ -12,6 +12,7 @@ using NUnit.Framework;
 
 namespace ESME.Tests.Simulator
 {
+#if false
     public class SimulationTests
     {
         readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME.Simulation Tests\Database");
@@ -96,4 +97,5 @@ namespace ESME.Tests.Simulator
             Console.WriteLine("Test complete");
         }
     }
+#endif
 }

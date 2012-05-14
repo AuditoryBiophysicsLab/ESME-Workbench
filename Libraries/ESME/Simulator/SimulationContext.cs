@@ -59,7 +59,6 @@ namespace ESME.Simulator
                 Name = scenario.Location.Name,
                 Comments = scenario.Location.Comments,
                 GeoRect = new GeoRect(scenario.Location.GeoRect),
-                StorageDirectory = scenario.Location.StorageDirectory,
             };
             newLocation.LayerSettings.IsChecked = true;
             Locations.Add(newLocation);

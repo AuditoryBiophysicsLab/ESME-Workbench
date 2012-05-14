@@ -14,7 +14,7 @@ namespace ESME.Locations
         public LocationContext(DbConnection connection, bool contextOwnsConnection)
             : base(connection, contextOwnsConnection)
         {
-            Configuration.AutoDetectChangesEnabled = false;
+            Configuration.AutoDetectChangesEnabled = true;
             Configuration.ProxyCreationEnabled = true;
             Configuration.LazyLoadingEnabled = true;
             Configuration.ValidateOnSaveEnabled = true;
@@ -27,7 +27,7 @@ namespace ESME.Locations
             {
                 try
                 {
-                    ChangeTracker.DetectChanges();
+                    //ChangeTracker.DetectChanges();
                     return ChangeTracker.Entries().Any(e => e.State != EntityState.Unchanged);
                 }
                 catch (Exception e)

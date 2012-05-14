@@ -71,10 +71,8 @@ namespace ESMEWorkbench.ViewModels.Main
         #endregion
 
         #region SaveCommand
-        public SimpleCommand<object, object> SaveCommand { get { return _save ?? (_save = new SimpleCommand<object, object>(o => IsSaveCommandEnabled, SaveHandler)); } }
+        public SimpleCommand<object, object> SaveCommand { get { return _save ?? (_save = new SimpleCommand<object, object>(o => Database.SaveChanges())); } }
         SimpleCommand<object, object> _save;
-        bool IsSaveCommandEnabled { get { return Scenario != null; } }
-        void SaveHandler(object o) { Database.SaveChanges(); }
         #endregion
 
         #region ViewClosingCommand
