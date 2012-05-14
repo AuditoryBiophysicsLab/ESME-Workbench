@@ -175,7 +175,6 @@ namespace ESMEWorkbench.ViewModels.Main
             });            
         }
 
-        public ObservableCollection<Location> Locations { get; private set; }
         public ObservableCollection<Scenario> Scenarios { get; private set; }
         public IMasterDatabaseService Database { get; private set; }
 
