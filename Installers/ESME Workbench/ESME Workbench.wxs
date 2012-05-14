@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <?define ProductName = "ESME Workbench" ?>
-  <?define ProductVersion = "1.0" ?>
-  <?define ProductFullVersion = "1.0.0.0" ?>
+  <?define ProductVersion = "3.0 beta 1" ?>
+  <?define ProductFullVersion = "2.9.1.0" ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
@@ -12,41 +12,38 @@
   <?define DocRoot="$(var.ESMERoot)\Release Notes"?>
   <?define GISRoot="$(var.ESMERoot)\ESME WorkBench\Sample GIS Data"?>
   <?define BellhopPath="$(var.UtilityRoot)\bellhop"?>
-  <?define MMMBSPath="$(var.UtilityRoot)\3MB"?>
   <?define ExternalsPath="$(var.ESMERoot)\ESME Workbench\External References"?>
   <?define ESMEPath="$(var.ESMERoot)\ESME Workbench\bin\Release"?>
   <?define MergeModulesPath="C:\Program Files (x86)\Common Files\Merge Modules"?>
   <?define TransmissionLossViewerPath="$(var.ESMERoot)\TransmissionLossViewer\bin\Release"?>
-  <?define TransmissionLossCalculatorPath="$(var.ESMERoot)\TransmissionLossCalculator\bin\Release"?>
   <?define dotConnectPath="C:\Program Files (x86)\Devart\dotConnect"?>
   
   <?if $(var.Platform) = x64 ?>
   <?define ProductDisplayName = "$(var.ProductName) 64-bit" ?>
-  <?define ProductId = "ECB254FD-4DD4-444B-8630-544A7DD71C56" ?>
   <?define ProductUpgradeCode = "88D30D04-AD51-4627-98E8-A54D82F8D4FC" ?>
   <?define Win64 = "yes" ?>
   <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
   <?else ?>
   <?define ProductDisplayName = "$(var.ProductName)" ?>
-  <?define ProductId = "62F4B20F-2E08-4EA1-A688-BDE8FE8653DB" ?>
   <?define ProductUpgradeCode = "12E20F8D-0C6D-47C9-98A1-D4920B755766" ?>
   <?define Win64 = "no" ?>
   <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
   <?endif ?>	
-  <Product Id="$(var.ProductId)"
+  <Product Id="*"
+           UpgradeCode="88D30D04-AD51-4627-98E8-A54D82F8D4FC"
            Name="$(var.ProductDisplayName) (v$(var.ProductVersion))"
            Language="1033"
            Version="$(var.ProductFullVersion)"
-           Manufacturer="$(var.Manufacturer)"
-           UpgradeCode="$(var.ProductUpgradeCode)">
+           Manufacturer="$(var.Manufacturer)">
     <Package InstallerVersion="300"
              Compressed="yes"
              InstallScope="perMachine"
              Manufacturer="$(var.ProductAuthor)"
+             Description="$(var.ProductDisplayName) (v$(var.ProductVersion))"
              Platform="$(var.Platform)" />
 
     <Media Id="1"
-           Cabinet="media.cab"
+           Cabinet="ESMEWorkbench.cab"
            EmbedCab="yes" />
 
     <WixVariable Id="WixUIBannerBmp" Value="Bitmaps\bannrbmp.bmp" />
@@ -54,9 +51,9 @@
 
     <MajorUpgrade AllowDowngrades="no"
                   AllowSameVersionUpgrades="yes"
-                  Schedule="afterInstallFinalize"
+                  Schedule="afterInstallInitialize"
                   MigrateFeatures="yes"
-                  DowngradeErrorMessage="A later or current version of [ProductName] is already installed. To install this version, uninstall the installed version first." />
+                  DowngradeErrorMessage="A later version of [ProductName] is already installed. Setup will now exit." />
 
     <!-- Property gets value from registry to set up installation folder for upgrades -->
     <Property Id="APPLICATIONFOLDER" Secure="yes">
@@ -118,9 +115,6 @@
             <File Id="ReadMe"
                   Name="Read Me.pdf"
                   Source="$(var.DocRoot)\Read Me.pdf" />
-            <File Id="TransmissionLossCalculator.exe"
-                  Name="TransmissionLossCalculator.exe"
-                  Source="$(var.TransmissionLossCalculatorPath)\TransmissionLossCalculator.exe" />
             <File Id="TransmissionLossViewer.exe"
                   Name="TransmissionLossViewer.exe"
                   Source="$(var.TransmissionLossViewerPath)\TransmissionLossViewer.exe" />
@@ -142,6 +136,11 @@
                   Name="bellhop.exe"
                   Source="$(var.BellhopPath)\bellhop.exe" />
             <!-- End external executables -->
+
+            <!-- PostSharp -->
+            <File Id="PostSharp.dll"
+                  Name="PostSharp.dll"
+                  Source="$(var.ExternalsPath)\PostSharp.dll" />
 
             <!-- ThinkGeo GIS assemblies -->
             <File Id="MapSuiteCore.dll"
@@ -183,20 +182,6 @@
             <File Id="FileHelpers.dll"
                   Name="FileHelpers.dll"
                   Source="$(var.ExternalsPath)\FileHelpers.dll" />
-
-            <!-- 3MB assemblies -->
-            <File Id="MMMBSLib.dll"
-                  Name="3MBSLib.dll"
-                  Source="$(var.MMMBSPath)\3MBSLib.dll" />
-            <File Id="MMMBWrapperClass.dll"
-                  Name="3MBWrapperClass.dll"
-                  Source="$(var.MMMBSPath)\3MBWrapperClass.dll" />
-            <File Id="MMMB.exe"
-                  Name="3MB.exe"
-                  Source="$(var.MMMBSPath)\3MB.exe" />
-            <File Id="MMMBSpeciesBuilder.exe"
-                  Name="3mbSpeciesBuilder.exe"
-                  Source="$(var.MMMBSPath)\3mbSpeciesBuilder.exe" />
 
             <!-- Miscellaneous Microsoft assemblies -->
             <File Id="Microsoft.Expression.InteractionsDLL"

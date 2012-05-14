@@ -14,6 +14,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <VerboseOutput>True</VerboseOutput>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Bundle.wxs" />
