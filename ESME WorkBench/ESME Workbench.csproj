@@ -131,6 +131,7 @@
     <Compile Include="EventToCommandTrigger.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="ViewModels\Layers\CustomUnitScaleBarAdornmentLayer.cs" />
+    <Compile Include="ViewModels\Main\FirstRunViewModel.cs" />
     <Compile Include="ViewModels\Tree\AnalysisPointsNode.cs" />
     <Compile Include="ViewModels\Tree\BitmapNode.cs" />
     <Compile Include="ViewModels\Tree\EnvironmentNode.cs" />
@@ -190,6 +191,12 @@
     </Compile>
     <Compile Include="Views\EnvironmentSettingsView.xaml.cs">
       <DependentUpon>EnvironmentSettingsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FirstRunProgressView.xaml.cs">
+      <DependentUpon>FirstRunProgressView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FirstRunQuestionView.xaml.cs">
+      <DependentUpon>FirstRunQuestionView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SimulationView.xaml.cs">
       <DependentUpon>SimulationView.xaml</DependentUpon>
@@ -265,6 +272,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\EditableLabelValueListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FirstRunProgressView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FirstRunQuestionView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
