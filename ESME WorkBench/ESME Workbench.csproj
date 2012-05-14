@@ -125,9 +125,6 @@
     <Compile Include="Controls\ProgressMarker.xaml.cs">
       <DependentUpon>ProgressMarker.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\ScatterPlot.xaml.cs">
-      <DependentUpon>ScatterPlot.xaml</DependentUpon>
-    </Compile>
     <Compile Include="EventToCommandTrigger.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="ViewModels\Layers\CustomUnitScaleBarAdornmentLayer.cs" />
@@ -225,10 +222,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ProgressMarker.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\ScatterPlot.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

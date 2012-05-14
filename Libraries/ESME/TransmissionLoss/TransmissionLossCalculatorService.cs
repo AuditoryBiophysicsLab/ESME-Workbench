@@ -170,6 +170,23 @@ namespace ESME.TransmissionLoss
                 var deepestPoint = bathymetry.DeepestPoint;
                 var deepestProfile = soundSpeed[timePeriod].GetDeepestSSP(deepestPoint).Extend(deepestPoint.Data);
 
+                var depthAtAnalysisPoint = bathymetry.Samples.IsFast2DLookupAvailable
+                                               ? bathymetry.Samples.GetNearestPointAsync(radial.TransmissionLoss.AnalysisPoint.Geo).Result
+                                               : bathymetry.Samples.GetNearestPoint(radial.TransmissionLoss.AnalysisPoint.Geo);
+
+                // If there is less than one meter of water at the analysis point, discard this radial
+                if (depthAtAnalysisPoint.Data > -1)
+                {
+                    radial.Delete();
+                    return;
+                }
+
+                var depthCellSize = DepthCellSize;
+                if ((depthAtAnalysisPoint.Data / depthCellSize) < 10)
+                {
+                    depthCellSize = Math.Abs(depthAtAnalysisPoint.Data / 10);
+                }
+
                 var windData = wind[timePeriod].EnvironmentData;
                 var windSample = windData.IsFast2DLookupAvailable
                                      ? windData.GetNearestPointAsync(radial.Segment.Center).Result
@@ -203,7 +220,7 @@ namespace ESME.TransmissionLoss
                                               mode.DepressionElevationAngle,
                                               (float)(bottomProfile.MaxDepth * 1.01),
                                               RangeCellSize,
-                                              DepthCellSize,
+                                              depthCellSize,
                                               true,
                                               false,
                                               1500);

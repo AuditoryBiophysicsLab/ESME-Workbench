@@ -1,10 +1,9 @@
-﻿using System.Windows.Shapes;
-using HRC.Utility;
+﻿using HRC.Utility;
 using HRC.ViewModels;
 
 namespace ESME.Views.Controls
 {
-    class DataPlotViewModel:ViewModelBase
+    class DataPlotViewModel : ViewModelBase
     {
         public double XMin { get; internal set; }
         public double XMax { get; internal set; }
@@ -16,12 +15,5 @@ namespace ESME.Views.Controls
         public ObservableList<double> XAxisMinorTicks { get; set; }
         public ObservableList<double> YAxisMajorTicks { get; set; }
         public ObservableList<double> YAxisMinorTicks { get; set; }
-
-        public DataPlotViewModel()
-        {
-            var view = new DataPlot();
-            //view.PlotSurface.Children.Add(new Path{Data = })
-        }
     }
-        
 }

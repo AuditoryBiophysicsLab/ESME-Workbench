@@ -203,7 +203,8 @@ namespace ESMEWorkbench.ViewModels.Main
             foreach (var radial in analysisPoint.TransmissionLosses.SelectMany(tl => tl.Radials))
             {
                 radial.IsCalculated = false;
-                File.Delete(radial.BasePath + ".shd");
+                var files = Directory.GetFiles(Path.GetDirectoryName(radial.BasePath), Path.GetFileNameWithoutExtension(radial.BasePath) + ".*");
+                foreach (var file in files) File.Delete(file);
                 _transmissionLoss.Add(radial);
             }
         }
@@ -218,7 +219,8 @@ namespace ESMEWorkbench.ViewModels.Main
             foreach (var radial in from point in Scenario.AnalysisPoints from transmissionLoss in point.TransmissionLosses from radial in transmissionLoss.Radials select radial)
             {
                 radial.IsCalculated = false;
-                File.Delete(radial.BasePath + ".shd");
+                var files = Directory.GetFiles(Path.GetDirectoryName(radial.BasePath), Path.GetFileNameWithoutExtension(radial.BasePath) + ".*");
+                foreach (var file in files) File.Delete(file);
                 _transmissionLoss.Add(radial);
             }
         }
@@ -242,7 +244,8 @@ namespace ESMEWorkbench.ViewModels.Main
             foreach (var radial in transmissionLoss.Radials)
             {
                 radial.IsCalculated = false;
-                File.Delete(radial.BasePath + ".shd");
+                var files = Directory.GetFiles(Path.GetDirectoryName(radial.BasePath), Path.GetFileNameWithoutExtension(radial.BasePath) + ".*");
+                foreach (var file in files) File.Delete(file);
                 _transmissionLoss.Add(radial);
             }
         }
@@ -423,7 +426,8 @@ namespace ESMEWorkbench.ViewModels.Main
             foreach (var radial in mode.TransmissionLosses.SelectMany(tl => tl.Radials))
             {
                 radial.IsCalculated = false;
-                File.Delete(radial.BasePath + ".shd");
+                var files = Directory.GetFiles(Path.GetDirectoryName(radial.BasePath), Path.GetFileNameWithoutExtension(radial.BasePath) + ".*");
+                foreach (var file in files) File.Delete(file);
                 _transmissionLoss.Add(radial);
             }
         }

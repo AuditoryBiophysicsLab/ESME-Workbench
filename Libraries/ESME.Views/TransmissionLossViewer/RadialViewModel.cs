@@ -125,9 +125,7 @@ namespace ESME.Views.TransmissionLossViewer
         #endregion
 
         #region public string BottomProfileGeometry { get; set; }
-        string _bottomProfileGeometry = "M 0,0";
-
-        public string BottomProfileGeometry { get { return _bottomProfileGeometry; } private set { _bottomProfileGeometry = value; } }
+        public string BottomProfileGeometry { get; private set; }
 
         void CalculateBottomProfileGeometry()
         {
@@ -139,17 +137,25 @@ namespace ESME.Views.TransmissionLossViewer
             // ReSharper restore CompareOfFloatsByEqualityOperator
 
             var profile = Radial.BottomProfile;
-            var maxDepth = Radial.Depths.Max();
-            var maxRange = Radial.Ranges.Last();
+            var maxDepth = Math.Round(Radial.Depths.Max(), 4);
+            var maxRange =  Math.Round(Radial.Ranges.Last(), 4);
             var sb = new StringBuilder();
             var lineFunc = PlotHelpers.GetGlyphRenderFunc(GlyphStyle.Line);
-            foreach (var point in profile)
+            try
             {
-                var y = point.Depth * (actualControlHeight / maxDepth);
-                var x = point.Range * 1000 * (actualControlWidth / maxRange);
-                sb.Append(sb.Length == 0 ? string.Format("M 0,{0} ", y) : lineFunc(x, y, 1));
+                foreach (var point in profile)
+                {
+                    var y = point.Depth * (actualControlHeight / maxDepth);
+                    var x = point.Range * 1000 * (actualControlWidth / maxRange);
+                    sb.Append(sb.Length == 0 ? string.Format("M 0,{0} ", y) : lineFunc(x, y, 1));
+                }
+                BottomProfileGeometry = sb.ToString();
             }
-            BottomProfileGeometry = sb.ToString();
+            catch (Exception e)
+            {
+                Debug.WriteLine("{0}: Caught exception in CalculateBottomProfileGeometry: {1}", DateTime.Now, e.Message);
+                BottomProfileGeometry = "M 0,0";
+            }
             //todo ; later try to subtract half a depth cell from each depth (off-by-1/2 error on display)
             //todo: Dave changed the bottom profile format on 13 Aug 2011.  New format is a list of range/depth pairs where depth changes by more than 1cm
         }
@@ -185,6 +191,7 @@ namespace ESME.Views.TransmissionLossViewer
         [ImportingConstructor]
         public RadialViewModel(RadialView view)
         {
+            BottomProfileGeometry = "M 0,0";
             _view = view;
             _dispatcher = Dispatcher.CurrentDispatcher;
             ColorMapViewModel = ColorMapViewModel.Default;
