@@ -75,6 +75,7 @@ namespace ESMEWorkbench.ViewModels.Map
             _wpfMap.AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
             _wpfMap.AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
             _wpfMap.CurrentExtent = new RectangleShape(-180, 90, 180, -90);
+            
             var localizedName = ((MainView)_viewAwareStatus.View).FontFamily.FamilyNames[XmlLanguage.GetLanguage(CultureInfo.CurrentUICulture.Name)];
 
             var customUnitScaleBarAdornmentLayer = new CustomUnitScaleBarAdornmentLayer
@@ -88,6 +89,8 @@ namespace ESMEWorkbench.ViewModels.Map
                                                    };
             _wpfMap.AdornmentOverlay.Layers.Add("Scale", customUnitScaleBarAdornmentLayer);
             _wpfMap.AdornmentOverlay.Layers["Scale"].IsVisible = Settings.Default.ShowScaleBar;
+            _wpfMap.ExtentOverlay.DoubleLeftClickMode = MapDoubleLeftClickMode.Disabled;
+            _wpfMap.ExtentOverlay.DoubleRightClickMode = MapDoubleRightClickMode.Disabled;
 
             _wpfMap.MapTools.PanZoomBar.Visibility = Settings.Default.ShowPanZoom ? Visibility.Visible : Visibility.Hidden;
             _mainViewModel.LayerTreeViewModel.MapViewModel = this;
