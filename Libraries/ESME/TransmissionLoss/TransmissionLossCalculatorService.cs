@@ -182,7 +182,7 @@ namespace ESME.TransmissionLoss
                 }
 
                 var depthCellSize = DepthCellSize;
-                if ((depthAtAnalysisPoint.Data / depthCellSize) < 10)
+                if (Math.Abs(depthAtAnalysisPoint.Data / depthCellSize) < 10)
                 {
                     depthCellSize = Math.Abs(depthAtAnalysisPoint.Data / 10);
                 }
