@@ -98,7 +98,8 @@
                 </HierarchicalDataTemplate>
                 <DataTemplate DataType="{x:Type Locations:EnvironmentalDataSet}">
                     <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
-                                           LayerName="{Binding Resolution, StringFormat=Resolution: {0}min}"
+                                           LayerName="{Binding Resolution,
+                                                               StringFormat={}{0}min}"
                                            LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
                                            LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
                         <Controls:LayerControl.ContextMenu>
@@ -126,11 +127,13 @@
                                         <Image Source="../Images/SmallIcons/application_form_delete.png" />
                                     </MenuItem.Icon>
                                 </MenuItem>
+                                <!-- 
                                 <MenuItem Command="{Binding ScenarioPropertiesCommand}" Header="Scenario properties...">
                                     <MenuItem.Icon>
                                         <Image Source="../Images/SmallIcons/application_form_edit.png" />
                                     </MenuItem.Icon>
                                 </MenuItem>
+                                -->
                             </ContextMenu>
                         </TextBlock.ContextMenu>
                     </TextBlock>

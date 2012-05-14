@@ -101,6 +101,7 @@ namespace ESME.Locations
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
         public void Delete()
         {
+            RemoveMapLayers();
             foreach (var scenario in Scenarios.ToList()) scenario.Delete();
             foreach (var dataSet in EnvironmentalDataSets.ToList()) dataSet.Delete();
             Database.Context.Locations.Remove(this);

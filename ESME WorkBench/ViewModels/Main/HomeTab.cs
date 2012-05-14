@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,7 +29,8 @@ namespace ESMEWorkbench.ViewModels.Main
         [Initialize] public LayerTreeViewModel LayerTreeViewModel { get; set; }
         public MapViewModel MapViewModel { get; set; }
 
-        [Affects("IsScenarioLoaded", "CanPlaceAnalysisPoint")] public Scenario Scenario
+        [Affects("IsScenarioLoaded", "CanPlaceAnalysisPoint")] 
+        public Scenario Scenario
         {
             get { return _scenario; }
             set
@@ -39,7 +39,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 {
                     if (Database.Context.IsModified)
                     {
-                        var result = _messageBox.ShowYesNoCancel("The experiment has been modified.  Would you like to save your changes before switching experiments?", MessageBoxImage.Question);
+                        var result = _messageBox.ShowYesNoCancel(string.Format("The database has been modified.  Would you like to save your changes before {0}?", value == null ? "closing this experiment": "switching experiments"), MessageBoxImage.Question);
                         switch (result)
                         {
                             case MessageBoxResult.Yes:
@@ -49,10 +49,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                 return;
                         }
                     }
-
-                    // todo: Remove any existing map layers here
                     _scenario.RemoveMapLayers();
-                    _scenario.Location.RemoveMapLayers();
                 }
                 _scenario = value;
                 LayerTreeViewModel.Scenario = _scenario;
@@ -64,7 +61,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 _cache[_scenario.Sediment].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() => _scenario.Sediment.CreateMapLayers()));
 
                 _scenario.CreateMapLayers();
-                _scenario.Location.CreateMapLayers();
+                _scenario.Location.LayerSettings.IsChecked = true;
                 MediatorMessage.Send(MediatorMessage.SetMapExtent, (GeoRect)_scenario.Location.GeoRect);
                 MediatorMessage.Send(MediatorMessage.RefreshMap, true);
             }
@@ -88,11 +85,26 @@ namespace ESMEWorkbench.ViewModels.Main
 
         public string MainWindowTitle { get; set; }
 
+        [MediatorMessageSink(MediatorMessage.LoadScenario), UsedImplicitly]
+        void LoadScenario(Scenario scenario) { Scenario = scenario; }
+
+        [MediatorMessageSink(MediatorMessage.DeleteAllScenarios), UsedImplicitly]
+        void DeleteAllScenarios(Location location)
+        {
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete all scenarios in location \"{0}\"?", location.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            foreach (var scenario in location.Scenarios.ToList()) scenario.Delete();
+        }
+
+        [MediatorMessageSink(MediatorMessage.DeleteScenario), UsedImplicitly]
+        void DeleteScenario(Scenario scenario)
+        {
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to the scenario \"{0}\"?", scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            scenario.Delete();
+        }
+
         #region CreateScenarioCommand
-        SimpleCommand<object, EventToCommandArgs> _createScenario;
-
         public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand { get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => IsCreateScenarioCommandEnabled, o => CreateScenarioHandler())); } }
-
+        SimpleCommand<object, EventToCommandArgs> _createScenario;
         bool IsCreateScenarioCommandEnabled { get { return Database.Context.Locations.Local.Count > 0; } }
 
         Location _lastCreateScenarioLocation;
@@ -104,7 +116,8 @@ namespace ESMEWorkbench.ViewModels.Main
             var result = _visualizer.ShowDialog("CreateScenarioView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
             if (location == null) _lastCreateScenarioLocation = vm.Location;
-            CreateScenario(vm.Location, vm.ScenarioName, vm.Comments, vm.TimePeriod, vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet);
+            var scenario = CreateScenario(vm.Location, vm.ScenarioName, vm.Comments, vm.TimePeriod, vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet);
+            Scenario = scenario;
 #if false
             var wind = Database.LoadOrCreateEnvironmentalDataSet(vm.Location,
                                                                  vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet.Resolution,
@@ -154,7 +167,6 @@ namespace ESMEWorkbench.ViewModels.Main
             };
             location.Scenarios.Add(scenario);
             Database.Add(scenario);
-            Database.SaveChanges();
             return scenario;
         }
         #endregion
@@ -260,7 +272,6 @@ namespace ESMEWorkbench.ViewModels.Main
                 IsRandom = false,
                 Launches = false,
                 TrackType = TrackType.Stationary,
-                LayerSettings = new LayerSettings(),
                 IsNew = isNew,
             };
             scenario.Platforms.Add(platform);

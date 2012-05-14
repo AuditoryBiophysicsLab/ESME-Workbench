@@ -145,6 +145,7 @@
     <Compile Include="ViewModels\TransmissionLoss\AcousticSimulatorOptionsViewModel.cs" />
     <Compile Include="ViewModels\Tree\LocationNode.cs" />
     <Compile Include="ViewModels\Tree\LocationEnvironmentNode.cs" />
+    <Compile Include="ViewModels\Tree\LocationScenarioNode.cs" />
     <Compile Include="ViewModels\Tree\LocationsTreeViewModel.cs" />
     <Compile Include="ViewModels\Tree\PerimetersNode.cs" />
     <Compile Include="ViewModels\Tree\ScenarioNode.cs" />

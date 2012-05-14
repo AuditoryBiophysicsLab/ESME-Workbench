@@ -106,7 +106,11 @@ namespace ESME.Scenarios
             foreach (var transmissionLoss in TransmissionLosses.ToList()) transmissionLoss.CreateMapLayers();
         }
 
-        public void RemoveMapLayers() { LayerSettings.PropertyChanged -= LayerSettingsChanged; }
+        public void RemoveMapLayers()
+        {
+            foreach (var transmissionLoss in TransmissionLosses.ToList()) transmissionLoss.RemoveMapLayers();
+            LayerSettings.PropertyChanged -= LayerSettingsChanged;
+        }
 
         void LayerSettingsChanged(object sender, PropertyChangedEventArgs args)
         {
@@ -404,7 +408,7 @@ namespace ESME.Scenarios
                 writer.Write(_meanTransmissionLossValues.Length);
                 foreach (var tl in _meanTransmissionLossValues) writer.Write(tl);
             }
-            MediatorMessage.Send(MediatorMessage.TransmissionLossLayerChanged, TransmissionLoss);
+            //MediatorMessage.Send(MediatorMessage.TransmissionLossLayerChanged, TransmissionLoss);
         }
 
         void ReadAxisFile()

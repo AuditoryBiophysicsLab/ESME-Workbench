@@ -130,7 +130,6 @@ namespace ESME.TransmissionLoss
             var radial = item.ProgressTarget;
             try
             {
-                if (radial.IsDeleted) return;
                 //Debug.WriteLine("{0}: Starting calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}",
                 //                DateTime.Now,
                 //                radial.Bearing,
@@ -251,19 +250,20 @@ namespace ESME.TransmissionLoss
                         bellhopProcess.Kill();
                         return;
                     }
-                    Thread.Sleep(100);
+                    Thread.Sleep(20);
                 }
                 radial.CalculationCompleted = DateTime.Now;
-                if (radial.IsDeleted) return;
-                try
-                {
-                    radial.ExtractAxisData();
-                }
-                catch (Exception e)
-                {
-                    if (radial.IsDeleted) return;
-                    Debug.WriteLine(string.Format("{0}: Caught (and discarded) exception in Transmission Loss Calculator: {1}", DateTime.Now, e.Message));
-                }
+                radial.IsCalculated = true;
+                //if (radial.IsDeleted) return;
+                //try
+                //{
+                //    radial.ExtractAxisData();
+                //}
+                //catch (Exception e)
+                //{
+                //    if (radial.IsDeleted) return;
+                //    Debug.WriteLine(string.Format("{0}: Caught (and discarded) exception in Transmission Loss Calculator: {1}", DateTime.Now, e.Message));
+                //}
                 //Debug.WriteLine("{0}: Finished calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}",
                 //                DateTime.Now,
                 //                radial.Bearing,

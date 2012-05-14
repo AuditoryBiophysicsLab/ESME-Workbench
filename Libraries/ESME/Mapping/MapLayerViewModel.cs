@@ -33,9 +33,29 @@ namespace ESME.Mapping
             LineStyle = CreateLineStyle(LineColor, LineWidth);
         }
 
-        public string Name { get; set; }
+        string _name;
 
-        public LayerOverlay LayerOverlay { get; set; }
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                _name = value;
+                if (LayerOverlay != null) LayerOverlay.Name = _name;
+            }
+        }
+
+        LayerOverlay _layerOverlay;
+
+        public LayerOverlay LayerOverlay
+        {
+            get { return _layerOverlay; }
+            set
+            {
+                _layerOverlay = value;
+                if (_layerOverlay != null && Name != null) _layerOverlay.Name = Name;
+            }
+        }
 
         #region AreaStyle AreaStyle { get; set; }
         AreaStyle _areaStyle;

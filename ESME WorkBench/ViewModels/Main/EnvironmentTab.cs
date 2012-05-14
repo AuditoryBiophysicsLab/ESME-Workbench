@@ -16,7 +16,8 @@ namespace ESMEWorkbench.ViewModels.Main
         void DeleteLocation(Location location)
         {
             if (_messageBox.ShowYesNo(string.Format("Deleting a location also deletes all scenarios defined in that location.\n\nAre you sure you want to delete the location \"{0}\"?", location.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-            Database.Context.Locations.Remove(location);
+            if (Scenario != null && Scenario.Location.Guid == location.Guid) Scenario = null;
+            location.Delete();
         }
 
         #region CreateLocationCommand

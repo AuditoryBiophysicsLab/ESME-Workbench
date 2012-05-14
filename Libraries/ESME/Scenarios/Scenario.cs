@@ -220,15 +220,12 @@ namespace ESME.Scenarios
 
         public void RemoveMapLayers()
         {
-            Wind.RemoveMapLayers();
-            SoundSpeed.RemoveMapLayers();
-            Bathymetry.RemoveMapLayers();
-            Sediment.RemoveMapLayers();
+            if (Wind != null) Wind.RemoveMapLayers();
+            if (Wind != null) SoundSpeed.RemoveMapLayers();
+            if (Wind != null) Bathymetry.RemoveMapLayers();
+            if (Wind != null) Sediment.RemoveMapLayers();
             if (Platforms != null) foreach (var platform in Platforms) platform.RemoveMapLayers();
-            var transmissionLosses = (from tl in Database.Context.TransmissionLosses
-                                      where tl.AnalysisPoint.Scenario.Guid == Guid
-                                      select tl).ToList();
-            foreach (var transmissionLoss in transmissionLosses) transmissionLoss.RemoveMapLayers();
+            foreach (var analysisPoint in AnalysisPoints) analysisPoint.RemoveMapLayers();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -246,6 +243,7 @@ namespace ESME.Scenarios
         #endregion
         public void Delete()
         {
+            RemoveMapLayers();
             foreach (var platform in Platforms.ToList()) platform.Delete();
             foreach (var analysisPoint in AnalysisPoints.ToList()) analysisPoint.Delete();
             foreach (var species in ScenarioSpecies.ToList()) species.Delete();

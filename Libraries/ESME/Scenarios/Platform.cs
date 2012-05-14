@@ -74,7 +74,8 @@ namespace ESME.Scenarios
         {
             RemoveMapLayers();
             foreach (var source in Sources.ToList()) source.Delete();
-            Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
+            if (LayerSettings != null) Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
+            LayerSettings = null;
             Scenario.Platforms.Remove(this);
             Scenario.Database.Context.Platforms.Remove(this);
         }
@@ -120,7 +121,10 @@ namespace ESME.Scenarios
             if (Perimeter != null) Perimeter.CreateMapLayers();
         }
 
-        public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
+        public void RemoveMapLayers()
+        {
+            LayerSettings.MapLayerViewModel = null;
+        }
         #region Layer Move commands
         #region MoveLayerToFrontCommand
         public SimpleCommand<object, EventToCommandArgs> MoveLayerToFrontCommand { get { return _moveLayerToFront ?? (_moveLayerToFront = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerToFront(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }

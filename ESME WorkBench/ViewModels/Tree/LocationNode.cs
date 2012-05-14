@@ -1,6 +1,4 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Windows.Data;
 using ESME;
 using ESME.Locations;
 using HRC.Navigation;
@@ -32,30 +30,6 @@ namespace ESMEWorkbench.ViewModels.Tree
         #region DeleteLocationCommand
         public SimpleCommand<object, EventToCommandArgs> DeleteLocationCommand { get { return _deleteLocation ?? (_deleteLocation = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteLocation, Location))); } }
         SimpleCommand<object, EventToCommandArgs> _deleteLocation;
-        #endregion
-    }
-
-    public class LocationScenarioNode : ViewModelBase
-    {
-        public LocationScenarioNode(Location location)
-        {
-            Location = location;
-            ScenariosViewSource = new CollectionViewSource { Source = location.Scenarios };
-            ScenariosViewSource.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Ascending));
-            ScenariosViewSource.View.Refresh();
-        }
-
-        public Location Location { get; set; }
-        public CollectionViewSource ScenariosViewSource { get; private set; }
-
-        #region CreateScenarioCommand
-        public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand { get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.CreateScenario, Location))); } }
-        SimpleCommand<object, EventToCommandArgs> _createScenario;
-        #endregion
-
-        #region DeleteAllScenariosCommand
-        public SimpleCommand<object, EventToCommandArgs> DeleteAllScenariosCommand { get { return _deleteAllScenarios ?? (_deleteAllScenarios = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteAllScenarios, Location))); } }
-        SimpleCommand<object, EventToCommandArgs> _deleteAllScenarios;
         #endregion
     }
 }

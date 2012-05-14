@@ -143,10 +143,10 @@ namespace ESMEWorkbench.ViewModels.Map
 
         #region Add/Remove/Refresh map layer mediator message sinks
         [MediatorMessageSink(MediatorMessage.AddMapLayer)]
-        public void Add(MapLayerViewModel layer) { _wpfMap.Overlays.Add(layer.LayerOverlay); }
+        public void Add(MapLayerViewModel layer) { if (!_wpfMap.Overlays.Contains(layer.Name)) _wpfMap.Overlays.Add(layer.Name, layer.LayerOverlay); }
 
         [MediatorMessageSink(MediatorMessage.RemoveMapLayer)]
-        public void Remove(MapLayerViewModel layer) { _wpfMap.Overlays.Remove(layer.LayerOverlay); }
+        public void Remove(MapLayerViewModel layer) { _wpfMap.Overlays.Remove(layer.Name); }
 
         [MediatorMessageSink(MediatorMessage.ShowMapLayer), UsedImplicitly]
         void ShowMapLayer(MapLayerViewModel layer) { SetIsVisible(layer, true); }
@@ -156,14 +156,16 @@ namespace ESMEWorkbench.ViewModels.Map
 
         public void SetIsVisible(MapLayerViewModel layer, bool isVisible)
         {
-            layer.LayerOverlay.IsVisible = isVisible;
+            var layerOverlay = _wpfMap.Overlays[layer.Name];
+            layerOverlay.IsVisible = isVisible;
+            //layer.LayerOverlay.IsVisible = isVisible;
             try
             {
-                _wpfMap.Refresh(layer.LayerOverlay);
+                _wpfMap.Refresh(layerOverlay);
             }
             catch (Exception e)
             {
-                _wpfMap.Overlays.Remove(layer.LayerOverlay);
+                _wpfMap.Overlays.Remove(layerOverlay);
                 _wpfMap.Refresh();
             }
         }
@@ -172,26 +174,28 @@ namespace ESMEWorkbench.ViewModels.Map
         public void Refresh(MapLayerViewModel layer)
         {
             if (layer == null || layer.LayerOverlay == null || layer.LayerOverlay.Layers == null || layer.LayerOverlay.Layers.Count <= 0) return;
+            var layerOverlay = (LayerOverlay)_wpfMap.Overlays[layer.Name];
+            if (layerOverlay == null || layerOverlay.Layers == null || layerOverlay.Layers.Count <= 0) return;
             if (layer.GetType() == typeof(ShapefileMapLayer))
-                ((ShapeFileFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = layer.AreaStyle;
+                ((ShapeFileFeatureLayer)layerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = layer.AreaStyle;
             else if (layer.GetType() == typeof(OverlayShapeMapLayer))
             {
                 if (layer.CustomLineStyle != null)
                 {
-                    ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.CustomStyles.Clear();
-                    ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.CustomStyles.Add(layer.CustomLineStyle);
+                    ((InMemoryFeatureLayer)layerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.CustomStyles.Clear();
+                    ((InMemoryFeatureLayer)layerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.CustomStyles.Add(layer.CustomLineStyle);
                 }
                 else
                 {
                     if (layer.LineStyle != null)
                     {
-                        ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultLineStyle = layer.LineStyle;
-                        ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = layer.AreaStyle;
+                        ((InMemoryFeatureLayer)layerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultLineStyle = layer.LineStyle;
+                        ((InMemoryFeatureLayer)layerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = layer.AreaStyle;
                     }
-                    if (layer.PointStyle != null) ((InMemoryFeatureLayer)layer.LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultPointStyle = layer.PointStyle;
+                    if (layer.PointStyle != null) ((InMemoryFeatureLayer)layerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultPointStyle = layer.PointStyle;
                 }
             }
-            _wpfMap.Refresh(layer.LayerOverlay);
+            _wpfMap.Refresh(layerOverlay);
         }
         #endregion
 
@@ -200,28 +204,28 @@ namespace ESMEWorkbench.ViewModels.Map
         void MoveLayerToFront(MapLayerViewModel layer)
         {
             Debug.WriteLine(string.Format("MediatorMessage.MoveLayerToFront: {0}", layer.LayerOverlay.Name));
-            _wpfMap.Overlays.MoveToTop(layer.LayerOverlay);
+            _wpfMap.Overlays.MoveToTop(layer.Name);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerForward), UsedImplicitly]
         void MoveLayerForward(MapLayerViewModel layer)
         {
             Debug.WriteLine(string.Format("MediatorMessage.MoveLayerForward: {0}", layer.LayerOverlay.Name));
-            _wpfMap.Overlays.MoveUp(layer.LayerOverlay);
+            _wpfMap.Overlays.MoveUp(layer.Name);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerBackward), UsedImplicitly]
         void MoveLayerBackward(MapLayerViewModel layer)
         {
             Debug.WriteLine(string.Format("MediatorMessage.MoveLayerBackward: {0}", layer.LayerOverlay.Name));
-            _wpfMap.Overlays.MoveDown(layer.LayerOverlay);
+            _wpfMap.Overlays.MoveDown(layer.Name);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerToBack), UsedImplicitly]
         void MoveLayerToBack(MapLayerViewModel layer)
         {
             Debug.WriteLine(string.Format("MediatorMessage.MoveLayerToBack: {0}", layer.LayerOverlay.Name));
-            _wpfMap.Overlays.MoveToBottom(layer.LayerOverlay);
+            _wpfMap.Overlays.MoveToBottom(layer.Name);
         }
         #endregion
 
