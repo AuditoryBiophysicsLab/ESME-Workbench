@@ -304,7 +304,7 @@ namespace ESME.Scenarios
             get
             {
                 if (Filename == null || Filename.EndsWith(".shd")) Filename = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
-                return TransmissionLoss == null ? null : Path.Combine(TransmissionLoss.AnalysisPoint.Scenario.StorageDirectoryPath, Filename);
+                return TransmissionLoss == null || TransmissionLoss.AnalysisPoint == null ? null : Path.Combine(TransmissionLoss.AnalysisPoint.Scenario.StorageDirectoryPath, Filename);
             }
         }
 
