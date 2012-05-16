@@ -88,6 +88,7 @@ namespace ESMEWorkbench.ViewModels.Main
             Cursor = Cursors.Arrow;
             _transmissionLoss.RangeCellSize = Globals.AppSettings.BellhopSettings.RangeCellSize;
             _transmissionLoss.DepthCellSize = Globals.AppSettings.BellhopSettings.DepthCellSize;
+            _transmissionLoss.RayCount = Globals.AppSettings.BellhopSettings.RayCount;
             _cache.PropertyChanged += (s, e) => { if (e.PropertyName == "BusyCount") CacheActivity = _cache.BusyCount > 0 ? string.Format("Cache: {0} importing", _cache.BusyCount) : "Cache: idle"; };
             _transmissionLoss.WorkQueue.PropertyChanged +=
                 (s, e) => { if (e.PropertyName == "Count") TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0 ? string.Format("TL: {0} queued", _transmissionLoss.WorkQueue.Keys.Count) : "TL: idle"; };

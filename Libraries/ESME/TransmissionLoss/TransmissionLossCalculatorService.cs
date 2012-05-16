@@ -49,6 +49,7 @@ namespace ESME.TransmissionLoss
         [Import] EnvironmentalCacheService _cacheService;
         [Initialize(float.NaN)] public float RangeCellSize { get; set; }
         [Initialize(float.NaN)] public float DepthCellSize { get; set; }
+        [Initialize(-1)] public int RayCount { get; set; }
         public Dispatcher Dispatcher { get; set; }
         public ObservableConcurrentDictionary<Guid, PercentProgress<Radial>> WorkQueue { get; private set; }
         readonly ActionBlock<PercentProgress<Radial>> _calculator;
@@ -223,7 +224,7 @@ namespace ESME.TransmissionLoss
                                               depthCellSize,
                                               true,
                                               false,
-                                              1500);
+                                              RayCount);
                 var bellhopProcess = new TransmissionLossProcess
                 {
                     StartInfo = new ProcessStartInfo(Path.Combine(AssemblyLocation, "bellhop.exe"), radial.Filename)

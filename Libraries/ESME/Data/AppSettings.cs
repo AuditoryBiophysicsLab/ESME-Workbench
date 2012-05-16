@@ -219,6 +219,16 @@ namespace ESME.Data
                                                                             return RangeCheck(ruleTarget,0,float.MaxValue,false);
                                                                         },
                                                  },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "RayCount",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((BellhopSettings) o).RayCount;
+                                                                            return RangeCheck(ruleTarget,0,int.MaxValue,false);
+                                                                        },
+                                                 },
 
                                          });
         }
@@ -226,10 +236,13 @@ namespace ESME.Data
         [Initialize(2000f)]
         public float MaximumDepth { get; set; }
 
-        [Initialize(25f)]
+        [Initialize(10f)]
         public float RangeCellSize { get; set; }
 
-        [Initialize(25f)]
+        [Initialize(10f)]
         public float DepthCellSize { get; set; }
+
+        [Initialize(3000)]
+        public int RayCount { get; set; }
     }
 }

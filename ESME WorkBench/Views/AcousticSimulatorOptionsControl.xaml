@@ -52,8 +52,13 @@
                     <TextBlock Text="Depth cell size (m)" />
                     <Controls:ValidatingTextBox BoundField="BellhopSettings.DepthCellSize" />
                 </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Number of rays" />
+                    <Controls:ValidatingTextBox BoundField="BellhopSettings.RayCount" />
+                </StackPanel>
             </StackPanel>
         </TabItem>
+        <!-- 
         <TabItem Header="RAM">
             <StackPanel Margin="5 5 5 10" Orientation="Vertical">
                 <GroupBox Margin="5 5 5 0" DockPanel.Dock="Top" Header="Options" Padding="5">
@@ -91,6 +96,7 @@
                 </GroupBox>
             </StackPanel>
         </TabItem>
+        -->
         <!--
             <TabItem Header="CASS"
             Visibility="{Binding ClassifiedVisibility}">
