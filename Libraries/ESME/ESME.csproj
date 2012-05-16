@@ -141,9 +141,6 @@
     <Compile Include="..\..\ESME WorkBench\Properties\AssemblyMetadata.cs">
       <Link>Properties\AssemblyMetadata.cs</Link>
     </Compile>
-    <Compile Include="..\..\ESME WorkBench\Properties\AssemblyVersionInfo.cs">
-      <Link>Properties\AssemblyVersionInfo.cs</Link>
-    </Compile>
     <Compile Include="Behaviors\PlatformBehavior.cs" />
     <Compile Include="Behaviors\TrackType.cs" />
     <Compile Include="BuildInformation.cs" />
@@ -168,6 +165,7 @@
     <Compile Include="Locations\LocationContext.cs" />
     <Compile Include="Locations\LogEntry.cs" />
     <Compile Include="Mapping\CustomEditOverlay.cs" />
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="Scenarios\AnalysisPoint.cs" />
     <Compile Include="Scenarios\AnimatLocation.cs" />
     <Compile Include="Scenarios\LayerSettings.cs" />

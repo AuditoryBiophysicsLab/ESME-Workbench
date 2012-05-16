@@ -61,14 +61,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\ESME WorkBench\Properties\AssemblyVersionInfo.cs">
-      <Link>Properties\AssemblyVersionInfo.cs</Link>
-    </Compile>
     <Compile Include="Hresult.cs" />
     <Compile Include="InstallationViewModel.cs" />
     <Compile Include="Model.cs" />
     <Compile Include="NewsItem.cs" />
     <Compile Include="ProgressViewModel.cs" />
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="PropertyNotifyBase.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="RootView.xaml.cs">

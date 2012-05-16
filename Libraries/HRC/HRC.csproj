@@ -98,9 +98,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\ESME WorkBench\Properties\AssemblyVersionInfo.cs">
-      <Link>Properties\AssemblyVersionInfo.cs</Link>
-    </Compile>
     <Compile Include="Annotations.cs" />
     <Compile Include="Aspects\InitializeAttribute.cs" />
     <Compile Include="Aspects\NotifyPropertyChangedAttribute.cs" />
@@ -182,6 +179,7 @@
     <Compile Include="NetCDF\NcVar.cs" />
     <Compile Include="NetCDF\NetCDFReaders.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="Services\HRCColorPickerService.cs" />
     <Compile Include="Services\HRCOpenFileService.cs" />
     <Compile Include="Services\HRCSaveFileService.cs" />

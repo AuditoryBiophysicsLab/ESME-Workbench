@@ -80,9 +80,6 @@
     <Compile Include="..\..\ESME WorkBench\Properties\AssemblyMetadata.cs">
       <Link>Properties\AssemblyMetadata.cs</Link>
     </Compile>
-    <Compile Include="..\..\ESME WorkBench\Properties\AssemblyVersionInfo.cs">
-      <Link>Properties\AssemblyVersionInfo.cs</Link>
-    </Compile>
     <Compile Include="BuildInformation.cs" />
     <Compile Include="ColorPicker\BindOnEnterTextBox.cs" />
     <Compile Include="ColorPicker\ColorComboBox.cs" />
@@ -158,6 +155,7 @@
     <Compile Include="Misc\BasicPropertiesView.xaml.cs">
       <DependentUpon>BasicPropertiesView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="Scenarios\TreeViewItemPropertiesView.xaml.cs">
       <DependentUpon>TreeViewItemPropertiesView.xaml</DependentUpon>
     </Compile>
