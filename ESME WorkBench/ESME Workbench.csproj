@@ -128,7 +128,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Properties\AssemblyMetadata.cs" />
-    <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="BuildInformation.cs" />
     <Compile Include="Controls\EditableTextBlock.xaml.cs">
       <DependentUpon>EditableTextBlock.xaml</DependentUpon>
@@ -141,6 +140,7 @@
     </Compile>
     <Compile Include="EventToCommandTrigger.cs" />
     <Compile Include="Exceptions.cs" />
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="ViewModels\Layers\CustomUnitScaleBarAdornmentLayer.cs" />
     <Compile Include="ViewModels\Main\FirstRunViewModel.cs" />
     <Compile Include="ViewModels\Tree\AnalysisPointsNode.cs" />
