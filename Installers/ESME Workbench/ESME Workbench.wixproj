@@ -44,6 +44,9 @@
 copy "$(TargetPath)" "$(ProjectDir)msi\$(TargetName)($(PlatformName))$(TargetExt)" /Y /V
 copy "$(ProjectDir)msi\$(TargetName)($(PlatformName))$(TargetExt)" "\\corti.bu.edu\hrc-backup\ESME Workbench\$(TargetName)($(PlatformName))$(TargetExt)" /Y /V</PostBuildEvent>
   </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -output "$(ProjectDir) "</PreBuildEvent>
+  </PropertyGroup>
   <!--
 To modify your build process, add your task inside one of the targets below and uncomment it.
 Other similar extension points exist, see Wix.targets.

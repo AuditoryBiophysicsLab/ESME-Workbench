@@ -235,7 +235,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\Plugins\Environmental Data Sources\InstallableNAVO\InstallableNAVOPlugin.csproj">
       <Project>{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}</Project>
-      <Name>InstallableNAVOPlugin</Name>
+      <Name>InstallableNAVOPlugin %28Plugins\InstallableNAVOPlugin%29</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Plugins\Environmental Data Sources\NAVODatabaseAdapter\NAVODatabaseAdapter.csproj">
       <Project>{409DC754-EEBD-4E49-8DDF-3960F2FFCE73}</Project>

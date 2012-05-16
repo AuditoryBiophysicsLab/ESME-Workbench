@@ -143,8 +143,7 @@
     <PostBuildEvent>copy /y $(TargetFileName) ..\..\..\TestManagedBootstrapper</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
+    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -assemblyversion "$(ProjectDir)Properties\AssemblyVersionInfo.cs" -output "$(ProjectDir) "</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

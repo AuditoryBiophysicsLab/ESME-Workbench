@@ -1,7 +1,6 @@
 ﻿using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -15,12 +14,16 @@ namespace ProjectBuildInfo
     {
         static int Main(string[] args)
         {
+            Console.Write("ProjectBuildInfo command line: ");
+            foreach (var arg in args) Console.Write(arg + " ");
+            Console.WriteLine();
             string namespaceName = null;
             string className = null;
             string outputFilename = null;
+            string versionFile = null;
+            string versionNumber = null;
             string assemblyVersionFile = null;
             string wixVersionFile = null;
-            string assemblyVersionString = null;
             for (var i = 0; i < args.Length; i++)
             {
                 switch (args[i])
@@ -33,6 +36,9 @@ namespace ProjectBuildInfo
                         break;
                     case "-output":
                         outputFilename = args[++i];
+                        break;
+                    case "-version":
+                        versionFile = args[++i].Trim();
                         break;
                     case "-assemblyversion":
                         assemblyVersionFile = args[++i].Trim();
@@ -55,67 +61,48 @@ namespace ProjectBuildInfo
                     client.GetInfo(new SvnUriTarget(client.GetUriFromWorkingCopy(Path.GetDirectoryName(outputFilename))), out svnInfo);
                     svnVersionString = svnInfo.Revision.ToString(CultureInfo.InvariantCulture);
                 }
-
-                if (assemblyVersionFile != null)
+                if (versionFile != null)
                 {
-                    var inputLines = File.ReadAllLines(assemblyVersionFile);
-                    var outputLines = new List<string>();
+                    var inputLines = File.ReadAllLines(versionFile);
                     foreach (var inputLine in inputLines)
                     {
-                        if (inputLine.Contains("AssemblyVersion") || inputLine.Contains("AssemblyFileVersion"))
+                        var curLine = inputLine.Trim();
+                        if (string.IsNullOrEmpty(curLine) || curLine.StartsWith("//")) continue;
+                        var versionFields = curLine.Split('.');
+                        switch (versionFields.Length)
                         {
-                            var lineFields = inputLine.Split('"');
-                            if (lineFields.Length != 3) throw new FormatException(string.Format("Assembly version file not in expected format. lineFields.Length should be 3, but was {0}", lineFields.Length));
-                            var versionFields = lineFields[1].Split('.');
-                            if (versionFields.Length != 4) throw new FormatException(string.Format("Assembly version file not in expected format. versionFields.Length should be 4, but was {0}", versionFields.Length));
-                            assemblyVersionString = string.Format("{0}.{1}.{2}.{3}", versionFields[0], versionFields[1], versionFields[2], svnVersionString);
-                            if (versionFields[1] == assemblyVersionString)
-                            {
-                                outputLines.Clear();
-                                outputLines = null;
+                            case 4:
+                            case 3:
+                                int major, minor, build;
+                                if (!int.TryParse(versionFields[0], out major) || !int.TryParse(versionFields[1], out minor) || !int.TryParse(versionFields[2], out build) || major < 0 || minor < 0 || build < 0) throw new FormatException(string.Format("Version file not in expected format. There should be only one line that does not begin with a comment mark ('//') and that line should contain a version number template in the form 1.2.3 where 1 is the Major version number of this application, 2 is the Minor version number and 3 is the Build number.  A fourth field, taken from the Subversion revision number of the output directory, will be appended to this and used for assembly and installer version numbers later in the build process."));
+                                versionNumber = string.Format("{0}.{1}.{2}.{3}", versionFields[0], versionFields[1], versionFields[2], svnVersionString);
                                 break;
-                            }
-                            if (inputLine.Contains("AssemblyVersion")) outputLines.Add(string.Format("[assembly: AssemblyVersion(\"{0}\")]", assemblyVersionString));
-                            if (inputLine.Contains("AssemblyFileVersion")) outputLines.Add(string.Format("[assembly: AssemblyFileVersion(\"{0}\")]", assemblyVersionString));
+                            default:
+                                throw new FormatException(string.Format("Version file not in expected format. There should be only one line that does not begin with a comment mark ('//') and that line should contain a version number template in the form 1.2.3 where 1 is the Major version number of this application, 2 is the Minor version number and 3 is the Build number.  A fourth field, taken from the Subversion revision number of the output directory, will be appended to this and used for assembly and installer version numbers later in the build process."));
                         }
-                        else outputLines.Add(inputLine);
                     }
-                    if (outputLines != null)
+                }
+                if (assemblyVersionFile != null)
+                {
+                    if (versionNumber == null) throw new ApplicationException("if -assembly is specified, -version must also be specified");
+                    using (var writer = new StreamWriter(assemblyVersionFile))
                     {
-                        if (outputLines.Count != inputLines.Length) throw new ApplicationException("InputLines and OutputLines have different counts for assembly version file");
-                        File.WriteAllLines(assemblyVersionFile, outputLines.ToArray());
+                        writer.WriteLine("using System.Reflection;");
+                        writer.WriteLine();
+                        writer.WriteLine("[assembly: AssemblyVersion(\"{0}\")]", versionNumber);
+                        writer.WriteLine("[assembly: AssemblyFileVersion(\"{0}\")]", versionNumber);
                     }
                 }
 
                 if (wixVersionFile != null)
                 {
-                    var inputLines = File.ReadAllLines(wixVersionFile);
-                    var outputLines = new List<string>();
-                    foreach (var inputLine in inputLines)
+                    if (versionNumber == null) throw new ApplicationException("if -assembly is specified, -version must also be specified");
+                    using (var writer = new StreamWriter(wixVersionFile))
                     {
-                        if (inputLine.Contains("ProductFullVersion"))
-                        {
-                            
-                            var lineFields = inputLine.Split('"');
-                            if (lineFields.Length != 3) throw new FormatException(string.Format("WiX version file not in expected format. lineFields.Length should be 3, but was {0}", lineFields.Length));
-                            var versionFields = lineFields[1].Split('.');
-                            if (versionFields.Length != 4) throw new FormatException(string.Format("WiX version file not in expected format. versionFields.Length should be 4, but was {0}", versionFields.Length));
-                            var wixVersionString = string.Format("{0}.{1}.{2}.{3}", versionFields[0], versionFields[1], versionFields[2], svnVersionString);
-                            if (assemblyVersionString != null) wixVersionString = assemblyVersionString;
-                            if (versionFields[1] == wixVersionString)
-                            {
-                                outputLines.Clear();
-                                outputLines = null;
-                                break;
-                            }
-                            outputLines.Add(string.Format("  <?define ProductFullVersion = \"{0}\" ?>", wixVersionString));
-                        }
-                        else outputLines.Add(inputLine);
-                    }
-                    if (outputLines != null)
-                    {
-                        if (outputLines.Count != inputLines.Length) throw new ApplicationException("InputLines and OutputLines have different counts for WiX version file");
-                        File.WriteAllLines(wixVersionFile, outputLines.ToArray());
+                        writer.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+                        writer.WriteLine("<Include>");
+                        writer.WriteLine("  <?define ProductFullVersion = \"{0}\" ?>", versionNumber);
+                        writer.WriteLine("</Include>");
                     }
                 }
                 if (namespaceName != null && className != null) GenerateCode(namespaceName, className, svnVersionString, outputFilename);
@@ -131,16 +118,17 @@ namespace ProjectBuildInfo
 
         static void Usage()
         {
-            Console.WriteLine("Usage: {0} -namespace [<namespaceName>] [-class <className>] [-assemblyversion <assemblyVersionFile>] [-wixversion <wixVersionFile>] -output <outputFilename>", Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location));
+            Console.WriteLine("Usage: {0} -namespace [<namespaceName>] [-class <className>] [-version <versionNumberFile>] [-assemblyversion <assemblyVersionFile>] [-wixversion <wixVersionFile>] -output <outputFilename>", Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location));
             Console.WriteLine("Where: <namespaceName> is the desired namespace for the generated code");
             Console.WriteLine("       <className> is the desired static class name for the generated code");
+            Console.WriteLine("       <versionNumberFile> (optional) is the path to a text file file that will have the application");
+            Console.WriteLine("                           version number read out of it.  This version number, combined with the");
+            Console.WriteLine("                           subversion revision number of the output directory, will be used for");
+            Console.WriteLine("                           the version numbers written to the <assemblyVersionFile> and <wixVersionFile>");
             Console.WriteLine("       <assemblyVersionFile> (optional) is the path to a file usually called AssemblyVersionInfo.cs");
-            Console.WriteLine("                             This file will be updated (if it exists) with the subversion version number");
-            Console.WriteLine("                            in the least significant field");
+            Console.WriteLine("                             This file will be created or updated with the version in the versionNumberFile");
             Console.WriteLine("       <wixVersionFile> (optional) is the path to a file usually called version.wxi");
-            Console.WriteLine("                        This file will be updated (if it exists) with the subversion version number");
-            Console.WriteLine("                        in the least significant field.  If <assemblyVersionFile> is also specified");
-            Console.WriteLine("                        the wix version number will be replaced by the assembly version number");
+            Console.WriteLine("                        This file will be created or updated with the version in the versionNumberFile");
             Console.WriteLine("       <outputFilename> is the filename that will contain the generated code");
         }
 
