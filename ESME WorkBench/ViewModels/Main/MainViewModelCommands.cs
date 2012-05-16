@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
@@ -95,6 +96,8 @@ namespace ESMEWorkbench.ViewModels.Main
                                 return;
                         }
                     }
+                    foreach (var popup in _openPopups.Where(popup => popup != null))
+                        popup.Close();
                     MediatorMessage.Send(MediatorMessage.ApplicationClosing, true);
                     ESME.Globals.AppSettings.Save();
                 }));

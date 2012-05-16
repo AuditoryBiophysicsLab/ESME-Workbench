@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
@@ -45,6 +46,8 @@ namespace ESMEWorkbench.ViewModels.Main
         readonly IUIVisualizerService _visualizer;
         public const bool ExperimentsCurrentlySupported = false;
         Dispatcher _dispatcher;
+
+        List<Window> _openPopups;
         #endregion
 
         #region Constructor
@@ -76,6 +79,7 @@ namespace ESMEWorkbench.ViewModels.Main
             _transmissionLoss = transmissionLoss;
             _plugins = plugins;
             _cache = cache;
+            _openPopups = new List<Window>();
             MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
             if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"))) Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
             Database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
@@ -113,6 +117,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     if (!result.HasValue || !result.Value) return;
                     var progress = new FirstRunProgressViewModel { ItemCount = 20, CurrentItem = 0 };
                     var window = _visualizer.ShowWindow("FirstRunProgressView", progress, true);
+                    _openPopups.Add(window);
                     await TaskEx.Delay(10);
                     var windData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(wind.PluginIdentifier), Resolution = wind.AvailableResolutions.Max() };
                     var soundSpeedData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(soundSpeed.PluginIdentifier), Resolution = soundSpeed.AvailableResolutions.Max() };
@@ -511,6 +516,7 @@ namespace ESMEWorkbench.ViewModels.Main
             var transmissionLossViewModel = new TransmissionLossViewModel {TransmissionLoss = transmissionLoss,};
 
             var window = _visualizer.ShowWindow("TransmissionLossWindowView", transmissionLossViewModel);
+            _openPopups.Add(window);
             transmissionLossViewModel.Window = window;
             transmissionLossViewModel.SaveFileService = _saveFile;
             transmissionLossViewModel.SelectedRadialIndex = 0;
@@ -522,6 +528,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             var analysisPointViewModel = new AnalysisPointViewModel(analysisPoint);
             var window = _visualizer.ShowWindow("AnalysisPointWindowView", analysisPointViewModel);
+            _openPopups.Add(window);
             analysisPointViewModel.TransmissionLossViewModel.Window = window;
             analysisPointViewModel.TransmissionLossViewModel.SaveFileService = _saveFile;
             analysisPointViewModel.TransmissionLossViewModel.SelectedRadialIndex = 0;
