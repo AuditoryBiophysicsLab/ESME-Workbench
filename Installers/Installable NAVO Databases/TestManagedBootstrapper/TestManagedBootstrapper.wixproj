@@ -16,6 +16,9 @@
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <VerboseOutput>True</VerboseOutput>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="Bundle.wxs" />
     <Compile Include="Netfx.wxs" />

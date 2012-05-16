@@ -55,7 +55,7 @@ namespace WixBootstrapper
             Dispatcher = Dispatcher.CurrentDispatcher;
             var viewModel = new RootViewModel
             {
-                ProductLongName = "Environmental Databases",
+                ProductLongName = "ESME Workbench 2012",
                 ProductShortName = "ESME"
             };
             // Populate the view models with the latest data. This is where Detect is called.

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <?define ProductName = "Environmental databases for ESME Workbench" ?>
+  <?define ProductName = "ESME Workbench 2012" ?>
   <?define ProductVersion = "1.0" ?>
   <?define ProductFullVersion = "1.0.0.0" ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
   <?define InstallersRoot="C:\Projects\ESME Deliverables\Installers"?>
+  <?define ESMERoot="$(var.InstallersRoot)\ESME Workbench"?>
   <?define DatabasesRoot="$(var.InstallersRoot)\Installable NAVO Databases"?>
   <?define PluginsRoot="$(var.InstallersRoot)\Plugins"?>
   <Bundle Name="$(var.ProductName)" Version="$(var.ProductFullVersion)" Manufacturer="$(var.Manufacturer)" 
@@ -22,6 +23,11 @@
     <Chain>
       <PackageGroupRef Id='Netfx4Full' />
 
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/ESMEWorkbenchSetup-x64.msi"
+                  SourceFile="$(var.ESMERoot)\bin\Release (x64)\ESMEWorkbenchSetup-x64.msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Vital="yes"/>
       <MsiPackage DownloadUrl="http://esme.bu.edu/data/SMGC_2.0_Minimal.msi"
                   SourceFile="$(var.DatabasesRoot)\SMGC_2.0_Minimal\bin\Release (x64)\SMGC_2.0_Minimal.msi"
                   Permanent="no"
