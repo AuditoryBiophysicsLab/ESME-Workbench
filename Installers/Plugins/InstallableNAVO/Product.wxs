@@ -25,7 +25,7 @@
              InstallScope="perMachine"
              Manufacturer="$(var.ProductAuthor)"/>
 
-    <Media Id="1" Cabinet="InstallableNAVO.cab" EmbedCab="yes" />
+    <Media Id="1" Cabinet="InstallableNAVOPlugin.cab" EmbedCab="yes" />
 
     <Property Id="ESMEINSTALLLOCATION">
       <RegistrySearch Id="ESMEInstallationKey"
@@ -39,8 +39,8 @@
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ESMEINSTALLLOCATION">
         <Component Id="PluginDLLs" Guid="957C7013-9881-42EC-B9DD-9D32973F0242">
-          <File Id="InstallableNAVO.dll"
-                Name="InstallableNAVO.dll"
+          <File Id="InstallableNAVOPlugin.dll"
+                Name="InstallableNAVOPlugin.dll"
                 Source="$(var.PluginDLLPath)\InstallableNAVOPlugin.dll"
                 KeyPath="yes" />
           <File Id="NAVODatabaseAdapter.dll"
