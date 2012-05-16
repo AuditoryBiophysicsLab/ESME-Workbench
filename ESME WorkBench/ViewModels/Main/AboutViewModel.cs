@@ -18,7 +18,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             RegisterMediator();
             WorkbenchModuleBuildInfo = new ModuleBuildInfoViewModel("ESME Workbench", BuildInformation.BuildDateTime, BuildInformation.BuildEngineer, BuildInformation.SVNVersion);
-            ESMEModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.dll", BuildInformation.BuildDateTime, BuildInformation.BuildEngineer, BuildInformation.SVNVersion);
+            ESMEModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.dll", ESME.BuildInformation.BuildDateTime, ESME.BuildInformation.BuildEngineer, ESME.BuildInformation.SVNVersion);
             HRCModuleBuildInfo = new ModuleBuildInfoViewModel("HRC.dll", HRC.BuildInformation.BuildDateTime, HRC.BuildInformation.BuildEngineer, HRC.BuildInformation.SVNVersion);
             ViewsModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.Views.dll", ESME.Views.BuildInformation.BuildDateTime, ESME.Views.BuildInformation.BuildEngineer, ESME.Views.BuildInformation.SVNVersion);
             var appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);

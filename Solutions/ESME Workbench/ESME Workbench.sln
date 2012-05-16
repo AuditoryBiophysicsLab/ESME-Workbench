@@ -37,6 +37,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BellhopNLWrapper", "..\..\Utilities\BellhopNL\BellhopNLWrapper.csproj", "{9E8EBE97-1F78-4613-9204-B69ADC3869E8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME Workbench", "..\..\ESME WorkBench\ESME Workbench.csproj", "{A80510EA-31DD-41C4-B3BC-0C7DCB966F3B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6} = {33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}
+	EndProjectSection
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ESME Workbench", "..\..\Installers\ESME Workbench\ESME Workbench.wixproj", "{198766F8-F78F-48A1-9F64-846B1B448B34}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -60,9 +63,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMGCImporter", "..\..\Utilities\SMGCImporter\SMGCImporter.csproj", "{C1E6E949-DB4B-49D1-BE17-BBCF845E6749}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Installers", "Installers", "{7D724624-B5C7-4796-ADDC-4DF20828EF2D}"
-	ProjectSection(SolutionItems) = preProject
-		..\..\..\WIX\src\burn\engine\engine.vcxproj = ..\..\..\WIX\src\burn\engine\engine.vcxproj
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImportPSM", "..\..\Utilities\ImportPSM\ImportPSM.csproj", "{BB125432-F575-4E97-8354-F720E1112F8B}"
 EndProject
@@ -223,8 +223,8 @@ Global
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Debug (x64)|Win32.ActiveCfg = Debug|Any CPU
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Debug (x64)|x64.ActiveCfg = Debug|Any CPU
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Debug (x64)|x86.ActiveCfg = Debug|Any CPU
-		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Debug|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Debug|Mixed Platforms.Build.0 = Release|Any CPU
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Debug|Win32.ActiveCfg = Debug|Any CPU
@@ -466,7 +466,6 @@ Global
 		{5A858CD7-E722-4153-BA0B-BAD75EF957A5}.Debug (x64)|x64.ActiveCfg = Debug|Any CPU
 		{5A858CD7-E722-4153-BA0B-BAD75EF957A5}.Debug (x64)|x86.ActiveCfg = Debug|Any CPU
 		{5A858CD7-E722-4153-BA0B-BAD75EF957A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5A858CD7-E722-4153-BA0B-BAD75EF957A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A858CD7-E722-4153-BA0B-BAD75EF957A5}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{5A858CD7-E722-4153-BA0B-BAD75EF957A5}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{5A858CD7-E722-4153-BA0B-BAD75EF957A5}.Debug|Win32.ActiveCfg = Debug|Any CPU
@@ -619,7 +618,6 @@ Global
 		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|x64.ActiveCfg = Debug|Any CPU
 		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug (x64)|x86.ActiveCfg = Debug|Any CPU
 		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}.Debug|Win32.ActiveCfg = Debug|Any CPU
@@ -647,7 +645,6 @@ Global
 		{DDC1E22A-276A-4910-A934-6F72CD22DE31}.Debug (x64)|x64.ActiveCfg = Debug|Any CPU
 		{DDC1E22A-276A-4910-A934-6F72CD22DE31}.Debug (x64)|x86.ActiveCfg = Debug|Any CPU
 		{DDC1E22A-276A-4910-A934-6F72CD22DE31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DDC1E22A-276A-4910-A934-6F72CD22DE31}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDC1E22A-276A-4910-A934-6F72CD22DE31}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{DDC1E22A-276A-4910-A934-6F72CD22DE31}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{DDC1E22A-276A-4910-A934-6F72CD22DE31}.Debug|Win32.ActiveCfg = Debug|Any CPU
@@ -675,7 +672,6 @@ Global
 		{409DC754-EEBD-4E49-8DDF-3960F2FFCE73}.Debug (x64)|x64.ActiveCfg = Debug|Any CPU
 		{409DC754-EEBD-4E49-8DDF-3960F2FFCE73}.Debug (x64)|x86.ActiveCfg = Debug|Any CPU
 		{409DC754-EEBD-4E49-8DDF-3960F2FFCE73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{409DC754-EEBD-4E49-8DDF-3960F2FFCE73}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{409DC754-EEBD-4E49-8DDF-3960F2FFCE73}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{409DC754-EEBD-4E49-8DDF-3960F2FFCE73}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{409DC754-EEBD-4E49-8DDF-3960F2FFCE73}.Debug|Win32.ActiveCfg = Debug|Any CPU
@@ -703,7 +699,6 @@ Global
 		{BB224728-826D-406D-9A19-3CF4DF2AA68E}.Debug (x64)|x64.ActiveCfg = Debug|Any CPU
 		{BB224728-826D-406D-9A19-3CF4DF2AA68E}.Debug (x64)|x86.ActiveCfg = Debug|Any CPU
 		{BB224728-826D-406D-9A19-3CF4DF2AA68E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BB224728-826D-406D-9A19-3CF4DF2AA68E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB224728-826D-406D-9A19-3CF4DF2AA68E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{BB224728-826D-406D-9A19-3CF4DF2AA68E}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{BB224728-826D-406D-9A19-3CF4DF2AA68E}.Debug|x64.ActiveCfg = Debug|Any CPU

@@ -98,6 +98,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\ESME WorkBench\Properties\AssemblyVersionInfo.cs">
+      <Link>Properties\AssemblyVersionInfo.cs</Link>
+    </Compile>
     <Compile Include="Annotations.cs" />
     <Compile Include="Aspects\InitializeAttribute.cs" />
     <Compile Include="Aspects\NotifyPropertyChangedAttribute.cs" />
@@ -295,8 +298,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace HRC -class BuildInformation -svnversion "$(ProjectDir) " -output "$(ProjectDir)BuildInformation.cs"
-</PreBuildEvent>
+    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace HRC -class BuildInformation -assemblyversion "C:\Projects\ESME Deliverables\ESME WorkBench\Properties\AssemblyVersionInfo.cs" -output "$(ProjectDir)BuildInformation.cs"</PreBuildEvent>
   </PropertyGroup>
   <Import Project="..\..\Solutions\ESME%20Workbench\packages\PostSharp.2.1.6.14\tools\PostSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

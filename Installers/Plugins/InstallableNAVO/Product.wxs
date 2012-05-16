@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <?define ProductName = "Installable NAVO Data Sources for ESME Workbench" ?>
-  <?define ProductVersion = "1.0" ?>
-  <?define ProductFullVersion = "1.0.0.0" ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
+  <?include version.wxi ?>
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
   <?define ESMERoot="C:\Projects\ESME Deliverables"?>
@@ -14,8 +13,8 @@
   <?define ProductDisplayName = "$(var.ProductName)" ?>
   <?define ProductId = "{560A34C4-244A-4379-A818-985A61054A34}" ?>
   <?define ProductUpgradeCode = "{3AD6BFB0-49A4-4857-80C8-15D282ECD6FB}" ?>
-  <Product Id="$(var.ProductId)"
-           Name="$(var.ProductDisplayName) (v$(var.ProductVersion))"
+  <Product Id="*"
+           Name="$(var.ProductDisplayName)"
            Language="1033"
            Version="$(var.ProductFullVersion)"
            Manufacturer="$(var.Manufacturer)"

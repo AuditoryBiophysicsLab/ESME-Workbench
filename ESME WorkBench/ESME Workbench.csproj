@@ -127,6 +127,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Properties\AssemblyMetadata.cs" />
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="BuildInformation.cs" />
     <Compile Include="Controls\EditableTextBlock.xaml.cs">
       <DependentUpon>EditableTextBlock.xaml</DependentUpon>
@@ -708,7 +710,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath32)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESMEWorkbench -class BuildInformation -svnversion "$(ProjectDir) " -output "$(ProjectDir)BuildInformation.cs"</PreBuildEvent>
+    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESMEWorkbench -class BuildInformation  -assemblyversion "C:\Projects\ESME Deliverables\ESME WorkBench\Properties\AssemblyVersionInfo.cs" -wixversion "C:\Projects\ESME Deliverables\Installers\ESME Workbench\version.wxi" -output "$(ProjectDir)BuildInformation.cs"</PreBuildEvent>
   </PropertyGroup>
   <Import Project="..\Solutions\ESME%20Workbench\packages\PostSharp.2.1.6.14\tools\PostSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

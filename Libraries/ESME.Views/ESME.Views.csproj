@@ -77,6 +77,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\ESME WorkBench\Properties\AssemblyMetadata.cs">
+      <Link>Properties\AssemblyMetadata.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ESME WorkBench\Properties\AssemblyVersionInfo.cs">
+      <Link>Properties\AssemblyVersionInfo.cs</Link>
+    </Compile>
     <Compile Include="BuildInformation.cs" />
     <Compile Include="ColorPicker\BindOnEnterTextBox.cs" />
     <Compile Include="ColorPicker\ColorComboBox.cs" />
@@ -376,7 +382,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESME.Views -class BuildInformation -svnversion "$(ProjectDir) " -output "$(ProjectDir)BuildInformation.cs"
+    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESME.Views -class BuildInformation -assemblyversion "C:\Projects\ESME Deliverables\ESME WorkBench\Properties\AssemblyVersionInfo.cs" -output "$(ProjectDir)BuildInformation.cs"
 </PreBuildEvent>
   </PropertyGroup>
   <Import Project="..\..\Solutions\ESME%20Workbench\packages\PostSharp.2.1.6.14\tools\PostSharp.targets" />
