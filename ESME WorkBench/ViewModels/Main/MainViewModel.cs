@@ -113,7 +113,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     var sediment = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment];
                     foreach (var locations in Database.Context.Locations.Local) locations.CreateMapLayers();
                     if (wind == null || soundSpeed == null || bathymetry == null || sediment == null) return;
-                    var result = _visualizer.ShowDialog("FirstRunQuestionView", new FirstRunQuestionViewModel());
+                    var result = _visualizer.ShowDialog("FirstRunQuestionView", new FirstRunQuestionViewModel { MessageBoxService = _messageBox });
                     if (!result.HasValue || !result.Value) return;
                     var progress = new FirstRunProgressViewModel { ItemCount = 20, CurrentItem = 0 };
                     var window = _visualizer.ShowWindow("FirstRunProgressView", progress, true);

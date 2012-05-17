@@ -111,6 +111,9 @@
             <File Id="UserGuide"
                   Name="ESME Workbench User Guide.pdf"
                   Source="$(var.DocRoot)\ESME Workbench User Guide.pdf" />
+            <File Id="QuickStartGuide"
+                  Name="ESME Workbench Quick Start.pdf"
+                  Source="$(var.DocRoot)\ESME Workbench Quick Start.pdf" />
             <File Id="ReadMe"
                   Name="Read Me.pdf"
                   Source="$(var.DocRoot)\Read Me.pdf" />
@@ -256,6 +259,12 @@
                       Name="Transmission Loss Viewer"
                       WorkingDirectory="APPLICATIONFOLDER"
                       Target="[APPLICATIONFOLDER]TransmissionLossViewer.exe"
+                      Advertise="no" />
+            <Shortcut Id="QuickStartGuide_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="Quick Start"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]ESME Workbench Quick Start.pdf"
                       Advertise="no" />
             <Shortcut Id="ReleaseNotes_Shortcut"
                       Directory="ProgramMenuDir"

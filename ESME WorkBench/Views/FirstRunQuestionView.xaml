@@ -23,12 +23,12 @@
             Welcome!
             <LineBreak />
             <LineBreak />
-            This appears to be the first time you've run
-            <Bold>ESME Workbench 2012 Beta 1</Bold>
-            . We hope your experience is informative and enjoyable.
+            This appears to be the first time you've run the
+            <Bold>ESME Workbench 2012 Demo Beta</Bold>.
+            We hope your experience is informative and enjoyable.
             <LineBreak />
             <LineBreak />
-            Unless you are an experienced user, we recommend that you follow the tutorial, which depends on having sample data available.
+            Unless you are already familar with ESME Workbench, we recommend that you follow the <Hyperlink Command="{Binding ShowQuickStartCommand}">Quick Start Guide</Hyperlink>, which depends on having sample data available.
             <LineBreak />
             <LineBreak />
             Would you like to have the sample data created for you?
