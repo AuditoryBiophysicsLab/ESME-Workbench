@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -24,26 +29,13 @@ namespace ESME.Views.TransmissionLossViewer
         readonly RadialView _view;
         readonly Dispatcher _dispatcher;
         TransmissionLossRadial TransmissionLossRadial { get; set; }
-        bool _isRendered;
-
         public float RangeMin { get; set; }
         public float RangeMax { get; set; }
         public float DepthMin { get; set; }
         public float DepthMax { get; set; }
         public string WaitToRenderText { get; set; }
 
-        #region public WriteableBitmap WriteableBitmap {get; }
-        WriteableBitmap _writeableBitmap;
-
-        public WriteableBitmap WriteableBitmap
-        {
-            get
-            {
-                if (!_isRendered) RenderBitmap();
-                return _writeableBitmap;
-            }
-        }
-        #endregion
+        public WriteableBitmap WriteableBitmap { get; set; }
 
         #region public ColorMapViewModel ColorMapViewModel { get; set; }
         ColorMapViewModel _colorMapViewModel;
@@ -60,8 +52,7 @@ namespace ESME.Views.TransmissionLossViewer
                     {
                         case "CurMinValue":
                         case "CurMaxValue":
-                            _isRendered = false;
-                            OnPropertyChanged("WriteableBitmap");
+                            BeginRenderBitmap(Radial.Guid, TransmissionLossRadial);
                             break;
                     }
                 };
@@ -80,8 +71,8 @@ namespace ESME.Views.TransmissionLossViewer
             {
                 _radial = value;
                 Debug.WriteLine("TransmissionLossRadialViewModel: Initializing transmission loss radial");
-                _isRendered = false;
-                _writeableBitmap = null;
+                WriteableBitmap = null;
+                WriteableBitmapVisibility = Visibility.Collapsed;
                 if (_radial == null || !_radial.IsCalculated)
                 {
                     WriteableBitmapVisibility = Visibility.Collapsed;
@@ -103,15 +94,16 @@ namespace ESME.Views.TransmissionLossViewer
                 try
                 {
                     TransmissionLossRadial = new TransmissionLossRadial((float)_radial.Bearing, new BellhopOutput(_radial.BasePath + ".shd"));
+                    if (WriteableBitmap == null) WriteableBitmap = new WriteableBitmap(TransmissionLossRadial.Ranges.Count, TransmissionLossRadial.Depths.Count, 96, 96, PixelFormats.Bgr32, null);
+                    ColorMapViewModel.StatisticalMaximum = TransmissionLossRadial.StatMax;
+                    ColorMapViewModel.StatisticalMinimum = TransmissionLossRadial.StatMin;
+                    BeginRenderBitmap(_radial.Guid, TransmissionLossRadial);
                     RangeMin = _radial.Ranges.First();
                     RangeMax = _radial.Ranges.Last();
                     DepthMin = _radial.Depths.First();
                     DepthMax = _radial.Depths.Last();
-                    ColorMapViewModel.StatisticalMaximum = TransmissionLossRadial.StatMax;
-                    ColorMapViewModel.StatisticalMinimum = TransmissionLossRadial.StatMin;
                     OnPropertyChanged("TransmissionLossRadial");
                     CalculateBottomProfileGeometry();
-                    RenderBitmap();
                 }
                 catch (Exception e)
                 {
@@ -198,42 +190,77 @@ namespace ESME.Views.TransmissionLossViewer
             view.SizeChanged += (s, e) => CalculateBottomProfileGeometry();
         }
 
-        void RenderBitmap()
+        [DllImport("Kernel32.dll")] private static extern bool QueryPerformanceCounter(out long lpPerformanceCount);
+        //readonly ConcurrentDictionary<long, Tuple<CancellationTokenSource, Task>> _renderTasks = new ConcurrentDictionary<long, Tuple<CancellationTokenSource, Task>>();
+        readonly Tuple<Task, CancellationTokenSource, long>[] _renderTasks = new Tuple<Task, CancellationTokenSource, long>[2];
+        void BeginRenderBitmap(Guid guid, TransmissionLossRadial transmissionLoss)
         {
-            if (TransmissionLossRadial == null || ColorMapViewModel == null) return;
-
-            var width = TransmissionLossRadial.Ranges.Count;
-            var height = TransmissionLossRadial.Depths.Count;
-
-            // ReSharper disable PossibleNullReferenceException
-            var m = PresentationSource.FromVisual(Application.Current.MainWindow).CompositionTarget.TransformToDevice;
-            // ReSharper restore PossibleNullReferenceException
-            var dx = m.M11;
-            var dy = m.M22;
-
-            if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(width, height, dx, dy, PixelFormats.Bgr32, null);
-            var infinityColor = _colorMapViewModel.Colors[0];
-            _writeableBitmap.Lock();
-            unsafe
+            var tokenSource = new CancellationTokenSource();
+            long ticks;
+            QueryPerformanceCounter(out ticks);
+            var task = TaskEx.Run(() => RenderBitmapAsync(guid, transmissionLoss, tokenSource.Token));
+            task.ContinueWith(t =>
             {
-                var curOffset = (int)_writeableBitmap.BackBuffer;
-                for (var y = 0; y < height; y++)
+                if (t.IsCanceled) return;
+                lock (_renderTasks)
                 {
-                    for (var x = 0; x < width; x++)
+                    if (_renderTasks[0] != null && _renderTasks[0].Item3 == ticks)
                     {
-                        // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
-                        // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
-                        var curValue = TransmissionLossRadial.TransmissionLoss[y, x];
-                        var curColor = float.IsInfinity(curValue) ? infinityColor : ColorMapViewModel.Lookup(curValue);
-                        *((int*)curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
-                        curOffset += sizeof(Int32);
+                        _renderTasks[0] = null;
+                        if (_renderTasks[1] != null)
+                        {
+                            _renderTasks[0] = _renderTasks[1];
+                            _renderTasks[1] = null;
+                        }
                     }
+                    else if (_renderTasks[1] != null && _renderTasks[1].Item3 == ticks) _renderTasks[1] = null;
+                }
+            });
+            lock (_renderTasks)
+            {
+                if (_renderTasks[0] == null) _renderTasks[0] = Tuple.Create(task, tokenSource, ticks);
+                else if (_renderTasks[1] == null) _renderTasks[1] = Tuple.Create(task, tokenSource, ticks);
+                else
+                {
+                    _renderTasks[1].Item2.Cancel();
+                    _renderTasks[1] = Tuple.Create(task, tokenSource, ticks);
                 }
             }
-            _writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
-            _writeableBitmap.Unlock();
-            _isRendered = true;
-            _dispatcher.InvokeIfRequired(RenderFinished, DispatcherPriority.ApplicationIdle);
+            //if (!_renderTasks.TryAdd(ticks, Tuple.Create(tokenSource, task))) tokenSource.Cancel();
+        }
+
+        void RenderBitmapAsync(Guid guid, TransmissionLossRadial transmissionLoss, CancellationToken token)
+        {
+            if (token.IsCancellationRequested) return;
+
+            var width = transmissionLoss.Ranges.Count;
+            var height = transmissionLoss.Depths.Count;
+            var buffer = new int[width * height];
+
+            var infinityColor = _colorMapViewModel.Colors[0];
+            var curOffset = 0;
+            for (var y = 0; y < height; y++)
+            {
+                for (var x = 0; x < width; x++)
+                {
+                    if (token.IsCancellationRequested) return;
+                    // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
+                    // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
+                    var curValue = transmissionLoss[y, x];
+                    var curColor = float.IsInfinity(curValue) ? infinityColor : ColorMapViewModel.Lookup(curValue);
+                    buffer[curOffset++] = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
+                }
+            }
+            _dispatcher.InvokeAsynchronouslyInBackground(() =>
+            {
+                if (guid != Radial.Guid) return;
+                WriteableBitmap.WritePixels(new Int32Rect(0, 0, width, height), buffer, WriteableBitmap.BackBufferStride, 0, 0);
+                OnPropertyChanged("WriteableBitmap");
+                WriteableBitmapVisibility = Visibility.Visible;
+            });
+            //_writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
+            //_writeableBitmap.Unlock();
+            //_dispatcher.InvokeIfRequired(RenderFinished, DispatcherPriority.ApplicationIdle);
         }
 
         void RenderFinished()

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using HRC.Aspects;
 using HRC.Utility;
 using HRC.ViewModels;
 
@@ -52,8 +52,11 @@ namespace ESME.Views.Controls
             get { return _curMaxValue; }
             set
             {
-                _curMaxValue = value;
-                _curRange = _curMaxValue - _curMinValue;
+                lock (this)
+                {
+                    _curMaxValue = value;
+                    _curRange = _curMaxValue - _curMinValue;
+                }
             }
         }
 
@@ -62,8 +65,11 @@ namespace ESME.Views.Controls
             get { return _curMinValue; }
             set
             {
-                _curMinValue = value;
-                _curRange = _curMaxValue - _curMinValue;
+                lock (this)
+                {
+                    _curMinValue = value;
+                    _curRange = _curMaxValue - _curMinValue;
+                }
             }
         }
 
@@ -91,6 +97,24 @@ namespace ESME.Views.Controls
 
         public Color Lookup(double value)
         {
+            lock (this)
+            {
+                if (value >= _curMaxValue) return _firstColor;
+                if (value <= _curMinValue) return _lastColor;
+                if (Math.Abs(_curRange) < 0.000001) _curRange = _curMaxValue - _curMinValue;
+
+                if (Math.Abs(_curRange) > 0)
+                {
+                    var fraction = 1.0 - (value - _curMinValue) / _curRange;
+                    var index = (int)(fraction * _colorCount);
+                    return Colors[index];
+                }
+            }
+            return System.Windows.Media.Colors.Black;
+        }
+
+        async public Task<Color> LookupAsync(double value)
+        {
             if (value >= _curMaxValue) return _firstColor;
             if (value <= _curMinValue) return _lastColor;
             if (Math.Abs(_curRange) < 0.000001) _curRange = _curMaxValue - _curMinValue;
@@ -98,7 +122,12 @@ namespace ESME.Views.Controls
             if (Math.Abs(_curRange) > 0)
             {
                 var fraction = 1.0 - (value - _curMinValue) / _curRange;
-                var index = (int) (fraction*_colorCount);
+                while (fraction < 0)
+                {
+                    await TaskEx.Delay(5);
+                    fraction = 1.0 - (value - _curMinValue) / _curRange;
+                }
+                var index = (int)(fraction * _colorCount);
                 return Colors[index];
             }
             return System.Windows.Media.Colors.Black;
@@ -112,11 +141,8 @@ namespace ESME.Views.Controls
             unsafe
             {
                 var curOffset = (int)colorBitmap.BackBuffer;
-                for (var y = 0; y < Colors.Count; y++)
+                foreach (var curColor in Colors) 
                 {
-                    // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
-                    // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
-                    var curColor = Colors[y];
                     *((int*)curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
                     curOffset += sizeof (Int32);
                 }
