@@ -40,7 +40,7 @@
         <Utility:BooleanNegatingConverter x:Key="NegatingConverter" />
     </r:RibbonWindow.Resources>
     <r:RibbonWindow.InputBindings>
-        <KeyBinding Gesture="CTRL+S" Command="{Binding SaveCommand}" />
+        <KeyBinding Command="{Binding SaveCommand}" Gesture="CTRL+S" />
     </r:RibbonWindow.InputBindings>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
@@ -104,14 +104,12 @@
                 <TextBlock Text="{Binding MouseSedimentInfo}" />
             </StatusBarItem>
             <StatusBarItem Grid.Column="11">
-                <TextBlock Text="{Binding CacheActivity}" />
-            </StatusBarItem>
-            <Separator Grid.Column="12" />
-            <StatusBarItem Grid.Column="13">
                 <TextBlock Text="{Binding TransmissionLossActivity}" />
             </StatusBarItem>
         </StatusBar>
-        <r:Ribbon x:Name="Ribbon" DockPanel.Dock="Top" SelectedIndex="{Binding SelectedRibbonTabIndex}">
+        <r:Ribbon x:Name="Ribbon"
+                  DockPanel.Dock="Top"
+                  SelectedIndex="{Binding SelectedRibbonTabIndex}">
             <r:Ribbon.ApplicationMenu>
                 <Controls:SlimRibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
                     <r:RibbonApplicationMenuItem Command="{Binding AboutCommand}"
@@ -145,7 +143,10 @@
             </r:Ribbon.ApplicationMenu>
             <r:RibbonTab Header="Home" KeyTip="H">
                 <r:RibbonGroup Header="Map">
-                    <r:RibbonButton Command="{Binding ZoomToWorldMapCommand}" Label="World Map" LargeImageSource="..\Images\LargeIcons\globe-icon.png" SmallImageSource="..\Images\SmallIcons\globe-icon.png" />
+                    <r:RibbonButton Command="{Binding ZoomToWorldMapCommand}"
+                                    Label="World Map"
+                                    LargeImageSource="..\Images\LargeIcons\globe-icon.png"
+                                    SmallImageSource="..\Images\SmallIcons\globe-icon.png" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Scenario">
                     <ListView Width="150"
@@ -215,7 +216,9 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <LocalControls:LayerTreeView Margin="5 5 0 0" Grid.Row="0" DataContext="{Binding}" />
+                <LocalControls:LayerTreeView Grid.Row="0"
+                                             Margin="5 5 0 0"
+                                             DataContext="{Binding}" />
                 <GridSplitter Grid.Row="1"
                               Height="2"
                               Margin="0 5 -5 5"
@@ -224,7 +227,9 @@
                               Background="Black"
                               ResizeBehavior="BasedOnAlignment"
                               ResizeDirection="Rows" />
-                <LocalControls:LocationsTreeView Margin="5 0 0 5" Grid.Row="2" DataContext="{Binding}" />
+                <LocalControls:LocationsTreeView Grid.Row="2"
+                                                 Margin="5 0 0 5"
+                                                 DataContext="{Binding}" />
             </Grid>
             <GridSplitter Grid.Column="1"
                           Width="2"
@@ -234,7 +239,9 @@
                           Background="Black"
                           ResizeBehavior="BasedOnAlignment"
                           ResizeDirection="Columns" />
-            <LocalControls:MapView x:Name="MapView" Grid.Column="2" DataContext="{Binding MapViewModel}" />
+            <LocalControls:MapView x:Name="MapView"
+                                   Grid.Column="2"
+                                   DataContext="{Binding MapViewModel}" />
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="Drop">
                     <ia:CallMethodAction MethodName="FilesDropped" TargetObject="{Binding}" />
