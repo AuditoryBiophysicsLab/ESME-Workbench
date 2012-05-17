@@ -90,7 +90,7 @@ namespace ESMEWorkbench.ViewModels.Main
             _transmissionLoss.DepthCellSize = Globals.AppSettings.BellhopSettings.DepthCellSize;
             _transmissionLoss.RayCount = Globals.AppSettings.BellhopSettings.RayCount;
             _transmissionLoss.WorkQueue.PropertyChanged +=
-                (s, e) => { if (e.PropertyName == "Count") TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0 ? string.Format("Acoustic Simulator: {0} queued", _transmissionLoss.WorkQueue.Keys.Count) : "TL: idle"; };
+                (s, e) => { if (e.PropertyName == "Count") TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0 ? string.Format("Acoustic Simulator: {0} items", _transmissionLoss.WorkQueue.Keys.Count) : "Acoustic Simulator: idle"; };
 
             if (Designer.IsInDesignMode) return;
 
