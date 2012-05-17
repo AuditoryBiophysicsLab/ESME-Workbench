@@ -403,8 +403,6 @@ namespace ESMEWorkbench.ViewModels.Main
             }
         }
 
-        public int SelectedRibbonTabIndex { get { return Settings.Default.SelectedRibbonTabIndex; } set { Settings.Default.SelectedRibbonTabIndex = value; } }
-
         void ShowAboutView()
         {
             var aboutViewModel = new AboutViewModel();

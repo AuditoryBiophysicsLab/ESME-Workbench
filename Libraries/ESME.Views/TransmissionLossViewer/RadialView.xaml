@@ -49,6 +49,8 @@
                                            ColorBarImage="{Binding ColorBitmap}"
                                            CurrentMaximum="{Binding CurMaxValue}"
                                            CurrentMinimum="{Binding CurMinValue}"
+                                           StatisticalMaximum="{Binding StatisticalMaximum}"
+                                           StatisticalMinimum="{Binding StatisticalMinimum}"
                                            DockPanel.Dock="Right"
                                            Maximum="{Binding MaxValue}"
                                            Minimum="{Binding MinValue}" />

@@ -57,7 +57,13 @@ namespace ESME.Views.TransmissionLossViewer
             {
                 _selectedRadialIndex = value;
                 TitleString = Radials == null ? "<no radial selected>" : string.Format("Radial bearing: {0:000.0} degrees", Radials[_selectedRadialIndex].Bearing);
-                if (RadialViewModel != null) RadialViewModel.Radial = Radials == null ? null : Radials[_selectedRadialIndex];
+                if (RadialViewModel != null)
+                {
+                    RadialViewModel.Radial = Radials == null ? null : Radials[_selectedRadialIndex];
+                    RadialViewModel.ColorMapViewModel.MaxValue = MaxTransmissionLoss;
+                    RadialViewModel.ColorMapViewModel.MinValue = MinTransmissionLoss;
+                }
+
             }
         }
         #endregion
@@ -104,8 +110,8 @@ namespace ESME.Views.TransmissionLossViewer
             }
         }
         #endregion
-        
-        #region public Scenario Scenario { get; set; }
+
+        #region public TransmissionLoss TransmissionLoss { get; set; }
         ESME.Scenarios.TransmissionLoss _transmissionLoss;
 
         [Affects("Radials", "RadialCount", "SelectedRadialIndex", "SelectedRadial", "SelectedBearingGeometry")] public ESME.Scenarios.TransmissionLoss TransmissionLoss
@@ -117,6 +123,9 @@ namespace ESME.Views.TransmissionLossViewer
                 Radials = _transmissionLoss == null ? null : new ObservableList<Radial>(from r in _transmissionLoss.Radials orderby r.Bearing select r);
                 SelectedRadialIndex = 0;
                 if (_transmissionLoss != null)
+                {
+                    MaxTransmissionLoss = Radials.Max(r => r.MaximumTransmissionLossValues.Max(v => !double.IsInfinity(v) ? v : -10));
+                    MinTransmissionLoss = Radials.Min(r => r.MinimumTransmissionLossValues.Min(v => !double.IsInfinity(v) ? v : 1000));
                     _transmissionLoss.PropertyChanged += (s, e) =>
                     {
                         if (e.PropertyName == "IsDeleted" && Window != null)
@@ -124,9 +133,13 @@ namespace ESME.Views.TransmissionLossViewer
                             CloseDialog(null);
                         }
                     };
+                }
             }
         }
         #endregion
+
+        public float MaxTransmissionLoss { get; set; }
+        public float MinTransmissionLoss { get; set; }
 
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
         {

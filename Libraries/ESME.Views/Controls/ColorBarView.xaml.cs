@@ -65,6 +65,14 @@ namespace ESME.Views.Controls
 
         #endregion
 
+        #region dependency property double StatisticalMaximum
+
+        public static DependencyProperty StatisticalMaximumProperty = DependencyProperty.Register("StatisticalMaximum", typeof(double), typeof(ColorBarView), new FrameworkPropertyMetadata(double.NaN, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+        public double StatisticalMaximum { get { return (double)GetValue(StatisticalMaximumProperty); } set { SetValue(StatisticalMaximumProperty, value); } }
+
+        #endregion
+
         #region public double Minimum {get; set;}
 
         public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register("Minimum", typeof (double), typeof (ColorBarView), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MinMaxPropertiesChanged));
@@ -74,6 +82,14 @@ namespace ESME.Views.Controls
             get { return (double) GetValue(MinimumProperty); }
             set { SetCurrentValue(MinimumProperty, value); }
         }
+
+        #endregion
+
+        #region dependency property double StatisticalMinimum
+
+        public static DependencyProperty StatisticalMinimumProperty = DependencyProperty.Register("StatisticalMinimum", typeof(double), typeof(ColorBarView), new FrameworkPropertyMetadata(double.NaN, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+        public double StatisticalMinimum { get { return (double)GetValue(StatisticalMinimumProperty); } set { SetValue(StatisticalMinimumProperty, value); } }
 
         #endregion
 
@@ -142,25 +158,32 @@ namespace ESME.Views.Controls
         // Animates the colorbar returning to its full range over a specified number of seconds
         void ResetColorbarRange(double transitionTimeSeconds)
         {
+            var maxTarget = Maximum;
+            var minTarget = Minimum;
+            if (CurrentMaximum == Maximum && CurrentMinimum == Minimum && !double.IsNaN(StatisticalMaximum) && !double.IsNaN(StatisticalMinimum))
+            {
+                maxTarget = StatisticalMaximum;
+                minTarget = StatisticalMinimum;
+            }
             if (transitionTimeSeconds <= 0)
             {
-                CurrentMaximum = Maximum;
-                CurrentMinimum = Minimum;
+                CurrentMaximum = maxTarget;
+                CurrentMinimum = minTarget;
             }
             else
             {
                 var duration = new Duration(TimeSpan.FromSeconds(transitionTimeSeconds));
-                var curMaxAnimation = new DoubleAnimation(Maximum, duration, FillBehavior.Stop);
-                var curMinAnimation = new DoubleAnimation(Minimum, duration, FillBehavior.Stop);
+                var curMaxAnimation = new DoubleAnimation(maxTarget, duration, FillBehavior.Stop);
+                var curMinAnimation = new DoubleAnimation(minTarget, duration, FillBehavior.Stop);
                 curMaxAnimation.Completed += delegate
                                              {
                                                  BeginAnimation(CurrentMaximumProperty, null);
-                                                 CurrentMaximum = Maximum;
+                                                 CurrentMaximum = maxTarget;
                                              };
                 curMinAnimation.Completed += delegate
                                              {
                                                  BeginAnimation(CurrentMinimumProperty, null);
-                                                 CurrentMinimum = Minimum;
+                                                 CurrentMinimum = minTarget;
                                              };
                 BeginAnimation(CurrentMaximumProperty, curMaxAnimation);
                 BeginAnimation(CurrentMinimumProperty, curMinAnimation);

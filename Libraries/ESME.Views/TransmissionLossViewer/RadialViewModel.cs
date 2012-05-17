@@ -107,8 +107,8 @@ namespace ESME.Views.TransmissionLossViewer
                     RangeMax = _radial.Ranges.Last();
                     DepthMin = _radial.Depths.First();
                     DepthMax = _radial.Depths.Last();
-                    ColorMapViewModel.MaxValue = TransmissionLossRadial.StatMax;
-                    ColorMapViewModel.MinValue = TransmissionLossRadial.StatMin;
+                    ColorMapViewModel.StatisticalMaximum = TransmissionLossRadial.StatMax;
+                    ColorMapViewModel.StatisticalMinimum = TransmissionLossRadial.StatMin;
                     OnPropertyChanged("TransmissionLossRadial");
                     CalculateBottomProfileGeometry();
                     RenderBitmap();

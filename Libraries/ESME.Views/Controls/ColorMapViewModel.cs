@@ -67,6 +67,9 @@ namespace ESME.Views.Controls
             }
         }
 
+        public double StatisticalMaximum { get; set; }
+        public double StatisticalMinimum { get; set; }
+
         public void Reverse()
         {
             Colors.Reverse();
