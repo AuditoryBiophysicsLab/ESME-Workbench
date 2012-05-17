@@ -26,7 +26,6 @@ namespace ESME.Views.TransmissionLossViewer
             {
                 _radialViewModel = value;                
                 _radialViewModel.PropertyChanged += (s, e) => { if (e.PropertyName == "WriteableBitmap" && Window!=null) Window.Activate(); };
-
             }
         } 
         #endregion

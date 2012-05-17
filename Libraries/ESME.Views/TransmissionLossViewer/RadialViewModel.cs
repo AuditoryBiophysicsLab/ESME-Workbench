@@ -238,9 +238,10 @@ namespace ESME.Views.TransmissionLossViewer
             var buffer = new int[width * height];
 
             var infinityColor = _colorMapViewModel.Colors[0];
-            var curOffset = 0;
-            for (var y = 0; y < height; y++)
+            var yValues = Enumerable.Range(0, height).AsParallel();
+            yValues.ForAll(y =>
             {
+                var curOffset = y * width;
                 for (var x = 0; x < width; x++)
                 {
                     if (token.IsCancellationRequested) return;
@@ -250,14 +251,18 @@ namespace ESME.Views.TransmissionLossViewer
                     var curColor = float.IsInfinity(curValue) ? infinityColor : ColorMapViewModel.Lookup(curValue);
                     buffer[curOffset++] = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
                 }
-            }
-            _dispatcher.InvokeAsynchronouslyInBackground(() =>
+            });
+            _dispatcher.InvokeIfRequired(() =>
             {
                 if (guid != Radial.Guid) return;
-                WriteableBitmap.WritePixels(new Int32Rect(0, 0, width, height), buffer, WriteableBitmap.BackBufferStride, 0, 0);
+                var rect = new Int32Rect(0, 0, width, height);
+                WriteableBitmap.Lock();
+                WriteableBitmap.WritePixels(rect, buffer, WriteableBitmap.BackBufferStride, 0, 0);
+                WriteableBitmap.AddDirtyRect(rect);
                 OnPropertyChanged("WriteableBitmap");
+                WriteableBitmap.Unlock();
                 WriteableBitmapVisibility = Visibility.Visible;
-            });
+            }, DispatcherPriority.Render);
             //_writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
             //_writeableBitmap.Unlock();
             //_dispatcher.InvokeIfRequired(RenderFinished, DispatcherPriority.ApplicationIdle);
