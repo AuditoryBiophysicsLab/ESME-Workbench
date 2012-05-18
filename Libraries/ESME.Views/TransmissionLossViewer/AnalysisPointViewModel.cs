@@ -21,10 +21,13 @@ namespace ESME.Views.TransmissionLossViewer
                     CloseDialog(null);
                 }
             };
-            TransmissionLossViewModel = new TransmissionLossViewModel { TransmissionLoss = analysisPoint.TransmissionLosses.First() };
+            TransmissionLossViewModel = new TransmissionLossViewModel { TransmissionLoss = analysisPoint.TransmissionLosses.FirstOrDefault() };
             _oldTL = TransmissionLossViewModel.TransmissionLoss;
-            _oldIndex = AnalysisPoint.TransmissionLosses.IndexOf(_oldTL);
-            _oldTL.PropertyChanged += TransmissionLossChanged;
+            if (_oldTL != null)
+            {
+                _oldIndex = AnalysisPoint.TransmissionLosses.IndexOf(_oldTL);
+                _oldTL.PropertyChanged += TransmissionLossChanged;
+            }
             TransmissionLossViewModel.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == "TransmissionLoss")

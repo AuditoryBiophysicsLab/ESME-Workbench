@@ -52,7 +52,8 @@ namespace ESME.Views.TransmissionLossViewer
                     {
                         case "CurMinValue":
                         case "CurMaxValue":
-                            BeginRenderBitmap(Radial.Guid, TransmissionLossRadial);
+                            if (Radial != null) BeginRenderBitmap(Radial.Guid, TransmissionLossRadial);
+                            else WaitToRenderText = "This radial has not yet been calculated";
                             break;
                     }
                 };
@@ -195,6 +196,11 @@ namespace ESME.Views.TransmissionLossViewer
         readonly Tuple<Task, CancellationTokenSource, long>[] _renderTasks = new Tuple<Task, CancellationTokenSource, long>[2];
         void BeginRenderBitmap(Guid guid, TransmissionLossRadial transmissionLoss)
         {
+            if (transmissionLoss == null)
+            {
+                WaitToRenderText = "This radial has not yet been calculated";
+                return;
+            };
             var tokenSource = new CancellationTokenSource();
             long ticks;
             QueryPerformanceCounter(out ticks);

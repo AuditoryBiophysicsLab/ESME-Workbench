@@ -66,7 +66,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 Name = locationName,
                 Comments = comments,
                 GeoRect = geoRect,
-                LayerSettings = { IsChecked = true }
+                LayerSettings = { IsChecked = true, LineOrSymbolSize = 5 }
             };
             Database.Context.Locations.Local.Add(location);
             location.CreateMapLayers();

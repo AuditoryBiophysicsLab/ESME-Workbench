@@ -121,6 +121,7 @@ namespace ESME.Scenarios
 
         public void Delete()
         {
+            if (IsDeleted) return;
             IsDeleted = true;
             LayerSettings.IsChecked = false;
             foreach (var transmissionLoss in TransmissionLosses) transmissionLoss.LayerSettings.IsChecked = false;
@@ -242,6 +243,7 @@ namespace ESME.Scenarios
 
         public void Delete()
         {
+            if (IsDeleted) return;
             lock (_createMapLayerLock)
             {
                 IsDeleted = true;
@@ -250,7 +252,7 @@ namespace ESME.Scenarios
             foreach (var radial in Radials.ToList()) radial.Delete();
             AnalysisPoint.TransmissionLosses.Remove(this);
             if (Mode != null) Mode.TransmissionLosses.Remove(this);
-            //if (AnalysisPoint.TransmissionLosses.Count == 0) AnalysisPoint.Delete();
+            if (AnalysisPoint.TransmissionLosses.Count == 0) AnalysisPoint.Delete();
             Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
             Scenario.Database.Context.TransmissionLosses.Remove(this);
         }
@@ -330,6 +332,7 @@ namespace ESME.Scenarios
 
         public void Delete()
         {
+            if (IsDeleted) return;
             IsDeleted = true;
             var files = Directory.GetFiles(Path.GetDirectoryName(BasePath), Path.GetFileNameWithoutExtension(BasePath) + ".*");
             foreach (var file in files) File.Delete(file);

@@ -59,10 +59,9 @@ namespace ESME.Views.TransmissionLossViewer
                 if (RadialViewModel != null)
                 {
                     RadialViewModel.Radial = Radials == null ? null : Radials[_selectedRadialIndex];
-                    RadialViewModel.ColorMapViewModel.MaxValue = MaxTransmissionLoss;
-                    RadialViewModel.ColorMapViewModel.MinValue = MinTransmissionLoss;
+                    if (!float.IsNaN(MaxTransmissionLoss)) RadialViewModel.ColorMapViewModel.MaxValue = MaxTransmissionLoss;
+                    if (!float.IsNaN(MinTransmissionLoss)) RadialViewModel.ColorMapViewModel.MinValue = MinTransmissionLoss;
                 }
-
             }
         }
         #endregion
@@ -123,8 +122,21 @@ namespace ESME.Views.TransmissionLossViewer
                 SelectedRadialIndex = 0;
                 if (_transmissionLoss != null)
                 {
-                    MaxTransmissionLoss = Radials.Max(r => r.MaximumTransmissionLossValues.Max(v => !double.IsInfinity(v) ? v : -10));
-                    MinTransmissionLoss = Radials.Min(r => r.MinimumTransmissionLossValues.Min(v => !double.IsInfinity(v) ? v : 1000));
+                    try
+                    {
+                        MaxTransmissionLoss = Radials.Max(r => r.MaximumTransmissionLossValues.Max(v => !double.IsInfinity(v) ? v : -10));
+                        MinTransmissionLoss = Radials.Min(r => r.MinimumTransmissionLossValues.Min(v => !double.IsInfinity(v) ? v : 1000));
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        MaxTransmissionLoss = float.NaN;
+                        MinTransmissionLoss = float.NaN;
+                    }
+                    catch (IOException)
+                    {
+                        MaxTransmissionLoss = float.NaN;
+                        MinTransmissionLoss = float.NaN;
+                    }
                     _transmissionLoss.PropertyChanged += (s, e) =>
                     {
                         if (e.PropertyName == "IsDeleted" && Window != null)
