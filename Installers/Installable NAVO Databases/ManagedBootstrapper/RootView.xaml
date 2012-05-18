@@ -16,6 +16,7 @@
         <ResourceDictionary Source="Styles.xaml" />
     </Window.Resources>
     <Grid>
+        <Rectangle MouseLeftButtonDown="BackgroundMouseLeftButtonDown" Fill="{StaticResource BackgroundBrush}"/>
         <Grid Margin="20"
               VerticalAlignment="Stretch"
               Background="{StaticResource BackgroundBrush}"
