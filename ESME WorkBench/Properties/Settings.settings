@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="LayersWidth" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">100</Value>
+      <Value Profile="(Default)">200</Value>
     </Setting>
     <Setting Name="WindowTop" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
@@ -12,10 +12,10 @@
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="WindowWidth" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">900</Value>
+      <Value Profile="(Default)">800</Value>
     </Setting>
     <Setting Name="WindowHeight" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">500</Value>
+      <Value Profile="(Default)">600</Value>
     </Setting>
     <Setting Name="ShowWorldMap" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -103,6 +103,9 @@
     </Setting>
     <Setting Name="LogListWidth" Type="System.String" Scope="User">
       <Value Profile="(Default)">200</Value>
+    </Setting>
+    <Setting Name="LocationViewHeight" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">250</Value>
     </Setting>
   </Settings>
 </SettingsFile>

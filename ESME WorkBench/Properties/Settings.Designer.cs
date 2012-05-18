@@ -25,7 +25,7 @@ namespace ESMEWorkbench.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        [global::System.Configuration.DefaultSettingValueAttribute("200")]
         public double LayersWidth {
             get {
                 return ((double)(this["LayersWidth"]));
@@ -61,7 +61,7 @@ namespace ESMEWorkbench.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("900")]
+        [global::System.Configuration.DefaultSettingValueAttribute("800")]
         public double WindowWidth {
             get {
                 return ((double)(this["WindowWidth"]));
@@ -73,7 +73,7 @@ namespace ESMEWorkbench.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("500")]
+        [global::System.Configuration.DefaultSettingValueAttribute("600")]
         public double WindowHeight {
             get {
                 return ((double)(this["WindowHeight"]));
@@ -428,6 +428,18 @@ namespace ESMEWorkbench.Properties {
             }
             set {
                 this["LogListWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("250")]
+        public double LocationViewHeight {
+            get {
+                return ((double)(this["LocationViewHeight"]));
+            }
+            set {
+                this["LocationViewHeight"] = value;
             }
         }
     }
