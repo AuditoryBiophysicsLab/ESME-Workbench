@@ -38,6 +38,7 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 if (_scenario != null)
                 {
+#if false
                     if (Database.Context.IsModified)
                     {
                         var result = _messageBox.ShowYesNoCancel(string.Format("The database has been modified.  Would you like to save your changes before {0}?", value == null ? "closing this experiment": "switching experiments"), MessageBoxImage.Question);
@@ -50,6 +51,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                 return;
                         }
                     }
+#endif
                     _scenario.RemoveMapLayers();
                 }
                 _scenario = value;
