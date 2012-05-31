@@ -288,6 +288,7 @@
                       WorkingDirectory="APPLICATIONFOLDER"
                       Target="[APPLICATIONFOLDER]ESMEWorkbench.exe"
                       Advertise="no" />
+            <!--
             <Shortcut Id="UninstallProduct"
                       Directory="ProgramMenuDir"
                       Advertise="no"
@@ -296,6 +297,7 @@
                       Target="[SystemFolder]msiexec.exe"
                       Arguments="/x [ProductCode]"
                       Description="Uninstalls $(var.ProductName)" />
+            -->
             <RemoveFolder Id="DeleteShortcutFolder"
                           Directory="ProgramMenuDir"
                           On="uninstall" />

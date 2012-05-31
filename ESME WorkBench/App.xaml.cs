@@ -57,7 +57,7 @@ namespace ESMEWorkbench
 
             if (Globals.AppSettings == null) 
                 Debugger.Break();
-
+#if false
             if (OSInfo.OperatingSystemName == "XP")
             {
                 Trace.TraceError("This application is not supported under Windows XP");
@@ -65,10 +65,9 @@ namespace ESMEWorkbench
                 Current.Shutdown();
                 return;
             }
+#endif
             try
             {
-                //ExperimentData.Test();
-
                 HRCBootstrapper.Initialise(new List<Assembly>
                                              {
                                                  typeof (App).Assembly,
