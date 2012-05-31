@@ -1,25 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>3.5</ProductVersion>
     <ProjectGuid>{198766f8-f78f-48a1-9f64-846b1b448b34}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>ESMEWorkbenchSetup-x64</OutputName>
+    <OutputName>ESMEWorkbenchSetup</OutputName>
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <Name>ESME Workbench</Name>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release (x64)|x64' ">
-    <OutputPath>bin\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <SuppressSpecificWarnings>
-    </SuppressSpecificWarnings>
-    <DefineConstants>BuildType=$(Configuration)</DefineConstants>
-    <WixVariables>
-    </WixVariables>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <SuppressSpecificWarnings />
+    <DefineConstants />
+    <WixVariables />
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <SuppressSpecificWarnings />
+    <DefineConstants />
+    <WixVariables />
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ESME Workbench.wxs" />
@@ -39,12 +42,12 @@
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <PropertyGroup>
-    <PostBuildEvent>if not exist "$(ProjectDir)msi" mkdir  "$(ProjectDir)msi"
-copy "$(TargetPath)" "$(ProjectDir)msi\$(TargetName)($(PlatformName))$(TargetExt)" /Y /V
-copy "$(ProjectDir)msi\$(TargetName)($(PlatformName))$(TargetExt)" "\\corti.bu.edu\hrc-backup\ESME Workbench\$(TargetName)($(PlatformName))$(TargetExt)" /Y /V</PostBuildEvent>
+    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -wixversion "$(ProjectDir)version.wxi" -output "$(ProjectDir) "</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -wixversion "$(ProjectDir)version.wxi" -output "$(ProjectDir) "</PreBuildEvent>
+    <PostBuildEvent>if not exist "$(ProjectDir)msi" mkdir  "$(ProjectDir)msi"
+copy "$(TargetPath)" "$(ProjectDir)msi\$(TargetName)-$(PlatformName)$(TargetExt)" /Y /V
+copy "$(TargetPath)" "\\corti.bu.edu\hrc-backup\ESME Workbench\$(TargetName)-$(PlatformName)$(TargetExt)" /Y /V</PostBuildEvent>
   </PropertyGroup>
   <!--
 To modify your build process, add your task inside one of the targets below and uncomment it.

@@ -29,7 +29,7 @@
   <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
   <?endif ?>	
   <Product Id="*"
-           UpgradeCode="88D30D04-AD51-4627-98E8-A54D82F8D4FC"
+           UpgradeCode="$(var.ProductUpgradeCode)"
            Name="$(var.ProductDisplayName)"
            Language="1033"
            Version="$(var.ProductFullVersion)"
@@ -38,8 +38,7 @@
              Compressed="yes"
              InstallScope="perMachine"
              Manufacturer="$(var.ProductAuthor)"
-             Description="$(var.ProductDisplayName)"
-             Platform="$(var.Platform)" />
+             Description="$(var.ProductDisplayName)" />
 
     <Media Id="1"
            Cabinet="ESMEWorkbench.cab"

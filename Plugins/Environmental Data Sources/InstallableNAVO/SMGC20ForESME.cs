@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Management;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Locations;
@@ -28,7 +29,8 @@ namespace InstallableNAVOPlugin
             IsTimeVariantData = true;
             AvailableTimePeriods = NAVOConfiguration.AllMonths.ToArray();
             AvailableResolutions = new[] { 60f };
-            var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\SMGC 2.0 Minimal");
+            var mo = new ManagementObject("Win32_Processor.DeviceID='CPU0'");
+            var regKey = Registry.LocalMachine.OpenSubKey(string.Format(@"Software{0}\Boston University\ESME Workbench\Data Sources\SMGC 2.0 Minimal", (ushort)mo["AddressWidth"] == 64 ? @"\Wow6432Node" : ""));
             if (regKey != null) _dataDirectory = (string)regKey.GetValue("");
 
             IsSelectable = _dataDirectory != null;

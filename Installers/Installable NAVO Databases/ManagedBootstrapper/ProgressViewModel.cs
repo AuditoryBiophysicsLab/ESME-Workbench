@@ -31,7 +31,25 @@ namespace WixBootstrapper
             ESMEBootstrapper.Model.Bootstrapper.CacheComplete += CacheComplete;
         }
 
-        public bool ProgressEnabled { get { return _root.State == InstallationState.Applying; } }
+        public bool ProgressEnabled
+        {
+            get
+            {
+                switch (_root.State)
+                {
+                    case InstallationState.Initializing:
+                    case InstallationState.Applying:
+                        return true;
+                    case InstallationState.Applied:
+                    case InstallationState.DetectedAbsent:
+                    case InstallationState.DetectedPresent:
+                    case InstallationState.DetectedNewer:
+                    case InstallationState.Failed:
+                    default:
+                        return false;
+                }
+            }
+        }
 
         public int Progress
         {

@@ -42,8 +42,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="HDF5DotNet">
-      <HintPath>..\..\..\ESME WorkBench\External References\HDF5DotNet.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\ESME WorkBench\External References\x64\HDF5DotNet.dll</HintPath>
     </Reference>
     <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
     <Reference Include="System" />

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Management;
 using System.Windows.Controls;
 using ESME.Environment;
 using ESME.Environment.NAVO;
@@ -27,7 +28,8 @@ namespace InstallableNAVOPlugin
             IsTimeVariantData = true;
             AvailableTimePeriods = NAVOConfiguration.AllMonths.ToArray();
             AvailableResolutions = new float[] { 15 };
-            var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\GDEM-V 3.0");
+            var mo = new ManagementObject("Win32_Processor.DeviceID='CPU0'");
+            var regKey = Registry.LocalMachine.OpenSubKey(string.Format(@"Software{0}\Boston University\ESME Workbench\Data Sources\GDEM-V 3.0", (ushort)mo["AddressWidth"] == 64 ? @"\Wow6432Node" : ""));
             if (regKey != null) _dataDirectory = (string)regKey.GetValue("");
 
             IsSelectable = _dataDirectory != null;

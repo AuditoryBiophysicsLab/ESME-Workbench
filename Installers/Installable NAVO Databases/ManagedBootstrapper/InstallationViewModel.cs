@@ -446,12 +446,14 @@ namespace WixBootstrapper
 
         private void ResolveSource(object sender, ResolveSourceEventArgs e)
         {
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("Entering ResolveSource. DownloadSource: {0} LocalSource: {1}", e.DownloadSource, e.LocalSource));
             int retries;
 
             _downloadRetries.TryGetValue(e.PackageOrContainerId, out retries);
             _downloadRetries[e.PackageOrContainerId] = retries + 1;
-
             e.Result = retries < 3 && !String.IsNullOrEmpty(e.DownloadSource) ? Result.Download : Result.Ok;
+            if (e.Result == Result.Download) Message = "Downloading " + e.PackageOrContainerId;
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("Leaving ResolveSource. DownloadSource: {0} LocalSource: {1}", e.DownloadSource, e.LocalSource));
         }
 
         private void ApplyComplete(object sender, ApplyCompleteEventArgs e)

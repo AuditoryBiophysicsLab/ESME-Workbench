@@ -6,13 +6,23 @@
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
   <?define ESMERoot="C:\Projects\ESME Deliverables"?>
-  <?define HDFRoot="$(var.ESMERoot)\ESME WorkBench\External References"?>
   <?define PluginRoot="$(var.ESMERoot)\Plugins\Environmental Data Sources"?>
   <?define PluginDLLPath="$(var.PluginRoot)\InstallableNAVO\bin\Release"?>
   <?define SupportDLLPath="$(var.PluginRoot)\NAVODatabaseAdapter\bin\Release"?>
+  <?define HDFRoot="$(var.ESMERoot)\ESME WorkBench\External References\$(var.Platform)"?>
+
+  <?if $(var.Platform) = x64 ?>
+  <?define ProductDisplayName = "$(var.ProductName) (64-bit)" ?>
+  <?define ProductUpgradeCode = "3AD6BFB0-49A4-4857-80C8-15D282ECD6FB" ?>
+  <?define Win64 = "yes" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?else ?>
   <?define ProductDisplayName = "$(var.ProductName)" ?>
-  <?define ProductId = "{560A34C4-244A-4379-A818-985A61054A34}" ?>
-  <?define ProductUpgradeCode = "{3AD6BFB0-49A4-4857-80C8-15D282ECD6FB}" ?>
+  <?define ProductUpgradeCode = "F67474C8-D50A-4F02-8E44-AC705FD7113F" ?>
+  <?define Win64 = "no" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+  <?endif ?>
+
   <Product Id="*"
            Name="$(var.ProductDisplayName)"
            Language="1033"
@@ -30,7 +40,8 @@
       <RegistrySearch Id="ESMEInstallationKey"
                       Root="HKLM"
                       Key="Software\Boston University\ESME Workbench"
-                      Type="raw" />
+                      Type="raw" 
+                      Win64="$(var.Win64)" />
     </Property>
     <Condition Message="This plugin requires the ESME Workbench to be installed. Please install it and try again. The ESME Workbench can be downloaded from http://esme.bu.edu/">
       Installed OR ESMEINSTALLLOCATION
@@ -60,7 +71,7 @@
                 Source="$(var.HDFRoot)\szip.dll" />
           <File Id="zlib1.dll"
                 Name="zlib1.dll"
-                Source="$(var.HDFRoot)\zlib1.dll" />
+                Source="$(var.HDFRoot)\zlib.dll" />
         </Component>
       </Directory>
     </Directory>

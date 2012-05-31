@@ -105,6 +105,7 @@ namespace WixBootstrapper
             {
                 if (_state == value) return;
                 _state = value;
+                ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("InstallationState is now {0}", _state));
 
                 // Notify all the properties derived from the state that the state changed.
                 base.OnPropertyChanged("State");

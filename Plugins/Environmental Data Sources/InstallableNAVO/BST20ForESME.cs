@@ -1,6 +1,7 @@
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Management;
 using System.Windows.Controls;
 using ESME.Environment;
 using ESME.Locations;
@@ -27,8 +28,8 @@ namespace InstallableNAVOPlugin
             AvailableResolutions = new[] { 5f, 0.1f };
             IsTimeVariantData = false;
             AvailableTimePeriods = new[] { TimePeriod.Invalid };
-
-            var regKey = Registry.LocalMachine.OpenSubKey(@"Software\Boston University\ESME Workbench\Data Sources\BST 2.0");
+            var mo = new ManagementObject("Win32_Processor.DeviceID='CPU0'");
+            var regKey = Registry.LocalMachine.OpenSubKey(string.Format(@"Software{0}\Boston University\ESME Workbench\Data Sources\BST 2.0", (ushort)mo["AddressWidth"] == 64 ? @"\Wow6432Node" : ""));
             if (regKey != null) _dataDirectory = (string)regKey.GetValue("");
 
             IsSelectable = _dataDirectory != null;
