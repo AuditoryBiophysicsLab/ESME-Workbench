@@ -53,7 +53,7 @@ namespace WixBootstrapper
         private readonly Dictionary<string, int> _downloadRetries;
         private bool _downgrade;
         const string ESMEHomePageUrl = "http://esme.bu.edu/";
-        const string ESMENewsUrl = "http://esme.bu.edu/news.htm";
+        const string ESMENewsUrl = "http://esme.bu.edu/";
 
         private bool _planAttempted;
         private LaunchAction _plannedAction;

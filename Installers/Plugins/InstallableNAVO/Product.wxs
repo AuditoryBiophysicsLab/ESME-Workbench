@@ -69,8 +69,8 @@
           <File Id="szip.dll"
                 Name="szip.dll"
                 Source="$(var.HDFRoot)\szip.dll" />
-          <File Id="zlib1.dll"
-                Name="zlib1.dll"
+          <File Id="zlib.dll"
+                Name="zlib.dll"
                 Source="$(var.HDFRoot)\zlib.dll" />
         </Component>
       </Directory>

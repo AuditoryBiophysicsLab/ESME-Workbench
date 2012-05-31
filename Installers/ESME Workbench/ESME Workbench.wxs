@@ -22,11 +22,13 @@
   <?define ProductUpgradeCode = "88D30D04-AD51-4627-98E8-A54D82F8D4FC" ?>
   <?define Win64 = "yes" ?>
   <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?define sqlite3dllPath="$(var.dotConnectPath)\SQLite\x64"?>
   <?else ?>
   <?define ProductDisplayName = "$(var.ProductName)" ?>
   <?define ProductUpgradeCode = "12E20F8D-0C6D-47C9-98A1-D4920B755766" ?>
   <?define Win64 = "no" ?>
   <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+  <?define sqlite3dllPath="$(var.dotConnectPath)\SQLite"?>
   <?endif ?>	
   <Product Id="*"
            UpgradeCode="$(var.ProductUpgradeCode)"
@@ -213,22 +215,7 @@
                   Source="$(var.dotConnectPath)\SQLite\Entity\EF4\Devart.Data.SQLite.Entity.Migrations.dll" />
             <File Id="sqlite3.dll"
                   Name="sqlite3.dll"
-                  Source="$(var.dotConnectPath)\SQLite\x64\sqlite3.dll" />
-            <!--
-            <File Id="Devart.Data.Linq.dll"
-                  Name="Devart.Data.Linq.dll"
-                  Source="$(var.dotConnectPath)\Linq\Devart.Data.Linq.dll" />
-            <File Id="Devart.Data.SQLite.Linq.dll"
-                  Name="Devart.Data.SQLite.Linq.dll"
-                  Source="$(var.dotConnectPath)\Linq\Devart.Data.SQLite.Linq.dll" />
-            <File Id="System.Data.SQLite.dll"
-                  Name="System.Data.SQLite.dll"
-                  Source="$(var.ExternalsPath)\System.Data.SQLite.dll" />
-            <File Id="System.Data.SQLite.Linq.dll"
-                  Name="System.Data.SQLite.Linq.dll"
-                  Source="$(var.ExternalsPath)\System.Data.SQLite.Linq.dll" />
-            -->
-
+                  Source="$(var.sqlite3dllPath)\sqlite3.dll" />
             <!-- Microsoft Ribbon assembly -->
             <File Id="RibbonControlsLibrary.dll"
                   Name="RibbonControlsLibrary.dll"
