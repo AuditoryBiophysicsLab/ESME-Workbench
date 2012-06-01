@@ -103,6 +103,17 @@
             <File Id="HRC.dll"
                   Name="HRC.dll"
                   Source="$(var.ESMEPath)\HRC.dll" />
+            <File Id="TransmissionLossViewer.exe"
+                  Name="TransmissionLossViewer.exe"
+                  Source="$(var.TransmissionLossViewerPath)\TransmissionLossViewer.exe" />
+            <File Id="WebsiteLink"
+                  Name="ESME.url"
+                  Source="$(var.ESMERoot)\ESME.url" />
+
+            <File Id="QuickStartGuide"
+                  Name="ESME Workbench Quick Start.pdf"
+                  Source="$(var.DocRoot)\ESME Workbench Quick Start.pdf" />
+            <!--
             <File Id="ReleaseNotes"
                   Name="ESME Workbench Release Notes.pdf"
                   Source="$(var.DocRoot)\ESME Workbench Release Notes.pdf" />
@@ -112,18 +123,10 @@
             <File Id="UserGuide"
                   Name="ESME Workbench User Guide.pdf"
                   Source="$(var.DocRoot)\ESME Workbench User Guide.pdf" />
-            <File Id="QuickStartGuide"
-                  Name="ESME Workbench Quick Start.pdf"
-                  Source="$(var.DocRoot)\ESME Workbench Quick Start.pdf" />
             <File Id="ReadMe"
                   Name="Read Me.pdf"
                   Source="$(var.DocRoot)\Read Me.pdf" />
-            <File Id="TransmissionLossViewer.exe"
-                  Name="TransmissionLossViewer.exe"
-                  Source="$(var.TransmissionLossViewerPath)\TransmissionLossViewer.exe" />
-            <File Id="WebsiteLink"
-                  Name="ESME.url"
-                  Source="$(var.ESMERoot)\ESME.url" />
+            -->
 
             <!-- Bellhop acoustic simulator -->
             <File Id="cyggcc_s1.dll"
@@ -252,6 +255,7 @@
                       WorkingDirectory="APPLICATIONFOLDER"
                       Target="[APPLICATIONFOLDER]ESME Workbench Quick Start.pdf"
                       Advertise="no" />
+            <!-- 
             <Shortcut Id="ReleaseNotes_Shortcut"
                       Directory="ProgramMenuDir"
                       Name="Release Notes"
@@ -276,9 +280,10 @@
                       WorkingDirectory="APPLICATIONFOLDER"
                       Target="[APPLICATIONFOLDER]Read Me.pdf"
                       Advertise="no" />
+            -->
             <Shortcut Id="WebLink_Shortcut"
                       Directory="ProgramMenuDir"
-                      Name="Visit the ESME Workbench Website to download environmental data"
+                      Name="ESME Website"
                       WorkingDirectory="APPLICATIONFOLDER"
                       Target="[APPLICATIONFOLDER]ESME.url"
                       Advertise="no" />

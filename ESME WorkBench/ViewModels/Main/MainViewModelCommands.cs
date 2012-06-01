@@ -1,11 +1,7 @@
-﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Windows;
-using System.Windows.Input;
 using ESME;
 using ESME.Data;
 using ESMEWorkbench.ViewModels.TransmissionLoss;
@@ -83,19 +79,7 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(o =>
                 {
-                    if (Database.Context.IsModified)
-                    {
-                        var result = _messageBox.ShowYesNoCancel("The experiment has been modified.  Would you like to save your changes before exiting?", MessageBoxImage.Question);
-                        switch (result)
-                        {
-                            case MessageBoxResult.Yes:
-                                Database.SaveChanges();
-                                break;
-                            case MessageBoxResult.Cancel:
-                                ((CancelEventArgs)o.EventArgs).Cancel = true;
-                                return;
-                        }
-                    }
+                    if (Database.Context.IsModified) Database.SaveChanges();
                     foreach (var popup in _openPopups.Where(popup => popup != null))
                         popup.Close();
                     MediatorMessage.Send(MediatorMessage.ApplicationClosing, true);

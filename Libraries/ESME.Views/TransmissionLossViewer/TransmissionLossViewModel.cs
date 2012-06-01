@@ -120,23 +120,25 @@ namespace ESME.Views.TransmissionLossViewer
             {
                 _transmissionLoss = value;
                 Radials = _transmissionLoss == null ? null : new ObservableList<Radial>(from r in _transmissionLoss.Radials orderby r.Bearing select r);
-                
+                var maxTransmissionLoss = float.NaN;
+                var minTransmissionLoss = float.NaN;
                 if (_transmissionLoss != null)
                 {
-                    try
+                    foreach (var radial in _transmissionLoss.Radials)
                     {
-                        MaxTransmissionLoss = Radials.Max(r => r.MaximumTransmissionLossValues.Max(v => !double.IsInfinity(v) ? v : -10));
-                        MinTransmissionLoss = Radials.Min(r => r.MinimumTransmissionLossValues.Min(v => !double.IsInfinity(v) ? v : 1000));
-                    }
-                    catch (FileNotFoundException)
-                    {
-                        MaxTransmissionLoss = float.NaN;
-                        MinTransmissionLoss = float.NaN;
-                    }
-                    catch (IOException)
-                    {
-                        MaxTransmissionLoss = float.NaN;
-                        MinTransmissionLoss = float.NaN;
+                        try
+                        {
+                            var curMax = radial.MaximumTransmissionLossValues.Max(v => !double.IsInfinity(v) ? v : -10);
+                            var curMin = radial.MinimumTransmissionLossValues.Min(v => !double.IsInfinity(v) ? v : 1000);
+                            maxTransmissionLoss = float.IsNaN(maxTransmissionLoss) ? curMax : Math.Max(maxTransmissionLoss, curMax);
+                            minTransmissionLoss = float.IsNaN(minTransmissionLoss) ? curMin : Math.Min(minTransmissionLoss, curMin);
+                        }
+                        catch (FileNotFoundException)
+                        {
+                        }
+                        catch (IOException)
+                        {
+                        }
                     }
                     _transmissionLoss.PropertyChanged += (s, e) =>
                     {
@@ -146,11 +148,8 @@ namespace ESME.Views.TransmissionLossViewer
                         }
                     };
                 }
-                else
-                {
-                    MaxTransmissionLoss = float.NaN;
-                    MinTransmissionLoss = float.NaN;
-                }
+                MaxTransmissionLoss = maxTransmissionLoss;
+                MinTransmissionLoss = minTransmissionLoss;
                 SelectedRadialIndex = 0;
             }
         }

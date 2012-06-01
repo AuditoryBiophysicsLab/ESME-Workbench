@@ -201,6 +201,7 @@ namespace ESME.Views.TransmissionLossViewer
                 WaitToRenderText = "This radial has not yet been calculated";
                 return;
             };
+            if (WriteableBitmap == null) return;
             var tokenSource = new CancellationTokenSource();
             long ticks;
             QueryPerformanceCounter(out ticks);
