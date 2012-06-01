@@ -112,14 +112,15 @@ namespace ESME.Views.TransmissionLossViewer
         #region public TransmissionLoss TransmissionLoss { get; set; }
         ESME.Scenarios.TransmissionLoss _transmissionLoss;
 
-        [Affects("Radials", "RadialCount", "SelectedRadialIndex", "SelectedRadial", "SelectedBearingGeometry")] public ESME.Scenarios.TransmissionLoss TransmissionLoss
+        [Affects("Radials", "RadialCount", "SelectedRadialIndex", "SelectedRadial", "SelectedBearingGeometry")] 
+        public ESME.Scenarios.TransmissionLoss TransmissionLoss
         {
             get { return _transmissionLoss; }
             set
             {
                 _transmissionLoss = value;
                 Radials = _transmissionLoss == null ? null : new ObservableList<Radial>(from r in _transmissionLoss.Radials orderby r.Bearing select r);
-                SelectedRadialIndex = 0;
+                
                 if (_transmissionLoss != null)
                 {
                     try
@@ -145,6 +146,12 @@ namespace ESME.Views.TransmissionLossViewer
                         }
                     };
                 }
+                else
+                {
+                    MaxTransmissionLoss = float.NaN;
+                    MinTransmissionLoss = float.NaN;
+                }
+                SelectedRadialIndex = 0;
             }
         }
         #endregion
