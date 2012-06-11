@@ -20,24 +20,30 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
             </Grid>
         </ItemsPanelTemplate>
     </StatusBar.ItemsPanel>
     <StatusBarItem Grid.Column="0">
-        <TextBlock Text="{Binding MouseRange}" Width="90" />
+        <TextBlock Width="90" Text="{Binding MouseRange}" />
     </StatusBarItem>
     <Separator Grid.Column="1" />
     <StatusBarItem Grid.Column="2">
-        <TextBlock Text="{Binding MouseDepth}" Width="90" />
+        <TextBlock Width="90" Text="{Binding MouseDepth}" />
     </StatusBarItem>
     <Separator Grid.Column="3" />
     <StatusBarItem Grid.Column="4">
-        <TextBlock Text="{Binding MouseTLInfo}" ToolTip="Units: dB re: 1 μPa" Width="147"/>
+        <TextBlock Width="147" Text="{Binding MouseTLInfo}" ToolTip="Units: dB re: 1 μPa" />
     </StatusBarItem>
     <Separator Grid.Column="5" />
     <StatusBarItem Grid.Column="6">
-        <TextBlock Text="{Binding MouseSPLInfo}" ToolTip="Units: dB SPL re: 1 μPa"/>
+        <TextBlock Text="{Binding MouseSPLInfo}" ToolTip="Units: dB SPL re: 1 μPa" />
+    </StatusBarItem>
+    <Separator Grid.Column="7" />
+    <StatusBarItem Grid.Column="8">
+        <TextBlock Text="{Binding RenderThreadDebugInfo}" ToolTip="RenderThreadDebugInfo" />
     </StatusBarItem>
 </StatusBar>
 

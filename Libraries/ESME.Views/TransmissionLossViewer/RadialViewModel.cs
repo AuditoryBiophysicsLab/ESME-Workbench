@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
@@ -52,7 +50,7 @@ namespace ESME.Views.TransmissionLossViewer
                     {
                         case "CurMinValue":
                         case "CurMaxValue":
-                            if (Radial != null) BeginRenderBitmap(Radial.Guid, TransmissionLossRadial);
+                            if (Radial != null) BeginRenderBitmap(Radial.Guid, TransmissionLossRadial, true);
                             else WaitToRenderText = "This radial has not yet been calculated";
                             break;
                     }
@@ -98,7 +96,8 @@ namespace ESME.Views.TransmissionLossViewer
                     if (WriteableBitmap == null) WriteableBitmap = new WriteableBitmap(TransmissionLossRadial.Ranges.Count, TransmissionLossRadial.Depths.Count, 96, 96, PixelFormats.Bgr32, null);
                     ColorMapViewModel.StatisticalMaximum = TransmissionLossRadial.StatMax;
                     ColorMapViewModel.StatisticalMinimum = TransmissionLossRadial.StatMin;
-                    BeginRenderBitmap(_radial.Guid, TransmissionLossRadial);
+                    _curMaxValue = _curMinValue = -1;
+                    BeginRenderBitmap(_radial.Guid, TransmissionLossRadial, true);
                     RangeMin = _radial.Ranges.First();
                     RangeMax = _radial.Ranges.Last();
                     DepthMin = _radial.Depths.First();
@@ -200,7 +199,7 @@ namespace ESME.Views.TransmissionLossViewer
             {
                 WaitToRenderText = "This radial has not yet been calculated";
                 return;
-            };
+            }
             if (WriteableBitmap == null) return;
             var tokenSource = new CancellationTokenSource();
             long ticks;
@@ -213,14 +212,22 @@ namespace ESME.Views.TransmissionLossViewer
                 {
                     if (_renderTasks[0] != null && _renderTasks[0].Item3 == ticks)
                     {
+                        //_writer.WriteLine("State 1");
                         _renderTasks[0] = null;
                         if (_renderTasks[1] != null)
                         {
+                            //_writer.WriteLine("State 1.1");
                             _renderTasks[0] = _renderTasks[1];
                             _renderTasks[1] = null;
                         }
                     }
-                    else if (_renderTasks[1] != null && _renderTasks[1].Item3 == ticks) _renderTasks[1] = null;
+                    else if (_renderTasks[1] != null && _renderTasks[1].Item3 == ticks)
+                    {
+                        _renderTasks[1] = null;
+                        //_writer.WriteLine("State 2");
+                    }
+                    //else _writer.WriteLine("State 3");
+                    //_writer.Flush();
                 }
             });
             lock (_renderTasks)
@@ -236,6 +243,54 @@ namespace ESME.Views.TransmissionLossViewer
             //if (!_renderTasks.TryAdd(ticks, Tuple.Create(tokenSource, task))) tokenSource.Cancel();
         }
 
+        void BeginRenderBitmap(Guid guid, TransmissionLossRadial transmissionLoss, bool dummy)
+        {
+            if (transmissionLoss == null)
+            {
+                Debug.WriteLine("Skipping rendering at 1");
+                WaitToRenderText = "This radial has not yet been calculated";
+                return;
+            }
+            if (WriteableBitmap == null)
+            {
+                Debug.WriteLine("Skipping rendering at 2");
+                return;
+            }
+            if (_isRendering)
+            {
+                Debug.WriteLine("Skipping rendering at 3");
+                return;
+            }
+            lock (_lockObject)
+            {
+                if (_isRendering)
+                {
+                    Debug.WriteLine("Skipping rendering at 4");
+                    return;
+                }
+                if (_curMinValue == ColorMapViewModel.CurMinValue && _curMaxValue == ColorMapViewModel.CurMaxValue)
+                {
+                    Debug.WriteLine("Skipping rendering at 5");
+                    return;
+                }
+                Debug.WriteLine("Render starting");
+                _isRendering = true;
+                _curMinValue = ColorMapViewModel.CurMinValue;
+                _curMaxValue = ColorMapViewModel.CurMaxValue;
+            }
+            var tokenSource = new CancellationTokenSource();
+            var task = TaskEx.Run(() =>
+            {
+                lock (_lockObject) _isRendering = false;
+                Debug.WriteLine("Render completed, checking for re-render...");
+                RenderBitmapAsync(guid, transmissionLoss, tokenSource.Token);
+            });
+            task.ContinueWith(t => BeginRenderBitmap(guid, transmissionLoss, dummy));
+        }
+
+        readonly object _lockObject = new object();
+        double _curMinValue, _curMaxValue;
+        volatile bool _isRendering;
         void RenderBitmapAsync(Guid guid, TransmissionLossRadial transmissionLoss, CancellationToken token)
         {
             if (token.IsCancellationRequested) return;
@@ -252,8 +307,6 @@ namespace ESME.Views.TransmissionLossViewer
                 for (var x = 0; x < width; x++)
                 {
                     if (token.IsCancellationRequested) return;
-                    // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
-                    // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
                     var curValue = transmissionLoss[y, x];
                     var curColor = float.IsInfinity(curValue) ? infinityColor : ColorMapViewModel.Lookup(curValue);
                     buffer[curOffset++] = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
@@ -273,12 +326,6 @@ namespace ESME.Views.TransmissionLossViewer
             //_writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
             //_writeableBitmap.Unlock();
             //_dispatcher.InvokeIfRequired(RenderFinished, DispatcherPriority.ApplicationIdle);
-        }
-
-        void RenderFinished()
-        {
-            OnPropertyChanged("WriteableBitmap");
-            WriteableBitmapVisibility = Visibility.Visible;
         }
 
         public string ToCSV()
@@ -363,5 +410,7 @@ namespace ESME.Views.TransmissionLossViewer
             }
         }
         #endregion
+
+        //public void Dispose() { _writer.Close(); }
     }
 }
