@@ -145,10 +145,10 @@ namespace ESME.Locations
                         dataSet.SampleCount = sediment.Samples.Count;
                         sediment.Serialize(fileName);
                         dataSet.FileSize = new FileInfo(fileName).Length;
-                        var sedimentColormap = new Colormap(Colormap.CopperComponents, 23);
+                        var sedimentColormap = new Colormap(Colormap.HotComponents, 24);
                         sedimentColormap.Map.Insert(0, Colors.Black);
                         sedimentColormap.Map.Add(Colors.Black);
-                        ToBitmap(sediment.Samples, fileName, v => v == null ? 0 : v.Data.SampleValue, (data, minValue, maxValue) => sedimentColormap.ToPixelValues(data, 1, 23));
+                        ToBitmap(sediment.Samples, fileName, v => v == null ? 0 : v.Data.SampleValue, (data, minValue, maxValue) => sedimentColormap.ToPixelValues(data, 1, 24));
                         Debug.WriteLine("Importer: Imported {0}min Sediment from plugin {1}", dataSet.Resolution, sourcePlugin.PluginName);
                         return sediment;
                     });
