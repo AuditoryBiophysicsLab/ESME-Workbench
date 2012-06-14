@@ -70,7 +70,7 @@ namespace ESME.TransmissionLoss.Bellhop
             var sb = new StringBuilder();
             sb.AppendFormat("'L' \n");
             sb.AppendFormat("{0} \n", Profile.Count);
-            foreach (var point in Profile) sb.AppendFormat("{0:0.#####} {1:0.#####} \n", point.Range, point.Depth);
+            foreach (var point in Profile) sb.AppendFormat("{0:0.###} {1:0.###} \n", point.Range, point.Depth);
             return sb.ToString();
         }
 
