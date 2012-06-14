@@ -137,6 +137,7 @@ namespace NAVODatabaseAdapter
             var newField = new SoundSpeedField { TimePeriod = month };
             newField.EnvironmentData.AddRange(newFieldEnvironmentData);
             newField.EnvironmentData.Sort();
+            newField.EnvironmentData.TrimToNearestPoints(region);
             return newField;
         }
 

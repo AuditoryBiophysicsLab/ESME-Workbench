@@ -58,10 +58,10 @@ namespace ESMEWorkbench.ViewModels.Main
                 LayerTreeViewModel.Scenario = _scenario;
                 MainWindowTitle = string.Format("ESME Workbench: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name);
                 if (_scenario == null) return;
-                _cache[_scenario.Wind].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() => _scenario.Wind.CreateMapLayers()));
-                _cache[_scenario.SoundSpeed].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() => _scenario.SoundSpeed.CreateMapLayers()));
-                _cache[_scenario.Bathymetry].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() => _scenario.Bathymetry.CreateMapLayers()));
-                _cache[_scenario.Sediment].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() => _scenario.Sediment.CreateMapLayers()));
+                _cache[_scenario.Wind].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() => { _scenario.Wind.CreateMapLayers(); _scenario.Wind.LayerSettings.MoveLayerToBack(); }));
+                _cache[_scenario.SoundSpeed].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() => { _scenario.SoundSpeed.CreateMapLayers(); _scenario.SoundSpeed.LayerSettings.MoveLayerToBack(); }));
+                _cache[_scenario.Bathymetry].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() => { _scenario.Bathymetry.CreateMapLayers(); _scenario.Bathymetry.LayerSettings.MoveLayerToBack(); }));
+                _cache[_scenario.Sediment].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() => { _scenario.Sediment.CreateMapLayers(); _scenario.Sediment.LayerSettings.MoveLayerToBack(); }));
 
                 _scenario.CreateMapLayers();
                 _scenario.Location.LayerSettings.IsChecked = true;

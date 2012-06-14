@@ -38,6 +38,7 @@ namespace NAVODatabaseAdapter
             if (progress != null) lock (progress) progress.Report(totalProgress++);
             sediment.Samples.AddRange(dedupeList);
             sediment.Samples.Sort();
+            sediment.Samples.TrimToNearestPoints(region);
             if (progress != null) lock (progress) progress.Report(totalProgress++);
             if (lowResGroup != null) H5G.close(lowResGroup);
             if (highResGroup != null) H5G.close(highResGroup);

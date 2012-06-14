@@ -80,26 +80,33 @@ namespace ESME.Locations
                     LayerSettings.MapLayerViewModel = pointLayer;
                     break;
                 case PluginSubtype.Wind:
+                    CreateRasterLayer(Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"), Location.GeoRect);
+                    break;
                 case PluginSubtype.Bathymetry:
+                    CreateRasterLayer(Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"), ((Bathymetry)Location.Cache[this].Result).Samples.GeoRect);
+                    break;
                 case PluginSubtype.Sediment:
-                    var rasterFilename = Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp");
-                    if (File.Exists(rasterFilename))
-                    {
-                        var rasterLayer = new RasterMapLayer
-                        {
-                            Name = string.Format("{0}", Guid),
-                            North = (float)Location.GeoRect.North,
-                            South = (float)Location.GeoRect.South,
-                            East = (float)Location.GeoRect.East,
-                            West = (float)Location.GeoRect.West,
-                            RasterFilename = Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"),
-                        };
-                        LayerSettings.MapLayerViewModel = rasterLayer;
-                    }
+                    CreateRasterLayer(Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"), ((Sediment)Location.Cache[this].Result).Samples.GeoRect);
                     break;
                 default:
                     throw new ApplicationException(string.Format("Unknown layer type: {0}", ((PluginIdentifier)SourcePlugin).PluginSubtype));
             }
+        }
+
+        void CreateRasterLayer(string rasterFilename, GeoRect geoRect)
+        {
+            if (!File.Exists(rasterFilename)) return;
+            var rasterLayer = new RasterMapLayer
+            {
+                Name = string.Format("{0}", Guid),
+                North = (float)geoRect.North,
+                South = (float)geoRect.South,
+                East = (float)geoRect.East,
+                West = (float)geoRect.West,
+                RasterFilename = rasterFilename,
+            };
+            LayerSettings.MapLayerViewModel = rasterLayer;
+            MediatorMessage.Send(MediatorMessage.MoveLayerToBack, rasterLayer);
         }
 
         public void Delete()

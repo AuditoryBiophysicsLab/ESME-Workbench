@@ -34,7 +34,7 @@ namespace NAVODatabaseAdapter
             if (progress != null) lock (progress) progress.Report(2);
 
             var bathymetry = Bathymetry.FromYXZ(Path.Combine(outputPath + ".yxz"), -1);
-
+            bathymetry.Samples.TrimToNearestPoints(region);
             if (progress != null) lock (progress) progress.Report(3);
 
             File.Delete(outputPath + ".yxz");

@@ -104,6 +104,7 @@ namespace ESME.Locations
 
         public void CreateMapLayers()
         {
+            foreach (var dataSet in EnvironmentalDataSets) dataSet.CreateMapLayers();
             var mapLayer = new OverlayShapeMapLayer
             {
                 Name = string.Format("{0}", Guid),
@@ -113,7 +114,6 @@ namespace ESME.Locations
             mapLayer.Done();
             LayerSettings.AreaColor = Colors.Transparent;
             LayerSettings.MapLayerViewModel = mapLayer;
-            foreach (var dataSet in EnvironmentalDataSets) dataSet.CreateMapLayers();
         }
 
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }

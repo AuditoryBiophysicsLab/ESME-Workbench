@@ -1,8 +1,6 @@
 using System.ComponentModel.Composition;
 using System.IO;
-using System.Linq;
 using System.Management;
-using System.Windows.Controls;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
