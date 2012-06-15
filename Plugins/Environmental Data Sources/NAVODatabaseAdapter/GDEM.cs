@@ -98,8 +98,20 @@ namespace NAVODatabaseAdapter
 
             var lonMap = new List<AxisMap>();
             var latMap = new List<AxisMap>();
-            for (var i = 0; i < temperatureLongitudes.Length; i++) if ((temperatureLongitudes[i] >= west) && (temperatureLongitudes[i] <= east)) lonMap.Add(new AxisMap((float)temperatureLongitudes[i], i));
-            for (var i = 0; i < temperatureLatitudes.Length; i++) if (temperatureLatitudes[i] >= south && temperatureLatitudes[i] <= north) latMap.Add(new AxisMap((float)temperatureLatitudes[i], i));
+            int i;
+            if (east < west)
+            {
+                for (i = 0; i < temperatureLongitudes.Length; i++) 
+                    if ((temperatureLongitudes[i] <= east) || (temperatureLongitudes[i] >= west)) 
+                        lonMap.Add(new AxisMap((float)temperatureLongitudes[i], i));
+            }
+            else
+            {
+                for (i = 0; i < temperatureLongitudes.Length; i++) 
+                    if ((temperatureLongitudes[i] >= west) && (temperatureLongitudes[i] <= east)) 
+                        lonMap.Add(new AxisMap((float)temperatureLongitudes[i], i));
+            }
+            for (i = 0; i < temperatureLatitudes.Length; i++) if (temperatureLatitudes[i] >= south && temperatureLatitudes[i] <= north) latMap.Add(new AxisMap((float)temperatureLatitudes[i], i));
             var selectedLons = lonMap.Select(x => x.Value).ToArray();
             var selectedLats = latMap.Select(y => y.Value).ToArray();
 

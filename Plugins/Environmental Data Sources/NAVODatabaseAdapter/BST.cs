@@ -24,7 +24,6 @@ namespace NAVODatabaseAdapter
 
             var fileId = H5F.open(bstDirectory, H5F.OpenMode.ACC_RDONLY);
             var highResGroup = H5G.open(fileId, "0.10000/G/UNCLASSIFIED/");
-            highResGroup = null;
             var lowResGroup = H5G.open(fileId, "5.00000/G/UNCLASSIFIED/");
             var dedupeList = new HashedArrayList<SedimentSample>();
             for (var lat = south; lat < north; lat++)
