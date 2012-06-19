@@ -8,7 +8,7 @@ using HRC.WPF;
 
 namespace ESME.Scenarios
 {
-    public class ScenarioSpecies : IHaveGuid, IHaveLayerSettings
+    public class ScenarioSpecies : IHaveGuid, IHaveLayerSettings,IEquatable<ScenarioSpecies>
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
@@ -50,5 +50,7 @@ namespace ESME.Scenarios
             Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
             Scenario.Database.Context.ScenarioSpecies.Remove(this);
         }
+        
+        public bool Equals(ScenarioSpecies other) { return Guid == other.Guid; }
     }
 }

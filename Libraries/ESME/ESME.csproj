@@ -245,14 +245,14 @@
     <Compile Include="Simulator\Actor.cs" />
     <Compile Include="Simulator\ActorExposureRecord.cs" />
     <Compile Include="Simulator\ActorPositionRecord.cs" />
-    <Compile Include="SimulationAnalysis\AnimatScatterplot.cs" />
+    <Compile Include="SimulationAnalysis\SpeciesScatterplot.cs" />
     <Compile Include="Simulator\Interfaces.cs" />
     <Compile Include="Simulator\Simulation.cs" />
     <Compile Include="Simulator\SimulationContext.cs" />
     <Compile Include="Simulator\SimulationLog.cs" />
     <Compile Include="Simulator\SimulationTimeStepRecord.cs" />
     <Compile Include="Simulator\SimulatorService.cs" />
-    <Compile Include="SimulationAnalysis\SourceModeThreshholdHistogram.cs" />
+    <Compile Include="SimulationAnalysis\ModeThreshholdHistogram.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLInput.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLOutput.cs" />
     <Compile Include="TransmissionLoss\CASS\CASSOutput.cs" />

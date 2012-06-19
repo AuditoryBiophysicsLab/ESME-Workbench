@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using ESME.Scenarios;
-using HRC.Navigation;
 
 namespace ESME.Simulator
 {

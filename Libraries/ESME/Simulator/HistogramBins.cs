@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Xml.Linq;
-using ESME.Scenarios;
 
 namespace ESME.Simulator
 {
@@ -12,30 +7,30 @@ namespace ESME.Simulator
         /// <summary>
         /// Lowest tracked exposure level, in dB re: 1 uPa
         /// </summary>
-        public float Low { get; set; }
+        public float Low { get; private set; }
 
         /// <summary>
         /// Exposure bin width, in dB
         /// </summary>
-        public float Width { get; set; }
+        public float Width { get; private set; }
 
         /// <summary>
         /// The actual array of recieved level bins
         /// </summary>
-        public int[] Bins { get; set; }
+        public int[] Bins { get; private set; }
 
-        public HistogramBins(float low, float width, int count)
+        public HistogramBins(float low=100, float width=10, int count=10)
         {
             Low = low;
             Width = width;
             Bins = new int[count + 2];
         }
 
-        public void Add(float exposureLevel)
+        public void Add(float value)
         {
             int bin;
-            if (exposureLevel < Low) bin = 0;
-            else bin = (int)Math.Min(((exposureLevel - Low) / Width) + 1, Bins.Length - 1);
+            if (value < Low) bin = 0;
+            else bin = (int)Math.Min(((value - Low) / Width) + 1, Bins.Length - 1);
             Bins[bin]++;
         }
 

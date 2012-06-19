@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using ESME.Locations;
-using FileHelpers;
-
-namespace ESME.Simulator
+﻿namespace ESME.Simulator
 {
     public interface ITimeStepProcessor
     {
