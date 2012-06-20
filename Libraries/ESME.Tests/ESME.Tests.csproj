@@ -38,6 +38,9 @@
     <Reference Include="AsyncCtpLibrary">
       <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
     </Reference>
+    <Reference Include="Core">
+      <HintPath>..\..\ESME WorkBench\External References\Core.dll</HintPath>
+    </Reference>
     <Reference Include="Devart.Data, Version=5.0.449.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
     <Reference Include="Devart.Data.SQLite, Version=3.80.350.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
     <Reference Include="Devart.Data.SQLite.Entity, Version=3.80.350.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
@@ -54,6 +57,9 @@
     </Reference>
     <Reference Include="HDF5DotNet">
       <HintPath>..\..\ESME WorkBench\External References\HDF5DotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="KMLib">
+      <HintPath>..\..\ESME WorkBench\External References\KMLib.dll</HintPath>
     </Reference>
     <Reference Include="MapSuiteCore">
       <HintPath>..\..\ESME WorkBench\External References\MapSuiteCore.dll</HintPath>
@@ -108,6 +114,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Behaviors\ActivityTimelineTests.cs" />
+    <Compile Include="Behaviors\PlatformBehaviorTests.cs" />
     <Compile Include="Common\TestLocation.cs" />
     <Compile Include="Environment\EnvironmentDataTests.cs" />
     <Compile Include="Locations\MasterDatabaseServiceTests.cs" />
