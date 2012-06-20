@@ -125,11 +125,25 @@ namespace HRC.Navigation
             return Navigation.Length.Kilometers.FromRadians(radians);
         }
 
+        /** Convert radians to meters. * */
+
+        public static double RadiansToMeters(double radians)
+        {
+            return Navigation.Length.Kilometers.FromRadians(radians) * 1000;
+        }
+
         /** Convert kilometers to radians. * */
 
         public static double KilometersToRadians(double km)
         {
             return Navigation.Length.Kilometers.ToRadians(km);
+        }
+
+        /** Convert meters to radians. * */
+
+        public static double MetersToRadians(double m)
+        {
+            return Navigation.Length.Kilometers.ToRadians(m / 1000);
         }
 
         /** Convert radians to nauticalMiles. * */

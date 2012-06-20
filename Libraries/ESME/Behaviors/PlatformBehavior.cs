@@ -94,45 +94,70 @@ namespace ESME.Behaviors
                     course = new Course(Platform.Course);
                 }
                 var metersPerSecond = Platform.Speed * 0.514444444f;
-                var metersPerTimeStep = metersPerSecond * _timeStep.TotalSeconds;
+                var metersPerTimeStep = (metersPerSecond * _timeStep.TotalSeconds);
 
-                for (var timeStep = 0; timeStep < _timeStepCount; timeStep++)
+                switch (trackType)
                 {
-                    switch (trackType)
-                    {
-                        default:
-                            throw new PlatformBehaviorException(string.Format("Unknown track type {0}", trackType));
-                        case TrackType.Stationary:
-                            metersPerSecond = 0;
-                            course = new Course(0);
-
-                            break;
-                        case TrackType.StraightLine:
-                            // straight line navigation code
-                            location = location.Offset(Geo.KilometersToRadians((metersPerSecond * _timeStep.TotalSeconds) / 1000),
-                                                       course.Radians);
-                            break;
-                        case TrackType.PerimeterBounce:
-                            // perimeter bounce navigation code here
-                            while (bounceTrack == null)
+                    default:
+                        throw new PlatformBehaviorException(string.Format("Unknown track type {0}", trackType));
+                    case TrackType.Stationary:
+                        for (var timeStep = 0; timeStep < _timeStepCount; timeStep++) 
+                            result.Add(new PlatformLocation
                             {
-                                try
-                                {
-                                    bounceTrack = perimeter.PerimeterBounce(location, course.Radians, 1e6);
-                                    location = bounceTrack.Geos.First();
-                                }
-                                catch (PerimeterBounceException) {}
+                                Location = new Geo(location), 
+                                Course = 0, 
+                                Speed = 0, 
+                                Depth = Platform.Depth,
+                            });
+                        break;
+                    case TrackType.StraightLine:
+                        // straight line navigation code
+                        for (var timeStep = 0; timeStep < _timeStepCount; timeStep++)
+                        {
+                            result.Add(new PlatformLocation
+                            {
+                                Location = location, 
+                                Course = (float)course.Degrees, 
+                                Speed = metersPerSecond, 
+                                Depth = Platform.Depth,
+                            });
+                            location = location.Offset(Geo.MetersToRadians(metersPerTimeStep), course.Radians);
+                        }
+                        break;
+                    case TrackType.PerimeterBounce:
+                        // perimeter bounce navigation code here
+                        while (bounceTrack == null)
+                        {
+                            try
+                            {
+                                bounceTrack = perimeter.PerimeterBounce(location, course.Radians, 1e6);
+                                location = bounceTrack.Geos.First();
                             }
-                            break;
-                    }
-                    // Put the current location, course, speed and time into the PlatformStates list
-                    result.Add(new PlatformLocation
-                    {
-                        Location = new Geo(location),
-                        Course = (float)course.Degrees,
-                        Speed = metersPerSecond,
-                        Depth = Platform.Depth,
-                    });
+                            catch (PerimeterBounceException) {}
+                        }
+                        var timeStepsRemaining = _timeStepCount;
+                        foreach (var segment in bounceTrack.Segments)
+                        {
+                            var segmentLength = Geo.RadiansToMeters(segment.LengthRadians);
+                            var stepsInSegment = Math.Round(segmentLength / metersPerTimeStep);
+                            for (double curStep = 0; curStep < stepsInSegment; curStep++)
+                            {
+                                var oldLocation = location;
+                                location = segment.Slerp(curStep / stepsInSegment);
+                                result.Add(new PlatformLocation
+                                {
+                                    Location = location,
+                                    Course = (float)course.Degrees,
+                                    Speed = metersPerSecond,
+                                    Depth = Platform.Depth,
+                                });
+                                timeStepsRemaining--;
+                                if (timeStepsRemaining <= 0) break;
+                                course = new Course(Geo.RadiansToDegrees(oldLocation.Azimuth(location)));
+                            }
+                            if (timeStepsRemaining <= 0) break;
+                        }
+                        break;
                 }
                 return result;
             }
