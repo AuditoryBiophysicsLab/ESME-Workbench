@@ -1,4 +1,4 @@
-﻿//#define KML_Support
+﻿#define KML_Support
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -417,7 +417,7 @@ namespace HRC.Navigation
 
 #if KML_Support
         #region KML support
-        public Placemark Placemark { get { return _placemark ?? (_placemark = new Placemark {Point = new KmlPoint(Longitude, Latitude, 0)}); } }
+        public Placemark Placemark { get { return _placemark ?? (_placemark = new Placemark { Point = new KmlPoint((float)Longitude, (float)Latitude, 0) }); } }
         Placemark _placemark;
         #endregion
 #endif

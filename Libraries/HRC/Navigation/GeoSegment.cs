@@ -1,10 +1,8 @@
-﻿//#define KML_Support
+﻿#define KML_Support
 using System;
-using HRC.Navigation;
 #if KML_Support
 using KMLib;
 using KMLib.Feature;
-using KMLib.Geometry;
 using Core.Geometry;
 #endif
 namespace HRC.Navigation

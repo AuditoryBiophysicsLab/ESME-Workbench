@@ -36,6 +36,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AsyncCtpLibrary, Version=1.0.4107.18181, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Core">
+      <HintPath>..\..\ESME WorkBench\External References\Core.dll</HintPath>
+    </Reference>
+    <Reference Include="KMLib">
+      <HintPath>..\..\ESME WorkBench\External References\KMLib.dll</HintPath>
+    </Reference>
     <Reference Include="MEFedMVVM.WPF">
       <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
     </Reference>
@@ -88,6 +94,7 @@
     <Compile Include="Aspects\TestNotifyPropertyChangedAttribute.cs" />
     <Compile Include="Navigation\GeoRectTests.cs" />
     <Compile Include="Navigation\GeoTests.cs" />
+    <Compile Include="Navigation\PerimeterBounceTests.cs" />
     <Compile Include="NetCDF\NetCDFFileTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\PercentProgressTests.cs" />

@@ -1,14 +1,12 @@
-﻿//#define KML_Support
+﻿#define KML_Support
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using HRC.Navigation;
 
 #if KML_Support
 using KMLib;
 using KMLib.Feature;
-using KMLib.Geometry;
 using Core.Geometry;
 #endif
 

@@ -6,31 +6,56 @@ namespace HRC.Navigation
 {
     public static class GeoArrayExtensions
     {
+        /// <summary>
+        /// Bounce a platform around inside a given perimeter
+        /// </summary>
+        /// <param name="perimeter">A GeoArray of points in the perimeter, which must satisfy certain conditions (no segments may cross and the polygon 
+        /// must be closed)</param>
+        /// <param name="startPoint">A Geo containing the starting point.  If this is null, a point inside the perimeter is chosen randomly</param>
+        /// <param name="initialCourse">The initial course, in radians from true north.  If startPoint is null, or if initialCourse is NaN, this is 
+        /// chosen randomly</param>
+        /// <param name="initialSpeed">The speed of the platform, in meters per second</param>
+        /// <param name="timeStep">The length of time between sampled points in the returned GeoArray.</param>
+        /// <param name="timeStepCount">The number of time steps (sampled points) that will be in the returned GeoArray</param>
+        /// <returns>A GeoArray containing the list of platform locations at each time step</returns>
         public static GeoArray PerimeterBounce(this GeoArray perimeter, Geo startPoint, double initialCourse, double initialSpeed, TimeSpan timeStep, int timeStepCount)
         {
             var points = new List<Geo>();
             var random = new Random();
-            if (startPoint == null)
+            while ((startPoint == null) || (!startPoint.IsInside(perimeter)))
             {
                 var distance = random.NextDouble() * perimeter.BoundingCircle.Radius;
                 var azimuth = random.NextDouble() * MoreMath.TwoPi;
                 startPoint = perimeter.Center.Offset(distance, azimuth);
-                while (!startPoint.IsInside(perimeter)) startPoint = perimeter.Center.Offset(distance, azimuth);
             }
+            points.Add(startPoint);
             if (double.IsNaN(initialCourse)) initialCourse = random.NextDouble()*MoreMath.TwoPi;
             var courseSegment = new GeoSegment(startPoint, startPoint.Offset(Geo.KilometersToRadians(0.001), initialCourse)).Scale(1000 * Geo.RadiansToKilometers(MoreMath.PiOverTwo));
-            var minIntersectionRange = double.MaxValue;
-            GeoSegment firstIntersectingSegment = null;
-            Geo firstIntersection = null;
-            foreach (var segment in perimeter.Segments)
+            for (var count = 0; count < 100000; count++)
             {
-                var intersection = courseSegment.Intersection(segment);
-                if (intersection == null) continue;
-                var curIntersectionRange = startPoint.DistanceRadians(intersection);
-                if (curIntersectionRange < Geo.KilometersToRadians(0.001) || curIntersectionRange >= minIntersectionRange) continue;
-                minIntersectionRange = curIntersectionRange;
-                firstIntersectingSegment = segment;
-                firstIntersection = intersection;
+                var minIntersectionRange = double.MaxValue;
+                GeoSegment firstIntersectingSegment = null;
+                Geo firstIntersection = null;
+                foreach (var segment in perimeter.Segments)
+                {
+                    var intersection = courseSegment.Intersection(segment);
+                    if (intersection == null) continue;
+                    var curIntersectionRange = startPoint.DistanceRadians(intersection);
+                    if (curIntersectionRange < Geo.KilometersToRadians(0.001) || curIntersectionRange >= minIntersectionRange) continue;
+                    minIntersectionRange = curIntersectionRange;
+                    firstIntersectingSegment = segment;
+                    firstIntersection = intersection;
+                }
+                if (firstIntersection == null)
+                {
+                    points.Add(courseSegment[1]);
+                    return new GeoArray(points);
+                }
+                points.Add(firstIntersection);
+                var reflectedSegment = courseSegment.Reflect(firstIntersectingSegment);
+                var reflectionAzimuth = reflectedSegment[0].Azimuth(reflectedSegment[1]);
+                courseSegment = new GeoSegment(reflectedSegment[1], 1000 * Geo.RadiansToKilometers(MoreMath.PiOverTwo), Geo.RadiansToDegrees(reflectionAzimuth));
+                //courseSegment = courseSegment.Reflect(firstIntersectingSegment).Scale((1000 * Geo.RadiansToKilometers(MoreMath.PiOverTwo)));
             }
             return new GeoArray(points);
         }

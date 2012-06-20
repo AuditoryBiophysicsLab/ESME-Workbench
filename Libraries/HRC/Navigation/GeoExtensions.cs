@@ -53,7 +53,34 @@ namespace HRC.Navigation
             return isIn;
         }
 
+        /// <summary>
+        /// Adapted from http://msdn.microsoft.com/en-us/library/cc451895.aspx
+        /// </summary>
+        /// <param name="geo"></param>
+        /// <param name="region"></param>
+        /// <returns></returns>
         public static bool IsInside(this Geo geo, GeoArray region)
+        {
+            if (region == null) throw new ArgumentNullException("region");
+            if (!region.IsClosed) throw new ArgumentException("Region must be closed", "region");
+            var points = region.ToArray();
+
+            var j = points.Length - 1;
+            var inPoly = false;
+
+            for (var i = 0; i < points.Length; i++)
+            {
+                if (points[i].Longitude < geo.Longitude && points[j].Longitude >= geo.Longitude || 
+                    points[j].Longitude < geo.Longitude && points[i].Longitude >= geo.Longitude) 
+                    if (points[i].Latitude + (geo.Longitude - points[i].Longitude) / (points[j].Longitude - points[i].Longitude) * 
+                        (points[j].Latitude - points[i].Latitude) < geo.Latitude) 
+                        inPoly = !inPoly;
+                j = i;
+            }
+            return inPoly;
+        }
+
+        public static bool IsInsideOld(this Geo geo, GeoArray region)
         {
             if (region == null) throw new ArgumentNullException("region");
             if (!region.BoundingBox.Contains(geo)) return false;
