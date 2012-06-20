@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ESME.Simulator
+namespace ESME.SimulationAnalysis
 {
     public class HistogramBins
     {
