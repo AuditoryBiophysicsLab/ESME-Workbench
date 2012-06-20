@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Media;
@@ -43,6 +44,32 @@ namespace HRC.Tests.Navigation
             result.Placemark.Snippet.maxLines = 1;
             result.Placemark.Geometry.AltitudeMode = AltitudeMode.clampedToGround;
             folder.Add(result.Placemark);
+
+            var endPoint = result.Segments.Last()[1];
+            if (!jaxOpsArea.Contains(endPoint))
+            {
+                var goodBounceSegment = result.Segments.ToArray()[result.Segments.Count() - 2];
+                var goodBouncePoint = goodBounceSegment[0];
+                var goodBounce = goodBouncePoint.Placemark;
+                Debug.WriteLine("Test failed"); 
+                goodBounce.name = string.Format("Last Good Bounce {0:000}", result.Segments.Count() - 1);
+                Debug.WriteLine(goodBounce.name);
+                goodBounce.Snippet = string.Format("Lat: {0:0.#####} Lon: {1:0.#####}", goodBouncePoint.Latitude, goodBouncePoint.Longitude);
+                goodBounce.Snippet.maxLines = 1;
+                folder.Add(goodBounce);
+
+                goodBounceSegment.Placemark.name = "Last good bounce segment";
+                goodBounceSegment.Placemark.AddStyle(new LineStyle(System.Drawing.Color.Red, 5));
+                folder.Add(goodBounceSegment.Placemark);
+
+                var badBouncePoint = goodBounceSegment[1];
+                var badBounce = badBouncePoint.Placemark;
+                badBounce.name = string.Format("Bad Bounce {0:000}", result.Segments.Count());
+                badBounce.Snippet = string.Format("Lat: {0:0.#####} Lon: {1:0.#####}", badBouncePoint.Latitude, badBouncePoint.Longitude);
+                badBounce.Snippet.maxLines = 1;
+                folder.Add(badBounce);
+            }
+            else Debug.WriteLine("Test passed");
 #if false
             var segments = result.Segments.ToArray();
             for (var segmentIndex = 0; segmentIndex < segments.Length; segmentIndex++)
@@ -65,6 +92,7 @@ namespace HRC.Tests.Navigation
             kml.Document.Add(folder);
 
             var savePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Perimeter Bounce Tests", "PerimeterBounce.kml");
+            Debug.WriteLine("Saving KML...");
             kml.Save(savePath);
         }
     }
