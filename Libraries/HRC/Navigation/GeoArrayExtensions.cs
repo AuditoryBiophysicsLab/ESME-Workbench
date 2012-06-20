@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace HRC.Navigation
 {
     public static class GeoArrayExtensions
     {
+        static readonly Random Random = new Random();
+
         /// <summary>
         /// Bounce a platform around inside a given perimeter
         /// </summary>
@@ -14,24 +17,22 @@ namespace HRC.Navigation
         /// <param name="startPoint">A Geo containing the starting point.  If this is null, a point inside the perimeter is chosen randomly</param>
         /// <param name="initialCourse">The initial course, in radians from true north.  If startPoint is null, or if initialCourse is NaN, this is 
         /// chosen randomly</param>
-        /// <param name="initialSpeed">The speed of the platform, in meters per second</param>
-        /// <param name="timeStep">The length of time between sampled points in the returned GeoArray.</param>
-        /// <param name="timeStepCount">The number of time steps (sampled points) that will be in the returned GeoArray</param>
-        /// <returns>A GeoArray containing the list of platform locations at each time step</returns>
-        public static GeoArray PerimeterBounce(this GeoArray perimeter, Geo startPoint, double initialCourse, double initialSpeed, TimeSpan timeStep, int timeStepCount)
+        /// <param name="minimumCourseLength">The minimum length of the returned course, in meters</param>
+        /// <returns>A GeoArray containing the start location and each point where the course bounces off the perimeter</returns>
+        public static GeoArray PerimeterBounce(this GeoArray perimeter, Geo startPoint, double initialCourse, double minimumCourseLength)
         {
             var points = new List<Geo>();
-            var random = new Random();
             while ((startPoint == null) || (!startPoint.IsInside(perimeter)))
             {
-                var distance = random.NextDouble() * perimeter.BoundingCircle.Radius;
-                var azimuth = random.NextDouble() * MoreMath.TwoPi;
+                var distance = Random.NextDouble() * perimeter.BoundingCircle.Radius;
+                var azimuth = Random.NextDouble() * MoreMath.TwoPi;
                 startPoint = perimeter.Center.Offset(distance, azimuth);
             }
             points.Add(startPoint);
-            if (double.IsNaN(initialCourse)) initialCourse = random.NextDouble()*MoreMath.TwoPi;
+            if (double.IsNaN(initialCourse)) initialCourse = Random.NextDouble()*MoreMath.TwoPi;
             var courseSegment = new GeoSegment(startPoint, startPoint.Offset(Geo.KilometersToRadians(0.001), initialCourse)).Scale(1000 * Geo.RadiansToKilometers(MoreMath.PiOverTwo));
-            for (var count = 0; count < 100000; count++)
+            var bounceCount = 1;
+            while (minimumCourseLength > 0)
             {
                 var minIntersectionRange = double.MaxValue;
                 GeoSegment firstIntersectingSegment = null;
@@ -46,16 +47,14 @@ namespace HRC.Navigation
                     firstIntersectingSegment = segment;
                     firstIntersection = intersection;
                 }
-                if (firstIntersection == null)
-                {
-                    points.Add(courseSegment[1]);
-                    return new GeoArray(points);
-                }
+                if (firstIntersection == null) throw new PerimeterBounceException(string.Format("Course segment failed to intersect the perimeter on bounce {0}", bounceCount));
+                var actualCourseSegment = new GeoSegment(points.Last(), firstIntersection);
+                minimumCourseLength -= Geo.RadiansToKilometers(actualCourseSegment.LengthRadians) * 1000;
                 points.Add(firstIntersection);
                 var reflectedSegment = courseSegment.Reflect(firstIntersectingSegment);
                 var reflectionAzimuth = reflectedSegment[0].Azimuth(reflectedSegment[1]);
                 courseSegment = new GeoSegment(reflectedSegment[1], 1000 * Geo.RadiansToKilometers(MoreMath.PiOverTwo), Geo.RadiansToDegrees(reflectionAzimuth));
-                //courseSegment = courseSegment.Reflect(firstIntersectingSegment).Scale((1000 * Geo.RadiansToKilometers(MoreMath.PiOverTwo)));
+                bounceCount++;
             }
             return new GeoArray(points);
         }
@@ -360,5 +359,21 @@ namespace HRC.Navigation
             }
             return new GeoArray(result);
         }
+    }
+
+    [Serializable]
+    public class PerimeterBounceException : Exception
+    {
+        //
+        // For guidelines regarding the creation of new exception types, see
+        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconerrorraisinghandlingguidelines.asp
+        // and
+        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
+        //
+
+        public PerimeterBounceException() { }
+        public PerimeterBounceException(string message) : base(message) { }
+        public PerimeterBounceException(string message, Exception inner) : base(message, inner) { }
+        protected PerimeterBounceException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 }

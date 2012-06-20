@@ -1,20 +1,53 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Windows.Media;
 using HRC.Navigation;
 using NUnit.Framework;
 using KMLib;
 using KMLib.Feature;
-using TimeSpan = System.TimeSpan;
 
 namespace HRC.Tests.Navigation
 {
     public class PerimeterBounceTests
     {
         [Test]
-        public void PerimeterBounce()
+        public void PerimeterBounceStatistics()
+        {
+            var jaxOpsArea = new GeoArray(
+                new Geo(29.3590, -79.2195),
+                new Geo(31.1627, -79.2195),
+                new Geo(31.1627, -81.2789),
+                new Geo(30.1627, -81.2789),
+                new Geo(29.3590, -80.8789),
+                new Geo(29.3590, -79.2195));
+
+            var failures = 0;
+            var successes = 0;
+            while (failures < 100)
+            {
+                GeoArray result = null;
+                while (result == null)
+                {
+                    try
+                    {
+                        result = jaxOpsArea.PerimeterBounce(null, double.NaN, 1e6);
+                        successes++;
+                        if (successes % 10000 == 0) Debug.WriteLine("Test in progress.  Successes: {0}  Failures: {1}  Success/Fail Ratio: {2:0.00%}", successes, failures, (float)successes / (float)(successes + failures));
+
+                    }
+                    catch (PerimeterBounceException ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                        failures++;
+                        Debug.WriteLine("Test in progress.  Successes: {0}  Failures: {1}  Success/Fail Ratio: {2:0.00%}", successes, failures, (float)successes / (float)(successes + failures));
+                    }
+                }
+            }
+            Debug.WriteLine("Test complete.  Successes: {0}  Failures: {1}  Success/Fail Ratio: {2:0.00%}", successes, failures, (float)successes / (float)(successes + failures));
+        }
+        
+        [Test]
+        public void PerimeterBounceToKML()
         {
             var jaxOpsArea = new GeoArray(
                 new Geo(29.3590, -79.2195),
@@ -31,7 +64,19 @@ namespace HRC.Tests.Navigation
             jaxOpsArea.Placemark.Snippet.maxLines = 1;
             folder.Add(jaxOpsArea.Placemark);
 
-            var result = jaxOpsArea.PerimeterBounce(null, double.NaN, 10, new TimeSpan(0, 0, 0, 1), 1000);
+            GeoArray result = null;
+            while (result == null)
+            {
+                try
+                {
+                    result = jaxOpsArea.PerimeterBounce(null, double.NaN, 1e8);
+                }
+                catch (PerimeterBounceException ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                    Debug.WriteLine("PerimeterBounce failed, retrying...");
+                }
+            }
             var startLocation = result[0];
             startLocation.Placemark.name = "Start location";
             startLocation.Placemark.Snippet = "The start of the track";
@@ -45,6 +90,7 @@ namespace HRC.Tests.Navigation
             result.Placemark.Geometry.AltitudeMode = AltitudeMode.clampedToGround;
             folder.Add(result.Placemark);
 
+#if false
             var endPoint = result.Segments.Last()[1];
             if (!jaxOpsArea.Contains(endPoint))
             {
@@ -70,7 +116,6 @@ namespace HRC.Tests.Navigation
                 folder.Add(badBounce);
             }
             else Debug.WriteLine("Test passed");
-#if false
             var segments = result.Segments.ToArray();
             for (var segmentIndex = 0; segmentIndex < segments.Length; segmentIndex++)
             {
