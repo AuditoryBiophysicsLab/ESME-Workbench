@@ -4,14 +4,14 @@ namespace HRC.Navigation
 {
     public class Course
     {
-        double _course;
+        static readonly Random Random = new Random();
 
         const double DegreesToRadians = Math.PI/180.0;
         const double RadiansToDegrees = 180.0/Math.PI;
 
         public Course()
         {
-            _course = 0;
+            Degrees = 0;
             Normalize();
         }
 
@@ -21,13 +21,13 @@ namespace HRC.Navigation
         /// <param name="initialBearing">Initial course, in degrees</param>
         public Course(double initialBearing)
         {
-            _course = initialBearing;
+            Degrees = initialBearing;
             Normalize();
         }
 
         public Course(Course course)
         {
-            _course = course._course;
+            Degrees = course.Degrees;
             Normalize();
         }
 
@@ -38,18 +38,17 @@ namespace HRC.Navigation
         /// <param name="finalPoint">Ending point of the course</param>
         public Course(Geo initialPoint, Geo finalPoint)
         {
-            _course = Geo.RadiansToDegrees(initialPoint.Azimuth(finalPoint));
+            Degrees = Geo.RadiansToDegrees(initialPoint.Azimuth(finalPoint));
             Normalize();
         }
 
-        public double Degrees
-        {
-            get { return _course; }
-        }
+        public static Course RandomCourse { get { return new Course(Random.NextDouble() * 360.0); } }
+
+        public double Degrees { get; private set; }
 
         public double Radians
         {
-            get { return _course*DegreesToRadians; }
+            get { return Degrees*DegreesToRadians; }
         }
 
         public static Course operator +(Course c1, Course c2) { return new Course(c1.Degrees + c2.Degrees); }
@@ -85,9 +84,9 @@ namespace HRC.Navigation
         // Normalize the bearing to +/- 180 degrees
         void Normalize()
         {
-            while (_course > 180) _course -= 360;
-            while (_course < -180) _course += 360;
-            Reciprocal = _course + 180;
+            while (Degrees > 180) Degrees -= 360;
+            while (Degrees < -180) Degrees += 360;
+            Reciprocal = Degrees + 180;
             while (Reciprocal > 180) Reciprocal -= 360;
             while (Reciprocal < -180) Reciprocal += 360;
         }

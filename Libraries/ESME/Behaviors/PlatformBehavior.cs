@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ESME.NEMO.Overlay;
 using ESME.Scenarios;
 using HRC.Navigation;
 
@@ -68,43 +67,34 @@ namespace ESME.Behaviors
             get
             {
                 var result = new List<PlatformLocation>();
-                var random = new Random();
                 Geo location;
                 Course course;
-                OverlayLineSegments perimeter = null;
-                GeoRect bounds = null;
+                GeoArray perimeter = null;
+                GeoArray bounceTrack = null;
                 var trackType = (TrackType)Platform.TrackType;
 
                 if (trackType == TrackType.PerimeterBounce && Platform.Perimeter == null) throw new PerimeterInvalidException("Must have a perimeter specified for PerimeterBounce behavior");
                 if (Platform.IsRandom && Platform.Perimeter == null) throw new PerimeterInvalidException("Must have a perimeter specified for random start point behavior");
                 if (Platform.Perimeter != null)
                 {
-                    var points = (from point in Platform.Perimeter.PerimeterCoordinates
-                                  orderby point.Order
-                                  select (Geo)point.Geo).ToList();
-                    bounds = new GeoRect(points);
-                    perimeter = new OverlayLineSegments(points);
-                    if (!perimeter.IsUsableAsPerimeter)
-                    {
-                        var reasons = new List<string>();
-                        if (!perimeter.IsClosed) reasons.Add("Perimeter is not closed");
-                        if (perimeter.HasCrossingSegments) reasons.Add("Perimeter is not a simple polygon (segments cross each other)");
-                        throw new PerimeterInvalidException(string.Format("The perimeter specified in the track definition is not valid: {0}", string.Join(", ", reasons)));
-                    }
+                    perimeter = Platform.Perimeter;
+                    var reasons = new List<string>();
+                    if (!perimeter.IsClosed) reasons.Add("Perimeter is not closed");
+                    if (perimeter.HasCrossingSegments) reasons.Add("Perimeter is not a simple polygon (segments cross each other)");
+                    if (reasons.Count != 0) throw new PerimeterInvalidException(string.Format("The perimeter specified in the track definition is not valid: {0}", string.Join(", ", reasons)));
                 }
-                if (bounds == null) throw new ApplicationException("Bounds is null, should not happen!");
                 if (Platform.IsRandom)
                 {
-                    location = new Geo(-90, 0);
-                    while (!bounds.Contains(location)) location = new Geo(bounds.South + (random.NextDouble() * bounds.Height), bounds.West + (random.NextDouble() * bounds.Width));
-                    course = new Course(random.NextDouble() * 360.0);
+                    location = perimeter.RandomLocationWithinPerimeter();
+                    course = Course.RandomCourse;
                 }
                 else
                 {
                     location = new Geo(Platform.Geo);
                     course = new Course(Platform.Course);
                 }
-                var speed = Platform.Speed * 0.514444444f;
+                var metersPerSecond = Platform.Speed * 0.514444444f;
+                var metersPerTimeStep = metersPerSecond * _timeStep.TotalSeconds;
 
                 for (var timeStep = 0; timeStep < _timeStepCount; timeStep++)
                 {
@@ -113,39 +103,25 @@ namespace ESME.Behaviors
                         default:
                             throw new PlatformBehaviorException(string.Format("Unknown track type {0}", trackType));
                         case TrackType.Stationary:
-                            speed = 0;
+                            metersPerSecond = 0;
+                            course = new Course(0);
+
                             break;
                         case TrackType.StraightLine:
                             // straight line navigation code
-                            location = location.Offset(Geo.KilometersToRadians((speed * _timeStep.TotalSeconds) / 1000),
+                            location = location.Offset(Geo.KilometersToRadians((metersPerSecond * _timeStep.TotalSeconds) / 1000),
                                                        course.Radians);
                             break;
                         case TrackType.PerimeterBounce:
                             // perimeter bounce navigation code here
-                            var proposedLocation = location.Offset(Geo.KilometersToRadians((speed * _timeStep.TotalSeconds) / 1000),
-                                                                   course.Radians);
-                            if (perimeter.Contains(proposedLocation)) location = proposedLocation;
-                            else
+                            while (bounceTrack == null)
                             {
-                                //curLocation.Compare(proposedLocation);
-                                Course proposedCourse;
-                                Console.WriteLine("At time step {0}, {1} crossed the perimeter at ({2}, {3}) while on course {4}", timeStep, Platform.PlatformName, proposedLocation.Latitude, proposedLocation.Longitude, course);
-                                proposedLocation = new Geo(perimeter.Reflect(location, proposedLocation, out proposedCourse));
-                                Console.WriteLine("  Bounced location: ({0}, {1}) and course {2}", proposedLocation.Latitude, proposedLocation.Longitude, new Course(location, proposedLocation).Degrees);
-                                if (!perimeter.Contains(proposedLocation))
+                                try
                                 {
-                                    proposedLocation = new Geo(perimeter.Reflect(location, proposedLocation, out proposedCourse));
-                                    Console.WriteLine("  Bounced location (2): ({0}, {1}) and course {2}", proposedLocation.Latitude, proposedLocation.Longitude, new Course(location, proposedLocation).Degrees);
-                                    if (!perimeter.Contains(proposedLocation))
-                                        throw new PlatformMovementException(
-                                            "Two reflections failed to keep the platform inside the bounding region.  Please check the bounding region closely for small pockets or other irregularities");
+                                    bounceTrack = perimeter.PerimeterBounce(location, course.Radians, 1e6);
+                                    location = bounceTrack.Geos.First();
                                 }
-
-                                var newCourse = new Course(location, proposedLocation);
-
-                                course = newCourse;
-                                location = new Geo(proposedLocation);
-                                if (!perimeter.Contains(location)) throw new PlatformMovementException("Reflected position is outside the bounding region");
+                                catch (PerimeterBounceException) {}
                             }
                             break;
                     }
@@ -154,7 +130,7 @@ namespace ESME.Behaviors
                     {
                         Location = new Geo(location),
                         Course = (float)course.Degrees,
-                        Speed = speed,
+                        Speed = metersPerSecond,
                         Depth = Platform.Depth,
                     });
                 }

@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using ESME.Database;
 using ESME.Locations;
 using ESME.Mapping;
 using HRC.Aspects;
@@ -37,6 +39,23 @@ namespace ESME.Scenarios
             mapLayer.AddPolygon(geos);
             mapLayer.Done();
             LayerSettings.MapLayerViewModel = mapLayer;
+        }
+
+        public static implicit operator Perimeter(GeoArray geoArray)
+        {
+            var perimeter = new Perimeter();
+            var geos = geoArray.Geos.ToArray();
+            for (var geoIndex = 0; geoIndex < geoArray.Geos.Count(); geoIndex++)
+            {
+                var geo = geos[geoIndex];
+                perimeter.PerimeterCoordinates.Add(new PerimeterCoordinate { Geo = geo, Order = geoIndex, Perimeter = perimeter });
+            }
+            return perimeter;
+        }
+
+        public static implicit operator GeoArray(Perimeter perimeter)
+        {
+            return new GeoArray(perimeter.PerimeterCoordinates.Select(coordinate => coordinate.Geo).Select(g => (Geo)g));
         }
 
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }

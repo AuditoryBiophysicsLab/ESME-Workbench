@@ -21,6 +21,8 @@ namespace HRC.Navigation
         /// <returns>A GeoArray containing the start location and each point where the course bounces off the perimeter</returns>
         public static GeoArray PerimeterBounce(this GeoArray perimeter, Geo startPoint, double initialCourse, double minimumCourseLength)
         {
+            if (!perimeter.IsClosed) throw new InvalidPerimeterException("Perimeter is not closed");
+            if (perimeter.HasCrossingSegments) throw new InvalidPerimeterException("Perimeter is not a simple polygon (segments cross each other)");
             var points = new List<Geo>();
             while ((startPoint == null) || (!startPoint.IsInside(perimeter)))
             {
@@ -57,6 +59,25 @@ namespace HRC.Navigation
                 bounceCount++;
             }
             return new GeoArray(points);
+        }
+
+        /// <summary>
+        /// Returns a random location that is within the specified perimeter
+        /// </summary>
+        /// <param name="perimeter"></param>
+        /// <returns></returns>
+        public static Geo RandomLocationWithinPerimeter(this GeoArray perimeter)
+        {
+            if (!perimeter.IsClosed) throw new InvalidPerimeterException("Perimeter is not closed");
+            if (perimeter.HasCrossingSegments) throw new InvalidPerimeterException("Perimeter is not a simple polygon (segments cross each other)");
+            Geo location = null;
+            while ((location == null) || (!location.IsInside(perimeter)))
+            {
+                var distance = Random.NextDouble() * perimeter.BoundingCircle.Radius;
+                var azimuth = Random.NextDouble() * MoreMath.TwoPi;
+                location = perimeter.Center.Offset(distance, azimuth);
+            }
+            return location;
         }
 
         public static bool Contains(this GeoArray region, Geo p)
@@ -375,5 +396,21 @@ namespace HRC.Navigation
         public PerimeterBounceException(string message) : base(message) { }
         public PerimeterBounceException(string message, Exception inner) : base(message, inner) { }
         protected PerimeterBounceException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
+    [Serializable]
+    public class InvalidPerimeterException : Exception
+    {
+        //
+        // For guidelines regarding the creation of new exception types, see
+        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconerrorraisinghandlingguidelines.asp
+        // and
+        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
+        //
+
+        public InvalidPerimeterException() { }
+        public InvalidPerimeterException(string message) : base(message) { }
+        public InvalidPerimeterException(string message, Exception inner) : base(message, inner) { }
+        protected InvalidPerimeterException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 }

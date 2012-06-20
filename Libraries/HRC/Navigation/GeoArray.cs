@@ -82,6 +82,18 @@ namespace HRC.Navigation
         #region Read-only properties computed on the fly
         public Geo this[int index] { get { return MyGeoArray[index]; } }
         public int Length { get { return MyGeoArray.Length; } }
+        public bool HasCrossingSegments
+        {
+            get
+            {
+                var segmentArray = Segments.ToArray();
+                var segmentCount = segmentArray.Length;
+                for (var i = 0; i < segmentCount; i++) 
+                    for (var j = 0; j < segmentCount - 2; j++) 
+                        if (segmentArray[i].Intersects(segmentArray[(i + j + 2) % segmentCount])) return true;
+                return false;
+            }
+        }
 
         /// <summary>
         /// Returns a closed version of the current GeoArray.  
