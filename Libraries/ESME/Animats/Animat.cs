@@ -47,7 +47,7 @@ namespace ESME.Animats
         public static List<AnimatLocation> Seed(string latinName, double density, Scenario scenario)
         {
             GeoArray bounds = scenario.Location.GeoRect;
-            
+            var species = new ScenarioSpecies {LatinName = latinName};
             var locations = new List<AnimatLocation>();
             var radius = Planet.wgs84_earthEquatorialRadiusMeters_D / 1000;
             var area = bounds.Area * radius * radius; //todo compare with google earth's area and tell dave about it.
@@ -66,7 +66,7 @@ namespace ESME.Animats
                     Depth = (float)(depth * Random.NextDouble()),
                     Geo = location,
                     ID = i,
-                    ScenarioSpecies = new ScenarioSpecies{LatinName = latinName},
+                    ScenarioSpecies = species,
                 });
                 else throw new Exception("no valid locations inside the specified scenario!");
             }
