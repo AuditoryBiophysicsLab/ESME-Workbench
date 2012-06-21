@@ -1,16 +1,17 @@
-﻿    using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-    using ESME.SimulationAnalysis;
-    using ESME.Simulator;
+using ESME.SimulationAnalysis;
+using ESME.Simulator;
 
 namespace ESME.Model
 {
     public class Species : IEquatable<Species>, IHasIDField
     {
-        [XmlIgnore] public HistogramBins[] LevelBins;
+        [XmlIgnore]
+        public HistogramBins[] LevelBins;
 
         #region Public Properties
 
@@ -88,7 +89,8 @@ namespace ESME.Model
 
         #region private data members
 
-        [XmlIgnore] private double _soundPressureLevel;
+        [XmlIgnore]
+        private double _soundPressureLevel;
 
         #endregion
 
@@ -193,7 +195,7 @@ namespace ESME.Model
                                                    "\" was not found");
             result.ReferenceCount++;
             return result.IDField;
-        } 
+        }
         #endregion
     }
 }

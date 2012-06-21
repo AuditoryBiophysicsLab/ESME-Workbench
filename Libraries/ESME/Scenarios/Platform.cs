@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
+using ESME.Behaviors;
 using ESME.Database;
 using ESME.Locations;
 using ESME.Mapping;
@@ -18,6 +19,8 @@ namespace ESME.Scenarios
 {
     public class Platform : IHaveGuid, IHaveLayerSettings
     {
+        public Platform() { TrackType = Behaviors.TrackType.Stationary; }
+
         [Key, Initialize] public Guid Guid { get; set; }
         public string Description { get; set; }
         public bool Launches { get; set; }
@@ -59,6 +62,23 @@ namespace ESME.Scenarios
         }
         object _layerControl;
 
+        [NotMapped] public List<TrackType> TrackTypeDisplay { get{return new List<TrackType>
+        {
+            Behaviors.TrackType.Stationary,
+            Behaviors.TrackType.PerimeterBounce,
+            Behaviors.TrackType.StraightLine
+        };} }
+
+        TrackType _selectedTrackType = Behaviors.TrackType.Stationary;
+        [NotMapped]
+        public TrackType SelectedTrackType
+        {
+            get { return _selectedTrackType; }
+            set {
+                _selectedTrackType = value;
+                TrackType = value;
+            }
+        }
 
         #region PlatformPropertiesCommand
         public SimpleCommand<object, EventToCommandArgs> PlatformPropertiesCommand { get { return _platformProperties ?? (_platformProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.PlatformProperties, this))); } }
