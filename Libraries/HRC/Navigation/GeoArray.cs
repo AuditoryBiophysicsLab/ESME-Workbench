@@ -90,7 +90,7 @@ namespace HRC.Navigation
                 var segmentCount = segmentArray.Length;
                 for (var i = 0; i < segmentCount; i++) 
                     for (var j = 0; j < segmentCount - 2; j++) 
-                        if (segmentArray[i].Intersects(segmentArray[(i + j + 2) % segmentCount])) return true;
+                        if (segmentArray[i].Intersection(segmentArray[(i + j + 2) % segmentCount]) != null) return true;
                 return false;
             }
         }

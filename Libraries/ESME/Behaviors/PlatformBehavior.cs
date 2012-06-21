@@ -112,6 +112,7 @@ namespace ESME.Behaviors
                         break;
                     case TrackType.StraightLine:
                         // straight line navigation code
+                        if (Platform.Speed == 0) throw new PlatformMovementException("Speed cannot be 0 for StraightLine behavior");
                         for (var timeStep = 0; timeStep < _timeStepCount; timeStep++)
                         {
                             result.Add(new PlatformLocation
@@ -126,6 +127,7 @@ namespace ESME.Behaviors
                         break;
                     case TrackType.PerimeterBounce:
                         // perimeter bounce navigation code here
+                        if (Platform.Speed == 0) throw new PlatformMovementException("Speed cannot be 0 for PerimeterBounce behavior");
                         while (bounceTrack == null)
                         {
                             try
@@ -232,5 +234,4 @@ namespace ESME.Behaviors
             }
         }
     }
-
 }

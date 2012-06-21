@@ -4,11 +4,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using ESME.Behaviors;
 using ESME.Scenarios;
 using HRC.Navigation;
+using HRC.Utility;
 using KMLib;
 using KMLib.Feature;
 using NUnit.Framework;
+using TimeSpan = System.TimeSpan;
 
 namespace ESME.Tests.Behaviors
 {
@@ -25,8 +28,40 @@ namespace ESME.Tests.Behaviors
                 new Geo(29.3590, -80.8789),
                 new Geo(29.3590, -79.2195));
 
-            var platform = new Platform { };
+            var platform = new Platform
+            {
+                PlatformName = "Test Platform",
+                Perimeter = jaxOpsArea,
+                Depth = 0,
+                IsRandom = true,
+                TrackType = TrackType.PerimeterBounce,
+                Sources = new ObservableList<Source>(),
+                Speed = 20,
+            };
+            var source = new Source
+            {
+                SourceName = "Test Source",
+                Modes = new ObservableList<Mode>(),
+                Platform = platform,
+            };
+            platform.Sources.Add(source);
+            var mode = new Mode
+            {
+                ModeName = "Test Mode",
+                PulseInterval = new TimeSpan(0, 0, 0, 10),
+                PulseLength = new TimeSpan(0, 0, 0, 0, 500),
+                Depth = 5,
+                HighFrequency = 1000,
+                LowFrequency = 1000,
+                DepressionElevationAngle = 10,
+                VerticalBeamWidth = 90,
+                SourceLevel = 200,
+                Source = source,
+            };
+            source.Modes.Add(mode);
 
+            var behavior = new PlatformBehavior(platform, new TimeSpan(0, 0, 0, 1), 86400);
+#if true
             var kml = new KMLRoot();
             var folder = new Folder("Jacksonville");
             jaxOpsArea.Placemark.name = "Jacksonville OpArea";
@@ -34,81 +69,31 @@ namespace ESME.Tests.Behaviors
             jaxOpsArea.Placemark.Snippet.maxLines = 1;
             folder.Add(jaxOpsArea.Placemark);
 
-            GeoArray result = null;
-            while (result == null)
+#if true
+            var timeStep = 0;
+            foreach (var state in behavior.PlatformStates)
             {
-                try
+                if (timeStep % 100 == 0)
                 {
-                    result = jaxOpsArea.PerimeterBounce(null, double.NaN, 1e8);
+                    state.PlatformLocation.Location.Placemark.name = string.Format("TimeStep {0}", timeStep);
+                    folder.Add(state.PlatformLocation.Location.Placemark);
                 }
-                catch (PerimeterBounceException ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                    Debug.WriteLine("PerimeterBounce failed, retrying...");
-                }
+                timeStep++;
             }
-            var startLocation = result[0];
-            startLocation.Placemark.name = "Start location";
-            startLocation.Placemark.Snippet = "The start of the track";
-            startLocation.Placemark.Snippet.maxLines = 1;
-            startLocation.Placemark.AddStyle(new IconStyle(System.Drawing.Color.Green) { Icon = new Icon() { href = @"http://www.clker.com/cliparts/q/y/S/n/A/V/green-pin-th.png" } });
-            folder.Add(startLocation.Placemark);
-
+#else
             result.Placemark.name = "Platform track";
             result.Placemark.Snippet = "The track of the platform";
             result.Placemark.Snippet.maxLines = 1;
             result.Placemark.Geometry.AltitudeMode = AltitudeMode.clampedToGround;
             folder.Add(result.Placemark);
-
-#if false
-            var endPoint = result.Segments.Last()[1];
-            if (!jaxOpsArea.Contains(endPoint))
-            {
-                var goodBounceSegment = result.Segments.ToArray()[result.Segments.Count() - 2];
-                var goodBouncePoint = goodBounceSegment[0];
-                var goodBounce = goodBouncePoint.Placemark;
-                Debug.WriteLine("Test failed"); 
-                goodBounce.name = string.Format("Last Good Bounce {0:000}", result.Segments.Count() - 1);
-                Debug.WriteLine(goodBounce.name);
-                goodBounce.Snippet = string.Format("Lat: {0:0.#####} Lon: {1:0.#####}", goodBouncePoint.Latitude, goodBouncePoint.Longitude);
-                goodBounce.Snippet.maxLines = 1;
-                folder.Add(goodBounce);
-
-                goodBounceSegment.Placemark.name = "Last good bounce segment";
-                goodBounceSegment.Placemark.AddStyle(new LineStyle(System.Drawing.Color.Red, 5));
-                folder.Add(goodBounceSegment.Placemark);
-
-                var badBouncePoint = goodBounceSegment[1];
-                var badBounce = badBouncePoint.Placemark;
-                badBounce.name = string.Format("Bad Bounce {0:000}", result.Segments.Count());
-                badBounce.Snippet = string.Format("Lat: {0:0.#####} Lon: {1:0.#####}", badBouncePoint.Latitude, badBouncePoint.Longitude);
-                badBounce.Snippet.maxLines = 1;
-                folder.Add(badBounce);
-            }
-            else Debug.WriteLine("Test passed");
-            var segments = result.Segments.ToArray();
-            for (var segmentIndex = 0; segmentIndex < segments.Length; segmentIndex++)
-            {
-                var bounce = segments[segmentIndex][1].Placemark;
-                bounce.name = string.Format("Bounce {0:000}", segmentIndex + 1);
-                bounce.Snippet = string.Format("Lat: {0:0.#####} Lon: {1:0.#####}", segments[segmentIndex][1].Latitude, segments[segmentIndex][1].Longitude);
-                bounce.Snippet.maxLines = 1;
-                folder.Add(bounce);
-            }
 #endif
-
-            var endLocation = result[result.Length - 1];
-            endLocation.Placemark.name = "End location";
-            endLocation.Placemark.Snippet = "The end of the track";
-            endLocation.Placemark.Snippet.maxLines = 1;
-            endLocation.Placemark.AddStyle(new IconStyle(System.Drawing.Color.Red) { Icon = new Icon { href = @"http://www.clker.com/cliparts/Z/x/U/0/B/3/red-pin-th.png" } });
-            folder.Add(endLocation.Placemark);
 
             kml.Document.Add(folder);
 
             var savePath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Platform Behavior Tests", "PlatformBehavior.kml");
             Debug.WriteLine("Saving KML...");
             kml.Save(savePath);
+#endif
         }
     }
 }
