@@ -44,10 +44,11 @@ namespace ESME.Animats
             throw new Exception("specified file does not exist!");
         }
 
-        public static AnimatFile Seed(string latinName, double density, Scenario scenario)
+        public static List<AnimatLocation> Seed(string latinName, double density, Scenario scenario)
         {
             GeoArray bounds = scenario.Location.GeoRect;
-            var startPoints = new List<Geo<float>>();
+            
+            var locations = new List<AnimatLocation>();
             var radius = Planet.wgs84_earthEquatorialRadiusMeters_D / 1000;
             var area = bounds.Area * radius * radius; //todo compare with google earth's area and tell dave about it.
             var population = (int)Math.Floor(area * density);
@@ -60,16 +61,17 @@ namespace ESME.Animats
                     location = bounds.RandomLocationWithinPerimeter();
                     depth = scenario.BathymetryData.Samples.GetNearestPoint(location).Data;
                 }
-                if (location != null) startPoints.Add(new Geo<float>(location.Latitude, location.Longitude, depth * Random.NextDouble()));
+                if (location != null) locations.Add(new AnimatLocation
+                {
+                    Depth = (float)(depth * Random.NextDouble()),
+                    Geo = location,
+                    ID = i,
+                    ScenarioSpecies = new ScenarioSpecies{LatinName = latinName},
+                });
                 else throw new Exception("no valid locations inside the specified scenario!");
             }
-            return new AnimatFile
-            {
-                Filename = null,
-                LatinName = latinName,
-                TotalAnimats = population,
-                AnimatStartPoints = startPoints
-            };
+            return locations;
+
         }
     }
 

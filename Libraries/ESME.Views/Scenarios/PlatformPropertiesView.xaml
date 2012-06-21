@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:l="clr-namespace:ESME.Views.Scenarios"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
         Title="{Binding WindowTitle}"
         Background="#fff0f0f0"
         d:DataContext="{d:DesignInstance l:PropertiesViewModel}"
@@ -13,6 +14,7 @@
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <Window.Resources>
+        <WPF:BooleanInverter x:Key="BooleanInverter" />
         <Style TargetType="{x:Type TextBox}">
             <Setter Property="MinWidth" Value="150" />
             <Setter Property="Validation.ErrorTemplate">
@@ -85,15 +87,67 @@
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
-                    <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                    <ColumnDefinition />
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0"
                                Margin="0 0 5 0"
                                VerticalAlignment="Top"
                                Text="Behavior"
                                TextAlignment="Right" />
-                    <ComboBox Grid.Column="1" ItemsSource="{Binding PropertyObject.TrackTypeDisplay}" SelectedItem="{Binding PropertyObject.SelectedTrackType}"/>
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding PropertyObject.TrackTypeDisplay}"
+                              SelectedItem="{Binding PropertyObject.SelectedTrackType}" />
+                </Grid>
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Top"
+                               Text="Random initial location"
+                               TextAlignment="Right" />
+                    <CheckBox Grid.Column="1"
+                              HorizontalAlignment="Center"
+                              IsChecked="{Binding PropertyObject.IsRandom}" />
+                </Grid>
+                <Grid Margin="5 5 5 0" IsEnabled="{Binding PropertyObject.IsRandom, Converter={StaticResource BooleanInverter}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Top"
+                               Text="Starting Latitude"
+                               TextAlignment="Right" />
+                    <TextBox Grid.Column="1" Text="{Binding PropertyObject.Geo.Latitude}" />
+                </Grid>
+                <Grid Margin="5 5 5 0" IsEnabled="{Binding PropertyObject.IsRandom, Converter={StaticResource BooleanInverter}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Top"
+                               Text="Starting Longitude"
+                               TextAlignment="Right" />
+                    <TextBox Grid.Column="1" Text="{Binding PropertyObject.Geo.Longitude}" />
+                </Grid>
+                <Grid Margin="5 5 5 0" IsEnabled="{Binding PropertyObject.IsRandom, Converter={StaticResource BooleanInverter}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Top"
+                               Text="Starting Course"
+                               TextAlignment="Right" />
+                    <TextBox Grid.Column="1" Text="{Binding PropertyObject.Course}" />
                 </Grid>
             </StackPanel>
         </Border>

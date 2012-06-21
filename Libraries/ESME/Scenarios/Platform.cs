@@ -10,7 +10,7 @@ using ESME.Locations;
 using ESME.Mapping;
 using HRC.Aspects;
 using HRC.Navigation;
-using HRC.Utility;
+using HRC.Utility;  
 using HRC.ViewModels;
 using HRC.WPF;
 using ThinkGeo.MapSuite.Core;
@@ -34,7 +34,13 @@ namespace ESME.Scenarios
 
         public DbTrackType TrackType { get; set; }
         public DbGeo Geo { get; set; }
-        public bool IsRandom { get; set; }
+        bool _isRandom= true;
+        public bool IsRandom
+        {
+            get { return _isRandom; }
+            set { _isRandom = value; }
+        }
+
         public float Depth { get; set; }
         public float Course { get; set; }
 
@@ -68,7 +74,6 @@ namespace ESME.Scenarios
             Behaviors.TrackType.PerimeterBounce,
             Behaviors.TrackType.StraightLine
         };} }
-
         TrackType _selectedTrackType = Behaviors.TrackType.Stationary;
         [NotMapped]
         public TrackType SelectedTrackType
