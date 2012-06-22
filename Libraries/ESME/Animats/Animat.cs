@@ -54,24 +54,20 @@ namespace ESME.Animats
             var population = (int)Math.Floor(area * density);
             for (var i = 0; i < population; i++)
             {
-                var depth = -1f;
-                Geo location = null;
-                while (depth > 0)
+                var location = bounds.RandomLocationWithinPerimeter();
+                var depth = scenario.BathymetryData.Samples.GetNearestPoint(location).Data;
+                if (depth > 0)
                 {
-                    location = bounds.RandomLocationWithinPerimeter();
-                    depth = scenario.BathymetryData.Samples.GetNearestPoint(location).Data;
-                }
-                if (location != null) locations.Add(new AnimatLocation
+                    locations.Add(new AnimatLocation
                 {
                     Depth = (float)(depth * Random.NextDouble()),
                     Geo = location,
                     ID = i,
                     ScenarioSpecies = species,
                 });
-                else throw new Exception("no valid locations inside the specified scenario!");
+                }
             }
             return locations;
-
         }
     }
 
