@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using ESME.Database;
@@ -18,16 +18,51 @@ namespace ESME.Scenarios
         public string ModeName { get; set; }
         public string ModeType { get; set; }
         public float? ActiveTime { get; set; }
+        /// <summary>
+        /// Depth offset from the platform, in meters
+        /// </summary>
         public float? Depth { get; set; }
+        /// <summary>
+        /// Source level in dB SPL re: 1 μPa
+        /// </summary>
         public float SourceLevel { get; set; }
+        /// <summary>
+        /// Lowest frequency of this mode, in Hz
+        /// </summary>
         public float LowFrequency { get; set; }
+        /// <summary>
+        /// Highest frequency of this mode, in Hz
+        /// </summary>
         public float HighFrequency { get; set; }
+        /// <summary>
+        /// Time between the start of sequential pulses
+        /// </summary>
         public DbTimeSpan PulseInterval { get; set; }
+        /// <summary>
+        /// The length of time a single pulse is transmitting
+        /// </summary>
         public DbTimeSpan PulseLength { get; set; }
+        /// <summary>
+        /// Horizontal beam width of this mode, in degrees.  
+        /// The beam is assumed to spread symmetrically for half this width to either side of the beam center
+        /// </summary>
         public float HorizontalBeamWidth { get; set; }
+        /// <summary>
+        /// Vertical beam width of this mode, in degrees
+        /// The beam is assumed to spread symmetrically for half this width to either side of the beam center
+        /// </summary>
         public float VerticalBeamWidth { get; set; }
+        /// <summary>
+        /// The beam center in the vertical plane.  Positive values are toward the sea floor.
+        /// </summary>
         public float DepressionElevationAngle { get; set; }
+        /// <summary>
+        /// The beam center in the horizontal plane, relative to the current heading of the platform on which this mode is hosted. 
+        /// </summary>
         public float RelativeBeamAngle { get; set; }
+        /// <summary>
+        /// The maximum distance to calculate the transmission loss for this mode
+        /// </summary>
         public float MaxPropagationRadius { get; set; }
 
         public virtual Source Source { get; set; }
@@ -48,6 +83,7 @@ namespace ESME.Scenarios
         }
         object _layerControl;
 
+        [NotMapped] public int SourceActorModeID { get; set; }
 
         /// <summary>
         /// Indicates whether the current object is equal to another object of the same type.

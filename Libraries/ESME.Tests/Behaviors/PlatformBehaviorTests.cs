@@ -20,13 +20,12 @@ namespace ESME.Tests.Behaviors
         [Test]
         public void PlatformBehaviorToKML()
         {
-            var jaxOpsArea = new GeoArray(
-                new Geo(29.3590, -79.2195),
-                new Geo(31.1627, -79.2195),
-                new Geo(31.1627, -81.2789),
-                new Geo(30.1627, -81.2789),
-                new Geo(29.3590, -80.8789),
-                new Geo(29.3590, -79.2195));
+            var jaxOpsArea = new GeoArray(new Geo(29.3590, -79.2195),
+                                          new Geo(31.1627, -79.2195),
+                                          new Geo(31.1627, -81.2789),
+                                          new Geo(30.1627, -81.2789),
+                                          new Geo(29.3590, -80.8789),
+                                          new Geo(29.3590, -79.2195));
 
             var platform = new Platform
             {

@@ -28,7 +28,6 @@ namespace ESME.Behaviors
                         }
                         _modeActiveTimes.Add(mode, modeTimeline.GetActiveTimes(_timeStep).ToList());
                     }
-                _platformLocations = PlatformLocations;
             }
             catch (Exception e)
             {
@@ -39,7 +38,6 @@ namespace ESME.Behaviors
         readonly TimeSpan _duration;
         readonly int _timeStepCount;
         readonly Dictionary<Mode, IList<TimeSpan>> _modeActiveTimes;
-        readonly List<PlatformLocation> _platformLocations;
         
         public Platform Platform { get; private set; }
         public bool Display { get; set; }
@@ -49,24 +47,26 @@ namespace ESME.Behaviors
             get
             {
                 var simulationTime = new TimeSpan(0);
+                var platformLocations = PlatformLocations.GetEnumerator();
+                platformLocations.MoveNext();
                 for (var timeStep = 0; timeStep < _timeStepCount; timeStep++)
                 {
                     yield return new PlatformState
                     {
                         SimulationTime = simulationTime,
-                        PlatformLocation = _platformLocations[timeStep],
+                        PlatformLocation = platformLocations.Current,
                         ModeActiveTimes = _modeActiveTimes.Keys.ToDictionary(key => key, key => _modeActiveTimes[key][timeStep]),
                     };
                     simulationTime += _timeStep;
+                    platformLocations.MoveNext();
                 }
             }
         }
 
-        List<PlatformLocation> PlatformLocations
+        IEnumerable<PlatformLocation> PlatformLocations
         {
             get
             {
-                var result = new List<PlatformLocation>();
                 Geo location;
                 Course course;
                 GeoArray perimeter = null;
@@ -102,26 +102,26 @@ namespace ESME.Behaviors
                         throw new PlatformBehaviorException(string.Format("Unknown track type {0}", trackType));
                     case TrackType.Stationary:
                         for (var timeStep = 0; timeStep < _timeStepCount; timeStep++) 
-                            result.Add(new PlatformLocation
+                            yield return new PlatformLocation
                             {
                                 Location = new Geo(location), 
                                 Course = 0, 
                                 Speed = 0, 
                                 Depth = Platform.Depth,
-                            });
+                            };
                         break;
                     case TrackType.StraightLine:
                         // straight line navigation code
                         if (Platform.Speed == 0) throw new PlatformMovementException("Speed cannot be 0 for StraightLine behavior");
                         for (var timeStep = 0; timeStep < _timeStepCount; timeStep++)
                         {
-                            result.Add(new PlatformLocation
+                            yield return new PlatformLocation
                             {
                                 Location = location, 
                                 Course = (float)course.Degrees, 
                                 Speed = metersPerSecond, 
                                 Depth = Platform.Depth,
-                            });
+                            };
                             location = location.Offset(Geo.MetersToRadians(metersPerTimeStep), course.Radians);
                         }
                         break;
@@ -146,13 +146,13 @@ namespace ESME.Behaviors
                             {
                                 var oldLocation = location;
                                 location = segment.Slerp(curStep / stepsInSegment);
-                                result.Add(new PlatformLocation
+                                yield return new PlatformLocation
                                 {
                                     Location = location,
                                     Course = (float)course.Degrees,
                                     Speed = metersPerSecond,
                                     Depth = Platform.Depth,
-                                });
+                                };
                                 timeStepsRemaining--;
                                 if (timeStepsRemaining <= 0) break;
                                 course = new Course(Geo.RadiansToDegrees(oldLocation.Azimuth(location)));
@@ -161,7 +161,6 @@ namespace ESME.Behaviors
                         }
                         break;
                 }
-                return result;
             }
         }
     }
