@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using ESME.Animats;
 using ESME.Behaviors;
 using ESME.Scenarios;
 
@@ -43,11 +42,12 @@ namespace ESME.Simulator
             }
             foreach (var species in _scenario.ScenarioSpecies)
             {
-                var animatDataTask = new Task<AnimatFile>(() => AnimatFile.Load(species.SpeciesFile));
-                animatDataTask.Start();
-                animatDataTask.Wait();
-                foreach (var animat in animatDataTask.Result.AnimatStartPoints)
-                    _database.Actors.Add(new Actor { AnimatLocation = new AnimatLocation { Geo = animat, Depth = animat.Data } });
+                //todo dave fix
+                //var animatDataTask = new Task<AnimatFile>(() => AnimatFile.Load(species.SpeciesFile));
+                //animatDataTask.Start();
+                //animatDataTask.Wait();
+                //foreach (var animat in animatDataTask.Result.AnimatStartPoints)
+                //    _database.Actors.Add(new Actor { AnimatLocation = new AnimatLocation { Geo = animat, Depth = animat.Data } });
             }
             _log = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), timeStepCount, timeStepSize);
         }

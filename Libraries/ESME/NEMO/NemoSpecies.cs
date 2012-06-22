@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
-using ESME.Animats;
+using ESME.Environment;
 
 namespace ESME.NEMO
 {
@@ -20,8 +20,8 @@ namespace ESME.NEMO
             TrackAreaTotal = GetInt("trackAreaTotal");
             SimAreaPopulation = GetFloat("simAreaPopulation");
             SimAreaTotal = GetInt("simAreaTotal");
-            string fileSpeciesName;
-            AnimatDataTask = new Task<AnimatFile>(() => AnimatFile.Load(Path.Combine(scenarioDirectory, "Species", SpeciesFile), out fileSpeciesName));
+            //string fileSpeciesName;  //todo this must be fixed to import nemo files...
+            //AnimatDataTask = new Task<Animat>(() => Animat.Load(Path.Combine(scenarioDirectory, "Species", SpeciesFile), out fileSpeciesName));
         }
 
         public override IEnumerable<KeyValuePair<string, string>> Properties
@@ -51,6 +51,6 @@ namespace ESME.NEMO
         public int    TrackAreaTotal        { get; private set; }
         public float  SimAreaPopulation     { get; private set; }
         public int    SimAreaTotal          { get; private set; }
-        public Task<AnimatFile> AnimatDataTask { get; private set; }
+        public Task<Animat> AnimatDataTask { get; private set; }
     }
 }

@@ -204,7 +204,6 @@
     <Compile Include="Environment\Transect.cs" />
     <Compile Include="Environment\Wind.cs" />
     <Compile Include="MediatorMessages.cs" />
-    <Compile Include="Animats\AnimatInterface.cs" />
     <Compile Include="NEMO\Exceptions.cs" />
     <Compile Include="NEMO\Overlay\Exceptions.cs" />
     <Compile Include="NEMO\Overlay\OverlayCircle.cs" />
@@ -275,10 +274,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Animats\AnimatLocationFile.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="TransmissionLoss\AcousticProperties.cs" />
-    <Compile Include="Animats\Animat.cs" />
+    <Compile Include="Environment\Animat.cs" />
     <Compile Include="Model\EnvironmentInformation.cs" />
     <Compile Include="Model\Exceptions.cs" />
     <Compile Include="SimulationAnalysis\HistogramBins.cs" />

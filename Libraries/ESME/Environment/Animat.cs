@@ -1,57 +1,55 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using ESME.Environment;
 using ESME.Scenarios;
 using HRC.Navigation;
 using FileFormatException = ESME.Model.FileFormatException;
 
-namespace ESME.Animats
+namespace ESME.Environment
 {
-    [Serializable]
-    public class AnimatFile
+    public class Animat : EnvironmentDataSetBase
     {
-        public string Filename { get; internal set; }
-        public string LatinName { get; internal set; }
-        public List<Geo<float>> AnimatStartPoints { get; internal set; }
+        public ScenarioSpecies ScenarioSpecies { get; set; }
+        public EnvironmentData<Geo<float>> Locations { get; protected set; }
         public int TotalAnimats { get; internal set; }
         static readonly Random Random = new Random();
-        public static AnimatFile Load(string fileName)
-        {
-            string speciesName;
-            return Load(fileName, out speciesName);
-        }
-        public static AnimatFile Load(string fileName, out string speciesName)
+        public static Animat Load(ScenarioSpecies species, string fileName)
         {
             var extension = Path.GetExtension(fileName);
             if (extension != null)
                 switch (extension.ToLower())
                 {
                     case ".3mb":
-                        var result = MMMB.Load(fileName);
-                        speciesName = result.LatinName;
-                        result.Filename = fileName;
-                        return result;
+                        return MMMB.Load(species, fileName);
                     case ".ddb":
-                        var result1 = DDB.Load(fileName);
-                        speciesName = result1.LatinName;
-                        result1.Filename = fileName;
-                        return result1;
+                        return DDB.Load(species, fileName);
+                    case ".ani":
+                        using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        using (var reader = new BinaryReader(stream))
+                        {
+                            var header = reader.ReadBytes(4);
+                            if (header[0] != 'a' && header[1] != 'n' && header[2] != 'i' && header[3] != 'm') throw new FileFormatException(string.Format("{0} is not a valid .ani file", fileName));
+                            var latinName = reader.ReadString();
+                            if (latinName != species.LatinName) throw new FileFormatException(string.Format("{0}: expected species name {1}, got {2}", fileName, species.LatinName, latinName));
+                            var locationCount = reader.ReadInt32();
+                            var result = new Animat();
+                            for (var i = 0; i < locationCount; i++) result.Locations.Add(new Geo<float>(reader.ReadDouble(), reader.ReadDouble(), reader.ReadSingle()));
+                            return result;
+                        }
+
                     default:
                         throw new FileFormatException(string.Format("Unable to load animat locations.  Unrecognized file type: \"{0}\"", extension));
                 }
             throw new Exception("specified file does not exist!");
         }
 
-        public static List<AnimatLocation> Seed(string latinName, double density, GeoRect geoRect, Bathymetry bathymetry)
+        public static Animat Seed(ScenarioSpecies species, double density, GeoRect geoRect, Bathymetry bathymetry)
         {
-            var bounds = new GeoArray(geoRect.NorthWest,geoRect.NorthEast,geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest);
-            var species = new ScenarioSpecies {LatinName = latinName};
-            var locations = new List<AnimatLocation>();
+            var bounds = new GeoArray(geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest);
+            var result = new Animat { ScenarioSpecies = species };
             var radius = Planet.wgs84_earthEquatorialRadiusMeters_D / 1000;
-            var area = bounds.Area * radius * radius; 
+            var area = bounds.Area * radius * radius;
             //Debug.WriteLine("Area: {0}",area);
             var population = (int)Math.Floor(area * density);
             for (var i = 0; i < population; i++)
@@ -60,21 +58,32 @@ namespace ESME.Animats
                 var depth = bathymetry.Samples.GetNearestPoint(location).Data;
                 if (depth > 0)
                 {
-                    locations.Add(new AnimatLocation
-                {
-                    Depth = (float)(depth * Random.NextDouble()),
-                    Geo = location,
-                    ID = i,
-                    ScenarioSpecies = species,
-                });
+                    result.Locations.Add(new Geo<float>(location.Latitude, location.Longitude, (float)(depth * Random.NextDouble())));
                 }
             }
-            return locations;
+            return result;
+        }
+
+        public override void Save(string filename)
+        {
+            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var writer = new BinaryWriter(stream))
+            {
+                writer.Write(new[] { 'a', 'n', 'i', 'm' });
+                writer.Write(ScenarioSpecies.LatinName);
+                writer.Write(Locations.Count);
+                foreach (var sample in Locations)
+                {
+                    writer.Write(sample.Latitude);
+                    writer.Write(sample.Longitude);
+                    writer.Write(sample.Data);
+                }
+            }
         }
     }
 
     [Serializable]
-    public class DDB : AnimatFile
+    public class DDB : Animat
     {
         #region public properties {get; internal set;}
         //not all of these are ever set; the header load procedure terminates once we have determined the species name, output configuration, and total number of animats -- it's all we need.
@@ -124,15 +133,17 @@ namespace ESME.Animats
 
 
         #endregion
+
         /// <summary>
         /// the header load procedure terminates once we have determined the species name, output configuration, and total number of animats -- it's all we need to display points on a map.
         /// </summary>
+        /// <param name="species"> </param>
         /// <param name="fileName">the full path to the .ddb file</param>
         /// <returns></returns>
-        public static new DDB Load(string fileName)
+        public new static DDB Load(ScenarioSpecies species, string fileName)
         {
             if (Path.GetExtension(fileName) != ".ddb") throw new FileFormatException("only ddb files are supported.");
-            var result = new DDB { Filename = fileName };
+            var result = new DDB();
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
                 //nuwc tests for header if 3mb here. (16 byte check)
@@ -190,7 +201,8 @@ namespace ESME.Animats
 
                     //  this.population = reader.ReadInt32();
                     result.ActualMammalPopulation = reader.ReadInt32();
-                    result.LatinName = Encoding.ASCII.GetString(reader.ReadBytes(32)).TrimEnd('\0').Trim();
+                    var latinName = Encoding.ASCII.GetString(reader.ReadBytes(32)).TrimEnd('\0').Trim();
+                    if (latinName != species.LatinName) throw new FileFormatException(string.Format("{0}: expected species name {1}, got {2}", fileName, species.LatinName, latinName));
                     //result.LatinName = reader.ReadString().TrimEnd('\0').Trim();
 
                     //  this.speciesName = new String(specName).trim();
@@ -364,14 +376,15 @@ namespace ESME.Animats
             }
             return result;
         }
+
         /// <summary>
         /// jumps the .ddb header, and then populates AnimatStartPoints with the starting locations of every animat in the file.
         /// </summary>
         /// <param name="reader"></param>
-        private void ReadStartPositions(BinaryReader reader)
+        void ReadStartPositions(BinaryReader reader)
         {
             reader.BaseStream.Seek(1040, SeekOrigin.Begin); // skip the .ddb header
-            AnimatStartPoints = new List<Geo<float>>();
+            Locations = new EnvironmentData<Geo<float>>();
             var datasize = GetSize(MbOutputConfiguration);
             for (var i = 0; i < TotalAnimats; i++)
             {
@@ -385,7 +398,7 @@ namespace ESME.Animats
                 //reader.BaseStream.Seek(8 + datasize, SeekOrigin.Current);
 
                 var depth = reader.ReadSingle();
-                AnimatStartPoints.Add(new Geo<float>(lat, lon, depth));
+                Locations.Add(new Geo<float>(lat, lon, depth));
                 reader.BaseStream.Seek(4 + datasize, SeekOrigin.Current);
                 // skip packedData, and the data itself.
                 //var packedData = reader.ReadSingle();
@@ -395,12 +408,13 @@ namespace ESME.Animats
                 //skip its data because we don't care.
             }
         }
+
         /// <summary>
         /// takes MbOutputConfiguration and determines the size of each animat's packed data.
         /// </summary>
         /// <param name="bitmap"></param>
         /// <returns></returns>
-        private static int GetSize(int bitmap)
+        static int GetSize(int bitmap)
         {
             var size = 0;
 
@@ -422,7 +436,7 @@ namespace ESME.Animats
     }
 
     [Serializable]
-    public class MMMB : AnimatFile
+    public class MMMB : Animat
     {
         #region public properties {get; internal set;}
         public string MbFileIdentifier { get; internal set; }
@@ -498,12 +512,13 @@ namespace ESME.Animats
         /// <summary>
         /// the header load procedure terminates once we have determined the species name, output configuration, and total number of animats -- it's all we need to display points on a map.
         /// </summary>
+        /// <param name="species"> </param>
         /// <param name="fileName">the full path to the .3mb file</param>
         /// <returns></returns>
-        public static new MMMB Load(string fileName)
+        public static new MMMB Load(ScenarioSpecies species, string fileName)
         {
             if (Path.GetExtension(fileName) != ".3mb") throw new FileFormatException("only 3MB files are supported.");
-            var result = new MMMB { Filename = fileName };
+            var result = new MMMB();
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
                 #region MbFileIdentifier
@@ -518,7 +533,7 @@ namespace ESME.Animats
                 result.MbOutputSubVersion = reader.ReadUInt32();
                 #region NumberOfSpecies
                 result.NumberOfSpecies = reader.ReadUInt32();
-                if (result.NumberOfSpecies > 1) throw new FileFormatException(string.Format("The 3MB file {0} associated with this species contains more than one species!", Path.GetFileName(result.Filename)));
+                if (result.NumberOfSpecies > 1) throw new FileFormatException(string.Format("The 3MB file {0} associated with this species contains more than one species!", Path.GetFileName(fileName)));
                 #endregion
                 result.TotalAnimats = reader.ReadInt32();
                 result.Duration = reader.ReadUInt32();
@@ -543,7 +558,8 @@ namespace ESME.Animats
                     if (buf[i] == 0) end = true;
                     if (end) buf[i] = 0;
                 }
-                result.LatinName = Encoding.Default.GetString(buf).TrimEnd('\0');
+                var latinName = Encoding.Default.GetString(buf).TrimEnd('\0');
+                if (latinName != species.LatinName) throw new FileFormatException(string.Format("{0}: expected species name {1}, got {2}", fileName, species.LatinName, latinName));
                 #endregion
                 result.ActualPopulation = reader.ReadUInt32();
                 result.InnerBoxDensity = reader.ReadSingle();
@@ -608,9 +624,9 @@ namespace ESME.Animats
         {
             //skip to where animat state data is
             reader.BaseStream.Seek((long)AnimatsState, SeekOrigin.Begin);
-            AnimatStartPoints = new List<Geo<float>>();
+            Locations = new EnvironmentData<Geo<float>>();
             //uint datasize = GetSize(OutputConfiguration);   
-            for (var i = 0; i < TotalAnimats; i++) AnimatStartPoints.Add(ReadAnimat(reader));
+            for (var i = 0; i < TotalAnimats; i++) Locations.Add(ReadAnimat(reader));
         }
         private Geo<float> ReadAnimat(BinaryReader reader)
         {
