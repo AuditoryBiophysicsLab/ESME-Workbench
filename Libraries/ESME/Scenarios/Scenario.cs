@@ -21,6 +21,8 @@ namespace ESME.Scenarios
         public Scenario()
         {
             StorageDirectory = Path.Combine("scenarios", MasterDatabaseService.RandomFilenameWithoutExension);
+            var duration = new TimeSpan(0, 1, 0, 0);
+            Duration.Ticks = duration.Ticks;
         }
 
         [Key, Initialize]
@@ -57,6 +59,8 @@ namespace ESME.Scenarios
         [Initialize] public virtual ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
         [Initialize] public virtual ObservableList<Perimeter> Perimeters { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
+
+        public void Add(Platform platform) { Platforms.Add(platform); }
 
         [NotMapped] public Wind WindData { get { return ((Wind)Cache[Wind].Result); } }
         [NotMapped] public SoundSpeed SoundSpeedData { get { return ((SoundSpeed)Cache[SoundSpeed].Result); } }

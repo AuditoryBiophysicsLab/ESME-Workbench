@@ -266,27 +266,25 @@ namespace ESMEWorkbench.ViewModels.Main
         void AddPlatform(Scenario scenario)
         {
             if (scenario.LayerControl != null) ((LayerControl)scenario.LayerControl).Expand();
-            AddPlatform(scenario, "New Platform", true);
-        }
-
-        static Platform AddPlatform(Scenario scenario, string name, bool isNew)
-        {
-            var platform = new Platform
+            scenario.Platforms.Add(new Platform
             {
                 Scenario = scenario,
                 Course = 0,
                 Depth = 0,
                 Description = null,
                 Geo = ((GeoRect)scenario.Location.GeoRect).Center,
-                PlatformName = name,
+                PlatformName = "New Platform",
                 IsRandom = false,
                 Launches = false,
                 TrackType = TrackType.Stationary,
-                IsNew = isNew,
-            };
+                IsNew = true,
+            });
+        }
+
+        static void AddPlatform(Scenario scenario, Platform platform)
+        {
             scenario.Platforms.Add(platform);
             platform.CreateMapLayers();
-            return platform;
         }
 
         [MediatorMessageSink(MediatorMessage.ViewScenarioProperties),UsedImplicitly]

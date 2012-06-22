@@ -68,18 +68,26 @@ namespace ESME.Scenarios
         }
         object _layerControl;
 
-        [NotMapped] public List<TrackType> TrackTypeDisplay { get{return new List<TrackType>
+        [NotMapped] public List<TrackType> TrackTypeDisplay
         {
-            Behaviors.TrackType.Stationary,
-            Behaviors.TrackType.PerimeterBounce,
-            Behaviors.TrackType.StraightLine
-        };} }
+            get
+            {
+                return new List<TrackType>
+                {
+                    Behaviors.TrackType.Stationary,
+                    Behaviors.TrackType.PerimeterBounce,
+                    Behaviors.TrackType.StraightLine
+                };
+            }
+        }
+
         TrackType _selectedTrackType = Behaviors.TrackType.Stationary;
-        [NotMapped]
-        public TrackType SelectedTrackType
+
+        [NotMapped] public TrackType SelectedTrackType
         {
             get { return _selectedTrackType; }
-            set {
+            set
+            {
                 _selectedTrackType = value;
                 TrackType = value;
             }
@@ -139,8 +147,9 @@ namespace ESME.Scenarios
                 CustomLineStyle =
                     new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, LayerSettings.LineOrSymbolColor, (float)LayerSettings.LineOrSymbolSize)
             };
-
-            mapLayer.AddLines(new List<Geo> { Geo, ((Geo)Geo).Offset(HRC.Navigation.Geo.KilometersToRadians(25), HRC.Navigation.Geo.DegreesToRadians(90)) });
+            var behavior = new PlatformBehavior(this, new TimeSpan(0, 0, 1, 0), (int)((TimeSpan)Scenario.Duration).TotalMinutes);
+            var locations = behavior.PlatformStates.Select(p => p.PlatformLocation.Location).ToList();
+            mapLayer.AddLines(locations);
             mapLayer.Done();
             LayerSettings.MapLayerViewModel = mapLayer;
             if (Perimeter != null) Perimeter.CreateMapLayers();

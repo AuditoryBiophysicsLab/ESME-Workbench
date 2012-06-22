@@ -88,9 +88,11 @@ namespace HRC.Navigation
             {
                 var segmentArray = Segments.ToArray();
                 var segmentCount = segmentArray.Length;
+                if (segmentCount == 3) return false;
+                if (segmentCount == 4) return segmentArray[0].Intersection(segmentArray[2]) != null || segmentArray[1].Intersection(segmentArray[3]) != null;
                 for (var i = 0; i < segmentCount; i++) 
-                    for (var j = 0; j < segmentCount - 2; j++) 
-                        if (segmentArray[i].Intersection(segmentArray[(i + j + 2) % segmentCount]) != null) return true;
+                    for (var j = i + 2; j < segmentCount - 2; j++) 
+                        if (segmentArray[i].Intersection(segmentArray[(i + j) % segmentCount]) != null) return true;
                 return false;
             }
         }

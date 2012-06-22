@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using ESME;
+using ESME.Behaviors;
 using ESME.Database;
 using ESME.Environment;
 using ESME.Environment.NAVO;
@@ -136,7 +137,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     await CreateSample("Florida Gulf Coast", "Florida Gulf Sample", new GeoRect(30.5, 25, -81, -87), (TimePeriod)DateTime.Today.Month, progress, windData, soundSpeedData, bathymetryData, sedimentData);
                     if (progress.IsCanceled) { window.Close(); return; }
 
-                    await CreateSample("Southern California", "Southern California Sample", new GeoRect(34, 32, -117.5, -120), (TimePeriod)DateTime.Today.Month, progress, windData, soundSpeedData, bathymetryData, sedimentData);
+                    await CreateSample("Southern California", "Southern California Sample", new GeoRect(34, 31, -117.5, -120), (TimePeriod)DateTime.Today.Month, progress, windData, soundSpeedData, bathymetryData, sedimentData);
                     if (progress.IsCanceled) { window.Close(); return; }
 
                     await CreateSample("Bahamas", "Bahamas Sample", new GeoRect(27, 22, -73.5, -79), (TimePeriod)DateTime.Today.Month, progress, windData, soundSpeedData, bathymetryData, sedimentData);
@@ -167,7 +168,30 @@ namespace ESMEWorkbench.ViewModels.Main
             progress.CurrentItem++;
             await TaskEx.Delay(10);
             var scenario = CreateScenario(location, scenarioName, "Created as a sample scenario", timePeriod, windData, soundSpeedData, bathymetryData, sedimentData);
-            AddMode(AddSource(AddPlatform(scenario, "Sample Platform", false), "Sample Source", false), "1 KHz mode", false);
+            var perimeter = new Perimeter();
+            perimeter.PerimeterCoordinates.Add(new PerimeterCoordinate { Geo = new Geo(locationGeoRect.NorthWest.Latitude - 1, locationGeoRect.NorthWest.Longitude + 1) });
+            perimeter.PerimeterCoordinates.Add(new PerimeterCoordinate { Geo = new Geo(locationGeoRect.NorthEast.Latitude - 1, locationGeoRect.NorthEast.Longitude - 1) });
+            perimeter.PerimeterCoordinates.Add(new PerimeterCoordinate { Geo = new Geo(locationGeoRect.SouthEast.Latitude + 1, locationGeoRect.SouthEast.Longitude - 1) });
+            perimeter.PerimeterCoordinates.Add(new PerimeterCoordinate { Geo = new Geo(locationGeoRect.SouthWest.Latitude + 1, locationGeoRect.SouthWest.Longitude + 1) });
+            perimeter.PerimeterCoordinates.Add(new PerimeterCoordinate { Geo = new Geo(locationGeoRect.NorthWest.Latitude - 1, locationGeoRect.NorthWest.Longitude + 1) });
+            scenario.Duration = new TimeSpan(0, 12, 0, 0);
+            var platform = new Platform
+            {
+                Scenario = scenario,
+                Course = 0,
+                Depth = 0,
+                Description = null,
+                Geo = ((GeoRect)scenario.Location.GeoRect).Center,
+                PlatformName = "Sample Platform",
+                IsRandom = true,
+                Launches = false,
+                TrackType = TrackType.PerimeterBounce,
+                Speed = 20,
+                IsNew = false,
+                Perimeter = perimeter,
+            };
+            AddPlatform(scenario, platform);
+            AddMode(AddSource(platform, "Sample Source", false), "1 KHz mode", false);
             //Database.SaveChanges();
             await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
             _dispatcher.InvokeInBackgroundIfRequired(() =>
