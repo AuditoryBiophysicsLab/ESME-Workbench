@@ -73,9 +73,10 @@ namespace HRC.Navigation
             Geo location = null;
             while ((location == null) || (!location.IsInside(perimeter)))
             {
-                var distance = Random.NextDouble() * perimeter.BoundingCircle.Radius;
-                var azimuth = Random.NextDouble() * MoreMath.TwoPi;
-                location = perimeter.Center.Offset(distance, azimuth);
+                location = new Geo(perimeter.BoundingBox.South + (perimeter.BoundingBox.Height * Random.NextDouble()), perimeter.BoundingBox.West + (perimeter.BoundingBox.Width * Random.NextDouble()));
+                //var distance = Random.NextDouble() * perimeter.BoundingCircle.Radius;
+                //var azimuth = Random.NextDouble() * MoreMath.TwoPi;
+                //location = perimeter.Center.Offset(distance, azimuth);
             }
             return location;
         }
