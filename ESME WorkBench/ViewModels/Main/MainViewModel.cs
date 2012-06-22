@@ -20,7 +20,6 @@ using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using ESME.Views.TransmissionLossViewer;
-using ESMEWorkbench.Properties;
 using ESMEWorkbench.ViewModels.Map;
 using ESMEWorkbench.ViewModels.Tree;
 using HRC;
@@ -124,7 +123,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     var soundSpeedData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(soundSpeed.PluginIdentifier), Resolution = soundSpeed.AvailableResolutions.Max() };
                     var bathymetryData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(bathymetry.PluginIdentifier), Resolution = bathymetry.AvailableResolutions.Max() };
                     var sedimentData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(sediment.PluginIdentifier), Resolution = sediment.AvailableResolutions.Max() };
-                    MediatorMessage.Send(MediatorMessage.SetMapExtent, new GeoRect(45, 22, -70, -120));
+                    MediatorMessage.Send(MediatorMessage.SetMapExtent, new GeoRect(45, 22, -65, -120));
                     await CreateSample("Gulf of Maine", "Maine Sample", new GeoRect(44, 41, -65, -71), (TimePeriod)DateTime.Today.Month, progress, windData, soundSpeedData, bathymetryData, sedimentData);
                     if (progress.IsCanceled) { window.Close(); return; }
 
@@ -168,12 +167,11 @@ namespace ESMEWorkbench.ViewModels.Main
             progress.CurrentItem++;
             await TaskEx.Delay(10);
             var scenario = CreateScenario(location, scenarioName, "Created as a sample scenario", timePeriod, windData, soundSpeedData, bathymetryData, sedimentData);
-            var perimeter = new Perimeter();
-            perimeter.PerimeterCoordinates.Add(new PerimeterCoordinate { Geo = new Geo(locationGeoRect.NorthWest.Latitude - 1, locationGeoRect.NorthWest.Longitude + 1) });
-            perimeter.PerimeterCoordinates.Add(new PerimeterCoordinate { Geo = new Geo(locationGeoRect.NorthEast.Latitude - 1, locationGeoRect.NorthEast.Longitude - 1) });
-            perimeter.PerimeterCoordinates.Add(new PerimeterCoordinate { Geo = new Geo(locationGeoRect.SouthEast.Latitude + 1, locationGeoRect.SouthEast.Longitude - 1) });
-            perimeter.PerimeterCoordinates.Add(new PerimeterCoordinate { Geo = new Geo(locationGeoRect.SouthWest.Latitude + 1, locationGeoRect.SouthWest.Longitude + 1) });
-            perimeter.PerimeterCoordinates.Add(new PerimeterCoordinate { Geo = new Geo(locationGeoRect.NorthWest.Latitude - 1, locationGeoRect.NorthWest.Longitude + 1) });
+            var perimeterGeoArray = new GeoArray(new Geo(locationGeoRect.NorthWest.Latitude - 1, locationGeoRect.NorthWest.Longitude + 1),
+                                                 new Geo(locationGeoRect.NorthEast.Latitude - 1, locationGeoRect.NorthEast.Longitude - 1),
+                                                 new Geo(locationGeoRect.SouthEast.Latitude + 1, locationGeoRect.SouthEast.Longitude - 1),
+                                                 new Geo(locationGeoRect.SouthWest.Latitude + 1, locationGeoRect.SouthWest.Longitude + 1));
+            Perimeter perimeter = (GeoArray)perimeterGeoArray.Closed;
             scenario.Duration = new TimeSpan(0, 12, 0, 0);
             var platform = new Platform
             {
@@ -191,7 +189,10 @@ namespace ESMEWorkbench.ViewModels.Main
                 Perimeter = perimeter,
             };
             AddPlatform(scenario, platform);
+            platform.LayerSettings.IsChecked = true;
             AddMode(AddSource(platform, "Sample Source", false), "1 KHz mode", false);
+            var species = new ScenarioSpecies { LatinName = "Sample Species" };
+            scenario.ScenarioSpecies.Add(species);            
             //Database.SaveChanges();
             await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
             _dispatcher.InvokeInBackgroundIfRequired(() =>

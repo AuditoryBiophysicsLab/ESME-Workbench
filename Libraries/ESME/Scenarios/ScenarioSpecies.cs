@@ -1,10 +1,15 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using ESME.Environment;
 using ESME.Locations;
+using ESME.Mapping;
 using HRC.Aspects;
+using HRC.Navigation;
 using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
+using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Scenarios
 {
@@ -42,8 +47,24 @@ namespace ESME.Scenarios
         #endregion
         #endregion
 
-        public void CreateMapLayers() { throw new NotImplementedException(); }
-        public void RemoveMapLayers() { throw new NotImplementedException(); }
+        protected static readonly Random Random = new Random();
+        public void CreateMapLayers()
+        {
+            var pointLayer = new OverlayShapeMapLayer
+            {
+                Name = string.Format("{0}", Guid),
+                PointSymbolType = (PointSymbolType)(Random.Next(8)),
+            };
+            while (pointLayer.PointSymbolType == PointSymbolType.Cross) pointLayer.PointSymbolType = (PointSymbolType)(Random.Next(8));
+            pointLayer.PointStyle = MapLayerViewModel.CreatePointStyle(pointLayer.PointSymbolType, LayerSettings.LineOrSymbolColor, (int)LayerSettings.LineOrSymbolSize);
+            var animats = Animat.Seed(this, 0.01, Scenario.Location.GeoRect, Scenario.BathymetryData);
+            pointLayer.Clear();
+            pointLayer.AddPoints(animats.Locations.Select(l => new Geo(l.Latitude, l.Longitude)).ToList());
+            pointLayer.Done();
+            LayerSettings.MapLayerViewModel = pointLayer;
+            LayerSettings.IsChecked = true;
+        }
+        public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
         public void Delete()
         {
             IsDeleted = true;

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using ESME.Scenarios;
+using HRC.Aspects;
 using HRC.Navigation;
 using FileFormatException = ESME.Model.FileFormatException;
 
@@ -10,6 +11,7 @@ namespace ESME.Environment
 {
     public class Animat : EnvironmentDataSetBase
     {
+        public Animat() { Locations = new EnvironmentData<Geo<float>>(); }
         public ScenarioSpecies ScenarioSpecies { get; set; }
         public EnvironmentData<Geo<float>> Locations { get; protected set; }
         public int TotalAnimats { get; internal set; }
@@ -56,10 +58,7 @@ namespace ESME.Environment
             {
                 var location = bounds.RandomLocationWithinPerimeter();
                 var depth = bathymetry.Samples.GetNearestPoint(location).Data;
-                if (depth > 0)
-                {
-                    result.Locations.Add(new Geo<float>(location.Latitude, location.Longitude, (float)(depth * Random.NextDouble())));
-                }
+                if (depth < 0) result.Locations.Add(new Geo<float>(location.Latitude, location.Longitude, (float)(depth * Random.NextDouble())));
             }
             return result;
         }

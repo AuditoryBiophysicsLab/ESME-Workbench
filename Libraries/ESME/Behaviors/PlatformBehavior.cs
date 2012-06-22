@@ -77,7 +77,9 @@ namespace ESME.Behaviors
                 if (Platform.IsRandom && Platform.Perimeter == null) throw new PerimeterInvalidException("Must have a perimeter specified for random start point behavior");
                 if (Platform.Perimeter != null)
                 {
-                    perimeter = Platform.Perimeter;
+                    perimeter = new GeoArray((from coordinate in Platform.Perimeter.PerimeterCoordinates
+                                              orderby coordinate.Order
+                                              select (Geo)coordinate.Geo).ToList());
                     var reasons = new List<string>();
                     if (!perimeter.IsClosed) reasons.Add("Perimeter is not closed");
                     if (perimeter.HasCrossingSegments) reasons.Add("Perimeter is not a simple polygon (segments cross each other)");

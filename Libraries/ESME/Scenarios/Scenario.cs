@@ -99,6 +99,7 @@ namespace ESME.Scenarios
         {
             if (Platforms != null) foreach (var platform in Platforms) platform.CreateMapLayers();
             foreach (var analysisPoint in AnalysisPoints.ToList()) analysisPoint.CreateMapLayers();
+            foreach (var species in ScenarioSpecies.ToList()) species.CreateMapLayers();
         }
 
         public void RemoveMapLayers()
