@@ -113,6 +113,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Animats\AnimatSeedingTests.cs" />
     <Compile Include="Behaviors\ActivityTimelineTests.cs" />
     <Compile Include="Behaviors\PlatformBehaviorTests.cs" />
     <Compile Include="Common\TestLocation.cs" />

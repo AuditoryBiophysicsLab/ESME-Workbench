@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using ESME.Environment;
 using ESME.Scenarios;
 using HRC.Navigation;
 using FileFormatException = ESME.Model.FileFormatException;
@@ -44,18 +45,19 @@ namespace ESME.Animats
             throw new Exception("specified file does not exist!");
         }
 
-        public static List<AnimatLocation> Seed(string latinName, double density, Scenario scenario)
+        public static List<AnimatLocation> Seed(string latinName, double density, GeoRect geoRect, Bathymetry bathymetry)
         {
-            GeoArray bounds = scenario.Location.GeoRect;
+            var bounds = new GeoArray(geoRect.NorthWest,geoRect.NorthEast,geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest);
             var species = new ScenarioSpecies {LatinName = latinName};
             var locations = new List<AnimatLocation>();
             var radius = Planet.wgs84_earthEquatorialRadiusMeters_D / 1000;
-            var area = bounds.Area * radius * radius; //todo compare with google earth's area and tell dave about it.
+            var area = bounds.Area * radius * radius; 
+            //Debug.WriteLine("Area: {0}",area);
             var population = (int)Math.Floor(area * density);
             for (var i = 0; i < population; i++)
             {
                 var location = bounds.RandomLocationWithinPerimeter();
-                var depth = scenario.BathymetryData.Samples.GetNearestPoint(location).Data;
+                var depth = bathymetry.Samples.GetNearestPoint(location).Data;
                 if (depth > 0)
                 {
                     locations.Add(new AnimatLocation
