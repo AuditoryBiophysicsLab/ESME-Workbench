@@ -218,6 +218,124 @@
                         </Controls:LayerControl.ContextMenu>
                     </Controls:LayerControl>
                 </HierarchicalDataTemplate>
+                <!-- Species -->
+                <HierarchicalDataTemplate DataType="{x:Type Tree:SpeciesNode}" ItemsSource="{Binding SpeciesList}">
+                    <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
+                                       IsLayerNameEditable="True"
+                                       LayerName="Species"
+                                       LineOrSymbolColor="{Binding Scenarios:LayerSettings.LineOrSymbolColor}"
+                                       LineOrSymbolSize="{Binding Scenarios:LayerSettings.LineOrSymbolSize}"
+                                       TheLayerControl="{Binding Controls:LayerControl}">
+                        <!--
+                        Should work, doesn't.  KeyUp is handled by TreeviewItem, not layercontrol.
+                        <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="KeyUp">
+                        <WPF:EventToCommandTrigger Command="{Binding KeyUpCommand}" />
+                        </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    -->
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeletePlatformCommand}" Header="Remove this platform">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/delete.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding AddSourceCommand}" Header="Add source">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/add.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding PlatformPropertiesCommand}" Header="Properties">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/application_form_edit.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator/>
+                                <MenuItem Command="{Binding MoveLayerToFrontCommand}" Header="Move platform to front">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_front.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerForwardCommand}" Header="Move platform forward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_forwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerBackwardCommand}" Header="Move platform backward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_backwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerToBackCommand}" Header="Move platform to back">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_back.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+
+                <!-- Perimeters -->
+                <HierarchicalDataTemplate DataType="{x:Type Tree:PerimetersNode}" ItemsSource="{Binding Scenario.Perimeters}">
+                    <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
+                                       IsLayerNameEditable="True"
+                                       LayerName="Perimeters"
+                                       LineOrSymbolColor="{Binding Scenarios:LayerSettings.LineOrSymbolColor}"
+                                       LineOrSymbolSize="{Binding Scenarios:LayerSettings.LineOrSymbolSize}"
+                                       TheLayerControl="{Binding Controls:LayerControl}">
+                        <!--
+                        Should work, doesn't.  KeyUp is handled by TreeviewItem, not layercontrol.
+                        <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="KeyUp">
+                        <WPF:EventToCommandTrigger Command="{Binding KeyUpCommand}" />
+                        </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    -->
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeletePlatformCommand}" Header="Remove this platform">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/delete.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding AddSourceCommand}" Header="Add source">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/add.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding PlatformPropertiesCommand}" Header="Properties">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/application_form_edit.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator/>
+                                <MenuItem Command="{Binding MoveLayerToFrontCommand}" Header="Move platform to front">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_front.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerForwardCommand}" Header="Move platform forward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_forwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerBackwardCommand}" Header="Move platform backward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_backwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerToBackCommand}" Header="Move platform to back">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_back.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+
                 <HierarchicalDataTemplate DataType="{x:Type Tree:WorldMapNode}" ItemsSource="{Binding Features}">
                     <Controls:LayerControl IsChecked="{Binding IsVisible}" LayerName="World Map" LineOrSymbolColor="{Binding LineColor}" LineOrSymbolSize="{Binding LineWeight}">
                         <Controls:LayerControl.ContextMenu>

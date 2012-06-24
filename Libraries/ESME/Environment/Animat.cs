@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using ESME.Scenarios;
-using HRC.Aspects;
 using HRC.Navigation;
 using FileFormatException = ESME.Model.FileFormatException;
 
@@ -65,6 +65,45 @@ namespace ESME.Environment
             return result;
         }
 
+        public async static Task<Animat> SeedAsync(ScenarioSpecies species, double density, GeoRect geoRect, Bathymetry bathymetry)
+        {
+            var bounds = new GeoArray(geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest);
+            var result = new Animat { ScenarioSpecies = species };
+            var radius = Planet.wgs84_earthEquatorialRadiusMeters_D / 1000;
+            var area = bounds.Area * radius * radius;
+            //Debug.WriteLine("Area: {0}",area);
+            var transformManyBlock = new TransformManyBlock<int, Geo<float>>(count =>
+            {
+                var geos = new List<Geo<float>>();
+                for (var i = 0; i < count; i++)
+                {
+                    var location = bounds.RandomLocationWithinPerimeter();
+                    var depth = bathymetry.Samples.GetNearestPointAsync(location).Result.Data;
+                    if (depth < 0) geos.Add(new Geo<float>(location.Latitude, location.Longitude, (float)(depth * Random.NextDouble())));
+                }
+                return geos;
+            }, new ExecutionDataflowBlockOptions
+            {
+                TaskScheduler = TaskScheduler.Default,
+                BoundedCapacity = -1,
+                MaxDegreeOfParallelism = -1,
+            });
+            var bufferBlock = new BufferBlock<Geo<float>>();
+            transformManyBlock.LinkTo(bufferBlock);
+            var population = (int)Math.Round(area * density);
+            const int blockSize = 100;
+            while (population > 0)
+            {
+                transformManyBlock.Post(population > blockSize ? blockSize : population);
+                population -= blockSize;
+            }
+            transformManyBlock.Complete();
+            await transformManyBlock.Completion;
+            IList<Geo<float>> animatGeos;
+            if (bufferBlock.TryReceiveAll(out animatGeos))
+                result.Locations.AddRange(animatGeos);
+            return result;
+        }
 
         public override void Save(string filename)
         {

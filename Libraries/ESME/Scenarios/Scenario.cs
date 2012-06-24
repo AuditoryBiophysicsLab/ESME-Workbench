@@ -100,16 +100,19 @@ namespace ESME.Scenarios
             if (Platforms != null) foreach (var platform in Platforms) platform.CreateMapLayers();
             foreach (var analysisPoint in AnalysisPoints.ToList()) analysisPoint.CreateMapLayers();
             foreach (var species in ScenarioSpecies.ToList()) species.CreateMapLayers();
+            foreach (var perimeter in Perimeters.ToList()) perimeter.CreateMapLayers();
         }
 
         public void RemoveMapLayers()
         {
             if (Wind != null) Wind.RemoveMapLayers();
-            if (Wind != null) SoundSpeed.RemoveMapLayers();
-            if (Wind != null) Bathymetry.RemoveMapLayers();
-            if (Wind != null) Sediment.RemoveMapLayers();
+            if (SoundSpeed != null) SoundSpeed.RemoveMapLayers();
+            if (Bathymetry != null) Bathymetry.RemoveMapLayers();
+            if (Sediment != null) Sediment.RemoveMapLayers();
             if (Platforms != null) foreach (var platform in Platforms) platform.RemoveMapLayers();
             foreach (var analysisPoint in AnalysisPoints) analysisPoint.RemoveMapLayers();
+            foreach (var species in ScenarioSpecies.ToList()) species.RemoveMapLayers();
+            foreach (var perimeter in Perimeters.ToList()) perimeter.RemoveMapLayers();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

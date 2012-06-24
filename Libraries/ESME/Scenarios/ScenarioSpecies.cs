@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using ESME.Environment;
 using ESME.Locations;
@@ -15,6 +16,7 @@ namespace ESME.Scenarios
 {
     public class ScenarioSpecies : IHaveGuid, IHaveLayerSettings,IEquatable<ScenarioSpecies>
     {
+        public ScenarioSpecies() { SpeciesFilename = MasterDatabaseService.RandomFilenameWithoutExension + ".ani"; }
         [Key, Initialize]
         public Guid Guid { get; set; }
         public string SpeciesFile { get; set; }
@@ -23,7 +25,20 @@ namespace ESME.Scenarios
         public virtual Scenario Scenario { get; set; }
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
+        public string SpeciesFilename { get; set; }
         [NotMapped] public bool IsDeleted { get; set; }
+        [NotMapped]
+        public string SpeciesFilePath
+        {
+            get
+            {
+                if (_speciesFilePath != null) return _speciesFilePath;
+                if (Scenario == null || Scenario.StorageDirectoryPath == null) throw new ApplicationException("Scenario or Scenario.StorageDirectoryPath is null");
+                _speciesFilePath = Path.Combine(Scenario.StorageDirectoryPath, SpeciesFilename);
+                return _speciesFilePath;
+            }
+        }
+        string _speciesFilePath;
 
         #region Layer Move commands
         #region MoveLayerToFrontCommand
@@ -57,7 +72,7 @@ namespace ESME.Scenarios
             };
             while (pointLayer.PointSymbolType == PointSymbolType.Cross) pointLayer.PointSymbolType = (PointSymbolType)(Random.Next(8));
             pointLayer.PointStyle = MapLayerViewModel.CreatePointStyle(pointLayer.PointSymbolType, LayerSettings.LineOrSymbolColor, (int)LayerSettings.LineOrSymbolSize);
-            var animats = Animat.Seed(this, 0.01, Scenario.Location.GeoRect, Scenario.BathymetryData);
+            var animats = File.Exists(SpeciesFilePath) ? Animat.Load(this, SpeciesFilePath) : Animat.Seed(this, 0.01, Scenario.Location.GeoRect, Scenario.BathymetryData);
             pointLayer.Clear();
             pointLayer.AddPoints(animats.Locations.Select(l => new Geo(l.Latitude, l.Longitude)).ToList());
             pointLayer.Done();

@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using ESME.Database;
 using ESME.Locations;
 using ESME.Mapping;
 using HRC.Aspects;
@@ -36,9 +34,11 @@ namespace ESME.Scenarios
             var geos = (from p in PerimeterCoordinates
                         orderby p.Order
                         select (Geo)p.Geo).ToList();
+            geos.Add(new Geo(geos.First()));
             mapLayer.AddPolygon(geos);
             mapLayer.Done();
             LayerSettings.MapLayerViewModel = mapLayer;
+            LayerSettings.IsChecked = true;
         }
 
         public static implicit operator Perimeter(GeoArray geoArray)

@@ -191,8 +191,11 @@ namespace ESMEWorkbench.ViewModels.Main
             AddPlatform(scenario, platform);
             platform.LayerSettings.IsChecked = true;
             AddMode(AddSource(platform, "Sample Source", false), "1 KHz mode", false);
-            var species = new ScenarioSpecies { LatinName = "Sample Species" };
-            scenario.ScenarioSpecies.Add(species);            
+            progress.ProgressMessage = string.Format("Generating animat population for scenario \"{0}\"", scenarioName);
+            var species = new ScenarioSpecies { LatinName = "Sample Species", Scenario = scenario };
+            scenario.ScenarioSpecies.Add(species);
+            var animats = await Animat.SeedAsync(species, 0.01, locationGeoRect, (Bathymetry)_cache[scenario.Bathymetry].Result);
+            animats.Save(species.SpeciesFilePath);
             //Database.SaveChanges();
             await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
             _dispatcher.InvokeInBackgroundIfRequired(() =>
