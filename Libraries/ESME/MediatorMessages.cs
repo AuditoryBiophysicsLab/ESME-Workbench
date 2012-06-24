@@ -46,6 +46,10 @@ namespace ESME
         public const string ModeProperties = "ModePropertiesMessage";
         public const string ModeBoundToLayer = "ModeBoundToLayerMessage";
 
+        public const string AddPerimeter = "AddPerimeterMessage";
+
+        public const string AddSpecies = "AddSpeciesMessage";
+
         public const string ShowProperties = "ShowPropertiesMessage";
 
         public const string SetExperiment = "SetExperimentMessage";
