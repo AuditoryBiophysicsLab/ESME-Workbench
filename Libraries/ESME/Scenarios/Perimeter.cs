@@ -38,7 +38,6 @@ namespace ESME.Scenarios
             mapLayer.AddPolygon(geos);
             mapLayer.Done();
             LayerSettings.MapLayerViewModel = mapLayer;
-            LayerSettings.IsChecked = true;
         }
 
         public static implicit operator Perimeter(GeoArray geoArray)

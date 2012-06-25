@@ -253,7 +253,7 @@
                 </HierarchicalDataTemplate>
                 <DataTemplate DataType="{x:Type Scenarios:ScenarioSpecies}">
                     <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
-                                           IsLayerNameEditable="True"
+                                           IsLayerNameEditable="False"
                                            LayerName="{Binding LatinName}"
                                            LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
                                            LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
@@ -326,7 +326,8 @@
                 <DataTemplate DataType="{x:Type Scenarios:Perimeter}">
                     <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
                                            IsLayerNameEditable="True"
-                                           LayerName="{Binding Name}"
+                                           LayerName="{Binding Name,
+                                                               Mode=TwoWay}"
                                            LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
                                            LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
                         <Controls:LayerControl.ContextMenu>

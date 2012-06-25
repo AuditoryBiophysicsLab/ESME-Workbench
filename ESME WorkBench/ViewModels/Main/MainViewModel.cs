@@ -191,7 +191,6 @@ namespace ESMEWorkbench.ViewModels.Main
             };
             scenario.Perimeters.Add(perimeter);
             AddPlatform(scenario, platform);
-            platform.LayerSettings.IsChecked = true;
             AddMode(AddSource(platform, "Sample Source", false), "1 KHz mode", false);
             progress.ProgressMessage = string.Format("Generating animat population for scenario \"{0}\"", scenarioName);
             var species = new ScenarioSpecies { LatinName = "Sample Species", Scenario = scenario };

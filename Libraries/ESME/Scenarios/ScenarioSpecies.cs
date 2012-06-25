@@ -77,7 +77,6 @@ namespace ESME.Scenarios
             pointLayer.AddPoints(animats.Locations.Select(l => new Geo(l.Latitude, l.Longitude)).ToList());
             pointLayer.Done();
             LayerSettings.MapLayerViewModel = pointLayer;
-            LayerSettings.IsChecked = true;
         }
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
         public void Delete()
