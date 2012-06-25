@@ -253,8 +253,8 @@
                 </HierarchicalDataTemplate>
                 <DataTemplate DataType="{x:Type Scenarios:ScenarioSpecies}">
                     <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
-                                           IsLayerNameEditable="False"
-                                           LayerName="{Binding LatinName}"
+                                           IsLayerNameEditable="True"
+                                           LayerName="{Binding LatinName, Mode=TwoWay}"
                                            LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
                                            LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
                         <Controls:LayerControl.ContextMenu>

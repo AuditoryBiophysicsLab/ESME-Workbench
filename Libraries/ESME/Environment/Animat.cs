@@ -34,8 +34,8 @@ namespace ESME.Environment
                         {
                             var header = reader.ReadBytes(4);
                             if (header[0] != 'a' && header[1] != 'n' && header[2] != 'i' && header[3] != 'm') throw new FileFormatException(string.Format("{0} is not a valid .ani file", fileName));
-                            var latinName = reader.ReadString();
-                            if (latinName != species.LatinName) throw new FileFormatException(string.Format("{0}: expected species name {1}, got {2}", fileName, species.LatinName, latinName));
+                            //var latinName = reader.ReadString();
+                            //if (latinName != species.LatinName) throw new FileFormatException(string.Format("{0}: expected species name {1}, got {2}", fileName, species.LatinName, latinName));
                             var locationCount = reader.ReadInt32();
                             var result = new Animat();
                             for (var i = 0; i < locationCount; i++) result.Locations.Add(new Geo<float>(reader.ReadDouble(), reader.ReadDouble(), reader.ReadSingle()));
@@ -111,7 +111,7 @@ namespace ESME.Environment
             using (var writer = new BinaryWriter(stream))
             {
                 writer.Write(new[] { 'a', 'n', 'i', 'm' });
-                writer.Write(ScenarioSpecies.LatinName);
+                //writer.Write(ScenarioSpecies.LatinName);
                 writer.Write(Locations.Count);
                 foreach (var sample in Locations)
                 {
