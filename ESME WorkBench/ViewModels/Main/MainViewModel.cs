@@ -172,6 +172,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                                  new Geo(locationGeoRect.SouthEast.Latitude + 1, locationGeoRect.SouthEast.Longitude - 1),
                                                  new Geo(locationGeoRect.SouthWest.Latitude + 1, locationGeoRect.SouthWest.Longitude + 1));
             Perimeter perimeter = (GeoArray)perimeterGeoArray.Closed;
+            perimeter.Name = "Sample Perimeter";
             scenario.Duration = new TimeSpan(0, 12, 0, 0);
             var platform = new Platform
             {
@@ -188,6 +189,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 IsNew = false,
                 Perimeter = perimeter,
             };
+            scenario.Perimeters.Add(perimeter);
             AddPlatform(scenario, platform);
             platform.LayerSettings.IsChecked = true;
             AddMode(AddSource(platform, "Sample Source", false), "1 KHz mode", false);
