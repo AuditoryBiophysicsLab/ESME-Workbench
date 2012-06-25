@@ -11,7 +11,6 @@ using ESME.Locations;
 using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.Views.Controls;
-using ESME.Views.Locations;
 using ESME.Views.Scenarios;
 using ESMEWorkbench.ViewModels.Map;
 using ESMEWorkbench.ViewModels.Tree;
@@ -88,23 +87,6 @@ namespace ESMEWorkbench.ViewModels.Main
 
         public string MainWindowTitle { get; set; }
 
-        [MediatorMessageSink(MediatorMessage.LoadScenario), UsedImplicitly]
-        void LoadScenario(Scenario scenario) { Scenario = scenario; }
-
-        [MediatorMessageSink(MediatorMessage.DeleteAllScenarios), UsedImplicitly]
-        void DeleteAllScenarios(Location location)
-        {
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete all scenarios in location \"{0}\"?", location.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-            foreach (var scenario in location.Scenarios.ToList()) scenario.Delete();
-        }
-
-        [MediatorMessageSink(MediatorMessage.DeleteScenario), UsedImplicitly]
-        void DeleteScenario(Scenario scenario)
-        {
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to the scenario \"{0}\"?", scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-            scenario.Delete();
-        }
-
         #region CreateScenarioCommand
         public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand { get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => IsCreateScenarioCommandEnabled, o => CreateScenarioHandler())); } }
         SimpleCommand<object, EventToCommandArgs> _createScenario;
@@ -178,6 +160,29 @@ namespace ESMEWorkbench.ViewModels.Main
         }
         #endregion
 
+        #region Handlers for Scenario-related MediatorMessages
+        [MediatorMessageSink(MediatorMessage.LoadScenario), UsedImplicitly]
+        void LoadScenario(Scenario scenario) { Scenario = scenario; }
+
+        [MediatorMessageSink(MediatorMessage.DeleteAllScenarios), UsedImplicitly]
+        void DeleteAllScenarios(Location location)
+        {
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete all scenarios in location \"{0}\"?", location.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            foreach (var scenario in location.Scenarios.ToList()) scenario.Delete();
+        }
+
+        [MediatorMessageSink(MediatorMessage.DeleteScenario), UsedImplicitly]
+        void DeleteScenario(Scenario scenario)
+        {
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to the scenario \"{0}\"?", scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            scenario.Delete();
+        }
+
+        [MediatorMessageSink(MediatorMessage.ViewScenarioProperties), UsedImplicitly]
+        void ViewScenarioProperties(Scenario scenario) { _visualizer.ShowDialog("TreeViewItemPropertiesView", new ScenarioPropertiesViewModel { PropertyObject = scenario }); }
+        #endregion
+
+        #region Handlers for AnalysisPoint-related MediatorMessages
         [MediatorMessageSink(MediatorMessage.DeleteAnalysisPoint), UsedImplicitly]
         void DeleteAnalysisPoint(AnalysisPoint analysisPoint)
         {
@@ -226,7 +231,9 @@ namespace ESMEWorkbench.ViewModels.Main
                 _transmissionLoss.Add(radial);
             }
         }
+        #endregion
 
+        #region Handlers for TransmissionLoss-related MediatorMessages
         [MediatorMessageSink(MediatorMessage.DeleteTransmissionLoss), UsedImplicitly]
         void DeleteTransmissionLoss(ESME.Scenarios.TransmissionLoss transmissionLoss)
         {
@@ -261,7 +268,9 @@ namespace ESMEWorkbench.ViewModels.Main
                 if (!transmissionLoss.IsDeleted) transmissionLoss.CreateMapLayers();
             });
         }
+        #endregion
 
+        #region Handlers for Platform-related MediatorMessages and associated utility routines
         [MediatorMessageSink(MediatorMessage.AddPlatform), UsedImplicitly]
         void AddPlatform(Scenario scenario)
         {
@@ -286,9 +295,6 @@ namespace ESMEWorkbench.ViewModels.Main
             scenario.Platforms.Add(platform);
             platform.CreateMapLayers();
         }
-
-        [MediatorMessageSink(MediatorMessage.ViewScenarioProperties),UsedImplicitly]
-        void ViewScenarioProperties(Scenario scenario) { _visualizer.ShowDialog("TreeViewItemPropertiesView", new ScenarioPropertiesViewModel { PropertyObject = scenario }); }
 
         [MediatorMessageSink(MediatorMessage.PlatformBoundToLayer), UsedImplicitly]
         async void PlatformBoundToLayer(Platform platform)
@@ -315,7 +321,9 @@ namespace ESMEWorkbench.ViewModels.Main
             _visualizer.ShowDialog("PlatformPropertiesView", vm);
             //_visualizer.ShowDialog("TreeViewItemPropertiesView", new PlatformPropertiesViewModel { Platform = platform });
         }
+        #endregion
 
+        #region Handlers for Source-related MediatorMessages and associated utility routines
         [MediatorMessageSink(MediatorMessage.AddSource), UsedImplicitly]
         void AddSource(Platform platform)
         {
@@ -364,7 +372,9 @@ namespace ESMEWorkbench.ViewModels.Main
             var vm = new PropertiesViewModel { PropertyObject = source, WindowTitle = "Source Properties: " + source.SourceName };
             _visualizer.ShowDialog("SourcePropertiesView", vm);
         }
+        #endregion
 
+        #region Handlers for Mode-related MediatorMessages and associated utility routines
         [MediatorMessageSink(MediatorMessage.AddMode), UsedImplicitly]
         void AddMode(Source source)
         {
@@ -440,5 +450,82 @@ namespace ESMEWorkbench.ViewModels.Main
             //_visualizer.ShowDialog("TreeViewItemPropertiesView", new ModePropertiesViewModel() { Mode = mode, });
             mode.LowFrequency = mode.HighFrequency;
         }
+        #endregion
+
+        #region Handlers for Species-related MediatorMessages
+        [MediatorMessageSink(MediatorMessage.AddSpecies), UsedImplicitly]
+        async void AddSpecies(Scenario scenario)
+        {
+            // todo: show a dialog here to allow the user to choose the species name and density.
+            //       Note that the species name is editable later on the same way you edit platform names, etc.
+            var species = new ScenarioSpecies { LatinName = "New Species", Scenario = scenario };
+            var animats = await Animat.SeedAsync(species, 0.01, scenario.Location.GeoRect, scenario.BathymetryData);
+            animats.Save(species.SpeciesFilePath);
+            scenario.ScenarioSpecies.Add(species);
+            species.CreateMapLayers();
+        }
+
+        [MediatorMessageSink(MediatorMessage.DeleteAllSpecies), UsedImplicitly]
+        void DeleteAllSpecies(Scenario scenario)
+        {
+            if (_messageBox.ShowYesNo("Are you sure you want to delete ALL the species from this scenario?", MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            foreach (var species in scenario.ScenarioSpecies.ToList())
+                species.Delete();
+        }
+
+        [MediatorMessageSink(MediatorMessage.RepopulateAllSpecies), UsedImplicitly]
+        async void RepopulateAllSpecies(Scenario scenario)
+        {
+            foreach (var species in scenario.ScenarioSpecies)
+                await RepopulateSpeciesAsync(species);
+        }
+
+        [MediatorMessageSink(MediatorMessage.DeleteSpecies), UsedImplicitly]
+        void DeleteSpecies(ScenarioSpecies species)
+        {
+            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the species \"{0}\"?", species.LatinName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            species.Delete();
+        }
+
+        [MediatorMessageSink(MediatorMessage.RepopulateSpecies), UsedImplicitly]
+        void RepopulateSpecies(ScenarioSpecies species)
+        {
+            RepopulateSpeciesAsync(species);
+        }
+
+        static async Task RepopulateSpeciesAsync(ScenarioSpecies species)
+        {
+            species.RemoveMapLayers();
+            var animats = await Animat.SeedAsync(species, species.PopulationDensity, species.Scenario.Location.GeoRect, species.Scenario.BathymetryData);
+            animats.Save(species.SpeciesFilePath);
+            species.CreateMapLayers();
+        }
+
+        [MediatorMessageSink(MediatorMessage.SpeciesProperties), UsedImplicitly]
+        void SpeciesProperties(ScenarioSpecies species)
+        {
+            // todo: show a properties dialog
+        }
+        #endregion
+
+        #region Handlers for Perimeter-related MediatorMessages
+        [MediatorMessageSink(MediatorMessage.AddPerimeter), UsedImplicitly]
+        void AddPerimeter(Scenario scenario)
+        {
+            
+        }
+
+        [MediatorMessageSink(MediatorMessage.DeletePerimeter), UsedImplicitly]
+        void DeletePerimeter(Perimeter Perimeter)
+        {
+            
+        }
+
+        [MediatorMessageSink(MediatorMessage.EditPerimeter), UsedImplicitly]
+        void RepopulatePerimeter(Perimeter Perimeter)
+        {
+            
+        }
+        #endregion
     }
 }

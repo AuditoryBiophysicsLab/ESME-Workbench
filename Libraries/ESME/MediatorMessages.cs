@@ -47,8 +47,16 @@ namespace ESME
         public const string ModeBoundToLayer = "ModeBoundToLayerMessage";
 
         public const string AddPerimeter = "AddPerimeterMessage";
+        public const string DeletePerimeter = "DeletePerimeterMessage";
+        public const string EditPerimeter = "EditPerimeterMessage";
+        public const string PerimeterProperties = "PerimeterPropertiesMessage";
 
         public const string AddSpecies = "AddSpeciesMessage";
+        public const string DeleteAllSpecies = "DeleteAllSpeciesMessage";
+        public const string RepopulateAllSpecies = "RepopulateAllSpeciesMessage";
+        public const string DeleteSpecies = "DeleteSpeciesMessage";
+        public const string RepopulateSpecies = "RepopulateSpeciesMessage";
+        public const string SpeciesProperties = "SpeciesPropertiesMessage";
 
         public const string ShowProperties = "ShowPropertiesMessage";
 

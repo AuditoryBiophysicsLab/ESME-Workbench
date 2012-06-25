@@ -23,8 +23,19 @@ namespace ESME.Scenarios
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
         [NotMapped] public bool IsDeleted { get; set; }
 
+        #region DeletePerimeterCommand
+        public SimpleCommand<object, EventToCommandArgs> DeletePerimeterCommand { get { return _deletePerimeter ?? (_deletePerimeter = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeletePerimeter, this))); } }
+        SimpleCommand<object, EventToCommandArgs> _deletePerimeter;
+        #endregion
+
+        #region EditPerimeterCommand
+        public SimpleCommand<object, EventToCommandArgs> EditPerimeterCommand { get { return _editPerimeter ?? (_editPerimeter = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.EditPerimeter, this))); } }
+        SimpleCommand<object, EventToCommandArgs> _editPerimeter;
+        #endregion
+
         public void CreateMapLayers()
         {
+            if (IsDeleted) return;
             var mapLayer = new OverlayShapeMapLayer
             {
                 Name = string.Format("{0}", Guid),
@@ -38,6 +49,7 @@ namespace ESME.Scenarios
             mapLayer.AddPolygon(geos);
             mapLayer.Done();
             LayerSettings.MapLayerViewModel = mapLayer;
+            if (Scenario.ShowAllPerimeters) LayerSettings.IsChecked = true;
         }
 
         public static implicit operator Perimeter(GeoArray geoArray)
@@ -82,6 +94,7 @@ namespace ESME.Scenarios
 
         public void Delete()
         {
+            IsDeleted = true;
             RemoveMapLayers();
             Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
             foreach (var point in PerimeterCoordinates.ToList()) Scenario.Database.Context.PerimeterCoordinates.Remove(point);

@@ -173,9 +173,10 @@
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type Tree:EnvironmentNode}" ItemsSource="{Binding EnvironmentLayers}">
                     <Controls:LayerControl IsChecked="{Binding Location.LayerSettings.IsChecked}"
-                                           LayerName="Environment"
+                                           LayerName="{Binding Location.Name}"
                                            LineOrSymbolColor="{Binding Location.LayerSettings.LineOrSymbolColor}"
-                                           LineOrSymbolSize="{Binding Location.LayerSettings.LineOrSymbolSize}" />
+                                           LineOrSymbolSize="{Binding Location.LayerSettings.LineOrSymbolSize}"
+                                           ToolTip="Check/uncheck to show or hide the boundary for the location containing this scenario.  Expand to show or hide environmental data layers for this scenario." />
                 </HierarchicalDataTemplate>
                 <!--  Mode  -->
                 <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
@@ -228,8 +229,9 @@
                     </Controls:LayerControl>
                 </HierarchicalDataTemplate>
                 <!--  Species subtree  -->
-                <HierarchicalDataTemplate DataType="{x:Type Tree:SpeciesNode}" ItemsSource="{Binding SpeciesList}">
-                    <Controls:LayerControl IsLayerNameEditable="False"
+                <HierarchicalDataTemplate DataType="{x:Type Tree:SpeciesNode}" ItemsSource="{Binding Scenario.ScenarioSpecies}">
+                    <Controls:LayerControl IsChecked="{Binding Scenario.ShowAllSpecies}"
+                                           IsLayerNameEditable="False"
                                            LayerName="Species"
                                            LineColorVisibility="Hidden">
                         <!--
@@ -247,6 +249,19 @@
                                         <Image Source="../Images/SmallIcons/add.png" />
                                     </MenuItem.Icon>
                                 </MenuItem>
+                                <MenuItem Command="{Binding DeleteAllSpeciesCommand}" Header="Remove all species">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/sound_delete.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding RepopulateAllSpeciesCommand}"
+                                          Header="Repopulate all species"
+                                          Visibility="{Binding AreAllSpeciesSeededByESME,
+                                                               Converter={StaticResource TrueVisibleFalseCollapsed}}">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/arrow_rotate_clockwise.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
                             </ContextMenu>
                         </Controls:LayerControl.ContextMenu>
                     </Controls:LayerControl>
@@ -254,7 +269,8 @@
                 <DataTemplate DataType="{x:Type Scenarios:ScenarioSpecies}">
                     <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
                                            IsLayerNameEditable="True"
-                                           LayerName="{Binding LatinName, Mode=TwoWay}"
+                                           LayerName="{Binding LatinName,
+                                                               Mode=TwoWay}"
                                            LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
                                            LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
                         <Controls:LayerControl.ContextMenu>
@@ -264,7 +280,10 @@
                                         <Image Source="../Images/SmallIcons/sound_delete.png" />
                                     </MenuItem.Icon>
                                 </MenuItem>
-                                <MenuItem Command="{Binding RepopulateSpeciesCommand}" Header="Repopulate this species">
+                                <MenuItem Command="{Binding RepopulateSpeciesCommand}"
+                                          Header="Repopulate this species"
+                                          Visibility="{Binding IsSeededByESME,
+                                                               Converter={StaticResource TrueVisibleFalseCollapsed}}">
                                     <MenuItem.Icon>
                                         <Image Source="../Images/SmallIcons/arrow_rotate_clockwise.png" />
                                     </MenuItem.Icon>
@@ -301,7 +320,8 @@
                 </DataTemplate>
                 <!--  Perimeters subtree  -->
                 <HierarchicalDataTemplate DataType="{x:Type Tree:PerimetersNode}" ItemsSource="{Binding Scenario.Perimeters}">
-                    <Controls:LayerControl IsLayerNameEditable="False"
+                    <Controls:LayerControl IsChecked="{Binding Scenario.ShowAllPerimeters}"
+                                           IsLayerNameEditable="False"
                                            LayerName="Perimeters"
                                            LineColorVisibility="Hidden">
                         <!--
@@ -340,11 +360,6 @@
                                 <MenuItem Command="{Binding EditPerimeterCommand}" Header="Edit this perimeter">
                                     <MenuItem.Icon>
                                         <Image Source="../Images/SmallIcons/arrow_rotate_clockwise.png" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem Command="{Binding PerimeterPropertiesCommand}" Header="Properties">
-                                    <MenuItem.Icon>
-                                        <Image Source="../Images/SmallIcons/application_form_edit.png" />
                                     </MenuItem.Icon>
                                 </MenuItem>
                                 <Separator />

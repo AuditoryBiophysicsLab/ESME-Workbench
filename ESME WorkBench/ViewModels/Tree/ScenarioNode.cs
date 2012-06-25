@@ -14,8 +14,8 @@ namespace ESMEWorkbench.ViewModels.Tree
             Scenario = scenario;
             Children.Add(scenario);
             Children.Add(new AnalysisPointsNode(scenario));
-            Children.Add(new PerimetersNode { Scenario = scenario });
-            Children.Add(new SpeciesNode { Scenario = scenario });
+            Children.Add(new PerimetersNode(scenario));
+            Children.Add(new SpeciesNode(scenario));
             Children.Add(new EnvironmentNode(scenario));
         }
 

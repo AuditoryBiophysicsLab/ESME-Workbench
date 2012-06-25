@@ -31,8 +31,6 @@ namespace ESME.Scenarios
         public string Name { get; set; }
         public string Comments { get; set; }
         public string StorageDirectory { get; set; }
-        bool _showAllAnalysisPoints;
-
         public bool ShowAllAnalysisPoints
         {
             get { return _showAllAnalysisPoints; }
@@ -42,6 +40,29 @@ namespace ESME.Scenarios
                 foreach (var analysisPoint in AnalysisPoints) analysisPoint.LayerSettings.IsChecked = _showAllAnalysisPoints;
             }
         }
+        bool _showAllAnalysisPoints;
+
+        public bool ShowAllPerimeters
+        {
+            get { return _showAllPerimeters; }
+            set
+            {
+                _showAllPerimeters = value;
+                foreach (var perimeter in Perimeters) perimeter.LayerSettings.IsChecked = _showAllPerimeters;
+            }
+        }
+        bool _showAllPerimeters;
+
+        public bool ShowAllSpecies
+        {
+            get { return _showAllSpecies; }
+            set
+            {
+                _showAllSpecies = value;
+                foreach (var species in ScenarioSpecies) species.LayerSettings.IsChecked = _showAllSpecies;
+            }
+        }
+        bool _showAllSpecies;
 
         [Initialize] public DbTimeSpan StartTime { get; set; }
         [Initialize] public DbTimeSpan Duration { get; set; }

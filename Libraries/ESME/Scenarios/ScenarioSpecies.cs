@@ -22,6 +22,11 @@ namespace ESME.Scenarios
         public string SpeciesFile { get; set; }
         public string LatinName { get; set; }
 
+        /// <summary>
+        /// Density in animats per square kilometer for our simple seeding routine
+        /// </summary>
+        [Initialize(0.01f)] public float PopulationDensity { get; set; }
+
         public virtual Scenario Scenario { get; set; }
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
@@ -39,6 +44,7 @@ namespace ESME.Scenarios
             }
         }
         string _speciesFilePath;
+        [NotMapped] public bool IsSeededByESME { get { return SpeciesFilename.ToLower().EndsWith(".ani"); } }
 
         #region Layer Move commands
         #region MoveLayerToFrontCommand
@@ -62,9 +68,25 @@ namespace ESME.Scenarios
         #endregion
         #endregion
 
+        #region DeleteSpeciesCommand
+        public SimpleCommand<object, EventToCommandArgs> DeleteSpeciesCommand { get { return _deleteSpecies ?? (_deleteSpecies = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteSpecies, this))); } }
+        SimpleCommand<object, EventToCommandArgs> _deleteSpecies;
+        #endregion
+
+        #region RepopulateSpeciesCommand
+        public SimpleCommand<object, EventToCommandArgs> RepopulateSpeciesCommand { get { return _repopulateSpecies ?? (_repopulateSpecies = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.RepopulateSpecies, this))); } }
+        SimpleCommand<object, EventToCommandArgs> _repopulateSpecies;
+        #endregion
+
+        #region SpeciesPropertiesCommand
+        public SimpleCommand<object, EventToCommandArgs> SpeciesPropertiesCommand { get { return _speciesProperties ?? (_speciesProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.SpeciesProperties, this))); } }
+        SimpleCommand<object, EventToCommandArgs> _speciesProperties;
+        #endregion
+
         protected static readonly Random Random = new Random();
         public void CreateMapLayers()
         {
+            if (IsDeleted) return;
             var pointLayer = new OverlayShapeMapLayer
             {
                 Name = string.Format("{0}", Guid),
@@ -77,11 +99,13 @@ namespace ESME.Scenarios
             pointLayer.AddPoints(animats.Locations.Select(l => new Geo(l.Latitude, l.Longitude)).ToList());
             pointLayer.Done();
             LayerSettings.MapLayerViewModel = pointLayer;
+            if (Scenario.ShowAllSpecies) LayerSettings.IsChecked = true;
         }
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
         public void Delete()
         {
             IsDeleted = true;
+            RemoveMapLayers();
             Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
             Scenario.Database.Context.ScenarioSpecies.Remove(this);
         }
