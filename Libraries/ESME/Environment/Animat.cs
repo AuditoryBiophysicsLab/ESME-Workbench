@@ -48,14 +48,14 @@ namespace ESME.Environment
             throw new Exception("specified file does not exist!");
         }
 
-        public static Animat Seed(ScenarioSpecies species, double density, GeoRect geoRect, Bathymetry bathymetry)
+        public static Animat Seed(ScenarioSpecies species, GeoRect geoRect, Bathymetry bathymetry)
         {
             var bounds = new GeoArray(geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest);
             var result = new Animat { ScenarioSpecies = species };
             var radius = Planet.wgs84_earthEquatorialRadiusMeters_D / 1000;
             var area = bounds.Area * radius * radius;
             //Debug.WriteLine("Area: {0}",area);
-            var population = (int)Math.Floor(area * density);
+            var population = (int)Math.Floor(area * species.PopulationDensity);
             for (var i = 0; i < population; i++)
             {
                 var location = bounds.RandomLocationWithinPerimeter();
@@ -65,7 +65,7 @@ namespace ESME.Environment
             return result;
         }
 
-        public async static Task<Animat> SeedAsync(ScenarioSpecies species, double density, GeoRect geoRect, Bathymetry bathymetry)
+        public async static Task<Animat> SeedAsync(ScenarioSpecies species, GeoRect geoRect, Bathymetry bathymetry)
         {
             var bounds = new GeoArray(geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest);
             var result = new Animat { ScenarioSpecies = species };
@@ -90,7 +90,7 @@ namespace ESME.Environment
             });
             var bufferBlock = new BufferBlock<Geo<float>>();
             transformManyBlock.LinkTo(bufferBlock);
-            var population = (int)Math.Round(area * density);
+            var population = (int)Math.Round(area * species.PopulationDensity);
             const int blockSize = 100;
             while (population > 0)
             {

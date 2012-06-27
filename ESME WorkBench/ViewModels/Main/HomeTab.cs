@@ -458,11 +458,17 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             // todo: show a dialog here to allow the user to choose the species name and density.
             //       Note that the species name is editable later on the same way you edit platform names, etc.
-            var species = new ScenarioSpecies { LatinName = "New Species", Scenario = scenario };
-            var animats = await Animat.SeedAsync(species, 0.01, scenario.Location.GeoRect, scenario.BathymetryData);
-            animats.Save(species.SpeciesFilePath);
-            scenario.ScenarioSpecies.Add(species);
-            species.CreateMapLayers();
+            var vm = new PropertiesViewModel { WindowTitle = "Add species", PropertyObject = new ScenarioSpecies { LatinName = "New Species", PopulationDensity = 0.01f } };
+            var result = _visualizer.ShowDialog("SpeciesPropertiesView", vm);
+            if ((result.HasValue) && (result.Value))
+            {
+                var species = (ScenarioSpecies)vm.PropertyObject;
+                species.Scenario = scenario;
+                scenario.ScenarioSpecies.Add(species);   
+                var animats = await Animat.SeedAsync(species, scenario.Location.GeoRect, scenario.BathymetryData);
+                animats.Save(species.SpeciesFilePath);
+                species.CreateMapLayers();
+            }
         }
 
         [MediatorMessageSink(MediatorMessage.DeleteAllSpecies), UsedImplicitly]
@@ -496,15 +502,27 @@ namespace ESMEWorkbench.ViewModels.Main
         static async Task RepopulateSpeciesAsync(ScenarioSpecies species)
         {
             species.RemoveMapLayers();
-            var animats = await Animat.SeedAsync(species, species.PopulationDensity, species.Scenario.Location.GeoRect, species.Scenario.BathymetryData);
+            var animats = await Animat.SeedAsync(species, species.Scenario.Location.GeoRect, species.Scenario.BathymetryData);
             animats.Save(species.SpeciesFilePath);
             species.CreateMapLayers();
         }
 
         [MediatorMessageSink(MediatorMessage.SpeciesProperties), UsedImplicitly]
-        void SpeciesProperties(ScenarioSpecies species)
+        async void SpeciesProperties(ScenarioSpecies species)
         {
-            // todo: show a properties dialog
+            var vm = new PropertiesViewModel {WindowTitle = "Species Properties", PropertyObject = species};
+            var density = species.PopulationDensity;
+            var result = _visualizer.ShowDialog("SpeciesPropertiesView", vm);
+            if ((result.HasValue) && (result.Value))
+            {
+                if (Math.Abs(species.PopulationDensity - density) > 0.0001)
+                {
+                    var animats = await Animat.SeedAsync(species, species.Scenario.Location.GeoRect, species.Scenario.BathymetryData);
+                    animats.Save(species.SpeciesFilePath);
+                    species.RemoveMapLayers();
+                    species.CreateMapLayers();
+                }
+            }
         }
         #endregion
 

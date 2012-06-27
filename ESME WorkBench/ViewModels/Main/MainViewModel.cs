@@ -196,7 +196,7 @@ namespace ESMEWorkbench.ViewModels.Main
             progress.ProgressMessage = string.Format("Generating animat population for scenario \"{0}\"", scenarioName);
             var species = new ScenarioSpecies { LatinName = "Sample Species", Scenario = scenario };
             scenario.ScenarioSpecies.Add(species);
-            var animats = await Animat.SeedAsync(species, species.PopulationDensity, locationGeoRect, (Bathymetry)_cache[scenario.Bathymetry].Result);
+            var animats = await Animat.SeedAsync(species, locationGeoRect, (Bathymetry)_cache[scenario.Bathymetry].Result);
             animats.Save(species.SpeciesFilePath);
             //Database.SaveChanges();
             await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);

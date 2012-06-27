@@ -94,7 +94,7 @@ namespace ESME.Scenarios
             };
             while (pointLayer.PointSymbolType == PointSymbolType.Cross) pointLayer.PointSymbolType = (PointSymbolType)(Random.Next(8));
             pointLayer.PointStyle = MapLayerViewModel.CreatePointStyle(pointLayer.PointSymbolType, LayerSettings.LineOrSymbolColor, (int)LayerSettings.LineOrSymbolSize);
-            var animats = File.Exists(SpeciesFilePath) ? Animat.Load(this, SpeciesFilePath) : Animat.Seed(this, 0.01, Scenario.Location.GeoRect, Scenario.BathymetryData);
+            var animats = File.Exists(SpeciesFilePath) ? Animat.Load(this, SpeciesFilePath) : Animat.Seed(this, Scenario.Location.GeoRect, Scenario.BathymetryData);
             pointLayer.Clear();
             pointLayer.AddPoints(animats.Locations.Select(l => new Geo(l.Latitude, l.Longitude)).ToList());
             pointLayer.Done();

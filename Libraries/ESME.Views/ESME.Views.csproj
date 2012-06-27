@@ -171,6 +171,9 @@
       <DependentUpon>CreateOrEditPerimeterView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scenarios\CreateOrEditPerimeterViewModel.cs" />
+    <Compile Include="Scenarios\SpeciesPropertiesView.xaml.cs">
+      <DependentUpon>SpeciesPropertiesView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Scenarios\TreeViewItemPropertiesView.xaml.cs">
       <DependentUpon>TreeViewItemPropertiesView.xaml</DependentUpon>
     </Compile>
@@ -286,6 +289,10 @@
     <Page Include="Scenarios\CreateOrEditPerimeterView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Scenarios\SpeciesPropertiesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Scenarios\TreeViewItemPropertiesView.xaml">
       <SubType>Designer</SubType>

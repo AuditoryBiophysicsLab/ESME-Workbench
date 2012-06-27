@@ -14,16 +14,13 @@ namespace ESME.Tests.Animats
 {
     class AnimatSeedingTests
     {
-        readonly string _databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), @"ESME Workbench\Database");
-        const string PluginDirectory = @"C:\Projects\ESME Deliverables\Libraries\ESME.Tests\bin\Debug";
-
         [Test]
         public void StaticDensitySeed()
         {
             var geoRect = new GeoRect(1, -1, 1, -1);
             var bathymetry = new Bathymetry();
             bathymetry.Samples.Add(new Geo<float>(geoRect.Center.Latitude,geoRect.Center.Longitude,100));
-            var list = Animat.Seed(new ScenarioSpecies{LatinName = "Orca orca"}, .2, geoRect,bathymetry);
+            var list = Animat.Seed(new ScenarioSpecies{LatinName = "Orca orca", PopulationDensity = .2f}, geoRect,bathymetry);
             foreach (var animatLocation in list.Locations)
             {
                 Assert.IsTrue(geoRect.Contains(animatLocation));
