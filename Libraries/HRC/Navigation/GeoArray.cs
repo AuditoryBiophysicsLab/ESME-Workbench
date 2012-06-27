@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 
 #if KML_Support
+using HRC.Utility;
 using KMLib;
 using KMLib.Feature;
 using Core.Geometry;
@@ -248,6 +249,7 @@ namespace HRC.Navigation
         }
 
         public static explicit operator GeoArray(Geo[] geos) { return new GeoArray(geos); }
+
         #endregion
         #region IEnumerable<Geo> support
         public IEnumerator<Geo> GetEnumerator()

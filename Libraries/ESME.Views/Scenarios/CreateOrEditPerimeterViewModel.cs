@@ -4,13 +4,14 @@ using HRC.ViewModels;
 
 namespace ESME.Views.Scenarios
 {
-    public sealed class CreatePerimeterViewModel : ValidatingViewModel
+    public sealed class CreateOrEditPerimeterViewModel : ValidatingViewModel
     {
-        public CreatePerimeterViewModel() { ValidationRules.Add(PerimeterNameValidationRule); }
+        public CreateOrEditPerimeterViewModel() { ValidationRules.Add(PerimeterNameValidationRule); }
 
         public EditablePolygonOverlayViewModel EditablePolygonOverlayViewModel { get; set; }
         public string PerimeterName { get; set; }
         public bool IsCanceled { get; private set; }
+        public string DialogTitle { get; set; }
         #region Validation Rules
         static readonly ValidationRule PerimeterNameValidationRule = new ValidationRule
         {
@@ -18,7 +19,7 @@ namespace ESME.Views.Scenarios
             Description = "Must be unique and cannot be null or empty",
             RuleDelegate = (o, r) =>
             {
-                var target = (CreatePerimeterViewModel)o;
+                var target = (CreateOrEditPerimeterViewModel)o;
                 return !string.IsNullOrEmpty(target.PerimeterName);
             },
         };

@@ -64,9 +64,18 @@ namespace ESME.Scenarios
             return perimeter;
         }
 
+        public void SetPerimeterCoordinates(GeoArray geoArray)
+        {
+            PerimeterCoordinates.Clear();
+            var order = 0;
+            foreach (var geo in geoArray.Geos) PerimeterCoordinates.Add(new PerimeterCoordinate { Geo = geo, Order = order++ });
+        }
+
         public static implicit operator GeoArray(Perimeter perimeter)
         {
-            return new GeoArray(perimeter.PerimeterCoordinates.Select(coordinate => coordinate.Geo).Select(g => (Geo)g));
+            return new GeoArray(from c in perimeter.PerimeterCoordinates
+                                orderby c.Order
+                                select (Geo)c.Geo);
         }
 
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }

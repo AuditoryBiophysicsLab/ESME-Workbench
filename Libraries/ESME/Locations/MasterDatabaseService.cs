@@ -62,8 +62,8 @@ namespace ESME.Locations
             Context.Locations.Load();
             Context.Scenarios.Load();
             Context.LayerSettings.Load();
-            Context.Perimeters.Load();
             Context.PerimeterCoordinates.Load();
+            Context.Perimeters.Load();
 #if false
             Context.EnvironmentalDataSets.Load();
             Context.Platforms.Load();

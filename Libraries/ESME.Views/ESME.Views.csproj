@@ -167,10 +167,10 @@
       <DependentUpon>BasicPropertiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
-    <Compile Include="Scenarios\CreatePerimeterView.xaml.cs">
-      <DependentUpon>CreatePerimeterView.xaml</DependentUpon>
+    <Compile Include="Scenarios\CreateOrEditPerimeterView.xaml.cs">
+      <DependentUpon>CreateOrEditPerimeterView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Scenarios\CreatePerimeterViewModel.cs" />
+    <Compile Include="Scenarios\CreateOrEditPerimeterViewModel.cs" />
     <Compile Include="Scenarios\TreeViewItemPropertiesView.xaml.cs">
       <DependentUpon>TreeViewItemPropertiesView.xaml</DependentUpon>
     </Compile>
@@ -283,7 +283,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Scenarios\CreatePerimeterView.xaml">
+    <Page Include="Scenarios\CreateOrEditPerimeterView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

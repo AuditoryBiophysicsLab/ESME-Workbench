@@ -130,6 +130,7 @@ namespace ESME.Behaviors
                     case TrackType.PerimeterBounce:
                         // perimeter bounce navigation code here
                         if (Platform.Speed == 0) throw new PlatformMovementException("Speed cannot be 0 for PerimeterBounce behavior");
+                        var retries = 10;
                         while (bounceTrack == null)
                         {
                             try
@@ -137,7 +138,15 @@ namespace ESME.Behaviors
                                 bounceTrack = perimeter.PerimeterBounce(location, course.Radians, 1e6);
                                 location = bounceTrack.Geos.First();
                             }
-                            catch (PerimeterBounceException) {}
+                            catch (PerimeterBounceException)
+                            {
+                                retries--;
+                                if (retries < 0) throw;
+
+                                if (!Platform.IsRandom) continue;
+                                location = perimeter.RandomLocationWithinPerimeter();
+                                course = Course.RandomCourse;
+                            }
                         }
                         var timeStepsRemaining = _timeStepCount;
                         foreach (var segment in bounceTrack.Segments)

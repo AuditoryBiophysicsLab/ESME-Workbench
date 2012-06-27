@@ -5,10 +5,10 @@ namespace ESME.Views.Scenarios
     /// <summary>
     /// Interaction logic for NewLocationView.xaml
     /// </summary>
-    [PopupNameToViewLookupKeyMetadata("CreatePerimeterView", typeof(CreatePerimeterView))]
-    public partial class CreatePerimeterView
+    [PopupNameToViewLookupKeyMetadata("CreateOrEditPerimeterView", typeof(CreateOrEditPerimeterView))]
+    public partial class CreateOrEditPerimeterView
     {
-        public CreatePerimeterView()
+        public CreateOrEditPerimeterView()
         {
             InitializeComponent();
         }

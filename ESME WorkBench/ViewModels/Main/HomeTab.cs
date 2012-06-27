@@ -512,7 +512,34 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.AddPerimeter), UsedImplicitly]
         void AddPerimeter(Scenario scenario)
         {
-            CreatePerimeterHandler(null);
+            try
+            {
+                var locationGeoRect = (GeoRect)Scenario.Location.GeoRect;
+                var initialGeoRect = new GeoRect((locationGeoRect.North + locationGeoRect.Center.Latitude) / 2,
+                                                 (locationGeoRect.South + locationGeoRect.Center.Latitude) / 2,
+                                                 (locationGeoRect.East + locationGeoRect.Center.Longitude) / 2,
+                                                 (locationGeoRect.West + locationGeoRect.Center.Longitude) / 2);
+                MapViewModel.EditablePolygonOverlayViewModel.GeoArray = new GeoArray(initialGeoRect.NorthWest, initialGeoRect.NorthEast, initialGeoRect.SouthEast, initialGeoRect.SouthWest, initialGeoRect.NorthWest);
+                MapViewModel.EditablePolygonOverlayViewModel.IsVisible = true;
+                MapViewModel.EditablePolygonOverlayViewModel.LocationBounds = locationGeoRect;
+                MapViewModel.EditablePolygonOverlayViewModel.AreCrossingSegmentsAllowed = false;
+
+                _visualizer.ShowWindow("CreateOrEditPerimeterView",
+                                       new CreateOrEditPerimeterViewModel { EditablePolygonOverlayViewModel = MapViewModel.EditablePolygonOverlayViewModel, PerimeterName = "New perimeter", DialogTitle = "Create perimeter" },
+                                       true,
+                                       (sender, args) =>
+                                       {
+                                           MapViewModel.EditablePolygonOverlayViewModel.IsVisible = false;
+                                           var vm = (CreateOrEditPerimeterViewModel)args.State;
+                                           if (vm.IsCanceled) return;
+                                           Perimeter perimeter = MapViewModel.EditablePolygonOverlayViewModel.GeoArray;
+                                           perimeter.Name = vm.PerimeterName;
+                                           perimeter.Scenario = Scenario;
+                                           Scenario.Perimeters.Add(perimeter);
+                                           perimeter.CreateMapLayers();
+                                       });
+            }
+            catch (Exception e) { _messageBox.ShowError(e.Message); }
         }
 
         [MediatorMessageSink(MediatorMessage.DeletePerimeter), UsedImplicitly]
@@ -522,9 +549,30 @@ namespace ESMEWorkbench.ViewModels.Main
         }
 
         [MediatorMessageSink(MediatorMessage.EditPerimeter), UsedImplicitly]
-        void RepopulatePerimeter(Perimeter perimeter)
+        void EditPerimeter(Perimeter perimeter)
         {
-            
+            try
+            {
+                var locationGeoRect = (GeoRect)Scenario.Location.GeoRect;
+                MapViewModel.EditablePolygonOverlayViewModel.GeoArray = (GeoArray)((GeoArray)perimeter).Closed;
+                MapViewModel.EditablePolygonOverlayViewModel.IsVisible = true;
+                MapViewModel.EditablePolygonOverlayViewModel.LocationBounds = locationGeoRect;
+                MapViewModel.EditablePolygonOverlayViewModel.AreCrossingSegmentsAllowed = false;
+                perimeter.RemoveMapLayers();
+                foreach (var platform in Scenario.Platforms.Where(platform => platform.Perimeter.Guid == perimeter.Guid)) platform.RemoveMapLayers();
+                _visualizer.ShowWindow("CreateOrEditPerimeterView",
+                                       new CreateOrEditPerimeterViewModel { EditablePolygonOverlayViewModel = MapViewModel.EditablePolygonOverlayViewModel, PerimeterName = perimeter.Name, DialogTitle = "Edit perimeter" },
+                                       true,
+                                       (sender, args) =>
+                                       {
+                                           MapViewModel.EditablePolygonOverlayViewModel.IsVisible = false;
+                                           var vm = (CreateOrEditPerimeterViewModel)args.State;
+                                           if (!vm.IsCanceled) perimeter.SetPerimeterCoordinates(MapViewModel.EditablePolygonOverlayViewModel.GeoArray);
+                                           perimeter.CreateMapLayers();
+                                           foreach (var platform in Scenario.Platforms.Where(platform => platform.Perimeter.Guid == perimeter.Guid)) platform.CreateMapLayers();
+                                       });
+            }
+            catch (Exception e) { _messageBox.ShowError(e.Message); }
         }
         #endregion
     }

@@ -50,7 +50,16 @@ namespace ESME.Scenarios
         public float Speed { get; set; }
 
         public virtual Scenario Scenario { get; set; }
-        public virtual Perimeter Perimeter { get; set; }
+
+        Perimeter _perimeter;
+        public virtual Perimeter Perimeter { get { return _perimeter; } set
+        {
+            _perimeter = value;
+            if (LayerSettings.MapLayerViewModel == null) return;
+            RemoveMapLayers();
+            CreateMapLayers();
+        } }
+
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<Source> Sources { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
@@ -76,20 +85,19 @@ namespace ESME.Scenarios
                 {
                     Behaviors.TrackType.Stationary,
                     Behaviors.TrackType.PerimeterBounce,
-                    Behaviors.TrackType.StraightLine
+                    //Behaviors.TrackType.StraightLine
                 };
             }
         }
 
-        TrackType _selectedTrackType = Behaviors.TrackType.Stationary;
-
         [NotMapped] public TrackType SelectedTrackType
         {
-            get { return _selectedTrackType; }
+            get { return TrackType; }
             set
             {
-                _selectedTrackType = value;
                 TrackType = value;
+                RemoveMapLayers();
+                CreateMapLayers();
             }
         }
 

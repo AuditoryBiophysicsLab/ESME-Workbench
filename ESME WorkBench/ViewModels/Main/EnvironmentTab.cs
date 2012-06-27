@@ -97,13 +97,13 @@ namespace ESMEWorkbench.ViewModels.Main
                 MapViewModel.EditablePolygonOverlayViewModel.LocationBounds = locationGeoRect;
                 MapViewModel.EditablePolygonOverlayViewModel.AreCrossingSegmentsAllowed = false;
 
-                _visualizer.ShowWindow("CreatePerimeterView",
-                                       new CreatePerimeterViewModel { EditablePolygonOverlayViewModel = MapViewModel.EditablePolygonOverlayViewModel, PerimeterName = "New perimeter"},
+                _visualizer.ShowWindow("CreateOrEditPerimeterView",
+                                       new CreateOrEditPerimeterViewModel { EditablePolygonOverlayViewModel = MapViewModel.EditablePolygonOverlayViewModel, PerimeterName = "New perimeter"},
                                        true,
                                        (sender, args) =>
                                        {
                                            MapViewModel.EditablePolygonOverlayViewModel.IsVisible = false;
-                                           var vm = (CreatePerimeterViewModel)args.State;
+                                           var vm = (CreateOrEditPerimeterViewModel)args.State;
                                            if (vm.IsCanceled) return;
                                            Perimeter perimeter = MapViewModel.EditablePolygonOverlayViewModel.GeoArray;
                                            perimeter.Name = vm.PerimeterName;
