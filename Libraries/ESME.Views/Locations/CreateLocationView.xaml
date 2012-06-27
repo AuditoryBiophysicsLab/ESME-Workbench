@@ -56,7 +56,7 @@
                        TextAlignment="Right" />
             <TextBox Grid.Row="1"
                      Grid.Column="1"
-                     DataContext="{Binding EditOverlayViewModel}"
+                     DataContext="{Binding EditableRectangleOverlayViewModel}"
                      Text="{Binding North,
                                     ValidatesOnDataErrors=True,
                                     ValidatesOnExceptions=True,
@@ -70,7 +70,7 @@
                        TextAlignment="Right" />
             <TextBox Grid.Row="2"
                      Grid.Column="1"
-                     DataContext="{Binding EditOverlayViewModel}"
+                     DataContext="{Binding EditableRectangleOverlayViewModel}"
                      Text="{Binding South,
                                     ValidatesOnDataErrors=True,
                                     ValidatesOnExceptions=True,
@@ -84,7 +84,7 @@
                        TextAlignment="Right" />
             <TextBox Grid.Row="3"
                      Grid.Column="1"
-                     DataContext="{Binding EditOverlayViewModel}"
+                     DataContext="{Binding EditableRectangleOverlayViewModel}"
                      Text="{Binding East,
                                     ValidatesOnDataErrors=True,
                                     ValidatesOnExceptions=True,
@@ -98,7 +98,7 @@
                        TextAlignment="Right" />
             <TextBox Grid.Row="4"
                      Grid.Column="1"
-                     DataContext="{Binding EditOverlayViewModel}"
+                     DataContext="{Binding EditableRectangleOverlayViewModel}"
                      Text="{Binding West,
                                     ValidatesOnDataErrors=True,
                                     ValidatesOnExceptions=True,

@@ -165,6 +165,7 @@
     <Compile Include="Locations\LocationContext.cs" />
     <Compile Include="Locations\LogEntry.cs" />
     <Compile Include="Mapping\CustomEditOverlay.cs" />
+    <Compile Include="Mapping\EditableRectangleInteractiveOverlay.cs" />
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="Scenarios\AnalysisPoint.cs" />
     <Compile Include="Scenarios\AnimatLocation.cs" />

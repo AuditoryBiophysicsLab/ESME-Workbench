@@ -512,17 +512,17 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.AddPerimeter), UsedImplicitly]
         void AddPerimeter(Scenario scenario)
         {
-            
+            CreatePerimeterHandler(null);
         }
 
         [MediatorMessageSink(MediatorMessage.DeletePerimeter), UsedImplicitly]
-        void DeletePerimeter(Perimeter Perimeter)
+        void DeletePerimeter(Perimeter perimeter)
         {
             
         }
 
         [MediatorMessageSink(MediatorMessage.EditPerimeter), UsedImplicitly]
-        void RepopulatePerimeter(Perimeter Perimeter)
+        void RepopulatePerimeter(Perimeter perimeter)
         {
             
         }

@@ -63,7 +63,8 @@ namespace ESMEWorkbench.ViewModels.Map
             if (Designer.IsInDesignMode) return;
 
             _wpfMap = ((MainView)_viewAwareStatus.View).MapView.WpfMap;
-            EditOverlayViewModel = new EditOverlayViewModel(_wpfMap);
+            EditableRectangleOverlayViewModel = new EditableRectangleOverlayViewModel(_wpfMap);
+            EditablePolygonOverlayViewModel = new EditablePolygonOverlayViewModel(_wpfMap);
             //SoundSpeedProfileViewModel = new SoundSpeedProfileViewModel(((MainView)_viewAwareStatus.View).MapView.SoundSpeedProfileView);
             MapDLLVersion = WpfMap.GetVersion();
             _wpfMap.MapUnit = GeographyUnit.DecimalDegree;
@@ -374,6 +375,7 @@ namespace ESMEWorkbench.ViewModels.Map
 
         #endregion
 
-        public EditOverlayViewModel EditOverlayViewModel { get; set; }
+        public EditableRectangleOverlayViewModel EditableRectangleOverlayViewModel { get; set; }
+        public EditablePolygonOverlayViewModel EditablePolygonOverlayViewModel { get; set; }
     }
 }

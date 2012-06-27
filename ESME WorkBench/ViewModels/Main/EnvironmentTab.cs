@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows;
 using ESME;
 using ESME.Locations;
+using ESME.Scenarios;
 using ESME.Views.Locations;
+using ESME.Views.Scenarios;
 using ESMEWorkbench.ViewModels.Tree;
 using HRC;
 using HRC.Navigation;
@@ -35,21 +38,21 @@ namespace ESMEWorkbench.ViewModels.Main
             try
             {
                 var currentExtent = MapViewModel.CurrentExtent;
-                MapViewModel.EditOverlayViewModel.North = (currentExtent.North + currentExtent.Center.Latitude) / 2;
-                MapViewModel.EditOverlayViewModel.South = (currentExtent.South + currentExtent.Center.Latitude) / 2;
-                MapViewModel.EditOverlayViewModel.East = (currentExtent.East + currentExtent.Center.Longitude) / 2;
-                MapViewModel.EditOverlayViewModel.West = (currentExtent.West + currentExtent.Center.Longitude) / 2;
-                MapViewModel.EditOverlayViewModel.IsVisible = true;
+                MapViewModel.EditableRectangleOverlayViewModel.North = (currentExtent.North + currentExtent.Center.Latitude) / 2;
+                MapViewModel.EditableRectangleOverlayViewModel.South = (currentExtent.South + currentExtent.Center.Latitude) / 2;
+                MapViewModel.EditableRectangleOverlayViewModel.East = (currentExtent.East + currentExtent.Center.Longitude) / 2;
+                MapViewModel.EditableRectangleOverlayViewModel.West = (currentExtent.West + currentExtent.Center.Longitude) / 2;
+                MapViewModel.EditableRectangleOverlayViewModel.IsVisible = true;
 
                 _visualizer.ShowWindow("CreateLocationView",
-                                       new CreateLocationViewModel { EditOverlayViewModel = MapViewModel.EditOverlayViewModel },
+                                       new CreateLocationViewModel { EditableRectangleOverlayViewModel = MapViewModel.EditableRectangleOverlayViewModel },
                                        true,
                                        (sender, args) =>
                                        {
-                                           MapViewModel.EditOverlayViewModel.IsVisible = false;
+                                           MapViewModel.EditableRectangleOverlayViewModel.IsVisible = false;
                                            var vm = (CreateLocationViewModel)args.State;
                                            if (vm.IsCanceled) return;
-                                           CreateLocation(vm.LocationName, vm.Comments, MapViewModel.EditOverlayViewModel.GeoRect);
+                                           CreateLocation(vm.LocationName, vm.Comments, MapViewModel.EditableRectangleOverlayViewModel.GeoRect);
                                        }); 
             }
             catch (Exception e) { _messageBox.ShowError(e.Message); }
@@ -71,6 +74,45 @@ namespace ESMEWorkbench.ViewModels.Main
             Database.Context.Locations.Local.Add(location);
             location.CreateMapLayers();
             return location;
+        }
+        #endregion
+
+        #region CreatePerimeterCommand
+        public SimpleCommand<object, object> CreatePerimeterCommand { get { return _createPerimeter ?? (_createPerimeter = new SimpleCommand<object, object>(o => IsCreatePerimeterCommandEnabled, CreatePerimeterHandler)); } }
+        SimpleCommand<object, object> _createPerimeter;
+
+        bool IsCreatePerimeterCommandEnabled { get { return Scenario != null; } }
+
+        void CreatePerimeterHandler(object o)
+        {
+            try
+            {
+                var locationGeoRect = (GeoRect)Scenario.Location.GeoRect;
+                var initialGeoRect = new GeoRect((locationGeoRect.North + locationGeoRect.Center.Latitude) / 2,
+                                                 (locationGeoRect.South + locationGeoRect.Center.Latitude) / 2,
+                                                 (locationGeoRect.East + locationGeoRect.Center.Longitude) / 2,
+                                                 (locationGeoRect.West + locationGeoRect.Center.Longitude) / 2);
+                MapViewModel.EditablePolygonOverlayViewModel.GeoArray = new GeoArray(initialGeoRect.NorthWest, initialGeoRect.NorthEast, initialGeoRect.SouthEast, initialGeoRect.SouthWest, initialGeoRect.NorthWest);
+                MapViewModel.EditablePolygonOverlayViewModel.IsVisible = true;
+                MapViewModel.EditablePolygonOverlayViewModel.LocationBounds = locationGeoRect;
+                MapViewModel.EditablePolygonOverlayViewModel.AreCrossingSegmentsAllowed = false;
+
+                _visualizer.ShowWindow("CreatePerimeterView",
+                                       new CreatePerimeterViewModel { EditablePolygonOverlayViewModel = MapViewModel.EditablePolygonOverlayViewModel, PerimeterName = "New perimeter"},
+                                       true,
+                                       (sender, args) =>
+                                       {
+                                           MapViewModel.EditablePolygonOverlayViewModel.IsVisible = false;
+                                           var vm = (CreatePerimeterViewModel)args.State;
+                                           if (vm.IsCanceled) return;
+                                           Perimeter perimeter = MapViewModel.EditablePolygonOverlayViewModel.GeoArray;
+                                           perimeter.Name = vm.PerimeterName;
+                                           perimeter.Scenario = Scenario;
+                                           Scenario.Perimeters.Add(perimeter);
+                                           perimeter.CreateMapLayers();
+                                       });
+            }
+            catch (Exception e) { _messageBox.ShowError(e.Message); }
         }
         #endregion
 

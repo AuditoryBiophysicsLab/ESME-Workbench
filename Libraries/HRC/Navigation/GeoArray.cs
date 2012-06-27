@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 #if KML_Support
@@ -90,9 +91,7 @@ namespace HRC.Navigation
                 var segmentCount = segmentArray.Length;
                 if (segmentCount == 3) return false;
                 if (segmentCount == 4) return segmentArray[0].Intersection(segmentArray[2]) != null || segmentArray[1].Intersection(segmentArray[3]) != null;
-                for (var i = 0; i < segmentCount; i++) 
-                    for (var j = i + 2; j < segmentCount - 2; j++) 
-                        if (segmentArray[i].Intersection(segmentArray[(i + j) % segmentCount]) != null) return true;
+                for (var i = 0; i < segmentCount; i++) for (var j = 2; j < segmentCount - 1; j++) if (segmentArray[i].Intersection(segmentArray[(i + j) % segmentCount]) != null) return true;
                 return false;
             }
         }
@@ -200,6 +199,33 @@ namespace HRC.Navigation
         {
             return segment.IsNear(this, epsilon);
         }
+
+        public static GeoArray FromWellKnownText(string wellKnownText)
+        {
+            //Debug.WriteLine(wellKnownText);
+            var upper = wellKnownText.ToUpperInvariant();
+            string[] parts;
+            if (upper.StartsWith("POINT"))
+            {
+                parts = upper.Split(new[]{'(', ')'}, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length != 2) throw new ArgumentException(string.Format("Unknown Well Known Text format for POINT data: \"{0}\"", wellKnownText), "wellKnownText");
+                throw new NotImplementedException("Parsing POINT data to GeoArray not yet implemented");
+            }
+            if (upper.StartsWith("LINESTRING"))
+            {
+                parts = upper.Split(new[] { '(', ')' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length != 2) throw new ArgumentException(string.Format("Unknown Well Known Text format for LINESTRING data: \"{0}\"", wellKnownText), "wellKnownText");
+                throw new NotImplementedException("Parsing LINESTRING data to GeoArray not yet implemented");
+            }
+            if (upper.StartsWith("POLYGON"))
+            {
+                parts = upper.Split(new[] { '(', ')' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length != 2) throw new ArgumentException(string.Format("Unknown Well Known Text format for POLYGON data: \"{0}\"", wellKnownText), "wellKnownText");
+                parts = parts[1].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                return new GeoArray(parts.Select(part => part.Split(' ')).Select(coordinates => new Geo(double.Parse(coordinates[1]), double.Parse(coordinates[0]))));
+            }
+            throw new ArgumentException(string.Format("Unable to create GeoArray from Well Known Text: \"{0}\"", wellKnownText), "wellKnownText");
+        }
         #endregion
         #region Enumerators
         public IEnumerable<Geo> Geos { get { return MyGeoArray.Select(geo => new Geo(geo)); } }
@@ -209,7 +235,6 @@ namespace HRC.Navigation
             get
             {
                 for (var i = 0; i < MyGeoArray.Length - 1; i++) yield return new GeoSegment(MyGeoArray[i], MyGeoArray[i + 1]);
-                if (IsClosed) yield return new GeoSegment(MyGeoArray.Last(), MyGeoArray.First());
             }
         }
         #endregion

@@ -9,6 +9,8 @@ namespace HRC.Navigation
     {
         static readonly Random Random = new Random();
 
+        public static string ToWellKnownText(this GeoArray geoArray) { return string.Format("POLYGON(({0}))", string.Join(",", geoArray.Geos.Select(geo => string.Format("{0} {1}", geo.Longitude, geo.Latitude)))); }
+
         /// <summary>
         /// Bounce a platform around inside a given perimeter
         /// </summary>

@@ -10,12 +10,12 @@ using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESME.Views.Locations
 {
-    public class EditOverlayViewModel : ValidatingViewModel, INotifyPropertyChanged
+    public class EditableRectangleOverlayViewModel : ValidatingViewModel, INotifyPropertyChanged
     {
         readonly WpfMap _wpfMap;
         EditInteractiveOverlay _editOverlay;
 
-        public EditOverlayViewModel(WpfMap wpfMap)
+        public EditableRectangleOverlayViewModel(WpfMap wpfMap)
         {
             _wpfMap = wpfMap;
             ValidationRules.AddRange(new List<ValidationRule> { NorthValidationRule, SouthValidationRule, EastValidationRule, WestValidationRule });
@@ -54,7 +54,7 @@ namespace ESME.Views.Locations
             var bounds = _editOverlay.EditShapesLayer.GetBoundingBox();
             _editOverlay.EditShapesLayer.Close();
             UpdateCoordinates(bounds);
-            Debug.WriteLine("Dragged: North {0} South {1} East {2} West {3}", bounds.UpperLeftPoint.Y, bounds.LowerRightPoint.Y, bounds.LowerRightPoint.X, bounds.UpperLeftPoint.X);
+            //Debug.WriteLine("Dragged: North {0} South {1} East {2} West {3}", bounds.UpperLeftPoint.Y, bounds.LowerRightPoint.Y, bounds.LowerRightPoint.X, bounds.UpperLeftPoint.X);
         }
 
         public void FeatureResizedHandler(object sender, FeatureResizedEditInteractiveOverlayEventArgs args)
@@ -63,7 +63,7 @@ namespace ESME.Views.Locations
             var bounds = _editOverlay.EditShapesLayer.GetBoundingBox();
             _editOverlay.EditShapesLayer.Close();
             UpdateCoordinates(bounds);
-            Debug.WriteLine("Resized: North {0} South {1} East {2} West {3}", bounds.UpperLeftPoint.Y, bounds.LowerRightPoint.Y, bounds.LowerRightPoint.X, bounds.UpperLeftPoint.X);
+            //Debug.WriteLine("Resized: North {0} South {1} East {2} West {3}", bounds.UpperLeftPoint.Y, bounds.LowerRightPoint.Y, bounds.LowerRightPoint.X, bounds.UpperLeftPoint.X);
         }
 
         bool _isVisible;
@@ -81,7 +81,7 @@ namespace ESME.Views.Locations
                     _wpfMap.Refresh();
                     return;
                 }
-                _editOverlay = new CustomEditInteractiveOverlay {CanAddVertex = false, CanRotate = false};
+                _editOverlay = new EditableRectangleInteractiveOverlay {CanAddVertex = false, CanRotate = false};
                 var rectangle = new Feature(new RectangleShape(West, North, East, South));
                 rectangle.ColumnValues.Add("Edit", null);
                 _editOverlay.EditShapesLayer.InternalFeatures.Add(rectangle);
@@ -150,7 +150,7 @@ namespace ESME.Views.Locations
             Description = "Must be between -90 and +90 and be greater than South",
             RuleDelegate = (o, r) =>
             {
-                var target = (EditOverlayViewModel)o;
+                var target = (EditableRectangleOverlayViewModel)o;
                 return target.North >= -90 && target.North <= 90 && target.North > target.South;
             },
         };
@@ -160,7 +160,7 @@ namespace ESME.Views.Locations
             Description = "Must be between -90 and +90 and be less than North",
             RuleDelegate = (sender, eventArgs) =>
             {
-                var target = (EditOverlayViewModel)sender;
+                var target = (EditableRectangleOverlayViewModel)sender;
                 return target.South >= -90 && target.South <= 90 && target.North > target.South;
             },
         };
@@ -170,7 +170,7 @@ namespace ESME.Views.Locations
             Description = "Must be between -180 and +180 and be greater than West",
             RuleDelegate = (sender, eventArgs) =>
             {
-                var target = (EditOverlayViewModel)sender;
+                var target = (EditableRectangleOverlayViewModel)sender;
                 return target.East >= -180 && target.East <= 180 && target.East > target.West;
             },
         };
@@ -180,7 +180,7 @@ namespace ESME.Views.Locations
             Description = "Must be between -180 and +180 and be less than East",
             RuleDelegate = (sender, eventArgs) =>
             {
-                var target = (EditOverlayViewModel)sender;
+                var target = (EditableRectangleOverlayViewModel)sender;
                 return target.West >= -180 && target.West <= 180 && target.East > target.West;
             },
         };

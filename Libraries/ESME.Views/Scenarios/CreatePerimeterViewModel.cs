@@ -1,25 +1,25 @@
-﻿using HRC.Validation;
+﻿using ESME.Views.Locations;
+using HRC.Validation;
 using HRC.ViewModels;
 
-namespace ESME.Views.Locations
+namespace ESME.Views.Scenarios
 {
-    public sealed class CreateLocationViewModel : ValidatingViewModel
+    public sealed class CreatePerimeterViewModel : ValidatingViewModel
     {
-        public CreateLocationViewModel() { ValidationRules.Add(LocationNameValidationRule); }
+        public CreatePerimeterViewModel() { ValidationRules.Add(PerimeterNameValidationRule); }
 
-        public EditableRectangleOverlayViewModel EditableRectangleOverlayViewModel { get; set; }
-        public string LocationName { get; set; }
-        public string Comments { get; set; }
+        public EditablePolygonOverlayViewModel EditablePolygonOverlayViewModel { get; set; }
+        public string PerimeterName { get; set; }
         public bool IsCanceled { get; private set; }
         #region Validation Rules
-        static readonly ValidationRule LocationNameValidationRule = new ValidationRule
+        static readonly ValidationRule PerimeterNameValidationRule = new ValidationRule
         {
-            PropertyName = "LocationName",
+            PropertyName = "PerimeterName",
             Description = "Must be unique and cannot be null or empty",
             RuleDelegate = (o, r) =>
             {
-                var target = (CreateLocationViewModel)o;
-                return !string.IsNullOrEmpty(target.LocationName);
+                var target = (CreatePerimeterViewModel)o;
+                return !string.IsNullOrEmpty(target.PerimeterName);
             },
         };
         #endregion
@@ -28,7 +28,7 @@ namespace ESME.Views.Locations
         #region OkCommand
         public SimpleCommand<object, object> OkCommand
         {
-            get { return _ok ?? (_ok = new SimpleCommand<object, object>(delegate { return IsValid; }, o => CloseDialog(null))); }
+            get { return _ok ?? (_ok = new SimpleCommand<object, object>(delegate { return IsValid && !EditablePolygonOverlayViewModel.HasErrors; }, o => CloseDialog(null))); }
         }
 
         SimpleCommand<object, object> _ok;
@@ -52,7 +52,7 @@ namespace ESME.Views.Locations
         #endregion
 
         #region ViewClosingCommand
-        public SimpleCommand<object, object> ViewClosingCommand { get { return _viewClosing ?? (_viewClosing = new SimpleCommand<object, object>(o=>Properties.Settings.Default.Save())); } }
+        public SimpleCommand<object, object> ViewClosingCommand { get { return _viewClosing ?? (_viewClosing = new SimpleCommand<object, object>(o => Properties.Settings.Default.Save())); } }
         SimpleCommand<object, object> _viewClosing;
         #endregion
         #endregion

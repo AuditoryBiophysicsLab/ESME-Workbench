@@ -6,20 +6,35 @@ using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESME.Mapping
 {
-    public class OldCustomEditInteractiveOverlay : EditInteractiveOverlay
+    public class EditableRectangleInteractiveOverlay : EditInteractiveOverlay
     {
+        protected override Feature AddVertexCore(Feature targetFeature, PointShape targetPointShape, double searchingTolerance)
+        {
+            // Override the base method and disable the function of AddVertex if the shape is the "custom"
+            return new Feature();
+        }
+
+        protected override Feature RemoveVertexCore(Feature editShapeFeature, Vertex selectedVertex, double searchingTolerance)
+        {
+            // Override the base method and disable the function of RemoveVertex if the shape is the "custom"
+            return new Feature();
+        }
+
         protected override IEnumerable<Feature> CalculateResizeControlPointsCore(Feature feature)
         {
             // Override the base method and modify the control points for resizing if the shape is the "custom"
             var resizeControlPoints = new Collection<Feature>();
+
             var polygonShape = feature.GetShape() as PolygonShape;
             if (polygonShape != null) foreach (var vertex in polygonShape.OuterRing.Vertices) resizeControlPoints.Add(new Feature(vertex, feature.Id));
             return resizeControlPoints;
         }
+
         protected override Feature ResizeFeatureCore(Feature sourceFeature, PointShape sourceControlPoint, PointShape targetControlPoint)
         {
             // Override the base method and modify the logic for resizing if the shape is the "custom"
             var polygonShape = sourceFeature.GetShape() as PolygonShape;
+
             if (polygonShape != null)
             {
                 // If the rectangle is horizontal or vertical, it will use the custom method.
@@ -28,15 +43,14 @@ namespace ESME.Mapping
                     var fixedPointIndex = GetFixedPointIndex(polygonShape, sourceControlPoint);
                     var fixedPointShape = new PointShape(polygonShape.OuterRing.Vertices[fixedPointIndex]);
                     var newRectangleShape = new LineShape(new[] { new Vertex(fixedPointShape), new Vertex(targetControlPoint) }).GetBoundingBox();
-                    return base.ResizeFeatureCore(new Feature(newRectangleShape.GetWellKnownBinary(), sourceFeature.Id, sourceFeature.ColumnValues),
-                                                  targetControlPoint,
-                                                  targetControlPoint);
+                    return new Feature(newRectangleShape.GetWellKnownBinary(), sourceFeature.Id, sourceFeature.ColumnValues);
                 }
             }
+
             return base.ResizeFeatureCore(sourceFeature, sourceControlPoint, targetControlPoint);
         }
 
-        private static int GetFixedPointIndex(PolygonShape sourcePolygonShape, PointShape sourceControlPointShape)
+        static int GetFixedPointIndex(PolygonShape sourcePolygonShape, PointShape sourceControlPointShape)
         {
             var index = 0;
             for (var i = 0; i < sourcePolygonShape.OuterRing.Vertices.Count; i++)
@@ -49,6 +63,7 @@ namespace ESME.Mapping
             int fixedPointIndex;
             if (index <= 2) fixedPointIndex = index + 2;
             else fixedPointIndex = index - 2;
+
             return fixedPointIndex;
         }
     }
