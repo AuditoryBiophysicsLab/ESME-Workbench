@@ -1,15 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using ESME.Behaviors;
 using ESME.Database;
 using ESME.Locations;
 using ESME.Mapping;
 using HRC.Aspects;
-using HRC.Navigation;
+using HRC.Services;
 using HRC.Utility;  
 using HRC.ViewModels;
 using HRC.WPF;
@@ -17,9 +20,11 @@ using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Scenarios
 {
-    public class Platform : IHaveGuid, IHaveLayerSettings
+    public class Platform : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
     {
         public Platform() { TrackType = Behaviors.TrackType.Stationary; }
+
+        [Import] static readonly IMessageBoxService _messageBox;
 
         [Key, Initialize] public Guid Guid { get; set; }
         public string Description { get; set; }
@@ -95,9 +100,19 @@ namespace ESME.Scenarios
             get { return TrackType; }
             set
             {
-                TrackType = value;
-                RemoveMapLayers();
-                CreateMapLayers();
+                TrackType oldValue = TrackType;
+                try
+                {
+                    TrackType = value;
+                    RemoveMapLayers();
+                    CreateMapLayers();
+                }
+                catch (Exception e)
+                {
+                    if (_messageBox != null) _messageBox.ShowError(e.Message);
+                    TrackType = oldValue;
+                    OnPropertyChanged("SelectedTrackType");
+                }
             }
         }
 
@@ -188,5 +203,22 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _moveLayerToBack;
         #endregion
         #endregion
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            var handlers = PropertyChanged;
+            if (handlers == null) return;
+            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                {
+                    var localHandler = handler;
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new PropertyChangedEventArgs(propertyName)));
+                }
+                else
+                    handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
     }
 }
