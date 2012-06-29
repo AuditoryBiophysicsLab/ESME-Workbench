@@ -108,7 +108,7 @@ namespace ESME.Locations
             var depthAtAnalysisPoint = bathymetry.Samples.IsFast2DLookupAvailable
                                            ? -bathymetry.Samples.GetNearestPointAsync(analysisPoint.Geo).Result.Data
                                            : -bathymetry.Samples.GetNearestPoint(analysisPoint.Geo).Data;
-            foreach (var mode in analysisPoint.Scenario.GetAllModes())
+            foreach (var mode in analysisPoint.Scenario.GetDistinctModes())
             {
                 var sourceDepth = mode.Source.Platform.Depth;
                 if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
