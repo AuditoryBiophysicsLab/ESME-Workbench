@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using ESME.Database;
 using ESME.Environment;
 using ESME.Locations;
@@ -178,9 +179,41 @@ namespace ESME.Scenarios
 
     public static class ScenarioExensions
     {
-        public static IEnumerable<Mode> GetAllModes(this Scenario scenario) 
+        public static IEnumerable<Mode> GetDistinctModes(this Scenario scenario)
         {
-            return scenario.Platforms.SelectMany(platform => platform.Sources.SelectMany(source => source.Modes));
+            return (from platform in scenario.Platforms
+                    from source in platform.Sources
+                    from mode in source.Modes
+                    select mode).Distinct();
+        }
+
+        public async static Task<string> Validate(this Scenario scenario)
+        {
+            if (scenario == null) return "Scenario is null";
+            if (scenario.Platforms == null || scenario.Platforms.Count == 0) return "No platforms have been defined";
+
+            var distinctScenarioModes = (from platform in scenario.Platforms
+                                         from source in platform.Sources
+                                         from mode in source.Modes
+                                         select mode).Distinct().ToList();
+            if (distinctScenarioModes.Count == 0) return "No modes have been defined";
+
+            var distinctAnalysisPointModes = (from analysisPoint in scenario.AnalysisPoints
+                                              from transmissionLoss in analysisPoint.TransmissionLosses
+                                              select transmissionLoss.Mode).Distinct().ToList();
+            if (distinctAnalysisPointModes.Count == 0) return "No analysis points have been defined";
+
+            var missingScenarioModes = distinctScenarioModes.Except(distinctAnalysisPointModes).ToList();
+            if (missingScenarioModes.Count != 0) return "The following modes do not appear in any currently defined analysis points: " + string.Join(", ", missingScenarioModes.Select(m => m.ModeName));
+
+            var radialsNotCalculated = (from analysisPoint in scenario.AnalysisPoints
+                                        from transmissionLoss in analysisPoint.TransmissionLosses
+                                        from radial in transmissionLoss.Radials
+                                        where !File.Exists(radial.BasePath + ".shd")
+                                        select radial).Count();
+            if (radialsNotCalculated != 0) return string.Format("There are still {0} radials awaiting calculation in this scenario.", radialsNotCalculated);
+
+            return null;
         }
     }
 }

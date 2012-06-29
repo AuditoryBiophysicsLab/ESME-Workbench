@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using ESME.Database;
@@ -10,7 +11,7 @@ using HRC.WPF;
 
 namespace ESME.Scenarios
 {
-    public class Mode : IHaveGuid, IEquatable<Mode>
+    public class Mode : IHaveGuid, IEqualityComparer<Mode>
     {
         [Key, Initialize]
         public Guid Guid { get; set; }
@@ -85,28 +86,6 @@ namespace ESME.Scenarios
 
         [NotMapped] public int SourceActorModeID { get; set; }
 
-        /// <summary>
-        /// Indicates whether the current object is equal to another object of the same type.
-        /// </summary>
-        /// <returns>
-        /// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
-        /// </returns>
-        /// <param name="other">An object to compare with this object.</param>
-        public bool Equals(Mode other)
-        {
-            if (Guid != other.Guid) return false;
-            var mydepth=0f;
-            if (Depth.HasValue)
-                mydepth = Depth.Value;
-            if ((Source == null || Source.Platform == null) && (other.Source == null || other.Source.Platform == null)) return true;
-            mydepth += Source.Platform.Depth;
-            var otherdepth = 0f;
-            if (other.Depth.HasValue)
-                otherdepth = other.Depth.Value;
-            otherdepth += other.Source.Platform.Depth;
-            return (Math.Abs(mydepth - otherdepth) < .001);
-        }
-
         public void CreateMapLayers() { throw new NotImplementedException(); }
         public void RemoveMapLayers() { throw new NotImplementedException(); }
 
@@ -171,5 +150,19 @@ namespace ESME.Scenarios
         }
         #endregion
         #endregion
+
+        public bool Equals(Mode x, Mode y)
+        {
+            var xDepth = x.Source.Platform.Depth;
+            if (x.Depth.HasValue) xDepth += x.Depth.Value;
+            var yDepth = y.Source.Platform.Depth;
+            if (y.Depth.HasValue) yDepth += y.Depth.Value;
+            if (Math.Abs(xDepth - yDepth) > 0.001) return false;
+            if (Math.Abs(x.VerticalBeamWidth - y.VerticalBeamWidth) > 0.1) return false;
+            if (Math.Abs(x.DepressionElevationAngle - y.DepressionElevationAngle) > 0.1) return false;
+            if (Math.Abs(x.HighFrequency - y.HighFrequency) > 0.1) return false;
+            return Math.Abs(x.LowFrequency - y.LowFrequency) <= 0.1;
+        }
+        public int GetHashCode(Mode obj) { return obj.GetHashCode(); }
     }
 }
