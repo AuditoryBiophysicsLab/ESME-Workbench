@@ -62,6 +62,7 @@ namespace ESME.Environment
                 var depth = bathymetry.Samples.GetNearestPoint(location).Data;
                 if (depth < 0) result.Locations.Add(new Geo<float>(location.Latitude, location.Longitude, (float)(depth * Random.NextDouble())));
             }
+            result.TotalAnimats = population;
             return result;
         }
 
@@ -91,6 +92,7 @@ namespace ESME.Environment
             var bufferBlock = new BufferBlock<Geo<float>>();
             transformManyBlock.LinkTo(bufferBlock);
             var population = (int)Math.Round(area * species.PopulationDensity);
+            result.TotalAnimats = population;
             const int blockSize = 100;
             while (population > 0)
             {
