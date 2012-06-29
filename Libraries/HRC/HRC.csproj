@@ -159,6 +159,7 @@
     <Compile Include="Navigation\GeoArray.cs" />
     <Compile Include="Navigation\GeoArrayExtensions.cs" />
     <Compile Include="Navigation\GeoExtensions.cs" />
+    <Compile Include="Navigation\GeoPieSlice.cs" />
     <Compile Include="Navigation\GeoSegmentExtensions.cs" />
     <Compile Include="Navigation\MatchCollector.cs" />
     <Compile Include="Navigation\MatchFilter.cs" />
