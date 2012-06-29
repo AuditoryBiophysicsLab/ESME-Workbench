@@ -464,7 +464,8 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 var species = (ScenarioSpecies)vm.PropertyObject;
                 species.Scenario = scenario;
-                scenario.ScenarioSpecies.Add(species);   
+                scenario.ScenarioSpecies.Add(species);
+                species.LayerSettings.LineOrSymbolSize = 3;
                 var animats = await Animat.SeedAsync(species, scenario.Location.GeoRect, scenario.BathymetryData);
                 animats.Save(species.SpeciesFilePath);
                 species.CreateMapLayers();
