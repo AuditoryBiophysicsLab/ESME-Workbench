@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using ESME.Database;
 using ESME.Environment;
@@ -65,9 +66,12 @@ namespace ESME.Scenarios
         }
         bool _showAllSpecies;
 
-        [Initialize] public DbTimeSpan StartTime { get; set; }
-        [Initialize] public DbTimeSpan Duration { get; set; }
-        [Initialize] public DbTimePeriod TimePeriod { get; set; }
+        [Initialize]
+        public DbTimeSpan StartTime { get; set; }
+        [Initialize]
+        public DbTimeSpan Duration { get; set; }
+        [Initialize]
+        public DbTimePeriod TimePeriod { get; set; }
 
         public virtual Location Location { get; set; }
 
@@ -76,20 +80,30 @@ namespace ESME.Scenarios
         public virtual EnvironmentalDataSet Sediment { get; set; }
         public virtual EnvironmentalDataSet Bathymetry { get; set; }
 
-        [Initialize] public virtual ObservableList<Platform> Platforms { get; set; }
-        [Initialize] public virtual ObservableList<ScenarioSpecies> ScenarioSpecies { get; set; }
-        [Initialize] public virtual ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
-        [Initialize] public virtual ObservableList<Perimeter> Perimeters { get; set; }
-        [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
+        [Initialize]
+        public virtual ObservableList<Platform> Platforms { get; set; }
+        [Initialize]
+        public virtual ObservableList<ScenarioSpecies> ScenarioSpecies { get; set; }
+        [Initialize]
+        public virtual ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
+        [Initialize]
+        public virtual ObservableList<Perimeter> Perimeters { get; set; }
+        [Initialize]
+        public virtual ObservableList<LogEntry> Logs { get; set; }
 
         public void Add(Platform platform) { Platforms.Add(platform); }
 
-        [NotMapped] public Wind WindData { get { return ((Wind)Cache[Wind].Result); } }
-        [NotMapped] public SoundSpeed SoundSpeedData { get { return ((SoundSpeed)Cache[SoundSpeed].Result); } }
-        [NotMapped] public Bathymetry BathymetryData { get { return ((Bathymetry)Cache[Bathymetry].Result); } }
-        [NotMapped] public Sediment SedimentData { get { return ((Sediment)Cache[Sediment].Result); } }
+        [NotMapped]
+        public Wind WindData { get { return ((Wind)Cache[Wind].Result); } }
+        [NotMapped]
+        public SoundSpeed SoundSpeedData { get { return ((SoundSpeed)Cache[SoundSpeed].Result); } }
+        [NotMapped]
+        public Bathymetry BathymetryData { get { return ((Bathymetry)Cache[Bathymetry].Result); } }
+        [NotMapped]
+        public Sediment SedimentData { get { return ((Sediment)Cache[Sediment].Result); } }
 
-        [NotMapped] public string StorageDirectoryPath
+        [NotMapped]
+        public string StorageDirectoryPath
         {
             get
             {
@@ -102,10 +116,14 @@ namespace ESME.Scenarios
         }
         string _storageDirectoryPath;
 
-        [NotMapped] public static IMasterDatabaseService Database { get; set; }
-        [NotMapped] public static EnvironmentalCacheService Cache { get; set; }
-        [NotMapped] public bool IsNew { get; set; }
-        [NotMapped] public object LayerControl
+        [NotMapped]
+        public static IMasterDatabaseService Database { get; set; }
+        [NotMapped]
+        public static EnvironmentalCacheService Cache { get; set; }
+        [NotMapped]
+        public bool IsNew { get; set; }
+        [NotMapped]
+        public object LayerControl
         {
             get { return _layerControl; }
             set
@@ -139,15 +157,17 @@ namespace ESME.Scenarios
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        [NotMapped] public bool IsMouseOver { get; set; }
-        [NotMapped] public GeoRect GeoRect { get { return Location.GeoRect; } }
+        [NotMapped]
+        public bool IsMouseOver { get; set; }
+        [NotMapped]
+        public GeoRect GeoRect { get { return Location.GeoRect; } }
         #region AddPlatformCommand
         public SimpleCommand<object, EventToCommandArgs> AddPlatformCommand { get { return _addPlatform ?? (_addPlatform = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.AddPlatform, this))); } }
         SimpleCommand<object, EventToCommandArgs> _addPlatform;
         #endregion
 
         #region ViewScenarioPropertiesCommand
-        public SimpleCommand<object, EventToCommandArgs> ViewScenarioPropertiesCommand { get { return _viewScenarioProperties ?? (_viewScenarioProperties = new SimpleCommand<object, EventToCommandArgs>(o =>MediatorMessage.Send(MediatorMessage.ViewScenarioProperties,this))); } }
+        public SimpleCommand<object, EventToCommandArgs> ViewScenarioPropertiesCommand { get { return _viewScenarioProperties ?? (_viewScenarioProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ViewScenarioProperties, this))); } }
         SimpleCommand<object, EventToCommandArgs> _viewScenarioProperties;
         #endregion
         public void Delete()
@@ -170,7 +190,6 @@ namespace ESME.Scenarios
         public SimpleCommand<object, EventToCommandArgs> DeleteScenarioCommand { get { return _deleteScenario ?? (_deleteScenario = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteScenario, this))); } }
         SimpleCommand<object, EventToCommandArgs> _deleteScenario;
         #endregion
-
         #region ScenarioPropertiesCommand
         public SimpleCommand<object, EventToCommandArgs> ScenarioPropertiesCommand { get { return _scenarioProperties ?? (_scenarioProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ScenarioProperties, this))); } }
         SimpleCommand<object, EventToCommandArgs> _scenarioProperties;
@@ -187,32 +206,51 @@ namespace ESME.Scenarios
                     select mode).Distinct();
         }
 
+        public static IEnumerable<Mode> GetDistinctAnalysisPointModes(this Scenario scenario)
+        {
+            return (from analysisPoint in scenario.AnalysisPoints
+                    from transmissionLoss in analysisPoint.TransmissionLosses
+                    select transmissionLoss.Mode).Distinct();
+        }
+
+        public static IEnumerable<Radial> GetUncalculatedRadials(this Scenario scenario)
+        {
+            return (from analysisPoint in scenario.AnalysisPoints
+                    from transmissionLoss in analysisPoint.TransmissionLosses
+                    from radial in transmissionLoss.Radials
+                    where !File.Exists(radial.BasePath + ".shd")
+                    select radial);
+        }
+
+        public static string MissingSpeciesText(this Scenario scenario)
+        {
+            if (scenario.ScenarioSpecies.Count == 0) return "There are no species specified in this scenario.";
+            var sb = new StringBuilder();
+            foreach (var species in from species in scenario.ScenarioSpecies let animats = Animat.Load(species, species.SpeciesFilePath) where animats.Locations.Count == 0 select species) sb.AppendLine(string.Format("There are no animats seeded for species {0}", species.LatinName));
+            return sb.ToString();
+        }
+
         public async static Task<string> Validate(this Scenario scenario)
         {
             if (scenario == null) return "Scenario is null";
             if (scenario.Platforms == null || scenario.Platforms.Count == 0) return "No platforms have been defined";
 
-            var distinctScenarioModes = (from platform in scenario.Platforms
-                                         from source in platform.Sources
-                                         from mode in source.Modes
-                                         select mode).Distinct().ToList();
+            var distinctScenarioModes = GetDistinctModes(scenario).ToList();
             if (distinctScenarioModes.Count == 0) return "No modes have been defined";
 
-            var distinctAnalysisPointModes = (from analysisPoint in scenario.AnalysisPoints
-                                              from transmissionLoss in analysisPoint.TransmissionLosses
-                                              select transmissionLoss.Mode).Distinct().ToList();
+            var distinctAnalysisPointModes = GetDistinctAnalysisPointModes(scenario).ToList();
             if (distinctAnalysisPointModes.Count == 0) return "No analysis points have been defined";
 
             var missingScenarioModes = distinctScenarioModes.Except(distinctAnalysisPointModes).ToList();
             if (missingScenarioModes.Count != 0) return "The following modes do not appear in any currently defined analysis points: " + string.Join(", ", missingScenarioModes.Select(m => m.ModeName));
 
-            var radialsNotCalculated = (from analysisPoint in scenario.AnalysisPoints
-                                        from transmissionLoss in analysisPoint.TransmissionLosses
-                                        from radial in transmissionLoss.Radials
-                                        where !File.Exists(radial.BasePath + ".shd")
-                                        select radial).Count();
+            var radialsNotCalculated = GetUncalculatedRadials(scenario).Count();
             if (radialsNotCalculated != 0) return string.Format("There are still {0} radials awaiting calculation in this scenario.", radialsNotCalculated);
 
+            var missingSpecies = MissingSpeciesText(scenario);
+            if (missingSpecies.Length != 0) return missingSpecies;
+
+            //todo warn if there are ghost platforms
             return null;
         }
     }
