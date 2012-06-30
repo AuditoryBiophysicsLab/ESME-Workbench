@@ -93,15 +93,10 @@ namespace ESME.Scenarios
 
         public void Add(Platform platform) { Platforms.Add(platform); }
 
-        [NotMapped]
-        public Wind WindData { get { return ((Wind)Cache[Wind].Result); } }
-        [NotMapped]
-        public SoundSpeed SoundSpeedData { get { return ((SoundSpeed)Cache[SoundSpeed].Result); } }
-        [NotMapped]
-        public Bathymetry BathymetryData { get { return ((Bathymetry)Cache[Bathymetry].Result); } }
-        [NotMapped]
-        public Sediment SedimentData { get { return ((Sediment)Cache[Sediment].Result); } }
-
+        [NotMapped] public Wind WindData { get { return ((Wind)Cache[Wind].Result); } }
+        [NotMapped] public SoundSpeed SoundSpeedData { get { return ((SoundSpeed)Cache[SoundSpeed].Result); } }
+        [NotMapped] public Bathymetry BathymetryData { get { return ((Bathymetry)Cache[Bathymetry].Result); } }
+        [NotMapped] public Sediment SedimentData { get { return ((Sediment)Cache[Sediment].Result); } }
         [NotMapped]
         public string StorageDirectoryPath
         {

@@ -68,8 +68,10 @@ namespace ESME.Scenarios
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<Source> Sources { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
+        [NotMapped] public int ActorID { get; set; }
         [NotMapped] public bool IsNew { get; set; }
-        [NotMapped] public bool IsDeleted { get; set; }
+        [NotMapped]
+        public bool IsDeleted { get; set; }
         [NotMapped]
         public object LayerControl
         {

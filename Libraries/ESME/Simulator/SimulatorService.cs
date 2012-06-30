@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
 using ESME.Scenarios;
 using ESME.Settings;
 using MEFedMVVM.ViewModelLocator;
@@ -15,11 +12,14 @@ namespace ESME.Simulator
     {
         public SimulatorService() {}
 
-        public void Run(Scenario scenario)
+        public void Run(Scenario scenario, TimeSpan timeStep)
         {
-            
+            if (scenario.Validate() != null) return;
+            var timeStepCount = (int)Math.Round(((TimeSpan)scenario.Duration).TotalSeconds / timeStep.TotalSeconds);
+            for (var timeStepIndex = 0; timeStepIndex < timeStepCount; timeStepIndex++)
+            {
+                
+            }
         }
-
-
     }
 }

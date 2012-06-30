@@ -32,6 +32,7 @@ namespace ESME.Scenarios
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
         public string SpeciesFilename { get; set; }
         [NotMapped] public bool IsDeleted { get; set; }
+        [NotMapped] public int StartActorID { get; set; }
         [NotMapped]
         public string SpeciesFilePath
         {

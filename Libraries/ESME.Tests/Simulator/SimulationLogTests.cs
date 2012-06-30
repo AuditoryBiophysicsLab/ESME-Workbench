@@ -111,7 +111,7 @@ namespace ESME.Tests.Simulator
                         Assert.AreEqual(platformStates.Count, actorPosition.Exposures.Count);
                         foreach (var exposure in actorPosition.Exposures)
                         {
-                            var exposureIndex = actorPosition.Exposures.IndexOf(exposure);
+                            var exposureIndex = actorPosition.Exposures.ToList().IndexOf(exposure);
                             Assert.AreEqual(exposureIndex, exposure.SourceActorModeID);
                             Assert.AreEqual(exposureIndex * 1000, exposure.PeakSPL);
                             Assert.AreEqual(exposureIndex * 2000, exposure.Energy);
@@ -160,7 +160,7 @@ namespace ESME.Tests.Simulator
                         Assert.AreEqual(11, actorPosition.Exposures.Count);
                         foreach (var exposure in actorPosition.Exposures)
                         {
-                            var exposureIndex = actorPosition.Exposures.IndexOf(exposure);
+                            var exposureIndex = actorPosition.Exposures.ToList().IndexOf(exposure);
                             Assert.AreEqual(exposureIndex, exposure.SourceActorModeID);
                             Assert.AreEqual(exposureIndex * 1000, exposure.PeakSPL);
                             Assert.AreEqual(exposureIndex * 2000, exposure.Energy);
