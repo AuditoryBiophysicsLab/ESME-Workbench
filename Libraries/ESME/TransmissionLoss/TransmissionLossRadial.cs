@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using ESME.TransmissionLoss.Bellhop;
 using HRC.Navigation;
 
@@ -151,6 +152,22 @@ namespace ESME.TransmissionLoss
                 if (TransmissionLoss == null) throw new ApplicationException("TransmissionLossRadialData: Indexing is invalid unless all data is in memory.  Try ReadSingleValue(...) instead.");
                 if ((depthCell >= Depths.Count) || (rangeCell >= Ranges.Count)) throw new IndexOutOfRangeException("TransmissionLossRadialData: Requested DepthCell or RangeCell out of valid range");
                 return TransmissionLoss[depthCell, rangeCell];
+            }
+        }
+
+        public float this[double range, double depth]
+        {
+            get
+            {
+                if (range > Ranges.Last()) throw new IndexOutOfRangeException("TransmissionLossRadialData: Requested range is past the end of the radial");
+                if (depth > Depths.Last()) throw new IndexOutOfRangeException("TransmissionLossRadialData: Requested depth is beyond the deepest point in this radial");
+                var rangeIndex = (from r in Ranges
+                                  orderby Math.Abs(range - r)
+                                  select Ranges.IndexOf(r)).First();
+                var depthIndex = (from d in Depths
+                                  orderby Math.Abs(depth - d)
+                                  select Depths.IndexOf(d)).First();
+                return TransmissionLoss[rangeIndex, depthIndex];
             }
         }
 

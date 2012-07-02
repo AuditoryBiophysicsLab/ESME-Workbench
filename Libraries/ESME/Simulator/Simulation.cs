@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -15,6 +16,7 @@ namespace ESME.Simulator
     {
         public List<Actor> GetActors() { return _database.Actors.ToList(); }
         public Scenario Scenario { get { return _database.Scenarios.First(); } }
+        readonly TransmissionLossCache _transmissionLossCache;
 
         public static Simulation Create(Scenario scenario, string simulationDirectory)
         {
@@ -28,6 +30,12 @@ namespace ESME.Simulator
             _simulationDirectory = simulationDirectory;
             _database = SimulationContext.OpenOrCreate(Path.Combine(_simulationDirectory, "simulation.db"));
             _scenario = _database.ImportScenario(scenario);
+            _transmissionLossCache = new TransmissionLossCache("RadialCache", new NameValueCollection
+            {
+                { "physicalMemoryLimitPercentage", "50" }, 
+                { "pollingInterval", "00:05:00" }
+            });
+
         }
 
         readonly Scenario _scenario;
@@ -76,7 +84,7 @@ namespace ESME.Simulator
                         var platformLocation = platformState.PlatformLocation.Location;
                         var course = Geo.DegreesToRadians(platformState.PlatformLocation.Course);
                         var thisPlatform = platform;
-                        var actionBlock = new ActionBlock<int>(index =>
+                        var actionBlock = new ActionBlock<int>(async index =>
                                                                {
                                                                    var geoArc = new GeoArc(platformLocation,
                                                                                            course + mode.RelativeBeamAngle,
@@ -90,15 +98,16 @@ namespace ESME.Simulator
                                                                    var radiusToActor = platformLocation.DistanceRadians(actorGeo);
                                                                    var azimuthToActor = platformLocation.Azimuth(actorGeo);
                                                                    if (!geoArc.Contains(radiusToActor, azimuthToActor)) return;
-                                                                   var closestRadial = ClosestRadialToBearing(platformLocation,mode,azimuthToActor);
                                                                    // At this point we know the actor will be exposed to this mode
-                                                                   // so we want to find the nearest radial, load it if necessary
-                                                                   // then look up the TL value at the actor's range and depth cell
-                                                                   var rangeToActor = Geo.RadiansToMeters(radiusToActor);
-                                                                   var actorDepth = record.Depth;
-                                                                   var peakSPL = 1f;
-                                                                   var energy = 2f;
-                                                                   record.Exposures.Add(new ActorExposureRecord(mode.SourceActorModeID, peakSPL, energy));
+                                                                   // Find the nearest radial
+                                                                   var closestRadial = Scenario.ClosestTransmissionLoss(platformLocation, mode)
+                                                                       .ClosestRadial(Geo.RadiansToDegrees(azimuthToActor));
+                                                                   // Load it into the cache if it's not already there
+                                                                   var tlTask = _transmissionLossCache[closestRadial];
+                                                                   await tlTask;
+                                                                   // Look up the TL value at the actor's range and depth
+                                                                   var peakSPL = tlTask.Result.TransmissionLossRadial[Geo.RadiansToMeters(radiusToActor), record.Depth];
+                                                                   record.Exposures.Add(new ActorExposureRecord(mode.SourceActorModeID, peakSPL, peakSPL));
                                                                },
                                                                new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = -1 });
                         broadcastBlock.LinkTo(actionBlock);
@@ -122,58 +131,6 @@ namespace ESME.Simulator
 #endif
                 }
             }
-        }
-
-        Radial ClosestRadialToBearing(Geo actorLocation, Mode targetMode, double azimuthToActor)
-        {
-            var closestTL = ClosestTransmissionLoss(Scenario, actorLocation, targetMode);
-            var bearingtoActor = Geo.RadiansToDegrees(azimuthToActor);
-            var minbearing = double.MaxValue;
-            Radial closestRadial = null;
-            foreach (var radial in closestTL.Radials)
-            {
-                var curbearing = radial.Bearing;
-                while (curbearing < 0) curbearing += 360;
-                curbearing %= 360;
-                var relBearing = Math.Abs(curbearing - bearingtoActor);
-                if (relBearing >= minbearing) continue;
-                minbearing = relBearing;
-                closestRadial = radial;
-            }
-            return closestRadial;
-        }
-
-        Scenarios.TransmissionLoss ClosestTransmissionLoss(Scenario scenario, Geo platformLocation, Mode mode)
-        {
-            var closest = (from ap in scenario.AnalysisPoints
-                           from tl in ap.TransmissionLosses
-                           where tl.Mode.Equals(mode, tl.Mode)
-                           let d = platformLocation.DistanceKilometers(ap.Geo)
-                           orderby d
-                           select new {d, tl}).FirstOrDefault();
-            return closest != null ? closest.tl : null;
-        }
-
-        float GetTransmissionLoss(TransmissionLossRadial radial, double range, double depth)
-        {
-            var rangeIndex = ClosestIndexTo(range, radial.Ranges);
-            var depthIndex = ClosestIndexTo(depth, radial.Depths);
-            return radial.TransmissionLoss[rangeIndex, depthIndex];
-        }
-
-        static int ClosestIndexTo(double target, IList<float> values)
-        {
-            var min = double.MaxValue;
-            var index = 0;
-            for (var i = 0; i < values.Count; i++)
-            {
-                var value = values[i];
-                var distance = Math.Abs(target - value);
-                if (distance >= min) continue;
-                min = distance;
-                index = i;
-            }
-            return index;
         }
     }
 

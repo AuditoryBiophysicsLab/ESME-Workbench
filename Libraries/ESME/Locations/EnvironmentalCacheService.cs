@@ -14,6 +14,7 @@ using System.Windows.Media;
 using ESME.Environment;
 using ESME.Plugins;
 using ESME.Scenarios;
+using ESME.TransmissionLoss;
 using HRC.Navigation;
 using HRC.Utility;
 using HRC.ViewModels;

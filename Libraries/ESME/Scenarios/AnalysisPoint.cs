@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
 using ESME.Database;
@@ -210,6 +212,28 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _recalculateTransmissionLoss;
         #endregion
 
+        /// <summary>
+        /// Return the Radial closest to the specified bearing
+        /// </summary>
+        /// <param name="desiredBearing">Desired bearing, in degrees clockwise from true north</param>
+        /// <returns></returns>
+        public Radial ClosestRadial(double desiredBearing)
+        {
+            var minBearing = double.MaxValue;
+            Radial closestRadial = null;
+            foreach (var radial in Radials)
+            {
+                var bearing = radial.Bearing;
+                while (bearing < 0) bearing += 360;
+                bearing %= 360;
+                var relBearing = Math.Abs(bearing - desiredBearing);
+                if (relBearing >= minBearing) continue;
+                minBearing = relBearing;
+                closestRadial = radial;
+            }
+            return closestRadial;
+        }
+
         volatile object _createMapLayerLock = new object();
         public void CreateMapLayers()
         {
@@ -381,6 +405,31 @@ namespace ESME.Scenarios
         }
 
         float[] _meanTransmissionLossValues;
+
+        public async Task<Radial> LoadAsync()
+        {
+            var result = new Task(() =>
+                                  {
+                                      if (_bottomProfile == null) _bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty");
+                                      if (_ranges == null || _depths == null) ReadAxisFile();
+                                      if (_transmissionLossRadial == null) _transmissionLossRadial = new TransmissionLossRadial((float)Bearing, new BellhopOutput(BasePath + ".shd"));
+                                  });
+            result.Start();
+            await TaskEx.WhenAll(result);
+            return this;
+        }
+
+        TransmissionLossRadial _transmissionLossRadial;
+
+        [NotMapped] public TransmissionLossRadial TransmissionLossRadial
+        {
+            get
+            {
+                if (_transmissionLossRadial != null) return _transmissionLossRadial;
+                _transmissionLossRadial = new TransmissionLossRadial((float)Bearing, new BellhopOutput(BasePath + ".shd"));
+                return _transmissionLossRadial;
+            }
+        }
 
         public void ExtractAxisData(TransmissionLossRadial transmissionLoss = null)
         {

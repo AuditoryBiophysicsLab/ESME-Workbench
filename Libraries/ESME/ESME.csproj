@@ -115,6 +115,7 @@
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Data.Linq" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Threading.Tasks.Dataflow, Version=0.0.4098.29463, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\ESME WorkBench\External References\System.Threading.Tasks.Dataflow.dll</HintPath>
@@ -264,6 +265,7 @@
     <Compile Include="TransmissionLoss\RAM\Ram.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="TransmissionLoss\TransmissionLossCache.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossCalculatorService.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossRadial.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossProcess.cs">

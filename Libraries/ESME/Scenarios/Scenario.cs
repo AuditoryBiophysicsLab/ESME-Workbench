@@ -225,6 +225,17 @@ namespace ESME.Scenarios
             return sb.ToString();
         }
 
+        public static TransmissionLoss ClosestTransmissionLoss(this Scenario scenario, Geo geo, Mode mode)
+        {
+            var closest = (from ap in scenario.AnalysisPoints
+                           from tl in ap.TransmissionLosses
+                           where tl.Mode.Equals(mode, tl.Mode)
+                           let d = geo.DistanceKilometers(ap.Geo)
+                           orderby d
+                           select new { d, tl }).FirstOrDefault();
+            return closest != null ? closest.tl : null;
+        }
+
         public async static Task<string> Validate(this Scenario scenario)
         {
             if (scenario == null) return "Scenario is null";
