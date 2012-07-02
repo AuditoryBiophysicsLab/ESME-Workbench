@@ -219,9 +219,9 @@ namespace ESME.Scenarios
 
         public static string MissingSpeciesText(this Scenario scenario)
         {
-            if (scenario.ScenarioSpecies.Count == 0) return "There are no species specified in this scenario.";
+            if (!scenario.ScenarioSpecies.Any()) return "There are no species specified in this scenario.";
             var sb = new StringBuilder();
-            foreach (var species in from species in scenario.ScenarioSpecies let animats = Animat.Load(species, species.SpeciesFilePath) where animats.Locations.Count == 0 select species) sb.AppendLine(string.Format("There are no animats seeded for species {0}", species.LatinName));
+            foreach (var species in scenario.ScenarioSpecies.Where(species => !species.Animat.Locations.Any())) sb.AppendLine(string.Format("There are no animats seeded for species {0}", species.LatinName));
             return sb.ToString();
         }
 
