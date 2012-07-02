@@ -46,6 +46,17 @@ namespace ESME.Scenarios
         }
         string _speciesFilePath;
         [NotMapped] public bool IsSeededByESME { get { return SpeciesFilename.ToLower().EndsWith(".ani"); } }
+        Animat _animat;
+
+        [NotMapped] public Animat Animat
+        {
+            get
+            {
+                if (_animat != null) return _animat;
+                _animat = File.Exists(SpeciesFilePath) ? Animat.Load(this, SpeciesFilePath) : Animat.Seed(this, Scenario.Location.GeoRect, Scenario.BathymetryData);
+                return _animat;
+            }
+        }
 
         #region Layer Move commands
         #region MoveLayerToFrontCommand
@@ -95,9 +106,8 @@ namespace ESME.Scenarios
             };
             while (pointLayer.PointSymbolType == PointSymbolType.Cross) pointLayer.PointSymbolType = (PointSymbolType)(Random.Next(8));
             pointLayer.PointStyle = MapLayerViewModel.CreatePointStyle(pointLayer.PointSymbolType, LayerSettings.LineOrSymbolColor, (int)LayerSettings.LineOrSymbolSize);
-            var animats = File.Exists(SpeciesFilePath) ? Animat.Load(this, SpeciesFilePath) : Animat.Seed(this, Scenario.Location.GeoRect, Scenario.BathymetryData);
             pointLayer.Clear();
-            pointLayer.AddPoints(animats.Locations.Select(l => new Geo(l.Latitude, l.Longitude)).ToList());
+            pointLayer.AddPoints(Animat.Locations.Select(l => new Geo(l.Latitude, l.Longitude)).ToList());
             pointLayer.Done();
             LayerSettings.MapLayerViewModel = pointLayer;
             if (Scenario.ShowAllSpecies) LayerSettings.IsChecked = true;
