@@ -90,7 +90,7 @@ namespace ESME.Simulator
                                                                    var radiusToActor = platformLocation.DistanceRadians(actorGeo);
                                                                    var azimuthToActor = platformLocation.Azimuth(actorGeo);
                                                                    if (!geoArc.Contains(radiusToActor, azimuthToActor)) return;
-                                                                   var closestRadialBearing = ClosestRadialBearing(azimuthToActor);
+                                                                   var closestRadial = ClosestRadialToBearing(platformLocation,mode,azimuthToActor);
                                                                    // At this point we know the actor will be exposed to this mode
                                                                    // so we want to find the nearest radial, load it if necessary
                                                                    // then look up the TL value at the actor's range and depth cell
@@ -124,9 +124,57 @@ namespace ESME.Simulator
             }
         }
 
-        float ClosestRadialBearing(double azimuthToActor) { return 0f; }
+        Radial ClosestRadialToBearing(Geo actorLocation, Mode targetMode, double azimuthToActor)
+        {
+            var closestTL = ClosestTransmissionLoss(Scenario, actorLocation, targetMode);
+            var bearingtoActor = Geo.RadiansToDegrees(azimuthToActor);
+            var minbearing = double.MaxValue;
+            Radial closestRadial = null;
+            foreach (var radial in closestTL.Radials)
+            {
+                var curbearing = radial.Bearing;
+                while (curbearing < 0) curbearing += 360;
+                curbearing %= 360;
+                var relBearing = Math.Abs(curbearing - bearingtoActor);
+                if (relBearing >= minbearing) continue;
+                minbearing = relBearing;
+                closestRadial = radial;
+            }
+            return closestRadial;
+        }
 
-        float GetTransmissionLoss(TransmissionLossRadial radial, double range, double depth) { return 0f; }
+        Scenarios.TransmissionLoss ClosestTransmissionLoss(Scenario scenario, Geo platformLocation, Mode mode)
+        {
+            var closest = (from ap in scenario.AnalysisPoints
+                           from tl in ap.TransmissionLosses
+                           where tl.Mode.Equals(mode, tl.Mode)
+                           let d = platformLocation.DistanceKilometers(ap.Geo)
+                           orderby d
+                           select new {d, tl}).FirstOrDefault();
+            return closest != null ? closest.tl : null;
+        }
+
+        float GetTransmissionLoss(TransmissionLossRadial radial, double range, double depth)
+        {
+            var rangeIndex = ClosestIndexTo(range, radial.Ranges);
+            var depthIndex = ClosestIndexTo(depth, radial.Depths);
+            return radial.TransmissionLoss[rangeIndex, depthIndex];
+        }
+
+        static int ClosestIndexTo(double target, IList<float> values)
+        {
+            var min = double.MaxValue;
+            var index = 0;
+            for (var i = 0; i < values.Count; i++)
+            {
+                var value = values[i];
+                var distance = Math.Abs(target - value);
+                if (distance >= min) continue;
+                min = distance;
+                index = i;
+            }
+            return index;
+        }
     }
 
     [Serializable]
