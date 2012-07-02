@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using ESME.Behaviors;
-using ESME.Environment;
 using ESME.Scenarios;
+using ESME.TransmissionLoss;
 using HRC.Navigation;
 
 namespace ESME.Simulator
@@ -40,13 +39,13 @@ namespace ESME.Simulator
 
         public void Start(TimeSpan timeStepSize)
         {
-            var actorID = 0;
+            var actorCount = 0;
             var sourceActorModeID = 0;
             var timeStepCount = (int)Math.Round(((TimeSpan)_scenario.Duration).TotalSeconds / timeStepSize.TotalSeconds);
             var actors = new List<Actor>();
             foreach (var platform in _scenario.Platforms)
             {
-                platform.ActorID = actorID++;
+                platform.ActorID = actorCount++;
                 var platformBehavior = new PlatformBehavior(platform, timeStepSize, timeStepCount);
                 _platformBehaviors.Add(platformBehavior);
                 _platformStates.Add(platformBehavior.PlatformStates.ToArray());
@@ -57,20 +56,17 @@ namespace ESME.Simulator
             }
             foreach (var species in _scenario.ScenarioSpecies)
             {
-                var animats = Animat.Load(species, species.SpeciesFilePath);
-                species.StartActorID = actorID;
-                foreach (var location in animats.Locations) _database.Actors.Add(new Actor { ID = actorID++, AnimatLocation = new AnimatLocation { Location = location, ScenarioSpecies = species } });
+                species.StartActorID = actorCount;
+                foreach (var location in species.Animat.Locations) _database.Actors.Add(new Actor { ID = actorCount++, AnimatLocation = new AnimatLocation { Location = location, ScenarioSpecies = species } });
             }
-            var actorCount = actorID;
             _log = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), timeStepCount, timeStepSize);
             for (var timeStepIndex = 0; timeStepIndex < timeStepCount; timeStepIndex++)
             {
-                var timeStepRecord = new SimulationTimeStepRecord();
                 var actorPositionRecords = new ActorPositionRecord[actorCount];
-                var broadcastBlock = new BroadcastBlock<ActorPositionRecord[]>(a => a);
+                var broadcastBlock = new BroadcastBlock<int>(a => a);
                 foreach (var platform in _scenario.Platforms)
                 {
-                    var platformState = _platformStates[actorID][timeStepIndex];
+                    var platformState = _platformStates[platform.ActorID][timeStepIndex];
                     actorPositionRecords[platform.ActorID] = new ActorPositionRecord((float)platformState.PlatformLocation.Location.Latitude,
                                                                                      (float)platformState.PlatformLocation.Location.Longitude,
                                                                                      platformState.PlatformLocation.Depth);
@@ -80,35 +76,44 @@ namespace ESME.Simulator
                         var platformLocation = platformState.PlatformLocation.Location;
                         var course = Geo.DegreesToRadians(platformState.PlatformLocation.Course);
                         var thisPlatform = platform;
-                        var actionBlock = new ActionBlock<ActorPositionRecord[]>(records =>
-                                                                                 {
-                                                                                     var geoArc = new GeoArc(platformLocation,
-                                                                                                             course + mode.RelativeBeamAngle,
-                                                                                                             mode.HorizontalBeamWidth,
-                                                                                                             mode.MaxPropagationRadius);
-                                                                                     for (var i = 0; i < records.Length; i++)
-                                                                                     {
-                                                                                         // Don't expose a platform to itself
-                                                                                         if (thisPlatform.ActorID == i) continue;
+                        var actionBlock = new ActionBlock<int>(index =>
+                                                               {
+                                                                   var geoArc = new GeoArc(platformLocation,
+                                                                                           course + mode.RelativeBeamAngle,
+                                                                                           mode.HorizontalBeamWidth,
+                                                                                           mode.MaxPropagationRadius);
+                                                                   // Don't expose a platform to itself
+                                                                   if (thisPlatform.ActorID == index) return;
 
-                                                                                         var record = records[i];
-                                                                                         var actorGeo = new Geo(record.Latitude, record.Longitude);
-                                                                                         var radiusToActor = platformLocation.DistanceRadians(actorGeo);
-                                                                                         var azimuthToActor = platformLocation.Azimuth(actorGeo);
-                                                                                         if (!geoArc.Contains(radiusToActor, azimuthToActor)) continue;
-                                                                                         // At this point we know the actor will be exposed to this mode
-                                                                                         // so we want to find the nearest radial, load it if necessary
-                                                                                         // then look up the TL value at the actor's range and depth cell
-                                                                                         var rangeToActor = Geo.RadiansToMeters(radiusToActor);
-                                                                                         var actorDepth = record.Depth;
-                                                                                         var peakSPL = 1f;
-                                                                                         var energy = 2f;
-                                                                                         record.Exposures.Add(new ActorExposureRecord(mode.SourceActorModeID, peakSPL, energy));
-                                                                                     }
-                                                                                 },
-                        new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = -1 });
+                                                                   var record = actorPositionRecords[index];
+                                                                   var actorGeo = new Geo(record.Latitude, record.Longitude);
+                                                                   var radiusToActor = platformLocation.DistanceRadians(actorGeo);
+                                                                   var azimuthToActor = platformLocation.Azimuth(actorGeo);
+                                                                   if (!geoArc.Contains(radiusToActor, azimuthToActor)) return;
+                                                                   var closestRadialBearing = ClosestRadialBearing(azimuthToActor);
+                                                                   // At this point we know the actor will be exposed to this mode
+                                                                   // so we want to find the nearest radial, load it if necessary
+                                                                   // then look up the TL value at the actor's range and depth cell
+                                                                   var rangeToActor = Geo.RadiansToMeters(radiusToActor);
+                                                                   var actorDepth = record.Depth;
+                                                                   var peakSPL = 1f;
+                                                                   var energy = 2f;
+                                                                   record.Exposures.Add(new ActorExposureRecord(mode.SourceActorModeID, peakSPL, energy));
+                                                               },
+                                                               new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = -1 });
                         broadcastBlock.LinkTo(actionBlock);
                     }
+                    foreach (var species in _scenario.ScenarioSpecies)
+                    {
+                        for (var animatIndex = 0; animatIndex < species.Animat.Locations.Count; animatIndex++)
+                        {
+                            var actorID = species.StartActorID + animatIndex;
+                            actorPositionRecords[actorID] = new ActorPositionRecord((float)species.Animat.Locations[animatIndex].Latitude,
+                                                                                    (float)species.Animat.Locations[animatIndex].Longitude,
+                                                                                    species.Animat.Locations[animatIndex].Data);
+                        }
+                    }
+                    for (var actorID = 0; actorID < actorCount; actorID++) broadcastBlock.Post(actorID);
 #if false
                     activeModes.AddRange(platformState[timeStepIndex].ModeActiveTimes.Keys);
                         timeStepRecord.ActorPositionRecords.Add(new ActorPositionRecord((float)animat.Location.Latitude,
@@ -118,6 +123,10 @@ namespace ESME.Simulator
                 }
             }
         }
+
+        float ClosestRadialBearing(double azimuthToActor) { return 0f; }
+
+        float GetTransmissionLoss(TransmissionLossRadial radial, double range, double depth) { return 0f; }
     }
 
     [Serializable]
