@@ -10,14 +10,15 @@ using System.Threading.Tasks.Dataflow;
 using ESME.Behaviors;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
+using HRC.Aspects;
 using HRC.Navigation;
 
 namespace ESME.Simulator
 {
     public class Simulation
     {
-        public List<Actor> GetActors() { return _database.Actors.ToList(); }
-        public Scenario Scenario { get { return _database.Scenarios.First(); } }
+        //public List<Actor> GetActors() { return _database.Actors.ToList(); }
+        //public Scenario Scenario { get { return _database.Scenarios.First(); } }
         readonly TransmissionLossCache _transmissionLossCache;
 
         public static Simulation Create(Scenario scenario, string simulationDirectory)
@@ -30,8 +31,9 @@ namespace ESME.Simulator
         Simulation(Scenario scenario, string simulationDirectory)
         {
             _simulationDirectory = simulationDirectory;
-            _database = SimulationContext.OpenOrCreate(Path.Combine(_simulationDirectory, "simulation.db"));
-            _scenario = _database.ImportScenario(scenario);
+            //_database = SimulationContext.OpenOrCreate(Path.Combine(_simulationDirectory, "simulation.db"));
+            //_scenario = _database.ImportScenario(scenario);
+            _scenario = scenario;
             _transmissionLossCache = new TransmissionLossCache("RadialCache", new NameValueCollection
             {
                 { "physicalMemoryLimitPercentage", "50" }, 
@@ -42,17 +44,16 @@ namespace ESME.Simulator
 
         readonly Scenario _scenario;
         readonly string _simulationDirectory;
-        readonly SimulationContext _database;
+        //readonly SimulationContext _database;
         readonly List<PlatformBehavior> _platformBehaviors = new List<PlatformBehavior>();
         readonly List<PlatformState[]> _platformStates = new List<PlatformState[]>();
         SimulationLog _log;
-
+        [Initialize] public List<Actor> Actors { get; private set; }
         public async void Start(TimeSpan timeStepSize)
         {
             var actorCount = 0;
             var sourceActorModeID = 0;
             var timeStepCount = (int)Math.Round(((TimeSpan)_scenario.Duration).TotalSeconds / timeStepSize.TotalSeconds);
-            var actors = new List<Actor>();
             foreach (var platform in _scenario.Platforms)
             {
                 platform.ActorID = actorCount++;
@@ -60,14 +61,14 @@ namespace ESME.Simulator
                 _platformBehaviors.Add(platformBehavior);
                 _platformStates.Add(platformBehavior.PlatformStates.ToArray());
                 var actor = new Actor { ID = platform.ActorID, Platform = platform };
-                actors.Add(actor);
-                _database.Actors.Add(actor);
+                Actors.Add(actor);
+                //_database.Actors.Add(actor);
                 foreach (var mode in platform.Sources.SelectMany(source => source.Modes)) mode.SourceActorModeID = sourceActorModeID++;
             }
             foreach (var species in _scenario.ScenarioSpecies)
             {
                 species.StartActorID = actorCount;
-                foreach (var location in species.Animat.Locations) _database.Actors.Add(new Actor { ID = actorCount++, Species = species });
+                foreach (var location in species.Animat.Locations) Actors.Add(new Actor { ID = actorCount++, Species = species });
             }
             _log = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), timeStepCount, timeStepSize);
             for (var timeStepIndex = 0; timeStepIndex < timeStepCount; timeStepIndex++)
@@ -87,12 +88,13 @@ namespace ESME.Simulator
                         var platformLocation = platformState.PlatformLocation.Location;
                         var course = Geo.DegreesToRadians(platformState.PlatformLocation.Course);
                         var thisPlatform = platform;
+                        var scenario = _scenario;
                         var actionBlock = new ActionBlock<int>(async index =>
                                                                {
                                                                    var geoArc = new GeoArc(platformLocation,
                                                                                            course + mode.RelativeBeamAngle,
                                                                                            mode.HorizontalBeamWidth,
-                                                                                           mode.MaxPropagationRadius);
+                                                                                           Geo.MetersToRadians(mode.MaxPropagationRadius));
                                                                    // Don't expose a platform to itself
                                                                    if (thisPlatform.ActorID == index) return;
 
@@ -103,7 +105,7 @@ namespace ESME.Simulator
                                                                    if (!geoArc.Contains(radiusToActor, azimuthToActor)) return;
                                                                    // At this point we know the actor will be exposed to this mode
                                                                    // Find the nearest radial
-                                                                   var closestRadial = Scenario.ClosestTransmissionLoss(platformLocation, mode)
+                                                                   var closestRadial = scenario.ClosestTransmissionLoss(platformLocation, mode)
                                                                        .ClosestRadial(Geo.RadiansToDegrees(azimuthToActor));
                                                                    // Load it into the cache if it's not already there
                                                                    var tlTask = _transmissionLossCache[closestRadial];
@@ -112,7 +114,7 @@ namespace ESME.Simulator
                                                                    var peakSPL = tlTask.Result.TransmissionLossRadial[Geo.RadiansToMeters(radiusToActor), record.Depth];
                                                                    record.Exposures.Add(new ActorExposureRecord(mode.SourceActorModeID, peakSPL, peakSPL));
                                                                },
-                                                               new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = -1 });
+                                                               new ExecutionDataflowBlockOptions { BoundedCapacity = 1, MaxDegreeOfParallelism = 1 });
                         actionBlocks.Add(actionBlock.Completion);
                         broadcastBlock.LinkTo(actionBlock);
                     }

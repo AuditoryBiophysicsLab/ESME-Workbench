@@ -15,7 +15,7 @@ namespace ESME.SimulationAnalysis
 
         public void Process(SimulationTimeStepRecord record)
         {
-            var actors = Simulation.GetActors();
+            var actors = Simulation.Actors;
             for (var i = 0; i < record.ActorPositionRecords.Count; i++)
             {
                 foreach (var t in record.ActorPositionRecords[actors[i].ID].Exposures) Scatterplot.Expose(actors[i], t);
@@ -41,7 +41,7 @@ namespace ESME.SimulationAnalysis
 
         public void Process(SimulationTimeStepRecord record)
         {
-            var actors = Simulation.GetActors();
+            var actors = Simulation.Actors;
             for (var i = 0; i < record.ActorPositionRecords.Count; i++)
             {
                 foreach (var t in record.ActorPositionRecords[actors[i].ID].Exposures) Scatterplot.Expose(actors[i], t);

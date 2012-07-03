@@ -30,7 +30,8 @@ namespace ESME.TransmissionLoss
                         requestedData = (Task<Radial>)this[guid];
                         if (requestedData == null)
                         {
-                            Add(guid, radial.LoadAsync(), DefaultCacheItemPolicy);
+                            requestedData = radial.LoadAsync();
+                            Add(guid, requestedData, DefaultCacheItemPolicy);
                             Debug.WriteLine(string.Format("{0}: Adding radial {1} to cache", DateTime.Now, guid));
                         }
                     }

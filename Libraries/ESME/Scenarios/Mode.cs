@@ -39,10 +39,12 @@ namespace ESME.Scenarios
         /// Time between the start of sequential pulses
         /// </summary>
         public DbTimeSpan PulseInterval { get; set; }
+        [NotMapped] public TimeSpan PulseIntervalTimeSpan { get { return PulseInterval; } set { PulseInterval = value; } }
         /// <summary>
         /// The length of time a single pulse is transmitting
         /// </summary>
         public DbTimeSpan PulseLength { get; set; }
+        [NotMapped] public TimeSpan PulseLengthTimeSpan { get { return PulseLength; } set { PulseLength = value; } }
         /// <summary>
         /// Horizontal beam width of this mode, in degrees.  
         /// The beam is assumed to spread symmetrically for half this width to either side of the beam center

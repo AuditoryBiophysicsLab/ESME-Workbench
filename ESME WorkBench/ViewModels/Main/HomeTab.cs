@@ -405,6 +405,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 Source = source,
                 SourceLevel = 200,
                 VerticalBeamWidth = 180f,
+                HorizontalBeamWidth = 90,
                 IsNew = isNew,
             };
             source.Modes.Add(mode);

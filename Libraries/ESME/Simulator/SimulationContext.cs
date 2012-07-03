@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Transactions;
 using Devart.Data.SQLite;
+using ESME.Database;
 using ESME.Locations;
 using ESME.Scenarios;
 using HRC.Navigation;
@@ -59,8 +60,8 @@ namespace ESME.Simulator
                 Name = scenario.Location.Name,
                 Comments = scenario.Location.Comments,
                 GeoRect = new GeoRect(scenario.Location.GeoRect),
+                LayerSettings = { IsChecked = true },
             };
-            newLocation.LayerSettings.IsChecked = true;
             Locations.Add(newLocation);
 
             EnvironmentalDataSet wind = null;
@@ -232,6 +233,25 @@ namespace ESME.Simulator
                     SpeciesFile = species.SpeciesFile,
                 };
                 ScenarioSpecies.Add(newSpecies);
+            }
+            foreach (var analysisPoint in scenario.AnalysisPoints)
+            {
+                var newAnalysisPoint = new AnalysisPoint
+                {
+                    Guid = analysisPoint.Guid,
+                    Geo = new Geo(analysisPoint.Geo),
+                    Scenario = newScenario,
+                };
+                foreach (var transmissionLoss in analysisPoint.TransmissionLosses)
+                {
+                    var newTransmissionLoss = new Scenarios.TransmissionLoss
+                    {
+                        Guid = transmissionLoss.Guid,
+                        AnalysisPoint = newAnalysisPoint,
+                        Mode = Modes.Find(transmissionLoss.Mode.Guid),
+                        
+                    };
+                }
             }
             using (var transaction = new TransactionScope())
             {

@@ -1,6 +1,7 @@
 ﻿<Window x:Class="ESME.Views.Scenarios.ModePropertiesView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Controls="clr-namespace:ESME.Views.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:l="clr-namespace:ESME.Views.Scenarios"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -19,9 +20,7 @@
                 <Setter.Value>
                     <ControlTemplate>
                         <DockPanel LastChildFill="True">
-                            <Border BorderBrush="Red"
-                                    BorderThickness="1"
-                                    DockPanel.Dock="Left">
+                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
                                 <AdornedElementPlaceholder />
                             </Border>
                         </DockPanel>
@@ -36,19 +35,27 @@
         </Style>
     </Window.Resources>
     <DockPanel LastChildFill="True">
-        <StackPanel HorizontalAlignment="Right"
-                    DockPanel.Dock="Bottom"
-                    Orientation="Horizontal">
+        <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
             <Button Width="75"
                     Margin="5"
                     Command="{Binding OkCommand}"
                     Content="OK"
                     IsDefault="True" />
         </StackPanel>
-        <Border BorderThickness="0"
-                DockPanel.Dock="Top"
-                Padding="5">
+        <Border BorderThickness="0" DockPanel.Dock="Top" Padding="5">
             <StackPanel Orientation="Vertical">
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Center"
+                               Text="Mode name"
+                               TextAlignment="Right" />
+                    <TextBox Grid.Column="1" Text="{Binding PropertyObject.ModeName}" ToolTip="This field is optional" />
+                </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition SharedSizeGroup="LabelColumn" />
@@ -59,94 +66,128 @@
                                VerticalAlignment="Center"
                                Text="Mode type"
                                TextAlignment="Right" />
-                    <TextBox Grid.Column="1"
-                             Text="{Binding PropertyObject.ModeType}"
-                             ToolTip="This field is optional" />
+                    <TextBox Grid.Column="1" Text="{Binding PropertyObject.ModeType}" ToolTip="This field is optional" />
                 </Grid>
-                <Grid Margin="5 5 5 0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0"
-                               Margin="0 0 5 0"
-                               VerticalAlignment="Center"
-                               Text="Depth offset (m)"
-                               TextAlignment="Right" />
-                    <TextBox Grid.Column="1"
-                             Text="{Binding PropertyObject.Depth}"
-                             ToolTip="Depth offset from the containing platform, in meters. This field is required" />
-                </Grid>
-                <Grid Margin="5 5 5 0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0"
-                               Margin="0 0 5 0"
-                               VerticalAlignment="Center"
-                               Text="Source level (dB)"
-                               TextAlignment="Right" />
-                    <TextBox Grid.Column="1"
-                             Text="{Binding PropertyObject.SourceLevel}"
-                             ToolTip="Source level, in dB re: 1 μPa. This field is required" />
-                </Grid>
-                <Grid Margin="5 5 5 0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0"
-                               Margin="0 0 5 0"
-                               VerticalAlignment="Center"
-                               Text="Frequency (Hz)"
-                               TextAlignment="Right" />
-                    <TextBox Grid.Column="1"
-                             Text="{Binding PropertyObject.HighFrequency}"
-                             ToolTip="Frequency of the source, in Hz. This field is required" />
-                </Grid>
-                <Grid Margin="5 5 5 0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0"
-                               Margin="0 0 5 0"
-                               VerticalAlignment="Center"
-                               Text="Vertical beam width (deg)"
-                               TextAlignment="Right" />
-                    <TextBox Grid.Column="1"
-                             Text="{Binding PropertyObject.VerticalBeamWidth}"
-                             ToolTip="Beam width of this mode in the vertical dimension, in degrees. This field is required" />
-                </Grid>
-                <Grid Margin="5 5 5 0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0"
-                               Margin="0 0 5 0"
-                               VerticalAlignment="Center"
-                               Text="Depression/Elevation angle (deg)"
-                               TextAlignment="Right" />
-                    <TextBox Grid.Column="1"
-                             Text="{Binding PropertyObject.DepressionElevationAngle}"
-                             ToolTip="Depression/elevation angle (vertical look direction) of this source, in degrees. Positive values are toward the bottom. This field is required" />
-                </Grid>
-                <Grid Margin="5 5 5 0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0"
+                <GroupBox Header="Acoustic simulator parameters" Padding="5">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Depth offset (m)"
+                                       TextAlignment="Right" />
+                            <TextBox Grid.Column="1" Text="{Binding PropertyObject.Depth}" ToolTip="Depth offset from the containing platform, in meters. This field is required" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Source level (dB)"
+                                       TextAlignment="Right" />
+                            <TextBox Grid.Column="1" Text="{Binding PropertyObject.SourceLevel}" ToolTip="Source level, in dB re: 1 μPa. This field is required" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Frequency (Hz)"
+                                       TextAlignment="Right" />
+                            <TextBox Grid.Column="1" Text="{Binding PropertyObject.HighFrequency}" ToolTip="Frequency of the source, in Hz. This field is required" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
                                Margin="0 0 5 0"
                                VerticalAlignment="Center"
                                Text="Maximum propagation radius (m)"
                                TextAlignment="Right" />
-                    <TextBox Grid.Column="1"
-                             Text="{Binding PropertyObject.MaxPropagationRadius}"
-                             ToolTip="Maximum propagation radius of this mode, in meters. This field is required" />
-                </Grid>
+                            <TextBox Grid.Column="1" Text="{Binding PropertyObject.MaxPropagationRadius}" ToolTip="Maximum propagation radius of this mode, in meters. This field is required" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Pulse Length"
+                                       TextAlignment="Right" />
+                            <Controls:TimePicker Grid.Column="1" SelectedTime="{Binding PropertyObject.PulseLengthTimeSpan, Mode=TwoWay}" ToolTip="Length of time the sound emitter is actually transmitting" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Pulse Interval"
+                                       TextAlignment="Right" />
+                            <Controls:TimePicker Grid.Column="1" SelectedTime="{Binding PropertyObject.PulseIntervalTimeSpan, Mode=TwoWay}" ToolTip="Length of time from the start of one pulse to the start of the next pulse in hours:minutes:seconds.milliseconds" />
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Horizontal beam pattern" Padding="5">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="0,1,5,5" VerticalAlignment="Center" Text="Relative beam angle (deg)" TextAlignment="Right" />
+                            <TextBox Grid.Column="1" Text="{Binding PropertyObject.RelativeBeamAngle}" ToolTip="The beam center in the horizontal plane, relative to the current heading of the platform on which this mode is hosted. This field is required" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="0,1,5,5" VerticalAlignment="Center" Text="Horizontal beam width (deg)" TextAlignment="Right" />
+                            <TextBox Grid.Column="1" Text="{Binding PropertyObject.HorizontalBeamWidth}" ToolTip="Beam width of this mode in the horizontal dimension, in degrees. This field is required" />
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Vertical beam pattern" Padding="5">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="0,1,5,5" VerticalAlignment="Center" Text="Vertical beam width (deg)" TextAlignment="Right" />
+                            <TextBox Grid.Column="1" Text="{Binding PropertyObject.VerticalBeamWidth}" ToolTip="Beam width of this mode in the vertical dimension, in degrees. This field is required" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Depression/Elevation angle (deg)"
+                                       TextAlignment="Right" />
+                            <TextBox Grid.Column="1" Text="{Binding PropertyObject.DepressionElevationAngle}" ToolTip="Depression/elevation angle (vertical look direction) of this source, in degrees. Positive values are toward the bottom. This field is required" />
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
         </Border>
     </DockPanel>
