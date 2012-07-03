@@ -14,7 +14,7 @@ namespace ESME.SimulationAnalysis
 
         public ModeThreshholdHistogram()
         {
-            ModeBinnedExposureDictionary.Filter1 = (actor, exposureRecord) => actor.AnimatLocation != null ? actor.AnimatLocation.ScenarioSpecies : null;
+            ModeBinnedExposureDictionary.Filter1 = (actor, exposureRecord) => actor.Species;
             ModeBinnedExposureDictionary.Filter2 = (actor, exposureRecord) => exposureRecord.Mode;
         }
 
@@ -67,7 +67,7 @@ namespace ESME.SimulationAnalysis
         public SpeciesThreshholdHistogram()
         {
             SpeciesBinnedExposureDictionary.Filter1 = (actor, expsureRecord) => expsureRecord.Mode;
-            SpeciesBinnedExposureDictionary.Filter2 = (actor, exposureRecord) => actor.AnimatLocation != null ? actor.AnimatLocation.ScenarioSpecies : null;
+            SpeciesBinnedExposureDictionary.Filter2 = (actor, exposureRecord) => actor.Species;
         }
         public void Process(SimulationTimeStepRecord record)
         {

@@ -197,6 +197,14 @@
                                           ToolTipTitle="{Binding Label,
                                                                  RelativeSource={RelativeSource Self}}" />
                 </r:RibbonGroup>
+                <r:RibbonGroup Header="Simulation">
+                    <r:RibbonButton Command="{Binding RunSimulationCommand}"
+                                    Label="Run"
+                                    LargeImageSource="..\Images\LargeIcons\hourglass_go.png"
+                                    ToolTipDescription="Run the current scenario"
+                                    ToolTipTitle="Run" />
+
+                </r:RibbonGroup>
             </r:RibbonTab>
         </r:Ribbon>
         <Grid>

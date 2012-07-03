@@ -10,10 +10,7 @@ namespace ESME.SimulationAnalysis
         [Initialize]
         public ScatterExposureDictionary<ScenarioSpecies> Scatterplot { get; set; }
 
-        public SpeciesScatterplot()
-        {
-            Scatterplot.Filter1 = (actor, record) => actor.AnimatLocation != null ? actor.AnimatLocation.ScenarioSpecies : null;
-        }
+        public SpeciesScatterplot() { Scatterplot.Filter1 = (actor, record) => actor.Species; }
 
 
         public void Process(SimulationTimeStepRecord record)
@@ -39,7 +36,7 @@ namespace ESME.SimulationAnalysis
 
         public AnimatScatterplot()
         {
-            Scatterplot.Filter1 = (actor, record) => actor.AnimatLocation != null ? actor : null;
+            Scatterplot.Filter1 = (actor, record) => actor.Species != null ? actor : null;
         }
 
         public void Process(SimulationTimeStepRecord record)

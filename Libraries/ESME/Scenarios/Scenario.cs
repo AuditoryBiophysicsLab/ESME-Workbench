@@ -236,7 +236,7 @@ namespace ESME.Scenarios
             return closest != null ? closest.tl : null;
         }
 
-        public async static Task<string> Validate(this Scenario scenario)
+        public static string Validate(this Scenario scenario)
         {
             if (scenario == null) return "Scenario is null";
             if (scenario.Platforms == null || scenario.Platforms.Count == 0) return "No platforms have been defined";

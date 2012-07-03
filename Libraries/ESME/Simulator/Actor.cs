@@ -8,6 +8,6 @@ namespace ESME.Simulator
         [Key]
         public int ID { get; set; }
         public Platform Platform { get; set; }
-        public AnimatLocation AnimatLocation { get; set; }
+        public ScenarioSpecies Species { get; set; }
     }
 }

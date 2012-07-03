@@ -10,6 +10,7 @@ using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
 using ESME.Scenarios;
+using ESME.Simulator;
 using ESME.Views.Controls;
 using ESME.Views.Scenarios;
 using ESMEWorkbench.ViewModels.Map;
@@ -593,6 +594,30 @@ namespace ESMEWorkbench.ViewModels.Main
             }
             catch (Exception e) { _messageBox.ShowError(e.Message); }
         }
+        #endregion
+
+        #region RunSimulationCommand
+        public SimpleCommand<object, object> RunSimulationCommand { get { return _runSimulation ?? (_runSimulation = new SimpleCommand<object, object>(o => IsRunSimulationCommandEnabled, RunSimulationHandler)); } }
+        SimpleCommand<object, object> _runSimulation;
+
+        bool IsRunSimulationCommandEnabled
+        {
+            get
+            {
+                if (Scenario == null) return false;
+                ScenarioValidationError = Scenario.Validate();
+                return string.IsNullOrEmpty(ScenarioValidationError);
+            }
+        }
+
+        void RunSimulationHandler(object o)
+        {
+            var simulationDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Simulation Test");
+            if (Directory.Exists(simulationDirectory)) Directory.Delete(simulationDirectory, true);
+            var simulation = Simulation.Create(Scenario, simulationDirectory);
+            simulation.Start(new TimeSpan(0, 0, 0, 1));
+        }
+        public string ScenarioValidationError { get; set; }
         #endregion
     }
 }

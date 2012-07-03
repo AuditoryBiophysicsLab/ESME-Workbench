@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using ESME.Behaviors;
 using ESME.Scenarios;
@@ -45,7 +47,7 @@ namespace ESME.Simulator
         readonly List<PlatformState[]> _platformStates = new List<PlatformState[]>();
         SimulationLog _log;
 
-        public void Start(TimeSpan timeStepSize)
+        public async void Start(TimeSpan timeStepSize)
         {
             var actorCount = 0;
             var sourceActorModeID = 0;
@@ -65,13 +67,14 @@ namespace ESME.Simulator
             foreach (var species in _scenario.ScenarioSpecies)
             {
                 species.StartActorID = actorCount;
-                foreach (var location in species.Animat.Locations) _database.Actors.Add(new Actor { ID = actorCount++, AnimatLocation = new AnimatLocation { Location = location, ScenarioSpecies = species } });
+                foreach (var location in species.Animat.Locations) _database.Actors.Add(new Actor { ID = actorCount++, Species = species });
             }
             _log = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), timeStepCount, timeStepSize);
             for (var timeStepIndex = 0; timeStepIndex < timeStepCount; timeStepIndex++)
             {
                 var actorPositionRecords = new ActorPositionRecord[actorCount];
                 var broadcastBlock = new BroadcastBlock<int>(a => a);
+                var actionBlocks = new List<Task>();
                 foreach (var platform in _scenario.Platforms)
                 {
                     var platformState = _platformStates[platform.ActorID][timeStepIndex];
@@ -110,6 +113,7 @@ namespace ESME.Simulator
                                                                    record.Exposures.Add(new ActorExposureRecord(mode.SourceActorModeID, peakSPL, peakSPL));
                                                                },
                                                                new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = -1 });
+                        actionBlocks.Add(actionBlock.Completion);
                         broadcastBlock.LinkTo(actionBlock);
                     }
                     foreach (var species in _scenario.ScenarioSpecies)
@@ -123,6 +127,9 @@ namespace ESME.Simulator
                         }
                     }
                     for (var actorID = 0; actorID < actorCount; actorID++) broadcastBlock.Post(actorID);
+                    broadcastBlock.Complete();
+                    await TaskEx.WhenAll(actionBlocks);
+                    Debug.WriteLine(string.Format("{0}: Completed time step {1} of {2}", DateTime.Now, timeStepIndex, timeStepCount));
 #if false
                     activeModes.AddRange(platformState[timeStepIndex].ModeActiveTimes.Keys);
                         timeStepRecord.ActorPositionRecords.Add(new ActorPositionRecord((float)animat.Location.Latitude,
