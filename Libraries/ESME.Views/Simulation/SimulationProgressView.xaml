@@ -1,0 +1,24 @@
+﻿<Window x:Class="ESME.Views.Simulation.SimulationProgressView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Simulation="clr-namespace:ESME.Views.Simulation"
+        Title="Scenario Simulator"
+        Width="300"
+        d:DataContext="{d:DesignInstance Simulation:SimulationProgressViewModel}"
+        ResizeMode="NoResize"
+        SizeToContent="Height"
+        WindowStyle="ToolWindow"
+        mc:Ignorable="d">
+    <StackPanel Orientation="Vertical">
+        <TextBlock Text="Simulation" />
+        <ProgressBar Grid.Row="0"
+                     Height="22"
+                     Value="{Binding Simulation.PercentProgress.PercentComplete}" />
+        <TextBlock Text="Log file" />
+        <ProgressBar Grid.Row="1"
+                     Height="22"
+                     Value="{Binding Simulation.SimulationLog.PercentProgress.PercentComplete}" />
+    </StackPanel>
+</Window>

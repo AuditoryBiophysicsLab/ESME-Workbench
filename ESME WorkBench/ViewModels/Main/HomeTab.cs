@@ -13,6 +13,7 @@ using ESME.Scenarios;
 using ESME.Simulator;
 using ESME.Views.Controls;
 using ESME.Views.Scenarios;
+using ESME.Views.Simulation;
 using ESMEWorkbench.ViewModels.Map;
 using ESMEWorkbench.ViewModels.Tree;
 using HRC;
@@ -617,6 +618,7 @@ namespace ESMEWorkbench.ViewModels.Main
             if (Directory.Exists(simulationDirectory)) Directory.Delete(simulationDirectory, true);
             var simulation = Simulation.Create(Scenario, simulationDirectory);
             simulation.Start(new TimeSpan(0, 0, 0, 1));
+            _visualizer.ShowWindow("SimulationProgressView", new SimulationProgressViewModel { Simulation = simulation });
         }
         public string ScenarioValidationError { get; set; }
         #endregion

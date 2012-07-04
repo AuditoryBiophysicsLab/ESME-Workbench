@@ -24,7 +24,7 @@ namespace HRC.Utility
             if (MaximumValue < value) MaximumValue = value;
             if (MinimumValue > value) MinimumValue = value;
             var percent = (int)((value / MaximumValue) * 100);
-            if (PercentComplete < percent) PercentComplete = percent;
+            PercentComplete = percent;
         }
     }
 

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using HRC.Utility;
 
 namespace ESME.Simulator
 {
@@ -13,6 +15,7 @@ namespace ESME.Simulator
         public string CreatingUser { get; private set; }
         public string CreatingComputer { get; private set; }
         public int TimeStepCount { get; private set; }
+        public PercentProgress<SimulationLog> PercentProgress { get; private set; }
         // Add any further metadata here
 
         readonly List<long> _timeStepOffsets;
@@ -40,6 +43,7 @@ namespace ESME.Simulator
             };
             for (var i = 0; i < timeStepCount; i++) result._timeStepOffsets.Add(-1);
             result.WriteHeader();
+            result.PercentProgress = new PercentProgress<SimulationLog>(result) { MinimumValue = 0, MaximumValue = timeStepCount - 1 };
             return result;
         }
 
@@ -65,7 +69,7 @@ namespace ESME.Simulator
             _writer.Write(CreatingComputer);
             _writer.Write(_timeStepOffsets.Count);
             foreach (var offset in _timeStepOffsets) _writer.Write(offset);
-            _writer.BaseStream.Flush();
+            //_writer.BaseStream.Flush();
         }
 
         void ReadHeader()
@@ -97,11 +101,42 @@ namespace ESME.Simulator
 
         public void Add(SimulationTimeStepRecord timeStep)
         {
-            _timeStepOffsets[_curStepIndex] = _writer.BaseStream.Seek(0, SeekOrigin.End);
-            timeStep.Write(_writer, _curTimeStep);
+            using (var writer = new BinaryWriter(new MemoryStream()))
+            {
+                _timeStepOffsets[_curStepIndex] = _writer.BaseStream.Seek(0, SeekOrigin.End);
+                timeStep.Write(writer, _curTimeStep);
+                _curStepIndex++;
+                PercentProgress.Report(_curStepIndex);
+                _curTimeStep += TimeStepSize;
+                writer.BaseStream.Flush();
+                _writer.Write(((MemoryStream)writer.BaseStream).GetBuffer());
+            }
+        }
+
+        public void AddRange(IEnumerable<SimulationTimeStepRecord> timeSteps)
+        {
+            using (var writer = new BinaryWriter(new MemoryStream()))
+            {
+                _writer.BaseStream.Seek(0, SeekOrigin.End);
+                foreach (var timeStep in timeSteps)
+                {
+                    _timeStepOffsets[_curStepIndex] = _writer.BaseStream.Position + writer.BaseStream.Position;
+                    //timeStep.Write(_writer, _curTimeStep);
+                    timeStep.Write(writer, _curTimeStep);
+                    _curStepIndex++;
+                    _curTimeStep += TimeStepSize;
+                }
+                writer.BaseStream.Flush();
+                _writer.Write(((MemoryStream)writer.BaseStream).GetBuffer());
+            }
+        }
+
+        public void Close()
+        {
+            if (_reader != null) _reader.Close();
+            if (_writer == null) return;
             WriteHeader();
-            _curStepIndex++;
-            _curTimeStep += TimeStepSize;
+            _writer.Close();
         }
 
         #region IDisposable implementation
@@ -135,12 +170,10 @@ namespace ESME.Simulator
             // and unmanaged resources.
             if (disposing)
             {
+                Close();
                 // Dispose managed resources.
                 if (_reader != null) _reader.Dispose();
-                if (_writer != null)
-                {
-                    _writer.Dispose();
-                }
+                if (_writer != null) _writer.Dispose();
             }
 
             // Note disposing has been done.
