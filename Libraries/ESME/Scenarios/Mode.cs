@@ -60,7 +60,7 @@ namespace ESME.Scenarios
         /// </summary>
         public float DepressionElevationAngle { get; set; }
         /// <summary>
-        /// The beam center in the horizontal plane, relative to the current heading of the platform on which this mode is hosted. 
+        /// The beam center in the horizontal plane, in degrees from true north, relative to the current heading of the platform on which this mode is hosted. 
         /// </summary>
         public float RelativeBeamAngle { get; set; }
         /// <summary>

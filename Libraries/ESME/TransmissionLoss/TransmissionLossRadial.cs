@@ -160,14 +160,15 @@ namespace ESME.TransmissionLoss
             get
             {
                 if (range > Ranges.Last()) throw new IndexOutOfRangeException("TransmissionLossRadialData: Requested range is past the end of the radial");
-                if (depth > Depths.Last()) throw new IndexOutOfRangeException("TransmissionLossRadialData: Requested depth is beyond the deepest point in this radial");
                 var rangeIndex = (from r in Ranges
                                   orderby Math.Abs(range - r)
                                   select Ranges.IndexOf(r)).First();
-                var depthIndex = (from d in Depths
+                var depthIndex = Depths.Count - 1;
+                if (depth < Depths.Last())
+                    depthIndex = (from d in Depths
                                   orderby Math.Abs(depth - d)
                                   select Depths.IndexOf(d)).First();
-                return TransmissionLoss[rangeIndex, depthIndex];
+                return TransmissionLoss[depthIndex, rangeIndex];
             }
         }
 

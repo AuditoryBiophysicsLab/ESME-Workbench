@@ -353,7 +353,7 @@ namespace HRC.Navigation
             var n1 = North.Cross(this).Normalized;
             var n2 = v2.Cross(this).Normalized;
             var az = Math.Atan2(-North.Dot(n2), n1.Dot(n2));
-            return (az >= 0.0) ? az : 2.0*Math.PI + az;
+            return (az >= 0.0) ? az : MoreMath.TwoPi + az;
         }
 
         /// <summary>
