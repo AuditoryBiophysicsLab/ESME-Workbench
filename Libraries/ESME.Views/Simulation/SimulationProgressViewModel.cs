@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
 using ESME.Simulator;
+using HRC.Aspects;
 using HRC.Utility;
 using HRC.ViewModels;
+using HRC.WPF;
 
 namespace ESME.Views.Simulation
 {
@@ -42,7 +44,18 @@ namespace ESME.Views.Simulation
             }
         }
 
-        public string SimulationProgressText { get; set; }
+        [Initialize("Starting")] public string SimulationProgressText { get; set; }
         public string LogfileProgressText { get; set; }
+
+        #region CancelCommand
+        public SimpleCommand<object, EventToCommandArgs> CancelCommand { get { return _cancel ?? (_cancel = new SimpleCommand<object, EventToCommandArgs>(CancelHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _cancel;
+
+        void CancelHandler(EventToCommandArgs args)
+        {
+            //var parameter = args.CommandParameter;
+            Simulation.Cancel();
+        }
+        #endregion
     }
 }

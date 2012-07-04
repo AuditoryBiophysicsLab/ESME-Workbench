@@ -11,7 +11,7 @@
         SizeToContent="Height"
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
-    <StackPanel Orientation="Vertical">
+    <StackPanel Margin="5" Orientation="Vertical">
         <TextBlock Text="Simulation" />
         <Grid>
             <ProgressBar Height="22" Value="{Binding Simulation.PercentProgress.PercentComplete}" />
@@ -26,5 +26,10 @@
                        VerticalAlignment="Center"
                        Text="{Binding LogfileProgressText}" />
         </Grid>
+        <Button Width="75"
+                Margin="0 20 0 0"
+                HorizontalAlignment="Right"
+                Command="{Binding CancelCommand}"
+                Content="Cancel" />
     </StackPanel>
 </Window>

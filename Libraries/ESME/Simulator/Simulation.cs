@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -49,20 +48,27 @@ namespace ESME.Simulator
         //readonly SimulationContext _database;
         readonly List<PlatformBehavior> _platformBehaviors = new List<PlatformBehavior>();
         readonly List<PlatformState[]> _platformStates = new List<PlatformState[]>();
-        [Initialize] public List<Actor> Actors { get; private set; }
+        public List<Actor> Actors { get; private set; }
         public PercentProgress<Simulation> PercentProgress { get; private set; }
         public SimulationLog SimulationLog { get; private set; }
-        public async void Start(TimeSpan timeStepSize)
+        CancellationTokenSource _cancellationTokenSource;
+        public void Cancel() { _cancellationTokenSource.Cancel(); }
+
+        public Task Start(TimeSpan timeStepSize)
+        {
+            _cancellationTokenSource = new CancellationTokenSource();
+            var task = new Task(() => Run(timeStepSize, _cancellationTokenSource.Token));
+            task.Start();
+            return task;
+        }
+
+        void Run(TimeSpan timeStepSize, CancellationToken token)
         {
             var actorCount = 0;
             var sourceActorModeID = 0;
             var timeStepCount = (int)Math.Round(((TimeSpan)_scenario.Duration).TotalSeconds / timeStepSize.TotalSeconds);
             PercentProgress = new PercentProgress<Simulation>(this) { MinimumValue = 0, MaximumValue = timeStepCount - 1 };
-            //((INotifyPropertyChanged)PercentProgress).PropertyChanged += (s, e) =>
-            //{
-            //    if (e.PropertyName != "PercentComplete") return;
-            //    Debug.WriteLine(string.Format("{0}: Simulation {1}% complete", DateTime.Now, ((PercentProgress)s).PercentComplete));
-            //};
+            Actors = new List<Actor>();
             foreach (var platform in _scenario.Platforms)
             {
                 platform.ActorID = actorCount++;
@@ -77,15 +83,11 @@ namespace ESME.Simulator
             foreach (var species in _scenario.ScenarioSpecies)
             {
                 species.StartActorID = actorCount;
-                foreach (var t in species.Animat.Locations) Actors.Add(new Actor { ID = actorCount++, Species = species });
+                for (var i = 0; i < species.Animat.Locations.Count; i++) Actors.Add(new Actor { ID = actorCount + i, Species = species });
+                actorCount += species.Animat.Locations.Count;
             }
 
             SimulationLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), timeStepCount, timeStepSize);
-            //((INotifyPropertyChanged)SimulationLog.PercentProgress).PropertyChanged += (s, e) =>
-            //{
-            //    if (e.PropertyName != "PercentComplete") return;
-            //    Debug.WriteLine(string.Format("{0}: Log file {1}% complete", DateTime.Now, ((PercentProgress)s).PercentComplete));
-            //};
             
             var logBlock = new ActionBlock<SimulationTimeStepRecord>(block => SimulationLog.Add(block), new ExecutionDataflowBlockOptions { BoundedCapacity = 1, MaxDegreeOfParallelism = 1 });
             logBlock.Completion.ContinueWith(t => SimulationLog.Close());
@@ -93,8 +95,6 @@ namespace ESME.Simulator
             var logBuffer = new BufferBlock<SimulationTimeStepRecord>();
             logBuffer.LinkTo(logBlock);
             logBuffer.Completion.ContinueWith(t => logBlock.Complete());
-
-            Debug.WriteLine(string.Format("{0}: Starting simulation", DateTime.Now));
 
             for (var timeStepIndex = 0; timeStepIndex < timeStepCount; timeStepIndex++)
             {
@@ -104,9 +104,7 @@ namespace ESME.Simulator
                 foreach (var platform in _scenario.Platforms)
                 {
                     var platformState = _platformStates[platform.ActorID][timeStepIndex];
-                    actorPositionRecords[platform.ActorID] = new ActorPositionRecord((float)platformState.PlatformLocation.Location.Latitude,
-                                                                                     (float)platformState.PlatformLocation.Location.Longitude,
-                                                                                     platformState.PlatformLocation.Depth);
+                    actorPositionRecords[platform.ActorID] = new ActorPositionRecord(platformState.PlatformLocation.Location, platformState.PlatformLocation.Depth);
                     foreach (var activeMode in platformState.ModeActiveTimes.Keys)
                     {
                         var mode = activeMode;
@@ -117,7 +115,7 @@ namespace ESME.Simulator
                                                 Geo.DegreesToRadians(platformState.PlatformLocation.Course + mode.RelativeBeamAngle),
                                                 Geo.DegreesToRadians(mode.HorizontalBeamWidth),
                                                 Geo.MetersToRadians(mode.MaxPropagationRadius));
-                        var exposedCount = 0;
+                        //var exposedCount = 0;
                         var actionBlock = new ActionBlock<int>(async index =>
                         {
                             // Don't expose a platform to itself
@@ -138,9 +136,8 @@ namespace ESME.Simulator
                             // Look up the TL value at the actor's range and depth
                             var peakSPL = tlTask.Result.TransmissionLossRadial[Geo.RadiansToMeters(radiansToActor), -record.Depth];
                             record.Exposures.Add(new ActorExposureRecord(mode.SourceActorModeID, peakSPL, peakSPL));
-                            Interlocked.Increment(ref exposedCount);
+                            //Interlocked.Increment(ref exposedCount);
                         }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = -1 });
-                        //actionBlock.Completion.ContinueWith(t => Debug.WriteLine(string.Format("Completed exposures for mode {0}: {1} actors exposed", mode.ModeName, exposedCount)));
                         var bufferBlock = new BufferBlock<int>();
                         bufferBlock.LinkTo(actionBlock);
                         bufferBlocks.Add(bufferBlock);
@@ -153,9 +150,7 @@ namespace ESME.Simulator
                     for (var animatIndex = 0; animatIndex < species.Animat.Locations.Count; animatIndex++)
                     {
                         var actorID = species.StartActorID + animatIndex;
-                        actorPositionRecords[actorID] = new ActorPositionRecord((float)species.Animat.Locations[animatIndex].Latitude,
-                                                                                (float)species.Animat.Locations[animatIndex].Longitude,
-                                                                                species.Animat.Locations[animatIndex].Data);
+                        actorPositionRecords[actorID] = new ActorPositionRecord(species.Animat.Locations[animatIndex]);
                     }
                 }
                 foreach (var bufferBlock in bufferBlocks)
@@ -165,12 +160,15 @@ namespace ESME.Simulator
                     bufferBlock.Complete();
                 }
                 //Debug.WriteLine("Actor IDs sent.  Waiting for completion.");
-                await TaskEx.WhenAll(actionBlockCompletions);
+                TaskEx.WhenAll(actionBlockCompletions).Wait();
                 PercentProgress.Report(timeStepIndex);
                 //Debug.WriteLine(string.Format("{0}: Finished time step {1} of {2}: {3:0%} complete", DateTime.Now, timeStepIndex, timeStepCount, (float)timeStepIndex / timeStepCount));
                 var timeStepRecord = new SimulationTimeStepRecord();
                 timeStepRecord.ActorPositionRecords.AddRange(actorPositionRecords);
                 logBuffer.Post(timeStepRecord);
+                // todo: when we have 3MB support, this is where we do the animat movement
+                // MoveAnimats();
+                if (token.IsCancellationRequested) break;
             }
             logBuffer.Complete();
         }

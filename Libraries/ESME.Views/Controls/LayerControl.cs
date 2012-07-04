@@ -109,11 +109,11 @@ namespace ESME.Views.Controls
         {
             var layerControl = (LayerControl)sender;
             var isMapLayer = (bool)args.NewValue;
-            Debug.WriteLine("{0}: IsMapLayerPropertyChanged: LayerName = {1}, IsChecked(old) = {2}, IsChecked(new) = {3}",
-                            DateTime.Now,
-                            layerControl.LayerName,
-                            (bool)args.OldValue,
-                            (bool)args.NewValue);
+            //Debug.WriteLine("{0}: IsMapLayerPropertyChanged: LayerName = {1}, IsChecked(old) = {2}, IsChecked(new) = {3}",
+            //                DateTime.Now,
+            //                layerControl.LayerName,
+            //                (bool)args.OldValue,
+            //                (bool)args.NewValue);
             layerControl.CheckBoxVisibility = isMapLayer ? Visibility.Visible : Visibility.Collapsed;
             layerControl.LineColorVisibility = isMapLayer ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -151,13 +151,8 @@ namespace ESME.Views.Controls
         #region dependency property string LayerName
         public static DependencyProperty LayerNameProperty = DependencyProperty.Register("LayerName",
                                                                                          typeof(string),
-                                                                                         typeof(LayerControl),
-                                                                                         new FrameworkPropertyMetadata(null, LayerNamePropertyChanged));
+                                                                                         typeof(LayerControl));
 
-        static void LayerNamePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
-        {
-            Debug.WriteLine("LayerNamePropertyChanged");
-        }
         public string LayerName { get { return (string)GetValue(LayerNameProperty); } set { SetCurrentValue(LayerNameProperty, value); } }
         #endregion
 
@@ -273,11 +268,11 @@ namespace ESME.Views.Controls
         public static DependencyProperty TheLayerControlProperty = DependencyProperty.Register("TheLayerControl", typeof(Control), typeof(LayerControl), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TheLayerControlPropertyChanged));
         static void TheLayerControlPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            Debug.WriteLine("TheLayerControlPropertyChanged");
+            //Debug.WriteLine("TheLayerControlPropertyChanged");
             var layerControl = (LayerControl)sender;
             if (layerControl.TheLayerControl != layerControl)
             {
-                Debug.WriteLine("TheLayerControlPropertyChanged, restoring proper value");
+                //Debug.WriteLine("TheLayerControlPropertyChanged, restoring proper value");
                 layerControl.TheLayerControl = layerControl;
             }
         }

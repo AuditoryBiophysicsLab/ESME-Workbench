@@ -207,28 +207,28 @@ namespace ESMEWorkbench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.MoveLayerToFront), UsedImplicitly]
         void MoveLayerToFront(MapLayerViewModel layer)
         {
-            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerToFront: {0}", layer.LayerOverlay.Name));
+            //Debug.WriteLine(string.Format("MediatorMessage.MoveLayerToFront: {0}", layer.LayerOverlay.Name));
             _wpfMap.Overlays.MoveToTop(layer.Name);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerForward), UsedImplicitly]
         void MoveLayerForward(MapLayerViewModel layer)
         {
-            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerForward: {0}", layer.LayerOverlay.Name));
+            //Debug.WriteLine(string.Format("MediatorMessage.MoveLayerForward: {0}", layer.LayerOverlay.Name));
             _wpfMap.Overlays.MoveUp(layer.Name);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerBackward), UsedImplicitly]
         void MoveLayerBackward(MapLayerViewModel layer)
         {
-            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerBackward: {0}", layer.LayerOverlay.Name));
+            //Debug.WriteLine(string.Format("MediatorMessage.MoveLayerBackward: {0}", layer.LayerOverlay.Name));
             _wpfMap.Overlays.MoveDown(layer.Name);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerToBack), UsedImplicitly]
         void MoveLayerToBack(MapLayerViewModel layer)
         {
-            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerToBack: {0}", layer.LayerOverlay.Name));
+            //Debug.WriteLine(string.Format("MediatorMessage.MoveLayerToBack: {0}", layer.LayerOverlay.Name));
             _wpfMap.Overlays.MoveToBottom(layer.Name);
         }
         #endregion

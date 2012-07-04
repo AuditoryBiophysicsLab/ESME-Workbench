@@ -42,7 +42,7 @@
             <TreeView x:Name="TreeView" BorderBrush="Transparent" ItemsSource="{Binding RootNodes}">
                 <TreeView.Resources>
                     <HierarchicalDataTemplate DataType="{x:Type Scenarios:Scenario}" ItemsSource="{Binding Platforms}">
-                        <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding Name, StringFormat=Scenario: {0}}" LineColorVisibility="Collapsed" />
+                        <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}" LayerName="{Binding Name, StringFormat=Scenario: {0}}" LineColorVisibility="Collapsed" />
                     </HierarchicalDataTemplate>
                     <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
                         <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding PlatformName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" />
@@ -54,7 +54,7 @@
                         <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="Environment" LineColorVisibility="Collapsed" />
                     </HierarchicalDataTemplate>
                     <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
-                        <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding ModeName}" LineColorVisibility="Collapsed" />
+                        <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}" LayerName="{Binding ModeName}" LineColorVisibility="Collapsed" />
                     </HierarchicalDataTemplate>
                     <HierarchicalDataTemplate DataType="{x:Type app:WorldMapNode}" ItemsSource="{Binding Features}">
                         <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="World Map" LineOrSymbolColor="{Binding LineColor}" LineOrSymbolSize="{Binding LineWeight}" />

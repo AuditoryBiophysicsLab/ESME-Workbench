@@ -20,6 +20,7 @@ namespace ESME.Simulator
             Depth = depth;
         }
         public ActorPositionRecord(Geo<float> geo) : this((float)geo.Latitude, (float)geo.Longitude, geo.Data) { }
+        public ActorPositionRecord(Geo geo, float depth) : this((float)geo.Latitude, (float)geo.Longitude, depth) { }
         ActorPositionRecord() { }
 
         int _exposureCount;

@@ -63,8 +63,7 @@
                   ItemsSource="{Binding LayerTreeViewModel.RootNodes}">
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type Scenarios:Scenario}" ItemsSource="{Binding Platforms}">
-                    <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
-                                           IsMapLayer="False"
+                    <Controls:LayerControl IsMapLayer="False"
                                            LayerName="{Binding Name,
                                                                StringFormat=Scenario: {0}}"
                                            TheLayerControl="{Binding LayerControl}">

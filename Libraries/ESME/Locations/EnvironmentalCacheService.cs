@@ -261,7 +261,7 @@ namespace ESME.Locations
                     return requestedData.Data;
                 }
                 if (string.IsNullOrEmpty(_database.MasterDatabaseDirectory)) throw new ServiceNotFoundException("Required service MasterDatabaseService is not properly configured.");
-                Debug.WriteLine(string.Format("Cache: Loading {0}", (PluginSubtype)dataSet.SourcePlugin.PluginSubtype));
+                //Debug.WriteLine(string.Format("Cache: Loading {0}", (PluginSubtype)dataSet.SourcePlugin.PluginSubtype));
                 _cache[dataSet.Guid] = EnvironmentalCacheEntry.Load(_database.MasterDatabaseDirectory, dataSet, this);
                 _cache[dataSet.Guid].LastAccessed = DateTime.Now;
                 return _cache[dataSet.Guid].Data;

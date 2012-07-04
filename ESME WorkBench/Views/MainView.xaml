@@ -107,7 +107,7 @@
                 <TextBlock Text="{Binding TransmissionLossActivity}" />
             </StatusBarItem>
         </StatusBar>
-        <r:Ribbon x:Name="Ribbon" DockPanel.Dock="Top" SelectedIndex="{Binding SelectedRibbonTabIndex}">
+        <r:Ribbon x:Name="Ribbon" DockPanel.Dock="Top">
             <r:Ribbon.ApplicationMenu>
                 <Controls:SlimRibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
                     <r:RibbonApplicationMenuItem Command="{Binding AboutCommand}"

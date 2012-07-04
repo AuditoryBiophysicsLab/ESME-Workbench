@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Runtime.Caching;
 using ESME.Scenarios;
@@ -12,7 +11,7 @@ namespace ESME.TransmissionLoss
         public TransmissionLossCache(string name, NameValueCollection config) : base(name, config)
         {
             DefaultCacheItemPolicy = new CacheItemPolicy { SlidingExpiration = new TimeSpan(0, 0, 5, 0) };
-            DefaultCacheItemPolicy.RemovedCallback += arguments => Debug.WriteLine(string.Format("{0}: Removing radial {1} from cache", DateTime.Now, arguments.CacheItem.Key));
+            //DefaultCacheItemPolicy.RemovedCallback += arguments => Debug.WriteLine(string.Format("{0}: Removing radial {1} from cache", DateTime.Now, arguments.CacheItem.Key));
         }
 
         public CacheItemPolicy DefaultCacheItemPolicy { get; set; }
@@ -32,7 +31,7 @@ namespace ESME.TransmissionLoss
                         {
                             requestedData = radial.LoadAsync();
                             Add(guid, requestedData, DefaultCacheItemPolicy);
-                            Debug.WriteLine(string.Format("{0}: Adding radial {1} to cache", DateTime.Now, guid));
+                            //Debug.WriteLine(string.Format("{0}: Adding radial {1} to cache", DateTime.Now, guid));
                         }
                     }
                 }

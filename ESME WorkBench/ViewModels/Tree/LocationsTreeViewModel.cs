@@ -46,7 +46,7 @@ namespace ESMEWorkbench.ViewModels.Tree
                 }
             };
             LocationsTreeViewSource = new CollectionViewSource { Source = Locations };
-            LocationsTreeViewSource.SortDescriptions.Add(new SortDescription("LocationName", ListSortDirection.Ascending));
+            LocationsTreeViewSource.SortDescriptions.Add(new SortDescription("Location.Name", ListSortDirection.Ascending));
         }
         public CollectionViewSource LocationsTreeViewSource { get; private set; }
         public ObservableList<LocationNode> Locations { get; private set; }
