@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -18,6 +17,7 @@ using HRC.Utility;
 
 namespace ESME.Simulator
 {
+    [NotifyPropertyChanged]
     public class Simulation
     {
         //public List<Actor> GetActors() { return _database.Actors.ToList(); }

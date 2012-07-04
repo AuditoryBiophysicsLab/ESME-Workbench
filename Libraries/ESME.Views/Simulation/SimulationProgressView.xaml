@@ -13,12 +13,18 @@
         mc:Ignorable="d">
     <StackPanel Orientation="Vertical">
         <TextBlock Text="Simulation" />
-        <ProgressBar Grid.Row="0"
-                     Height="22"
-                     Value="{Binding Simulation.PercentProgress.PercentComplete}" />
+        <Grid>
+            <ProgressBar Height="22" Value="{Binding Simulation.PercentProgress.PercentComplete}" />
+            <TextBlock HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Text="{Binding SimulationProgressText}" />
+        </Grid>
         <TextBlock Text="Log file" />
-        <ProgressBar Grid.Row="1"
-                     Height="22"
-                     Value="{Binding Simulation.SimulationLog.PercentProgress.PercentComplete}" />
+        <Grid>
+            <ProgressBar Height="22" Value="{Binding Simulation.SimulationLog.PercentProgress.PercentComplete}" />
+            <TextBlock HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Text="{Binding LogfileProgressText}" />
+        </Grid>
     </StackPanel>
 </Window>

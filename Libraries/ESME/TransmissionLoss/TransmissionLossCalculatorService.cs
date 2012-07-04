@@ -225,7 +225,7 @@ namespace ESME.TransmissionLoss
                                               windSample.Data,
                                               (float)Math.Sqrt(mode.HighFrequency * mode.LowFrequency),
                                               sourceDepth,
-                                              (float)radial.Length,
+                                              mode.MaxPropagationRadius,
                                               mode.VerticalBeamWidth,
                                               mode.DepressionElevationAngle,
                                               (float)(bottomProfile.MaxDepth * 1.01),
@@ -292,6 +292,7 @@ namespace ESME.TransmissionLoss
                     Thread.Sleep(20);
                 }
                 radial.CalculationCompleted = DateTime.Now;
+                radial.Length = mode.MaxPropagationRadius;
                 radial.IsCalculated = true;
                 //if (radial.IsDeleted) return;
                 //try
