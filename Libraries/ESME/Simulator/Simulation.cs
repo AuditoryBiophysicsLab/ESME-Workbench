@@ -189,7 +189,7 @@ namespace ESME.Simulator
             Debug.WriteLine(string.Format("{0}: Exposures by species:", DateTime.Now));
             for (var i = 0; i < _exposuresBySpecies.Length; i++) Debug.WriteLine(string.Format("{0}: Species: {1}, Exposures: {2}", DateTime.Now, Scenario.ScenarioSpecies[i].LatinName, _exposuresBySpecies[i]));
             ModeThresholdHistogram.Display();
-            ModeThresholdHistogram.Write(@"C:\Users\Graham Voysey\Desktop\out.csv", Scenario.Name, Scenario.Location.Name);
+            ModeThresholdHistogram.Write(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Simulation Test",Scenario.Name+".csv"), Scenario.Name, Scenario.Location.Name);
             //SpeciesThresholdHistogram.Display();
         }
     }
