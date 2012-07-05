@@ -70,6 +70,9 @@ namespace ESME.Simulator
         }
 
         int _totalExposureCount;
+        int[] _exposuresBySpecies;
+        int[] _speciesActorIDStart;
+        int[] _speciesActorIDEnd;
         void Run(TimeSpan timeStepSize, CancellationToken token)
         {
             var timeStepCount = (int)Math.Round(((TimeSpan)Scenario.Duration).TotalSeconds / timeStepSize.TotalSeconds);
@@ -83,7 +86,16 @@ namespace ESME.Simulator
                 var actor = new Actor { ID = platform.ActorID, Platform = platform };
                 Actors.Add(actor);
             }
-            foreach (var species in Scenario.ScenarioSpecies) for (var i = 0; i < species.Animat.Locations.Count; i++) Actors.Add(new Actor { ID = species.StartActorID + i, Species = species });
+            _exposuresBySpecies = new int[Scenario.ScenarioSpecies.Count];
+            _speciesActorIDStart = new int[Scenario.ScenarioSpecies.Count];
+            _speciesActorIDEnd = new int[Scenario.ScenarioSpecies.Count];
+            for (var j = 0; j < Scenario.ScenarioSpecies.Count; j++)
+            {
+                var species = Scenario.ScenarioSpecies[j];
+                _speciesActorIDStart[j] = species.StartActorID;
+                _speciesActorIDEnd[j] = species.StartActorID + species.Animat.Locations.Count - 1;
+                for (var i = 0; i < species.Animat.Locations.Count; i++) Actors.Add(new Actor { ID = species.StartActorID + i, Species = species });
+            }
             var actorCount = Scenario.ScenarioSpecies.Last().StartActorID + Scenario.ScenarioSpecies.Last().Animat.Locations.Count;
             var logBlock = new ActionBlock<SimulationTimeStepRecord>(block => SimulationLog.Add(block), new ExecutionDataflowBlockOptions { BoundedCapacity = 1, MaxDegreeOfParallelism = 1 });
             logBlock.Completion.ContinueWith(t => SimulationLog.Close());
@@ -132,6 +144,10 @@ namespace ESME.Simulator
                             var peakSPL = mode.SourceLevel - tlTask.Result.TransmissionLossRadial[Geo.RadiansToMeters(radiansToActor), -record.Depth];
                             record.Exposures.Add(new ActorExposureRecord(index, mode, peakSPL, peakSPL));
                             Interlocked.Increment(ref _totalExposureCount);
+                            for (var i = 0; i < Scenario.ScenarioSpecies.Count; i++)
+                                if (_speciesActorIDStart[i] <= index && index <= _speciesActorIDEnd[i]) Interlocked.Increment(ref _exposuresBySpecies[i]);
+                            //var actorRecord = SimulationLog.RecordFromActorID(index) as SpeciesNameGuid;
+                            //if (actorRecord != null) Interlocked.Increment(ref _exposuresBySpecies[SimulationLog.SpeciesRecords.IndexOf(actorRecord)]);
                         }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = -1 });
                         var bufferBlock = new BufferBlock<int>();
                         bufferBlock.LinkTo(actionBlock);
@@ -170,6 +186,8 @@ namespace ESME.Simulator
             logBuffer.Complete();
             logBlock.Completion.Wait();
             Debug.WriteLine(string.Format("{0}: Simulation complete. Exposure count: {1}", DateTime.Now, _totalExposureCount));
+            Debug.WriteLine(string.Format("{0}: Exposures by species:", DateTime.Now));
+            for (var i = 0; i < _exposuresBySpecies.Length; i++) Debug.WriteLine(string.Format("{0}: Species: {1}, Exposures: {2}", DateTime.Now, Scenario.ScenarioSpecies[i].LatinName, _exposuresBySpecies[i]));
             ModeThresholdHistogram.Display();
             //SpeciesThresholdHistogram.Display();
         }

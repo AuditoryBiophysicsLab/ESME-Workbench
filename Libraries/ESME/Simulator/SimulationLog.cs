@@ -56,7 +56,8 @@ namespace ESME.Simulator
             }
             foreach (var species in scenario.ScenarioSpecies)
             {
-                species.StartActorID = actorID++;
+                species.StartActorID = actorID;
+                actorID += species.Animat.Locations.Count;
                 result.SpeciesRecords.Add(new SpeciesNameGuid(species));
             }
             return result;
@@ -238,7 +239,7 @@ namespace ESME.Simulator
             if (log == null) throw new ArgumentNullException("log");
             if (actorID < 0) throw new ArgumentOutOfRangeException("actorID");
             foreach (var platformRecord in log.PlatformRecords.Where(r => r.ActorID == actorID)) return platformRecord;
-            return log.SpeciesRecords.FirstOrDefault(species => species.ActorID <= actorID && actorID <= species.ActorID + species.AnimatCount);
+            return log.SpeciesRecords.FirstOrDefault(species => species.ActorID <= actorID && actorID < species.ActorID + species.AnimatCount);
         }
 
         public static string NameFromActorID(this SimulationLog log, int actorID)
