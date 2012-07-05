@@ -10,13 +10,14 @@ namespace ESME.Simulator
         public float Latitude { get; set; }
         public float Longitude { get; set; }
         public float Depth { get; set; }
-        [Initialize] public ConcurrentBag<ActorExposureRecord> Exposures { get; set; }
+        public ConcurrentBag<ActorExposureRecord> Exposures { get; set; }
 
         public ActorPositionRecord(float latitude, float longitude, float depth)
         {
             Latitude = latitude;
             Longitude = longitude;
             Depth = depth;
+            Exposures = new ConcurrentBag<ActorExposureRecord>();
         }
         public ActorPositionRecord(Geo<float> geo) : this((float)geo.Latitude, (float)geo.Longitude, geo.Data) { }
         public ActorPositionRecord(Geo geo, float depth) : this((float)geo.Latitude, (float)geo.Longitude, depth) { }
