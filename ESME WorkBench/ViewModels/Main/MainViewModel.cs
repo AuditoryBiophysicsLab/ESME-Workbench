@@ -166,7 +166,7 @@ namespace ESMEWorkbench.ViewModels.Main
             progress.ProgressMessage = string.Format("Creating sample scenario \"{0}\"", scenarioName);
             progress.CurrentItem++;
             await TaskEx.Delay(10);
-            var scenario = CreateScenario(location, scenarioName, "Created as a sample scenario", timePeriod, windData, soundSpeedData, bathymetryData, sedimentData);
+            var scenario = CreateScenario(location, scenarioName, "Created as a sample scenario", timePeriod,new TimeSpan(0, 12, 0, 0), windData, soundSpeedData, bathymetryData, sedimentData);
             var perimeterGeoArray = new GeoArray(new Geo(locationGeoRect.NorthWest.Latitude - 1, locationGeoRect.NorthWest.Longitude + 1),
                                                  new Geo(locationGeoRect.NorthEast.Latitude - 1, locationGeoRect.NorthEast.Longitude - 1),
                                                  new Geo(locationGeoRect.SouthEast.Latitude + 1, locationGeoRect.SouthEast.Longitude - 1),
@@ -174,7 +174,6 @@ namespace ESMEWorkbench.ViewModels.Main
             Perimeter perimeter = (GeoArray)perimeterGeoArray.Closed;
             perimeter.Name = "Sample Perimeter";
             perimeter.Scenario = scenario;
-            scenario.Duration = new TimeSpan(0, 12, 0, 0);
             var platform = new Platform
             {
                 Scenario = scenario,

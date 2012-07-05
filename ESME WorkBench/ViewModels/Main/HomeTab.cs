@@ -103,7 +103,7 @@ namespace ESMEWorkbench.ViewModels.Main
             var result = _visualizer.ShowDialog("CreateScenarioView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
             if (location == null) _lastCreateScenarioLocation = vm.Location;
-            var scenario = CreateScenario(vm.Location, vm.ScenarioName, vm.Comments, vm.TimePeriod, vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet);
+            var scenario = CreateScenario(vm.Location, vm.ScenarioName, vm.Comments, vm.TimePeriod, vm.Duration, vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet);
             Scenario = scenario;
 #if false
             var wind = Database.LoadOrCreateEnvironmentalDataSet(vm.Location,
@@ -139,7 +139,7 @@ namespace ESMEWorkbench.ViewModels.Main
 #endif
         }
 
-        Scenario CreateScenario(Location location, string scenarioName, string comments, TimePeriod timePeriod, EnvironmentalDataSet wind, EnvironmentalDataSet soundSpeed, EnvironmentalDataSet bathymetry, EnvironmentalDataSet sediment)
+        Scenario CreateScenario(Location location, string scenarioName, string comments, TimePeriod timePeriod, TimeSpan duration, EnvironmentalDataSet wind, EnvironmentalDataSet soundSpeed, EnvironmentalDataSet bathymetry, EnvironmentalDataSet sediment)
         {
             var scenario = new Scenario
             {
@@ -151,6 +151,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 Location = location,
                 Comments = comments,
                 TimePeriod = timePeriod,
+                Duration = duration,
             };
             var existing = (from s in location.Scenarios
                             where s.Name == scenario.Name && s.Location == scenario.Location

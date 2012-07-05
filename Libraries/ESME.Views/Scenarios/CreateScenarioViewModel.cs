@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -45,6 +46,7 @@ namespace ESME.Views.Scenarios
         public Location Location { get; set; }
         public string Comments { get; set; }
         public TimePeriod TimePeriod { get; set; }
+        public TimeSpan Duration { get; set; }
         public bool IsLocationSelectable { get; set; }
         #region PluginManager stuff
         IPluginManagerService _pluginManager;
