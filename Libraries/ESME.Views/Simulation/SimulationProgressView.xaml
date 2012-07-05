@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:Simulation="clr-namespace:ESME.Views.Simulation"
+        xmlns:Simulation="clr-namespace:ESME.Views.Simulation" xmlns:Controls="clr-namespace:ESME.Views.Controls"
         Title="Scenario Simulator"
         Width="300"
         d:DataContext="{d:DesignInstance Simulation:SimulationProgressViewModel}"
@@ -11,9 +11,21 @@
         SizeToContent="Height"
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
-    <StackPanel Margin="5" Orientation="Vertical">
+    <DockPanel LastChildFill="True">
+    <StackPanel Margin="5" Orientation="Vertical" DockPanel.Dock="Top">
         <TextBlock Text="{Binding Simulation.Scenario.Name, StringFormat=Scenario Name: {0}}" />
-        <TextBlock Text="{Binding Simulation.TimeStepSize, StringFormat=Time Step: {0}}" />
+            <Grid Margin="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0"                               
+                               VerticalAlignment="Center"
+                               Text="Time Step Length"
+                               TextAlignment="Right" IsEnabled="{Binding IsStartCommandEnabled}" />
+                <Controls:TimePicker Grid.Column="1" SelectedTime="{Binding TimeStepSize, Mode=TwoWay}" ToolTip="Length of simulated time the scenario runs" IsEnabled="{Binding IsStartCommandEnabled}"/>
+            </Grid>        
+        
         <StackPanel Orientation="Horizontal">
             <TextBlock Text="Simulation progress: " />
             <Grid>
@@ -22,11 +34,21 @@
                            VerticalAlignment="Center"
                            Text="{Binding SimulationProgressText}" />
             </Grid>
-        </StackPanel>
+        </StackPanel>       
+    </StackPanel>
+    <StackPanel HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                DockPanel.Dock="Bottom">
         <Button Width="75"
                 Margin="0 20 0 0"
                 HorizontalAlignment="Right"
                 Command="{Binding CancelCommand}"
                 Content="Cancel" />
+        <Button Width="75"
+                Margin="0 20 0 0"
+                HorizontalAlignment="Right"
+                Command="{Binding StartCommand}"
+                Content="Start" />
     </StackPanel>
+    </DockPanel>
 </Window>
