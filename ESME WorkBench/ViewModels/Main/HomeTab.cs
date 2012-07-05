@@ -507,8 +507,8 @@ namespace ESMEWorkbench.ViewModels.Main
         static async Task RepopulateSpeciesAsync(ScenarioSpecies species)
         {
             species.RemoveMapLayers();
-            var animats = await Animat.SeedAsync(species, species.Scenario.Location.GeoRect, species.Scenario.BathymetryData);
-            animats.Save(species.SpeciesFilePath);
+            species.Animat = await Animat.SeedAsync(species, species.Scenario.Location.GeoRect, species.Scenario.BathymetryData);
+            species.Animat.Save(species.SpeciesFilePath);
             species.CreateMapLayers();
         }
 
@@ -522,9 +522,9 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 if (Math.Abs(species.PopulationDensity - density) > 0.0001)
                 {
-                    var animats = await Animat.SeedAsync(species, species.Scenario.Location.GeoRect, species.Scenario.BathymetryData);
-                    animats.Save(species.SpeciesFilePath);
                     species.RemoveMapLayers();
+                    species.Animat = await Animat.SeedAsync(species, species.Scenario.Location.GeoRect, species.Scenario.BathymetryData);
+                    species.Animat.Save(species.SpeciesFilePath);
                     species.CreateMapLayers();
                 }
             }

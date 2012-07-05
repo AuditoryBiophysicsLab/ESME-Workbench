@@ -79,7 +79,7 @@ namespace ESME.Tests.Simulator
                     VerticalBeamWidth = 90,
                     SourceLevel = 200,
                     Source = source,
-                    //SourceActorModeID = sourceActorModeID++,
+                    ModeID = sourceActorModeID++,
                 };
                 source.Modes.Add(mode);
                 var behavior = new PlatformBehavior(platform, new TimeSpan(0, 0, 0, 1), 86400);
@@ -138,7 +138,7 @@ namespace ESME.Tests.Simulator
                             var exposureIndex = actorPosition.Exposures.ToList().IndexOf(exposure);
                             var mode = platformState[readTimeStepIndex].ModeActiveTimes.FirstOrDefault();
                             if (mode.Key == null) continue;
-                            //Assert.AreEqual(exposureIndex, exposure.SourceActorModeID);
+                            //Assert.AreEqual(exposureIndex, exposure.ModeID);
                             Assert.AreEqual(exposureIndex * 1000, exposure.PeakSPL);
                             Assert.AreEqual(exposureIndex * 2000, exposure.Energy);
                         }

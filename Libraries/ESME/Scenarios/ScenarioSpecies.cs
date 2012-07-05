@@ -56,6 +56,7 @@ namespace ESME.Scenarios
                 _animat = File.Exists(SpeciesFilePath) ? Animat.Load(this, SpeciesFilePath) : Animat.Seed(this, Scenario.Location.GeoRect, Scenario.BathymetryData);
                 return _animat;
             }
+            set { _animat = value; }
         }
 
         #region Layer Move commands
