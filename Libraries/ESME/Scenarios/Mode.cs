@@ -86,7 +86,7 @@ namespace ESME.Scenarios
         }
         object _layerControl;
 
-        [NotMapped] public int SourceActorModeID { get; set; }
+        [NotMapped] public int ModeID { get; set; }
 
         public void CreateMapLayers() { throw new NotImplementedException(); }
         public void RemoveMapLayers() { throw new NotImplementedException(); }

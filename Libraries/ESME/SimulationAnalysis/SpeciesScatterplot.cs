@@ -4,6 +4,7 @@ using HRC.Aspects;
 
 namespace ESME.SimulationAnalysis
 {
+#if false
     public class SpeciesScatterplot : ITimeStepProcessor
     {
         public Simulation Simulation { get; set; }
@@ -45,4 +46,6 @@ namespace ESME.SimulationAnalysis
             }
         }
     }
+#endif
+
 }

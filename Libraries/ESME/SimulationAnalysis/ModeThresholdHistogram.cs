@@ -1,4 +1,4 @@
-using System;
+using System.Diagnostics;
 using System.Linq;
 using ESME.Simulator;
 using HRC;
@@ -11,16 +11,35 @@ namespace ESME.SimulationAnalysis
     /// </summary>
     public class ModeThresholdHistogram : ITimeStepProcessor
     {
-        public Simulation Simulation { get; set; }
+        public ModeThresholdHistogram(SimulationLog simulationLog)
+        {
+            ModeBinnedExposureDictionary.Filter1 = SpeciesIndexFromActorExposureRecord;
+            ModeBinnedExposureDictionary.Filter2 = record => record.ModeID;
+            SimulationLog = simulationLog;
+        }
+        public SimulationLog SimulationLog { get; private set; }
         [Initialize, UsedImplicitly] public BinnedExposureDictionary ModeBinnedExposureDictionary { get; private set; }
 
-        public void Process(SimulationTimeStepRecord record) { foreach (var exposure in record.ActorPositionRecords.SelectMany(actorPositionRecord => actorPositionRecord.Exposures)) ModeBinnedExposureDictionary.Expose(exposure); }
-
-        public void Display(Func<int, string> key1NameFunc, Func<int, string> key2NameFunc)
+        public void Process(SimulationTimeStepRecord record)
         {
-            ModeBinnedExposureDictionary.Display(species => "Species: " + key1NameFunc(species) + ",",
-                                                 mode => "Mode: " + key2NameFunc(mode));
+            foreach (var exposure in record.ActorPositionRecords.SelectMany(actorPositionRecord => actorPositionRecord.Exposures)) 
+                ModeBinnedExposureDictionary.Expose(exposure);
         }
+
+        public void Display()
+        {
+            Debug.WriteLine("Species by Mode");
+            ModeBinnedExposureDictionary.Display(speciesIndex => "Species: " + SimulationLog.SpeciesRecords[speciesIndex].Name + ",",
+                                                 modeID => "Mode: " + SimulationLog.NameFromModeID(modeID));
+        }
+
+        int? SpeciesIndexFromActorExposureRecord(ActorExposureRecord record)
+        {
+            var result = SimulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid;
+            if (result != null) return SimulationLog.SpeciesRecords.IndexOf(result);
+            return null;
+        }
+
 #if false
         public void Serialize(string outFile)
         {

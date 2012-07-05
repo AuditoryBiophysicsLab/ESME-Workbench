@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using ESME.Scenarios;
 using HRC.Aspects;
 
@@ -15,9 +16,10 @@ namespace ESME.Simulator
         public string CreatingUser { get; private set; }
         public string CreatingComputer { get; private set; }
         public int TimeStepCount { get { return _timeStepOffsets.Count; } }
-        public ScenarioIdentityRecord ScenarioIdentityRecord { get; set; }
-        [Initialize] public List<PlatformIdentityRecord> PlatformIdentityRecords { get; set; }
-        [Initialize] public List<SpeciesIdentityRecord> SpeciesIdentityRecords { get; set; }
+        public NameGuidRecord ScenarioRecord { get; set; }
+        [Initialize] public List<ActorNameGuid> PlatformRecords { get; set; }
+        [Initialize] public List<ActorNameGuid> ModeRecords { get; set; }
+        [Initialize] public List<SpeciesNameGuid> SpeciesRecords { get; set; }
         // Add any further metadata here
 
         readonly List<long> _timeStepOffsets = new List<long>();
@@ -38,10 +40,25 @@ namespace ESME.Simulator
                 CreatingUser = System.Environment.UserName,
                 CreatingComputer = System.Environment.MachineName,
                 TimeStepSize = timeStepSize,
-                ScenarioIdentityRecord = new ScenarioIdentityRecord(scenario),
+                ScenarioRecord = new NameGuidRecord(scenario),
             };
-            foreach (var platform in scenario.Platforms) result.PlatformIdentityRecords.Add(new PlatformIdentityRecord(platform));
-            foreach (var species in scenario.ScenarioSpecies) result.SpeciesIdentityRecords.Add(new SpeciesIdentityRecord(species));
+            var actorID = 0;
+            var modeID = 0;
+            foreach (var platform in scenario.Platforms)
+            {
+                platform.ActorID = actorID++;
+                result.PlatformRecords.Add(new ActorNameGuid(platform));
+                foreach (var mode in platform.Sources.SelectMany(source => source.Modes)) 
+                {
+                    mode.ModeID = modeID++;
+                    result.ModeRecords.Add(new ActorNameGuid(mode));
+                }
+            }
+            foreach (var species in scenario.ScenarioSpecies)
+            {
+                species.StartActorID = actorID++;
+                result.SpeciesRecords.Add(new SpeciesNameGuid(species));
+            }
             return result;
         }
 
@@ -65,13 +82,16 @@ namespace ESME.Simulator
             _writer.Write(CreatingUser);
             _writer.Write(CreatingComputer);
 
-            ScenarioIdentityRecord.Write(_writer);
+            ScenarioRecord.Write(_writer);
 
-            _writer.Write(PlatformIdentityRecords.Count);
-            foreach (var record in PlatformIdentityRecords) record.Write(_writer);
+            _writer.Write(PlatformRecords.Count);
+            foreach (var record in PlatformRecords) record.Write(_writer);
 
-            _writer.Write(SpeciesIdentityRecords.Count);
-            foreach (var record in SpeciesIdentityRecords) record.Write(_writer);
+            _writer.Write(ModeRecords.Count);
+            foreach (var record in ModeRecords) record.Write(_writer);
+
+            _writer.Write(SpeciesRecords.Count);
+            foreach (var record in SpeciesRecords) record.Write(_writer);
 
             _writer.Write(_timeStepOffsets.Count);
             foreach (var offset in _timeStepOffsets) _writer.Write(offset);
@@ -93,13 +113,16 @@ namespace ESME.Simulator
             CreatingUser = _reader.ReadString();
             CreatingComputer = _reader.ReadString();
 
-            ScenarioIdentityRecord = ScenarioIdentityRecord.Read(_reader);
+            ScenarioRecord = NameGuidRecord.Read(_reader);
 
             var count = _reader.ReadInt32();
-            for (var i = 0; i < count; i++) PlatformIdentityRecords.Add(PlatformIdentityRecord.Read(_reader));
+            for (var i = 0; i < count; i++) PlatformRecords.Add(ActorNameGuid.Read(_reader));
 
             count = _reader.ReadInt32();
-            for (var i = 0; i < count; i++) SpeciesIdentityRecords.Add(SpeciesIdentityRecord.Read(_reader));
+            for (var i = 0; i < count; i++) ModeRecords.Add(ActorNameGuid.Read(_reader));
+
+            count = _reader.ReadInt32();
+            for (var i = 0; i < count; i++) SpeciesRecords.Add(SpeciesNameGuid.Read(_reader));
 
             count = _reader.ReadInt32();
             for (var i = 0; i < count; i++) _timeStepOffsets.Add(_reader.ReadInt64());
@@ -208,68 +231,96 @@ namespace ESME.Simulator
         #endregion
     }
 
-    public class ScenarioIdentityRecord
+    public static class SimulationLogExtensions
     {
-        internal ScenarioIdentityRecord(Scenario scenario) : this(scenario.Name, scenario.Guid) {}
-        internal ScenarioIdentityRecord(string scenarioName, Guid guid)
+        public static NameGuidRecord RecordFromActorID(this SimulationLog log, int actorID) 
         {
-            ScenarioName = scenarioName;
+            if (log == null) throw new ArgumentNullException("log");
+            if (actorID < 0) throw new ArgumentOutOfRangeException("actorID");
+            foreach (var platformRecord in log.PlatformRecords.Where(r => r.ActorID == actorID)) return platformRecord;
+            return log.SpeciesRecords.FirstOrDefault(species => species.ActorID <= actorID && actorID <= species.ActorID + species.AnimatCount);
+        }
+
+        public static string NameFromActorID(this SimulationLog log, int actorID)
+        {
+            var result = log.RecordFromActorID(actorID);
+            return result != null ? result.Name : "<Unknown>";
+        }
+
+        public static Guid GuidFromActorID(this SimulationLog log, int actorID)
+        {
+            var result = log.RecordFromActorID(actorID);
+            return result != null ? result.Guid : Guid.Empty;
+        }
+
+        public static NameGuidRecord RecordFromModeID(this SimulationLog log, int modeID)
+        {
+            if (log == null) throw new ArgumentNullException("log");
+            if (modeID < 0) throw new ArgumentOutOfRangeException("modeID");
+            return log.ModeRecords.FirstOrDefault(r => r.ActorID == modeID);
+        }
+        public static string NameFromModeID(this SimulationLog log, int modeID)
+        {
+            var result = log.RecordFromModeID(modeID);
+            return result != null ? result.Name : "<Unknown>";
+        }
+        public static Guid GuidFromModeID(this SimulationLog log, int modeID)
+        {
+            var result = log.RecordFromModeID(modeID);
+            return result != null ? result.Guid : Guid.Empty;
+        }
+    }
+
+    public class NameGuidRecord
+    {
+        internal NameGuidRecord(Scenario scenario) : this(scenario.Name, scenario.Guid) {}
+        internal NameGuidRecord(string name, Guid guid)
+        {
+            Name = name;
             Guid = guid;
         }
 
-        public string ScenarioName { get; private set; }
+        public string Name { get; private set; }
         public Guid Guid { get; private set; }
 
-        public static ScenarioIdentityRecord Read(BinaryReader reader) { return new ScenarioIdentityRecord(reader.ReadString(), new Guid(reader.ReadBytes(16))); }
-        public void Write(BinaryWriter writer)
+        public static NameGuidRecord Read(BinaryReader reader) { return new NameGuidRecord(reader.ReadString(), new Guid(reader.ReadBytes(16))); }
+        public virtual void Write(BinaryWriter writer)
         {
-            writer.Write(ScenarioName);
+            writer.Write(Name);
             writer.Write(Guid.ToByteArray());
         }
     }
 
-    public class PlatformIdentityRecord
+    public class ActorNameGuid : NameGuidRecord
     {
-        internal PlatformIdentityRecord(Platform platform) : this(platform.ActorID, platform.Guid) { }
-        internal PlatformIdentityRecord(int actorID, Guid guid)
-        {
-            ActorID = actorID;
-            Guid = guid;
-        }
+        internal ActorNameGuid(Platform platform) : this(platform.PlatformName, platform.ActorID, platform.Guid) { }
+        internal ActorNameGuid(Mode mode) : this(mode.ModeName, mode.ModeID, mode.Guid) { }
+        internal ActorNameGuid(string name, int actorID, Guid guid) : base(name, guid) { ActorID = actorID; }
 
         public int ActorID { get; set; }
-        public Guid Guid { get; set; }
 
-        public static PlatformIdentityRecord Read(BinaryReader reader) { return new PlatformIdentityRecord(reader.ReadInt32(), new Guid(reader.ReadBytes(16))); }
+        public static new ActorNameGuid Read(BinaryReader reader) { return new ActorNameGuid(reader.ReadString(), reader.ReadInt32(), new Guid(reader.ReadBytes(16))); }
 
-        public void Write(BinaryWriter writer)
+        public override void Write(BinaryWriter writer)
         {
             writer.Write(ActorID);
-            writer.Write(Guid.ToByteArray());
+            base.Write(writer);
         }
     }
 
-    public class SpeciesIdentityRecord
+    public class SpeciesNameGuid : ActorNameGuid
     {
-        internal SpeciesIdentityRecord(ScenarioSpecies species) : this(species.StartActorID, species.Animat.Locations.Count, species.Guid) { }
-        internal SpeciesIdentityRecord(int startActorID, int animatCount, Guid guid)
-        {
-            StartActorID = startActorID;
-            AnimatCount = animatCount;
-            Guid = guid;
-        }
+        internal SpeciesNameGuid(ScenarioSpecies species) : this(species.LatinName, species.StartActorID, species.Animat.Locations.Count, species.Guid) { }
+        internal SpeciesNameGuid(string name, int startActorID, int animatCount, Guid guid) : base(name, startActorID, guid) { AnimatCount = animatCount; }
 
-        public int StartActorID { get; set; }
         public int AnimatCount { get; set; }
-        public Guid Guid { get; set; }
 
-        public static SpeciesIdentityRecord Read(BinaryReader reader) { return new SpeciesIdentityRecord(reader.ReadInt32(), reader.ReadInt32(), new Guid(reader.ReadBytes(16))); }
+        public static new SpeciesNameGuid Read(BinaryReader reader) { return new SpeciesNameGuid(reader.ReadString(), reader.ReadInt32(), reader.ReadInt32(), new Guid(reader.ReadBytes(16))); }
 
-        public void Write(BinaryWriter writer)
+        public override void Write(BinaryWriter writer)
         {
-            writer.Write(StartActorID);
             writer.Write(AnimatCount);
-            writer.Write(Guid.ToByteArray());
+            base.Write(writer);
         }
     }
 }

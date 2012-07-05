@@ -2,7 +2,7 @@
 {
     public interface ITimeStepProcessor
     {
-        Simulation Simulation { get; set; }
+        SimulationLog SimulationLog { get; }
         void Process(SimulationTimeStepRecord record);
     }
 }
