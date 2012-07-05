@@ -5,17 +5,19 @@ namespace ESME.Simulator
 {
     public class ActorExposureRecord
     {
+        public int ActorID { get; private set; }
         public int SourceActorModeID { get; private set; }
         public float PeakSPL { get; private set; }
         public float Energy { get; private set; }
-
         public Mode Mode { get; private set; }
 
         ActorExposureRecord() {}
 
-        public ActorExposureRecord(int sourceActorModeID, float peakSPL, float energy) 
+        public ActorExposureRecord(int actorID, Mode mode, float peakSPL, float energy)
         {
-            SourceActorModeID = sourceActorModeID;
+            ActorID = actorID;
+            Mode = mode;
+            SourceActorModeID = Mode.SourceActorModeID;
             PeakSPL = peakSPL;
             Energy = energy;
         }
@@ -24,6 +26,7 @@ namespace ESME.Simulator
         {
             return new ActorExposureRecord
             {
+                ActorID = reader.ReadInt32(),
                 SourceActorModeID = reader.ReadInt32(),
                 PeakSPL = reader.ReadSingle(),
                 Energy = reader.ReadSingle(),
@@ -32,6 +35,7 @@ namespace ESME.Simulator
 
         internal void Write(BinaryWriter writer)
         {
+            writer.Write(ActorID);
             writer.Write(SourceActorModeID);
             writer.Write(PeakSPL);
             writer.Write(Energy);

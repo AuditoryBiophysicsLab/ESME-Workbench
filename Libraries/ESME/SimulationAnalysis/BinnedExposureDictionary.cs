@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using ESME.Simulator;
 
 namespace ESME.SimulationAnalysis
@@ -38,6 +39,18 @@ namespace ESME.SimulationAnalysis
             }
             bins[0].Add(exposureRecord.PeakSPL);
             bins[1].Add(exposureRecord.Energy);
+        }
+
+        public void Display(Func<TKey1, string> key1NameFunc, Func<TKey2, string> key2NameFunc)
+        {
+            foreach (var key1 in Exposures.Keys)
+                foreach (var key2 in Exposures[key1].Keys)
+                {
+                    Debug.WriteLine(string.Format("{0} {1}", key1NameFunc(key1), key2NameFunc(key2)));
+                    Debug.WriteLine("PeakSPL bins:");
+                    Exposures[key1][key2][0].Display();
+                    Debug.WriteLine("");
+                }
         }
     }
 }

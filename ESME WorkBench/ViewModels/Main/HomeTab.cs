@@ -618,7 +618,7 @@ namespace ESMEWorkbench.ViewModels.Main
             if (Directory.Exists(simulationDirectory)) Directory.Delete(simulationDirectory, true);
             var simulation = Simulation.Create(Scenario, simulationDirectory);
             var window = _visualizer.ShowWindow("SimulationProgressView", new SimulationProgressViewModel { Simulation = simulation });
-            var task = simulation.Start(new TimeSpan(0, 0, 0, 1));
+            var task = simulation.Start(new TimeSpan(0, 0, 1, 0));
             task.ContinueWith(t => _dispatcher.InvokeIfRequired(window.Close));
         }
         public string ScenarioValidationError { get; set; }

@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
-using ESME.Simulator;
 using HRC.Aspects;
 using HRC.Utility;
 using HRC.ViewModels;
@@ -31,21 +30,12 @@ namespace ESME.Views.Simulation
                                 SimulationProgressText = percentComplete < 100 ? percentComplete.ToString(CultureInfo.InvariantCulture) + "%" : "Complete";
                             };
                             break;
-                        case "SimulationLog":
-                            ((INotifyPropertyChanged)_simulation.SimulationLog.PercentProgress).PropertyChanged += (s1, e1) =>
-                            {
-                                if (e1.PropertyName != "PercentComplete") return;
-                                var percentComplete = ((PercentProgress<SimulationLog>)s1).PercentComplete;
-                                LogfileProgressText = percentComplete < 100 ? percentComplete.ToString(CultureInfo.InvariantCulture) + "%" : "Complete";
-                            };
-                            break;
                     }
                 };
             }
         }
 
         [Initialize("Starting")] public string SimulationProgressText { get; set; }
-        public string LogfileProgressText { get; set; }
 
         #region CancelCommand
         public SimpleCommand<object, EventToCommandArgs> CancelCommand { get { return _cancel ?? (_cancel = new SimpleCommand<object, EventToCommandArgs>(CancelHandler)); } }

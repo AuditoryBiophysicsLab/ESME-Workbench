@@ -7,36 +7,33 @@ namespace ESME.SimulationAnalysis
     public class SpeciesScatterplot : ITimeStepProcessor
     {
         public Simulation Simulation { get; set; }
-        [Initialize]
-        public ScatterExposureDictionary<ScenarioSpecies> Scatterplot { get; set; }
+        [Initialize] public ScatterExposureDictionary<ScenarioSpecies> Scatterplot { get; set; }
 
-        public SpeciesScatterplot() { Scatterplot.Filter1 = (actor, record) => actor.Species; }
-
+        public SpeciesScatterplot(Simulation simulation)
+        {
+            Scatterplot.Filter1 = (actor, record) => actor.Species;
+            Simulation = simulation;
+        }
 
         public void Process(SimulationTimeStepRecord record)
         {
             var actors = Simulation.Actors;
             for (var i = 0; i < record.ActorPositionRecords.Count; i++)
             {
-                foreach (var t in record.ActorPositionRecords[actors[i].ID].Exposures) Scatterplot.Expose(actors[i], t);
+                foreach (var t in record.ActorPositionRecords[i].Exposures) Scatterplot.Expose(actors[i], t);
             }
-        }
-
-        public void Initialize(Simulation simulation)
-        {
-            Simulation = simulation;
         }
     }
 
     public class AnimatScatterplot : ITimeStepProcessor
     {
         public Simulation Simulation { get; set; }
-        [Initialize]
-        public ScatterExposureDictionary<Actor> Scatterplot { get; set; }
+        [Initialize] public ScatterExposureDictionary<Actor> Scatterplot { get; set; }
 
-        public AnimatScatterplot()
+        public AnimatScatterplot(Simulation simulation)
         {
             Scatterplot.Filter1 = (actor, record) => actor.Species != null ? actor : null;
+            Simulation = simulation;
         }
 
         public void Process(SimulationTimeStepRecord record)
@@ -44,13 +41,8 @@ namespace ESME.SimulationAnalysis
             var actors = Simulation.Actors;
             for (var i = 0; i < record.ActorPositionRecords.Count; i++)
             {
-                foreach (var t in record.ActorPositionRecords[actors[i].ID].Exposures) Scatterplot.Expose(actors[i], t);
+                foreach (var t in record.ActorPositionRecords[i].Exposures) Scatterplot.Expose(actors[i], t);
             }
-        }
-
-        public void Initialize(Simulation simulation)
-        {
-            Simulation = simulation;
         }
     }
 }

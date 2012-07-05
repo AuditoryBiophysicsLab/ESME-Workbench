@@ -255,7 +255,7 @@
     <Compile Include="Simulator\SimulationLog.cs" />
     <Compile Include="Simulator\SimulationTimeStepRecord.cs" />
     <Compile Include="Simulator\SimulatorService.cs" />
-    <Compile Include="SimulationAnalysis\ModeThreshholdHistogram.cs" />
+    <Compile Include="SimulationAnalysis\ModeThresholdHistogram.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLInput.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLOutput.cs" />
     <Compile Include="TransmissionLoss\CASS\CASSOutput.cs" />

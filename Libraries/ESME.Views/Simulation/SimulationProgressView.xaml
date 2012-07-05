@@ -12,20 +12,17 @@
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <StackPanel Margin="5" Orientation="Vertical">
-        <TextBlock Text="Simulation" />
-        <Grid>
-            <ProgressBar Height="22" Value="{Binding Simulation.PercentProgress.PercentComplete}" />
-            <TextBlock HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Text="{Binding SimulationProgressText}" />
-        </Grid>
-        <TextBlock Text="Log file" />
-        <Grid>
-            <ProgressBar Height="22" Value="{Binding Simulation.SimulationLog.PercentProgress.PercentComplete}" />
-            <TextBlock HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Text="{Binding LogfileProgressText}" />
-        </Grid>
+        <TextBlock Text="{Binding Simulation.Scenario.Name, StringFormat=Scenario Name: {0}}" />
+        <TextBlock Text="{Binding Simulation.TimeStepSize, StringFormat=Time Step: {0}}" />
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Simulation progress: " />
+            <Grid>
+                <ProgressBar Height="22" Width="157" Value="{Binding Simulation.PercentProgress.PercentComplete}" />
+                <TextBlock HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Text="{Binding SimulationProgressText}" />
+            </Grid>
+        </StackPanel>
         <Button Width="75"
                 Margin="0 20 0 0"
                 HorizontalAlignment="Right"

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Linq;
 
 namespace ESME.SimulationAnalysis
 {
@@ -32,6 +34,15 @@ namespace ESME.SimulationAnalysis
             if (value < Low) bin = 0;
             else bin = (int)Math.Min(((value - Low) / Width) + 1, Bins.Length - 1);
             Bins[bin]++;
+        }
+
+        public void Display()
+        {
+            Debug.Write(string.Format("< {0}, ", Low));
+            for (var bin = 1; bin < Bins.Length - 1; bin++)
+                Debug.Write(string.Format("{0}, ", Low + (Width / 2 + ((bin - 1) * Width))));
+            Debug.WriteLine(string.Format("> {0}", Low + ((Bins.Length - 2) * Width)));
+            Debug.WriteLine(string.Format("{0} Total: {1}", string.Join(", ", Bins), Bins.Sum()));
         }
 
 #if false

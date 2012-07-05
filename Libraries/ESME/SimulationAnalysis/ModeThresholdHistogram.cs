@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using ESME.Scenarios;
 using ESME.Simulator;
 using HRC.Aspects;
@@ -7,15 +8,16 @@ namespace ESME.SimulationAnalysis
     /// <summary>
     /// Accumulates binned data.  x-axis: species.  legend: mode.
     /// </summary>
-    public class ModeThreshholdHistogram : ITimeStepProcessor
+    public class ModeThresholdHistogram : ITimeStepProcessor
     {
         public Simulation Simulation { get; set; }
         [Initialize] public BinnedExposureDictionary<ScenarioSpecies, Mode> ModeBinnedExposureDictionary { get; set; }
 
-        public ModeThreshholdHistogram()
+        public ModeThresholdHistogram(Simulation simulation)
         {
             ModeBinnedExposureDictionary.Filter1 = (actor, exposureRecord) => actor.Species;
             ModeBinnedExposureDictionary.Filter2 = (actor, exposureRecord) => exposureRecord.Mode;
+            Simulation = simulation;
         }
 
         public void Process(SimulationTimeStepRecord record)
@@ -23,13 +25,16 @@ namespace ESME.SimulationAnalysis
             var actors = Simulation.Actors;
             for (var i = 0; i < record.ActorPositionRecords.Count; i++)
             {
-                foreach (var t in record.ActorPositionRecords[actors[i].ID].Exposures) ModeBinnedExposureDictionary.Expose(actors[i], t);
+                foreach (var t in record.ActorPositionRecords[i].Exposures) ModeBinnedExposureDictionary.Expose(actors[i], t);
             }
         }
 
-        public void Initialize(Simulation simulation) { Simulation = simulation; }
-
-#if falsek
+        public void Display()
+        {
+            Debug.WriteLine("Species by Mode");
+            ModeBinnedExposureDictionary.Display(species => "Species: " + species.LatinName + ",", mode => "Mode: " + mode.ModeName);
+        }
+#if false
         public void Serialize(string outFile)
         {
             var engine = new FileHelperEngine<SourceModeThreshholdHistogramFileRecord>();
@@ -59,25 +64,31 @@ namespace ESME.SimulationAnalysis
     /// <summary>
     /// Accumulates binned data.  x-axis: modes. legend: species.
     /// </summary>
-    public class SpeciesThreshholdHistogram : ITimeStepProcessor
+    public class SpeciesThresholdHistogram : ITimeStepProcessor
     {
         public Simulation Simulation { get; set; }
         [Initialize] public BinnedExposureDictionary<Mode, ScenarioSpecies> SpeciesBinnedExposureDictionary { get; set; }
 
-        public SpeciesThreshholdHistogram()
+        public SpeciesThresholdHistogram(Simulation simulation)
         {
-            SpeciesBinnedExposureDictionary.Filter1 = (actor, expsureRecord) => expsureRecord.Mode;
+            SpeciesBinnedExposureDictionary.Filter1 = (actor, exposureRecord) => exposureRecord.Mode;
             SpeciesBinnedExposureDictionary.Filter2 = (actor, exposureRecord) => actor.Species;
+            Simulation = simulation;
         }
         public void Process(SimulationTimeStepRecord record)
         {
             var actors = Simulation.Actors;
             for (var i = 0; i < record.ActorPositionRecords.Count; i++)
             {
-                foreach (var t in record.ActorPositionRecords[actors[i].ID].Exposures) SpeciesBinnedExposureDictionary.Expose(actors[i], t);
+                foreach (var t in record.ActorPositionRecords[i].Exposures) SpeciesBinnedExposureDictionary.Expose(actors[i], t);
             }
         }
-        public void Initialize(Simulation simulation) { Simulation = simulation; }
+
+        public void Display()
+        {
+            Debug.WriteLine("Mode by Species");
+            SpeciesBinnedExposureDictionary.Display(mode => "Mode: " + mode.ModeName + ",", species => "Species: " + species.LatinName);
+        }
     }
 }
 #if false

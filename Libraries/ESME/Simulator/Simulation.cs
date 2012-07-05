@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -10,6 +11,7 @@ using System.Threading.Tasks.Dataflow;
 using ESME.Behaviors;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
+using ESME.SimulationAnalysis;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
@@ -35,7 +37,7 @@ namespace ESME.Simulator
             _simulationDirectory = simulationDirectory;
             //_database = SimulationContext.OpenOrCreate(Path.Combine(_simulationDirectory, "simulation.db"));
             //_scenario = _database.ImportScenario(scenario);
-            _scenario = scenario;
+            Scenario = scenario;
             _transmissionLossCache = new TransmissionLossCache("RadialCache", new NameValueCollection
             {
                 { "physicalMemoryLimitPercentage", "50" }, 
@@ -43,7 +45,7 @@ namespace ESME.Simulator
             });
         }
 
-        readonly Scenario _scenario;
+        public Scenario Scenario { get; private set; }
         readonly string _simulationDirectory;
         //readonly SimulationContext _database;
         readonly List<PlatformBehavior> _platformBehaviors = new List<PlatformBehavior>();
@@ -53,23 +55,30 @@ namespace ESME.Simulator
         public SimulationLog SimulationLog { get; private set; }
         CancellationTokenSource _cancellationTokenSource;
         public void Cancel() { _cancellationTokenSource.Cancel(); }
+        public TimeSpan TimeStepSize { get; private set; }
+        public ModeThresholdHistogram ModeThresholdHistogram { get; set; }
+        public SpeciesThresholdHistogram SpeciesThresholdHistogram { get; set; }
 
         public Task Start(TimeSpan timeStepSize)
         {
+            TimeStepSize = timeStepSize;
+            ModeThresholdHistogram = new ModeThresholdHistogram(this);
+            SpeciesThresholdHistogram = new SpeciesThresholdHistogram(this);
             _cancellationTokenSource = new CancellationTokenSource();
             var task = new Task(() => Run(timeStepSize, _cancellationTokenSource.Token));
             task.Start();
             return task;
         }
 
+        int _totalExposureCount;
         void Run(TimeSpan timeStepSize, CancellationToken token)
         {
             var actorCount = 0;
             var sourceActorModeID = 0;
-            var timeStepCount = (int)Math.Round(((TimeSpan)_scenario.Duration).TotalSeconds / timeStepSize.TotalSeconds);
+            var timeStepCount = (int)Math.Round(((TimeSpan)Scenario.Duration).TotalSeconds / timeStepSize.TotalSeconds);
             PercentProgress = new PercentProgress<Simulation>(this) { MinimumValue = 0, MaximumValue = timeStepCount - 1 };
             Actors = new List<Actor>();
-            foreach (var platform in _scenario.Platforms)
+            foreach (var platform in Scenario.Platforms)
             {
                 platform.ActorID = actorCount++;
                 var platformBehavior = new PlatformBehavior(platform, timeStepSize, timeStepCount);
@@ -80,7 +89,7 @@ namespace ESME.Simulator
                 //_database.Actors.Add(actor);
                 foreach (var mode in platform.Sources.SelectMany(source => source.Modes)) mode.SourceActorModeID = sourceActorModeID++;
             }
-            foreach (var species in _scenario.ScenarioSpecies)
+            foreach (var species in Scenario.ScenarioSpecies)
             {
                 species.StartActorID = actorCount;
                 for (var i = 0; i < species.Animat.Locations.Count; i++) Actors.Add(new Actor { ID = actorCount + i, Species = species });
@@ -101,7 +110,7 @@ namespace ESME.Simulator
                 var actorPositionRecords = new ActorPositionRecord[actorCount];
                 var actionBlockCompletions = new List<Task>();
                 var bufferBlocks = new List<BufferBlock<int>>();
-                foreach (var platform in _scenario.Platforms)
+                foreach (var platform in Scenario.Platforms)
                 {
                     var platformState = _platformStates[platform.ActorID][timeStepIndex];
                     actorPositionRecords[platform.ActorID] = new ActorPositionRecord(platformState.PlatformLocation.Location, platformState.PlatformLocation.Depth);
@@ -110,12 +119,11 @@ namespace ESME.Simulator
                         var mode = activeMode;
                         var platformLocation = platformState.PlatformLocation.Location;
                         var thisPlatform = platform;
-                        var scenario = _scenario;
+                        var scenario = Scenario;
                         var geoArc = new GeoArc(platformLocation,
                                                 Geo.DegreesToRadians(platformState.PlatformLocation.Course + mode.RelativeBeamAngle),
                                                 Geo.DegreesToRadians(mode.HorizontalBeamWidth),
                                                 Geo.MetersToRadians(mode.MaxPropagationRadius));
-                        //var exposedCount = 0;
                         var actionBlock = new ActionBlock<int>(async index =>
                         {
                             // Don't expose a platform to itself
@@ -134,9 +142,9 @@ namespace ESME.Simulator
                             var tlTask = _transmissionLossCache[closestRadial];
                             await tlTask;
                             // Look up the TL value at the actor's range and depth
-                            var peakSPL = tlTask.Result.TransmissionLossRadial[Geo.RadiansToMeters(radiansToActor), -record.Depth];
-                            record.Exposures.Add(new ActorExposureRecord(mode.SourceActorModeID, peakSPL, peakSPL));
-                            //Interlocked.Increment(ref exposedCount);
+                            var peakSPL = mode.SourceLevel - tlTask.Result.TransmissionLossRadial[Geo.RadiansToMeters(radiansToActor), -record.Depth];
+                            record.Exposures.Add(new ActorExposureRecord(index, mode, peakSPL, peakSPL));
+                            Interlocked.Increment(ref _totalExposureCount);
                         }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = -1 });
                         var bufferBlock = new BufferBlock<int>();
                         bufferBlock.LinkTo(actionBlock);
@@ -145,7 +153,7 @@ namespace ESME.Simulator
                         bufferBlock.Completion.ContinueWith(t => actionBlock.Complete());
                     }
                 }
-                foreach (var species in _scenario.ScenarioSpecies)
+                foreach (var species in Scenario.ScenarioSpecies)
                 {
                     for (var animatIndex = 0; animatIndex < species.Animat.Locations.Count; animatIndex++)
                     {
@@ -165,12 +173,18 @@ namespace ESME.Simulator
                 //Debug.WriteLine(string.Format("{0}: Finished time step {1} of {2}: {3:0%} complete", DateTime.Now, timeStepIndex, timeStepCount, (float)timeStepIndex / timeStepCount));
                 var timeStepRecord = new SimulationTimeStepRecord();
                 timeStepRecord.ActorPositionRecords.AddRange(actorPositionRecords);
+                ModeThresholdHistogram.Process(timeStepRecord);
+                SpeciesThresholdHistogram.Process(timeStepRecord);
                 logBuffer.Post(timeStepRecord);
                 // todo: when we have 3MB support, this is where we do the animat movement
                 // MoveAnimats();
                 if (token.IsCancellationRequested) break;
             }
             logBuffer.Complete();
+            logBlock.Completion.Wait();
+            Debug.WriteLine(string.Format("{0}: Simulation complete. Exposure count: {1}", DateTime.Now, _totalExposureCount));
+            ModeThresholdHistogram.Display();
+            SpeciesThresholdHistogram.Display();
         }
     }
 
