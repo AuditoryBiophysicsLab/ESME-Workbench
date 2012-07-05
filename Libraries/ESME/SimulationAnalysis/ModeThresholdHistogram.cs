@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text;
 using ESME.Simulator;
 using HRC;
 using HRC.Aspects;
@@ -40,6 +42,19 @@ namespace ESME.SimulationAnalysis
             return null;
         }
 
+        public void Write(string outFile, string scenarioName,string locationName)
+        {
+            using (var writer = new StringWriter())
+            {
+                writer.WriteLine(scenarioName);
+                writer.WriteLine(locationName);
+                writer.WriteLine(ModeBinnedExposureDictionary.Write(speciesIndex => SimulationLog.SpeciesRecords[speciesIndex].Name + ",",
+                                                                 modeID => SimulationLog.NameFromModeID(modeID)));
+
+                File.WriteAllText(outFile,writer.ToString());   
+            }
+
+        }
 #if false
         public void Serialize(string outFile)
         {

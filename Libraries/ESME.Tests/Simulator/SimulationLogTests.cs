@@ -79,7 +79,7 @@ namespace ESME.Tests.Simulator
                     VerticalBeamWidth = 90,
                     SourceLevel = 200,
                     Source = source,
-                    SourceActorModeID = sourceActorModeID++,
+                    //SourceActorModeID = sourceActorModeID++,
                 };
                 source.Modes.Add(mode);
                 var behavior = new PlatformBehavior(platform, new TimeSpan(0, 0, 0, 1), 86400);

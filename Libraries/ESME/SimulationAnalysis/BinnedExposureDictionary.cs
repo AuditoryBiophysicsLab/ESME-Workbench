@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 using ESME.Simulator;
 
 namespace ESME.SimulationAnalysis
@@ -48,6 +49,20 @@ namespace ESME.SimulationAnalysis
                     Exposures[key1][key2][0].Display();
                     Debug.WriteLine("");
                 }
+        }
+        public string Write(Func<int, string> key1NameFunc, Func<int, string> key2NameFunc)
+        {
+            var sb = new StringBuilder();
+            foreach (var key1 in Exposures.Keys)
+                foreach (var key2 in Exposures[key1].Keys)
+                {
+                    sb.AppendLine(string.Format("{0}", key1NameFunc(key1)));
+                    sb.AppendLine(string.Format("{0}",key2NameFunc(key2)));
+                    sb.AppendLine(Exposures[key1][key2][0].WriteBinWidths());
+                    sb.AppendLine(Exposures[key1][key2][0].WriteBinTotals());
+                    sb.AppendLine("");
+                }
+            return sb.ToString();
         }
     }
 }

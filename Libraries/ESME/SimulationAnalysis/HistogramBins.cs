@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 
 namespace ESME.SimulationAnalysis
 {
@@ -43,6 +44,24 @@ namespace ESME.SimulationAnalysis
                 Debug.Write(string.Format("{0}, ", Low + (Width / 2 + ((bin - 1) * Width))));
             Debug.WriteLine(string.Format("> {0}", Low + ((Bins.Length - 2) * Width)));
             Debug.WriteLine(string.Format("{0} Total: {1}", string.Join(", ", Bins), Bins.Sum()));
+        }
+
+        public string WriteBinWidths()
+        {
+            var sb = new StringBuilder();
+            sb.Append(string.Format("{0}, ", Low));
+            for (var bin = 1; bin < Bins.Length - 1; bin++)
+                sb.Append(string.Format("{0}, ", Low + (Width / 2 + ((bin - 1) * Width))));
+            sb.Append(string.Format("{0}", Low + ((Bins.Length - 2) * Width)));
+            sb.AppendLine();
+            return sb.ToString();
+        }
+        public string WriteBinTotals()
+        {
+            var sb = new StringBuilder();
+            sb.Append(string.Format("{0}", string.Join(", ",Bins)));
+            sb.AppendLine();
+            return sb.ToString();
         }
 
 #if false
