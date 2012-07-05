@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using ESME.Behaviors;
+using ESME.NEMO;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using ESME.SimulationAnalysis;
@@ -57,13 +58,11 @@ namespace ESME.Simulator
         public void Cancel() { _cancellationTokenSource.Cancel(); }
         public TimeSpan TimeStepSize { get; private set; }
         public ModeThresholdHistogram ModeThresholdHistogram { get; set; }
-        public SpeciesThresholdHistogram SpeciesThresholdHistogram { get; set; }
+        //public SpeciesThresholdHistogram SpeciesThresholdHistogram { get; set; }
 
         public Task Start(TimeSpan timeStepSize)
         {
             TimeStepSize = timeStepSize;
-            ModeThresholdHistogram = new ModeThresholdHistogram(this);
-            SpeciesThresholdHistogram = new SpeciesThresholdHistogram(this);
             _cancellationTokenSource = new CancellationTokenSource();
             var task = new Task(() => Run(timeStepSize, _cancellationTokenSource.Token));
             task.Start();
@@ -95,8 +94,17 @@ namespace ESME.Simulator
                 for (var i = 0; i < species.Animat.Locations.Count; i++) Actors.Add(new Actor { ID = actorCount + i, Species = species });
                 actorCount += species.Animat.Locations.Count;
             }
+            ModeThresholdHistogram = new ModeThresholdHistogram
+            {
+                ModeBinnedExposureDictionary =
+                {
+                    Filter1 = SpeciesIndexFromActorExposureRecord,
+                    Filter2 = record => record.SourceActorModeID,
+                },
+            };
+            //SpeciesThresholdHistogram = new SpeciesThresholdHistogram(this);
 
-            SimulationLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), timeStepCount, timeStepSize);
+            SimulationLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), timeStepSize, Scenario);
             
             var logBlock = new ActionBlock<SimulationTimeStepRecord>(block => SimulationLog.Add(block), new ExecutionDataflowBlockOptions { BoundedCapacity = 1, MaxDegreeOfParallelism = 1 });
             logBlock.Completion.ContinueWith(t => SimulationLog.Close());
@@ -174,7 +182,7 @@ namespace ESME.Simulator
                 var timeStepRecord = new SimulationTimeStepRecord();
                 timeStepRecord.ActorPositionRecords.AddRange(actorPositionRecords);
                 ModeThresholdHistogram.Process(timeStepRecord);
-                SpeciesThresholdHistogram.Process(timeStepRecord);
+                //SpeciesThresholdHistogram.Process(timeStepRecord);
                 logBuffer.Post(timeStepRecord);
                 // todo: when we have 3MB support, this is where we do the animat movement
                 // MoveAnimats();
@@ -183,8 +191,27 @@ namespace ESME.Simulator
             logBuffer.Complete();
             logBlock.Completion.Wait();
             Debug.WriteLine(string.Format("{0}: Simulation complete. Exposure count: {1}", DateTime.Now, _totalExposureCount));
-            ModeThresholdHistogram.Display();
-            SpeciesThresholdHistogram.Display();
+            Debug.WriteLine("Species by Mode");
+            ModeThresholdHistogram.Display(speciesIndex => Scenario.ScenarioSpecies[speciesIndex].LatinName, modeID => (from platform in Scenario.Platforms from source in platform.Sources from mode in source.Modes where mode.SourceActorModeID == modeID select mode.ModeName).FirstOrDefault());
+            //SpeciesThresholdHistogram.Display();
+        }
+
+        int SpeciesIndexFromActorID(int actorID)
+        {
+            if (actorID < 0) throw new ParameterOutOfRangeException("actorID must be non-negative");
+            if (actorID < Scenario.ScenarioSpecies[0].StartActorID) throw new ParameterOutOfRangeException("actorID must be greater than the highest platform number");
+            for (var i = 0; i < Scenario.ScenarioSpecies.Count - 1; i++)
+                if (Scenario.ScenarioSpecies[i].StartActorID <= actorID && actorID < Scenario.ScenarioSpecies[i + 1].StartActorID) return i;
+            return Scenario.ScenarioSpecies.Count - 1;
+        }
+
+        int? SpeciesIndexFromActorExposureRecord(ActorExposureRecord record)
+        {
+            if (record.ActorID < 0) return null;
+            if (record.ActorID < Scenario.ScenarioSpecies[0].StartActorID) return null;
+            for (var i = 0; i < Scenario.ScenarioSpecies.Count - 1; i++)
+                if (Scenario.ScenarioSpecies[i].StartActorID <= record.ActorID && record.ActorID < Scenario.ScenarioSpecies[i + 1].StartActorID) return i;
+            return Scenario.ScenarioSpecies.Count - 1;
         }
     }
 

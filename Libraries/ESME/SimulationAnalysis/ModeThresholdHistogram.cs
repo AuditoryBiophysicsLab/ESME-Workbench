@@ -1,6 +1,7 @@
-using System.Diagnostics;
-using ESME.Scenarios;
+using System;
+using System.Linq;
 using ESME.Simulator;
+using HRC;
 using HRC.Aspects;
 
 namespace ESME.SimulationAnalysis
@@ -11,28 +12,14 @@ namespace ESME.SimulationAnalysis
     public class ModeThresholdHistogram : ITimeStepProcessor
     {
         public Simulation Simulation { get; set; }
-        [Initialize] public BinnedExposureDictionary<ScenarioSpecies, Mode> ModeBinnedExposureDictionary { get; set; }
+        [Initialize, UsedImplicitly] public BinnedExposureDictionary ModeBinnedExposureDictionary { get; private set; }
 
-        public ModeThresholdHistogram(Simulation simulation)
-        {
-            ModeBinnedExposureDictionary.Filter1 = (actor, exposureRecord) => actor.Species;
-            ModeBinnedExposureDictionary.Filter2 = (actor, exposureRecord) => exposureRecord.Mode;
-            Simulation = simulation;
-        }
+        public void Process(SimulationTimeStepRecord record) { foreach (var exposure in record.ActorPositionRecords.SelectMany(actorPositionRecord => actorPositionRecord.Exposures)) ModeBinnedExposureDictionary.Expose(exposure); }
 
-        public void Process(SimulationTimeStepRecord record)
+        public void Display(Func<int, string> key1NameFunc, Func<int, string> key2NameFunc)
         {
-            var actors = Simulation.Actors;
-            for (var i = 0; i < record.ActorPositionRecords.Count; i++)
-            {
-                foreach (var t in record.ActorPositionRecords[i].Exposures) ModeBinnedExposureDictionary.Expose(actors[i], t);
-            }
-        }
-
-        public void Display()
-        {
-            Debug.WriteLine("Species by Mode");
-            ModeBinnedExposureDictionary.Display(species => "Species: " + species.LatinName + ",", mode => "Mode: " + mode.ModeName);
+            ModeBinnedExposureDictionary.Display(species => "Species: " + key1NameFunc(species) + ",",
+                                                 mode => "Mode: " + key2NameFunc(mode));
         }
 #if false
         public void Serialize(string outFile)
@@ -61,6 +48,7 @@ namespace ESME.SimulationAnalysis
 #endif
     }
 
+#if false
     /// <summary>
     /// Accumulates binned data.  x-axis: modes. legend: species.
     /// </summary>
@@ -90,6 +78,7 @@ namespace ESME.SimulationAnalysis
             SpeciesBinnedExposureDictionary.Display(mode => "Mode: " + mode.ModeName + ",", species => "Species: " + species.LatinName);
         }
     }
+#endif
 }
 #if false
 

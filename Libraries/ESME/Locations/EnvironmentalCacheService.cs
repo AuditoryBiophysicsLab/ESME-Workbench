@@ -14,7 +14,6 @@ using System.Windows.Media;
 using ESME.Environment;
 using ESME.Plugins;
 using ESME.Scenarios;
-using ESME.TransmissionLoss;
 using HRC.Navigation;
 using HRC.Utility;
 using HRC.ViewModels;
@@ -22,9 +21,21 @@ using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Locations
 {
+    public interface IEnvironmentalCacheService 
+    {
+        PercentProgressList<PercentProgressList<Location>> ImportMissingDatasets();
+        PercentProgressList<Location> ImportLocationDatasets(Location location);
+        PercentProgress<EnvironmentalDataSet> ImportDataset(EnvironmentalDataSet dataSet);
+        void ImportDatasetTest(EnvironmentalDataSet dataSet);
+        int BusyCount { get; }
+        void ToBitmap<T>(EnvironmentData<T> data, string fileName, Func<T, float> valueFunc, Func<float[,], float, float, uint[,]> toPixelValuesFunc) where T: Geo, new();
+        bool IsCached(EnvironmentalDataSet dataSet);
+        Task<EnvironmentDataSetBase> this[EnvironmentalDataSet dataSet] { get; }
+    }
+
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ExportService(ServiceType.Both, typeof(EnvironmentalCacheService))]
-    public class EnvironmentalCacheService : ViewModelBase
+    public class EnvironmentalCacheService : ViewModelBase, IEnvironmentalCacheService
     {
         public EnvironmentalCacheService() { Location.Cache = this; Scenario.Cache = this; }
         public EnvironmentalCacheService(IPluginManagerService plugins, IMasterDatabaseService database) : this()
@@ -88,7 +99,7 @@ namespace ESME.Locations
         int _busyCount;
         public int BusyCount { get { return _busyCount; } }
 
-        public ActionBlock<PercentProgress<EnvironmentalDataSet>> ImportActionBlock { get; private set; }
+        ActionBlock<PercentProgress<EnvironmentalDataSet>> ImportActionBlock { get; set; }
 
         ActionBlock<PercentProgress<EnvironmentalDataSet>> CreateImporter(TaskScheduler taskScheduler = null, int boundedCapacity = -1, int maxDegreeOfParallelism = -1)
         {

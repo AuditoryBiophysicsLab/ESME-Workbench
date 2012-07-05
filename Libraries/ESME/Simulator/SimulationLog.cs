@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using HRC.Utility;
+using ESME.Scenarios;
+using HRC.Aspects;
 
 namespace ESME.Simulator
 {
@@ -13,22 +14,21 @@ namespace ESME.Simulator
         public DateTime EndTime { get; private set; }
         public string CreatingUser { get; private set; }
         public string CreatingComputer { get; private set; }
-        public int TimeStepCount { get; private set; }
-        public PercentProgress<SimulationLog> PercentProgress { get; private set; }
+        public int TimeStepCount { get { return _timeStepOffsets.Count; } }
+        public ScenarioIdentityRecord ScenarioIdentityRecord { get; set; }
+        [Initialize] public List<PlatformIdentityRecord> PlatformIdentityRecords { get; set; }
+        [Initialize] public List<SpeciesIdentityRecord> SpeciesIdentityRecords { get; set; }
         // Add any further metadata here
 
-        readonly List<long> _timeStepOffsets;
+        readonly List<long> _timeStepOffsets = new List<long>();
         BinaryWriter _writer;
         BinaryReader _reader;
         int _curStepIndex;
         TimeSpan _curTimeStep;
 
-        SimulationLog()
-        {
-            _timeStepOffsets = new List<long>();
-        }
+        SimulationLog() {}
 
-        public static SimulationLog Create(string fileName, int timeStepCount, TimeSpan timeStepSize)
+        public static SimulationLog Create(string fileName, TimeSpan timeStepSize, Scenario scenario)
         {
             if (timeStepSize.TotalMilliseconds <= 0) throw new ArgumentOutOfRangeException("timeStepSize", "The time step size must be greater than zero");
             var result = new SimulationLog
@@ -38,11 +38,10 @@ namespace ESME.Simulator
                 CreatingUser = System.Environment.UserName,
                 CreatingComputer = System.Environment.MachineName,
                 TimeStepSize = timeStepSize,
-                TimeStepCount = timeStepCount,
+                ScenarioIdentityRecord = new ScenarioIdentityRecord(scenario),
             };
-            for (var i = 0; i < timeStepCount; i++) result._timeStepOffsets.Add(-1);
-            result.WriteHeader();
-            result.PercentProgress = new PercentProgress<SimulationLog>(result) { MinimumValue = 0, MaximumValue = timeStepCount - 1 };
+            foreach (var platform in scenario.Platforms) result.PlatformIdentityRecords.Add(new PlatformIdentityRecord(platform));
+            foreach (var species in scenario.ScenarioSpecies) result.SpeciesIdentityRecords.Add(new SpeciesIdentityRecord(species));
             return result;
         }
 
@@ -52,37 +51,58 @@ namespace ESME.Simulator
             {
                 _reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)),
             };
-            result.ReadHeader();
+            result.ReadTrailer();
             return result;
         }
 
-        public void WriteHeader()
+        void WriteTrailer()
         {
             if (_writer == null) throw new IOException("The simulation log file has not been opened for writing");
-            _writer.Seek(0, SeekOrigin.Begin);
-            _writer.Write(Magic);
+            var trailerOffset = _writer.Seek(0, SeekOrigin.End);
             _writer.Write(TimeStepSize.Ticks);
             _writer.Write(StartTime.Ticks);
             _writer.Write(DateTime.Now.Ticks);
             _writer.Write(CreatingUser);
             _writer.Write(CreatingComputer);
+
+            ScenarioIdentityRecord.Write(_writer);
+
+            _writer.Write(PlatformIdentityRecords.Count);
+            foreach (var record in PlatformIdentityRecords) record.Write(_writer);
+
+            _writer.Write(SpeciesIdentityRecords.Count);
+            foreach (var record in SpeciesIdentityRecords) record.Write(_writer);
+
             _writer.Write(_timeStepOffsets.Count);
             foreach (var offset in _timeStepOffsets) _writer.Write(offset);
-            //_writer.BaseStream.Flush();
+
+            _writer.Write(trailerOffset);
+            _writer.Write(Magic);
         }
 
-        void ReadHeader()
+        void ReadTrailer()
         {
             if (_reader == null) throw new IOException("The simulation log file has not been opened for reading");
-            _reader.BaseStream.Seek(0, SeekOrigin.Begin);
-            if (Magic != _reader.ReadUInt64()) throw new FileFormatException("Error reading simulation log file, magic number not seen at position 0");
+            _reader.BaseStream.Seek(-16, SeekOrigin.End);
+            var trailerOffset = _reader.ReadInt64();
+            if (Magic != _reader.ReadUInt64()) throw new FileFormatException("Error reading simulation log file, magic number not seen at expected location");
+            _reader.BaseStream.Seek(trailerOffset, SeekOrigin.Begin);
             TimeStepSize = new TimeSpan(_reader.ReadInt64());
             StartTime = new DateTime(_reader.ReadInt64());
             EndTime = new DateTime(_reader.ReadInt64());
             CreatingUser = _reader.ReadString();
             CreatingComputer = _reader.ReadString();
-            TimeStepCount = _reader.ReadInt32();
-            for (var i = 0; i < TimeStepCount; i++) _timeStepOffsets.Add(_reader.ReadInt64());
+
+            ScenarioIdentityRecord = ScenarioIdentityRecord.Read(_reader);
+
+            var count = _reader.ReadInt32();
+            for (var i = 0; i < count; i++) PlatformIdentityRecords.Add(PlatformIdentityRecord.Read(_reader));
+
+            count = _reader.ReadInt32();
+            for (var i = 0; i < count; i++) SpeciesIdentityRecords.Add(SpeciesIdentityRecord.Read(_reader));
+
+            count = _reader.ReadInt32();
+            for (var i = 0; i < count; i++) _timeStepOffsets.Add(_reader.ReadInt64());
         }
 
         public SimulationTimeStepRecord this[int timeStepIndex]
@@ -102,10 +122,9 @@ namespace ESME.Simulator
         {
             using (var writer = new BinaryWriter(new MemoryStream()))
             {
-                _timeStepOffsets[_curStepIndex] = _writer.BaseStream.Seek(0, SeekOrigin.End);
+                _timeStepOffsets.Add(_writer.BaseStream.Seek(0, SeekOrigin.End));
                 timeStep.Write(writer, _curTimeStep);
                 _curStepIndex++;
-                PercentProgress.Report(_curStepIndex);
                 _curTimeStep += TimeStepSize;
                 writer.BaseStream.Flush();
                 _writer.Write(((MemoryStream)writer.BaseStream).GetBuffer());
@@ -134,7 +153,7 @@ namespace ESME.Simulator
         {
             if (_reader != null) _reader.Close();
             if (_writer == null) return;
-            WriteHeader();
+            WriteTrailer();
             _writer.Close();
         }
 
@@ -187,5 +206,70 @@ namespace ESME.Simulator
             Dispose(false);
         }
         #endregion
+    }
+
+    public class ScenarioIdentityRecord
+    {
+        internal ScenarioIdentityRecord(Scenario scenario) : this(scenario.Name, scenario.Guid) {}
+        internal ScenarioIdentityRecord(string scenarioName, Guid guid)
+        {
+            ScenarioName = scenarioName;
+            Guid = guid;
+        }
+
+        public string ScenarioName { get; private set; }
+        public Guid Guid { get; private set; }
+
+        public static ScenarioIdentityRecord Read(BinaryReader reader) { return new ScenarioIdentityRecord(reader.ReadString(), new Guid(reader.ReadBytes(16))); }
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(ScenarioName);
+            writer.Write(Guid.ToByteArray());
+        }
+    }
+
+    public class PlatformIdentityRecord
+    {
+        internal PlatformIdentityRecord(Platform platform) : this(platform.ActorID, platform.Guid) { }
+        internal PlatformIdentityRecord(int actorID, Guid guid)
+        {
+            ActorID = actorID;
+            Guid = guid;
+        }
+
+        public int ActorID { get; set; }
+        public Guid Guid { get; set; }
+
+        public static PlatformIdentityRecord Read(BinaryReader reader) { return new PlatformIdentityRecord(reader.ReadInt32(), new Guid(reader.ReadBytes(16))); }
+
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(ActorID);
+            writer.Write(Guid.ToByteArray());
+        }
+    }
+
+    public class SpeciesIdentityRecord
+    {
+        internal SpeciesIdentityRecord(ScenarioSpecies species) : this(species.StartActorID, species.Animat.Locations.Count, species.Guid) { }
+        internal SpeciesIdentityRecord(int startActorID, int animatCount, Guid guid)
+        {
+            StartActorID = startActorID;
+            AnimatCount = animatCount;
+            Guid = guid;
+        }
+
+        public int StartActorID { get; set; }
+        public int AnimatCount { get; set; }
+        public Guid Guid { get; set; }
+
+        public static SpeciesIdentityRecord Read(BinaryReader reader) { return new SpeciesIdentityRecord(reader.ReadInt32(), reader.ReadInt32(), new Guid(reader.ReadBytes(16))); }
+
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(StartActorID);
+            writer.Write(AnimatCount);
+            writer.Write(Guid.ToByteArray());
+        }
     }
 }

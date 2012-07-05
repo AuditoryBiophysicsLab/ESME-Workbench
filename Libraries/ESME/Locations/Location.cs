@@ -65,7 +65,7 @@ namespace ESME.Locations
         }
         CollectionViewSource _collectionView;
         [NotMapped] public static IMasterDatabaseService Database { get; set; }
-        [NotMapped] public static EnvironmentalCacheService Cache { get; set; }
+        [NotMapped] public static IEnvironmentalCacheService Cache { get; set; }
         [NotMapped] public bool IsDeleted { get; set; }
         [NotMapped] public string StorageDirectoryPath
         {

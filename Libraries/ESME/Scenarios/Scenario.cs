@@ -114,7 +114,7 @@ namespace ESME.Scenarios
         [NotMapped]
         public static IMasterDatabaseService Database { get; set; }
         [NotMapped]
-        public static EnvironmentalCacheService Cache { get; set; }
+        public static IEnvironmentalCacheService Cache { get; set; }
         [NotMapped]
         public bool IsNew { get; set; }
         [NotMapped]

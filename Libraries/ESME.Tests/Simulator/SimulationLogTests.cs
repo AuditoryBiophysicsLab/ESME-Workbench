@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using ESME.Behaviors;
+using ESME.Environment;
+using ESME.Locations;
+using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.Simulator;
 using HRC.Navigation;
@@ -14,12 +18,12 @@ namespace ESME.Tests.Simulator
 {
     public class SimulationLogTests
     {
-        readonly string _simulationDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Simulation Log Tests");
+        public static readonly string SimulationDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Simulation Log Tests");
 
         [Test]
         public void CreateSimulationLogFromBehaviors()
         {
-            if (!Directory.Exists(_simulationDirectory)) Directory.CreateDirectory(_simulationDirectory);
+            if (!Directory.Exists(SimulationDirectory)) Directory.CreateDirectory(SimulationDirectory);
 
             var jaxOpsArea = new GeoArray(new Geo(29.3590, -79.2195),
                                           new Geo(31.1627, -79.2195),
@@ -28,7 +32,20 @@ namespace ESME.Tests.Simulator
                                           new Geo(29.3590, -80.8789),
                                           new Geo(29.3590, -79.2195));
             var platformStates = new List<List<PlatformState>>();
+            var actorID = 0;
             var sourceActorModeID = 0;
+            Location.Database = new DummyDatabaseService();
+            Scenario.Database = Location.Database;
+            Location.Cache = new DummyCacheService();
+            Scenario.Cache = Location.Cache;
+            var scenario = new Scenario
+            {
+                Name = "Test Scenario",
+                Location = new Location
+                {
+                    GeoRect = new GeoRect(1, -1, 1, -1),
+                },
+            };
             for (var i = 0; i < 10; i++)
             {
                 var platform = new Platform
@@ -40,7 +57,9 @@ namespace ESME.Tests.Simulator
                     TrackType = TrackType.PerimeterBounce,
                     Sources = new ObservableList<Source>(),
                     Speed = 20,
+                    ActorID = actorID++,
                 };
+                scenario.Platforms.Add(platform);
                 var source = new Source
                 {
                     SourceName = "Test Source",
@@ -66,9 +85,12 @@ namespace ESME.Tests.Simulator
                 var behavior = new PlatformBehavior(platform, new TimeSpan(0, 0, 0, 1), 86400);
                 platformStates.Add(behavior.PlatformStates.ToList());
             }
+            var species = new ScenarioSpecies { StartActorID = actorID++, Scenario = scenario, PopulationDensity = 0.01f };
+            scenario.ScenarioSpecies.Add(species);
+            species.Animat.Locations.Add(new Geo<float>(0, 0, 10));
             const int timeStepCount = 86400;
             Debug.WriteLine(string.Format("{0}: Beginning write phase of test", DateTime.Now));
-            using (var writeLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), timeStepCount, new TimeSpan(0, 0, 0, 1)))
+            using (var writeLog = SimulationLog.Create(Path.Combine(SimulationDirectory, "simulation.log"), new TimeSpan(0, 0, 0, 1), scenario))
             {
                 Assert.AreEqual(timeStepCount, writeLog.TimeStepCount);
                 Assert.AreEqual(new TimeSpan(0, 0, 0, 1), writeLog.TimeStepSize);
@@ -79,9 +101,7 @@ namespace ESME.Tests.Simulator
                     {
                         var platformState = platformStates[actorIndex];
                         var platformLocation = platformState[writeTimeStepIndex].PlatformLocation;
-                        cur.ActorPositionRecords.Add(new ActorPositionRecord((float)platformLocation.Location.Latitude,
-                                                                             (float)platformLocation.Location.Longitude,
-                                                                             platformLocation.Depth));
+                        cur.ActorPositionRecords.Add(new ActorPositionRecord(platformLocation.Location, platformLocation.Depth));
                         for (var activeSource = 0; activeSource < platformStates.Count; activeSource++)
                         {
                             // dja: This test may be bad.  Rewrite it to take into account the active mode in the current step, if any.
@@ -96,7 +116,7 @@ namespace ESME.Tests.Simulator
             }
 
             Debug.WriteLine(string.Format("{0}: Beginning read phase of test", DateTime.Now));
-            using (var readLog = SimulationLog.Open(Path.Combine(_simulationDirectory, "simulation.log")))
+            using (var readLog = SimulationLog.Open(Path.Combine(SimulationDirectory, "simulation.log")))
             {
                 Assert.AreEqual(timeStepCount, readLog.TimeStepCount);
                 Assert.AreEqual(new TimeSpan(0, 0, 0, 1), readLog.TimeStepSize);
@@ -127,57 +147,46 @@ namespace ESME.Tests.Simulator
                 }
             }
         }
+    }
 
-        [Test]
-        public void CreateSimpleSimulationLog()
+    class DummyDatabaseService : IMasterDatabaseService 
+    {
+        public void Dispose() { throw new NotImplementedException(); }
+        public string MasterDatabaseDirectory { get { return SimulationLogTests.SimulationDirectory; } set { throw new NotImplementedException(); } }
+
+        public LocationContext Context { get { throw new NotImplementedException(); } }
+
+        public void Refresh() { throw new NotImplementedException(); }
+        public void Add(Perimeter perimeter) { throw new NotImplementedException(); }
+        public void Add(PerimeterCoordinate coordinate, bool replaceExisting = false) { throw new NotImplementedException(); }
+        public void Add(ScenarioSpecies species) { throw new NotImplementedException(); }
+        public void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry) { throw new NotImplementedException(); }
+        public EnvironmentalDataSet LoadOrCreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin) { throw new NotImplementedException(); }
+        public void SaveChanges() { throw new NotImplementedException(); }
+    }
+
+    class DummyCacheService : IEnvironmentalCacheService 
+    {
+        public PercentProgressList<PercentProgressList<Location>> ImportMissingDatasets() { throw new NotImplementedException(); }
+        public PercentProgressList<Location> ImportLocationDatasets(Location location) { throw new NotImplementedException(); }
+        public PercentProgress<EnvironmentalDataSet> ImportDataset(EnvironmentalDataSet dataSet) { throw new NotImplementedException(); }
+        public void ImportDatasetTest(EnvironmentalDataSet dataSet) { throw new NotImplementedException(); }
+        public int BusyCount { get { throw new NotImplementedException(); } }
+
+        public void ToBitmap<T>(EnvironmentData<T> data, string fileName, Func<T, float> valueFunc, Func<float[,], float, float, uint[,]> toPixelValuesFunc) where T : Geo, new() { throw new NotImplementedException(); }
+        public bool IsCached(EnvironmentalDataSet dataSet) { throw new NotImplementedException(); }
+
+        public Task<EnvironmentDataSetBase> this[EnvironmentalDataSet dataSet]
         {
-            var mode = new Mode
+            get
             {
-                SourceActorModeID = 1
-            };
-            using (var writeLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), 100, new TimeSpan(0, 0, 0, 1)))
-            {
-                Assert.AreEqual(100, writeLog.TimeStepCount);
-                Assert.AreEqual(new TimeSpan(0, 0, 0, 1), writeLog.TimeStepSize);
-                for (var writeTimeStepIndex = 0; writeTimeStepIndex < writeLog.TimeStepCount; writeTimeStepIndex++)
+                if (dataSet.SourcePlugin.PluginSubtype != PluginSubtype.Bathymetry) throw new NotImplementedException();
+                return new Task<EnvironmentDataSetBase>(() =>
                 {
-                    var cur = new SimulationTimeStepRecord();
-                    for (var actorIndex = 0; actorIndex < 101; actorIndex++)
-                    {
-                        cur.ActorPositionRecords.Add(new ActorPositionRecord(42, -70, 10));
-                        for (var activeSource = 0; activeSource < 11; activeSource++)
-                        {
-                            cur.ActorPositionRecords[actorIndex].Exposures.Add(new ActorExposureRecord(activeSource, mode, activeSource * 1000, activeSource * 2000));
-                        }
-                    }
-                    writeLog.Add(cur);
-                }
-            }
-
-            using (var readLog = SimulationLog.Open(Path.Combine(_simulationDirectory, "simulation.log")))
-            {
-                Assert.AreEqual(100, readLog.TimeStepCount);
-                Assert.AreEqual(new TimeSpan(0, 0, 0, 1), readLog.TimeStepSize);
-                for (var readTimeStepIndex = 0; readTimeStepIndex < readLog.TimeStepCount; readTimeStepIndex++)
-                {
-                    var cur = readLog[readTimeStepIndex];
-                    cur.ReadAll();
-                    Assert.AreEqual(101, cur.ActorPositionRecords.Count);
-                    foreach (var actorPosition in cur.ActorPositionRecords)
-                    {
-                        Assert.AreEqual(42, actorPosition.Latitude);
-                        Assert.AreEqual(-70, actorPosition.Longitude);
-                        Assert.AreEqual(10, actorPosition.Depth);
-                        Assert.AreEqual(11, actorPosition.Exposures.Count);
-                        foreach (var exposure in actorPosition.Exposures)
-                        {
-                            var exposureIndex = actorPosition.Exposures.ToList().IndexOf(exposure);
-                            Assert.AreEqual(exposureIndex, mode.SourceActorModeID);
-                            Assert.AreEqual(exposureIndex * 1000, exposure.PeakSPL);
-                            Assert.AreEqual(exposureIndex * 2000, exposure.Energy);
-                        }
-                    }
-                }
+                    var result = new Bathymetry();
+                    result.Samples.Add(new Geo<float>(0, 0, -500));
+                    return result;
+                });
             }
         }
     }
