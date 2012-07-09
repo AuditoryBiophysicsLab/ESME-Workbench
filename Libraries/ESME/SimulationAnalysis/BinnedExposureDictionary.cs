@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Xml;
 using ESME.Simulator;
 
 namespace ESME.SimulationAnalysis
@@ -54,15 +55,46 @@ namespace ESME.SimulationAnalysis
         {
             var sb = new StringBuilder();
             foreach (var key1 in Exposures.Keys)
+            {
+                sb.AppendLine(string.Format("modes: {0}",Exposures[key1].Values.Count));
                 foreach (var key2 in Exposures[key1].Keys)
                 {
                     sb.AppendLine(string.Format("{0}", key1NameFunc(key1)));
-                    sb.AppendLine(string.Format("{0}",key2NameFunc(key2)));
+                    sb.AppendLine(string.Format("{0}", key2NameFunc(key2)));
                     sb.AppendLine(Exposures[key1][key2][0].WriteBinWidths());
                     sb.AppendLine(Exposures[key1][key2][0].WriteBinTotals());
                     sb.AppendLine("");
                 }
+            }
             return sb.ToString();
+        }
+
+        public XmlWriter WriteXML(XmlWriter x, Func<int, string> key1NameFunc, Func<int, string> key2NameFunc)
+        {
+            x.WriteStartElement("AnimatSpecies");
+            foreach (var key1 in Exposures.Keys)
+            {
+                x.WriteStartElement("Species");
+                x.WriteElementString("Name",key1NameFunc(key1));
+                x.WriteStartElement("BinWidths");
+                Exposures[key1][0][0].WriteBinWidthsXML(x);
+                x.WriteEndElement();
+                x.WriteStartElement("Modes");
+                foreach (var key2 in Exposures[key1].Keys)
+                {
+                    x.WriteStartElement("Mode");
+                    x.WriteElementString("Name",key2NameFunc(key2));
+                    foreach (var bins in Exposures[key1][key2])
+                    {
+                        bins.WriteBins(x);
+                    }
+                    x.WriteEndElement();
+                }
+                x.WriteEndElement();
+                x.WriteEndElement();
+            }
+            x.WriteEndElement();
+            return x;
         }
     }
 }

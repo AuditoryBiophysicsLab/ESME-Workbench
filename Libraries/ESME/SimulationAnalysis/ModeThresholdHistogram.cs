@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using ESME.Simulator;
 using HRC;
 using HRC.Aspects;
@@ -44,15 +45,41 @@ namespace ESME.SimulationAnalysis
 
         public void Write(string outFile, string scenarioName,string locationName)
         {
+            var s = new XmlWriterSettings
+            {
+                Indent = true,
+                IndentChars = "\t",
+            };
+            using(var x = XmlWriter.Create(outFile,s))
+            {
+                x.WriteStartDocument();
+                x.WriteStartElement("HistogramBins");
+           
+                    x.WriteStartElement("Scenario");
+                            x.WriteElementString("Name", scenarioName);
+                    x.WriteEndElement();
+                    
+                    x.WriteStartElement("Location");
+                        x.WriteElementString("Name", locationName);
+                    x.WriteEndElement();
+
+                    ModeBinnedExposureDictionary.WriteXML(x, speciesIndex => SimulationLog.SpeciesRecords[speciesIndex].Name, modeID => SimulationLog.NameFromModeID(modeID));
+                x.WriteEndElement();
+                x.WriteEndDocument();
+            }
+
+#if f
             using (var writer = new StringWriter())
             {
                 writer.WriteLine(scenarioName);
                 writer.WriteLine(locationName);
+                writer.WriteLine("species " + SimulationLog.SpeciesRecords.Count);
                 writer.WriteLine(ModeBinnedExposureDictionary.Write(speciesIndex => SimulationLog.SpeciesRecords[speciesIndex].Name + ",",
                                                                  modeID => SimulationLog.NameFromModeID(modeID)));
 
-                File.WriteAllText(outFile,writer.ToString());   
-            }
+                File.WriteAllText(outFile, writer.ToString());
+            } 
+#endif
 
         }
 #if false

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Xml;
 
 namespace ESME.SimulationAnalysis
 {
@@ -56,12 +58,36 @@ namespace ESME.SimulationAnalysis
             sb.AppendLine();
             return sb.ToString();
         }
+
+        public XmlWriter WriteBinWidthsXML(XmlWriter x)
+        {
+            x.WriteElementString("Bin", Low.ToString(CultureInfo.InvariantCulture));
+            for (var i = 1; i < Bins.Length-1; i++)
+            {
+                var value = Low + (Width / 2 + ((i - 1) * Width));
+                x.WriteElementString("Bin", value.ToString(CultureInfo.InvariantCulture));
+            }
+            x.WriteElementString("Bin", (Low + ((Bins.Length - 2) * Width)).ToString(CultureInfo.InvariantCulture));
+            return x;
+        }
+
         public string WriteBinTotals()
         {
             var sb = new StringBuilder();
             sb.Append(string.Format("{0}", string.Join(", ",Bins)));
             sb.AppendLine();
             return sb.ToString();
+        }
+
+        public XmlWriter WriteBins(XmlWriter x)
+        {
+            x.WriteStartElement("Exposure");
+            foreach (var bin in Bins)
+            {
+                x.WriteElementString("Bin",bin.ToString(CultureInfo.InvariantCulture));
+            }
+            x.WriteEndElement();
+            return x;
         }
 
 #if false

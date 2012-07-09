@@ -45,7 +45,7 @@ namespace ESME.Views.Simulation
             }
         }
 
-        [Initialize("Starting")] public string SimulationProgressText { get; set; }
+        [Initialize("Press start to begin")] public string SimulationProgressText { get; set; }
 
 
         #region CancelCommand
