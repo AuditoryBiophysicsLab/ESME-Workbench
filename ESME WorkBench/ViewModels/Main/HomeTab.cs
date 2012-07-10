@@ -471,7 +471,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 scenario.ScenarioSpecies.Add(species);
                 species.LayerSettings.LineOrSymbolSize = 3;
                 var animats = await Animat.SeedAsync(species, scenario.Location.GeoRect, scenario.BathymetryData);
-                animats.Save(species.SpeciesFilePath);
+                animats.Save(species.PopulationFilePath);
                 species.CreateMapLayers();
             }
         }
@@ -508,7 +508,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             species.RemoveMapLayers();
             species.Animat = await Animat.SeedAsync(species, species.Scenario.Location.GeoRect, species.Scenario.BathymetryData);
-            species.Animat.Save(species.SpeciesFilePath);
+            species.Animat.Save(species.PopulationFilePath);
             species.CreateMapLayers();
         }
 
@@ -524,7 +524,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 {
                     species.RemoveMapLayers();
                     species.Animat = await Animat.SeedAsync(species, species.Scenario.Location.GeoRect, species.Scenario.BathymetryData);
-                    species.Animat.Save(species.SpeciesFilePath);
+                    species.Animat.Save(species.PopulationFilePath);
                     species.CreateMapLayers();
                 }
             }
@@ -619,6 +619,7 @@ namespace ESMEWorkbench.ViewModels.Main
             
             if (Directory.Exists(simulationDirectory)) try{ Directory.Delete(simulationDirectory, true);} catch{}
             var simulation = Simulation.Create(Scenario, simulationDirectory);
+            simulation.Dispatcher = _dispatcher;
             var vm = new SimulationProgressViewModel {Simulation = simulation};
             var window = _visualizer.ShowWindow("SimulationProgressView",vm);
             vm.Window = window;

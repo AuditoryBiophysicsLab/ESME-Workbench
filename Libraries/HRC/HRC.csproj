@@ -120,6 +120,7 @@
     <Compile Include="Collections\BinaryTreeNode.cs" />
     <Compile Include="Collections\HeaderedKeyValuePairListBase.cs" />
     <Compile Include="Collections\KeyedList.cs" />
+    <Compile Include="Collections\LinqExtensions.cs" />
     <Compile Include="Collections\Node.cs" />
     <Compile Include="Collections\NodeList.cs" />
     <Compile Include="Collections\ObservableConcurrentDictionary.cs" />

@@ -64,12 +64,8 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="3MBSLib">
-      <HintPath>External References\3MBSLib.dll</HintPath>
-    </Reference>
-    <Reference Include="3MBWrapperClass, Version=1.0.4344.27297, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>External References\3MBWrapperClass.dll</HintPath>
+    <Reference Include="3MBWrapperClass, Version=1.0.4266.14522, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>External References\x64\3MBWrapperClass.dll</HintPath>
     </Reference>
     <Reference Include="AsyncCtpLibrary, Version=1.0.4107.18181, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Devart.Data, Version=5.0.449.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">

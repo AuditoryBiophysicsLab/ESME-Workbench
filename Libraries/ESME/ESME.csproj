@@ -44,6 +44,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -56,8 +57,8 @@
     <PostSharpOptimizationMode>OptimizeForBuildTime</PostSharpOptimizationMode>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="3MBWrapperClass">
-      <HintPath>..\..\ESME WorkBench\External References\3MBWrapperClass.dll</HintPath>
+    <Reference Include="3MBWrapperClass, Version=1.0.4266.14522, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\..\ESME WorkBench\External References\x64\3MBWrapperClass.dll</HintPath>
     </Reference>
     <Reference Include="AsyncCtpLibrary">
       <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
@@ -162,6 +163,8 @@
     <Compile Include="Database\Importers\NemoFile.cs" />
     <Compile Include="Database\Importers\PSMFile.cs" />
     <Compile Include="Database\Importers\PSMFileRecord.cs" />
+    <Compile Include="Environment\AnimatDDBFile.cs" />
+    <Compile Include="Environment\Animat3MBFile.cs" />
     <Compile Include="Environment\SoundSpeedProfileExtensions.cs" />
     <Compile Include="Locations\EnvironmentalDataSet.cs" />
     <Compile Include="Locations\Location.cs" />

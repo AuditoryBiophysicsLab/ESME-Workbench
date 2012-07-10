@@ -57,7 +57,7 @@ namespace ESME.Environment
         readonly int _maxPrecision;
         readonly List<T> _arrayList = new List<T>();
 
-        public T this[int index] { get { return _arrayList[index]; } }
+        public virtual T this[int index] { get { return _arrayList[index]; } protected set { _arrayList[index] = value; } }
         public bool IsFast2DLookupAvailable { get { return _twoDIndex != null; } }
 
         /// <summary>
@@ -584,5 +584,10 @@ namespace ESME.Environment
 
         public TimePeriod TimePeriod { get; set; }
         public EnvironmentData<T> EnvironmentData { get; set; }
+    }
+
+    public class AnimatEnvironmentData<T> : EnvironmentData<T> where T : Geo, IComparer<T>, new()
+    {
+        public new T this[int index] { get { return base[index]; } set { base[index] = value; } }
     }
 }

@@ -16,7 +16,7 @@ namespace ESME.Scenarios
 {
     public class ScenarioSpecies : IHaveGuid, IHaveLayerSettings,IEquatable<ScenarioSpecies>
     {
-        public ScenarioSpecies() { SpeciesFilename = MasterDatabaseService.RandomFilenameWithoutExension + ".ani"; }
+        public ScenarioSpecies() { PopulationFilename = MasterDatabaseService.RandomFilenameWithoutExension + ".ani"; }
         [Key, Initialize]
         public Guid Guid { get; set; }
         public string SpeciesFile { get; set; }
@@ -30,22 +30,37 @@ namespace ESME.Scenarios
         public virtual Scenario Scenario { get; set; }
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
-        public string SpeciesFilename { get; set; }
+        public string SpeciesDefinitionFilename { get; set; }
+        public string PopulationFilename { get; set; }
         [NotMapped] public bool IsDeleted { get; set; }
         [NotMapped] public int StartActorID { get; set; }
         [NotMapped]
-        public string SpeciesFilePath
+        public string PopulationFilePath
         {
             get
             {
-                if (_speciesFilePath != null) return _speciesFilePath;
+                if (_populationFilePath != null) return _populationFilePath;
                 if (Scenario == null || Scenario.StorageDirectoryPath == null) throw new ApplicationException("Scenario or Scenario.StorageDirectoryPath is null");
-                _speciesFilePath = Path.Combine(Scenario.StorageDirectoryPath, SpeciesFilename);
-                return _speciesFilePath;
+                _populationFilePath = Path.Combine(Scenario.StorageDirectoryPath, PopulationFilename);
+                return _populationFilePath;
             }
         }
-        string _speciesFilePath;
-        [NotMapped] public bool IsSeededByESME { get { return SpeciesFilename.ToLower().EndsWith(".ani"); } }
+        string _populationFilePath;
+        [NotMapped]
+        public string SpeciesDefinitionFilePath
+        {
+            get
+            {
+                if (_speciesDefinitionFilePath != null) return _speciesDefinitionFilePath;
+                if (string.IsNullOrEmpty(SpeciesDefinitionFilename)) throw new ApplicationException("SpeciesDefinitionFilename is not set");
+                _speciesDefinitionFilePath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().Location), "Species Definition Files", SpeciesDefinitionFilename);
+                if (!File.Exists(_speciesDefinitionFilePath)) throw new ApplicationException(string.Format("Species definition file \"{0}\" does not exist", _speciesDefinitionFilePath));
+                return _speciesDefinitionFilePath;
+            }
+        }
+        string _speciesDefinitionFilePath;
+        [NotMapped]
+        public bool IsSeededByESME { get { return PopulationFilename.ToLower().EndsWith(".ani"); } }
         Animat _animat;
 
         [NotMapped] public Animat Animat
@@ -53,7 +68,7 @@ namespace ESME.Scenarios
             get
             {
                 if (_animat != null) return _animat;
-                _animat = File.Exists(SpeciesFilePath) ? Animat.Load(this, SpeciesFilePath) : Animat.Seed(this, Scenario.Location.GeoRect, Scenario.BathymetryData);
+                _animat = File.Exists(PopulationFilePath) ? Animat.Load(this, PopulationFilePath) : Animat.Seed(this, Scenario.Location.GeoRect, Scenario.BathymetryData);
                 return _animat;
             }
             set { _animat = value; }
