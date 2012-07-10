@@ -82,31 +82,6 @@ namespace ESME.SimulationAnalysis
 #endif
 
         }
-#if false
-        public void Serialize(string outFile)
-        {
-            var engine = new FileHelperEngine<SourceModeThreshholdHistogramFileRecord>();
-            var records = new List<SourceModeThreshholdHistogramFileRecord>();
-            for (int i = 0; i < _simulation.Scenario.ScenarioSpecies.Count; i++)
-            {
-                var record = new SourceModeThreshholdHistogramFileRecord
-                                 {
-                                     SpeciesName = _simulation.Scenario.ScenarioSpecies.ToList()[i].LatinName,
-                                     ScenarioName = _simulation.Scenario.Name,
-                                     LocationName = _simulation.Scenario.Location.Name,
-                                     NumberOfEmitters = ModeDictionary[_simulation.Scenario.ScenarioSpecies.ToList()[i].Guid].Count,
-                                     SoundEmitterData = new List<Tuple<string, int[]>>(),
-                                 };
-                for (int j = 0; j < record.NumberOfEmitters; j++)
-                {
-                    var curMode = ModeDictionary[_simulation.Scenario.ScenarioSpecies.ToList()[i].Guid].ToList()[j];
-                    record.SoundEmitterData.Add(new Tuple<string, int[]>(curMode.Key.ModeName, curMode.Value.Bins));
-                }
-                records.Add(record);
-            }
-            engine.WriteFile(outFile, records);
-        } 
-#endif
     }
 
 #if false
@@ -141,15 +116,3 @@ namespace ESME.SimulationAnalysis
     }
 #endif
 }
-#if false
-
-[DelimitedRecord(",")]
-public class SourceModeThreshholdHistogramFileRecord
-{
-    public string SpeciesName; // the species these sources were accumulated for
-    public string ScenarioName; //the scenario name
-    public string LocationName;
-    public int NumberOfEmitters;
-    public List<Tuple<string, int[]>> SoundEmitterData;
-}
-#endif
