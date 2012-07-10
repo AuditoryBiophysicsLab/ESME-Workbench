@@ -258,7 +258,7 @@ namespace ESME.Simulator
 
                 var config = _mbs[mbsIndex].GetConfiguration();
                 config.seedValue = (uint)mbsIndex;  // Probably wise to set each 3mb instance to a unique randomizer seed value.
-                config.enabled = true;             // binary output enabled/disabled
+                config.enabled = false;             // binary output enabled/disabled
                 config.durationLess = true;         // make sure we're in durationless mode.
                 _mbs[mbsIndex].SetConfiguration(config);
                 result = _mbs[mbsIndex].LoadBathymetryFromTextFile(yxzFileName);
@@ -344,23 +344,10 @@ namespace ESME.Simulator
                     _mbs[mbsIndex].AbortRun();
                     throw new AnimatInterfaceMMBSException("C3mbs::RunScenarioNumIterations FATAL error: " + _mbs[mbsIndex].ResultToTc(result));
                 }
-                mbsRUNSTATE runState;
-                while (mbsRUNSTATE.RUNNING == (runState = _mbs[mbsIndex].GetRunState())) Thread.Sleep(1);
-                var positions = new mbsPosition[_animatContext[mbsIndex].Length];
-                if (mbsRESULT.OK != (result = _mbs[mbsIndex].GetAnimatCoordinates(positions)))
-                {
-                    _mbs[mbsIndex].AbortRun(); // kills the thread.
-                    throw new AnimatInterfaceMMBSException("C3mbs::GetAnimatCoordinates FATAL error " + _mbs[mbsIndex].ResultToTc(result));
-                }
-                for (var contextIndex = 0; contextIndex < _animatContext[mbsIndex].Length; contextIndex++)
-                {
-                    var species = _animatContext[mbsIndex][contextIndex].Species;
-                    var position = positions[contextIndex];
-                    species.Animat.Locations[_animatContext[mbsIndex][contextIndex].SpeciesAnimatIndex] = new Geo<float>(position.latitude, position.longitude) { Data = -(float)position.depth };
-                }
+                while (mbsRUNSTATE.RUNNING == _mbs[mbsIndex].GetRunState()) Thread.Sleep(1);
             }
 
-            //UpdateAnimatPositions();
+            UpdateAnimatPositions();
         }
 
         void Shutdown3MB()
