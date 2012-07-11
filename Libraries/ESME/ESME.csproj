@@ -57,6 +57,9 @@
     <PostSharpOptimizationMode>OptimizeForBuildTime</PostSharpOptimizationMode>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="3MBSLib">
+      <HintPath>..\..\ESME WorkBench\External References\x64\3MBSLib.dll</HintPath>
+    </Reference>
     <Reference Include="3MBWrapperClass">
       <HintPath>..\..\ESME WorkBench\External References\x64\3MBWrapperClass.dll</HintPath>
     </Reference>

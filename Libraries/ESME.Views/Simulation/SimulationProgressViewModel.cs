@@ -15,9 +15,6 @@ namespace ESME.Views.Simulation
 
         public TimeSpan TimeStepSize { get; set; }
         public Window Window { get; set; }
-        
-
-       
 
         public SimulationProgressViewModel() { TimeStepSize = new TimeSpan(0, 0, 1, 0); }
 
@@ -45,8 +42,8 @@ namespace ESME.Views.Simulation
             }
         }
 
-        [Initialize("Press start to begin")] public string SimulationProgressText { get; set; }
-
+        [Initialize("Press start to begin")]
+        public string SimulationProgressText { get; set; }
 
         #region CancelCommand
         public SimpleCommand<object, object> CancelCommand
@@ -69,7 +66,8 @@ namespace ESME.Views.Simulation
 
         SimpleCommand<object, object> _start;
 
-        [Initialize(true)]public bool IsStartCommandEnabled {get; set; }
+        [Initialize(true)]
+        public bool IsStartCommandEnabled { get; set; }
 
         void StartHandler(object o)
         {

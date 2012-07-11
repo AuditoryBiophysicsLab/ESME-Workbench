@@ -32,16 +32,17 @@ namespace ESME.Simulator
         //public Scenario Scenario { get { return _database.Scenarios.First(); } }
         readonly TransmissionLossCache _transmissionLossCache;
 
-        public static Simulation Create(Scenario scenario, string simulationDirectory)
+        public static Simulation Create(Scenario scenario, string simulationDirectory, Dispatcher dispatcher)
         {
             Directory.CreateDirectory(simulationDirectory);
-            var result = new Simulation(scenario, simulationDirectory);
+            var result = new Simulation(scenario, simulationDirectory, dispatcher);
             return result;
         }
 
-        Simulation(Scenario scenario, string simulationDirectory)
+        Simulation(Scenario scenario, string simulationDirectory, Dispatcher dispatcher)
         {
             _simulationDirectory = simulationDirectory;
+            Dispatcher = dispatcher;
             //_database = SimulationContext.OpenOrCreate(Path.Combine(_simulationDirectory, "simulation.db"));
             //_scenario = _database.ImportScenario(scenario);
             Scenario = scenario;
@@ -53,7 +54,7 @@ namespace ESME.Simulator
         }
 
         public Scenario Scenario { get; private set; }
-        public Dispatcher Dispatcher { get; set; }
+        public Dispatcher Dispatcher { get; private set; }
         readonly string _simulationDirectory;
         //readonly SimulationContext _database;
         readonly List<PlatformState[]> _platformStates = new List<PlatformState[]>();
@@ -93,20 +94,17 @@ namespace ESME.Simulator
             {
                 var behaviors = platform.PlatformBehavior.PlatformStates.ToArray();
                 _platformStates.Add(behaviors);
-                if (AnimateSimulation && Dispatcher != null)
-                {
-                    var curPlatform = platform;
-                    Dispatcher.InvokeIfRequired(() =>
+                var curPlatform = platform;
+                Dispatcher.InvokeIfRequired(() =>
+                                            {
+                                                var mapLayers = CreateFootprintMapLayers(curPlatform, behaviors[0]).ToArray();
+                                                _modeFootprintMapLayers.Add(mapLayers);
+                                                foreach (var layer in mapLayers)
                                                 {
-                                                    var mapLayers = CreateFootprintMapLayers(curPlatform, behaviors[0]).ToArray();
-                                                    _modeFootprintMapLayers.Add(mapLayers);
-                                                    foreach (var layer in mapLayers)
-                                                    {
-                                                        MediatorMessage.Send(MediatorMessage.AddMapLayer, layer);
-                                                        MediatorMessage.Send(MediatorMessage.HideMapLayer, layer);
-                                                    }
-                                                });
-                }
+                                                    MediatorMessage.Send(MediatorMessage.AddMapLayer, layer);
+                                                    MediatorMessage.Send(MediatorMessage.HideMapLayer, layer);
+                                                }
+                                            });
                 var actor = new Actor { ID = platform.ActorID, Platform = platform };
                 Actors.Add(actor);
             }
@@ -141,23 +139,20 @@ namespace ESME.Simulator
                     actorPositionRecords[platform.ActorID] = new ActorPositionRecord(platformState.PlatformLocation.Location, platformState.PlatformLocation.Depth);
                     foreach (var activeMode in platformState.ModeActiveTimes.Keys)
                     {
-                        if (AnimateSimulation && Dispatcher != null)
+                        var platformModeLayers = _modeFootprintMapLayers[Scenario.Platforms.IndexOf(platform)];
+                        var activeModeLayerName = string.Format("{0}-footprint", activeMode.Guid);
+                        var curModeLayer = (from l in platformModeLayers
+                                            where l.Name == activeModeLayerName
+                                            select l).FirstOrDefault();
+                        if (curModeLayer != null)
                         {
-                            var platformModeLayers = _modeFootprintMapLayers[Scenario.Platforms.IndexOf(platform)];
-                            var activeModeLayerName = string.Format("{0}-footprint", activeMode.Guid);
-                            var curModeLayer = (from l in platformModeLayers
-                                                where l.Name == activeModeLayerName
-                                                select l).FirstOrDefault();
-                            if (curModeLayer != null)
-                            {
-                                UpdateFootprintMapLayer(activeMode, platformState, curModeLayer);
-                                var isActive = platformState.ModeActiveTimes[activeMode].Ticks > 0;
-                                Dispatcher.InvokeIfRequired(() =>
-                                                            {
-                                                                MediatorMessage.Send(isActive ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, curModeLayer);
-                                                                MediatorMessage.Send(MediatorMessage.RefreshMapLayer, curModeLayer);
-                                                            });
-                            }
+                            UpdateFootprintMapLayer(activeMode, platformState, curModeLayer);
+                            var isActive = platformState.ModeActiveTimes[activeMode].Ticks > 0;
+                            Dispatcher.InvokeIfRequired(() =>
+                                                        {
+                                                            MediatorMessage.Send(AnimateSimulation && isActive ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, curModeLayer);
+                                                            MediatorMessage.Send(MediatorMessage.RefreshMapLayer, curModeLayer);
+                                                        });
                         }
                         var mode = activeMode;
                         var platformLocation = platformState.PlatformLocation.Location;
@@ -230,14 +225,7 @@ namespace ESME.Simulator
                 //var distance = Scenario.ScenarioSpecies[0].Animat.Locations[0].DistanceKilometers(firstAnimatPosition);
                 //if (distance > 0.01) Debug.WriteLine(string.Format("{0}: First animat has moved {1:0.##} km from initial location", DateTime.Now, distance));
                 //Debug.WriteLine(string.Format("{0}: Finished time step {1} of {2}: {3:0%} complete", DateTime.Now, timeStepIndex, timeStepCount, Math.Round((float)timeStepIndex / timeStepCount, 3)));
-                if (AnimateSimulation && Dispatcher != null)
-                    Dispatcher.InvokeIfRequired(() =>
-                                                {
-                                                    foreach (var species in Scenario.ScenarioSpecies)
-                                                    {
-                                                        species.UpdateMapLayers();
-                                                    }
-                                                });
+                if (AnimateSimulation) Dispatcher.InvokeIfRequired(() => { foreach (var species in Scenario.ScenarioSpecies) species.UpdateMapLayers(); });
                 if (token.IsCancellationRequested) break;
             }
             foreach (var layer in _modeFootprintMapLayers.SelectMany(layerSet => layerSet))
@@ -270,7 +258,7 @@ namespace ESME.Simulator
                 {
                     Name = string.Format("{0}-footprint", mode.Guid),
                     LineColor = Colors.Red,
-                    AreaColor = Color.FromArgb(32, 255, 0, 0),
+                    AreaColor = Color.FromArgb(64, 255, 0, 0),
                     LineWidth = 2f,
                 };
                 UpdateFootprintMapLayer(mode, state, mapLayer);

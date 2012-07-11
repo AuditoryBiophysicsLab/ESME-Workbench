@@ -6,69 +6,73 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Simulation="clr-namespace:ESME.Views.Simulation"
         Title="{Binding Simulation.Scenario.Name,
-                        StringFormat=Scenario Name: {0}}"
-        Width="300"
+                        StringFormat=Scenario: {0}}"
         d:DataContext="{d:DesignInstance Simulation:SimulationProgressViewModel}"
         ResizeMode="NoResize"
-        SizeToContent="Height"
+        SizeToContent="WidthAndHeight"
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
-    <DockPanel LastChildFill="True">
-        <StackPanel Margin="5"
-                    DockPanel.Dock="Top"
-                    Orientation="Vertical">
-            <Grid Margin="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0"
-                           VerticalAlignment="Center"
-                           IsEnabled="{Binding IsStartCommandEnabled}"
-                           Text="Time Step Length:"
-                           TextAlignment="Left" />
-                <Controls:TimePicker Grid.Column="1"
-                                     IsEnabled="{Binding IsStartCommandEnabled}"
-                                     SelectedTime="{Binding TimeStepSize,
-                                                            Mode=TwoWay}"
-                                     ToolTip="Length of simulated time the scenario runs" />
+    <Window.Resources>
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="5 0 5 0" />
+            <Setter Property="Height" Value="22" />
+        </Style>
+    </Window.Resources>
+    <StackPanel Grid.IsSharedSizeScope="True" Orientation="Vertical">
+        <Grid Margin="0 5 0 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
+                <ColumnDefinition Width="*" SharedSizeGroup="ValueColumn" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       IsEnabled="{Binding IsStartCommandEnabled}"
+                       Style="{StaticResource LabelStyle}"
+                       Text="Time Step Length:"
+                       TextAlignment="Left" />
+            <Controls:TimePicker Grid.Column="1"
+                                 Margin="-8 -5 5 0"
+                                 HorizontalAlignment="Left"
+                                 VerticalAlignment="Top"
+                                 IsEnabled="{Binding IsStartCommandEnabled}"
+                                 SelectedTime="{Binding TimeStepSize,
+                                                        Mode=TwoWay}"
+                                 ToolTip="Length of simulated time the scenario runs" />
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
+                <ColumnDefinition Width="*" SharedSizeGroup="ValueColumn" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       IsEnabled="{Binding IsStartCommandEnabled}"
+                       Style="{StaticResource LabelStyle}"
+                       Text="Animate Display:"
+                       ToolTip="Show movement of animals and platforms on map" />
+            <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding Simulation.AnimateSimulation}" />
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
+                <ColumnDefinition Width="*" SharedSizeGroup="ValueColumn" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" HorizontalAlignment="Right" Style="{StaticResource LabelStyle}" Text="Simulation progress:" />
+            <Grid Grid.Column="1">
+                <ProgressBar Height="22" Margin="0 0 5 0" Value="{Binding Simulation.PercentProgress.PercentComplete}" />
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding SimulationProgressText}" />
             </Grid>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock IsEnabled="{Binding IsStartCommandEnabled}"
-                           Text="Animate Display"
-                           ToolTip="Show movement of animals and platforms on map" />
-                <Grid>
-                    <CheckBox Margin="90 0 0 0 "
-                              IsChecked="{Binding Simulation.AnimateSimulation}"
-                              IsEnabled="{Binding IsStartCommandEnabled}" />
-                </Grid>
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
+                <ColumnDefinition Width="*" SharedSizeGroup="ValueColumn" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="1" Margin="0 20 5 5" Orientation="Horizontal">
+                <Button Width="75" Height="22" Command="{Binding StartCommand}" Content="Start" />
+                <Button Width="75" Height="22" Command="{Binding CancelCommand}" Content="Cancel" />
             </StackPanel>
-
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Simulation progress: " />
-                <Grid>
-                    <ProgressBar Width="157"
-                                 Height="22"
-                                 Value="{Binding Simulation.PercentProgress.PercentComplete}" />
-                    <TextBlock HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               Text="{Binding SimulationProgressText}" />
-                </Grid>
-            </StackPanel>
-        </StackPanel>
-        <StackPanel HorizontalAlignment="Right"
-                    DockPanel.Dock="Bottom"
-                    Orientation="Horizontal">
-            <Button Width="75"
-                    Margin="0 20 0 0"
-                    HorizontalAlignment="Right"
-                    Command="{Binding CancelCommand}"
-                    Content="Cancel" />
-            <Button Width="75"
-                    Margin="0 20 0 0"
-                    HorizontalAlignment="Right"
-                    Command="{Binding StartCommand}"
-                    Content="Start" />
-        </StackPanel>
-    </DockPanel>
+        </Grid>
+    </StackPanel>
 </Window>
