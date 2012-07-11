@@ -1,7 +1,9 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Windows;
 using ESME;
 using ESME.Data;
 using ESMEWorkbench.ViewModels.TransmissionLoss;
@@ -78,10 +80,22 @@ namespace ESMEWorkbench.ViewModels.Main
             get
             {
                 return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(o =>
-                {
+                { //todo
+#if false 
+                    if (SimulationProgressViewModel != null)
+                    {
+                        if (_messageBox.ShowOkCancel("A simulation is currently running.  OK to halt this simulation and exit ESME?", MessageBoxImage.Question) == MessageBoxResult.Cancel)
+                        {
+                            ((CancelEventArgs)o.EventArgs).Cancel = true;
+                            return;
+                        }
+                        SimulationProgressViewModel.Simulation.Cancel();
+                    } 
+#endif
                     if (Database.Context.IsModified) Database.SaveChanges();
                     foreach (var popup in _openPopups.Where(popup => popup != null))
                         popup.Close();
+                    
                     MediatorMessage.Send(MediatorMessage.ApplicationClosing, true);
                     ESME.Globals.AppSettings.Save();
                 }));

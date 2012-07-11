@@ -1,10 +1,12 @@
 ﻿<Window x:Class="ESME.Views.Simulation.SimulationProgressView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Controls="clr-namespace:ESME.Views.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:Simulation="clr-namespace:ESME.Views.Simulation" xmlns:Controls="clr-namespace:ESME.Views.Controls"
-        Title="Scenario Simulator"
+        xmlns:Simulation="clr-namespace:ESME.Views.Simulation"
+        Title="{Binding Simulation.Scenario.Name,
+                        StringFormat=Scenario Name: {0}}"
         Width="300"
         d:DataContext="{d:DesignInstance Simulation:SimulationProgressViewModel}"
         ResizeMode="NoResize"
@@ -12,43 +14,61 @@
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <DockPanel LastChildFill="True">
-    <StackPanel Margin="5" Orientation="Vertical" DockPanel.Dock="Top">
-        <TextBlock Text="{Binding Simulation.Scenario.Name, StringFormat=Scenario Name: {0}}" />
+        <StackPanel Margin="5"
+                    DockPanel.Dock="Top"
+                    Orientation="Vertical">
             <Grid Margin="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0"                               
-                               VerticalAlignment="Center"
-                               Text="Time Step Length"
-                               TextAlignment="Right" IsEnabled="{Binding IsStartCommandEnabled}" />
-                <Controls:TimePicker Grid.Column="1" SelectedTime="{Binding TimeStepSize, Mode=TwoWay}" ToolTip="Length of simulated time the scenario runs" IsEnabled="{Binding IsStartCommandEnabled}"/>
-            </Grid>        
-        
-        <StackPanel Orientation="Horizontal">
-            <TextBlock Text="Simulation progress: " />
-            <Grid>
-                <ProgressBar Height="22" Width="157" Value="{Binding Simulation.PercentProgress.PercentComplete}" />
-                <TextBlock HorizontalAlignment="Center"
+                <TextBlock Grid.Column="0"
                            VerticalAlignment="Center"
-                           Text="{Binding SimulationProgressText}" />
+                           IsEnabled="{Binding IsStartCommandEnabled}"
+                           Text="Time Step Length:"
+                           TextAlignment="Left" />
+                <Controls:TimePicker Grid.Column="1"
+                                     IsEnabled="{Binding IsStartCommandEnabled}"
+                                     SelectedTime="{Binding TimeStepSize,
+                                                            Mode=TwoWay}"
+                                     ToolTip="Length of simulated time the scenario runs" />
             </Grid>
-        </StackPanel>       
-    </StackPanel>
-    <StackPanel HorizontalAlignment="Right"
-                Orientation="Horizontal"
-                DockPanel.Dock="Bottom">
-        <Button Width="75"
-                Margin="0 20 0 0"
-                HorizontalAlignment="Right"
-                Command="{Binding CancelCommand}"
-                Content="Cancel" />
-        <Button Width="75"
-                Margin="0 20 0 0"
-                HorizontalAlignment="Right"
-                Command="{Binding StartCommand}"
-                Content="Start" />
-    </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock IsEnabled="{Binding IsStartCommandEnabled}"
+                           Text="Animate Display"
+                           ToolTip="Show movement of animals and platforms on map" />
+                <Grid>
+                    <CheckBox Margin="90 0 0 0 "
+                              IsChecked="{Binding Simulation.AnimateSimulation}"
+                              IsEnabled="{Binding IsStartCommandEnabled}" />
+                </Grid>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Simulation progress: " />
+                <Grid>
+                    <ProgressBar Width="157"
+                                 Height="22"
+                                 Value="{Binding Simulation.PercentProgress.PercentComplete}" />
+                    <TextBlock HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Text="{Binding SimulationProgressText}" />
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel HorizontalAlignment="Right"
+                    DockPanel.Dock="Bottom"
+                    Orientation="Horizontal">
+            <Button Width="75"
+                    Margin="0 20 0 0"
+                    HorizontalAlignment="Right"
+                    Command="{Binding CancelCommand}"
+                    Content="Cancel" />
+            <Button Width="75"
+                    Margin="0 20 0 0"
+                    HorizontalAlignment="Right"
+                    Command="{Binding StartCommand}"
+                    Content="Start" />
+        </StackPanel>
     </DockPanel>
 </Window>
