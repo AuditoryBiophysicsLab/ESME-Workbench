@@ -52,6 +52,7 @@ namespace ESME.Scenarios
             get
             {
                 if (_speciesDefinitionFilePath != null) return _speciesDefinitionFilePath;
+                if (string.IsNullOrEmpty(SpeciesDefinitionFilename)) SpeciesDefinitionFilename = "generic_odontocete.spe";
                 if (string.IsNullOrEmpty(SpeciesDefinitionFilename)) throw new ApplicationException("SpeciesDefinitionFilename is not set");
                 _speciesDefinitionFilePath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().Location), "Species Definition Files", SpeciesDefinitionFilename);
                 if (!File.Exists(_speciesDefinitionFilePath)) throw new ApplicationException(string.Format("Species definition file \"{0}\" does not exist", _speciesDefinitionFilePath));
