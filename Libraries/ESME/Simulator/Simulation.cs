@@ -70,7 +70,6 @@ namespace ESME.Simulator
 
         public Task Start(TimeSpan timeStepSize)
         {
-            AnimateSimulation = true;
             TimeStepSize = timeStepSize;
             _cancellationTokenSource = new CancellationTokenSource();
             SimulationLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), timeStepSize, Scenario);
