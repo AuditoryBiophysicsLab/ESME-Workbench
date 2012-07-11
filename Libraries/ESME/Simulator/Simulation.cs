@@ -152,9 +152,10 @@ namespace ESME.Simulator
                             if (curModeLayer != null)
                             {
                                 UpdateFootprintMapLayer(activeMode, platformState, curModeLayer);
+                                var isActive = platformState.ModeActiveTimes[activeMode].Ticks > 0;
                                 Dispatcher.InvokeIfRequired(() =>
                                                             {
-                                                                MediatorMessage.Send(MediatorMessage.ShowMapLayer, curModeLayer);
+                                                                MediatorMessage.Send(isActive ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, curModeLayer);
                                                                 MediatorMessage.Send(MediatorMessage.RefreshMapLayer, curModeLayer);
                                                             });
                             }
@@ -200,6 +201,7 @@ namespace ESME.Simulator
                         bufferBlock.Completion.ContinueWith(t => actionBlock.Complete());
                     }
                 }
+
                 foreach (var species in Scenario.ScenarioSpecies)
                 {
                     for (var animatIndex = 0; animatIndex < species.Animat.Locations.Count; animatIndex++)
@@ -239,6 +241,8 @@ namespace ESME.Simulator
                                                 });
                 if (token.IsCancellationRequested) break;
             }
+            foreach (var layer in _modeFootprintMapLayers.SelectMany(layerSet => layerSet)) Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RemoveMapLayer, layer));
+            Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RefreshMap, true));
             logBuffer.Complete();
             logBlock.Completion.Wait();
             Shutdown3MB();
