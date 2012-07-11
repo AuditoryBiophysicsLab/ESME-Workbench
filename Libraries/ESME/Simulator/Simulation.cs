@@ -240,7 +240,11 @@ namespace ESME.Simulator
                                                 });
                 if (token.IsCancellationRequested) break;
             }
-            foreach (var layer in _modeFootprintMapLayers.SelectMany(layerSet => layerSet)) Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RemoveMapLayer, layer));
+            foreach (var layer in _modeFootprintMapLayers.SelectMany(layerSet => layerSet))
+            {
+                var curLayer = layer;
+                Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RemoveMapLayer, curLayer));
+            }
             Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RefreshMap, true));
             logBuffer.Complete();
             logBlock.Completion.Wait();
