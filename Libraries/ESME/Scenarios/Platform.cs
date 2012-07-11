@@ -164,6 +164,18 @@ namespace ESME.Scenarios
         }
         #endregion
 
+        PlatformBehavior _platformBehavior;
+        [NotMapped] public PlatformBehavior PlatformBehavior
+        {
+            get
+            {
+                if (_platformBehavior != null) return _platformBehavior;
+                _platformBehavior = new PlatformBehavior(this, new TimeSpan(0, 0, 1, 0), (int)((TimeSpan)Scenario.Duration).TotalMinutes);
+                return _platformBehavior;
+            }
+            set { _platformBehavior = value; }
+        }
+
         public void CreateMapLayers()
         {
             var mapLayer = new OverlayShapeMapLayer
@@ -172,8 +184,7 @@ namespace ESME.Scenarios
                 CustomLineStyle =
                     new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, LayerSettings.LineOrSymbolColor, (float)LayerSettings.LineOrSymbolSize)
             };
-            var behavior = new PlatformBehavior(this, new TimeSpan(0, 0, 1, 0), (int)((TimeSpan)Scenario.Duration).TotalMinutes);
-            var locations = behavior.PlatformStates.Select(p => p.PlatformLocation.Location).ToList();
+            var locations = PlatformBehavior.PlatformStates.Select(p => p.PlatformLocation.Location).ToList();
             mapLayer.AddLines(locations);
             mapLayer.Done();
             LayerSettings.MapLayerViewModel = mapLayer;

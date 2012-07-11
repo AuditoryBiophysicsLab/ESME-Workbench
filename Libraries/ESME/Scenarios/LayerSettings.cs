@@ -120,5 +120,11 @@ namespace ESME.Scenarios
             }
         }
         MapLayerViewModel _mapLayerViewModel;
+
+        public void RefreshMapLayer()
+        {
+            if (_mapLayerViewModel == null) return;
+            MediatorMessage.Send(MediatorMessage.RefreshMapLayer, _mapLayerViewModel);
+        }
     }
 }

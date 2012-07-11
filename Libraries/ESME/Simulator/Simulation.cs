@@ -8,8 +8,10 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using System.Windows.Media;
 using System.Windows.Threading;
 using ESME.Behaviors;
+using ESME.Mapping;
 using ESME.Model;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
@@ -54,8 +56,8 @@ namespace ESME.Simulator
         public Dispatcher Dispatcher { get; set; }
         readonly string _simulationDirectory;
         //readonly SimulationContext _database;
-        readonly List<PlatformBehavior> _platformBehaviors = new List<PlatformBehavior>();
         readonly List<PlatformState[]> _platformStates = new List<PlatformState[]>();
+        readonly List<OverlayShapeMapLayer[]> _modeFootprintMapLayers = new List<OverlayShapeMapLayer[]>();
         public List<Actor> Actors { get; private set; }
         public PercentProgress<Simulation> PercentProgress { get; private set; }
         public SimulationLog SimulationLog { get; private set; }
@@ -64,9 +66,11 @@ namespace ESME.Simulator
         public TimeSpan TimeStepSize { get; private set; }
         public ModeThresholdHistogram ModeThresholdHistogram { get; set; }
         //public SpeciesThresholdHistogram SpeciesThresholdHistogram { get; set; }
+        public bool AnimateSimulation { get; set; }
 
         public Task Start(TimeSpan timeStepSize)
         {
+            AnimateSimulation = true;
             TimeStepSize = timeStepSize;
             _cancellationTokenSource = new CancellationTokenSource();
             SimulationLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), timeStepSize, Scenario);
@@ -88,9 +92,22 @@ namespace ESME.Simulator
             Actors = new List<Actor>();
             foreach (var platform in Scenario.Platforms)
             {
-                var platformBehavior = new PlatformBehavior(platform, timeStepSize, timeStepCount);
-                _platformBehaviors.Add(platformBehavior);
-                _platformStates.Add(platformBehavior.PlatformStates.ToArray());
+                var behaviors = platform.PlatformBehavior.PlatformStates.ToArray();
+                _platformStates.Add(behaviors);
+                if (AnimateSimulation && Dispatcher != null)
+                {
+                    var curPlatform = platform;
+                    Dispatcher.InvokeIfRequired(() =>
+                                                {
+                                                    var mapLayers = CreateFootprintMapLayers(curPlatform, behaviors[0]).ToArray();
+                                                    _modeFootprintMapLayers.Add(mapLayers);
+                                                    foreach (var layer in mapLayers)
+                                                    {
+                                                        MediatorMessage.Send(MediatorMessage.AddMapLayer, layer);
+                                                        MediatorMessage.Send(MediatorMessage.HideMapLayer, layer);
+                                                    }
+                                                });
+                }
                 var actor = new Actor { ID = platform.ActorID, Platform = platform };
                 Actors.Add(actor);
             }
@@ -125,6 +142,23 @@ namespace ESME.Simulator
                     actorPositionRecords[platform.ActorID] = new ActorPositionRecord(platformState.PlatformLocation.Location, platformState.PlatformLocation.Depth);
                     foreach (var activeMode in platformState.ModeActiveTimes.Keys)
                     {
+                        if (AnimateSimulation && Dispatcher != null)
+                        {
+                            var platformModeLayers = _modeFootprintMapLayers[Scenario.Platforms.IndexOf(platform)];
+                            var activeModeLayerName = string.Format("{0}-footprint", activeMode.Guid);
+                            var curModeLayer = (from l in platformModeLayers
+                                                where l.Name == activeModeLayerName
+                                                select l).FirstOrDefault();
+                            if (curModeLayer != null)
+                            {
+                                UpdateFootprintMapLayer(activeMode, platformState, curModeLayer);
+                                Dispatcher.InvokeIfRequired(() =>
+                                                            {
+                                                                MediatorMessage.Send(MediatorMessage.ShowMapLayer, curModeLayer);
+                                                                MediatorMessage.Send(MediatorMessage.RefreshMapLayer, curModeLayer);
+                                                            });
+                            }
+                        }
                         var mode = activeMode;
                         var platformLocation = platformState.PlatformLocation.Location;
                         var thisPlatform = platform;
@@ -188,19 +222,19 @@ namespace ESME.Simulator
                 ModeThresholdHistogram.Process(timeStepRecord);
                 //SpeciesThresholdHistogram.Process(timeStepRecord);
                 logBuffer.Post(timeStepRecord);
-                // todo: when we have 3MB support, this is where we do the animat movement
+                // Wait for 3MB to finish moving the animats
                 moveTask.Wait();
+                // Pull in updated animat positions from 3MB for the next time step
                 UpdateAnimatPositions();
-                var distance = Scenario.ScenarioSpecies[0].Animat.Locations[0].DistanceKilometers(firstAnimatPosition);
-                if (distance > 0.01) Debug.WriteLine(string.Format("{0}: First animat has moved {1:0.##} km from initial location", DateTime.Now, distance));
-                Debug.WriteLine(string.Format("{0}: Finished time step {1} of {2}: {3:0%} complete", DateTime.Now, timeStepIndex, timeStepCount, Math.Round((float)timeStepIndex / timeStepCount, 3)));
-                if (Dispatcher != null)
+                //var distance = Scenario.ScenarioSpecies[0].Animat.Locations[0].DistanceKilometers(firstAnimatPosition);
+                //if (distance > 0.01) Debug.WriteLine(string.Format("{0}: First animat has moved {1:0.##} km from initial location", DateTime.Now, distance));
+                //Debug.WriteLine(string.Format("{0}: Finished time step {1} of {2}: {3:0%} complete", DateTime.Now, timeStepIndex, timeStepCount, Math.Round((float)timeStepIndex / timeStepCount, 3)));
+                if (AnimateSimulation && Dispatcher != null)
                     Dispatcher.InvokeIfRequired(() =>
                                                 {
                                                     foreach (var species in Scenario.ScenarioSpecies)
                                                     {
-                                                        species.RemoveMapLayers();
-                                                        species.CreateMapLayers();
+                                                        species.UpdateMapLayers();
                                                     }
                                                 });
                 if (token.IsCancellationRequested) break;
@@ -215,6 +249,42 @@ namespace ESME.Simulator
             ModeThresholdHistogram.Write(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Simulation Test",Scenario.Name+".xml"), Scenario.Name, Scenario.Location.Name);
             WriteMatlabFiles();
             //SpeciesThresholdHistogram.Display();
+        }
+
+        static List<OverlayShapeMapLayer> CreateFootprintMapLayers(Platform platform, PlatformState state)
+        {
+            var result = new List<OverlayShapeMapLayer>();
+            foreach (var mode in from source in platform.Sources
+                                 from mode in source.Modes
+                                 orderby mode.ModeID
+                                 select mode)
+            {
+                var mapLayer = new OverlayShapeMapLayer
+                {
+                    Name = string.Format("{0}-footprint", mode.Guid),
+                    LineColor = Colors.Red,
+                    AreaColor = Color.FromArgb(32, 255, 0, 0),
+                    LineWidth = 2f,
+                };
+                UpdateFootprintMapLayer(mode, state, mapLayer);
+                result.Add(mapLayer);
+            }
+            return result;
+        }
+
+        static void UpdateFootprintMapLayer(Mode mode, PlatformState state, OverlayShapeMapLayer mapLayer)
+        {
+            mapLayer.Clear();
+            var initialGeo = state.PlatformLocation.Location;
+            var footprintArcStartBearing = state.PlatformLocation.Course + mode.RelativeBeamAngle - (Math.Abs(mode.HorizontalBeamWidth / 2));
+            var footprintArcEndBearing = state.PlatformLocation.Course + mode.RelativeBeamAngle + (Math.Abs(mode.HorizontalBeamWidth / 2));
+            var geos = new List<Geo>();
+            if (mode.HorizontalBeamWidth < 360) geos.Add(initialGeo);
+            for (var arcPointBearing = footprintArcStartBearing; arcPointBearing < footprintArcEndBearing; arcPointBearing++) geos.Add(initialGeo.Offset(Geo.MetersToRadians(mode.MaxPropagationRadius), Geo.DegreesToRadians(arcPointBearing)));
+            geos.Add(initialGeo.Offset(Geo.MetersToRadians(mode.MaxPropagationRadius), Geo.DegreesToRadians(footprintArcEndBearing)));
+            if (mode.HorizontalBeamWidth < 360) geos.Add(initialGeo);
+            mapLayer.AddPolygon(geos);
+            mapLayer.Done();
         }
 
         void WriteMatlabFiles()
@@ -333,20 +403,6 @@ namespace ESME.Simulator
                     var position = positions[contextIndex];
                     species.Animat.Locations[_animatContext[mbsIndex][contextIndex].SpeciesAnimatIndex] = new Geo<float>(position.latitude, position.longitude) { Data = -(float)position.depth };
                 }
-            }
-        }
-
-        void MoveAnimats()
-        {
-            foreach (var mbs in _mbs) 
-            {
-                var result = mbs.RunScenarioNumIterations((int)Math.Round(TimeStepSize.TotalSeconds));
-                if (result != mbsRESULT.OK)
-                {
-                    mbs.AbortRun();
-                    throw new AnimatInterfaceMMBSException("C3mbs::RunScenarioNumIterations FATAL error: " + mbs.ResultToTc(result));
-                }
-                while (mbsRUNSTATE.RUNNING == mbs.GetRunState()) Thread.Sleep(1);
             }
         }
 

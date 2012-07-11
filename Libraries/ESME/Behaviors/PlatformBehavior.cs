@@ -42,7 +42,18 @@ namespace ESME.Behaviors
         public Platform Platform { get; private set; }
         public bool Display { get; set; }
 
-        public IEnumerable<PlatformState> PlatformStates
+        List<PlatformState> _platformStates;
+        public List<PlatformState> PlatformStates
+        {
+            get
+            {
+                if (_platformStates != null) return _platformStates;
+                _platformStates = PlatformStatesEnumerable.ToList();
+                return _platformStates;
+            }
+        }
+
+        IEnumerable<PlatformState> PlatformStatesEnumerable
         {
             get
             {

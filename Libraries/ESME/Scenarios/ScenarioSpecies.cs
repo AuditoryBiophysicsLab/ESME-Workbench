@@ -130,6 +130,21 @@ namespace ESME.Scenarios
             if (Scenario.ShowAllSpecies) LayerSettings.IsChecked = true;
         }
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
+
+        public void UpdateMapLayers()
+        {
+            if (LayerSettings == null || LayerSettings.MapLayerViewModel == null)
+            {
+                CreateMapLayers();
+                return;
+            }
+            var pointLayer = (OverlayShapeMapLayer)LayerSettings.MapLayerViewModel;
+            pointLayer.Clear();
+            pointLayer.AddPoints(Animat.Locations.Select(l => new Geo(l.Latitude, l.Longitude)).ToList());
+            pointLayer.Done();
+            LayerSettings.RefreshMapLayer();
+        }
+
         public void Delete()
         {
             IsDeleted = true;
