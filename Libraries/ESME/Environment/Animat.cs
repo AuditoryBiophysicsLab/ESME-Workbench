@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using ESME.Model;
 using ESME.Scenarios;
 using HRC.Navigation;
+using mbs;
 using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.Environment
@@ -64,7 +67,7 @@ namespace ESME.Environment
             return result;
         }
 
-        public async static Task<Animat> SeedAsync(ScenarioSpecies species, GeoRect geoRect, Bathymetry bathymetry)
+        public async static Task<Animat> SeedAsyncWithout3MB(ScenarioSpecies species, GeoRect geoRect, Bathymetry bathymetry)
         {
             var bounds = new GeoArray(geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest);
             var result = new Animat { ScenarioSpecies = species };
@@ -99,6 +102,70 @@ namespace ESME.Environment
             }
             transformManyBlock.Complete();
             await transformManyBlock.Completion;
+            IList<Geo<float>> animatGeos;
+            if (bufferBlock.TryReceiveAll(out animatGeos))
+                result.Locations.AddRange(animatGeos);
+            return result;
+        }
+
+        public async static Task<Animat> SeedAsync(ScenarioSpecies species, GeoRect geoRect, Bathymetry bathymetry)
+        {
+            var yxzFileName = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + ".txt");
+            bathymetry.ToYXZ(yxzFileName, -1);
+            var mbs = new C3mbs();
+            mbsRESULT mbsResult;
+            if (mbsRESULT.OK != (mbsResult = mbs.SetOutputDirectory(Path.GetTempPath())))
+                throw new AnimatInterfaceMMBSException("SetOutputDirectory Error:" + mbs.ResultToTc(mbsResult));
+            var config = mbs.GetConfiguration();
+            config.enabled = false;             // binary output enabled/disabled
+            config.durationLess = true;         // make sure we're in durationless mode.
+            mbs.SetConfiguration(config);
+            mbsResult = mbs.LoadBathymetryFromTextFile(yxzFileName);
+            if (mbsRESULT.OK != mbsResult) throw new AnimatInterfaceMMBSException("Bathymetry failed to load: " + mbs.ResultToTc(mbsResult));
+            mbsResult = mbs.AddSpecies(species.SpeciesDefinitionFilePath);
+            if (mbsRESULT.OK != mbsResult) throw new AnimatInterfaceMMBSException(string.Format("C3mbs::AddSpecies FATAL error {0} for species {1}", mbs.ResultToTc(mbsResult), species.SpeciesDefinitionFilePath));
+
+            var bounds = new GeoArray(geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest);
+            var result = new Animat { ScenarioSpecies = species };
+            var radius = Planet.wgs84_earthEquatorialRadiusMeters_D / 1000;
+            var area = bounds.Area * radius * radius;
+            //Debug.WriteLine("Area: {0}",area);
+            var transformManyBlock = new TransformManyBlock<int, Geo<float>>(count =>
+            {
+                var geos = new List<Geo<float>>();
+                for (var i = 0; i < count; i++)
+                {
+                    var location = bounds.RandomLocationWithinPerimeter();
+                    var depth = bathymetry.Samples.GetNearestPointAsync(location).Result.Data;
+                    mbsRESULT retval;
+                    lock (mbs) retval = mbs.AddIndividualAnimat(0, new mbsPosition { latitude = location.Latitude, longitude = location.Longitude, depth = 0 });
+                    if (mbsRESULT.OK == retval) geos.Add(new Geo<float>(location.Latitude, location.Longitude, (float)(depth * Random.NextDouble())));
+                }
+                return geos;
+            }, new ExecutionDataflowBlockOptions
+            {
+                TaskScheduler = TaskScheduler.Default,
+                BoundedCapacity = -1,
+                MaxDegreeOfParallelism = -1,
+            });
+            var bufferBlock = new BufferBlock<Geo<float>>();
+            transformManyBlock.LinkTo(bufferBlock);
+            var population = (int)Math.Round(area * species.PopulationDensity);
+            result.TotalAnimats = population;
+            const int blockSize = 100;
+            while (population > 0)
+            {
+                transformManyBlock.Post(population > blockSize ? blockSize : population);
+                population -= blockSize;
+            }
+            transformManyBlock.Complete();
+            await transformManyBlock.Completion;
+            mbsResult = mbs.InitializeRun();
+            if (mbsRESULT.OK == mbsResult) while (mbsRUNSTATE.INITIALIZING == mbs.GetRunState()) Thread.Sleep(1);
+            else throw new AnimatInterfaceMMBSException("C3mbs::Initialize FATAL error " + mbs.ResultToTc(mbsResult));
+            mbsResult = mbs.FinishRun();
+            if (mbsRESULT.OK != mbsResult) throw new AnimatInterfaceMMBSException("C3mbs::FinishRun FATAL error " + mbs.ResultToTc(mbsResult));
+
             IList<Geo<float>> animatGeos;
             if (bufferBlock.TryReceiveAll(out animatGeos))
                 result.Locations.AddRange(animatGeos);

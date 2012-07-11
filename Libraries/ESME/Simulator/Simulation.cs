@@ -242,7 +242,7 @@ namespace ESME.Simulator
         void Initialize3MB()
         {
             var nextSpeciesIndex = 0;
-            var yxzFileName = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetTempFileName()) + ".txt");
+            var yxzFileName = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + ".txt");
             Scenario.BathymetryData.ToYXZ(yxzFileName, -1);
             var contexts = new List<AnimatContext>();
             foreach (var species in Scenario.ScenarioSpecies)
@@ -291,7 +291,7 @@ namespace ESME.Simulator
                 //Debug.WriteLine("Thread {0} contains {1} animats", mbsIndex, context.Count);
                 for (var animatIndex = 0; animatIndex < context.Count; animatIndex++)
                 //for (var animatIndex = 0; animatIndex < 1; animatIndex++)
-                    {
+                {
                     var species = context[animatIndex].Species;
                     var geo = species.Animat.Locations[context[animatIndex].SpeciesAnimatIndex];
                     _animatContext[mbsIndex][animatIndex] = new AnimatContext { Species = species, SpeciesAnimatIndex = context[animatIndex].SpeciesAnimatIndex };
@@ -302,26 +302,12 @@ namespace ESME.Simulator
                 mbs.SetDuration((int)((TimeSpan)Scenario.Duration).TotalSeconds);
                 result = mbs.SaveScenario(Path.Combine(_simulationDirectory, "test.sce"));
                 if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException(string.Format("C3mbs::SaveScenario FATAL error {0}", mbs.ResultToTc(result)));
-#if true
                 //----------------------------------------------------------------------//
                 // Initialize the scenario.
                 //----------------------------//
-                result = mbs.InitializeRun();
-                if (mbsRESULT.OK == result)
-                {
-                    // Wait for reach 3mb instance to finish initialzing (run state wont
-                    // be mbsRUNSTATE.INITIALIZING) before initializing the instance.
-                    mbsRUNSTATE runState;
-                    do
-                    {
-                        Thread.Sleep(20);
-                        runState = mbs.GetRunState();
-                    } while (mbsRUNSTATE.INITIALIZING == runState);
-                }
-                else
-                {
-                    throw new AnimatInterfaceMMBSException("C3mbs::Initialize FATAL error " + mbs.ResultToTc(result));
-                }
+#if true
+                if (mbsRESULT.OK == result) while (mbsRUNSTATE.INITIALIZING == mbs.GetRunState()) Thread.Sleep(1);
+                else throw new AnimatInterfaceMMBSException("C3mbs::Initialize FATAL error " + mbs.ResultToTc(result));
 #else
                 if (mbsRESULT.OK != (result = mbs.RunScenarioNumIterations(0))) throw new AnimatInterfaceMMBSException("C3mbs::RunScenarioNumIterations FATAL error " + _mbs[mbsIndex].ResultToTc(result));
                 while (mbs.GetRunState() == mbsRUNSTATE.INITIALIZING) Thread.Sleep(1);
