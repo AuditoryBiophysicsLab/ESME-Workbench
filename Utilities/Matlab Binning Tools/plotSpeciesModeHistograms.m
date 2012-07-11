@@ -47,7 +47,7 @@ for i=1:length(s.AnimatSpecies.Species)
     %subplot(2,1,1),bar(exposures,'stacked');
     %subplot(2,1,2),bar(energy,'stacked');
     legend(legendNames);
-    title(['Location: ', s.Location.Name, ' Scenario: ',s.Scenario.Name, ' Species: ', thisSpecies.Name]);
+    title(['Location: ', s.Location.Name, '| Scenario: ',s.Scenario.Name, '| Species: ', thisSpecies.Name]);
     
 end
 end
