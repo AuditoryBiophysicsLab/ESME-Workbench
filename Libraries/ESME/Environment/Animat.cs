@@ -160,9 +160,9 @@ namespace ESME.Environment
             }
             transformManyBlock.Complete();
             await transformManyBlock.Completion;
-            mbsResult = mbs.InitializeRun();
-            if (mbsRESULT.OK == mbsResult) while (mbsRUNSTATE.INITIALIZING == mbs.GetRunState()) Thread.Sleep(1);
-            else throw new AnimatInterfaceMMBSException("C3mbs::Initialize FATAL error " + mbs.ResultToTc(mbsResult));
+            //mbsResult = mbs.InitializeRun();
+            //if (mbsRESULT.OK == mbsResult) while (mbsRUNSTATE.INITIALIZING == mbs.GetRunState()) Thread.Sleep(1);
+            //else throw new AnimatInterfaceMMBSException("C3mbs::Initialize FATAL error " + mbs.ResultToTc(mbsResult));
             mbsResult = mbs.FinishRun();
             if (mbsRESULT.OK != mbsResult) throw new AnimatInterfaceMMBSException("C3mbs::FinishRun FATAL error " + mbs.ResultToTc(mbsResult));
 
