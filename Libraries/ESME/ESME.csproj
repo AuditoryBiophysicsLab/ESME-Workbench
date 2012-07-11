@@ -57,7 +57,7 @@
     <PostSharpOptimizationMode>OptimizeForBuildTime</PostSharpOptimizationMode>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="3MBWrapperClass, Version=1.0.4266.14522, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="3MBWrapperClass">
       <HintPath>..\..\ESME WorkBench\External References\x64\3MBWrapperClass.dll</HintPath>
     </Reference>
     <Reference Include="AsyncCtpLibrary">

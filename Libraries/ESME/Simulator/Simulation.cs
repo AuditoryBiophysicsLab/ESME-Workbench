@@ -115,6 +115,7 @@ namespace ESME.Simulator
 
             for (var timeStepIndex = 0; timeStepIndex < timeStepCount; timeStepIndex++)
             {
+                var moveTask = MoveAnimatsAsync();
                 var actorPositionRecords = new ActorPositionRecord[actorCount];
                 var actionBlockCompletions = new List<Task>();
                 var bufferBlocks = new List<BufferBlock<int>>();
@@ -188,7 +189,8 @@ namespace ESME.Simulator
                 //SpeciesThresholdHistogram.Process(timeStepRecord);
                 logBuffer.Post(timeStepRecord);
                 // todo: when we have 3MB support, this is where we do the animat movement
-                MoveAnimats();
+                moveTask.Wait();
+                UpdateAnimatPositions();
                 var distance = Scenario.ScenarioSpecies[0].Animat.Locations[0].DistanceKilometers(firstAnimatPosition);
                 if (distance > 0.01) Debug.WriteLine(string.Format("{0}: First animat has moved {1:0.##} km from initial location", DateTime.Now, distance));
                 Debug.WriteLine(string.Format("{0}: Finished time step {1} of {2}: {3:0%} complete", DateTime.Now, timeStepIndex, timeStepCount, Math.Round((float)timeStepIndex / timeStepCount, 3)));
@@ -256,30 +258,32 @@ namespace ESME.Simulator
                     SpeciesAnimatIndex = speciesIndex
                 }));
             }
+            //var splitContext = contexts.Split(System.Environment.ProcessorCount).ToList();
             var splitContext = contexts.Split(1).ToList();
             _mbs = new C3mbs[splitContext.Count];
             _animatContext = new AnimatContext[splitContext.Count][];
             for (var mbsIndex = 0; mbsIndex < splitContext.Count; mbsIndex++)
             {
                 mbsRESULT result;
-                _mbs[mbsIndex] = new C3mbs();
+                var mbs = new C3mbs();
+                _mbs[mbsIndex] = mbs;
                 
                 // set the output directory
-                if (mbsRESULT.OK != (result = _mbs[mbsIndex].SetOutputDirectory(_simulationDirectory))) 
-                    throw new AnimatInterfaceMMBSException("SetOutputDirectory Error:" + _mbs[mbsIndex].ResultToTc(result));
+                if (mbsRESULT.OK != (result = mbs.SetOutputDirectory(_simulationDirectory)))
+                    throw new AnimatInterfaceMMBSException("SetOutputDirectory Error:" + mbs.ResultToTc(result));
 
-                var config = _mbs[mbsIndex].GetConfiguration();
+                var config = mbs.GetConfiguration();
                 config.seedValue = (uint)mbsIndex;  // Probably wise to set each 3mb instance to a unique randomizer seed value.
                 config.enabled = false;             // binary output enabled/disabled
                 config.durationLess = true;         // make sure we're in durationless mode.
-                _mbs[mbsIndex].SetConfiguration(config);
-                result = _mbs[mbsIndex].LoadBathymetryFromTextFile(yxzFileName);
-                if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException("Bathymetry failed to load: " + _mbs[mbsIndex].ResultToTc(result));
+                mbs.SetConfiguration(config);
+                result = mbs.LoadBathymetryFromTextFile(yxzFileName);
+                if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException("Bathymetry failed to load: " + mbs.ResultToTc(result));
 
                 foreach (var speciesFilePath in _speciesNameToIndex.Keys)
                 {
-                    result = _mbs[mbsIndex].AddSpecies(speciesFilePath);
-                    if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException(string.Format("C3mbs::AddSpecies FATAL error {0} for species {1}", _mbs[mbsIndex].ResultToTc(result), speciesFilePath));
+                    result = mbs.AddSpecies(speciesFilePath);
+                    if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException(string.Format("C3mbs::AddSpecies FATAL error {0} for species {1}", mbs.ResultToTc(result), speciesFilePath));
                 }
                 var context = splitContext[mbsIndex].ToList();
                 _animatContext[mbsIndex] = new AnimatContext[context.Count];
@@ -291,18 +295,18 @@ namespace ESME.Simulator
                     var species = context[animatIndex].Species;
                     var geo = species.Animat.Locations[context[animatIndex].SpeciesAnimatIndex];
                     _animatContext[mbsIndex][animatIndex] = new AnimatContext { Species = species, SpeciesAnimatIndex = context[animatIndex].SpeciesAnimatIndex };
-                    result = _mbs[mbsIndex].AddIndividualAnimat(context[animatIndex].SpeciesInstanceIndex, new mbsPosition { latitude = geo.Latitude, longitude = geo.Longitude, depth = 0 });
-                    if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException(string.Format("C3mbs::AddIndividualAnimat FATAL error {0}", _mbs[mbsIndex].ResultToTc(result)));
+                    result = mbs.AddIndividualAnimat(context[animatIndex].SpeciesInstanceIndex, new mbsPosition { latitude = geo.Latitude, longitude = geo.Longitude, depth = 0 });
+                    if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException(string.Format("C3mbs::AddIndividualAnimat FATAL error {0}", mbs.ResultToTc(result)));
                     //Debug.WriteLine("Animat {0} lat: {1:0.####} lon: {2:0.####} depth: {3:0.#}, bathy: {4:0.#}", animatIndex, geo.Latitude, geo.Longitude, geo.Data, Scenario.BathymetryData.Samples.GetNearestPoint(geo).Data);
                 }
-                _mbs[mbsIndex].SetDuration((int)((TimeSpan)Scenario.Duration).TotalSeconds);
-                result = _mbs[mbsIndex].SaveScenario(Path.Combine(_simulationDirectory, "test.sce"));
-                if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException(string.Format("C3mbs::SaveScenario FATAL error {0}", _mbs[mbsIndex].ResultToTc(result)));
+                mbs.SetDuration((int)((TimeSpan)Scenario.Duration).TotalSeconds);
+                result = mbs.SaveScenario(Path.Combine(_simulationDirectory, "test.sce"));
+                if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException(string.Format("C3mbs::SaveScenario FATAL error {0}", mbs.ResultToTc(result)));
 #if true
                 //----------------------------------------------------------------------//
                 // Initialize the scenario.
                 //----------------------------//
-                result = _mbs[mbsIndex].InitializeRun();
+                result = mbs.InitializeRun();
                 if (mbsRESULT.OK == result)
                 {
                     // Wait for reach 3mb instance to finish initialzing (run state wont
@@ -311,16 +315,16 @@ namespace ESME.Simulator
                     do
                     {
                         Thread.Sleep(20);
-                        runState = _mbs[mbsIndex].GetRunState();
+                        runState = mbs.GetRunState();
                     } while (mbsRUNSTATE.INITIALIZING == runState);
                 }
                 else
                 {
-                    throw new AnimatInterfaceMMBSException("C3mbs::Initialize FATAL error " + _mbs[mbsIndex].ResultToTc(result));
+                    throw new AnimatInterfaceMMBSException("C3mbs::Initialize FATAL error " + mbs.ResultToTc(result));
                 }
 #else
-                if (mbsRESULT.OK != (result = _mbs[mbsIndex].RunScenarioNumIterations(0))) throw new AnimatInterfaceMMBSException("C3mbs::RunScenarioNumIterations FATAL error " + _mbs[mbsIndex].ResultToTc(result));
-                while (_mbs[mbsIndex].GetRunState() == mbsRUNSTATE.INITIALIZING) Thread.Sleep(1);
+                if (mbsRESULT.OK != (result = mbs.RunScenarioNumIterations(0))) throw new AnimatInterfaceMMBSException("C3mbs::RunScenarioNumIterations FATAL error " + _mbs[mbsIndex].ResultToTc(result));
+                while (mbs.GetRunState() == mbsRUNSTATE.INITIALIZING) Thread.Sleep(1);
 #endif
             }
             UpdateAnimatPositions();
@@ -348,18 +352,33 @@ namespace ESME.Simulator
 
         void MoveAnimats()
         {
-            for (var mbsIndex = 0; mbsIndex < _mbs.Length; mbsIndex++)
+            foreach (var mbs in _mbs) 
             {
-                var result = _mbs[mbsIndex].RunScenarioNumIterations((int)Math.Round(TimeStepSize.TotalSeconds));
+                var result = mbs.RunScenarioNumIterations((int)Math.Round(TimeStepSize.TotalSeconds));
                 if (result != mbsRESULT.OK)
                 {
-                    _mbs[mbsIndex].AbortRun();
-                    throw new AnimatInterfaceMMBSException("C3mbs::RunScenarioNumIterations FATAL error: " + _mbs[mbsIndex].ResultToTc(result));
+                    mbs.AbortRun();
+                    throw new AnimatInterfaceMMBSException("C3mbs::RunScenarioNumIterations FATAL error: " + mbs.ResultToTc(result));
                 }
-                while (mbsRUNSTATE.RUNNING == _mbs[mbsIndex].GetRunState()) Thread.Sleep(1);
+                while (mbsRUNSTATE.RUNNING == mbs.GetRunState()) Thread.Sleep(1);
             }
+        }
 
-            UpdateAnimatPositions();
+        async Task MoveAnimatsAsync()
+        {
+            var actionBlock = new ActionBlock<C3mbs>(mbs =>
+            {
+                var result = mbs.RunScenarioNumIterations((int)Math.Round(TimeStepSize.TotalSeconds));
+                if (result != mbsRESULT.OK)
+                {
+                    mbs.AbortRun();
+                    throw new AnimatInterfaceMMBSException("C3mbs::RunScenarioNumIterations FATAL error: " + mbs.ResultToTc(result));
+                }
+                while (mbsRUNSTATE.RUNNING == mbs.GetRunState()) TaskEx.Yield();
+            }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = -1 });
+            foreach (var mbs in _mbs) actionBlock.Post(mbs);
+            actionBlock.Complete();
+            await actionBlock.Completion;
         }
 
         void Shutdown3MB()
