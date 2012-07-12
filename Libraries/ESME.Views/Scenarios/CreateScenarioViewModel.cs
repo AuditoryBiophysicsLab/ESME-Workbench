@@ -30,6 +30,7 @@ namespace ESME.Views.Scenarios
     {
         public CreateScenarioViewModel()
         {
+            Duration = new TimeSpan(0,1,0,0);
             ValidationRules.Add(new ValidationRule
             {
                 PropertyName = "ScenarioName",
