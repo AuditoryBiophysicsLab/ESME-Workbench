@@ -560,6 +560,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                            perimeter.Scenario = Scenario;
                                            Scenario.Perimeters.Add(perimeter);
                                            perimeter.CreateMapLayers();
+                                           perimeter.LayerSettings.IsChecked = true;
                                        });
             }
             catch (Exception e) { _messageBox.ShowError(e.Message); }
