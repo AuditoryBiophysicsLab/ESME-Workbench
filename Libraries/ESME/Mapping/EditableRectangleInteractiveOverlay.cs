@@ -43,7 +43,9 @@ namespace ESME.Mapping
                     var fixedPointIndex = GetFixedPointIndex(polygonShape, sourceControlPoint);
                     var fixedPointShape = new PointShape(polygonShape.OuterRing.Vertices[fixedPointIndex]);
                     var newRectangleShape = new LineShape(new[] { new Vertex(fixedPointShape), new Vertex(targetControlPoint) }).GetBoundingBox();
-                    return new Feature(newRectangleShape.GetWellKnownBinary(), sourceFeature.Id, sourceFeature.ColumnValues);
+                    var feature = new Feature(newRectangleShape.GetWellKnownBinary(), sourceFeature.Id, sourceFeature.ColumnValues);
+                    OnFeatureResized(new FeatureResizedEditInteractiveOverlayEventArgs(feature));
+                    return feature;
                 }
             }
 
