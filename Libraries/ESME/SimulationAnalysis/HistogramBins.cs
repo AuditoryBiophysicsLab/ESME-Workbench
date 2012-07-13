@@ -59,7 +59,7 @@ namespace ESME.SimulationAnalysis
             return sb.ToString();
         }
 
-        public XmlWriter WriteBinWidthsXML(XmlWriter x)
+        public void WriteBinWidthsXML(XmlWriter x)
         {
             x.WriteElementString("Bin", Low.ToString(CultureInfo.InvariantCulture));
             for (var i = 1; i < Bins.Length-1; i++)
@@ -68,7 +68,7 @@ namespace ESME.SimulationAnalysis
                 x.WriteElementString("Bin", value.ToString(CultureInfo.InvariantCulture));
             }
             x.WriteElementString("Bin", (Low + ((Bins.Length - 2) * Width)).ToString(CultureInfo.InvariantCulture));
-            return x;
+            
         }
 
         public string WriteBinTotals()

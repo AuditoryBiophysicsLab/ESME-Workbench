@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using ESME.Simulator;
@@ -69,7 +70,7 @@ namespace ESME.SimulationAnalysis
             return sb.ToString();
         }
 
-        public XmlWriter WriteXML(XmlWriter x, Func<int, string> key1NameFunc, Func<int, string> key2NameFunc)
+        public void WriteXML(XmlWriter x, Func<int, string> key1NameFunc, Func<int, string> key2NameFunc)
         {
             x.WriteStartElement("AnimatSpecies");
             foreach (var key1 in Exposures.Keys)
@@ -77,7 +78,7 @@ namespace ESME.SimulationAnalysis
                 x.WriteStartElement("Species");
                 x.WriteElementString("Name",key1NameFunc(key1));
                 x.WriteStartElement("BinWidths");
-                Exposures[key1][0][0].WriteBinWidthsXML(x);
+                Exposures[key1][Exposures[key1].Keys.First()][0].WriteBinWidthsXML(x);
                 x.WriteEndElement();
                 x.WriteStartElement("Modes");
                 foreach (var key2 in Exposures[key1].Keys)
@@ -94,7 +95,7 @@ namespace ESME.SimulationAnalysis
                 x.WriteEndElement();
             }
             x.WriteEndElement();
-            return x;
+            
         }
     }
 }
