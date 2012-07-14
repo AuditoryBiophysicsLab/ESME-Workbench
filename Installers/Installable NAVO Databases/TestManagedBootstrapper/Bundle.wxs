@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <?define ProductName = "ESME Workbench 2012" ?>
-  <!-- <?include version.wxi ?> Updating the version for each build is the wrong way to to bundles -->
-  <!-- Increment the number below only when adding new components to the chain -->
-  <?define ProductFullVersion = "3.0" ?>
+  <?define ProductName = "ESME Workbench 2012 Bundle" ?>
+  <?include version.wxi ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
@@ -29,7 +27,7 @@
                   Permanent="no"
                   Compressed="no"
                   Visible="yes"
-                  Vital="yes">
+                  Vital="no">
       </MsiPackage>
       <MsiPackage DownloadUrl="http://esme.bu.edu/data/InstallableNAVOPlugin-$(var.Platform).msi"
                   SourceFile="$(var.PluginsRoot)\InstallableNAVO\msi\InstallableNAVOPlugin-$(var.Platform).msi"
