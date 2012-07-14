@@ -209,6 +209,7 @@
     <Compile Include="Utility\GenericBackgroundTask.cs" />
     <Compile Include="Utility\GenericWeakReference.cs" />
     <Compile Include="Collections\EditableKeyValuePair.cs" />
+    <Compile Include="Utility\MsiUtilityFunctions.cs" />
     <Compile Include="Utility\MediatorBase.cs" />
     <Compile Include="Utility\Minidump.cs" />
     <Compile Include="Utility\NotifyIcon.cs" />
