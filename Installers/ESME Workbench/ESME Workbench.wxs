@@ -12,11 +12,12 @@
   <?define GISRoot="$(var.ESMERoot)\ESME WorkBench\Sample GIS Data"?>
   <?define BellhopPath="$(var.UtilityRoot)\bellhop"?>
   <?define ExternalsPath="$(var.ESMERoot)\ESME Workbench\External References"?>
+  <?define ExternalsPathArchDependent="$(var.ExternalsPath)\$(var.Platform)"?>
   <?define ESMEPath="$(var.ESMERoot)\ESME Workbench\bin\Release"?>
   <?define MergeModulesPath="C:\Program Files (x86)\Common Files\Merge Modules"?>
   <?define TransmissionLossViewerPath="$(var.ESMERoot)\TransmissionLossViewer\bin\Release"?>
   <?define dotConnectPath="C:\Program Files (x86)\Devart\dotConnect"?>
-  
+
   <?if $(var.Platform) = x64 ?>
   <?define ProductDisplayName = "$(var.ProductName) (64-bit)" ?>
   <?define ProductUpgradeCode = "88D30D04-AD51-4627-98E8-A54D82F8D4FC" ?>
@@ -147,6 +148,14 @@
             <File Id="PostSharp.dll"
                   Name="PostSharp.dll"
                   Source="$(var.ExternalsPath)\PostSharp.dll" />
+
+            <!-- 3MB assemblies -->
+            <File Id="_3MBSLib.dll"
+                  Name="3MBSLib.dll"
+                  Source="$(var.ExternalsPathArchDependent)\3MBSLib.dll" />
+            <File Id="_3MBWrapperClass.dll"
+                  Name="3MBWrapperClass.dll"
+                  Source="$(var.ExternalsPathArchDependent)\3MBWrapperClass.dll" />
 
             <!-- ThinkGeo GIS assemblies -->
             <File Id="MapSuiteCore.dll"

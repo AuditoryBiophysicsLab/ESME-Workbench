@@ -365,7 +365,7 @@ namespace WixBootstrapper
         private void DetectedPackage(object sender, DetectPackageCompleteEventArgs e)
         {
             ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel.DetectedPackage()");
-            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("  e.PackageID = '{0}'", e.PackageId));
+            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("  e.PackageID = '{0}' is {1}", e.PackageId, (e.State == PackageState.Present) ? "Present" : "Absent"));
             //if (e.PackageId.Equals("Wix", StringComparison.Ordinal))
             _root.State = (e.State == PackageState.Present) ? InstallationState.DetectedPresent : InstallationState.DetectedAbsent;
             ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Leaving InstallationViewModel.DetectedPackage()");
