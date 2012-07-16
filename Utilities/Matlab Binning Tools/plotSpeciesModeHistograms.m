@@ -40,9 +40,9 @@ for i=1:length(s.AnimatSpecies.Species)
     end
     
     %plot a stacked histogram
-    figure;hold on; set(gca,'XTickLabel',tickLabels,'XTick',[1:1:numBins]);    
+    figure;hold on; set(gca,'XTickLabel',tickLabels,'XTick',[1:1:numBins],'YScale','log');    
     xlabel('Bins, dB SPL');ylabel('Bin Count');
-    bar(exposures,'stacked');
+    bar(exposures,'grouped');
     %todo subplot for energy once it works here.
     %subplot(2,1,1),bar(exposures,'stacked');
     %subplot(2,1,2),bar(energy,'stacked');
