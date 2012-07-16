@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -14,7 +15,7 @@ using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Scenarios
 {
-    public class ScenarioSpecies : IHaveGuid, IHaveLayerSettings,IEquatable<ScenarioSpecies>
+    public class ScenarioSpecies : IHaveGuid, IHaveLayerSettings, IEquatable<ScenarioSpecies>
     {
         public ScenarioSpecies() { PopulationFilename = MasterDatabaseService.RandomFilenameWithoutExension + ".ani"; }
         [Key, Initialize]
@@ -25,15 +26,20 @@ namespace ESME.Scenarios
         /// <summary>
         /// Density in animats per square kilometer for our simple seeding routine
         /// </summary>
-        [Initialize(0.01f)] public float PopulationDensity { get; set; }
+        [Initialize(0.01f)]
+        public float PopulationDensity { get; set; }
 
         public virtual Scenario Scenario { get; set; }
-        [Initialize] public virtual LayerSettings LayerSettings { get; set; }
-        [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
+        [Initialize]
+        public virtual LayerSettings LayerSettings { get; set; }
+        [Initialize]
+        public virtual ObservableList<LogEntry> Logs { get; set; }
         public string SpeciesDefinitionFilename { get; set; }
         public string PopulationFilename { get; set; }
-        [NotMapped] public bool IsDeleted { get; set; }
-        [NotMapped] public int StartActorID { get; set; }
+        [NotMapped]
+        public bool IsDeleted { get; set; }
+        [NotMapped]
+        public int StartActorID { get; set; }
         [NotMapped]
         public string PopulationFilePath
         {
@@ -47,6 +53,43 @@ namespace ESME.Scenarios
         }
         string _populationFilePath;
         [NotMapped]
+        public List<string> PredefinedSpecies
+        {
+            get
+            {
+                return new List<string>
+                {
+                    "Generic Odontocete",
+                    "Generic Mysticete",
+                 //   "Load custom ...",
+                };
+            }
+        }
+
+        string _selectedSpecies = "Generic Odontocete";
+        [NotMapped]
+        public string SelectedSpecies
+        {
+            get { return _selectedSpecies; }
+            set
+            {
+                _selectedSpecies = value;
+                switch (_selectedSpecies)
+                {
+                    case "Generic Odontocete":
+                        SpeciesDefinitionFilename = "generic_odontocete.spe";
+                        break;
+                    case "Generic Mysticete":
+                        SpeciesDefinitionFilename = "generic_mysticete.spe";
+                        break;
+                    //case "Load custom ...":
+                    //    break;
+                    default:
+                        throw new ApplicationException("Invalid species type selected!");
+                }
+            }
+        }
+
         public string SpeciesDefinitionFilePath
         {
             get
@@ -64,7 +107,8 @@ namespace ESME.Scenarios
         public bool IsSeededByESME { get { return PopulationFilename.ToLower().EndsWith(".ani"); } }
         Animat _animat;
 
-        [NotMapped] public Animat Animat
+        [NotMapped]
+        public Animat Animat
         {
             get
             {
@@ -152,7 +196,7 @@ namespace ESME.Scenarios
             Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
             Scenario.Database.Context.ScenarioSpecies.Remove(this);
         }
-        
+
         public bool Equals(ScenarioSpecies other) { return Guid == other.Guid; }
     }
 }

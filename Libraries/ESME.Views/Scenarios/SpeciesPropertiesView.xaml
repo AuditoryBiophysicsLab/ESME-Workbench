@@ -52,6 +52,19 @@
                              Text="{Binding PropertyObject.PopulationDensity}"
                                ToolTip="Animals per square kilometer"/>
                 </Grid>
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Center"
+                               Text="Species Type"
+                               ToolTip="Defines the paramters of the animal movement model"
+                               TextAlignment="Right" />
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding PropertyObject.PredefinedSpecies}" SelectedItem="{Binding PropertyObject.SelectedSpecies}"/>
+                </Grid>
             </StackPanel>
         </Border>
     </DockPanel>
