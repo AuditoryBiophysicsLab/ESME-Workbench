@@ -460,8 +460,6 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.AddSpecies), UsedImplicitly]
         async void AddSpecies(Scenario scenario)
         {
-            // todo: show a dialog here to allow the user to choose the species name and density.
-            //       Note that the species name is editable later on the same way you edit platform names, etc.
             var vm = new PropertiesViewModel { WindowTitle = "Add species", PropertyObject = new ScenarioSpecies { LatinName = "New Species", PopulationDensity = 0.01f } };
             var result = _visualizer.ShowDialog("SpeciesPropertiesView", vm);
             if ((result.HasValue) && (result.Value))
