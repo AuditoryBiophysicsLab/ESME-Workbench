@@ -14,7 +14,7 @@
           SplashScreenSourceFile='ESMELogo.bmp' AboutUrl='http://esme.bu.edu/' UpdateUrl='http://esme.bu.edu'
           Compressed='no'>
     <BootstrapperApplicationRef Id='ManagedBootstrapperApplicationHost'>
-      <Payload Name='BootstrapperCore.config' SourceFile='ESMEBootstrapper.BootstrapperCore.config' />
+      <Payload Name='BootstrapperCore.config' SourceFile='Bootstrapper.BootstrapperCore.config' />
       <Payload SourceFile='ESMEBootstrapper.dll' />
       <Payload SourceFile='license.htm' />
       <Payload SourceFile='NetFxLicense.rtf' />
@@ -41,7 +41,7 @@
                   Compressed="no"
                   Visible="yes"
                   Vital="no">
-        <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/>
+        <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
       </MsiPackage>
       <MsiPackage DownloadUrl="http://esme.bu.edu/data/BST_2.0.msi"
                   SourceFile="$(var.DatabasesRoot)\BST_2.0\bin\x86\Release\BST_2.0.msi"
@@ -49,7 +49,7 @@
                   Compressed="no"
                   Visible="yes"
                   Vital="no">
-        <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/>
+        <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
       </MsiPackage>
       <MsiPackage DownloadUrl="http://esme.bu.edu/data/DBDB-V_5.4.msi"
                   SourceFile="$(var.DatabasesRoot)\DBDB-V_5.4\bin\x86\Release\DBDB-V_5.4.msi"
@@ -57,7 +57,7 @@
                   Compressed="no"
                   Visible="yes"
                   Vital="no">
-        <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/>
+        <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
       </MsiPackage>
       <MsiPackage DownloadUrl="http://esme.bu.edu/data/GDEM-V_3.0.msi"
                   SourceFile="$(var.DatabasesRoot)\GDEM-V_3.0\bin\x86\Release\GDEM-V_3.0.msi"
@@ -65,7 +65,7 @@
                   Compressed="no"
                   Visible="yes"
                   Vital="no">
-        <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/>
+        <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
       </MsiPackage>
     </Chain>
   </Bundle>
