@@ -22,13 +22,13 @@ namespace WixBootstrapper
 
             _root.PropertyChanged += RootPropertyChanged;
 
-            ESMEBootstrapper.Model.Bootstrapper.ExecuteMsiMessage += ExecuteMsiMessage;
-            ESMEBootstrapper.Model.Bootstrapper.ExecuteProgress += ApplyExecuteProgress;
-            ESMEBootstrapper.Model.Bootstrapper.PlanBegin += PlanBegin;
-            ESMEBootstrapper.Model.Bootstrapper.PlanPackageComplete += PlanPackageComplete;
-            ESMEBootstrapper.Model.Bootstrapper.Progress += ApplyProgress;
-            ESMEBootstrapper.Model.Bootstrapper.CacheAcquireProgress += CacheAcquireProgress;
-            ESMEBootstrapper.Model.Bootstrapper.CacheComplete += CacheComplete;
+            Bootstrapper.Model.Bootstrapper.ExecuteMsiMessage += ExecuteMsiMessage;
+            Bootstrapper.Model.Bootstrapper.ExecuteProgress += ApplyExecuteProgress;
+            Bootstrapper.Model.Bootstrapper.PlanBegin += PlanBegin;
+            Bootstrapper.Model.Bootstrapper.PlanPackageComplete += PlanPackageComplete;
+            Bootstrapper.Model.Bootstrapper.Progress += ApplyProgress;
+            Bootstrapper.Model.Bootstrapper.CacheAcquireProgress += CacheAcquireProgress;
+            Bootstrapper.Model.Bootstrapper.CacheComplete += CacheComplete;
         }
 
         public bool ProgressEnabled
@@ -126,8 +126,8 @@ namespace WixBootstrapper
                 _executeProgress = e.OverallPercentage;
                 Progress = (_cacheProgress + _executeProgress) / 2;
 
-                if (ESMEBootstrapper.Model.Command.Display == Display.Embedded)
-                    ESMEBootstrapper.Model.Engine.SendEmbeddedProgress(e.ProgressPercentage, Progress);
+                if (Bootstrapper.Model.Command.Display == Display.Embedded)
+                    Bootstrapper.Model.Engine.SendEmbeddedProgress(e.ProgressPercentage, Progress);
 
                 e.Result = _root.Canceled ? Result.Cancel : Result.Ok;
             }

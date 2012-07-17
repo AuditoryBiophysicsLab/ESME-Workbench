@@ -44,7 +44,7 @@ namespace WixBootstrapper
     }
 
     /// <summary>
-    /// The model of the installation view in ESMEBootstrapper.
+    /// The model of the installation view in Bootstrapper.
     /// </summary>
     public class InstallationViewModel : PropertyNotifyBase
     {
@@ -74,23 +74,23 @@ namespace WixBootstrapper
         /// </summary>
         public InstallationViewModel(RootViewModel root)
         {
-            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel constructor");
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel constructor");
             _root = root;
             _downloadRetries = new Dictionary<string, int>();
 
             _root.PropertyChanged += RootPropertyChanged;
 
-            ESMEBootstrapper.Model.Bootstrapper.DetectBegin += DetectBegin;
-            ESMEBootstrapper.Model.Bootstrapper.DetectRelatedBundle += DetectedRelatedBundle;
-            ESMEBootstrapper.Model.Bootstrapper.DetectPackageComplete += DetectedPackage;
-            ESMEBootstrapper.Model.Bootstrapper.DetectComplete += DetectComplete;
-            ESMEBootstrapper.Model.Bootstrapper.PlanPackageBegin += PlanPackageBegin;
-            ESMEBootstrapper.Model.Bootstrapper.PlanComplete += PlanComplete;
-            ESMEBootstrapper.Model.Bootstrapper.ApplyBegin += ApplyBegin;
-            ESMEBootstrapper.Model.Bootstrapper.Error += ExecuteError;
-            ESMEBootstrapper.Model.Bootstrapper.ResolveSource += ResolveSource;
-            ESMEBootstrapper.Model.Bootstrapper.ApplyComplete += ApplyComplete;
-            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Leaving InstallationViewModel constructor");
+            Bootstrapper.Model.Bootstrapper.DetectBegin += DetectBegin;
+            Bootstrapper.Model.Bootstrapper.DetectRelatedBundle += DetectedRelatedBundle;
+            Bootstrapper.Model.Bootstrapper.DetectPackageComplete += DetectedPackage;
+            Bootstrapper.Model.Bootstrapper.DetectComplete += DetectComplete;
+            Bootstrapper.Model.Bootstrapper.PlanPackageBegin += PlanPackageBegin;
+            Bootstrapper.Model.Bootstrapper.PlanComplete += PlanComplete;
+            Bootstrapper.Model.Bootstrapper.ApplyBegin += ApplyBegin;
+            Bootstrapper.Model.Bootstrapper.Error += ExecuteError;
+            Bootstrapper.Model.Bootstrapper.ResolveSource += ResolveSource;
+            Bootstrapper.Model.Bootstrapper.ApplyComplete += ApplyComplete;
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Leaving InstallationViewModel constructor");
         }
 
         void RootPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -107,7 +107,7 @@ namespace WixBootstrapper
         /// <summary>
         /// Gets the title for the application.
         /// </summary>
-        public string Version { get { return String.Concat("v", ESMEBootstrapper.Model.Version.ToString()); } }
+        public string Version { get { return String.Concat("v", Bootstrapper.Model.Version.ToString()); } }
 
         public string Message
         {
@@ -138,7 +138,7 @@ namespace WixBootstrapper
         {
             get 
             {
-                return _launchHomePageCommand ?? (_launchHomePageCommand = new RelayCommand(param => ESMEBootstrapper.LaunchUrl(ESMEHomePageUrl), param => true));
+                return _launchHomePageCommand ?? (_launchHomePageCommand = new RelayCommand(param => Bootstrapper.LaunchUrl(ESMEHomePageUrl), param => true));
             }
         }
 
@@ -146,7 +146,7 @@ namespace WixBootstrapper
         {
             get 
             {
-                return _launchNewsCommand ?? (_launchNewsCommand = new RelayCommand(param => ESMEBootstrapper.LaunchUrl(ESMENewsUrl), param => true));
+                return _launchNewsCommand ?? (_launchNewsCommand = new RelayCommand(param => Bootstrapper.LaunchUrl(ESMENewsUrl), param => true));
             }
         }
 
@@ -317,12 +317,12 @@ namespace WixBootstrapper
         /// </summary>
         public void Refresh()
         {
-            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel.Refresh()");
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel.Refresh()");
             // TODO: verify that the engine is in a state that will allow it to do Detect().
 
             _root.Canceled = false;
-            ESMEBootstrapper.Model.Engine.Detect();
-            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting InstallationViewModel.Refresh()");
+            Bootstrapper.Model.Engine.Detect();
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting InstallationViewModel.Refresh()");
         }
 
         /// <summary>
@@ -331,7 +331,7 @@ namespace WixBootstrapper
         private static void LaunchLicense()
         {
             var folder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            ESMEBootstrapper.LaunchUrl(Path.Combine(folder, "License.htm"));
+            Bootstrapper.LaunchUrl(Path.Combine(folder, "License.htm"));
         }
 
         /// <summary>
@@ -342,10 +342,10 @@ namespace WixBootstrapper
         {
             _planAttempted = true;
             _plannedAction = action;
-            _hwnd = (ESMEBootstrapper.View == null) ? IntPtr.Zero : new WindowInteropHelper(ESMEBootstrapper.View).Handle;
+            _hwnd = (Bootstrapper.View == null) ? IntPtr.Zero : new WindowInteropHelper(Bootstrapper.View).Handle;
 
             _root.Canceled = false;
-            ESMEBootstrapper.Model.Engine.Plan(_plannedAction);
+            Bootstrapper.Model.Engine.Plan(_plannedAction);
         }
 
         private void DetectBegin(object sender, DetectBeginEventArgs e)
@@ -364,19 +364,19 @@ namespace WixBootstrapper
 
         private void DetectedPackage(object sender, DetectPackageCompleteEventArgs e)
         {
-            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel.DetectedPackage()");
-            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("  e.PackageID = '{0}' is {1}", e.PackageId, (e.State == PackageState.Present) ? "Present" : "Absent"));
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel.DetectedPackage()");
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("  e.PackageID = '{0}' is {1}", e.PackageId, (e.State == PackageState.Present) ? "Present" : "Absent"));
             //if (e.PackageId.Equals("Wix", StringComparison.Ordinal))
             _root.State = (e.State == PackageState.Present) ? InstallationState.DetectedPresent : InstallationState.DetectedAbsent;
-            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Leaving InstallationViewModel.DetectedPackage()");
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Leaving InstallationViewModel.DetectedPackage()");
         }
 
         private void DetectComplete(object sender, DetectCompleteEventArgs e)
         {
-            if (LaunchAction.Uninstall == ESMEBootstrapper.Model.Command.Action)
+            if (LaunchAction.Uninstall == Bootstrapper.Model.Command.Action)
             {
-                ESMEBootstrapper.Model.Engine.Log(LogLevel.Verbose, "Invoking automatic plan for uninstall");
-                ESMEBootstrapper.Dispatcher.Invoke((Action)(() => Plan(LaunchAction.Uninstall)));
+                Bootstrapper.Model.Engine.Log(LogLevel.Verbose, "Invoking automatic plan for uninstall");
+                Bootstrapper.Dispatcher.Invoke((Action)(() => Plan(LaunchAction.Uninstall)));
             }
             else if (Hresult.Succeeded(e.Status))
             {
@@ -387,10 +387,10 @@ namespace WixBootstrapper
                 }
 
                 // If we're not waiting for the user to click install, dispatch plan with the default action.
-                if (ESMEBootstrapper.Model.Command.Display != Display.Full)
+                if (Bootstrapper.Model.Command.Display != Display.Full)
                 {
-                    ESMEBootstrapper.Model.Engine.Log(LogLevel.Verbose, "Invoking automatic plan for non-interactive mode.");
-                    ESMEBootstrapper.Dispatcher.Invoke((Action)(() => Plan(ESMEBootstrapper.Model.Command.Action)));
+                    Bootstrapper.Model.Engine.Log(LogLevel.Verbose, "Invoking automatic plan for non-interactive mode.");
+                    Bootstrapper.Dispatcher.Invoke((Action)(() => Plan(Bootstrapper.Model.Command.Action)));
                 }
             }
             else
@@ -401,7 +401,7 @@ namespace WixBootstrapper
 
         private static void PlanPackageBegin(object sender, PlanPackageBeginEventArgs e)
         {
-            if (e.PackageId.Equals(ESMEBootstrapper.Model.Engine.StringVariables["MbaNetfxPackageId"], StringComparison.Ordinal))
+            if (e.PackageId.Equals(Bootstrapper.Model.Engine.StringVariables["MbaNetfxPackageId"], StringComparison.Ordinal))
                 e.State = RequestState.None;
         }
 
@@ -411,7 +411,7 @@ namespace WixBootstrapper
             {
                 _root.PreApplyState = _root.State;
                 _root.State = InstallationState.Applying;
-                ESMEBootstrapper.Model.Engine.Apply(_hwnd);
+                Bootstrapper.Model.Engine.Apply(_hwnd);
             }
             else
                 _root.State = InstallationState.Failed;
@@ -435,7 +435,7 @@ namespace WixBootstrapper
                     {
                         Message = e.ErrorMessage;
 
-                        ESMEBootstrapper.View.Dispatcher.Invoke((Action)(() => MessageBox.Show(ESMEBootstrapper.View, e.ErrorMessage,
+                        Bootstrapper.View.Dispatcher.Invoke((Action)(() => MessageBox.Show(Bootstrapper.View, e.ErrorMessage,
                                                                                                "ESME Workbench", MessageBoxButton.OK, MessageBoxImage.Error)));
                     }
                 }
@@ -446,29 +446,29 @@ namespace WixBootstrapper
 
         private void ResolveSource(object sender, ResolveSourceEventArgs e)
         {
-            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("Entering ResolveSource. DownloadSource: {0} LocalSource: {1}", e.DownloadSource, e.LocalSource));
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("Entering ResolveSource. DownloadSource: {0} LocalSource: {1}", e.DownloadSource, e.LocalSource));
             int retries;
 
             _downloadRetries.TryGetValue(e.PackageOrContainerId, out retries);
             _downloadRetries[e.PackageOrContainerId] = retries + 1;
             e.Result = retries < 3 && !String.IsNullOrEmpty(e.DownloadSource) ? Result.Download : Result.Ok;
             if (e.Result == Result.Download) Message = "Downloading " + e.PackageOrContainerId;
-            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("Leaving ResolveSource. DownloadSource: {0} LocalSource: {1}", e.DownloadSource, e.LocalSource));
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("Leaving ResolveSource. DownloadSource: {0} LocalSource: {1}", e.DownloadSource, e.LocalSource));
         }
 
         private void ApplyComplete(object sender, ApplyCompleteEventArgs e)
         {
             // If we're not in Full UI mode, we need to alert the dispatcher to stop and close the window for passive.
-            if (Display.Full != ESMEBootstrapper.Model.Command.Display)
+            if (Display.Full != Bootstrapper.Model.Command.Display)
             {
                 // If its passive, send a message to the window to close.
-                if (Display.Passive == ESMEBootstrapper.Model.Command.Display)
+                if (Display.Passive == Bootstrapper.Model.Command.Display)
                 {
-                    ESMEBootstrapper.Model.Engine.Log(LogLevel.Verbose, "Automatically closing the window for non-interactive install");
-                    ESMEBootstrapper.Dispatcher.BeginInvoke((Action)(() => ESMEBootstrapper.View.Close()));
+                    Bootstrapper.Model.Engine.Log(LogLevel.Verbose, "Automatically closing the window for non-interactive install");
+                    Bootstrapper.Dispatcher.BeginInvoke((Action)(() => Bootstrapper.View.Close()));
                 }
                 else
-                    ESMEBootstrapper.Dispatcher.InvokeShutdown();
+                    Bootstrapper.Dispatcher.InvokeShutdown();
             }
 
             // Set the state to applied or failed unless the state has already been set back to the preapply state

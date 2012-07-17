@@ -47,18 +47,18 @@ namespace WixBootstrapper
         /// </summary>
         public RootViewModel()
         {
-            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering RootViewModel constructor");
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering RootViewModel constructor");
             InstallationViewModel = new InstallationViewModel(this);
             ProgressViewModel = new ProgressViewModel(this);
             UpdateViewModel = new UpdateViewModel(this);
-            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting RootViewModel constructor");
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting RootViewModel constructor");
         }
 
         public InstallationViewModel InstallationViewModel { get; private set; }
         public ProgressViewModel ProgressViewModel { get; private set; }
         public UpdateViewModel UpdateViewModel { get; private set; }
 
-        public ICommand CloseCommand { get { return _closeCommand ?? (_closeCommand = new RelayCommand(param => ESMEBootstrapper.View.Close())); } }
+        public ICommand CloseCommand { get { return _closeCommand ?? (_closeCommand = new RelayCommand(param => Bootstrapper.View.Close())); } }
 
         public ICommand RefreshCommand { get { return _refreshCommand ?? (_refreshCommand = new RelayCommand(param => Refresh(), param => false)); } }
 
@@ -70,7 +70,7 @@ namespace WixBootstrapper
                 {
                     lock (this) 
                     { 
-                        Canceled = (MessageBoxResult.Yes == MessageBox.Show(ESMEBootstrapper.View, "Are you sure you want to cancel?", "WiX Toolset", MessageBoxButton.YesNo, MessageBoxImage.Error));
+                        Canceled = (MessageBoxResult.Yes == MessageBox.Show(Bootstrapper.View, "Are you sure you want to cancel?", "WiX Toolset", MessageBoxButton.YesNo, MessageBoxImage.Error));
                     }
                 },
                 param => State == InstallationState.Applying));
@@ -105,7 +105,7 @@ namespace WixBootstrapper
             {
                 if (_state == value) return;
                 _state = value;
-                ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("InstallationState is now {0}", _state));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("InstallationState is now {0}", _state));
 
                 // Notify all the properties derived from the state that the state changed.
                 base.OnPropertyChanged("State");

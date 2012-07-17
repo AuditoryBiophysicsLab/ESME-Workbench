@@ -86,7 +86,7 @@ namespace WixBootstrapper
         {
             get 
             {
-                return _launchCommand ?? (_launchCommand = new RelayCommand(param => ESMEBootstrapper.LaunchUrl(UpdateUrl), param => State == UpdateState.Available && !String.IsNullOrEmpty(UpdateUrl)));
+                return _launchCommand ?? (_launchCommand = new RelayCommand(param => Bootstrapper.LaunchUrl(UpdateUrl), param => State == UpdateState.Available && !String.IsNullOrEmpty(UpdateUrl)));
             }
         }
 
@@ -178,11 +178,11 @@ namespace WixBootstrapper
         /// </summary>
         public void Refresh()
         {
-            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering UpdateViewModel.Refresh()");
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering UpdateViewModel.Refresh()");
             // If we're already checking for updates, skip the refresh.
             if (State == UpdateState.Checking)
             {
-                ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting UpdateViewModel.Refresh() at point 1");
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting UpdateViewModel.Refresh() at point 1");
                 return;
             }
 
@@ -191,7 +191,7 @@ namespace WixBootstrapper
 
             //_worker.RunWorkerAsync();
             State = UpdateState.Available;
-            ESMEBootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting UpdateViewModel.Refresh() at point 2");
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting UpdateViewModel.Refresh() at point 2");
         }
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace WixBootstrapper
             var succeeded = false;
             try
             {
-                var request = ESMEBootstrapper.Model.CreateWebRequest("http://wix.sourceforge.net/releases/wix3.6.feed");
+                var request = Bootstrapper.Model.CreateWebRequest("http://wix.sourceforge.net/releases/wix3.6.feed");
                 var response = (HttpWebResponse)request.GetResponse();
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -228,7 +228,7 @@ namespace WixBootstrapper
                                               Version = new Version(extension.GetObject<string>())
                                       };
 
-                        var update = updates.Where(u => u.Version > ESMEBootstrapper.Model.Version).OrderByDescending(u => u.Version).FirstOrDefault();
+                        var update = updates.Where(u => u.Version > Bootstrapper.Model.Version).OrderByDescending(u => u.Version).FirstOrDefault();
                         if (update == null)
                         {
                             UpdateUrl = null;

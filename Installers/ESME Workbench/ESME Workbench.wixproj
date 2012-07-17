@@ -39,6 +39,7 @@
   <ItemGroup>
     <Content Include="Bitmaps\bannrbmp.bmp" />
     <Content Include="Bitmaps\dlgbmp.bmp" />
+    <Content Include="version.wxi" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <PropertyGroup>

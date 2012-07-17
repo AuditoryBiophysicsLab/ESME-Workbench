@@ -33,7 +33,7 @@ namespace WixBootstrapper
         {
             DataContext = viewModel;
 
-            Loaded += (sender, e) => ESMEBootstrapper.Model.Engine.CloseSplashScreen();
+            Loaded += (sender, e) => Bootstrapper.Model.Engine.CloseSplashScreen();
             Closed += (sender, e) => Dispatcher.InvokeShutdown(); // shutdown dispatcher when the window is closed.
 
             InitializeComponent();

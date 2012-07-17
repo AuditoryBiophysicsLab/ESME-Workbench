@@ -61,6 +61,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bootstrapper.cs" />
     <Compile Include="Hresult.cs" />
     <Compile Include="InstallationViewModel.cs" />
     <Compile Include="Model.cs" />
@@ -74,7 +75,6 @@
     </Compile>
     <Compile Include="RootViewModel.cs" />
     <Compile Include="UpdateViewModel.cs" />
-    <Compile Include="ESMEBootstrapper.cs" />
     <Page Include="RootView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -102,14 +102,12 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Bootstrapper.BootstrapperCore.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-    <None Include="ESMEBootstrapper.BootstrapperCore.config">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\ocean.png" />

@@ -1,34 +1,47 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ProductVersion>3.5</ProductVersion>
-    <ProjectGuid>{52fd86b0-7fbd-456b-8b3d-d4c2bc298490}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>3.x</ProductVersion>
+    <ProjectGuid>{acbe1053-cf95-462c-8fa7-b8865383c8e6}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>InstallableNAVOPlugin</OutputName>
-    <OutputType>Package</OutputType>
+    <OutputName>ESME Upgrade</OutputName>
+    <OutputType>Bundle</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
-    <Name>InstallableNAVOPlugin</Name>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <SuppressSpecificWarnings />
-    <DefineConstants />
-    <WixVariables />
-    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <SuppressSpecificWarnings />
-    <DefineConstants />
-    <WixVariables />
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <DefineConstants>Debug</DefineConstants>
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Product.wxs" />
+    <Compile Include="Bundle.wxs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="version.wxi" />
+    <WixExtension Include="WixBalExtension">
+      <HintPath>$(WixExtDir)\WixBalExtension.dll</HintPath>
+      <Name>WixBalExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Installable NAVO Databases\TestManagedBootstrapper\ESMELogo.bmp">
+      <Link>ESMELogo.bmp</Link>
+    </Content>
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <PropertyGroup>
@@ -37,7 +50,7 @@
   <PropertyGroup>
     <PostBuildEvent>if not exist "$(ProjectDir)msi" mkdir  "$(ProjectDir)msi"
 copy "$(TargetPath)" "$(ProjectDir)msi\$(TargetName)-$(PlatformName)$(TargetExt)" /Y /V
-copy "$(TargetPath)" "\\corti.bu.edu\hrc-backup\ESME Workbench\$(TargetName)-$(PlatformName)$(TargetExt)" /Y /V</PostBuildEvent>
+copy "$(TargetDir)%2a-$(PlatformName).msi" "$(ProjectDir)msi\" /Y /V</PostBuildEvent>
   </PropertyGroup>
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.
