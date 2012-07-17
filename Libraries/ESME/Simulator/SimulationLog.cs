@@ -294,13 +294,13 @@ namespace ESME.Simulator
 
     public class ActorNameGuid : NameGuidRecord
     {
-        internal ActorNameGuid(Platform platform) : this(platform.PlatformName, platform.ActorID, platform.Guid) { }
-        internal ActorNameGuid(Mode mode) : this(mode.ModeName, mode.ModeID, mode.Guid) { }
-        internal ActorNameGuid(string name, int actorID, Guid guid) : base(name, guid) { ActorID = actorID; }
+        internal ActorNameGuid(Platform platform) : this(platform.ActorID, platform.PlatformName, platform.Guid) { }
+        internal ActorNameGuid(Mode mode) : this(mode.ModeID, mode.ModeName, mode.Guid) { }
+        internal ActorNameGuid(int actorID, string name, Guid guid) : base(name, guid) { ActorID = actorID; }
 
         public int ActorID { get; set; }
 
-        public static new ActorNameGuid Read(BinaryReader reader) { return new ActorNameGuid(reader.ReadString(), reader.ReadInt32(), new Guid(reader.ReadBytes(16))); }
+        public static new ActorNameGuid Read(BinaryReader reader) { return new ActorNameGuid(reader.ReadInt32(), reader.ReadString(), new Guid(reader.ReadBytes(16))); }
 
         public override void Write(BinaryWriter writer)
         {
@@ -311,12 +311,12 @@ namespace ESME.Simulator
 
     public class SpeciesNameGuid : ActorNameGuid
     {
-        internal SpeciesNameGuid(ScenarioSpecies species) : this(species.LatinName, species.StartActorID, species.Animat.Locations.Count, species.Guid) { }
-        internal SpeciesNameGuid(string name, int startActorID, int animatCount, Guid guid) : base(name, startActorID, guid) { AnimatCount = animatCount; }
+        internal SpeciesNameGuid(ScenarioSpecies species) : this(species.Animat.Locations.Count,species.StartActorID, species.LatinName, species.Guid) { }
+        internal SpeciesNameGuid(int animatCount, int startActorID, string name, Guid guid) : base(startActorID, name, guid) { AnimatCount = animatCount; }
 
         public int AnimatCount { get; set; }
 
-        public static new SpeciesNameGuid Read(BinaryReader reader) { return new SpeciesNameGuid(reader.ReadString(), reader.ReadInt32(), reader.ReadInt32(), new Guid(reader.ReadBytes(16))); }
+        public static new SpeciesNameGuid Read(BinaryReader reader) { return new SpeciesNameGuid(reader.ReadInt32(), reader.ReadInt32(), reader.ReadString(), new Guid(reader.ReadBytes(16))); }
 
         public override void Write(BinaryWriter writer)
         {

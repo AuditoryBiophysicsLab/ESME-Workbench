@@ -89,6 +89,7 @@ namespace ESME.Scenarios
                 }
             }
         }
+        //void AddCustomSpeciesFile()
 
         public string SpeciesDefinitionFilePath
         {
