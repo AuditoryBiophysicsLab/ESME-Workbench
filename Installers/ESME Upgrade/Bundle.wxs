@@ -9,15 +9,24 @@
   <?define ESMERoot="$(var.InstallersRoot)\ESME Workbench"?>
   <?define DatabasesRoot="$(var.InstallersRoot)\Installable NAVO Databases"?>
   <?define PluginsRoot="$(var.InstallersRoot)\Plugins"?>
-  <Bundle Name="$(var.ProductName)" Version="$(var.ProductFullVersion)" Manufacturer="$(var.Manufacturer)"
-          UpgradeCode="86F5F4D6-9212-4B95-B545-9490C6A25D67" IconSourceFile="Wave.ico"
-          SplashScreenSourceFile='ESMELogo.bmp' AboutUrl='http://esme.bu.edu/' UpdateUrl='http://esme.bu.edu'
+  <Bundle Name="$(var.ProductName)" 
+          Version="$(var.ProductFullVersion)" 
+          Manufacturer="$(var.Manufacturer)"
+          UpgradeCode="86F5F4D6-9212-4B95-B545-9490C6A25D67" 
+          IconSourceFile="..\ESME Application and Database Bundle\Wave.ico"
+          SplashScreenSourceFile='..\ESME Application and Database Bundle\ESMELogo.bmp' 
+          AboutUrl='http://esme.bu.edu/' 
+          UpdateUrl='http://esme.bu.edu'
           Compressed='no'>
     <BootstrapperApplicationRef Id='ManagedBootstrapperApplicationHost'>
-      <Payload Name='BootstrapperCore.config' SourceFile='Bootstrapper.BootstrapperCore.config' />
-      <Payload SourceFile='..\ManagedBootstrapper\bin\Release\Bootstrapper.dll' />
-      <Payload SourceFile='license.htm' />
-      <Payload SourceFile='NetFxLicense.rtf' />
+      <Payload Name='BootstrapperCore.config' 
+               SourceFile='..\ManagedBootstrapper\Bootstrapper.BootstrapperCore.config' />
+      <Payload Name='Bootstrapper.dll' 
+               SourceFile='..\ManagedBootstrapper\bin\Release\Bootstrapper.dll' />
+      <Payload Name='License.htm' 
+               SourceFile='..\ESME Application and Database Bundle\license.htm' />
+      <Payload Name='NetFxLicense.rtf' 
+               SourceFile='..\dotNetFx40\NetFxLicense.rtf' />
     </BootstrapperApplicationRef>
     <Chain>
       <PackageGroupRef Id='Netfx4Full' />
