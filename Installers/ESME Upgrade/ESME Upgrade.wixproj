@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Bundle.wxs" />
+    <Compile Include="Netfx.wxs" />
   </ItemGroup>
   <ItemGroup>
     <WixExtension Include="WixBalExtension">
@@ -39,9 +40,10 @@
     </WixExtension>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\Installable NAVO Databases\TestManagedBootstrapper\ESMELogo.bmp">
+    <Content Include="..\ESME Application and Database Bundle\ESMELogo.bmp">
       <Link>ESMELogo.bmp</Link>
     </Content>
+    <Content Include="version.wxi" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <PropertyGroup>

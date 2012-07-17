@@ -15,7 +15,7 @@
           Compressed='no'>
     <BootstrapperApplicationRef Id='ManagedBootstrapperApplicationHost'>
       <Payload Name='BootstrapperCore.config' SourceFile='Bootstrapper.BootstrapperCore.config' />
-      <Payload SourceFile='ESMEBootstrapper.dll' />
+      <Payload SourceFile='..\ManagedBootstrapper\bin\Release\Bootstrapper.dll' />
       <Payload SourceFile='license.htm' />
       <Payload SourceFile='NetFxLicense.rtf' />
     </BootstrapperApplicationRef>
