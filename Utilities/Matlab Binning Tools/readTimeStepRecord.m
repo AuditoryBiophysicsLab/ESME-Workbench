@@ -26,21 +26,24 @@ end
 function [header,fid] = readTimeStepHeader(fid,offset)
 status = fseek(fid,offset,'bof');
 assert(status ~= -1, ferror(fid));
-
 magic = readuint64(fid);
 assert(magic==hex2uint64('d3c603dd0d7a1ee6'),'Error reading time step header, magic number not seen at expected location');
 
-header.startTime = readuint64(fid);
+header.startTime = ticks2timespan(readuint64(fid));
 header.actorCount = fread(fid,1,'int32');
 header.offset = offset;
 end
 
 %% helper functions to read ESME data classes into structs
 function [lat,lon,depth] = readActorPositionRecord(fid)
-[lat,lon,depth] = fread(fid,3,'single');
+lat= fread(fid,1,'single');
+lon= fread(fid,1,'single');
+depth= fread(fid,1,'single');
 end
 
 function [actorID, modeID,peakSPL,energy]=readActorExposureRecord(fid)
-[actorID,modeID]=fread(fid,2,'int32');
-[peakSPL,energy]=fread(fid,2,'single');
+actorID =fread(fid,1,'int32');
+modeID=fread(fid,1,'int32');
+peakSPL=fread(fid,1,'single');
+energy=fread(fid,1,'single');
 end

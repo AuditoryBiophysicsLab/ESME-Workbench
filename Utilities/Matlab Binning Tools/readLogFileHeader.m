@@ -17,9 +17,9 @@ assert(magic==hex2uint64('a57d8ee659dc45ec'),'Error reading simulation log file,
 status = fseek(fid,trailerOffset,'bof');
 assert(status~=-1,ferror(fid));
 
-logStruct.timeStepSize = readuint64(fid); % in ticks
-logStruct.startTime = readuint64(fid); % in ticks
-logStruct.endTime = readuint64(fid); % in ticks
+logStruct.timeStepSize = ticks2timespan(readuint64(fid)); % in ticks
+logStruct.startTime =ticks2timespan(readuint64(fid)); % in ticks
+logStruct.endTime = ticks2timespan(readuint64(fid)); % in ticks
 logStruct.creatingUser = readString(fid);
 logStruct.creatingComputer = readString(fid);
 [name, guid]= readNameGuidRecord(fid);
@@ -64,7 +64,7 @@ logStruct.speciesRecords = speciesRecords;
 numTimeStepOffsets = fread(fid,1,'int32');
 timeStepRecords = struct;
 for i = 1:numTimeStepOffsets,
-    timeStepRecords(i).offsets=readuint64(fid);
+    timeStepRecords(i).offsets=cast(readuint64(fid),'int64');
 end
 logStruct.timeStepRecords = timeStepRecords;
 end
