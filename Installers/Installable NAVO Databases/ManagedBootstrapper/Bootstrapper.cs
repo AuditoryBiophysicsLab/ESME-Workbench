@@ -5,7 +5,7 @@ using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 
 namespace WixBootstrapper
 {
-    public class ESMEBootstrapper : BootstrapperApplication
+    public class Bootstrapper : BootstrapperApplication
     {
         /// <summary>
         /// Gets the global model.
