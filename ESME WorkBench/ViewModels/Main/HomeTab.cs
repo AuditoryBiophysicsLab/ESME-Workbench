@@ -515,10 +515,11 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             var vm = new PropertiesViewModel {WindowTitle = "Species Properties", PropertyObject = species};
             var density = species.PopulationDensity;
+            var speciesFile = species.SpeciesDefinitionFilename;
             var result = _visualizer.ShowDialog("SpeciesPropertiesView", vm);
             if ((result.HasValue) && (result.Value))
             {
-                if (Math.Abs(species.PopulationDensity - density) > 0.0001)
+                if (Math.Abs(species.PopulationDensity - density) > 0.0001 || speciesFile != species.SpeciesDefinitionFilename )
                 {
                     species.RemoveMapLayers();
                     species.Animat = await Animat.SeedAsync(species, species.Scenario.Location.GeoRect, species.Scenario.BathymetryData);
