@@ -9,6 +9,7 @@ using HRC.WPF;
 
 namespace ESME.Scenarios
 {
+     [NotifyPropertyChanged]
     public class Source : IHaveGuid
     {
         [Key, Initialize]

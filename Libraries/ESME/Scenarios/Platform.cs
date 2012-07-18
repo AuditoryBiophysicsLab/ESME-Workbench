@@ -20,6 +20,7 @@ using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Scenarios
 {
+     [NotifyPropertyChanged]
     public class Platform : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
     {
         public Platform() { TrackType = Behaviors.TrackType.Stationary; }

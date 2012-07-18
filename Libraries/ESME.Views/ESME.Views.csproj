@@ -176,6 +176,7 @@
     <Compile Include="Scenarios\SpeciesPropertiesView.xaml.cs">
       <DependentUpon>SpeciesPropertiesView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Scenarios\SpeciesPropertiesViewModel.cs" />
     <Compile Include="Scenarios\TreeViewItemPropertiesView.xaml.cs">
       <DependentUpon>TreeViewItemPropertiesView.xaml</DependentUpon>
     </Compile>

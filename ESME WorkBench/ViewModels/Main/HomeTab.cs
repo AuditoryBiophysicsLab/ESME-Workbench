@@ -460,12 +460,19 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.AddSpecies), UsedImplicitly]
         async void AddSpecies(Scenario scenario)
         {
-            var vm = new PropertiesViewModel { WindowTitle = "Add species", PropertyObject = new ScenarioSpecies { LatinName = "New Species", PopulationDensity = 0.01f } };
+            var vm = new SpeciesPropertiesViewModel(new ScenarioSpecies { LatinName = "New Species", PopulationDensity = 0.01f, SpeciesDefinitionFilename = "generic_odontocete.spe" });
+            vm.WindowTitle = "Add new species";
             var result = _visualizer.ShowDialog("SpeciesPropertiesView", vm);
             if ((result.HasValue) && (result.Value))
             {
-                var species = (ScenarioSpecies)vm.PropertyObject;
-                species.Scenario = scenario;
+                var species = new ScenarioSpecies
+                {
+                    Scenario = scenario,
+                    LatinName = vm.LatinName,
+                    PopulationDensity = vm.PopulationDensity,
+                    SpeciesDefinitionFilename = vm.SpeciesDefinitionFilename,
+                };
+                
                 scenario.ScenarioSpecies.Add(species);
                 species.LayerSettings.LineOrSymbolSize = 3;
                 var animats = await Animat.SeedAsync(species, scenario.Location.GeoRect, scenario.BathymetryData);
@@ -511,21 +518,20 @@ namespace ESMEWorkbench.ViewModels.Main
         }
 
         [MediatorMessageSink(MediatorMessage.SpeciesProperties), UsedImplicitly]
-        async void SpeciesProperties(ScenarioSpecies species)
+        void SpeciesProperties(ScenarioSpecies species)
         {
-            var vm = new PropertiesViewModel {WindowTitle = "Species Properties", PropertyObject = species};
-            var density = species.PopulationDensity;
-            var speciesFile = species.SpeciesDefinitionFilename;
+            var vm = new SpeciesPropertiesViewModel (species);
+            vm.WindowTitle = "Species Properties";
             var result = _visualizer.ShowDialog("SpeciesPropertiesView", vm);
             if ((result.HasValue) && (result.Value))
             {
-                if (Math.Abs(species.PopulationDensity - density) > 0.0001 || speciesFile != species.SpeciesDefinitionFilename )
+                if (Math.Abs(vm.PopulationDensity - species.PopulationDensity) > 0.0001 || species.SpeciesDefinitionFilename != vm.SpeciesDefinitionFilename)
                 {
-                    species.RemoveMapLayers();
-                    species.Animat = await Animat.SeedAsync(species, species.Scenario.Location.GeoRect, species.Scenario.BathymetryData);
-                    species.Animat.Save(species.PopulationFilePath);
-                    species.CreateMapLayers();
+                    species.PopulationDensity = vm.PopulationDensity;
+                    species.SpeciesDefinitionFilename = vm.SpeciesDefinitionFilename;
+                    RepopulateSpeciesAsync(species);
                 }
+                if (vm.LatinName != species.LatinName) species.LatinName = vm.LatinName;
             }
         }
         #endregion
@@ -568,7 +574,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.DeletePerimeter), UsedImplicitly]
         void DeletePerimeter(Perimeter perimeter)
         {
-            
+            perimeter.Delete();
         }
 
         [MediatorMessageSink(MediatorMessage.EditPerimeter), UsedImplicitly]

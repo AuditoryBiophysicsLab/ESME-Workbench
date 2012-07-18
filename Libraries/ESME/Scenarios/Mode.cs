@@ -11,6 +11,7 @@ using HRC.WPF;
 
 namespace ESME.Scenarios
 {
+     [NotifyPropertyChanged]
     public class Mode : IHaveGuid, IEqualityComparer<Mode>
     {
         [Key, Initialize]
