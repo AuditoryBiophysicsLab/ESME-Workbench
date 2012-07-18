@@ -18,8 +18,8 @@ status = fseek(fid,trailerOffset,'bof');
 assert(status~=-1,ferror(fid));
 
 logStruct.timeStepSize = ticks2timespan(readuint64(fid)); % in ticks
-logStruct.startTime =ticks2timespan(readuint64(fid)); % in ticks
-logStruct.endTime = ticks2timespan(readuint64(fid)); % in ticks
+logStruct.startTime =ticks2datetime(readuint64(fid)); % in ticks
+logStruct.endTime = ticks2datetime(readuint64(fid)); % in ticks
 logStruct.creatingUser = readString(fid);
 logStruct.creatingComputer = readString(fid);
 [name, guid]= readNameGuidRecord(fid);
