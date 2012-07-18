@@ -1,3 +1,4 @@
+%% parses the ticks of a .NET TimeSpan object and returns a sensibly-formatted string representing the time.
 function timestamp = ticks2timespan(ticks)
 ticksPerMs = cast(10000,'uint64');
 ticksPerSec = ticksPerMs * 1000;

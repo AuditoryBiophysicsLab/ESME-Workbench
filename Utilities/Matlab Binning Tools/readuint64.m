@@ -1,3 +1,4 @@
+%% read one unsigned 64-bit integer from a file specified by the given file ID with no loss of precision.
 function y = readuint64(fid)
 x = fread(fid,8,'uint8');
 v=zeros(1,16);

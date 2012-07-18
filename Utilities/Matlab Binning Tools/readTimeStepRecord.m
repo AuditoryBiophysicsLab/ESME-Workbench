@@ -1,4 +1,4 @@
-%% read an individual time step record from the currently open log file
+%% read an individual time step record from the currently open log file, given its file ID and an offset, in bytes, from the beginning of the file.  Offsets are specified in the file trailer.
 function timeStruct = readTimeStepRecord(fid,offset)
 [header,fid]=readTimeStepHeader(fid,offset);
 timeStruct.header = header;

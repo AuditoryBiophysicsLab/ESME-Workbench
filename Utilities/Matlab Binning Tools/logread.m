@@ -1,5 +1,5 @@
 
-%% read the entire log
+%% Reads the trailer and every log entry in a given log file.  Warning: very large log files may occupy a great deal of memory.
 function [log] = logread(filePath)
 [logStruct,fid] = readLogFileHeader(filePath);
 log = struct;
