@@ -5,6 +5,6 @@ function [log] = logread(filePath)
 log = struct;
 log.FileHeader=logStruct;
 for i=1:length(logStruct.timeStepRecords),
-    log.record=readTimeStepRecord(fid,logStruct.timeStepRecords(i).offsets);
+    log.record(i)=readTimeStepRecord(fid,logStruct.timeStepRecords(i).offsets);
 end
 end
