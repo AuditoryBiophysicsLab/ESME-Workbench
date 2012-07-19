@@ -57,6 +57,7 @@ namespace ProjectBuildInfo
                 string svnVersionString;
                 using (var client = new SvnClient())
                 {
+                    if (string.IsNullOrEmpty(outputFilename)) outputFilename = assemblyVersionFile;
                     SvnInfoEventArgs svnInfo;
                     client.GetInfo(new SvnUriTarget(client.GetUriFromWorkingCopy(Path.GetDirectoryName(outputFilename))), out svnInfo);
                     svnVersionString = svnInfo.Revision.ToString(CultureInfo.InvariantCulture);
@@ -84,7 +85,7 @@ namespace ProjectBuildInfo
                 }
                 if (assemblyVersionFile != null)
                 {
-                    if (versionNumber == null) throw new ApplicationException("if -assembly is specified, -version must also be specified");
+                    if (versionNumber == null) throw new ApplicationException("if -assemblyversion is specified, -version must also be specified");
                     using (var writer = new StreamWriter(assemblyVersionFile))
                     {
                         writer.WriteLine("using System.Reflection;");
@@ -96,7 +97,7 @@ namespace ProjectBuildInfo
 
                 if (wixVersionFile != null)
                 {
-                    if (versionNumber == null) throw new ApplicationException("if -assembly is specified, -version must also be specified");
+                    if (versionNumber == null) throw new ApplicationException("if -wixversion is specified, -version must also be specified");
                     using (var writer = new StreamWriter(wixVersionFile))
                     {
                         writer.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");

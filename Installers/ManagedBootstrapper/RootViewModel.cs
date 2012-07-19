@@ -131,6 +131,7 @@ namespace WixBootstrapper
 
         public string ProductShortName { get; set; }
         public string ProductLongName { get; set; }
+        public string ProductVersion { get; set; }
 
         #region public Visibility MainPanelVisibility { get; set; }
 

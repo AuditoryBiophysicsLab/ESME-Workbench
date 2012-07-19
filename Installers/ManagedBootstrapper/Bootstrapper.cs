@@ -55,8 +55,9 @@ namespace WixBootstrapper
             Dispatcher = Dispatcher.CurrentDispatcher;
             var viewModel = new RootViewModel
             {
-                ProductLongName = "ESME Workbench 2012",
-                ProductShortName = "ESME"
+                ProductLongName = Engine.StringVariables["ProductLongName"],
+                ProductShortName = Engine.StringVariables["ProductShortName"],
+                ProductVersion = Engine.StringVariables["ProductVersion"],
             };
             // Populate the view models with the latest data. This is where Detect is called.
             viewModel.Refresh();
@@ -69,7 +70,6 @@ namespace WixBootstrapper
                 View = new RootView(viewModel);
                 View.Show();
             }
-
             Dispatcher.Run();
 
             Engine.Quit(0);

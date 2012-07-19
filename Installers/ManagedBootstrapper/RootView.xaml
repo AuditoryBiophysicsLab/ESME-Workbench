@@ -36,7 +36,7 @@
                        Grid.ColumnSpan="2"
                        HorizontalAlignment="Right"
                        Style="{StaticResource StatusTextStyle}"
-                       Text="{Binding InstallationViewModel.Version}" />
+                       Text="{Binding ProductVersion}" />
             <TextBlock Grid.Row="0"
                        Grid.ColumnSpan="2"
                        HorizontalAlignment="Center"
@@ -206,7 +206,7 @@
                        Grid.ColumnSpan="2"
                        HorizontalAlignment="Right"
                        Style="{StaticResource StatusTextStyle}"
-                       Text="{Binding InstallationViewModel.Version}" />
+                       Text="{Binding ProductVersion}" />
             <TextBlock Grid.Row="2"
                        Grid.ColumnSpan="2"
                        HorizontalAlignment="Center"

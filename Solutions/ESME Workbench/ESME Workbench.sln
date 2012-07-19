@@ -39,7 +39,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME Workbench", "..\..\ESM
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6} = {33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}
 	EndProjectSection
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ESME Workbench", "..\..\Installers\ESME Workbench\ESME Workbench.wixproj", "{198766F8-F78F-48A1-9F64-846B1B448B34}"
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ESME Application MSI", "..\..\Installers\ESME Workbench\ESME Application MSI.wixproj", "{198766F8-F78F-48A1-9F64-846B1B448B34}"
 	ProjectSection(ProjectDependencies) = postProject
 		{49221733-2EB6-468F-8833-06C0E36B3C83} = {49221733-2EB6-468F-8833-06C0E36B3C83}
 		{B8D1B045-78F7-4645-9754-5A1DF2B79439} = {B8D1B045-78F7-4645-9754-5A1DF2B79439}
@@ -79,13 +79,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		VersionInfo.txt = VersionInfo.txt
 	EndProjectSection
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "InstallableNAVOPlugin", "..\..\Installers\Plugins\InstallableNAVO\InstallableNAVOPlugin.wixproj", "{52FD86B0-7FBD-456B-8B3D-D4C2BC298490}"
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "InstallableNAVOPlugin MSI", "..\..\Installers\Plugins\InstallableNAVO\InstallableNAVOPlugin MSI.wixproj", "{52FD86B0-7FBD-456B-8B3D-D4C2BC298490}"
 	ProjectSection(ProjectDependencies) = postProject
 		{409DC754-EEBD-4E49-8DDF-3960F2FFCE73} = {409DC754-EEBD-4E49-8DDF-3960F2FFCE73}
 		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7} = {1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}
 	EndProjectSection
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ESME Upgrade", "..\..\Installers\ESME Upgrade\ESME Upgrade.wixproj", "{ACBE1053-CF95-462C-8FA7-B8865383C8E6}"
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ESME Application Bundle", "..\..\Installers\ESME Upgrade\ESME Application Bundle.wixproj", "{ACBE1053-CF95-462C-8FA7-B8865383C8E6}"
 	ProjectSection(ProjectDependencies) = postProject
 		{BB224728-826D-406D-9A19-3CF4DF2AA68E} = {BB224728-826D-406D-9A19-3CF4DF2AA68E}
 		{49221733-2EB6-468F-8833-06C0E36B3C83} = {49221733-2EB6-468F-8833-06C0E36B3C83}
@@ -315,8 +315,8 @@ Global
 		{ACBE1053-CF95-462C-8FA7-B8865383C8E6}.Debug|x64.ActiveCfg = Debug|x86
 		{ACBE1053-CF95-462C-8FA7-B8865383C8E6}.Debug|x86.ActiveCfg = Debug|x86
 		{ACBE1053-CF95-462C-8FA7-B8865383C8E6}.Debug|x86.Build.0 = Debug|x86
-		{ACBE1053-CF95-462C-8FA7-B8865383C8E6}.Release|Any CPU.ActiveCfg = Release|x86
-		{ACBE1053-CF95-462C-8FA7-B8865383C8E6}.Release|Any CPU.Build.0 = Release|x86
+		{ACBE1053-CF95-462C-8FA7-B8865383C8E6}.Release|Any CPU.ActiveCfg = Release|x64
+		{ACBE1053-CF95-462C-8FA7-B8865383C8E6}.Release|Any CPU.Build.0 = Release|x64
 		{ACBE1053-CF95-462C-8FA7-B8865383C8E6}.Release|Mixed Platforms.ActiveCfg = Release|x86
 		{ACBE1053-CF95-462C-8FA7-B8865383C8E6}.Release|Mixed Platforms.Build.0 = Release|x86
 		{ACBE1053-CF95-462C-8FA7-B8865383C8E6}.Release|x64.ActiveCfg = Release|x86

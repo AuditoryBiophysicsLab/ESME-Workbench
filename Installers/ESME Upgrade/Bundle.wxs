@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define ProductName = "ESME Workbench 2012" ?>
   <?include version.wxi ?>
-  <?define ProductName = "ESME Workbench 2012 Upgrade" ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
@@ -9,6 +9,12 @@
   <?define ESMERoot="$(var.InstallersRoot)\ESME Workbench"?>
   <?define DatabasesRoot="$(var.InstallersRoot)\Installable NAVO Databases"?>
   <?define PluginsRoot="$(var.InstallersRoot)\Plugins"?>
+  <?if $(var.Platform) = x64 ?>
+  <?define ProductNameWithBitness="$(var.ProductName) (64-bit)"?>
+  <?else ?>
+  <?define ProductNameWithBitness="$(var.ProductName) (32-bit)"?>
+  <?endif ?>
+
   <Bundle Name="$(var.ProductName)" 
           Version="$(var.ProductFullVersion)" 
           Manufacturer="$(var.Manufacturer)"
@@ -18,6 +24,9 @@
           AboutUrl='http://esme.bu.edu/' 
           UpdateUrl='http://esme.bu.edu'
           Compressed='no'>
+    <Variable Name="ProductLongName" Value="$(var.ProductNameWithBitness)" />
+    <Variable Name="ProductShortName" Value="ESME" />
+    <Variable Name="ProductVersion" Value="$(var.ProductFullVersion)" />
     <BootstrapperApplicationRef Id='ManagedBootstrapperApplicationHost'>
       <Payload Name='BootstrapperCore.config' 
                SourceFile='..\ManagedBootstrapper\Bootstrapper.BootstrapperCore.config' />
