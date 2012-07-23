@@ -31,25 +31,20 @@
 
             <!--  Title  -->
             <Button Grid.Row="0" Grid.ColumnSpan="2" Command="{Binding InstallationViewModel.LaunchHomePageCommand}" />
-            <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource StatusTextStyle}" Text="{Binding ProductLongName}" />
-            <TextBlock Grid.Row="0"
-                       Grid.ColumnSpan="2"
-                       HorizontalAlignment="Right"
-                       Style="{StaticResource StatusTextStyle}"
-                       Text="{Binding ProductVersion}" />
-            <TextBlock Grid.Row="0"
-                       Grid.ColumnSpan="2"
-                       HorizontalAlignment="Center"
-                       FontSize="10.5"
-                       Style="{StaticResource TopTextStyle}"
-                       Text="Effects of Sound on the Marine Environment" />
-            <TextBlock Grid.ColumnSpan="2"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       FontSize="60"
-                       Foreground="White"
-                       IsHitTestVisible="False"
-                       Text="{Binding ProductShortName}" />
+            <Viewbox Grid.Row="0"
+                     Grid.ColumnSpan="2"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Top"
+                     Stretch="Uniform">
+                <TextBlock FontSize="10.5" Style="{StaticResource TopTextStyle}" Text="{Binding BundleLongName}" />
+            </Viewbox>
+            <Viewbox Grid.Row="0"
+                     Grid.ColumnSpan="2"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     Stretch="Uniform">
+                <TextBlock FontSize="60" Foreground="White" IsHitTestVisible="False" Text="{Binding ProductShortName}" />
+            </Viewbox>
             <!--  License  -->
             <Button Grid.Row="0" Grid.Column="2" Command="{Binding InstallationViewModel.LicenseCommand}">License</Button>
             <Image Grid.Row="0" Grid.Column="2" Source="resources\legal.png" />
@@ -142,6 +137,12 @@
                     </EventTrigger>
                 </Image.Triggers>
             </Image>
+
+            <!--  ProductLongName  -->
+            <Viewbox Grid.Row="1" Grid.ColumnSpan="3" VerticalAlignment="Top" Stretch="Uniform">
+                <TextBlock Style="{StaticResource StatusTextStyle}" Text="{Binding ProductLongName}" />
+            </Viewbox>
+
 
             <!--  Check for Update  -->
             <Button Grid.Row="2" Grid.Column="0" Content="Options" IsEnabled="False" />

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 
@@ -53,11 +54,14 @@ namespace WixBootstrapper
             Engine.Log(LogLevel.Verbose, "Running the ESME Bootstrapper.");
             Model = new Model(this);
             Dispatcher = Dispatcher.CurrentDispatcher;
+            var backgroundColor = (Color)(ColorConverter.ConvertFromString(Engine.StringVariables["BackgroundColor"]) ?? Colors.LightSeaGreen);
+            var progressBarColor = (Color)(ColorConverter.ConvertFromString(Engine.StringVariables["BackgroundColor"]) ?? ColorConverter.ConvertFromString("#FF008E91"));
             var viewModel = new RootViewModel
             {
                 ProductLongName = Engine.StringVariables["ProductLongName"],
                 ProductShortName = Engine.StringVariables["ProductShortName"],
-                ProductVersion = Engine.StringVariables["ProductVersion"],
+                BundleLongName = Engine.StringVariables["BundleLongName"],
+                ButtonBackgroundBrush = new SolidColorBrush(backgroundColor)
             };
             // Populate the view models with the latest data. This is where Detect is called.
             viewModel.Refresh();

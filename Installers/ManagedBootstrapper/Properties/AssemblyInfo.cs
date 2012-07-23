@@ -35,3 +35,5 @@ using WixBootstrapper;
 // Identifies the class that derives from UserExperience and is the UX class that gets
 // instantiated by the interop layer
 [assembly: BootstrapperApplication(typeof(Bootstrapper))]
+[assembly: AssemblyVersion("1.2.0.0")]
+[assembly: AssemblyFileVersion("1.2.0.0")]

@@ -10,9 +10,9 @@
   <?define DatabasesRoot="$(var.InstallersRoot)\Installable NAVO Databases"?>
   <?define PluginsRoot="$(var.InstallersRoot)\Plugins"?>
   <?if $(var.Platform) = x64 ?>
-  <?define ProductNameWithBitness="$(var.ProductName) (64-bit)"?>
+  <?define Bitness="64-bit"?>
   <?else ?>
-  <?define ProductNameWithBitness="$(var.ProductName) (32-bit)"?>
+  <?define Bitness="32-bit"?>
   <?endif ?>
 
   <Bundle Name="$(var.ProductName)" 
@@ -24,9 +24,9 @@
           AboutUrl='http://esme.bu.edu/' 
           UpdateUrl='http://esme.bu.edu'
           Compressed='no'>
-    <Variable Name="ProductLongName" Value="$(var.ProductNameWithBitness)" />
+    <Variable Name="BundleLongName" Value="Effects of Sound on the Marine Environment" />
     <Variable Name="ProductShortName" Value="ESME" />
-    <Variable Name="ProductVersion" Value="$(var.ProductFullVersion)" />
+    <Variable Name="ProductLongName" Value="$(var.ProductName) Application Bundle ($(var.Bitness)) v$(var.ProductFullVersion)" />
     <BootstrapperApplicationRef Id='ManagedBootstrapperApplicationHost'>
       <Payload Name='BootstrapperCore.config' 
                SourceFile='..\ManagedBootstrapper\Bootstrapper.BootstrapperCore.config' />

@@ -18,6 +18,7 @@
 
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 
 namespace WixBootstrapper
@@ -131,7 +132,8 @@ namespace WixBootstrapper
 
         public string ProductShortName { get; set; }
         public string ProductLongName { get; set; }
-        public string ProductVersion { get; set; }
+        public string BundleLongName { get; set; }
+        public Brush ButtonBackgroundBrush { get; set; }
 
         #region public Visibility MainPanelVisibility { get; set; }
 

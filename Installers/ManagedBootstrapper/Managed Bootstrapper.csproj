@@ -41,6 +41,7 @@
     <Reference Include="BootstrapperCore, Version=3.0.0.0, Culture=neutral, PublicKeyToken=ce35f76fcda82bad, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -67,7 +68,6 @@
     <Compile Include="Model.cs" />
     <Compile Include="NewsItem.cs" />
     <Compile Include="ProgressViewModel.cs" />
-    <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="PropertyNotifyBase.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="RootView.xaml.cs">
@@ -140,7 +140,8 @@
     </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -assemblyversion "$(ProjectDir)\Properties\AssemblyVersionInfo.cs"</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
