@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define ProductName = "OAML Databases for ESME" ?>
+  <?include version.wxi ?>
+  <?define ProductAuthor = "Hearing Research Center" ?>
+  <?define Manufacturer="Boston University"?>
+  <?define ProductAppFolder = "InstallLocation" ?>
+  <?define InstallersRoot="C:\Projects\ESME Deliverables\Installers"?>
+  <?define ESMERoot="$(var.InstallersRoot)\ESME Workbench"?>
+  <?define DatabasesRoot="$(var.InstallersRoot)\Installable NAVO Databases"?>
+  <?define PluginsRoot="$(var.InstallersRoot)\Plugins"?>
+  <?if $(var.Platform) = x64 ?>
+  <?define Bitness="64-bit"?>
+  <?else ?>
+  <?define Bitness="32-bit"?>
+  <?endif ?>
+
+  <Bundle Name="$(var.ProductName)" 
+          Version="$(var.ProductFullVersion)" 
+          Manufacturer="$(var.Manufacturer)"
+          UpgradeCode="86F5F4D6-9212-4B95-B545-9490C6A25D67" 
+          IconSourceFile="..\ESME Application and Database Bundle\Wave.ico"
+          SplashScreenSourceFile='..\ESME Application and Database Bundle\ESMELogo.bmp' 
+          AboutUrl='http://esme.bu.edu/' 
+          UpdateUrl='http://esme.bu.edu'
+          Compressed='no'>
+    <Variable Name="BundleLongName" Value="Effects of Sound on the Marine Environment" />
+    <Variable Name="ProductShortName" Value="ESME" />
+    <Variable Name="ProductLongName" Value="$(var.ProductName) Application Bundle ($(var.Bitness)) v$(var.ProductFullVersion)" />
+    <BootstrapperApplicationRef Id='ManagedBootstrapperApplicationHost'>
+      <Payload Name='BootstrapperCore.config' 
+               SourceFile='..\ManagedBootstrapper\Bootstrapper.BootstrapperCore.config' />
+      <Payload Name='Bootstrapper.dll' 
+               SourceFile='..\ManagedBootstrapper\bin\Release\Bootstrapper.dll' />
+      <Payload Name='License.htm' 
+               SourceFile='..\ESME Application and Database Bundle\license.htm' />
+      <Payload Name='NetFxLicense.rtf' 
+               SourceFile='..\dotNetFx40\NetFxLicense.rtf' />
+    </BootstrapperApplicationRef>
+    <Chain>
+      <PackageGroupRef Id='Netfx4Full' />
+
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/ESMEWorkbenchSetup-$(var.Platform).msi"
+                  SourceFile="$(var.ESMERoot)\msi\ESMEWorkbenchSetup-$(var.Platform).msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Visible="yes"
+                  Vital="no">
+      </MsiPackage>
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/InstallableNAVOPlugin-$(var.Platform).msi"
+                  SourceFile="$(var.PluginsRoot)\InstallableNAVO\msi\InstallableNAVOPlugin-$(var.Platform).msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Visible="yes"
+                  Vital="no"/>
+    </Chain>
+  </Bundle>
+</Wix>
