@@ -77,5 +77,7 @@
                   Visible="yes"
                   Vital="no">
         <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
-      </MsiPackage>  </Bundle>
+      </MsiPackage>
+    </Chain>
+  </Bundle>
 </Wix>
