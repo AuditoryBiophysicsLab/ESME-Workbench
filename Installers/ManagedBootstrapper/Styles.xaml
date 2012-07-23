@@ -67,7 +67,6 @@
     <Style TargetType="Button">
         <Setter Property="FontFamily" Value="Segoe UI" />
         <Setter Property="Foreground" Value="White" />
-        <Setter Property="Background" Value="LightSeaGreen" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="Template" Value="{StaticResource ButtonTemplateKey}" />
     </Style>

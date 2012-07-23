@@ -134,6 +134,7 @@ namespace WixBootstrapper
         public string ProductLongName { get; set; }
         public string BundleLongName { get; set; }
         public Brush ButtonBackgroundBrush { get; set; }
+        public Brush ProgressBarBrush { get; set; }
 
         #region public Visibility MainPanelVisibility { get; set; }
 

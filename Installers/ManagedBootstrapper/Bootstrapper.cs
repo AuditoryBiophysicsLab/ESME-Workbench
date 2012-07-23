@@ -54,14 +54,29 @@ namespace WixBootstrapper
             Engine.Log(LogLevel.Verbose, "Running the ESME Bootstrapper.");
             Model = new Model(this);
             Dispatcher = Dispatcher.CurrentDispatcher;
-            var backgroundColor = (Color)(ColorConverter.ConvertFromString(Engine.StringVariables["BackgroundColor"]) ?? Colors.LightSeaGreen);
-            var progressBarColor = (Color)(ColorConverter.ConvertFromString(Engine.StringVariables["BackgroundColor"]) ?? ColorConverter.ConvertFromString("#FF008E91"));
+            var backgroundColorString = Engine.StringVariables["BackgroundColor"];
+            var progressBarColorString = Engine.StringVariables["ProgressBarColor"];
+            Engine.Log(LogLevel.Verbose, string.Format("BackgroundColor read as \"{0}\"", backgroundColorString));
+            var convertedBackgroundColorObject = ColorConverter.ConvertFromString(backgroundColorString);
+            var convertedProgressBarColorObject = ColorConverter.ConvertFromString(progressBarColorString);
+            var backgroundColor = Colors.LightSeaGreen;
+            var progressBarColor = Color.FromArgb(0xFF, 0x00, 0x8E, 0x91);
+            if (convertedBackgroundColorObject == null) Engine.Log(LogLevel.Verbose, string.Format("ColorConverter.ConvertFromString({0}) returned NULL", backgroundColorString));
+            else
+            {
+                backgroundColor = (Color)convertedBackgroundColorObject;
+                Engine.Log(LogLevel.Verbose, string.Format("ColorConverter.ConvertFromString({0}) returned A:{1} R:{2} G:{3} B:{4}", backgroundColorString, backgroundColor.A, backgroundColor.R, backgroundColor.G, backgroundColor.B));
+            }
+            if (convertedProgressBarColorObject != null) progressBarColor = (Color)convertedProgressBarColorObject;
+            //var backgroundColor = (Color)(ColorConverter.ConvertFromString(Engine.StringVariables["BackgroundColor"]) ?? Colors.LightSeaGreen);
+            //var progressBarColor = (Color)(ColorConverter.ConvertFromString(Engine.StringVariables["ProgressBarColor"]) ?? ColorConverter.ConvertFromString("#FF008E91"));
             var viewModel = new RootViewModel
             {
                 ProductLongName = Engine.StringVariables["ProductLongName"],
                 ProductShortName = Engine.StringVariables["ProductShortName"],
                 BundleLongName = Engine.StringVariables["BundleLongName"],
-                ButtonBackgroundBrush = new SolidColorBrush(backgroundColor)
+                ButtonBackgroundBrush = new SolidColorBrush(backgroundColor),
+                ProgressBarBrush = new SolidColorBrush(progressBarColor),
             };
             // Populate the view models with the latest data. This is where Detect is called.
             viewModel.Refresh();
