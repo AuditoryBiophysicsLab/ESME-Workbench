@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <?define ProductName = "ESME Workbench 2012" ?>
   <?include version.wxi ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
   <?define Manufacturer="Boston University"?>
@@ -14,11 +13,11 @@
   <?else ?>
   <?define Bitness="32-bit"?>
   <?endif ?>
-
-  <Bundle Name="$(var.ProductName)" 
+  <?define ProductName = "ESME Workbench 2012" ?>
+  <Bundle Name="$(var.ProductName) ($(var.Bitness))" 
           Version="$(var.ProductFullVersion)" 
           Manufacturer="$(var.Manufacturer)"
-          UpgradeCode="86F5F4D6-9212-4B95-B545-9490C6A25D67" 
+          UpgradeCode="D3DA4B39-A7F3-408D-8B6B-C515A259F35D" 
           IconSourceFile="..\Common Files\Wave.ico"
           SplashScreenSourceFile="..\Common Files\ESMELogo.bmp" 
           AboutUrl="http://esme.bu.edu/" 
@@ -26,7 +25,7 @@
           Compressed="no">
     <Variable Name="BundleLongName" Value="Effects of Sound on the Marine Environment" />
     <Variable Name="ProductShortName" Value="ESME" />
-    <Variable Name="ProductLongName" Value="$(var.ProductName) Application Bundle ($(var.Bitness)) v$(var.ProductFullVersion)" />
+    <Variable Name="ProductLongName" Value="$(var.ProductName) ($(var.Bitness)) v$(var.ProductFullVersion)" />
     <Variable Name="BackgroundColor" Value="#FF2090B3" />
     <Variable Name="ProgressBarColor" Value="#FF176780" />
     <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">

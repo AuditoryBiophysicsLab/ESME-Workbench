@@ -116,7 +116,7 @@ namespace WixBootstrapper
             {
                 if (_message == value) return;
                 _message = value;
-                base.OnPropertyChanged("Message");
+                base.OnPropertyChanged("OverallMessage");
             }
         }
 

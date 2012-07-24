@@ -118,18 +118,53 @@
                        Visibility="{Binding InstallationViewModel.TryAgainEnabled,
                                             Converter={StaticResource BooleanToVisibilityConverter}}" />
             <!--  Progress  -->
-            <ProgressBar Grid.Row="1"
-                         Grid.ColumnSpan="3"
-                         Margin="3"
-                         Background="{Binding ProgressBarBrush}"
-                         Foreground="{Binding ButtonBackgroundBrush}"
-                         Visibility="{Binding ProgressViewModel.ProgressEnabled,
-                                              Converter={StaticResource BooleanToVisibilityConverter}}"
-                         Value="{Binding Path=ProgressViewModel.Progress}" />
+            <Grid Grid.Row="1" Grid.ColumnSpan="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <ProgressBar Grid.Row="0"
+                             Margin="3"
+                             Background="{Binding ProgressBarBrush}"
+                             Foreground="{Binding ButtonBackgroundBrush}"
+                             Visibility="{Binding ProgressViewModel.ProgressEnabled,
+                                                  Converter={StaticResource BooleanToVisibilityConverter}}"
+                             Value="{Binding Path=ProgressViewModel.CacheProgress}" />
+                <TextBlock Grid.Row="0"
+                       Style="{StaticResource StatusTextStyle}"
+                       Text="{Binding ProgressViewModel.CacheMessage}"
+                       Visibility="{Binding ProgressViewModel.ProgressEnabled,
+                                            Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <ProgressBar Grid.Row="1"
+                             Margin="3"
+                             Background="{Binding ProgressBarBrush}"
+                             Foreground="{Binding ButtonBackgroundBrush}"
+                             Visibility="{Binding ProgressViewModel.ProgressEnabled,
+                                                  Converter={StaticResource BooleanToVisibilityConverter}}"
+                             Value="{Binding Path=ProgressViewModel.ExecuteProgress}" />
+                <TextBlock Grid.Row="1"
+                       Style="{StaticResource StatusTextStyle}"
+                       Text="{Binding ProgressViewModel.ExecuteMessage}"
+                       Visibility="{Binding ProgressViewModel.ProgressEnabled,
+                                            Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <ProgressBar Grid.Row="2"
+                             Margin="3"
+                             Background="{Binding ProgressBarBrush}"
+                             Foreground="{Binding ButtonBackgroundBrush}"
+                             Visibility="{Binding ProgressViewModel.ProgressEnabled,
+                                                  Converter={StaticResource BooleanToVisibilityConverter}}"
+                             Value="{Binding Path=ProgressViewModel.OverallProgress}" />
+                <TextBlock Grid.Row="3"
+                       Style="{StaticResource StatusTextStyle}"
+                       Text="{Binding ProgressViewModel.OverallMessage}"
+                       Visibility="{Binding ProgressViewModel.ProgressEnabled,
+                                            Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </Grid>
             <TextBlock Grid.Row="1"
                        Grid.ColumnSpan="3"
                        Style="{StaticResource StatusTextStyle}"
-                       Text="{Binding ProgressViewModel.Message}"
+                       Text="{Binding ProgressViewModel.OverallMessage}"
                        Visibility="{Binding ProgressViewModel.ProgressEnabled,
                                             Converter={StaticResource BooleanToVisibilityConverter}}" />
             <Image Grid.Row="1" Grid.Column="2" Source="resources\gear.png" Visibility="{Binding ProgressViewModel.ProgressEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
