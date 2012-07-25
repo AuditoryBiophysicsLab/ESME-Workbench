@@ -8,6 +8,7 @@ using System.Windows.Data;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
+using ESME.Scenarios;
 using HRC.Aspects;
 using HRC.Collections;
 using HRC.Validation;
@@ -41,6 +42,14 @@ namespace ESME.Views.Scenarios
                     return !string.IsNullOrEmpty(target.ScenarioName);
                 },
             });
+        }
+
+        public CreateScenarioViewModel(Scenario scenario)
+        {
+            Location = scenario.Location;
+            Comments = scenario.Comments;
+            TimePeriod = scenario.TimePeriod;
+            Duration = scenario.Duration;
         }
         public ObservableCollection<Location> Locations { get; set; }
         public string ScenarioName { get; set; }

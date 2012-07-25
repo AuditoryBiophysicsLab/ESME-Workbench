@@ -31,7 +31,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [Initialize] public LayerTreeViewModel LayerTreeViewModel { get; set; }
         public MapViewModel MapViewModel { get; set; }
 
-        [Affects("IsScenarioLoaded", "CanPlaceAnalysisPoint")] 
+        [Affects("IsScenarioLoaded", "CanPlaceAnalysisPoint", "IsRunSimulationCommandEnabled")] 
         public Scenario Scenario
         {
             get { return _scenario; }
@@ -81,9 +81,12 @@ namespace ESMEWorkbench.ViewModels.Main
                 if (Scenario.Platforms.Count == 0) return false;
                 var modes = (from platform in Scenario.Platforms from source in platform.Sources from mode in source.Modes select mode).ToList();
                 if (modes.Count == 0) return false;
+                if (IsSimulationRunning) return false;
                 return Scenario.Wind != null && Scenario.SoundSpeed != null && Scenario.Bathymetry != null && Scenario.Sediment != null;
             }
         }
+        [Affects("CanPlaceAnalysisPoint")]
+        public bool IsSimulationRunning { get; set; }
 
         public bool IsInAnalysisPointMode { get; set; }
 
@@ -606,14 +609,14 @@ namespace ESMEWorkbench.ViewModels.Main
         #endregion
 
         #region RunSimulationCommand
-        public SimpleCommand<object, object> RunSimulationCommand { get { return _runSimulation ?? (_runSimulation = new SimpleCommand<object, object>(o => IsRunSimulationCommandEnabled, RunSimulationHandler)); } }
+        public SimpleCommand<object, object> RunSimulationCommand { get { return _runSimulation ?? (_runSimulation = new SimpleCommand<object, object>(RunSimulationHandler)); } }
         SimpleCommand<object, object> _runSimulation;
 
-        bool IsRunSimulationCommandEnabled
+        public bool IsRunSimulationCommandEnabled
         {
             get
             {
-                if (Scenario == null) return false;
+                if (Scenario == null || IsTransmissionLossBusy) return false;
                 ScenarioValidationError = Scenario.Validate();
                 return string.IsNullOrEmpty(ScenarioValidationError);
             }
@@ -623,11 +626,12 @@ namespace ESMEWorkbench.ViewModels.Main
         void RunSimulationHandler(object o)
         {
             var simulationDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Simulation Test");
-            
             if (Directory.Exists(simulationDirectory)) try{ Directory.Delete(simulationDirectory, true);} catch{}
+
             var simulation = Simulation.Create(Scenario, simulationDirectory, _dispatcher);
             SimulationProgressViewModel = new SimulationProgressViewModel {Simulation = simulation};
-            var window = _visualizer.ShowWindow("SimulationProgressView", SimulationProgressViewModel);
+            SimulationProgressViewModel.SimulationStarting += (s, e) => IsSimulationRunning = true;
+            var window = _visualizer.ShowWindow("SimulationProgressView", SimulationProgressViewModel,false,(s,e)=>IsSimulationRunning=false);
             SimulationProgressViewModel.Window = window;
             //var task = simulation.Start(vm.TimeStepSize);
             //task.ContinueWith(t => _dispatcher.InvokeIfRequired(window.Close));

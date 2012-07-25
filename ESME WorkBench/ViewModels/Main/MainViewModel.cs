@@ -90,7 +90,15 @@ namespace ESMEWorkbench.ViewModels.Main
             _transmissionLoss.DepthCellSize = Globals.AppSettings.BellhopSettings.DepthCellSize;
             _transmissionLoss.RayCount = Globals.AppSettings.BellhopSettings.RayCount;
             _transmissionLoss.WorkQueue.PropertyChanged +=
-                (s, e) => { if (e.PropertyName == "Count") TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0 ? string.Format("Acoustic Simulator: {0} items", _transmissionLoss.WorkQueue.Keys.Count) : "Acoustic Simulator: idle"; };
+                (s, e) =>
+                {
+                    if (e.PropertyName == "Count")
+                    {
+                        TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0 ? string.Format("Acoustic Simulator: {0} items", _transmissionLoss.WorkQueue.Keys.Count) : "Acoustic Simulator: idle";
+                       // Debug.WriteLine(string.Format("TransmissionLossActivity: {0}", TransmissionLossActivity));
+                        IsTransmissionLossBusy = _transmissionLoss.WorkQueue.Keys.Count > 0;
+                    }
+                };
 
             if (Designer.IsInDesignMode) return;
 
@@ -216,7 +224,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         public ObservableCollection<Scenario> Scenarios { get; private set; }
         public IMasterDatabaseService Database { get; private set; }
-
+        [Affects("IsRunSimulationCommandEnabled"),Initialize(false)] public bool IsTransmissionLossBusy { get; set; }
         protected override void OnDispose()
         {
             base.OnDispose();
@@ -400,8 +408,9 @@ namespace ESMEWorkbench.ViewModels.Main
         public bool IsModified { get { return Database.Context.IsModified; } }
 
 
-        
-        [Initialize("Acoustic Simulator: idle")] public string TransmissionLossActivity { get; set; }
+
+        [Initialize("Acoustic Simulator: idle")]
+        public string TransmissionLossActivity { get; set; }
 
         [Initialize("Lat: N/A")] public string MouseLatitude { get; private set; }
 

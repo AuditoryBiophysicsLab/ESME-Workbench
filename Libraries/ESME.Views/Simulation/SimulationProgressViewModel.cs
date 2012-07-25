@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
+using System.Windows.Threading;
 using HRC.Aspects;
 using HRC.Utility;
 using HRC.ViewModels;
@@ -75,6 +76,25 @@ namespace ESME.Views.Simulation
             task.ContinueWith(t => Window.Dispatcher.InvokeIfRequired(Window.Close));
             IsStartCommandEnabled = false;
             IsCancelCommandEnabled = true;
+            OnSimulationStarting();
+        }
+
+        public event EventHandler SimulationStarting;
+
+        protected void OnSimulationStarting()
+        {
+            var handlers = SimulationStarting;
+            if (handlers == null) return;
+            foreach (EventHandler handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                {
+                    var localHandler = handler;
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new EventArgs()));
+                }
+                else
+                    handler(this, new EventArgs());
+            }
         }
         #endregion
     }

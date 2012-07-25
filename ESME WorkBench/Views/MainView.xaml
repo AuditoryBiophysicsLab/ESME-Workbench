@@ -199,6 +199,7 @@
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Simulation">
                     <r:RibbonButton Command="{Binding RunSimulationCommand}"
+                                    IsEnabled="{Binding IsRunSimulationCommandEnabled}"
                                     Label="Run"
                                     LargeImageSource="..\Images\LargeIcons\hourglass_go.png"
                                     ToolTipDescription="Run the current scenario"
