@@ -85,7 +85,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 return Scenario.Wind != null && Scenario.SoundSpeed != null && Scenario.Bathymetry != null && Scenario.Sediment != null;
             }
         }
-        [Affects("CanPlaceAnalysisPoint")]
+        [Affects("CanPlaceAnalysisPoint", "IsRunSimulationCommandEnabled")]
         public bool IsSimulationRunning { get; set; }
 
         public bool IsInAnalysisPointMode { get; set; }
@@ -616,7 +616,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             get
             {
-                if (Scenario == null || IsTransmissionLossBusy) return false;
+                if (Scenario == null || IsTransmissionLossBusy || IsSimulationRunning) return false;
                 ScenarioValidationError = Scenario.Validate();
                 return string.IsNullOrEmpty(ScenarioValidationError);
             }
@@ -625,7 +625,10 @@ namespace ESMEWorkbench.ViewModels.Main
         public SimulationProgressViewModel SimulationProgressViewModel { get; set; }
         void RunSimulationHandler(object o)
         {
-            var simulationDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Simulation Test");
+            var now = DateTime.Now;
+            var name = Scenario.Name;
+            foreach (var c in Path.GetInvalidPathChars().Where(name.Contains)) name.Replace(c, '-');
+            var simulationDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ESME Simulations", name, string.Format("{0}-{1}-{2}-{3}-{4}-{5}",now.Year,now.Month,now.Day,now.Hour,now.Minute,now.Second));
             if (Directory.Exists(simulationDirectory)) try{ Directory.Delete(simulationDirectory, true);} catch{}
 
             var simulation = Simulation.Create(Scenario, simulationDirectory, _dispatcher);
