@@ -94,6 +94,12 @@ namespace HRC.Collections
             NotifyObserversOfChange();
         }
 
+        public void Clear()
+        {
+            _dictionary.Clear();
+            NotifyObserversOfChange();
+        }
+
         #region ICollection<KeyValuePair<TKey,TValue>> Members
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item)
         {

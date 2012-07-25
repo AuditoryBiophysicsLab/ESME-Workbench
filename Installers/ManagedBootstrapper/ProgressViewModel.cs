@@ -25,6 +25,53 @@ namespace WixBootstrapper
             Bootstrapper.Model.Bootstrapper.Progress += ApplyProgress;
             Bootstrapper.Model.Bootstrapper.CacheAcquireProgress += CacheAcquireProgress;
             Bootstrapper.Model.Bootstrapper.CacheComplete += CacheComplete;
+            Bootstrapper.Model.Bootstrapper.CacheBegin += (s, e) =>
+            {
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("CacheBegin"));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    Result: {0}", e.Result));
+            };
+            Bootstrapper.Model.Bootstrapper.CachePackageBegin += (s, e) =>
+            {
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("CachePackageBegin"));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PackageId: {0}", e.PackageId));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    CachePayloads: {0}", e.CachePayloads));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PackageCacheSize: {0}", e.PackageCacheSize));
+            };
+            Bootstrapper.Model.Bootstrapper.CachePackageComplete += (s, e) =>
+            {
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("CachePackageComplete"));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PackageId: {0}", e.PackageId));
+            };
+            Bootstrapper.Model.Bootstrapper.CacheVerifyBegin += (s, e) =>
+            {
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("CacheVerifyBegin"));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PackageId: {0}", e.PackageId));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PayloadId: {0}", e.PayloadId));
+            };
+            Bootstrapper.Model.Bootstrapper.CacheVerifyComplete += (s, e) =>
+            {
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("CacheVerifyComplete"));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PackageId: {0}", e.PackageId));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PayloadId: {0}", e.PayloadId));
+            };
+            Bootstrapper.Model.Bootstrapper.DetectBegin += (s, e) =>
+            {
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("DetectBegin"));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PackageCount: {0}", e.PackageCount));
+            };
+            Bootstrapper.Model.Bootstrapper.DetectComplete += (s, e) => Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("DetectComplete"));
+            Bootstrapper.Model.Bootstrapper.DetectMsiFeature += (s, e) =>
+            {
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("DetectMsiFeature"));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    FeatureId: {0}", e.FeatureId));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PackageId: {0}", e.PackageId));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    State: {0}", e.State));
+            };
+            Bootstrapper.Model.Bootstrapper.DetectPackageBegin += (s, e) =>
+            {
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("DetectPackageBegin"));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PackageId: {0}", e.PackageId));
+            };
             CacheMessage = "Acquisition progress";
             ExecuteMessage = "Installation progress";
             OverallMessage = "Overall progress";
@@ -131,7 +178,12 @@ namespace WixBootstrapper
 
         void RootPropertyChanged(object sender, PropertyChangedEventArgs e) { if ("State" == e.PropertyName) base.OnPropertyChanged("ProgressEnabled"); }
 
-        private void PlanBegin(object sender, PlanBeginEventArgs e) { lock (this) _executingPackageOrderIndex.Clear(); }
+        private void PlanBegin(object sender, PlanBeginEventArgs e)
+        {
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("PlanBegin"));
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PackageCount: {0}", e.PackageCount));
+            lock (this) _executingPackageOrderIndex.Clear();
+        }
 
         private void PlanPackageComplete(object sender, PlanPackageCompleteEventArgs e)
         {
@@ -140,6 +192,12 @@ namespace WixBootstrapper
             {
                 Debug.Assert(!_executingPackageOrderIndex.ContainsKey(e.PackageId));
                 _executingPackageOrderIndex.Add(e.PackageId, _executingPackageOrderIndex.Count);
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("PlanPackageComplete"));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PackageID: {0}", e.PackageId));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    Execute: {0}", e.Execute));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    Requested: {0}", e.Requested));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    Rollback: {0}", e.Rollback));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    State: {0}", e.State));
             }
         }
 
@@ -169,6 +227,12 @@ namespace WixBootstrapper
         {
             lock (this)
             {
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("CacheAcquireProgress"));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    OverallPercentage: {0}", e.OverallPercentage));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PackageOrContainerId: {0}", e.PackageOrContainerId));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PayloadId: {0}", e.PayloadId));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    Progress: {0}", e.Progress));
+                Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    Total: {0}", e.Total));
                 CacheProgress = e.OverallPercentage;
                 CacheMessage = string.Format("Acquiring {0}", e.PackageOrContainerId);
                 OverallProgress = (_cacheProgress + _executeProgress) / 2;
@@ -178,6 +242,8 @@ namespace WixBootstrapper
 
         private void CacheComplete(object sender, CacheCompleteEventArgs e)
         {
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("CacheComplete"));
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    Status: {0}", e.Status));
             lock (this)
             {
                 CacheMessage = string.Format("Package acquisition complete");
@@ -188,6 +254,10 @@ namespace WixBootstrapper
 
         private void ApplyExecuteProgress(object sender, ExecuteProgressEventArgs e)
         {
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("ApplyExecuteProgress"));
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    OverallPercentage: {0}", e.OverallPercentage));
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    PackageId: {0}", e.PackageId));
+            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("    ProgressPercentage: {0}", e.ProgressPercentage));
             lock (this)
             {
                 ExecuteProgress = e.OverallPercentage;

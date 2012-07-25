@@ -39,9 +39,6 @@
     </WixExtension>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\ESME Application and Database Bundle\ESMELogo.bmp">
-      <Link>ESMELogo.bmp</Link>
-    </Content>
     <Content Include="version.wxi" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />

@@ -40,8 +40,6 @@
     </WixExtension>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ESMELogo.bmp" />
-    <Content Include="license.htm" />
     <Content Include="version.wxi" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
