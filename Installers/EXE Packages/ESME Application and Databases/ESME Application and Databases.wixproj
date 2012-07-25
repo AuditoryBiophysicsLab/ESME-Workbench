@@ -2,13 +2,13 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProductVersion>3.x</ProductVersion>
-    <ProjectGuid>{a10f5a4a-a8fb-4d6f-992b-01d6e2e9dbfa}</ProjectGuid>
+    <ProjectGuid>{02e4c2c3-9362-4c6d-8c8b-a42d63d118c3}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>ESMEWorkbench2012</OutputName>
+    <OutputName>ESME Application and Databases</OutputName>
     <OutputType>Bundle</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
-    <Name>ESME Application and Database Bundle</Name>
+    <Name>ESME Application and Databases</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <SuppressSpecificWarnings />

@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProductVersion>3.x</ProductVersion>
-    <ProjectGuid>{acbe1053-cf95-462c-8fa7-b8865383c8e6}</ProjectGuid>
+    <ProjectGuid>{37b05855-21a5-44da-8549-9828182739a1}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputName>ESME Application</OutputName>
     <OutputType>Bundle</OutputType>

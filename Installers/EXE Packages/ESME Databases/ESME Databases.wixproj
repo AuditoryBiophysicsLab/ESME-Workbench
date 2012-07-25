@@ -2,13 +2,13 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProductVersion>3.x</ProductVersion>
-    <ProjectGuid>{52c5756f-3b8a-4952-a77f-a51472b01fad}</ProjectGuid>
+    <ProjectGuid>{398e627e-2203-4b1d-9805-28ab6f2815d5}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>OAML Databases for ESME</OutputName>
+    <OutputName>ESME Databases</OutputName>
     <OutputType>Bundle</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
-    <Name>OAML Databases for ESME</Name>
+    <Name>ESME Databases</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <SuppressSpecificWarnings />

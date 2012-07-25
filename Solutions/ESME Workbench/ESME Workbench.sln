@@ -105,7 +105,34 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ESME Application", "..\..\I
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "OAML Databases for ESME", "..\..\Installers\OAML Databases for ESME\OAML Databases for ESME.wixproj", "{52C5756F-3B8A-4952-A77F-A51472B01FAD}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common Files", "Common Files", "{B3F80BFE-D409-47CB-A1D0-261E8198E869}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EXE Packages", "EXE Packages", "{A6CB8409-490A-4064-91D0-191DB579A3F0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MSI Packages", "MSI Packages", "{5598DCAA-663E-4444-9761-5F321FF99F75}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common Files", "Common Files", "{F22644A1-1374-469B-B7E7-1AD854DE7477}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\Installers\EXE Packages\Common Files\ESMELogo.bmp = ..\..\Installers\EXE Packages\Common Files\ESMELogo.bmp
+		..\..\Installers\EXE Packages\Common Files\ESMELogo.png = ..\..\Installers\EXE Packages\Common Files\ESMELogo.png
+		..\..\Installers\EXE Packages\Common Files\GPLv3.docx = ..\..\Installers\EXE Packages\Common Files\GPLv3.docx
+		..\..\Installers\EXE Packages\Common Files\GPLv3.rtf = ..\..\Installers\EXE Packages\Common Files\GPLv3.rtf
+		..\..\Installers\EXE Packages\Common Files\License.docx = ..\..\Installers\EXE Packages\Common Files\License.docx
+		..\..\Installers\EXE Packages\Common Files\license.htm = ..\..\Installers\EXE Packages\Common Files\license.htm
+		..\..\Installers\EXE Packages\Common Files\License.rtf = ..\..\Installers\EXE Packages\Common Files\License.rtf
+		..\..\Installers\EXE Packages\Common Files\Navo_logo.gif = ..\..\Installers\EXE Packages\Common Files\Navo_logo.gif
+		..\..\Installers\EXE Packages\Common Files\NAVO_Logo.jpg = ..\..\Installers\EXE Packages\Common Files\NAVO_Logo.jpg
+		..\..\Installers\EXE Packages\Common Files\NAVO_Logo.png = ..\..\Installers\EXE Packages\Common Files\NAVO_Logo.png
+		..\..\Installers\EXE Packages\Common Files\NAVO_Logo_285px.png = ..\..\Installers\EXE Packages\Common Files\NAVO_Logo_285px.png
+		..\..\Installers\EXE Packages\Common Files\NAVO_Logo_64px_transparent.png = ..\..\Installers\EXE Packages\Common Files\NAVO_Logo_64px_transparent.png
+		..\..\Installers\EXE Packages\Common Files\NAVO_Logo_64px_white.png = ..\..\Installers\EXE Packages\Common Files\NAVO_Logo_64px_white.png
+		..\..\Installers\EXE Packages\Common Files\Wave.ico = ..\..\Installers\EXE Packages\Common Files\Wave.ico
+		..\..\Installers\EXE Packages\Common Files\Wave.png = ..\..\Installers\EXE Packages\Common Files\Wave.png
+	EndProjectSection
+EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ESME Application", "..\..\Installers\EXE Packages\ESME Application\ESME Application.wixproj", "{37B05855-21A5-44DA-8549-9828182739A1}"
+EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ESME Application and Databases", "..\..\Installers\EXE Packages\ESME Application and Databases\ESME Application and Databases.wixproj", "{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}"
+EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ESME Databases", "..\..\Installers\EXE Packages\ESME Databases\ESME Databases.wixproj", "{398E627E-2203-4B1D-9805-28AB6F2815D5}"
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
@@ -349,6 +376,48 @@ Global
 		{52C5756F-3B8A-4952-A77F-A51472B01FAD}.Release|x64.Build.0 = Release|x64
 		{52C5756F-3B8A-4952-A77F-A51472B01FAD}.Release|x86.ActiveCfg = Release|x86
 		{52C5756F-3B8A-4952-A77F-A51472B01FAD}.Release|x86.Build.0 = Release|x86
+		{37B05855-21A5-44DA-8549-9828182739A1}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{37B05855-21A5-44DA-8549-9828182739A1}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{37B05855-21A5-44DA-8549-9828182739A1}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{37B05855-21A5-44DA-8549-9828182739A1}.Debug|x64.ActiveCfg = Debug|x64
+		{37B05855-21A5-44DA-8549-9828182739A1}.Debug|x64.Build.0 = Debug|x64
+		{37B05855-21A5-44DA-8549-9828182739A1}.Debug|x86.ActiveCfg = Debug|x86
+		{37B05855-21A5-44DA-8549-9828182739A1}.Debug|x86.Build.0 = Debug|x86
+		{37B05855-21A5-44DA-8549-9828182739A1}.Release|Any CPU.ActiveCfg = Release|x86
+		{37B05855-21A5-44DA-8549-9828182739A1}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{37B05855-21A5-44DA-8549-9828182739A1}.Release|Mixed Platforms.Build.0 = Release|x86
+		{37B05855-21A5-44DA-8549-9828182739A1}.Release|x64.ActiveCfg = Release|x64
+		{37B05855-21A5-44DA-8549-9828182739A1}.Release|x64.Build.0 = Release|x64
+		{37B05855-21A5-44DA-8549-9828182739A1}.Release|x86.ActiveCfg = Release|x86
+		{37B05855-21A5-44DA-8549-9828182739A1}.Release|x86.Build.0 = Release|x86
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}.Debug|x64.ActiveCfg = Debug|x64
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}.Debug|x64.Build.0 = Debug|x64
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}.Debug|x86.ActiveCfg = Debug|x86
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}.Debug|x86.Build.0 = Debug|x86
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}.Release|Any CPU.ActiveCfg = Release|x86
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}.Release|Mixed Platforms.Build.0 = Release|x86
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}.Release|x64.ActiveCfg = Release|x64
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}.Release|x64.Build.0 = Release|x64
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}.Release|x86.ActiveCfg = Release|x86
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3}.Release|x86.Build.0 = Release|x86
+		{398E627E-2203-4B1D-9805-28AB6F2815D5}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{398E627E-2203-4B1D-9805-28AB6F2815D5}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{398E627E-2203-4B1D-9805-28AB6F2815D5}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{398E627E-2203-4B1D-9805-28AB6F2815D5}.Debug|x64.ActiveCfg = Debug|x64
+		{398E627E-2203-4B1D-9805-28AB6F2815D5}.Debug|x64.Build.0 = Debug|x64
+		{398E627E-2203-4B1D-9805-28AB6F2815D5}.Debug|x86.ActiveCfg = Debug|x86
+		{398E627E-2203-4B1D-9805-28AB6F2815D5}.Debug|x86.Build.0 = Debug|x86
+		{398E627E-2203-4B1D-9805-28AB6F2815D5}.Release|Any CPU.ActiveCfg = Release|x86
+		{398E627E-2203-4B1D-9805-28AB6F2815D5}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{398E627E-2203-4B1D-9805-28AB6F2815D5}.Release|Mixed Platforms.Build.0 = Release|x86
+		{398E627E-2203-4B1D-9805-28AB6F2815D5}.Release|x64.ActiveCfg = Release|x64
+		{398E627E-2203-4B1D-9805-28AB6F2815D5}.Release|x64.Build.0 = Release|x64
+		{398E627E-2203-4B1D-9805-28AB6F2815D5}.Release|x86.ActiveCfg = Release|x86
+		{398E627E-2203-4B1D-9805-28AB6F2815D5}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -370,10 +439,15 @@ Global
 		{A10F5A4A-A8FB-4D6F-992B-01D6E2E9DBFA} = {7D724624-B5C7-4796-ADDC-4DF20828EF2D}
 		{ACBE1053-CF95-462C-8FA7-B8865383C8E6} = {7D724624-B5C7-4796-ADDC-4DF20828EF2D}
 		{52C5756F-3B8A-4952-A77F-A51472B01FAD} = {7D724624-B5C7-4796-ADDC-4DF20828EF2D}
-		{B3F80BFE-D409-47CB-A1D0-261E8198E869} = {7D724624-B5C7-4796-ADDC-4DF20828EF2D}
+		{A6CB8409-490A-4064-91D0-191DB579A3F0} = {7D724624-B5C7-4796-ADDC-4DF20828EF2D}
+		{5598DCAA-663E-4444-9761-5F321FF99F75} = {7D724624-B5C7-4796-ADDC-4DF20828EF2D}
 		{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7} = {FD53A315-6534-4370-924A-193988E9979E}
 		{DDC1E22A-276A-4910-A934-6F72CD22DE31} = {FD53A315-6534-4370-924A-193988E9979E}
 		{409DC754-EEBD-4E49-8DDF-3960F2FFCE73} = {FD53A315-6534-4370-924A-193988E9979E}
 		{D1640B4C-4997-4978-9FE7-C358B8A5B84B} = {FD53A315-6534-4370-924A-193988E9979E}
+		{F22644A1-1374-469B-B7E7-1AD854DE7477} = {A6CB8409-490A-4064-91D0-191DB579A3F0}
+		{37B05855-21A5-44DA-8549-9828182739A1} = {A6CB8409-490A-4064-91D0-191DB579A3F0}
+		{02E4C2C3-9362-4C6D-8C8B-A42D63D118C3} = {A6CB8409-490A-4064-91D0-191DB579A3F0}
+		{398E627E-2203-4B1D-9805-28AB6F2815D5} = {A6CB8409-490A-4064-91D0-191DB579A3F0}
 	EndGlobalSection
 EndGlobal
