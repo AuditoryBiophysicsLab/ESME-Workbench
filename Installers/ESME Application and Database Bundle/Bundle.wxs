@@ -13,8 +13,8 @@
   <?else ?>
   <?define Bitness="32-bit"?>
   <?endif ?>
-  <?define ProductName = "ESME Workbench 2012 App & Database Bundle" ?>
-  <Bundle Name="$(var.ProductName) ($(var.Bitness))" 
+  <?define ProductName = "ESME 2012 $(var.Bitness) Application and Databases" ?>
+  <Bundle Name="$(var.ProductName)" 
           Version="$(var.ProductFullVersion)" 
           Manufacturer="$(var.Manufacturer)" 
           UpgradeCode="88B26169-9067-4371-B043-358D191E9001" 
@@ -24,8 +24,10 @@
           UpdateUrl="http://esme.bu.edu"
           Compressed="no">
     <Variable Name="BundleLongName" Value="Effects of Sound on the Marine Environment" />
-    <Variable Name="ProductShortName" Value="ESME" />
-    <Variable Name="ProductLongName" Value="$(var.ProductName) ($(var.Bitness)) v$(var.ProductFullVersion)" />
+    <Variable Name="BundleShortName" Value="ESME 2012" />
+    <Variable Name="ProductLongName" Value="$(var.ProductName)" />
+    <Variable Name="ProductShortName" Value="$(var.Bitness) Application and Databases" />
+    <Variable Name="ProductFullVersion" Value="$(var.ProductFullVersion)" />
     <Variable Name="BackgroundColor" Value="#FF20B2AA" />
     <Variable Name="ProgressBarColor" Value="#FF008E91" />
     <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">
@@ -40,18 +42,50 @@
     </BootstrapperApplicationRef>
     <Chain DisableRollback="yes" DisableSystemRestore="yes" ParallelCache="yes">
       <PackageGroupRef Id="Netfx4Full" />
-      <ExePackage DownloadUrl="http://esme.bu.edu/data/ESME%20Application-$(var.Platform).exe"
-                  SourceFile="..\ESME Application\msi\ESME Application-$(var.Platform).exe"
-                  InstallCommand="/q /ACTION=Install"
-                  RepairCommand="/q ACTION=Repair /hideconsole"
-                  UninstallCommand="/q /ACTION=Uninstall /hideconsole"
-                  Vital="no" />
-      <ExePackage DownloadUrl="http://esme.bu.edu/data/OAML%20Databases%20for%20ESME-$(var.Platform).exe"
-                  SourceFile="..\OAML Databases for ESME\msi\OAML Databases for ESME-$(var.Platform).exe"
-                  InstallCommand="/q /ACTION=Install"
-                  RepairCommand="/q ACTION=Repair /hideconsole"
-                  UninstallCommand="/q /ACTION=Uninstall /hideconsole"
-                  Vital="no" />
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/ESMEWorkbenchSetup-$(var.Platform).msi"
+                  SourceFile="$(var.ESMERoot)\msi\ESMEWorkbenchSetup-$(var.Platform).msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Visible="yes"
+                  Vital="no"/>
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/InstallableNAVOPlugin-$(var.Platform).msi"
+                  SourceFile="$(var.PluginsRoot)\InstallableNAVO\msi\InstallableNAVOPlugin-$(var.Platform).msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Visible="yes"
+                  Vital="no"/>
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/SMGC_2.0_Minimal.msi"
+                  SourceFile="$(var.DatabasesRoot)\SMGC_2.0_Minimal\bin\x86\Release\SMGC_2.0_Minimal.msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Visible="yes"
+                  Vital="no">
+        <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
+      </MsiPackage>
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/BST_2.0.msi"
+                  SourceFile="$(var.DatabasesRoot)\BST_2.0\bin\x86\Release\BST_2.0.msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Visible="yes"
+                  Vital="no">
+        <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
+      </MsiPackage>
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/DBDB-V_5.4.msi"
+                  SourceFile="$(var.DatabasesRoot)\DBDB-V_5.4\bin\x86\Release\DBDB-V_5.4.msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Visible="yes"
+                  Vital="no">
+        <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
+      </MsiPackage>
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/GDEM-V_3.0.msi"
+                  SourceFile="$(var.DatabasesRoot)\GDEM-V_3.0\bin\x86\Release\GDEM-V_3.0.msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Visible="yes"
+                  Vital="no">
+        <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
+      </MsiPackage>
     </Chain>
   </Bundle>
 </Wix>

@@ -38,16 +38,13 @@
       <Name>WixBalExtension</Name>
     </WixExtension>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="version.wxi" />
-  </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
-  <PropertyGroup>
-    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -wixversion "$(ProjectDir)version.wxi" -output "$(ProjectDir) "</PreBuildEvent>
-  </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>if not exist "$(ProjectDir)msi" mkdir  "$(ProjectDir)msi"
 copy "$(TargetPath)" "$(ProjectDir)msi\$(TargetName)-$(PlatformName)$(TargetExt)" /Y /V</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent />
   </PropertyGroup>
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.

@@ -74,7 +74,7 @@ namespace WixBootstrapper
         /// </summary>
         public InstallationViewModel(RootViewModel root)
         {
-            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel constructor");
+            //Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel constructor");
             _root = root;
             _downloadRetries = new Dictionary<string, int>();
 
@@ -90,7 +90,7 @@ namespace WixBootstrapper
             Bootstrapper.Model.Bootstrapper.Error += ExecuteError;
             Bootstrapper.Model.Bootstrapper.ResolveSource += ResolveSource;
             Bootstrapper.Model.Bootstrapper.ApplyComplete += ApplyComplete;
-            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Leaving InstallationViewModel constructor");
+            //Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Leaving InstallationViewModel constructor");
         }
 
         void RootPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -317,12 +317,12 @@ namespace WixBootstrapper
         /// </summary>
         public void Refresh()
         {
-            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel.Refresh()");
+            //Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel.Refresh()");
             // TODO: verify that the engine is in a state that will allow it to do Detect().
 
             _root.Canceled = false;
             Bootstrapper.Model.Engine.Detect();
-            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting InstallationViewModel.Refresh()");
+            //Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting InstallationViewModel.Refresh()");
         }
 
         /// <summary>
@@ -364,11 +364,11 @@ namespace WixBootstrapper
 
         private void DetectedPackage(object sender, DetectPackageCompleteEventArgs e)
         {
-            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel.DetectedPackage()");
-            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("  e.PackageID = '{0}' is {1}", e.PackageId, (e.State == PackageState.Present) ? "Present" : "Absent"));
+            //Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel.DetectedPackage()");
+            //Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("  e.PackageID = '{0}' is {1}", e.PackageId, (e.State == PackageState.Present) ? "Present" : "Absent"));
             //if (e.PackageId.Equals("Wix", StringComparison.Ordinal))
             _root.State = (e.State == PackageState.Present) ? InstallationState.DetectedPresent : InstallationState.DetectedAbsent;
-            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Leaving InstallationViewModel.DetectedPackage()");
+            //Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Leaving InstallationViewModel.DetectedPackage()");
         }
 
         private void DetectComplete(object sender, DetectCompleteEventArgs e)
@@ -446,14 +446,15 @@ namespace WixBootstrapper
 
         private void ResolveSource(object sender, ResolveSourceEventArgs e)
         {
-            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("Entering ResolveSource. DownloadSource: {0} LocalSource: {1}", e.DownloadSource, e.LocalSource));
+            //Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("Entering ResolveSource. DownloadSource: {0} LocalSource: {1}", e.DownloadSource, e.LocalSource));
             int retries;
 
             _downloadRetries.TryGetValue(e.PackageOrContainerId, out retries);
             _downloadRetries[e.PackageOrContainerId] = retries + 1;
             e.Result = retries < 3 && !String.IsNullOrEmpty(e.DownloadSource) ? Result.Download : Result.Ok;
             if (e.Result == Result.Download) Message = "Downloading " + e.PackageOrContainerId;
-            Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("Leaving ResolveSource. DownloadSource: {0} LocalSource: {1}", e.DownloadSource, e.LocalSource));
+            else Message = "Caching " + e.PackageOrContainerId;
+            //Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, string.Format("Leaving ResolveSource. DownloadSource: {0} LocalSource: {1}", e.DownloadSource, e.LocalSource));
         }
 
         private void ApplyComplete(object sender, ApplyCompleteEventArgs e)

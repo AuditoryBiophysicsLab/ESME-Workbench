@@ -16,6 +16,7 @@
 // </summary>
 //-------------------------------------------------------------------------------------------------
 
+using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -130,9 +131,11 @@ namespace WixBootstrapper
             UpdateViewModel.Refresh();
         }
 
-        public string ProductShortName { get; set; }
-        public string ProductLongName { get; set; }
         public string BundleLongName { get; set; }
+        public string BundleShortName { get; set; }
+        public string ProductLongName { get; set; }
+        public string ProductShortName { get; set; }
+        public string ProductFullVersion { get; set; }
         public Brush ButtonBackgroundBrush { get; set; }
         public Brush ProgressBarBrush { get; set; }
 

@@ -62,6 +62,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BooleanToVisibilityConverter.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Hresult.cs" />
     <Compile Include="InstallationViewModel.cs" />

@@ -13,8 +13,8 @@
   <?else ?>
   <?define Bitness="32-bit"?>
   <?endif ?>
-  <?define ProductName = "ESME Workbench 2012" ?>
-  <Bundle Name="$(var.ProductName) ($(var.Bitness))" 
+  <?define ProductName = "ESME 2012 $(var.Bitness) Application" ?>
+  <Bundle Name="$(var.ProductName)" 
           Version="$(var.ProductFullVersion)" 
           Manufacturer="$(var.Manufacturer)"
           UpgradeCode="D3DA4B39-A7F3-408D-8B6B-C515A259F35D" 
@@ -24,8 +24,10 @@
           UpdateUrl="http://esme.bu.edu"
           Compressed="no">
     <Variable Name="BundleLongName" Value="Effects of Sound on the Marine Environment" />
-    <Variable Name="ProductShortName" Value="ESME" />
-    <Variable Name="ProductLongName" Value="$(var.ProductName) ($(var.Bitness)) v$(var.ProductFullVersion)" />
+    <Variable Name="BundleShortName" Value="ESME 2012" />
+    <Variable Name="ProductLongName" Value="$(var.ProductName)" />
+    <Variable Name="ProductShortName" Value=" $(var.Bitness) Application" />
+    <Variable Name="ProductFullVersion" Value="$(var.ProductFullVersion)" />
     <Variable Name="BackgroundColor" Value="#FF2090B3" />
     <Variable Name="ProgressBarColor" Value="#FF176780" />
     <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">

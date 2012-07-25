@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <?include version.wxi ?>
+  <?define ProductFullVersion = "1.0.0.0" ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
@@ -8,12 +8,7 @@
   <?define ESMERoot="$(var.InstallersRoot)\ESME Workbench"?>
   <?define DatabasesRoot="$(var.InstallersRoot)\Installable NAVO Databases"?>
   <?define PluginsRoot="$(var.InstallersRoot)\Plugins"?>
-  <?if $(var.Platform) = x64 ?>
-  <?define Bitness="64-bit"?>
-  <?else ?>
-  <?define Bitness="32-bit"?>
-  <?endif ?>
-  <?define ProductName = "ESME Workbench 2012 Databases" ?>
+  <?define ProductName = "ESME 2012 Databases" ?>
   <Bundle Name="$(var.ProductName)" 
           Version="$(var.ProductFullVersion)" 
           Manufacturer="$(var.Manufacturer)"
@@ -24,8 +19,10 @@
           UpdateUrl="http://esme.bu.edu"
           Compressed="no">
     <Variable Name="BundleLongName" Value="Effects of Sound on the Marine Environment" />
-    <Variable Name="ProductShortName" Value="ESME" />
-    <Variable Name="ProductLongName" Value="$(var.ProductName) v$(var.ProductFullVersion)" />
+    <Variable Name="BundleShortName" Value="ESME 2012" />
+    <Variable Name="ProductLongName" Value="$(var.ProductName)" />
+    <Variable Name="ProductShortName" Value="Databases" />
+    <Variable Name="ProductFullVersion" Value="$(var.ProductFullVersion)" />
     <Variable Name="BackgroundColor" Value="#FF3DB320" />
     <Variable Name="ProgressBarColor" Value="#FF2C8017" />
     <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">
@@ -45,7 +42,7 @@
                   SourceFile="$(var.DatabasesRoot)\SMGC_2.0_Minimal\bin\x86\Release\SMGC_2.0_Minimal.msi"
                   Permanent="no"
                   Compressed="no"
-                  Visible="no"
+                  Visible="yes"
                   Vital="no">
         <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
       </MsiPackage>
@@ -53,7 +50,7 @@
                   SourceFile="$(var.DatabasesRoot)\BST_2.0\bin\x86\Release\BST_2.0.msi"
                   Permanent="no"
                   Compressed="no"
-                  Visible="no"
+                  Visible="yes"
                   Vital="no">
         <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
       </MsiPackage>
@@ -61,7 +58,7 @@
                   SourceFile="$(var.DatabasesRoot)\DBDB-V_5.4\bin\x86\Release\DBDB-V_5.4.msi"
                   Permanent="no"
                   Compressed="no"
-                  Visible="no"
+                  Visible="yes"
                   Vital="no">
         <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
       </MsiPackage>
@@ -69,7 +66,7 @@
                   SourceFile="$(var.DatabasesRoot)\GDEM-V_3.0\bin\x86\Release\GDEM-V_3.0.msi"
                   Permanent="no"
                   Compressed="no"
-                  Visible="no"
+                  Visible="yes"
                   Vital="no">
         <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
       </MsiPackage>
