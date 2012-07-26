@@ -9,6 +9,7 @@
   <?define DatabasesRoot="$(var.MSIRoot)\ESME Databases"?>
   <?define ApplicationRoot="$(var.MSIRoot)\ESME Application MSI"?>
   <?define PluginsRoot="$(var.MSIRoot)\Plugins\Environmental Databases"?>
+  <?define DownloadURLRoot="http://esme.bu.edu/download"?>
   <?if $(var.Platform) = x64 ?>
   <?define Bitness="64-bit"?>
   <?else ?>
@@ -44,14 +45,14 @@
     <Chain>
       <PackageGroupRef Id="Netfx4Full" />
 
-      <MsiPackage DownloadUrl="http://esme.bu.edu/data/ESME%20Application-$(var.Platform).msi"
+      <MsiPackage DownloadUrl="$(var.DownloadURLRoot)/ESME%20Application-$(var.Platform).msi"
                   SourceFile="$(var.ApplicationRoot)\msi\ESME Application-$(var.Platform).msi"
                   Permanent="no"
                   Compressed="no"
                   Visible="yes"
                   Vital="no">
       </MsiPackage>
-      <MsiPackage DownloadUrl="http://esme.bu.edu/data/InstallableNAVOPlugin-$(var.Platform).msi"
+      <MsiPackage DownloadUrl="$(var.DownloadURLRoot)/InstallableNAVOPlugin-$(var.Platform).msi"
                   SourceFile="$(var.PluginsRoot)\InstallableNAVO\msi\InstallableNAVOPlugin-$(var.Platform).msi"
                   Permanent="no"
                   Compressed="no"

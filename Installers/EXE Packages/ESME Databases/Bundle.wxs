@@ -8,6 +8,7 @@
   <?define MSIRoot="$(var.InstallersRoot)\MSI Packages"?>
   <?define DatabasesRoot="$(var.MSIRoot)\ESME Databases"?>
   <?define ProductName = "ESME 2012 Databases" ?>
+  <?define DownloadURLRoot="http://esme.bu.edu/download"?>
   <Bundle Name="$(var.ProductName)" 
           Version="$(var.ProductFullVersion)" 
           Manufacturer="$(var.Manufacturer)"
@@ -37,7 +38,7 @@
     <Chain>
       <PackageGroupRef Id="Netfx4Full" />
 
-      <MsiPackage DownloadUrl="http://esme.bu.edu/data/SMGC_2.0_Minimal.msi"
+      <MsiPackage DownloadUrl="$(var.DownloadURLRoot)/SMGC_2.0_Minimal.msi"
                   SourceFile="$(var.DatabasesRoot)\SMGC_2.0_Minimal\bin\x86\Release\SMGC_2.0_Minimal.msi"
                   Permanent="no"
                   Compressed="no"
@@ -45,7 +46,7 @@
                   Vital="no">
         <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
       </MsiPackage>
-      <MsiPackage DownloadUrl="http://esme.bu.edu/data/BST_2.0.msi"
+      <MsiPackage DownloadUrl="$(var.DownloadURLRoot)/BST_2.0.msi"
                   SourceFile="$(var.DatabasesRoot)\BST_2.0\bin\x86\Release\BST_2.0.msi"
                   Permanent="no"
                   Compressed="no"
@@ -53,7 +54,7 @@
                   Vital="no">
         <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
       </MsiPackage>
-      <MsiPackage DownloadUrl="http://esme.bu.edu/data/DBDB-V_5.4.msi"
+      <MsiPackage DownloadUrl="$(var.DownloadURLRoot)/DBDB-V_5.4.msi"
                   SourceFile="$(var.DatabasesRoot)\DBDB-V_5.4\bin\x86\Release\DBDB-V_5.4.msi"
                   Permanent="no"
                   Compressed="no"
@@ -61,7 +62,7 @@
                   Vital="no">
         <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
       </MsiPackage>
-      <MsiPackage DownloadUrl="http://esme.bu.edu/data/GDEM-V_3.0.msi"
+      <MsiPackage DownloadUrl="$(var.DownloadURLRoot)/GDEM-V_3.0.msi"
                   SourceFile="$(var.DatabasesRoot)\GDEM-V_3.0\bin\x86\Release\GDEM-V_3.0.msi"
                   Permanent="no"
                   Compressed="no"
