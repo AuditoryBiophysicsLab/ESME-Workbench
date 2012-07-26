@@ -5,9 +5,8 @@
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
   <?define InstallersRoot="C:\Projects\ESME Deliverables\Installers"?>
-  <?define ESMERoot="$(var.InstallersRoot)\ESME Workbench"?>
-  <?define DatabasesRoot="$(var.InstallersRoot)\Installable NAVO Databases"?>
-  <?define PluginsRoot="$(var.InstallersRoot)\Plugins"?>
+  <?define MSIRoot="$(var.InstallersRoot)\MSI Packages"?>
+  <?define DatabasesRoot="$(var.MSIRoot)\ESME Databases"?>
   <?define ProductName = "ESME 2012 Databases" ?>
   <Bundle Name="$(var.ProductName)" 
           Version="$(var.ProductFullVersion)" 
@@ -27,9 +26,9 @@
     <Variable Name="ProgressBarColor" Value="#FF2C8017" />
     <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">
       <Payload Name="BootstrapperCore.config" 
-               SourceFile="..\ManagedBootstrapper\Bootstrapper.BootstrapperCore.config" />
+               SourceFile="..\..\ManagedBootstrapper\Bootstrapper.BootstrapperCore.config" />
       <Payload Name="Bootstrapper.dll" 
-               SourceFile="..\ManagedBootstrapper\bin\Release\Bootstrapper.dll" />
+               SourceFile="..\..\ManagedBootstrapper\bin\Release\Bootstrapper.dll" />
       <Payload Name="License.htm" 
                SourceFile="..\Common Files\license.htm" />
       <Payload Name="NetFxLicense.rtf" 

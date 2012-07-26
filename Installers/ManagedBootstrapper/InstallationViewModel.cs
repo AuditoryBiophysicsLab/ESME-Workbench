@@ -68,14 +68,15 @@ namespace WixBootstrapper
         private ICommand _tryAgainCommand;
 
         private string _message;
-
+        ProgressViewModel _progressViewModel;
         /// <summary>
         /// Creates a new model of the installation view.
         /// </summary>
-        public InstallationViewModel(RootViewModel root)
+        public InstallationViewModel(RootViewModel root, ProgressViewModel progressViewModel)
         {
             //Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering InstallationViewModel constructor");
             _root = root;
+            _progressViewModel = progressViewModel;
             _downloadRetries = new Dictionary<string, int>();
 
             _root.PropertyChanged += RootPropertyChanged;
@@ -346,6 +347,24 @@ namespace WixBootstrapper
 
             _root.Canceled = false;
             Bootstrapper.Model.Engine.Plan(_plannedAction);
+            _progressViewModel.IsInstall = false;
+            _progressViewModel.IsRepair = false;
+            _progressViewModel.IsUninstall = false;
+            switch (action)
+            {
+                case LaunchAction.Install:
+                    _progressViewModel.IsInstall = true;
+                    break;
+                case LaunchAction.Repair:
+                    _progressViewModel.IsRepair = true;
+                    break;
+                case LaunchAction.Uninstall:
+                    _progressViewModel.IsUninstall = true;
+                    break;
+                default:
+                    _progressViewModel.CurrentAction = "Unknown";
+                    break;
+            }
         }
 
         private void DetectBegin(object sender, DetectBeginEventArgs e)

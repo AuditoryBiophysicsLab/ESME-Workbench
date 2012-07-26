@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <?define ProductName = "BST for ESME Workbench" ?>
-  <?define ProductVersion = "2.0" ?>
+  <?define ProductName = "BST for ESME" ?>
   <?define ProductFullVersion = "2.0.0.0" ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
   <?define Manufacturer="Boston University"?>
@@ -12,7 +11,7 @@
   <?define ProductId = "{8AB90780-5D24-427C-9296-04F21B76732E}" ?>
   <?define ProductUpgradeCode = "{163FF6CE-1ADE-416B-80AB-CD3229738A66}" ?>
   <Product Id="$(var.ProductId)"
-           Name="$(var.ProductDisplayName) (v$(var.ProductVersion))"
+           Name="$(var.ProductDisplayName)"
            Language="1033"
            Version="$(var.ProductFullVersion)"
            Manufacturer="$(var.Manufacturer)"

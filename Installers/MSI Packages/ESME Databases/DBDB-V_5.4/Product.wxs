@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <?define ProductName = "DBDB-V for ESME Workbench" ?>
-  <?define ProductVersion = "5.4" ?>
+  <?define ProductName = "DBDB-V for ESME" ?>
   <?define ProductFullVersion = "5.4.0.0" ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
   <?define Manufacturer="Boston University"?>
@@ -12,7 +11,7 @@
   <?define ProductId = "43165055-2504-4D1B-9749-84357CD3CCCA" ?>
   <?define ProductUpgradeCode = "02E49857-286F-4C7E-8774-EB9151F12004" ?>
   <Product Id="$(var.ProductId)"
-           Name="$(var.ProductDisplayName) (v$(var.ProductVersion))"
+           Name="$(var.ProductDisplayName)"
            Language="1033"
            Version="$(var.ProductFullVersion)"
            Manufacturer="$(var.Manufacturer)"

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <?define ProductName = "GDEM-V for ESME Workbench" ?>
-  <?define ProductVersion = "3.0" ?>
+  <?define ProductName = "GDEM-V for ESME" ?>
   <?define ProductFullVersion = "3.0.1.0" ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
   <?define Manufacturer="Boston University"?>
@@ -12,7 +11,7 @@
   <?define ProductId = "B64956A3-9395-4DDF-A8CA-FA2CB9F69D7F" ?>
   <?define ProductUpgradeCode = "6CF4B387-F95B-44C5-BC3A-E28E40570025" ?>
   <Product Id="$(var.ProductId)"
-           Name="$(var.ProductDisplayName) (v$(var.ProductVersion))"
+           Name="$(var.ProductDisplayName)"
            Language="1033"
            Version="$(var.ProductFullVersion)"
            Manufacturer="$(var.Manufacturer)"

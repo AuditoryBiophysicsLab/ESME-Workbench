@@ -5,9 +5,10 @@
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
   <?define InstallersRoot="C:\Projects\ESME Deliverables\Installers"?>
-  <?define ESMERoot="$(var.InstallersRoot)\ESME Workbench"?>
-  <?define DatabasesRoot="$(var.InstallersRoot)\Installable NAVO Databases"?>
-  <?define PluginsRoot="$(var.InstallersRoot)\Plugins"?>
+  <?define MSIRoot="$(var.InstallersRoot)\MSI Packages"?>
+  <?define DatabasesRoot="$(var.MSIRoot)\ESME Databases"?>
+  <?define ApplicationRoot="$(var.MSIRoot)\ESME Application MSI"?>
+  <?define PluginsRoot="$(var.MSIRoot)\Plugins\Environmental Databases"?>
   <?if $(var.Platform) = x64 ?>
   <?define Bitness="64-bit"?>
   <?else ?>
@@ -32,9 +33,9 @@
     <Variable Name="ProgressBarColor" Value="#FF008E91" />
     <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">
       <Payload Name="BootstrapperCore.config"
-               SourceFile="..\ManagedBootstrapper\Bootstrapper.BootstrapperCore.config" />
+               SourceFile="..\..\ManagedBootstrapper\Bootstrapper.BootstrapperCore.config" />
       <Payload Name="Bootstrapper.dll"
-               SourceFile="..\ManagedBootstrapper\bin\Release\Bootstrapper.dll" />
+               SourceFile="..\..\ManagedBootstrapper\bin\Release\Bootstrapper.dll" />
       <Payload Name="License.htm"
                SourceFile="..\Common Files\license.htm" />
       <Payload Name="NetFxLicense.rtf"
@@ -42,8 +43,8 @@
     </BootstrapperApplicationRef>
     <Chain DisableRollback="yes" DisableSystemRestore="yes" ParallelCache="yes">
       <PackageGroupRef Id="Netfx4Full" />
-      <MsiPackage DownloadUrl="http://esme.bu.edu/data/ESMEWorkbenchSetup-$(var.Platform).msi"
-                  SourceFile="$(var.ESMERoot)\msi\ESMEWorkbenchSetup-$(var.Platform).msi"
+      <MsiPackage DownloadUrl="http://esme.bu.edu/data/ESME%20Application-$(var.Platform).msi"
+                  SourceFile="$(var.ApplicationRoot)\msi\ESME Application-$(var.Platform).msi"
                   Permanent="no"
                   Compressed="no"
                   Visible="yes"

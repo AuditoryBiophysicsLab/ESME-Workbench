@@ -50,8 +50,8 @@ namespace WixBootstrapper
         public RootViewModel()
         {
             Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Entering RootViewModel constructor");
-            InstallationViewModel = new InstallationViewModel(this);
             ProgressViewModel = new ProgressViewModel(this);
+            InstallationViewModel = new InstallationViewModel(this, ProgressViewModel);
             UpdateViewModel = new UpdateViewModel(this);
             Bootstrapper.Model.Bootstrapper.Engine.Log(LogLevel.Verbose, "Exiting RootViewModel constructor");
         }
@@ -72,7 +72,7 @@ namespace WixBootstrapper
                 {
                     lock (this) 
                     { 
-                        Canceled = (MessageBoxResult.Yes == MessageBox.Show(Bootstrapper.View, "Are you sure you want to cancel?", "WiX Toolset", MessageBoxButton.YesNo, MessageBoxImage.Error));
+                        Canceled = (MessageBoxResult.Yes == MessageBox.Show(Bootstrapper.View, "Are you sure you want to cancel?", ProductLongName, MessageBoxButton.YesNo, MessageBoxImage.Error));
                     }
                 },
                 param => State == InstallationState.Applying));

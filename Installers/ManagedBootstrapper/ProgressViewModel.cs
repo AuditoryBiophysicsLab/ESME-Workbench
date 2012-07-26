@@ -28,9 +28,7 @@ namespace WixBootstrapper
             _ba.CacheAcquireProgress += CacheAcquireProgress;
             _ba.CacheComplete += CacheComplete;
             CacheMessage = "Acquisition progress";
-            ExecuteMessage = "Installation progress";
-            OverallMessage = "Overall progress";
-
+#if false
             #region Verbose logging for many bootstrapper events
 
             // Fired when the engine has begun installing the bundle
@@ -375,6 +373,7 @@ namespace WixBootstrapper
             _ba.UnregisterComplete += (s, e) => _ba.Engine.Log(LogLevel.Verbose, "UnregisterComplete");
 
             #endregion
+#endif
         }
 
         public bool ProgressEnabled
@@ -397,6 +396,51 @@ namespace WixBootstrapper
             }
         }
 
+        private bool _isInstall;
+        public bool IsInstall
+        {
+            get { return _isInstall; }
+
+            set
+            {
+                if (_isInstall == value) return;
+                _isInstall = value;
+                base.OnPropertyChanged("IsInstall");
+                ExecuteMessage = "Install progress";
+                CurrentAction = "Installing";
+            }
+        }
+
+        private bool _isRepair;
+        public bool IsRepair
+        {
+            get { return _isRepair; }
+
+            set
+            {
+                if (_isRepair == value) return;
+                _isRepair = value;
+                base.OnPropertyChanged("IsRepair");
+                ExecuteMessage = "Repair progress";
+                CurrentAction = "Repairing";
+            }
+        }
+
+        private bool _isUninstall;
+        public bool IsUninstall
+        {
+            get { return _isUninstall; }
+
+            set
+            {
+                if (_isUninstall == value) return;
+                _isUninstall = value;
+                base.OnPropertyChanged("IsUninstall");
+                ExecuteMessage = "Uninstall progress";
+                CurrentAction = "Uninstalling";
+            }
+        }
+
         private int _cacheProgress;
         public int CacheProgress
         {
@@ -407,6 +451,19 @@ namespace WixBootstrapper
                 if (_cacheProgress == value) return;
                 _cacheProgress = value;
                 base.OnPropertyChanged("CacheProgress");
+            }
+        }
+
+        private string _currentAction;
+        public string CurrentAction
+        {
+            get { return _currentAction; }
+
+            set
+            {
+                if (_currentAction == value) return;
+                _currentAction = value;
+                base.OnPropertyChanged("CurrentAction");
             }
         }
 
@@ -463,19 +520,6 @@ namespace WixBootstrapper
             }
         }
 
-        private string _overallMessage;
-        public string OverallMessage
-        {
-            get { return _overallMessage; }
-
-            set
-            {
-                if (_overallMessage == value) return;
-                _overallMessage = value;
-                base.OnPropertyChanged("OverallMessage");
-            }
-        }
-
         void RootPropertyChanged(object sender, PropertyChangedEventArgs e) { if ("State" == e.PropertyName) base.OnPropertyChanged("ProgressEnabled"); }
 
         private void PlanBegin(object sender, PlanBeginEventArgs e)
@@ -497,8 +541,7 @@ namespace WixBootstrapper
         {
             lock (this)
             {
-                if (e.Data.Count == 2 && e.Data[0] == "1") ExecuteMessage = string.Format("Installing {0}", e.Data[1]);
-                //OverallMessage = e.Message;
+                if (e.Data.Count == 2 && e.Data[0] == "1") ExecuteMessage = string.Format("{0} {1}", CurrentAction, e.Data[1]);
                 e.Result = _root.Canceled ? Result.Cancel : Result.Ok;
             }
         }
@@ -522,7 +565,7 @@ namespace WixBootstrapper
         {
             lock (this)
             {
-                CacheMessage = string.Format("All packages acquired");
+                if (IsInstall) CacheMessage = string.Format("All packages acquired");
                 CacheProgress = 100;
                 OverallProgress = (_cacheProgress + _executeProgress) / 2;
             }
