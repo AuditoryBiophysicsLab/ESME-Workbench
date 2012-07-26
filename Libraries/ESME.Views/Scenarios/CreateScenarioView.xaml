@@ -27,9 +27,7 @@
                 <Setter.Value>
                     <ControlTemplate>
                         <DockPanel LastChildFill="True">
-                            <Border BorderBrush="Red"
-                                    BorderThickness="1"
-                                    DockPanel.Dock="Left">
+                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
                                 <AdornedElementPlaceholder />
                             </Border>
                         </DockPanel>
@@ -49,9 +47,7 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <DockPanel>
-        <Border BorderThickness="0"
-                DockPanel.Dock="Top"
-                Padding="5">
+        <Border BorderThickness="0" DockPanel.Dock="Top" Padding="5">
             <StackPanel Orientation="Vertical">
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -63,16 +59,9 @@
                                VerticalAlignment="Center"
                                Text="Scenario name"
                                TextAlignment="Right" />
-                    <TextBox Grid.Column="1"
-                             Style="{StaticResource ValidationStyle}"
-                             Text="{Binding ScenarioName,
-                                            ValidatesOnDataErrors=True,
-                                            ValidatesOnExceptions=True,
-                                            NotifyOnValidationError=True,
-                                            UpdateSourceTrigger=PropertyChanged}"
-                             ToolTip="This field is required" />
+                    <TextBox Grid.Column="1" Style="{StaticResource ValidationStyle}" Text="{Binding ScenarioName, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" ToolTip="This field is required" />
                 </Grid>
-                <Grid Margin="5 5 5 0" >
+                <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
                         <ColumnDefinition />
@@ -98,10 +87,7 @@
                                VerticalAlignment="Center"
                                Text="Time Period"
                                TextAlignment="Right" />
-                    <ComboBox Grid.Column="1"
-                              ItemsSource="{x:Static NAVO:NAVOConfiguration.AllTimePeriods}"
-                              SelectedItem="{Binding TimePeriod}"
-                              ToolTip="This field is required" />
+                    <ComboBox Grid.Column="1" ItemsSource="{x:Static NAVO:NAVOConfiguration.AllMonths}" SelectedItem="{Binding TimePeriod}" ToolTip="This field is required" />
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -130,41 +116,22 @@
                                VerticalAlignment="Center"
                                Text="Duration"
                                TextAlignment="Right" />
-                    <Controls:TimePicker Grid.Column="1" SelectedTime="{Binding Duration, Mode=TwoWay}" ToolTip="Length of simulated time the scenario runs" />                    
+                    <Controls:TimePicker Grid.Column="1" SelectedTime="{Binding Duration, Mode=TwoWay}" ToolTip="Length of simulated time the scenario runs" />
                 </Grid>
             </StackPanel>
         </Border>
-        <GroupBox Margin="0 10 0 0"
-                  DockPanel.Dock="Top"
-                  Header="Environmental Data Sources"
-                  IsEnabled="{Binding IsValid}">
-            <StackPanel Margin="5"
-                        DockPanel.Dock="Left"
-                        Orientation="Vertical">
-                <Controls:PluginSelector Grid.Row="0"
-                                         ItemsSource="{Binding EnvironmentDataSourceViews[Wind]}"
-                                         PluginTypeName="Wind"
-                                         SelectedItem="{Binding SelectedPlugins[Wind]}" />
+        <GroupBox Margin="0 10 0 0" DockPanel.Dock="Top" Header="Environmental Data Sources" IsEnabled="{Binding IsValid}">
+            <StackPanel Margin="5" DockPanel.Dock="Left" Orientation="Vertical">
+                <Controls:PluginSelector Grid.Row="0" ItemsSource="{Binding EnvironmentDataSourceViews[Wind]}" PluginTypeName="Wind" SelectedItem="{Binding SelectedPlugins[Wind]}" />
                 <Separator Margin="0 5 0 10" />
-                <Controls:PluginSelector Grid.Row="1"
-                                         ItemsSource="{Binding EnvironmentDataSourceViews[SoundSpeed]}"
-                                         PluginTypeName="Sound Speed"
-                                         SelectedItem="{Binding SelectedPlugins[SoundSpeed]}" />
+                <Controls:PluginSelector Grid.Row="1" ItemsSource="{Binding EnvironmentDataSourceViews[SoundSpeed]}" PluginTypeName="Sound Speed" SelectedItem="{Binding SelectedPlugins[SoundSpeed]}" />
                 <Separator Margin="0 5 0 10" />
-                <Controls:PluginSelector Grid.Row="2"
-                                         ItemsSource="{Binding EnvironmentDataSourceViews[Sediment]}"
-                                         PluginTypeName="Sediment"
-                                         SelectedItem="{Binding SelectedPlugins[Sediment]}" />
+                <Controls:PluginSelector Grid.Row="2" ItemsSource="{Binding EnvironmentDataSourceViews[Sediment]}" PluginTypeName="Sediment" SelectedItem="{Binding SelectedPlugins[Sediment]}" />
                 <Separator Margin="0 5 0 10" />
-                <Controls:PluginSelector Grid.Row="3"
-                                         ItemsSource="{Binding EnvironmentDataSourceViews[Bathymetry]}"
-                                         PluginTypeName="Bathymetry"
-                                         SelectedItem="{Binding SelectedPlugins[Bathymetry]}" />
+                <Controls:PluginSelector Grid.Row="3" ItemsSource="{Binding EnvironmentDataSourceViews[Bathymetry]}" PluginTypeName="Bathymetry" SelectedItem="{Binding SelectedPlugins[Bathymetry]}" />
             </StackPanel>
         </GroupBox>
-        <StackPanel HorizontalAlignment="Right"
-                    DockPanel.Dock="Bottom"
-                    Orientation="Horizontal">
+        <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
             <Button Width="75"
                     Margin="5"
                     Command="{Binding OkCommand}"

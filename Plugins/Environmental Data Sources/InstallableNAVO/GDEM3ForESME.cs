@@ -24,7 +24,7 @@ namespace InstallableNAVOPlugin
         {
             SetPropertiesFromAttributes(GetType());
             IsTimeVariantData = true;
-            AvailableTimePeriods = NAVOConfiguration.AllMonths.ToArray();
+            AvailableTimePeriods = NAVOConfiguration.AllTimePeriods.ToArray();
             AvailableResolutions = new float[] { 15 };
             var mo = new ManagementObject("Win32_Processor.DeviceID='CPU0'");
             var regKey = Registry.LocalMachine.OpenSubKey(string.Format(@"Software{0}\Boston University\ESME Workbench\Data Sources\GDEM-V 3.0", (ushort)mo["AddressWidth"] == 64 ? @"\Wow6432Node" : ""));

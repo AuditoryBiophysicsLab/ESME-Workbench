@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Controls;
 using System.Xml.Serialization;
 using ESME.Environment;
+using ESME.Environment.NAVO;
 using ESME.Locations;
 using ESME.NEMO;
 using HRC.Aspects;

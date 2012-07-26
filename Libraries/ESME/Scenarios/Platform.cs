@@ -61,7 +61,7 @@ namespace ESME.Scenarios
         public virtual Perimeter Perimeter { get { return _perimeter; } set
         {
             _perimeter = value;
-            if (LayerSettings.MapLayerViewModel == null) return;
+            if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
             RemoveMapLayers();
             CreateMapLayers();
         } }

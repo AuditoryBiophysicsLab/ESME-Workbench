@@ -35,7 +35,7 @@ namespace StandaloneNAVOPlugin
             ConfigurationControl = new NAVOConfigurationControl { DataContext = this };
 
             IsTimeVariantData = true;
-            AvailableTimePeriods = NAVOConfiguration.AllMonths.ToArray();
+            AvailableTimePeriods = NAVOConfiguration.AllTimePeriods.ToArray();
             AvailableResolutions = new[] { 60f };
 
             IsSelectable = true;
