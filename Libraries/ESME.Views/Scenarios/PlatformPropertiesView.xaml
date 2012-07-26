@@ -21,9 +21,7 @@
                 <Setter.Value>
                     <ControlTemplate>
                         <DockPanel LastChildFill="True">
-                            <Border BorderBrush="Red"
-                                    BorderThickness="1"
-                                    DockPanel.Dock="Left">
+                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
                                 <AdornedElementPlaceholder />
                             </Border>
                         </DockPanel>
@@ -38,9 +36,7 @@
         </Style>
     </Window.Resources>
     <DockPanel LastChildFill="True">
-        <StackPanel HorizontalAlignment="Right"
-                    DockPanel.Dock="Bottom"
-                    Orientation="Horizontal">
+        <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
             <Button Width="75"
                     Height="22"
                     Margin="5"
@@ -48,9 +44,7 @@
                     Content="OK"
                     IsDefault="True" />
         </StackPanel>
-        <Border BorderThickness="0"
-                DockPanel.Dock="Top"
-                Padding="5">
+        <Border BorderThickness="0" DockPanel.Dock="Top" Padding="5">
             <StackPanel Orientation="Vertical">
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -62,10 +56,7 @@
                                VerticalAlignment="Top"
                                Text="Platform Type"
                                TextAlignment="Right" />
-                    <TextBox Grid.Column="1"
-                             Height="Auto"
-                             Text="{Binding PropertyObject.PlatformType}"
-                             ToolTip="This field is optional" />
+                    <TextBox Grid.Column="1" Height="Auto" Text="{Binding PropertyObject.PlatformType}" ToolTip="This field is optional" />
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -93,12 +84,26 @@
                     <TextBlock Grid.Column="0"
                                Margin="0 0 5 0"
                                VerticalAlignment="Top"
+                               Text="Speed"
+                               TextAlignment="Right"
+                               ToolTip="Speed in knots (nautical miles per hour). A speed greater than zero is required before you can choose the PerimeterBounce behavior." />
+                    <TextBox Grid.Column="1" Height="Auto" Text="{Binding PropertyObject.Speed}" ToolTip="Speed in knots (nautical miles per hour)" />
+                </Grid>                
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Top"
                                Text="Perimeter"
                                TextAlignment="Right" />
                     <ComboBox Grid.Column="1"
                               DisplayMemberPath="Name"
                               ItemsSource="{Binding PropertyObject.Scenario.Perimeters}"
-                              SelectedItem="{Binding PropertyObject.Perimeter}" />
+                              SelectedItem="{Binding PropertyObject.Perimeter}"
+                              ToolTip="A perimeter must be chosen before you can select the PerimeterBounce behavior" />
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -110,31 +115,14 @@
                                VerticalAlignment="Top"
                                Text="Behavior"
                                TextAlignment="Right" />
-                    <ComboBox Grid.Column="1"
-                              ItemsSource="{Binding PropertyObject.TrackTypeDisplay}"
-                              SelectedItem="{Binding PropertyObject.SelectedTrackType}" />
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding PropertyObject.TrackTypeDisplay}" SelectedItem="{Binding PropertyObject.SelectedTrackType}" ToolTip="A speed greater than zero must be entered, and a perimeter selected, before you can choose the PerimeterBounce behavior." />
                 </Grid>
-                <Grid Margin="5 5 5 0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0"
-                               Margin="0 0 5 0"
-                               VerticalAlignment="Top"
-                               Text="Speed"
-                               ToolTip="Speed in knots (nautical miles per hour)"
-                               TextAlignment="Right" />
-                    <TextBox Grid.Column="1"
-                             Height="Auto"
-                             Text="{Binding PropertyObject.Speed}"
-                             ToolTip="Speed in knots (nautical miles per hour)" />
-                </Grid>
+
                 <GroupBox>
                     <GroupBox.Header>
                         <CheckBox x:Name="RandomizeCheckBox" Content="Randomize" IsChecked="{Binding PropertyObject.IsRandom}" />
                     </GroupBox.Header>
-                    <StackPanel Orientation="Vertical" IsEnabled="{Binding ElementName=RandomizeCheckBox, Path=IsChecked, Converter={StaticResource BooleanInverter}}">
+                    <StackPanel IsEnabled="{Binding ElementName=RandomizeCheckBox, Path=IsChecked, Converter={StaticResource BooleanInverter}}" Orientation="Vertical">
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="LabelColumn" />

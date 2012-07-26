@@ -37,6 +37,7 @@ namespace ESME.Scenarios
         public void CreateMapLayers()
         {
             if (IsDeleted) return;
+            if (LayerSettings.MapLayerViewModel != null) return;
             var mapLayer = new OverlayShapeMapLayer
             {
                 Name = string.Format("{0}", Guid),

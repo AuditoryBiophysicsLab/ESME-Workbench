@@ -20,7 +20,7 @@ using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Scenarios
 {
-     [NotifyPropertyChanged]
+    [NotifyPropertyChanged]
     public class Platform : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
     {
         public Platform() { TrackType = Behaviors.TrackType.Stationary; }
@@ -40,12 +40,8 @@ namespace ESME.Scenarios
 
         public DbTrackType TrackType { get; set; }
         public DbGeo Geo { get; set; }
-        bool _isRandom= true;
-        public bool IsRandom
-        {
-            get { return _isRandom; }
-            set { _isRandom = value; }
-        }
+        bool _isRandom = true;
+        public bool IsRandom { get { return _isRandom; } set { _isRandom = value; } }
 
         public float Depth { get; set; }
         public float Course { get; set; }
@@ -53,28 +49,34 @@ namespace ESME.Scenarios
         /// <summary>
         ///   Speed in knots (nautical miles per hour)
         /// </summary>
+        [Affects("TrackTypeDisplay")]
         public float Speed { get; set; }
 
         public virtual Scenario Scenario { get; set; }
 
         Perimeter _perimeter;
-        public virtual Perimeter Perimeter { get { return _perimeter; } set
+
+        [Affects("TrackTypeDisplay")]
+        public virtual Perimeter Perimeter
         {
-            _perimeter = value;
-            if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
-            RemoveMapLayers();
-            CreateMapLayers();
-        } }
+            get { return _perimeter; }
+            set
+            {
+                _perimeter = value;
+                if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
+                RemoveMapLayers();
+                CreateMapLayers();
+            }
+        }
 
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<Source> Sources { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
         [NotMapped] public int ActorID { get; set; }
         [NotMapped] public bool IsNew { get; set; }
-        [NotMapped]
-        public bool IsDeleted { get; set; }
-        [NotMapped]
-        public object LayerControl
+        [NotMapped] public bool IsDeleted { get; set; }
+
+        [NotMapped] public object LayerControl
         {
             get { return _layerControl; }
             set
@@ -83,20 +85,12 @@ namespace ESME.Scenarios
                 MediatorMessage.Send(MediatorMessage.PlatformBoundToLayer, this);
             }
         }
+
         object _layerControl;
 
-        [NotMapped] public List<TrackType> TrackTypeDisplay
-        {
-            get
-            {
-                return new List<TrackType>
-                {
-                    Behaviors.TrackType.Stationary,
-                    Behaviors.TrackType.PerimeterBounce,
-                    //Behaviors.TrackType.StraightLine
-                };
-            }
-        }
+        static readonly List<TrackType> StationaryOnly = new List<TrackType> { Behaviors.TrackType.Stationary };
+        static readonly List<TrackType> AllTrackTypes = new List<TrackType> { Behaviors.TrackType.Stationary, Behaviors.TrackType.PerimeterBounce };
+        [NotMapped] public List<TrackType> TrackTypeDisplay { get { return Perimeter == null || Speed == 0 ? StationaryOnly : AllTrackTypes; } }
 
         [NotMapped] public TrackType SelectedTrackType
         {
@@ -108,6 +102,7 @@ namespace ESME.Scenarios
                 {
                     TrackType = value;
                     RemoveMapLayers();
+                    PlatformBehavior = null;
                     CreateMapLayers();
                 }
                 catch (Exception e)
@@ -120,7 +115,15 @@ namespace ESME.Scenarios
         }
 
         #region PlatformPropertiesCommand
-        public SimpleCommand<object, EventToCommandArgs> PlatformPropertiesCommand { get { return _platformProperties ?? (_platformProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.PlatformProperties, this))); } }
+        public SimpleCommand<object, EventToCommandArgs> PlatformPropertiesCommand
+        {
+            get
+            {
+                return _platformProperties ??
+                       (_platformProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.PlatformProperties, this)));
+            }
+        }
+
         SimpleCommand<object, EventToCommandArgs> _platformProperties;
         #endregion
 
@@ -151,13 +154,13 @@ namespace ESME.Scenarios
         void KeyUpHandler(EventToCommandArgs args)
         {
             var parameter = (KeyEventArgs)args.EventArgs;
-            switch(parameter.Key)
+            switch (parameter.Key)
             {
                 case Key.Delete:
                     MediatorMessage.Send(MediatorMessage.DeletePlatform, this);
                     break;
                 case Key.Insert:
-                    MediatorMessage.Send(MediatorMessage.AddSource,this);
+                    MediatorMessage.Send(MediatorMessage.AddSource, this);
                     break;
                 default:
                     return;
@@ -166,6 +169,7 @@ namespace ESME.Scenarios
         #endregion
 
         PlatformBehavior _platformBehavior;
+
         [NotMapped] public PlatformBehavior PlatformBehavior
         {
             get
@@ -183,42 +187,93 @@ namespace ESME.Scenarios
             {
                 Name = string.Format("{0}", Guid),
                 CustomLineStyle =
-                    new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, LayerSettings.LineOrSymbolColor, (float)LayerSettings.LineOrSymbolSize)
+                    new CustomStartEndLineStyle(PointSymbolType.Circle,
+                                                Colors.Green,
+                                                5,
+                                                PointSymbolType.Square,
+                                                Colors.Red,
+                                                5,
+                                                LayerSettings.LineOrSymbolColor,
+                                                (float)LayerSettings.LineOrSymbolSize)
             };
             var locations = PlatformBehavior.PlatformStates.Select(p => p.PlatformLocation.Location).ToList();
             mapLayer.AddLines(locations);
             mapLayer.Done();
             LayerSettings.MapLayerViewModel = mapLayer;
-            if (Perimeter != null) Perimeter.CreateMapLayers();
         }
 
-        public void RemoveMapLayers()
-        {
-            LayerSettings.MapLayerViewModel = null;
-        }
+        public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
+
         #region Layer Move commands
+
         #region MoveLayerToFrontCommand
-        public SimpleCommand<object, EventToCommandArgs> MoveLayerToFrontCommand { get { return _moveLayerToFront ?? (_moveLayerToFront = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerToFront(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }
+        public SimpleCommand<object, EventToCommandArgs> MoveLayerToFrontCommand
+        {
+            get
+            {
+                return _moveLayerToFront ?? (_moveLayerToFront = new SimpleCommand<object, EventToCommandArgs>(o =>
+                                                                                                               {
+                                                                                                                   LayerSettings.MoveLayerToFront();
+                                                                                                                   MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+                                                                                                               }));
+            }
+        }
+
         SimpleCommand<object, EventToCommandArgs> _moveLayerToFront;
         #endregion
 
         #region MoveLayerForwardCommand
-        public SimpleCommand<object, EventToCommandArgs> MoveLayerForwardCommand { get { return _moveLayerForward ?? (_moveLayerForward = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerForward(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }
+        public SimpleCommand<object, EventToCommandArgs> MoveLayerForwardCommand
+        {
+            get
+            {
+                return _moveLayerForward ?? (_moveLayerForward = new SimpleCommand<object, EventToCommandArgs>(o =>
+                                                                                                               {
+                                                                                                                   LayerSettings.MoveLayerForward();
+                                                                                                                   MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+                                                                                                               }));
+            }
+        }
+
         SimpleCommand<object, EventToCommandArgs> _moveLayerForward;
         #endregion
 
         #region MoveLayerBackwardCommand
-        public SimpleCommand<object, EventToCommandArgs> MoveLayerBackwardCommand { get { return _moveLayerBackward ?? (_moveLayerBackward = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerBackward(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }
+        public SimpleCommand<object, EventToCommandArgs> MoveLayerBackwardCommand
+        {
+            get
+            {
+                return _moveLayerBackward ?? (_moveLayerBackward = new SimpleCommand<object, EventToCommandArgs>(o =>
+                                                                                                                 {
+                                                                                                                     LayerSettings.MoveLayerBackward();
+                                                                                                                     MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+                                                                                                                 }));
+            }
+        }
+
         SimpleCommand<object, EventToCommandArgs> _moveLayerBackward;
         #endregion
 
         #region MoveLayerToBackCommand
-        public SimpleCommand<object, EventToCommandArgs> MoveLayerToBackCommand { get { return _moveLayerToBack ?? (_moveLayerToBack = new SimpleCommand<object, EventToCommandArgs>(o => { LayerSettings.MoveLayerToBack(); MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); } }
+        public SimpleCommand<object, EventToCommandArgs> MoveLayerToBackCommand
+        {
+            get
+            {
+                return _moveLayerToBack ?? (_moveLayerToBack = new SimpleCommand<object, EventToCommandArgs>(o =>
+                                                                                                             {
+                                                                                                                 LayerSettings.MoveLayerToBack();
+                                                                                                                 MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+                                                                                                             }));
+            }
+        }
+
         SimpleCommand<object, EventToCommandArgs> _moveLayerToBack;
         #endregion
+
         #endregion
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void OnPropertyChanged(string propertyName)
         {
             var handlers = PropertyChanged;
@@ -230,8 +285,7 @@ namespace ESME.Scenarios
                     var localHandler = handler;
                     ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new PropertyChangedEventArgs(propertyName)));
                 }
-                else
-                    handler(this, new PropertyChangedEventArgs(propertyName));
+                else handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }
