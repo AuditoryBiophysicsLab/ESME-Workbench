@@ -130,9 +130,6 @@
       <DependentUpon>DataPlot.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\SlimRibbonApplicationMenu.cs" />
-    <Compile Include="Controls\TimePeriodComboBox.xaml.cs">
-      <DependentUpon>TimePeriodComboBox.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\TimePicker.cs" />
     <Compile Include="Controls\TLStatusBar.xaml.cs">
       <DependentUpon>TLStatusBar.xaml</DependentUpon>
@@ -252,10 +249,6 @@
     <Page Include="Controls\DataPlot.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Controls\TimePeriodComboBox.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\TLStatusBar.xaml">
       <SubType>Designer</SubType>
