@@ -316,6 +316,7 @@ namespace ESME.Simulator
                     _speciesNameToIndex.Add(species.SpeciesDefinitionFilePath, nextSpeciesIndex++);
                 var speciesInstanceIndex = _speciesNameToIndex[species.SpeciesDefinitionFilePath];
                 var curSpecies = species;
+                species.ReloadOrReseedAnimats();
                 contexts.AddRange(species.Animat.Locations.Select((t, speciesIndex) => new AnimatContext
                 {
                     Species = curSpecies, 

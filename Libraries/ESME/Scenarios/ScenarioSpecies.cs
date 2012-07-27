@@ -83,6 +83,7 @@ namespace ESME.Scenarios
             }
             set { _animat = value; }
         }
+        public void ReloadOrReseedAnimats() { Animat = null; }
 
         #region Layer Move commands
         #region MoveLayerToFrontCommand
