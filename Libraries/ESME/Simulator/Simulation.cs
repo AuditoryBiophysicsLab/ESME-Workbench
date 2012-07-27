@@ -287,7 +287,7 @@ namespace ESME.Simulator
         {
             using (var w = new StringWriter())
             {
-                var xmlPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Simulation Test", Scenario.Name + ".xml");
+                var xmlPath = Path.Combine(_simulationDirectory, Scenario.Name + ".xml");
                 w.WriteLine("simulatorOutputStruct = plotSpeciesModeHistograms('{0}',true);",xmlPath);
                 File.WriteAllText(Path.Combine(_simulationDirectory, "batch.m"),w.ToString());
             }
