@@ -32,7 +32,6 @@ namespace ESME.Views.Scenarios
         {
             get { return _ok ?? (_ok = new SimpleCommand<object, object>(delegate { return IsValid && !EditablePolygonOverlayViewModel.HasErrors; }, o =>
             {
-                Debug.WriteLine("Perimeter: " + PerimeterName);
                 Debug.Write("PerimeterGeos = new List<Geo>{");
                 foreach (var geo in EditablePolygonOverlayViewModel.GeoArray) Debug.Write(string.Format("new Geo({0}, {1}), ", geo.Latitude, geo.Longitude));
                 Debug.WriteLine("},");

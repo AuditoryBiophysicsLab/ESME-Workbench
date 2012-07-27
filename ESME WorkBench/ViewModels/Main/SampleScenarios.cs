@@ -66,6 +66,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 GeoRect = new GeoRect(36, 33, -75, -78), 
                 TimePeriod = (TimePeriod)DateTime.Today.Month,
                 PerimeterGeos = new List<Geo>{new Geo(34.505712890625, -76.8515625), new Geo(34.714453125, -76.357177734375), new Geo(35.340673828125, -75.99462890625), new Geo(34.78037109375, -75.478271484375), new Geo(33.978369140625, -75.412353515625), new Geo(33.33017578125, -76.291259765625), new Geo(33.74765625, -77.323974609375), new Geo(34.505712890625, -76.8515625), },
+                AnalysisPointGeos = new List<Geo>{new Geo(34.0223144531, -75.5991210938), new Geo(33.6487792969, -76.4450683594), new Geo(33.8465332031, -77.0383300781), new Geo(34.8462890625, -75.9616699219)}
             },
             new SampleScenarioDescriptor
             {
@@ -98,6 +99,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 GeoRect = new GeoRect(27, 22, -73.5, -79), 
                 TimePeriod = (TimePeriod)DateTime.Today.Month,
                 PerimeterGeos = new List<Geo>{new Geo(25.3470671337664, -78.0021554441618), new Geo(25.3744018554687, -77.6507568359375), new Geo(25.7589233398437, -77.2332763671875), new Geo(25.3853881835937, -76.9696044921875), new Geo(25.0338256835937, -77.7056884765625), new Geo(24.4845092773437, -77.3431396484375), new Geo(23.7985296289286, -77.1489493545971), new Geo(23.8309538525164, -77.0243722410368), new Geo(23.7870085400164, -76.6508370847868), new Geo(23.5123503368914, -76.7057687254118), new Geo(23.5453093212664, -77.2221261472868), new Geo(25.3470671337664, -78.0021554441618), },
+                AnalysisPointGeos = new List<Geo>{new Geo(23.7042602539, -76.9696044922), new Geo(24.4403442383, -77.48046875), new Geo(25.3412231445, -77.4200439453)},
             },
         };
         class SampleScenarioDescriptor
@@ -106,6 +108,7 @@ namespace ESMEWorkbench.ViewModels.Main
             public string ScenarioName { get; set; }
             public GeoRect GeoRect { get; set; }
             public List<Geo> PerimeterGeos { get; set; }
+            public List<Geo> AnalysisPointGeos { get; set; }
             public TimePeriod TimePeriod { get; set; }
         }
 
@@ -151,16 +154,31 @@ namespace ESMEWorkbench.ViewModels.Main
             await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
             _dispatcher.InvokeInBackgroundIfRequired(() =>
             {
-                progress.ProgressMessage = string.Format("Adding analysis point to scenario \"{0}\"", scenarioDescriptor.ScenarioName);
+                progress.ProgressMessage = string.Format("Adding analysis point(s) to scenario \"{0}\"", scenarioDescriptor.ScenarioName);
                 progress.CurrentItem++;
                 scenario.ShowAllAnalysisPoints = true;
-                var analysisPoint = new AnalysisPoint
+                if (scenarioDescriptor.AnalysisPointGeos == null || scenarioDescriptor.AnalysisPointGeos.Count < 1)
                 {
-                    Geo = new Geo(((GeoRect)location.GeoRect).Center),
-                    Scenario = scenario
-                };
-                scenario.AnalysisPoints.Add(analysisPoint);
-                Database.Add(analysisPoint, (Bathymetry)_cache[scenario.Bathymetry].Result);
+                    var analysisPoint = new AnalysisPoint
+                    {
+                        Geo = new Geo(((GeoRect)location.GeoRect).Center),
+                        Scenario = scenario
+                    };
+                    scenario.AnalysisPoints.Add(analysisPoint);
+                    Database.Add(analysisPoint, (Bathymetry)_cache[scenario.Bathymetry].Result);
+                }
+                else
+                {
+                    foreach (var analysisPoint in scenarioDescriptor.AnalysisPointGeos.Select(analysisPointGeo => new AnalysisPoint
+                    {
+                        Geo = new Geo(analysisPointGeo),
+                        Scenario = scenario
+                    }))
+                    {
+                        scenario.AnalysisPoints.Add(analysisPoint);
+                        Database.Add(analysisPoint, (Bathymetry)_cache[scenario.Bathymetry].Result);
+                    }
+                }
             });
         }
     }
