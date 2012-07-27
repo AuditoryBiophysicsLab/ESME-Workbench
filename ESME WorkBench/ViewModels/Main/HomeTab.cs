@@ -198,7 +198,7 @@ namespace ESMEWorkbench.ViewModels.Main
             //analysisPoint.RemoveMapLayers();
             //await TaskEx.Delay(50);
             analysisPoint.Delete();
-            CommandManager.InvalidateRequerySuggested();
+            OnPropertyChanged("IsRunSimulationCommandEnabled");
         }
 
         [MediatorMessageSink(MediatorMessage.DeleteAllAnalysisPoints), UsedImplicitly]
@@ -209,7 +209,7 @@ namespace ESMEWorkbench.ViewModels.Main
             //foreach (var analysisPoint in Scenario.AnalysisPoints) analysisPoint.RemoveMapLayers();
             //await TaskEx.Delay(50);
             foreach (var analysisPoint in Scenario.AnalysisPoints.ToList()) analysisPoint.Delete();
-            CommandManager.InvalidateRequerySuggested();
+            OnPropertyChanged("IsRunSimulationCommandEnabled");
         }
 
         [MediatorMessageSink(MediatorMessage.RecalculateAnalysisPoint), UsedImplicitly]
