@@ -156,7 +156,7 @@
             <File Id="_3MBWrapperClass.dll"
                   Name="3MBWrapperClass.dll"
                   Source="$(var.ExternalsPathArchDependent)\3MBWrapperClass.dll" />
-
+            
             <!-- ThinkGeo GIS assemblies -->
             <File Id="MapSuiteCore.dll"
                   Name="MapSuiteCore.dll"
@@ -317,7 +317,7 @@
                           On="uninstall" />
           </Component>
           <Directory Id="GISDataFolder" Name="Sample GIS Data">
-            <Component Id="GISFiles" 
+            <Component Id="GISFiles"
                        Guid="22C39901-AC58-4461-8BAF-15616C48649D"
                        Win64="$(var.Win64)">
               <File Id="Countries02.shx"
@@ -336,6 +336,19 @@
               <File Id="Countries02.shp"
                     Name="Countries02.shp"
                     Source="$(var.GISRoot)\Countries02.shp" />
+            </Component>
+          </Directory>
+          <Directory Id="SpeciesDefinitionFilesFolder" Name="Species Definition Files">
+            <Component Id="SpeciesFiles"
+                       Guid="144784EF-F12D-49A7-B24A-F9F2B7D1FAFF"
+                       Win64="$(var.Win64)">
+              <!-- 3MB Species Files-->
+              <File Id="generic_mysticete.spe"
+                    Name="generic_mysticete.spe"
+                    Source="$(var.UtilityRoot)\3MB\Species Files\generic_mysticete.spe" />
+              <File Id="generic_odontocete.spe"
+                    Name="generic_odontocete.spe"
+                    Source="$(var.UtilityRoot)\3MB\Species Files\generic_odontocete.spe" />
             </Component>
           </Directory>
         </Directory>
@@ -359,6 +372,7 @@
       <ComponentRef Id="ESMEWorkbench" />
       <MergeRef Id="vc100"/>
       <ComponentRef Id="GISFiles" />
+      <ComponentRef Id="SpeciesFiles" />
       <ComponentRef Id="ESMEWorkbench_Shortcuts"/>
       <ComponentRef Id="RegistryEntries"/>
     </Feature>
