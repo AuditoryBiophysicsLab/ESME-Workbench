@@ -43,7 +43,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     if (_scenario != null) _scenario.RemoveMapLayers();
                     _scenario = value;
                     LayerTreeViewModel.Scenario = _scenario;
-                    MainWindowTitle = string.Format("ESME Workbench: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name);
+                    MainWindowTitle = string.Format("ESME 2012: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name);
                     if (_scenario == null) return;
                     _cache[_scenario.Wind].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
                     {

@@ -8,7 +8,7 @@
 [assembly: AssemblyDescription("ESME Workbench")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Boston University")]
-[assembly: AssemblyProduct("ESME Workbench 2012 beta 1")]
+[assembly: AssemblyProduct("ESME 2012 beta 2")]
 [assembly: AssemblyCopyright("© Boston University 2009-2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
