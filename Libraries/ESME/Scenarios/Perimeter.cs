@@ -112,8 +112,10 @@ namespace ESME.Scenarios
             {
                 platform.Perimeter = null;
                 platform.TrackType = TrackType.Stationary;
+                platform.IsRandom = false;
             }
             Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
+            Scenario.Perimeters.Remove(this);
             foreach (var point in PerimeterCoordinates.ToList()) Scenario.Database.Context.PerimeterCoordinates.Remove(point);
         }
     }

@@ -38,37 +38,44 @@ namespace ESMEWorkbench.ViewModels.Main
             get { return _scenario; }
             set
             {
-                if (_scenario != null)
+                try
                 {
-#if false
-                    if (Database.Context.IsModified)
+                    if (_scenario != null) _scenario.RemoveMapLayers();
+                    _scenario = value;
+                    LayerTreeViewModel.Scenario = _scenario;
+                    MainWindowTitle = string.Format("ESME Workbench: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name);
+                    if (_scenario == null) return;
+                    _cache[_scenario.Wind].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
-                        var result = _messageBox.ShowYesNoCancel(string.Format("The database has been modified.  Would you like to save your changes before {0}?", value == null ? "closing this experiment": "switching experiments"), MessageBoxImage.Question);
-                        switch (result)
-                        {
-                            case MessageBoxResult.Yes:
-                                Database.SaveChanges();
-                                break;
-                            case MessageBoxResult.Cancel:
-                                return;
-                        }
-                    }
-#endif
-                    _scenario.RemoveMapLayers();
-                }
-                _scenario = value;
-                LayerTreeViewModel.Scenario = _scenario;
-                MainWindowTitle = string.Format("ESME Workbench: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name);
-                if (_scenario == null) return;
-                _cache[_scenario.Wind].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() => { _scenario.Wind.CreateMapLayers(); _scenario.Wind.LayerSettings.MoveLayerToBack(); }));
-                _cache[_scenario.SoundSpeed].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() => { _scenario.SoundSpeed.CreateMapLayers(); _scenario.SoundSpeed.LayerSettings.MoveLayerToBack(); }));
-                _cache[_scenario.Bathymetry].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() => { _scenario.Bathymetry.CreateMapLayers(); _scenario.Bathymetry.LayerSettings.MoveLayerToBack(); }));
-                _cache[_scenario.Sediment].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() => { _scenario.Sediment.CreateMapLayers(); _scenario.Sediment.LayerSettings.MoveLayerToBack(); }));
+                        _scenario.Wind.CreateMapLayers();
+                        _scenario.Wind.LayerSettings.MoveLayerToBack();
+                    }));
+                    _cache[_scenario.SoundSpeed].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    {
+                        _scenario.SoundSpeed.CreateMapLayers();
+                        _scenario.SoundSpeed.LayerSettings.MoveLayerToBack();
+                    }));
+                    _cache[_scenario.Bathymetry].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    {
+                        _scenario.Bathymetry.CreateMapLayers();
+                        _scenario.Bathymetry.LayerSettings.MoveLayerToBack();
+                    }));
+                    _cache[_scenario.Sediment].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    {
+                        _scenario.Sediment.CreateMapLayers();
+                        _scenario.Sediment.LayerSettings.MoveLayerToBack();
+                    }));
 
-                _scenario.CreateMapLayers();
-                _scenario.Location.LayerSettings.IsChecked = true;
-                MediatorMessage.Send(MediatorMessage.SetMapExtent, (GeoRect)_scenario.Location.GeoRect);
-                MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+                    _scenario.Location.LayerSettings.IsChecked = true;
+                    MediatorMessage.Send(MediatorMessage.SetMapExtent, (GeoRect)_scenario.Location.GeoRect);
+                    MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+                }
+                catch (Exception e)
+                {
+                    _messageBox.ShowError(e.Message);
+                    _scenario = null;
+                    OnPropertyChanged("Scenario");
+                }
             }
         }
 
