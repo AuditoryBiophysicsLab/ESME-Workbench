@@ -78,10 +78,6 @@ namespace ESMEWorkbench.ViewModels.Main
             _plugins = plugins;
             _cache = cache;
             MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
-            if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"))) Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
-            Database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
-            Scenarios = Database.Context.Scenarios.Local;
-            LocationsTreeViewModel = new LocationsTreeViewModel(Database.Context.Locations.Local);
             Cursor = Cursors.Arrow;
             _transmissionLoss.RangeCellSize = Globals.AppSettings.BellhopSettings.RangeCellSize;
             _transmissionLoss.DepthCellSize = Globals.AppSettings.BellhopSettings.DepthCellSize;
@@ -102,6 +98,15 @@ namespace ESMEWorkbench.ViewModels.Main
             _viewAwareStatus.ViewLoaded += () =>
             {
                 if (Designer.IsInDesignMode) return;
+                
+                if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"))) Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
+                var databaseDirectory = Database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ??
+                                                       Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
+                Database.MasterDatabaseDirectory = databaseDirectory;
+
+                Scenarios = Database.Context.Scenarios.Local;
+                LocationsTreeViewModel = new LocationsTreeViewModel(Database.Context.Locations.Local);
+
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 _plugins.PluginDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 

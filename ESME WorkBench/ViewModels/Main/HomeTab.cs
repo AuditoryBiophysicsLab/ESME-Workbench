@@ -104,7 +104,7 @@ namespace ESMEWorkbench.ViewModels.Main
         #region CreateScenarioCommand
         public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand { get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => IsCreateScenarioCommandEnabled, o => CreateScenarioHandler())); } }
         SimpleCommand<object, EventToCommandArgs> _createScenario;
-        bool IsCreateScenarioCommandEnabled { get { return Database.Context.Locations.Local.Count > 0; } }
+        bool IsCreateScenarioCommandEnabled { get { return Database != null && Database.Context != null && Database.Context.Locations.Local.Count > 0; } }
 
         Location _lastCreateScenarioLocation;
         [MediatorMessageSink(MediatorMessage.CreateScenario)]

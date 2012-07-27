@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Windows;
 using Devart.Data.SQLite;
 using Devart.Data.SQLite.Entity.Configuration;
 using ESME.Database;
@@ -17,6 +18,7 @@ using ESME.Plugins;
 using ESME.Scenarios;
 using HRC;
 using HRC.Aspects;
+using HRC.Services;
 using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;   
 
@@ -75,6 +77,7 @@ namespace ESME.Locations
 #endif
         }
 
+        [Import] IMessageBoxService _messageBoxService;
         #region Add operations
         public void Add(Perimeter perimeter)
         {
