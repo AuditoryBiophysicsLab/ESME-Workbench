@@ -1,4 +1,5 @@
-﻿using ESME.Views.Locations;
+﻿using System.Diagnostics;
+using ESME.Views.Locations;
 using HRC.Validation;
 using HRC.ViewModels;
 
@@ -29,7 +30,14 @@ namespace ESME.Views.Scenarios
         #region OkCommand
         public SimpleCommand<object, object> OkCommand
         {
-            get { return _ok ?? (_ok = new SimpleCommand<object, object>(delegate { return IsValid && !EditablePolygonOverlayViewModel.HasErrors; }, o => CloseDialog(null))); }
+            get { return _ok ?? (_ok = new SimpleCommand<object, object>(delegate { return IsValid && !EditablePolygonOverlayViewModel.HasErrors; }, o =>
+            {
+                Debug.WriteLine("Perimeter: " + PerimeterName);
+                Debug.Write("PerimeterGeos = new List<Geo>{");
+                foreach (var geo in EditablePolygonOverlayViewModel.GeoArray) Debug.Write(string.Format("new Geo({0}, {1}), ", geo.Latitude, geo.Longitude));
+                Debug.WriteLine("},");
+                CloseDialog(null);
+            })); }
         }
 
         SimpleCommand<object, object> _ok;

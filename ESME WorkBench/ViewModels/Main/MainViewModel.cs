@@ -11,8 +11,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using ESME;
-using ESME.Behaviors;
-using ESME.Database;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Locations;
@@ -47,7 +45,7 @@ namespace ESMEWorkbench.ViewModels.Main
         public const bool ExperimentsCurrentlySupported = false;
         Dispatcher _dispatcher;
 
-        List<Window> _openPopups;
+        readonly List<Window> _openPopups = new List<Window>();
         #endregion
 
         #region Constructor
@@ -79,7 +77,6 @@ namespace ESMEWorkbench.ViewModels.Main
             _transmissionLoss = transmissionLoss;
             _plugins = plugins;
             _cache = cache;
-            _openPopups = new List<Window>();
             MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
             if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"))) Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
             Database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
@@ -113,48 +110,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 _transmissionLoss.Start();
                 NAVOImporter.PluginManagerService = _plugins;
                 GeoRect locationsExtent = null;
-                if (!Database.Context.Locations.Any()) _dispatcher.InvokeInBackgroundIfRequired(async () =>
-                {
-                    var wind = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Wind];
-                    var soundSpeed = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed];
-                    var bathymetry = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry];
-                    var sediment = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment];
-                    foreach (var locations in Database.Context.Locations.Local) locations.CreateMapLayers();
-                    if (wind == null || soundSpeed == null || bathymetry == null || sediment == null) return;
-                    var result = _visualizer.ShowDialog("FirstRunQuestionView", new FirstRunQuestionViewModel { MessageBoxService = _messageBox });
-                    if (!result.HasValue || !result.Value) return;
-                    var progress = new FirstRunProgressViewModel { ItemCount = 20, CurrentItem = 0 };
-                    var window = _visualizer.ShowWindow("FirstRunProgressView", progress, true);
-                    _openPopups.Add(window);
-                    await TaskEx.Delay(10);
-                    var windData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(wind.PluginIdentifier), Resolution = wind.AvailableResolutions.Max() };
-                    var soundSpeedData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(soundSpeed.PluginIdentifier), Resolution = soundSpeed.AvailableResolutions.Max() };
-                    var bathymetryData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(bathymetry.PluginIdentifier), Resolution = bathymetry.AvailableResolutions.Max() };
-                    var sedimentData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(sediment.PluginIdentifier), Resolution = sediment.AvailableResolutions.Max() };
-                    MediatorMessage.Send(MediatorMessage.SetMapExtent, new GeoRect(45, 22, -65, -120));
-                    await CreateSample("Gulf of Maine", "Maine Sample", new GeoRect(44, 41, -65, -71), (TimePeriod)DateTime.Today.Month, progress, windData, soundSpeedData, bathymetryData, sedimentData);
-                    if (progress.IsCanceled) { window.Close(); return; }
-
-                    await CreateSample("Carolina Coast", "Carolina Sample", new GeoRect(36, 33, -75, -78), (TimePeriod)DateTime.Today.Month, progress, windData, soundSpeedData, bathymetryData, sedimentData);
-                    if (progress.IsCanceled) { window.Close(); return; }
-
-                    await CreateSample("Florida Atlantic Coast", "Florida Atlantic Sample", new GeoRect(32, 27, -76, -81.5), (TimePeriod)DateTime.Today.Month, progress, windData, soundSpeedData, bathymetryData, sedimentData);
-                    if (progress.IsCanceled) { window.Close(); return; }
-
-                    await CreateSample("Florida Gulf Coast", "Florida Gulf Sample", new GeoRect(30.5, 25, -81, -87), (TimePeriod)DateTime.Today.Month, progress, windData, soundSpeedData, bathymetryData, sedimentData);
-                    if (progress.IsCanceled) { window.Close(); return; }
-
-                    await CreateSample("Southern California", "Southern California Sample", new GeoRect(34, 31, -117.5, -120), (TimePeriod)DateTime.Today.Month, progress, windData, soundSpeedData, bathymetryData, sedimentData);
-                    if (progress.IsCanceled) { window.Close(); return; }
-
-                    await CreateSample("Bahamas", "Bahamas Sample", new GeoRect(27, 22, -73.5, -79), (TimePeriod)DateTime.Today.Month, progress, windData, soundSpeedData, bathymetryData, sedimentData);
-                    if (progress.IsCanceled) { window.Close(); return; }
-
-                    progress.ProgressMessage = string.Format("Updating database...");
-                    progress.CurrentItem++;
-                    //Database.SaveChanges();
-                    window.Close();
-                });
+                if (!Database.Context.Locations.Any()) _dispatcher.InvokeInBackgroundIfRequired(CreateSampleScenariosIfRequested);
                 else foreach (var location in Database.Context.Locations.Local)
                 {
                     locationsExtent = locationsExtent == null ? new GeoRect(location.GeoRect) : GeoRect.Union(locationsExtent, (GeoRect)location.GeoRect);
@@ -164,63 +120,6 @@ namespace ESMEWorkbench.ViewModels.Main
             };
         }
 
-        async Task CreateSample(string locationName, string scenarioName, GeoRect locationGeoRect, TimePeriod timePeriod, FirstRunProgressViewModel progress, EnvironmentalDataSet windData, EnvironmentalDataSet soundSpeedData, EnvironmentalDataSet bathymetryData, EnvironmentalDataSet sedimentData)
-        {
-            progress.ProgressMessage = string.Format("Creating sample location \"{0}\"", locationName);
-            progress.CurrentItem++;
-            await TaskEx.Delay(10);
-            var location = CreateLocation(locationName, "Created as a sample location", locationGeoRect);
-            location.CreateMapLayers();
-            progress.ProgressMessage = string.Format("Creating sample scenario \"{0}\"", scenarioName);
-            progress.CurrentItem++;
-            await TaskEx.Delay(10);
-            var scenario = CreateScenario(location, scenarioName, "Created as a sample scenario", timePeriod,new TimeSpan(0, 12, 0, 0), windData, soundSpeedData, bathymetryData, sedimentData);
-            var perimeterGeoArray = new GeoArray(new Geo(locationGeoRect.NorthWest.Latitude - 1, locationGeoRect.NorthWest.Longitude + 1),
-                                                 new Geo(locationGeoRect.NorthEast.Latitude - 1, locationGeoRect.NorthEast.Longitude - 1),
-                                                 new Geo(locationGeoRect.SouthEast.Latitude + 1, locationGeoRect.SouthEast.Longitude - 1),
-                                                 new Geo(locationGeoRect.SouthWest.Latitude + 1, locationGeoRect.SouthWest.Longitude + 1));
-            Perimeter perimeter = (GeoArray)perimeterGeoArray.Closed;
-            perimeter.Name = "Sample Perimeter";
-            perimeter.Scenario = scenario;
-            var platform = new Platform
-            {
-                Scenario = scenario,
-                Course = 0,
-                Depth = 0,
-                Description = null,
-                Geo = ((GeoRect)scenario.Location.GeoRect).Center,
-                PlatformName = "Sample Platform",
-                Perimeter = perimeter,
-                Speed = 20,
-                IsRandom = true,
-                Launches = false,
-                TrackType = TrackType.PerimeterBounce,
-                IsNew = false,
-            };
-            scenario.Perimeters.Add(perimeter);
-            AddPlatform(scenario, platform);
-            AddMode(AddSource(platform, "Sample Source", false), "1 KHz mode", false);
-            progress.ProgressMessage = string.Format("Generating animat population for scenario \"{0}\"", scenarioName);
-            var species = new ScenarioSpecies { LatinName = "Sample Species", Scenario = scenario, SpeciesDefinitionFilename = "generic_odontocete.spe" };
-            scenario.ScenarioSpecies.Add(species);
-            var animats = await Animat.SeedAsync(species, locationGeoRect, (Bathymetry)_cache[scenario.Bathymetry].Result);
-            animats.Save(species.PopulationFilePath);
-            //Database.SaveChanges();
-            await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
-            _dispatcher.InvokeInBackgroundIfRequired(() =>
-            {
-                progress.ProgressMessage = string.Format("Adding analysis point to scenario \"{0}\"", scenarioName);
-                progress.CurrentItem++;
-                scenario.ShowAllAnalysisPoints = true;
-                var analysisPoint = new AnalysisPoint
-                {
-                    Geo = new Geo(((GeoRect)location.GeoRect).Center),
-                    Scenario = scenario
-                };
-                scenario.AnalysisPoints.Add(analysisPoint);
-                Database.Add(analysisPoint, (Bathymetry)_cache[scenario.Bathymetry].Result);
-            });
-        }
 
         public ObservableCollection<Scenario> Scenarios { get; private set; }
         public IMasterDatabaseService Database { get; private set; }

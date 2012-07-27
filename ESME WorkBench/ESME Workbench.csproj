@@ -147,6 +147,7 @@
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="ViewModels\Layers\CustomUnitScaleBarAdornmentLayer.cs" />
     <Compile Include="ViewModels\Main\FirstRunViewModel.cs" />
+    <Compile Include="ViewModels\Main\SampleScenarios.cs" />
     <Compile Include="ViewModels\Tree\AnalysisPointsNode.cs" />
     <Compile Include="ViewModels\Tree\BitmapNode.cs" />
     <Compile Include="ViewModels\Tree\EnvironmentNode.cs" />
