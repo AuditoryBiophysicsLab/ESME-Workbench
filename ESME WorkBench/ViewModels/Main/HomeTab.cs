@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using ESME;
 using ESME.Behaviors;
 using ESME.Environment;
@@ -197,6 +198,7 @@ namespace ESMEWorkbench.ViewModels.Main
             //analysisPoint.RemoveMapLayers();
             //await TaskEx.Delay(50);
             analysisPoint.Delete();
+            CommandManager.InvalidateRequerySuggested();
         }
 
         [MediatorMessageSink(MediatorMessage.DeleteAllAnalysisPoints), UsedImplicitly]
@@ -207,6 +209,7 @@ namespace ESMEWorkbench.ViewModels.Main
             //foreach (var analysisPoint in Scenario.AnalysisPoints) analysisPoint.RemoveMapLayers();
             //await TaskEx.Delay(50);
             foreach (var analysisPoint in Scenario.AnalysisPoints.ToList()) analysisPoint.Delete();
+            CommandManager.InvalidateRequerySuggested();
         }
 
         [MediatorMessageSink(MediatorMessage.RecalculateAnalysisPoint), UsedImplicitly]
@@ -616,7 +619,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             get
             {
-                if (Scenario == null || IsTransmissionLossBusy || IsSimulationRunning) return false;
+                if (Scenario == null || IsTransmissionLossBusy || IsSimulationRunning || Scenario.AnalysisPoints.Count == 0) return false;
                 ScenarioValidationError = Scenario.Validate();
                 return string.IsNullOrEmpty(ScenarioValidationError);
             }

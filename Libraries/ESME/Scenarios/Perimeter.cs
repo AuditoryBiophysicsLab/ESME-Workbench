@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using ESME.Behaviors;
 using ESME.Locations;
 using ESME.Mapping;
 using HRC.Aspects;
@@ -19,7 +20,7 @@ namespace ESME.Scenarios
         public string Name { get; set; }
         public virtual Scenario Scenario { get; set; }
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
-        [Initialize] public virtual ObservableList<Platform> Platforms { get; set; }
+        //[Initialize] public virtual ObservableList<Platform> Platforms { get; set; }
         [Initialize] public virtual ObservableList<PerimeterCoordinate> PerimeterCoordinates { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
         [NotMapped] public bool IsDeleted { get; set; }
@@ -107,6 +108,11 @@ namespace ESME.Scenarios
         {
             IsDeleted = true;
             RemoveMapLayers();
+            foreach (var platform in Scenario.Platforms.Where(platform => platform.Perimeter != null && platform.Perimeter.Guid == Guid)) 
+            {
+                platform.Perimeter = null;
+                platform.TrackType = TrackType.Stationary;
+            }
             Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
             foreach (var point in PerimeterCoordinates.ToList()) Scenario.Database.Context.PerimeterCoordinates.Remove(point);
         }
