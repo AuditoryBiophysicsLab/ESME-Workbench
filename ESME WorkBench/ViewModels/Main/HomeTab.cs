@@ -45,6 +45,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     LayerTreeViewModel.Scenario = _scenario;
                     MainWindowTitle = string.Format("ESME 2012: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name);
                     if (_scenario == null) return;
+                    _scenario.CreateMapLayers();
                     _cache[_scenario.Wind].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
                         _scenario.Wind.CreateMapLayers();
@@ -291,7 +292,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void AddPlatform(Scenario scenario)
         {
             if (scenario.LayerControl != null) ((LayerControl)scenario.LayerControl).Expand();
-            scenario.Platforms.Add(new Platform
+            var platform = new Platform
             {
                 Scenario = scenario,
                 Course = 0,
@@ -303,7 +304,9 @@ namespace ESMEWorkbench.ViewModels.Main
                 Launches = false,
                 TrackType = TrackType.Stationary,
                 IsNew = true,
-            });
+            };
+            scenario.Platforms.Add(platform);
+            platform.CreateMapLayers();
         }
 
         static void AddPlatform(Scenario scenario, Platform platform)

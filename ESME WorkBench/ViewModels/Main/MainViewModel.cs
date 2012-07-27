@@ -190,12 +190,12 @@ namespace ESMEWorkbench.ViewModels.Main
                 Description = null,
                 Geo = ((GeoRect)scenario.Location.GeoRect).Center,
                 PlatformName = "Sample Platform",
+                Perimeter = perimeter,
+                Speed = 20,
                 IsRandom = true,
                 Launches = false,
                 TrackType = TrackType.PerimeterBounce,
-                Speed = 20,
                 IsNew = false,
-                Perimeter = perimeter,
             };
             scenario.Perimeters.Add(perimeter);
             AddPlatform(scenario, platform);

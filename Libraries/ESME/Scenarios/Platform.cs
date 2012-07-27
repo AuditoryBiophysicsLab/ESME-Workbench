@@ -41,7 +41,15 @@ namespace ESME.Scenarios
         public DbTrackType TrackType { get; set; }
         public DbGeo Geo { get; set; }
         bool _isRandom = true;
-        public bool IsRandom { get { return _isRandom; } set { _isRandom = value; } }
+        public bool IsRandom { get { return _isRandom; } set
+        {
+            _isRandom = value;
+            if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
+            RemoveMapLayers();
+            PlatformBehavior = null;
+            CreateMapLayers();
+        }
+        }
 
         public float Depth { get; set; }
         public float Course { get; set; }
@@ -65,6 +73,7 @@ namespace ESME.Scenarios
                 _perimeter = value;
                 if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
                 RemoveMapLayers();
+                PlatformBehavior = null;
                 CreateMapLayers();
             }
         }
@@ -101,6 +110,7 @@ namespace ESME.Scenarios
                 try
                 {
                     TrackType = value;
+                    if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
                     RemoveMapLayers();
                     PlatformBehavior = null;
                     CreateMapLayers();

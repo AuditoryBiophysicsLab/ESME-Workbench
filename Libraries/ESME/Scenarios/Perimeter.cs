@@ -110,9 +110,10 @@ namespace ESME.Scenarios
             RemoveMapLayers();
             foreach (var platform in Scenario.Platforms.Where(platform => platform.Perimeter != null && platform.Perimeter.Guid == Guid)) 
             {
-                platform.Perimeter = null;
                 platform.TrackType = TrackType.Stationary;
                 platform.IsRandom = false;
+                platform.Speed = 0;
+                platform.Perimeter = null;
             }
             Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
             Scenario.Perimeters.Remove(this);
