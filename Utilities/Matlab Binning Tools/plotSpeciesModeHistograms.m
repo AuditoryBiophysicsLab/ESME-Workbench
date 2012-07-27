@@ -26,29 +26,31 @@ for i=1:length(s.AnimatSpecies.Species)
     
     %for each mode,
     numModes = length(thisSpecies.Modes.Mode);
-    exposures = zeros(numBins,numModes);
+    SPLexposures = zeros(numBins,numModes);
+    Energyexposures = zeros(numBins,numModes);
     legendNames = cell(1,numModes);
     for j=1:numModes
         thisMode = thisSpecies.Modes.Mode(j);
         %build up a legend string
         legendNames{j}= thisMode.Name;
         %accumulate exposures
-        exposures(:,j) = cell2mat(thisMode.Exposure(1).Bin);
-        %exposures(j).splBins = cell2mat(thisMode.Exposure(1).Bin);
-        %exposures(j).energyBins = cell2mat(thisMode.Exposure(2).BIn)
+         SPLexposures(:,j) = cell2mat(thisMode.Exposure(1).Bin);
+         Energyexposures(:,j) = cell2mat(thisMode.Exposure(2).Bin);
         %//todo once energy calculations are correct                
     end
     
     %plot a stacked histogram
     figure;hold on; set(gca,'XTickLabel',tickLabels,'XTick',[1:1:numBins],'YScale','log');    
     xlabel('Bins, dB SPL');ylabel('Bin Count');
-    bar(exposures,'grouped');
-    %todo subplot for energy once it works here.
-    %subplot(2,1,1),bar(exposures,'stacked');
-    %subplot(2,1,2),bar(energy,'stacked');
+    bar(SPLexposures,'grouped');    
     legend(legendNames);
     title(['Location: ', s.Location.Name, '| Scenario: ',s.Scenario.Name, '| Species: ', thisSpecies.Name]);
     
+    figure;hold on; set(gca,'XTickLabel',tickLabels,'XTick',[1:1:numBins],'YScale','log');    
+    xlabel('Bins, muPa^2 * s');ylabel('Bin Count');
+    bar(Energyexposures,'grouped');    
+    legend(legendNames);
+    title(['Location: ', s.Location.Name, '| Scenario: ',s.Scenario.Name, '| Species: ', thisSpecies.Name]);
 end
 end
 end
