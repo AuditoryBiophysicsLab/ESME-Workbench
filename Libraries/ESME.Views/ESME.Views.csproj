@@ -85,7 +85,6 @@
     <Reference Include="WpfDesktopEdition">
       <HintPath>..\..\ESME WorkBench\External References\WpfDesktopEdition.dll</HintPath>
     </Reference>
-    <Reference Include="WPFToolkit, Version=3.5.40128.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="WPFToolkit.Extended">
       <HintPath>..\..\Solutions\ESME Workbench\packages\Extended.Wpf.Toolkit.1.6.0\lib\net40\WPFToolkit.Extended.dll</HintPath>
     </Reference>
@@ -410,6 +409,12 @@
   <ItemGroup>
     <Resource Include="Images\clipboard_text.png" />
     <Resource Include="Images\clipboard_text_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\exclamation.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\information.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

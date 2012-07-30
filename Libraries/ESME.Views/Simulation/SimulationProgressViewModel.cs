@@ -14,10 +14,7 @@ namespace ESME.Views.Simulation
     {
         Simulator.Simulation _simulation;
 
-        public TimeSpan TimeStepSize { get; set; }
         public Window Window { get; set; }
-
-        public SimulationProgressViewModel() { TimeStepSize = new TimeSpan(0, 0, 1, 0); }
 
         public Simulator.Simulation Simulation
         {
@@ -72,7 +69,7 @@ namespace ESME.Views.Simulation
 
         void StartHandler(object o)
         {
-            var task = Simulation.Start(TimeStepSize);
+            var task = Simulation.Start();
             task.ContinueWith(t => Window.Dispatcher.InvokeIfRequired(Window.Close));
             IsStartCommandEnabled = false;
             IsCancelCommandEnabled = true;

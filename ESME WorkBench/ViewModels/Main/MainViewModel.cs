@@ -100,8 +100,14 @@ namespace ESMEWorkbench.ViewModels.Main
                 if (Designer.IsInDesignMode) return;
                 
                 if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"))) Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
-                var databaseDirectory = Database.MasterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ??
-                                                       Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
+                var databaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
+                var databaseFile = Path.Combine(databaseDirectory, "esme.db");
+                if (Directory.Exists(databaseDirectory) && File.Exists(databaseFile))
+                {
+                    var fileInfo = new FileInfo(databaseFile);
+                    var cutoffTime = new DateTime(2012, 7, 30, 16, 00, 00);
+                    if (fileInfo.LastWriteTime < cutoffTime) Directory.Delete(databaseDirectory, true);
+                }
                 Database.MasterDatabaseDirectory = databaseDirectory;
 
                 Scenarios = Database.Context.Scenarios.Local;

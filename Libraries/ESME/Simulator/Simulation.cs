@@ -35,7 +35,15 @@ namespace ESME.Simulator
         public static Simulation Create(Scenario scenario, string simulationDirectory, Dispatcher dispatcher)
         {
             Directory.CreateDirectory(simulationDirectory);
-            var result = new Simulation(scenario, simulationDirectory, dispatcher);
+            var result = new Simulation(scenario, simulationDirectory, dispatcher)
+            {
+                MovingAnimats = false,
+                AnimateSimulation = true,
+                TimeStepSize = (from p in scenario.Platforms
+                                from s in p.Sources
+                                from m in s.Modes
+                                select m.PulseIntervalTimeSpan).Max()
+            };
             return result;
         }
 
@@ -65,18 +73,28 @@ namespace ESME.Simulator
         CancellationTokenSource _cancellationTokenSource;
         public void Cancel() { _cancellationTokenSource.Cancel(); }
         public TimeSpan TimeStepSize { get; private set; }
+
+        public string TimeStepString
+        {
+            get { return TimeStepSize.ToString(); }
+            set
+            {
+                TimeStepSize = TimeSpan.Parse(value);
+            }
+        }
+
         public ModeThresholdHistogram ModeThresholdHistogram { get; set; }
         //public SpeciesThresholdHistogram SpeciesThresholdHistogram { get; set; }
         public bool AnimateSimulation { get; set; }
+        public bool MovingAnimats { get; set; }
 
-        public Task Start(TimeSpan timeStepSize)
+        public Task Start()
         {
-            TimeStepSize = timeStepSize;
             _cancellationTokenSource = new CancellationTokenSource();
-            SimulationLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), timeStepSize, Scenario);
+            SimulationLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), TimeStepSize, Scenario);
             ModeThresholdHistogram = new ModeThresholdHistogram(SimulationLog);
             //SpeciesThresholdHistogram = new SpeciesThresholdHistogram(this);
-            return TaskEx.Run(() => Run(timeStepSize, _cancellationTokenSource.Token));
+            return TaskEx.Run(() => Run(TimeStepSize, _cancellationTokenSource.Token));
         }
 
         int _totalExposureCount;
@@ -87,16 +105,20 @@ namespace ESME.Simulator
         {
             Geo<float> firstAnimatPosition = null;
             var timeStepCount = (int)Math.Round(((TimeSpan)Scenario.Duration).TotalSeconds / timeStepSize.TotalSeconds);
-            Initialize3MB();
+            if (MovingAnimats) Initialize3MB();
             PercentProgress = new PercentProgress<Simulation>(this) { MinimumValue = 0, MaximumValue = timeStepCount - 1 };
             Actors = new List<Actor>();
             foreach (var platform in Scenario.Platforms)
             {
+                platform.PlatformBehavior = new PlatformBehavior(platform, timeStepSize, timeStepCount);
                 var behaviors = platform.PlatformBehavior.PlatformStates.ToArray();
+
                 _platformStates.Add(behaviors);
                 var curPlatform = platform;
                 Dispatcher.InvokeIfRequired(() =>
                                             {
+                                                curPlatform.RemoveMapLayers();
+                                                curPlatform.CreateMapLayers();
                                                 var mapLayers = CreateFootprintMapLayers(curPlatform, behaviors[0]).ToArray();
                                                 _modeFootprintMapLayers.Add(mapLayers);
                                                 foreach (var layer in mapLayers)
@@ -126,10 +148,11 @@ namespace ESME.Simulator
             var logBuffer = new BufferBlock<SimulationTimeStepRecord>();
             logBuffer.LinkTo(logBlock);
             logBuffer.Completion.ContinueWith(t => logBlock.Complete());
-
+            Task moveTask = null;
             for (var timeStepIndex = 0; timeStepIndex < timeStepCount; timeStepIndex++)
             {
-                var moveTask = MoveAnimatsAsync();
+
+                if (MovingAnimats) moveTask = MoveAnimatsAsync();
                 var actorPositionRecords = new ActorPositionRecord[actorCount];
                 var actionBlockCompletions = new List<Task>();
                 var bufferBlocks = new List<BufferBlock<int>>();
@@ -219,14 +242,17 @@ namespace ESME.Simulator
                 ModeThresholdHistogram.Process(timeStepRecord);
                 //SpeciesThresholdHistogram.Process(timeStepRecord);
                 logBuffer.Post(timeStepRecord);
-                // Wait for 3MB to finish moving the animats
-                moveTask.Wait();
-                // Pull in updated animat positions from 3MB for the next time step
-                UpdateAnimatPositions();
+                if (moveTask != null)
+                {
+                    // Wait for 3MB to finish moving the animats
+                    moveTask.Wait();
+                    // Pull in updated animat positions from 3MB for the next time step
+                    UpdateAnimatPositions();
+                }
                 //var distance = Scenario.ScenarioSpecies[0].Animat.Locations[0].DistanceKilometers(firstAnimatPosition);
                 //if (distance > 0.01) Debug.WriteLine(string.Format("{0}: First animat has moved {1:0.##} km from initial location", DateTime.Now, distance));
                 //Debug.WriteLine(string.Format("{0}: Finished time step {1} of {2}: {3:0%} complete", DateTime.Now, timeStepIndex, timeStepCount, Math.Round((float)timeStepIndex / timeStepCount, 3)));
-                if (AnimateSimulation) Dispatcher.InvokeIfRequired(() => { foreach (var species in Scenario.ScenarioSpecies) species.UpdateMapLayers(); });
+                if (MovingAnimats & AnimateSimulation) Dispatcher.InvokeIfRequired(() => { foreach (var species in Scenario.ScenarioSpecies) species.UpdateMapLayers(); });
                 if (token.IsCancellationRequested) break;
             }
             foreach (var layer in _modeFootprintMapLayers.SelectMany(layerSet => layerSet))
@@ -237,7 +263,7 @@ namespace ESME.Simulator
             Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RefreshMap, true));
             logBuffer.Complete();
             logBlock.Completion.Wait();
-            Shutdown3MB();
+            if (MovingAnimats) Shutdown3MB();
             Debug.WriteLine(string.Format("{0}: Simulation complete. Exposure count: {1}", DateTime.Now, _totalExposureCount));
             Debug.WriteLine(string.Format("{0}: Exposures by species:", DateTime.Now));
             for (var i = 0; i < _exposuresBySpecies.Length; i++) Debug.WriteLine(string.Format("{0}: Species: {1}, Exposures: {2}", DateTime.Now, Scenario.ScenarioSpecies[i].LatinName, _exposuresBySpecies[i]));
