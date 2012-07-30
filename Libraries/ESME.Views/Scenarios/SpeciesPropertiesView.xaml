@@ -31,11 +31,12 @@
                         <ColumnDefinition SharedSizeGroup="LabelColumn" />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <TextBlock VerticalAlignment="Center"
+                    <TextBlock Width="75"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
                                Text="Species Name"
-                               TextAlignment="Right" HorizontalAlignment="Left" Width="75" />
-                    <TextBox Grid.Column="1"
-                             Text="{Binding LatinName}"/>                    
+                               TextAlignment="Right" />
+                    <TextBox Grid.Column="1" Text="{Binding LatinName}" />
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -45,12 +46,12 @@
                     <TextBlock Grid.Column="0"
                                Margin="0 0 5 0"
                                VerticalAlignment="Center"
-                               Text="Density"
-                               ToolTip="Animals per square kilometer"
-                               TextAlignment="Right" />
+                               Text="Density (#/sq km)"
+                               TextAlignment="Right"
+                               ToolTip="Animals per square kilometer" />
                     <TextBox Grid.Column="1"
                              Text="{Binding PopulationDensity}"
-                               ToolTip="Animals per square kilometer"/>
+                             ToolTip="Animals per square kilometer" />
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -61,9 +62,11 @@
                                Margin="0 0 5 0"
                                VerticalAlignment="Center"
                                Text="Species Type"
-                               ToolTip="Defines the paramters of the animal movement model"
-                               TextAlignment="Right" />
-                    <ComboBox Grid.Column="1" ItemsSource="{Binding PredefinedSpecies}" SelectedItem="{Binding SelectedSpecies}"/>
+                               TextAlignment="Right"
+                               ToolTip="Defines the paramters of the animal movement model" />
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding PredefinedSpecies}"
+                              SelectedItem="{Binding SelectedSpecies}" />
                 </Grid>
             </StackPanel>
         </Border>

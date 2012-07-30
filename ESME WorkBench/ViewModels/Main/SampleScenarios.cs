@@ -51,23 +51,15 @@ namespace ESMEWorkbench.ViewModels.Main
         }
         readonly List<SampleScenarioDescriptor> _sampleScenarios = new List<SampleScenarioDescriptor>
         {
-            new SampleScenarioDescriptor
+            #if false
+		new SampleScenarioDescriptor
             {
                 LocationName = "Gulf of Maine", 
                 ScenarioName = "Maine Sample", 
                 GeoRect = new GeoRect(44, 41, -65, -71), 
                 TimePeriod = (TimePeriod)DateTime.Today.Month,
                 PerimeterGeos = new List<Geo>{new Geo(43, -70), new Geo(43, -66), new Geo(42, -66), new Geo(42, -70), new Geo(43, -70), },
-            },
-            new SampleScenarioDescriptor
-            {
-                LocationName = "Carolina Coast", 
-                ScenarioName = "Carolina Sample", 
-                GeoRect = new GeoRect(36, 33, -75, -78), 
-                TimePeriod = (TimePeriod)DateTime.Today.Month,
-                PerimeterGeos = new List<Geo>{new Geo(34.505712890625, -76.8515625), new Geo(34.714453125, -76.357177734375), new Geo(35.340673828125, -75.99462890625), new Geo(34.78037109375, -75.478271484375), new Geo(33.978369140625, -75.412353515625), new Geo(33.33017578125, -76.291259765625), new Geo(33.74765625, -77.323974609375), new Geo(34.505712890625, -76.8515625), },
-                AnalysisPointGeos = new List<Geo>{new Geo(34.0223144531, -75.5991210938), new Geo(33.6487792969, -76.4450683594), new Geo(33.8465332031, -77.0383300781), new Geo(34.8462890625, -75.9616699219)}
-            },
+            },  
             new SampleScenarioDescriptor
             {
                 LocationName = "Florida Atlantic Coast", 
@@ -84,6 +76,17 @@ namespace ESMEWorkbench.ViewModels.Main
                 TimePeriod = (TimePeriod)DateTime.Today.Month,
                 PerimeterGeos = new List<Geo>{new Geo(29.5, -86), new Geo(29.51923828125, -84.94482421875), new Geo(29.78291015625, -84.0439453125), new Geo(28.94794921875, -83.0771484375), new Geo(28.24482421875, -83.033203125), new Geo(27.40986328125, -82.83544921875), new Geo(26, -82), new Geo(26, -86), new Geo(29.5, -86), },
             },
+	        #endif
+            new SampleScenarioDescriptor
+            {
+                LocationName = "Carolina Coast", 
+                ScenarioName = "Carolina Sample", 
+                GeoRect = new GeoRect(36, 33, -75, -78), 
+                TimePeriod = (TimePeriod)DateTime.Today.Month,
+                PerimeterGeos = new List<Geo>{new Geo(34.505712890625, -76.8515625), new Geo(34.714453125, -76.357177734375), new Geo(35.340673828125, -75.99462890625), new Geo(34.78037109375, -75.478271484375), new Geo(33.978369140625, -75.412353515625), new Geo(33.33017578125, -76.291259765625), new Geo(33.74765625, -77.323974609375), new Geo(34.505712890625, -76.8515625), },
+                AnalysisPointGeos = new List<Geo>{new Geo(34.0223144531, -75.5991210938), new Geo(33.6487792969, -76.4450683594), new Geo(33.8465332031, -77.0383300781), new Geo(34.8462890625, -75.9616699219)}
+            },
+            
             new SampleScenarioDescriptor
             {
                 LocationName = "Southern California", 
@@ -122,7 +125,7 @@ namespace ESMEWorkbench.ViewModels.Main
             progress.ProgressMessage = string.Format("Creating sample scenario \"{0}\"", scenarioDescriptor.ScenarioName);
             progress.CurrentItem++;
             await TaskEx.Delay(10);
-            var scenario = CreateScenario(location, scenarioDescriptor.ScenarioName, "Created as a sample scenario", scenarioDescriptor.TimePeriod, new TimeSpan(0, 12, 0, 0), windData, soundSpeedData, bathymetryData, sedimentData);
+            var scenario = CreateScenario(location, scenarioDescriptor.ScenarioName, "Created as a sample scenario", scenarioDescriptor.TimePeriod, new TimeSpan(0, 1, 0, 0), windData, soundSpeedData, bathymetryData, sedimentData);
             var perimeterGeoArray = new GeoArray(scenarioDescriptor.PerimeterGeos);
             Perimeter perimeter = (GeoArray)perimeterGeoArray.Closed;
             perimeter.Name = "Sample Perimeter";
