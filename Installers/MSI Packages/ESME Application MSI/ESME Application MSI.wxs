@@ -17,6 +17,7 @@
   <?define ESMEPath="$(var.ESMERoot)\ESME Workbench\bin\Release"?>
   <?define MergeModulesPath="C:\Program Files (x86)\Common Files\Merge Modules"?>
   <?define TransmissionLossViewerPath="$(var.ESMERoot)\TransmissionLossViewer\bin\Release"?>
+  <?define MatlabBinningToolsPath="$(var.UtilityRoot)\Matlab Binning Tools\Standalone Plotter\PlotHistograms\distrib"?>
   <?define dotConnectPath="C:\Program Files (x86)\Devart\dotConnect"?>
 
   <?if $(var.Platform) = x64 ?>
@@ -233,11 +234,16 @@
             <File Id="RibbonControlsLibrary.dll"
                   Name="RibbonControlsLibrary.dll"
                   Source="$(var.ExternalsPath)\RibbonControlsLibrary.dll" />
-            
+
             <!-- WPF Toolkit Extended assembly -->
             <File Id="WPFToolkit.Extended.dll"
                   Name="WPFToolkit.Extended.dll"
                   Source="$(var.ExternalsPath)\WPFToolkit.Extended.dll" />
+
+            <!-- Matlab Binning Tools -->
+            <File Id="PlotHistograms.exe"
+                  Name="PlotHistograms.exe"
+                  Source="$(var.MatlabBinningToolsPath)\PlotHistograms.exe" />
           </Component>
           <?if $(var.Platform) = x64 ?>
           <!-- 64-bit components go here -->

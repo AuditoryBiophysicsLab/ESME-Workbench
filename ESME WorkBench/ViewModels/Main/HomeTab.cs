@@ -676,7 +676,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 var client = new WebClient();
                 var vm = new DownloadProgressViewModel {WebClient = client, WindowTitle = "Download Progress", Message = "Downloading Matlab Common Runtime..."};
                 var window = _visualizer.ShowWindow("DownloadProgressView", vm);
-                var installerName = !Environment.Is64BitOperatingSystem ? "MCR_R2012a_win64_installer.exe" : "MCR_R2012a_win32_installer.exe";
+                var installerName = Environment.Is64BitOperatingSystem ? "MCR_R2012a_win64_installer.exe" : "MCR_R2012a_win32_installer.exe";
                 var downloadTarget = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), installerName);
                 client.DownloadFileAsync(new Uri("http://esme.bu.edu/download/"+installerName), downloadTarget);
                 client.DownloadProgressChanged += (s, e) =>
@@ -691,8 +691,8 @@ namespace ESMEWorkbench.ViewModels.Main
                     window.Close();
                     if(!vm.IsCanceled) System.Diagnostics.Process.Start(downloadTarget);
                 };
+                _messageBox.ShowInformation("Please wait for the Matlab Common Runtime installer to complete before running this simulation.");
             }
-            _messageBox.ShowInformation("Please wait for the Matlab Common Runtime installer to complete before running this simulation.");
         }
     }
 }
