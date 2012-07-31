@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.standalone.win" target-name="Windows Standalone Application" name="SpeciesHistograms" location="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter" file="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\SpeciesHistograms.prj" build-checksum="995973248">
-    <param.project.name>C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\SpeciesHistograms.prj</param.project.name>
+  <configuration target="target.standalone.win" target-name="Windows Standalone Application" name="PlotHistograms" location="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter" file="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\PlotHistograms.prj" preferred-package-type="package.type.exe" build-checksum="1466468061" preferred-package-location="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter">
+    <param.project.name>C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\PlotHistograms.prj</param.project.name>
     <param.target.type>Windows Standalone Application</param.target.type>
-    <param.appname>SpeciesHistograms</param.appname>
-    <param.intermediate>${PROJECT_ROOT}\SpeciesHistograms\src</param.intermediate>
-    <param.output>${PROJECT_ROOT}\SpeciesHistograms\distrib</param.output>
+    <param.appname>PlotHistograms</param.appname>
+    <param.intermediate>${PROJECT_ROOT}\PlotHistograms\src</param.intermediate>
+    <param.output>${PROJECT_ROOT}\PlotHistograms\distrib</param.output>
     <param.embed.ctf>true</param.embed.ctf>
     <param.tbx_on_path>
       <item>all</item>
@@ -63,12 +63,10 @@
     <fileset.resources>
       <file>C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\xml_read.m</file>
     </fileset.resources>
-    <fileset.package>
-      <file special-file="file.mcr" reference-mode="batch-invoker">${MATLAB_ROOT}\toolbox\compiler\deploy\win64\MCRInstaller.exe</file>
-    </fileset.package>
+    <fileset.package />
     <build-deliverables>
-      <file name="SpeciesHistograms.exe" location="${PROJECT_ROOT}\SpeciesHistograms\distrib" optional="false">C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\SpeciesHistograms\distrib\SpeciesHistograms.exe</file>
-      <file name="readme.txt" location="${PROJECT_ROOT}\SpeciesHistograms\distrib" optional="false">C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\SpeciesHistograms\distrib\readme.txt</file>
+      <file name="readme.txt" location="${PROJECT_ROOT}\PlotHistograms\distrib" optional="false">C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\PlotHistograms\distrib\readme.txt</file>
+      <file name="PlotHistograms.exe" location="${PROJECT_ROOT}\PlotHistograms\distrib" optional="false">C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\PlotHistograms\distrib\PlotHistograms.exe</file>
     </build-deliverables>
     <matlab>
       <root>C:\Program Files\MATLAB\R2011a</root>
