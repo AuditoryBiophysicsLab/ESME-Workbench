@@ -20,6 +20,7 @@
             <Setter Property="Height" Value="22" />
         </Style>
         <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed" FalseValue="Collapsed" TrueValue="Visible" />
+        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed" FalseValue="Visible" TrueValue="Collapsed" />
     </Window.Resources>
     <StackPanel Grid.IsSharedSizeScope="True" Orientation="Vertical">
         <Grid Margin="0 5 0 0">
@@ -63,7 +64,11 @@
                        IsEnabled="{Binding IsStartCommandEnabled}"
                        Style="{StaticResource LabelStyle}"
                        Text="Animate Display:" />
-            <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding Simulation.AnimateSimulation}" ToolTip="Show movement of animals and platforms on map" />
+            <CheckBox Grid.Column="1"
+                      VerticalAlignment="Center"
+                      IsChecked="{Binding Simulation.AnimateSimulation}"
+                      IsEnabled="{Binding IsStartCommandEnabled}"
+                      ToolTip="Show movement of animals and platforms on map" />
         </Grid>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -76,11 +81,27 @@
                        Style="{StaticResource LabelStyle}"
                        Text="Simulate animal movement:" />
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <CheckBox VerticalAlignment="Center" IsChecked="{Binding Simulation.MovingAnimats}" ToolTip="Simulate animal movement using the Marine Mammal Movement and Behavior Simulator" />
+                <CheckBox VerticalAlignment="Center" IsChecked="{Binding Simulation.MovingAnimats}" IsEnabled="{Binding IsStartCommandEnabled}" ToolTip="Simulate animal movement using the Marine Mammal Movement and Behavior Simulator" />
                 <Image Margin="5 0 0 0" Source="..\Images\information.png" ToolTip="Warning: Enabling this option will make the simulation run MUCH more slowly!" Visibility="{Binding Simulation.MovingAnimats, Converter={StaticResource TrueVisibleFalseCollapsed}}" />
             </StackPanel>
         </Grid>
         <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
+                <ColumnDefinition Width="*" SharedSizeGroup="ValueColumn" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       IsEnabled="{Binding IsStartCommandEnabled}"
+                       Style="{StaticResource LabelStyle}"
+                       Text="Display exposure histograms:" />
+            <CheckBox Grid.Column="1"
+                      VerticalAlignment="Center"
+                      IsChecked="{Binding Simulation.DisplayExposureHistograms}"
+                      IsEnabled="{Binding IsStartCommandEnabled}"
+                      ToolTip="Display exposure histogram(s) at the end of the simulation run" />
+        </Grid>
+        <Grid Visibility="{Binding IsStartCommandEnabled, Converter={StaticResource FalseVisibleTrueCollapsed}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
                 <ColumnDefinition Width="*" SharedSizeGroup="ValueColumn" />
