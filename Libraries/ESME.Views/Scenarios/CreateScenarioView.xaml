@@ -9,6 +9,7 @@
         xmlns:NAVO="clr-namespace:ESME.Environment.NAVO;assembly=ESME"
         xmlns:Properties="clr-namespace:ESME.Views.Properties"
         xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         Title="Create Scenario"
         d:DataContext="{d:DesignInstance l:CreateScenarioViewModel}"
         Grid.IsSharedSizeScope="True"
@@ -116,7 +117,13 @@
                                VerticalAlignment="Center"
                                Text="Duration"
                                TextAlignment="Right" />
-                    <Controls:TimePicker Grid.Column="1" SelectedTime="{Binding Duration, Mode=TwoWay}" ToolTip="Length of simulated time the scenario runs" />
+                    <xctk:MaskedTextBox Grid.Column="1"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Top"
+                                        Mask="00:00"
+                                        ToolTip="Length of simulated time the scenario runs (hh:mm)"
+                                        Value="{Binding DurationString,
+                                                        Mode=TwoWay}" />
                 </Grid>
             </StackPanel>
         </Border>

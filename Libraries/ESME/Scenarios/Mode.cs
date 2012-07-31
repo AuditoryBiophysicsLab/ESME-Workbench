@@ -41,12 +41,16 @@ namespace ESME.Scenarios
         /// </summary>
         public DbTimeSpan PulseInterval { get; set; }
         [NotMapped] public TimeSpan PulseIntervalTimeSpan { get { return PulseInterval; } set { PulseInterval = value; } }
-        /// <summary>
+        [NotMapped] public string PulseIntervalString { get { return PulseIntervalTimeSpan.ToString(@"hh\:mm\:ss\.fff"); } set { PulseIntervalTimeSpan = TimeSpan.Parse(value); } }
+
+         /// <summary>
         /// The length of time a single pulse is transmitting
         /// </summary>
         public DbTimeSpan PulseLength { get; set; }
         [NotMapped] public TimeSpan PulseLengthTimeSpan { get { return PulseLength; } set { PulseLength = value; } }
-        /// <summary>
+        [NotMapped] public string PulseLengthString { get { return PulseLengthTimeSpan.ToString(@"hh\:mm\:ss\.fff"); } set { PulseLengthTimeSpan = TimeSpan.Parse(value); } }
+
+         /// <summary>
         /// Horizontal beam width of this mode, in degrees.  
         /// The beam is assumed to spread symmetrically for half this width to either side of the beam center
         /// </summary>

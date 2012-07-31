@@ -132,7 +132,6 @@
       <DependentUpon>DataPlot.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\SlimRibbonApplicationMenu.cs" />
-    <Compile Include="Controls\TimePicker.cs" />
     <Compile Include="Controls\TLStatusBar.xaml.cs">
       <DependentUpon>TLStatusBar.xaml</DependentUpon>
     </Compile>

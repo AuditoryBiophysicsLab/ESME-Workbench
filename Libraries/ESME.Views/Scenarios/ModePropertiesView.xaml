@@ -5,6 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:l="clr-namespace:ESME.Views.Scenarios"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         Title="{Binding WindowTitle}"
         Background="#fff0f0f0"
         d:DataContext="{d:DesignInstance l:PropertiesViewModel}"
@@ -112,10 +113,10 @@
                                 <ColumnDefinition />
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0"
-                               Margin="0 0 5 0"
-                               VerticalAlignment="Center"
-                               Text="Maximum propagation radius (m)"
-                               TextAlignment="Right" />
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Maximum propagation radius (m)"
+                                       TextAlignment="Right" />
                             <TextBox Grid.Column="1" Text="{Binding PropertyObject.MaxPropagationRadius}" ToolTip="Maximum propagation radius of this mode, in meters. This field is required" />
                         </Grid>
                         <Grid Margin="5 5 5 0">
@@ -128,7 +129,13 @@
                                        VerticalAlignment="Center"
                                        Text="Pulse Length"
                                        TextAlignment="Right" />
-                            <Controls:TimePicker Grid.Column="1" SelectedTime="{Binding PropertyObject.PulseLengthTimeSpan, Mode=TwoWay}" ToolTip="Length of time the sound emitter is actually transmitting" />
+                            <xctk:MaskedTextBox Grid.Column="1"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Mask="00:00:00.000"
+                                                ToolTip="Length of time the sound emitter is actually transmitting"
+                                                Value="{Binding PropertyObject.PulseLengthString,
+                                                                Mode=TwoWay}" />
                         </Grid>
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>
@@ -140,7 +147,13 @@
                                        VerticalAlignment="Center"
                                        Text="Pulse Interval"
                                        TextAlignment="Right" />
-                            <Controls:TimePicker Grid.Column="1" SelectedTime="{Binding PropertyObject.PulseIntervalTimeSpan, Mode=TwoWay}" ToolTip="Length of time from the start of one pulse to the start of the next pulse in hours:minutes:seconds.milliseconds" />
+                            <xctk:MaskedTextBox Grid.Column="1"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Mask="00:00:00.000"
+                                                ToolTip="The time between the start of consecutive pulses"
+                                                Value="{Binding PropertyObject.PulseIntervalString,
+                                                                Mode=TwoWay}" />
                         </Grid>
                     </StackPanel>
                 </GroupBox>

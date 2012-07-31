@@ -57,6 +57,7 @@ namespace ESME.Views.Scenarios
         public string Comments { get; set; }
         public TimePeriod TimePeriod { get; set; }
         public TimeSpan Duration { get; set; }
+        public string DurationString { get { return Duration.ToString(@"hh\:mm"); } set { Duration = TimeSpan.ParseExact(value, @"hh\:mm", null); } }
         public bool IsLocationSelectable { get; set; }
         #region PluginManager stuff
         IPluginManagerService _pluginManager;
