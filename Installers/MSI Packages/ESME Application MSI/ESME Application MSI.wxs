@@ -8,6 +8,7 @@
   <?define ESMERoot="C:\Projects\ESME Deliverables"?>
   <?define LibraryRoot="$(var.ESMERoot)\Libraries"?>
   <?define UtilityRoot="$(var.ESMERoot)\Utilities"?>
+  <?define PackagesRoot="$(var.ESMERoot)\Solutions\ESME Workbench\packages"?>
   <?define DocRoot="$(var.ESMERoot)\Release Notes"?>
   <?define GISRoot="$(var.ESMERoot)\ESME WorkBench\Sample GIS Data"?>
   <?define BellhopPath="$(var.UtilityRoot)\bellhop"?>
@@ -232,6 +233,11 @@
             <File Id="RibbonControlsLibrary.dll"
                   Name="RibbonControlsLibrary.dll"
                   Source="$(var.ExternalsPath)\RibbonControlsLibrary.dll" />
+            
+            <!-- WPF Toolkit Extended assembly -->
+            <File Id="WPFToolkit.Extended.dll"
+                  Name="WPFToolkit.Extended.dll"
+                  Source="$(var.ExternalsPath)\WPFToolkit.Extended.dll" />
           </Component>
           <?if $(var.Platform) = x64 ?>
           <!-- 64-bit components go here -->
