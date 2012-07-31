@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<deployment-project>
-  <configuration target="target.standalone.win" target-name="Windows Standalone Application" name="PlotHistograms" location="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter" file="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\PlotHistograms.prj" preferred-package-type="package.type.exe" build-checksum="1466468061" preferred-package-location="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter">
+<deployment-project plugin="plugin.deploytool" plugin-version="1.0">
+  <configuration target="target.standalone.win" target-name="Windows Standalone Application" name="PlotHistograms" location="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter" file="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\PlotHistograms.prj" preferred-package-type="package.type.exe" build-checksum="3301402094" preferred-package-location="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter">
     <param.project.name>C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\PlotHistograms.prj</param.project.name>
     <param.target.type>Windows Standalone Application</param.target.type>
     <param.appname>PlotHistograms</param.appname>
@@ -65,11 +65,12 @@
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
-      <file name="readme.txt" location="${PROJECT_ROOT}\PlotHistograms\distrib" optional="false">C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\PlotHistograms\distrib\readme.txt</file>
+      <file name="readme.txt" location="${PROJECT_ROOT}\PlotHistograms\distrib" optional="true">C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\PlotHistograms\distrib\readme.txt</file>
       <file name="PlotHistograms.exe" location="${PROJECT_ROOT}\PlotHistograms\distrib" optional="false">C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\PlotHistograms\distrib\PlotHistograms.exe</file>
     </build-deliverables>
+    <workflow />
     <matlab>
-      <root>C:\Program Files\MATLAB\R2011a</root>
+      <root>C:\Program Files\MATLAB\R2012a</root>
       <path>
         <directory>C:\Users\Graham Voysey\Documents\MATLAB</directory>
         <directory>C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools</directory>
@@ -148,9 +149,6 @@
         <directory>${MATLAB_ROOT}\toolbox\rtw\targets\common\tgtcommon</directory>
         <directory>${MATLAB_ROOT}\toolbox\rtw\targets\connectivity</directory>
         <directory>${MATLAB_ROOT}\toolbox\rtw\targets\pil</directory>
-        <directory>${MATLAB_ROOT}\toolbox\rtw\rtw\datadiff\gui</directory>
-        <directory>${MATLAB_ROOT}\toolbox\rtw\rtw\datadiff\gui\icons</directory>
-        <directory>${MATLAB_ROOT}\toolbox\rtw\rtw\datadiff\api</directory>
         <directory>${MATLAB_ROOT}\toolbox\rtw\rtw\cgv\api</directory>
         <directory>${MATLAB_ROOT}\toolbox\rtw\rtw\misra</directory>
         <directory>${MATLAB_ROOT}\toolbox\rtw\targets\autosar\autosar</directory>
