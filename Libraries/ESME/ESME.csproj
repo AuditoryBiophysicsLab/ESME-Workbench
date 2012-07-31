@@ -231,7 +231,6 @@
     <Compile Include="NEMO\NemoSource.cs" />
     <Compile Include="NEMO\NemoSpecies.cs" />
     <Compile Include="NEMO\NemoTrackdef.cs" />
-    <Compile Include="Behaviors\ActiveMode.cs" />
     <Compile Include="NEMO\ActiveTimeStep.cs" />
     <Compile Include="Behaviors\BehaviorModel.cs" />
     <Compile Include="Behaviors\BehaviorModelTest.cs" />
