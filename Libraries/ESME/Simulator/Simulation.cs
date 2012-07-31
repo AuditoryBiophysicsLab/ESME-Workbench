@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,6 +62,8 @@ namespace ESME.Simulator
             });
         }
 
+        public static bool MCRIsInstalled { get; set; }
+
         public Scenario Scenario { get; private set; }
         public Dispatcher Dispatcher { get; private set; }
         readonly string _simulationDirectory;
@@ -87,6 +90,20 @@ namespace ESME.Simulator
         //public SpeciesThresholdHistogram SpeciesThresholdHistogram { get; set; }
         public bool AnimateSimulation { get; set; }
         public bool MovingAnimats { get; set; }
+        bool _displayExposureHistograms;
+        public bool DisplayExposureHistograms
+        {
+            get { return _displayExposureHistograms; }
+            set
+            {
+                _displayExposureHistograms = value;
+                if (_displayExposureHistograms && IsMCRInstallationRequired())
+                {
+                    MediatorMessage.Send(MediatorMessage.MCRInstallationRequired);
+                    _displayExposureHistograms = false;
+                }
+            }
+        }
 
         public Task Start()
         {
@@ -269,7 +286,6 @@ namespace ESME.Simulator
             for (var i = 0; i < _exposuresBySpecies.Length; i++) Debug.WriteLine(string.Format("{0}: Species: {1}, Exposures: {2}", DateTime.Now, Scenario.ScenarioSpecies[i].LatinName, _exposuresBySpecies[i]));
             ModeThresholdHistogram.Display();
             ModeThresholdHistogram.Write(Path.Combine(_simulationDirectory,Scenario.Name+".xml"), Scenario.Name, Scenario.Location.Name);
-            WriteMatlabFiles();
             //SpeciesThresholdHistogram.Display();
         }
 
@@ -308,15 +324,19 @@ namespace ESME.Simulator
             mapLayer.AddPolygon(geos);
             mapLayer.Done();
         }
+        
+        [DllImport("kernel32.dll")]
+        static extern IntPtr LoadLibrary(string dllName);
 
-        void WriteMatlabFiles()
+        static bool IsMCRInstallationRequired()
         {
-            using (var w = new StringWriter())
-            {
-                var xmlPath = Path.Combine(_simulationDirectory, Scenario.Name + ".xml");
-                w.WriteLine("simulatorOutputStruct = plotSpeciesModeHistograms('{0}',true);",xmlPath);
-                File.WriteAllText(Path.Combine(_simulationDirectory, "batch.m"),w.ToString());
-            }
+            //this DLL will be present if the correct version of the MCR dll is installed.  See http://www.mathworks.com/support/solutions/en/data/1-A4XH5B/index.html?product=CO&solution=1-A4XH5B
+            var curpath = System.Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Process).Split(';').ToList();
+            var systemPath = System.Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.Machine).Split(';');
+            var items = systemPath.Except(curpath).ToList();
+            curpath.AddRange(items);
+            System.Environment.SetEnvironmentVariable("PATH",string.Join(";",curpath),EnvironmentVariableTarget.Process);
+            return ((int) LoadLibrary("mclmcrrt7_17.dll") == 0);
         }
 
         class AnimatContext

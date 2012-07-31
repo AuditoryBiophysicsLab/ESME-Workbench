@@ -1,7 +1,9 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
 using ESME;
@@ -12,6 +14,7 @@ using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.Simulator;
 using ESME.Views.Controls;
+using ESME.Views.Misc;
 using ESME.Views.Scenarios;
 using ESME.Views.Simulation;
 using ESMEWorkbench.ViewModels.Map;
@@ -652,11 +655,44 @@ namespace ESMEWorkbench.ViewModels.Main
             SimulationProgressViewModel.SimulationStarting += (s, e) => IsSimulationRunning = true;
             var window = _visualizer.ShowWindow("SimulationProgressView", SimulationProgressViewModel,false,(s,e)=>IsSimulationRunning=false);
             SimulationProgressViewModel.Window = window;
-            //var task = simulation.Start(vm.TimeStepSize);
-            //task.ContinueWith(t => _dispatcher.InvokeIfRequired(window.Close));
+            window.Closed += (s, e) =>
+            {
+                if (!SimulationProgressViewModel.Simulation.DisplayExposureHistograms) return;
+                var filepath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "PlotHistograms.exe");
+                var argname = "\"" + Path.Combine(simulationDirectory, name + ".xml") + "\"";
+                System.Diagnostics.Process.Start(filepath, argname);
+            };
         }
 
         public string ScenarioValidationError { get; set; }
         #endregion
+
+        [MediatorMessageSink(MediatorMessage.MCRInstallationRequired), UsedImplicitly]
+        void InstallMCR(bool fake)
+        {
+            if (_messageBox.ShowOkCancel("To display exposure histograms, ESME Workbench needs to install the Matlab Common Runtime environment.\r\n\r\n" +
+                                         "OK to download and install the MCR?", MessageBoxImage.Question) == MessageBoxResult.OK)
+            {
+                var client = new WebClient();
+                var vm = new DownloadProgressViewModel {WebClient = client, WindowTitle = "Download Progress", Message = "Downloading Matlab Common Runtime..."};
+                var window = _visualizer.ShowWindow("DownloadProgressView", vm);
+                var installerName = !Environment.Is64BitOperatingSystem ? "MCR_R2012a_win64_installer.exe" : "MCR_R2012a_win32_installer.exe";
+                var downloadTarget = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), installerName);
+                client.DownloadFileAsync(new Uri("http://esme.bu.edu/download/"+installerName), downloadTarget);
+                client.DownloadProgressChanged += (s, e) =>
+                {
+                    var bytesIn = double.Parse(e.BytesReceived.ToString());
+                    var totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
+                    var percentage = bytesIn / totalBytes * 100;
+                    vm.ProgressPercent = (int)percentage;
+                };
+                client.DownloadFileCompleted += (s, e) =>
+                {
+                    window.Close();
+                    if(!vm.IsCanceled) System.Diagnostics.Process.Start(downloadTarget);
+                };
+            }
+            _messageBox.ShowInformation("Please wait for the Matlab Common Runtime installer to complete before running this simulation.");
+        }
     }
 }

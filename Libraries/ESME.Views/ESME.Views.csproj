@@ -156,6 +156,10 @@
       <DependentUpon>CreateLocationView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Locations\CreateLocationViewModel.cs" />
+    <Compile Include="Misc\DownloadProgressView.xaml.cs">
+      <DependentUpon>DownloadProgressView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Misc\DownloadProgressViewModel.cs" />
     <Compile Include="Misc\ModuleBuildInfoViewModel.cs" />
     <Compile Include="Misc\ModuleBuildInfoView.xaml.cs">
       <DependentUpon>ModuleBuildInfoView.xaml</DependentUpon>
@@ -272,6 +276,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Locations\CreateLocationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Misc\DownloadProgressView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
