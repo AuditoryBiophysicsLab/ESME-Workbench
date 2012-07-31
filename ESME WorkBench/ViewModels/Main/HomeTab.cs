@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
 using ESME;
 using ESME.Behaviors;
 using ESME.Environment;
@@ -165,6 +164,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 TimePeriod = timePeriod,
                 Duration = duration,
             };
+            scenario.SoundSpeed.LayerSettings.LineOrSymbolSize = 5;
             var existing = (from s in location.Scenarios
                             where s.Name == scenario.Name && s.Location == scenario.Location
                             select s).FirstOrDefault();
@@ -405,7 +405,7 @@ namespace ESMEWorkbench.ViewModels.Main
             OnPropertyChanged("CanPlaceAnalysisPoint");
         }
 
-        static Mode AddMode(Source source, string name, bool isNew)
+        static void AddMode(Source source, string name, bool isNew)
         {
             var mode = new Mode
             {
@@ -427,7 +427,6 @@ namespace ESMEWorkbench.ViewModels.Main
                 IsNew = isNew,
             };
             source.Modes.Add(mode);
-            return mode;
         }
 
         [MediatorMessageSink(MediatorMessage.ModeBoundToLayer), UsedImplicitly]
@@ -476,25 +475,30 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.AddSpecies), UsedImplicitly]
         async void AddSpecies(Scenario scenario)
         {
-            var vm = new SpeciesPropertiesViewModel(new ScenarioSpecies { LatinName = "New Species", PopulationDensity = 0.01f, SpeciesDefinitionFilename = "generic_odontocete.spe" });
-            vm.WindowTitle = "Add new species";
-            var result = _visualizer.ShowDialog("SpeciesPropertiesView", vm);
-            if ((result.HasValue) && (result.Value))
+            var vm = new SpeciesPropertiesViewModel(new ScenarioSpecies
             {
-                var species = new ScenarioSpecies
-                {
-                    Scenario = scenario,
-                    LatinName = vm.LatinName,
-                    PopulationDensity = vm.PopulationDensity,
-                    SpeciesDefinitionFilename = vm.SpeciesDefinitionFilename,
-                };
+                LatinName = "New Species", 
+                PopulationDensity = 0.01f, 
+                SpeciesDefinitionFilename = "generic_odontocete.spe"
+            })
+            {
+                WindowTitle = "Add new species"
+            };
+            var result = _visualizer.ShowDialog("SpeciesPropertiesView", vm);
+            if ((!result.HasValue) || (!result.Value)) return;
+            var species = new ScenarioSpecies
+            {
+                Scenario = scenario,
+                LatinName = vm.LatinName,
+                PopulationDensity = vm.PopulationDensity,
+                SpeciesDefinitionFilename = vm.SpeciesDefinitionFilename,
+            };
                 
-                scenario.ScenarioSpecies.Add(species);
-                species.LayerSettings.LineOrSymbolSize = 3;
-                var animats = await Animat.SeedAsync(species, scenario.Location.GeoRect, scenario.BathymetryData);
-                animats.Save(species.PopulationFilePath);
-                species.CreateMapLayers();
-            }
+            scenario.ScenarioSpecies.Add(species);
+            species.LayerSettings.LineOrSymbolSize = 3;
+            var animats = await Animat.SeedAsync(species, scenario.Location.GeoRect, scenario.BathymetryData);
+            animats.Save(species.PopulationFilePath);
+            species.CreateMapLayers();
         }
 
         [MediatorMessageSink(MediatorMessage.DeleteAllSpecies), UsedImplicitly]
@@ -536,8 +540,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.SpeciesProperties), UsedImplicitly]
         void SpeciesProperties(ScenarioSpecies species)
         {
-            var vm = new SpeciesPropertiesViewModel (species);
-            vm.WindowTitle = "Species Properties";
+            var vm = new SpeciesPropertiesViewModel(species) { WindowTitle = "Species Properties" };
             var result = _visualizer.ShowDialog("SpeciesPropertiesView", vm);
             if ((result.HasValue) && (result.Value))
             {
@@ -640,7 +643,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             var now = DateTime.Now;
             var name = Scenario.Name;
-            foreach (var c in Path.GetInvalidPathChars().Where(name.Contains)) name.Replace(c, '-');
+            foreach (var c in Path.GetInvalidPathChars().Where(name.Contains)) name = name.Replace(c, '-');
             var simulationDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ESME Simulations", name, string.Format("{0}-{1}-{2}-{3}-{4}-{5}",now.Year,now.Month,now.Day,now.Hour,now.Minute,now.Second));
             if (Directory.Exists(simulationDirectory)) try{ Directory.Delete(simulationDirectory, true);} catch{}
 

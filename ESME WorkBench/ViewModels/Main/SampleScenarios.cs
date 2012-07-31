@@ -149,11 +149,21 @@ namespace ESMEWorkbench.ViewModels.Main
             AddPlatform(scenario, platform);
             AddMode(AddSource(platform, "Sample Source", false), "1 KHz mode", false);
             progress.ProgressMessage = string.Format("Generating animat population for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
-            var species = new ScenarioSpecies { LatinName = "Sample Species", Scenario = scenario, SpeciesDefinitionFilename = "generic_odontocete.spe" };
+            var species = new ScenarioSpecies
+            {
+                LatinName = "Sample Species", 
+                Scenario = scenario, 
+                SpeciesDefinitionFilename = "generic_odontocete.spe", 
+                LayerSettings =
+                {
+                    LineOrSymbolSize = 3
+                }
+            };
             scenario.ScenarioSpecies.Add(species);
             var animats = await Animat.SeedAsync(species, scenarioDescriptor.GeoRect, (Bathymetry)_cache[scenario.Bathymetry].Result);
             animats.Save(species.PopulationFilePath);
             //Database.SaveChanges();
+            progress.ProgressMessage = string.Format("Extracting environmental data for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
             await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
             _dispatcher.InvokeInBackgroundIfRequired(() =>
             {
