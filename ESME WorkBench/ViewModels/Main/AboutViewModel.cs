@@ -17,10 +17,10 @@ namespace ESMEWorkbench.ViewModels.Main
         public AboutViewModel()
         {
             RegisterMediator();
-            WorkbenchModuleBuildInfo = new ModuleBuildInfoViewModel("ESME Workbench", BuildInformation.BuildDateTime, BuildInformation.BuildEngineer, BuildInformation.SVNVersion);
-            ESMEModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.dll", ESME.BuildInformation.BuildDateTime, ESME.BuildInformation.BuildEngineer, ESME.BuildInformation.SVNVersion);
-            HRCModuleBuildInfo = new ModuleBuildInfoViewModel("HRC.dll", HRC.BuildInformation.BuildDateTime, HRC.BuildInformation.BuildEngineer, HRC.BuildInformation.SVNVersion);
-            ViewsModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.Views.dll", ESME.Views.BuildInformation.BuildDateTime, ESME.Views.BuildInformation.BuildEngineer, ESME.Views.BuildInformation.SVNVersion);
+            WorkbenchModuleBuildInfo = new ModuleBuildInfoViewModel("ESME Workbench", BuildInformation.BuildDateTime, BuildInformation.BuildEngineer, Assembly.GetEntryAssembly().GetName().Version.ToString());
+            ESMEModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.dll", ESME.BuildInformation.BuildDateTime, ESME.BuildInformation.BuildEngineer);
+            HRCModuleBuildInfo = new ModuleBuildInfoViewModel("HRC.dll", HRC.BuildInformation.BuildDateTime, HRC.BuildInformation.BuildEngineer);
+            ViewsModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.Views.dll", ESME.Views.BuildInformation.BuildDateTime, ESME.Views.BuildInformation.BuildEngineer);
             var appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (string.IsNullOrEmpty(appDir)) return;
             MapDllVersion = Assembly.LoadFile(Path.Combine(appDir, "WpfDesktopEdition.dll")).GetName().Version.ToString();
@@ -100,7 +100,7 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 sb.AppendLine(moduleBuildInfoViewModel.ModuleName);
                 sb.AppendLine(string.Format("  Build Date : {0}", moduleBuildInfoViewModel.BuildDateTime));
-                sb.AppendLine(string.Format("  SVN Build  : {0}", moduleBuildInfoViewModel.SVNVersion));
+                sb.AppendLine(string.Format("  SVN Build  : {0}", moduleBuildInfoViewModel.VersionString));
             }
             sb.AppendLine("----- Component Version Info -----");
             sb.AppendLine("");

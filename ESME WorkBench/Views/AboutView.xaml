@@ -12,7 +12,7 @@
                 <ColumnDefinition SharedSizeGroup="Left" />
                 <ColumnDefinition SharedSizeGroup="Right" />
             </Grid.ColumnDefinitions>
-            <Misc:ProjectCredits Grid.Column="0" />
+            <Misc:ProjectCredits DockPanel.Dock="Top"/>                
             <GroupBox Grid.Column="1" Header="Components">
                 <StackPanel Grid.Column="1"
                             Margin="2 5 5 5"

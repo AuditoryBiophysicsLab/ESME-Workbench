@@ -11,12 +11,12 @@
             <StackPanel Grid.Column="0" Orientation="Vertical" Margin="5 5 2 5" HorizontalAlignment="Stretch">
                 <TextBlock Text="Built:" TextAlignment="Right" />
                 <TextBlock Text="By:" TextAlignment="Right" />
-                <TextBlock Text="Rev:" TextAlignment="Right" />
+                <TextBlock Text="Ver:" TextAlignment="Right" />
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Vertical" Margin="2 5 5 5" HorizontalAlignment="Stretch">
                 <TextBlock Text="{Binding BuildDateTime}" TextAlignment="Left" />
                 <TextBlock Text="{Binding BuildEngineer}" TextAlignment="Left" />
-                <TextBlock Text="{Binding SVNVersion}" TextAlignment="Left" />
+                <TextBlock Text="{Binding VersionString}" TextAlignment="Left" />
             </StackPanel>
         </Grid>
     </GroupBox>
