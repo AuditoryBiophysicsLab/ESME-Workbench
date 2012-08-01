@@ -196,20 +196,40 @@ namespace ESME.Scenarios
             var mapLayer = new OverlayShapeMapLayer
             {
                 Name = string.Format("{0}", Guid),
-                CustomLineStyle =
-                    new CustomStartEndLineStyle(PointSymbolType.Circle,
-                                                Colors.Green,
-                                                5,
-                                                PointSymbolType.Square,
-                                                Colors.Red,
-                                                5,
-                                                LayerSettings.LineOrSymbolColor,
-                                                (float)LayerSettings.LineOrSymbolSize)
+#if true
+                CustomLineStyleFunc = m => new CustomStartEndLineStyle("Wingdings", 0x6C,
+                                                               Colors.Green,
+                                                               m.LineWidth + 8,
+                                                               "Wingdings", 0x6E,
+                                                               Colors.Red,
+                                                               m.LineWidth + 8,
+                                                               m.LineColor,
+                                                               m.LineWidth),
+
+#else
+		                CustomLineStyleFunc = m => new CustomStartEndLineStyle(PointSymbolType.Circle,
+                                                                       Colors.Green,
+                                                                       (int)Math.Round(m.LineWidth + 5),
+                                                                       PointSymbolType.Square,
+                                                                       Colors.Red,
+                                                                       (int)Math.Round(m.LineWidth + 5),
+                                                                       m.LineColor,
+                                                                       m.LineWidth),
+  
+#endif
             };
             var locations = PlatformBehavior.PlatformStates.Select(p => p.PlatformLocation.Location).ToList();
             mapLayer.AddLines(locations);
             mapLayer.Done();
             LayerSettings.MapLayerViewModel = mapLayer;
+        }
+
+        public void Refresh()
+        {
+            if (LayerSettings.MapLayerViewModel == null) return;
+            PlatformBehavior = null;
+            RemoveMapLayers();
+            CreateMapLayers();
         }
 
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }

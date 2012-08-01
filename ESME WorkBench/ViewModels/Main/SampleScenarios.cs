@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using ESME;
 using ESME.Behaviors;
 using ESME.Database;
@@ -145,6 +146,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 Launches = false,
                 TrackType = TrackType.PerimeterBounce,
                 IsNew = false,
+                LayerSettings = { IsChecked = true },
             };
             scenario.Perimeters.Add(perimeter);
             AddPlatform(scenario, platform);
@@ -161,12 +163,13 @@ namespace ESMEWorkbench.ViewModels.Main
                 }
             };
             scenario.ScenarioSpecies.Add(species);
+            scenario.RemoveMapLayers();
             var animats = await Animat.SeedAsync(species, scenarioDescriptor.GeoRect, (Bathymetry)_cache[scenario.Bathymetry].Result);
             animats.Save(species.PopulationFilePath);
             //Database.SaveChanges();
             progress.ProgressMessage = string.Format("Extracting environmental data for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
             await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
-            _dispatcher.InvokeInBackgroundIfRequired(() =>
+            _dispatcher.InvokeIfRequired(() =>
             {
                 progress.ProgressMessage = string.Format("Adding analysis point(s) to scenario \"{0}\"", scenarioDescriptor.ScenarioName);
                 progress.CurrentItem++;

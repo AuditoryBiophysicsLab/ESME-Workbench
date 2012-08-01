@@ -173,6 +173,9 @@ namespace ESMEWorkbench.ViewModels.Main
                 Comments = comments,
                 TimePeriod = timePeriod,
                 Duration = duration,
+                ShowAllPerimeters = true,
+                ShowAllAnalysisPoints = true,
+                ShowAllSpecies = false,
             };
             scenario.SoundSpeed.LayerSettings.LineOrSymbolSize = 5;
             var existing = (from s in location.Scenarios

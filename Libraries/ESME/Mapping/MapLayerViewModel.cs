@@ -112,13 +112,16 @@ namespace ESME.Mapping
                 _customLineStyle = value;
                 if (_customLineStyle == null) return;
                 if (LayerOverlay.Layers.Count == 0) return;
+                ((FeatureLayer)LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.CustomStyles.Clear();
                 ((FeatureLayer)LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.CustomStyles.Add(_customLineStyle);
                 ((FeatureLayer)LayerOverlay.Layers[0]).ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel =
                     ApplyUntilZoomLevel.Level20;
                 MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
             }
         }
-        #endregion
+
+        public Func<MapLayerViewModel, LineStyle> CustomLineStyleFunc { get; set; }
+        #endregion  
 
         #region public PointStyle PointStyle { get; set; }
         PointStyle _pointStyle;
@@ -148,9 +151,13 @@ namespace ESME.Mapping
             {
                 _lineWidth = value;
                 _areaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
-                _lineStyle = CreateLineStyle(LineColor, LineWidth);
-                _pointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
-                MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
+                if (CustomLineStyleFunc == null)
+                {
+                    _lineStyle = CreateLineStyle(LineColor, LineWidth);
+                    _pointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
+                    MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
+                }
+                else CustomLineStyle = CustomLineStyleFunc(this);
             }
         }
         #endregion
@@ -178,9 +185,13 @@ namespace ESME.Mapping
             {
                 _lineColor = value;
                 _areaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
-                _lineStyle = CreateLineStyle(LineColor, LineWidth);
-                _pointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)Math.Max(1, LineWidth));
-                MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
+                if (CustomLineStyleFunc == null)
+                {
+                    _lineStyle = CreateLineStyle(LineColor, LineWidth);
+                    _pointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)Math.Max(1, LineWidth));
+                    MediatorMessage.Send(MediatorMessage.RefreshMapLayer, this);
+                }
+                else CustomLineStyle = CustomLineStyleFunc(this);
             }
         }
         #endregion

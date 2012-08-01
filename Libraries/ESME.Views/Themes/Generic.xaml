@@ -65,11 +65,12 @@
                                     </ToggleButton.Template>
                                 </ToggleButton>
                                 <Popup x:Name="LineColorPopup" IsOpen="{Binding IsChecked, ElementName=LineColorToggle}" StaysOpen="False">
-                                    <Border BorderBrush="Black" BorderThickness="1">
+                                    <Border BorderBrush="Black" BorderThickness="1" Background="LightYellow">
                                         <StackPanel Orientation="Vertical">
-                                            <colorPicker:ColorPicker Background="LightYellow" Padding="5" SelectedColor="{Binding Path=LineOrSymbolColor, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:LayerControl}}, Mode=TwoWay}" />
-                                            <Slider Background="LightYellow"
-                                                    Maximum="10"
+                                            <TextBlock Margin="5 5 5 2" Text="Color" />
+                                            <colorPicker:ColorPicker Padding="5" SelectedColor="{Binding Path=LineOrSymbolColor, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:LayerControl}}, Mode=TwoWay}" />
+                                            <TextBlock Margin="5 5 5 2" Text="Line Weight" />
+                                            <Slider Maximum="10"
                                                     Minimum="0.5"
                                                     Orientation="Horizontal"
                                                     Padding="5"

@@ -69,8 +69,19 @@ namespace ESME.Scenarios
 
         [Initialize]
         public DbTimeSpan StartTime { get; set; }
-        [Initialize]
-        public DbTimeSpan Duration { get; set; }
+
+        DbTimeSpan _duration;
+
+        [Initialize] public DbTimeSpan Duration
+        {
+            get { return _duration; }
+            set
+            {
+                _duration = value;
+                foreach (var platform in Platforms) platform.Refresh();
+            }
+        }
+
         [Initialize]
         public DbTimePeriod TimePeriod { get; set; }
 

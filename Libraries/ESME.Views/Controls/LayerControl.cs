@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -287,6 +286,5 @@ namespace ESME.Views.Controls
         public Control TheLayerControl { get { return (Control)GetValue(TheLayerControlProperty); } set { SetValue(TheLayerControlProperty, value); } }
 
         #endregion
-
     }
 }

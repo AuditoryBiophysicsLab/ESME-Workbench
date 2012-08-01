@@ -19,6 +19,17 @@ namespace ESME.Mapping
                    new LineStyle(new GeoPen(GeoColor.FromArgb(lineColor.A, lineColor.R, lineColor.G, lineColor.B), lineSize)))
         { }
 
+        public CustomStartEndLineStyle(string startFontName, int startCharacterIndex, Color startColor, float startSize,
+                                       string endFontName, int endCharacterIndex, Color endColor, float endSize,
+                                       Color lineColor, float lineSize)
+        {
+            var startFont = new GeoFont(startFontName, startSize);
+            var endFont = new GeoFont(endFontName, endSize);
+            _startPointStyle = new PointStyle(startFont, startCharacterIndex, new GeoSolidBrush(GeoColor.FromArgb(startColor.A, startColor.R, startColor.G, startColor.B)));
+            _endPointStyle = new PointStyle(endFont, endCharacterIndex, new GeoSolidBrush(GeoColor.FromArgb(endColor.A, endColor.R, endColor.G, endColor.B)));
+            _lineStyle = new LineStyle(new GeoPen(GeoColor.FromArgb(lineColor.A, lineColor.R, lineColor.G, lineColor.B), lineSize));
+        }
+
         public CustomStartEndLineStyle(PointStyle startPointStyle, PointStyle endPointStyle, LineStyle lineStyle)
         {
             _startPointStyle = startPointStyle;

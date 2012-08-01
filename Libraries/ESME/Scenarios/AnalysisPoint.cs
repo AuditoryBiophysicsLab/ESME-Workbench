@@ -161,6 +161,15 @@ namespace ESME.Scenarios
     {
         [Key, Initialize] public Guid Guid { get; set; }
 
+        public TransmissionLoss() { Initialize(); }
+
+        void Initialize()
+        {
+            var lineColor = LayerSettings.LineOrSymbolColor;
+            lineColor.ScA = 0.5f;   // Set the default alpha channel for this TransmissionLoss to 50%
+            LayerSettings.LineOrSymbolColor = lineColor;
+        }
+
         public bool IsReadyToCalculate { get; set; }
         public virtual AnalysisPoint AnalysisPoint { get; set; }
         public virtual Mode Mode { get; set; }
