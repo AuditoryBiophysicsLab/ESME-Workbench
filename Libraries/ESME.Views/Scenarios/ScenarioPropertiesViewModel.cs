@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using ESME.Environment;
 using ESME.Scenarios;
-using HRC.Validation;
 using HRC.ViewModels;
 
 namespace ESME.Views.Scenarios
