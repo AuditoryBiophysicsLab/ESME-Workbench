@@ -677,7 +677,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 var vm = new DownloadProgressViewModel {WebClient = client, WindowTitle = "Download Progress", Message = "Downloading Matlab Common Runtime..."};
                 var window = _visualizer.ShowWindow("DownloadProgressView", vm);
                 var installerName = Environment.Is64BitOperatingSystem ? "MCR_R2012a_win64_installer.exe" : "MCR_R2012a_win32_installer.exe";
-                var downloadTarget = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), installerName);
+                var downloadTarget = Path.Combine(Path.GetTempPath(), installerName);
                 client.DownloadFileAsync(new Uri("http://esme.bu.edu/download/"+installerName), downloadTarget);
                 client.DownloadProgressChanged += (s, e) =>
                 {
