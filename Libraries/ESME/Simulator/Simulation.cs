@@ -99,7 +99,7 @@ namespace ESME.Simulator
                 _displayExposureHistograms = value;
                 if (_displayExposureHistograms && IsMCRInstallationRequired())
                 {
-                    MediatorMessage.Send(MediatorMessage.MCRInstallationRequired);
+                    MediatorMessage.Send(MediatorMessage.MCRInstallationRequired, true);
                     _displayExposureHistograms = false;
                 }
             }

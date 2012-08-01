@@ -668,7 +668,7 @@ namespace ESMEWorkbench.ViewModels.Main
         #endregion
 
         [MediatorMessageSink(MediatorMessage.MCRInstallationRequired), UsedImplicitly]
-        void InstallMCR(bool fake)
+        void InstallMCR(bool dummy)
         {
             if (_messageBox.ShowOkCancel("To display exposure histograms, ESME Workbench needs to install the Matlab Common Runtime environment.\r\n\r\n" +
                                          "OK to download and install the MCR?", MessageBoxImage.Question) == MessageBoxResult.OK)
