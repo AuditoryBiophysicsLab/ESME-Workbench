@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using ESME.Database;
 using ESME.Environment;
 using ESME.Locations;
@@ -18,7 +19,7 @@ using HRC.WPF;
 namespace ESME.Scenarios
 {
     [NotifyPropertyChanged]
-    public class Scenario : IHaveGuid, INotifyPropertyChanged, IMouseOverAware
+    public class Scenario : IHaveGuid, IMouseOverAware
     {
         public Scenario()
         {
@@ -151,6 +152,21 @@ namespace ESME.Scenarios
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            var handlers = PropertyChanged;
+            if (handlers == null) return;
+            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                {
+                    var localHandler = handler;
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new PropertyChangedEventArgs(propertyName)));
+                }
+                else
+                    handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
 
         [NotMapped]
         public bool IsMouseOver { get; set; }

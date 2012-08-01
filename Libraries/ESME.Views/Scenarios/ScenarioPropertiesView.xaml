@@ -11,7 +11,7 @@
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
         WindowStyle="ToolWindow"
-        Title="{Binding ScenarioName, StringFormat=Scenario properties: {0}}"
+        Title="{Binding Scenario.Name, StringFormat=Scenario properties: {0}}"
         mc:Ignorable="d">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}">
@@ -60,7 +60,7 @@
                                VerticalAlignment="Top"
                                Text="Scenario Name:"
                                TextAlignment="Right" />
-                    <TextBox Grid.Column="1" Height="Auto" Text="{Binding ScenarioName}" />
+                    <TextBox Grid.Column="1" Height="Auto" Text="{Binding ScenarioName, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -78,7 +78,7 @@
                                         Mask="00:00"
                                         ToolTip="Duration of the scenario (hh:mm)"
                                         Value="{Binding DurationString,
-                                                        Mode=TwoWay}" />
+                                                        Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -94,7 +94,7 @@
                              Height="Auto"
                              MinHeight="50"
                              AcceptsReturn="True"
-                             Text="{Binding Comments}"
+                             Text="{Binding Comments, UpdateSourceTrigger=PropertyChanged}"
                              TextWrapping="Wrap"
                              ToolTip="This field is optional" />
                 </Grid>

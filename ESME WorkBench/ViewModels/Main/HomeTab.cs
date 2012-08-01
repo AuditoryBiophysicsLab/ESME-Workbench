@@ -34,7 +34,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [Initialize] public LayerTreeViewModel LayerTreeViewModel { get; set; }
         public MapViewModel MapViewModel { get; set; }
 
-        [Affects("IsScenarioLoaded", "CanPlaceAnalysisPoint", "IsRunSimulationCommandEnabled")] 
+        [Affects("IsScenarioLoaded", "CanPlaceAnalysisPoint", "IsRunSimulationCommandEnabled", "MainWindowTitle")] 
         public Scenario Scenario
         {
             get { return _scenario; }
@@ -42,11 +42,15 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 try
                 {
-                    if (_scenario != null) _scenario.RemoveMapLayers();
+                    if (_scenario != null)
+                    {
+                        _scenario.RemoveMapLayers();
+                        _scenario.PropertyChanged -= ScenarioPropertyChangedMonitor;
+                    }
                     _scenario = value;
                     LayerTreeViewModel.Scenario = _scenario;
-                    MainWindowTitle = string.Format("ESME 2012: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name);
                     if (_scenario == null) return;
+                    _scenario.PropertyChanged += ScenarioPropertyChangedMonitor;
                     _scenario.CreateMapLayers();
                     _cache[_scenario.Wind].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
@@ -81,7 +85,10 @@ namespace ESMEWorkbench.ViewModels.Main
                 }
             }
         }
-
+        void ScenarioPropertyChangedMonitor(object s, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Name") OnPropertyChanged("MainWindowTitle");
+        }
         public bool IsScenarioLoaded { get { return Scenario != null; } }
 
         public bool CanPlaceAnalysisPoint
@@ -101,7 +108,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         public bool IsInAnalysisPointMode { get; set; }
 
-        public string MainWindowTitle { get; set; }
+        public string MainWindowTitle { get { return string.Format("ESME 2012: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name); } }
 
         #region CreateScenarioCommand
         public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand { get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => IsCreateScenarioCommandEnabled, o => CreateScenarioHandler())); } }

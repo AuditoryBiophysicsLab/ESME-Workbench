@@ -46,6 +46,7 @@ namespace ESMEWorkbench.ViewModels.Main
             }
             progress.ProgressMessage = string.Format("Updating database...");
             progress.CurrentItem++;
+            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
             //Database.SaveChanges();
             window.Close();
         }

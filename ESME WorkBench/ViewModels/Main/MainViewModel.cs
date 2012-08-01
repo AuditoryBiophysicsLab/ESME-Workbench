@@ -59,7 +59,6 @@ namespace ESMEWorkbench.ViewModels.Main
                              IPluginManagerService plugins,
                              EnvironmentalCacheService cache)
         {
-            MainWindowTitle = "ESME Workbench: <No scenario loaded>";
             try
             {
                 Mediator.Instance.Register(this);
