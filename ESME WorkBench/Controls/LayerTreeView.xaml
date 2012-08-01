@@ -54,7 +54,7 @@
                                     ToolTipTitle="Export the currently selected scenario to a scenario file" />
                     <r:RibbonButton Command="{Binding Scenario.Location.ZoomToLocationCommand}"
                                     IsEnabled="{Binding IsScenarioLoaded}"
-                                    SmallImageSource="..\Images\SmallIcons\application_form_magnify.png"
+                                    SmallImageSource="../Images/SmallIcons/zoom_layer.png"
                                     ToolTipDescription="Not yet implemented"
                                     ToolTipTitle="Resets the map position to the current scenario" />
                 </StackPanel>
