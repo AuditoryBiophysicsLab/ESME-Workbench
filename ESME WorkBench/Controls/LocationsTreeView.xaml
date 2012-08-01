@@ -26,36 +26,26 @@
                       X1="0"
                       X2="1" />
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                    <r:RibbonButton Command="{Binding CreateLocationCommand}"
-                                    SmallImageSource="..\Images\SmallIcons\layer_create.png"
-                                    ToolTipDescription="An adjustable rectangle will appear on the map. It can be moved by dragging the control at the rectangle's center and its size can be adjusted by dragging one of the controls at the rectangle's corners.  The bounds of the new location can also be entered directly if you prefer."
-                                    ToolTipTitle="Create a new location by drawing a rectangle on the map" />
-                    <r:RibbonButton Command="{Binding DisabledCommand}"
-                                    SmallImageSource="..\Images\SmallIcons\layer_edit.png"
-                                    ToolTipDescription="Edit the boundaries and/or cached environmental data of the selected location"
-                                    ToolTipTitle="Edit location" />
-                    <r:RibbonButton Command="{Binding DisabledCommand}"
-                                    SmallImageSource="..\Images\SmallIcons\layer_delete.png"
-                                    ToolTipDescription="Delete an existing location, along with all cached data and all scenarios that depend upon it"
-                                    ToolTipTitle="Delete location" />
-                    <r:RibbonButton Command="{Binding DisabledCommand}"
-                                    SmallImageSource="..\Images\SmallIcons\layer_import.png"
-                                    ToolTipDescription="This feature is not yet implemented"
-                                    ToolTipTitle="Import a location file" />
-                    <r:RibbonButton Command="{Binding DisabledCommand}"
-                                    SmallImageSource="..\Images\SmallIcons\layer_export.png"
-                                    ToolTipDescription="This feature is not yet implemented"
-                                    ToolTipTitle="Export the selected location to a location file" />
+                    <r:RibbonButton Command="{Binding CreateLocationCommand}" SmallImageSource="..\Images\SmallIcons\layer_add.png" ToolTipDescription="An adjustable rectangle will appear on the map. It can be moved by dragging the control at the rectangle's center and its size can be adjusted by dragging one of the controls at the rectangle's corners.  The bounds of the new location can also be entered directly if you prefer." ToolTipTitle="Create a new location" />
+                    <r:RibbonButton Command="{Binding DisabledCommand}" SmallImageSource="..\Images\SmallIcons\layer_delete.png" ToolTipDescription="Delete an existing location, along with all cached data and all scenarios that depend upon it" ToolTipTitle="Delete location" />
+                    <r:RibbonButton Command="{Binding DisabledCommand}" SmallImageSource="..\Images\SmallIcons\layer_edit.png" ToolTipDescription="Edit the boundaries and/or cached environmental data of the selected location" ToolTipTitle="Edit location" />
+                    <!--
+                        <r:RibbonButton Command="{Binding DisabledCommand}"
+                        SmallImageSource="..\Images\SmallIcons\layer_import.png"
+                        ToolTipDescription="This feature is not yet implemented"
+                        ToolTipTitle="Import a location file" />
+                        <r:RibbonButton Command="{Binding DisabledCommand}"
+                        SmallImageSource="..\Images\SmallIcons\layer_export.png"
+                        ToolTipDescription="This feature is not yet implemented"
+                        ToolTipTitle="Export the selected location to a location file" />
+                    -->
                 </StackPanel>
             </StackPanel>
         </Border>
         <TreeView DockPanel.Dock="Bottom" ItemsSource="{Binding LocationsTreeViewModel.LocationsTreeViewSource.View}">
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type Tree:LocationNode}" ItemsSource="{Binding Children}">
-                    <Controls:LayerControl IsChecked="{Binding Location.LayerSettings.IsChecked}"
-                                           LayerName="{Binding Location.Name}"
-                                           LineOrSymbolColor="{Binding Location.LayerSettings.LineOrSymbolColor}"
-                                           LineOrSymbolSize="{Binding Location.LayerSettings.LineOrSymbolSize}">
+                    <Controls:LayerControl IsChecked="{Binding Location.LayerSettings.IsChecked}" LayerName="{Binding Location.Name}" LineOrSymbolColor="{Binding Location.LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding Location.LayerSettings.LineOrSymbolSize}">
                         <Controls:LayerControl.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Command="{Binding ZoomToLocationCommand}" Header="Zoom to location">
@@ -97,11 +87,7 @@
                     <TextBlock Text="{Binding Name}" />
                 </HierarchicalDataTemplate>
                 <DataTemplate DataType="{x:Type Locations:EnvironmentalDataSet}">
-                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
-                                           LayerName="{Binding Resolution,
-                                                               StringFormat={}{0}min}"
-                                           LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
-                                           LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
+                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding Resolution, StringFormat={}{0}min}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
                         <Controls:LayerControl.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Command="{Binding ZoomToLocationCommand}" Header="Zoom to data set">
@@ -127,12 +113,12 @@
                                         <Image Source="../Images/SmallIcons/application_form_delete.png" />
                                     </MenuItem.Icon>
                                 </MenuItem>
-                                <!-- 
-                                <MenuItem Command="{Binding ScenarioPropertiesCommand}" Header="Scenario properties...">
+                                <!--
+                                    <MenuItem Command="{Binding ScenarioPropertiesCommand}" Header="Scenario properties...">
                                     <MenuItem.Icon>
-                                        <Image Source="../Images/SmallIcons/application_form_edit.png" />
+                                    <Image Source="../Images/SmallIcons/application_form_edit.png" />
                                     </MenuItem.Icon>
-                                </MenuItem>
+                                    </MenuItem>
                                 -->
                             </ContextMenu>
                         </TextBlock.ContextMenu>
