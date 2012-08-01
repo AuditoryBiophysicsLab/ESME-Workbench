@@ -3,16 +3,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
 using ESME.Scenarios;
 using ESME.Views.Controls;
-using ESME.Views.Locations;
 using HRC.Aspects;
-using HRC.Validation;
 using HRC.ViewModels;
 using HRC.WPF;
-using ValidationRule = HRC.Validation.ValidationRule;
 
 namespace ESME.Views.Scenarios
 {
@@ -28,31 +23,13 @@ namespace ESME.Views.Scenarios
 
         internal static string FormattedSize(long size)
         {
-            switch ((int)Math.Log10(size))
-            {
-                case 0:
-                case 1:
-                case 2:
-                    return String.Format("{0}b", size);
-                case 3:
-                case 4:
-                case 5:
-                    return String.Format("{0}K", size >> 10);
-                case 6:
-                case 7:
-                case 8:
-                    return String.Format("{0}M", size >> 20);
-                case 9:
-                case 10:
-                case 11:
-                    return String.Format("{0}G", size >> 30);
-                case 12:
-                case 13:
-                case 14:
-                    return String.Format("{0}T", size >> 40);
-                default:
-                    return String.Format("{0}b", size);
-            }
+            var logSize = Math.Log(size, 2);
+            if (logSize < 10) return String.Format("{0}b", size);
+            if (logSize < 20) return String.Format("{0}K", size >> 10);
+            if (logSize < 30) return String.Format("{0}M", size >> 20);
+            if (logSize < 40) return String.Format("{0}G", size >> 30);
+            if (logSize < 50) return String.Format("{0}T", size >> 40);
+            return logSize < 60 ? String.Format("{0}P", size >> 50) : String.Format("{0:N}b", size);
         }
 
         #region public Object PropertyObject { get; set; }
@@ -112,6 +89,7 @@ namespace ESME.Views.Scenarios
         }
     }
 
+#if false
     public class ScenarioPropertiesViewModel : TreeViewItemPropertiesViewModel
     {
         protected override void GenerateProperties()
@@ -160,79 +138,5 @@ namespace ESME.Views.Scenarios
             }
         }
     }
-
-
-    internal class PropertiesViewHelpers
-    { }
-#if false
-    public class ModePropertiesViewModel : TreeViewItemPropertiesViewModel
-    {
-        Mode _mode;
-        public Mode Mode
-        {
-            get { return _mode; }
-            set
-            {
-                _mode = value;
-                GenerateProperties();
-                WindowTitle = "Mode Properties: " + _mode.ModeName;
-            }
-        }
-
-        void GenerateProperties()
-        {
-
-            Properties.Add(new EditableKeyValuePair<string, object>("Mode Type", "", true));
-            Properties.Add(new EditableKeyValuePair<string, object>("Depth offset (m)", "", true));
-            Properties.Add(new EditableKeyValuePair<string, object>("Source level (dB)", "", true));
-            Properties.Add(new EditableKeyValuePair<string, object>("Frequency (Hz)", "", true));
-            Properties.Add(new EditableKeyValuePair<string, object>("Vertical beam width (deg)", "", true));
-            Properties.Add(new EditableKeyValuePair<string, object>("Depression/Elevation angle (deg)", "", true));
-            Properties.Add(new EditableKeyValuePair<string, object>("Maximum propagation radius (m)", "", true));
-        }
-    }
-
-    public class SourcePropertiesViewModel : TreeViewItemPropertiesViewModel
-    {
-        Source _source;
-        public Source Source
-        {
-            get { return _source; }
-            set
-            {
-                _source = value;
-                GenerateProperties();
-                WindowTitle = "Source Properties: " + _source.SourceName;
-            }
-        }
-
-        void GenerateProperties()
-        {
-            //Properties.Add(new EditableKeyValuePair<string, string>("Source Type:", Source.SourceType ?? "N/A"));
-            Properties.Add(new EditableKeyValuePair<string, object>("Source Type:", "", true));
-        }
-    }
-
-    public class PlatformPropertiesViewModel : TreeViewItemPropertiesViewModel
-    {
-        Platform _platform;
-        public Platform Platform
-        {
-            get { return _platform; }
-            set
-            {
-                _platform = value;
-                GenerateProperties();
-                WindowTitle = "Platform Properties: " + Platform.PlatformName;
-            }
-        }
-
-        void GenerateProperties()
-        {
-            Properties.Add(new EditableKeyValuePair<string, object>("Platform Type: ", "", true));
-            Properties.Add(new EditableKeyValuePair<string, object>("Description: ", "", true));
-        }
-    } 
 #endif
-
 }

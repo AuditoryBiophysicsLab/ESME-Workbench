@@ -197,7 +197,10 @@ namespace ESMEWorkbench.ViewModels.Main
         }
 
         [MediatorMessageSink(MediatorMessage.ViewScenarioProperties), UsedImplicitly]
-        void ViewScenarioProperties(Scenario scenario) { _visualizer.ShowDialog("TreeViewItemPropertiesView", new ScenarioPropertiesViewModel { PropertyObject = scenario }); }
+        void ViewScenarioProperties(Scenario scenario)
+        {
+            _visualizer.ShowDialog("ScenarioPropertiesView", new ScenarioPropertiesViewModel(scenario));
+        }
         #endregion
 
         #region Handlers for AnalysisPoint-related MediatorMessages

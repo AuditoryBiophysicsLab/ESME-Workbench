@@ -325,6 +325,21 @@ namespace ESME.Scenarios
 
         public virtual TransmissionLoss TransmissionLoss { get; set; }
 
+        /// <summary>
+        /// Returns the size on disk of all files used by this radial
+        /// </summary>
+        [NotMapped]
+        public long FileSize
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Filename) || TransmissionLoss == null || TransmissionLoss.AnalysisPoint == null || TransmissionLoss.AnalysisPoint.Scenario == null || string.IsNullOrEmpty(TransmissionLoss.AnalysisPoint.Scenario.StorageDirectoryPath)) return 0;
+                if (!Directory.Exists(TransmissionLoss.AnalysisPoint.Scenario.StorageDirectoryPath)) return 0;
+                var files = Directory.GetFiles(TransmissionLoss.AnalysisPoint.Scenario.StorageDirectoryPath, Filename + ".*");
+                return files.Select(file => new FileInfo(file)).Select(fi => fi.Length).Sum();
+            }
+        }
+
         [NotMapped] public string BasePath
         {
             get

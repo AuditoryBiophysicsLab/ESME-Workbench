@@ -25,7 +25,22 @@ namespace ESME.Locations
         public Guid Guid { get; set; }
         public float Resolution { get; set; }
         public int SampleCount { get; set; }
-        public long FileSize { get; set; }
+
+        [NotMapped] 
+        public long FileSize
+        {
+            get
+            {
+                if (Location == null) return 0;
+                if (string.IsNullOrEmpty(Location.StorageDirectoryPath)) return 0;
+                if (!Directory.Exists(Location.StorageDirectoryPath)) return 0;
+                if (string.IsNullOrEmpty(FileName)) return 0;
+                var filePath = Path.Combine(Location.StorageDirectoryPath, FileName);
+                if (!File.Exists(filePath)) return 0;
+                var fi = new FileInfo(filePath);
+                return fi.Length;
+            }
+        }
 
         public DbTimePeriod TimePeriod { get; set; }
         
