@@ -126,5 +126,10 @@ namespace ESME.Locations
             Directory.Delete(StorageDirectoryPath, true);
         }
 
+        #region ZoomToLocationCommand
+        public SimpleCommand<object, EventToCommandArgs> ZoomToLocationCommand { get { return _zoomToLocation ?? (_zoomToLocation = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.SetMapExtent, (GeoRect)GeoRect))); } }
+        SimpleCommand<object, EventToCommandArgs> _zoomToLocation;
+        #endregion
+
     }
 }
