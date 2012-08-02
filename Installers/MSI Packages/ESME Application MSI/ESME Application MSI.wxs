@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <?define ProductName = "ESME Workbench 2012" ?>
+  <?define ProductName = "ESME 2012" ?>
   <?include version.wxi ?>
   <?define ProductAuthor = "Hearing Research Center" ?>
   <?define Manufacturer="Boston University"?>
@@ -21,13 +21,13 @@
   <?define dotConnectPath="C:\Program Files (x86)\Devart\dotConnect"?>
 
   <?if $(var.Platform) = x64 ?>
-  <?define ProductDisplayName = "$(var.ProductName) (64-bit)" ?>
+  <?define ProductDisplayName = "$(var.ProductName) Application (64-bit)" ?>
   <?define ProductUpgradeCode = "88D30D04-AD51-4627-98E8-A54D82F8D4FC" ?>
   <?define Win64 = "yes" ?>
   <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
   <?define sqlite3dllPath="$(var.dotConnectPath)\SQLite\x64"?>
   <?else ?>
-  <?define ProductDisplayName = "$(var.ProductName)" ?>
+  <?define ProductDisplayName = "$(var.ProductName) Application (32-bit)" ?>
   <?define ProductUpgradeCode = "12E20F8D-0C6D-47C9-98A1-D4920B755766" ?>
   <?define Win64 = "no" ?>
   <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
@@ -241,9 +241,12 @@
                   Source="$(var.ExternalsPath)\WPFToolkit.Extended.dll" />
 
             <!-- Matlab Binning Tools -->
-            <File Id="PlotHistograms.exe"
-                  Name="PlotHistograms.exe"
-                  Source="$(var.MatlabBinningToolsPath)\PlotHistograms.exe" />
+            <File Id="PlotHistograms_x86.exe"
+                  Name="PlotHistograms_x86.exe"
+                  Source="$(var.MatlabBinningToolsPath)\PlotHistograms_x86.exe" />
+            <File Id="PlotHistograms_x64.exe"
+                  Name="PlotHistograms_x64.exe"
+                  Source="$(var.MatlabBinningToolsPath)\PlotHistograms_x64.exe" />
           </Component>
           <?if $(var.Platform) = x64 ?>
           <!-- 64-bit components go here -->
