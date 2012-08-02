@@ -673,7 +673,7 @@ namespace ESMEWorkbench.ViewModels.Main
             window.Closed += (s, e) =>
             {
                 if (!SimulationProgressViewModel.Simulation.DisplayExposureHistograms) return;
-                var filepath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "PlotHistograms.exe");
+                var filepath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), string.Format("PlotHistograms{0}.exe",Environment.Is64BitOperatingSystem ? "_x64":"_x86"));
                 var argname = "\"" + Path.Combine(simulationDirectory, name + ".xml") + "\"";
                 System.Diagnostics.Process.Start(filepath, argname);
             };
