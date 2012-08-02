@@ -103,6 +103,7 @@ namespace ESME.TransmissionLoss
                 }
                 if (!File.Exists(radial.BasePath + ".shd")) Add(radial);
             }
+#if false
             _databaseService.Context.Radials.Local.CollectionChanged += (sender, args) =>
             {
                 switch (args.Action)
@@ -114,6 +115,7 @@ namespace ESME.TransmissionLoss
                         break;
                 }
             };
+#endif
         }
 
         public void Add(Radial radial)

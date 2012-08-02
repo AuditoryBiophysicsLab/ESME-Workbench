@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Threading;
 using ESME.Database;
 using ESME.Environment;
@@ -235,15 +234,6 @@ namespace ESME.Scenarios
                     select transmissionLoss.Mode).Distinct();
         }
 
-        public static IEnumerable<Radial> GetUncalculatedRadials(this Scenario scenario)
-        {
-            return (from analysisPoint in scenario.AnalysisPoints
-                    from transmissionLoss in analysisPoint.TransmissionLosses
-                    from radial in transmissionLoss.Radials
-                    where !File.Exists(radial.BasePath + ".shd")
-                    select radial);
-        }
-
         public static string MissingSpeciesText(this Scenario scenario)
         {
             if (!scenario.ScenarioSpecies.Any()) return "There are no species specified in this scenario.";
@@ -271,13 +261,16 @@ namespace ESME.Scenarios
             var distinctScenarioModes = GetDistinctModes(scenario).ToList();
             if (distinctScenarioModes.Count == 0) return "No modes have been defined";
 
-            var distinctAnalysisPointModes = GetDistinctAnalysisPointModes(scenario).ToList();
-            if (distinctAnalysisPointModes.Count == 0) return "No analysis points have been defined";
+            if (scenario.AnalysisPoints.Count == 0) return "No analysis points have been defined";
 
-            var missingScenarioModes = distinctScenarioModes.Except(distinctAnalysisPointModes).ToList();
+            var missingScenarioModes = distinctScenarioModes.Except(GetDistinctAnalysisPointModes(scenario).ToList()).ToList();
             if (missingScenarioModes.Count != 0) return "The following modes do not appear in any currently defined analysis points: " + string.Join(", ", missingScenarioModes.Select(m => m.ModeName));
 
-            var radialsNotCalculated = GetUncalculatedRadials(scenario).Count();
+            var radialsNotCalculated = (from analysisPoint in scenario.AnalysisPoints
+                                        from transmissionLoss in analysisPoint.TransmissionLosses
+                                        from radial in transmissionLoss.Radials
+                                        where !File.Exists(radial.BasePath + ".shd")
+                                        select radial).Count();
             if (radialsNotCalculated != 0) return string.Format("There are still {0} radials awaiting calculation in this scenario.", radialsNotCalculated);
 
             var missingSpecies = MissingSpeciesText(scenario);

@@ -439,7 +439,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     TaskEx.Run(() =>
                     {
                         Database.Add(analysisPoint, (Bathymetry)_cache[Scenario.Bathymetry].Result);
-                        _dispatcher.InvokeInBackgroundIfRequired(analysisPoint.CreateMapLayers);
+                        _dispatcher.InvokeIfRequired(analysisPoint.CreateMapLayers);
                     });
                 }
                 IsInAnalysisPointMode = false;

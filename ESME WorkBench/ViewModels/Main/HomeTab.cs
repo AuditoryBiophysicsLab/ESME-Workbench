@@ -183,6 +183,8 @@ namespace ESMEWorkbench.ViewModels.Main
                             select s).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A scenario named {0} already exists in location {1}, choose another name", scenario.Name, scenario.Location.Name));
             location.Scenarios.Add(scenario);
+            Database.Context.Locations.Add(location);
+            Database.Context.Scenarios.Add(scenario);
             //Database.Add(scenario);
             return scenario;
         }

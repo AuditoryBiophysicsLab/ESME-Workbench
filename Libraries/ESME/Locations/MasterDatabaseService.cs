@@ -16,6 +16,7 @@ using ESME.Database;
 using ESME.Environment;
 using ESME.Plugins;
 using ESME.Scenarios;
+using ESME.TransmissionLoss;
 using HRC;
 using HRC.Aspects;
 using HRC.Services;
@@ -78,6 +79,7 @@ namespace ESME.Locations
         }
 
         [Import] IMessageBoxService _messageBoxService;
+        [Import] TransmissionLossCalculatorService _transmissionLossCalculator;
         #region Add operations
         public void Add(Perimeter perimeter)
         {
@@ -143,6 +145,7 @@ namespace ESME.Locations
                         IsCalculated = false,
                     };
                     transmissionLoss.Radials.Add(radial);
+                    _transmissionLossCalculator.Add(radial);
                     //Log(radial, "Added new radial with bearing {0} and length {1} to transmission loss for mode {2} in analysis point at {3} to scenario {4} in location {5}", radial.Bearing, radial.Length, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo, radial.TransmissionLoss.AnalysisPoint.Scenario.Name, radial.TransmissionLoss.AnalysisPoint.Scenario.Location.Name);
                 }
             }
