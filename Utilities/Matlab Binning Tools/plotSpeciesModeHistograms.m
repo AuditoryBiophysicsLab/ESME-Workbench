@@ -40,14 +40,14 @@ for i=1:length(s.AnimatSpecies.Species)
     subplot(2,1,1),        
     b1=bar(SPLexposures,'grouped');    
     set(gca,'XTickLabel',tickLabels,'XTick',[1:1:numBins],'YScale','log');
-    xlabel('Peak Sound Pressure Bins, dB SPL');ylabel('Bin Count');
+    xlabel('Peak Sound Pressure Bins (dB re 1 \muPa)');ylabel('Bin Count');
     legend(legendNames);
     title(['Location: ', s.Location.Name, ' | Scenario: ',s.Scenario.Name, ' | Species: ', thisSpecies.Name]);
     
     subplot(2,1,2),
     b2=bar(Energyexposures,'grouped');  
     set(gca,'XTickLabel',tickLabels,'XTick',[1:1:numBins],'YScale','log');        
-    xlabel('Peak Energy, muPa^2 * s');ylabel('Bin Count');      
+    xlabel('Energy (\muPa^2 * s)');ylabel('Bin Count');      
        
     
 end
