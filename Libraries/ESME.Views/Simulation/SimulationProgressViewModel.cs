@@ -16,6 +16,7 @@ namespace ESME.Views.Simulation
 
         public Window Window { get; set; }
 
+        [Affects("TimeStepString")]
         public Simulator.Simulation Simulation
         {
             get { return _simulation; }
@@ -23,6 +24,7 @@ namespace ESME.Views.Simulation
             {
                 _simulation = value;
                 if (_simulation == null) return;
+                _timeStepSize = _simulation.TimeStepSize;
                 ((INotifyPropertyChanged)_simulation).PropertyChanged += (s, e) =>
                 {
                     switch (e.PropertyName)
@@ -40,20 +42,40 @@ namespace ESME.Views.Simulation
             }
         }
 
-        [Initialize("Press start to begin")]
+        TimeSpan _timeStepSize;
+        public string TimeStepString
+        {
+            get { return _timeStepSize.ToString(@"hh\:mm\:ss"); }
+            set
+            {
+                IsStartCommandEnabled = TimeSpan.TryParseExact(value, @"hh\:mm\:ss", null, out _timeStepSize);
+            }
+        }
+
+        [Initialize("Starting...")]
         public string SimulationProgressText { get; set; }
+
+        public bool SimulationNotRunning { get { return !IsSimulationRunning; } }
+
+        [Affects("SimulationNotRunning")]
+        public bool IsSimulationRunning { get; set; }
+
+        public bool IsSimulationCanceled { get; set; }
 
         #region CancelCommand
         public SimpleCommand<object, object> CancelCommand
         {
-            get { return _cancel ?? (_cancel = new SimpleCommand<object, object>(o => IsCancelCommandEnabled, CancelHandler)); }
+            get { return _cancel ?? (_cancel = new SimpleCommand<object, object>(CancelHandler)); }
         }
 
         SimpleCommand<object, object> _cancel;
 
-        bool IsCancelCommandEnabled { get; set; }
-
-        void CancelHandler(object o) { Simulation.Cancel(); }
+        void CancelHandler(object o)
+        {
+            IsSimulationCanceled = true;
+            if (!SimulationNotRunning) Simulation.Cancel();
+            else Window.Close();
+        }
         #endregion
 
         #region StartCommand
@@ -69,10 +91,10 @@ namespace ESME.Views.Simulation
 
         void StartHandler(object o)
         {
-            var task = Simulation.Start();
+            var task = Simulation.Start(_timeStepSize);
             task.ContinueWith(t => Window.Dispatcher.InvokeIfRequired(Window.Close));
             IsStartCommandEnabled = false;
-            IsCancelCommandEnabled = true;
+            IsSimulationRunning = true;
             OnSimulationStarting();
         }
 

@@ -77,15 +77,6 @@ namespace ESME.Simulator
         public void Cancel() { _cancellationTokenSource.Cancel(); }
         public TimeSpan TimeStepSize { get; private set; }
 
-        public string TimeStepString
-        {
-            get { return TimeStepSize.ToString(); }
-            set
-            {
-                TimeStepSize = TimeSpan.Parse(value);
-            }
-        }
-
         public ModeThresholdHistogram ModeThresholdHistogram { get; set; }
         //public SpeciesThresholdHistogram SpeciesThresholdHistogram { get; set; }
         public bool AnimateSimulation { get; set; }
@@ -105,8 +96,9 @@ namespace ESME.Simulator
             }
         }
 
-        public Task Start()
+        public Task Start(TimeSpan timeStepSize)
         {
+            TimeStepSize = timeStepSize;
             _cancellationTokenSource = new CancellationTokenSource();
             SimulationLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), TimeStepSize, Scenario);
             ModeThresholdHistogram = new ModeThresholdHistogram(SimulationLog);

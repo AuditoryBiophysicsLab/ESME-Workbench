@@ -663,16 +663,17 @@ namespace ESMEWorkbench.ViewModels.Main
             var name = Scenario.Name;
             foreach (var c in Path.GetInvalidPathChars().Where(name.Contains)) name = name.Replace(c, '-');
             var simulationDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ESME Simulations", name, string.Format("{0}-{1}-{2}-{3}-{4}-{5}",now.Year,now.Month,now.Day,now.Hour,now.Minute,now.Second));
-            if (Directory.Exists(simulationDirectory)) try{ Directory.Delete(simulationDirectory, true);} catch{}
+            if (Directory.Exists(simulationDirectory)) try { Directory.Delete(simulationDirectory, true); } catch{}
 
             var simulation = Simulation.Create(Scenario, simulationDirectory, _dispatcher);
             SimulationProgressViewModel = new SimulationProgressViewModel {Simulation = simulation};
             SimulationProgressViewModel.SimulationStarting += (s, e) => IsSimulationRunning = true;
-            var window = _visualizer.ShowWindow("SimulationProgressView", SimulationProgressViewModel,false,(s,e)=>IsSimulationRunning=false);
+            var window = _visualizer.ShowWindow("SimulationProgressView", SimulationProgressViewModel, false, (s, e) => IsSimulationRunning = false);
             SimulationProgressViewModel.Window = window;
             window.Closed += (s, e) =>
             {
-                if (!SimulationProgressViewModel.Simulation.DisplayExposureHistograms) return;
+                if (!SimulationProgressViewModel.IsSimulationRunning || !SimulationProgressViewModel.Simulation.DisplayExposureHistograms) return;
+                if (SimulationProgressViewModel.IsSimulationCanceled && (_messageBox.ShowYesNo("Simulation was canceled by user request.  Show histogram(s) from incomplete simulation?", MessageBoxImage.Question) != MessageBoxResult.Yes)) return;
                 var filepath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), string.Format("PlotHistograms{0}.exe",Environment.Is64BitOperatingSystem ? "_x64":"_x86"));
                 var argname = "\"" + Path.Combine(simulationDirectory, name + ".xml") + "\"";
                 System.Diagnostics.Process.Start(filepath, argname);
