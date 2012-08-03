@@ -41,8 +41,6 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PostSharpOptimizationMode>OptimizeForBuildTime</PostSharpOptimizationMode>
-    <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
@@ -53,8 +51,6 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
-    <PostSharpOptimizationMode>OptimizeForBuildTime</PostSharpOptimizationMode>
-    <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -82,6 +78,9 @@
     </Reference>
     <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\ESME WorkBench\External References\Microsoft.Expression.Interactions.dll</HintPath>
+    </Reference>
+    <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+      <HintPath>..\..\ESME WorkBench\External References\PostSharp.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Private>True</Private>
@@ -204,40 +203,6 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Libraries\ESME.Tests\ESME.Tests.csproj">
-      <Project>{30119915-93B3-4B5F-8678-9FB7B0CF8FC2}</Project>
-      <Name>ESME.Tests</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Libraries\ESME.Views\ESME.Views.csproj">
-      <Project>{49221733-2EB6-468F-8833-06C0E36B3C83}</Project>
-      <Name>ESME.Views</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Libraries\C5\C5.csproj">
-      <Project>{7029F5D5-ABBB-4564-B170-39802AD65C62}</Project>
-      <Name>C5</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Libraries\ESME\ESME.csproj">
-      <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
-      <Name>ESME</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Libraries\HRC\HRC.csproj">
-      <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
-      <Name>HRC</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Plugins\Environmental Data Sources\InstallableNAVO\InstallableNAVOPlugin.csproj">
-      <Project>{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}</Project>
-      <Name>InstallableNAVOPlugin</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Plugins\Environmental Data Sources\NAVODatabaseAdapter\NAVODatabaseAdapter.csproj">
-      <Project>{409DC754-EEBD-4E49-8DDF-3960F2FFCE73}</Project>
-      <Name>NAVODatabaseAdapter</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Utilities\ProjectBuildInfo\ProjectBuildInfo.csproj">
-      <Project>{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}</Project>
-      <Name>ProjectBuildInfo</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29</ProductName>
@@ -258,6 +223,20 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\ESME.Views\ESME.Views.csproj">
+      <Project>{49221733-2EB6-468F-8833-06C0E36B3C83}</Project>
+      <Name>ESME.Views</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libraries\ESME\ESME.csproj">
+      <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
+      <Name>ESME</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libraries\HRC\HRC.csproj">
+      <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
+      <Name>HRC</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

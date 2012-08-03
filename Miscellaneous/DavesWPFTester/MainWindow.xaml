@@ -2,83 +2,23 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:app="clr-namespace:DavesWPFTester"
-        xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        xmlns:Locations="clr-namespace:ESME.Locations;assembly=ESME"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-        xmlns:Scenarios="clr-namespace:ESME.Scenarios;assembly=ESME"
-        xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views"
         xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
-        Title="Scenario Tree View Tester"
+        Title="Graph Control Tester"
+        MinWidth="800"
+        MinHeight="600"
         d:DataContext="{d:DesignInstance app:MainWindowViewModel}"
         mef:ViewModelLocator.ViewModel="MainWindowViewModel"
         SizeToContent="WidthAndHeight"
         SnapsToDevicePixels="True"
         mc:Ignorable="d">
-    <Window.Resources>
-        <Style TargetType="{x:Type TreeViewItem}">
-            <Setter Property="KeyboardNavigation.AcceptsReturn" Value="True" />
-            <Setter Property="views:VirtualToggleButton.IsVirtualToggleButton" Value="True" />
-            <Setter Property="views:VirtualToggleButton.IsChecked" Value="{Binding Scenarios:LayerSettings.IsChecked, RelativeSource={RelativeSource Self}}" />
-            <!--  <Setter Property="ToolTip" Value="{Binding ToolTip}" />  -->
-            <Style.Triggers>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="FontWeight" Value="Bold" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
 
-    </Window.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
             <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-
-    <StackPanel Orientation="Vertical">
-        <StackPanel Orientation="Vertical">
-            <TreeView x:Name="TreeView" BorderBrush="Transparent" ItemsSource="{Binding RootNodes}">
-                <TreeView.Resources>
-                    <HierarchicalDataTemplate DataType="{x:Type Scenarios:Scenario}" ItemsSource="{Binding Platforms}">
-                        <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}" LayerName="{Binding Name, StringFormat=Scenario: {0}}" LineColorVisibility="Collapsed" />
-                    </HierarchicalDataTemplate>
-                    <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
-                        <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding PlatformName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" />
-                    </HierarchicalDataTemplate>
-                    <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
-                        <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}" LayerName="{Binding SourceName}" LineColorVisibility="Collapsed" />
-                    </HierarchicalDataTemplate>
-                    <HierarchicalDataTemplate DataType="{x:Type app:EnvironmentNode}" ItemsSource="{Binding EnvironmentLayers}">
-                        <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="Environment" LineColorVisibility="Collapsed" />
-                    </HierarchicalDataTemplate>
-                    <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
-                        <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}" LayerName="{Binding ModeName}" LineColorVisibility="Collapsed" />
-                    </HierarchicalDataTemplate>
-                    <HierarchicalDataTemplate DataType="{x:Type app:WorldMapNode}" ItemsSource="{Binding Features}">
-                        <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="World Map" LineOrSymbolColor="{Binding LineColor}" LineOrSymbolSize="{Binding LineWeight}" />
-                    </HierarchicalDataTemplate>
-                    <HierarchicalDataTemplate DataType="{x:Type app:SedimentNode}" ItemsSource="{Binding SedimentTypes}">
-                        <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="Sediment" LineColorVisibility="Collapsed" />
-                    </HierarchicalDataTemplate>
-                    <DataTemplate DataType="{x:Type Scenarios:TransmissionLoss}">
-                        <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" />
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type app:SedimentTypeNode}">
-                        <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="{Binding SedimentType}" LineOrSymbolColor="{Binding SymbolColor}" LineOrSymbolSize="{Binding SymbolSize}" />
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type Locations:EnvironmentalDataSet}">
-                        <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}" LayerName="{Binding LayerName}" LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}" />
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type app:WorldMapFeatureNode}">
-                        <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="{Binding FeatureName, Mode=OneWay}" LineColorVisibility="Collapsed" />
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type app:BathymetryNode}">
-                        <Controls:LayerControl IsChecked="{Binding IsChecked}" LayerName="Bathymetry" LineColorVisibility="Collapsed" />
-                    </DataTemplate>
-                </TreeView.Resources>
-            </TreeView>
-        </StackPanel>
-    </StackPanel>
 </Window>
