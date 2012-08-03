@@ -46,7 +46,8 @@ namespace ESME.Scenarios
         public DbTimeSpan PulseInterval { get; set; }
 
         [NotMapped] public TimeSpan PulseIntervalTimeSpan { get { return PulseInterval; } set { PulseInterval = value; } }
-        [NotMapped] public string PulseIntervalString { get { return PulseIntervalTimeSpan.ToString(@"hh\:mm\:ss\.fff"); } set { PulseIntervalTimeSpan = TimeSpan.Parse(value); } }
+        [NotMapped]
+        public string PulseIntervalString { get { return PulseIntervalTimeSpan.ToString(@"hh\:mm\:ss\.fff"); } set { PulseIntervalTimeSpan = TimeSpan.ParseExact(value, @"hh\:mm\:ss\.fff", null); } }
 
         /// <summary>
         /// The length of time a single pulse is transmitting
@@ -54,7 +55,8 @@ namespace ESME.Scenarios
         public DbTimeSpan PulseLength { get; set; }
 
         [NotMapped] public TimeSpan PulseLengthTimeSpan { get { return PulseLength; } set { PulseLength = value; } }
-        [NotMapped] public string PulseLengthString { get { return PulseLengthTimeSpan.ToString(@"hh\:mm\:ss\.fff"); } set { PulseLengthTimeSpan = TimeSpan.Parse(value); } }
+        [NotMapped]
+        public string PulseLengthString { get { return PulseLengthTimeSpan.ToString(@"hh\:mm\:ss\.fff"); } set { PulseLengthTimeSpan = TimeSpan.ParseExact(value, @"hh\:mm\:ss\.fff", null); } }
 
         /// <summary>
         /// Horizontal beam width of this mode, in degrees.  

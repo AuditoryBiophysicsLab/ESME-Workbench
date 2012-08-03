@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows;
 using System.Windows.Data;
 using ESME.Environment;
 using ESME.Locations;
@@ -91,8 +90,8 @@ namespace ESME.Views.Scenarios
 
         #region OkCommand
         public SimpleCommand<object, EventToCommandArgs> OkCommand { get { return _ok ?? (_ok = new SimpleCommand<object, EventToCommandArgs>(OkHandler)); } }
+        public bool IsOkEnabled { get; set; }
         SimpleCommand<object, EventToCommandArgs> _ok;
-
         void OkHandler(EventToCommandArgs args)
         {
             //var parameter = args.CommandParameter;

@@ -5,13 +5,14 @@
         xmlns:l="clr-namespace:ESME.Views.Scenarios"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        Title="{Binding Scenario.Name,
+                        StringFormat=Scenario properties: {0}}"
         Background="#fff0f0f0"
         d:DataContext="{d:DesignInstance l:ScenarioPropertiesViewModel}"
         Grid.IsSharedSizeScope="True"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
         WindowStyle="ToolWindow"
-        Title="{Binding Scenario.Name, StringFormat=Scenario properties: {0}}"
         mc:Ignorable="d">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}">
@@ -41,7 +42,8 @@
                     Margin="5"
                     Command="{Binding OkCommand}"
                     Content="OK"
-                    IsDefault="True" />
+                    IsDefault="True"
+                    IsEnabled="{Binding IsValid}" />
             <Button Width="75"
                     Height="22"
                     Margin="5"
@@ -60,7 +62,7 @@
                                VerticalAlignment="Top"
                                Text="Scenario Name:"
                                TextAlignment="Right" />
-                    <TextBox Grid.Column="1" Height="Auto" Text="{Binding ScenarioName, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Grid.Column="1" Height="Auto" Text="{Binding ScenarioName, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -78,7 +80,9 @@
                                         Mask="00:00"
                                         ToolTip="Duration of the scenario (hh:mm)"
                                         Value="{Binding DurationString,
-                                                        Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                        Mode=TwoWay,
+                                                        ValidatesOnExceptions=True,
+                                                        UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -94,7 +98,8 @@
                              Height="Auto"
                              MinHeight="50"
                              AcceptsReturn="True"
-                             Text="{Binding Comments, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{Binding Comments,
+                                            UpdateSourceTrigger=PropertyChanged}"
                              TextWrapping="Wrap"
                              ToolTip="This field is optional" />
                 </Grid>

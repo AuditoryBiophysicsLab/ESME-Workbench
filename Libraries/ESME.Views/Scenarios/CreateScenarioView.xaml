@@ -23,7 +23,8 @@
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <Window.Resources>
-        <Style x:Key="ValidationStyle" TargetType="{x:Type Control}">
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="MinWidth" Value="150" />
             <Setter Property="Validation.ErrorTemplate">
                 <Setter.Value>
                     <ControlTemplate>
@@ -60,7 +61,8 @@
                                VerticalAlignment="Center"
                                Text="Scenario name"
                                TextAlignment="Right" />
-                    <TextBox Grid.Column="1" Style="{StaticResource ValidationStyle}" Text="{Binding ScenarioName, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" ToolTip="This field is required" />
+                    <TextBox Grid.Column="1"
+                             Text="{Binding ScenarioName, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"/>
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -123,7 +125,8 @@
                                         Mask="00:00"
                                         ToolTip="Length of simulated time the scenario runs (hh:mm)"
                                         Value="{Binding DurationString,
-                                                        Mode=TwoWay}" />
+                                                        ValidatesOnExceptions=True,
+                                                        UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
             </StackPanel>
         </Border>

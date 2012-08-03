@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using ESME.Environment;
 using ESME.Scenarios;
+using HRC.Validation;
 using HRC.ViewModels;
 
 namespace ESME.Views.Scenarios
@@ -17,7 +18,7 @@ namespace ESME.Views.Scenarios
     /// var vm = new ScenarioPropertiesViewModel {...};
     /// var window = _visualizerService.ShowWindow("ScenarioPropertiesView", vm);
     /// </summary>
-    public class ScenarioPropertiesViewModel : ViewModelBase
+    public class ScenarioPropertiesViewModel : ValidatingViewModel
     {
         public Scenario Scenario { get; private set; }
 
@@ -28,20 +29,20 @@ namespace ESME.Views.Scenarios
             Duration = Scenario.Duration;
             Comments = Scenario.Comments;
             ComputeSizes();
+            ValidationRules.Add(new ValidationRule
+            {
+                PropertyName = "ScenarioName",
+                Description = "Must be unique within the selected location and cannot be null or empty",
+                RuleDelegate = (o, r) =>
+                {
+                    var target = (ScenarioPropertiesViewModel)o;
+                    return !string.IsNullOrEmpty(target.ScenarioName);
+                },
+            });
         }
         public string ScenarioName { get; set; }
         public TimeSpan Duration { get; set; }
-        bool _durationIsValid = true;
-        public string DurationString
-        {
-            get { return Duration.ToString(@"hh\:mm"); }
-            set
-            {
-                TimeSpan duration;
-                _durationIsValid = TimeSpan.TryParseExact(value, @"hh\:mm", null, out duration);
-                if (_durationIsValid) Duration = duration;
-            }
-        }
+        public string DurationString { get { return Duration.ToString(@"hh\:mm"); } set { Duration = TimeSpan.ParseExact(value, @"hh\:mm", null); } }
         public string Comments { get; set; }
         public TimePeriod TimePeriod { get { return Scenario.TimePeriod; } }
         public string AcousticDataSize { get; private set; }
@@ -76,7 +77,7 @@ namespace ESME.Views.Scenarios
         public int SpeciesCount { get { return Scenario.ScenarioSpecies.Count; } }
 
         #region OkCommand
-        public SimpleCommand<object, object> OkCommand { get { return _ok ?? (_ok = new SimpleCommand<object, object>(o => _durationIsValid, OkHandler)); } }
+        public SimpleCommand<object, object> OkCommand { get { return _ok ?? (_ok = new SimpleCommand<object, object>(OkHandler)); } }
         SimpleCommand<object, object> _ok;
 
         void OkHandler(object o)
