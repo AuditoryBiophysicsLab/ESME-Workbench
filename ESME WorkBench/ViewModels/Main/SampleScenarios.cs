@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Media;
 using ESME;
 using ESME.Behaviors;
 using ESME.Database;
@@ -141,7 +140,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 Geo = ((GeoRect)scenario.Location.GeoRect).Center,
                 PlatformName = "Sample Platform",
                 Perimeter = perimeter,
-                Speed = 20,
+                Speed = 10,
                 IsRandom = true,
                 Launches = false,
                 TrackType = TrackType.PerimeterBounce,
