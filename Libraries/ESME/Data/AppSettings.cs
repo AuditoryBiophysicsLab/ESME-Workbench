@@ -8,11 +8,12 @@ using HRC.Aspects;
 using HRC.Collections;
 using HRC.Utility;
 using HRC.Validation;
+using HRC.ViewModels;
 
 namespace ESME.Data
 {
     [Serializable]
-    public class AppSettings : ValidatingViewModel
+    public class AppSettings : ViewModelBase
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>
         {
@@ -112,7 +113,7 @@ namespace ESME.Data
         public string DatabaseDirectory { get; set; }
     }
 
-    public sealed class PluginSelection : ValidatingViewModel
+    public sealed class PluginSelection : ViewModelBase
     {
         public string DllFilename { get; set; }
 
@@ -123,50 +124,31 @@ namespace ESME.Data
     {
         public RAMSettings()
         {
-            ValidationRules.AddRange(new List<ValidationRule>
-                                         {
-                                             new ValidationRule
-                                                 {
-                                                     PropertyName = "MaximumDepth",
-                                                     Description = "Must be positive",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget = ((RAMSettings) o).MaximumDepth;
-                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
-                                                                        },
-                                                 },
-                                             new ValidationRule
-                                                 {
-                                                     PropertyName = "DepthStepSize",
-                                                     Description = "Must be positive",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget = ((RAMSettings) o).DepthStepSize;
-                                                                            return RangeCheck(ruleTarget, 0,float.MaxValue,false);
-                                                                        },
-                                                 },
-                                             new ValidationRule
-                                                 {
-                                                     PropertyName = "MaximumRange",
-                                                     Description = "Must be positive",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget = ((RAMSettings)o).MaximumRange;
-                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
-                                                                        },
-                                                 },
-                                             new ValidationRule
-                                                 {
-                                                     PropertyName = "RangeStepSize",
-                                                     Description = "Must be positive",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget = ((RAMSettings) o).RangeStepSize;
-                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
-                                                                        },
-                                                 },
-                                         }
-                );
+            AddValidationRules(
+                new ValidationRule<RAMSettings>
+                {
+                    PropertyName = "MaximumDepth",
+                    Description = "Must be positive",
+                    IsRuleValid = (target, rule) => target.MaximumDepth > 0,
+                },
+                new ValidationRule<RAMSettings>
+                {
+                    PropertyName = "DepthStepSize",
+                    Description = "Must be positive",
+                    IsRuleValid = (target, rule) => target.DepthStepSize > 0,
+                },
+                new ValidationRule<RAMSettings>
+                {
+                    PropertyName = "MaximumRange",
+                    Description = "Must be positive",
+                    IsRuleValid = (target, rule) => target.MaximumRange > 0,
+                },
+                new ValidationRule<RAMSettings>
+                {
+                    PropertyName = "RangeStepSize",
+                    Description = "Must be positive",
+                    IsRuleValid = (target, rule) => target.RangeStepSize > 0,
+                });
         }
 
         [Initialize(2000f)]
@@ -186,51 +168,32 @@ namespace ESME.Data
     {
         public BellhopSettings()
         {
-            ValidationRules.AddRange(new List<ValidationRule>
-                                         {
-                                             new ValidationRule
-                                                 {
-                                                     PropertyName = "MaximumDepth",
-                                                     Description = "Must be positive",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget = ((BellhopSettings)o).MaximumDepth;
-                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
-                                                                        },
-                                                 },
+            AddValidationRules(
+                new ValidationRule<BellhopSettings>
+                {
+                    PropertyName = "MaximumDepth",
+                    Description = "Must be positive",
+                    IsRuleValid = (target, rule) => target.MaximumDepth > 0,
+                },
 
-                                             new ValidationRule
-                                                 {
-                                                     PropertyName = "RangeCellSize",
-                                                     Description = "Must be positive",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget =((BellhopSettings) o).RangeCellSize;
-                                                                            return RangeCheck(ruleTarget, 0,float.MaxValue, false);
-                                                                        },
-                                                 },
-                                             new ValidationRule
-                                                 {
-                                                     PropertyName = "DepthCellSize",
-                                                     Description = "Must be positive",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget = ((BellhopSettings) o).DepthCellSize;
-                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
-                                                                        },
-                                                 },
-                                             new ValidationRule
-                                                 {
-                                                     PropertyName = "RayCount",
-                                                     Description = "Must be positive",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget = ((BellhopSettings) o).RayCount;
-                                                                            return RangeCheck(ruleTarget,0,int.MaxValue,false);
-                                                                        },
-                                                 },
-
-                                         });
+                new ValidationRule<BellhopSettings>
+                {
+                    PropertyName = "RangeCellSize",
+                    Description = "Must be positive",
+                    IsRuleValid = (target, rule) => target.RangeCellSize > 0,
+                },
+                new ValidationRule<BellhopSettings>
+                {
+                    PropertyName = "DepthCellSize",
+                    Description = "Must be positive",
+                    IsRuleValid = (target, rule) => target.DepthCellSize > 0,
+                },
+                new ValidationRule<BellhopSettings>
+                {
+                    PropertyName = "RayCount",
+                    Description = "Must be positive",
+                    IsRuleValid = (target, rule) => target.RayCount > 0,
+                });
         }
 
         [Initialize(2000f)]

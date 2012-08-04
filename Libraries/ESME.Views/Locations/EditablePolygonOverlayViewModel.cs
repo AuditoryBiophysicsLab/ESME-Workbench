@@ -2,13 +2,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using HRC.Navigation;
-using HRC.Validation;
+using HRC.ViewModels;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESME.Views.Locations
 {
-    public class EditablePolygonOverlayViewModel : ValidatingViewModel, INotifyPropertyChanged
+    public class EditablePolygonOverlayViewModel : ViewModelBase, INotifyPropertyChanged
     {
         readonly WpfMap _wpfMap;
         EditInteractiveOverlay _editOverlay;
@@ -16,13 +16,11 @@ namespace ESME.Views.Locations
         public EditablePolygonOverlayViewModel(WpfMap wpfMap)
         {
             _wpfMap = wpfMap;
-            //ValidationRules.AddRange(new List<ValidationRule> { NorthValidationRule, SouthValidationRule, EastValidationRule, WestValidationRule });
         }
 
         void UpdateOverlay()
         {
-            CheckForBrokenRules();
-            if (!_isVisible || !IsValid) return;
+            if (!_isVisible) return;
             _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Clear();
             var polygon = new Feature(new PolygonShape(GeoArray.ToWellKnownText()));
             _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Add(polygon);
@@ -52,9 +50,6 @@ namespace ESME.Views.Locations
                 _editOverlay.EditShapesLayer.InternalFeatures.Add(polygon);
                 _editOverlay.CalculateAllControlPoints();
                 _wpfMap.EditOverlay = _editOverlay;
-                //_wpfMap.EditOverlay.EditShapesLayer.ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = new AreaStyle(new GeoPen(GeoColor.StandardColors.Blue), new GeoSolidBrush(new GeoColor(128, 128, 0, 0)));
-                //_wpfMap.EditOverlay.EditShapesLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
-                // Draw the map image on the screen
                 _wpfMap.Refresh();
             }
         }

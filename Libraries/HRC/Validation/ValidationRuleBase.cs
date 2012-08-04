@@ -1,7 +1,9 @@
-﻿using System;
-
-// A simple base rule that can be used for more specific rules
+﻿// A simple base rule that can be used for more specific rules
 // that may be used to validate objects
+
+using System.Collections.Generic;
+using HRC.Aspects;
+
 namespace HRC.Validation
 {
     /// <summary>
@@ -32,9 +34,9 @@ namespace HRC.Validation
         public virtual string PropertyName { get; set; }
 
         /// <summary>
-        /// Validates that the rule has been followed.
+        /// Returns true if the rule is valid
         /// </summary>
-        public abstract bool Validate(Object domainObject, ValidationRuleBase rule);
+        public abstract bool Validate(object domainObject, ValidationRuleBase rule);
 
         /// <summary>
         /// Gets a string representation of this rule.

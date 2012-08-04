@@ -482,7 +482,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.ModeProperties), UsedImplicitly]
         void ModeProperties(Mode mode)
         {
-            var vm = new PropertiesViewModel { PropertyObject = mode, WindowTitle = "Mode Properties: " + mode.ModeName };
+            var vm = new ModePropertiesViewModel(mode);
             _visualizer.ShowDialog("ModePropertiesView", vm);
             //_visualizer.ShowDialog("TreeViewItemPropertiesView", new ModePropertiesViewModel() { Mode = mode, });
             mode.LowFrequency = mode.HighFrequency;

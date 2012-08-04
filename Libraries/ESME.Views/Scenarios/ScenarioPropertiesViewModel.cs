@@ -21,28 +21,37 @@ namespace ESME.Views.Scenarios
     public class ScenarioPropertiesViewModel : ValidatingViewModel
     {
         public Scenario Scenario { get; private set; }
+        const string TimeSpanFormatString = @"hh\:mm";
 
         public ScenarioPropertiesViewModel(Scenario scenario)
         {
             Scenario = scenario;
             ScenarioName = Scenario.Name;
-            Duration = Scenario.Duration;
+            DurationString = ((TimeSpan)Scenario.Duration).ToString(TimeSpanFormatString);
             Comments = Scenario.Comments;
             ComputeSizes();
-            ValidationRules.Add(new ValidationRule
-            {
-                PropertyName = "ScenarioName",
-                Description = "Must be unique within the selected location and cannot be null or empty",
-                RuleDelegate = (o, r) =>
+            AddValidationRules(
+                new ValidationRule<ScenarioPropertiesViewModel>
                 {
-                    var target = (ScenarioPropertiesViewModel)o;
-                    return !string.IsNullOrEmpty(target.ScenarioName);
+                    PropertyName = "ScenarioName",
+                    Description = "Must be unique within the selected location and cannot be null or empty",
+                    IsRuleValid = (target, rule) => !string.IsNullOrEmpty(target.ScenarioName),
                 },
-            });
+                new ValidationRule<ScenarioPropertiesViewModel>
+                {
+                    PropertyName = "PulseIntervalString",
+                    Description = "Must be a valid, non-negative time span value in the format hh:mm where 00 <= hh <= 23; 00 <= mm <= 59",
+                    IsRuleValid = (target, rule) =>
+                    {
+                        if (string.IsNullOrEmpty(target.DurationString)) return false;
+                        TimeSpan timeSpan;
+                        var isOK = TimeSpan.TryParseExact(target.DurationString, TimeSpanFormatString, null, out timeSpan);
+                        return isOK && timeSpan.Ticks > 0;
+                    },
+                });
         }
         public string ScenarioName { get; set; }
-        public TimeSpan Duration { get; set; }
-        public string DurationString { get { return Duration.ToString(@"hh\:mm"); } set { Duration = TimeSpan.ParseExact(value, @"hh\:mm", null); } }
+        public string DurationString { get; set; }
         public string Comments { get; set; }
         public TimePeriod TimePeriod { get { return Scenario.TimePeriod; } }
         public string AcousticDataSize { get; private set; }
@@ -83,7 +92,7 @@ namespace ESME.Views.Scenarios
         void OkHandler(object o)
         {
             Scenario.Name = ScenarioName;
-            Scenario.Duration = Duration;
+            Scenario.Duration = TimeSpan.ParseExact(DurationString, TimeSpanFormatString, null);
             Scenario.Comments = Comments;
             CloseActivePopUpCommand.Execute(true);
         }

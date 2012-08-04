@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Xml.Serialization;
 using HRC.Aspects;
 using HRC.ViewModels;
@@ -13,7 +11,8 @@ namespace HRC.Validation
 {
     public abstract class ValidatingViewModel : ViewModelBase, IDataErrorInfo
     {
-        [XmlIgnore, NotMapped, Initialize] protected List<ValidationRule> ValidationRules { get; set; }
+        [XmlIgnore, NotMapped, Initialize] protected List<ValidationRuleBase> ValidationRules { get; set; }
+        protected void AddValidationRules(params ValidationRuleBase[] validationRules) { foreach (var rule in validationRules) ValidationRules.Add(rule); }
 
         #region Implementation of IDataErrorInfo
         /// <summary>
@@ -34,19 +33,18 @@ namespace HRC.Validation
                 foreach (var rule in ValidationRules)
                 {
                     rule.ValidationErrorMessage = null;
-                    var ruleIsBroken = !rule.Validate(this, rule);
-                    if (!ruleIsBroken) continue;
+                    if (rule.Validate(this, rule)) continue;
                     allRulesValid = false;
                     //Debug.WriteLine("{0}: Broken rule on {1} : {2}{3}", DateTime.Now, rule.PropertyName, rule.Description, !string.IsNullOrEmpty(rule.ValidationErrorMessage) ? "\n" + rule.ValidationErrorMessage : "");
                     if (!string.IsNullOrEmpty(rule.Description))
                     {
                         errStr += rule.Description + Environment.NewLine;
-                        result += rule.Description + Environment.NewLine;
+                        if (rule.PropertyName == columnName) result += rule.Description + Environment.NewLine;
                     }
                     if (!string.IsNullOrEmpty(rule.ValidationErrorMessage))
                     {
                         errStr += rule.ValidationErrorMessage + Environment.NewLine;
-                        result += rule.ValidationErrorMessage + Environment.NewLine;
+                        if (rule.PropertyName == columnName) result += rule.ValidationErrorMessage + Environment.NewLine;
                     }
                 }
                 IsValid = allRulesValid;
@@ -56,36 +54,24 @@ namespace HRC.Validation
             }
         }
 
-        protected void CheckForBrokenRules()
+        protected void Validate()
         {
+            var errStr = string.Empty;
             var allRulesValid = true;
             foreach (var rule in ValidationRules)
             {
                 rule.ValidationErrorMessage = null;
-                var ruleIsBroken = !rule.Validate(this, rule);
-                if (!ruleIsBroken) continue;
+                if (rule.Validate(this, rule)) continue;
                 allRulesValid = false;
+                //Debug.WriteLine("{0}: Broken rule on {1} : {2}{3}", DateTime.Now, rule.PropertyName, rule.Description, !string.IsNullOrEmpty(rule.ValidationErrorMessage) ? "\n" + rule.ValidationErrorMessage : "");
+                if (!string.IsNullOrEmpty(rule.Description)) errStr += rule.Description + Environment.NewLine;
+                if (!string.IsNullOrEmpty(rule.ValidationErrorMessage)) errStr += rule.ValidationErrorMessage + Environment.NewLine;
             }
             IsValid = allRulesValid;
+            Error = !string.IsNullOrEmpty(errStr) ? errStr.Remove(errStr.Length - 2, 2) : errStr;
         }
 
-        #region public virtual bool IsValid { get; private set; }
-
-        [XmlIgnore, NotMapped]
-        public virtual bool IsValid
-        {
-            get { return _isValid; }
-            private set
-            {
-                _isValid = value;
-                CommandManager.InvalidateRequerySuggested();
-            }
-        }
-
-        bool _isValid;
-
-        #endregion
-
+        [XmlIgnore, NotMapped] public virtual bool IsValid { get; private set; }
 
         /// <summary>
         /// Gets an error message indicating what is wrong with this object.
@@ -126,25 +112,5 @@ namespace HRC.Validation
 
         SimpleCommand<object, ValidationErrorEventArgs> _validationError;
         #endregion
-
-        public static bool RangeCheck(double valueToCheck, double minimum = double.MinValue, double maximum = double.MaxValue, bool includeEndpoints = true)
-        {
-            if (includeEndpoints)
-                return (!double.IsNaN(valueToCheck) && (valueToCheck >= minimum)) && (valueToCheck <= maximum);
-            return (!double.IsNaN(valueToCheck) && (valueToCheck > minimum)) && (valueToCheck < maximum);
-        }
-        public static bool RangeCheck(float valueToCheck, float minimum = float.MinValue, float maximum = float.MaxValue, bool includeEndpoints = true)
-        {
-            if (includeEndpoints)
-                return (!float.IsNaN(valueToCheck) && (valueToCheck >= minimum)) && (valueToCheck <= maximum);
-            return (!float.IsNaN(valueToCheck) && (valueToCheck > minimum)) && (valueToCheck < maximum);
-        }
-
-        public static bool RangeCheck(int valueToCheck, int minimum = int.MinValue, int maximum = int.MaxValue, bool includeEndpoints = true)
-        {
-            if (includeEndpoints)
-                return ((valueToCheck >= minimum)) && (valueToCheck <= maximum);
-            return ((valueToCheck > minimum)) && (valueToCheck < maximum);
-        }
     }
 }

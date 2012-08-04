@@ -5,14 +5,33 @@ using System.Windows;
 using System.Windows.Threading;
 using HRC.Aspects;
 using HRC.Utility;
+using HRC.Validation;
 using HRC.ViewModels;
 using HRC.WPF;
 
 namespace ESME.Views.Simulation
 {
-    public class SimulationProgressViewModel : ViewModelBase
+    public class SimulationProgressViewModel : ValidatingViewModel
     {
         Simulator.Simulation _simulation;
+        const string TimeSpanFormatString = @"hh\:mm\:ss";
+        public SimulationProgressViewModel()
+        {
+            AddValidationRules(
+                new ValidationRule<SimulationProgressViewModel>
+                {
+                    PropertyName = "TimeStepString",
+                    Description = "Must be a valid, non-negative time span value in the format hh:mm:ss where 00 <= hh <= 23; 00 <= mm <= 59; 00 <= ss <= 59",
+                    IsRuleValid = (target, rule) =>
+                    {
+                        if (string.IsNullOrEmpty(target.TimeStepString)) return false;
+                        TimeSpan timeSpan;
+                        var isOK = TimeSpan.TryParseExact(target.TimeStepString, TimeSpanFormatString, null, out timeSpan);
+                        return isOK && timeSpan.Ticks > 0;
+                    },
+                });
+
+        }
 
         public Window Window { get; set; }
 
@@ -24,7 +43,7 @@ namespace ESME.Views.Simulation
             {
                 _simulation = value;
                 if (_simulation == null) return;
-                _timeStepSize = _simulation.TimeStepSize;
+                TimeStepString = _simulation.TimeStepSize.ToString(TimeSpanFormatString);
                 ((INotifyPropertyChanged)_simulation).PropertyChanged += (s, e) =>
                 {
                     switch (e.PropertyName)
@@ -42,15 +61,7 @@ namespace ESME.Views.Simulation
             }
         }
 
-        TimeSpan _timeStepSize;
-        public string TimeStepString
-        {
-            get { return _timeStepSize.ToString(@"hh\:mm\:ss"); }
-            set
-            {
-                IsStartCommandEnabled = TimeSpan.TryParseExact(value, @"hh\:mm\:ss", null, out _timeStepSize);
-            }
-        }
+        public string TimeStepString { get; set; }
 
         [Initialize("Starting...")]
         public string SimulationProgressText { get; set; }
@@ -91,7 +102,7 @@ namespace ESME.Views.Simulation
 
         void StartHandler(object o)
         {
-            var task = Simulation.Start(_timeStepSize);
+            var task = Simulation.Start(TimeSpan.ParseExact(TimeStepString, TimeSpanFormatString, null));
             task.ContinueWith(t => Window.Dispatcher.InvokeIfRequired(Window.Close));
             IsStartCommandEnabled = false;
             IsSimulationRunning = true;

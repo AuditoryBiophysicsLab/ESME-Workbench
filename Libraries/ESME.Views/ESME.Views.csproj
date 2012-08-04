@@ -175,6 +175,7 @@
       <DependentUpon>CreateOrEditPerimeterView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scenarios\CreateOrEditPerimeterViewModel.cs" />
+    <Compile Include="Scenarios\ModePropertiesViewModel.cs" />
     <Compile Include="Scenarios\ScenarioPropertiesView.xaml.cs">
       <DependentUpon>ScenarioPropertiesView.xaml</DependentUpon>
     </Compile>

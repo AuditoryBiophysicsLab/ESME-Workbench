@@ -2,26 +2,15 @@
 
 namespace HRC.Validation
 {
-    public class ValidationRule : ValidationRuleBase
+    public class ValidationRule<T> : ValidationRuleBase where T : ValidatingViewModel
     {
         #region Public Methods/Properties
         /// <summary>
-        /// Gets or sets the delegate used to validate this rule.
+        /// Gets or sets the delegate used to validate this rule.  Should return true if the rule is being followed, or false if it is not.
         /// </summary>
-        public virtual Func<object, ValidationRuleBase, bool> RuleDelegate { get; set; }
+        public virtual Func<T, ValidationRule<T>, bool> IsRuleValid { get; set; }
         #endregion
 
-        #region Overrides
-        /// <summary>
-        /// Validates that the rule has not been broken.
-        /// </summary>
-        /// <param name="domainObject">The domain object being validated.</param>
-        /// <param name="rule"></param>
-        /// <returns>True if the rule has not been broken, or false if it has.</returns>
-        public override bool Validate(Object domainObject, ValidationRuleBase rule)
-        {
-            return RuleDelegate(domainObject, rule);
-        }
-        #endregion
+        public override bool Validate(object domainObject, ValidationRuleBase rule) { return IsRuleValid((T)domainObject, (ValidationRule<T>)rule); }
     }
 }

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using System.Windows.Controls;
 using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Environment.NAVO;
@@ -12,9 +10,9 @@ using ESME.Plugins;
 using ESME.Views.Locations;
 using HRC.Navigation;
 using HRC.Utility;
+using HRC.Validation;
 using NAVODatabaseAdapter;
 using StandaloneNAVOPlugin.Controls;
-using ValidationRule = HRC.Validation.ValidationRule;
 
 namespace StandaloneNAVOPlugin
 {
@@ -40,14 +38,11 @@ namespace StandaloneNAVOPlugin
 
             IsSelectable = true;
 
-            ValidationRules.AddRange(new List<ValidationRule>
+            AddValidationRules(new ValidationRule<GDEM3ForNAVO>
             {
-                new ValidationRule
-                {
-                    PropertyName = "DataLocation",
-                    Description = "Directory must exists and contain the 24 required GDEM database files",
-                    RuleDelegate = (o, r) => ((GDEM3ForNAVO)o).IsConfigured,
-                },
+                PropertyName = "DataLocation",
+                Description = "Directory must exists and contain the 24 required GDEM database files",
+                IsRuleValid = (target, rule) => target.IsConfigured,
             });
             SelectionControlViewModel = new MultipleSelectionsViewModel<float>
             {

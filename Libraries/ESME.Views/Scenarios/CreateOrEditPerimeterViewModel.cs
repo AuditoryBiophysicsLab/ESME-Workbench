@@ -14,15 +14,11 @@ namespace ESME.Views.Scenarios
         public bool IsCanceled { get; private set; }
         public string DialogTitle { get; set; }
         #region Validation Rules
-        static readonly ValidationRule PerimeterNameValidationRule = new ValidationRule
+        static readonly ValidationRule<CreateOrEditPerimeterViewModel> PerimeterNameValidationRule = new ValidationRule<CreateOrEditPerimeterViewModel>
         {
             PropertyName = "PerimeterName",
             Description = "Must be unique and cannot be null or empty",
-            RuleDelegate = (o, r) =>
-            {
-                var target = (CreateOrEditPerimeterViewModel)o;
-                return !string.IsNullOrEmpty(target.PerimeterName);
-            },
+            IsRuleValid = (target, rule) => !string.IsNullOrEmpty(target.PerimeterName),
         };
         #endregion
 

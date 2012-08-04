@@ -7,7 +7,6 @@ using System.Windows.Data;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
-using ESME.Scenarios;
 using HRC.Aspects;
 using HRC.Collections;
 using HRC.Validation;
@@ -28,36 +27,41 @@ namespace ESME.Views.Scenarios
     /// </summary>
     public class CreateScenarioViewModel : ValidatingViewModel
     {
+        const string TimeSpanFormatString = @"hh\:mm";
         public CreateScenarioViewModel()
         {
-            Duration = new TimeSpan(0,1,0,0);
-            ValidationRules.Add(new ValidationRule
-            {
-                PropertyName = "ScenarioName",
-                Description = "Must be unique within the selected location and cannot be null or empty",
-                RuleDelegate = (o, r) =>
+            AddValidationRules(
+                new ValidationRule<CreateScenarioViewModel>
                 {
-                    var target = (CreateScenarioViewModel)o;
-                    return !string.IsNullOrEmpty(target.ScenarioName);
+                    PropertyName = "ScenarioName",
+                    Description = "Must be unique within the selected location and cannot be null or empty",
+                    IsRuleValid = (target, rule) => !string.IsNullOrEmpty(target.ScenarioName),
                 },
-            });
+                new ValidationRule<CreateScenarioViewModel>
+                {
+                    PropertyName = "DurationString",
+                    Description = "Must be a valid, non-negative time span value in the format hh:mm where 00 <= hh <= 23; 00 <= mm <= 59",
+                    IsRuleValid = (target, rule) =>
+                    {
+                        if (string.IsNullOrEmpty(target.DurationString)) return false;
+                        TimeSpan timeSpan;
+                        var isOK = TimeSpan.TryParseExact(target.DurationString, TimeSpanFormatString, null, out timeSpan);
+                        return isOK && timeSpan.Ticks > 0;
+                    },
+                });
+            DurationString = "01:00";
+            ScenarioName = "New Scenario";
         }
 
-        public CreateScenarioViewModel(Scenario scenario)
-        {
-            Location = scenario.Location;
-            Comments = scenario.Comments;
-            TimePeriod = scenario.TimePeriod;
-            Duration = scenario.Duration;
-        }
         public ObservableCollection<Location> Locations { get; set; }
         public string ScenarioName { get; set; }
         public Location Location { get; set; }
         public string Comments { get; set; }
         public TimePeriod TimePeriod { get; set; }
-        public TimeSpan Duration { get; set; }
-        public string DurationString { get { return Duration.ToString(@"hh\:mm"); } set { Duration = TimeSpan.ParseExact(value, @"hh\:mm", null); } }
+        public TimeSpan Duration { get; private set; }
+        public string DurationString { get; set; }
         public bool IsLocationSelectable { get; set; }
+
         #region PluginManager stuff
         IPluginManagerService _pluginManager;
         public IPluginManagerService PluginManager
@@ -90,11 +94,11 @@ namespace ESME.Views.Scenarios
 
         #region OkCommand
         public SimpleCommand<object, EventToCommandArgs> OkCommand { get { return _ok ?? (_ok = new SimpleCommand<object, EventToCommandArgs>(OkHandler)); } }
-        public bool IsOkEnabled { get; set; }
         SimpleCommand<object, EventToCommandArgs> _ok;
         void OkHandler(EventToCommandArgs args)
         {
             //var parameter = args.CommandParameter;
+            Duration = TimeSpan.ParseExact(DurationString, TimeSpanFormatString, null);
             CloseDialog(true);
         }
         #endregion

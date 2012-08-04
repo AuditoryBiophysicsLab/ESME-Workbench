@@ -5,24 +5,20 @@ namespace ESME.Views.Locations
 {
     public sealed class CreateLocationViewModel : ValidatingViewModel
     {
-        public CreateLocationViewModel() { ValidationRules.Add(LocationNameValidationRule); }
+        public CreateLocationViewModel()
+        {
+            AddValidationRules(new ValidationRule<CreateLocationViewModel>
+            {
+                PropertyName = "LocationName",
+                Description = "Must be unique and cannot be null or empty",
+                IsRuleValid = (target, rule) => !string.IsNullOrEmpty(target.LocationName),
+            });
+        }
 
         public EditableRectangleOverlayViewModel EditableRectangleOverlayViewModel { get; set; }
         public string LocationName { get; set; }
         public string Comments { get; set; }
         public bool IsCanceled { get; private set; }
-        #region Validation Rules
-        static readonly ValidationRule LocationNameValidationRule = new ValidationRule
-        {
-            PropertyName = "LocationName",
-            Description = "Must be unique and cannot be null or empty",
-            RuleDelegate = (o, r) =>
-            {
-                var target = (CreateLocationViewModel)o;
-                return !string.IsNullOrEmpty(target.LocationName);
-            },
-        };
-        #endregion
 
         #region Commands
         #region OkCommand

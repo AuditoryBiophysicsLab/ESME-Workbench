@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using System.Windows.Controls;
 using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Environment.NAVO;
@@ -12,9 +10,9 @@ using ESME.Plugins;
 using ESME.Views.Locations;
 using HRC.Navigation;
 using HRC.Utility;
+using HRC.Validation;
 using NAVODatabaseAdapter;
 using StandaloneNAVOPlugin.Controls;
-using ValidationRule = HRC.Validation.ValidationRule;
 
 namespace StandaloneNAVOPlugin
 {
@@ -39,14 +37,11 @@ namespace StandaloneNAVOPlugin
             AvailableResolutions = new[] { 60f };
 
             IsSelectable = true;
-            ValidationRules.AddRange(new List<ValidationRule>
+            AddValidationRules(new ValidationRule<SMGC20ForNAVO>
             {
-                new ValidationRule
-                {
-                    PropertyName = "DataLocation",
-                    Description = "The directory must exist and contain many files with a .stt extension",
-                    RuleDelegate = (o, r) => ((SMGC20ForNAVO)o).IsConfigured,
-                },
+                PropertyName = "DataLocation",
+                Description = "The directory must exist and contain many files with a .stt extension",
+                IsRuleValid = (target, rule) => target.IsConfigured,
             });
             SelectionControlViewModel = new MultipleSelectionsViewModel<float>
             {

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using HRC.Aspects;
-using HRC.Validation;
+using HRC.ViewModels;
 
 namespace ESME.Environment.NAVO
 {
 
     [Serializable]
-    public sealed class NAVOConfiguration : ValidatingViewModel
+    public sealed class NAVOConfiguration : ViewModelBase
     {
         [Initialize(TimePeriod.March)]     public TimePeriod SpringStartMonth { get; set; }
         [Initialize(TimePeriod.June)]      public TimePeriod SummerStartMonth { get; set; }

@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using ESME.Mapping;
 using HRC.Aspects;
 using HRC.Navigation;
@@ -18,12 +16,36 @@ namespace ESME.Views.Locations
         public EditableRectangleOverlayViewModel(WpfMap wpfMap)
         {
             _wpfMap = wpfMap;
-            ValidationRules.AddRange(new List<ValidationRule> { NorthValidationRule, SouthValidationRule, EastValidationRule, WestValidationRule });
+            AddValidationRules(
+                new ValidationRule<EditableRectangleOverlayViewModel>
+                {
+                    PropertyName = "North",
+                    Description = "Must be between -90 and +90 and be greater than South",
+                    IsRuleValid = (target, rule) => target.North >= -90 && target.North <= 90 && target.North > target.South,
+                },
+                new ValidationRule<EditableRectangleOverlayViewModel>
+                {
+                    PropertyName = "South",
+                    Description = "Must be between -90 and +90 and be less than North",
+                    IsRuleValid = (target, rule) => target.South >= -90 && target.South <= 90 && target.North > target.South,
+                },
+                new ValidationRule<EditableRectangleOverlayViewModel>
+                {
+                    PropertyName = "East",
+                    Description = "Must be between -180 and +180 and be greater than West",
+                    IsRuleValid = (target, rule) => target.East >= -180 && target.East <= 180 && target.East > target.West,
+                },
+                new ValidationRule<EditableRectangleOverlayViewModel>
+                {
+                    PropertyName = "West",
+                    Description = "Must be between -180 and +180 and be less than East",
+                    IsRuleValid = (target, rule) => target.West >= -180 && target.West <= 180 && target.East > target.West,
+                });
         }
 
         void UpdateOverlay()
         {
-            CheckForBrokenRules();
+            Validate();
             if (!_isVisible || !IsValid) return;
             _wpfMap.EditOverlay.EditShapesLayer.InternalFeatures.Clear();
             var rectangle = new Feature(new RectangleShape(West, North, East, South));
@@ -142,48 +164,5 @@ namespace ESME.Views.Locations
         }
 
         public GeoRect GeoRect { get { return new GeoRect(North, South, East, West); } }
-
-        #region Validation Rules
-        static readonly ValidationRule NorthValidationRule = new ValidationRule
-        {
-            PropertyName = "North",
-            Description = "Must be between -90 and +90 and be greater than South",
-            RuleDelegate = (o, r) =>
-            {
-                var target = (EditableRectangleOverlayViewModel)o;
-                return target.North >= -90 && target.North <= 90 && target.North > target.South;
-            },
-        };
-        static readonly ValidationRule SouthValidationRule = new ValidationRule
-        {
-            PropertyName = "South",
-            Description = "Must be between -90 and +90 and be less than North",
-            RuleDelegate = (sender, eventArgs) =>
-            {
-                var target = (EditableRectangleOverlayViewModel)sender;
-                return target.South >= -90 && target.South <= 90 && target.North > target.South;
-            },
-        };
-        static readonly ValidationRule EastValidationRule = new ValidationRule
-        {
-            PropertyName = "East",
-            Description = "Must be between -180 and +180 and be greater than West",
-            RuleDelegate = (sender, eventArgs) =>
-            {
-                var target = (EditableRectangleOverlayViewModel)sender;
-                return target.East >= -180 && target.East <= 180 && target.East > target.West;
-            },
-        };
-        static readonly ValidationRule WestValidationRule = new ValidationRule
-        {
-            PropertyName = "West",
-            Description = "Must be between -180 and +180 and be less than East",
-            RuleDelegate = (sender, eventArgs) =>
-            {
-                var target = (EditableRectangleOverlayViewModel)sender;
-                return target.West >= -180 && target.West <= 180 && target.East > target.West;
-            },
-        };
-        #endregion
     }
 }

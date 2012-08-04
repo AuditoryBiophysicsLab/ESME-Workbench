@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
-using System.Linq;
-using System.Windows.Controls;
 using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Locations;
@@ -11,9 +8,9 @@ using ESME.Plugins;
 using ESME.Views.Locations;
 using HRC.Navigation;
 using HRC.Utility;
+using HRC.Validation;
 using NAVODatabaseAdapter;
 using StandaloneNAVOPlugin.Controls;
-using ValidationRule = HRC.Validation.ValidationRule;
 
 namespace StandaloneNAVOPlugin
 {
@@ -38,14 +35,11 @@ namespace StandaloneNAVOPlugin
             AvailableTimePeriods = new[] { TimePeriod.Invalid };
 
             IsSelectable = true;
-            ValidationRules.AddRange(new List<ValidationRule>
+            AddValidationRules(new ValidationRule<BST20ForNAVO>
             {
-                new ValidationRule
-                {
-                    PropertyName = "DataLocation",
-                    Description = "File must exist and be named hfevav2.h5",
-                    RuleDelegate = (o, r) => ((BST20ForNAVO)o).IsConfigured,
-                },
+                PropertyName = "DataLocation",
+                Description = "File must exist and be named hfevav2.h5",
+                IsRuleValid = (target, rule) => target.IsConfigured,
             });
             SelectionControlViewModel = new MultipleSelectionsViewModel<float>
             {

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
-using System.Linq;
-using System.Windows.Controls;
 using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Locations;
@@ -11,9 +8,9 @@ using ESME.Plugins;
 using ESME.Views.Locations;
 using HRC.Navigation;
 using HRC.Utility;
+using HRC.Validation;
 using NAVODatabaseAdapter;
 using StandaloneNAVOPlugin.Controls;
-using ValidationRule = HRC.Validation.ValidationRule;
 
 namespace StandaloneNAVOPlugin
 {
@@ -46,25 +43,23 @@ namespace StandaloneNAVOPlugin
             AvailableTimePeriods = new[] { TimePeriod.Invalid };
 
             IsSelectable = true;
-            ValidationRules.AddRange(new List<ValidationRule>
-            {
-                new ValidationRule
+            AddValidationRules(
+                new ValidationRule<DBDB54ForNAVO>
                 {
                     PropertyName = "DatabaseLocation",
                     Description = "File must exist and be named dbdbv5_level0c_0.h5",
-                    RuleDelegate = (o, r) => ((DBDB54ForNAVO)o).DatabaseLocation != null &&
-                                             File.Exists(((DBDB54ForNAVO)o).DatabaseLocation) &&
-                                             Path.GetFileName(DatabaseLocation) == RequiredDBDBFilename,
+                    IsRuleValid = (target, rule) => target.DatabaseLocation != null &&
+                                                     File.Exists(target.DatabaseLocation) &&
+                                                     Path.GetFileName(DatabaseLocation) == RequiredDBDBFilename,
                 },
-                new ValidationRule
+                new ValidationRule<DBDB54ForNAVO>
                 {
                     PropertyName = "ExtractorLocation",
                     Description = "File must exist and be named dbv5_command.exe",
-                    RuleDelegate = (o, r) => ((DBDB54ForNAVO)o).ExtractorLocation != null &&
-                                             File.Exists(((DBDB54ForNAVO)o).ExtractorLocation) &&
-                                             Path.GetFileName(ExtractorLocation) == RequiredDBDBExtractionProgram,
-                },
-            });
+                    IsRuleValid = (target, rule) => target.ExtractorLocation != null &&
+                                                     File.Exists(target.ExtractorLocation) &&
+                                                     Path.GetFileName(ExtractorLocation) == RequiredDBDBExtractionProgram,
+                });
             SelectionControlViewModel = new MultipleSelectionsViewModel<float>
             {
                 UnitName = " min",

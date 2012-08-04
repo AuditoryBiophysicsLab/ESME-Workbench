@@ -8,15 +8,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using ESME.Environment;
-using ESME.Model;
 using HRC.Navigation;
 using HRC.Utility;
-using HRC.Validation;
+using HRC.ViewModels;
 using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.TransmissionLoss.CASS
 {
-    public class CASSOutput : ValidatingViewModel, IEquatable<AcousticProperties>, ISupportValidation
+    public class CASSOutput : ViewModelBase, IEquatable<AcousticProperties>
     {
         #region Public Properties
 

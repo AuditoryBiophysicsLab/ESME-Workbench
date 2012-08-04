@@ -11,45 +11,43 @@ namespace ESME.Environment
         const string SeasonRuleDescription = "Must be a value between January and December, inclusive";
         public SeasonConfiguration()
         {
-            ValidationRules.AddRange(new List<ValidationRule>
-            {
-                new ValidationRule
+            AddValidationRules(
+                new ValidationRule<SeasonConfiguration>
                 {
                     PropertyName = "SpringStartMonth",
                     Description = SeasonRuleDescription,
-                    RuleDelegate = (o, r) => AllMonths.Contains(((SeasonConfiguration)o).SpringStartMonth),
+                    IsRuleValid = (target, rule) => AllMonths.Contains(target.SpringStartMonth),
                 },
-                new ValidationRule
+                new ValidationRule<SeasonConfiguration>
                 {
                     PropertyName = "SummerStartMonth",
                     Description = SeasonRuleDescription,
-                    RuleDelegate = (o, r) => AllMonths.Contains(((SeasonConfiguration)o).SummerStartMonth),
+                    IsRuleValid = (target, rule) => AllMonths.Contains(target.SummerStartMonth),
                 },
-                new ValidationRule
+                new ValidationRule<SeasonConfiguration>
                 {
                     PropertyName = "FallStartMonth",
                     Description = SeasonRuleDescription,
-                    RuleDelegate = (o, r) => AllMonths.Contains(((SeasonConfiguration)o).FallStartMonth),
+                    IsRuleValid = (target, rule) => AllMonths.Contains(target.FallStartMonth),
                 },
-                new ValidationRule
+                new ValidationRule<SeasonConfiguration>
                 {
                     PropertyName = "WinterStartMonth",
                     Description = SeasonRuleDescription,
-                    RuleDelegate = (o, r) => AllMonths.Contains(((SeasonConfiguration)o).WinterStartMonth),
+                    IsRuleValid = (target, rule) => AllMonths.Contains(target.WinterStartMonth),
                 },
-                new ValidationRule
+                new ValidationRule<SeasonConfiguration>
                 {
                     PropertyName = "ColdSeasonStartMonth",
                     Description = SeasonRuleDescription,
-                    RuleDelegate = (o, r) => AllMonths.Contains(((SeasonConfiguration)o).ColdSeasonStartMonth),
+                    IsRuleValid = (target, rule) => AllMonths.Contains(target.ColdSeasonStartMonth),
                 },
-                new ValidationRule
+                new ValidationRule<SeasonConfiguration>
                 {
                     PropertyName = "WarmSeasonStartMonth",
                     Description = SeasonRuleDescription,
-                    RuleDelegate = (o, r) => AllMonths.Contains(((SeasonConfiguration)o).WarmSeasonStartMonth),
-                },
-            });
+                    IsRuleValid = (target, rule) => AllMonths.Contains(target.WarmSeasonStartMonth),
+                });
         }
 
         [Initialize(TimePeriod.March)]     public TimePeriod SpringStartMonth { get; set; }
