@@ -15,6 +15,18 @@ namespace ESME.Scenarios
      [NotifyPropertyChanged]
     public class Perimeter : IHaveGuid, IHaveLayerSettings
     {
+         public Perimeter() {}
+         public Perimeter(Perimeter perimeter) 
+         {
+             Copy(perimeter);
+         }
+         void Copy(Perimeter perimeter)
+         {
+             Name = perimeter.Name;
+             foreach (var coordinate in perimeter.PerimeterCoordinates)
+                 PerimeterCoordinates.Add(new PerimeterCoordinate(coordinate) { Perimeter = this });
+             LayerSettings = new LayerSettings(perimeter.LayerSettings);
+         }
         [Key, Initialize]
         public Guid Guid { get; set; }
         public string Name { get; set; }

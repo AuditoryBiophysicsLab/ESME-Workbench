@@ -26,6 +26,7 @@ namespace ESME
         public const string LoadScenario = "LoadScenarioMessage";
         public const string DeleteAllScenarios = "DeleteAllScenariosMessage";
         public const string ScenarioProperties = "ScenarioPropertiesMessage";
+        public const string SaveScenarioCopy = "SaveScenarioCopyMessage";
 
         public const string ScenarioBoundToLayer = "ScenarioBoundToLayerMessage";
         public const string ViewScenarioProperties = "ViewScenarioPropertiesMessage";

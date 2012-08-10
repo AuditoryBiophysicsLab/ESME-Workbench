@@ -15,6 +15,26 @@ namespace ESME.Scenarios
     [NotifyPropertyChanged]
     public class Mode : IHaveGuid
     {
+        public Mode() {}
+
+        public Mode(Mode mode)
+        {
+            PSMModeGuid = mode.PSMModeGuid;
+            ModeName = mode.ModeName;
+            ModeType = mode.ModeType;
+            ActiveTime = mode.ActiveTime;
+            Depth = mode.Depth;
+            SourceLevel = mode.SourceLevel;
+            LowFrequency = mode.LowFrequency;
+            HighFrequency = mode.HighFrequency;
+            PulseInterval = mode.PulseInterval;
+            PulseLength = mode.PulseLength;
+            HorizontalBeamWidth = mode.HorizontalBeamWidth;
+            VerticalBeamWidth = mode.VerticalBeamWidth;
+            DepressionElevationAngle = mode.DepressionElevationAngle;
+            RelativeBeamAngle = mode.RelativeBeamAngle;
+            MaxPropagationRadius = mode.MaxPropagationRadius;
+        }
         [Key, Initialize] public Guid Guid { get; set; }
         public string PSMModeGuid { get; set; }
         public string ModeName { get; set; }

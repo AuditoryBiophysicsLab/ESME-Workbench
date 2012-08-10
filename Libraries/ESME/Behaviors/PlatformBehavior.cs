@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using ESME.Scenarios;
 using HRC.Navigation;
@@ -23,10 +24,13 @@ namespace ESME.Behaviors
                         var modeTimeline = new ActivityTimeline();
                         while (modeTimeline.Duration < _duration)
                         {
+                            //Debug.WriteLine(string.Format("Mode {0} active {1} inactive {2} at {3}", mode.PSMName, (TimeSpan)mode.PulseLength, (TimeSpan)mode.PulseInterval - (TimeSpan)mode.PulseLength, modeTimeline.Duration));
                             modeTimeline.AddActivity(true, mode.PulseLength);
                             modeTimeline.AddActivity(false, (TimeSpan)mode.PulseInterval - mode.PulseLength);
                         }
-                        _modeActiveTimes.Add(mode, modeTimeline.GetActiveTimes(_timeStep).ToList());
+                        var activeTimes = modeTimeline.GetActiveTimes(_timeStep).ToList();
+                        Debug.WriteLine(string.Format("Mode {0} is active for {1} across {2} time steps", mode.PSMName, new TimeSpan(activeTimes.Sum(t => t.Ticks)), _timeStepCount));
+                        _modeActiveTimes.Add(mode, activeTimes);
                     }
             }
             catch (Exception e)
@@ -226,7 +230,7 @@ namespace ESME.Behaviors
         {
             if (_items.Count == 0) yield break;
 
-            // Make a local copy of the items in case we need to call GetActiveItems again
+            // Make a local copy of the items in case we need to call GetActiveTimes again
             var itemQueue = new Queue<TimelineItem>();
             foreach (var curItem in _items) itemQueue.Enqueue(new TimelineItem(curItem));
 

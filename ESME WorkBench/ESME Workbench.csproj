@@ -486,6 +486,9 @@
     <Content Include="External References\System.Data.SQLite.dll" />
     <Content Include="External References\System.Data.SQLite.Linq.dll" />
     <Content Include="External References\System.Threading.Tasks.Dataflow.dll" />
+    <Resource Include="Images\SmallIcons\table_save.png" />
+    <Resource Include="table_save.png" />
+    <Resource Include="Images\SmallIcons\save_as.png" />
     <Resource Include="Images\SmallIcons\zoom_layer.png" />
     <Resource Include="Images\SmallIcons\layer_open.png" />
     <Resource Include="Images\SmallIcons\sound_delete.png" />

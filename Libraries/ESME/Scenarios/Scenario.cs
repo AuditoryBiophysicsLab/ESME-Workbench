@@ -27,8 +27,82 @@ namespace ESME.Scenarios
         public Scenario()
         {
             StorageDirectory = Path.Combine("scenarios", MasterDatabaseService.RandomFilenameWithoutExension);
-            var duration = new TimeSpan(0, 1, 0, 0);
-            Duration.Ticks = duration.Ticks;
+            Duration = new TimeSpan(0, 1, 0, 0);
+        }
+
+        public Scenario(Scenario scenario) : this()
+        {
+            Copy(scenario);
+        }
+
+        void Copy(Scenario scenario)
+        {
+            Name = scenario.Name;
+            Comments = scenario.Comments;
+            ShowAllAnalysisPoints = scenario.ShowAllAnalysisPoints;
+            ShowAllPerimeters = scenario.ShowAllPerimeters;
+            ShowAllSpecies = scenario.ShowAllSpecies;
+            StartTime = new TimeSpan(scenario.StartTime.Ticks);
+            Duration = new TimeSpan(scenario.Duration.Ticks);
+            TimePeriod = (TimePeriod)scenario.TimePeriod;
+            Location = scenario.Location;
+            Wind = scenario.Wind;
+            SoundSpeed = scenario.SoundSpeed;
+            Sediment = scenario.Sediment;
+            Bathymetry = scenario.Bathymetry;
+            // Here we map the old perimeter to the new perimeter so that the copied platform gets the proper perimeter
+            var perimeterMap = new Dictionary<Guid, Guid>();
+            foreach (var perimeter in scenario.Perimeters)
+            {
+                var newPerimeter = new Perimeter(perimeter) { Scenario = this };
+                perimeterMap.Add(perimeter.Guid, newPerimeter.Guid);
+                Perimeters.Add(newPerimeter);
+            }
+            var modeMap = new Dictionary<Guid, Guid>();
+            var allModes = new List<Mode>();
+            foreach (var platform in scenario.Platforms)
+            {
+                var newPlatform = new Platform(platform) { Scenario = this };
+                // Make sure the new perimeter gets the proper copied perimeter from the original scenario
+                if (platform.Perimeter != null) newPlatform.Perimeter = Perimeters.Find(p => p.Guid == perimeterMap[platform.Perimeter.Guid]);
+                Platforms.Add(newPlatform);
+                foreach (var source in platform.Sources)
+                {
+                    var newSource = new Source(source) { Platform = newPlatform };
+                    newPlatform.Sources.Add(newSource);
+                    foreach (var mode in source.Modes)
+                    {
+                        var newMode = new Mode(mode) { Source = newSource };
+                        modeMap.Add(mode.Guid, newMode.Guid);
+                        newSource.Modes.Add(newMode);
+                        allModes.Add(newMode);
+                    }
+                }
+            }
+            foreach (var analysisPoint in scenario.AnalysisPoints)
+            {
+                var newAnalysisPoint = new AnalysisPoint(analysisPoint) { Scenario = this };
+                AnalysisPoints.Add(newAnalysisPoint);
+                foreach (var transmissionLoss in analysisPoint.TransmissionLosses)
+                {
+                    var newTransmissionLoss = new TransmissionLoss { AnalysisPoint = newAnalysisPoint, LayerSettings = new LayerSettings(transmissionLoss.LayerSettings) };
+                    foreach (var mode in transmissionLoss.Modes) 
+                        newTransmissionLoss.Modes.Add(allModes.Find(m => m.Guid == modeMap[mode.Guid]));
+                    newAnalysisPoint.TransmissionLosses.Add(newTransmissionLoss);
+                    foreach (var radial in transmissionLoss.Radials)
+                    {
+                        var newRadial = new Radial(radial) { TransmissionLoss = newTransmissionLoss };
+                        newTransmissionLoss.Radials.Add(newRadial);
+                        newRadial.CopyFiles(radial);
+                    }
+                }
+            }
+            foreach (var species in scenario.ScenarioSpecies)
+            {
+                var newSpecies = new ScenarioSpecies(species) { Scenario = this };
+                ScenarioSpecies.Add(newSpecies);
+                newSpecies.CopyFiles(species);
+            }
         }
 
         [Key, Initialize]
@@ -219,6 +293,10 @@ namespace ESME.Scenarios
         public SimpleCommand<object, EventToCommandArgs> ScenarioPropertiesCommand { get { return _scenarioProperties ?? (_scenarioProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ScenarioProperties, this))); } }
         SimpleCommand<object, EventToCommandArgs> _scenarioProperties;
         #endregion
+        #region SaveACopyCommand
+        public SimpleCommand<object, EventToCommandArgs> SaveACopyCommand { get { return _saveACopy ?? (_saveACopy = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.SaveScenarioCopy, this))); } }
+        SimpleCommand<object, EventToCommandArgs> _saveACopy;
+        #endregion
     }
 
     public static class ScenarioExensions
@@ -363,14 +441,6 @@ namespace ESME.Scenarios
                 analysisPoint.Add(new List<Mode> { mode });
             }
         }
-
-        /// <summary>
-        /// Removes the specified mode from the scenario.  If the mode is the only one for a given TL, the TL will be removed.
-        /// If the TL is the only TL in any given analysis point, then it too will be removed
-        /// </summary>
-        /// <param name="scenario"> </param>
-        /// <param name="mode"></param>
-        public static void Remove(this Scenario scenario, Mode mode){}
 
         private static ListCollectionView GroupEquivalentModes(this Scenario scenario)
         {

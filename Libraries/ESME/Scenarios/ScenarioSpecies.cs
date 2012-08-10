@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -19,6 +18,18 @@ namespace ESME.Scenarios
     public class ScenarioSpecies : IHaveGuid, IHaveLayerSettings, IEquatable<ScenarioSpecies>
     {
         public ScenarioSpecies() { PopulationFilename = MasterDatabaseService.RandomFilenameWithoutExension + ".ani"; }
+        public ScenarioSpecies(ScenarioSpecies species) : this() { Copy(species); }
+        void Copy(ScenarioSpecies species)
+        {
+            LatinName = species.LatinName;
+            SpeciesDefinitionFilename = species.SpeciesDefinitionFilename;
+            LayerSettings = new LayerSettings(species.LayerSettings);
+        }
+
+        public void CopyFiles(ScenarioSpecies species)
+        {
+            File.Copy(species.PopulationFilePath, PopulationFilePath);
+        }
         [Key, Initialize]
         public Guid Guid { get; set; }
         public string SpeciesFile { get; set; }

@@ -281,7 +281,7 @@ namespace ESME.TransmissionLoss
                 if (radial.IsDeleted) return;
                 bellhopProcess.Start();
                 radial.CalculationStarted = DateTime.Now;
-                bellhopProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
+                bellhopProcess.PriorityClass = ProcessPriorityClass.Idle;
                 bellhopProcess.BeginOutputReadLine();
                 while (!bellhopProcess.HasExited)
                 {

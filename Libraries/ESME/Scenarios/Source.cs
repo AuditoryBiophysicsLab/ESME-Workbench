@@ -12,7 +12,16 @@ namespace ESME.Scenarios
      [NotifyPropertyChanged]
     public class Source : IHaveGuid
     {
-        [Key, Initialize]
+         public Source() {}
+
+         public Source(Source source) 
+         {
+             PSMSourceGuid = source.PSMSourceGuid;
+             SourceName = source.SourceName;
+             SourceType = source.SourceType;
+         }
+
+         [Key, Initialize]
         public Guid Guid { get; set; }
         public string PSMSourceGuid { get; set; }
         public string SourceName { get; set; }

@@ -182,6 +182,7 @@
     <Compile Include="Scenarios\Perimeter.cs" />
     <Compile Include="Scenarios\PerimeterCoordinate.cs" />
     <Compile Include="Scenarios\Platform.cs" />
+    <Compile Include="Scenarios\Radial.cs" />
     <Compile Include="Scenarios\Scenario.cs" />
     <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Delegates.cs" />
@@ -246,6 +247,7 @@
     <Compile Include="Scenarios\ScenarioSpecies.cs" />
     <Compile Include="Scenarios\Source.cs" />
     <Compile Include="Scenarios\TrackDefinition.cs" />
+    <Compile Include="Scenarios\TransmissionLoss.cs" />
     <Compile Include="Settings\Exceptions.cs" />
     <Compile Include="Settings\SettingsBase.cs" />
     <Compile Include="Settings\SettingsService.cs" />

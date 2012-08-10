@@ -12,11 +12,11 @@ using ESME.Database;
 using ESME.Locations;
 using ESME.Mapping;
 using HRC.Aspects;
+using HRC.Navigation;
 using HRC.Services;
 using HRC.Utility;  
 using HRC.ViewModels;
 using HRC.WPF;
-using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Scenarios
 {
@@ -24,6 +24,24 @@ namespace ESME.Scenarios
     public class Platform : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
     {
         public Platform() { TrackType = Behaviors.TrackType.Stationary; }
+        public Platform(Platform platform) { Copy(platform); }
+        void Copy(Platform platform)
+        {
+            Description = platform.Description;
+            Launches = platform.Launches;
+            Tows = platform.Tows;
+            RepeatCount = platform.RepeatCount;
+            PSMPlatformGuid = platform.PSMPlatformGuid;
+            PlatformName = platform.PlatformName;
+            PlatformType = platform.PlatformType;
+            TrackType = (TrackType)platform.TrackType;
+            Geo = new Geo(platform.Geo);
+            IsRandom = platform.IsRandom;
+            Depth = platform.Depth;
+            Course = platform.Course;
+            Speed = platform.Speed;
+            LayerSettings = new LayerSettings(platform.LayerSettings);
+        }
 
         [Import] static readonly IMessageBoxService _messageBox;
 
@@ -41,14 +59,18 @@ namespace ESME.Scenarios
         public DbTrackType TrackType { get; set; }
         public DbGeo Geo { get; set; }
         bool _isRandom = true;
-        public bool IsRandom { get { return _isRandom; } set
+
+        public bool IsRandom
         {
-            _isRandom = value;
-            if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
-            RemoveMapLayers();
-            PlatformBehavior = null;
-            CreateMapLayers();
-        }
+            get { return _isRandom; }
+            set
+            {
+                _isRandom = value;
+                if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
+                RemoveMapLayers();
+                PlatformBehavior = null;
+                CreateMapLayers();
+            }
         }
 
         public float Depth { get; set; }

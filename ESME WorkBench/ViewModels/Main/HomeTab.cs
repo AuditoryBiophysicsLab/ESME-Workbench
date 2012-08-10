@@ -183,7 +183,7 @@ namespace ESMEWorkbench.ViewModels.Main
                             select s).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A scenario named {0} already exists in location {1}, choose another name", scenario.Name, scenario.Location.Name));
             location.Scenarios.Add(scenario);
-            Database.Context.Locations.Add(location);
+           // Database.Context.Locations.Add(location);
             Database.Context.Scenarios.Add(scenario);
             //Database.Add(scenario);
             return scenario;
@@ -212,6 +212,18 @@ namespace ESMEWorkbench.ViewModels.Main
         void ViewScenarioProperties(Scenario scenario)
         {
             _visualizer.ShowDialog("ScenarioPropertiesView", new ScenarioPropertiesViewModel(scenario));
+        }
+
+        [MediatorMessageSink(MediatorMessage.SaveScenarioCopy), UsedImplicitly]
+        void SaveScenarioCopy(Scenario scenario)
+        {
+            var copy = new Scenario(scenario) { Name = "Copy of " + scenario.Name };
+            var copyNumber = 2;
+            while ((from s in scenario.Location.Scenarios
+                    where s.Name == copy.Name
+                    select s).FirstOrDefault() != null) copy.Name = "Copy " + copyNumber++ + " of " + scenario.Name;
+            scenario.Location.Scenarios.Add(copy);
+            Database.Context.Scenarios.Add(copy);
         }
         #endregion
 

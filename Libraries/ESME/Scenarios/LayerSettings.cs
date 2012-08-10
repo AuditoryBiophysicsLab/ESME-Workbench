@@ -21,6 +21,16 @@ namespace ESME.Scenarios
             LineOrSymbolDbColor = new DbColor(ColorExtensions.GetRandomNamedColor());
             AreaDbColor = new DbColor(Colors.Transparent);
         }
+
+        public LayerSettings(LayerSettings layerSettings)
+        {
+            IsChecked = layerSettings.IsChecked;
+            PointSymbolType = layerSettings.PointSymbolType;
+            LineOrSymbolDbColor = layerSettings.LineOrSymbolDbColor;
+            AreaDbColor = layerSettings.AreaDbColor;
+            LineOrSymbolSize = layerSettings.LineOrSymbolSize;
+        }
+
         [Key, Initialize] public Guid Guid { get; set; }
         bool _isChecked;
 
