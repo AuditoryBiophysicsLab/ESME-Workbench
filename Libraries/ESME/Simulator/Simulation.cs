@@ -43,7 +43,7 @@ namespace ESME.Simulator
                 TimeStepSize = (from p in scenario.Platforms
                                 from s in p.Sources
                                 from m in s.Modes
-                                select m.PulseIntervalTimeSpan).Max()
+                                select (TimeSpan)m.PulseInterval).Max()
             };
             return result;
         }

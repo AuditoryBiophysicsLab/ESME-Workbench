@@ -19,8 +19,8 @@ namespace ESME.Views.Scenarios
             SourceLevel = _mode.SourceLevel;
             LowFrequency = _mode.LowFrequency;
             HighFrequency = _mode.HighFrequency;
-            PulseIntervalString = _mode.PulseIntervalTimeSpan.ToString(TimeSpanFormatString);
-            PulseLengthString = _mode.PulseLengthTimeSpan.ToString(TimeSpanFormatString);
+            PulseIntervalString = ((TimeSpan)_mode.PulseInterval).ToString(TimeSpanFormatString);
+            PulseLengthString = ((TimeSpan)_mode.PulseLength).ToString(TimeSpanFormatString);
             HorizontalBeamWidth = _mode.HorizontalBeamWidth;
             VerticalBeamWidth = _mode.VerticalBeamWidth;
             DepressionElevationAngle = _mode.DepressionElevationAngle;
@@ -160,6 +160,9 @@ namespace ESME.Views.Scenarios
         /// </summary>
         public float MaxPropagationRadius { get; set; }
 
+        public bool AcousticPropertiesHaveChanged { get; private set; }
+        public bool RadiusHasChanged { get; private set; }
+
         #region OkCommand
         public SimpleCommand<object, EventToCommandArgs> OkCommand { get { return _ok ?? (_ok = new SimpleCommand<object, EventToCommandArgs>(OkHandler)); } }
         SimpleCommand<object, EventToCommandArgs> _ok;
@@ -167,20 +170,32 @@ namespace ESME.Views.Scenarios
         void OkHandler(EventToCommandArgs args)
         {
             //var parameter = args.CommandParameter;
+            AcousticPropertiesHaveChanged = HaveAcousticPropertiesChanged();
+            RadiusHasChanged = Math.Abs(MaxPropagationRadius - _mode.MaxPropagationRadius) > 0.1;
             _mode.ModeName = ModeName;
             _mode.ModeType = ModeType;
             _mode.Depth = Depth;
             _mode.SourceLevel = SourceLevel;
             _mode.LowFrequency = LowFrequency;
             _mode.HighFrequency = HighFrequency;
-            _mode.PulseIntervalTimeSpan = TimeSpan.ParseExact(PulseIntervalString, TimeSpanFormatString, null);
-            _mode.PulseLengthTimeSpan = TimeSpan.ParseExact(PulseLengthString, TimeSpanFormatString, null);
+            _mode.PulseInterval = TimeSpan.ParseExact(PulseIntervalString, TimeSpanFormatString, null);
+            _mode.PulseLength = TimeSpan.ParseExact(PulseLengthString, TimeSpanFormatString, null);
             _mode.HorizontalBeamWidth = HorizontalBeamWidth;
             _mode.VerticalBeamWidth = VerticalBeamWidth;
             _mode.DepressionElevationAngle = DepressionElevationAngle;
             _mode.RelativeBeamAngle = RelativeBeamAngle;
             _mode.MaxPropagationRadius = MaxPropagationRadius;
             CloseActivePopUpCommand.Execute(true);
+        }
+
+        bool HaveAcousticPropertiesChanged()
+        {
+            if (_mode.Depth.HasValue != Depth.HasValue) return true;
+            if (_mode.Depth.HasValue && Depth.HasValue && (_mode.Depth.Value != Depth.Value)) return true;
+            if (Math.Abs(VerticalBeamWidth - _mode.VerticalBeamWidth) > 0.1) return true;
+            if (Math.Abs(DepressionElevationAngle - _mode.DepressionElevationAngle) > 0.1) return true;
+            if (Math.Abs(HighFrequency - _mode.HighFrequency) > 0.1) return true;
+            return Math.Abs(LowFrequency - _mode.LowFrequency) > 0.1;
         }
         #endregion
         #region CancelCommand

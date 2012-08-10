@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.Data.Entity;
 using System.Diagnostics;
@@ -74,9 +73,9 @@ namespace ESME.TransmissionLoss
             }
             var radials = (from radial in _databaseService.Context.Radials
                                .Include(r => r.TransmissionLoss)
-                               .Include(r => r.TransmissionLoss.Mode)
-                               .Include(r => r.TransmissionLoss.Mode.Source)
-                               .Include(r => r.TransmissionLoss.Mode.Source.Platform)
+                               .Include(r => r.TransmissionLoss.Modes)
+                               //.Include(r => r.TransmissionLoss.Mode.Source)
+                               //.Include(r => r.TransmissionLoss.Mode.Source.Platform)
                                .Include(r => r.TransmissionLoss.AnalysisPoint)
                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario)
                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Location)
@@ -158,7 +157,7 @@ namespace ESME.TransmissionLoss
                 //                                              where s.Guid == radial.TransmissionLoss.AnalysisPoint.Scenario.Guid
                 //                                              select s).Single());
                 var scenario = radial.TransmissionLoss.AnalysisPoint.Scenario;
-                var mode = radial.TransmissionLoss.Mode;
+                var mode = radial.TransmissionLoss.Modes[0];
                 var platform = mode.Source.Platform;
                 var timePeriod = platform.Scenario.TimePeriod;
                 if (radial.IsDeleted) return;
@@ -317,7 +316,7 @@ namespace ESME.TransmissionLoss
                 Debug.WriteLine("{0}: FAIL: Calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}.  Exception: {4}",
                                 DateTime.Now,
                                 radial.Bearing,
-                                radial.TransmissionLoss.Mode.ModeName,
+                                radial.TransmissionLoss.Modes[0].ModeName,
                                 (Geo)radial.TransmissionLoss.AnalysisPoint.Geo, e.Message);
             }
         }

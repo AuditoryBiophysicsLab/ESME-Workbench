@@ -3,7 +3,6 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,7 +49,7 @@ namespace ESME.Views.TransmissionLossViewer
                     {
                         case "CurMinValue":
                         case "CurMaxValue":
-                            if (Radial != null) BeginRenderBitmap(Radial.Guid, TransmissionLossRadial, true);
+                            if (Radial != null) BeginRenderBitmap(Radial.Guid, TransmissionLossRadial);
                             else WaitToRenderText = "This radial has not yet been calculated";
                             break;
                     }
@@ -97,7 +96,7 @@ namespace ESME.Views.TransmissionLossViewer
                     ColorMapViewModel.StatisticalMaximum = TransmissionLossRadial.StatMax;
                     ColorMapViewModel.StatisticalMinimum = TransmissionLossRadial.StatMin;
                     _curMaxValue = _curMinValue = -1;
-                    BeginRenderBitmap(_radial.Guid, TransmissionLossRadial, true);
+                    BeginRenderBitmap(_radial.Guid, TransmissionLossRadial);
                     RangeMin = _radial.Ranges.First();
                     RangeMax = _radial.Ranges.Last();
                     DepthMin = _radial.Depths.First();
@@ -163,9 +162,9 @@ namespace ESME.Views.TransmissionLossViewer
                                ? null
                                : Path.Combine(Properties.Settings.Default.ExperimentReportDirectory,
                                               string.Format("{0} {1} {2} bearing {3} degrees",
-                                                            Radial.TransmissionLoss.Mode.ModeName,
-                                                            Radial.TransmissionLoss.Mode.Source.SourceName,
-                                                            Radial.TransmissionLoss.Mode.Source.Platform.PlatformName,
+                                                            Radial.TransmissionLoss.Modes[0].ModeName,
+                                                            Radial.TransmissionLoss.Modes[0].Source.SourceName,
+                                                            Radial.TransmissionLoss.Modes[0].Source.Platform.PlatformName,
                                                             Radial.Bearing));
             }
         }
@@ -190,60 +189,7 @@ namespace ESME.Views.TransmissionLossViewer
             view.SizeChanged += (s, e) => CalculateBottomProfileGeometry();
         }
 
-        [DllImport("Kernel32.dll")] private static extern bool QueryPerformanceCounter(out long lpPerformanceCount);
-        //readonly ConcurrentDictionary<long, Tuple<CancellationTokenSource, Task>> _renderTasks = new ConcurrentDictionary<long, Tuple<CancellationTokenSource, Task>>();
-        readonly Tuple<Task, CancellationTokenSource, long>[] _renderTasks = new Tuple<Task, CancellationTokenSource, long>[2];
         void BeginRenderBitmap(Guid guid, TransmissionLossRadial transmissionLoss)
-        {
-            if (transmissionLoss == null)
-            {
-                WaitToRenderText = "This radial has not yet been calculated";
-                return;
-            }
-            if (WriteableBitmap == null) return;
-            var tokenSource = new CancellationTokenSource();
-            long ticks;
-            QueryPerformanceCounter(out ticks);
-            var task = TaskEx.Run(() => RenderBitmapAsync(guid, transmissionLoss, tokenSource.Token));
-            task.ContinueWith(t =>
-            {
-                if (t.IsCanceled) return;
-                lock (_renderTasks)
-                {
-                    if (_renderTasks[0] != null && _renderTasks[0].Item3 == ticks)
-                    {
-                        //_writer.WriteLine("State 1");
-                        _renderTasks[0] = null;
-                        if (_renderTasks[1] != null)
-                        {
-                            //_writer.WriteLine("State 1.1");
-                            _renderTasks[0] = _renderTasks[1];
-                            _renderTasks[1] = null;
-                        }
-                    }
-                    else if (_renderTasks[1] != null && _renderTasks[1].Item3 == ticks)
-                    {
-                        _renderTasks[1] = null;
-                        //_writer.WriteLine("State 2");
-                    }
-                    //else _writer.WriteLine("State 3");
-                    //_writer.Flush();
-                }
-            });
-            lock (_renderTasks)
-            {
-                if (_renderTasks[0] == null) _renderTasks[0] = Tuple.Create(task, tokenSource, ticks);
-                else if (_renderTasks[1] == null) _renderTasks[1] = Tuple.Create(task, tokenSource, ticks);
-                else
-                {
-                    _renderTasks[1].Item2.Cancel();
-                    _renderTasks[1] = Tuple.Create(task, tokenSource, ticks);
-                }
-            }
-            //if (!_renderTasks.TryAdd(ticks, Tuple.Create(tokenSource, task))) tokenSource.Cancel();
-        }
-
-        void BeginRenderBitmap(Guid guid, TransmissionLossRadial transmissionLoss, bool dummy)
         {
             if (transmissionLoss == null)
             {
@@ -285,7 +231,7 @@ namespace ESME.Views.TransmissionLossViewer
                 Debug.WriteLine("Render completed, checking for re-render...");
                 RenderBitmapAsync(guid, transmissionLoss, tokenSource.Token);
             });
-            task.ContinueWith(t => BeginRenderBitmap(guid, transmissionLoss, dummy));
+            task.ContinueWith(t => BeginRenderBitmap(guid, transmissionLoss));
         }
 
         readonly object _lockObject = new object();
@@ -398,7 +344,7 @@ namespace ESME.Views.TransmissionLossViewer
                 else
                 {
                     MouseTLInfo = string.Format("Transmission Loss: {0:0.0}dB", TransmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
-                    MouseSPLInfo = string.Format("Sound Pressure: {0:0.0}dB", Radial.TransmissionLoss.Mode.SourceLevel - TransmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
+                    MouseSPLInfo = string.Format("Sound Pressure: {0:0.0}dB", Radial.TransmissionLoss.Modes[0].SourceLevel - TransmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
                 }
             }
             else

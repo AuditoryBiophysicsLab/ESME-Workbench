@@ -445,6 +445,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 IsNew = isNew,
             };
             source.Modes.Add(mode);
+            source.Platform.Scenario.Add(mode);
         }
 
         [MediatorMessageSink(MediatorMessage.ModeBoundToLayer), UsedImplicitly]
@@ -486,6 +487,8 @@ namespace ESMEWorkbench.ViewModels.Main
             _visualizer.ShowDialog("ModePropertiesView", vm);
             //_visualizer.ShowDialog("TreeViewItemPropertiesView", new ModePropertiesViewModel() { Mode = mode, });
             mode.LowFrequency = mode.HighFrequency;
+            if (vm.AcousticPropertiesHaveChanged) Scenario.NotifyAcousticsChanged(mode);
+            else if (vm.RadiusHasChanged) Scenario.NotifyRadiusChanged(mode);
         }
         #endregion
 

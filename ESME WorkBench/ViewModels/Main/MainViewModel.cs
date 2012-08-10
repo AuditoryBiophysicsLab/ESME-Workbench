@@ -74,6 +74,8 @@ namespace ESMEWorkbench.ViewModels.Main
             _visualizer = visualizer;
             _saveFile = saveFile;
             _transmissionLoss = transmissionLoss;
+            ScenarioExensions.TransmissionLossCalculator = _transmissionLoss;
+            Radial.TransmissionLossCalculator = _transmissionLoss;
             _plugins = plugins;
             _cache = cache;
             MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
@@ -113,6 +115,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 LocationsTreeViewModel = new LocationsTreeViewModel(Database.Context.Locations.Local);
 
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
+                ScenarioExensions.Dispatcher = _dispatcher;
                 _plugins.PluginDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
                 Globals.AppSettings.PluginManagerService = _plugins;
@@ -434,11 +437,10 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 if (Scenario != null && geo != null && Scenario.GeoRect.Contains(geo))
                 {
-                    var analysisPoint = new AnalysisPoint { Geo = new Geo(geo), Scenario = Scenario };
-                    Scenario.AnalysisPoints.Add(analysisPoint);
                     TaskEx.Run(() =>
                     {
-                        Database.Add(analysisPoint, (Bathymetry)_cache[Scenario.Bathymetry].Result);
+                        var analysisPoint = new AnalysisPoint { Geo = new Geo(geo) };
+                        Scenario.Add(analysisPoint);
                         _dispatcher.InvokeIfRequired(analysisPoint.CreateMapLayers);
                     });
                 }

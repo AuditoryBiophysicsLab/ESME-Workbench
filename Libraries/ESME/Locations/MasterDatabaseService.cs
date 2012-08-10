@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Data;
 using System.Data.Common;
@@ -10,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Data;
 using Devart.Data.SQLite;
 using Devart.Data.SQLite.Entity.Configuration;
 using ESME.Database;
@@ -33,7 +36,6 @@ namespace ESME.Locations
         void Add(Perimeter perimeter);
         void Add(PerimeterCoordinate coordinate, bool replaceExisting = false);
         void Add(ScenarioSpecies species);
-        void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry);
         EnvironmentalDataSet LoadOrCreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin);
         void SaveChanges();
     }
@@ -106,51 +108,6 @@ namespace ESME.Locations
             if (existing != null) throw new DuplicateNameException(String.Format("A species named {0} already exists in scenario {1}, choose another name", species.LatinName, species.Scenario.Name));
             Log(species, "Added new species {0} to scenario {1} in location {2}", species.LatinName, species.Scenario.Name, species.Scenario.Location.Name);
         }
-
-        public void Add(AnalysisPoint analysisPoint, Bathymetry bathymetry)
-        {
-            //Console.WriteLine("Adding analysis point at {0}", analysisPoint.Geo);
-            var depthAtAnalysisPoint = bathymetry.Samples.IsFast2DLookupAvailable
-                                           ? -bathymetry.Samples.GetNearestPointAsync(analysisPoint.Geo).Result.Data
-                                           : -bathymetry.Samples.GetNearestPoint(analysisPoint.Geo).Data;
-            foreach (var mode in analysisPoint.Scenario.GetDistinctModes())
-            {
-                var sourceDepth = mode.Source.Platform.Depth;
-                if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
-                if (sourceDepth >= depthAtAnalysisPoint)
-                {
-                    //Console.WriteLine("  Skipping transmission loss for {0}:{1}:{2}, because the depth is below the bottom for this analysis point", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName);
-                    continue;
-                }
-                //Console.WriteLine("  Adding transmission loss for {0}:{1}:{2}", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName);
-                var transmissionLoss = new Scenarios.TransmissionLoss
-                {
-                    AnalysisPoint = analysisPoint,
-                    IsReadyToCalculate = false,
-                    Mode = mode,
-                };
-                analysisPoint.TransmissionLosses.Add(transmissionLoss);
-                //Log(transmissionLoss, "Added new transmission loss for mode {0} to analysis point at {1} to scenario {2} in location {3}", transmissionLoss.Mode.ModeName, (Geo)transmissionLoss.AnalysisPoint.Geo, transmissionLoss.AnalysisPoint.Scenario.Name, transmissionLoss.AnalysisPoint.Scenario.Location.Name); 
-                var radialCount = mode.MaxPropagationRadius <= 10000 ? 8 : 16;
-                //Console.WriteLine("    Radius: {0}m, radial count: {1}", mode.MaxPropagationRadius, radialCount);
-                for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
-                {
-                    var radial = new Radial
-                    {
-                        TransmissionLoss = transmissionLoss,
-                        CalculationCompleted = DateTime.MaxValue,
-                        CalculationStarted = DateTime.MaxValue,
-                        Bearing = (360.0 / radialCount) * radialIndex,
-                        Length = transmissionLoss.Mode.MaxPropagationRadius,
-                        IsCalculated = false,
-                    };
-                    transmissionLoss.Radials.Add(radial);
-                    _transmissionLossCalculator.Add(radial);
-                    //Log(radial, "Added new radial with bearing {0} and length {1} to transmission loss for mode {2} in analysis point at {3} to scenario {4} in location {5}", radial.Bearing, radial.Length, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo, radial.TransmissionLoss.AnalysisPoint.Scenario.Name, radial.TransmissionLoss.AnalysisPoint.Scenario.Location.Name);
-                }
-            }
-            //Log(analysisPoint, "Added new analysis point at {0} to scenario {1} in location {2}", (Geo)analysisPoint.Geo, analysisPoint.Scenario.Name, analysisPoint.Scenario.Location.Name);
-        }
         #endregion
 
         #region Create operations for Locations
@@ -177,7 +134,6 @@ namespace ESME.Locations
             return environmentalDataSet;
         }
         #endregion
-
 
         #endregion
         #region Private helper methods, properties and fields

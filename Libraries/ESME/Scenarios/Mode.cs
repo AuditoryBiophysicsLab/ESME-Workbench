@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
+using System.Windows.Data;
 using ESME.Database;
 using ESME.Locations;
 using HRC.Aspects;
@@ -12,7 +13,7 @@ using HRC.WPF;
 namespace ESME.Scenarios
 {
     [NotifyPropertyChanged]
-    public class Mode : IHaveGuid, IEqualityComparer<Mode>
+    public class Mode : IHaveGuid
     {
         [Key, Initialize] public Guid Guid { get; set; }
         public string PSMModeGuid { get; set; }
@@ -45,18 +46,10 @@ namespace ESME.Scenarios
         /// </summary>
         public DbTimeSpan PulseInterval { get; set; }
 
-        [NotMapped] public TimeSpan PulseIntervalTimeSpan { get { return PulseInterval; } set { PulseInterval = value; } }
-        [NotMapped]
-        public string PulseIntervalString { get { return PulseIntervalTimeSpan.ToString(@"hh\:mm\:ss\.fff"); } set { PulseIntervalTimeSpan = TimeSpan.ParseExact(value, @"hh\:mm\:ss\.fff", null); } }
-
         /// <summary>
         /// The length of time a single pulse is transmitting
         /// </summary>
         public DbTimeSpan PulseLength { get; set; }
-
-        [NotMapped] public TimeSpan PulseLengthTimeSpan { get { return PulseLength; } set { PulseLength = value; } }
-        [NotMapped]
-        public string PulseLengthString { get { return PulseLengthTimeSpan.ToString(@"hh\:mm\:ss\.fff"); } set { PulseLengthTimeSpan = TimeSpan.ParseExact(value, @"hh\:mm\:ss\.fff", null); } }
 
         /// <summary>
         /// Horizontal beam width of this mode, in degrees.  
@@ -179,19 +172,32 @@ namespace ESME.Scenarios
 
         #endregion
 
-        public bool Equals(Mode x, Mode y)
+        public bool IsAcousticallyEquivalentTo(Mode other)
         {
-            var xDepth = x.Source.Platform.Depth;
-            if (x.Depth.HasValue) xDepth += x.Depth.Value;
-            var yDepth = y.Source.Platform.Depth;
-            if (y.Depth.HasValue) yDepth += y.Depth.Value;
-            if (Math.Abs(xDepth - yDepth) > 0.001) return false;
-            if (Math.Abs(x.VerticalBeamWidth - y.VerticalBeamWidth) > 0.1) return false;
-            if (Math.Abs(x.DepressionElevationAngle - y.DepressionElevationAngle) > 0.1) return false;
-            if (Math.Abs(x.HighFrequency - y.HighFrequency) > 0.1) return false;
-            return Math.Abs(x.LowFrequency - y.LowFrequency) <= 0.1;
+            var myDepth = Source.Platform.Depth;
+            if (Depth.HasValue) myDepth += Depth.Value;
+            var otherDepth = other.Source.Platform.Depth;
+            if (other.Depth.HasValue) otherDepth += other.Depth.Value;
+            if (Math.Abs(myDepth - otherDepth) > 0.001) return false;
+            if (Math.Abs(VerticalBeamWidth - other.VerticalBeamWidth) > 0.1) return false;
+            if (Math.Abs(DepressionElevationAngle - other.DepressionElevationAngle) > 0.1) return false;
+            if (Math.Abs(HighFrequency - other.HighFrequency) > 0.1) return false;
+            return Math.Abs(LowFrequency - other.LowFrequency) <= 0.1;
         }
 
         public int GetHashCode(Mode obj) { return obj.GetHashCode(); }
+    }
+
+    [ValueConversion(typeof(Mode), typeof(string))]
+    public class ModeGroupingConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var mode = (Mode)value;
+            var depth = mode.Source.Platform.Depth;
+            if (mode.Depth.HasValue) depth += mode.Depth.Value;
+            return string.Format("{0}Hz, {1}Hz, {2}m, {3}deg, {4}deg", mode.HighFrequency, mode.LowFrequency, depth, mode.VerticalBeamWidth, mode.DepressionElevationAngle);
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) { throw new NotImplementedException(); }
     }
 }

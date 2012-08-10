@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -154,13 +155,17 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _moveLayerToBack;
         #endregion
         #endregion
+
+        public void Recalculate()
+        {
+            foreach (var tl in TransmissionLosses) tl.Recalculate();
+        }
     }
 
     [NotifyPropertyChanged]
     public class TransmissionLoss : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
     {
         [Key, Initialize] public Guid Guid { get; set; }
-
         public TransmissionLoss() { Initialize(); }
 
         void Initialize()
@@ -172,7 +177,8 @@ namespace ESME.Scenarios
 
         public bool IsReadyToCalculate { get; set; }
         public virtual AnalysisPoint AnalysisPoint { get; set; }
-        public virtual Mode Mode { get; set; }
+        //public virtual Mode Mode { get; set; }
+        [Initialize] public virtual ObservableList<Mode> Modes { get; set; }
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<Radial> Radials { get; set; }
         #region INotifyPropertyChanged implementation
@@ -246,7 +252,7 @@ namespace ESME.Scenarios
         volatile object _createMapLayerLock = new object();
         public void CreateMapLayers()
         {
-            if (Mode == null)
+            if (Modes == null || Modes.Count == 0)
             {
                 Delete();
                 return;
@@ -262,7 +268,7 @@ namespace ESME.Scenarios
                 foreach (var radial in Radials)
                 {
                     geos.Add(AnalysisPoint.Geo);
-                    geos.Add(((Geo)AnalysisPoint.Geo).Offset(Geo.KilometersToRadians(Mode.MaxPropagationRadius / 1000), Geo.DegreesToRadians(radial.Bearing)));
+                    geos.Add(((Geo)AnalysisPoint.Geo).Offset(Geo.KilometersToRadians(Modes[0].MaxPropagationRadius / 1000), Geo.DegreesToRadians(radial.Bearing)));
                 }
                 geos.Add(AnalysisPoint.Geo);
                 mapLayer.AddLines(geos);
@@ -279,12 +285,13 @@ namespace ESME.Scenarios
             if (IsDeleted) return;
             lock (_createMapLayerLock)
             {
+                if (IsDeleted) return;
                 IsDeleted = true;
                 RemoveMapLayers();
             }
             foreach (var radial in Radials.ToList()) radial.Delete();
             AnalysisPoint.TransmissionLosses.Remove(this);
-            if (Mode != null) Mode.TransmissionLosses.Remove(this);
+            foreach (var mode in Modes) mode.TransmissionLosses.Remove(this); // Remove this TL from all matching modes' list of TLs
             if (AnalysisPoint.TransmissionLosses.Count == 0) AnalysisPoint.Delete();
             Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
             Scenario.Database.Context.TransmissionLosses.Remove(this);
@@ -310,11 +317,24 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _moveLayerToBack;
         #endregion
         #endregion
+
+        public void Recalculate()
+        {
+            var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
+            RemoveMapLayers();
+            CreateMapLayers();
+            foreach (var radial in Radials)
+            {
+                radial.Length = maxPropagationRadius;
+                radial.Recalculate();
+            }
+        }
     }
 
     [NotifyPropertyChanged]
     public class Radial : IHaveGuid
     {
+        public static TransmissionLossCalculatorService TransmissionLossCalculator; 
         public Radial() { Filename = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()); }
         [Key, Initialize] public Guid Guid { get; set; }
         public bool IsCalculated { get; set; }
@@ -506,6 +526,14 @@ namespace ESME.Scenarios
                 _meanTransmissionLossValues = new float[reader.ReadInt32()];
                 for (var i = 0; i < _meanTransmissionLossValues.Length; i++) _meanTransmissionLossValues[i] = reader.ReadSingle();
             }
+        }
+
+        public void Recalculate()
+        {
+            IsCalculated = false;
+            var files = Directory.GetFiles(Path.GetDirectoryName(BasePath), Path.GetFileNameWithoutExtension(BasePath) + ".*");
+            foreach (var file in files) File.Delete(file);
+            TransmissionLossCalculator.Add(this);
         }
     }
 }
