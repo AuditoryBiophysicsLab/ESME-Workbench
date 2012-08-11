@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -120,26 +121,59 @@ namespace ESME.Views.TransmissionLossViewer
             {
                 _transmissionLoss = value;
                 Radials = _transmissionLoss == null ? null : new ObservableList<Radial>(from r in _transmissionLoss.Radials orderby r.Bearing select r);
-                var maxTransmissionLoss = float.NaN;
-                var minTransmissionLoss = float.NaN;
+                //var maxTransmissionLoss = float.NaN;
+                //var minTransmissionLoss = float.NaN;
                 if (_transmissionLoss != null)
                 {
+                    try
+                    {
+                        MinTransmissionLoss = (from radial in _transmissionLoss.Radials
+                                               from minimumValue in radial.MinimumTransmissionLossValues
+                                               where !double.IsNaN(minimumValue) && !double.IsInfinity(minimumValue)
+                                               select minimumValue).Min();
+                        MaxTransmissionLoss = (from radial in _transmissionLoss.Radials
+                                               from maximumValue in radial.MaximumTransmissionLossValues
+                                               where !double.IsNaN(maximumValue) && !double.IsInfinity(maximumValue)
+                                               select maximumValue).Max();
+#if DEBUG
+                        foreach (var radial in _transmissionLoss.Radials)
+                        {
+                            var maxIndex = radial.MaximumTransmissionLossValues.ToList().IndexOf(MaxTransmissionLoss);
+                            if (maxIndex == -1) continue;
+                            Debug.WriteLine(string.Format("Maximum TL value of {0} found in radial bearing {1} at range {2}", MaxTransmissionLoss, radial.Bearing, radial.Ranges[maxIndex]));
+                            radial.ExtractAxisData(null, maxIndex);
+                        }
+#endif
+
+                    }
+                    catch (FileNotFoundException ex)
+                    {
+                        Debug.WriteLine(string.Format("File not found exception loading radial: {0}", ex.FileName));
+                    }
+                    catch (IOException ex)
+                    {
+                        Debug.WriteLine(string.Format("I/O exception loading radial: {0}", ex.Message));
+                    }
+#if false
                     foreach (var radial in _transmissionLoss.Radials)
                     {
                         try
                         {
-                            var curMax = radial.MaximumTransmissionLossValues.Max(v => !double.IsInfinity(v) ? v : -10);
-                            var curMin = radial.MinimumTransmissionLossValues.Min(v => !double.IsInfinity(v) ? v : 1000);
+                            var curMax = radial.MaximumTransmissionLossValues.Where(v => !double.IsNaN(v) && !double.IsInfinity(v)).Max();
+                            var curMin = radial.MinimumTransmissionLossValues.Where(v => !double.IsNaN(v) && !double.IsInfinity(v)).Min(v => !double.IsInfinity(v) ? v : 1000);
                             maxTransmissionLoss = float.IsNaN(maxTransmissionLoss) ? curMax : Math.Max(maxTransmissionLoss, curMax);
                             minTransmissionLoss = float.IsNaN(minTransmissionLoss) ? curMin : Math.Min(minTransmissionLoss, curMin);
                         }
                         catch (FileNotFoundException)
                         {
+                            Debug.WriteLine(string.Format("File not found exception loading radial: {0}", radial.Filename));
                         }
                         catch (IOException)
                         {
+                            Debug.WriteLine(string.Format("I/O exception loading radial: {0}", radial.Filename));
                         }
                     }
+#endif
                     _transmissionLoss.PropertyChanged += (s, e) =>
                     {
                         if (e.PropertyName == "IsDeleted" && Window != null)
@@ -148,8 +182,8 @@ namespace ESME.Views.TransmissionLossViewer
                         }
                     };
                 }
-                MaxTransmissionLoss = maxTransmissionLoss;
-                MinTransmissionLoss = minTransmissionLoss;
+                //MaxTransmissionLoss = maxTransmissionLoss;
+                //MinTransmissionLoss = minTransmissionLoss;
                 SelectedRadialIndex = 0;
             }
         }
