@@ -60,10 +60,11 @@
                 </Button>
             </ToolBar>
         </ToolBarTray>
-        <ComboBox DisplayMemberPath="Mode.PSMName"
+        <ComboBox DisplayMemberPath="Modes[0]"
                   DockPanel.Dock="Bottom"
                   ItemsSource="{Binding AnalysisPoint.TransmissionLosses}"
-                  SelectedItem="{Binding TransmissionLossViewModel.TransmissionLoss}" />
+                  SelectedItem="{Binding TransmissionLossViewModel.TransmissionLoss}" 
+                  ToolTip="{Binding ModeListToolTip}"/>
         <TransmissionLossViewer:TransmissionLossView DataContext="{Binding TransmissionLossViewModel}" DockPanel.Dock="Top" />
     </DockPanel>
 </Window>

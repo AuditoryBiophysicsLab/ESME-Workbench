@@ -42,8 +42,6 @@ namespace ESME.Views.TransmissionLossViewer
                     
                 }
             };
-            
-
         }
         void TransmissionLossChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -56,5 +54,18 @@ namespace ESME.Views.TransmissionLossViewer
         ESME.Scenarios.TransmissionLoss _oldTL;
         int _oldIndex;
         #endregion
+
+        public string ModeListToolTip
+        {
+            get
+            {
+                return "HiFreq = High Frequency in Hertz" + System.Environment.NewLine +
+                       "LowFreq = Low Frequency in Hertz" + System.Environment.NewLine +
+                       "Depth = Depth below the surface, in meters" + System.Environment.NewLine +
+                       "VBW = Vertical beam width of the mode, in degrees" + System.Environment.NewLine +
+                       "D/E = Depression/Elevation angle. Vertical look direction of this mode, in degrees" + System.Environment.NewLine +
+                       "      Zero is horizontal, positive values are towards the bottom" + System.Environment.NewLine;
+            }
+        }
     }
 }

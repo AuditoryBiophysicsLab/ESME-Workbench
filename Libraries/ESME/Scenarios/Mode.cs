@@ -206,18 +206,18 @@ namespace ESME.Scenarios
         }
 
         public int GetHashCode(Mode obj) { return obj.GetHashCode(); }
+        public override string ToString()
+        {
+            var depth = Source.Platform.Depth;
+            if (Depth.HasValue) depth += Depth.Value;
+            return string.Format("HiFreq: {0}Hz | LoFreq: {1}Hz | Depth: {2}m | VBW: {3}deg | D/E: {4}deg", HighFrequency, LowFrequency, depth, VerticalBeamWidth, DepressionElevationAngle);
+        }
     }
 
     [ValueConversion(typeof(Mode), typeof(string))]
     public class ModeGroupingConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            var mode = (Mode)value;
-            var depth = mode.Source.Platform.Depth;
-            if (mode.Depth.HasValue) depth += mode.Depth.Value;
-            return string.Format("{0}Hz, {1}Hz, {2}m, {3}deg, {4}deg", mode.HighFrequency, mode.LowFrequency, depth, mode.VerticalBeamWidth, mode.DepressionElevationAngle);
-        }
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) { return value.ToString(); }
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) { throw new NotImplementedException(); }
     }
 }
