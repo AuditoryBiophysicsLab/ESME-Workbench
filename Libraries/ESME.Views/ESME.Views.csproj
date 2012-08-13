@@ -114,10 +114,6 @@
       <DependentUpon>ColorBarView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\DataAxis.cs" />
-    <Compile Include="Controls\DataAxisControl.xaml.cs">
-      <DependentUpon>DataAxisControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\DataAxisControlViewModel.cs" />
     <Compile Include="Controls\DataPlotViewModel.cs" />
     <Compile Include="Controls\EditableKeyValuePair.cs" />
     <Compile Include="Controls\EditableKeyValuePairListView.xaml.cs">
@@ -245,10 +241,6 @@
     <Page Include="Controls\ColorBarView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Controls\DataAxisControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\EditableKeyValuePairListView.xaml">
       <SubType>Designer</SubType>

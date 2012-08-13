@@ -128,7 +128,8 @@ namespace ESME.Views.Controls
         {
             CreateChildren(availableSize);
             var sizes = new List<double>();
-            var sizeToContent = new Size(Double.PositiveInfinity, Double.PositiveInfinity);
+
+            var sizeToContent = new Size(SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
             _axis.Measure(sizeToContent);
             foreach (var tick in _ticks)
             {
