@@ -157,7 +157,9 @@ namespace ESME.TransmissionLoss
                 //                                              where s.Guid == radial.TransmissionLoss.AnalysisPoint.Scenario.Guid
                 //                                              select s).Single());
                 var scenario = radial.TransmissionLoss.AnalysisPoint.Scenario;
-                var mode = radial.TransmissionLoss.Modes[0];
+                var mode = (from m in radial.TransmissionLoss.Modes
+                            orderby m.MaxPropagationRadius
+                            select m).Last();
                 var platform = mode.Source.Platform;
                 var timePeriod = platform.Scenario.TimePeriod;
                 if (radial.IsDeleted) return;
@@ -316,7 +318,7 @@ namespace ESME.TransmissionLoss
                 Debug.WriteLine("{0}: FAIL: Calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}.  Exception: {4}",
                                 DateTime.Now,
                                 radial.Bearing,
-                                radial.TransmissionLoss.Modes[0].ModeName,
+                                radial.TransmissionLoss.Modes[0],
                                 (Geo)radial.TransmissionLoss.AnalysisPoint.Geo, e.Message);
             }
         }

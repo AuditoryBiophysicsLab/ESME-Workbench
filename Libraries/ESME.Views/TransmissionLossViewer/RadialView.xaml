@@ -14,7 +14,7 @@
              mc:Ignorable="d">
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="MouseMove">
-            <WPF:EventToCommandTrigger Command="{Binding MouseMoveCommand}"/>
+            <WPF:EventToCommandTrigger Command="{Binding MouseMoveCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <DockPanel>
@@ -49,11 +49,11 @@
                                            ColorBarImage="{Binding ColorBitmap}"
                                            CurrentMaximum="{Binding CurMaxValue}"
                                            CurrentMinimum="{Binding CurMinValue}"
-                                           StatisticalMaximum="{Binding StatisticalMaximum}"
-                                           StatisticalMinimum="{Binding StatisticalMinimum}"
                                            DockPanel.Dock="Right"
                                            Maximum="{Binding MaxValue}"
-                                           Minimum="{Binding MinValue}" />
+                                           Minimum="{Binding MinValue}"
+                                           StatisticalMaximum="{Binding StatisticalMaximum}"
+                                           StatisticalMinimum="{Binding StatisticalMinimum}" />
                 </DockPanel>
             </DockPanel>
         </DockPanel>
@@ -84,21 +84,19 @@
                        VerticalAlignment="Center"
                        Background="Transparent"
                        FontSize="24"
-                       TextWrapping="Wrap"
-                       Text="{Binding WaitToRenderText}" />
+                       Text="{Binding WaitToRenderText}"
+                       TextWrapping="Wrap" />
             <Image Grid.Row="0"
                    Grid.Column="0"
-                   Visibility="{Binding WriteableBitmapVisibility}"
                    Source="{Binding WriteableBitmap}"
-                   Stretch="Fill" />
+                   Stretch="Fill"
+                   Visibility="{Binding WriteableBitmapVisibility}" />
 
             <Canvas x:Name="OverlayCanvas"
                     Grid.Row="0"
                     Grid.Column="0"
                     Background="Transparent">
-                <Path Data="{Binding BottomProfileGeometry}"
-                      Stroke="BlanchedAlmond"
-                      StrokeThickness="3" />
+                <Path Data="{Binding BottomProfileGeometry}" Fill="DarkGray" Stroke="Black" StrokeThickness="0.1"/>
             </Canvas>
         </Grid>
     </DockPanel>

@@ -37,6 +37,23 @@
                         TickPlacement="BottomRight"
                         Value="{Binding SelectedRadialIndex,
                                         Mode=TwoWay}" />
+                <ComboBox DockPanel.Dock="Bottom"
+                          ItemsSource="{Binding TransmissionLoss.Modes}"
+                          SelectedItem="{Binding SelectedMode}"
+                          ToolTip="The available modes that match the acoustic properties of this transmission loss field">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding PSMName, StringFormat=Mode: {0}}" />
+                                <TextBlock Text=" | " />
+                                <TextBlock Text="{Binding SourceLevel, StringFormat=Source Level: {0}}" />
+                                <TextBlock Text=" | " />
+                                <TextBlock Text="{Binding MaxPropagationRadius, StringFormat=Radius: {0}}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
             </StackPanel>
         </DockPanel>
         <View:RadialView x:Name="TransmissionLossRadialView" DataContext="{Binding RadialViewModel}" />

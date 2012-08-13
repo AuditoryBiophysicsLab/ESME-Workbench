@@ -25,7 +25,8 @@ namespace ESME.Views.TransmissionLossViewer
             get { return _radialViewModel; }
             set
             {
-                _radialViewModel = value;                
+                _radialViewModel = value;
+                _radialViewModel.SelectedMode = SelectedMode;
                 _radialViewModel.PropertyChanged += (s, e) => { if (e.PropertyName == "WriteableBitmap" && Window!=null) Window.Activate(); };
             }
         } 
@@ -110,6 +111,18 @@ namespace ESME.Views.TransmissionLossViewer
         }
         #endregion
 
+        Mode _selectedMode;
+
+        public Mode SelectedMode
+        {
+            get { return _selectedMode; }
+            set
+            {
+                _selectedMode = value;
+                if (RadialViewModel != null) RadialViewModel.SelectedMode = _selectedMode;
+            }
+        }
+
         #region public TransmissionLoss TransmissionLoss { get; set; }
         ESME.Scenarios.TransmissionLoss _transmissionLoss;
 
@@ -181,6 +194,9 @@ namespace ESME.Views.TransmissionLossViewer
                             CloseDialog(null);
                         }
                     };
+                    SelectedMode = (from m in _transmissionLoss.Modes
+                                    orderby m.MaxPropagationRadius
+                                    select m).Last();
                 }
                 //MaxTransmissionLoss = maxTransmissionLoss;
                 //MinTransmissionLoss = minTransmissionLoss;

@@ -42,12 +42,12 @@ namespace ESME.Scenarios
         /// <summary>
         ///   In degrees, clockwise from true north
         /// </summary>
-        public double Bearing { get; set; }
+        [Affects("Segment")]public double Bearing { get; set; }
 
         /// <summary>
         ///   In meters
         /// </summary>
-        public double Length { get; set; }
+        [Affects("Segment")]public double Length { get; set; }
 
         public virtual TransmissionLoss TransmissionLoss { get; set; }
 
@@ -109,8 +109,8 @@ namespace ESME.Scenarios
         [NotMapped] public BottomProfilePoint[] BottomProfile { get { return _bottomProfile ?? (_bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty")); } }
         BottomProfilePoint[] _bottomProfile;
 
-        [NotMapped] public GeoSegment Segment { get { return _segment ?? (_segment = new GeoSegment(TransmissionLoss.AnalysisPoint.Geo, Length, Bearing)); } }
-        GeoSegment _segment;
+        [NotMapped]
+        public GeoSegment Segment { get { return new GeoSegment(TransmissionLoss.AnalysisPoint.Geo, Length, Bearing); } }
 
         [NotMapped] public bool IsDeleted { get; set; }
 

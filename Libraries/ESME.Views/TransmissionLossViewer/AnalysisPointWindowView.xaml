@@ -63,8 +63,8 @@
         <ComboBox DisplayMemberPath="Modes[0]"
                   DockPanel.Dock="Bottom"
                   ItemsSource="{Binding AnalysisPoint.TransmissionLosses}"
-                  SelectedItem="{Binding TransmissionLossViewModel.TransmissionLoss}" 
-                  ToolTip="{Binding ModeListToolTip}"/>
+                  SelectedItem="{Binding TransmissionLossViewModel.TransmissionLoss}"
+                  ToolTip="{Binding TransmissionLossListToolTip}" />
         <TransmissionLossViewer:TransmissionLossView DataContext="{Binding TransmissionLossViewModel}" DockPanel.Dock="Top" />
     </DockPanel>
 </Window>

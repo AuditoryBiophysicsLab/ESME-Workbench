@@ -138,9 +138,9 @@ namespace ESME.Views.TransmissionLossViewer
                 {
                     var y = point.Depth * (actualControlHeight / maxDepth);
                     var x = point.Range * 1000 * (actualControlWidth / maxRange);
-                    sb.Append(sb.Length == 0 ? string.Format("M 0,{0} ", y) : lineFunc(x, y, 1));
+                    sb.Append(sb.Length == 0 ? string.Format("L 0,{0} ", y) : lineFunc(x, y, 1));
                 }
-                BottomProfileGeometry = sb.ToString();
+                BottomProfileGeometry = string.Format("M 0,{0} {1} L {2},{0} Z", actualControlHeight, sb, actualControlWidth);
             }
             catch (Exception e)
             {
@@ -152,6 +152,7 @@ namespace ESME.Views.TransmissionLossViewer
         }
         #endregion
 
+        public Mode SelectedMode { get; set; }
         #region public string OutputFileName { get; }
         public string OutputFileName
         {
@@ -162,9 +163,9 @@ namespace ESME.Views.TransmissionLossViewer
                                ? null
                                : Path.Combine(Properties.Settings.Default.ExperimentReportDirectory,
                                               string.Format("{0} {1} {2} bearing {3} degrees",
-                                                            Radial.TransmissionLoss.Modes[0].ModeName,
-                                                            Radial.TransmissionLoss.Modes[0].Source.SourceName,
-                                                            Radial.TransmissionLoss.Modes[0].Source.Platform.PlatformName,
+                                                            SelectedMode.ModeName,
+                                                            SelectedMode.Source.SourceName,
+                                                            SelectedMode.Source.Platform.PlatformName,
                                                             Radial.Bearing));
             }
         }
@@ -344,7 +345,7 @@ namespace ESME.Views.TransmissionLossViewer
                 else
                 {
                     MouseTLInfo = string.Format("Transmission Loss: {0:0.0}dB", TransmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
-                    MouseSPLInfo = string.Format("Sound Pressure: {0:0.0}dB", Radial.TransmissionLoss.Modes[0].SourceLevel - TransmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
+                    MouseSPLInfo = string.Format("Sound Pressure: {0:0.0}dB", SelectedMode.SourceLevel - TransmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
                 }
             }
             else

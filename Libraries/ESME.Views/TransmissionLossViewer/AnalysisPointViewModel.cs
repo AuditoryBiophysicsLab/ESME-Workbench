@@ -55,7 +55,7 @@ namespace ESME.Views.TransmissionLossViewer
         int _oldIndex;
         #endregion
 
-        public string ModeListToolTip
+        public string TransmissionLossListToolTip
         {
             get
             {
@@ -64,7 +64,7 @@ namespace ESME.Views.TransmissionLossViewer
                        "Depth = Depth below the surface, in meters" + System.Environment.NewLine +
                        "VBW = Vertical beam width of the mode, in degrees" + System.Environment.NewLine +
                        "D/E = Depression/Elevation angle. Vertical look direction of this mode, in degrees" + System.Environment.NewLine +
-                       "      Zero is horizontal, positive values are towards the bottom" + System.Environment.NewLine;
+                       "         Zero is horizontal, positive values are towards the bottom" + System.Environment.NewLine;
             }
         }
     }

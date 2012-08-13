@@ -117,10 +117,11 @@ namespace ESME.Scenarios
                 var mapLayer = new OverlayShapeMapLayer { Name = string.Format("{0}", Guid) };
                 mapLayer.Clear();
                 var geos = new List<Geo>();
+                var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
                 foreach (var radial in Radials)
                 {
                     geos.Add(AnalysisPoint.Geo);
-                    geos.Add(((Geo)AnalysisPoint.Geo).Offset(Geo.KilometersToRadians(Modes[0].MaxPropagationRadius / 1000), Geo.DegreesToRadians(radial.Bearing)));
+                    geos.Add(((Geo)AnalysisPoint.Geo).Offset(Geo.KilometersToRadians(maxPropagationRadius / 1000), Geo.DegreesToRadians(radial.Bearing)));
                 }
                 geos.Add(AnalysisPoint.Geo);
                 mapLayer.AddLines(geos);
@@ -174,12 +175,12 @@ namespace ESME.Scenarios
         {
             var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
             RemoveMapLayers();
-            CreateMapLayers();
             foreach (var radial in Radials)
             {
                 radial.Length = maxPropagationRadius;
                 radial.Recalculate();
             }
+            CreateMapLayers();
         }
     }
 }
