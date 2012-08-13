@@ -254,13 +254,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void RecalculateAnalysisPoint(AnalysisPoint analysisPoint)
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to recalculate this analysis point \"{0}\"?", analysisPoint.Geo), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-            foreach (var radial in analysisPoint.TransmissionLosses.SelectMany(tl => tl.Radials))
-            {
-                radial.IsCalculated = false;
-                var files = Directory.GetFiles(Path.GetDirectoryName(radial.BasePath), Path.GetFileNameWithoutExtension(radial.BasePath) + ".*");
-                foreach (var file in files) File.Delete(file);
-                _transmissionLoss.Add(radial);
-            }
+            analysisPoint.Recalculate();
         }
 
         [MediatorMessageSink(MediatorMessage.ViewAnalysisPointProperties), UsedImplicitly]
@@ -270,13 +264,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void RecalculateAllAnalysisPoints(bool dummy)
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to recalculate all analysis points from the scenario {0} ?", Scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-            foreach (var radial in from point in Scenario.AnalysisPoints from transmissionLoss in point.TransmissionLosses from radial in transmissionLoss.Radials select radial)
-            {
-                radial.IsCalculated = false;
-                var files = Directory.GetFiles(Path.GetDirectoryName(radial.BasePath), Path.GetFileNameWithoutExtension(radial.BasePath) + ".*");
-                foreach (var file in files) File.Delete(file);
-                _transmissionLoss.Add(radial);
-            }
+            foreach (var analysisPoint in Scenario.AnalysisPoints) analysisPoint.Recalculate();
         }
         #endregion
 
@@ -297,13 +285,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to recalculate this transmission loss \"{0}\"?", transmissionLoss.AnalysisPoint.Geo), MessageBoxImage.Warning) !=
                 MessageBoxResult.Yes) return;
-            foreach (var radial in transmissionLoss.Radials)
-            {
-                radial.IsCalculated = false;
-                var files = Directory.GetFiles(Path.GetDirectoryName(radial.BasePath), Path.GetFileNameWithoutExtension(radial.BasePath) + ".*");
-                foreach (var file in files) File.Delete(file);
-                _transmissionLoss.Add(radial);
-            }
+            transmissionLoss.Recalculate();
         }
 
         [MediatorMessageSink(MediatorMessage.TransmissionLossLayerChanged), UsedImplicitly]
@@ -483,13 +465,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to recalculate all transmission losses for the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) !=
                 MessageBoxResult.Yes) return;
-            foreach (var radial in mode.TransmissionLosses.SelectMany(tl => tl.Radials))
-            {
-                radial.IsCalculated = false;
-                var files = Directory.GetFiles(Path.GetDirectoryName(radial.BasePath), Path.GetFileNameWithoutExtension(radial.BasePath) + ".*");
-                foreach (var file in files) File.Delete(file);
-                _transmissionLoss.Add(radial);
-            }
+            foreach (var transmissionLoss in mode.TransmissionLosses) transmissionLoss.Recalculate();
         }
 
         [MediatorMessageSink(MediatorMessage.ModeProperties), UsedImplicitly]

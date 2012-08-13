@@ -257,6 +257,10 @@ namespace ESME.Scenarios
         public void Recalculate()
         {
             IsCalculated = false;
+            _bottomProfile = null;
+            _transmissionLossRadial = null;
+            _depths = _ranges = null;
+            _minimumTransmissionLossValues = _maximumTransmissionLossValues = _meanTransmissionLossValues = null;
             var files = Directory.GetFiles(Path.GetDirectoryName(BasePath), Path.GetFileNameWithoutExtension(BasePath) + ".*");
             foreach (var file in files) File.Delete(file);
             TransmissionLossCalculator.Add(this);

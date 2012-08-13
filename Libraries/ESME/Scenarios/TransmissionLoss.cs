@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Threading;
 using ESME.Locations;
@@ -173,12 +174,14 @@ namespace ESME.Scenarios
 
         public void Recalculate()
         {
+            Debug.WriteLine(string.Format("Recalculating transmission loss at ({0:0.###}, {1:0.###}) for mode {2}", AnalysisPoint.Geo.Latitude, AnalysisPoint.Geo.Longitude, Modes[0]));
             var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
             RemoveMapLayers();
             foreach (var radial in Radials)
             {
                 radial.Length = maxPropagationRadius;
                 radial.Recalculate();
+                Debug.WriteLine(string.Format("Recalculating radial at bearing {0} with radius of {1}", radial.Bearing, radial.Length));
             }
             CreateMapLayers();
         }

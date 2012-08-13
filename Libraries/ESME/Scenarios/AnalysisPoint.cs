@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -158,6 +159,8 @@ namespace ESME.Scenarios
 
         public void Recalculate()
         {
+            Debug.WriteLine(string.Format("Recalculating analysis point at ({0:0.###}, {1:0.###})", Geo.Latitude, Geo.Longitude));
+
             foreach (var tl in TransmissionLosses) tl.Recalculate();
         }
     }
