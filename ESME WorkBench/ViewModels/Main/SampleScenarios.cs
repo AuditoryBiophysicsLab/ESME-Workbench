@@ -155,7 +155,7 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 LatinName = "Sample Species", 
                 Scenario = scenario, 
-                SpeciesDefinitionFilename = "generic_odontocete.spe", 
+                SpeciesDefinitionFilename = "Generic odontocete.spe", 
                 LayerSettings =
                 {
                     LineOrSymbolSize = 3

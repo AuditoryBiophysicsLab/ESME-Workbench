@@ -488,7 +488,7 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 LatinName = "New Species", 
                 PopulationDensity = 0.01f, 
-                SpeciesDefinitionFilename = "generic_odontocete.spe"
+                SpeciesDefinitionFilename = "Generic odontocete.spe"
             })
             {
                 WindowTitle = "Add new species"
@@ -508,6 +508,7 @@ namespace ESMEWorkbench.ViewModels.Main
             var animats = await Animat.SeedAsync(species, scenario.Location.GeoRect, scenario.BathymetryData);
             animats.Save(species.PopulationFilePath);
             species.CreateMapLayers();
+            OnPropertyChanged("IsRunSimulationCommandEnabled");
         }
 
         [MediatorMessageSink(MediatorMessage.DeleteAllSpecies), UsedImplicitly]
@@ -515,7 +516,10 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (_messageBox.ShowYesNo("Are you sure you want to delete ALL the species from this scenario?", MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             foreach (var species in scenario.ScenarioSpecies.ToList())
+            {
                 species.Delete();
+                OnPropertyChanged("IsRunSimulationCommandEnabled");
+            }
         }
 
         [MediatorMessageSink(MediatorMessage.RepopulateAllSpecies), UsedImplicitly]
@@ -530,6 +534,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the species \"{0}\"?", species.LatinName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             species.Delete();
+            OnPropertyChanged("IsRunSimulationCommandEnabled");
         }
 
         [MediatorMessageSink(MediatorMessage.RepopulateSpecies), UsedImplicitly]
@@ -641,7 +646,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             get
             {
-                if (Scenario == null || IsTransmissionLossBusy || IsSimulationRunning || Scenario.AnalysisPoints.Count == 0) return false;
+                if (Scenario == null || IsTransmissionLossBusy || IsSimulationRunning || Scenario.AnalysisPoints.Count == 0 || Scenario.ScenarioSpecies.Count == 0) return false;
                 ScenarioValidationError = Scenario.Validate();
                 return string.IsNullOrEmpty(ScenarioValidationError);
             }

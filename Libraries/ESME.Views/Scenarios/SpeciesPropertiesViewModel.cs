@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using ESME.Scenarios;
 using HRC.ViewModels;
 using HRC.WPF;
@@ -11,17 +13,13 @@ namespace ESME.Views.Scenarios
         public string WindowTitle { get; set; }
         public string LatinName { get; set; }
         public string SpeciesDefinitionFilename { get; set; }
+       public string SpeciesDirectory { get; set; }
         public float PopulationDensity { get; set; }
         public List<string> PredefinedSpecies
         {
             get
             {
-                return new List<string>
-                {
-                    "Generic Odontocete",
-                    "Generic Mysticete",
-                 //   "Load custom ...",
-                };
+                return Directory.GetFiles(SpeciesDirectory, "*.spe").ToList().Select(Path.GetFileNameWithoutExtension).ToList();
             }
         }
         string _selectedSpecies;
@@ -29,39 +27,18 @@ namespace ESME.Views.Scenarios
         {
             get { return _selectedSpecies; }
             set
-            {{}
+            {
                 _selectedSpecies = value;
-                switch (_selectedSpecies)
-                {
-                    case "Generic Odontocete":
-                        SpeciesDefinitionFilename = "generic_odontocete.spe";
-                        break;
-                    case "Generic Mysticete":
-                        SpeciesDefinitionFilename = "generic_mysticete.spe";
-                        break;
-                    //case "Load custom ...":f
-                    //    break;
-                    default:
-                        throw new ApplicationException("Invalid species type selected!");
-                }
+                foreach (var species in PredefinedSpecies.Where(species => _selectedSpecies == species)) SpeciesDefinitionFilename = species + ".spe";
             }
         }
         
         public SpeciesPropertiesViewModel(ScenarioSpecies species)
         {
+            SpeciesDirectory = Path.GetDirectoryName(species.SpeciesDefinitionFilePath);
             LatinName = species.LatinName;
             PopulationDensity = species.PopulationDensity;
-            switch (species.SpeciesDefinitionFilename)
-            {
-                case "generic_odontocete.spe":
-                    SelectedSpecies = "Generic Odontocete";
-                    break;
-                case "generic_mysticete.spe":
-                    SelectedSpecies = "Generic Mysticete";
-                    break;
-                default:
-                    throw new ApplicationException();
-            }
+            SelectedSpecies = Path.GetFileNameWithoutExtension(species.SpeciesDefinitionFilename);
         }
 
         #region commands

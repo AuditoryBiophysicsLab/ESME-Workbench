@@ -4,14 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:l="clr-namespace:ESME.Views.Scenarios"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        Title="{Binding WindowTitle}"
+        xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC" Title="{Binding WindowTitle}"
         Background="#fff0f0f0"
         d:DataContext="{d:DesignInstance l:SpeciesPropertiesViewModel}"
         Grid.IsSharedSizeScope="True"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
         WindowStyle="ToolWindow"
-        mc:Ignorable="d">
+        mc:Ignorable="d">    
     <DockPanel LastChildFill="True">
         <StackPanel HorizontalAlignment="Right"
                     DockPanel.Dock="Bottom"
