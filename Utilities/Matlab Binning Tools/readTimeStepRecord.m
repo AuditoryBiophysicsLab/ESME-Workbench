@@ -1,3 +1,23 @@
+%% readTimeStepRecord Access to ESME Workbench simulation time step data
+%    S = readTimeStepRecord(fid,offset) imports the data for a given time
+%    during an ESME Workbench simulation and returns it as a struct S.
+%       fid is a file handle obtained by fid = fopen('simulation.log')
+%       offset is a valid offset in bytes obtained with readLogFileHeader.
+%
+%   S contains: 
+%       - header                  : A struct that contains the start time, number of
+%          total active animats and platforms, and its own offset.
+%
+%       - actorPositionRecords(i) : A list of structs containing the
+%          latitude, longitude, and depth of the platform or animat.  The
+%          index of the record corresponds to the ID of the platform or
+%          animat
+%
+%       - exposureRecords(i)      : A list of structs containing all
+%       recorded exposures at this time step.  Each exposure lists the ID
+%       of the exposed animat, the ID of the exposing mode, the peak SPL
+%       (in dB re 1 uPa) and the energy (in uPa*s).
+
 %% read an individual time step record from the currently open log file, given its file ID and an offset, in bytes, from the beginning of the file.  Offsets are specified in the file trailer.
 function timeStruct = readTimeStepRecord(fid,offset)
 [header,fid]=readTimeStepHeader(fid,offset);

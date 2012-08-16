@@ -1,3 +1,33 @@
+%% readLogFileHeader Access to ESME Workbench simulation metadata
+%    S = readLogFileHeader('simulation.log') imports the metadata about
+%    a given simulation and returns it as a struct S. 
+%
+%    S contains:        
+%       - timeStepSize       : A string representation of the simulation time
+%       sampling size
+%
+%       - startTime          : The date and time the simulation began running
+%
+%       - endTime            : The date and time the simulation completed
+%
+%       - creatingUser       : The name of the user who ran the simulation
+%
+%       - ScenarioRecord     : A struct containing the name and GUID of the
+%           scenario that was simulated.
+%
+%       - platformRecords(i) : A list of structs containing the name, ID, and GUID of
+%           each simulated platform
+%
+%       - modeRecords(i)     : A list of structs containing the name, ID, and GUID
+%           of each simulated mode
+%
+%       - speciesRecords(i)  : A list of structs containing the name,
+%           startID, count, and GUID of each simulated species
+%
+%       - timeStepRecords(i) : A list of structs containing the file offset
+%          for the beginning of each time step record in the simulation log
+%          in bytes.  Consult 'help readTimeStepRecord' for more detail
+
 %% read the log file trailer of a given log file, and return metadata and a file handle.
 function [logStruct,fid] = readLogFileHeader(filePath)
 logStruct = struct;
