@@ -506,7 +506,7 @@ namespace ESME.Views.Controls
             axis.StrokeEndLineCap = PenLineCap.Flat;
             axis.SnapsToDevicePixels = true;
             axis.Data = geometry;
-
+            
             return axis;
         }
 

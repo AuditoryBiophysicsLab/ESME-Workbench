@@ -3,9 +3,9 @@
     /// <summary>
     /// Interaction logic for DataPlot.xaml
     /// </summary>
-    public partial class DataPlot
+    public partial class DataPlotView
     {
-        public DataPlot()
+        public DataPlotView()
         {
             InitializeComponent();
         }

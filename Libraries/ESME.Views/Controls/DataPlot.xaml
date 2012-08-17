@@ -1,42 +1,47 @@
-﻿<UserControl x:Class="ESME.Views.Controls.DataPlot"
+﻿<UserControl x:Class="ESME.Views.Controls.DataPlotView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:controls="clr-namespace:ESME.Views.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              Background="White"
-             mc:Ignorable="d"             
              d:DataContext="{d:DesignInstance controls:DataPlotViewModel}"
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300"
+             d:DesignWidth="300"
+             mc:Ignorable="d">
     <DockPanel>
         <DockPanel DockPanel.Dock="Left">
             <DockPanel>
-                <TextBlock DockPanel.Dock="Bottom"
-				           MinHeight="{Binding ElementName=XAxis, Path=ActualHeight}" />
+                <TextBlock MinHeight="{Binding ElementName=XAxis, Path=ActualHeight}" DockPanel.Dock="Bottom" />
                 <controls:DataAxis x:Name="YAxis"
-				                   AxisLabel="{Binding YAxisLabel}"
-				                   AxisLocation="Right"
-				                   StartValue="{Binding YMin}"
-				                   EndValue="{Binding YMin}"
+                                   AxisLabel="{Binding YAxisLabel}"
+                                   AxisLocation="Right"
+                                   AxisType="{Binding YAxisType}"
+                                   EndValue="{Binding YMin}"
                                    MajorTicks="{Binding YAxisMajorTicks,
-                                                    Mode=OneWayToSource}"
+                                                        Mode=OneWayToSource}"
                                    MinorTicks="{Binding YAxisMinorTicks,
-                                                    Mode=OneWayToSource}"
-				                   TickValueFormat="0" />
+                                                        Mode=OneWayToSource}"
+                                   StartValue="{Binding YMin}"
+                                   TickValueFormat="0" />
             </DockPanel>
         </DockPanel>
         <DockPanel DockPanel.Dock="Bottom">
             <controls:DataAxis x:Name="XAxis"
-			                   AxisLocation="Top"
-			                   AxisLabel="{Binding XAxisLabel}"
-			                   StartValue="{Binding XMin}"
-			                   EndValue="{Binding XMax}"
+                               AxisLabel="{Binding XAxisLabel}"
+                               AxisLocation="Top"
+                               AxisType="{Binding XAxisType}"
+                               EndValue="{Binding XMax}"
                                MajorTicks="{Binding XAxisMajorTicks,
                                                     Mode=OneWayToSource}"
                                MinorTicks="{Binding XAxisMinorTicks,
                                                     Mode=OneWayToSource}"
-			                   TickValueFormat="0" />
+                               StartValue="{Binding XMin}"
+                               TickValueFormat="0" />
         </DockPanel>
-        <Canvas x:Name="PlotSurface" />
+        <Canvas x:Name="PlotSurface" SnapsToDevicePixels="True" UseLayoutRounding="True">
+            <Path Data="{Binding MajorGrid}" Stroke="DarkGray" StrokeDashArray="5 1" StrokeThickness="1" />
+            <Path Data="{Binding MinorGrid}" Stroke="DarkGray" StrokeDashArray="2 1" StrokeThickness=".5" />
+        </Canvas>
     </DockPanel>
 </UserControl>
