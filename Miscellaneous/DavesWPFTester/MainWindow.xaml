@@ -24,8 +24,8 @@
     <DockPanel>
         <DockPanel DockPanel.Dock="Left">
             <DockPanel>
-                <TextBlock Height="{Binding ActualHeight, ElementName=HorizontalLinearAxis, Mode=OneWay}" DockPanel.Dock="Top" />
-                <TextBlock Height="{Binding ActualHeight, ElementName=HorizontalLogAxis, Mode=OneWay}" DockPanel.Dock="Bottom" />
+                <TextBlock Height="95" DockPanel.Dock="Top" />
+                <TextBlock Height="89" DockPanel.Dock="Bottom" />
                 <controls:DataAxis VerticalAlignment="Top"
                                    AxisLabel="Left Linear Axis"
                                    AxisLocation="Right"
@@ -40,12 +40,12 @@
                                    AxisType="Logarithmic"
                                    EndValue="10000"
                                    StartValue="1"
-                                   TickValueFormat="e0" />
+                                   TickValueFormat="m" />
             </DockPanel>
         </DockPanel>
         <DockPanel DockPanel.Dock="Right">
-            <TextBlock Height="{Binding ActualHeight, ElementName=HorizontalLinearAxis, Mode=OneWay}" DockPanel.Dock="Top" />
-            <TextBlock Height="{Binding ActualHeight, ElementName=HorizontalLogAxis, Mode=OneWay}" DockPanel.Dock="Bottom" />
+            <TextBlock Height="95" DockPanel.Dock="Top" />
+            <TextBlock Height="89" DockPanel.Dock="Bottom" />
             <controls:DataAxis x:Name="VerticalLinearAxis"
                                AxisLabel="Right Linear Axis"
                                AxisLocation="Left"
@@ -75,7 +75,7 @@
                            DockPanel.Dock="Bottom"
                            EndValue="1e6"
                            StartValue="1"
-                           TickValueFormat="m" />
+                           TickValueFormat="e0" />
         <controls:DataAxis x:Name="HorizontalLinearAxis"
                            AxisLabel="Top Linear Axis"
                            AxisLocation="Bottom"
