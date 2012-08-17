@@ -36,13 +36,40 @@ namespace ESME.Views.Controls
         public ObservableList<AxisTick> MinorTicks { get { return (ObservableList<AxisTick>)GetValue(MinorTicksProperty); } set { SetCurrentValue(MinorTicksProperty, value); } }
         #endregion
 
+        #region dependency property List<double> MajorTickValues
+
+        public static DependencyProperty MajorTickValuesProperty = DependencyProperty.Register("MajorTickValues",
+                                                                                 typeof(List<double>),
+                                                                                 typeof(DataAxis),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, MajorTickValuesPropertyChanged));
+
+        public List<double> MajorTickValues { get { return (List<double>)GetValue(MajorTickValuesProperty); } set { SetValue(MajorTickValuesProperty, value); } }
+
+        static void MajorTickValuesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).MajorTickValuesPropertyChanged(); }
+        void MajorTickValuesPropertyChanged() { InvalidateVisual(); }
+        #endregion
+
+        #region dependency property List<double> MinorTickValues
+
+        public static DependencyProperty MinorTickValuesProperty = DependencyProperty.Register("MinorTickValues",
+                                                                                 typeof(List<double>),
+                                                                                 typeof(DataAxis),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, MinorTickValuesPropertyChanged));
+
+        public List<double> MinorTickValues { get { return (List<double>)GetValue(MinorTickValuesProperty); } set { SetValue(MinorTickValuesProperty, value); } }
+
+        static void MinorTickValuesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).MinorTickValuesPropertyChanged(); }
+        void MinorTickValuesPropertyChanged() { InvalidateVisual(); }
+        #endregion
+
         #region dependency property AxisLocation AxisLocation {get; set;}
         public static readonly DependencyProperty AxisLocationProperty = DependencyProperty.Register("AxisLocation",
                                                                                                      typeof(AxisLocation),
                                                                                                      typeof(DataAxis),
                                                                                                      new FrameworkPropertyMetadata((AxisLocation.Top),
                                                                                                                                    FrameworkPropertyMetadataOptions.AffectsArrange |
-                                                                                                                                   FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                                                                                                   FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                                                                                                   FrameworkPropertyMetadataOptions.AffectsRender,
                                                                                                                                    AxisLocationPropertyChanged));
 
         public AxisLocation AxisLocation { get { return (AxisLocation)GetValue(AxisLocationProperty); } set { SetCurrentValue(AxisLocationProperty, value); } }
@@ -77,7 +104,8 @@ namespace ESME.Views.Controls
                                                                                         typeof(AxisType),
                                                                                         typeof(DataAxis),
                                                                                         new FrameworkPropertyMetadata(AxisType.Linear,
-                                                                                                                      FrameworkPropertyMetadataOptions.AffectsArrange,
+                                                                                                                      FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                      FrameworkPropertyMetadataOptions.AffectsRender,
                                                                                                                       AxisTypePropertyChanged));
 
         public AxisType AxisType { get { return (AxisType)GetValue(AxisTypeProperty); } set { SetValue(AxisTypeProperty, value); } }
@@ -93,7 +121,8 @@ namespace ESME.Views.Controls
                                                                                                           typeof(DataAxis),
                                                                                                           new FrameworkPropertyMetadata("",
                                                                                                                                         FrameworkPropertyMetadataOptions.AffectsArrange |
-                                                                                                                                        FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                                                                                                        FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                                                                                                        FrameworkPropertyMetadataOptions.AffectsRender,
                                                                                                                                         AxisLabelPropertyChanged));
 
         public string AxisLabel { get { return (string)GetValue(AxisLabelProperty); } set { SetCurrentValue(AxisLabelProperty, value); } }
@@ -107,8 +136,7 @@ namespace ESME.Views.Controls
                                                                                                            typeof(double),
                                                                                                            typeof(DataAxis),
                                                                                                            new FrameworkPropertyMetadata(0.1,
-                                                                                                                                         FrameworkPropertyMetadataOptions.AffectsArrange |
-                                                                                                                                         FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                                                                                                         FrameworkPropertyMetadataOptions.AffectsRender,
                                                                                                                                          StartValuePropertyChanged));
 
         public double StartValue { get { return (double)GetValue(StartValueProperty); } set { SetCurrentValue(StartValueProperty, value); } }
@@ -122,8 +150,7 @@ namespace ESME.Views.Controls
                                                                                                          typeof(double),
                                                                                                          typeof(DataAxis),
                                                                                                          new FrameworkPropertyMetadata(10.0,
-                                                                                                                                       FrameworkPropertyMetadataOptions.AffectsArrange |
-                                                                                                                                       FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                                                                                                       FrameworkPropertyMetadataOptions.AffectsRender,
                                                                                                                                        EndValuePropertyChanged));
 
         public double EndValue { get { return (double)GetValue(EndValueProperty); } set { SetCurrentValue(EndValueProperty, value); } }
@@ -157,6 +184,7 @@ namespace ESME.Views.Controls
             AxisLocation = AxisLocation.Right;
             MajorTicks = new ObservableList<AxisTick>();
             MinorTicks = new ObservableList<AxisTick>();
+            SnapsToDevicePixels = true;
         }
 
         #region Layout and drawing code
@@ -356,7 +384,7 @@ namespace ESME.Views.Controls
                 var majorTick = new AxisTickInternal(majorTickLocation, _majorTickLength, majorTickValue, format);
                 _ticks.Add(majorTick);
                 MajorTicks.Add(new AxisTick { Location = majorTick.Location, Value = majorTickValue });
-                Debug.WriteLine(String.Format("Added major tick at location {0}", majorTick.Location));
+                //Debug.WriteLine(String.Format("Added major tick at location {0}", majorTick.Location));
                 if (AxisType == AxisType.Linear)
                 {
                     for (var minorTickCount = 1; minorTickCount < 5; minorTickCount++)
@@ -364,7 +392,7 @@ namespace ESME.Views.Controls
                         var minorTick = new AxisTickInternal(majorTickLocation + (direction * minorTickCount * _minorTickSpacing), _minorTickLength, null, null);
                         _ticks.Add(minorTick);
                         MinorTicks.Add(new AxisTick { Location = minorTick.Location, Value = null });
-                        Debug.WriteLine(String.Format("Linear: Added minor tick at location {0}", minorTick.Location));
+                        //Debug.WriteLine(String.Format("Linear: Added minor tick at location {0}", minorTick.Location));
                     }
                     majorTickValue += (valueStep * _majorTickSpacing);
                 }
@@ -375,7 +403,7 @@ namespace ESME.Views.Controls
                         var minorTick = new AxisTickInternal(majorTickLocation + (direction * Math.Log10(minorTickCount) * _majorTickSpacing), _minorTickLength, null, null);
                         _ticks.Add(minorTick);
                         MinorTicks.Add(new AxisTick { Location = minorTick.Location, Value = null });
-                        Debug.WriteLine(String.Format("Log: Added minor tick at location {0}", minorTick.Location));
+                        //Debug.WriteLine(String.Format("Log: Added minor tick at location {0}", minorTick.Location));
                     }
                     majorTickValue = Math.Pow(10, Math.Log10(majorTickValue) + 1);
                 }
@@ -386,13 +414,10 @@ namespace ESME.Views.Controls
             var endTick = new AxisTickInternal(_endLocation, _majorTickLength, majorTickValue, format);
             _ticks.Add(endTick);
             MajorTicks.Add(new AxisTick { Location = endTick.Location, Value = majorTickValue });
-            Debug.WriteLine(String.Format("Added last major tick at location {0}", endTick.Location));
+            //Debug.WriteLine(String.Format("Added last major tick at location {0}", endTick.Location));
 
             // Create a StreamGeometry to use to specify _axis.
-            var geometry = new StreamGeometry
-            {
-                FillRule = FillRule.EvenOdd
-            };
+            var geometry = new StreamGeometry { FillRule = FillRule.EvenOdd };
 
             // Open a StreamGeometryContext that can be used to describe this StreamGeometry 
             // object's contents.
@@ -413,15 +438,13 @@ namespace ESME.Views.Controls
             var axis = new Path
             {
                 Stroke = Brushes.Black,
-                StrokeThickness = _lineThickness
+                StrokeThickness = _lineThickness,
+                StrokeMiterLimit = 1,
+                StrokeStartLineCap = PenLineCap.Flat,
+                StrokeEndLineCap = PenLineCap.Flat,
+                SnapsToDevicePixels = true,
+                Data = geometry
             };
-            axis.Stroke = Brushes.Black;
-            axis.StrokeThickness = _lineThickness;
-            axis.StrokeMiterLimit = 1;
-            axis.StrokeStartLineCap = PenLineCap.Flat;
-            axis.StrokeEndLineCap = PenLineCap.Flat;
-            axis.SnapsToDevicePixels = true;
-            axis.Data = geometry;
 
             return axis;
         }
@@ -476,7 +499,7 @@ namespace ESME.Views.Controls
         double _startLocation;
         const double TickLabelSpacing = 3;
         #endregion
-        #region Axis utility classes, delegates and enumerations
+        #region Axis utility classes
         class AxisTicksInternal : List<AxisTickInternal>
         {
             public void AddLabels(Panel parent) { foreach (var tick in this.Where(tick => tick.Label != null)) parent.Children.Add(tick.Label); }

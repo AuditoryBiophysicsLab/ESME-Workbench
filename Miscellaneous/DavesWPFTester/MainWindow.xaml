@@ -21,7 +21,7 @@
             <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <DockPanel>
+    <DockPanel LastChildFill="True">
         <DockPanel DockPanel.Dock="Left">
             <DockPanel>
                 <TextBlock Height="95" DockPanel.Dock="Top" />
@@ -39,6 +39,10 @@
                                    AxisLocation="Right"
                                    AxisType="Logarithmic"
                                    EndValue="10000"
+                                   MajorTicks="{Binding YAxisMajorTicks,
+                                                        Mode=OneWayToSource}"
+                                   MinorTicks="{Binding YAxisMinorTicks,
+                                                        Mode=OneWayToSource}"
                                    StartValue="1"
                                    TickValueFormat="m" />
             </DockPanel>
@@ -67,6 +71,10 @@
                            DockPanel.Dock="Bottom"
                            EndValue="15"
                            StartValue="-1"
+                           MajorTicks="{Binding XAxisMajorTicks,
+                                                Mode=OneWayToSource}"
+                           MinorTicks="{Binding XAxisMinorTicks,
+                                                Mode=OneWayToSource}"
                            TickValueFormat="e0" />
         <controls:DataAxis x:Name="HorizontalLogAxis"
                            AxisLabel="Bottom Log Axis"
@@ -91,36 +99,7 @@
                            EndValue="10000"
                            StartValue="0.01"
                            TickValueFormat="m" />
-
-        <Grid>
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="SizeChanged">
-                    <WPF:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0"
-                       Grid.Column="0"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Background="Transparent"
-                       FontSize="24"
-                       Text="{Binding WaitToRenderText}"
-                       TextWrapping="Wrap" />
-            <Image Grid.Row="0"
-                   Grid.Column="0"
-                   Source="{Binding WriteableBitmap}"
-                   Stretch="Fill"
-                   Visibility="{Binding WriteableBitmapVisibility}" />
-
-            <Canvas x:Name="OverlayCanvas" Grid.Row="0" Grid.Column="0" Background="Transparent">
-                <Path Data="{Binding BottomProfileGeometry}" Fill="DarkGray" Stroke="Black" StrokeThickness="0.1" />
-            </Canvas>
-        </Grid>
+        <!-- <Image Source="{Binding DisplayImage}" /> -->
+        <app:ShapeCanvas x:Name="ShapeCanvas" Shapes="{Binding Shapes}" />
     </DockPanel>
 </Window>
