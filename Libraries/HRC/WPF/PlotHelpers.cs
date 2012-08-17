@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 
 namespace HRC.WPF
 {
@@ -23,16 +20,6 @@ namespace HRC.WPF
                 default:
                     throw new InvalidEnumArgumentException();
             }
-        }
-
-        public static string GetGrid(ICollection<double> horizontalTicks, ICollection<double> verticalTicks, int skipFactor, double height, double width)
-        {
-            var sb = new StringBuilder();
-            foreach (var tick in horizontalTicks.Skip(skipFactor))
-                sb.Append(String.Format("M 0,{0} H {1}", tick, width));
-            foreach (var tick in verticalTicks.Skip(skipFactor))
-                sb.Append(String.Format("M {0},0 V {1}", tick, height));
-            return sb.ToString();
         }
     }
 

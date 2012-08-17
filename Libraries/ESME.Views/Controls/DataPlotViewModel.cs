@@ -23,19 +23,19 @@ namespace ESME.Views.Controls
         [Initialize(10000)] 
         public double YMax { get; internal set; }
         
-        [Initialize(DataAxis.AxisTypeEnum.Logarithmic)] 
-        public DataAxis.AxisTypeEnum YAxisType { get; set; }
+        [Initialize(AxisType.Logarithmic)] 
+        public AxisType YAxisType { get; set; }
         
-        [Initialize(DataAxis.AxisTypeEnum.Linear)]
-        public DataAxis.AxisTypeEnum XAxisType { get; set; }
+        [Initialize(AxisType.Linear)]
+        public AxisType XAxisType { get; set; }
         
         public string XAxisLabel { get; set; }
         public string YAxisLabel { get; set; }
         
-        public ObservableList<double> XAxisMajorTicks { get; set; }
-        public ObservableList<double> XAxisMinorTicks { get; set; }
-        public ObservableList<double> YAxisMajorTicks { get; set; }
-        public ObservableList<double> YAxisMinorTicks { get; set; }
+        public ObservableList<AxisTick> XAxisMajorTicks { get; set; }
+        public ObservableList<AxisTick> XAxisMinorTicks { get; set; }
+        public ObservableList<AxisTick> YAxisMajorTicks { get; set; }
+        public ObservableList<AxisTick> YAxisMinorTicks { get; set; }
 
         public DataPlotView View { get; set; }
         [Initialize("M 0,0")]
@@ -50,8 +50,8 @@ namespace ESME.Views.Controls
             if (height == 0 || width == 0) return;
             // ReSharper restore CompareOfFloatsByEqualityOperator
 
-            MajorGrid = PlotHelpers.GetGrid(YAxisMajorTicks, XAxisMajorTicks, 1, height, width);
-            MinorGrid = PlotHelpers.GetGrid(YAxisMinorTicks, XAxisMinorTicks, 0, height, width);
+            MajorGrid = DataAxis.GetGrid(YAxisMajorTicks, XAxisMajorTicks, 1, height, width);
+            MinorGrid = DataAxis.GetGrid(YAxisMinorTicks, XAxisMinorTicks, 0, height, width);
         }
     }
 }

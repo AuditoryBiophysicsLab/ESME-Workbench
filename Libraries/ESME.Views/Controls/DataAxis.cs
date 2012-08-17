@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -13,96 +14,38 @@ using HRC.Utility;
 
 namespace ESME.Views.Controls
 {
-    /// <summary>
-    /// Follow steps 1a or 1b and then 2 to use this custom control in a XAML file.
-    ///
-    /// Step 1a) Using this custom control in a XAML file that exists in the current project.
-    /// Add this XmlNamespace attribute to the root element of the markup file where it is 
-    /// to be used:
-    ///
-    ///     xmlns:MyNamespace="clr-namespace:GeoCanvasDevelopment.Controls"
-    ///
-    ///
-    /// Step 1b) Using this custom control in a XAML file that exists in a different project.
-    /// Add this XmlNamespace attribute to the root element of the markup file where it is 
-    /// to be used:
-    ///
-    ///     xmlns:MyNamespace="clr-namespace:GeoCanvasDevelopment.Controls;assembly=GeoCanvasDevelopment.Controls"
-    ///
-    /// You will also need to add a project reference from the project where the XAML file lives
-    /// to this project and Rebuild to avoid compilation errors:
-    ///
-    ///     Right click on the target project in the Solution Explorer and
-    ///     "Add Reference"->"Projects"->[Browse to and select this project]
-    ///
-    ///
-    /// Step 2)
-    /// Go ahead and use your control in the XAML file.
-    ///
-    ///     <MyNamespace:GeoCanvas/>
-    ///
-    /// </summary>
     public class DataAxis : Panel
     {
-        #region AxisLocationEnum enum
+        static DataAxis() { DefaultStyleKeyProperty.OverrideMetadata(typeof(DataAxis), new FrameworkPropertyMetadata(typeof(DataAxis))); }
 
-        public enum AxisLocationEnum
-        {
-            Top,
-            Bottom,
-            Left,
-            Right
-        }
-
-        #endregion
-
-        public enum AxisTypeEnum
-        {
-            Linear,
-            Logarithmic
-        }
-
-        static DataAxis() { DefaultStyleKeyProperty.OverrideMetadata(typeof (DataAxis), new FrameworkPropertyMetadata(typeof (DataAxis))); }
-
-        #region dependency property ObservableList<double> MajorTicks
-
+        #region dependency property ObservableList<AxisTick> MajorTicks
         public static DependencyProperty MajorTicksProperty = DependencyProperty.Register("MajorTicks",
-                                                                                 typeof (ObservableList<double>),
-                                                                                 typeof (DataAxis),
-                                                                                 new FrameworkPropertyMetadata(null));
+                                                                                          typeof(ObservableList<AxisTick>),
+                                                                                          typeof(DataAxis),
+                                                                                          new FrameworkPropertyMetadata(null));
 
-        public ObservableList<double> MajorTicks
-        {
-            get { return (ObservableList<double>)GetValue(MajorTicksProperty); }
-            set { SetCurrentValue(MajorTicksProperty, value); }
-        }
-
+        public ObservableList<AxisTick> MajorTicks { get { return (ObservableList<AxisTick>)GetValue(MajorTicksProperty); } set { SetCurrentValue(MajorTicksProperty, value); } }
         #endregion
 
-        #region dependency property ObservableList<double> MinorTicks
-
+        #region dependency property ObservableList<AxisTick> MinorTicks
         public static DependencyProperty MinorTicksProperty = DependencyProperty.Register("MinorTicks",
-                                                                                 typeof (ObservableList<double>),
-                                                                                 typeof (DataAxis),
-                                                                                 new FrameworkPropertyMetadata(null));
+                                                                                          typeof(ObservableList<AxisTick>),
+                                                                                          typeof(DataAxis),
+                                                                                          new FrameworkPropertyMetadata(null));
 
-        public ObservableList<double> MinorTicks
-        {
-            get { return (ObservableList<double>)GetValue(MinorTicksProperty); }
-            set { SetCurrentValue(MinorTicksProperty, value); }
-        }
-
+        public ObservableList<AxisTick> MinorTicks { get { return (ObservableList<AxisTick>)GetValue(MinorTicksProperty); } set { SetCurrentValue(MinorTicksProperty, value); } }
         #endregion
 
-        #region public AxisLocationEnum AxisLocation {get; set;}
+        #region dependency property AxisLocation AxisLocation {get; set;}
+        public static readonly DependencyProperty AxisLocationProperty = DependencyProperty.Register("AxisLocation",
+                                                                                                     typeof(AxisLocation),
+                                                                                                     typeof(DataAxis),
+                                                                                                     new FrameworkPropertyMetadata((AxisLocation.Top),
+                                                                                                                                   FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                                   FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                                                                                                   AxisLocationPropertyChanged));
 
-        public static readonly DependencyProperty AxisLocationProperty = DependencyProperty.Register("AxisLocation", typeof(AxisLocationEnum), typeof(DataAxis), new FrameworkPropertyMetadata((AxisLocationEnum.Top), FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, AxisLocationPropertyChanged));
-
-        public AxisLocationEnum AxisLocation
-        {
-            get { return (AxisLocationEnum)GetValue(AxisLocationProperty); }
-            set { SetCurrentValue(AxisLocationProperty, value); }
-        }
+        public AxisLocation AxisLocation { get { return (AxisLocation)GetValue(AxisLocationProperty); } set { SetCurrentValue(AxisLocationProperty, value); } }
 
         static void AxisLocationPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).AxisLocationPropertyChanged(); }
 
@@ -110,16 +53,16 @@ namespace ESME.Views.Controls
         {
             switch (AxisLocation)
             {
-                case AxisLocationEnum.Top:
+                case AxisLocation.Top:
                     _isVertical = false;
                     break;
-                case AxisLocationEnum.Bottom:
+                case AxisLocation.Bottom:
                     _isVertical = false;
                     break;
-                case AxisLocationEnum.Left:
+                case AxisLocation.Left:
                     _isVertical = true;
                     break;
-                case AxisLocationEnum.Right:
+                case AxisLocation.Right:
                     _isVertical = true;
                     break;
                 default:
@@ -127,97 +70,96 @@ namespace ESME.Views.Controls
             }
             InvalidateVisual();
         }
-
         #endregion
 
-        #region dependency property AxisTypeEnum AxisType
-
+        #region dependency property AxisType AxisType
         public static DependencyProperty AxisTypeProperty = DependencyProperty.Register("AxisType",
-                                                                                 typeof(AxisTypeEnum),
-                                                                                 typeof(DataAxis),
-                                                                                 new FrameworkPropertyMetadata(AxisTypeEnum.Linear, FrameworkPropertyMetadataOptions.AffectsArrange, AxisTypePropertyChanged));
+                                                                                        typeof(AxisType),
+                                                                                        typeof(DataAxis),
+                                                                                        new FrameworkPropertyMetadata(AxisType.Linear,
+                                                                                                                      FrameworkPropertyMetadataOptions.AffectsArrange,
+                                                                                                                      AxisTypePropertyChanged));
 
-        public AxisTypeEnum AxisType { get { return (AxisTypeEnum)GetValue(AxisTypeProperty); } set { SetValue(AxisTypeProperty, value); } }
+        public AxisType AxisType { get { return (AxisType)GetValue(AxisTypeProperty); } set { SetValue(AxisTypeProperty, value); } }
 
         static void AxisTypePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).AxisTypePropertyChanged(); }
 
         void AxisTypePropertyChanged() { InvalidateVisual(); }
         #endregion
 
-        #region public string AxisLabel { get; set; }
+        #region dependency property string AxisLabel { get; set; }
+        public static readonly DependencyProperty AxisLabelProperty = DependencyProperty.RegisterAttached("AxisLabel",
+                                                                                                          typeof(string),
+                                                                                                          typeof(DataAxis),
+                                                                                                          new FrameworkPropertyMetadata("",
+                                                                                                                                        FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                                        FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                                                                                                        AxisLabelPropertyChanged));
 
-        public static readonly DependencyProperty AxisLabelProperty = DependencyProperty.RegisterAttached("AxisLabel", typeof(string), typeof(DataAxis), new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, AxisLabelPropertyChanged));
-
-        public string AxisLabel
-        {
-            get { return (string)GetValue(AxisLabelProperty); }
-            set { SetCurrentValue(AxisLabelProperty, value); }
-        }
+        public string AxisLabel { get { return (string)GetValue(AxisLabelProperty); } set { SetCurrentValue(AxisLabelProperty, value); } }
 
         static void AxisLabelPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).AxisLabelPropertyChanged(); }
         void AxisLabelPropertyChanged() { InvalidateVisual(); }
-
         #endregion
 
-        #region public double StartValue { get; set; }
+        #region dependency property double StartValue { get; set; }
+        public static readonly DependencyProperty StartValueProperty = DependencyProperty.RegisterAttached("StartValue",
+                                                                                                           typeof(double),
+                                                                                                           typeof(DataAxis),
+                                                                                                           new FrameworkPropertyMetadata(0.1,
+                                                                                                                                         FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                                         FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                                                                                                         StartValuePropertyChanged));
 
-        public static readonly DependencyProperty StartValueProperty = DependencyProperty.RegisterAttached("StartValue", typeof(double), typeof(DataAxis), new FrameworkPropertyMetadata(0.1, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, StartValuePropertyChanged));
-
-        public double StartValue
-        {
-            get { return (double)GetValue(StartValueProperty); }
-            set { SetCurrentValue(StartValueProperty, value); }
-        }
+        public double StartValue { get { return (double)GetValue(StartValueProperty); } set { SetCurrentValue(StartValueProperty, value); } }
 
         static void StartValuePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).StartValuePropertyChanged(); }
         void StartValuePropertyChanged() { InvalidateVisual(); }
-
         #endregion
 
-        #region public double EndValue { get; set; }
+        #region dependency property double EndValue { get; set; }
+        public static readonly DependencyProperty EndValueProperty = DependencyProperty.RegisterAttached("EndValue",
+                                                                                                         typeof(double),
+                                                                                                         typeof(DataAxis),
+                                                                                                         new FrameworkPropertyMetadata(10.0,
+                                                                                                                                       FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                                       FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                                                                                                       EndValuePropertyChanged));
 
-        public static readonly DependencyProperty EndValueProperty = DependencyProperty.RegisterAttached("EndValue", typeof(double), typeof(DataAxis), new FrameworkPropertyMetadata(10.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, EndValuePropertyChanged));
-
-        public double EndValue
-        {
-            get { return (double)GetValue(EndValueProperty); }
-            set { SetCurrentValue(EndValueProperty, value); }
-        }
+        public double EndValue { get { return (double)GetValue(EndValueProperty); } set { SetCurrentValue(EndValueProperty, value); } }
 
         static void EndValuePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).EndValuePropertyChanged(); }
         void EndValuePropertyChanged() { InvalidateVisual(); }
-
         #endregion
 
-        #region public string TickValueFormat { get; set; }
+        #region dependency property string TickValueFormat { get; set; }
+        public static readonly DependencyProperty TickValueFormatProperty = DependencyProperty.RegisterAttached("TickValueFormat",
+                                                                                                                typeof(string),
+                                                                                                                typeof(DataAxis),
+                                                                                                                new FrameworkPropertyMetadata("0.###",
+                                                                                                                                              FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                                              FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                                                                                                              TickValueFormatPropertyChanged));
 
-        public static readonly DependencyProperty TickValueFormatProperty = DependencyProperty.RegisterAttached("TickValueFormat", typeof(string), typeof(DataAxis), new FrameworkPropertyMetadata("0.###", FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, TickValueFormatPropertyChanged));
-
-        public string TickValueFormat
-        {
-            get { return (string)GetValue(TickValueFormatProperty); }
-            set { SetCurrentValue(TickValueFormatProperty, value); }
-        }
+        public string TickValueFormat { get { return (string)GetValue(TickValueFormatProperty); } set { SetCurrentValue(TickValueFormatProperty, value); } }
 
         static void TickValueFormatPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).TickValueFormatPropertyChanged(); }
         void TickValueFormatPropertyChanged() { InvalidateVisual(); }
-
         #endregion
 
         public DataAxis()
         {
             _lineThickness = 1;
             _majorTickLength = 6;
-            _minorTickLength = 2;
+            _minorTickLength = 3;
             _majorTickSpacing = 100;
             _minorTickSpacing = 10;
-            AxisLocation = AxisLocationEnum.Right;
-            MajorTicks = new ObservableList<double>();
-            MinorTicks = new ObservableList<double>();
+            AxisLocation = AxisLocation.Right;
+            MajorTicks = new ObservableList<AxisTick>();
+            MinorTicks = new ObservableList<AxisTick>();
         }
 
         #region Layout and drawing code
-
         void CreateChildren(Size newSize)
         {
             if (_isVertical)
@@ -232,7 +174,7 @@ namespace ESME.Views.Controls
                 _startLocation = 0;
                 _endLocation = _length;
             }
-            if (AxisType == AxisTypeEnum.Logarithmic)
+            if (AxisType == AxisType.Logarithmic)
             {
                 var startTickValue = Math.Floor(Math.Log10(StartValue));
                 var endTickValue = Math.Ceiling(Math.Log10(EndValue));
@@ -250,7 +192,7 @@ namespace ESME.Views.Controls
             Children.Add(_axis);
             _ticks.AddLabels(this);
 
-            if (!string.IsNullOrEmpty(AxisLabel))
+            if (!String.IsNullOrEmpty(AxisLabel))
             {
                 _axisLabel.Text = AxisLabel;
                 Children.Add(_axisLabel);
@@ -259,7 +201,7 @@ namespace ESME.Views.Controls
 
         protected override Size MeasureOverride(Size availableSize)
         {
-            if (AxisType == AxisTypeEnum.Logarithmic)
+            if (AxisType == AxisType.Logarithmic)
             {
                 if (StartValue <= 0) throw new ParameterOutOfRangeException("StartValue cannot be zero or negative on a Logarithmic axis");
                 if (EndValue <= 0) throw new ParameterOutOfRangeException("EndValue cannot be zero or negative on a Logarithmic axis");
@@ -268,8 +210,8 @@ namespace ESME.Views.Controls
             CreateChildren(availableSize);
             var labelSizes = new List<double>();
 
-            if (double.IsNaN(availableSize.Width) || double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;
-            if (double.IsNaN(availableSize.Height) || double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
+            if (Double.IsNaN(availableSize.Width) || Double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;
+            if (Double.IsNaN(availableSize.Height) || Double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
             var sizeToContent = new Size(SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
             _axis.Measure(sizeToContent);
             foreach (var tick in _ticks)
@@ -302,34 +244,43 @@ namespace ESME.Views.Controls
         {
             switch (AxisLocation)
             {
-                case AxisLocationEnum.Top:
+                case AxisLocation.Top:
                     if (_axisLabel != null)
                     {
-                        _axisLabel.Arrange(new Rect((DesiredSize.Width - _axisLabel.DesiredSize.Width)/2, DesiredSize.Height - _axisLabel.DesiredSize.Height, _axisLabel.DesiredSize.Width, _axisLabel.DesiredSize.Height));
+                        _axisLabel.Arrange(new Rect((DesiredSize.Width - _axisLabel.DesiredSize.Width) / 2,
+                                                    DesiredSize.Height - _axisLabel.DesiredSize.Height,
+                                                    _axisLabel.DesiredSize.Width,
+                                                    _axisLabel.DesiredSize.Height));
                         _axis.Arrange(new Rect(0, 0, _axis.DesiredSize.Width, _axis.DesiredSize.Height));
                     }
                     break;
-                case AxisLocationEnum.Bottom:
+                case AxisLocation.Bottom:
                     if (_axisLabel != null)
                     {
-                        _axisLabel.Arrange(new Rect((DesiredSize.Width - _axisLabel.DesiredSize.Width)/2, 0, _axisLabel.DesiredSize.Width, _axisLabel.DesiredSize.Height));
+                        _axisLabel.Arrange(new Rect((DesiredSize.Width - _axisLabel.DesiredSize.Width) / 2, 0, _axisLabel.DesiredSize.Width, _axisLabel.DesiredSize.Height));
                         _axis.Arrange(new Rect(0, arrangeSize.Height, _axis.DesiredSize.Width, _axis.DesiredSize.Height));
                     }
                     break;
-                case AxisLocationEnum.Left:
+                case AxisLocation.Left:
                     if (_axisLabel != null)
                     {
                         _axisLabel.RenderTransformOrigin = new Point(0.5, 0.5);
-                        _axisLabel.Arrange(new Rect(DesiredSize.Width - (_axisLabel.DesiredSize.Width/2) - (_axisLabel.DesiredSize.Height/2), (DesiredSize.Height - _axisLabel.DesiredSize.Height)/2, _axisLabel.DesiredSize.Width, _axisLabel.DesiredSize.Height));
+                        _axisLabel.Arrange(new Rect(DesiredSize.Width - (_axisLabel.DesiredSize.Width / 2) - (_axisLabel.DesiredSize.Height / 2),
+                                                    (DesiredSize.Height - _axisLabel.DesiredSize.Height) / 2,
+                                                    _axisLabel.DesiredSize.Width,
+                                                    _axisLabel.DesiredSize.Height));
                         _axis.Arrange(new Rect(0, 0, _axis.DesiredSize.Width, _axis.DesiredSize.Height));
                         _axisLabel.RenderTransform = new RotateTransform(90);
                     }
                     break;
-                case AxisLocationEnum.Right:
+                case AxisLocation.Right:
                     if (_axisLabel != null)
                     {
                         _axisLabel.RenderTransformOrigin = new Point(0.5, 0.5);
-                        _axisLabel.Arrange(new Rect((_axisLabel.DesiredSize.Height/2) - (_axisLabel.DesiredSize.Width/2), (DesiredSize.Height - _axisLabel.DesiredSize.Height)/2, _axisLabel.DesiredSize.Width, _axisLabel.DesiredSize.Height));
+                        _axisLabel.Arrange(new Rect((_axisLabel.DesiredSize.Height / 2) - (_axisLabel.DesiredSize.Width / 2),
+                                                    (DesiredSize.Height - _axisLabel.DesiredSize.Height) / 2,
+                                                    _axisLabel.DesiredSize.Width,
+                                                    _axisLabel.DesiredSize.Height));
                         _axis.Arrange(new Rect(arrangeSize.Width, 0, _axis.DesiredSize.Width, _axis.DesiredSize.Height));
                         _axisLabel.RenderTransform = new RotateTransform(-90);
                     }
@@ -351,23 +302,23 @@ namespace ESME.Views.Controls
                     double top;
                     switch (AxisLocation)
                     {
-                        case AxisLocationEnum.Top:
-                            left = Math.Max(0, tick.Location - (width/2));
+                        case AxisLocation.Top:
+                            left = Math.Max(0, tick.Location - (width / 2));
                             if (DesiredSize.Width < (left + width)) left -= (left + width) - DesiredSize.Width;
                             top = tick.Length + 1;
                             break;
-                        case AxisLocationEnum.Bottom:
-                            left = Math.Max(0, tick.Location - (width/2));
+                        case AxisLocation.Bottom:
+                            left = Math.Max(0, tick.Location - (width / 2));
                             if (DesiredSize.Width < (left + width)) left -= (left + width) - DesiredSize.Width;
                             top = Math.Max(0, DesiredSize.Height - tick.Length - height - 1);
                             break;
-                        case AxisLocationEnum.Left:
-                            top = Math.Max(0, tick.Location - (height/2));
+                        case AxisLocation.Left:
+                            top = Math.Max(0, tick.Location - (height / 2));
                             if (DesiredSize.Height < (top + height)) top -= (top + height) - DesiredSize.Height;
                             left = tick.Length + 1;
                             break;
-                        case AxisLocationEnum.Right:
-                            top = Math.Max(0, tick.Location - (height/2));
+                        case AxisLocation.Right:
+                            top = Math.Max(0, tick.Location - (height / 2));
                             if (DesiredSize.Height < (top + height)) top -= (top + height) - DesiredSize.Height;
                             left = Math.Max(0, DesiredSize.Width - tick.Length - width - 1);
                             break;
@@ -386,34 +337,34 @@ namespace ESME.Views.Controls
 
         Path CreateAxis()
         {
-            var valueStep = (EndValue - StartValue)/Math.Abs(_endLocation - _startLocation);
-            var format = TickValueFormat == "m" ? "m" : string.Format("{{0:{0}}}", TickValueFormat);
-            if (MajorTicks == null) MajorTicks = new ObservableList<double>();
-            if (MinorTicks == null) MinorTicks = new ObservableList<double>();
+            var valueStep = (EndValue - StartValue) / Math.Abs(_endLocation - _startLocation);
+            var format = TickValueFormat == "m" ? "m" : String.Format("{{0:{0}}}", TickValueFormat);
+            if (MajorTicks == null) MajorTicks = new ObservableList<AxisTick>();
+            if (MinorTicks == null) MinorTicks = new ObservableList<AxisTick>();
             MajorTicks.Clear();
             MinorTicks.Clear();
             // Clear the tick cache
             _ticks.Clear();
 
-            var majorTickValue = AxisType == AxisTypeEnum.Linear ? StartValue : Math.Pow(10, Math.Floor(Math.Log10(StartValue)));
+            var majorTickValue = AxisType == AxisType.Linear ? StartValue : Math.Pow(10, Math.Floor(Math.Log10(StartValue)));
             var direction = _isVertical ? -1 : 1;
             var conditionLambda = !_isVertical
                                       ? new Func<double, double, bool>((tickLocation, endLocation) => tickLocation < endLocation - 1)
                                       : ((tickLocation, endLocation) => tickLocation > endLocation + 1);
             for (var majorTickLocation = _startLocation; conditionLambda(majorTickLocation, _endLocation); majorTickLocation += direction * _majorTickSpacing)
             {
-                var majorTick = new AxisTick(majorTickLocation, _majorTickLength, majorTickValue, format);
+                var majorTick = new AxisTickInternal(majorTickLocation, _majorTickLength, majorTickValue, format);
                 _ticks.Add(majorTick);
-                MajorTicks.Add(majorTick.Location);
-                Debug.WriteLine(string.Format("Added major tick at location {0}", majorTick.Location));
-                if (AxisType == AxisTypeEnum.Linear)
+                MajorTicks.Add(new AxisTick { Location = majorTick.Location, Value = majorTickValue });
+                Debug.WriteLine(String.Format("Added major tick at location {0}", majorTick.Location));
+                if (AxisType == AxisType.Linear)
                 {
                     for (var minorTickCount = 1; minorTickCount < 5; minorTickCount++)
                     {
-                        var minorTick = new AxisTick(majorTickLocation + (direction * minorTickCount * _minorTickSpacing), _minorTickLength, null, null);
+                        var minorTick = new AxisTickInternal(majorTickLocation + (direction * minorTickCount * _minorTickSpacing), _minorTickLength, null, null);
                         _ticks.Add(minorTick);
-                        MinorTicks.Add(minorTick.Location);
-                        Debug.WriteLine(string.Format("Linear: Added minor tick at location {0}", minorTick.Location));
+                        MinorTicks.Add(new AxisTick { Location = minorTick.Location, Value = null });
+                        Debug.WriteLine(String.Format("Linear: Added minor tick at location {0}", minorTick.Location));
                     }
                     majorTickValue += (valueStep * _majorTickSpacing);
                 }
@@ -421,10 +372,10 @@ namespace ESME.Views.Controls
                 {
                     for (var minorTickCount = 2; minorTickCount < 10; minorTickCount++)
                     {
-                        var minorTick = new AxisTick(majorTickLocation + (direction * Math.Log10(minorTickCount) * _majorTickSpacing), _minorTickLength, null, null);
+                        var minorTick = new AxisTickInternal(majorTickLocation + (direction * Math.Log10(minorTickCount) * _majorTickSpacing), _minorTickLength, null, null);
                         _ticks.Add(minorTick);
-                        MinorTicks.Add(minorTick.Location);
-                        Debug.WriteLine(string.Format("Log: Added minor tick at location {0}", minorTick.Location));
+                        MinorTicks.Add(new AxisTick { Location = minorTick.Location, Value = null });
+                        Debug.WriteLine(String.Format("Log: Added minor tick at location {0}", minorTick.Location));
                     }
                     majorTickValue = Math.Pow(10, Math.Log10(majorTickValue) + 1);
                 }
@@ -432,16 +383,16 @@ namespace ESME.Views.Controls
 
             // Add a major tick at the end
             majorTickValue = EndValue;
-            var endTick = new AxisTick(_endLocation, _majorTickLength, majorTickValue, format);
+            var endTick = new AxisTickInternal(_endLocation, _majorTickLength, majorTickValue, format);
             _ticks.Add(endTick);
-            MajorTicks.Add(endTick.Location);
-            Debug.WriteLine(string.Format("Added last major tick at location {0}", endTick.Location));
+            MajorTicks.Add(new AxisTick { Location = endTick.Location, Value = majorTickValue });
+            Debug.WriteLine(String.Format("Added last major tick at location {0}", endTick.Location));
 
             // Create a StreamGeometry to use to specify _axis.
             var geometry = new StreamGeometry
-                           {
-                               FillRule = FillRule.EvenOdd
-                           };
+            {
+                FillRule = FillRule.EvenOdd
+            };
 
             // Open a StreamGeometryContext that can be used to describe this StreamGeometry 
             // object's contents.
@@ -460,10 +411,10 @@ namespace ESME.Views.Controls
             // for additional performance benefits.
             geometry.Freeze();
             var axis = new Path
-                       {
-                           Stroke = Brushes.Black,
-                           StrokeThickness = _lineThickness
-                       };
+            {
+                Stroke = Brushes.Black,
+                StrokeThickness = _lineThickness
+            };
             axis.Stroke = Brushes.Black;
             axis.StrokeThickness = _lineThickness;
             axis.StrokeMiterLimit = 1;
@@ -471,7 +422,7 @@ namespace ESME.Views.Controls
             axis.StrokeEndLineCap = PenLineCap.Flat;
             axis.SnapsToDevicePixels = true;
             axis.Data = geometry;
-            
+
             return axis;
         }
 
@@ -479,23 +430,31 @@ namespace ESME.Views.Controls
         {
             switch (AxisLocation)
             {
-                case AxisLocationEnum.Top:
+                case AxisLocation.Top:
                     return new Point(location, offset);
-                case AxisLocationEnum.Bottom:
+                case AxisLocation.Bottom:
                     return new Point(location, -offset);
-                case AxisLocationEnum.Left:
+                case AxisLocation.Left:
                     return new Point(offset, location);
-                case AxisLocationEnum.Right:
+                case AxisLocation.Right:
                     return new Point(-offset, location);
                 default:
                     throw new ApplicationException("DataAxis: Unknown AxisLocation value.");
             }
         }
-
         #endregion
 
-        #region Private data members
+        public static string GetGrid(ICollection<AxisTick> horizontalTicks, ICollection<AxisTick> verticalTicks, int skipFactor, double height, double width)
+        {
+            var sb = new StringBuilder();
+            foreach (var tick in horizontalTicks.Skip(skipFactor))
+                sb.Append(String.Format("M 0,{0} H {1}", tick.Location, width));
+            foreach (var tick in verticalTicks.Skip(skipFactor))
+                sb.Append(String.Format("M {0},0 V {1}", tick.Location, height));
+            return sb.ToString();
+        }
 
+        #region Private data members
         readonly TextBlock _axisLabel = new TextBlock();
         readonly double _lineThickness;
 
@@ -504,7 +463,7 @@ namespace ESME.Views.Controls
         readonly List<double> _minWidths = new List<double>();
         readonly double _minorTickLength;
 
-        readonly AxisTicks _ticks = new AxisTicks();
+        readonly AxisTicksInternal _ticks = new AxisTicksInternal();
         Path _axis;
         double _endLocation;
         bool _isVertical;
@@ -516,50 +475,20 @@ namespace ESME.Views.Controls
 
         double _startLocation;
         const double TickLabelSpacing = 3;
-
         #endregion
-
-    }
-
-    #region Axis utility classes, delegates and enumerations
-
-    internal delegate double TickLabelLayoutDelegate(AxisTick tick);
-
-    internal delegate double AxisLabelLayoutDelegate(double position);
-
-    internal class AxisTicks : List<AxisTick>
-    {
-        public void AddLabels(DataAxis parent)
+        #region Axis utility classes, delegates and enumerations
+        class AxisTicksInternal : List<AxisTickInternal>
         {
-            foreach (var tick in this)
-                if (tick.Label != null)
-                {
-                    parent.Children.Add(tick.Label);
-                }
-        }
-    }
-
-    internal class AxisTick : IComparable<AxisTick>
-    {
-        public AxisTick(double location, double height, string label)
-        {
-            Value = null;
-            Location = location;
-            Length = height;
-            if (label != null)
-                Label = new TextBlock
-                             {
-                                 Text = label
-                             };
+            public void AddLabels(Panel parent) { foreach (var tick in this.Where(tick => tick.Label != null)) parent.Children.Add(tick.Label); }
         }
 
-        public AxisTick(double location, double height, double? value, string format)
+        class AxisTickInternal : IComparable<AxisTickInternal>
         {
-            Location = location;
-            Length = height;
-            Value = value;
-            if (value != null)
+            public AxisTickInternal(double location, double height, double? value, string format)
             {
+                Location = location;
+                Length = height;
+                if (value == null) return;
                 if (format == "m")
                 {
                     Label = new TextBlock { Text = "10" };
@@ -571,30 +500,47 @@ namespace ESME.Views.Controls
                 {
                     Label = new TextBlock
                     {
-                        Text = string.Format(format, value)
+                        Text = String.Format(format, value)
                     };
                 }
             }
+
+            public double Location { get; private set; }
+            public double Length { get; private set; }
+            public TextBlock Label { get; private set; }
+
+            #region IComparable<AxisTickInternal> Members
+            int IComparable<AxisTickInternal>.CompareTo(AxisTickInternal that)
+            {
+                if ((that == null) || (Location > that.Location)) return 1;
+                if (Location < that.Location) return -1;
+                return 0;
+            }
+            #endregion
+
+            ~AxisTickInternal() { Label = null; }
         }
-
-        public double Location { get; internal set; }
-        public double Length { get; internal set; }
-        public double? Value { get; internal set; }
-        public TextBlock Label { get; set; }
-
-        #region IComparable<AxisTick> Members
-
-        int IComparable<AxisTick>.CompareTo(AxisTick that)
-        {
-            if ((that == null) || (Location > that.Location)) return 1;
-            if (Location < that.Location) return -1;
-            return 0;
-        }
-
         #endregion
-
-        ~AxisTick() { Label = null; }
     }
 
-    #endregion
+    public class AxisTick
+    {
+        public double Location { get; set; }
+        public double? Value { get; set; }
+    }
+
+    public enum AxisLocation
+    {
+        Top,
+        Bottom,
+        Left,
+        Right
+    }
+
+    public enum AxisType
+    {
+        Linear,
+        Logarithmic
+    }
+
 }

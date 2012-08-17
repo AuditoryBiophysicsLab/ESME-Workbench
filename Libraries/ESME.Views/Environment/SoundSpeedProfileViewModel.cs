@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using ESME.Environment;
+using ESME.Views.Controls;
 using HRC.Aspects;
 using HRC.Services;
 using HRC.Utility;
@@ -27,10 +28,10 @@ namespace ESME.Views.Environment
         [Initialize("M 0,0")] public string MinorGrid { get; private set; }
         [Initialize("Sound Speed Profile")] public string WindowTitle { get; set; }
         public string OutputFileName { get; set; }
-        public ObservableList<double> DepthAxisMajorTicks { get; set; }
-        public ObservableList<double> DepthAxisMinorTicks { get; set; }
-        public ObservableList<double> SpeedAxisMajorTicks { get; set; }
-        public ObservableList<double> SpeedAxisMinorTicks { get; set; }
+        public ObservableList<AxisTick> DepthAxisMajorTicks { get; set; }
+        public ObservableList<AxisTick> DepthAxisMinorTicks { get; set; }
+        public ObservableList<AxisTick> SpeedAxisMajorTicks { get; set; }
+        public ObservableList<AxisTick> SpeedAxisMinorTicks { get; set; }
 
         #region public SoundSpeedProfile SoundSpeedProfile {get; set; }
         SoundSpeedProfile _soundSpeedProfile;
@@ -63,8 +64,8 @@ namespace ESME.Views.Environment
             if (height == 0 || width == 0) return;
             // ReSharper restore CompareOfFloatsByEqualityOperator
 
-            MajorGrid = PlotHelpers.GetGrid(DepthAxisMajorTicks, SpeedAxisMajorTicks, 1, height, width);
-            MinorGrid = PlotHelpers.GetGrid(DepthAxisMinorTicks, SpeedAxisMinorTicks, 0, height, width);
+            MajorGrid = DataAxis.GetGrid(DepthAxisMajorTicks, SpeedAxisMajorTicks, 1, height, width);
+            MinorGrid = DataAxis.GetGrid(DepthAxisMinorTicks, SpeedAxisMinorTicks, 0, height, width);
 
             SoundSpeedGeometry = SoundSpeedProfile.GetGeometry(height, width);
             SoundSpeedDataPoints = SoundSpeedProfile.GetGeometry(height, width, glyphStyle:GlyphStyle.Circle);
