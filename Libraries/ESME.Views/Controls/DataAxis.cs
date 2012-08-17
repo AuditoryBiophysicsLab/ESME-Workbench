@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using ESME.NEMO;
@@ -385,7 +387,7 @@ namespace ESME.Views.Controls
         Path CreateAxis()
         {
             var valueStep = (EndValue - StartValue)/Math.Abs(_endLocation - _startLocation);
-            var format = string.Format("{{0:{0}}}", TickValueFormat);
+            var format = TickValueFormat == "m" ? "m" : string.Format("{{0:{0}}}", TickValueFormat);
 
             MajorTicks = MajorTicks ?? new ObservableList<double>();
             MinorTicks = MinorTicks ?? new ObservableList<double>();
@@ -592,10 +594,22 @@ namespace ESME.Views.Controls
             Length = height;
             Value = value;
             if (value != null)
-                Label = new TextBlock
-                        {
-                            Text = string.Format(format, value)
-                        };
+            {
+                if (format == "m")
+                {
+                    Label = new TextBlock { Text = "10" };
+                    var superscript = new TextBlock { Text = ((int)Math.Floor(Math.Log10(value.Value))).ToString(CultureInfo.InvariantCulture), FontSize = 10 };
+                    var inline = new InlineUIContainer(superscript) { BaselineAlignment = BaselineAlignment.Superscript };
+                    Label.Inlines.Add(inline);
+                }
+                else
+                {
+                    Label = new TextBlock
+                    {
+                        Text = string.Format(format, value)
+                    };
+                }
+            }
         }
 
         public double Location { get; internal set; }

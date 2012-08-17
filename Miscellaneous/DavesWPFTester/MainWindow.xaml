@@ -75,7 +75,7 @@
                            DockPanel.Dock="Bottom"
                            EndValue="1e6"
                            StartValue="1"
-                           TickValueFormat="e0" />
+                           TickValueFormat="m" />
         <controls:DataAxis x:Name="HorizontalLinearAxis"
                            AxisLabel="Top Linear Axis"
                            AxisLocation="Bottom"
@@ -90,7 +90,7 @@
                            DockPanel.Dock="Top"
                            EndValue="10000"
                            StartValue="0.01"
-                           TickValueFormat="0.##" />
+                           TickValueFormat="m" />
 
         <Grid>
             <i:Interaction.Triggers>
