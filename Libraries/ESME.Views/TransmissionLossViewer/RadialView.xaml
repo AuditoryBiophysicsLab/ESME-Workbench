@@ -28,8 +28,8 @@
                                    VerticalAlignment="Top"
                                    AxisLabel="Depth (m)"
                                    AxisLocation="Right"
-                                   EndValue="{Binding DepthMax}"
-                                   StartValue="{Binding DepthMin}"
+                                   EndValue="{Binding DepthMin}"
+                                   StartValue="{Binding DepthMax}"
                                    TickValueFormat="0" />
             </DockPanel>
         </DockPanel>
@@ -42,8 +42,8 @@
                     <controls:DataAxis AxisLabel="Transmission Loss (dB)"
                                        AxisLocation="Left"
                                        DockPanel.Dock="Right"
-                                       EndValue="{Binding MinValue}"
-                                       StartValue="{Binding MaxValue}"
+                                       EndValue="{Binding MaxValue}"
+                                       StartValue="{Binding MinValue}"
                                        TickValueFormat="0.#" />
                     <controls:ColorBarView MinWidth="50"
                                            ColorBarImage="{Binding ColorBitmap}"
