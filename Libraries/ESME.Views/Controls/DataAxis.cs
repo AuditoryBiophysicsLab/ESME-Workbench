@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -224,7 +225,6 @@ namespace ESME.Views.Controls
                 _length = newSize.Height;
                 _startLocation = _length;
                 _endLocation = 0;
-                _lineThickness = -_lineThickness;
             }
             else
             {
@@ -238,7 +238,7 @@ namespace ESME.Views.Controls
                 var endTickValue = Math.Ceiling(Math.Log10(EndValue));
                 _majorTickCount = (int)(endTickValue - startTickValue);
             }
-            else for (_majorTickCount = 2; _majorTickCount < 20; _majorTickCount++) if ((_endLocation/(_majorTickCount + 1)) < 100) break;
+            else for (_majorTickCount = 2; _majorTickCount < 20; _majorTickCount++) if ((_length / (_majorTickCount + 1)) < 100) break;
 
             _majorTickSpacing = _length / _majorTickCount;
             _minorTickSpacing = _majorTickSpacing / 5;
@@ -388,81 +388,54 @@ namespace ESME.Views.Controls
         {
             var valueStep = (EndValue - StartValue)/Math.Abs(_endLocation - _startLocation);
             var format = TickValueFormat == "m" ? "m" : string.Format("{{0:{0}}}", TickValueFormat);
-
-            MajorTicks = MajorTicks ?? new ObservableList<double>();
-            MinorTicks = MinorTicks ?? new ObservableList<double>();
-
+            if (MajorTicks == null) MajorTicks = new ObservableList<double>();
+            if (MinorTicks == null) MinorTicks = new ObservableList<double>();
+            MajorTicks.Clear();
+            MinorTicks.Clear();
             // Clear the tick cache
             _ticks.Clear();
 
             var majorTickValue = AxisType == AxisTypeEnum.Linear ? StartValue : Math.Pow(10, Math.Floor(Math.Log10(StartValue)));
-
-            if (_isVertical)
+            var direction = _isVertical ? -1 : 1;
+            var conditionLambda = !_isVertical
+                                      ? new Func<double, double, bool>((tickLocation, endLocation) => tickLocation < endLocation - 1)
+                                      : ((tickLocation, endLocation) => tickLocation > endLocation + 1);
+            for (var majorTickLocation = _startLocation; conditionLambda(majorTickLocation, _endLocation); majorTickLocation += direction * _majorTickSpacing)
             {
-                // Vertical axes
-                for (var majorTickLocation = _startLocation; majorTickLocation > _endLocation + 1; majorTickLocation -= _majorTickSpacing)
+                var majorTick = new AxisTick(majorTickLocation, _majorTickLength, majorTickValue, format);
+                _ticks.Add(majorTick);
+                MajorTicks.Add(majorTick.Location);
+                Debug.WriteLine(string.Format("Added major tick at location {0}", majorTick.Location));
+                if (AxisType == AxisTypeEnum.Linear)
                 {
-                    var majorTick = new AxisTick(majorTickLocation, _majorTickLength, majorTickValue, format);
-                    _ticks.Add(majorTick);
-                    MajorTicks.Add(majorTick.Location);
-                    if (AxisType == AxisTypeEnum.Linear)
+                    for (var minorTickCount = 1; minorTickCount < 5; minorTickCount++)
                     {
-                        for (var minorTickCount = 1; minorTickCount < 5; minorTickCount++)
-                        {
-                            var minorTick = new AxisTick(majorTickLocation - (minorTickCount * _minorTickSpacing), _minorTickLength + 1, null, null);
-                            _ticks.Add(minorTick);
-                            MinorTicks.Add(minorTick.Location);
-                        }
-                        majorTickValue += (valueStep * _majorTickSpacing);
+                        var minorTick = new AxisTick(majorTickLocation + (direction * minorTickCount * _minorTickSpacing), _minorTickLength, null, null);
+                        _ticks.Add(minorTick);
+                        MinorTicks.Add(minorTick.Location);
+                        Debug.WriteLine(string.Format("Linear: Added minor tick at location {0}", minorTick.Location));
                     }
-                    else
-                    {
-                        for (var minorTickCount = 2; minorTickCount < 10; minorTickCount++)
-                        {
-                            var minorTick = new AxisTick(majorTickLocation - (Math.Log10(minorTickCount) * _majorTickSpacing), _minorTickLength + 1, null, null);
-                            _ticks.Add(minorTick);
-                            MinorTicks.Add(minorTick.Location);
-                        }
-                        majorTickValue = Math.Pow(10, Math.Log10(majorTickValue) + 1);
-                    }
+                    majorTickValue += (valueStep * _majorTickSpacing);
                 }
-            }
-            else
-            {
-                // Horizontal axes
-                for (var majorTickLocation = _startLocation; majorTickLocation < _endLocation - 1; majorTickLocation += _majorTickSpacing)
+                else
                 {
-                    var majorTick = new AxisTick(majorTickLocation, _majorTickLength, majorTickValue, format);
-                    _ticks.Add(majorTick);
-                    MajorTicks.Add(majorTick.Location);
-                    if (AxisType == AxisTypeEnum.Linear)
+                    for (var minorTickCount = 2; minorTickCount < 10; minorTickCount++)
                     {
-                        for (var minorTickCount = 1; minorTickCount < 5; minorTickCount++)
-                        {
-                            var minorTick = new AxisTick(majorTickLocation + (minorTickCount * _minorTickSpacing), _minorTickLength, null, null);
-                            _ticks.Add(minorTick);
-                            MinorTicks.Add(minorTick.Location);
-                        }
-                        majorTickValue += (valueStep * _majorTickSpacing);
+                        var minorTick = new AxisTick(majorTickLocation + (direction * Math.Log10(minorTickCount) * _majorTickSpacing), _minorTickLength, null, null);
+                        _ticks.Add(minorTick);
+                        MinorTicks.Add(minorTick.Location);
+                        Debug.WriteLine(string.Format("Log: Added minor tick at location {0}", minorTick.Location));
                     }
-                    else
-                    {
-                        for (var minorTickCount = 2; minorTickCount < 10; minorTickCount++)
-                        {
-                            var minorTick = new AxisTick(majorTickLocation + (Math.Log10(minorTickCount) * _majorTickSpacing), _minorTickLength, null, null);
-                            _ticks.Add(minorTick);
-                            MinorTicks.Add(minorTick.Location);
-                        }
-                        majorTickValue = Math.Pow(10, Math.Log10(majorTickValue) + 1);
-                    }
+                    majorTickValue = Math.Pow(10, Math.Log10(majorTickValue) + 1);
                 }
             }
 
             // Add a major tick at the end
             majorTickValue = EndValue;
-            var endTick = new AxisTick(_endLocation - (_lineThickness / 2), _majorTickLength, majorTickValue, format);
+            var endTick = new AxisTick(_endLocation, _majorTickLength, majorTickValue, format);
             _ticks.Add(endTick);
             MajorTicks.Add(endTick.Location);
+            Debug.WriteLine(string.Format("Added last major tick at location {0}", endTick.Location));
 
             // Create a StreamGeometry to use to specify _axis.
             var geometry = new StreamGeometry
@@ -474,22 +447,14 @@ namespace ESME.Views.Controls
             // object's contents.
             using (var ctx = geometry.Open())
             {
-                // Begin the triangle at the point specified. Notice that the shape is set to 
-                // be closed so only two lines need to be specified below to make the triangle.
-                ctx.BeginFigure(_isVertical
-                                    ? TransformedPoint(_startLocation - (_lineThickness / 2), _lineThickness / 2)
-                                    : TransformedPoint(_startLocation + (_lineThickness / 2), _lineThickness / 2),
-                                false,
-                                false);
+                ctx.BeginFigure(TransformedPoint(_startLocation, 0), false, false);
+                ctx.LineTo(TransformedPoint(_endLocation, 0), true, false);
 
                 foreach (var tick in _ticks)
                 {
-                    ctx.LineTo(TransformedPoint(tick.Location, _lineThickness/2), true, true);
-                    ctx.LineTo(TransformedPoint(tick.Location, tick.Length + _lineThickness), true, true);
-                    ctx.LineTo(TransformedPoint(tick.Location, _lineThickness/2), true, true);
+                    ctx.BeginFigure(TransformedPoint(tick.Location, 0), false, false);
+                    ctx.LineTo(TransformedPoint(tick.Location, tick.Length), true, false);
                 }
-                // Draw a line to the next specified point.
-                ctx.LineTo(TransformedPoint(_endLocation - (_lineThickness/2), _lineThickness/2), true, true);
             }
             // Freeze the geometry (make it unmodifiable)
             // for additional performance benefits.
@@ -532,7 +497,7 @@ namespace ESME.Views.Controls
         #region Private data members
 
         readonly TextBlock _axisLabel = new TextBlock();
-        double _lineThickness;
+        readonly double _lineThickness;
 
         readonly double _majorTickLength;
         readonly List<double> _minHeights = new List<double>();

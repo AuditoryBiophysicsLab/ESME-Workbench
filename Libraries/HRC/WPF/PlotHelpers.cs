@@ -28,7 +28,7 @@ namespace HRC.WPF
         public static string GetGrid(ICollection<double> horizontalTicks, ICollection<double> verticalTicks, int skipFactor, double height, double width)
         {
             var sb = new StringBuilder();
-            foreach (var tick in horizontalTicks.Take(horizontalTicks.Count - skipFactor))
+            foreach (var tick in horizontalTicks.Skip(skipFactor))
                 sb.Append(String.Format("M 0,{0} H {1}", tick, width));
             foreach (var tick in verticalTicks.Skip(skipFactor))
                 sb.Append(String.Format("M {0},0 V {1}", tick, height));
