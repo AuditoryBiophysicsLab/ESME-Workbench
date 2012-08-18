@@ -1,4 +1,6 @@
-﻿using System.Collections.Specialized;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
@@ -27,6 +29,7 @@ namespace DavesWPFTester
             _viewAwareStatus.ViewLoaded += () =>
             {
                 ShapeCanvas = ((MainWindow)_viewAwareStatus.View).ShapeCanvas;
+                ShapeCanvas.SizeChanged += (s, e) => DrawGridShapes();
                 DrawGridShapes();
             };
             PropertyChanged += (s, e) =>
@@ -95,64 +98,44 @@ namespace DavesWPFTester
             var endX = ShapeCanvas.ActualWidth;
             var endY = ShapeCanvas.ActualHeight;
 
-            var minorGeometry = new StreamGeometry();
             Shapes.Clear();
-
-            using (var ctx = minorGeometry.Open())
-            {
-                foreach (var coordinate in XAxisMinorTicks)
-                {
-                    ctx.BeginFigure(new Point(coordinate.Location, 0), false, false);
-                    ctx.LineTo(new Point(coordinate.Location, endY), true, false);
-                }
-                foreach (var coordinate in YAxisMinorTicks)
-                {
-                    ctx.BeginFigure(new Point(0, coordinate.Location), false, false);
-                    ctx.LineTo(new Point(endX, coordinate.Location), true, false);
-                }
-            }
-            minorGeometry.Freeze();
-            Shapes.Add(new Path
-            {
-                Stroke = Brushes.LightGray,
-                StrokeThickness = 1,
-                StrokeMiterLimit = 1,
-                StrokeStartLineCap = PenLineCap.Flat,
-                StrokeEndLineCap = PenLineCap.Flat,
-                SnapsToDevicePixels = true,
-                Data = minorGeometry,
-                ToolTip = "Minor axis tick"
-            });
-            var majorGeometry = new StreamGeometry();
-
-            using (var ctx = majorGeometry.Open())
-            {
-                foreach (var coordinate in XAxisMajorTicks.Skip(1).Take(XAxisMajorTicks.Count - 2))
-                {
-                    ctx.BeginFigure(new Point(coordinate.Location, 0), false, false);
-                    ctx.LineTo(new Point(coordinate.Location, endY), true, false);
-                }
-                foreach (var coordinate in YAxisMajorTicks.Skip(1).Take(YAxisMajorTicks.Count - 2))
-                {
-                    ctx.BeginFigure(new Point(0, coordinate.Location), false, false);
-                    ctx.LineTo(new Point(endX, coordinate.Location), true, false);
-                }
-            }
-            majorGeometry.Freeze();
-            Shapes.Add(new Path
-            {
-                Stroke = Brushes.Black,
-                StrokeThickness = 1,
-                StrokeMiterLimit = 1,
-                StrokeStartLineCap = PenLineCap.Flat,
-                StrokeEndLineCap = PenLineCap.Flat,
-                SnapsToDevicePixels = true,
-                Data = majorGeometry,
-                ToolTip = "Major axis tick"
-            });
+            Shapes.Add(CreateAxisLines(XAxisMinorTicks, endY, true, Brushes.LightGray, 1));
+            Shapes.Add(CreateAxisLines(YAxisMinorTicks, endX, false, Brushes.LightGray, 1));
+            Shapes.Add(CreateAxisLines(XAxisMajorTicks.Skip(1).Take(XAxisMajorTicks.Count - 2), endY, true, Brushes.Black, 1));
+            Shapes.Add(CreateAxisLines(YAxisMajorTicks.Skip(1).Take(YAxisMajorTicks.Count - 2), endX, false, Brushes.Black, 1));
         }
 
-        [Initialize] public ObservableList<Shape> Shapes { get; set; }
+        static Path CreateAxisLines(IEnumerable<AxisTick> ticks, double length, bool isVertical, Brush brush, double strokeThickness)
+        {
+            var geometry = new StreamGeometry();
+            using (var geometryContext = geometry.Open()) 
+                foreach (var coordinate in ticks) 
+                    CreateAxisLine(geometryContext, coordinate.Location, length, isVertical);
+            geometry.Freeze();
+            return new Path
+            {
+                Stroke = brush,
+                StrokeThickness = strokeThickness,
+                SnapsToDevicePixels = true,
+                Data = geometry,
+            };
+        }
+
+        static void CreateAxisLine(StreamGeometryContext geometryContext, double location, double length, bool isVertical)
+        {
+            if (isVertical)
+            {
+                geometryContext.BeginFigure(new Point(location, 0), false, false);
+                geometryContext.LineTo(new Point(location, length), true, false);
+            }
+            else
+            {
+                geometryContext.BeginFigure(new Point(0, location), false, false);
+                geometryContext.LineTo(new Point(length, location), true, false);
+            }
+        }
+
+        [Initialize] public ObservableCollection<Shape> Shapes { get; set; }
     }
 
 }

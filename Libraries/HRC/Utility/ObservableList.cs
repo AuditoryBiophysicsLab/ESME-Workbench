@@ -35,7 +35,7 @@ namespace HRC.Utility
 
         void IDeserializationCallback.OnDeserialization(Object sender) { _lockObject = new object(); }
 
-        public new void AddRange(IEnumerable<T> items)
+        public void AddRange(IList<T> items)
         {
             lock(_lockObject) base.AddRange(items);
             OnCollectionChangedMultiItem(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, items));
@@ -59,7 +59,7 @@ namespace HRC.Utility
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
         }
 
-        public new void InsertRange(int index, IEnumerable<T> items)
+        public void InsertRange(int index, IList<T> items)
         {
             lock (_lockObject) base.InsertRange(index, items);
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, items));
