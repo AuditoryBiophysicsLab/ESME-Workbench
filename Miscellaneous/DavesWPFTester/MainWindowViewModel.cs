@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -31,6 +32,7 @@ namespace DavesWPFTester
                 ShapeCanvas = ((MainWindow)_viewAwareStatus.View).ShapeCanvas;
                 ShapeCanvas.SizeChanged += (s, e) => DrawGridShapes();
                 DrawGridShapes();
+                PlotSamplePoints();
             };
             PropertyChanged += (s, e) =>
             {
@@ -49,6 +51,13 @@ namespace DavesWPFTester
                     case "YAxisMinorTicks":
                         if (YAxisMinorTicks != null) YAxisMinorTicks.CollectionChanged += TickCollectionChanged;
                         break;
+                    case "XAxis":
+                    case "YAxis":
+                        PlotSamplePoints();
+                        break;
+                    case "XTestFunc":
+                        if (XTestFunc != null) Debug.WriteLine(string.Format("XTestFunc(1) result: {0}", XTestFunc(1)));
+                        break;
                 }
             };
         }
@@ -62,16 +71,19 @@ namespace DavesWPFTester
         #endregion
 
         public ShapeCanvas ShapeCanvas { get; private set; }
+        public DataAxis XAxis { get; set; }
+        public DataAxis YAxis { get; set; }
         public ObservableList<AxisTick> XAxisMajorTicks { get; set; }
         public ObservableList<AxisTick> XAxisMinorTicks { get; set; }
         public ObservableList<AxisTick> YAxisMajorTicks { get; set; }
         public ObservableList<AxisTick> YAxisMinorTicks { get; set; }
+        public Func<double, double> XTestFunc { get; set; }
 
         public DrawingImage DisplayImage { get; set; }
 
         void TickCollectionChanged(object sender, NotifyCollectionChangedEventArgs args) { DrawGridShapes(); }
 
-        public void DrawGridDrawingContext()
+        void DrawGridDrawingContext()
         {
             if (XAxisMajorTicks == null || XAxisMinorTicks == null || YAxisMajorTicks == null || YAxisMinorTicks == null) return;
             if (XAxisMajorTicks.Count == 0 || XAxisMinorTicks.Count == 0 || YAxisMajorTicks.Count == 0 || YAxisMinorTicks.Count == 0) return;
@@ -90,7 +102,46 @@ namespace DavesWPFTester
             DisplayImage = new DrawingImage(drawing);
         }
 
-        public void DrawGridShapes()
+        void PlotSamplePoints()
+        {
+            if (XAxis == null || YAxis == null) return;
+            var xMin = Math.Min(XAxis.StartValue, XAxis.EndValue);
+            var xMax = Math.Max(XAxis.StartValue, XAxis.EndValue);
+            var xRange = xMax - xMin;
+            var yMin = Math.Min(YAxis.StartValue, YAxis.EndValue);
+            var yMax = Math.Max(YAxis.StartValue, YAxis.EndValue);
+            var yRange = yMax - yMin;
+            var random = new Random();
+            for (var xCount = 0; xCount < 10; xCount++)
+                for (var yCount = 0; yCount < 10; yCount++)
+                {
+                    var xValue = (random.NextDouble() * xRange) + xMin;
+                    var yValue = (random.NextDouble() * yRange) + yMin;
+                    var geometry = new StreamGeometry();
+                    using (var geometryContext = geometry.Open()) CreateDataPoint(geometryContext, XAxis, YAxis, xValue, yValue, 5);
+                    geometry.Freeze();
+                    Shapes.Add(new Path
+                    {
+                        Stroke = Brushes.Red,
+                        Fill = Brushes.Blue,
+                        SnapsToDevicePixels = true,
+                        Data = geometry,
+                        ToolTip = string.Format("({0}, {1})", xValue, yValue)
+                    });
+                }
+        }
+
+        static void CreateDataPoint(StreamGeometryContext geometryContext, DataAxis xAxis, DataAxis yAxis, double xValue, double yValue, double size)
+        {
+            var halfSize = size / 2;
+            var xCoordinate = xAxis.MappingFunction(xValue);
+            var yCoordinate = yAxis.MappingFunction(yValue);
+            geometryContext.BeginFigure(new Point(xCoordinate - halfSize, yCoordinate), true, true);
+            geometryContext.ArcTo(new Point(xCoordinate + halfSize, yCoordinate), new Size(halfSize, halfSize), 180, false, SweepDirection.Clockwise, true, false);
+            geometryContext.ArcTo(new Point(xCoordinate - halfSize, yCoordinate), new Size(halfSize, halfSize), 180, false, SweepDirection.Clockwise, true, false);
+        }
+
+        void DrawGridShapes()
         {
             if (ShapeCanvas == null) return;
             if (XAxisMajorTicks == null || XAxisMinorTicks == null || YAxisMajorTicks == null || YAxisMinorTicks == null) return;
@@ -103,6 +154,7 @@ namespace DavesWPFTester
             Shapes.Add(CreateAxisLines(YAxisMinorTicks, endX, false, Brushes.LightGray, 1));
             Shapes.Add(CreateAxisLines(XAxisMajorTicks.Skip(1).Take(XAxisMajorTicks.Count - 2), endY, true, Brushes.Black, 1));
             Shapes.Add(CreateAxisLines(YAxisMajorTicks.Skip(1).Take(YAxisMajorTicks.Count - 2), endX, false, Brushes.Black, 1));
+            PlotSamplePoints();
         }
 
         static Path CreateAxisLines(IEnumerable<AxisTick> ticks, double length, bool isVertical, Brush brush, double strokeThickness)

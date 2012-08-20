@@ -27,22 +27,24 @@
                 <TextBlock Height="95" DockPanel.Dock="Top" />
                 <TextBlock Height="89" DockPanel.Dock="Bottom" />
                 <controls:DataAxis VerticalAlignment="Top"
+                                   Axis="{Binding YAxis,
+                                                  Mode=OneWayToSource}"
                                    AxisLabel="Left Linear Axis"
                                    AxisLocation="Right"
                                    AxisType="Linear"
-                                   EndValue="62.54"
-                                   StartValue="15"
+                                   EndValue="15"
+                                   MajorTicks="{Binding YAxisMajorTicks,
+                                                        Mode=OneWayToSource}"
+                                   MinorTicks="{Binding YAxisMinorTicks,
+                                                        Mode=OneWayToSource}"
+                                   StartValue="-15"
                                    TickValueFormat="0.##" />
-                <controls:DataAxis x:Name="VerticalLogAxis"
+                <controls:DataAxis x:Name="LeftLogAxis"
                                    VerticalAlignment="Top"
                                    AxisLabel="Left Log Axis"
                                    AxisLocation="Right"
                                    AxisType="Logarithmic"
                                    EndValue="10000"
-                                   MajorTicks="{Binding YAxisMajorTicks,
-                                                        Mode=OneWayToSource}"
-                                   MinorTicks="{Binding YAxisMinorTicks,
-                                                        Mode=OneWayToSource}"
                                    StartValue="1"
                                    TickValueFormat="m" />
             </DockPanel>
@@ -65,17 +67,21 @@
                                StartValue="100"
                                TickValueFormat="0.#" />
         </DockPanel>
-        <controls:DataAxis AxisLabel="Bottom Linear Axis"
+        <controls:DataAxis x:Name="BottomLinearAxis"
+                           Axis="{Binding XAxis,
+                                          Mode=OneWayToSource}"
+                           AxisLabel="Bottom Linear Axis"
                            AxisLocation="Top"
                            AxisType="Linear"
                            DockPanel.Dock="Bottom"
                            EndValue="15"
-                           StartValue="-1"
+                           TestFunc="{Binding XTestFunc}"
                            MajorTicks="{Binding XAxisMajorTicks,
                                                 Mode=OneWayToSource}"
                            MinorTicks="{Binding XAxisMinorTicks,
                                                 Mode=OneWayToSource}"
-                           TickValueFormat="e0" />
+                           StartValue="-15"
+                           TickValueFormat="0.##" />
         <controls:DataAxis x:Name="HorizontalLogAxis"
                            AxisLabel="Bottom Log Axis"
                            AxisLocation="Top"
@@ -99,7 +105,7 @@
                            EndValue="10000"
                            StartValue="0.01"
                            TickValueFormat="m" />
-        <!-- <Image Source="{Binding DisplayImage}" /> -->
+        <!--  <Image Source="{Binding DisplayImage}" />  -->
         <app:ShapeCanvas x:Name="ShapeCanvas" Shapes="{Binding Shapes}" />
     </DockPanel>
 </Window>

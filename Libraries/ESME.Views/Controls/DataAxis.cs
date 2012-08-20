@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -8,9 +7,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using ESME.NEMO;
 using HRC.Utility;
+using Path = System.Windows.Shapes.Path;
 
 namespace ESME.Views.Controls
 {
@@ -112,7 +111,10 @@ namespace ESME.Views.Controls
 
         static void AxisTypePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).AxisTypePropertyChanged(); }
 
-        void AxisTypePropertyChanged() { InvalidateVisual(); }
+        void AxisTypePropertyChanged()
+        {
+            InvalidateVisual();
+        }
         #endregion
 
         #region dependency property string AxisLabel { get; set; }
@@ -142,7 +144,10 @@ namespace ESME.Views.Controls
         public double StartValue { get { return (double)GetValue(StartValueProperty); } set { SetCurrentValue(StartValueProperty, value); } }
 
         static void StartValuePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).StartValuePropertyChanged(); }
-        void StartValuePropertyChanged() { InvalidateVisual(); }
+        void StartValuePropertyChanged()
+        {
+            InvalidateVisual();
+        }
         #endregion
 
         #region dependency property double EndValue { get; set; }
@@ -156,7 +161,10 @@ namespace ESME.Views.Controls
         public double EndValue { get { return (double)GetValue(EndValueProperty); } set { SetCurrentValue(EndValueProperty, value); } }
 
         static void EndValuePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).EndValuePropertyChanged(); }
-        void EndValuePropertyChanged() { InvalidateVisual(); }
+        void EndValuePropertyChanged()
+        {
+            InvalidateVisual();
+        }
         #endregion
 
         #region dependency property string TickValueFormat { get; set; }
@@ -173,6 +181,47 @@ namespace ESME.Views.Controls
         static void TickValueFormatPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).TickValueFormatPropertyChanged(); }
         void TickValueFormatPropertyChanged() { InvalidateVisual(); }
         #endregion
+
+        #region dependency property Func<double, double> TestFunc
+
+        public static DependencyProperty TestFuncProperty = DependencyProperty.Register("TestFunc",
+                                                                                 typeof(Func<double, double>),
+                                                                                 typeof(DataAxis),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TestFuncPropertyChanged));
+
+        public Func<double, double> TestFunc { get { return (Func<double, double>)GetValue(TestFuncProperty); } set { SetValue(TestFuncProperty, value); } }
+
+        static void TestFuncPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).TestFuncPropertyChanged(); }
+        void TestFuncPropertyChanged() { }
+        #endregion
+
+
+        #region dependency property DataAxis Axis
+
+        public static DependencyProperty AxisProperty = DependencyProperty.Register("Axis",
+                                                                                 typeof(DataAxis),
+                                                                                 typeof(DataAxis),
+                                                                                 new FrameworkPropertyMetadata(null));
+
+        public DataAxis Axis { get { return (DataAxis)GetValue(AxisProperty); } set { SetValue(AxisProperty, value); } }
+        #endregion
+
+        public double MappingFunction(double value)
+        {
+            var startValue = AxisType == AxisType.Linear ? StartValue : Math.Floor(Math.Log10(StartValue));
+            var endValue = AxisType == AxisType.Linear ? EndValue : Math.Ceiling(Math.Log10(EndValue));
+            value = AxisType == AxisType.Linear ? value : Math.Log10(value);
+            var lowValue = Math.Min(startValue, endValue);
+            var highValue = Math.Max(startValue, endValue);
+            if (value < lowValue || value > highValue) throw new ParameterOutOfRangeException("value is out of range for this axis");
+            var axisDelta = highValue - lowValue;
+            var valueDelta = value - lowValue;
+            var valueRatio = valueDelta / axisDelta;
+            var offsetFromLength = _isVertical;
+            if (endValue < startValue) offsetFromLength = !offsetFromLength;
+            var lengthOffset = offsetFromLength ? _length - (_length * valueRatio) : _length * valueRatio;
+            return lengthOffset;
+        }
 
         public DataAxis()
         {
@@ -236,6 +285,8 @@ namespace ESME.Views.Controls
                 if (EndValue <= StartValue) throw new ParameterOutOfRangeException("EndValue cannot be less than or equal to StartValue on a Logarithmic axis");
             }
             CreateChildren(availableSize);
+            Axis = this;
+            TestFunc = d => (d + 1);
             var labelSizes = new List<double>();
 
             if (Double.IsNaN(availableSize.Width) || Double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;
