@@ -26,17 +26,14 @@
             <DockPanel>
                 <TextBlock Height="95" DockPanel.Dock="Top" />
                 <TextBlock Height="89" DockPanel.Dock="Bottom" />
-                <controls:DataAxis VerticalAlignment="Top"
+                <controls:DataAxis x:Name="LeftLinearAxis"
+                                   VerticalAlignment="Top"
                                    Axis="{Binding YAxis,
                                                   Mode=OneWayToSource}"
                                    AxisLabel="Left Linear Axis"
                                    AxisLocation="Right"
                                    AxisType="Linear"
                                    EndValue="15"
-                                   MajorTicks="{Binding YAxisMajorTicks,
-                                                        Mode=OneWayToSource}"
-                                   MinorTicks="{Binding YAxisMinorTicks,
-                                                        Mode=OneWayToSource}"
                                    StartValue="-15"
                                    TickValueFormat="0.##" />
                 <controls:DataAxis x:Name="LeftLogAxis"
@@ -75,12 +72,8 @@
                            AxisType="Linear"
                            DockPanel.Dock="Bottom"
                            EndValue="15"
-                           TestFunc="{Binding XTestFunc}"
-                           MajorTicks="{Binding XAxisMajorTicks,
-                                                Mode=OneWayToSource}"
-                           MinorTicks="{Binding XAxisMinorTicks,
-                                                Mode=OneWayToSource}"
                            StartValue="-15"
+                           TestFunc="{Binding XTestFunc}"
                            TickValueFormat="0.##" />
         <controls:DataAxis x:Name="HorizontalLogAxis"
                            AxisLabel="Bottom Log Axis"
@@ -106,6 +99,13 @@
                            StartValue="0.01"
                            TickValueFormat="m" />
         <!--  <Image Source="{Binding DisplayImage}" />  -->
-        <app:ShapeCanvas x:Name="ShapeCanvas" Shapes="{Binding Shapes}" />
+        <app:ShapeCanvas x:Name="ShapeCanvas"
+                         MajorTickLineColor="DarkGray"
+                         MinorTickLineColor="AliceBlue"
+                         SeriesSource="{Binding SeriesSource}"
+                         YAxisMajorTicks="{Binding MajorTicks,
+                                                   ElementName=LeftLinearAxis}"
+                         YAxisMinorTicks="{Binding MinorTicks,
+                                                   ElementName=LeftLinearAxis}" />
     </DockPanel>
 </Window>

@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Diagnostics;
-using System.Linq;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using ESME.Views.Controls;
 using HRC.Aspects;
+using HRC.Navigation;
 using HRC.Services;
 using HRC.Utility;
 using HRC.ViewModels;
@@ -27,38 +23,11 @@ namespace DavesWPFTester
         public MainWindowViewModel(IViewAwareStatus viewAwareStatus)
         {
             _viewAwareStatus = viewAwareStatus;
-            _viewAwareStatus.ViewLoaded += () =>
+            CreateSeries();
+            _viewAwareStatus.ViewActivated += () =>
             {
-                ShapeCanvas = ((MainWindow)_viewAwareStatus.View).ShapeCanvas;
-                ShapeCanvas.SizeChanged += (s, e) => DrawGridShapes();
-                DrawGridShapes();
-                PlotSamplePoints();
-            };
-            PropertyChanged += (s, e) =>
-            {
-                Debug.WriteLine(string.Format("PropertyChanged: {0}", e.PropertyName));
-                switch (e.PropertyName)
-                {
-                    case "XAxisMajorTicks":
-                        if (XAxisMajorTicks != null) XAxisMajorTicks.CollectionChanged += TickCollectionChanged;
-                        break;
-                    case "XAxisMinorTicks":
-                        if (XAxisMinorTicks != null) XAxisMinorTicks.CollectionChanged += TickCollectionChanged;
-                        break;
-                    case "YAxisMajorTicks":
-                        if (YAxisMajorTicks != null) YAxisMajorTicks.CollectionChanged += TickCollectionChanged;
-                        break;
-                    case "YAxisMinorTicks":
-                        if (YAxisMinorTicks != null) YAxisMinorTicks.CollectionChanged += TickCollectionChanged;
-                        break;
-                    case "XAxis":
-                    case "YAxis":
-                        PlotSamplePoints();
-                        break;
-                    case "XTestFunc":
-                        if (XTestFunc != null) Debug.WriteLine(string.Format("XTestFunc(1) result: {0}", XTestFunc(1)));
-                        break;
-                }
+                TestSeries.XAxis = ((MainWindow)_viewAwareStatus.View).BottomLinearAxis;
+                TestSeries.YAxis = ((MainWindow)_viewAwareStatus.View).LeftLinearAxis;
             };
         }
 
@@ -70,124 +39,89 @@ namespace DavesWPFTester
 
         #endregion
 
-        public ShapeCanvas ShapeCanvas { get; private set; }
-        public DataAxis XAxis { get; set; }
-        public DataAxis YAxis { get; set; }
-        public ObservableList<AxisTick> XAxisMajorTicks { get; set; }
-        public ObservableList<AxisTick> XAxisMinorTicks { get; set; }
-        public ObservableList<AxisTick> YAxisMajorTicks { get; set; }
-        public ObservableList<AxisTick> YAxisMinorTicks { get; set; }
-        public Func<double, double> XTestFunc { get; set; }
+        [Initialize] public List<ISeries> SeriesSource { get; set; }
 
-        public DrawingImage DisplayImage { get; set; }
-
-        void TickCollectionChanged(object sender, NotifyCollectionChangedEventArgs args) { DrawGridShapes(); }
-
-        void DrawGridDrawingContext()
+        void CreateSeries()
         {
-            if (XAxisMajorTicks == null || XAxisMinorTicks == null || YAxisMajorTicks == null || YAxisMinorTicks == null) return;
-            if (XAxisMajorTicks.Count == 0 || XAxisMinorTicks.Count == 0 || YAxisMajorTicks.Count == 0 || YAxisMinorTicks.Count == 0) return;
-            var grayPen = new Pen(Brushes.LightGray, 1);
-            var blackPen = new Pen(Brushes.Black, 1);
-            var drawing = new DrawingGroup();
-            var endX = ShapeCanvas.ActualWidth;
-            var endY = ShapeCanvas.ActualHeight;
-            using (var dc = drawing.Open())
-            {
-                foreach (var xMinor in XAxisMinorTicks) dc.DrawLine(grayPen, new Point(xMinor.Location, 0), new Point(xMinor.Location, endY));
-                foreach (var yMinor in YAxisMinorTicks) dc.DrawLine(grayPen, new Point(0, yMinor.Location), new Point(endX, yMinor.Location));
-                foreach (var xMajor in XAxisMajorTicks.Skip(1).Take(XAxisMajorTicks.Count - 2)) dc.DrawLine(blackPen, new Point(xMajor.Location, 0), new Point(xMajor.Location, endY));
-                foreach (var yMajor in YAxisMajorTicks.Skip(1).Take(YAxisMajorTicks.Count - 2)) dc.DrawLine(blackPen, new Point(0, yMajor.Location), new Point(endX, yMajor.Location));
-            }
-            DisplayImage = new DrawingImage(drawing);
+            SeriesSource.Clear();
+            for (double x = 0; x <= MoreMath.TwoPi; x += (MoreMath.TwoPi / 100))
+                TestSeries.Add(new Tuple<double, double>(x, Math.Sin(x)));
+            SeriesSource.Add(TestSeries);
         }
 
-        void PlotSamplePoints()
-        {
-            if (XAxis == null || YAxis == null) return;
-            var xMin = Math.Min(XAxis.StartValue, XAxis.EndValue);
-            var xMax = Math.Max(XAxis.StartValue, XAxis.EndValue);
-            var xRange = xMax - xMin;
-            var yMin = Math.Min(YAxis.StartValue, YAxis.EndValue);
-            var yMax = Math.Max(YAxis.StartValue, YAxis.EndValue);
-            var yRange = yMax - yMin;
-            var random = new Random();
-            for (var xCount = 0; xCount < 10; xCount++)
-                for (var yCount = 0; yCount < 10; yCount++)
-                {
-                    var xValue = (random.NextDouble() * xRange) + xMin;
-                    var yValue = (random.NextDouble() * yRange) + yMin;
-                    var geometry = new StreamGeometry();
-                    using (var geometryContext = geometry.Open()) CreateDataPoint(geometryContext, XAxis, YAxis, xValue, yValue, 5);
-                    geometry.Freeze();
-                    Shapes.Add(new Path
-                    {
-                        Stroke = Brushes.Red,
-                        Fill = Brushes.Blue,
-                        SnapsToDevicePixels = true,
-                        Data = geometry,
-                        ToolTip = string.Format("({0}, {1})", xValue, yValue)
-                    });
-                }
-        }
-
-        static void CreateDataPoint(StreamGeometryContext geometryContext, DataAxis xAxis, DataAxis yAxis, double xValue, double yValue, double size)
-        {
-            var halfSize = size / 2;
-            var xCoordinate = xAxis.MappingFunction(xValue);
-            var yCoordinate = yAxis.MappingFunction(yValue);
-            geometryContext.BeginFigure(new Point(xCoordinate - halfSize, yCoordinate), true, true);
-            geometryContext.ArcTo(new Point(xCoordinate + halfSize, yCoordinate), new Size(halfSize, halfSize), 180, false, SweepDirection.Clockwise, true, false);
-            geometryContext.ArcTo(new Point(xCoordinate - halfSize, yCoordinate), new Size(halfSize, halfSize), 180, false, SweepDirection.Clockwise, true, false);
-        }
-
-        void DrawGridShapes()
-        {
-            if (ShapeCanvas == null) return;
-            if (XAxisMajorTicks == null || XAxisMinorTicks == null || YAxisMajorTicks == null || YAxisMinorTicks == null) return;
-            if (XAxisMajorTicks.Count == 0 || XAxisMinorTicks.Count == 0 || YAxisMajorTicks.Count == 0 || YAxisMinorTicks.Count == 0) return;
-            var endX = ShapeCanvas.ActualWidth;
-            var endY = ShapeCanvas.ActualHeight;
-
-            Shapes.Clear();
-            Shapes.Add(CreateAxisLines(XAxisMinorTicks, endY, true, Brushes.LightGray, 1));
-            Shapes.Add(CreateAxisLines(YAxisMinorTicks, endX, false, Brushes.LightGray, 1));
-            Shapes.Add(CreateAxisLines(XAxisMajorTicks.Skip(1).Take(XAxisMajorTicks.Count - 2), endY, true, Brushes.Black, 1));
-            Shapes.Add(CreateAxisLines(YAxisMajorTicks.Skip(1).Take(YAxisMajorTicks.Count - 2), endX, false, Brushes.Black, 1));
-            PlotSamplePoints();
-        }
-
-        static Path CreateAxisLines(IEnumerable<AxisTick> ticks, double length, bool isVertical, Brush brush, double strokeThickness)
-        {
-            var geometry = new StreamGeometry();
-            using (var geometryContext = geometry.Open()) 
-                foreach (var coordinate in ticks) 
-                    CreateAxisLine(geometryContext, coordinate.Location, length, isVertical);
-            geometry.Freeze();
-            return new Path
-            {
-                Stroke = brush,
-                StrokeThickness = strokeThickness,
-                SnapsToDevicePixels = true,
-                Data = geometry,
-            };
-        }
-
-        static void CreateAxisLine(StreamGeometryContext geometryContext, double location, double length, bool isVertical)
-        {
-            if (isVertical)
-            {
-                geometryContext.BeginFigure(new Point(location, 0), false, false);
-                geometryContext.LineTo(new Point(location, length), true, false);
-            }
-            else
-            {
-                geometryContext.BeginFigure(new Point(0, location), false, false);
-                geometryContext.LineTo(new Point(length, location), true, false);
-            }
-        }
-
-        [Initialize] public ObservableCollection<Shape> Shapes { get; set; }
+        [Initialize] public TestSeries TestSeries { get; set; }
     }
 
+    public class TestSeries : ObservableList<Tuple<double, double>>, ISeries
+    {
+        public Func<object, Point> ItemToPoint { get { return p => new Point(((Tuple<double, double>)p).Item1, ((Tuple<double, double>)p).Item2); } }
+
+        public IEnumerable<object> DataPoints { get { return this; } }
+
+        public Action<StreamGeometryContext, Point, double> AddToGeometry
+        {
+            get
+            {
+                return (ctx, point, size) =>
+                {
+                    var halfSize = size / 2;
+                    ctx.BeginFigure(new Point(point.X - halfSize, point.Y), true, true);
+                    ctx.ArcTo(new Point(point.X + halfSize, point.Y), new Size(halfSize, halfSize), 180, false, SweepDirection.Clockwise, true, false);
+                    ctx.ArcTo(new Point(point.X - halfSize, point.Y), new Size(halfSize, halfSize), 180, false, SweepDirection.Clockwise, true, true);
+                };
+            }
+        }
+
+        public double StrokeWidth { get { return 1; } }
+
+        public double PointSize { get { return 5; } }
+
+        public Brush Stroke { get { return Brushes.Blue; } }
+
+        public Brush Fill { get { return null; } }
+
+        public DataAxis XAxis { get; set; }
+
+        public DataAxis YAxis { get; set; }
+    }
+
+    public interface ISeries
+    {
+        /// <summary>
+        /// Converts an item in the series to a Point.  X and Y should be whatever natural values should be plotted for that point
+        /// </summary>
+        Func<object, Point> ItemToPoint { get; }
+        /// <summary>
+        /// An enumerable that returns the data points in the series, in the order they should be plotted
+        /// </summary>
+        IEnumerable<object> DataPoints { get; }
+        /// <summary>
+        /// An action that adds a Point to a StreamGeometryContext using a given size
+        /// </summary>
+        Action<StreamGeometryContext, Point, double> AddToGeometry { get; }
+        /// <summary>
+        /// Width of the stroke
+        /// </summary>
+        double StrokeWidth { get; }
+        /// <summary>
+        /// Size of the point, passed to the AddToGeometry action
+        /// </summary>
+        double PointSize { get; }
+        /// <summary>
+        /// Stroke brush
+        /// </summary>
+        Brush Stroke { get; }
+        /// <summary>
+        /// Fill brush
+        /// </summary>
+        Brush Fill { get; }
+        /// <summary>
+        /// The X Axis control to plot the DataPoints against (used for mapping X values to screen coordinates)
+        /// </summary>
+        DataAxis XAxis { get; set; }
+        /// <summary>
+        /// The Y Axis control to plot the DataPoints against (used for mapping Y values to screen coordinates)        
+        /// </summary>
+        DataAxis YAxis { get; set; }
+    }
 }
