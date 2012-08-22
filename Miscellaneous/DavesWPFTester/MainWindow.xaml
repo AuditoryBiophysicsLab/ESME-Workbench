@@ -67,7 +67,7 @@
                            AxisLocation="Top"
                            AxisType="Linear"
                            DockPanel.Dock="Bottom"
-                           EndValue="40"
+                           EndValue="14"
                            StartValue="0"
                            TickValueFormat="0.##" />
         <controls:DataAxis x:Name="HorizontalLogAxis"

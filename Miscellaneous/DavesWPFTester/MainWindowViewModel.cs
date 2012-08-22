@@ -33,12 +33,11 @@ namespace DavesWPFTester
                 var wrapper = new SeriesWrapper<List<Tuple<double, double>>>
                 {
                     SeriesData = Range(0, MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Sin(v))).ToList(),
-                    MarkerType = SeriesWrapper.Square,
+                    MarkerType = SeriesMarkerType.Plus,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     StrokeWidth = 1,
                     Stroke = Brushes.Blue,
                     PointSize = 5,
-                    Fill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
                 };
@@ -46,8 +45,8 @@ namespace DavesWPFTester
                 SeriesSource.Add(wrapper);
                 wrapper = new SeriesWrapper<List<Tuple<double, double>>>
                 {
-                    SeriesData = Range(MoreMath.TwoPi, 2 * MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Sin(v))).ToList(),
-                    MarkerType = SeriesWrapper.UpTriangle,
+                    SeriesData = Range(0, MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Cos(v))).ToList(),
+                    MarkerType = SeriesMarkerType.Asterisk,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     StrokeWidth = 1,
                     Stroke = Brushes.Red,
@@ -60,8 +59,8 @@ namespace DavesWPFTester
                 SeriesSource.Add(wrapper);
                 wrapper = new SeriesWrapper<List<Tuple<double, double>>>
                 {
-                    SeriesData = Range(2 * MoreMath.TwoPi, 4 * MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Sin(v))).ToList(),
-                    MarkerType = SeriesWrapper.Circle,
+                    SeriesData = Range(MoreMath.TwoPi, 2 * MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Sin(v))).ToList(),
+                    MarkerType = SeriesMarkerType.Cross,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     StrokeWidth = 1,
                     Stroke = Brushes.Green,
@@ -74,8 +73,8 @@ namespace DavesWPFTester
                 SeriesSource.Add(wrapper);
                 wrapper = new SeriesWrapper<List<Tuple<double, double>>>
                 {
-                    SeriesData = Range(4 * MoreMath.TwoPi, 6 * MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Sin(v))).ToList(),
-                    MarkerType = SeriesWrapper.DownTriangle,
+                    SeriesData = Range(MoreMath.TwoPi, 2 * MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Cos(v))).ToList(),
+                    MarkerType = SeriesMarkerType.Pentagram,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     StrokeWidth = 1,
                     Stroke = Brushes.OrangeRed,
@@ -107,24 +106,6 @@ namespace DavesWPFTester
         #endregion
 
         [Initialize] public ObservableCollection<ISeries> SeriesSource { get; set; }
-
-        SeriesWrapper CreateSeries()
-        {
-            var wrapper = new SeriesWrapper<ObservableList<Tuple<double, double>>>
-            {
-                SeriesData = new ObservableList<Tuple<double, double>>(),
-                MarkerType = SeriesWrapper.Square,
-                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                StrokeWidth = 1,
-                Stroke = Brushes.Blue,
-                PointSize = 5,
-                Fill = null,
-            };
-            wrapper.DataPoints = wrapper.SeriesData;
-            for (double x = 0; x <= MoreMath.TwoPi; x += (MoreMath.TwoPi / 100))
-                wrapper.SeriesData.Add(new Tuple<double, double>(x, Math.Sin(x)));
-            return wrapper;
-        }
     }
 
     public class SeriesWrapper<T> : SeriesWrapper
@@ -140,6 +121,21 @@ namespace DavesWPFTester
 
         public Action<StreamGeometryContext, Point, double> MarkerType { get; set; }
 
+        public double StrokeWidth { get; set; }
+
+        public double PointSize { get; set; }
+
+        public Brush Stroke { get; set; }
+
+        public Brush Fill { get; set; }
+
+        public DataAxis XAxis { get; set; }
+
+        public DataAxis YAxis { get; set; }
+    }
+
+    public static class SeriesMarkerType
+    {
         public static Action<StreamGeometryContext, Point, double> Circle
         {
             get
@@ -169,6 +165,98 @@ namespace DavesWPFTester
                     ctx.LineTo(new Point(right, top), true, false);
                     ctx.LineTo(new Point(right, bottom), true, true);
                     ctx.LineTo(new Point(left, bottom), true, true);
+                };
+            }
+        }
+        public static Action<StreamGeometryContext, Point, double> Diamond
+        {
+            get
+            {
+                return (ctx, point, size) =>
+                {
+                    var halfSize = size / 2;
+                    var top = point.Y - halfSize;
+                    var bottom = point.Y + halfSize;
+                    var left = point.X - halfSize;
+                    var right = point.X + halfSize;
+                    ctx.BeginFigure(new Point(point.X, top), true, true);
+                    ctx.LineTo(new Point(right, point.Y), true, false);
+                    ctx.LineTo(new Point(point.X, bottom), true, true);
+                    ctx.LineTo(new Point(left, point.Y), true, true);
+                };
+            }
+        }
+
+        public static Action<StreamGeometryContext, Point, double> Plus
+        {
+            get
+            {
+                return (ctx, point, size) =>
+                {
+                    var halfSize = size / 2;
+                    var top = point.Y - halfSize;
+                    var bottom = point.Y + halfSize;
+                    var left = point.X - halfSize;
+                    var right = point.X + halfSize;
+                    ctx.BeginFigure(new Point(point.X, top), false, false);
+                    ctx.LineTo(new Point(point.X, bottom), true, false);
+                    ctx.BeginFigure(new Point(left, point.Y), false, false);
+                    ctx.LineTo(new Point(right, point.Y), true, false);
+                };
+            }
+        }
+
+        public static Action<StreamGeometryContext, Point, double> Cross
+        {
+            get
+            {
+                return (ctx, point, size) =>
+                {
+                    var halfSize = size / 2;
+                    var top = point.Y - halfSize;
+                    var bottom = point.Y + halfSize;
+                    var left = point.X - halfSize;
+                    var right = point.X + halfSize;
+                    ctx.BeginFigure(new Point(left, top), false, false);
+                    ctx.LineTo(new Point(right, bottom), true, false);
+                    ctx.BeginFigure(new Point(right, top), false, false);
+                    ctx.LineTo(new Point(left, bottom), true, false);
+                };
+            }
+        }
+
+        public static Action<StreamGeometryContext, Point, double> Asterisk
+        {
+            get
+            {
+                return (ctx, point, size) =>
+                {
+                    var halfSize = size / 2;
+                    for (double angle = 0; angle < MoreMath.TwoPi; angle += Math.PI / 3)
+                    {
+                        ctx.BeginFigure(new Point(point.X, point.Y), false, false);
+                        ctx.LineTo(new Point(point.X + (halfSize * Math.Sin(angle)), point.Y + (halfSize * Math.Cos(angle))), true, false);
+                    }
+                };
+            }
+        }
+
+        public static Action<StreamGeometryContext, Point, double> Pentagram
+        {
+            get
+            {
+                return (ctx, point, size) =>
+                {
+                    var halfSize = size / 2;
+                    var quarterSize = halfSize / 2;
+                    ctx.BeginFigure(new Point(point.X, point.Y - halfSize), true, true);
+                    for (double angle = 0; angle < MoreMath.TwoPi; angle += Math.PI / 5)
+                    {
+                        angle += Math.PI / 5;
+                        ctx.LineTo(new Point(point.X + (quarterSize * Math.Sin(angle)), point.Y - (quarterSize * Math.Cos(angle))), true, true);
+                        angle += Math.PI / 5;
+                        ctx.LineTo(new Point(point.X + (halfSize * Math.Sin(angle)), point.Y - (halfSize * Math.Cos(angle))), true, true);
+                    }
                 };
             }
         }
@@ -209,17 +297,41 @@ namespace DavesWPFTester
             }
         }
 
-        public double StrokeWidth { get; set; }
+        public static Action<StreamGeometryContext, Point, double> LeftTriangle
+        {
+            get
+            {
+                return (ctx, point, size) =>
+                {
+                    var halfSize = size / 2;
+                    var top = point.Y - halfSize;
+                    var bottom = point.Y + halfSize;
+                    var left = point.X - halfSize;
+                    var right = point.X + halfSize;
+                    ctx.BeginFigure(new Point(left, point.Y), true, true);
+                    ctx.LineTo(new Point(right, top), true, true);
+                    ctx.LineTo(new Point(right, bottom), true, true);
+                };
+            }
+        }
 
-        public double PointSize { get; set; }
-
-        public Brush Stroke { get; set; }
-
-        public Brush Fill { get; set; }
-
-        public DataAxis XAxis { get; set; }
-
-        public DataAxis YAxis { get; set; }
+        public static Action<StreamGeometryContext, Point, double> RightTriangle
+        {
+            get
+            {
+                return (ctx, point, size) =>
+                {
+                    var halfSize = size / 2;
+                    var top = point.Y - halfSize;
+                    var bottom = point.Y + halfSize;
+                    var left = point.X - halfSize;
+                    var right = point.X + halfSize;
+                    ctx.BeginFigure(new Point(right, point.Y), true, true);
+                    ctx.LineTo(new Point(left, top), true, true);
+                    ctx.LineTo(new Point(left, bottom), true, true);
+                };
+            }
+        }
     }
 
     public interface ISeries
