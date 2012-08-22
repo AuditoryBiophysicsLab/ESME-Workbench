@@ -28,13 +28,11 @@
                 <TextBlock Height="89" DockPanel.Dock="Bottom" />
                 <controls:DataAxis x:Name="LeftLinearAxis"
                                    VerticalAlignment="Top"
-                                   Axis="{Binding YAxis,
-                                                  Mode=OneWayToSource}"
                                    AxisLabel="Left Linear Axis"
                                    AxisLocation="Right"
                                    AxisType="Linear"
-                                   EndValue="15"
-                                   StartValue="-15"
+                                   EndValue="1"
+                                   StartValue="-1"
                                    TickValueFormat="0.##" />
                 <controls:DataAxis x:Name="LeftLogAxis"
                                    VerticalAlignment="Top"
@@ -65,15 +63,12 @@
                                TickValueFormat="0.#" />
         </DockPanel>
         <controls:DataAxis x:Name="BottomLinearAxis"
-                           Axis="{Binding XAxis,
-                                          Mode=OneWayToSource}"
                            AxisLabel="Bottom Linear Axis"
                            AxisLocation="Top"
                            AxisType="Linear"
                            DockPanel.Dock="Bottom"
-                           EndValue="15"
-                           StartValue="-15"
-                           TestFunc="{Binding XTestFunc}"
+                           EndValue="7"
+                           StartValue="0"
                            TickValueFormat="0.##" />
         <controls:DataAxis x:Name="HorizontalLogAxis"
                            AxisLabel="Bottom Log Axis"
@@ -103,6 +98,10 @@
                          MajorTickLineColor="DarkGray"
                          MinorTickLineColor="AliceBlue"
                          SeriesSource="{Binding SeriesSource}"
+                         XAxisMajorTicks="{Binding MajorTicks,
+                                                   ElementName=BottomLinearAxis}"
+                         XAxisMinorTicks="{Binding MinorTicks,
+                                                   ElementName=BottomLinearAxis}"
                          YAxisMajorTicks="{Binding MajorTicks,
                                                    ElementName=LeftLinearAxis}"
                          YAxisMinorTicks="{Binding MinorTicks,

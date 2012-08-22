@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Media;
 using ESME.Views.Controls;
@@ -23,11 +24,11 @@ namespace DavesWPFTester
         public MainWindowViewModel(IViewAwareStatus viewAwareStatus)
         {
             _viewAwareStatus = viewAwareStatus;
-            CreateSeries();
             _viewAwareStatus.ViewActivated += () =>
             {
                 TestSeries.XAxis = ((MainWindow)_viewAwareStatus.View).BottomLinearAxis;
                 TestSeries.YAxis = ((MainWindow)_viewAwareStatus.View).LeftLinearAxis;
+                CreateSeries();
             };
         }
 
@@ -39,7 +40,7 @@ namespace DavesWPFTester
 
         #endregion
 
-        [Initialize] public List<ISeries> SeriesSource { get; set; }
+        [Initialize] public ObservableCollection<ISeries> SeriesSource { get; set; }
 
         void CreateSeries()
         {

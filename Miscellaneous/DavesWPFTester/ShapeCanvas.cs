@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
@@ -123,9 +124,21 @@ namespace DavesWPFTester
 
         public ObservableCollection<ISeries> SeriesSource { get { return (ObservableCollection<ISeries>)GetValue(SeriesSourceProperty); } set { SetValue(SeriesSourceProperty, value); } }
 
-        static void SeriesSourcePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).SeriesSourcePropertyChanged(); }
-        void SeriesSourcePropertyChanged() { }
+        static void SeriesSourcePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).SeriesSourcePropertyChanged(args); }
+        void SeriesSourcePropertyChanged(DependencyPropertyChangedEventArgs args)
+        {
+            if (args.OldValue != null) ((ObservableCollection<ISeries>)args.OldValue).CollectionChanged -= SeriesSourceCollectionChanged;
+            if (args.NewValue != null) ((ObservableCollection<ISeries>)args.NewValue).CollectionChanged += SeriesSourceCollectionChanged;
+            Redraw();
+        }
+
+        void SeriesSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            Redraw();
+        }
         #endregion
+
+        public ShapeCanvas() { SizeChanged += (s, e) => Redraw(); }
 
         void Redraw()
         {
@@ -134,7 +147,7 @@ namespace DavesWPFTester
             if (YAxisMinorTicks != null && YAxisMinorTicks.Count > 0) Children.Add(CreateAxisLines(YAxisMinorTicks, ActualWidth, false, _minorTickBrush, 1));
             if (XAxisMajorTicks != null && XAxisMajorTicks.Count > 0) Children.Add(CreateAxisLines(XAxisMajorTicks.Skip(1).Take(XAxisMajorTicks.Count - 2), ActualHeight, true, _majorTickBrush, 1));
             if (YAxisMajorTicks != null && YAxisMajorTicks.Count > 0) Children.Add(CreateAxisLines(YAxisMajorTicks.Skip(1).Take(YAxisMajorTicks.Count - 2), ActualWidth, false, _majorTickBrush, 1));
-            foreach (var series in SeriesSource) RenderSeries(series);
+            if (SeriesSource != null) foreach (var series in SeriesSource) RenderSeries(series);
             if (Shapes != null) foreach (var shape in Shapes) Children.Add(shape);
             InvalidateVisual();
         }
