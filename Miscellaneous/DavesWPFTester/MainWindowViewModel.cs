@@ -9,6 +9,7 @@ using ESME.Views.Controls;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Services;
+using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
 using MEFedMVVM.ViewModelLocator;
@@ -33,9 +34,9 @@ namespace DavesWPFTester
                 var rangeEnd = MoreMath.TwoPi;
                 var rangeStep = MoreMath.TwoPi / 100;
                 const int pointSize = 10;
-                var wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                var wrapper = new SeriesWrapper<ObservableList<Tuple<double, double>>>
                 {
-                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 12)).ToList(),
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 12)).ToObservableList(),
                     MarkerType = SeriesMarkerType.Plus,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
@@ -49,9 +50,9 @@ namespace DavesWPFTester
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
-                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                wrapper = new SeriesWrapper<ObservableList<Tuple<double, double>>>
                 {
-                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 11)).ToList(),
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 11)).ToObservableList(),
                     MarkerType = SeriesMarkerType.Circle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
@@ -66,9 +67,9 @@ namespace DavesWPFTester
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
-                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                wrapper = new SeriesWrapper<ObservableList<Tuple<double, double>>>
                 {
-                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 10)).ToList(),
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 10)).ToObservableList(),
                     MarkerType = SeriesMarkerType.Asterisk,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
@@ -82,9 +83,9 @@ namespace DavesWPFTester
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
-                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                wrapper = new SeriesWrapper<ObservableList<Tuple<double, double>>>
                 {
-                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 9)).ToList(),
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 9)).ToObservableList(),
                     MarkerType = SeriesMarkerType.Cross,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
@@ -100,9 +101,9 @@ namespace DavesWPFTester
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
 
-                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                wrapper = new SeriesWrapper<ObservableList<Tuple<double, double>>>
                 {
-                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 8)).ToList(),
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 8)).ToObservableList(),
                     MarkerType = SeriesMarkerType.Square,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
@@ -117,9 +118,9 @@ namespace DavesWPFTester
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
-                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                wrapper = new SeriesWrapper<ObservableList<Tuple<double, double>>>
                 {
-                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 7)).ToList(),
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 7)).ToObservableList(),
                     MarkerType = SeriesMarkerType.Diamond,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
@@ -134,9 +135,9 @@ namespace DavesWPFTester
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
-                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                wrapper = new SeriesWrapper<ObservableList<Tuple<double, double>>>
                 {
-                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 6)).ToList(),
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 6)).ToObservableList(),
                     MarkerType = SeriesMarkerType.UpTriangle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
@@ -151,9 +152,9 @@ namespace DavesWPFTester
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
-                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                wrapper = new SeriesWrapper<ObservableList<Tuple<double, double>>>
                 {
-                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 5)).ToList(),
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 5)).ToObservableList(),
                     MarkerType = SeriesMarkerType.DownTriangle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
@@ -169,9 +170,9 @@ namespace DavesWPFTester
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
 
-                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                wrapper = new SeriesWrapper<ObservableList<Tuple<double, double>>>
                 {
-                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 4)).ToList(),
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 4)).ToObservableList(),
                     MarkerType = SeriesMarkerType.RightTriangle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
@@ -187,9 +188,9 @@ namespace DavesWPFTester
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
 
-                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                wrapper = new SeriesWrapper<ObservableList<Tuple<double, double>>>
                 {
-                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 3)).ToList(),
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 3)).ToObservableList(),
                     MarkerType = SeriesMarkerType.LeftTriangle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
@@ -204,9 +205,9 @@ namespace DavesWPFTester
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
-                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                wrapper = new SeriesWrapper<ObservableList<Tuple<double, double>>>
                 {
-                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 2)).ToList(),
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 2)).ToObservableList(),
                     MarkerType = SeriesMarkerType.Pentagram,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
@@ -221,9 +222,9 @@ namespace DavesWPFTester
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
-                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                wrapper = new SeriesWrapper<ObservableList<Tuple<double, double>>>
                 {
-                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 1)).ToList(),
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 1)).ToObservableList(),
                     MarkerType = SeriesMarkerType.Hexagram,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
