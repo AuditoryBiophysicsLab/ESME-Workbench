@@ -44,7 +44,7 @@ namespace DavesWPFTester
                     XAxis = xAxis,
                     YAxis = yAxis,
                     SeriesName = "y = sin(x) + 12",
-                    LineStroke = Brushes.Black,
+                    LineStroke = Brushes.DarkViolet,
                     LineStrokeThickness = 2,
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
@@ -76,7 +76,9 @@ namespace DavesWPFTester
                     MarkerSize = pointSize,
                     XAxis = xAxis,
                     YAxis = yAxis,
-                    SeriesName = "y = sin(x) + 10"
+                    SeriesName = "y = sin(x) + 10",
+                    LineStroke = Brushes.Green,
+                    LineStrokeThickness = 2,
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
@@ -91,7 +93,9 @@ namespace DavesWPFTester
                     MarkerFill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
-                    SeriesName = "y = sin(x) + 9"
+                    SeriesName = "y = sin(x) + 9",
+                    LineStroke = Brushes.Blue,
+                    LineStrokeThickness = 2,
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
@@ -107,7 +111,9 @@ namespace DavesWPFTester
                     MarkerFill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
-                    SeriesName = "y = sin(x) + 8"
+                    SeriesName = "y = sin(x) + 8",
+                    LineStroke = Brushes.Cyan,
+                    LineStrokeThickness = 2,
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
@@ -122,7 +128,9 @@ namespace DavesWPFTester
                     MarkerFill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
-                    SeriesName = "y = sin(x) + 7"
+                    SeriesName = "y = sin(x) + 7",
+                    LineStroke = Brushes.Magenta,
+                    LineStrokeThickness = 2,
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
@@ -137,7 +145,9 @@ namespace DavesWPFTester
                     MarkerFill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
-                    SeriesName = "y = sin(x) + 6"
+                    SeriesName = "y = sin(x) + 6",
+                    LineStroke = Brushes.Cyan,
+                    LineStrokeThickness = 2,
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
@@ -147,12 +157,14 @@ namespace DavesWPFTester
                     MarkerType = SeriesMarkerType.DownTriangle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
-                    MarkerStroke = Brushes.Cyan,
+                    MarkerStroke = Brushes.DarkCyan,
                     MarkerSize = pointSize,
                     MarkerFill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
-                    SeriesName = "y = sin(x) + 5"
+                    SeriesName = "y = sin(x) + 5",
+                    LineStroke = Brushes.Orange,
+                    LineStrokeThickness = 2,
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
@@ -168,7 +180,9 @@ namespace DavesWPFTester
                     MarkerFill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
-                    SeriesName = "y = sin(x) + 4"
+                    SeriesName = "y = sin(x) + 4",
+                    LineStroke = Brushes.DarkCyan,
+                    LineStrokeThickness = 2,
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
@@ -184,7 +198,9 @@ namespace DavesWPFTester
                     MarkerFill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
-                    SeriesName = "y = sin(x) + 3"
+                    SeriesName = "y = sin(x) + 3",
+                    LineStroke = Brushes.DarkRed,
+                    LineStrokeThickness = 2,
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
@@ -199,7 +215,9 @@ namespace DavesWPFTester
                     MarkerFill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
-                    SeriesName = "y = sin(x) + 2"
+                    SeriesName = "y = sin(x) + 2",
+                    LineStroke = Brushes.DarkSeaGreen,
+                    LineStrokeThickness = 2,
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
@@ -214,7 +232,9 @@ namespace DavesWPFTester
                     MarkerFill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
-                    SeriesName = "y = sin(x) + 1"
+                    SeriesName = "y = sin(x) + 1",
+                    LineStroke = Brushes.DodgerBlue,
+                    LineStrokeThickness = 2,
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);

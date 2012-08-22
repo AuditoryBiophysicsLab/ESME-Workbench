@@ -76,7 +76,7 @@
                            AxisLocation="Top"
                            AxisType="Linear"
                            DockPanel.Dock="Bottom"
-                           EndValue="7"
+                           EndValue="6.5"
                            StartValue="0"
                            TickValueFormat="0.##" />
         <!--
