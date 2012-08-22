@@ -153,21 +153,42 @@ namespace DavesWPFTester
 
         void RenderSeries(ISeries series)
         {
-            var geometry = new StreamGeometry();
-            using (var ctx = geometry.Open())
+            var glyphGeometry = new StreamGeometry();
+            var glyphContext = glyphGeometry.Open();
+            var lineGeometry = (series.LineStroke == null) ? null : new StreamGeometry();
+            var lineContext = lineGeometry == null ? null : lineGeometry.Open();
+            var isFirst = true;
+            foreach (var item in series.DataPoints)
             {
-                foreach (var item in series.DataPoints)
+                var dataPoint = series.ItemToPoint(item);
+                var plotPoint = new Point(series.XAxis.MappingFunction(dataPoint.X), series.YAxis.MappingFunction(dataPoint.Y));
+                series.MarkerType(glyphContext, plotPoint, series.MarkerSize);
+                if (lineContext == null) continue;
+                if (isFirst)
                 {
-                    var dataPoint = series.ItemToPoint(item);
-                    var plotPoint = new Point(series.XAxis.MappingFunction(dataPoint.X), series.YAxis.MappingFunction(dataPoint.Y));
-                    series.MarkerType(ctx, plotPoint, series.MarkerSize);
+                    lineContext.BeginFigure(plotPoint, false, false);
+                    isFirst = false;
                 }
+                else lineContext.LineTo(plotPoint, true, true);
+            }
+            glyphContext.Close();
+            if (lineContext != null)
+            {
+                lineContext.Close();
+                Children.Add(new Path
+                {
+                    Stroke = series.LineStroke,
+                    StrokeDashArray = series.LineStrokeDashArray,
+                    StrokeThickness = series.LineStrokeThickness,
+                    Data = lineGeometry,
+                });
             }
             Children.Add(new Path
             {
-                Stroke = series.Stroke,
-                Fill = series.Fill,
-                Data = geometry,
+                Stroke = series.MarkerStroke,
+                StrokeThickness = series.MarkerStrokeThickness,
+                Fill = series.MarkerFill,
+                Data = glyphGeometry,
             });
         }
 

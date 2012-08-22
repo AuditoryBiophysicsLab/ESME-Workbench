@@ -14,10 +14,15 @@
                 </Grid.ColumnDefinitions>
                 <Path Grid.Column="0"
                       Margin="5 0 5 0"
-                      Data="{Binding SampleGlyph}"
-                      Fill="{Binding Fill}"
-                      Stroke="{Binding Stroke}"
-                      StrokeThickness="{Binding StrokeThickness}" />
+                      Data="{Binding SampleLine}"
+                      Stroke="{Binding LineStroke}"
+                      StrokeThickness="{Binding LineStrokeThickness}" />
+                <Path Grid.Column="0"
+                      Margin="5 0 5 0"
+                      Data="{Binding SampleMarker}"
+                      Fill="{Binding MarkerFill}"
+                      Stroke="{Binding MarkerStroke}"
+                      StrokeThickness="{Binding MarkerStrokeThickness}" />
                 <TextBlock Grid.Column="1"
                            Margin="2 0 5 0"
                            Text="{Binding SeriesName}" />

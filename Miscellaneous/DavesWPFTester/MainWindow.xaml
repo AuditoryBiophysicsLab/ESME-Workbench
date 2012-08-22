@@ -21,8 +21,11 @@
             <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <DockPanel LastChildFill="True" Margin="10">
-        <GroupBox Margin="10 0 0 0" Header="Legend" DockPanel.Dock="Right" Padding="5">
+    <DockPanel Margin="10" LastChildFill="True">
+        <GroupBox Margin="10 0 0 0"
+                  DockPanel.Dock="Right"
+                  Header="Legend"
+                  Padding="5">
             <app:LegendView ItemsSource="{Binding SeriesSource}" />
         </GroupBox>
         <DockPanel DockPanel.Dock="Left">
@@ -34,7 +37,7 @@
                                    AxisLocation="Right"
                                    AxisType="Linear"
                                    EndValue="13"
-                                   StartValue="-13"
+                                   StartValue="0"
                                    TickValueFormat="0.##" />
                 <!--
                     <controls:DataAxis x:Name="LeftLogAxis"
