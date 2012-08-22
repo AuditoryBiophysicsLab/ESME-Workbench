@@ -29,58 +29,188 @@ namespace DavesWPFTester
             {
                 var xAxis = ((MainWindow)_viewAwareStatus.View).BottomLinearAxis;
                 var yAxis = ((MainWindow)_viewAwareStatus.View).LeftLinearAxis;
+                const double rangeStart = 0.0;
+                var rangeEnd = MoreMath.TwoPi;
+                var rangeStep = MoreMath.TwoPi / 100;
+                const int pointSize = 10;
                 var wrapper = new SeriesWrapper<List<Tuple<double, double>>>
                 {
-                    SeriesData = Range(0, MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Sin(v))).ToList(),
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 12)).ToList(),
                     MarkerType = SeriesMarkerType.Plus,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     StrokeWidth = 1,
-                    Stroke = Brushes.Blue,
-                    PointSize = 5,
-                    XAxis = xAxis,
-                    YAxis = yAxis,
-                };
-                wrapper.DataPoints = wrapper.SeriesData;
-                SeriesSource.Add(wrapper);
-                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
-                {
-                    SeriesData = Range(0, MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Cos(v))).ToList(),
-                    MarkerType = SeriesMarkerType.Asterisk,
-                    ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                    StrokeWidth = 1,
                     Stroke = Brushes.Red,
-                    PointSize = 5,
-                    Fill = null,
+                    PointSize = pointSize,
                     XAxis = xAxis,
                     YAxis = yAxis,
+                    SeriesName = "y = sin(x) + 12"
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
                 wrapper = new SeriesWrapper<List<Tuple<double, double>>>
                 {
-                    SeriesData = Range(MoreMath.TwoPi, 2 * MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Sin(v))).ToList(),
-                    MarkerType = SeriesMarkerType.Cross,
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 10)).ToList(),
+                    MarkerType = SeriesMarkerType.Circle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     StrokeWidth = 1,
                     Stroke = Brushes.Green,
-                    PointSize = 5,
+                    PointSize = pointSize,
                     Fill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
+                    SeriesName = "y = sin(x) + 10"
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
                 wrapper = new SeriesWrapper<List<Tuple<double, double>>>
                 {
-                    SeriesData = Range(MoreMath.TwoPi, 2 * MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Cos(v))).ToList(),
-                    MarkerType = SeriesMarkerType.Pentagram,
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 8)).ToList(),
+                    MarkerType = SeriesMarkerType.Asterisk,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     StrokeWidth = 1,
-                    Stroke = Brushes.OrangeRed,
-                    PointSize = 5,
+                    Stroke = Brushes.Blue,
+                    PointSize = pointSize,
+                    XAxis = xAxis,
+                    YAxis = yAxis,
+                    SeriesName = "y = sin(x) + 8"
+                };
+                wrapper.DataPoints = wrapper.SeriesData;
+                SeriesSource.Add(wrapper);
+                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                {
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 6)).ToList(),
+                    MarkerType = SeriesMarkerType.Cross,
+                    ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                    StrokeWidth = 1,
+                    Stroke = Brushes.Cyan,
+                    PointSize = pointSize,
                     Fill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
+                    SeriesName = "y = sin(x) + 6"
+                };
+                wrapper.DataPoints = wrapper.SeriesData;
+                SeriesSource.Add(wrapper);
+
+                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                {
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 4)).ToList(),
+                    MarkerType = SeriesMarkerType.Square,
+                    ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                    StrokeWidth = 1,
+                    Stroke = Brushes.Magenta,
+                    PointSize = pointSize,
+                    Fill = null,
+                    XAxis = xAxis,
+                    YAxis = yAxis,
+                    SeriesName = "y = sin(x) + 4"
+                };
+                wrapper.DataPoints = wrapper.SeriesData;
+                SeriesSource.Add(wrapper);
+                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                {
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 2)).ToList(),
+                    MarkerType = SeriesMarkerType.Diamond,
+                    ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                    StrokeWidth = 1,
+                    Stroke = Brushes.Cyan,
+                    PointSize = pointSize,
+                    Fill = null,
+                    XAxis = xAxis,
+                    YAxis = yAxis,
+                    SeriesName = "y = sin(x) + 2"
+                };
+                wrapper.DataPoints = wrapper.SeriesData;
+                SeriesSource.Add(wrapper);
+                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                {
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x))).ToList(),
+                    MarkerType = SeriesMarkerType.UpTriangle,
+                    ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                    StrokeWidth = 1,
+                    Stroke = Brushes.Orange,
+                    PointSize = pointSize,
+                    Fill = null,
+                    XAxis = xAxis,
+                    YAxis = yAxis,
+                    SeriesName = "y = sin(x)"
+                };
+                wrapper.DataPoints = wrapper.SeriesData;
+                SeriesSource.Add(wrapper);
+                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                {
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) - 2)).ToList(),
+                    MarkerType = SeriesMarkerType.DownTriangle,
+                    ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                    StrokeWidth = 1,
+                    Stroke = Brushes.Cyan,
+                    PointSize = pointSize,
+                    Fill = null,
+                    XAxis = xAxis,
+                    YAxis = yAxis,
+                    SeriesName = "y = sin(x) - 2"
+                };
+                wrapper.DataPoints = wrapper.SeriesData;
+                SeriesSource.Add(wrapper);
+
+                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                {
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) - 4)).ToList(),
+                    MarkerType = SeriesMarkerType.RightTriangle,
+                    ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                    StrokeWidth = 1,
+                    Stroke = Brushes.DarkRed,
+                    PointSize = pointSize,
+                    Fill = null,
+                    XAxis = xAxis,
+                    YAxis = yAxis,
+                    SeriesName = "y = sin(x) - 4"
+                };
+                wrapper.DataPoints = wrapper.SeriesData;
+                SeriesSource.Add(wrapper);
+
+                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                {
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) - 6)).ToList(),
+                    MarkerType = SeriesMarkerType.LeftTriangle,
+                    ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                    StrokeWidth = 1,
+                    Stroke = Brushes.DarkSeaGreen,
+                    PointSize = pointSize,
+                    Fill = null,
+                    XAxis = xAxis,
+                    YAxis = yAxis,
+                    SeriesName = "y = sin(x) - 6"
+                };
+                wrapper.DataPoints = wrapper.SeriesData;
+                SeriesSource.Add(wrapper);
+                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                {
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) - 8)).ToList(),
+                    MarkerType = SeriesMarkerType.Pentagram,
+                    ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                    StrokeWidth = 1,
+                    Stroke = Brushes.DodgerBlue,
+                    PointSize = pointSize,
+                    Fill = null,
+                    XAxis = xAxis,
+                    YAxis = yAxis,
+                    SeriesName = "y = sin(x) - 8"
+                };
+                wrapper.DataPoints = wrapper.SeriesData;
+                SeriesSource.Add(wrapper);
+                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                {
+                    SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) - 10)).ToList(),
+                    MarkerType = SeriesMarkerType.Hexagram,
+                    ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                    StrokeWidth = 1,
+                    Stroke = Brushes.DarkViolet,
+                    PointSize = pointSize,
+                    Fill = null,
+                    XAxis = xAxis,
+                    YAxis = yAxis,
+                    SeriesName = "y = sin(x) - 10"
                 };
                 wrapper.DataPoints = wrapper.SeriesData;
                 SeriesSource.Add(wrapper);
@@ -131,6 +261,8 @@ namespace DavesWPFTester
         public DataAxis XAxis { get; set; }
 
         public DataAxis YAxis { get; set; }
+
+        public string SeriesName { get; set; }
     }
 
     public static class SeriesMarkerType
@@ -248,12 +380,32 @@ namespace DavesWPFTester
                 {
                     var halfSize = size / 2;
                     var quarterSize = halfSize / 2;
+                    const int steps = 5;
                     ctx.BeginFigure(new Point(point.X, point.Y - halfSize), true, true);
-                    for (double angle = 0; angle < MoreMath.TwoPi; angle += Math.PI / 5)
+                    for (var angle = Math.PI / steps; angle < MoreMath.TwoPi; angle += Math.PI / steps)
                     {
-                        angle += Math.PI / 5;
                         ctx.LineTo(new Point(point.X + (quarterSize * Math.Sin(angle)), point.Y - (quarterSize * Math.Cos(angle))), true, true);
-                        angle += Math.PI / 5;
+                        angle += Math.PI / steps;
+                        ctx.LineTo(new Point(point.X + (halfSize * Math.Sin(angle)), point.Y - (halfSize * Math.Cos(angle))), true, true);
+                    }
+                };
+            }
+        }
+
+        public static Action<StreamGeometryContext, Point, double> Hexagram
+        {
+            get
+            {
+                return (ctx, point, size) =>
+                {
+                    var halfSize = size / 2;
+                    var quarterSize = halfSize / 2;
+                    const int steps = 6;
+                    ctx.BeginFigure(new Point(point.X, point.Y - halfSize), true, true);
+                    for (var angle = Math.PI / steps; angle < MoreMath.TwoPi; angle += Math.PI / steps)
+                    {
+                        ctx.LineTo(new Point(point.X + (quarterSize * Math.Sin(angle)), point.Y - (quarterSize * Math.Cos(angle))), true, true);
+                        angle += Math.PI / steps;
                         ctx.LineTo(new Point(point.X + (halfSize * Math.Sin(angle)), point.Y - (halfSize * Math.Cos(angle))), true, true);
                     }
                 };
@@ -371,5 +523,9 @@ namespace DavesWPFTester
         /// The Y Axis control to plot the DataPoints against (used for mapping Y values to screen coordinates)        
         /// </summary>
         DataAxis YAxis { get; set; }
+        /// <summary>
+        /// The name of the series, used to create a legend
+        /// </summary>
+        string SeriesName { get; }
     }
 }

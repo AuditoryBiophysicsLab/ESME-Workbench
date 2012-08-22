@@ -21,78 +21,84 @@
             <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <DockPanel LastChildFill="True">
+    <DockPanel LastChildFill="True" Margin="10">
         <DockPanel DockPanel.Dock="Left">
             <DockPanel>
-                <TextBlock Height="95" DockPanel.Dock="Top" />
-                <TextBlock Height="89" DockPanel.Dock="Bottom" />
+                <TextBlock Height="{Binding ActualHeight, ElementName=BottomLinearAxis}" DockPanel.Dock="Bottom" />
                 <controls:DataAxis x:Name="LeftLinearAxis"
                                    VerticalAlignment="Top"
-                                   AxisLabel="Left Linear Axis"
+                                   AxisLabel="Y"
                                    AxisLocation="Right"
                                    AxisType="Linear"
-                                   EndValue="1"
-                                   StartValue="-1"
+                                   EndValue="13"
+                                   StartValue="-13"
                                    TickValueFormat="0.##" />
-                <controls:DataAxis x:Name="LeftLogAxis"
-                                   VerticalAlignment="Top"
-                                   AxisLabel="Left Log Axis"
-                                   AxisLocation="Right"
-                                   AxisType="Logarithmic"
-                                   EndValue="10000"
-                                   StartValue="1"
-                                   TickValueFormat="m" />
+                <!--
+                    <controls:DataAxis x:Name="LeftLogAxis"
+                    VerticalAlignment="Top"
+                    AxisLabel="Left Log Axis"
+                    AxisLocation="Right"
+                    AxisType="Logarithmic"
+                    EndValue="10000"
+                    StartValue="1"
+                    TickValueFormat="m" />
+                -->
             </DockPanel>
         </DockPanel>
-        <DockPanel DockPanel.Dock="Right">
+        <!--
+            <DockPanel DockPanel.Dock="Right">
             <TextBlock Height="95" DockPanel.Dock="Top" />
             <TextBlock Height="89" DockPanel.Dock="Bottom" />
-            <controls:DataAxis x:Name="VerticalLinearAxis"
-                               AxisLabel="Right Linear Axis"
-                               AxisLocation="Left"
-                               DockPanel.Dock="Right"
-                               EndValue="10"
-                               StartValue="-10"
-                               TickValueFormat="0.#" />
+            <controls:DataAxis x:Name="RightLinearAxis"
+            AxisLabel="Right Linear Axis"
+            AxisLocation="Left"
+            DockPanel.Dock="Right"
+            EndValue="10"
+            StartValue="-10"
+            TickValueFormat="0.#" />
             <controls:DataAxis AxisLabel="Right Log Axis"
-                               AxisLocation="Left"
-                               AxisType="Logarithmic"
-                               DockPanel.Dock="Right"
-                               EndValue="100000"
-                               StartValue="100"
-                               TickValueFormat="0.#" />
-        </DockPanel>
+            AxisLocation="Left"
+            AxisType="Logarithmic"
+            DockPanel.Dock="Right"
+            EndValue="100000"
+            StartValue="100"
+            TickValueFormat="0.#" />
+            </DockPanel>
+        -->
         <controls:DataAxis x:Name="BottomLinearAxis"
-                           AxisLabel="Bottom Linear Axis"
+                           AxisLabel="X"
                            AxisLocation="Top"
                            AxisType="Linear"
                            DockPanel.Dock="Bottom"
-                           EndValue="14"
+                           EndValue="7"
                            StartValue="0"
                            TickValueFormat="0.##" />
-        <controls:DataAxis x:Name="HorizontalLogAxis"
-                           AxisLabel="Bottom Log Axis"
-                           AxisLocation="Top"
-                           AxisType="Logarithmic"
-                           DockPanel.Dock="Bottom"
-                           EndValue="1e6"
-                           StartValue="1"
-                           TickValueFormat="e0" />
-        <controls:DataAxis x:Name="HorizontalLinearAxis"
-                           AxisLabel="Top Linear Axis"
-                           AxisLocation="Bottom"
-                           AxisType="Linear"
-                           DockPanel.Dock="Top"
-                           EndValue="25"
-                           StartValue="-10"
-                           TickValueFormat="0" />
-        <controls:DataAxis AxisLabel="Top Log Axis"
-                           AxisLocation="Bottom"
-                           AxisType="Logarithmic"
-                           DockPanel.Dock="Top"
-                           EndValue="10000"
-                           StartValue="0.01"
-                           TickValueFormat="m" />
+        <!--
+            <controls:DataAxis x:Name="BottomLogAxis"
+            AxisLabel="Bottom Log Axis"
+            AxisLocation="Top"
+            AxisType="Logarithmic"
+            DockPanel.Dock="Bottom"
+            EndValue="1e6"
+            StartValue="1"
+            TickValueFormat="e0" />
+            <controls:DataAxis x:Name="TopLinearAxis"
+            AxisLabel="Top Linear Axis"
+            AxisLocation="Bottom"
+            AxisType="Linear"
+            DockPanel.Dock="Top"
+            EndValue="25"
+            StartValue="-10"
+            TickValueFormat="0" />
+            <controls:DataAxis x:Name="TopLogAxis"
+            AxisLabel="Top Log Axis"
+            AxisLocation="Bottom"
+            AxisType="Logarithmic"
+            DockPanel.Dock="Top"
+            EndValue="10000"
+            StartValue="0.01"
+            TickValueFormat="m" />
+        -->
         <!--  <Image Source="{Binding DisplayImage}" />  -->
         <app:ShapeCanvas x:Name="ShapeCanvas"
                          MajorTickLineColor="DarkGray"

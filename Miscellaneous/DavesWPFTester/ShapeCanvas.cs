@@ -145,8 +145,8 @@ namespace DavesWPFTester
             Children.Clear();
             if (XAxisMinorTicks != null && XAxisMinorTicks.Count > 0) Children.Add(CreateAxisLines(XAxisMinorTicks, ActualHeight, true, _minorTickBrush, 1));
             if (YAxisMinorTicks != null && YAxisMinorTicks.Count > 0) Children.Add(CreateAxisLines(YAxisMinorTicks, ActualWidth, false, _minorTickBrush, 1));
-            if (XAxisMajorTicks != null && XAxisMajorTicks.Count > 0) Children.Add(CreateAxisLines(XAxisMajorTicks.Skip(1).Take(XAxisMajorTicks.Count - 2), ActualHeight, true, _majorTickBrush, 1));
-            if (YAxisMajorTicks != null && YAxisMajorTicks.Count > 0) Children.Add(CreateAxisLines(YAxisMajorTicks.Skip(1).Take(YAxisMajorTicks.Count - 2), ActualWidth, false, _majorTickBrush, 1));
+            if (XAxisMajorTicks != null && XAxisMajorTicks.Count > 0) Children.Add(CreateAxisLines(XAxisMajorTicks.Skip(1), ActualHeight, true, _majorTickBrush, 1));
+            if (YAxisMajorTicks != null && YAxisMajorTicks.Count > 0) Children.Add(CreateAxisLines(YAxisMajorTicks.Skip(1), ActualWidth, false, _majorTickBrush, 1));
             if (SeriesSource != null) foreach (var series in SeriesSource) RenderSeries(series);
             if (Shapes != null) foreach (var shape in Shapes) Children.Add(shape);
             InvalidateVisual();
@@ -168,7 +168,6 @@ namespace DavesWPFTester
             {
                 Stroke = series.Stroke,
                 Fill = series.Fill,
-                SnapsToDevicePixels = true,
                 Data = geometry,
             });
         }
