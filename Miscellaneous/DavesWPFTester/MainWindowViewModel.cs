@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using ESME.NEMO;
 using ESME.Views.Controls;
 using HRC.Aspects;
 using HRC.Navigation;
@@ -26,12 +28,76 @@ namespace DavesWPFTester
             _viewAwareStatus = viewAwareStatus;
             _viewAwareStatus.ViewActivated += () =>
             {
-                TestSeries.XAxis = ((MainWindow)_viewAwareStatus.View).BottomLinearAxis;
-                TestSeries.YAxis = ((MainWindow)_viewAwareStatus.View).LeftLinearAxis;
-                CreateSeries();
+                var xAxis = ((MainWindow)_viewAwareStatus.View).BottomLinearAxis;
+                var yAxis = ((MainWindow)_viewAwareStatus.View).LeftLinearAxis;
+                var wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                {
+                    SeriesData = Range(0, MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Sin(v))).ToList(),
+                    MarkerType = SeriesWrapper.Square,
+                    ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                    StrokeWidth = 1,
+                    Stroke = Brushes.Blue,
+                    PointSize = 5,
+                    Fill = null,
+                    XAxis = xAxis,
+                    YAxis = yAxis,
+                };
+                wrapper.DataPoints = wrapper.SeriesData;
+                SeriesSource.Add(wrapper);
+                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                {
+                    SeriesData = Range(MoreMath.TwoPi, 2 * MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Sin(v))).ToList(),
+                    MarkerType = SeriesWrapper.UpTriangle,
+                    ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                    StrokeWidth = 1,
+                    Stroke = Brushes.Red,
+                    PointSize = 5,
+                    Fill = null,
+                    XAxis = xAxis,
+                    YAxis = yAxis,
+                };
+                wrapper.DataPoints = wrapper.SeriesData;
+                SeriesSource.Add(wrapper);
+                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                {
+                    SeriesData = Range(2 * MoreMath.TwoPi, 4 * MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Sin(v))).ToList(),
+                    MarkerType = SeriesWrapper.Circle,
+                    ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                    StrokeWidth = 1,
+                    Stroke = Brushes.Green,
+                    PointSize = 5,
+                    Fill = null,
+                    XAxis = xAxis,
+                    YAxis = yAxis,
+                };
+                wrapper.DataPoints = wrapper.SeriesData;
+                SeriesSource.Add(wrapper);
+                wrapper = new SeriesWrapper<List<Tuple<double, double>>>
+                {
+                    SeriesData = Range(4 * MoreMath.TwoPi, 6 * MoreMath.TwoPi, MoreMath.TwoPi / 100).Select(v => Tuple.Create(v, Math.Sin(v))).ToList(),
+                    MarkerType = SeriesWrapper.DownTriangle,
+                    ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                    StrokeWidth = 1,
+                    Stroke = Brushes.OrangeRed,
+                    PointSize = 5,
+                    Fill = null,
+                    XAxis = xAxis,
+                    YAxis = yAxis,
+                };
+                wrapper.DataPoints = wrapper.SeriesData;
+                SeriesSource.Add(wrapper);
             };
         }
 
+        IEnumerable<double> Range(double start, double end, double step)
+        {
+            if (start == end) throw new ParameterOutOfRangeException("Start and End cannot be equal");
+            if (step == 0) throw new ParameterOutOfRangeException("Step cannot be zero");
+            if (start < end && step < 0) throw new ParameterOutOfRangeException("Step value cannot be negative when Start < End");
+            if (start > end && step > 0) throw new ParameterOutOfRangeException("Step value cannot be positive when Start > End");
+            if (start < end) for (var value = start; value <= end; value += step) yield return value;
+            else for (var value = end; value >= start; value += step) yield return value;
+        }
         #region ViewClosingCommand
 
         public SimpleCommand<object, EventToCommandArgs> ViewClosingCommand { get { return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(vcArgs => Properties.Settings.Default.Save())); } }
@@ -42,24 +108,39 @@ namespace DavesWPFTester
 
         [Initialize] public ObservableCollection<ISeries> SeriesSource { get; set; }
 
-        void CreateSeries()
+        SeriesWrapper CreateSeries()
         {
-            SeriesSource.Clear();
+            var wrapper = new SeriesWrapper<ObservableList<Tuple<double, double>>>
+            {
+                SeriesData = new ObservableList<Tuple<double, double>>(),
+                MarkerType = SeriesWrapper.Square,
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeWidth = 1,
+                Stroke = Brushes.Blue,
+                PointSize = 5,
+                Fill = null,
+            };
+            wrapper.DataPoints = wrapper.SeriesData;
             for (double x = 0; x <= MoreMath.TwoPi; x += (MoreMath.TwoPi / 100))
-                TestSeries.Add(new Tuple<double, double>(x, Math.Sin(x)));
-            SeriesSource.Add(TestSeries);
+                wrapper.SeriesData.Add(new Tuple<double, double>(x, Math.Sin(x)));
+            return wrapper;
         }
-
-        [Initialize] public TestSeries TestSeries { get; set; }
     }
 
-    public class TestSeries : ObservableList<Tuple<double, double>>, ISeries
+    public class SeriesWrapper<T> : SeriesWrapper
     {
-        public Func<object, Point> ItemToPoint { get { return p => new Point(((Tuple<double, double>)p).Item1, ((Tuple<double, double>)p).Item2); } }
+        public T SeriesData { get; set; }
+    }
 
-        public IEnumerable<object> DataPoints { get { return this; } }
+    public class SeriesWrapper : ISeries
+    {
+        public Func<object, Point> ItemToPoint { get; set; }
 
-        public Action<StreamGeometryContext, Point, double> AddToGeometry
+        public IEnumerable<object> DataPoints { get; set; }
+
+        public Action<StreamGeometryContext, Point, double> MarkerType { get; set; }
+
+        public static Action<StreamGeometryContext, Point, double> Circle
         {
             get
             {
@@ -73,13 +154,68 @@ namespace DavesWPFTester
             }
         }
 
-        public double StrokeWidth { get { return 1; } }
+        public static Action<StreamGeometryContext, Point, double> Square
+        {
+            get
+            {
+                return (ctx, point, size) =>
+                {
+                    var halfSize = size / 2;
+                    var top = point.Y - halfSize;
+                    var bottom = point.Y + halfSize;
+                    var left = point.X - halfSize;
+                    var right = point.X + halfSize;
+                    ctx.BeginFigure(new Point(left, top), true, true);
+                    ctx.LineTo(new Point(right, top), true, false);
+                    ctx.LineTo(new Point(right, bottom), true, true);
+                    ctx.LineTo(new Point(left, bottom), true, true);
+                };
+            }
+        }
 
-        public double PointSize { get { return 5; } }
+        public static Action<StreamGeometryContext, Point, double> UpTriangle
+        {
+            get
+            {
+                return (ctx, point, size) =>
+                {
+                    var halfSize = size / 2;
+                    var top = point.Y - halfSize;
+                    var bottom = point.Y + halfSize;
+                    var left = point.X - halfSize;
+                    var right = point.X + halfSize;
+                    ctx.BeginFigure(new Point(point.X, top), true, true);
+                    ctx.LineTo(new Point(right, bottom), true, true);
+                    ctx.LineTo(new Point(left, bottom), true, true);
+                };
+            }
+        }
 
-        public Brush Stroke { get { return Brushes.Blue; } }
+        public static Action<StreamGeometryContext, Point, double> DownTriangle
+        {
+            get
+            {
+                return (ctx, point, size) =>
+                {
+                    var halfSize = size / 2;
+                    var top = point.Y - halfSize;
+                    var bottom = point.Y + halfSize;
+                    var left = point.X - halfSize;
+                    var right = point.X + halfSize;
+                    ctx.BeginFigure(new Point(point.X, bottom), true, true);
+                    ctx.LineTo(new Point(left, top), true, true);
+                    ctx.LineTo(new Point(right, top), true, true);
+                };
+            }
+        }
 
-        public Brush Fill { get { return null; } }
+        public double StrokeWidth { get; set; }
+
+        public double PointSize { get; set; }
+
+        public Brush Stroke { get; set; }
+
+        public Brush Fill { get; set; }
 
         public DataAxis XAxis { get; set; }
 
@@ -99,7 +235,7 @@ namespace DavesWPFTester
         /// <summary>
         /// An action that adds a Point to a StreamGeometryContext using a given size
         /// </summary>
-        Action<StreamGeometryContext, Point, double> AddToGeometry { get; }
+        Action<StreamGeometryContext, Point, double> MarkerType { get; }
         /// <summary>
         /// Width of the stroke
         /// </summary>

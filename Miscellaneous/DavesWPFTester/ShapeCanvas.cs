@@ -161,7 +161,7 @@ namespace DavesWPFTester
                 {
                     var dataPoint = series.ItemToPoint(item);
                     var plotPoint = new Point(series.XAxis.MappingFunction(dataPoint.X), series.YAxis.MappingFunction(dataPoint.Y));
-                    series.AddToGeometry(ctx, plotPoint, series.PointSize);
+                    series.MarkerType(ctx, plotPoint, series.PointSize);
                 }
             }
             Children.Add(new Path
