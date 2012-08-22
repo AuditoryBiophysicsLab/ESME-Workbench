@@ -9,7 +9,6 @@ using ESME.Views.Controls;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Services;
-using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
 using MEFedMVVM.ViewModelLocator;
@@ -88,7 +87,7 @@ namespace DavesWPFTester
             };
         }
 
-        IEnumerable<double> Range(double start, double end, double step)
+        static IEnumerable<double> Range(double start, double end, double step)
         {
             if (start == end) throw new ParameterOutOfRangeException("Start and End cannot be equal");
             if (step == 0) throw new ParameterOutOfRangeException("Step cannot be zero");
