@@ -4,8 +4,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using ESME.NEMO;
 using ESME.Views.Controls;
+using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Services;
@@ -38,9 +40,9 @@ namespace DavesWPFTester
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 12)).ToList(),
                     MarkerType = SeriesMarkerType.Plus,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                    StrokeWidth = 1,
+                    StrokeThickness = 1,
                     Stroke = Brushes.Red,
-                    PointSize = pointSize,
+                    MarkerSize = pointSize,
                     XAxis = xAxis,
                     YAxis = yAxis,
                     SeriesName = "y = sin(x) + 12"
@@ -52,9 +54,9 @@ namespace DavesWPFTester
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 10)).ToList(),
                     MarkerType = SeriesMarkerType.Circle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                    StrokeWidth = 1,
+                    StrokeThickness = 1,
                     Stroke = Brushes.Green,
-                    PointSize = pointSize,
+                    MarkerSize = pointSize,
                     Fill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
@@ -67,9 +69,9 @@ namespace DavesWPFTester
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 8)).ToList(),
                     MarkerType = SeriesMarkerType.Asterisk,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                    StrokeWidth = 1,
+                    StrokeThickness = 1,
                     Stroke = Brushes.Blue,
-                    PointSize = pointSize,
+                    MarkerSize = pointSize,
                     XAxis = xAxis,
                     YAxis = yAxis,
                     SeriesName = "y = sin(x) + 8"
@@ -81,9 +83,9 @@ namespace DavesWPFTester
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 6)).ToList(),
                     MarkerType = SeriesMarkerType.Cross,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                    StrokeWidth = 1,
+                    StrokeThickness = 1,
                     Stroke = Brushes.Cyan,
-                    PointSize = pointSize,
+                    MarkerSize = pointSize,
                     Fill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
@@ -97,9 +99,9 @@ namespace DavesWPFTester
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 4)).ToList(),
                     MarkerType = SeriesMarkerType.Square,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                    StrokeWidth = 1,
+                    StrokeThickness = 1,
                     Stroke = Brushes.Magenta,
-                    PointSize = pointSize,
+                    MarkerSize = pointSize,
                     Fill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
@@ -112,9 +114,9 @@ namespace DavesWPFTester
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 2)).ToList(),
                     MarkerType = SeriesMarkerType.Diamond,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                    StrokeWidth = 1,
+                    StrokeThickness = 1,
                     Stroke = Brushes.Cyan,
-                    PointSize = pointSize,
+                    MarkerSize = pointSize,
                     Fill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
@@ -127,9 +129,9 @@ namespace DavesWPFTester
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x))).ToList(),
                     MarkerType = SeriesMarkerType.UpTriangle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                    StrokeWidth = 1,
+                    StrokeThickness = 1,
                     Stroke = Brushes.Orange,
-                    PointSize = pointSize,
+                    MarkerSize = pointSize,
                     Fill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
@@ -142,9 +144,9 @@ namespace DavesWPFTester
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) - 2)).ToList(),
                     MarkerType = SeriesMarkerType.DownTriangle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                    StrokeWidth = 1,
+                    StrokeThickness = 1,
                     Stroke = Brushes.Cyan,
-                    PointSize = pointSize,
+                    MarkerSize = pointSize,
                     Fill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
@@ -158,9 +160,9 @@ namespace DavesWPFTester
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) - 4)).ToList(),
                     MarkerType = SeriesMarkerType.RightTriangle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                    StrokeWidth = 1,
+                    StrokeThickness = 1,
                     Stroke = Brushes.DarkRed,
-                    PointSize = pointSize,
+                    MarkerSize = pointSize,
                     Fill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
@@ -174,9 +176,9 @@ namespace DavesWPFTester
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) - 6)).ToList(),
                     MarkerType = SeriesMarkerType.LeftTriangle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                    StrokeWidth = 1,
+                    StrokeThickness = 1,
                     Stroke = Brushes.DarkSeaGreen,
-                    PointSize = pointSize,
+                    MarkerSize = pointSize,
                     Fill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
@@ -189,9 +191,9 @@ namespace DavesWPFTester
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) - 8)).ToList(),
                     MarkerType = SeriesMarkerType.Pentagram,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                    StrokeWidth = 1,
+                    StrokeThickness = 1,
                     Stroke = Brushes.DodgerBlue,
-                    PointSize = pointSize,
+                    MarkerSize = pointSize,
                     Fill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
@@ -204,9 +206,9 @@ namespace DavesWPFTester
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) - 10)).ToList(),
                     MarkerType = SeriesMarkerType.Hexagram,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                    StrokeWidth = 1,
+                    StrokeThickness = 1,
                     Stroke = Brushes.DarkViolet,
-                    PointSize = pointSize,
+                    MarkerSize = pointSize,
                     Fill = null,
                     XAxis = xAxis,
                     YAxis = yAxis,
@@ -242,17 +244,47 @@ namespace DavesWPFTester
         public T SeriesData { get; set; }
     }
 
-    public class SeriesWrapper : ISeries
+    public class SeriesWrapper : ViewModelBase, ISeries
     {
+        public SeriesWrapper()
+        {
+            PropertyChanged += (s, e) =>
+            {
+                switch (e.PropertyName)
+                {
+                    case "MarkerType":
+                    case "StrokeWidth":
+                    case "MarkerSize":
+                    case "Stroke":
+                    case "Fill":
+                        RenderSampleGlyph();
+                        break;
+                }
+            };
+        }
+
+        void RenderSampleGlyph()
+        {
+            if (MarkerType == null || StrokeThickness == 0 || MarkerSize == 0 || (Stroke == null && Fill == null)) return;
+            var geometry = new StreamGeometry();
+            using (var ctx = geometry.Open())
+            {
+                MarkerType(ctx, new Point(MarkerSize / 2, MarkerSize), MarkerSize);
+            }
+            SampleGlyph = geometry;
+        }
+
         public Func<object, Point> ItemToPoint { get; set; }
 
         public IEnumerable<object> DataPoints { get; set; }
 
         public Action<StreamGeometryContext, Point, double> MarkerType { get; set; }
 
-        public double StrokeWidth { get; set; }
+        public Geometry SampleGlyph { get; private set; }
 
-        public double PointSize { get; set; }
+        public double StrokeThickness { get; set; }
+
+        public double MarkerSize { get; set; }
 
         public Brush Stroke { get; set; }
 
@@ -500,13 +532,17 @@ namespace DavesWPFTester
         /// </summary>
         Action<StreamGeometryContext, Point, double> MarkerType { get; }
         /// <summary>
+        /// The geometry for a glyph in this series, usually used to draw the legend
+        /// </summary>
+        Geometry SampleGlyph { get; }
+        /// <summary>
         /// Width of the stroke
         /// </summary>
-        double StrokeWidth { get; }
+        double StrokeThickness { get; }
         /// <summary>
         /// Size of the point, passed to the AddToGeometry action
         /// </summary>
-        double PointSize { get; }
+        double MarkerSize { get; }
         /// <summary>
         /// Stroke brush
         /// </summary>

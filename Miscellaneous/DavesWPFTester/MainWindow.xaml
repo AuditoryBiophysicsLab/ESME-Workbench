@@ -22,6 +22,9 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <DockPanel LastChildFill="True" Margin="10">
+        <GroupBox Margin="10 0 0 0" Header="Legend" DockPanel.Dock="Right" Padding="5">
+            <app:LegendView ItemsSource="{Binding SeriesSource}" />
+        </GroupBox>
         <DockPanel DockPanel.Dock="Left">
             <DockPanel>
                 <TextBlock Height="{Binding ActualHeight, ElementName=BottomLinearAxis}" DockPanel.Dock="Bottom" />

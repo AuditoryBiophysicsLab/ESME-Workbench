@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
@@ -161,7 +160,7 @@ namespace DavesWPFTester
                 {
                     var dataPoint = series.ItemToPoint(item);
                     var plotPoint = new Point(series.XAxis.MappingFunction(dataPoint.X), series.YAxis.MappingFunction(dataPoint.Y));
-                    series.MarkerType(ctx, plotPoint, series.PointSize);
+                    series.MarkerType(ctx, plotPoint, series.MarkerSize);
                 }
             }
             Children.Add(new Path
