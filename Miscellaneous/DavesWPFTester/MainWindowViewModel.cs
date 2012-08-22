@@ -354,7 +354,7 @@ namespace DavesWPFTester
                 {
                     var halfSize = size / 2;
                     ctx.BeginFigure(new Point(point.X - halfSize, point.Y), true, true);
-                    ctx.ArcTo(new Point(point.X + halfSize, point.Y), new Size(halfSize, halfSize), 180, false, SweepDirection.Clockwise, true, false);
+                    ctx.ArcTo(new Point(point.X + halfSize, point.Y), new Size(halfSize, halfSize), 180, false, SweepDirection.Clockwise, true, true);
                     ctx.ArcTo(new Point(point.X - halfSize, point.Y), new Size(halfSize, halfSize), 180, false, SweepDirection.Clockwise, true, true);
                 };
             }
@@ -372,7 +372,7 @@ namespace DavesWPFTester
                     var left = point.X - halfSize;
                     var right = point.X + halfSize;
                     ctx.BeginFigure(new Point(left, top), true, true);
-                    ctx.LineTo(new Point(right, top), true, false);
+                    ctx.LineTo(new Point(right, top), true, true);
                     ctx.LineTo(new Point(right, bottom), true, true);
                     ctx.LineTo(new Point(left, bottom), true, true);
                 };
@@ -390,7 +390,7 @@ namespace DavesWPFTester
                     var left = point.X - halfSize;
                     var right = point.X + halfSize;
                     ctx.BeginFigure(new Point(point.X, top), true, true);
-                    ctx.LineTo(new Point(right, point.Y), true, false);
+                    ctx.LineTo(new Point(right, point.Y), true, true);
                     ctx.LineTo(new Point(point.X, bottom), true, true);
                     ctx.LineTo(new Point(left, point.Y), true, true);
                 };
