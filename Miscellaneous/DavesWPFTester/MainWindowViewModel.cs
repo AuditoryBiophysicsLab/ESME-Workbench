@@ -210,14 +210,14 @@ namespace DavesWPFTester
 #if true
                 _timer = new Timer(state => _dispatcher.InvokeInBackgroundIfRequired(() =>
                 {
-                    var selectedSeries = (DataSeriesViewModel)SeriesSource.Last();
+                    var selectedSeries = (DataSeriesViewModel)SeriesSource[SeriesSource.Count - 2];
                     var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
                     _amplitude += _amplitudeDelta;
-                    selectedSeries.SeriesName = string.Format("y = ({0:0.0} * sin(x)) + 1", _amplitude);
+                    selectedSeries.SeriesName = string.Format("y = ({0:0.0} * sin(x)) + 2", _amplitude);
                     using (var d = _dispatcher.DisableProcessing())
                     {
                         for (var i = 0; i < seriesData.Count; i++)
-                            seriesData[i] = Tuple.Create(seriesData[i].Item1, (_amplitude * Math.Sin(seriesData[i].Item1)) + 1);
+                            seriesData[i] = Tuple.Create(seriesData[i].Item1, (_amplitude * Math.Sin(seriesData[i].Item1)) + 2);
                     }
                     if (_amplitude > 10) _amplitudeDelta = -0.1;
                     if (_amplitude < -10) _amplitudeDelta = 0.1;
