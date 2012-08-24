@@ -10,7 +10,7 @@ using HRC.WPF;
 namespace HRC.ViewModels
 {
     [NotifyPropertyChanged]
-    public abstract class ViewModelBase
+    public abstract class ViewModelBase : INotifyPropertyChanged
     {
         protected ViewModelBase() { CloseActivePopUpCommand = new SimpleCommand<object, bool>(CloseDialog); }
 

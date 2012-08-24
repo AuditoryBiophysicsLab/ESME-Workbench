@@ -126,13 +126,20 @@ namespace DavesWPFTester
         static void SeriesSourcePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).SeriesSourcePropertyChanged(args); }
         void SeriesSourcePropertyChanged(DependencyPropertyChangedEventArgs args)
         {
-            if (args.OldValue != null) ((ObservableCollection<ISeries>)args.OldValue).CollectionChanged -= SeriesSourceCollectionChanged;
+            if (args.OldValue != null) {((ObservableCollection<ISeries>)args.OldValue).CollectionChanged -= SeriesSourceCollectionChanged;}
             if (args.NewValue != null) ((ObservableCollection<ISeries>)args.NewValue).CollectionChanged += SeriesSourceCollectionChanged;
             Redraw();
         }
 
         void SeriesSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
+            switch (args.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                case NotifyCollectionChangedAction.Replace:
+                    foreach (ISeries newItem in args.NewItems) if (newItem.SeriesData is INotifyCollectionChanged) ((INotifyCollectionChanged)newItem.SeriesData).CollectionChanged += (s, e) => Redraw();
+                    break;
+            }
             Redraw();
         }
         #endregion
@@ -146,50 +153,13 @@ namespace DavesWPFTester
             if (YAxisMinorTicks != null && YAxisMinorTicks.Count > 0) Children.Add(CreateAxisLines(YAxisMinorTicks, ActualWidth, false, _minorTickBrush, 1));
             if (XAxisMajorTicks != null && XAxisMajorTicks.Count > 0) Children.Add(CreateAxisLines(XAxisMajorTicks.Skip(1), ActualHeight, true, _majorTickBrush, 1));
             if (YAxisMajorTicks != null && YAxisMajorTicks.Count > 0) Children.Add(CreateAxisLines(YAxisMajorTicks.Skip(1), ActualWidth, false, _majorTickBrush, 1));
-            if (SeriesSource != null) foreach (var series in SeriesSource) RenderSeries(series);
+            if (SeriesSource != null) foreach (var series in SeriesSource)
+            {
+                series.RenderShapes();
+                if (series.Shapes != null) foreach (var shape in series.Shapes) Children.Add(shape);
+            }
             if (Shapes != null) foreach (var shape in Shapes) Children.Add(shape);
             InvalidateVisual();
-        }
-
-        void RenderSeries(ISeries series)
-        {
-            var glyphGeometry = new StreamGeometry();
-            var glyphContext = glyphGeometry.Open();
-            var lineGeometry = (series.LineStroke == null) ? null : new StreamGeometry();
-            var lineContext = lineGeometry == null ? null : lineGeometry.Open();
-            var isFirst = true;
-            foreach (var item in series.DataPoints)
-            {
-                var dataPoint = series.ItemToPoint(item);
-                var plotPoint = new Point(series.XAxis.MappingFunction(dataPoint.X), series.YAxis.MappingFunction(dataPoint.Y));
-                series.MarkerType(glyphContext, plotPoint, series.MarkerSize);
-                if (lineContext == null) continue;
-                if (isFirst)
-                {
-                    lineContext.BeginFigure(plotPoint, false, false);
-                    isFirst = false;
-                }
-                else lineContext.LineTo(plotPoint, true, true);
-            }
-            glyphContext.Close();
-            if (lineContext != null)
-            {
-                lineContext.Close();
-                Children.Add(new Path
-                {
-                    Stroke = series.LineStroke,
-                    StrokeDashArray = series.LineStrokeDashArray,
-                    StrokeThickness = series.LineStrokeThickness,
-                    Data = lineGeometry,
-                });
-            }
-            Children.Add(new Path
-            {
-                Stroke = series.MarkerStroke,
-                StrokeThickness = series.MarkerStrokeThickness,
-                Fill = series.MarkerFill,
-                Data = glyphGeometry,
-            });
         }
 
         static Path CreateAxisLines(IEnumerable<AxisTick> ticks, double length, bool isVertical, Brush brush, double strokeThickness)
