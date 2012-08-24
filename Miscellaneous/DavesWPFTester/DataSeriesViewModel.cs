@@ -1,12 +1,16 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ESME.Views.Controls;
+using HRC;
 using HRC.Aspects;
 using HRC.ViewModels;
 using Brush = System.Windows.Media.Brush;
@@ -17,26 +21,43 @@ namespace DavesWPFTester
 {
     public class DataSeriesViewModel : ViewModelBase, ISeries
     {
-        PropertyObserver<DataSeriesViewModel> _observer;
+        [UsedImplicitly] PropertyObserver<DataSeriesViewModel> _observer;
         public DataSeriesViewModel()
         {
             _observer = new PropertyObserver<DataSeriesViewModel>(this)
-                .RegisterHandler(d => d.MarkerType, RenderSample)
-                .RegisterHandler(d => d.MarkerStrokeThickness, RenderSample)
-                .RegisterHandler(d => d.MarkerSize, RenderSample)
-                .RegisterHandler(d => d.MarkerStroke, RenderSample)
-                .RegisterHandler(d => d.MarkerFill, RenderSample)
-                .RegisterHandler(d => d.LineStroke, RenderSample)
-                .RegisterHandler(d => d.LineStrokeDashArray, RenderSample)
-                .RegisterHandler(d => d.LineStrokeThickness, RenderSample);
+                .RegisterHandler(d => d.MarkerType, MarkerPropertiesChanged)
+                .RegisterHandler(d => d.MarkerStrokeThickness, MarkerPropertiesChanged)
+                .RegisterHandler(d => d.MarkerSize, MarkerPropertiesChanged)
+                .RegisterHandler(d => d.MarkerStroke, MarkerPropertiesChanged)
+                .RegisterHandler(d => d.LineStroke, LinePropertiesChanged)
+                .RegisterHandler(d => d.LineStrokeDashArray, LinePropertiesChanged)
+                .RegisterHandler(d => d.LineStrokeThickness, LinePropertiesChanged)
+                .RegisterHandler(d => d.SeriesData, SeriesDataChanged)
+                .RegisterHandler(d => d.ItemToPoint, ProcessSeriesData);
+
         }
 
+        void LinePropertiesChanged()
+        {
+            DrawLine = LineStrokeThickness > 0 && LineStroke != null;
+            RenderSample();
+        }
+
+        void MarkerPropertiesChanged()
+        {
+            DrawMarker = MarkerType != null && MarkerStrokeThickness > 0 && MarkerSize > 0 && MarkerStroke != null;
+            RenderSample();
+        }
+
+        bool DrawMarker { get; set; }
+        bool DrawLine { get; set; }
+
         //string _randomFileName;
-        void RenderSample(DataSeriesViewModel vm)
+        void RenderSample()
         {
             StreamGeometry geometry;
             var canvas = new Canvas { Width = Math.Max(MarkerSize + 10, 10), Height = Math.Max(MarkerSize + 2, 10), SnapsToDevicePixels = true, Background = Brushes.Transparent };
-            if (LineStrokeThickness > 0 && LineStroke != null)
+            if (DrawLine)
             {
                 geometry = new StreamGeometry();
                 using (var ctx = geometry.Open())
@@ -52,7 +73,7 @@ namespace DavesWPFTester
                     Data = geometry,
                 });
             }
-            if (MarkerType != null && MarkerStrokeThickness > 0 && MarkerSize > 0 && (MarkerStroke != null || MarkerFill != null))
+            if (DrawMarker)
             {
                 geometry = new StreamGeometry();
                 using (var ctx = geometry.Open())
@@ -63,7 +84,6 @@ namespace DavesWPFTester
                 {
                     Stroke = MarkerStroke,
                     StrokeThickness = MarkerStrokeThickness,
-                    Fill = MarkerFill,
                     Data = geometry,
                 });
             }
@@ -93,46 +113,70 @@ namespace DavesWPFTester
 
         public void RenderShapes()
         {
-            // If we need to render a line for this series, do so
-            if ((LineStrokeThickness > 0 && LineStroke != null))
+            if (DrawLine)
             {
-                var lineGeometry = (LineStroke == null) ? null : new StreamGeometry();
-                var lineContext = lineGeometry == null ? null : lineGeometry.Open();
-                var isFirst = true;
-                Shapes.Clear();
-                foreach (var item in SeriesData)
+                if (_lineShape != null) Shapes.Remove(_lineShape);
+                _lineShape = RenderLine();
+                Shapes.Insert(0, _lineShape);
+            }
+            else
+            {
+                if (_lineShape != null)
                 {
-                    var dataPoint = ItemToPoint(item);
-                    var plotPoint = new Point(XAxis.MappingFunction(dataPoint.X), YAxis.MappingFunction(dataPoint.Y));
-                    if (lineContext == null) continue;
-                    if (isFirst)
-                    {
-                        lineContext.BeginFigure(plotPoint, false, false);
-                        isFirst = false;
-                    }
-                    else lineContext.LineTo(plotPoint, true, true);
-                }
-                if (lineContext != null)
-                {
-                    lineContext.Close();
-                    Shapes.Add(new Path
-                    {
-                        Stroke = LineStroke,
-                        StrokeDashArray = LineStrokeDashArray,
-                        StrokeThickness = LineStrokeThickness,
-                        Data = lineGeometry,
-                    });
+                    Shapes.Remove(_lineShape);
+                    _lineShape = null;
                 }
             }
             // If we need to render a marker for this series, do so
-            if (MarkerSize > 0 || (MarkerStrokeThickness > 0 && MarkerStroke != null) || MarkerFill != null) 
-                foreach (var item in SeriesData) Shapes.Add(RenderMarker(item));
+            if (DrawMarker)
+                foreach (var point in Points)
+                {
+                    if (!_pointShapeMap.ContainsKey(point))
+                    {
+                        var newShape = RenderMarker(point);
+                        _pointShapeMap.Add(point, newShape);
+                        Shapes.Add(newShape);
+                    }
+                    else
+                    {
+                        var shapeIndex = Shapes.IndexOf(_pointShapeMap[point]);
+                        var newShape = RenderMarker(point);
+                        _pointShapeMap[point] = newShape;
+                        Shapes[shapeIndex] = newShape;
+                    }
+                }
         }
 
-        Shape RenderMarker(object dataItem)
+        Shape _lineShape;
+        readonly Dictionary<Point, Shape> _pointShapeMap = new Dictionary<Point, Shape>();
+
+        Shape RenderLine()
         {
-            var dataPoint = ItemToPoint(dataItem);
-            var plotPoint = new Point(XAxis.MappingFunction(dataPoint.X), YAxis.MappingFunction(dataPoint.Y));
+            var lineGeometry = new StreamGeometry();
+            var lineContext = lineGeometry.Open();
+            var isFirst = true;
+            foreach (var plotPoint in Points.Select(point => new Point(XAxis.MappingFunction(point.X), YAxis.MappingFunction(point.Y)))) 
+            {
+                if (isFirst)
+                {
+                    lineContext.BeginFigure(plotPoint, false, false);
+                    isFirst = false;
+                }
+                else lineContext.LineTo(plotPoint, true, true);
+            }
+            lineContext.Close();
+            return new Path
+            {
+                Stroke = LineStroke,
+                StrokeDashArray = LineStrokeDashArray,
+                StrokeThickness = LineStrokeThickness,
+                Data = lineGeometry,
+            };
+        }
+
+        Shape RenderMarker(Point point)
+        {
+            var plotPoint = new Point(XAxis.MappingFunction(point.X), YAxis.MappingFunction(point.Y));
             var geometry = new StreamGeometry();
             var context = geometry.Open();
             MarkerType(context, plotPoint, MarkerSize);
@@ -141,14 +185,97 @@ namespace DavesWPFTester
             {
                 Stroke = MarkerStroke,
                 StrokeThickness = MarkerStrokeThickness,
-                Fill = MarkerFill,
                 Data = geometry,
+                Fill = Brushes.Transparent,
+                ToolTip = string.Format("{0:0.###}, {1:0.###}", point.X, point.Y),
             };
         }
 
         [Initialize] public ObservableCollection<Shape> Shapes { get; set; }
-
+        CollectionObserver _seriesDataObserver;
         public ICollection SeriesData { get; set; }
+        void SeriesDataChanged()
+        {
+            ProcessSeriesData();
+            if (SeriesData == null || !(SeriesData is INotifyCollectionChanged)) return;
+            var series = (INotifyCollectionChanged)SeriesData;
+            if (_seriesDataObserver == null) _seriesDataObserver = new CollectionObserver(series).RegisterHandler(SeriesDataCollectionChanged);
+            else
+            {
+                _seriesDataObserver.UnregisterHandler(SeriesDataCollectionChanged);
+                _seriesDataObserver.RegisterHandler(SeriesDataCollectionChanged);
+            }
+        }
+
+        void SeriesDataCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            if (ItemToPoint == null) return;
+            switch (args.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    for (var i = 0; i < args.NewItems.Count; i++) Points.Insert(args.NewStartingIndex + i, ItemToPoint(args.NewItems[i]));
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    for (var i = 0; i < args.OldItems.Count; i++) Points.RemoveAt(args.OldStartingIndex);
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    for (var i = 0; i < args.NewItems.Count; i++) Points[args.NewStartingIndex + i] = ItemToPoint(args.NewItems[i]);
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    Points.Clear();
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    throw new NotImplementedException("Move not implemented for SeriesData collection");
+            }
+        }
+
+        void PointDataCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            switch (args.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (Point point in args.NewItems) UpdateMinMax(point);
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    break;
+            }
+        }
+
+        [Initialize]
+        ObservableCollection<Point> Points { get; [UsedImplicitly] set; }
+        void ProcessSeriesData()
+        {
+            if (ItemToPoint == null || SeriesData == null || SeriesData.Count == 0) return;
+            Points.Clear();
+            foreach(var item in SeriesData) Points.Add(ItemToPoint(item));
+            MaxX = Points.Max(p => p.X);
+            MinX = Points.Min(p => p.X);
+            MaxY = Points.Max(p => p.Y);
+            MinY = Points.Min(p => p.Y);
+            RenderShapes();
+        }
+
+        void UpdateMinMax(Point point)
+        {
+            MaxX = Math.Max(MaxX, point.X);
+            MinX = Math.Min(MinX, point.X);
+            MaxY = Math.Max(MaxY, point.Y);
+            MinY = Math.Min(MinY, point.Y);
+        }
+
+        public double MinX { get; set; }
+
+        public double MaxX { get; set; }
+
+        public double MinY { get; set; }
+
+        public double MaxY { get; set; }
 
         public Func<object, Point> ItemToPoint { get; set; }
 
@@ -170,10 +297,6 @@ namespace DavesWPFTester
         /// Brush used to stroke the outline of the marker
         /// </summary>
         public Brush MarkerStroke { get; set; }
-        /// <summary>
-        /// Brush used to fill the marker
-        /// </summary>
-        public Brush MarkerFill { get; set; }
         /// <summary>
         /// Thickness of the line between series points
         /// </summary>

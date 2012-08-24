@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.Serialization;
@@ -228,8 +229,9 @@ namespace HRC.Utility
         #endregion
     }
 
-    public static class ObservableListHelpers
+    public static class ObservableHelpers
     {
         public static ObservableList<T> ToObservableList<T>(this IEnumerable<T> source) { return new ObservableList<T>(source); }
+        public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> source) { return new ObservableCollection<T>(source); }
     }
 }

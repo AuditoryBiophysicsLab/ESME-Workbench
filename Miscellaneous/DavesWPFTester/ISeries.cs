@@ -9,6 +9,10 @@ namespace DavesWPFTester
 {
     public interface ISeries
     {
+        double MinX { get; }
+        double MaxX { get; }
+        double MinY { get; }
+        double MaxY { get; }
         /// <summary>
         /// Converts an item in the series to a Point.  X and Y should be whatever natural values should be plotted for that point
         /// </summary>

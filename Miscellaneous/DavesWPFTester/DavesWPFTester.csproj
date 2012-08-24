@@ -164,6 +164,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CollectionObserver.cs" />
     <Compile Include="DataSeriesViewModel.cs" />
     <Compile Include="ISeries.cs" />
     <Compile Include="LegendView.xaml.cs">
