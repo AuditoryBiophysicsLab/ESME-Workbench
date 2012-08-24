@@ -201,15 +201,20 @@ namespace DavesWPFTester
                     }
                     break;
                 case NotifyCollectionChangedAction.Replace:
-                    foreach (Shape oldShape in args.OldItems)
+                    for (var i = 0; i < args.NewItems.Count; i++)
                     {
-                        _seriesShapeCache[key].Remove(oldShape);
-                        Children.Remove(oldShape);
-                    }
-                    foreach (Shape newShape in args.NewItems)
-                    {
-                        _seriesShapeCache[key].Add(newShape); 
-                        Children.Add(newShape);
+                        var oldShape = (Shape)args.OldItems[i];
+                        var newShape = (Shape)args.NewItems[i];
+                        var oldShapeCacheIndex = _seriesShapeCache[key].IndexOf(oldShape);
+                        if (oldShapeCacheIndex == -1) _seriesShapeCache[key].Add(newShape);
+                        else _seriesShapeCache[key][oldShapeCacheIndex] = newShape;
+                        var oldShapeChildIndex = Children.IndexOf(oldShape);
+                        if (oldShapeChildIndex == -1) Children.Add(newShape);
+                        else
+                        {
+                            Children.RemoveAt(oldShapeChildIndex);
+                            Children.Insert(oldShapeChildIndex, newShape);
+                        }
                     }
                     break;
                 case NotifyCollectionChangedAction.Reset:

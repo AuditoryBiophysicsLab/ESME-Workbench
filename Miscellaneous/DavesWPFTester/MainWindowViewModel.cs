@@ -207,7 +207,7 @@ namespace DavesWPFTester
                     LineStroke = Brushes.DodgerBlue,
                     LineStrokeThickness = 2,
                 });
-#if false
+#if true
                 _timer = new Timer(state =>
                 {
                     var selectedSeriesIndex = _random.Next(SeriesSource.Count);

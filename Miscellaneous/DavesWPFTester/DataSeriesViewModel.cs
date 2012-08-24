@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,10 +22,11 @@ namespace DavesWPFTester
 {
     public class DataSeriesViewModel : ViewModelBase, ISeries
     {
-        [UsedImplicitly] PropertyObserver<DataSeriesViewModel> _observer;
+        [UsedImplicitly] PropertyObserver<DataSeriesViewModel> _propertyObserver;
+        [UsedImplicitly] CollectionObserver _pointsObserver;
         public DataSeriesViewModel()
         {
-            _observer = new PropertyObserver<DataSeriesViewModel>(this)
+            _propertyObserver = new PropertyObserver<DataSeriesViewModel>(this)
                 .RegisterHandler(d => d.MarkerType, MarkerPropertiesChanged)
                 .RegisterHandler(d => d.MarkerStrokeThickness, MarkerPropertiesChanged)
                 .RegisterHandler(d => d.MarkerSize, MarkerPropertiesChanged)
@@ -34,19 +36,21 @@ namespace DavesWPFTester
                 .RegisterHandler(d => d.LineStrokeThickness, LinePropertiesChanged)
                 .RegisterHandler(d => d.SeriesData, SeriesDataChanged)
                 .RegisterHandler(d => d.ItemToPoint, ProcessSeriesData);
-
+            _pointsObserver = new CollectionObserver(Points).RegisterHandler(PointsCollectionChanged);
         }
 
         void LinePropertiesChanged()
         {
             DrawLine = LineStrokeThickness > 0 && LineStroke != null;
             RenderSample();
+            RenderLine();
         }
 
         void MarkerPropertiesChanged()
         {
             DrawMarker = MarkerType != null && MarkerStrokeThickness > 0 && MarkerSize > 0 && MarkerStroke != null;
             RenderSample();
+            RenderMarkers();
         }
 
         bool DrawMarker { get; set; }
@@ -113,45 +117,25 @@ namespace DavesWPFTester
 
         public void RenderShapes()
         {
-            if (DrawLine)
-            {
-                if (_lineShape != null) Shapes.Remove(_lineShape);
-                _lineShape = RenderLine();
-                Shapes.Insert(0, _lineShape);
-            }
-            else
+            RenderLine();
+            RenderMarkers();
+        }
+
+        Shape _lineShape;
+        readonly Dictionary<Point, Shape> _pointShapeMap = new Dictionary<Point, Shape>();
+
+        void RenderLine()
+        {
+            if (!DrawLine)
             {
                 if (_lineShape != null)
                 {
                     Shapes.Remove(_lineShape);
                     _lineShape = null;
                 }
+                return;
             }
-            // If we need to render a marker for this series, do so
-            if (DrawMarker)
-                foreach (var point in Points)
-                {
-                    if (!_pointShapeMap.ContainsKey(point))
-                    {
-                        var newShape = RenderMarker(point);
-                        _pointShapeMap.Add(point, newShape);
-                        Shapes.Add(newShape);
-                    }
-                    else
-                    {
-                        var shapeIndex = Shapes.IndexOf(_pointShapeMap[point]);
-                        var newShape = RenderMarker(point);
-                        _pointShapeMap[point] = newShape;
-                        Shapes[shapeIndex] = newShape;
-                    }
-                }
-        }
-
-        Shape _lineShape;
-        readonly Dictionary<Point, Shape> _pointShapeMap = new Dictionary<Point, Shape>();
-
-        Shape RenderLine()
-        {
+            if (_lineShape != null) Shapes.Remove(_lineShape);
             var lineGeometry = new StreamGeometry();
             var lineContext = lineGeometry.Open();
             var isFirst = true;
@@ -165,23 +149,39 @@ namespace DavesWPFTester
                 else lineContext.LineTo(plotPoint, true, true);
             }
             lineContext.Close();
-            return new Path
+            _lineShape = new Path
             {
                 Stroke = LineStroke,
                 StrokeDashArray = LineStrokeDashArray,
                 StrokeThickness = LineStrokeThickness,
                 Data = lineGeometry,
             };
+            Shapes.Insert(0, _lineShape);
         }
 
-        Shape RenderMarker(Point point)
+        void RenderMarkers()
         {
+            if (DrawMarker) foreach (var point in Points) RenderMarker(point);
+            else
+            {
+                if (_lineShape == null)
+                {
+                    Shapes.Clear();
+                    _pointShapeMap.Clear();
+                }
+                else foreach (var shape in Shapes.Where(shape => shape != _lineShape).ToList()) Shapes.Remove(shape);
+            }
+        }
+
+        void RenderMarker(Point point)
+        {
+            if (XAxis == null || YAxis == null) return;
             var plotPoint = new Point(XAxis.MappingFunction(point.X), YAxis.MappingFunction(point.Y));
             var geometry = new StreamGeometry();
             var context = geometry.Open();
             MarkerType(context, plotPoint, MarkerSize);
             context.Close();
-            return new Path
+            var marker = new Path
             {
                 Stroke = MarkerStroke,
                 StrokeThickness = MarkerStrokeThickness,
@@ -189,6 +189,25 @@ namespace DavesWPFTester
                 Fill = Brushes.Transparent,
                 ToolTip = string.Format("{0:0.###}, {1:0.###}", point.X, point.Y),
             };
+            if (!_pointShapeMap.ContainsKey(point))
+            {
+                _pointShapeMap.Add(point, marker);
+                Shapes.Add(marker);
+            }
+            else
+            {
+                var shapeIndex = Shapes.IndexOf(_pointShapeMap[point]);
+                _pointShapeMap[point] = marker;
+                if (shapeIndex == -1) Shapes.Add(marker);
+                else Shapes[shapeIndex] = marker;
+            }
+
+        }
+
+        void RemoveMarker(Point point)
+        {
+            if (!_pointShapeMap.ContainsKey(point)) return;
+            Shapes.Remove(_pointShapeMap[point]);
         }
 
         [Initialize] public ObservableCollection<Shape> Shapes { get; set; }
@@ -196,6 +215,7 @@ namespace DavesWPFTester
         public ICollection SeriesData { get; set; }
         void SeriesDataChanged()
         {
+            Points.Clear();
             ProcessSeriesData();
             if (SeriesData == null || !(SeriesData is INotifyCollectionChanged)) return;
             var series = (INotifyCollectionChanged)SeriesData;
@@ -229,22 +249,38 @@ namespace DavesWPFTester
             }
         }
 
-        void PointDataCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        void PointsCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
             switch (args.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    foreach (Point point in args.NewItems) UpdateMinMax(point);
+                    foreach (Point point in args.NewItems)
+                    {
+                        if (DrawMarker) RenderMarker(point);
+                        UpdateMinMax(point);
+                    }
                     break;
                 case NotifyCollectionChangedAction.Remove:
+                    foreach (Point point in args.OldItems) RemoveMarker(point);
                     break;
                 case NotifyCollectionChangedAction.Replace:
+                    for (var i = 0; i < args.NewItems.Count; i++)
+                    {
+                        var oldPoint = (Point)args.OldItems[i];
+                        var newPoint = (Point)args.NewItems[i];
+                        RemoveMarker(oldPoint);
+                        if (DrawMarker) RenderMarker(newPoint);
+                        UpdateMinMax(newPoint);
+                    }
                     break;
                 case NotifyCollectionChangedAction.Reset:
+                    Shapes.Clear();
+                    _pointShapeMap.Clear();
                     break;
                 case NotifyCollectionChangedAction.Move:
-                    break;
+                    throw new NotImplementedException("Move not implemented for Points collection");
             }
+            RenderLine();
         }
 
         [Initialize]
@@ -252,7 +288,6 @@ namespace DavesWPFTester
         void ProcessSeriesData()
         {
             if (ItemToPoint == null || SeriesData == null || SeriesData.Count == 0) return;
-            Points.Clear();
             foreach(var item in SeriesData) Points.Add(ItemToPoint(item));
             MaxX = Points.Max(p => p.X);
             MinX = Points.Min(p => p.X);

@@ -38,13 +38,17 @@ namespace DavesWPFTester
         /// </summary>
         /// <param name="handler">The callback to invoke when the property has changed.</param>
         /// <returns>The object on which this method was invoked, to allow for multiple invocations chained together.</returns>
-        public CollectionObserver RegisterHandler(Action<INotifyPropertyChanged, NotifyCollectionChangedEventArgs> handler)
+        public CollectionObserver RegisterHandler(Action<INotifyCollectionChanged, NotifyCollectionChangedEventArgs> handler)
         {
             if (handler == null)
                 throw new ArgumentNullException("handler");
 
             var propertySource = GetCollectionSource();
-            if (propertySource != null) CollectionChangedEventManager.AddListener(propertySource, this);
+            if (propertySource != null)
+            {
+                _handler = handler;
+                CollectionChangedEventManager.AddListener(propertySource, this);
+            }
 
             return this;
         }
@@ -96,7 +100,7 @@ namespace DavesWPFTester
 
         #region Fields
 
-        Action<INotifyPropertyChanged, NotifyCollectionChangedEventArgs> _handler;
+        Action<INotifyCollectionChanged, NotifyCollectionChangedEventArgs> _handler;
         readonly WeakReference _collectionSourceRef;
 
         #endregion // Fields
@@ -105,10 +109,10 @@ namespace DavesWPFTester
 
         bool IWeakEventListener.ReceiveWeakEvent(Type managerType, object sender, EventArgs e)
         {
-            if (managerType == typeof(PropertyChangedEventManager))
+            if (managerType == typeof(CollectionChangedEventManager))
             {
                 var eventArgs = (NotifyCollectionChangedEventArgs)e;
-                var collectionSource = (INotifyPropertyChanged)sender;
+                var collectionSource = (INotifyCollectionChanged)sender;
                 if (_handler != null)
                 {
                     _handler(collectionSource, eventArgs);
