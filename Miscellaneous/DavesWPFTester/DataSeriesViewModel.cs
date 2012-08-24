@@ -152,22 +152,44 @@ namespace DavesWPFTester
 
         public Func<object, Point> ItemToPoint { get; set; }
 
-        public Action<StreamGeometryContext, Point, double> MarkerType { get; set; }
-
         public ImageSource SampleImageSource { get; set; }
 
+        /// <summary>
+        /// An action that adds a Point to a StreamGeometryContext using a given size
+        /// </summary>
+        public Action<StreamGeometryContext, Point, double> MarkerType { get; set; }
+        /// <summary>
+        /// Thickness of the stroke used to draw the outline of a marker
+        /// </summary>
         public double MarkerStrokeThickness { get; set; }
-
+        /// <summary>
+        /// Size of the marker
+        /// </summary>
         public double MarkerSize { get; set; }
-
+        /// <summary>
+        /// Brush used to stroke the outline of the marker
+        /// </summary>
         public Brush MarkerStroke { get; set; }
-
+        /// <summary>
+        /// Brush used to fill the marker
+        /// </summary>
         public Brush MarkerFill { get; set; }
-
+        /// <summary>
+        /// Thickness of the line between series points
+        /// </summary>
         public double LineStrokeThickness { get; set; }
-
+        /// <summary>
+        /// Brush used to stroke the line between series points.  If null, no line will be drawn
+        /// </summary>
         public Brush LineStroke { get; set; }
-
+        /// <summary>
+        /// Each Double in the collection specifies the length of a dash or gap relative to the 
+        /// Thickness of the pen. For example, a value of 1 creates a dash or gap that has the 
+        /// same length as the thickness of the pen (a square).
+        /// The first item in the collection, which is located at index 0, specifies the length 
+        /// of a dash; the second item, which is located at index 1, specifies the length of a gap
+        /// Objects with an even index value specify dashes; objects with an odd index value specify gaps.
+        /// </summary>
         public DoubleCollection LineStrokeDashArray { get; set; }
 
         public DataAxis XAxis { get; set; }

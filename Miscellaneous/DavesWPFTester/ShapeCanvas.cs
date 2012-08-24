@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
@@ -40,7 +41,7 @@ namespace DavesWPFTester
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, XAxisMajorTicksPropertyChanged));
 
         static void XAxisMajorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).XAxisMajorTicksPropertyChanged(); }
-        void XAxisMajorTicksPropertyChanged() { Redraw(); }
+        void XAxisMajorTicksPropertyChanged() { DrawAxes(); }
 
         public ObservableList<AxisTick> XAxisMajorTicks { get { return (ObservableList<AxisTick>)GetValue(XAxisMajorTicksProperty); } set { SetCurrentValue(XAxisMajorTicksProperty, value); } }
         #endregion
@@ -51,7 +52,7 @@ namespace DavesWPFTester
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, XAxisMinorTicksPropertyChanged));
 
         static void XAxisMinorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).XAxisMinorTicksPropertyChanged(); }
-        void XAxisMinorTicksPropertyChanged() { Redraw(); }
+        void XAxisMinorTicksPropertyChanged() { DrawAxes(); }
 
         public ObservableList<AxisTick> XAxisMinorTicks { get { return (ObservableList<AxisTick>)GetValue(XAxisMinorTicksProperty); } set { SetCurrentValue(XAxisMinorTicksProperty, value); } }
         #endregion
@@ -62,7 +63,7 @@ namespace DavesWPFTester
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, YAxisMajorTicksPropertyChanged));
 
         static void YAxisMajorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).YAxisMajorTicksPropertyChanged(); }
-        void YAxisMajorTicksPropertyChanged() { Redraw(); }
+        void YAxisMajorTicksPropertyChanged() { DrawAxes(); }
 
         public ObservableList<AxisTick> YAxisMajorTicks { get { return (ObservableList<AxisTick>)GetValue(YAxisMajorTicksProperty); } set { SetCurrentValue(YAxisMajorTicksProperty, value); } }
         #endregion
@@ -73,7 +74,7 @@ namespace DavesWPFTester
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, YAxisMinorTicksPropertyChanged));
 
         static void YAxisMinorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).YAxisMinorTicksPropertyChanged(); }
-        void YAxisMinorTicksPropertyChanged() { Redraw(); }
+        void YAxisMinorTicksPropertyChanged() { DrawAxes(); }
 
         public ObservableList<AxisTick> YAxisMinorTicks { get { return (ObservableList<AxisTick>)GetValue(YAxisMinorTicksProperty); } set { SetCurrentValue(YAxisMinorTicksProperty, value); } }
         #endregion
@@ -91,7 +92,7 @@ namespace DavesWPFTester
         void MinorTickLineColorPropertyChanged()
         {
             _minorTickBrush = new SolidColorBrush(MinorTickLineColor);
-            Redraw();
+            DrawAxes();
         }
         Brush _minorTickBrush = Brushes.LightGray;
         #endregion
@@ -109,7 +110,7 @@ namespace DavesWPFTester
         void MajorTickLineColorPropertyChanged()
         {
             _majorTickBrush = new SolidColorBrush(MajorTickLineColor);
-            Redraw();
+            DrawAxes();
         }
         Brush _majorTickBrush = Brushes.Black;
         #endregion
@@ -127,8 +128,8 @@ namespace DavesWPFTester
         void SeriesSourcePropertyChanged(DependencyPropertyChangedEventArgs args)
         {
             if (args.OldValue != null) {((ObservableCollection<ISeries>)args.OldValue).CollectionChanged -= SeriesSourceCollectionChanged;}
-            if (args.NewValue != null) ((ObservableCollection<ISeries>)args.NewValue).CollectionChanged += SeriesSourceCollectionChanged;
             Redraw();
+            if (args.NewValue != null) ((ObservableCollection<ISeries>)args.NewValue).CollectionChanged += SeriesSourceCollectionChanged;
         }
 
         void SeriesSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
@@ -136,31 +137,120 @@ namespace DavesWPFTester
             switch (args.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                case NotifyCollectionChangedAction.Replace:
-                    foreach (ISeries newItem in args.NewItems) if (newItem.SeriesData is INotifyCollectionChanged) ((INotifyCollectionChanged)newItem.SeriesData).CollectionChanged += (s, e) => Redraw();
+                    foreach (ISeries newItem in args.NewItems)
+                    {
+                        newItem.RenderShapes();
+                        newItem.Shapes.CollectionChanged += SeriesShapesCollectionChanged;
+                        foreach (var shape in newItem.Shapes) Children.Add(shape);
+                    }
                     break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (ISeries oldItem in args.OldItems)
+                    {
+                        oldItem.Shapes.CollectionChanged -= SeriesShapesCollectionChanged;
+                        foreach (var shape in oldItem.Shapes) Children.Remove(shape);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    foreach (ISeries oldItem in args.OldItems)
+                    {
+                        oldItem.Shapes.CollectionChanged -= SeriesShapesCollectionChanged;
+                        foreach (var shape in oldItem.Shapes) Children.Remove(shape);
+                    }
+                    foreach (ISeries newItem in args.NewItems)
+                    {
+                        newItem.RenderShapes();
+                        newItem.Shapes.CollectionChanged += SeriesShapesCollectionChanged;
+                        foreach (var shape in newItem.Shapes) Children.Add(shape);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    Children.Clear();
+                    DrawAxes();
+                    if (SeriesSource != null) foreach (var item in SeriesSource)
+                    {
+                        item.RenderShapes();
+                        item.Shapes.CollectionChanged += SeriesShapesCollectionChanged;
+                        foreach (var shape in item.Shapes) Children.Add(shape);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    throw new NotSupportedException("Move operation not yet supported on SeriesSource");
             }
-            Redraw();
+            InvalidateVisual();
+        }
+
+        void SeriesShapesCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            var key = (ObservableCollection<Shape>)sender;
+            if (!_seriesShapeCache.ContainsKey(key)) _seriesShapeCache.Add(key, new List<Shape>());
+            switch (args.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (Shape newShape in args.NewItems)
+                    {
+                        _seriesShapeCache[key].Add(newShape);
+                        Children.Add(newShape);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (Shape oldShape in args.OldItems)
+                    {
+                        _seriesShapeCache[key].Remove(oldShape);
+                        Children.Remove(oldShape);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    foreach (Shape oldShape in args.OldItems)
+                    {
+                        _seriesShapeCache[key].Remove(oldShape);
+                        Children.Remove(oldShape);
+                    }
+                    foreach (Shape newShape in args.NewItems)
+                    {
+                        _seriesShapeCache[key].Add(newShape); 
+                        Children.Add(newShape);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    foreach (var oldShape in _seriesShapeCache[key]) Children.Remove(oldShape);
+                    _seriesShapeCache[key].Clear();
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    throw new NotSupportedException("Move operation not yet supported on ISeries.Shapes");
+            }
+            InvalidateVisual();
         }
         #endregion
 
+        readonly Dictionary<ObservableCollection<Shape>, List<Shape>> _seriesShapeCache = new Dictionary<ObservableCollection<Shape>, List<Shape>>();
         public ShapeCanvas() { SizeChanged += (s, e) => Redraw(); }
 
         void Redraw()
         {
             Children.Clear();
-            if (XAxisMinorTicks != null && XAxisMinorTicks.Count > 0) Children.Add(CreateAxisLines(XAxisMinorTicks, ActualHeight, true, _minorTickBrush, 1));
-            if (YAxisMinorTicks != null && YAxisMinorTicks.Count > 0) Children.Add(CreateAxisLines(YAxisMinorTicks, ActualWidth, false, _minorTickBrush, 1));
-            if (XAxisMajorTicks != null && XAxisMajorTicks.Count > 0) Children.Add(CreateAxisLines(XAxisMajorTicks.Skip(1), ActualHeight, true, _majorTickBrush, 1));
-            if (YAxisMajorTicks != null && YAxisMajorTicks.Count > 0) Children.Add(CreateAxisLines(YAxisMajorTicks.Skip(1), ActualWidth, false, _majorTickBrush, 1));
-            if (SeriesSource != null) foreach (var series in SeriesSource)
-            {
-                series.RenderShapes();
-                if (series.Shapes != null) foreach (var shape in series.Shapes) Children.Add(shape);
-            }
-            if (Shapes != null) foreach (var shape in Shapes) Children.Add(shape);
+            DrawAxes();
+            if (SeriesSource != null) foreach (var series in SeriesSource) series.RenderShapes();
             InvalidateVisual();
         }
+
+        void DrawAxes()
+        {
+            if (XAxisMinorTicks != null && XAxisMinorTicks.Count > 0) CreateOrUpdateAxisLines("XAxisMinorTicks", CreateAxisLines(XAxisMinorTicks, ActualHeight, true, _minorTickBrush, 1));
+            if (YAxisMinorTicks != null && YAxisMinorTicks.Count > 0) CreateOrUpdateAxisLines("YAxisMinorTicks", CreateAxisLines(YAxisMinorTicks, ActualWidth, false, _minorTickBrush, 1));
+            if (XAxisMajorTicks != null && XAxisMajorTicks.Count > 0) CreateOrUpdateAxisLines("XAxisMajorTicks", CreateAxisLines(XAxisMajorTicks.Skip(1), ActualHeight, true, _majorTickBrush, 1));
+            if (YAxisMajorTicks != null && YAxisMajorTicks.Count > 0) CreateOrUpdateAxisLines("YAxisMajorTicks", CreateAxisLines(YAxisMajorTicks.Skip(1), ActualWidth, false, _majorTickBrush, 1));
+        }
+
+        void CreateOrUpdateAxisLines(string axisKey, Shape shape)
+        {
+            var axisIndex = -1;
+            if (_axisLines.ContainsKey(axisKey) && _axisLines[axisKey] != null) axisIndex = Children.IndexOf(_axisLines[axisKey]);
+            _axisLines[axisKey] = shape;
+            if (axisIndex == -1) Children.Insert(0, _axisLines[axisKey]);
+            else Children[axisIndex] = _axisLines[axisKey];
+        }
+        readonly Dictionary<string, Shape> _axisLines = new Dictionary<string, Shape>();
 
         static Path CreateAxisLines(IEnumerable<AxisTick> ticks, double length, bool isVertical, Brush brush, double strokeThickness)
         {

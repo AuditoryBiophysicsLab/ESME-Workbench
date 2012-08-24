@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 using ESME.NEMO;
 using HRC.Aspects;
 using HRC.Navigation;
@@ -23,18 +24,21 @@ namespace DavesWPFTester
         readonly IViewAwareStatus _viewAwareStatus;
         Timer _timer;
         readonly Random _random = new Random();
+        Dispatcher _dispatcher;
         [ImportingConstructor]
         public MainWindowViewModel(IViewAwareStatus viewAwareStatus)
         {
             _viewAwareStatus = viewAwareStatus;
             _viewAwareStatus.ViewLoaded += () =>
             {
+                _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 var xAxis = ((MainWindow)_viewAwareStatus.View).BottomLinearAxis;
                 var yAxis = ((MainWindow)_viewAwareStatus.View).LeftLinearAxis;
                 const double rangeStart = 0.0;
                 var rangeEnd = MoreMath.TwoPi;
                 var rangeStep = MoreMath.TwoPi / 100;
                 const int pointSize = 10;
+
                 SeriesSource.Add(new DataSeriesViewModel
                 {
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 12)).ToObservableList(),
@@ -213,14 +217,16 @@ namespace DavesWPFTester
                     LineStroke = Brushes.DodgerBlue,
                     LineStrokeThickness = 2,
                 });
-#if false
+#if true
                 _timer = new Timer(state =>
                 {
-                    var selectedSeries = _random.Next(SeriesSource.Count);
-                    var seriesData = (ObservableList<Tuple<double, double>>)SeriesSource[selectedSeries].SeriesData;
+                    var selectedSeriesIndex = _random.Next(SeriesSource.Count);
+                    var selectedSeries = (DataSeriesViewModel)SeriesSource[selectedSeriesIndex];
+                    var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
                     for (var i = 0; i < seriesData.Count; i++ )
                         seriesData[i] = Tuple.Create(seriesData[i].Item1, -seriesData[i].Item2);
-                }, null, 2000, 2000);
+                    _dispatcher.InvokeInBackgroundIfRequired(selectedSeries.RenderShapes);
+                }, null, 100, 100);
 #endif
             };
         }
