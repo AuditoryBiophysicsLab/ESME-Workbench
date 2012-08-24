@@ -210,16 +210,21 @@ namespace DavesWPFTester
 #if true
                 _timer = new Timer(state =>
                 {
-                    var selectedSeriesIndex = _random.Next(SeriesSource.Count);
-                    var selectedSeries = (DataSeriesViewModel)SeriesSource[selectedSeriesIndex];
+                    var selectedSeries = (DataSeriesViewModel)SeriesSource.Last();
                     var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
+                    _amplitude += _amplitudeDelta;
+                    selectedSeries.SeriesName = string.Format("y = ({0:0.0} * sin(x)) + 1", _amplitude);
                     for (var i = 0; i < seriesData.Count; i++ )
-                        seriesData[i] = Tuple.Create(seriesData[i].Item1, -seriesData[i].Item2);
-                    _dispatcher.InvokeInBackgroundIfRequired(selectedSeries.RenderShapes);
-                }, null, 100, 100);
+                        seriesData[i] = Tuple.Create(seriesData[i].Item1, (_amplitude * Math.Sin(seriesData[i].Item1)) + 1);
+                    if (_amplitude > 10) _amplitudeDelta = -0.1;
+                    if (_amplitude < -10) _amplitudeDelta = 0.1;
+                }, null, 50, 50);
 #endif
             };
         }
+
+        double _amplitude = 1;
+        double _amplitudeDelta = 0.1;
 
         static IEnumerable<double> Range(double start, double end, double step)
         {
