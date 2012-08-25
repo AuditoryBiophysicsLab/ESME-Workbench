@@ -12,20 +12,20 @@ using HRC.Utility;
 
 namespace DavesWPFTester
 {
-    public class ShapeCanvas : Canvas
+    public class DataCanvas : Canvas
     {
-        static ShapeCanvas() { DefaultStyleKeyProperty.OverrideMetadata(typeof(ShapeCanvas), new FrameworkPropertyMetadata(typeof(ShapeCanvas))); }
+        static DataCanvas() { DefaultStyleKeyProperty.OverrideMetadata(typeof(DataCanvas), new FrameworkPropertyMetadata(typeof(DataCanvas))); }
 
         #region dependency property ObservableCollection<Shape> Shapes
 
         public static DependencyProperty ShapesProperty = DependencyProperty.Register("Shapes",
                                                                                  typeof(ObservableCollection<Shape>),
-                                                                                 typeof(ShapeCanvas),
+                                                                                 typeof(DataCanvas),
                                                                                  new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, ShapesPropertyChanged));
 
         public ObservableCollection<Shape> Shapes { get { return (ObservableCollection<Shape>)GetValue(ShapesProperty); } set { SetValue(ShapesProperty, value); } }
 
-        static void ShapesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).ShapesPropertyChanged(args); }
+        static void ShapesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).ShapesPropertyChanged(args); }
         void ShapesPropertyChanged(DependencyPropertyChangedEventArgs args)
         {
             if (args.OldValue != null) ((ObservableCollection<Shape>)args.OldValue).CollectionChanged -= ShapesCollectionChanged;
@@ -37,10 +37,10 @@ namespace DavesWPFTester
         #region dependency property ObservableList<AxisTick> XAxisMajorTicks
         public static DependencyProperty XAxisMajorTicksProperty = DependencyProperty.Register("XAxisMajorTicks",
                                                                                           typeof(ObservableList<AxisTick>),
-                                                                                          typeof(ShapeCanvas),
+                                                                                          typeof(DataCanvas),
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, XAxisMajorTicksPropertyChanged));
 
-        static void XAxisMajorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).XAxisMajorTicksPropertyChanged(); }
+        static void XAxisMajorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).XAxisMajorTicksPropertyChanged(); }
         void XAxisMajorTicksPropertyChanged() { DrawAxes(); }
 
         public ObservableList<AxisTick> XAxisMajorTicks { get { return (ObservableList<AxisTick>)GetValue(XAxisMajorTicksProperty); } set { SetCurrentValue(XAxisMajorTicksProperty, value); } }
@@ -48,10 +48,10 @@ namespace DavesWPFTester
         #region dependency property ObservableList<AxisTick> XAxisMinorTicks
         public static DependencyProperty XAxisMinorTicksProperty = DependencyProperty.Register("XAxisMinorTicks",
                                                                                           typeof(ObservableList<AxisTick>),
-                                                                                          typeof(ShapeCanvas),
+                                                                                          typeof(DataCanvas),
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, XAxisMinorTicksPropertyChanged));
 
-        static void XAxisMinorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).XAxisMinorTicksPropertyChanged(); }
+        static void XAxisMinorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).XAxisMinorTicksPropertyChanged(); }
         void XAxisMinorTicksPropertyChanged() { DrawAxes(); }
 
         public ObservableList<AxisTick> XAxisMinorTicks { get { return (ObservableList<AxisTick>)GetValue(XAxisMinorTicksProperty); } set { SetCurrentValue(XAxisMinorTicksProperty, value); } }
@@ -59,10 +59,10 @@ namespace DavesWPFTester
         #region dependency property ObservableList<AxisTick> YAxisMajorTicks
         public static DependencyProperty YAxisMajorTicksProperty = DependencyProperty.Register("YAxisMajorTicks",
                                                                                           typeof(ObservableList<AxisTick>),
-                                                                                          typeof(ShapeCanvas),
+                                                                                          typeof(DataCanvas),
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, YAxisMajorTicksPropertyChanged));
 
-        static void YAxisMajorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).YAxisMajorTicksPropertyChanged(); }
+        static void YAxisMajorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).YAxisMajorTicksPropertyChanged(); }
         void YAxisMajorTicksPropertyChanged() { DrawAxes(); }
 
         public ObservableList<AxisTick> YAxisMajorTicks { get { return (ObservableList<AxisTick>)GetValue(YAxisMajorTicksProperty); } set { SetCurrentValue(YAxisMajorTicksProperty, value); } }
@@ -70,10 +70,10 @@ namespace DavesWPFTester
         #region dependency property ObservableList<AxisTick> YAxisMinorTicks
         public static DependencyProperty YAxisMinorTicksProperty = DependencyProperty.Register("YAxisMinorTicks",
                                                                                           typeof(ObservableList<AxisTick>),
-                                                                                          typeof(ShapeCanvas),
+                                                                                          typeof(DataCanvas),
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, YAxisMinorTicksPropertyChanged));
 
-        static void YAxisMinorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).YAxisMinorTicksPropertyChanged(); }
+        static void YAxisMinorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).YAxisMinorTicksPropertyChanged(); }
         void YAxisMinorTicksPropertyChanged() { DrawAxes(); }
 
         public ObservableList<AxisTick> YAxisMinorTicks { get { return (ObservableList<AxisTick>)GetValue(YAxisMinorTicksProperty); } set { SetCurrentValue(YAxisMinorTicksProperty, value); } }
@@ -83,12 +83,12 @@ namespace DavesWPFTester
 
         public static DependencyProperty MinorTickLineColorProperty = DependencyProperty.Register("MinorTickLineColor",
                                                                                  typeof(Color),
-                                                                                 typeof(ShapeCanvas),
+                                                                                 typeof(DataCanvas),
                                                                                  new FrameworkPropertyMetadata(Colors.LightGray, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MinorTickLineColorPropertyChanged));
 
         public Color MinorTickLineColor { get { return (Color)GetValue(MinorTickLineColorProperty); } set { SetValue(MinorTickLineColorProperty, value); } }
 
-        static void MinorTickLineColorPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).MinorTickLineColorPropertyChanged(); }
+        static void MinorTickLineColorPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).MinorTickLineColorPropertyChanged(); }
         void MinorTickLineColorPropertyChanged()
         {
             _minorTickBrush = new SolidColorBrush(MinorTickLineColor);
@@ -101,12 +101,12 @@ namespace DavesWPFTester
 
         public static DependencyProperty MajorTickLineColorProperty = DependencyProperty.Register("MajorTickLineColor",
                                                                                  typeof(Color),
-                                                                                 typeof(ShapeCanvas),
+                                                                                 typeof(DataCanvas),
                                                                                  new FrameworkPropertyMetadata(Colors.Black, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MajorTickLineColorPropertyChanged));
 
         public Color MajorTickLineColor { get { return (Color)GetValue(MajorTickLineColorProperty); } set { SetValue(MajorTickLineColorProperty, value); } }
 
-        static void MajorTickLineColorPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).MajorTickLineColorPropertyChanged(); }
+        static void MajorTickLineColorPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).MajorTickLineColorPropertyChanged(); }
         void MajorTickLineColorPropertyChanged()
         {
             _majorTickBrush = new SolidColorBrush(MajorTickLineColor);
@@ -119,12 +119,12 @@ namespace DavesWPFTester
 
         public static DependencyProperty SeriesSourceProperty = DependencyProperty.Register("SeriesSource",
                                                                                  typeof(ObservableCollection<ISeries>),
-                                                                                 typeof(ShapeCanvas),
+                                                                                 typeof(DataCanvas),
                                                                                  new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, SeriesSourcePropertyChanged));
 
         public ObservableCollection<ISeries> SeriesSource { get { return (ObservableCollection<ISeries>)GetValue(SeriesSourceProperty); } set { SetValue(SeriesSourceProperty, value); } }
 
-        static void SeriesSourcePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ShapeCanvas)obj).SeriesSourcePropertyChanged(args); }
+        static void SeriesSourcePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).SeriesSourcePropertyChanged(args); }
         void SeriesSourcePropertyChanged(DependencyPropertyChangedEventArgs args)
         {
             if (args.OldValue != null) {((ObservableCollection<ISeries>)args.OldValue).CollectionChanged -= SeriesSourceCollectionChanged;}
@@ -229,7 +229,7 @@ namespace DavesWPFTester
         #endregion
 
         readonly Dictionary<ObservableCollection<Shape>, List<Shape>> _seriesShapeCache = new Dictionary<ObservableCollection<Shape>, List<Shape>>();
-        public ShapeCanvas() { SizeChanged += (s, e) => Redraw(); }
+        public DataCanvas() { SizeChanged += (s, e) => Redraw(); }
 
         void Redraw()
         {

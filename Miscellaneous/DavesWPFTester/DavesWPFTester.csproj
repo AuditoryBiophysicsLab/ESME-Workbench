@@ -172,7 +172,7 @@
     </Compile>
     <Compile Include="PropertyObserver.cs" />
     <Compile Include="SeriesMarkerType.cs" />
-    <Compile Include="ShapeCanvas.cs" />
+    <Compile Include="DataCanvas.cs" />
     <Page Include="LegendView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

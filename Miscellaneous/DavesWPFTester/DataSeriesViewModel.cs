@@ -3,17 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using ESME.Views.Controls;
 using HRC;
 using HRC.Aspects;
 using HRC.ViewModels;
+using HRC.WPF;
 using Brush = System.Windows.Media.Brush;
 using Path = System.Windows.Shapes.Path;
 using Point = System.Windows.Point;
@@ -355,5 +359,291 @@ namespace DavesWPFTester
         public DataAxis YAxis { get; set; }
 
         public string SeriesName { get; set; }
+    }
+
+    public class DataSeriesBase : DependencyObject, INotifyPropertyChanged
+    {
+        #region dependency property ICollection Data
+
+        public static DependencyProperty DataProperty = DependencyProperty.Register("Data",
+                                                                                 typeof(ICollection),
+                                                                                 typeof(DataSeriesBase),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, DataPropertyChanged));
+
+        public ICollection<object> Data { get { return (ICollection<object>)GetValue(DataProperty); } }
+        static void DataPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs) { throw new NotImplementedException(); }
+
+
+        #endregion
+
+        #region dependency property double XMin
+
+        public static DependencyProperty XMinProperty = DependencyProperty.Register("XMin",
+                                                                                 typeof(double),
+                                                                                 typeof(DataSeriesBase),
+                                                                                 new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.None, XMinPropertyChanged));
+
+        public double XMin { get { return (double)GetValue(XMinProperty); } set { SetValue(XMinProperty, value); } }
+        static void XMinPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataSeriesBase)obj).XMinPropertyChanged(args); }
+        void XMinPropertyChanged(DependencyPropertyChangedEventArgs args) { }
+        #endregion
+
+        #region dependency property double XMax
+
+        public static DependencyProperty XMaxProperty = DependencyProperty.Register("XMax",
+                                                                                 typeof(double),
+                                                                                 typeof(DataSeriesBase),
+                                                                                 new FrameworkPropertyMetadata(10.0, FrameworkPropertyMetadataOptions.None, XMaxPropertyChanged));
+
+        public double XMax { get { return (double)GetValue(XMaxProperty); } set { SetValue(XMaxProperty, value); } }
+        static void XMaxPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataSeriesBase)obj).XMaxPropertyChanged(args); }
+        void XMaxPropertyChanged(DependencyPropertyChangedEventArgs args) { }
+        #endregion
+
+        #region dependency property double YMin
+
+        public static DependencyProperty YMinProperty = DependencyProperty.Register("YMin",
+                                                                                 typeof(double),
+                                                                                 typeof(DataSeriesBase),
+                                                                                 new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.None, YMinPropertyChanged));
+
+        public double YMin { get { return (double)GetValue(YMinProperty); } set { SetValue(YMinProperty, value); } }
+        static void YMinPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataSeriesBase)obj).YMinPropertyChanged(args); }
+        void YMinPropertyChanged(DependencyPropertyChangedEventArgs args) { }
+        #endregion
+
+        #region dependency property double YMax
+
+        public static DependencyProperty YMaxProperty = DependencyProperty.Register("YMax",
+                                                                                 typeof(double),
+                                                                                 typeof(DataSeriesBase),
+                                                                                 new FrameworkPropertyMetadata(10.0, FrameworkPropertyMetadataOptions.None, YMaxPropertyChanged));
+
+        public double YMax { get { return (double)GetValue(YMaxProperty); } set { SetValue(YMaxProperty, value); } }
+        static void YMaxPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataSeriesBase)obj).YMaxPropertyChanged(args); }
+        void YMaxPropertyChanged(DependencyPropertyChangedEventArgs args) { }
+        #endregion
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            var handlers = PropertyChanged;
+            if (handlers == null) return;
+            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                {
+                    var localHandler = handler;
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new PropertyChangedEventArgs(propertyName)));
+                }
+                else
+                    handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+
+    public enum AxisAutoranging
+    {
+        None,
+        IncreaseX,
+        IncreaseDecreaseX,
+        IncreaseY,
+        IncreaseDecreaseY,
+        IncreaseBoth,
+        IncreaseDecreaseBoth
+    };
+
+    [ContentProperty("DataSeriesCollection")]
+    public class UsesAxes : DependencyObject
+    {
+        public UsesAxes() { DataSeriesCollection = new ObservableCollection<DataSeriesBase>(); }
+
+        #region dependency property ObservableCollection<DataSeriesBase> DataSeriesCollection
+
+        public static DependencyProperty DataSeriesCollectionProperty = DependencyProperty.Register("DataSeriesCollection",
+                                                                                                    typeof(ObservableCollection<DataSeriesBase>),
+                                                                                                    typeof(UsesAxes),
+                                                                                                    new FrameworkPropertyMetadata(null,
+                                                                                                                                  FrameworkPropertyMetadataOptions.None,
+                                                                                                                                  DataSeriesCollectionPropertyChanged));
+
+        public ObservableCollection<DataSeriesBase> DataSeriesCollection { get { return (ObservableCollection<DataSeriesBase>)GetValue(DataSeriesCollectionProperty); } set { SetValue(DataSeriesCollectionProperty, value); } }
+        static void DataSeriesCollectionPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((UsesAxes)obj).DataSeriesCollectionPropertyChanged(args); }
+        void DataSeriesCollectionPropertyChanged(DependencyPropertyChangedEventArgs args)
+        {
+            Debug.WriteLine(string.Format("DataSeriesCollectionPropertyChanged. Old value = {0}, New value = {1}", args.OldValue, args.NewValue));
+            if (args.OldValue != null) ((ObservableCollection<DataSeriesBase>)args.OldValue).CollectionChanged -= DataSeriesCollectionChanged;
+            if (args.NewValue != null) ((ObservableCollection<DataSeriesBase>)args.NewValue).CollectionChanged += DataSeriesCollectionChanged;
+            UpdateMinMaxForAllSeries();
+        }
+
+        readonly Dictionary<DataSeriesBase, PropertyObserver<DataSeriesBase>> _seriesObservers = new Dictionary<DataSeriesBase, PropertyObserver<DataSeriesBase>>();
+        void DataSeriesCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            switch (args.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (DataSeriesBase dataSeries in args.NewItems)
+                    {
+                        var observer = new PropertyObserver<DataSeriesBase>(dataSeries)
+                            .RegisterHandler(d => d.XMin, UpdateMinMax)
+                            .RegisterHandler(d => d.XMax, UpdateMinMax)
+                            .RegisterHandler(d => d.YMin, UpdateMinMax)
+                            .RegisterHandler(d => d.YMax, UpdateMinMax);
+                        _seriesObservers.Add(dataSeries, observer);
+                        UpdateMinMax(dataSeries);
+                        Debug.WriteLine(string.Format("Adding DataSeries: {0}", dataSeries));
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (DataSeriesBase dataSeries in args.OldItems) 
+                        if (_seriesObservers.ContainsKey(dataSeries))
+                        {
+                            _seriesObservers[dataSeries]
+                                .UnregisterHandler(d => d.XMin)
+                                .UnregisterHandler(d => d.XMax)
+                                .UnregisterHandler(d => d.YMin)
+                                .UnregisterHandler(d => d.YMax);
+                            _seriesObservers.Remove(dataSeries);
+                        }
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    foreach (DataSeriesBase dataSeries in args.OldItems) 
+                        if (_seriesObservers.ContainsKey(dataSeries))
+                        {
+                            _seriesObservers[dataSeries]
+                                .UnregisterHandler(d => d.XMin)
+                                .UnregisterHandler(d => d.XMax)
+                                .UnregisterHandler(d => d.YMin)
+                                .UnregisterHandler(d => d.YMax);
+                            _seriesObservers.Remove(dataSeries);
+                        }
+                    foreach (DataSeriesBase dataSeries in args.NewItems)
+                    {
+                        var observer = new PropertyObserver<DataSeriesBase>(dataSeries)
+                            .RegisterHandler(d => d.XMin, UpdateMinMax)
+                            .RegisterHandler(d => d.XMax, UpdateMinMax)
+                            .RegisterHandler(d => d.YMin, UpdateMinMax)
+                            .RegisterHandler(d => d.YMax, UpdateMinMax);
+                        _seriesObservers.Add(dataSeries, observer);
+                        UpdateMinMax(dataSeries);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    _seriesObservers.Clear();
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    throw new NotImplementedException("Move");
+            }
+        }
+        void UpdateMinMax(DataSeriesBase dataSeries)
+        {
+            XMin = Math.Min(XMin, dataSeries.XMin);
+            XMax = Math.Max(XMax, dataSeries.XMax);
+            YMin = Math.Min(YMin, dataSeries.YMin);
+            YMax = Math.Max(YMax, dataSeries.YMax);
+        }
+        void UpdateMinMaxForAllSeries()
+        {
+            foreach (var dataSeries in DataSeriesCollection) UpdateMinMax(dataSeries);
+        }
+        #endregion
+
+        #region dependency property DataAxis XAxis
+
+        public static DependencyProperty XAxisProperty = DependencyProperty.Register("XAxis",
+                                                                                 typeof(DataAxis),
+                                                                                 typeof(UsesAxes),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, XAxisPropertyChanged));
+
+        public DataAxis XAxis { get { return (DataAxis)GetValue(XAxisProperty); } set { SetValue(XAxisProperty, value); } }
+        static void XAxisPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((UsesAxes)obj).XAxisPropertyChanged(args); }
+        void XAxisPropertyChanged(DependencyPropertyChangedEventArgs args) { }
+        #endregion
+
+        #region dependency property DataAxis YAxis
+
+        public static DependencyProperty YAxisProperty = DependencyProperty.Register("YAxis",
+                                                                                 typeof(DataAxis),
+                                                                                 typeof(UsesAxes),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, YAxisPropertyChanged));
+
+        public DataAxis YAxis { get { return (DataAxis)GetValue(YAxisProperty); } set { SetValue(YAxisProperty, value); } }
+        static void YAxisPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((UsesAxes)obj).YAxisPropertyChanged(args); }
+        void YAxisPropertyChanged(DependencyPropertyChangedEventArgs args) { }
+        #endregion
+
+        #region dependency property double XMin
+
+        public static DependencyProperty XMinProperty = DependencyProperty.Register("XMin",
+                                                                                 typeof(double),
+                                                                                 typeof(UsesAxes),
+                                                                                 new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.None, XMinPropertyChanged));
+
+        public double XMin { get { return (double)GetValue(XMinProperty); } set { SetValue(XMinProperty, value); } }
+        static void XMinPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((UsesAxes)obj).XMinPropertyChanged(args); }
+        void XMinPropertyChanged(DependencyPropertyChangedEventArgs args)
+        {
+            Debug.WriteLine(string.Format("XMin is now {0}", XMin));
+        }
+        #endregion
+
+        #region dependency property double XMax
+
+        public static DependencyProperty XMaxProperty = DependencyProperty.Register("XMax",
+                                                                                 typeof(double),
+                                                                                 typeof(UsesAxes),
+                                                                                 new FrameworkPropertyMetadata(10.0, FrameworkPropertyMetadataOptions.None, XMaxPropertyChanged));
+
+        public double XMax { get { return (double)GetValue(XMaxProperty); } set { SetValue(XMaxProperty, value); } }
+        static void XMaxPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((UsesAxes)obj).XMaxPropertyChanged(args); }
+        void XMaxPropertyChanged(DependencyPropertyChangedEventArgs args)
+        {
+            Debug.WriteLine(string.Format("XMax is now {0}", XMax));
+        }
+        #endregion
+
+        #region dependency property double YMin
+
+        public static DependencyProperty YMinProperty = DependencyProperty.Register("YMin",
+                                                                                 typeof(double),
+                                                                                 typeof(UsesAxes),
+                                                                                 new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.None, YMinPropertyChanged));
+
+        public double YMin { get { return (double)GetValue(YMinProperty); } set { SetValue(YMinProperty, value); } }
+        static void YMinPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((UsesAxes)obj).YMinPropertyChanged(args); }
+        void YMinPropertyChanged(DependencyPropertyChangedEventArgs args)
+        {
+            Debug.WriteLine(string.Format("YMin is now {0}", YMin));
+        }
+        #endregion
+
+        #region dependency property double YMax
+
+        public static DependencyProperty YMaxProperty = DependencyProperty.Register("YMax",
+                                                                                 typeof(double),
+                                                                                 typeof(UsesAxes),
+                                                                                 new FrameworkPropertyMetadata(10.0, FrameworkPropertyMetadataOptions.None, YMaxPropertyChanged));
+
+        public double YMax { get { return (double)GetValue(YMaxProperty); } set { SetValue(YMaxProperty, value); } }
+        static void YMaxPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((UsesAxes)obj).YMaxPropertyChanged(args); }
+        void YMaxPropertyChanged(DependencyPropertyChangedEventArgs args)
+        {
+            Debug.WriteLine(string.Format("YMax is now {0}", YMax));
+        }
+        #endregion
+
+        #region dependency property AxisAutorangeSetting AxisAutoranging
+
+        public static DependencyProperty AxisAutorangingProperty = DependencyProperty.Register("AxisAutoranging",
+                                                                                 typeof(AxisAutoranging),
+                                                                                 typeof(UsesAxes),
+                                                                                 new FrameworkPropertyMetadata(AxisAutoranging.None, FrameworkPropertyMetadataOptions.None, AxisAutorangingPropertyChanged));
+
+        public AxisAutoranging AxisAutoranging { get { return (AxisAutoranging)GetValue(AxisAutorangingProperty); } set { SetValue(AxisAutorangingProperty, value); } }
+        static void AxisAutorangingPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((UsesAxes)obj).AxisAutorangingPropertyChanged(args); }
+        void AxisAutorangingPropertyChanged(DependencyPropertyChangedEventArgs args) { }
+        #endregion
     }
 }

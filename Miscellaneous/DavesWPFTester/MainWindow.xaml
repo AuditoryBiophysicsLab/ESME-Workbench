@@ -21,99 +21,114 @@
             <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <DockPanel Margin="10" LastChildFill="True">
-        <GroupBox Margin="10 0 0 0" DockPanel.Dock="Right" Header="Legend" Padding="5">
-            <app:LegendView ItemsSource="{Binding SeriesSource}" />
-        </GroupBox>
-        <DockPanel DockPanel.Dock="Left">
-            <DockPanel>
-                <TextBlock Height="{Binding ActualHeight, ElementName=BottomLinearAxis}" DockPanel.Dock="Bottom" />
-                <controls:DataAxis x:Name="LeftLinearAxis"
-                                   VerticalAlignment="Top"
-                                   AxisLabel="Y"
-                                   AxisLocation="Right"
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <GroupBox Grid.Row="0"
+                  Grid.Column="0"
+                  Padding="5"
+                  Header="Multiple sinusoidal series, with markers and lines">
+            <DockPanel LastChildFill="True">
+                <GroupBox Margin="10 0 0 0"
+                          DockPanel.Dock="Right"
+                          Header="Legend"
+                          Padding="5">
+                    <app:LegendView ItemsSource="{Binding TopLeftSeriesSource}" />
+                </GroupBox>
+                <DockPanel DockPanel.Dock="Left">
+                    <DockPanel>
+                        <TextBlock Height="{Binding ActualHeight, ElementName=BottomLinearAxis}" DockPanel.Dock="Bottom" />
+                        <controls:DataAxis x:Name="TopLeftVerticalAxis"
+                                           VerticalAlignment="Top"
+                                           AxisLabel="Y"
+                                           AxisLocation="Right"
+                                           AxisType="Linear"
+                                           EndValue="13"
+                                           StartValue="-13"
+                                           TickValueFormat="0.##" />
+                    </DockPanel>
+                </DockPanel>
+                <controls:DataAxis x:Name="TopLeftHorizontalAxis"
+                                   AxisLabel="X"
+                                   AxisLocation="Top"
                                    AxisType="Linear"
-                                   EndValue="13"
-                                   StartValue="-13"
+                                   DockPanel.Dock="Bottom"
+                                   EndValue="6.5"
+                                   StartValue="0"
                                    TickValueFormat="0.##" />
-                <!--
-                    <controls:DataAxis x:Name="LeftLogAxis"
-                    VerticalAlignment="Top"
-                    AxisLabel="Left Log Axis"
-                    AxisLocation="Right"
-                    AxisType="Logarithmic"
-                    EndValue="10000"
-                    StartValue="1"
-                    TickValueFormat="m" />
-                -->
+                <app:DataCanvas x:Name="TopLeftShapeCanvas"
+                                 MajorTickLineColor="DarkGray"
+                                 MinorTickLineColor="AliceBlue"
+                                 SeriesSource="{Binding TopLeftSeriesSource}"
+                                 XAxisMajorTicks="{Binding MajorTicks,
+                                                           ElementName=TopLeftHorizontalAxis}"
+                                 XAxisMinorTicks="{Binding MinorTicks,
+                                                           ElementName=TopLeftHorizontalAxis}"
+                                 YAxisMajorTicks="{Binding MajorTicks,
+                                                           ElementName=TopLeftVerticalAxis}"
+                                 YAxisMinorTicks="{Binding MinorTicks,
+                                                           ElementName=TopLeftVerticalAxis}" />
             </DockPanel>
-        </DockPanel>
-        <!--
-            <DockPanel DockPanel.Dock="Right">
-            <TextBlock Height="95" DockPanel.Dock="Top" />
-            <TextBlock Height="89" DockPanel.Dock="Bottom" />
-            <controls:DataAxis x:Name="RightLinearAxis"
-            AxisLabel="Right Linear Axis"
-            AxisLocation="Left"
-            DockPanel.Dock="Right"
-            EndValue="10"
-            StartValue="-10"
-            TickValueFormat="0.#" />
-            <controls:DataAxis AxisLabel="Right Log Axis"
-            AxisLocation="Left"
-            AxisType="Logarithmic"
-            DockPanel.Dock="Right"
-            EndValue="100000"
-            StartValue="100"
-            TickValueFormat="0.#" />
+        </GroupBox>
+        <GroupBox Grid.Row="0"
+                  Grid.Column="1"
+                  Padding="5"
+                  Header="Multiple sinusoidal series, with markers and lines">
+            <DockPanel LastChildFill="True">
+                <GroupBox Margin="10 0 0 0"
+                          DockPanel.Dock="Right"
+                          Header="Legend"
+                          Padding="5">
+                    <app:LegendView ItemsSource="{Binding TopLeftSeriesSource}" />
+                </GroupBox>
+                <DockPanel DockPanel.Dock="Left">
+                    <DockPanel>
+                        <TextBlock Height="{Binding ActualHeight, ElementName=BottomLinearAxis}" DockPanel.Dock="Bottom" />
+                        <controls:DataAxis x:Name="TopRightVerticalAxis"
+                                           VerticalAlignment="Top"
+                                           AxisLabel="Y"
+                                           AxisLocation="Right"
+                                           AxisType="Linear"
+                                           EndValue="13"
+                                           StartValue="-13"
+                                           TickValueFormat="0.##" />
+                    </DockPanel>
+                </DockPanel>
+                <controls:DataAxis x:Name="TopRightHorizontalAxis"
+                                   AxisLabel="X"
+                                   AxisLocation="Top"
+                                   AxisType="Linear"
+                                   DockPanel.Dock="Bottom"
+                                   EndValue="6.5"
+                                   StartValue="0"
+                                   TickValueFormat="0.##" />
+                <app:DataCanvas x:Name="TopRightShapeCanvas"
+                                 MajorTickLineColor="DarkGray"
+                                 MinorTickLineColor="AliceBlue"
+                                 SeriesSource="{Binding TopRightSeriesSource}"
+                                 XAxisMajorTicks="{Binding MajorTicks,
+                                                           ElementName=TopRightHorizontalAxis}"
+                                 XAxisMinorTicks="{Binding MinorTicks,
+                                                           ElementName=TopRightHorizontalAxis}"
+                                 YAxisMajorTicks="{Binding MajorTicks,
+                                                           ElementName=TopRightVerticalAxis}"
+                                 YAxisMinorTicks="{Binding MinorTicks,
+                                                           ElementName=TopRightVerticalAxis}" />
             </DockPanel>
-        -->
-        <controls:DataAxis x:Name="BottomLinearAxis"
-                           AxisLabel="X"
-                           AxisLocation="Top"
-                           AxisType="Linear"
-                           DockPanel.Dock="Bottom"
-                           EndValue="6.5"
-                           StartValue="0"
-                           TickValueFormat="0.##" />
-        <!--
-            <controls:DataAxis x:Name="BottomLogAxis"
-            AxisLabel="Bottom Log Axis"
-            AxisLocation="Top"
-            AxisType="Logarithmic"
-            DockPanel.Dock="Bottom"
-            EndValue="1e6"
-            StartValue="1"
-            TickValueFormat="e0" />
-            <controls:DataAxis x:Name="TopLinearAxis"
-            AxisLabel="Top Linear Axis"
-            AxisLocation="Bottom"
-            AxisType="Linear"
-            DockPanel.Dock="Top"
-            EndValue="25"
-            StartValue="-10"
-            TickValueFormat="0" />
-            <controls:DataAxis x:Name="TopLogAxis"
-            AxisLabel="Top Log Axis"
-            AxisLocation="Bottom"
-            AxisType="Logarithmic"
-            DockPanel.Dock="Top"
-            EndValue="10000"
-            StartValue="0.01"
-            TickValueFormat="m" />
-        -->
-        <!--  <Image Source="{Binding DisplayImage}" />  -->
-        <app:ShapeCanvas x:Name="ShapeCanvas"
-                         MajorTickLineColor="DarkGray"
-                         MinorTickLineColor="AliceBlue"
-                         SeriesSource="{Binding SeriesSource}"
-                         XAxisMajorTicks="{Binding MajorTicks,
-                                                   ElementName=BottomLinearAxis}"
-                         XAxisMinorTicks="{Binding MinorTicks,
-                                                   ElementName=BottomLinearAxis}"
-                         YAxisMajorTicks="{Binding MajorTicks,
-                                                   ElementName=LeftLinearAxis}"
-                         YAxisMinorTicks="{Binding MinorTicks,
-                                                   ElementName=LeftLinearAxis}" />
-    </DockPanel>
+        </GroupBox>
+        <GroupBox Header="Test Area" Grid.Row="1" Grid.Column="0">
+            <app:UsesAxes>
+                <app:DataSeriesBase XMin="0"/>
+                <app:DataSeriesBase XMax="11"/>
+                <app:DataSeriesBase YMin="-1"/>
+                <app:DataSeriesBase YMax="12"/>
+            </app:UsesAxes>
+        </GroupBox>
+    </Grid>
 </Window>
