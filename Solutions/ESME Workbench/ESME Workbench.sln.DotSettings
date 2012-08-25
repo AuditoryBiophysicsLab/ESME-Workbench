@@ -179,11 +179,11 @@
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=71B7F0A870607A47B2BC307B4D98B556/Shortcut/@EntryValue">vmcc</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=71B7F0A870607A47B2BC307B4D98B556/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=71B7F0A870607A47B2BC307B4D98B556/Text/@EntryValue">#region $COMMANDNAME$Command&#xD;
-public SimpleCommand&lt;object, object&gt; $COMMANDNAME$Command&#xD;
+public SimpleCommand&lt;object, EventToCommandArgs&gt; $COMMANDNAME$Command&#xD;
 {&#xD;
-    get { return _$PRIVATE$ ?? (_$PRIVATE$ = new SimpleCommand&lt;object, object&gt;(o =&gt; Is$COMMANDNAME$CommandEnabled, $COMMANDNAME$Handler)); }&#xD;
+    get { return _$PRIVATE$ ?? (_$PRIVATE$ = new SimpleCommand&lt;object, EventToCommandArgs&gt;(o =&gt; Is$COMMANDNAME$CommandEnabled, $COMMANDNAME$Handler)); }&#xD;
 }&#xD;
-SimpleCommand&lt;object, object&gt; _$PRIVATE$;&#xD;
+SimpleCommand&lt;object, EventToCommandArgs&gt; _$PRIVATE$;&#xD;
 &#xD;
 static bool Is$COMMANDNAME$CommandEnabled&#xD;
 {&#xD;
@@ -193,9 +193,9 @@ static bool Is$COMMANDNAME$CommandEnabled&#xD;
 	}&#xD;
 }&#xD;
 &#xD;
-static void $COMMANDNAME$Handler(object o)&#xD;
+static void $COMMANDNAME$Handler(EventToCommandArgs args)&#xD;
 {&#xD;
-	&#xD;
+	//var parameter = args.CommandParameter; &#xD;
 }&#xD;
 #endregion</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=994016DC67C2AE43B0DA8517607CC665/@KeyIndexDefined">True</s:Boolean>
