@@ -77,7 +77,8 @@ namespace ESMEWorkbench.ViewModels.Map
             _wpfMap.AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
             _wpfMap.CurrentExtent = new RectangleShape(-180, 90, 180, -90);
             
-            var localizedName = ((MainView)_viewAwareStatus.View).FontFamily.FamilyNames[XmlLanguage.GetLanguage(CultureInfo.CurrentUICulture.Name)];
+            //var localizedName = ((MainView)_viewAwareStatus.View).FontFamily.FamilyNames[XmlLanguage.GetLanguage(CultureInfo.CurrentUICulture.Name)];
+            var localizedName = "Segoe UI";
 
             var customUnitScaleBarAdornmentLayer = new CustomUnitScaleBarAdornmentLayer
                                                    {
