@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Markup;
 using ESME;
 using ESME.Environment;
 using ESME.Mapping;
