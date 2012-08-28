@@ -41,12 +41,6 @@
     <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="3MBSLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="3MBWrapperClass, Version=1.0.4574.28957, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="AsyncCtpLibrary">
       <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
       <Private>False</Private>
