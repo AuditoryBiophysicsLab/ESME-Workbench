@@ -9,10 +9,10 @@ namespace DavesWPFTester
 {
     public interface ISeries
     {
-        double MinX { get; }
-        double MaxX { get; }
-        double MinY { get; }
-        double MaxY { get; }
+        double XMin { get; }
+        double XMax { get; }
+        double YMin { get; }
+        double YMax { get; }
         /// <summary>
         /// Converts an item in the series to a Point.  X and Y should be whatever natural values should be plotted for that point
         /// </summary>
@@ -22,13 +22,13 @@ namespace DavesWPFTester
         /// </summary>
         ImageSource SampleImageSource { get; }
         /// <summary>
-        /// The X Axis control to plot the DataPoints against (used for mapping X values to screen coordinates)
+        /// The function that maps X values to axis offsets, usually bound from an Axis control
         /// </summary>
-        DataAxis XAxis { get; set; }
+        Func<double, double> XAxisMappingFunction { get; set; }
         /// <summary>
-        /// The Y Axis control to plot the DataPoints against (used for mapping Y values to screen coordinates)        
+        /// The function that maps Y values to axis offsets, usually bound from an Axis control
         /// </summary>
-        DataAxis YAxis { get; set; }
+        Func<double, double> YAxisMappingFunction { get; set; }
         /// <summary>
         /// The name of the series, used to create a legend
         /// </summary>

@@ -39,7 +39,9 @@ namespace DavesWPFTester
                 .RegisterHandler(d => d.LineStrokeDashArray, LinePropertiesChanged)
                 .RegisterHandler(d => d.LineStrokeThickness, LinePropertiesChanged)
                 .RegisterHandler(d => d.SeriesData, SeriesDataChanged)
-                .RegisterHandler(d => d.ItemToPoint, ProcessSeriesData);
+                .RegisterHandler(d => d.ItemToPoint, ProcessSeriesData)
+                .RegisterHandler(d => d.XAxisMappingFunction, MappingFunctionChanged)
+                .RegisterHandler(d => d.YAxisMappingFunction, MappingFunctionChanged);
             _pointsObserver = new CollectionObserver(Points).RegisterHandler(PointsCollectionChanged);
         }
 
@@ -130,6 +132,7 @@ namespace DavesWPFTester
 
         void RenderLine()
         {
+            if (XAxisMappingFunction == null || YAxisMappingFunction == null) return;
             if (!DrawLine)
             {
                 if (_lineShape != null)
@@ -143,7 +146,7 @@ namespace DavesWPFTester
             var lineGeometry = new StreamGeometry();
             var lineContext = lineGeometry.Open();
             var isFirst = true;
-            foreach (var plotPoint in Points.Select(point => new Point(XAxis.MappingFunction(point.X), YAxis.MappingFunction(point.Y)))) 
+            foreach (var plotPoint in Points.Select(point => new Point(XAxisMappingFunction(point.X), YAxisMappingFunction(point.Y)))) 
             {
                 if (isFirst)
                 {
@@ -179,8 +182,8 @@ namespace DavesWPFTester
 
         void RenderMarker(Point point)
         {
-            if (XAxis == null || YAxis == null) return;
-            var plotPoint = new Point(XAxis.MappingFunction(point.X), YAxis.MappingFunction(point.Y));
+            if (XAxisMappingFunction == null || YAxisMappingFunction == null) return;
+            var plotPoint = new Point(XAxisMappingFunction(point.X), YAxisMappingFunction(point.Y));
             var geometry = new StreamGeometry();
             var context = geometry.Open();
             MarkerType(context, plotPoint, MarkerSize);
@@ -293,33 +296,41 @@ namespace DavesWPFTester
         {
             if (ItemToPoint == null || SeriesData == null || SeriesData.Count == 0) return;
             foreach(var item in SeriesData) Points.Add(ItemToPoint(item));
-            MaxX = Points.Max(p => p.X);
-            MinX = Points.Min(p => p.X);
-            MaxY = Points.Max(p => p.Y);
-            MinY = Points.Min(p => p.Y);
+            XMax = Points.Max(p => p.X);
+            XMin = Points.Min(p => p.X);
+            YMax = Points.Max(p => p.Y);
+            YMin = Points.Min(p => p.Y);
             RenderShapes();
         }
 
         void UpdateMinMax(Point point)
         {
-            MaxX = Math.Max(MaxX, point.X);
-            MinX = Math.Min(MinX, point.X);
-            MaxY = Math.Max(MaxY, point.Y);
-            MinY = Math.Min(MinY, point.Y);
+            XMax = Math.Max(XMax, point.X);
+            XMin = Math.Min(XMin, point.X);
+            YMax = Math.Max(YMax, point.Y);
+            YMin = Math.Min(YMin, point.Y);
         }
 
-        public double MinX { get; set; }
+        public double XMin { get; set; }
 
-        public double MaxX { get; set; }
+        public double XMax { get; set; }
 
-        public double MinY { get; set; }
+        public double YMin { get; set; }
 
-        public double MaxY { get; set; }
+        public double YMax { get; set; }
 
         public Func<object, Point> ItemToPoint { get; set; }
 
         public ImageSource SampleImageSource { get; set; }
 
+        public Func<double, double> XAxisMappingFunction { get; set; }
+
+        public Func<double, double> YAxisMappingFunction { get; set; }
+        void MappingFunctionChanged()
+        {
+            if (XAxisMappingFunction == null || YAxisMappingFunction == null) return;
+            RenderShapes();
+        }
         /// <summary>
         /// An action that adds a Point to a StreamGeometryContext using a given size
         /// </summary>
@@ -353,10 +364,6 @@ namespace DavesWPFTester
         /// Objects with an even index value specify dashes; objects with an odd index value specify gaps.
         /// </summary>
         public DoubleCollection LineStrokeDashArray { get; set; }
-
-        public DataAxis XAxis { get; set; }
-
-        public DataAxis YAxis { get; set; }
 
         public string SeriesName { get; set; }
     }

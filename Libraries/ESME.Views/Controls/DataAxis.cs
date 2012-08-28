@@ -182,19 +182,20 @@ namespace ESME.Views.Controls
         void TickValueFormatPropertyChanged() { InvalidateVisual(); }
         #endregion
 
-        #region dependency property Func<double, double> TestFunc
+        #region dependency property Func<double, double> MappingFunction
 
-        public static DependencyProperty TestFuncProperty = DependencyProperty.Register("TestFunc",
-                                                                                 typeof(Func<double, double>),
-                                                                                 typeof(DataAxis),
-                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, TestFuncPropertyChanged));
+        public static DependencyProperty MappingFunctionProperty = DependencyProperty.Register("MappingFunction",
+                                                                                               typeof(Func<double, double>),
+                                                                                               typeof(DataAxis),
+                                                                                               new FrameworkPropertyMetadata(null,
+                                                                                                                             FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                                                                                                                             MappingFunctionPropertyChanged));
 
-        public Func<double, double> TestFunc { get { return (Func<double, double>)GetValue(TestFuncProperty); } set { SetValue(TestFuncProperty, value); } }
+        public Func<double, double> MappingFunction { get { return (Func<double, double>)GetValue(MappingFunctionProperty); } set { SetValue(MappingFunctionProperty, value); } }
 
-        static void TestFuncPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).TestFuncPropertyChanged(); }
-        void TestFuncPropertyChanged() { }
+        static void MappingFunctionPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).MappingFunctionPropertyChanged(); }
+        void MappingFunctionPropertyChanged() { }
         #endregion
-
 
         #region dependency property DataAxis Axis
 
@@ -206,13 +207,14 @@ namespace ESME.Views.Controls
         public DataAxis Axis { get { return (DataAxis)GetValue(AxisProperty); } set { SetValue(AxisProperty, value); } }
         #endregion
 
-        public double MappingFunction(double value)
+        double PrivateMappingFunction(double value)
         {
             var startValue = AxisType == AxisType.Linear ? StartValue : Math.Floor(Math.Log10(StartValue));
             var endValue = AxisType == AxisType.Linear ? EndValue : Math.Ceiling(Math.Log10(EndValue));
             value = AxisType == AxisType.Linear ? value : Math.Log10(value);
             var lowValue = Math.Min(startValue, endValue);
             var highValue = Math.Max(startValue, endValue);
+            if (highValue == lowValue) return highValue;
             if (value < lowValue || value > highValue) throw new ParameterOutOfRangeException("value is out of range for this axis");
             var axisDelta = highValue - lowValue;
             var valueDelta = value - lowValue;
@@ -286,7 +288,7 @@ namespace ESME.Views.Controls
             }
             CreateChildren(availableSize);
             Axis = this;
-            TestFunc = d => (d + 1);
+            MappingFunction = PrivateMappingFunction;
             var labelSizes = new List<double>();
 
             if (Double.IsNaN(availableSize.Width) || Double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;

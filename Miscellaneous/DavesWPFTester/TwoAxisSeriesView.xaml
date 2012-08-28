@@ -20,6 +20,7 @@
                                    EndValue="{Binding EndValue}"
                                    MajorTicks="{Binding MajorTicks,
                                                         Mode=OneWayToSource}"
+                                   MappingFunction="{Binding MappingFunction}"
                                    MinorTicks="{Binding MinorTicks,
                                                         Mode=OneWayToSource}"
                                    StartValue="{Binding StartValue}"
@@ -35,6 +36,7 @@
                            EndValue="{Binding EndValue}"
                            MajorTicks="{Binding MajorTicks,
                                                 Mode=OneWayToSource}"
+                           MappingFunction="{Binding MappingFunction}"
                            MinorTicks="{Binding MinorTicks,
                                                 Mode=OneWayToSource}"
                            StartValue="{Binding StartValue}"
@@ -42,7 +44,7 @@
         <app:DataCanvas x:Name="DataCanvas"
                         MajorTickLineColor="{Binding MajorTickLineColor}"
                         MinorTickLineColor="{Binding MinorTickLineColor}"
-                        SeriesSource="{Binding SeriesSource}"
+                        SeriesSource="{Binding DataSeriesCollection}"
                         XAxisMajorTicks="{Binding XAxis.MajorTicks}"
                         XAxisMinorTicks="{Binding XAxis.MinorTicks}"
                         YAxisMajorTicks="{Binding YAxis.MajorTicks}"
