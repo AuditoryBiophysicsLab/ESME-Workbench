@@ -39,6 +39,7 @@ namespace DavesWPFTester
                 var rangeEnd = MoreMath.TwoPi;
                 var rangeStep = MoreMath.TwoPi / 100;
                 const int pointSize = 10;
+                LowerRight.Dispatcher = _dispatcher;
                 LowerRight.DataSeriesCollection.Add(new DataSeriesViewModel
                 {
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 11)).ToObservableList(),
@@ -196,7 +197,7 @@ namespace DavesWPFTester
                     }
                     if (_amplitude > 10) _amplitudeDelta = -0.1;
                     if (_amplitude < -10) _amplitudeDelta = 0.1;
-                }), null, 10000, 2000);
+                }), null, 2000, 1000);
 #endif
             };
         }

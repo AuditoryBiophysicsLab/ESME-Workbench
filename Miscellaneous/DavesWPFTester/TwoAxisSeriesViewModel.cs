@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Windows.Media;
+using System.Windows.Threading;
 using ESME.Views.Controls;
 using HRC;
 using HRC.Aspects;
@@ -38,6 +39,8 @@ namespace DavesWPFTester
             XAxisPropertyChanged();
             YAxisPropertyChanged();
         }
+
+        public Dispatcher Dispatcher { get; set; }
         [Initialize] public DataAxisViewModel XAxis { get; set; }
         [Initialize] public DataAxisViewModel YAxis { get; set; }
         public bool ShowXAxisMajorTicks { get { return XAxis.ShowMajorTicks; } set { XAxis.ShowMajorTicks = value; } }
@@ -66,7 +69,11 @@ namespace DavesWPFTester
         }
         void XAxisChanged() { foreach (var item in DataSeriesCollection) item.XAxisMappingFunction = XAxis.MappingFunction; }
         void YAxisChanged() { foreach (var item in DataSeriesCollection) item.YAxisMappingFunction = YAxis.MappingFunction; }
-        void RenderAllSeries() { foreach (var item in DataSeriesCollection) item.RenderShapes(); }
+        void RenderAllSeries()
+        {
+            using (var d = Dispatcher.DisableProcessing())
+                foreach (var item in DataSeriesCollection) item.RenderShapes();
+        }
 
         void MinMaxPropertiesChanged()
         {
