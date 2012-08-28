@@ -34,7 +34,7 @@ namespace DavesWPFTester
             {
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 var mainWindowView = (MainWindow)_viewAwareStatus.View;
-                CreateTopLeftSeriesSource(mainWindowView.TopLeftHorizontalAxis, mainWindowView.TopLeftVerticalAxis);
+                //CreateTopLeftSeriesSource(mainWindowView.TopLeftHorizontalAxis, mainWindowView.TopLeftVerticalAxis);
             };
         }
 
@@ -59,6 +59,7 @@ namespace DavesWPFTester
         #endregion
 
         [Initialize] public ObservableCollection<ISeries> TopLeftSeriesSource { get; set; }
+        [Initialize] public TwoAxisSeriesViewModel LowerRight { get; set; }
 
         void CreateTopLeftSeriesSource(DataAxis xAxis, DataAxis yAxis)
         {

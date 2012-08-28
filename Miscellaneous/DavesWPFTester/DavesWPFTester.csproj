@@ -173,6 +173,10 @@
     <Compile Include="PropertyObserver.cs" />
     <Compile Include="SeriesMarkerType.cs" />
     <Compile Include="DataCanvas.cs" />
+    <Compile Include="TwoAxisSeriesView.xaml.cs">
+      <DependentUpon>TwoAxisSeriesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TwoAxisSeriesViewModel.cs" />
     <Page Include="LegendView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -189,6 +193,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="TwoAxisSeriesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainWindowViewModel.cs" />

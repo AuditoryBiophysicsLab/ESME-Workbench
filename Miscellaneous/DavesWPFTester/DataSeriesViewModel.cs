@@ -260,8 +260,8 @@ namespace DavesWPFTester
                 case NotifyCollectionChangedAction.Add:
                     foreach (Point point in args.NewItems)
                     {
-                        if (DrawMarker) RenderMarker(point);
                         UpdateMinMax(point);
+                        if (DrawMarker) RenderMarker(point);
                     }
                     break;
                 case NotifyCollectionChangedAction.Remove:
@@ -272,9 +272,9 @@ namespace DavesWPFTester
                     {
                         var oldPoint = (Point)args.OldItems[i];
                         var newPoint = (Point)args.NewItems[i];
+                        UpdateMinMax(newPoint);
                         RemoveMarker(oldPoint);
                         if (DrawMarker) RenderMarker(newPoint);
-                        UpdateMinMax(newPoint);
                     }
                     break;
                 case NotifyCollectionChangedAction.Reset:

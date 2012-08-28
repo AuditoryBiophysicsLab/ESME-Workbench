@@ -30,6 +30,7 @@
             <RowDefinition />
             <RowDefinition />
         </Grid.RowDefinitions>
+        <!--
         <GroupBox Grid.Row="0"
                   Grid.Column="0"
                   Padding="5"
@@ -43,7 +44,7 @@
                 </GroupBox>
                 <DockPanel DockPanel.Dock="Left">
                     <DockPanel>
-                        <TextBlock Height="{Binding ActualHeight, ElementName=BottomLinearAxis}" DockPanel.Dock="Bottom" />
+                        <TextBlock x:Name="TopLeftSpacer" Height="{Binding ActualHeight, ElementName=TopLeftHorizontalAxis}" DockPanel.Dock="Bottom" />
                         <controls:DataAxis x:Name="TopLeftVerticalAxis"
                                            VerticalAlignment="Top"
                                            AxisLabel="Y"
@@ -85,11 +86,11 @@
                           DockPanel.Dock="Right"
                           Header="Legend"
                           Padding="5">
-                    <app:LegendView ItemsSource="{Binding TopLeftSeriesSource}" />
+                    <app:LegendView ItemsSource="{Binding TopRightSeriesSource}" />
                 </GroupBox>
                 <DockPanel DockPanel.Dock="Left">
                     <DockPanel>
-                        <TextBlock Height="{Binding ActualHeight, ElementName=BottomLinearAxis}" DockPanel.Dock="Bottom" />
+                        <TextBlock x:Name="TopRightSpacer" Height="{Binding ActualHeight, ElementName=TopRightHorizontalAxis}" DockPanel.Dock="Bottom" />
                         <controls:DataAxis x:Name="TopRightVerticalAxis"
                                            VerticalAlignment="Top"
                                            AxisLabel="Y"
@@ -122,6 +123,7 @@
                                                            ElementName=TopRightVerticalAxis}" />
             </DockPanel>
         </GroupBox>
+         -->
         <GroupBox Header="Test Area" Grid.Row="1" Grid.Column="0">
             <app:UsesAxes>
                 <app:DataSeriesBase XMin="0"/>
@@ -129,6 +131,9 @@
                 <app:DataSeriesBase YMin="-1"/>
                 <app:DataSeriesBase YMax="12"/>
             </app:UsesAxes>
+        </GroupBox>
+        <GroupBox Header="SeriesView" Grid.Row="1" Grid.Column="1" Padding="10">
+            <app:TwoAxisSeriesView DataContext="{Binding LowerRight}"/>
         </GroupBox>
     </Grid>
 </Window>

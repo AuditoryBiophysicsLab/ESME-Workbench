@@ -242,14 +242,14 @@ namespace ESME.Views.Controls
             if (_isVertical)
             {
                 _length = newSize.Height;
-                _startLocation = _length;
-                _endLocation = 0;
+                _startLocation = _length - 1;
+                _endLocation = 1;
             }
             else
             {
                 _length = newSize.Width;
-                _startLocation = 0;
-                _endLocation = _length;
+                _startLocation = 1;
+                _endLocation = _length + 1;
             }
             if (AxisType == AxisType.Logarithmic)
             {
@@ -474,13 +474,13 @@ namespace ESME.Views.Controls
             // object's contents.
             using (var ctx = geometry.Open())
             {
-                ctx.BeginFigure(TransformedPoint(_startLocation, 0), false, false);
-                ctx.LineTo(TransformedPoint(_endLocation, 0), true, false);
+                ctx.BeginFigure(TransformedPoint(_startLocation - (direction * _lineThickness / 2), 0), false, false);
+                ctx.LineTo(TransformedPoint(_endLocation + (direction * _lineThickness / 2), 0), true, false);
 
                 foreach (var tick in _ticks)
                 {
                     ctx.BeginFigure(TransformedPoint(tick.Location, 0), false, false);
-                    ctx.LineTo(TransformedPoint(tick.Location, tick.Length), true, false);
+                    ctx.LineTo(TransformedPoint(tick.Location, tick.Length), true, true);
                 }
             }
             // Freeze the geometry (make it unmodifiable)
