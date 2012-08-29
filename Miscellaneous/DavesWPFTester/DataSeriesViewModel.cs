@@ -144,10 +144,10 @@ namespace DavesWPFTester
             }
             if (_lineShape != null)
             {
-                Debug.WriteLine(string.Format("Re-rendering line for series {0}", SeriesName));
+                //Debug.WriteLine(string.Format("Re-rendering line for series {0}", SeriesName));
                 Shapes.Remove(_lineShape);
             }
-            else Debug.WriteLine(string.Format("Rendering line for series {0}", SeriesName));
+            //else Debug.WriteLine(string.Format("Rendering line for series {0}", SeriesName));
             var lineGeometry = new StreamGeometry();
             var lineContext = lineGeometry.Open();
             var isFirst = true;

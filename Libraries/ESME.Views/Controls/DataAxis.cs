@@ -138,7 +138,7 @@ namespace ESME.Views.Controls
                                                                                                            typeof(double),
                                                                                                            typeof(DataAxis),
                                                                                                            new FrameworkPropertyMetadata(0.1,
-                                                                                                                                         FrameworkPropertyMetadataOptions.AffectsRender,
+                                                                                                                                         FrameworkPropertyMetadataOptions.AffectsMeasure,
                                                                                                                                          StartValuePropertyChanged));
 
         public double StartValue { get { return (double)GetValue(StartValueProperty); } set { SetCurrentValue(StartValueProperty, value); } }
@@ -147,7 +147,7 @@ namespace ESME.Views.Controls
         void StartValuePropertyChanged()
         {
             MappingFunction = PrivateMappingFunction;
-            InvalidateVisual();
+            InvalidateMeasure();
         }
         #endregion
 
@@ -156,7 +156,7 @@ namespace ESME.Views.Controls
                                                                                                          typeof(double),
                                                                                                          typeof(DataAxis),
                                                                                                          new FrameworkPropertyMetadata(10.0,
-                                                                                                                                       FrameworkPropertyMetadataOptions.AffectsRender,
+                                                                                                                                       FrameworkPropertyMetadataOptions.AffectsMeasure,
                                                                                                                                        EndValuePropertyChanged));
 
         public double EndValue { get { return (double)GetValue(EndValueProperty); } set { SetCurrentValue(EndValueProperty, value); } }
@@ -165,7 +165,7 @@ namespace ESME.Views.Controls
         void EndValuePropertyChanged()
         {
             MappingFunction = PrivateMappingFunction;
-            InvalidateVisual();
+            InvalidateMeasure();
         }
         #endregion
 
