@@ -43,148 +43,149 @@ namespace DavesWPFTester
                 LowerRight.DataSeriesCollection.Add(new DataSeriesViewModel
                 {
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 11)).ToObservableList(),
-                    MarkerType = SeriesMarkerType.Plus,
+                    //MarkerType = SeriesMarkerType.Plus,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
                     MarkerStroke = Brushes.Red,
                     MarkerSize = pointSize,
                     SeriesName = "y = (1.0 * sin(x)) + 11",
                     LineStroke = Brushes.DarkViolet,
-                    LineStrokeThickness = 2,
+                    LineStrokeThickness = 1,
                 });
                 LowerRight.DataSeriesCollection.Add(new DataSeriesViewModel
                 {
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 10)).ToObservableList(),
-                    MarkerType = SeriesMarkerType.Circle,
+                    //MarkerType = SeriesMarkerType.Circle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
                     MarkerStroke = Brushes.Green,
                     MarkerSize = pointSize,
                     SeriesName = "y = sin(x) + 10",
                     LineStroke = Brushes.Red,
-                    LineStrokeThickness = 2,
+                    LineStrokeThickness = 1,
                 });
+#if true
                 LowerRight.DataSeriesCollection.Add(new DataSeriesViewModel
                 {
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 9)).ToObservableList(),
-                    MarkerType = SeriesMarkerType.Asterisk,
+                    //MarkerType = SeriesMarkerType.Asterisk,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
                     MarkerStroke = Brushes.Blue,
                     MarkerSize = pointSize,
                     SeriesName = "y = sin(x) + 9",
                     LineStroke = Brushes.Green,
-                    LineStrokeThickness = 2,
+                    LineStrokeThickness = 1,
                 });
                 LowerRight.DataSeriesCollection.Add(new DataSeriesViewModel
                 {
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 8)).ToObservableList(),
-                    MarkerType = SeriesMarkerType.Cross,
+                    //MarkerType = SeriesMarkerType.Cross,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
                     MarkerStroke = Brushes.Cyan,
                     MarkerSize = pointSize,
                     SeriesName = "y = sin(x) + 8",
                     LineStroke = Brushes.Blue,
-                    LineStrokeThickness = 2,
+                    LineStrokeThickness = 1,
                 });
                 LowerRight.DataSeriesCollection.Add(new DataSeriesViewModel
                 {
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 7)).ToObservableList(),
-                    MarkerType = SeriesMarkerType.Square,
+                    //MarkerType = SeriesMarkerType.Square,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
                     MarkerStroke = Brushes.Magenta,
                     MarkerSize = pointSize,
                     SeriesName = "y = sin(x) + 7",
                     LineStroke = Brushes.Cyan,
-                    LineStrokeThickness = 2,
+                    LineStrokeThickness = 1,
                 });
                 LowerRight.DataSeriesCollection.Add(new DataSeriesViewModel
                 {
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 6)).ToObservableList(),
-                    MarkerType = SeriesMarkerType.Diamond,
+                    //MarkerType = SeriesMarkerType.Diamond,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
                     MarkerStroke = Brushes.Cyan,
                     MarkerSize = pointSize,
                     SeriesName = "y = sin(x) + 6",
                     LineStroke = Brushes.Magenta,
-                    LineStrokeThickness = 2,
+                    LineStrokeThickness = 1,
                 });
                 LowerRight.DataSeriesCollection.Add(new DataSeriesViewModel
                 {
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 5)).ToObservableList(),
-                    MarkerType = SeriesMarkerType.UpTriangle,
+                    //MarkerType = SeriesMarkerType.UpTriangle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
                     MarkerStroke = Brushes.Orange,
                     MarkerSize = pointSize,
                     SeriesName = "y = sin(x) + 5",
                     LineStroke = Brushes.Cyan,
-                    LineStrokeThickness = 2,
+                    LineStrokeThickness = 1,
                 });
                 LowerRight.DataSeriesCollection.Add(new DataSeriesViewModel
                 {
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 4)).ToObservableList(),
-                    MarkerType = SeriesMarkerType.DownTriangle,
+                    //MarkerType = SeriesMarkerType.DownTriangle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
                     MarkerStroke = Brushes.DarkCyan,
                     MarkerSize = pointSize,
                     SeriesName = "y = sin(x) + 4",
                     LineStroke = Brushes.Orange,
-                    LineStrokeThickness = 2,
+                    LineStrokeThickness = 1,
                 });
                 LowerRight.DataSeriesCollection.Add(new DataSeriesViewModel
                 {
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 3)).ToObservableList(),
-                    MarkerType = SeriesMarkerType.RightTriangle,
+                    //MarkerType = SeriesMarkerType.RightTriangle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
                     MarkerStroke = Brushes.DarkRed,
                     MarkerSize = pointSize,
                     SeriesName = "y = sin(x) + 3",
                     LineStroke = Brushes.DarkCyan,
-                    LineStrokeThickness = 2,
+                    LineStrokeThickness = 1,
                 });
                 LowerRight.DataSeriesCollection.Add(new DataSeriesViewModel
                 {
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 2)).ToObservableList(),
-                    MarkerType = SeriesMarkerType.LeftTriangle,
+                    //MarkerType = SeriesMarkerType.LeftTriangle,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
                     MarkerStroke = Brushes.DarkSeaGreen,
                     MarkerSize = pointSize,
                     SeriesName = "y = sin(x) + 2",
                     LineStroke = Brushes.DarkRed,
-                    LineStrokeThickness = 2,
+                    LineStrokeThickness = 1,
                 });
                 LowerRight.DataSeriesCollection.Add(new DataSeriesViewModel
                 {
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 1)).ToObservableList(),
-                    MarkerType = SeriesMarkerType.Pentagram,
+                    //MarkerType = SeriesMarkerType.Pentagram,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
                     MarkerStroke = Brushes.DodgerBlue,
                     MarkerSize = pointSize,
                     SeriesName = "y = sin(x) + 1",
                     LineStroke = Brushes.DarkSeaGreen,
-                    LineStrokeThickness = 2,
+                    LineStrokeThickness = 1,
                 });
                 LowerRight.DataSeriesCollection.Add(new DataSeriesViewModel
                 {
                     SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x))).ToObservableList(),
-                    MarkerType = SeriesMarkerType.Hexagram,
+                    //MarkerType = SeriesMarkerType.Hexagram,
                     ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                     MarkerStrokeThickness = 1,
                     MarkerStroke = Brushes.DarkViolet,
                     MarkerSize = pointSize,
                     SeriesName = "y = sin(x)",
                     LineStroke = Brushes.DodgerBlue,
-                    LineStrokeThickness = 2,
+                    LineStrokeThickness = 1,
                 });
-#if false
+#endif
                 _timer = new Timer(state => _dispatcher.InvokeInBackgroundIfRequired(() =>
                 {
                     var selectedSeries = (DataSeriesViewModel)LowerRight.DataSeriesCollection.First();
@@ -195,15 +196,14 @@ namespace DavesWPFTester
                     {
                         for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, (_amplitude * Math.Sin(seriesData[i].Item1)) + 11);
                     }
-                    if (_amplitude > 10) _amplitudeDelta = -0.1;
-                    if (_amplitude < -10) _amplitudeDelta = 0.1;
-                }), null, 2000, 1000);
-#endif
+                    if (_amplitude > 10) _amplitudeDelta = -1;
+                    if (_amplitude < -10) _amplitudeDelta = 1;
+                }), null, 20, 20);
             };
         }
 
         double _amplitude = 1;
-        double _amplitudeDelta = 0.1;
+        double _amplitudeDelta = 1;
 
         static IEnumerable<double> Range(double start, double end, double step)
         {

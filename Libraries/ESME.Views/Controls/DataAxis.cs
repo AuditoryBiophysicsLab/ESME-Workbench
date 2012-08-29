@@ -146,6 +146,7 @@ namespace ESME.Views.Controls
         static void StartValuePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).StartValuePropertyChanged(); }
         void StartValuePropertyChanged()
         {
+            MappingFunction = PrivateMappingFunction;
             InvalidateVisual();
         }
         #endregion
@@ -163,6 +164,7 @@ namespace ESME.Views.Controls
         static void EndValuePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).EndValuePropertyChanged(); }
         void EndValuePropertyChanged()
         {
+            MappingFunction = PrivateMappingFunction;
             InvalidateVisual();
         }
         #endregion

@@ -28,10 +28,10 @@ namespace DavesWPFTester
 
             _propertyObserver = new PropertyObserver<TwoAxisSeriesViewModel>(this)
                 .RegisterHandler(d => d.DataSeriesCollection, DataSeriesCollectionPropertyChanged)
-                .RegisterHandler(d => XMin, MinMaxPropertiesChanged)
-                .RegisterHandler(d => XMax, MinMaxPropertiesChanged)
-                .RegisterHandler(d => YMin, MinMaxPropertiesChanged)
-                .RegisterHandler(d => YMax, MinMaxPropertiesChanged)
+                .RegisterHandler(d => XMin, XMinMaxPropertiesChanged)
+                .RegisterHandler(d => XMax, XMinMaxPropertiesChanged)
+                .RegisterHandler(d => YMin, YMinMaxPropertiesChanged)
+                .RegisterHandler(d => YMax, YMinMaxPropertiesChanged)
                 .RegisterHandler(d => XAxis, XAxisPropertyChanged)
                 .RegisterHandler(d => YAxis, YAxisPropertyChanged);
 
@@ -55,31 +55,50 @@ namespace DavesWPFTester
         public double YMin { get; set; }
         public double YMax { get; set; }
 
-        void XAxisPropertyChanged() { AxisPropertyChanged(XAxis, ref _xAxisObserver, XAxisChanged); }
-        void YAxisPropertyChanged() { AxisPropertyChanged(YAxis, ref _yAxisObserver, YAxisChanged); }
-
-        void AxisPropertyChanged(DataAxisViewModel dataAxis, ref PropertyObserver<DataAxisViewModel> observer, Action action)
+        void XAxisPropertyChanged()
         {
-            if (observer != null) observer.UnregisterHandler(d => d.MappingFunction).UnregisterHandler(d => d.StartValue).UnregisterHandler(d => d.EndValue);
+            AxisMappingFunctionChanged(XAxis, ref _xAxisObserver, XAxisChanged);
+            AxisMappingFunctionChanged(XAxis, ref _xAxisObserver, RenderAllSeries);
+        }
+        void YAxisPropertyChanged()
+        {
+            AxisMappingFunctionChanged(YAxis, ref _yAxisObserver, YAxisChanged);
+            AxisMappingFunctionChanged(XAxis, ref _xAxisObserver, RenderAllSeries);
+        }
+
+        static void AxisMappingFunctionChanged(DataAxisViewModel dataAxis, ref PropertyObserver<DataAxisViewModel> observer, Action action)
+        {
+            if (observer != null) observer.UnregisterHandler(d => d.MappingFunction);
             if (dataAxis == null) return;
-            if (observer == null) observer = new PropertyObserver<DataAxisViewModel>(XAxis);
-            observer.RegisterHandler(d => d.MappingFunction, action)
-                .RegisterHandler(d => d.StartValue, RenderAllSeries)
-                .RegisterHandler(d => d.EndValue, RenderAllSeries);
+            if (observer == null) observer = new PropertyObserver<DataAxisViewModel>(dataAxis);
+            observer.RegisterHandler(d => d.MappingFunction, action);
         }
         void XAxisChanged() { foreach (var item in DataSeriesCollection) item.XAxisMappingFunction = XAxis.MappingFunction; }
         void YAxisChanged() { foreach (var item in DataSeriesCollection) item.YAxisMappingFunction = YAxis.MappingFunction; }
         void RenderAllSeries()
         {
-            using (var d = Dispatcher.DisableProcessing())
-                foreach (var item in DataSeriesCollection) item.RenderShapes();
+            //Debug.WriteLine("Re-rendering all series");
+            foreach (var item in DataSeriesCollection) item.RenderShapes();
         }
 
-        void MinMaxPropertiesChanged()
+        void XMinMaxPropertiesChanged()
         {
-            if (XAxis != null && XAxis.Autorange) XAxis.UpdateRange(XMin, XMax);
-            if (YAxis != null && YAxis.Autorange) YAxis.UpdateRange(YMin, YMax);
+            if (XAxis != null && XAxis.Autorange)
+            {
+                //Debug.WriteLine(string.Format("Updating X Axis min/max. Old range: {0} ... {1} New range: {2} ... {3}", XAxis.StartValue, XAxis.EndValue, XMin, XMax));
+                XAxis.UpdateRange(XMin, XMax);
+            }
         }
+
+        void YMinMaxPropertiesChanged()
+        {
+            if (YAxis != null && YAxis.Autorange)
+            {
+                //Debug.WriteLine(string.Format("Updating Y Axis min/max. Old range: {0} ... {1} New range: {2} ... {3}", YAxis.StartValue, YAxis.EndValue, YMin, YMax));
+                YAxis.UpdateRange(YMin, YMax);
+            }
+        }
+
         void DataSeriesCollectionPropertyChanged()
         {
             if (_dataSeriesCollectionObserver != null) _dataSeriesCollectionObserver.UnregisterHandler(DataSeriesCollectionChanged);
@@ -151,6 +170,7 @@ namespace DavesWPFTester
                     throw new NotImplementedException("Move");
             }
         }
+
         void UpdateMinMax(ISeries dataSeries)
         {
             if (double.IsNaN(XMin)) XMin = dataSeries.XMin;
@@ -162,6 +182,7 @@ namespace DavesWPFTester
             YMin = Math.Min(YMin, dataSeries.YMin);
             YMax = Math.Max(YMax, dataSeries.YMax);
         }
+
         void UpdateMinMaxForAllSeries()
         {
             foreach (var dataSeries in DataSeriesCollection) UpdateMinMax(dataSeries);
@@ -183,11 +204,14 @@ namespace DavesWPFTester
         public double EndValue { get; set; }
         public bool ShowMajorTicks { get; set; }
         public bool ShowMinorTicks { get; set; }
+
         ObservableList<AxisTick> _majorTicks;
         public ObservableList<AxisTick> MajorTicks { get { return ShowMajorTicks ? _majorTicks : null; } set { _majorTicks = value; } }
+        
         ObservableList<AxisTick> _minorTicks;
         public ObservableList<AxisTick> MinorTicks { get { return ShowMinorTicks ? _minorTicks : null; } set { _minorTicks = value; } }
-        [Initialize("0.##")]public string TickValueFormat { get; set; }
+        
+        [Initialize("0.##")] public string TickValueFormat { get; set; }
         public bool Autorange { get; set; }
         public bool IsInverted { get; set; }
         public Func<double, double> MappingFunction { get; set; }
@@ -201,8 +225,10 @@ namespace DavesWPFTester
         public void UpdateRange(double min, double max)
         {
             if (double.IsNaN(min) || double.IsNaN(max)) return;
-            StartValue = IsInverted ? max : min;
-            EndValue = IsInverted ? min : max;
+            var startValue = IsInverted ? max : min;
+            var endValue = IsInverted ? min : max;
+            if (Math.Abs(startValue - StartValue) > 0.0001) StartValue = startValue;
+            if (Math.Abs(endValue - EndValue) > 0.0001) EndValue = endValue;
         }
     }
 }

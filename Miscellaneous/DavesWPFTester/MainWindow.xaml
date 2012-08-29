@@ -133,7 +133,7 @@
             </app:UsesAxes>
         </GroupBox>
         <GroupBox Header="SeriesView" Grid.Row="1" Grid.Column="1" Padding="10">
-            <app:TwoAxisSeriesView DataContext="{Binding LowerRight}"/>
+            <app:TwoAxisSeriesView x:Name="TwoAxisSeriesView" DataContext="{Binding LowerRight}"/>
         </GroupBox>
     </Grid>
 </Window>

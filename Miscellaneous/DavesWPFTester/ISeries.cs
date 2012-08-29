@@ -2,7 +2,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using ESME.Views.Controls;
 using Point = System.Windows.Point;
 
 namespace DavesWPFTester

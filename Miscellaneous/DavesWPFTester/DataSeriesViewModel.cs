@@ -142,7 +142,12 @@ namespace DavesWPFTester
                 }
                 return;
             }
-            if (_lineShape != null) Shapes.Remove(_lineShape);
+            if (_lineShape != null)
+            {
+                Debug.WriteLine(string.Format("Re-rendering line for series {0}", SeriesName));
+                Shapes.Remove(_lineShape);
+            }
+            else Debug.WriteLine(string.Format("Rendering line for series {0}", SeriesName));
             var lineGeometry = new StreamGeometry();
             var lineContext = lineGeometry.Open();
             var isFirst = true;
@@ -500,7 +505,7 @@ namespace DavesWPFTester
                             .RegisterHandler(d => d.YMax, UpdateMinMax);
                         _seriesObservers.Add(dataSeries, observer);
                         UpdateMinMax(dataSeries);
-                        Debug.WriteLine(string.Format("Adding DataSeries: {0}", dataSeries));
+                        //Debug.WriteLine(string.Format("Adding DataSeries: {0}", dataSeries));
                     }
                     break;
                 case NotifyCollectionChangedAction.Remove:
