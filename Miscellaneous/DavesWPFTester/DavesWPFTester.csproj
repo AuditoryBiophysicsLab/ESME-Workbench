@@ -165,6 +165,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="BarSeriesViewModel.cs" />
+    <Compile Include="NewAxisSeriesView.xaml.cs">
+      <DependentUpon>NewAxisSeriesView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LineSeriesViewModel.cs" />
     <Compile Include="ISeries.cs" />
     <Compile Include="LegendView.xaml.cs">
@@ -177,6 +180,10 @@
       <DependentUpon>TwoAxisSeriesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="TwoAxisSeriesViewModel.cs" />
+    <Page Include="NewAxisSeriesView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="LegendView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

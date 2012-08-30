@@ -8,8 +8,8 @@
         xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
         xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
         Title="Axis Control Tester"
-        Width="800"
-        Height="600"
+        Width="1000"
+        Height="1000"
         d:DataContext="{d:DesignInstance app:MainWindowViewModel}"
         mef:ViewModelLocator.ViewModel="MainWindowViewModel"
         SnapsToDevicePixels="True"
@@ -22,6 +22,7 @@
     </i:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition />
             <RowDefinition />
             <RowDefinition />
         </Grid.RowDefinitions>
@@ -80,6 +81,18 @@
                     <app:LegendView ItemsSource="{Binding LowerRight.DataSeriesCollection}" />
                 </StackPanel>
                 <app:TwoAxisSeriesView DataContext="{Binding LowerRight}" DockPanel.Dock="Left" />
+            </DockPanel>
+        </GroupBox>
+        <GroupBox Grid.Row="2"
+                  Grid.Column="0"
+                  Margin="5"
+                  Header="NewAxisSeriesView"
+                  Padding="5">
+            <DockPanel LastChildFill="True">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
+                    <app:LegendView ItemsSource="{Binding BottomLeft.DataSeriesCollection}" />
+                </StackPanel>
+                <app:NewAxisSeriesView DataContext="{Binding BottomLeft}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
     </Grid>

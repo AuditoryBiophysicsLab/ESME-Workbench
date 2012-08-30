@@ -107,6 +107,7 @@
     <Compile Include="Controls\ColorBarView.xaml.cs">
       <DependentUpon>ColorBarView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\NewDataAxis.cs" />
     <Compile Include="Controls\DataAxis.cs" />
     <Compile Include="Controls\DataPlotViewModel.cs" />
     <Compile Include="Controls\EditableKeyValuePair.cs" />

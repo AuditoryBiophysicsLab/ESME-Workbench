@@ -3,9 +3,9 @@
     /// <summary>
     /// Interaction logic for TwoAxisSeriesView.xaml
     /// </summary>
-    public partial class TwoAxisSeriesView
+    public partial class NewAxisSeriesView
     {
-        public TwoAxisSeriesView()
+        public NewAxisSeriesView()
         {
             InitializeComponent();
         }
