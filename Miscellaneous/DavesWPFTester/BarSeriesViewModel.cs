@@ -116,15 +116,15 @@ namespace DavesWPFTester
                     Data = new RectangleGeometry(new Rect(new Point(left, bottom), new Point(right, top))),
                     ToolTip = string.Format("{0:0.###}, {1:0.###}", dataPoint.X, dataPoint.Y),
                 };
-                if (!PointShapeMap.ContainsKey(plotPoint))
+                if (!PointShapeMap.ContainsKey(dataPoint))
                 {
-                    PointShapeMap.Add(plotPoint, bar);
+                    PointShapeMap.Add(dataPoint, bar);
                     Shapes.Add(bar);
                 }
                 else
                 {
-                    var shapeIndex = Shapes.IndexOf(PointShapeMap[plotPoint]);
-                    PointShapeMap[plotPoint] = bar;
+                    var shapeIndex = Shapes.IndexOf(PointShapeMap[dataPoint]);
+                    PointShapeMap[dataPoint] = bar;
                     if (shapeIndex == -1) Shapes.Add(bar);
                     else Shapes[shapeIndex] = bar;
                 }
