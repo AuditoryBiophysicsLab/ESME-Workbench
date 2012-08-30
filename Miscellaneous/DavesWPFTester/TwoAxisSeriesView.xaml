@@ -10,7 +10,7 @@
     <DockPanel LastChildFill="True">
         <DockPanel DockPanel.Dock="Left">
             <DockPanel>
-                <TextBlock Height="{Binding ActualHeight, ElementName=XAxis}" DockPanel.Dock="Bottom" />
+                <TextBlock Height="{Binding ActualHeight, ElementName=XAxis}" DockPanel.Dock="Bottom"/>
                 <controls:DataAxis x:Name="YAxis"
                                    VerticalAlignment="Top"
                                    AxisLabel="{Binding Label}"

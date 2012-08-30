@@ -228,7 +228,12 @@ namespace DavesWPFTester
         #endregion
 
         readonly Dictionary<ObservableCollection<Shape>, List<Shape>> _seriesShapeCache = new Dictionary<ObservableCollection<Shape>, List<Shape>>();
-        public DataCanvas() { SizeChanged += (s, e) => Redraw(); }
+        public DataCanvas()
+        {
+            SizeChanged += (s, e) => Redraw();
+            //SnapsToDevicePixels = true;
+            //UseLayoutRounding = true;
+        }
 
         void Redraw()
         {
@@ -240,10 +245,10 @@ namespace DavesWPFTester
 
         void DrawAxes()
         {
-            if (XAxisMinorTicks != null && XAxisMinorTicks.Count > 0) CreateOrUpdateAxisLines("XAxisMinorTicks", CreateAxisLines(XAxisMinorTicks, ActualHeight, true, _minorTickBrush, 1));
-            if (YAxisMinorTicks != null && YAxisMinorTicks.Count > 0) CreateOrUpdateAxisLines("YAxisMinorTicks", CreateAxisLines(YAxisMinorTicks, ActualWidth, false, _minorTickBrush, 1));
             if (XAxisMajorTicks != null && XAxisMajorTicks.Count > 0) CreateOrUpdateAxisLines("XAxisMajorTicks", CreateAxisLines(XAxisMajorTicks.Skip(1), ActualHeight, true, _majorTickBrush, 1));
             if (YAxisMajorTicks != null && YAxisMajorTicks.Count > 0) CreateOrUpdateAxisLines("YAxisMajorTicks", CreateAxisLines(YAxisMajorTicks.Skip(1), ActualWidth, false, _majorTickBrush, 1));
+            if (XAxisMinorTicks != null && XAxisMinorTicks.Count > 0) CreateOrUpdateAxisLines("XAxisMinorTicks", CreateAxisLines(XAxisMinorTicks, ActualHeight, true, _minorTickBrush, 1));
+            if (YAxisMinorTicks != null && YAxisMinorTicks.Count > 0) CreateOrUpdateAxisLines("YAxisMinorTicks", CreateAxisLines(YAxisMinorTicks, ActualWidth, false, _minorTickBrush, 1));
         }
 
         void CreateOrUpdateAxisLines(string axisKey, Shape shape)
@@ -272,6 +277,8 @@ namespace DavesWPFTester
                 Stroke = brush,
                 StrokeThickness = strokeThickness,
                 SnapsToDevicePixels = true,
+                StrokeStartLineCap = PenLineCap.Flat,
+                StrokeEndLineCap = PenLineCap.Flat,
                 Data = geometry,
             };
         }

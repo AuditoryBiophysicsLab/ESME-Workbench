@@ -38,43 +38,59 @@ namespace ESME.Views.Controls
         public ObservableCollection<AxisTick> MinorTicks { get { return (ObservableCollection<AxisTick>)GetValue(MinorTicksProperty); } set { SetCurrentValue(MinorTicksProperty, value); } }
         #endregion
 
-        #region dependency property ObservableCollection<AxisTick> MajorTickValues
+        #region dependency property ObservableCollection<AxisTick> TickValues
 
-        public static DependencyProperty MajorTickValuesProperty = DependencyProperty.Register("MajorTickValues",
-                                                                                 typeof(ObservableCollection<AxisTick>),
-                                                                                 typeof(DataAxis),
-                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsMeasure, MajorTickValuesPropertyChanged));
+        public static DependencyProperty TickValuesProperty = DependencyProperty.Register("TickValues",
+                                                                                          typeof(ObservableCollection<AxisTick>),
+                                                                                          typeof(DataAxis),
+                                                                                          new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsMeasure, TickValuesPropertyChanged));
 
-        public ObservableCollection<AxisTick> MajorTickValues { get { return (ObservableCollection<AxisTick>)GetValue(MajorTickValuesProperty); } set { SetValue(MajorTickValuesProperty, value); } }
-        static void MajorTickValuesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).MajorTickValuesPropertyChanged(args); }
-        [UsedImplicitly] CollectionObserver _majorTickValuesObserver;
-        void MajorTickValuesPropertyChanged(DependencyPropertyChangedEventArgs args)
+        public ObservableCollection<AxisTick> TickValues { get { return (ObservableCollection<AxisTick>)GetValue(TickValuesProperty); } set { SetValue(TickValuesProperty, value); } }
+        static void TickValuesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).TickValuesPropertyChanged(args); }
+        [UsedImplicitly] CollectionObserver _tickValuesObserver;
+        void TickValuesPropertyChanged(DependencyPropertyChangedEventArgs args)
         {
-            if (_majorTickValuesObserver != null)
+            if (AxisType == AxisType.Logarithmic) throw new InvalidOperationException("Cannot set TickValues on a Logarithmic axis");
+            if (_tickValuesObserver != null)
             {
-                _majorTickValuesObserver.UnregisterHandler(MajorTickValuesCollectionChanged);
-                _majorTickValuesObserver = null;
+                _tickValuesObserver.UnregisterHandler(TickValuesCollectionChanged);
+                _tickValuesObserver = null;
             }
-            if (MajorTickValues == null) return;
-            _majorTickValuesObserver = new CollectionObserver(MajorTickValues);
-            _majorTickValuesObserver.RegisterHandler(MajorTickValuesCollectionChanged);
+            if (TickValues == null) return;
+            _tickValuesObserver = new CollectionObserver(TickValues);
+            _tickValuesObserver.RegisterHandler(TickValuesCollectionChanged);
         }
-        void MajorTickValuesCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+
+        void TickValuesCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
             InvalidateMeasure();
         }
         #endregion
 
-        #region dependency property ObservableCollection<AxisTick> MinorTickValues
+        #region dependency property bool ShowMajorTicks
 
-        public static DependencyProperty MinorTickValuesProperty = DependencyProperty.Register("MinorTickValues",
-                                                                                 typeof(ObservableCollection<AxisTick>),
+        public static DependencyProperty ShowMajorTicksProperty = DependencyProperty.Register("ShowMajorTicks",
+                                                                                 typeof(bool),
                                                                                  typeof(DataAxis),
-                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, MinorTickValuesPropertyChanged));
+                                                                                 new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, ShowMajorTicksPropertyChanged));
 
-        public ObservableCollection<AxisTick> MinorTickValues { get { return (ObservableCollection<AxisTick>)GetValue(MinorTickValuesProperty); } set { SetValue(MinorTickValuesProperty, value); } }
-        static void MinorTickValuesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).MinorTickValuesPropertyChanged(args); }
-        void MinorTickValuesPropertyChanged(DependencyPropertyChangedEventArgs args) { }
+        public bool ShowMajorTicks { get { return (bool)GetValue(ShowMajorTicksProperty); } set { SetValue(ShowMajorTicksProperty, value); } }
+
+        static void ShowMajorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).ShowMajorTicksPropertyChanged(); }
+        void ShowMajorTicksPropertyChanged() { }
+        #endregion
+
+        #region dependency property bool ShowMinorTicks
+
+        public static DependencyProperty ShowMinorTicksProperty = DependencyProperty.Register("ShowMinorTicks",
+                                                                                 typeof(bool),
+                                                                                 typeof(DataAxis),
+                                                                                 new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, ShowMinorTicksPropertyChanged));
+
+        public bool ShowMinorTicks { get { return (bool)GetValue(ShowMinorTicksProperty); } set { SetValue(ShowMinorTicksProperty, value); } }
+
+        static void ShowMinorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).ShowMinorTicksPropertyChanged(); }
+        void ShowMinorTicksPropertyChanged() { }
         #endregion
 
         #region dependency property AxisLocation AxisLocation {get; set;}
@@ -129,6 +145,7 @@ namespace ESME.Views.Controls
 
         void AxisTypePropertyChanged()
         {
+            if (AxisType == AxisType.Logarithmic && (TickValues != null || TickValues != null)) throw new InvalidOperationException("Cannot set an axis to Logarithmic that is using MajorTickValues or MinorTickValues");
             InvalidateVisual();
         }
         #endregion
@@ -254,6 +271,7 @@ namespace ESME.Views.Controls
             MajorTicks = new ObservableCollection<AxisTick>();
             MinorTicks = new ObservableCollection<AxisTick>();
             SnapsToDevicePixels = true;
+            UseLayoutRounding = true;
         }
 
         #region Layout and drawing code
@@ -262,14 +280,14 @@ namespace ESME.Views.Controls
             if (_isVertical)
             {
                 _length = newSize.Height;
-                _startLocation = _length - 1;
-                _endLocation = 1;
+                _startLocation = _length;
+                _endLocation = 0;
             }
             else
             {
                 _length = newSize.Width;
-                _startLocation = 1;
-                _endLocation = _length + 1;
+                _startLocation = 0;
+                _endLocation = _length;
             }
             if (AxisType == AxisType.Logarithmic)
             {
@@ -450,7 +468,7 @@ namespace ESME.Views.Controls
             var conditionLambda = !_isVertical
                                       ? new Func<double, double, bool>((tickLocation, endLocation) => tickLocation < endLocation - 1)
                                       : ((tickLocation, endLocation) => tickLocation > endLocation + 1);
-            for (var majorTickLocation = _startLocation; conditionLambda(majorTickLocation, _endLocation); majorTickLocation += direction * _majorTickSpacing)
+            for (var majorTickLocation = _startLocation + (direction * (_lineThickness / 2)); conditionLambda(majorTickLocation, _endLocation); majorTickLocation += direction * _majorTickSpacing)
             {
                 var majorTick = new AxisTickInternal(majorTickLocation, _majorTickLength, majorTickValue, format);
                 _ticks.Add(majorTick);
@@ -482,7 +500,7 @@ namespace ESME.Views.Controls
 
             // Add a major tick at the end
             majorTickValue = AxisType == AxisType.Linear ? EndValue : Math.Pow(10, Math.Ceiling(Math.Log10(EndValue)));
-            var endTick = new AxisTickInternal(_endLocation, _majorTickLength, majorTickValue, format);
+            var endTick = new AxisTickInternal(_endLocation - (direction * (_lineThickness / 2)), _majorTickLength, majorTickValue, format);
             _ticks.Add(endTick);
             MajorTicks.Add(new AxisTick { Location = endTick.Location, Value = majorTickValue });
             //Debug.WriteLine(String.Format("Added last major tick at location {0}", endTick.Location));
@@ -494,13 +512,13 @@ namespace ESME.Views.Controls
             // object's contents.
             using (var ctx = geometry.Open())
             {
-                ctx.BeginFigure(TransformedPoint(_startLocation - (direction * _lineThickness / 2), 0), false, false);
-                ctx.LineTo(TransformedPoint(_endLocation + (direction * _lineThickness / 2), 0), true, false);
+                ctx.BeginFigure(TransformedPoint(_startLocation, _lineThickness / 2), false, false);
+                ctx.LineTo(TransformedPoint(_endLocation, _lineThickness / 2), true, false);
 
                 foreach (var tick in _ticks)
                 {
-                    ctx.BeginFigure(TransformedPoint(tick.Location, 0), false, false);
-                    ctx.LineTo(TransformedPoint(tick.Location, tick.Length), true, true);
+                    ctx.BeginFigure(TransformedPoint(tick.Location, _lineThickness / 2), false, false);
+                    ctx.LineTo(TransformedPoint(tick.Location, tick.Length + (_lineThickness / 2)), true, true);
                 }
             }
             // Freeze the geometry (make it unmodifiable)
@@ -627,6 +645,7 @@ namespace ESME.Views.Controls
     {
         public string Label { get; set; }
         public double Value { get; set; }
+        public bool IsMajorTick { get; set; }
         public bool IsLegalValue { get; set; }
     }
 
