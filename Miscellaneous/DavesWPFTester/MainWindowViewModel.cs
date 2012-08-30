@@ -39,7 +39,6 @@ namespace DavesWPFTester
             {
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 var mainWindowView = (MainWindow)_viewAwareStatus.View;
-                //CreateTopLeftSeriesSource(mainWindowView.TopLeftHorizontalAxis, mainWindowView.TopLeftVerticalAxis);
                 CreateUpperLeftSeries();
                 CreateUpperRightSeries();
                 CreateLowerLeftSeries();
@@ -49,16 +48,16 @@ namespace DavesWPFTester
                 {
                     if (AnimateLowerLeft)
                     {
-                        for (var seriesIndex = 0; seriesIndex < LowerLeft.DataSeriesCollection.Count; seriesIndex++)
+                        var selectedSeries = (BarSeriesViewModel)LowerLeft.DataSeriesCollection[0];
+                        var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
+                        selectedSeries.SeriesName = string.Format("y = {0:0.0} * x", _lowerLeftAmplitude);
+                        using (var d = _dispatcher.DisableProcessing())
                         {
-                            var selectedSeries = (BarSeriesViewModel)LowerLeft.DataSeriesCollection[seriesIndex];
-                            var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
-                            selectedSeries.SeriesName = string.Format("y = {0:0.0} * x", _amplitude);
-                            using (var d = _dispatcher.DisableProcessing())
-                            {
-                                for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, _amplitude * seriesData[i].Item1);
-                            }
+                            for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, _lowerLeftAmplitude * seriesData[i].Item1);
                         }
+                        _lowerLeftAmplitude += _lowerLeftAmplitudeDelta;
+                        if (_lowerLeftAmplitude > 10) _lowerLeftAmplitudeDelta = -1;
+                        if (_lowerLeftAmplitude < -10) _lowerLeftAmplitudeDelta = 1;
                     }
                     if (AnimateUpperLeft)
                     {
@@ -66,24 +65,25 @@ namespace DavesWPFTester
                         {
                             var selectedSeries = (LineSeriesViewModel)UpperLeft.DataSeriesCollection[seriesIndex];
                             var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
-                            selectedSeries.SeriesName = string.Format("y = ({0:0.0} * sin(x)) + {1}", _amplitude, 11 - seriesIndex);
+                            selectedSeries.SeriesName = string.Format("y = ({0:0.0} * sin(x)) + {1}", _upperLeftAmplitude, 11 - seriesIndex);
                             using (var d = _dispatcher.DisableProcessing())
                             {
-                                for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, (_amplitude * Math.Sin(seriesData[i].Item1)) + (11 - seriesIndex));
+                                for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, (_upperLeftAmplitude * Math.Sin(seriesData[i].Item1)) + (11 - seriesIndex));
                             }
                         }
+                        _upperLeftAmplitude += _upperLeftAmplitudeDelta;
+                        if (_upperLeftAmplitude > 10) _upperLeftAmplitudeDelta = -1;
+                        if (_upperLeftAmplitude < -10) _upperLeftAmplitudeDelta = 1;
                     }
-                    _amplitude += _amplitudeDelta;
-                    if (_amplitude > 10) _amplitudeDelta = -1;
-                    if (_amplitude < -10) _amplitudeDelta = 1;
                 }), null, 500, 500);
 #endif
             };
         }
 
-        double _amplitude = 1;
-        double _amplitudeDelta = 1;
-
+        double _upperLeftAmplitude = 1;
+        double _upperLeftAmplitudeDelta = 1;
+        double _lowerLeftAmplitude = 1;
+        double _lowerLeftAmplitudeDelta = 1;
         static IEnumerable<double> Range(double start, double end, double step)
         {
             if (start == end) throw new ParameterOutOfRangeException("Start and End cannot be equal");
@@ -122,7 +122,7 @@ namespace DavesWPFTester
 
         void CreateLowerLeftSeries()
         {
-            const double rangeStart = 0;
+            const double rangeStart = -10;
             const int rangeEnd = 10;
             const double rangeStep = 1;
             LowerLeft.MajorTickLineColor = Colors.Black;

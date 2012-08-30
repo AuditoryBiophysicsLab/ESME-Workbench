@@ -204,7 +204,7 @@ namespace DavesWPFTester
 
         protected override void AddPoint(Point newPoint)
         {
-            base.AddPoint(newPoint);
+            UpdateMinMax(newPoint);
             if (DrawMarker) RenderMarker(newPoint);
         }
 

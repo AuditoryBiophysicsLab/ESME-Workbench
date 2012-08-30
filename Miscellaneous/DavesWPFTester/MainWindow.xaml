@@ -59,7 +59,7 @@
             <GroupBox.Header>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Bar series, linear axes" />
-                    <CheckBox Margin="40 0 0 0" Content="Animate (known to be broken)" IsChecked="{Binding AnimateLowerLeft}" />
+                    <CheckBox Margin="40 0 0 0" Content="Animate" IsChecked="{Binding AnimateLowerLeft}" />
                 </StackPanel>
             </GroupBox.Header>
 

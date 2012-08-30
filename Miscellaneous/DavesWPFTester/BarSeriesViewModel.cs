@@ -13,11 +13,23 @@ namespace DavesWPFTester
 {
     public class BarSeriesViewModel : SeriesViewModelBase
     {
+        [UsedImplicitly] PropertyObserver<BarSeriesViewModel> _propertyObserver;
         [UsedImplicitly] CollectionObserver _pointsObserver;
-        public BarSeriesViewModel() 
+        public BarSeriesViewModel()
         {
+            _propertyObserver = new PropertyObserver<BarSeriesViewModel>(this)
+                .RegisterHandler(d => d.StrokeThickness, RenderPropertiesChanged)
+                .RegisterHandler(d => d.Stroke, RenderPropertiesChanged)
+                .RegisterHandler(d => d.Fill, RenderPropertiesChanged);
             _pointsObserver = new CollectionObserver(Points).RegisterHandler(PointsCollectionChanged);
         }
+
+        void RenderPropertiesChanged()
+        {
+            RenderSample();
+            RenderShapes();
+        }
+
         protected override void RenderSample()
         {
             var canvas = new Canvas { Width = 10, Height = 10, SnapsToDevicePixels = true, Background = Brushes.Transparent };
@@ -74,6 +86,7 @@ namespace DavesWPFTester
         public override void RenderShapes()
         {
             if (XAxisMappingFunction == null || YAxisMappingFunction == null || Points.Count == 0) return;
+            //Debug.WriteLine("Starting rendering bars");
             var xDataCoords = (from point in Points
                                orderby point.X ascending
                                select Math.Round(point.X, XRoundingPrecision)).ToList();
@@ -89,16 +102,15 @@ namespace DavesWPFTester
             var minXPlotDelta = double.MaxValue;
             for (var i = 0; i < xPlotCoords.Count - 1; i++) minXPlotDelta = Math.Min(minXPlotDelta, xPlotCoords[i + 1] - xPlotCoords[i]);
             var barHalfWidth = (minXPlotDelta * BarWidth) / 2;
-            var yZeroValue = Math.Min(YMin, Points.Select(p => p.Y).Min());
-            if (YMin < 0) yZeroValue = Math.Min(yZeroValue, 0.0);
-            var yZeroCoordinate = YAxisMappingFunction(yZeroValue);
+            var yMinValue = Math.Min(YMin, Points.Select(p => p.Y).Min());
+            var yZeroCoordinate = YMin < 0 ? YAxisMappingFunction(0.0) : YAxisMappingFunction(yMinValue);
             foreach (var plotPoint in plotPoints)
             {
                 var dataPoint = Points[plotPoints.IndexOf(plotPoint)];
                 var left = plotPoint.X - barHalfWidth;
                 var right = plotPoint.X + barHalfWidth;
                 double top, bottom;
-                if (dataPoint.Y < 0)
+                if (dataPoint.Y <= 0)
                 {
                     top = yZeroCoordinate;
                     bottom = plotPoint.Y;
@@ -108,6 +120,7 @@ namespace DavesWPFTester
                     top = plotPoint.Y;
                     bottom = yZeroCoordinate;
                 }
+                //Debug.WriteLine("Drawing bar from: (left: {0:0.#}, bottom: {1:0.#}) to (right: {2:0.#}, top: {3:0.#})", left, bottom, right, top);
                 var bar = new Path
                 {
                     Stroke = Stroke,
@@ -129,12 +142,18 @@ namespace DavesWPFTester
                     else Shapes[shapeIndex] = bar;
                 }
             }
+            //Debug.WriteLine("Finished rendering bars");
         }
 
         protected override void RemovePoint(Point oldPoint)
         {
             if (!PointShapeMap.ContainsKey(oldPoint)) return;
             Shapes.Remove(PointShapeMap[oldPoint]);
+        }
+        protected override void AddPoint(Point newPoint)
+        {
+            UpdateMinMax(newPoint);
+            RenderShapes();
         }
     }
 }

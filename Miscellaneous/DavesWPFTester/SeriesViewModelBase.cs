@@ -64,7 +64,7 @@ namespace DavesWPFTester
             RenderShapes();
         }
 
-        void UpdateMinMax(Point point)
+        protected void UpdateMinMax(Point point)
         {
             XMax = Math.Max(XMax, point.X);
             XMin = Math.Min(XMin, point.X);
@@ -138,10 +138,7 @@ namespace DavesWPFTester
             }
         }
 
-        protected virtual void AddPoint(Point newPoint)
-        {
-            UpdateMinMax(newPoint);
-        }
+        protected abstract void AddPoint(Point newPoint);
 
         protected abstract void RemovePoint(Point oldPoint);
 
