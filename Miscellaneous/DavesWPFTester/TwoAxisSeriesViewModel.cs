@@ -4,11 +4,9 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Windows.Media;
-using System.Windows.Threading;
 using ESME.Views.Controls;
 using HRC;
 using HRC.Aspects;
-using HRC.Utility;
 using HRC.ViewModels;
 
 namespace DavesWPFTester
@@ -40,13 +38,8 @@ namespace DavesWPFTester
             YAxisPropertyChanged();
         }
 
-        public Dispatcher Dispatcher { get; set; }
         [Initialize] public DataAxisViewModel XAxis { get; set; }
         [Initialize] public DataAxisViewModel YAxis { get; set; }
-        public bool ShowXAxisMajorTicks { get { return XAxis.ShowMajorTicks; } set { XAxis.ShowMajorTicks = value; } }
-        public bool ShowXAxisMinorTicks { get { return XAxis.ShowMinorTicks; } set { XAxis.ShowMinorTicks = value; } }
-        public bool ShowYAxisMajorTicks { get { return YAxis.ShowMajorTicks; } set { YAxis.ShowMajorTicks = value; } }
-        public bool ShowYAxisMinorTicks { get { return YAxis.ShowMinorTicks; } set { YAxis.ShowMinorTicks = value; } }
         [Initialize] public ObservableCollection<ISeries> DataSeriesCollection { get; set; }
         public Color MajorTickLineColor { get; set; }
         public Color MinorTickLineColor { get; set; }
@@ -107,15 +100,15 @@ namespace DavesWPFTester
             _dataSeriesCollectionObserver.RegisterHandler(DataSeriesCollectionChanged);
             UpdateMinMaxForAllSeries();
         }
-        readonly Dictionary<DataSeriesViewModel, PropertyObserver<DataSeriesViewModel>> _seriesObservers = new Dictionary<DataSeriesViewModel, PropertyObserver<DataSeriesViewModel>>();
+        readonly Dictionary<SeriesViewModelBase, PropertyObserver<SeriesViewModelBase>> _seriesObservers = new Dictionary<SeriesViewModelBase, PropertyObserver<SeriesViewModelBase>>();
         void DataSeriesCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
             switch (args.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    foreach (DataSeriesViewModel dataSeries in args.NewItems)
+                    foreach (SeriesViewModelBase dataSeries in args.NewItems)
                     {
-                        var observer = new PropertyObserver<DataSeriesViewModel>(dataSeries)
+                        var observer = new PropertyObserver<SeriesViewModelBase>(dataSeries)
                             .RegisterHandler(d => d.XMin, UpdateMinMax)
                             .RegisterHandler(d => d.XMax, UpdateMinMax)
                             .RegisterHandler(d => d.YMin, UpdateMinMax)
@@ -128,7 +121,7 @@ namespace DavesWPFTester
                     }
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    foreach (DataSeriesViewModel dataSeries in args.OldItems)
+                    foreach (SeriesViewModelBase dataSeries in args.OldItems)
                         if (_seriesObservers.ContainsKey(dataSeries))
                         {
                             _seriesObservers[dataSeries]
@@ -140,7 +133,7 @@ namespace DavesWPFTester
                         }
                     break;
                 case NotifyCollectionChangedAction.Replace:
-                    foreach (DataSeriesViewModel dataSeries in args.OldItems)
+                    foreach (SeriesViewModelBase dataSeries in args.OldItems)
                         if (_seriesObservers.ContainsKey(dataSeries))
                         {
                             _seriesObservers[dataSeries]
@@ -150,9 +143,9 @@ namespace DavesWPFTester
                                 .UnregisterHandler(d => d.YMax);
                             _seriesObservers.Remove(dataSeries);
                         }
-                    foreach (DataSeriesViewModel dataSeries in args.NewItems)
+                    foreach (SeriesViewModelBase dataSeries in args.NewItems)
                     {
-                        var observer = new PropertyObserver<DataSeriesViewModel>(dataSeries)
+                        var observer = new PropertyObserver<SeriesViewModelBase>(dataSeries)
                             .RegisterHandler(d => d.XMin, UpdateMinMax)
                             .RegisterHandler(d => d.XMax, UpdateMinMax)
                             .RegisterHandler(d => d.YMin, UpdateMinMax)
@@ -205,12 +198,6 @@ namespace DavesWPFTester
         public bool ShowMajorTicks { get; set; }
         public bool ShowMinorTicks { get; set; }
 
-        ObservableList<AxisTick> _majorTicks;
-        public ObservableList<AxisTick> MajorTicks { get { return ShowMajorTicks ? _majorTicks : null; } set { _majorTicks = value; } }
-        
-        ObservableList<AxisTick> _minorTicks;
-        public ObservableList<AxisTick> MinorTicks { get { return ShowMinorTicks ? _minorTicks : null; } set { _minorTicks = value; } }
-        
         [Initialize("0.##")] public string TickValueFormat { get; set; }
         public bool Autorange { get; set; }
         public bool IsInverted { get; set; }

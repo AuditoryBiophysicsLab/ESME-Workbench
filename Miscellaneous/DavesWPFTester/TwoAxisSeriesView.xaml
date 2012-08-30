@@ -18,11 +18,7 @@
                                    AxisType="{Binding AxisType}"
                                    DataContext="{Binding YAxis}"
                                    EndValue="{Binding EndValue}"
-                                   MajorTicks="{Binding MajorTicks,
-                                                        Mode=OneWayToSource}"
                                    MappingFunction="{Binding MappingFunction}"
-                                   MinorTicks="{Binding MinorTicks,
-                                                        Mode=OneWayToSource}"
                                    StartValue="{Binding StartValue}"
                                    TickValueFormat="{Binding TickValueFormat}" />
             </DockPanel>
@@ -34,20 +30,24 @@
                            DataContext="{Binding XAxis}"
                            DockPanel.Dock="Bottom"
                            EndValue="{Binding EndValue}"
-                           MajorTicks="{Binding MajorTicks,
-                                                Mode=OneWayToSource}"
                            MappingFunction="{Binding MappingFunction}"
-                           MinorTicks="{Binding MinorTicks,
-                                                Mode=OneWayToSource}"
                            StartValue="{Binding StartValue}"
                            TickValueFormat="{Binding TickValueFormat}" />
         <app:DataCanvas x:Name="DataCanvas"
                         MajorTickLineColor="{Binding MajorTickLineColor}"
                         MinorTickLineColor="{Binding MinorTickLineColor}"
                         SeriesSource="{Binding DataSeriesCollection}"
-                        XAxisMajorTicks="{Binding XAxis.MajorTicks}"
-                        XAxisMinorTicks="{Binding XAxis.MinorTicks}"
-                        YAxisMajorTicks="{Binding YAxis.MajorTicks}"
-                        YAxisMinorTicks="{Binding YAxis.MinorTicks}" />
+                        XAxisMajorTicks="{Binding MajorTicks,
+                                                  ElementName=XAxis,
+                                                  Mode=OneWay}"
+                        XAxisMinorTicks="{Binding MinorTicks,
+                                                  ElementName=XAxis,
+                                                  Mode=OneWay}"
+                        YAxisMajorTicks="{Binding MajorTicks,
+                                                  ElementName=YAxis,
+                                                  Mode=OneWay}"
+                        YAxisMinorTicks="{Binding MinorTicks,
+                                                  ElementName=YAxis,
+                                                  Mode=OneWay}" />
     </DockPanel>
 </UserControl>

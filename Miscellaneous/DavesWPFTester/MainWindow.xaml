@@ -2,7 +2,6 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:app="clr-namespace:DavesWPFTester"
-        xmlns:controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -21,12 +20,67 @@
             <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <GroupBox Header="SeriesView" Padding="10">
-        <DockPanel LastChildFill="True">
-            <GroupBox Margin="5" DockPanel.Dock="Right" Header="Legend">
-                <app:LegendView ItemsSource="{Binding LowerRight.DataSeriesCollection}" />
-            </GroupBox>
-            <app:TwoAxisSeriesView x:Name="TwoAxisSeriesView" DataContext="{Binding LowerRight}" DockPanel.Dock="Left" />
-        </DockPanel>
-    </GroupBox>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <GroupBox Grid.Row="0" Grid.Column="0" Margin="5" Padding="5">
+            <GroupBox.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Line series with markers, linear axes" />
+                    <CheckBox Margin="40 0 0 0" Content="Animate" IsChecked="{Binding AnimateUpperLeft}" />
+                </StackPanel>
+            </GroupBox.Header>
+            <DockPanel LastChildFill="True">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
+                    <app:LegendView ItemsSource="{Binding UpperLeft.DataSeriesCollection}" />
+                </StackPanel>
+                <app:TwoAxisSeriesView DataContext="{Binding UpperLeft}" DockPanel.Dock="Left" />
+            </DockPanel>
+        </GroupBox>
+        <GroupBox Grid.Row="0"
+                  Grid.Column="1"
+                  Margin="5"
+                  Header="Line series, semilog axes"
+                  Padding="5">
+            <DockPanel LastChildFill="True">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
+                    <app:LegendView ItemsSource="{Binding UpperRight.DataSeriesCollection}" />
+                </StackPanel>
+                <app:TwoAxisSeriesView DataContext="{Binding UpperRight}" DockPanel.Dock="Left" />
+            </DockPanel>
+        </GroupBox>
+        <GroupBox Grid.Row="1" Grid.Column="0" Margin="5" Padding="5">
+            <GroupBox.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Bar series, linear axes" />
+                    <CheckBox Margin="40 0 0 0" Content="Animate (known to be broken)" IsChecked="{Binding AnimateLowerLeft}" />
+                </StackPanel>
+            </GroupBox.Header>
+
+            <DockPanel LastChildFill="True">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
+                    <app:LegendView ItemsSource="{Binding LowerLeft.DataSeriesCollection}" />
+                </StackPanel>
+                <app:TwoAxisSeriesView DataContext="{Binding LowerLeft}" DockPanel.Dock="Left" />
+            </DockPanel>
+        </GroupBox>
+        <GroupBox Grid.Row="1"
+                  Grid.Column="1"
+                  Margin="5"
+                  Header="Bar series, semilog axes"
+                  Padding="5">
+            <DockPanel LastChildFill="True">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
+                    <app:LegendView ItemsSource="{Binding LowerRight.DataSeriesCollection}" />
+                </StackPanel>
+                <app:TwoAxisSeriesView DataContext="{Binding LowerRight}" DockPanel.Dock="Left" />
+            </DockPanel>
+        </GroupBox>
+    </Grid>
 </Window>

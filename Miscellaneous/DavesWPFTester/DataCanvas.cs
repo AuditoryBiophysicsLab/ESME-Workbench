@@ -8,7 +8,6 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using ESME.Views.Controls;
-using HRC.Utility;
 
 namespace DavesWPFTester
 {
@@ -34,49 +33,49 @@ namespace DavesWPFTester
 
         void ShapesCollectionChanged(object sender, NotifyCollectionChangedEventArgs args) { Redraw(); }
         #endregion
-        #region dependency property ObservableList<AxisTick> XAxisMajorTicks
+        #region dependency property ObservableCollection<AxisTick> XAxisMajorTicks
         public static DependencyProperty XAxisMajorTicksProperty = DependencyProperty.Register("XAxisMajorTicks",
-                                                                                          typeof(ObservableList<AxisTick>),
+                                                                                          typeof(ObservableCollection<AxisTick>),
                                                                                           typeof(DataCanvas),
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, XAxisMajorTicksPropertyChanged));
 
         static void XAxisMajorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).XAxisMajorTicksPropertyChanged(); }
         void XAxisMajorTicksPropertyChanged() { DrawAxes(); }
 
-        public ObservableList<AxisTick> XAxisMajorTicks { get { return (ObservableList<AxisTick>)GetValue(XAxisMajorTicksProperty); } set { SetCurrentValue(XAxisMajorTicksProperty, value); } }
+        public ObservableCollection<AxisTick> XAxisMajorTicks { get { return (ObservableCollection<AxisTick>)GetValue(XAxisMajorTicksProperty); } set { SetCurrentValue(XAxisMajorTicksProperty, value); } }
         #endregion
-        #region dependency property ObservableList<AxisTick> XAxisMinorTicks
+        #region dependency property ObservableCollection<AxisTick> XAxisMinorTicks
         public static DependencyProperty XAxisMinorTicksProperty = DependencyProperty.Register("XAxisMinorTicks",
-                                                                                          typeof(ObservableList<AxisTick>),
+                                                                                          typeof(ObservableCollection<AxisTick>),
                                                                                           typeof(DataCanvas),
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, XAxisMinorTicksPropertyChanged));
 
         static void XAxisMinorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).XAxisMinorTicksPropertyChanged(); }
         void XAxisMinorTicksPropertyChanged() { DrawAxes(); }
 
-        public ObservableList<AxisTick> XAxisMinorTicks { get { return (ObservableList<AxisTick>)GetValue(XAxisMinorTicksProperty); } set { SetCurrentValue(XAxisMinorTicksProperty, value); } }
+        public ObservableCollection<AxisTick> XAxisMinorTicks { get { return (ObservableCollection<AxisTick>)GetValue(XAxisMinorTicksProperty); } set { SetCurrentValue(XAxisMinorTicksProperty, value); } }
         #endregion
-        #region dependency property ObservableList<AxisTick> YAxisMajorTicks
+        #region dependency property ObservableCollection<AxisTick> YAxisMajorTicks
         public static DependencyProperty YAxisMajorTicksProperty = DependencyProperty.Register("YAxisMajorTicks",
-                                                                                          typeof(ObservableList<AxisTick>),
+                                                                                          typeof(ObservableCollection<AxisTick>),
                                                                                           typeof(DataCanvas),
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, YAxisMajorTicksPropertyChanged));
 
         static void YAxisMajorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).YAxisMajorTicksPropertyChanged(); }
         void YAxisMajorTicksPropertyChanged() { DrawAxes(); }
 
-        public ObservableList<AxisTick> YAxisMajorTicks { get { return (ObservableList<AxisTick>)GetValue(YAxisMajorTicksProperty); } set { SetCurrentValue(YAxisMajorTicksProperty, value); } }
+        public ObservableCollection<AxisTick> YAxisMajorTicks { get { return (ObservableCollection<AxisTick>)GetValue(YAxisMajorTicksProperty); } set { SetCurrentValue(YAxisMajorTicksProperty, value); } }
         #endregion
-        #region dependency property ObservableList<AxisTick> YAxisMinorTicks
+        #region dependency property ObservableCollection<AxisTick> YAxisMinorTicks
         public static DependencyProperty YAxisMinorTicksProperty = DependencyProperty.Register("YAxisMinorTicks",
-                                                                                          typeof(ObservableList<AxisTick>),
+                                                                                          typeof(ObservableCollection<AxisTick>),
                                                                                           typeof(DataCanvas),
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, YAxisMinorTicksPropertyChanged));
 
         static void YAxisMinorTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).YAxisMinorTicksPropertyChanged(); }
         void YAxisMinorTicksPropertyChanged() { DrawAxes(); }
 
-        public ObservableList<AxisTick> YAxisMinorTicks { get { return (ObservableList<AxisTick>)GetValue(YAxisMinorTicksProperty); } set { SetCurrentValue(YAxisMinorTicksProperty, value); } }
+        public ObservableCollection<AxisTick> YAxisMinorTicks { get { return (ObservableCollection<AxisTick>)GetValue(YAxisMinorTicksProperty); } set { SetCurrentValue(YAxisMinorTicksProperty, value); } }
         #endregion
 
         #region dependency property Color MinorTickLineColor
@@ -253,7 +252,11 @@ namespace DavesWPFTester
             if (_axisLines.ContainsKey(axisKey) && _axisLines[axisKey] != null) axisIndex = Children.IndexOf(_axisLines[axisKey]);
             _axisLines[axisKey] = shape;
             if (axisIndex == -1) Children.Insert(0, _axisLines[axisKey]);
-            else Children[axisIndex] = _axisLines[axisKey];
+            else
+            {
+                Children.RemoveAt(axisIndex);
+                Children.Insert(axisIndex, _axisLines[axisKey]);
+            }
         }
         readonly Dictionary<string, Shape> _axisLines = new Dictionary<string, Shape>();
 

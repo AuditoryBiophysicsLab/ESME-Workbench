@@ -164,8 +164,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BarSeriesViewModel.cs" />
     <Compile Include="CollectionObserver.cs" />
-    <Compile Include="DataSeriesViewModel.cs" />
+    <Compile Include="LineSeriesViewModel.cs" />
     <Compile Include="ISeries.cs" />
     <Compile Include="LegendView.xaml.cs">
       <DependentUpon>LegendView.xaml</DependentUpon>
@@ -173,6 +174,7 @@
     <Compile Include="PropertyObserver.cs" />
     <Compile Include="SeriesMarkerType.cs" />
     <Compile Include="DataCanvas.cs" />
+    <Compile Include="SeriesViewModelBase.cs" />
     <Compile Include="TwoAxisSeriesView.xaml.cs">
       <DependentUpon>TwoAxisSeriesView.xaml</DependentUpon>
     </Compile>

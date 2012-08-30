@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,6 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using ESME.NEMO;
-using HRC.Utility;
 using Path = System.Windows.Shapes.Path;
 
 namespace ESME.Views.Controls
@@ -17,22 +17,22 @@ namespace ESME.Views.Controls
     {
         static DataAxis() { DefaultStyleKeyProperty.OverrideMetadata(typeof(DataAxis), new FrameworkPropertyMetadata(typeof(DataAxis))); }
 
-        #region dependency property ObservableList<AxisTick> MajorTicks
+        #region dependency property ObservableCollection<AxisTick> MajorTicks
         public static DependencyProperty MajorTicksProperty = DependencyProperty.Register("MajorTicks",
-                                                                                          typeof(ObservableList<AxisTick>),
+                                                                                          typeof(ObservableCollection<AxisTick>),
                                                                                           typeof(DataAxis),
                                                                                           new FrameworkPropertyMetadata(null));
 
-        public ObservableList<AxisTick> MajorTicks { get { return (ObservableList<AxisTick>)GetValue(MajorTicksProperty); } set { SetCurrentValue(MajorTicksProperty, value); } }
+        public ObservableCollection<AxisTick> MajorTicks { get { return (ObservableCollection<AxisTick>)GetValue(MajorTicksProperty); } set { SetCurrentValue(MajorTicksProperty, value); } }
         #endregion
 
-        #region dependency property ObservableList<AxisTick> MinorTicks
+        #region dependency property ObservableCollection<AxisTick> MinorTicks
         public static DependencyProperty MinorTicksProperty = DependencyProperty.Register("MinorTicks",
-                                                                                          typeof(ObservableList<AxisTick>),
+                                                                                          typeof(ObservableCollection<AxisTick>),
                                                                                           typeof(DataAxis),
                                                                                           new FrameworkPropertyMetadata(null));
 
-        public ObservableList<AxisTick> MinorTicks { get { return (ObservableList<AxisTick>)GetValue(MinorTicksProperty); } set { SetCurrentValue(MinorTicksProperty, value); } }
+        public ObservableCollection<AxisTick> MinorTicks { get { return (ObservableCollection<AxisTick>)GetValue(MinorTicksProperty); } set { SetCurrentValue(MinorTicksProperty, value); } }
         #endregion
 
         #region dependency property List<double> MajorTickValues
@@ -235,8 +235,8 @@ namespace ESME.Views.Controls
             _majorTickSpacing = 100;
             _minorTickSpacing = 10;
             AxisLocation = AxisLocation.Right;
-            MajorTicks = new ObservableList<AxisTick>();
-            MinorTicks = new ObservableList<AxisTick>();
+            MajorTicks = new ObservableCollection<AxisTick>();
+            MinorTicks = new ObservableCollection<AxisTick>();
             SnapsToDevicePixels = true;
         }
 
@@ -422,8 +422,8 @@ namespace ESME.Views.Controls
         {
             var valueStep = (EndValue - StartValue) / Math.Abs(_endLocation - _startLocation);
             var format = TickValueFormat == "m" ? "m" : String.Format("{{0:{0}}}", TickValueFormat);
-            if (MajorTicks == null) MajorTicks = new ObservableList<AxisTick>();
-            if (MinorTicks == null) MinorTicks = new ObservableList<AxisTick>();
+            if (MajorTicks == null) MajorTicks = new ObservableCollection<AxisTick>();
+            if (MinorTicks == null) MinorTicks = new ObservableCollection<AxisTick>();
             MajorTicks.Clear();
             MinorTicks.Clear();
             // Clear the tick cache
@@ -465,7 +465,7 @@ namespace ESME.Views.Controls
             }
 
             // Add a major tick at the end
-            majorTickValue = EndValue;
+            majorTickValue = AxisType == AxisType.Linear ? EndValue : Math.Pow(10, Math.Ceiling(Math.Log10(EndValue)));
             var endTick = new AxisTickInternal(_endLocation, _majorTickLength, majorTickValue, format);
             _ticks.Add(endTick);
             MajorTicks.Add(new AxisTick { Location = endTick.Location, Value = majorTickValue });
