@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,8 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using ESME.NEMO;
+using HRC;
+using HRC.ViewModels;
 using Path = System.Windows.Shapes.Path;
 
 namespace ESME.Views.Controls
@@ -35,30 +38,43 @@ namespace ESME.Views.Controls
         public ObservableCollection<AxisTick> MinorTicks { get { return (ObservableCollection<AxisTick>)GetValue(MinorTicksProperty); } set { SetCurrentValue(MinorTicksProperty, value); } }
         #endregion
 
-        #region dependency property List<double> MajorTickValues
+        #region dependency property ObservableCollection<AxisTick> MajorTickValues
 
         public static DependencyProperty MajorTickValuesProperty = DependencyProperty.Register("MajorTickValues",
-                                                                                 typeof(List<double>),
+                                                                                 typeof(ObservableCollection<AxisTick>),
                                                                                  typeof(DataAxis),
-                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, MajorTickValuesPropertyChanged));
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsMeasure, MajorTickValuesPropertyChanged));
 
-        public List<double> MajorTickValues { get { return (List<double>)GetValue(MajorTickValuesProperty); } set { SetValue(MajorTickValuesProperty, value); } }
-
-        static void MajorTickValuesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).MajorTickValuesPropertyChanged(); }
-        void MajorTickValuesPropertyChanged() { InvalidateVisual(); }
+        public ObservableCollection<AxisTick> MajorTickValues { get { return (ObservableCollection<AxisTick>)GetValue(MajorTickValuesProperty); } set { SetValue(MajorTickValuesProperty, value); } }
+        static void MajorTickValuesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).MajorTickValuesPropertyChanged(args); }
+        [UsedImplicitly] CollectionObserver _majorTickValuesObserver;
+        void MajorTickValuesPropertyChanged(DependencyPropertyChangedEventArgs args)
+        {
+            if (_majorTickValuesObserver != null)
+            {
+                _majorTickValuesObserver.UnregisterHandler(MajorTickValuesCollectionChanged);
+                _majorTickValuesObserver = null;
+            }
+            if (MajorTickValues == null) return;
+            _majorTickValuesObserver = new CollectionObserver(MajorTickValues);
+            _majorTickValuesObserver.RegisterHandler(MajorTickValuesCollectionChanged);
+        }
+        void MajorTickValuesCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            InvalidateMeasure();
+        }
         #endregion
 
-        #region dependency property List<double> MinorTickValues
+        #region dependency property ObservableCollection<AxisTick> MinorTickValues
 
         public static DependencyProperty MinorTickValuesProperty = DependencyProperty.Register("MinorTickValues",
-                                                                                 typeof(List<double>),
+                                                                                 typeof(ObservableCollection<AxisTick>),
                                                                                  typeof(DataAxis),
-                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, MinorTickValuesPropertyChanged));
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, MinorTickValuesPropertyChanged));
 
-        public List<double> MinorTickValues { get { return (List<double>)GetValue(MinorTickValuesProperty); } set { SetValue(MinorTickValuesProperty, value); } }
-
-        static void MinorTickValuesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).MinorTickValuesPropertyChanged(); }
-        void MinorTickValuesPropertyChanged() { InvalidateVisual(); }
+        public ObservableCollection<AxisTick> MinorTickValues { get { return (ObservableCollection<AxisTick>)GetValue(MinorTickValuesProperty); } set { SetValue(MinorTickValuesProperty, value); } }
+        static void MinorTickValuesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).MinorTickValuesPropertyChanged(args); }
+        void MinorTickValuesPropertyChanged(DependencyPropertyChangedEventArgs args) { }
         #endregion
 
         #region dependency property AxisLocation AxisLocation {get; set;}
@@ -607,6 +623,13 @@ namespace ESME.Views.Controls
         public double? Value { get; set; }
     }
 
+    public class EnumeratedAxisTick
+    {
+        public string Label { get; set; }
+        public double Value { get; set; }
+        public bool IsLegalValue { get; set; }
+    }
+
     public enum AxisLocation
     {
         Top,
@@ -618,7 +641,8 @@ namespace ESME.Views.Controls
     public enum AxisType
     {
         Linear,
-        Logarithmic
+        Logarithmic,
+        Enumerated,
     }
 
 }

@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 
-namespace DavesWPFTester
+namespace HRC.ViewModels
 {
     /// <summary>
     /// Monitors the CollectionChanged event of an object that implements INotifyPropertyChanged,

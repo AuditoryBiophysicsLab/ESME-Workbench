@@ -226,9 +226,11 @@
     <Compile Include="Validation\ValidationRule.cs" />
     <Compile Include="Validation\ValidatingViewModel.cs" />
     <Compile Include="Triggers\ValidationErrorEventTrigger.cs" />
+    <Compile Include="ViewModels\CollectionObserver.cs" />
     <Compile Include="ViewModels\Mediator.cs" />
     <Compile Include="ViewModels\MenuItemViewModelBase.cs" />
     <Compile Include="ViewModels\PopupNameToViewLookupKeyMetadata.cs" />
+    <Compile Include="ViewModels\PropertyObserver.cs" />
     <Compile Include="ViewModels\SimpleCommand.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\WeakActionEvent.cs" />

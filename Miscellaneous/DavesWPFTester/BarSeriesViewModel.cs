@@ -8,6 +8,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using HRC;
 using HRC.Aspects;
+using HRC.ViewModels;
 
 namespace DavesWPFTester
 {

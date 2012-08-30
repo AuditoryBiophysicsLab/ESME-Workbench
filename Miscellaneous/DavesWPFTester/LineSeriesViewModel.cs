@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using HRC;
+using HRC.ViewModels;
 using Brush = System.Windows.Media.Brush;
 using Path = System.Windows.Shapes.Path;
 using Point = System.Windows.Point;
