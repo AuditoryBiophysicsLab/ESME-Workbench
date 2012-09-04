@@ -110,9 +110,6 @@
     <Reference Include="System.Data.Linq">
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Drawing">
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization">
       <Private>True</Private>
@@ -164,6 +161,33 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AxisLabeling\Language\Expressions\BoxCox.cs" />
+    <Compile Include="AxisLabeling\Language\Expressions\Expression.cs" />
+    <Compile Include="AxisLabeling\Language\Expressions\Formula.cs" />
+    <Compile Include="AxisLabeling\Language\Expressions\Symbol.cs" />
+    <Compile Include="AxisLabeling\Language\Range.cs" />
+    <Compile Include="AxisLabeling\Language\Types\Constant.cs" />
+    <Compile Include="AxisLabeling\Language\Types\Factor.cs" />
+    <Compile Include="AxisLabeling\Language\Types\Frame.cs" />
+    <Compile Include="AxisLabeling\Language\Types\Numeric.cs" />
+    <Compile Include="AxisLabeling\Language\Utilities.cs" />
+    <Compile Include="AxisLabeling\Layout\Axis.cs" />
+    <Compile Include="AxisLabeling\Layout\AxisLabelers\AxisLabeler.cs" />
+    <Compile Include="AxisLabeling\Layout\AxisLabelers\CategoricalAxisLabeler.cs" />
+    <Compile Include="AxisLabeling\Layout\AxisLabelers\ExtendedAxisLabeler.cs" />
+    <Compile Include="AxisLabeling\Layout\AxisLabelers\HeckbertAxisLabeler.cs" />
+    <Compile Include="AxisLabeling\Layout\AxisLabelers\MatplotlibAxisLabeler.cs" />
+    <Compile Include="AxisLabeling\Layout\AxisLabelers\WilkinsonAxisLabeler.cs" />
+    <Compile Include="AxisLabeling\Layout\AxisLayout.cs" />
+    <Compile Include="AxisLabeling\Layout\Formatters\Format.cs" />
+    <Compile Include="AxisLabeling\Layout\Formatters\Formatter.cs" />
+    <Compile Include="AxisLabeling\Layout\Formatters\QuantitativeFormatter.cs" />
+    <Compile Include="AxisLabeling\Renderer\FrameLayer.cs" />
+    <Compile Include="AxisLabeling\Renderer\Layer.cs" />
+    <Compile Include="AxisLabeling\Renderer\Transform.cs" />
+    <Compile Include="AxisLabeling\Renderer\PlotPanel.cs" />
+    <Compile Include="AxisLabeling\Renderer\PointLayer.cs" />
+    <Compile Include="AxisLabeling\Renderer\RenderState.cs" />
     <Compile Include="BarSeriesViewModel.cs" />
     <Compile Include="NewAxisSeriesView.xaml.cs">
       <DependentUpon>NewAxisSeriesView.xaml</DependentUpon>
@@ -173,6 +197,7 @@
     <Compile Include="LegendView.xaml.cs">
       <DependentUpon>LegendView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="NewDataAxis.cs" />
     <Compile Include="SeriesMarkerType.cs" />
     <Compile Include="DataCanvas.cs" />
     <Compile Include="SeriesViewModelBase.cs" />
@@ -224,6 +249,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="Properties\Settings.settings">

@@ -78,6 +78,30 @@ namespace DavesWPFTester
         public ObservableCollection<AxisTick> YAxisMinorTicks { get { return (ObservableCollection<AxisTick>)GetValue(YAxisMinorTicksProperty); } set { SetCurrentValue(YAxisMinorTicksProperty, value); } }
         #endregion
 
+        #region dependency property ObservableCollection<AxisTick> XAxisTicks
+
+        public static DependencyProperty XAxisTicksProperty = DependencyProperty.Register("XAxisTicks",
+                                                                                 typeof(ObservableCollection<AxisTick>),
+                                                                                 typeof(DataCanvas),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, XAxisTicksPropertyChanged));
+
+        public ObservableCollection<AxisTick> XAxisTicks { get { return (ObservableCollection<AxisTick>)GetValue(XAxisTicksProperty); } set { SetValue(XAxisTicksProperty, value); } }
+        static void XAxisTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).XAxisTicksPropertyChanged(args); }
+        void XAxisTicksPropertyChanged(DependencyPropertyChangedEventArgs args) { DrawAxes(); }
+        #endregion
+
+        #region dependency property ObservableCollection<AxisTick> YAxisTicks
+
+        public static DependencyProperty YAxisTicksProperty = DependencyProperty.Register("YAxisTicks",
+                                                                                 typeof(ObservableCollection<AxisTick>),
+                                                                                 typeof(DataCanvas),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, YAxisTicksPropertyChanged));
+
+        public ObservableCollection<AxisTick> YAxisTicks { get { return (ObservableCollection<AxisTick>)GetValue(YAxisTicksProperty); } set { SetValue(YAxisTicksProperty, value); } }
+        static void YAxisTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).YAxisTicksPropertyChanged(args); }
+        void YAxisTicksPropertyChanged(DependencyPropertyChangedEventArgs args) { DrawAxes(); }
+        #endregion
+
         #region dependency property Color MinorTickLineColor
 
         public static DependencyProperty MinorTickLineColorProperty = DependencyProperty.Register("MinorTickLineColor",
@@ -245,6 +269,10 @@ namespace DavesWPFTester
 
         void DrawAxes()
         {
+            if (XAxisTicks != null && XAxisTicks.Count > 0) CreateOrUpdateAxisLines("XAxisMajorTicks", CreateAxisLines(XAxisTicks.Where(t => t.IsMajorTick), ActualHeight, true, _majorTickBrush, 1));
+            if (YAxisTicks != null && YAxisTicks.Count > 0) CreateOrUpdateAxisLines("YAxisMajorTicks", CreateAxisLines(YAxisTicks.Where(t => t.IsMajorTick), ActualWidth, false, _majorTickBrush, 1));
+            if (XAxisTicks != null && XAxisTicks.Count > 0) CreateOrUpdateAxisLines("XAxisMinorTicks", CreateAxisLines(XAxisTicks.Where(t => !t.IsMajorTick), ActualHeight, true, _minorTickBrush, 1));
+            if (YAxisTicks != null && YAxisTicks.Count > 0) CreateOrUpdateAxisLines("YAxisMinorTicks", CreateAxisLines(YAxisTicks.Where(t => !t.IsMajorTick), ActualWidth, false, _minorTickBrush, 1));
             if (XAxisMajorTicks != null && XAxisMajorTicks.Count > 0) CreateOrUpdateAxisLines("XAxisMajorTicks", CreateAxisLines(XAxisMajorTicks.Skip(1), ActualHeight, true, _majorTickBrush, 1));
             if (YAxisMajorTicks != null && YAxisMajorTicks.Count > 0) CreateOrUpdateAxisLines("YAxisMajorTicks", CreateAxisLines(YAxisMajorTicks.Skip(1), ActualWidth, false, _majorTickBrush, 1));
             if (XAxisMinorTicks != null && XAxisMinorTicks.Count > 0) CreateOrUpdateAxisLines("XAxisMinorTicks", CreateAxisLines(XAxisMinorTicks, ActualHeight, true, _minorTickBrush, 1));

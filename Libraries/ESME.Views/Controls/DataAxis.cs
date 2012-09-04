@@ -470,7 +470,7 @@ namespace ESME.Views.Controls
                                       : ((tickLocation, endLocation) => tickLocation > endLocation + 1);
             for (var majorTickLocation = _startLocation + (direction * (_lineThickness / 2)); conditionLambda(majorTickLocation, _endLocation); majorTickLocation += direction * _majorTickSpacing)
             {
-                var majorTick = new AxisTickInternal(majorTickLocation, _majorTickLength, majorTickValue, format);
+                var majorTick = new AxisTickInternal(majorTickLocation, _majorTickLength, majorTickValue, true, format);
                 _ticks.Add(majorTick);
                 MajorTicks.Add(new AxisTick { Location = majorTick.Location, Value = majorTickValue });
                 //Debug.WriteLine(String.Format("Added major tick at location {0}", majorTick.Location));
@@ -478,9 +478,9 @@ namespace ESME.Views.Controls
                 {
                     for (var minorTickCount = 1; minorTickCount < 5; minorTickCount++)
                     {
-                        var minorTick = new AxisTickInternal(majorTickLocation + (direction * minorTickCount * _minorTickSpacing), _minorTickLength, null, null);
+                        var minorTick = new AxisTickInternal(majorTickLocation + (direction * minorTickCount * _minorTickSpacing), _minorTickLength, double.NaN, false, null);
                         _ticks.Add(minorTick);
-                        MinorTicks.Add(new AxisTick { Location = minorTick.Location, Value = null });
+                        MinorTicks.Add(new AxisTick { Location = minorTick.Location, Value = double.NaN });
                         //Debug.WriteLine(String.Format("Linear: Added minor tick at location {0}", minorTick.Location));
                     }
                     majorTickValue += (valueStep * _majorTickSpacing);
@@ -489,9 +489,9 @@ namespace ESME.Views.Controls
                 {
                     for (var minorTickCount = 2; minorTickCount < 10; minorTickCount++)
                     {
-                        var minorTick = new AxisTickInternal(majorTickLocation + (direction * Math.Log10(minorTickCount) * _majorTickSpacing), _minorTickLength, null, null);
+                        var minorTick = new AxisTickInternal(majorTickLocation + (direction * Math.Log10(minorTickCount) * _majorTickSpacing), _minorTickLength, double.NaN, false, null);
                         _ticks.Add(minorTick);
-                        MinorTicks.Add(new AxisTick { Location = minorTick.Location, Value = null });
+                        MinorTicks.Add(new AxisTick { Location = minorTick.Location, Value = double.NaN });
                         //Debug.WriteLine(String.Format("Log: Added minor tick at location {0}", minorTick.Location));
                     }
                     majorTickValue = Math.Pow(10, Math.Log10(majorTickValue) + 1);
@@ -500,7 +500,7 @@ namespace ESME.Views.Controls
 
             // Add a major tick at the end
             majorTickValue = AxisType == AxisType.Linear ? EndValue : Math.Pow(10, Math.Ceiling(Math.Log10(EndValue)));
-            var endTick = new AxisTickInternal(_endLocation - (direction * (_lineThickness / 2)), _majorTickLength, majorTickValue, format);
+            var endTick = new AxisTickInternal(_endLocation - (direction * (_lineThickness / 2)), _majorTickLength, majorTickValue, true, format);
             _ticks.Add(endTick);
             MajorTicks.Add(new AxisTick { Location = endTick.Location, Value = majorTickValue });
             //Debug.WriteLine(String.Format("Added last major tick at location {0}", endTick.Location));
@@ -596,15 +596,15 @@ namespace ESME.Views.Controls
 
         class AxisTickInternal : IComparable<AxisTickInternal>
         {
-            public AxisTickInternal(double location, double height, double? value, string format)
+            public AxisTickInternal(double location, double height, double value, bool isMajorTick, string format)
             {
                 Location = location;
                 Length = height;
-                if (value == null) return;
+                if (!isMajorTick) return;
                 if (format == "m")
                 {
                     Label = new TextBlock { Text = "10" };
-                    var superscript = new TextBlock { Text = ((int)Math.Floor(Math.Log10(value.Value))).ToString(CultureInfo.InvariantCulture), FontSize = 10 };
+                    var superscript = new TextBlock { Text = ((int)Math.Floor(Math.Log10(value))).ToString(CultureInfo.InvariantCulture), FontSize = 10 };
                     var inline = new InlineUIContainer(superscript) { BaselineAlignment = BaselineAlignment.Superscript };
                     Label.Inlines.Add(inline);
                 }
@@ -638,15 +638,8 @@ namespace ESME.Views.Controls
     public class AxisTick
     {
         public double Location { get; set; }
-        public double? Value { get; set; }
-    }
-
-    public class EnumeratedAxisTick
-    {
-        public string Label { get; set; }
         public double Value { get; set; }
         public bool IsMajorTick { get; set; }
-        public bool IsLegalValue { get; set; }
     }
 
     public enum AxisLocation

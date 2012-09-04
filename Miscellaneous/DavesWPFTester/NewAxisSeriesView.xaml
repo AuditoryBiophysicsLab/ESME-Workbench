@@ -2,7 +2,6 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:app="clr-namespace:DavesWPFTester"
-             xmlns:controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DataContext="{d:DesignInstance app:TwoAxisSeriesViewModel}"
@@ -10,46 +9,44 @@
     <DockPanel LastChildFill="True">
         <DockPanel DockPanel.Dock="Left">
             <DockPanel>
-                <TextBlock Height="{Binding ActualHeight, ElementName=XAxis}" DockPanel.Dock="Bottom" Background="LightPink"/>
-                <controls:NewDataAxis x:Name="YAxis"
-                                   VerticalAlignment="Top"
-                                   AxisLabel="{Binding Label}"
-                                   AxisLocation="Right"
-                                   AxisType="{Binding AxisType}"
-                                   DataContext="{Binding YAxis}"
-                                   EndValue="{Binding EndValue}"
-                                   MappingFunction="{Binding MappingFunction}"
-                                   StartValue="{Binding StartValue}"
-                                   TickValueFormat="{Binding TickValueFormat}" Background="LightBlue"/>
+                <TextBlock Height="{Binding ActualHeight,
+                                            ElementName=XAxis}"
+                           Background="LightPink"
+                           DockPanel.Dock="Bottom" />
+                <app:NewDataAxis x:Name="YAxis"
+                                 VerticalAlignment="Top"
+                                 AxisLabel="{Binding Label}"
+                                 AxisLocation="Right"
+                                 AxisType="{Binding AxisType}"
+                                 Background="LightBlue"
+                                 DataContext="{Binding YAxis}"
+                                 EndValue="{Binding EndValue}"
+                                 MappingFunction="{Binding MappingFunction}"
+                                 StartValue="{Binding StartValue}"
+                                 TickValueFormat="{Binding TickValueFormat}" />
             </DockPanel>
         </DockPanel>
-        <controls:NewDataAxis x:Name="XAxis"
-                           AxisLabel="{Binding Label}"
-                           AxisLocation="Top"
-                           AxisType="{Binding AxisType}"
-                           DataContext="{Binding XAxis}"
-                           DockPanel.Dock="Bottom"
-                           EndValue="{Binding EndValue}"
-                           MappingFunction="{Binding MappingFunction}"
-                           StartValue="{Binding StartValue}"
-                           TickValueFormat="{Binding TickValueFormat}" 
-                              Background="LightGreen"/>
+        <app:NewDataAxis x:Name="XAxis"
+                         AxisLabel="{Binding Label}"
+                         AxisLocation="Top"
+                         AxisType="{Binding AxisType}"
+                         Background="LightGreen"
+                         DataContext="{Binding XAxis}"
+                         DockPanel.Dock="Bottom"
+                         EndValue="{Binding EndValue}"
+                         MappingFunction="{Binding MappingFunction}"
+                         StartValue="{Binding StartValue}"
+                         TickValueFormat="{Binding TickValueFormat}" />
         <app:DataCanvas x:Name="DataCanvas"
+                        Background="LightSalmon"
                         MajorTickLineColor="{Binding MajorTickLineColor}"
                         MinorTickLineColor="{Binding MinorTickLineColor}"
                         SeriesSource="{Binding DataSeriesCollection}"
-                        XAxisMajorTicks="{Binding MajorTicks,
-                                                  ElementName=XAxis,
-                                                  Mode=OneWay}"
-                        XAxisMinorTicks="{Binding MinorTicks,
-                                                  ElementName=XAxis,
-                                                  Mode=OneWay}"
-                        YAxisMajorTicks="{Binding MajorTicks,
-                                                  ElementName=YAxis,
-                                                  Mode=OneWay}"
-                        YAxisMinorTicks="{Binding MinorTicks,
-                                                  ElementName=YAxis,
-                                                  Mode=OneWay}" 
-                        Background="LightSalmon"/>
+                        XAxisTicks="{Binding AxisTicks,
+                                             ElementName=XAxis,
+                                             Mode=OneWay}"
+                        YAxisTicks="{Binding AxisTicks,
+                                             ElementName=YAxis,
+                                             Mode=OneWay}" />
     </DockPanel>
 </UserControl>
