@@ -8,15 +8,16 @@
              mc:Ignorable="d">
     <DockPanel LastChildFill="True">
         <DockPanel DockPanel.Dock="Left">
-            <DockPanel>
+            <DockPanel LastChildFill="True">
                 <TextBlock Height="{Binding ActualHeight,
                                             ElementName=XAxis}"
                            Background="LightPink"
                            DockPanel.Dock="Bottom" />
                 <app:NewDataAxis x:Name="YAxis"
+				                 DockPanel.Dock="Top"
                                  VerticalAlignment="Top"
                                  AxisLabel="{Binding Label}"
-                                 AxisLocation="Right"
+                                 AxisLocation="Left"
                                  AxisType="{Binding AxisType}"
                                  Background="LightBlue"
                                  DataContext="{Binding YAxis}"
@@ -28,7 +29,7 @@
         </DockPanel>
         <app:NewDataAxis x:Name="XAxis"
                          AxisLabel="{Binding Label}"
-                         AxisLocation="Top"
+                         AxisLocation="Bottom"
                          AxisType="{Binding AxisType}"
                          Background="LightGreen"
                          DataContext="{Binding XAxis}"

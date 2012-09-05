@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using DavesWPFTester.AxisLabeling.Language;
+using ESME.Views.Controls;
 
 namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
 {
@@ -10,7 +11,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
         public override Axis Generate(AxisLabelerOptions options, double density)
         {
             //int nbins = 9;      // in the actual Matplotlib implementation this was fixed at 9. here we let it vary like the other methods for a better comparison
-            var m = ((options.AxisDirection == AxisDirection.Horizontal ? options.Screen.Width : options.Screen.Height) * density);
+            var m = (((options.AxisLocation == AxisLocation.Top || options.AxisLocation == AxisLocation.Bottom) ? options.Screen.Width : options.Screen.Height) * density);
             var nbins = (int)Math.Max(m, 2);
 
             var steps = new List<double> { 1, 2, 5, 10 };

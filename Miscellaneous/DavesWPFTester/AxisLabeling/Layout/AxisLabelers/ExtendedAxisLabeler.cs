@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using DavesWPFTester.AxisLabeling.Language;
 using DavesWPFTester.AxisLabeling.Layout.Formatters;
+using ESME.Views.Controls;
 
 namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
 {
@@ -16,8 +17,6 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
         readonly List<double> Q = new List<double> { 1.0, 5.0, 2.0, 2.5, 4.0, 3.0 };
         readonly List<double> w = new List<double> { 0.25, 0.2, 0.5, 0.05 };
         readonly List<Format> formats;
-
-        readonly QuantitativeFormatter formatter = new QuantitativeFormatter();
 
         void AddUnitFormat(double unit, string name, Range logRange, double weight, double factoredWeight)
         {
@@ -54,13 +53,6 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
         }
 
         protected double floored_mod(double a, double n) { return a - n * Math.Floor(a / n); }
-
-        protected double pow10(int i)
-        {
-            var a = 1;
-            for (var j = 0; j < i; j++) a *= 10;
-            return a;
-        }
 
         protected double simplicity(double stepSize, List<double> stepSizes, int j, double lmin, double lmax, double lstep)
         {
@@ -105,7 +97,8 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
 
         public override Axis Generate(AxisLabelerOptions options, double density)
         {
-            var space = (options.AxisDirection == AxisDirection.Horizontal ? options.Screen.Width : options.Screen.Height);
+            var formatter = new QuantitativeFormatter(options.FontFamily);
+            var space = ((options.AxisLocation == AxisLocation.Top || options.AxisLocation == AxisLocation.Bottom) ? options.Screen.Width : options.Screen.Height);
 
             var dmax = options.DataRange.Max;
             var dmin = options.DataRange.Min;
@@ -139,7 +132,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
 
                         while (z < int.MaxValue)
                         {
-                            var step = j * q * pow10(z);
+                            var step = j * q * Math.Pow(10, z);
                             var cm = max_coverage(dmin, dmax, step * (k - 1));
 
                             if (w[0] * sm + w[1] * cm + w[2] * dm + w[3] < bestScore) break;

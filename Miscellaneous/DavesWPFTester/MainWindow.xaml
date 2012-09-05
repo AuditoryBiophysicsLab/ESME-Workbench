@@ -101,7 +101,6 @@
                 <app:TwoAxisSeriesView DataContext="{Binding LowerRight}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
-        <!-- 
         <GroupBox Grid.Row="2"
                   Grid.Column="0"
                   Margin="5"
@@ -116,6 +115,5 @@
                 <app:NewAxisSeriesView DataContext="{Binding BottomLeft}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
-        -->
     </Grid>
 </Window>

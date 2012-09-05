@@ -2,13 +2,14 @@
 using System.Windows;
 using System.Windows.Media;
 using DavesWPFTester.AxisLabeling.Language;
+using ESME.Views.Controls;
 using Vector = DavesWPFTester.AxisLabeling.Language.Types.Vector;
 
 namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
 {
     public class AxisLabelerOptions
     {
-        public AxisDirection AxisDirection { get; set; }
+        public AxisLocation AxisLocation { get; set; }
         public double FontSize { get; set; }
         public FontFamily FontFamily { get; set; }
         public Vector Symbol { get; set; }
@@ -17,7 +18,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
         public Rect Screen { get; set; }
         public Func<string, double, Axis, Rect> ComputeLabelRect;
 
-        public Axis DefaultAxis() { return new Axis { FontSize = FontSize, FontFamily = FontFamily, AxisDirection = AxisDirection, Symbol = Symbol, VisibleRange = VisibleRange }; }
+        public Axis DefaultAxis() { return new Axis { FontSize = FontSize, FontFamily = FontFamily, AxisLocation = AxisLocation, Symbol = Symbol, VisibleRange = VisibleRange }; }
     }
     public abstract class AxisLabeler
     {

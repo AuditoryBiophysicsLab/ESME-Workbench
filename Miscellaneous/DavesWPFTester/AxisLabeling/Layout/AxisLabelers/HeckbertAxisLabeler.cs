@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using DavesWPFTester.AxisLabeling.Language;
 using DavesWPFTester.AxisLabeling.Language.Types;
+using ESME.Views.Controls;
 
 namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
 {
@@ -28,7 +29,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
 
         public override Axis Generate(AxisLabelerOptions options, double density)
         {
-            var m = ((options.AxisDirection == AxisDirection.Horizontal ? options.Screen.Width : options.Screen.Height) * density);
+            var m = (((options.AxisLocation == AxisLocation.Top || options.AxisLocation == AxisLocation.Bottom) ? options.Screen.Width : options.Screen.Height) * density);
             m = Math.Max(m, 2);
 
             var v = (Numeric)options.Symbol;

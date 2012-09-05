@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media;
 using DavesWPFTester.AxisLabeling.Layout.AxisLabelers;
+using ESME.Views.Controls;
 
 namespace DavesWPFTester.AxisLabeling.Layout.Formatters
 {
@@ -12,9 +13,8 @@ namespace DavesWPFTester.AxisLabeling.Layout.Formatters
         readonly Dictionary<double, double> ems;
         // In the paper we had a minimum font size of 5, but that's pretty stinking tiny. 7 is probably a better minimum size.
 
-        public QuantitativeFormatter()
+        public QuantitativeFormatter(FontFamily fontFamily)
         {
-            var fontFamily = new FontFamily("Verdana");
             ems = (from x in fontSizes select new { x, size = fontFamily.LineSpacing * x }).ToDictionary(a => a.x, a => a.size);
         }
 
@@ -65,12 +65,22 @@ namespace DavesWPFTester.AxisLabeling.Layout.Formatters
             var em = ems[data.FontSize];
             var rects = data.Labels.Select(s => options.ComputeLabelRect(s.Item2, s.Item1, data)).ToList();
             // takes adjacent pairs of rectangles
-            var overlap = rects.Take(rects.Count() - 1).Zip(rects.Skip(1),
+            var take = rects.Take(rects.Count - 1).ToList();
+            var skip = rects.Skip(1).ToList();
+            var zip = take.Zip(skip, (a, b) =>
+                               {
+                                   var dist = (options.AxisLocation == AxisLocation.Top || options.AxisLocation == AxisLocation.Bottom) ? b.Left - a.Right : a.Top - b.Bottom;
+                                   return Math.Min(1, 2 - (1.5 * em) / Math.Max(0, dist));
+                               }).ToList();
+            var overlap = zip.Min();
+#if false
+            var overlap = rects.Take(rects.Count - 1).Zip(rects.Skip(1),
                                                             (a, b) =>
                                                             {
-                                                                var dist = (options.AxisDirection == AxisDirection.Horizontal) ? b.Left - a.Right : a.Top - b.Bottom;
+                                                                var dist = (options.AxisLocation == AxisLocation.Top || options.AxisLocation == AxisLocation.Bottom) ? b.Left - a.Right : a.Top - b.Bottom;
                                                                 return Math.Min(1, 2 - (1.5 * em) / Math.Max(0, dist));
                                                             }).Min();
+#endif
             return overlap;
         }
 

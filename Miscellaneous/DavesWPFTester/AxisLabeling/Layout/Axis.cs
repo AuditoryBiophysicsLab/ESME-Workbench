@@ -4,6 +4,7 @@ using System.Windows.Media;
 using DavesWPFTester.AxisLabeling.Language;
 using DavesWPFTester.AxisLabeling.Language.Expressions;
 using DavesWPFTester.AxisLabeling.Layout.Formatters;
+using ESME.Views.Controls;
 
 namespace DavesWPFTester.AxisLabeling.Layout
 {
@@ -16,7 +17,7 @@ namespace DavesWPFTester.AxisLabeling.Layout
     public class Axis
     {
         public Value Symbol { get; set; }
-        public AxisDirection AxisDirection { get; set; }
+        public AxisLocation AxisLocation { get; set; }
 
         // Formatting results
         public Range VisibleRange { get; set; }
@@ -44,7 +45,7 @@ namespace DavesWPFTester.AxisLabeling.Layout
         public Axis()
         {
             Labels = new List<Tuple<double, string>>();
-            AxisDirection = AxisDirection.Horizontal;
+            AxisLocation = AxisLocation.Bottom;
             Score = -10000000;
             TickSize = 7;
             FontSize = 12;
@@ -64,7 +65,7 @@ namespace DavesWPFTester.AxisLabeling.Layout
             {
                 Symbol = Symbol,
                 FontSize = FontSize,
-                AxisDirection = AxisDirection,
+                AxisLocation = AxisLocation,
                 Labels = new List<Tuple<double, string>>(Labels),
                 Score = Score,
                 TickSize = TickSize,

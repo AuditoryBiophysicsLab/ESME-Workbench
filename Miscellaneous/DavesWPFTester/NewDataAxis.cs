@@ -57,7 +57,7 @@ namespace DavesWPFTester
         public static readonly DependencyProperty AxisLocationProperty = DependencyProperty.Register("AxisLocation",
                                                                                                      typeof(AxisLocation),
                                                                                                      typeof(NewDataAxis),
-                                                                                                     new FrameworkPropertyMetadata((AxisLocation.Top),
+                                                                                                     new FrameworkPropertyMetadata((AxisLocation.Bottom),
                                                                                                                                    FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                                                                                    FrameworkPropertyMetadataOptions.AffectsMeasure |
                                                                                                                                    FrameworkPropertyMetadataOptions.AffectsRender,
@@ -229,7 +229,7 @@ namespace DavesWPFTester
             var axisDelta = highValue - lowValue;
             var valueDelta = value - lowValue;
             var valueRatio = valueDelta / axisDelta;
-            var offsetFromLength = _axisOptions.AxisDirection == AxisDirection.Vertical;
+            var offsetFromLength = _axisOptions.AxisLocation == AxisLocation.Left || _axisOptions.AxisLocation == AxisLocation.Right;
             if (endValue < startValue) offsetFromLength = !offsetFromLength;
             var lengthOffset = offsetFromLength ? _length - (_length * valueRatio) : _length * valueRatio;
             return lengthOffset;
@@ -252,26 +252,11 @@ namespace DavesWPFTester
             _axisOptions.FontFamily = TextBlock.GetFontFamily(this);
             _axisOptions.ComputeLabelRect = ComputeLabelRect;
             _axisOptions.DataRange = new Range(StartValue, EndValue);
+            _axisOptions.VisibleRange = new Range(StartValue, EndValue);
             _lineThickness = 1;
             _majorTickSpacing = 100;
             _minorTickSpacing = 10;
-            switch (AxisLocation)
-            {
-                case AxisLocation.Top:
-                    _axisOptions.AxisDirection = AxisDirection.Horizontal;
-                    break;
-                case AxisLocation.Bottom:
-                    _axisOptions.AxisDirection = AxisDirection.Horizontal;
-                    break;
-                case AxisLocation.Left:
-                    _axisOptions.AxisDirection = AxisDirection.Vertical;
-                    break;
-                case AxisLocation.Right:
-                    _axisOptions.AxisDirection = AxisDirection.Vertical;
-                    break;
-                default:
-                    throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
-            }
+            _axisOptions.AxisLocation = AxisLocation;
             MappingFunction = PrivateMappingFunction;
             Axis = this;
             switch (AxisLayoutAlgorithm)
@@ -289,54 +274,48 @@ namespace DavesWPFTester
                     _axisLabeler = new HeckbertAxisLabeler();
                     break;
             }
+            _typeface = new Typeface(TextBlock.GetFontFamily(this), TextBlock.GetFontStyle(this), TextBlock.GetFontWeight(this), TextBlock.GetFontStretch(this));
             InvalidateVisual();
         }
 
+        Typeface _typeface;
         Rect ComputeLabelRect(string label, double position, Axis axis)
         {
             double left, top;
-            var tb = new TextBlock
-            {
-                Text = label,
-                FontFamily = TextBlock.GetFontFamily(this),
-                FontSize = TextBlock.GetFontSize(this),
-                FontStretch = TextBlock.GetFontStretch(this),
-                FontWeight = TextBlock.GetFontWeight(this),
-                FontStyle = TextBlock.GetFontStyle(this),
-                //LayoutTransform = LayoutTransform,
-            };
-            switch (AxisLocation)
+            var text = new FormattedText(label, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, _typeface, TextBlock.GetFontSize(this), Brushes.Black);
+            switch (axis.AxisLocation)
             {
                 case AxisLocation.Top:
-                    left = position;
-                    top = axis.TickSize - tb.Height;
+                    left = position - (text.Width / 2);
+                    top = axis.TickSize - text.Height;
                     break;
                 case AxisLocation.Bottom:
-                    left = position;
-                    top = axis.TickSize + tb.Height;
+                    left = position - (text.Width / 2);
+                    top = axis.TickSize + text.Height;
                     break;
                 case AxisLocation.Left:
-                    top = position;
-                    left = axis.TickSize - tb.Width;
+                    top = position - (text.Height / 2);
+                    left = axis.TickSize - text.Width;
                     break;
                 case AxisLocation.Right:
-                    top = position;
-                    left = axis.TickSize + tb.Width;
+                    top = position - (text.Height / 2);
+                    left = axis.TickSize + text.Width;
                     break;
                 default:
                     throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
             }
-            return new Rect(top, left, tb.Width, tb.Height);
+            return new Rect(top, left, text.Width, text.Height);
         }
 
         #region Layout and drawing code
         void CreateChildren(Size newSize)
         {
-            if (_axisOptions == null) return;
+            if (_axisOptions == null) OnDependencyPropertyChanged();
+            if (_axisOptions == null) throw new ApplicationException();
+            _axisOptions.Screen = new Rect(newSize);
+            var axis = _axisLabeler.Generate(_axisOptions, 1.0 / 96.0);
 
-            var axis = _axisLabeler.Generate(_axisOptions, 1.0 / 150);
-
-            if (_axisOptions.AxisDirection == AxisDirection.Vertical)
+            if (_axisOptions.AxisLocation == AxisLocation.Left || _axisOptions.AxisLocation == AxisLocation.Right)
             {
                 _length = newSize.Height;
                 _startLocation = _length;
@@ -386,27 +365,26 @@ namespace DavesWPFTester
 
             if (Double.IsNaN(availableSize.Width) || Double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;
             if (Double.IsNaN(availableSize.Height) || Double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
-            var sizeToContent = new Size(SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
-            _axis.Measure(sizeToContent);
+            _axis.Measure(availableSize);
             foreach (var tick in _ticks)
             {
                 if (tick.Label != null)
                 {
-                    tick.Label.Measure(sizeToContent);
-                    labelSizes.Add(_axisOptions.AxisDirection == AxisDirection.Vertical ? tick.Label.DesiredSize.Width : tick.Label.DesiredSize.Height);
+                    tick.Label.Measure(availableSize);
+                    labelSizes.Add(_axisOptions.AxisLocation == AxisLocation.Left || _axisOptions.AxisLocation == AxisLocation.Right ? tick.Label.DesiredSize.Width : tick.Label.DesiredSize.Height);
                 }
             }
 
             double axisLabelSize = 0;
             if (_axisLabel != null)
             {
-                _axisLabel.Measure(sizeToContent);
+                _axisLabel.Measure(availableSize);
                 axisLabelSize = _axisLabel.DesiredSize.Height;
             }
             var maxLabelSize = labelSizes.Max();
             var shortSize = maxLabelSize + MajorTickLength + TickLabelSpacing + axisLabelSize + TickLabelSpacing;
             var longSize = _length;
-            var desiredSize = _axisOptions.AxisDirection == AxisDirection.Vertical ? new Size(shortSize, longSize) : new Size(longSize, shortSize);
+            var desiredSize = _axisOptions.AxisLocation == AxisLocation.Left || _axisOptions.AxisLocation == AxisLocation.Right ? new Size(shortSize, longSize) : new Size(longSize, shortSize);
 
             // desiredSize = ... computed sum of children's DesiredSize ...;
             // IMPORTANT: do not allow PositiveInfinity to be returned, that will raise an exception in the caller!
@@ -416,6 +394,9 @@ namespace DavesWPFTester
 
         protected override Size ArrangeOverride(Size arrangeSize)
         {
+            if (_axisOptions == null) throw new ApplicationException();
+            _axisOptions.Screen = new Rect(arrangeSize);
+            var axis = _axisLabeler.Generate(_axisOptions, 1.0 / 150);
             switch (AxisLocation)
             {
                 case AxisLocation.Top:
@@ -519,8 +500,8 @@ namespace DavesWPFTester
             _ticks.Clear();
 
             var majorTickValue = AxisType == AxisType.Linear ? StartValue : Math.Pow(10, Math.Floor(Math.Log10(StartValue)));
-            var direction = _axisOptions.AxisDirection == AxisDirection.Vertical ? -1 : 1;
-            var conditionLambda = _axisOptions.AxisDirection == AxisDirection.Horizontal
+            var direction = _axisOptions.AxisLocation == AxisLocation.Left || _axisOptions.AxisLocation == AxisLocation.Right ? -1 : 1;
+            var conditionLambda = _axisOptions.AxisLocation == AxisLocation.Left || _axisOptions.AxisLocation == AxisLocation.Right
                                       ? new Func<double, double, bool>((tickLocation, endLocation) => tickLocation < endLocation - 1)
                                       : ((tickLocation, endLocation) => tickLocation > endLocation + 1);
             for (var majorTickLocation = _startLocation + (direction * (_lineThickness / 2)); conditionLambda(majorTickLocation, _endLocation); majorTickLocation += direction * _majorTickSpacing)

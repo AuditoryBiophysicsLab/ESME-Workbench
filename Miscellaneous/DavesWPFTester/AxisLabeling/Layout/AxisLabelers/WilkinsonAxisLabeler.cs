@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using DavesWPFTester.AxisLabeling.Language;
 using DavesWPFTester.AxisLabeling.Language.Types;
+using ESME.Views.Controls;
 
 namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
 {
@@ -13,7 +14,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
 
         public Axis Generate(AxisLabelerOptions options, double density, double mincoverage)
         {
-            var m = ((options.AxisDirection == AxisDirection.Horizontal ? options.Screen.Width : options.Screen.Height) * density);
+            var m = (((options.AxisLocation == AxisLocation.Top || options.AxisLocation == AxisLocation.Bottom) ? options.Screen.Width : options.Screen.Height) * density);
             m = Math.Max(m, 2);
 
             Axis best = null;
