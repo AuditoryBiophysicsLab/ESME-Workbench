@@ -284,9 +284,9 @@ namespace DavesWPFTester
         {
             double tickDirectionScale;
             double originScale;
-            _axisTransform.Children.Clear();
             double axisDirectionTranslation;
             double tickDirectionTranslation;
+            _axisTransform.Children.Clear();
             // The intent of _axisTransform is to make every axis draw the same as a Bottom axis (i.e. the StartValue is at 
             // transformed-X of 0, and the axis line is drawn from top left to top right, axis ticks from top to tickLength)
             switch (AxisLocation)
