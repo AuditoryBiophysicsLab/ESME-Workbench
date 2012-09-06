@@ -23,7 +23,7 @@ namespace DavesWPFTester.AxisLabeling.Layout
         public static double AxisDensity = 1.0 / 150;
         public static double AxisFontSize = 12.0;
         readonly AxisLabelerOptions _options;
-        public AxisLayout(AxisLocation axisLocation, Vector symbol, Range dataRange, Range visibleRange, Func<string, double, Axis, Rect> computeLabelRect, Rect screen)
+        public AxisLayout(AxisLocation axisLocation, Vector symbol, Range dataRange, Range visibleRange, Func<string, double, Axis, AxisLabelerOptions, Rect> computeLabelRect, Rect screen)
         {
             _options = new AxisLabelerOptions
             {

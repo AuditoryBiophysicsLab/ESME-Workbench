@@ -23,7 +23,6 @@ namespace DavesWPFTester.AxisLabeling.Layout
         public Range VisibleRange { get; set; }
 
         public double FontSize { get; set; }
-        public FontFamily FontFamily { get; set; }
         public double TickSize { get; set; }
         public AxisDirection LabelDirection { get; set; }
         

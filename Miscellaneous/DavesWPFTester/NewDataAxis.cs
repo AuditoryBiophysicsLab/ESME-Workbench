@@ -241,17 +241,27 @@ namespace DavesWPFTester
             SnapsToDevicePixels = true;
             UseLayoutRounding = true;
             AxisTicks = new ObservableCollection<AxisTick>();
-            SizeChanged += (s, e) => CreateAxisTransform(new Size(ActualWidth, ActualHeight));
         }
 
         void OnDependencyPropertyChanged()
         {
             // Catchall property changed function, called when any of the dependency properties that might affect layout, arrange or render change
             if (_axisOptions == null) _axisOptions = new AxisLabelerOptions();
-            _axisOptions.DataRange = DataRange;
-            _axisOptions.VisibleRange = VisibleRange;
+            double minValue, maxValue;
+            if (AxisType == AxisType.Logarithmic)
+            {
+                minValue = Math.Log10(StartValue);
+                maxValue = Math.Log10(EndValue);
+            }
+            else
+            {
+                minValue = Math.Min(StartValue, EndValue);
+                maxValue = Math.Max(StartValue, EndValue);
+            }
+            _axisOptions.DataRange = new Range(minValue, maxValue);
+            _axisOptions.VisibleRange = new Range(minValue, maxValue);
             _axisOptions.FontSize = TextBlock.GetFontSize(this);
-            _axisOptions.FontFamily = TextBlock.GetFontFamily(this);
+            _axisOptions.Typeface = new Typeface(TextBlock.GetFontFamily(this), TextBlock.GetFontStyle(this), TextBlock.GetFontWeight(this), TextBlock.GetFontStretch(this));
             _axisOptions.ComputeLabelRect = ComputeLabelRect;
             _axisOptions.DataRange = new Range(StartValue, EndValue);
             _axisOptions.VisibleRange = new Range(StartValue, EndValue);
@@ -276,19 +286,16 @@ namespace DavesWPFTester
                     _axisLabeler = new HeckbertAxisLabeler();
                     break;
             }
-            _typeface = new Typeface(TextBlock.GetFontFamily(this), TextBlock.GetFontStyle(this), TextBlock.GetFontWeight(this), TextBlock.GetFontStretch(this));
             InvalidateVisual();
         }
 
-        void CreateAxisTransform(Size newSize)
+        GeneralTransformGroup CreateAxisTransform(double startValue, double endValue, Size newSize)
         {
             double tickDirectionScale;
             double originScale;
             double axisDirectionTranslation;
             double tickDirectionTranslation;
-            _axisTransform.Children.Clear();
-            // The intent of _axisTransform is to make every axis draw the same as a Bottom axis (i.e. the StartValue is at 
-            // transformed-X of 0, and the axis line is drawn from top left to top right, axis ticks from top to tickLength)
+            double axisLength;
             switch (AxisLocation)
             {
                 case AxisLocation.Top:
@@ -296,55 +303,56 @@ namespace DavesWPFTester
                     originScale = 1.0;
                     axisDirectionTranslation = 0.0;
                     tickDirectionTranslation = newSize.Height;
+                    axisLength = newSize.Width;
                     break;
                 case AxisLocation.Bottom:
                     tickDirectionScale = 1.0;
                     originScale = 1.0;
                     axisDirectionTranslation = 0.0;
                     tickDirectionTranslation = 0.0;
+                    axisLength = newSize.Width;
                     break;
                 case AxisLocation.Left:
                     tickDirectionScale = -1.0;
                     originScale = -1.0;
                     axisDirectionTranslation = newSize.Height;
                     tickDirectionTranslation = newSize.Width;
-                    //_axisTransform.Children.Add(new SwapTransform());
+                    axisLength = newSize.Height;
                     break;
                 case AxisLocation.Right:
                     tickDirectionScale = 1.0;
                     originScale = -1.0;
                     axisDirectionTranslation = newSize.Height;
                     tickDirectionTranslation = 0.0;
-                    //_axisTransform.Children.Add(new SwapTransform());
+                    axisLength = newSize.Height;
                     break;
                 default:
                     throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
             }
-            var startValue = StartValue;
-            var endValue = EndValue;
+            var result = new GeneralTransformGroup();
+            // The intent of _axisTransform is to make every axis draw the same as a Bottom axis (i.e. the StartValue is at 
+            // transformed-X of 0, and the axis line is drawn from top left to top right, axis ticks from top to tickLength)
             if (AxisType == AxisType.Logarithmic)
             {
                 startValue = Math.Log10(startValue);
                 endValue = Math.Log10(endValue);
-                _axisTransform.Children.Add(new LogTransform(10));
+                result.Children.Add(new LogTransform(10));
             }
             var lowValue = Math.Min(startValue, endValue);
             var highValue = Math.Max(startValue, endValue);
             var range = highValue - lowValue;
-            _axisTransform.Children.Add(new TranslateTransform(-startValue, 0));
             if (startValue > endValue) originScale *= -1;
-            _axisTransform.Children.Add(new ScaleTransform(originScale * (newSize.Width / range), tickDirectionScale));
-            _axisTransform.Children.Add(new TranslateTransform(axisDirectionTranslation, tickDirectionTranslation));
-            if (AxisLocation == AxisLocation.Left || AxisLocation == AxisLocation.Right) _axisTransform.Children.Add(new SwapTransform());
+            result.Children.Add(new TranslateTransform(-startValue, 0)); // might be -lowValue
+            result.Children.Add(new ScaleTransform(originScale * (axisLength / range), tickDirectionScale));
+            result.Children.Add(new TranslateTransform(axisDirectionTranslation, tickDirectionTranslation));
+            if (AxisLocation == AxisLocation.Left || AxisLocation == AxisLocation.Right) result.Children.Add(new SwapTransform());
+            return result;
         }
 
-        readonly GeneralTransformGroup _axisTransform = new GeneralTransformGroup();
-
-        Typeface _typeface;
-        Rect ComputeLabelRect(string label, double position, Axis axis)
+        static Rect ComputeLabelRect(string label, double position, Axis axis, AxisLabelerOptions options)
         {
-            var axisPosition = _axisTransform.Transform(new Point(position, MajorTickLength));
-            var text = new FormattedText(label, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, _typeface, TextBlock.GetFontSize(this), Brushes.Black);
+            var axisPosition = options.AxisTransform.Transform(new Point(position, axis.TickSize));
+            var text = new FormattedText(label, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, options.Typeface, options.FontSize, Brushes.Black);
             var left = axisPosition.X;
             var top = axisPosition.Y;
             switch (axis.AxisLocation)
@@ -366,7 +374,7 @@ namespace DavesWPFTester
                 default:
                     throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
             }
-            return new Rect(new Point(top, left), new Size(text.Width, text.Height));
+            return new Rect(new Point(left, top), new Size(text.Width, text.Height));
         }
 
         #region Layout and drawing code
@@ -374,35 +382,19 @@ namespace DavesWPFTester
         {
             if (_axisOptions == null) OnDependencyPropertyChanged();
             if (_axisOptions == null) throw new ApplicationException();
-            CreateAxisTransform(newSize);
+            _axisOptions.AxisTransform = CreateAxisTransform(Math.Min(StartValue, EndValue), Math.Max(StartValue, EndValue), newSize);
             _axisOptions.Screen = new Rect(newSize);
             var axis = _axisLabeler.Generate(_axisOptions, 1.0 / 96.0);
-
-            if (_axisOptions.AxisLocation == AxisLocation.Left || _axisOptions.AxisLocation == AxisLocation.Right)
-            {
-                _length = newSize.Height;
-                _startLocation = _length;
-                _endLocation = 0;
-            }
-            else
-            {
-                _length = newSize.Width;
-                _startLocation = 0;
-                _endLocation = _length;
-            }
-            if (AxisType == AxisType.Logarithmic)
-            {
-                var startTickValue = Math.Floor(Math.Log10(StartValue));
-                var endTickValue = Math.Ceiling(Math.Log10(EndValue));
-                _majorTickCount = (int)(endTickValue - startTickValue);
-            }
-            else for (_majorTickCount = 2; _majorTickCount < 20; _majorTickCount++) if ((_length / (_majorTickCount + 1)) < 100) break;
-
-            _majorTickSpacing = _length / _majorTickCount;
-            _minorTickSpacing = _majorTickSpacing / 5;
+            var maxLabelValue = axis.Labels.Select(l => l.Item1).Max();
+            var minLabelValue = axis.Labels.Select(l => l.Item1).Min();
+            var labelRange = maxLabelValue - minLabelValue;
+            var extendRange = labelRange * .05; // Extend range by 5% on either side of the min and max labels
+            _minRange = minLabelValue - extendRange;
+            _maxRange = maxLabelValue + extendRange;
+            var axisTransform = StartValue > EndValue ? CreateAxisTransform(_maxRange, _minRange, newSize) : CreateAxisTransform(_minRange, _maxRange, newSize);
 
             Children.Clear();
-            _axis = CreateAxis();
+            _axis = CreateAxis(axis, axisTransform, _minRange, _maxRange);
             Children.Add(_axis);
             _ticks.AddLabels(this);
 
@@ -413,8 +405,11 @@ namespace DavesWPFTester
             }
         }
 
+        double _minRange, _maxRange;
         protected override Size MeasureOverride(Size availableSize)
         {
+            if (Double.IsNaN(availableSize.Width) || Double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;
+            if (Double.IsNaN(availableSize.Height) || Double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
             if (AxisType == AxisType.Logarithmic)
             {
                 if (StartValue <= 0) throw new ParameterOutOfRangeException("StartValue cannot be zero or negative on a Logarithmic axis");
@@ -426,8 +421,6 @@ namespace DavesWPFTester
             MappingFunction = PrivateMappingFunction;
             var labelSizes = new List<double>();
 
-            if (Double.IsNaN(availableSize.Width) || Double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;
-            if (Double.IsNaN(availableSize.Height) || Double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
             _axis.Measure(availableSize);
             foreach (var tick in _ticks)
             {
@@ -553,14 +546,43 @@ namespace DavesWPFTester
             return arrangeSize;
         }
 
-        Path CreateAxis()
+        Path CreateAxis(Axis axis, GeneralTransform axisTransform, double minRange, double maxRange)
         {
-            var valueStep = (EndValue - StartValue) / Math.Abs(_endLocation - _startLocation);
             var format = TickValueFormat == "m" ? "m" : String.Format("{{0:{0}}}", TickValueFormat);
             if (AxisTicks == null) AxisTicks = new ObservableCollection<AxisTick>();
             AxisTicks.Clear();
             // Clear the tick cache
             _ticks.Clear();
+            var axisGeometry = new StreamGeometry() { FillRule = FillRule.EvenOdd };
+            using (var ctx = axisGeometry.Open())
+            {
+                ctx.BeginFigure(axisTransform.Transform(new Point(minRange, 0)), false, false);
+                ctx.LineTo(axisTransform.Transform(new Point(maxRange, 0)), true, false);
+                foreach (var label in axis.Labels)
+                {
+                    var tickStart = axisTransform.Transform(new Point(label.Item1, 0));
+                    var tickEnd = axisTransform.Transform(new Point(label.Item1, axis.TickSize));
+                    ctx.BeginFigure(tickStart, false, false);
+                    ctx.LineTo(tickEnd, true, false);
+                    var tickLocation = AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? tickStart.X : tickStart.Y;
+                    var tick = new AxisTickInternal(tickLocation, axis.TickSize, label.Item1, true, format);
+                    _ticks.Add(tick);
+                    AxisTicks.Add(new AxisTick { Location = tickLocation, IsMajorTick = true, Value = label.Item1 });
+                }
+            }
+            axisGeometry.Freeze();
+            return new Path
+            {
+                Stroke = Brushes.Black,
+                StrokeThickness = _lineThickness,
+                StrokeMiterLimit = 1,
+                StrokeStartLineCap = PenLineCap.Flat,
+                StrokeEndLineCap = PenLineCap.Flat,
+                SnapsToDevicePixels = true,
+                Data = axisGeometry
+            };
+
+            var valueStep = (EndValue - StartValue) / Math.Abs(_endLocation - _startLocation);
 
             var majorTickValue = AxisType == AxisType.Linear ? StartValue : Math.Pow(10, Math.Floor(Math.Log10(StartValue)));
             var direction = _axisOptions.AxisLocation == AxisLocation.Left || _axisOptions.AxisLocation == AxisLocation.Right ? -1 : 1;
@@ -623,7 +645,7 @@ namespace DavesWPFTester
             // Freeze the geometry (make it unmodifiable)
             // for additional performance benefits.
             geometry.Freeze();
-            var axis = new Path
+            var path = new Path
             {
                 Stroke = Brushes.Black,
                 StrokeThickness = _lineThickness,
@@ -634,7 +656,7 @@ namespace DavesWPFTester
                 Data = geometry
             };
 
-            return axis;
+            return path;
         }
 
         Point TransformedPoint(double location, double offset)

@@ -97,7 +97,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
 
         public override Axis Generate(AxisLabelerOptions options, double density)
         {
-            var formatter = new QuantitativeFormatter(options.FontFamily);
+            var formatter = new QuantitativeFormatter(options.Typeface.FontFamily);
             var space = ((options.AxisLocation == AxisLocation.Top || options.AxisLocation == AxisLocation.Bottom) ? options.Screen.Width : options.Screen.Height);
 
             var dmax = options.DataRange.Max;

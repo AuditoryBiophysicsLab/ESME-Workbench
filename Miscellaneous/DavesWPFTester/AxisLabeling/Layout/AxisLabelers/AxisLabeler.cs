@@ -11,14 +11,15 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
     {
         public AxisLocation AxisLocation { get; set; }
         public double FontSize { get; set; }
-        public FontFamily FontFamily { get; set; }
+        public Typeface Typeface { get; set; }
         public Vector Symbol { get; set; }
         public Range DataRange { get; set; }
         public Range VisibleRange { get; set; }
         public Rect Screen { get; set; }
-        public Func<string, double, Axis, Rect> ComputeLabelRect;
+        public GeneralTransform AxisTransform { get; set; }
+        public Func<string, double, Axis, AxisLabelerOptions, Rect> ComputeLabelRect;
 
-        public Axis DefaultAxis() { return new Axis { FontSize = FontSize, FontFamily = FontFamily, AxisLocation = AxisLocation, Symbol = Symbol, VisibleRange = VisibleRange }; }
+        public Axis DefaultAxis() { return new Axis { FontSize = FontSize, AxisLocation = AxisLocation, Symbol = Symbol, VisibleRange = VisibleRange }; }
     }
     public abstract class AxisLabeler
     {

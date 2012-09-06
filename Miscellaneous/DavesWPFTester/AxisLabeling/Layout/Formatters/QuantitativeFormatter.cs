@@ -63,7 +63,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.Formatters
         {
             // compute overlap score
             var em = ems[data.FontSize];
-            var rects = data.Labels.Select(s => options.ComputeLabelRect(s.Item2, s.Item1, data)).ToList();
+            var rects = data.Labels.Select(s => options.ComputeLabelRect(s.Item2, s.Item1, data, options)).ToList();
             // takes adjacent pairs of rectangles
             var take = rects.Take(rects.Count - 1).ToList();
             var skip = rects.Skip(1).ToList();
