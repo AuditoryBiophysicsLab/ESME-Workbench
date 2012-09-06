@@ -189,6 +189,7 @@
     <Compile Include="AxisLabeling\Renderer\PointLayer.cs" />
     <Compile Include="AxisLabeling\Renderer\RenderState.cs" />
     <Compile Include="BarSeriesViewModel.cs" />
+    <Compile Include="Transforms\LogTransform.cs" />
     <Compile Include="NewAxisSeriesView.xaml.cs">
       <DependentUpon>NewAxisSeriesView.xaml</DependentUpon>
     </Compile>
@@ -198,9 +199,11 @@
       <DependentUpon>LegendView.xaml</DependentUpon>
     </Compile>
     <Compile Include="NewDataAxis.cs" />
+    <Compile Include="Transforms\SwapTransform.cs" />
     <Compile Include="SeriesMarkerType.cs" />
     <Compile Include="DataCanvas.cs" />
     <Compile Include="SeriesViewModelBase.cs" />
+    <Compile Include="Transforms\PowTransform.cs" />
     <Compile Include="TwoAxisSeriesView.xaml.cs">
       <DependentUpon>TwoAxisSeriesView.xaml</DependentUpon>
     </Compile>

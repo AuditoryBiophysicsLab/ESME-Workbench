@@ -13,6 +13,7 @@ using System.Windows.Shapes;
 using DavesWPFTester.AxisLabeling.Language;
 using DavesWPFTester.AxisLabeling.Layout;
 using DavesWPFTester.AxisLabeling.Layout.AxisLabelers;
+using DavesWPFTester.Transforms;
 using ESME.NEMO;
 using ESME.Views.Controls;
 using HRC;
@@ -240,6 +241,7 @@ namespace DavesWPFTester
             SnapsToDevicePixels = true;
             UseLayoutRounding = true;
             AxisTicks = new ObservableCollection<AxisTick>();
+            SizeChanged += (s, e) => CreateAxisTransform(new Size(ActualWidth, ActualHeight));
         }
 
         void OnDependencyPropertyChanged()
@@ -278,33 +280,93 @@ namespace DavesWPFTester
             InvalidateVisual();
         }
 
-        Typeface _typeface;
-        Rect ComputeLabelRect(string label, double position, Axis axis)
+        void CreateAxisTransform(Size newSize)
         {
-            double left, top;
-            var text = new FormattedText(label, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, _typeface, TextBlock.GetFontSize(this), Brushes.Black);
-            switch (axis.AxisLocation)
+            double tickDirectionScale;
+            double originScale;
+            _axisTransform.Children.Clear();
+            double axisDirectionTranslation;
+            double tickDirectionTranslation;
+            // The intent of _axisTransform is to make every axis draw the same as a Bottom axis (i.e. the StartValue is at 
+            // transformed-X of 0, and the axis line is drawn from top left to top right, axis ticks from top to tickLength)
+            switch (AxisLocation)
             {
                 case AxisLocation.Top:
-                    left = position - (text.Width / 2);
-                    top = axis.TickSize - text.Height;
+                    tickDirectionScale = -1.0;
+                    originScale = 1.0;
+                    axisDirectionTranslation = 0.0;
+                    tickDirectionTranslation = newSize.Height;
                     break;
                 case AxisLocation.Bottom:
-                    left = position - (text.Width / 2);
-                    top = axis.TickSize + text.Height;
+                    tickDirectionScale = 1.0;
+                    originScale = 1.0;
+                    axisDirectionTranslation = 0.0;
+                    tickDirectionTranslation = 0.0;
                     break;
                 case AxisLocation.Left:
-                    top = position - (text.Height / 2);
-                    left = axis.TickSize - text.Width;
+                    tickDirectionScale = -1.0;
+                    originScale = -1.0;
+                    axisDirectionTranslation = newSize.Height;
+                    tickDirectionTranslation = newSize.Width;
+                    //_axisTransform.Children.Add(new SwapTransform());
                     break;
                 case AxisLocation.Right:
-                    top = position - (text.Height / 2);
-                    left = axis.TickSize + text.Width;
+                    tickDirectionScale = 1.0;
+                    originScale = -1.0;
+                    axisDirectionTranslation = newSize.Height;
+                    tickDirectionTranslation = 0.0;
+                    //_axisTransform.Children.Add(new SwapTransform());
                     break;
                 default:
                     throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
             }
-            return new Rect(top, left, text.Width, text.Height);
+            var startValue = StartValue;
+            var endValue = EndValue;
+            if (AxisType == AxisType.Logarithmic)
+            {
+                startValue = Math.Log10(startValue);
+                endValue = Math.Log10(endValue);
+                _axisTransform.Children.Add(new LogTransform(10));
+            }
+            var lowValue = Math.Min(startValue, endValue);
+            var highValue = Math.Max(startValue, endValue);
+            var range = highValue - lowValue;
+            _axisTransform.Children.Add(new TranslateTransform(-startValue, 0));
+            if (startValue > endValue) originScale *= -1;
+            _axisTransform.Children.Add(new ScaleTransform(originScale * (newSize.Width / range), tickDirectionScale));
+            _axisTransform.Children.Add(new TranslateTransform(axisDirectionTranslation, tickDirectionTranslation));
+            if (AxisLocation == AxisLocation.Left || AxisLocation == AxisLocation.Right) _axisTransform.Children.Add(new SwapTransform());
+        }
+
+        readonly GeneralTransformGroup _axisTransform = new GeneralTransformGroup();
+
+        Typeface _typeface;
+        Rect ComputeLabelRect(string label, double position, Axis axis)
+        {
+            var axisPosition = _axisTransform.Transform(new Point(position, MajorTickLength));
+            var text = new FormattedText(label, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, _typeface, TextBlock.GetFontSize(this), Brushes.Black);
+            var left = axisPosition.X;
+            var top = axisPosition.Y;
+            switch (axis.AxisLocation)
+            {
+                case AxisLocation.Top:
+                    left -= text.Width / 2;
+                    top -= text.Height;
+                    break;
+                case AxisLocation.Bottom:
+                    left -= text.Width / 2;
+                    break;
+                case AxisLocation.Left:
+                    top -= text.Height / 2;
+                    left -= text.Width;
+                    break;
+                case AxisLocation.Right:
+                    top -= text.Height / 2;
+                    break;
+                default:
+                    throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
+            }
+            return new Rect(new Point(top, left), new Size(text.Width, text.Height));
         }
 
         #region Layout and drawing code
@@ -312,6 +374,7 @@ namespace DavesWPFTester
         {
             if (_axisOptions == null) OnDependencyPropertyChanged();
             if (_axisOptions == null) throw new ApplicationException();
+            CreateAxisTransform(newSize);
             _axisOptions.Screen = new Rect(newSize);
             var axis = _axisLabeler.Generate(_axisOptions, 1.0 / 96.0);
 
@@ -396,7 +459,7 @@ namespace DavesWPFTester
         {
             if (_axisOptions == null) throw new ApplicationException();
             _axisOptions.Screen = new Rect(arrangeSize);
-            var axis = _axisLabeler.Generate(_axisOptions, 1.0 / 150);
+            //var axis = _axisLabeler.Generate(_axisOptions, 1.0 / 150);
             switch (AxisLocation)
             {
                 case AxisLocation.Top:
