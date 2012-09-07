@@ -458,12 +458,15 @@ namespace DavesWPFTester
             {
                 case AxisLocation.Top:
                 case AxisLocation.Bottom:
-                    axisLabelTopLeft = axisTransform.Transform(new Point(_visibleRange.Size / 2, _tickLabels.TickSize + 2 + longestTickLabelText.Height + 2));
+                    axisLabelTopLeft = axisTransform.Transform(new Point(_visibleRange.Size / 2, _tickLabels.TickSize + 2 + longestTickLabelText.Height + 2 + axisLabelText.Height));
                     axisLabelTopLeft.X -= axisLabelText.Width / 2;
                     _axisLabel.Arrange(new Rect(axisLabelTopLeft, new Size(axisLabelText.Width, axisLabelText.Height)));
                     break;
                 case AxisLocation.Left:
                 case AxisLocation.Right:
+                    axisLabelTopLeft = axisTransform.Transform(new Point(_visibleRange.Size / 2, _tickLabels.TickSize + 2 + longestTickLabelText.Width + 2 + axisLabelText.Height));
+                    axisLabelTopLeft.Y -= axisLabelText.Width / 2;
+                    _axisLabel.Arrange(new Rect(axisLabelTopLeft, new Size(axisLabelText.Width, axisLabelText.Height)));
 #if false
                     _axisLabel.RenderTransformOrigin = new Point(0.5, 0.5);
                     _axisLabel.Arrange(new Rect(DesiredSize.Width - (_axisLabel.DesiredSize.Width / 2) - (_axisLabel.DesiredSize.Height / 2),
