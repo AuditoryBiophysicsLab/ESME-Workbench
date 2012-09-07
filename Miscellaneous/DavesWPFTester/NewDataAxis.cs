@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,6 @@ using DavesWPFTester.AxisLabeling.Language;
 using DavesWPFTester.AxisLabeling.Layout;
 using DavesWPFTester.AxisLabeling.Layout.AxisLabelers;
 using DavesWPFTester.Transforms;
-using ESME.NEMO;
 using ESME.Views.Controls;
 using HRC;
 using HRC.ViewModels;
@@ -30,27 +30,26 @@ namespace DavesWPFTester
         public static DependencyProperty AxisTicksProperty = DependencyProperty.Register("AxisTicks",
                                                                                           typeof(ObservableCollection<AxisTick>),
                                                                                           typeof(NewDataAxis),
-                                                                                          new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsMeasure, AxisTicksPropertyChanged));
+                                                                                          new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, AxisTicksPropertyChanged));
 
         public ObservableCollection<AxisTick> AxisTicks { get { return (ObservableCollection<AxisTick>)GetValue(AxisTicksProperty); } set { SetValue(AxisTicksProperty, value); } }
-        static void AxisTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).AxisTicksPropertyChanged(args); }
-        [UsedImplicitly] CollectionObserver _AxisTicksObserver;
-        void AxisTicksPropertyChanged(DependencyPropertyChangedEventArgs args)
+        static void AxisTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).AxisTicksPropertyChanged(); }
+        [UsedImplicitly] CollectionObserver _axisTicksObserver;
+        void AxisTicksPropertyChanged()
         {
             if (AxisType == AxisType.Logarithmic) throw new InvalidOperationException("Cannot set AxisTicks on a Logarithmic axis");
-            if (_AxisTicksObserver != null)
+            if (_axisTicksObserver != null)
             {
-                _AxisTicksObserver.UnregisterHandler(AxisTicksCollectionChanged);
-                _AxisTicksObserver = null;
+                _axisTicksObserver.UnregisterHandler(AxisTicksCollectionChanged);
+                _axisTicksObserver = null;
             }
             if (AxisTicks == null) return;
-            _AxisTicksObserver = new CollectionObserver(AxisTicks);
-            _AxisTicksObserver.RegisterHandler(AxisTicksCollectionChanged);
+            _axisTicksObserver = new CollectionObserver(AxisTicks);
+            _axisTicksObserver.RegisterHandler(AxisTicksCollectionChanged);
         }
 
-        void AxisTicksCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        static void AxisTicksCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            InvalidateMeasure();
         }
         #endregion
 
@@ -66,7 +65,8 @@ namespace DavesWPFTester
 
         public AxisLocation AxisLocation { get { return (AxisLocation)GetValue(AxisLocationProperty); } set { SetCurrentValue(AxisLocationProperty, value); } }
 
-        static void AxisLocationPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnDependencyPropertyChanged(); }
+        static void AxisLocationPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).AxisLocationPropertyChanged(); }
+        void AxisLocationPropertyChanged() { _axisOptions.AxisLocation = AxisLocation; }
         #endregion
 
         #region dependency property AxisType AxisType
@@ -75,12 +75,13 @@ namespace DavesWPFTester
                                                                                         typeof(NewDataAxis),
                                                                                         new FrameworkPropertyMetadata(AxisType.Linear,
                                                                                                                       FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                      FrameworkPropertyMetadataOptions.AffectsMeasure |
                                                                                                                       FrameworkPropertyMetadataOptions.AffectsRender,
                                                                                                                       AxisTypePropertyChanged));
 
         public AxisType AxisType { get { return (AxisType)GetValue(AxisTypeProperty); } set { SetValue(AxisTypeProperty, value); } }
 
-        static void AxisTypePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnDependencyPropertyChanged(); }
+        static void AxisTypePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnSizeOrVisibleRangeChanged(); }
         #endregion
 
         #region dependency property string AxisLabel { get; set; }
@@ -90,38 +91,22 @@ namespace DavesWPFTester
                                                                                                           new FrameworkPropertyMetadata("",
                                                                                                                                         FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                                                                                         FrameworkPropertyMetadataOptions.AffectsMeasure |
-                                                                                                                                        FrameworkPropertyMetadataOptions.AffectsRender,
-                                                                                                                                        AxisLabelPropertyChanged));
+                                                                                                                                        FrameworkPropertyMetadataOptions.AffectsRender));
 
         public string AxisLabel { get { return (string)GetValue(AxisLabelProperty); } set { SetCurrentValue(AxisLabelProperty, value); } }
-
-        static void AxisLabelPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnDependencyPropertyChanged(); }
         #endregion
 
-        #region dependency property double StartValue { get; set; }
-        public static readonly DependencyProperty StartValueProperty = DependencyProperty.RegisterAttached("StartValue",
-                                                                                                           typeof(double),
-                                                                                                           typeof(NewDataAxis),
-                                                                                                           new FrameworkPropertyMetadata(0.1,
-                                                                                                                                         FrameworkPropertyMetadataOptions.AffectsMeasure,
-                                                                                                                                         StartValuePropertyChanged));
+        #region dependency property bool IsInverted
 
-        public double StartValue { get { return (double)GetValue(StartValueProperty); } set { SetCurrentValue(StartValueProperty, value); } }
+        public static DependencyProperty IsInvertedProperty = DependencyProperty.Register("IsInverted",
+                                                                                 typeof(bool),
+                                                                                 typeof(NewDataAxis),
+                                                                                 new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, IsInvertedPropertyChanged));
 
-        static void StartValuePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnDependencyPropertyChanged(); }
-        #endregion
+        public bool IsInverted { get { return (bool)GetValue(IsInvertedProperty); } set { SetValue(IsInvertedProperty, value); } }
 
-        #region dependency property double EndValue { get; set; }
-        public static readonly DependencyProperty EndValueProperty = DependencyProperty.RegisterAttached("EndValue",
-                                                                                                         typeof(double),
-                                                                                                         typeof(NewDataAxis),
-                                                                                                         new FrameworkPropertyMetadata(10.0,
-                                                                                                                                       FrameworkPropertyMetadataOptions.AffectsMeasure,
-                                                                                                                                       EndValuePropertyChanged));
-
-        public double EndValue { get { return (double)GetValue(EndValueProperty); } set { SetCurrentValue(EndValueProperty, value); } }
-
-        static void EndValuePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnDependencyPropertyChanged(); }
+        static void IsInvertedPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).IsInvertedPropertyChanged(); }
+        void IsInvertedPropertyChanged() { }
         #endregion
 
         #region dependency property string TickValueFormat { get; set; }
@@ -130,12 +115,9 @@ namespace DavesWPFTester
                                                                                                                 typeof(NewDataAxis),
                                                                                                                 new FrameworkPropertyMetadata("0.###",
                                                                                                                                               FrameworkPropertyMetadataOptions.AffectsArrange |
-                                                                                                                                              FrameworkPropertyMetadataOptions.AffectsMeasure,
-                                                                                                                                              TickValueFormatPropertyChanged));
+                                                                                                                                              FrameworkPropertyMetadataOptions.AffectsMeasure));
 
         public string TickValueFormat { get { return (string)GetValue(TickValueFormatProperty); } set { SetCurrentValue(TickValueFormatProperty, value); } }
-
-        static void TickValueFormatPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnDependencyPropertyChanged(); }
         #endregion
 
         #region dependency property AxisLayoutAlgorithm AxisLayoutAlgorithm
@@ -146,7 +128,25 @@ namespace DavesWPFTester
                                                                                  new FrameworkPropertyMetadata(AxisLayoutAlgorithm.ExtendedWilkinson, FrameworkPropertyMetadataOptions.None, AxisLayoutAlgorithmPropertyChanged));
 
         public AxisLayoutAlgorithm AxisLayoutAlgorithm { get { return (AxisLayoutAlgorithm)GetValue(AxisLayoutAlgorithmProperty); } set { SetValue(AxisLayoutAlgorithmProperty, value); } }
-        static void AxisLayoutAlgorithmPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnDependencyPropertyChanged(); }
+        static void AxisLayoutAlgorithmPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).AxisLayoutAlgorithmPropertyChanged(); }
+        void AxisLayoutAlgorithmPropertyChanged()
+        {             // Catchall property changed function, called when any of the dependency properties that might affect layout, arrange or render change
+            switch (AxisLayoutAlgorithm)
+            {
+                case AxisLayoutAlgorithm.Wilkinson:
+                    _axisLabeler = new WilkinsonAxisLabeler();
+                    break;
+                case AxisLayoutAlgorithm.ExtendedWilkinson:
+                    _axisLabeler = new ExtendedAxisLabeler();
+                    break;
+                case AxisLayoutAlgorithm.MatPlotLib:
+                    _axisLabeler = new MatplotlibAxisLabeler();
+                    break;
+                case AxisLayoutAlgorithm.Heckbert:
+                    _axisLabeler = new HeckbertAxisLabeler();
+                    break;
+            }
+        }
         #endregion
 
         #region dependency property Func<double, double> MappingFunction
@@ -182,114 +182,116 @@ namespace DavesWPFTester
                                                                                  new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, DataRangePropertyChanged));
 
         public Range DataRange { get { return (Range)GetValue(DataRangeProperty); } set { SetValue(DataRangeProperty, value); } }
-        static void DataRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnDependencyPropertyChanged(); }
+        static void DataRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).DataRangePropertyChanged(args); }
+        void DataRangePropertyChanged(DependencyPropertyChangedEventArgs args)
+        {
+            if (args.OldValue != null) ((Range)args.OldValue).RangeChanged -= DataRangeChanged;
+            if (args.NewValue != null) ((Range)args.NewValue).RangeChanged += DataRangeChanged;
+            DataRangeChanged(null, null);
+        }
+        void DataRangeChanged(object sender, EventArgs args)
+        {
+            if (DataRange == null)
+            {
+                _axisOptions.DataRange = null;
+                VisibleRange = null;
+                return;
+            }
+            _dataRange = DataRange.Expand(0);
+            if (AxisType == AxisType.Logarithmic)
+            {
+                if (_dataRange.Min <= 0) throw new InvalidOperationException("Cannot plot negative or zero values on a log scale");
+                _dataRange.Min = Math.Log10(_dataRange.Min);
+                _dataRange.Max = Math.Log10(_dataRange.Max);
+            }
+            _axisOptions.DataRange = _dataRange;
+            VisibleRange = DataRange.Size > 0 ? DataRange.Expand(DataRange.Size * 0.05) : new Range(DataRange.Min - 0.5, DataRange.Max + 0.5);
+        }
+
+        Range _dataRange;
         #endregion
 
         #region dependency property Range VisibleRange
 
         public static DependencyProperty VisibleRangeProperty = DependencyProperty.Register("VisibleRange",
-                                                                                 typeof(Range),
-                                                                                 typeof(NewDataAxis),
-                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, VisibleRangePropertyChanged));
+                                                                                            typeof(Range),
+                                                                                            typeof(NewDataAxis),
+                                                                                            new FrameworkPropertyMetadata(null,
+                                                                                                                          FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                          FrameworkPropertyMetadataOptions.AffectsRender |
+                                                                                                                          FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                                                                                          VisibleRangePropertyChanged));
 
         public Range VisibleRange { get { return (Range)GetValue(VisibleRangeProperty); } set { SetValue(VisibleRangeProperty, value); } }
-        static void VisibleRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnDependencyPropertyChanged(); }
+        static void VisibleRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnSizeOrVisibleRangeChanged(); }
+        void OnSizeOrVisibleRangeChanged()
+        {
+            if (ActualWidth <= 0 || ActualHeight <= 0 || VisibleRange == null || VisibleRange.Size <= 0)
+            {
+                MappingFunction = null;
+                return;
+            }
+            _visibleRange = VisibleRange.Expand(0);
+            if (AxisType == AxisType.Logarithmic)
+            {
+                if (VisibleRange.Min <= 0) VisibleRange.Min = _visibleRange.Min = DataRange.Min;
+                _visibleRange.Min = Math.Log10(_visibleRange.Min);
+                _visibleRange.Max = Math.Log10(_visibleRange.Max);
+            }
+            _mappingFunctionTransform = CreateAxisTransform(_visibleRange, new Size(ActualWidth, ActualHeight), false);
+            MappingFunction = v => _mappingFunctionTransform.Transform(new Point(v, 0)).X;
+            _axisOptions.VisibleRange = _visibleRange.Expand(0);
+        }
+
+        Range _visibleRange;
+
         #endregion
 
         #region dependency property double MajorTickLength
 
         public static DependencyProperty MajorTickLengthProperty = DependencyProperty.Register("MajorTickLength",
-                                                                                 typeof(double),
-                                                                                 typeof(NewDataAxis),
-                                                                                 new FrameworkPropertyMetadata(6.0, FrameworkPropertyMetadataOptions.None, MajorTickLengthPropertyChanged));
+                                                                                               typeof(double),
+                                                                                               typeof(NewDataAxis),
+                                                                                               new FrameworkPropertyMetadata(6.0,
+                                                                                                                             FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                                                                                             FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                             FrameworkPropertyMetadataOptions.AffectsRender));
 
         public double MajorTickLength { get { return (double)GetValue(MajorTickLengthProperty); } set { SetValue(MajorTickLengthProperty, value); } }
-        static void MajorTickLengthPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnDependencyPropertyChanged(); }
         #endregion
 
         #region dependency property double MinorTickLength
 
         public static DependencyProperty MinorTickLengthProperty = DependencyProperty.Register("MinorTickLength",
-                                                                                 typeof(double),
-                                                                                 typeof(NewDataAxis),
-                                                                                 new FrameworkPropertyMetadata(3.0, FrameworkPropertyMetadataOptions.None, MinorTickLengthPropertyChanged));
+                                                                                               typeof(double),
+                                                                                               typeof(NewDataAxis),
+                                                                                               new FrameworkPropertyMetadata(3.0,
+                                                                                                                             FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                                                                                             FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                             FrameworkPropertyMetadataOptions.AffectsRender));
 
         public double MinorTickLength { get { return (double)GetValue(MinorTickLengthProperty); } set { SetValue(MinorTickLengthProperty, value); } }
-        static void MinorTickLengthPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnDependencyPropertyChanged(); }
         #endregion
     
-        double PrivateMappingFunction(double value)
-        {
-            var startValue = AxisType == AxisType.Linear ? StartValue : Math.Floor(Math.Log10(StartValue));
-            var endValue = AxisType == AxisType.Linear ? EndValue : Math.Ceiling(Math.Log10(EndValue));
-            value = AxisType == AxisType.Linear ? value : Math.Log10(value);
-            var lowValue = Math.Min(startValue, endValue);
-            var highValue = Math.Max(startValue, endValue);
-            if (highValue == lowValue) return highValue;
-            if (value < lowValue || value > highValue) throw new ParameterOutOfRangeException("value is out of range for this axis");
-            var axisDelta = highValue - lowValue;
-            var valueDelta = value - lowValue;
-            var valueRatio = valueDelta / axisDelta;
-            var offsetFromLength = _axisOptions.AxisLocation == AxisLocation.Left || _axisOptions.AxisLocation == AxisLocation.Right;
-            if (endValue < startValue) offsetFromLength = !offsetFromLength;
-            var lengthOffset = offsetFromLength ? _length - (_length * valueRatio) : _length * valueRatio;
-            return lengthOffset;
-        }
-
         public NewDataAxis()
         {
             SnapsToDevicePixels = true;
             UseLayoutRounding = true;
             AxisTicks = new ObservableCollection<AxisTick>();
-        }
-
-        void OnDependencyPropertyChanged()
-        {
-            // Catchall property changed function, called when any of the dependency properties that might affect layout, arrange or render change
-            if (_axisOptions == null) _axisOptions = new AxisLabelerOptions();
-            double minValue, maxValue;
-            if (AxisType == AxisType.Logarithmic)
-            {
-                minValue = Math.Log10(StartValue);
-                maxValue = Math.Log10(EndValue);
-            }
-            else
-            {
-                minValue = Math.Min(StartValue, EndValue);
-                maxValue = Math.Max(StartValue, EndValue);
-            }
-            _axisOptions.DataRange = new Range(minValue, maxValue);
-            _axisOptions.VisibleRange = new Range(minValue, maxValue);
-            _axisOptions.FontSize = TextBlock.GetFontSize(this);
-            _axisOptions.Typeface = new Typeface(TextBlock.GetFontFamily(this), TextBlock.GetFontStyle(this), TextBlock.GetFontWeight(this), TextBlock.GetFontStretch(this));
-            _axisOptions.ComputeLabelRect = ComputeLabelRect;
-            _axisOptions.DataRange = new Range(StartValue, EndValue);
-            _axisOptions.VisibleRange = new Range(StartValue, EndValue);
-            _lineThickness = 1;
-            _majorTickSpacing = 100;
-            _minorTickSpacing = 10;
-            _axisOptions.AxisLocation = AxisLocation;
-            MappingFunction = PrivateMappingFunction;
             Axis = this;
-            switch (AxisLayoutAlgorithm)
+            SizeChanged += (s, e) => OnSizeOrVisibleRangeChanged();
+            _axisOptions = new AxisLabelerOptions
             {
-                case AxisLayoutAlgorithm.Wilkinson:
-                    _axisLabeler = new WilkinsonAxisLabeler();
-                    break;
-                case AxisLayoutAlgorithm.ExtendedWilkinson:
-                    _axisLabeler = new ExtendedAxisLabeler();
-                    break;
-                case AxisLayoutAlgorithm.MatPlotLib:
-                    _axisLabeler = new MatplotlibAxisLabeler();
-                    break;
-                case AxisLayoutAlgorithm.Heckbert:
-                    _axisLabeler = new HeckbertAxisLabeler();
-                    break;
-            }
-            InvalidateVisual();
+                ComputeLabelRect = ComputeLabelRect,
+                FontSize = TextBlock.GetFontSize(this),
+                Typeface = new Typeface(TextBlock.GetFontFamily(this), TextBlock.GetFontStyle(this), TextBlock.GetFontWeight(this), TextBlock.GetFontStretch(this))
+            };
+            _axisLabeler = new ExtendedAxisLabeler();
         }
 
-        GeneralTransformGroup CreateAxisTransform(double startValue, double endValue, Size newSize)
+        GeneralTransform _mappingFunctionTransform;
+
+        GeneralTransform CreateAxisTransform(Range visbleRange, Size newSize, bool includeSwapTransform)
         {
             double tickDirectionScale;
             double originScale;
@@ -329,23 +331,14 @@ namespace DavesWPFTester
                 default:
                     throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
             }
+            if (IsInverted) originScale *= -1;
             var result = new GeneralTransformGroup();
             // The intent of _axisTransform is to make every axis draw the same as a Bottom axis (i.e. the StartValue is at 
             // transformed-X of 0, and the axis line is drawn from top left to top right, axis ticks from top to tickLength)
-            if (AxisType == AxisType.Logarithmic)
-            {
-                startValue = Math.Log10(startValue);
-                endValue = Math.Log10(endValue);
-                result.Children.Add(new LogTransform(10));
-            }
-            var lowValue = Math.Min(startValue, endValue);
-            var highValue = Math.Max(startValue, endValue);
-            var range = highValue - lowValue;
-            if (startValue > endValue) originScale *= -1;
-            result.Children.Add(new TranslateTransform(-startValue, 0)); // might be -lowValue
-            result.Children.Add(new ScaleTransform(originScale * (axisLength / range), tickDirectionScale));
+            result.Children.Add(new TranslateTransform(-visbleRange.Min, 0)); // might be -lowValue
+            result.Children.Add(new ScaleTransform(originScale * (axisLength / visbleRange.Size), tickDirectionScale));
             result.Children.Add(new TranslateTransform(axisDirectionTranslation, tickDirectionTranslation));
-            if (AxisLocation == AxisLocation.Left || AxisLocation == AxisLocation.Right) result.Children.Add(new SwapTransform());
+            if (includeSwapTransform && AxisLocation == AxisLocation.Left || AxisLocation == AxisLocation.Right) result.Children.Add(new SwapTransform());
             return result;
         }
 
@@ -378,123 +371,108 @@ namespace DavesWPFTester
         }
 
         #region Layout and drawing code
-        void CreateChildren(Size newSize)
+
+        Axis CalculateAxisLabels(Size newSize)
         {
-            if (_axisOptions == null) OnDependencyPropertyChanged();
-            if (_axisOptions == null) throw new ApplicationException();
-            _axisOptions.AxisTransform = CreateAxisTransform(Math.Min(StartValue, EndValue), Math.Max(StartValue, EndValue), newSize);
+            _axisOptions.AxisTransform = CreateAxisTransform(_visibleRange, newSize, true);
             _axisOptions.Screen = new Rect(newSize);
-            var axis = _axisLabeler.Generate(_axisOptions, 1.0 / 96.0);
-            var maxLabelValue = axis.Labels.Select(l => l.Item1).Max();
-            var minLabelValue = axis.Labels.Select(l => l.Item1).Min();
-            var labelRange = maxLabelValue - minLabelValue;
-            var extendRange = labelRange * .05; // Extend range by 5% on either side of the min and max labels
-            _minRange = minLabelValue - extendRange;
-            _maxRange = maxLabelValue + extendRange;
-            var axisTransform = StartValue > EndValue ? CreateAxisTransform(_maxRange, _minRange, newSize) : CreateAxisTransform(_minRange, _maxRange, newSize);
-
-            Children.Clear();
-            _axis = CreateAxis(axis, axisTransform, _minRange, _maxRange);
-            Children.Add(_axis);
-            _ticks.AddLabels(this);
-
-            if (!String.IsNullOrEmpty(AxisLabel))
-            {
-                _axisLabel.Text = AxisLabel;
-                Children.Add(_axisLabel);
-            }
+            return _axisLabeler.Generate(_axisOptions, 1.0 / 96.0);
         }
 
-        double _minRange, _maxRange;
+        double _tickLabelDimension;
+        double _axisLabelDimension;
+        Axis _tickLabels;
         protected override Size MeasureOverride(Size availableSize)
         {
+            if (_visibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
             if (Double.IsNaN(availableSize.Width) || Double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;
             if (Double.IsNaN(availableSize.Height) || Double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
-            if (AxisType == AxisType.Logarithmic)
-            {
-                if (StartValue <= 0) throw new ParameterOutOfRangeException("StartValue cannot be zero or negative on a Logarithmic axis");
-                if (EndValue <= 0) throw new ParameterOutOfRangeException("EndValue cannot be zero or negative on a Logarithmic axis");
-                if (EndValue <= StartValue) throw new ParameterOutOfRangeException("EndValue cannot be less than or equal to StartValue on a Logarithmic axis");
-            }
-            CreateChildren(availableSize);
-            Axis = this;
-            MappingFunction = PrivateMappingFunction;
-            var labelSizes = new List<double>();
-
-            _axis.Measure(availableSize);
-            foreach (var tick in _ticks)
-            {
-                if (tick.Label != null)
-                {
-                    tick.Label.Measure(availableSize);
-                    labelSizes.Add(_axisOptions.AxisLocation == AxisLocation.Left || _axisOptions.AxisLocation == AxisLocation.Right ? tick.Label.DesiredSize.Width : tick.Label.DesiredSize.Height);
-                }
-            }
-
-            double axisLabelSize = 0;
-            if (_axisLabel != null)
-            {
-                _axisLabel.Measure(availableSize);
-                axisLabelSize = _axisLabel.DesiredSize.Height;
-            }
-            var maxLabelSize = labelSizes.Max();
-            var shortSize = maxLabelSize + MajorTickLength + TickLabelSpacing + axisLabelSize + TickLabelSpacing;
-            var longSize = _length;
-            var desiredSize = _axisOptions.AxisLocation == AxisLocation.Left || _axisOptions.AxisLocation == AxisLocation.Right ? new Size(shortSize, longSize) : new Size(longSize, shortSize);
-
-            // desiredSize = ... computed sum of children's DesiredSize ...;
-            // IMPORTANT: do not allow PositiveInfinity to be returned, that will raise an exception in the caller!
-            // PositiveInfinity might be an availableSize input; this means that the parent does not care about sizing
-            return desiredSize;
-        }
-
-        protected override Size ArrangeOverride(Size arrangeSize)
-        {
-            if (_axisOptions == null) throw new ApplicationException();
-            _axisOptions.Screen = new Rect(arrangeSize);
-            //var axis = _axisLabeler.Generate(_axisOptions, 1.0 / 150);
+            _tickLabels = CalculateAxisLabels(availableSize);
+            var axisTransform = CreateAxisTransform(_visibleRange, availableSize, true);
+            Children.Clear();
+            _axis = CreateAxis(_tickLabels, axisTransform);
+            Children.Add(_axis);
+            _ticks.AddLabels(this);
+            var longestTickLabel = (from label in _tickLabels.Labels
+                                    orderby label.Item2.Length
+                                    select label.Item2).Last();
+            var longestTickLabelText = new FormattedText(longestTickLabel, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, _axisOptions.Typeface, _axisOptions.FontSize, Brushes.Black);
+            var axisLabel = string.IsNullOrEmpty(_tickLabels.AxisTitleExtension) ? AxisLabel : string.Format("{0} ({1})", AxisLabel, _tickLabels.AxisTitleExtension);
+            var axisLabelText = new FormattedText(axisLabel, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, _axisOptions.Typeface, _axisOptions.FontSize + 2, Brushes.Black);
+            var desiredSize = new Size(availableSize.Width, availableSize.Height);
+            Children.Add(_axisLabel);
             switch (AxisLocation)
             {
                 case AxisLocation.Top:
-                    if (_axisLabel != null)
-                    {
-                        _axisLabel.Arrange(new Rect((DesiredSize.Width - _axisLabel.DesiredSize.Width) / 2,
-                                                    DesiredSize.Height - _axisLabel.DesiredSize.Height,
-                                                    _axisLabel.DesiredSize.Width,
-                                                    _axisLabel.DesiredSize.Height));
-                        _axis.Arrange(new Rect(0, 0, _axis.DesiredSize.Width, _axis.DesiredSize.Height));
-                    }
-                    break;
                 case AxisLocation.Bottom:
-                    if (_axisLabel != null)
-                    {
-                        _axisLabel.Arrange(new Rect((DesiredSize.Width - _axisLabel.DesiredSize.Width) / 2, 0, _axisLabel.DesiredSize.Width, _axisLabel.DesiredSize.Height));
-                        _axis.Arrange(new Rect(0, arrangeSize.Height, _axis.DesiredSize.Width, _axis.DesiredSize.Height));
-                    }
+                    _tickLabelDimension = longestTickLabelText.Height;
+                    _axisLabelDimension = axisLabelText.Height;
+                    desiredSize.Height = _tickLabels.TickSize + 2 + _tickLabelDimension + 2 + _axisLabelDimension;
                     break;
                 case AxisLocation.Left:
-                    if (_axisLabel != null)
-                    {
-                        _axisLabel.RenderTransformOrigin = new Point(0.5, 0.5);
-                        _axisLabel.Arrange(new Rect(DesiredSize.Width - (_axisLabel.DesiredSize.Width / 2) - (_axisLabel.DesiredSize.Height / 2),
-                                                    (DesiredSize.Height - _axisLabel.DesiredSize.Height) / 2,
-                                                    _axisLabel.DesiredSize.Width,
-                                                    _axisLabel.DesiredSize.Height));
-                        _axis.Arrange(new Rect(0, 0, _axis.DesiredSize.Width, _axis.DesiredSize.Height));
-                        _axisLabel.RenderTransform = new RotateTransform(90);
-                    }
-                    break;
                 case AxisLocation.Right:
-                    if (_axisLabel != null)
-                    {
-                        _axisLabel.RenderTransformOrigin = new Point(0.5, 0.5);
-                        _axisLabel.Arrange(new Rect((_axisLabel.DesiredSize.Height / 2) - (_axisLabel.DesiredSize.Width / 2),
-                                                    (DesiredSize.Height - _axisLabel.DesiredSize.Height) / 2,
-                                                    _axisLabel.DesiredSize.Width,
-                                                    _axisLabel.DesiredSize.Height));
-                        _axis.Arrange(new Rect(arrangeSize.Width, 0, _axis.DesiredSize.Width, _axis.DesiredSize.Height));
-                        _axisLabel.RenderTransform = new RotateTransform(-90);
-                    }
+                    _tickLabelDimension = longestTickLabelText.Width;
+                    _axisLabelDimension = axisLabelText.Width;
+                    desiredSize.Width = _tickLabels.TickSize + 2 + _tickLabelDimension + 2 + _axisLabelDimension;
+                    break;
+                default:
+                    throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
+            }
+            // desiredSize = ... computed sum of children's DesiredSize ...;
+            // IMPORTANT: do not allow PositiveInfinity to be returned, that will raise an exception in the caller!
+            // PositiveInfinity might be an availableSize input; this means that the parent does not care about sizing
+            Debug.WriteLine(string.Format("NewDataAxis: MeasureOverride for {0} returning desired width {1} and height {2}. Count: {3}", AxisLabel, desiredSize.Width, desiredSize.Height, _measureOverrideCount++));
+            return desiredSize;
+        }
+        int _measureOverrideCount;
+
+        protected override Size ArrangeOverride(Size arrangeSize)
+        {
+            if (_visibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(arrangeSize.Width, 22) : new Size(arrangeSize.Height, 22);
+            switch (AxisLocation)
+            {
+                case AxisLocation.Top:
+                case AxisLocation.Bottom:
+                    arrangeSize.Height = _tickLabels.TickSize + 2 + _tickLabelDimension + 2 + _axisLabelDimension;
+                    break;
+                case AxisLocation.Left:
+                case AxisLocation.Right:
+                    arrangeSize.Width = _tickLabels.TickSize + 2 + _tickLabelDimension + 2 + _axisLabelDimension;
+                    break;
+                default:
+                    throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
+            }
+            var axisTransform = CreateAxisTransform(_visibleRange, arrangeSize, true);
+
+            _axis.Arrange(axisTransform.TransformBounds(new Rect(_visibleRange.Min, 0, _visibleRange.Size, _tickLabels.TickSize)));
+            var longestTickLabel = (from label in _tickLabels.Labels
+                                    orderby label.Item2.Length
+                                    select label.Item2).Last();
+            var longestTickLabelText = new FormattedText(longestTickLabel, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, _axisOptions.Typeface, _axisOptions.FontSize, Brushes.Black);
+            var axisLabel = string.IsNullOrEmpty(_tickLabels.AxisTitleExtension) ? AxisLabel : string.Format("{0} ({1})", AxisLabel, _tickLabels.AxisTitleExtension);
+            var axisLabelText = new FormattedText(axisLabel, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, _axisOptions.Typeface, _axisOptions.FontSize + 2, Brushes.Black);
+            _axisLabel.Text = axisLabel;
+            _axisLabel.FontSize = _tickLabels.FontSize + 2;
+            Point axisLabelTopLeft;
+            switch (AxisLocation)
+            {
+                case AxisLocation.Top:
+                case AxisLocation.Bottom:
+                    axisLabelTopLeft = axisTransform.Transform(new Point(_visibleRange.Size / 2, _tickLabels.TickSize + 2 + longestTickLabelText.Height + 2));
+                    axisLabelTopLeft.X -= axisLabelText.Width / 2;
+                    _axisLabel.Arrange(new Rect(axisLabelTopLeft, new Size(axisLabelText.Width, axisLabelText.Height)));
+                    break;
+                case AxisLocation.Left:
+                case AxisLocation.Right:
+#if false
+                    _axisLabel.RenderTransformOrigin = new Point(0.5, 0.5);
+                    _axisLabel.Arrange(new Rect(DesiredSize.Width - (_axisLabel.DesiredSize.Width / 2) - (_axisLabel.DesiredSize.Height / 2),
+                                                (DesiredSize.Height - _axisLabel.DesiredSize.Height) / 2,
+                                                _axisLabel.DesiredSize.Width,
+                                                _axisLabel.DesiredSize.Height));
+                    _axis.Arrange(new Rect(0, 0, _axis.DesiredSize.Width, _axis.DesiredSize.Height));
+                    _axisLabel.RenderTransform = new RotateTransform(90);
+#endif
                     break;
                 default:
                     throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
@@ -543,21 +521,23 @@ namespace DavesWPFTester
                     tick.Label.Arrange(new Rect(location, size));
                 }
             //this.Background = Brushes.LightBlue;
+            Debug.WriteLine(string.Format("NewDataAxis: ArrangeOverride for {0} returning desired width {1} and height {2}", AxisLabel, arrangeSize.Width, arrangeSize.Height));
             return arrangeSize;
         }
 
-        Path CreateAxis(Axis axis, GeneralTransform axisTransform, double minRange, double maxRange)
+
+        Path CreateAxis(Axis axis, GeneralTransform axisTransform)
         {
             var format = TickValueFormat == "m" ? "m" : String.Format("{{0:{0}}}", TickValueFormat);
             if (AxisTicks == null) AxisTicks = new ObservableCollection<AxisTick>();
             AxisTicks.Clear();
             // Clear the tick cache
             _ticks.Clear();
-            var axisGeometry = new StreamGeometry() { FillRule = FillRule.EvenOdd };
+            var axisGeometry = new StreamGeometry { FillRule = FillRule.EvenOdd };
             using (var ctx = axisGeometry.Open())
             {
-                ctx.BeginFigure(axisTransform.Transform(new Point(minRange, 0)), false, false);
-                ctx.LineTo(axisTransform.Transform(new Point(maxRange, 0)), true, false);
+                ctx.BeginFigure(axisTransform.Transform(new Point(_visibleRange.Min, 0)), false, false);
+                ctx.LineTo(axisTransform.Transform(new Point(_visibleRange.Max, 0)), true, false);
                 foreach (var label in axis.Labels)
                 {
                     var tickStart = axisTransform.Transform(new Point(label.Item1, 0));
@@ -581,99 +561,6 @@ namespace DavesWPFTester
                 SnapsToDevicePixels = true,
                 Data = axisGeometry
             };
-
-            var valueStep = (EndValue - StartValue) / Math.Abs(_endLocation - _startLocation);
-
-            var majorTickValue = AxisType == AxisType.Linear ? StartValue : Math.Pow(10, Math.Floor(Math.Log10(StartValue)));
-            var direction = _axisOptions.AxisLocation == AxisLocation.Left || _axisOptions.AxisLocation == AxisLocation.Right ? -1 : 1;
-            var conditionLambda = _axisOptions.AxisLocation == AxisLocation.Left || _axisOptions.AxisLocation == AxisLocation.Right
-                                      ? new Func<double, double, bool>((tickLocation, endLocation) => tickLocation < endLocation - 1)
-                                      : ((tickLocation, endLocation) => tickLocation > endLocation + 1);
-            for (var majorTickLocation = _startLocation + (direction * (_lineThickness / 2)); conditionLambda(majorTickLocation, _endLocation); majorTickLocation += direction * _majorTickSpacing)
-            {
-                var majorTick = new AxisTickInternal(majorTickLocation, MajorTickLength, majorTickValue, true, format);
-                _ticks.Add(majorTick);
-                AxisTicks.Add(new AxisTick { Location = majorTick.Location, Value = majorTickValue, IsMajorTick = true });
-                //Debug.WriteLine(String.Format("Added major tick at location {0}", majorTick.Location));
-                if (AxisType == AxisType.Linear)
-                {
-                    for (var minorTickCount = 1; minorTickCount < 5; minorTickCount++)
-                    {
-                        var minorTick = new AxisTickInternal(majorTickLocation + (direction * minorTickCount * _minorTickSpacing), MinorTickLength, double.NaN, false, null);
-                        _ticks.Add(minorTick);
-                        AxisTicks.Add(new AxisTick { Location = minorTick.Location, Value = double.NaN, IsMajorTick = false });
-                        //Debug.WriteLine(String.Format("Linear: Added minor tick at location {0}", minorTick.Location));
-                    }
-                    majorTickValue += (valueStep * _majorTickSpacing);
-                }
-                else
-                {
-                    for (var minorTickCount = 2; minorTickCount < 10; minorTickCount++)
-                    {
-                        var minorTick = new AxisTickInternal(majorTickLocation + (direction * Math.Log10(minorTickCount) * _majorTickSpacing), MinorTickLength, double.NaN, false, null);
-                        _ticks.Add(minorTick);
-                        AxisTicks.Add(new AxisTick { Location = minorTick.Location, Value = double.NaN, IsMajorTick = false });
-                        //Debug.WriteLine(String.Format("Log: Added minor tick at location {0}", minorTick.Location));
-                    }
-                    majorTickValue = Math.Pow(10, Math.Log10(majorTickValue) + 1);
-                }
-            }
-
-            // Add a major tick at the end
-            majorTickValue = AxisType == AxisType.Linear ? EndValue : Math.Pow(10, Math.Ceiling(Math.Log10(EndValue)));
-            var endTick = new AxisTickInternal(_endLocation - (direction * (_lineThickness / 2)), MajorTickLength, majorTickValue, true, format);
-            _ticks.Add(endTick);
-            AxisTicks.Add(new AxisTick { Location = endTick.Location, Value = majorTickValue, IsMajorTick = true });
-            //Debug.WriteLine(String.Format("Added last major tick at location {0}", endTick.Location));
-
-            // Create a StreamGeometry to use to specify _axis.
-            var geometry = new StreamGeometry { FillRule = FillRule.EvenOdd };
-
-            // Open a StreamGeometryContext that can be used to describe this StreamGeometry 
-            // object's contents.
-            using (var ctx = geometry.Open())
-            {
-                ctx.BeginFigure(TransformedPoint(_startLocation, _lineThickness / 2), false, false);
-                ctx.LineTo(TransformedPoint(_endLocation, _lineThickness / 2), true, false);
-
-                foreach (var tick in _ticks)
-                {
-                    ctx.BeginFigure(TransformedPoint(tick.Location, _lineThickness / 2), false, false);
-                    ctx.LineTo(TransformedPoint(tick.Location, tick.Length + (_lineThickness / 2)), true, true);
-                }
-            }
-            // Freeze the geometry (make it unmodifiable)
-            // for additional performance benefits.
-            geometry.Freeze();
-            var path = new Path
-            {
-                Stroke = Brushes.Black,
-                StrokeThickness = _lineThickness,
-                StrokeMiterLimit = 1,
-                StrokeStartLineCap = PenLineCap.Flat,
-                StrokeEndLineCap = PenLineCap.Flat,
-                SnapsToDevicePixels = true,
-                Data = geometry
-            };
-
-            return path;
-        }
-
-        Point TransformedPoint(double location, double offset)
-        {
-            switch (AxisLocation)
-            {
-                case AxisLocation.Top:
-                    return new Point(location, offset);
-                case AxisLocation.Bottom:
-                    return new Point(location, -offset);
-                case AxisLocation.Left:
-                    return new Point(offset, location);
-                case AxisLocation.Right:
-                    return new Point(-offset, location);
-                default:
-                    throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
-            }
         }
         #endregion
 
@@ -689,21 +576,13 @@ namespace DavesWPFTester
 
         #region Private data members
         readonly TextBlock _axisLabel = new TextBlock();
-        double _lineThickness;
+        double _lineThickness = 1;
 
         readonly AxisTicksInternal _ticks = new AxisTicksInternal();
         Path _axis;
-        double _endLocation;
-        double _length;
-        int _majorTickCount;
-
-        double _majorTickSpacing,
-               _minorTickSpacing;
 
         AxisLabeler _axisLabeler;
-        AxisLabelerOptions _axisOptions;
-        double _startLocation;
-        const double TickLabelSpacing = 3;
+        readonly AxisLabelerOptions _axisOptions;
         #endregion
         #region Axis utility classes
         class AxisTicksInternal : List<AxisTickInternal>
