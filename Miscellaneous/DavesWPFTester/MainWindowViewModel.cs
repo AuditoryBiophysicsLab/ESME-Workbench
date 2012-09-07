@@ -29,6 +29,7 @@ namespace DavesWPFTester
         [Initialize] public TwoAxisSeriesViewModel UpperRight { get; set; }
         [Initialize] public TwoAxisSeriesViewModel LowerLeft { get; set; }
         [Initialize] public TwoAxisSeriesViewModel LowerRight { get; set; }
+        [Initialize] public TwoAxisSeriesViewModel BottomLeft { get; set; }
         public bool AnimateUpperLeft { get; set; }
         public bool AnimateLowerLeft { get; set; }
         [ImportingConstructor]
@@ -43,6 +44,7 @@ namespace DavesWPFTester
                 CreateUpperRightSeries();
                 CreateLowerLeftSeries();
                 CreateLowerRightSeries();
+                CreateBottomLeftSeries();
 #if true
                 _timer = new Timer(state => _dispatcher.InvokeInBackgroundIfRequired(() =>
                 {
@@ -100,6 +102,25 @@ namespace DavesWPFTester
         SimpleCommand<object, EventToCommandArgs> _viewClosing;
 
         #endregion
+
+        void CreateBottomLeftSeries()
+        {
+            BottomLeft.YAxis.Label = "Y Axis";
+            BottomLeft.XAxis.Label = "X Axis";
+            const double rangeStart = .1;
+            const int rangeEnd = 10;
+            const double rangeStep = .1;
+            BottomLeft.MajorTickLineColor = Colors.Black;
+            BottomLeft.MinorTickLineColor = Colors.AliceBlue;
+            BottomLeft.DataSeriesCollection.Add(new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "y = x",
+                Fill = Brushes.Blue,
+            });
+        }
 
         void CreateLowerRightSeries()
         {

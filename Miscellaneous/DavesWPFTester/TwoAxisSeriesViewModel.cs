@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Windows.Media;
+using DavesWPFTester.AxisLabeling.Language;
 using ESME.Views.Controls;
 using HRC;
 using HRC.Aspects;
@@ -79,7 +80,7 @@ namespace DavesWPFTester
             if (XAxis != null && XAxis.Autorange)
             {
                 //Debug.WriteLine(string.Format("Updating X Axis min/max. Old range: {0} ... {1} New range: {2} ... {3}", XAxis.StartValue, XAxis.EndValue, XMin, XMax));
-                XAxis.UpdateRange(XMin, XMax);
+                XAxis.Range.Update(XMin, XMax);
             }
         }
 
@@ -88,7 +89,7 @@ namespace DavesWPFTester
             if (YAxis != null && YAxis.Autorange)
             {
                 //Debug.WriteLine(string.Format("Updating Y Axis min/max. Old range: {0} ... {1} New range: {2} ... {3}", YAxis.StartValue, YAxis.EndValue, YMin, YMax));
-                YAxis.UpdateRange(YMin, YMax);
+                YAxis.Range.Update(YMin, YMax);
             }
         }
 
@@ -188,13 +189,37 @@ namespace DavesWPFTester
 
         public DataAxisViewModel()
         {
-            _propertyObserver = new PropertyObserver<DataAxisViewModel>(this)
-                .RegisterHandler(d => d.IsInverted, IsInvertedChanged);
+            Range = new Range(0.1, 10);
+            Range.RangeChanged += (s, e) =>
+            {
+                OnPropertyChanged("StartValue");
+                OnPropertyChanged("EndValue");
+            };
         }
         public string Label { get; set; }
         public AxisType AxisType { get; set; }
-        public double StartValue { get; set; }
-        public double EndValue { get; set; }
+
+        public double StartValue
+        {
+            get { return IsInverted ? Range.Max : Range.Min; }
+            set
+            {
+                if (IsInverted) Range.Max = value;
+                else Range.Min = value;
+            }
+        }
+
+        public double EndValue
+        {
+            get { return IsInverted ? Range.Min : Range.Max; }
+            set
+            {
+                if (IsInverted) Range.Min = value;
+                else Range.Max = value;
+            }
+        }
+
+        public Range Range { get; private set; }
         public bool ShowMajorTicks { get; set; }
         public bool ShowMinorTicks { get; set; }
 
@@ -202,20 +227,5 @@ namespace DavesWPFTester
         public bool Autorange { get; set; }
         public bool IsInverted { get; set; }
         public Func<double, double> MappingFunction { get; set; }
-        void IsInvertedChanged()
-        {
-            var startValue = StartValue;
-            var endValue = EndValue;
-            StartValue = IsInverted ? endValue : startValue;
-            EndValue = IsInverted ? startValue : endValue;
-        }
-        public void UpdateRange(double min, double max)
-        {
-            if (double.IsNaN(min) || double.IsNaN(max)) return;
-            var startValue = IsInverted ? max : min;
-            var endValue = IsInverted ? min : max;
-            if (Math.Abs(startValue - StartValue) > 0.0001) StartValue = startValue;
-            if (Math.Abs(endValue - EndValue) > 0.0001) EndValue = endValue;
-        }
     }
 }

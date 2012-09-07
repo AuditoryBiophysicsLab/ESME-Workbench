@@ -5,25 +5,23 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DataContext="{d:DesignInstance app:TwoAxisSeriesViewModel}"
+             d:DesignHeight="600"
+             d:DesignWidth="800"
              mc:Ignorable="d">
     <DockPanel LastChildFill="True">
         <DockPanel DockPanel.Dock="Left">
             <DockPanel LastChildFill="True">
-                <TextBlock Height="{Binding ActualHeight,
-                                            ElementName=XAxis}"
-                           Background="LightPink"
-                           DockPanel.Dock="Bottom" />
+                <TextBlock Height="{Binding ActualHeight, ElementName=XAxis}" Background="LightPink" DockPanel.Dock="Bottom" />
                 <app:NewDataAxis x:Name="YAxis"
-				                 DockPanel.Dock="Top"
                                  VerticalAlignment="Top"
                                  AxisLabel="{Binding Label}"
                                  AxisLocation="Left"
                                  AxisType="{Binding AxisType}"
                                  Background="LightBlue"
                                  DataContext="{Binding YAxis}"
-                                 EndValue="{Binding EndValue}"
+                                 DataRange="{Binding Range}"
+                                 DockPanel.Dock="Top"
                                  MappingFunction="{Binding MappingFunction}"
-                                 StartValue="{Binding StartValue}"
                                  TickValueFormat="{Binding TickValueFormat}" />
             </DockPanel>
         </DockPanel>
@@ -33,10 +31,9 @@
                          AxisType="{Binding AxisType}"
                          Background="LightGreen"
                          DataContext="{Binding XAxis}"
+                         DataRange="{Binding Range}"
                          DockPanel.Dock="Bottom"
-                         EndValue="{Binding EndValue}"
                          MappingFunction="{Binding MappingFunction}"
-                         StartValue="{Binding StartValue}"
                          TickValueFormat="{Binding TickValueFormat}" />
         <app:DataCanvas x:Name="DataCanvas"
                         Background="LightSalmon"

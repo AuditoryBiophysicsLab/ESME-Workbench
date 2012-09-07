@@ -187,7 +187,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
                 j = j + 1;
             }
 
-            if (best == null) Console.WriteLine("WARNING: Extended algorithm found 0 solutions");
+            if (best == null) Console.WriteLine(@"WARNING: Extended algorithm found 0 solutions");
             else best.VisibleRange = new Range(Math.Min(options.VisibleRange.Min, best.Labels.Min(t => t.Item1)), Math.Max(options.VisibleRange.Max, best.Labels.Max(t => t.Item1)));
             return best;
         }
