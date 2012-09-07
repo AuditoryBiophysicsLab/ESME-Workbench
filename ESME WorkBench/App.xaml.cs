@@ -117,6 +117,13 @@ namespace ESMEWorkbench
         static void LastChanceExceptionHandler(object sender, UnhandledExceptionEventArgs ex)
         {
             Trace.TraceError("{0} encountered an unhandled exception and is exiting.  A dump file will be created in {1}", Name, DumpFile);
+            Trace.TraceError("{0} Exception type: {1}", Name, ex.ExceptionObject.GetType());
+            Trace.TraceError("{0} Exception message: {1}", Name, ((Exception)ex.ExceptionObject).Message);
+            if (((Exception)ex.ExceptionObject).InnerException != null)
+            {
+                Trace.TraceError("{0} Inner exception type: {1}", Name, ((Exception)ex.ExceptionObject).InnerException.GetType());
+                Trace.TraceError("{0} Inner exception message: {1}", Name, ((Exception)ex.ExceptionObject).InnerException.Message);
+            }
 
             MiniDump.Write(DumpFile, MiniDump.Option.WithoutAuxiliaryState | MiniDump.Option.WithoutOptionalData, MiniDump.ExceptionInfo.Present);
         }
