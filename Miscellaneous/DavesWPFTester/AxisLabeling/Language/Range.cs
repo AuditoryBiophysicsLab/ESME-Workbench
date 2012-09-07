@@ -48,6 +48,8 @@ namespace DavesWPFTester.AxisLabeling.Language
 
         public double RangeToValue(double range) { return (range * Size) + Min; }
 
+        public bool Contains(Range otherRange) { return Min <= otherRange.Min && Max >= otherRange.Max; }
+
         public static Range Identity = new Range(0, 1);
 
         public Range Expand(double amount) { return new Range(Min - amount, Max + amount); }

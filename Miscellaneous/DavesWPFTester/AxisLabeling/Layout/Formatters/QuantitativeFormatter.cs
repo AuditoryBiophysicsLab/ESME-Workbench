@@ -25,11 +25,11 @@ namespace DavesWPFTester.AxisLabeling.Layout.Formatters
                 foreach (var format in formats)
                 {
                     var f = data.Clone();
-                    f._formatStyle = format;
+                    f.FormatStyle = format;
                     f.Legibility = legibilityScoreMax(f, options);
 
                     if (ScoreAxis(f) < bestScore) continue;
-                    var labels = f._formatStyle.FormalLabels(f.Labels.Select(x => (object)x.Item1).ToList());
+                    var labels = f.FormatStyle.FormalLabels(f.Labels.Select(x => (object)x.Item1).ToList());
                     f.Labels = f.Labels.Select(x => x.Item1).Zip(labels.Item1, (a, b) => new Tuple<double, string>(a, b)).ToList();
                     f.AxisTitleExtension = labels.Item2;
                     f.Legibility = legibilityScore(f, options);
@@ -43,7 +43,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.Formatters
 
         protected double legibility_format(Axis data, AxisLabelerOptions options)
         {
-            var format = data._formatStyle.Score(data.Labels.Select(x => (object)x.Item1).ToList());
+            var format = data.FormatStyle.Score(data.Labels.Select(x => (object)x.Item1).ToList());
             return format;
         }
 

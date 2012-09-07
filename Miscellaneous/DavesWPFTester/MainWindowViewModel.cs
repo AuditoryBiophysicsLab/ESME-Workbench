@@ -107,9 +107,9 @@ namespace DavesWPFTester
         {
             BottomLeft.YAxis.Label = "Y Axis";
             BottomLeft.XAxis.Label = "X Axis";
-            const double rangeStart = .1;
+            const double rangeStart = 1;
             const int rangeEnd = 10;
-            const double rangeStep = .1;
+            const double rangeStep = .5;
             BottomLeft.MajorTickLineColor = Colors.Black;
             BottomLeft.MinorTickLineColor = Colors.AliceBlue;
             BottomLeft.DataSeriesCollection.Add(new BarSeriesViewModel

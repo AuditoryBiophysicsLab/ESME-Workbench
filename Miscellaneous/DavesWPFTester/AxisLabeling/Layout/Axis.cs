@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Media;
 using DavesWPFTester.AxisLabeling.Language;
 using DavesWPFTester.AxisLabeling.Language.Expressions;
 using DavesWPFTester.AxisLabeling.Layout.Formatters;
@@ -23,7 +22,6 @@ namespace DavesWPFTester.AxisLabeling.Layout
         public Range VisibleRange { get; set; }
 
         public double FontSize { get; set; }
-        public double TickSize { get; set; }
         public AxisDirection LabelDirection { get; set; }
         
         //tick placement, label text
@@ -39,14 +37,13 @@ namespace DavesWPFTester.AxisLabeling.Layout
         public double Legibility { get; set; }
 
         //testing purposes
-        public Format _formatStyle;
+        public Format FormatStyle;
 
         public Axis()
         {
             Labels = new List<Tuple<double, string>>();
             AxisLocation = AxisLocation.Bottom;
             Score = -10000000;
-            TickSize = 7;
             FontSize = 12;
             VisibleRange = new Range(0, 0);
             LabelDirection = AxisDirection.Horizontal;
@@ -55,7 +52,7 @@ namespace DavesWPFTester.AxisLabeling.Layout
             Coverage = -1000000000;
             Granularity = -100000000;
             Legibility = -10000000;
-            _formatStyle = null;
+            FormatStyle = null;
         }
 
         public Axis Clone()
@@ -67,14 +64,13 @@ namespace DavesWPFTester.AxisLabeling.Layout
                 AxisLocation = AxisLocation,
                 Labels = new List<Tuple<double, string>>(Labels),
                 Score = Score,
-                TickSize = TickSize,
                 VisibleRange = VisibleRange,
                 LabelDirection = LabelDirection,
                 Simplicity = Simplicity,
                 Coverage = Coverage,
                 Granularity = Granularity,
                 Legibility = Legibility,
-                _formatStyle = _formatStyle
+                FormatStyle = FormatStyle
             };
         }
     }

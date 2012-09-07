@@ -10,7 +10,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using DavesWPFTester.AxisLabeling.Language;
 using DavesWPFTester.AxisLabeling.Layout;
 using DavesWPFTester.AxisLabeling.Layout.AxisLabelers;
@@ -107,17 +106,6 @@ namespace DavesWPFTester
 
         static void IsInvertedPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).IsInvertedPropertyChanged(); }
         void IsInvertedPropertyChanged() { }
-        #endregion
-
-        #region dependency property string TickValueFormat { get; set; }
-        public static readonly DependencyProperty TickValueFormatProperty = DependencyProperty.RegisterAttached("TickValueFormat",
-                                                                                                                typeof(string),
-                                                                                                                typeof(NewDataAxis),
-                                                                                                                new FrameworkPropertyMetadata("0.###",
-                                                                                                                                              FrameworkPropertyMetadataOptions.AffectsArrange |
-                                                                                                                                              FrameworkPropertyMetadataOptions.AffectsMeasure));
-
-        public string TickValueFormat { get { return (string)GetValue(TickValueFormatProperty); } set { SetCurrentValue(TickValueFormatProperty, value); } }
         #endregion
 
         #region dependency property AxisLayoutAlgorithm AxisLayoutAlgorithm
@@ -303,28 +291,28 @@ namespace DavesWPFTester
                 case AxisLocation.Top:
                     tickDirectionScale = -1.0;
                     originScale = 1.0;
-                    axisDirectionTranslation = 0.0;
+                    axisDirectionTranslation = 0.5;
                     tickDirectionTranslation = newSize.Height;
                     axisLength = newSize.Width;
                     break;
                 case AxisLocation.Bottom:
                     tickDirectionScale = 1.0;
                     originScale = 1.0;
-                    axisDirectionTranslation = 0.0;
+                    axisDirectionTranslation = 0.5;
                     tickDirectionTranslation = 0.0;
                     axisLength = newSize.Width;
                     break;
                 case AxisLocation.Left:
                     tickDirectionScale = -1.0;
                     originScale = -1.0;
-                    axisDirectionTranslation = newSize.Height;
+                    axisDirectionTranslation = newSize.Height - 0.5;
                     tickDirectionTranslation = newSize.Width;
                     axisLength = newSize.Height;
                     break;
                 case AxisLocation.Right:
                     tickDirectionScale = 1.0;
                     originScale = -1.0;
-                    axisDirectionTranslation = newSize.Height;
+                    axisDirectionTranslation = newSize.Height - 0.5;
                     tickDirectionTranslation = 0.0;
                     axisLength = newSize.Height;
                     break;
@@ -336,15 +324,15 @@ namespace DavesWPFTester
             // The intent of _axisTransform is to make every axis draw the same as a Bottom axis (i.e. the StartValue is at 
             // transformed-X of 0, and the axis line is drawn from top left to top right, axis ticks from top to tickLength)
             result.Children.Add(new TranslateTransform(-visbleRange.Min, 0)); // might be -lowValue
-            result.Children.Add(new ScaleTransform(originScale * (axisLength / visbleRange.Size), tickDirectionScale));
+            result.Children.Add(new ScaleTransform(originScale * ((axisLength - 1) / visbleRange.Size), tickDirectionScale));
             result.Children.Add(new TranslateTransform(axisDirectionTranslation, tickDirectionTranslation));
             if (includeSwapTransform && AxisLocation == AxisLocation.Left || AxisLocation == AxisLocation.Right) result.Children.Add(new SwapTransform());
             return result;
         }
 
-        static Rect ComputeLabelRect(string label, double position, Axis axis, AxisLabelerOptions options)
+        Rect ComputeLabelRect(string label, double position, Axis axis, AxisLabelerOptions options)
         {
-            var axisPosition = options.AxisTransform.Transform(new Point(position, axis.TickSize));
+            var axisPosition = options.AxisTransform.Transform(new Point(position, MajorTickLength));
             var text = new FormattedText(label, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, options.Typeface, options.FontSize, Brushes.Black);
             var left = axisPosition.X;
             var top = axisPosition.Y;
@@ -372,13 +360,6 @@ namespace DavesWPFTester
 
         #region Layout and drawing code
 
-        Axis CalculateAxisLabels(Size newSize)
-        {
-            _axisOptions.AxisTransform = CreateAxisTransform(_visibleRange, newSize, true);
-            _axisOptions.Screen = new Rect(newSize);
-            return _axisLabeler.Generate(_axisOptions, 1.0 / 96.0);
-        }
-
         double _tickLabelDimension;
         double _axisLabelDimension;
         Axis _tickLabels;
@@ -387,33 +368,47 @@ namespace DavesWPFTester
             if (_visibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
             if (Double.IsNaN(availableSize.Width) || Double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;
             if (Double.IsNaN(availableSize.Height) || Double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
-            _tickLabels = CalculateAxisLabels(availableSize);
+            _axisOptions.AxisTransform = CreateAxisTransform(_visibleRange, availableSize, true);
+            _axisOptions.Screen = new Rect(availableSize);
+            _tickLabels = _axisLabeler.Generate(_axisOptions, 1.0 / 96.0);
+            var axisRange = new Range(_tickLabels.Labels.Min(l => l.Item1), _tickLabels.Labels.Max(l => l.Item1));
+            if (!axisRange.Contains(_visibleRange)) VisibleRange = axisRange;
             var axisTransform = CreateAxisTransform(_visibleRange, availableSize, true);
             Children.Clear();
-            _axis = CreateAxis(_tickLabels, axisTransform);
-            Children.Add(_axis);
-            _ticks.AddLabels(this);
-            var longestTickLabel = (from label in _tickLabels.Labels
-                                    orderby label.Item2.Length
-                                    select label.Item2).Last();
-            var longestTickLabelText = new FormattedText(longestTickLabel, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, _axisOptions.Typeface, _axisOptions.FontSize, Brushes.Black);
+            AxisTicks.Clear();
+            // Clear the tick cache
+            _ticks.Clear();
+            foreach (var label in _tickLabels.Labels)
+            {
+                var tickStart = axisTransform.Transform(new Point(label.Item1, 0));
+                var tickLocation = AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? tickStart.X : tickStart.Y;
+                var tick = new AxisTickInternal(label.Item1, label.Item2, true, AxisType == AxisType.Logarithmic);
+                _ticks.Add(tick);
+                Children.Add(tick.Label);
+                tick.Label.Measure(availableSize);
+                AxisTicks.Add(new AxisTick { Location = tickLocation, IsMajorTick = true, Value = label.Item1 });
+            }
+            _tickLabelMaxWidth = _ticks.Max(t => t.Label.DesiredSize.Width);
+            _tickLabelMaxHeight = _ticks.Max(t => t.Label.DesiredSize.Height);
             var axisLabel = string.IsNullOrEmpty(_tickLabels.AxisTitleExtension) ? AxisLabel : string.Format("{0} ({1})", AxisLabel, _tickLabels.AxisTitleExtension);
-            var axisLabelText = new FormattedText(axisLabel, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, _axisOptions.Typeface, _axisOptions.FontSize + 2, Brushes.Black);
-            var desiredSize = new Size(availableSize.Width, availableSize.Height);
+            _axisLabel.Text = axisLabel;
+            _axisLabel.FontSize = _tickLabels.FontSize + 2;
             Children.Add(_axisLabel);
+            _axisLabel.Measure(availableSize);
+            var desiredSize = new Size(availableSize.Width, availableSize.Height);
             switch (AxisLocation)
             {
                 case AxisLocation.Top:
                 case AxisLocation.Bottom:
-                    _tickLabelDimension = longestTickLabelText.Height;
-                    _axisLabelDimension = axisLabelText.Height;
-                    desiredSize.Height = _tickLabels.TickSize + 2 + _tickLabelDimension + 2 + _axisLabelDimension;
+                    _tickLabelDimension = _tickLabelMaxHeight;
+                    _axisLabelDimension = _axisLabel.DesiredSize.Height;
+                    desiredSize.Height = MajorTickLength + _tickLabelDimension + _axisLabelDimension;
                     break;
                 case AxisLocation.Left:
                 case AxisLocation.Right:
-                    _tickLabelDimension = longestTickLabelText.Width;
-                    _axisLabelDimension = axisLabelText.Width;
-                    desiredSize.Width = _tickLabels.TickSize + 2 + _tickLabelDimension + 2 + _axisLabelDimension;
+                    _tickLabelDimension = _tickLabelMaxWidth;
+                    _axisLabelDimension = _axisLabel.DesiredSize.Height;
+                    desiredSize.Width = MajorTickLength + 2 + _tickLabelDimension + _axisLabelDimension;
                     break;
                 default:
                     throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
@@ -421,149 +416,75 @@ namespace DavesWPFTester
             // desiredSize = ... computed sum of children's DesiredSize ...;
             // IMPORTANT: do not allow PositiveInfinity to be returned, that will raise an exception in the caller!
             // PositiveInfinity might be an availableSize input; this means that the parent does not care about sizing
-            Debug.WriteLine(string.Format("NewDataAxis: MeasureOverride for {0} returning desired width {1} and height {2}. Count: {3}", AxisLabel, desiredSize.Width, desiredSize.Height, _measureOverrideCount++));
+            Debug.WriteLine(string.Format("NewDataAxis: MeasureOverride for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
             return desiredSize;
         }
-        int _measureOverrideCount;
+
+        double _tickLabelMaxWidth, _tickLabelMaxHeight;
 
         protected override Size ArrangeOverride(Size arrangeSize)
         {
             if (_visibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(arrangeSize.Width, 22) : new Size(arrangeSize.Height, 22);
-            switch (AxisLocation)
-            {
-                case AxisLocation.Top:
-                case AxisLocation.Bottom:
-                    arrangeSize.Height = _tickLabels.TickSize + 2 + _tickLabelDimension + 2 + _axisLabelDimension;
-                    break;
-                case AxisLocation.Left:
-                case AxisLocation.Right:
-                    arrangeSize.Width = _tickLabels.TickSize + 2 + _tickLabelDimension + 2 + _axisLabelDimension;
-                    break;
-                default:
-                    throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
-            }
             var axisTransform = CreateAxisTransform(_visibleRange, arrangeSize, true);
 
-            _axis.Arrange(axisTransform.TransformBounds(new Rect(_visibleRange.Min, 0, _visibleRange.Size, _tickLabels.TickSize)));
-            var longestTickLabel = (from label in _tickLabels.Labels
-                                    orderby label.Item2.Length
-                                    select label.Item2).Last();
-            var longestTickLabelText = new FormattedText(longestTickLabel, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, _axisOptions.Typeface, _axisOptions.FontSize, Brushes.Black);
-            var axisLabel = string.IsNullOrEmpty(_tickLabels.AxisTitleExtension) ? AxisLabel : string.Format("{0} ({1})", AxisLabel, _tickLabels.AxisTitleExtension);
-            var axisLabelText = new FormattedText(axisLabel, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, _axisOptions.Typeface, _axisOptions.FontSize + 2, Brushes.Black);
-            _axisLabel.Text = axisLabel;
-            _axisLabel.FontSize = _tickLabels.FontSize + 2;
-            Point axisLabelTopLeft;
             switch (AxisLocation)
             {
                 case AxisLocation.Top:
                 case AxisLocation.Bottom:
-                    axisLabelTopLeft = axisTransform.Transform(new Point(_visibleRange.Size / 2, _tickLabels.TickSize + 2 + longestTickLabelText.Height + 2 + axisLabelText.Height));
-                    axisLabelTopLeft.X -= axisLabelText.Width / 2;
-                    _axisLabel.Arrange(new Rect(axisLabelTopLeft, new Size(axisLabelText.Width, axisLabelText.Height)));
+                    var axisLabelPosition = axisTransform.Transform(new Point(_visibleRange.Size / 2, MajorTickLength + _tickLabelMaxHeight));
+                    axisLabelPosition.X -= _axisLabel.DesiredSize.Width;
+                    _axisLabel.Arrange(new Rect(axisLabelPosition, _axisLabel.DesiredSize));
                     break;
                 case AxisLocation.Left:
                 case AxisLocation.Right:
-                    axisLabelTopLeft = axisTransform.Transform(new Point(_visibleRange.Size / 2, _tickLabels.TickSize + 2 + longestTickLabelText.Width + 2 + axisLabelText.Height));
-                    axisLabelTopLeft.Y -= axisLabelText.Width / 2;
-                    _axisLabel.Arrange(new Rect(axisLabelTopLeft, new Size(axisLabelText.Width, axisLabelText.Height)));
-#if false
-                    _axisLabel.RenderTransformOrigin = new Point(0.5, 0.5);
-                    _axisLabel.Arrange(new Rect(DesiredSize.Width - (_axisLabel.DesiredSize.Width / 2) - (_axisLabel.DesiredSize.Height / 2),
-                                                (DesiredSize.Height - _axisLabel.DesiredSize.Height) / 2,
-                                                _axisLabel.DesiredSize.Width,
-                                                _axisLabel.DesiredSize.Height));
-                    _axis.Arrange(new Rect(0, 0, _axis.DesiredSize.Width, _axis.DesiredSize.Height));
-                    _axisLabel.RenderTransform = new RotateTransform(90);
-#endif
+                    var axisLabelCenter = axisTransform.Transform(new Point(_visibleRange.Size / 2, MajorTickLength + 2 + _tickLabelMaxWidth + _axisLabel.DesiredSize.Height));
+                    _axisLabel.RenderTransformOrigin = new Point(0.5, 1);
+                    _axisLabel.RenderTransform = new RotateTransform(-90);
+                    _axisLabel.Arrange(new Rect(axisLabelCenter, _axisLabel.DesiredSize));
                     break;
                 default:
                     throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
             }
-            _axis.SnapsToDevicePixels = true;
 
-            var location = new Point();
-            var rect = new Rect();
-            foreach (var tick in _ticks)
-                if (tick.Label != null)
+            foreach (var tick in _ticks.Where(tick => tick.Label != null)) 
+            {
+                Point tickLabelPosition;
+                switch (AxisLocation)
                 {
-                    var size = tick.Label.DesiredSize;
-                    var width = tick.Label.DesiredSize.Width;
-                    var height = tick.Label.DesiredSize.Height;
-                    double left;
-                    double top;
-                    switch (AxisLocation)
-                    {
-                        case AxisLocation.Top:
-                            left = Math.Max(0, tick.Location - (width / 2));
-                            if (DesiredSize.Width < (left + width)) left -= (left + width) - DesiredSize.Width;
-                            top = tick.Length + 1;
-                            break;
-                        case AxisLocation.Bottom:
-                            left = Math.Max(0, tick.Location - (width / 2));
-                            if (DesiredSize.Width < (left + width)) left -= (left + width) - DesiredSize.Width;
-                            top = Math.Max(0, DesiredSize.Height - tick.Length - height - 1);
-                            break;
-                        case AxisLocation.Left:
-                            top = Math.Max(0, tick.Location - (height / 2));
-                            if (DesiredSize.Height < (top + height)) top -= (top + height) - DesiredSize.Height;
-                            left = tick.Length + 1;
-                            break;
-                        case AxisLocation.Right:
-                            top = Math.Max(0, tick.Location - (height / 2));
-                            if (DesiredSize.Height < (top + height)) top -= (top + height) - DesiredSize.Height;
-                            left = Math.Max(0, DesiredSize.Width - tick.Length - width - 1);
-                            break;
-                        default:
-                            throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
-                    }
-                    location.X = left;
-                    location.Y = top;
-                    rect.Location = location;
-                    rect.Size = size;
-                    tick.Label.Arrange(new Rect(location, size));
+                    case AxisLocation.Top:
+                    case AxisLocation.Bottom:
+                        tickLabelPosition = axisTransform.Transform(new Point(tick.Value, MajorTickLength));
+                        tickLabelPosition.X -= tick.Label.DesiredSize.Width / 2;
+                        tickLabelPosition.X = Math.Max(tickLabelPosition.X, 0);
+                        tickLabelPosition.X = Math.Min(tickLabelPosition.X, arrangeSize.Width - tick.Label.DesiredSize.Width);
+                        break;
+                    case AxisLocation.Left:
+                    case AxisLocation.Right:
+                        tickLabelPosition = axisTransform.Transform(new Point(tick.Value, MajorTickLength + 2));
+                        if (AxisLocation == AxisLocation.Left) tickLabelPosition.X -= tick.Label.DesiredSize.Width;
+                        tickLabelPosition.Y -= tick.Label.DesiredSize.Height / 2;
+                        tickLabelPosition.Y = Math.Max(tickLabelPosition.Y, 0);
+                        tickLabelPosition.Y = Math.Min(tickLabelPosition.Y, arrangeSize.Height - tick.Label.DesiredSize.Height);
+                        break;
+                    default:
+                        throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
                 }
-            //this.Background = Brushes.LightBlue;
+                tick.Label.Arrange(new Rect(tickLabelPosition, tick.Label.DesiredSize));
+            }
             Debug.WriteLine(string.Format("NewDataAxis: ArrangeOverride for {0} returning desired width {1} and height {2}", AxisLabel, arrangeSize.Width, arrangeSize.Height));
             return arrangeSize;
         }
 
-
-        Path CreateAxis(Axis axis, GeneralTransform axisTransform)
+        protected override void OnRender(DrawingContext dc)
         {
-            var format = TickValueFormat == "m" ? "m" : String.Format("{{0:{0}}}", TickValueFormat);
-            if (AxisTicks == null) AxisTicks = new ObservableCollection<AxisTick>();
-            AxisTicks.Clear();
-            // Clear the tick cache
-            _ticks.Clear();
-            var axisGeometry = new StreamGeometry { FillRule = FillRule.EvenOdd };
-            using (var ctx = axisGeometry.Open())
-            {
-                ctx.BeginFigure(axisTransform.Transform(new Point(_visibleRange.Min, 0)), false, false);
-                ctx.LineTo(axisTransform.Transform(new Point(_visibleRange.Max, 0)), true, false);
-                foreach (var label in axis.Labels)
-                {
-                    var tickStart = axisTransform.Transform(new Point(label.Item1, 0));
-                    var tickEnd = axisTransform.Transform(new Point(label.Item1, axis.TickSize));
-                    ctx.BeginFigure(tickStart, false, false);
-                    ctx.LineTo(tickEnd, true, false);
-                    var tickLocation = AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? tickStart.X : tickStart.Y;
-                    var tick = new AxisTickInternal(tickLocation, axis.TickSize, label.Item1, true, format);
-                    _ticks.Add(tick);
-                    AxisTicks.Add(new AxisTick { Location = tickLocation, IsMajorTick = true, Value = label.Item1 });
-                }
-            }
-            axisGeometry.Freeze();
-            return new Path
-            {
-                Stroke = Brushes.Black,
-                StrokeThickness = _lineThickness,
-                StrokeMiterLimit = 1,
-                StrokeStartLineCap = PenLineCap.Flat,
-                StrokeEndLineCap = PenLineCap.Flat,
-                SnapsToDevicePixels = true,
-                Data = axisGeometry
-            };
+            base.OnRender(dc);
+            if (_visibleRange == null) return;
+            var size = new Size(ActualWidth, ActualHeight);
+            var axisTransform = CreateAxisTransform(_visibleRange, size, true);
+            var pen = new Pen(Brushes.Black, 1);
+            dc.DrawLine(pen, axisTransform.Transform(new Point(_visibleRange.Min, 0.5)), axisTransform.Transform(new Point(_visibleRange.Max, 0.5)));
+            foreach (var tick in _ticks) 
+                dc.DrawLine(pen, axisTransform.Transform(new Point(tick.Value, 0.5)), axisTransform.Transform(new Point(tick.Value, MajorTickLength + 0.5)));
         }
         #endregion
 
@@ -579,56 +500,32 @@ namespace DavesWPFTester
 
         #region Private data members
         readonly TextBlock _axisLabel = new TextBlock();
-        double _lineThickness = 1;
 
-        readonly AxisTicksInternal _ticks = new AxisTicksInternal();
-        Path _axis;
+        readonly List<AxisTickInternal> _ticks = new List<AxisTickInternal>();
 
         AxisLabeler _axisLabeler;
         readonly AxisLabelerOptions _axisOptions;
         #endregion
         #region Axis utility classes
-        class AxisTicksInternal : List<AxisTickInternal>
+        class AxisTickInternal
         {
-            public void AddLabels(Panel parent) { foreach (var tick in this.Where(tick => tick.Label != null)) parent.Children.Add(tick.Label); }
-        }
-
-        class AxisTickInternal : IComparable<AxisTickInternal>
-        {
-            public AxisTickInternal(double location, double height, double value, bool isMajorTick, string format)
+            public AxisTickInternal(double value, string text, bool isMajorTick, bool isMagnitude)
             {
-                Location = location;
-                Length = height;
+                Value = value;
                 if (!isMajorTick) return;
-                if (format == "m")
+                Label = new TextBlock();
+                if (isMagnitude)
                 {
-                    Label = new TextBlock { Text = "10" };
+                    Label.Text = "10";
                     var superscript = new TextBlock { Text = ((int)Math.Floor(Math.Log10(value))).ToString(CultureInfo.InvariantCulture), FontSize = 10 };
                     var inline = new InlineUIContainer(superscript) { BaselineAlignment = BaselineAlignment.Superscript };
                     Label.Inlines.Add(inline);
                 }
-                else
-                {
-                    Label = new TextBlock
-                    {
-                        Text = String.Format(format, value)
-                    };
-                }
+                else Label.Text = text;
             }
 
-            public double Location { get; private set; }
-            public double Length { get; private set; }
             public TextBlock Label { get; private set; }
-
-            #region IComparable<AxisTickInternal> Members
-            int IComparable<AxisTickInternal>.CompareTo(AxisTickInternal that)
-            {
-                if ((that == null) || (Location > that.Location)) return 1;
-                if (Location < that.Location) return -1;
-                return 0;
-            }
-            #endregion
-
+            public double Value { get; private set; }
             ~AxisTickInternal() { Label = null; }
         }
         #endregion

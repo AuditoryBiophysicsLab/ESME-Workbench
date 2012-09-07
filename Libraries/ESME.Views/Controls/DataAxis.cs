@@ -47,9 +47,9 @@ namespace ESME.Views.Controls
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsMeasure, TickValuesPropertyChanged));
 
         public ObservableCollection<AxisTick> TickValues { get { return (ObservableCollection<AxisTick>)GetValue(TickValuesProperty); } set { SetValue(TickValuesProperty, value); } }
-        static void TickValuesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).TickValuesPropertyChanged(args); }
+        static void TickValuesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).TickValuesPropertyChanged(); }
         [UsedImplicitly] CollectionObserver _tickValuesObserver;
-        void TickValuesPropertyChanged(DependencyPropertyChangedEventArgs args)
+        void TickValuesPropertyChanged()
         {
             if (AxisType == AxisType.Logarithmic) throw new InvalidOperationException("Cannot set TickValues on a Logarithmic axis");
             if (_tickValuesObserver != null)
