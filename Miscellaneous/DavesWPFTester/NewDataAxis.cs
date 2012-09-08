@@ -288,7 +288,6 @@ namespace DavesWPFTester
         void MinorTicksPerInchPropertyChanged() { }
         #endregion
 
-
         public NewDataAxis()
         {
             SnapsToDevicePixels = true;
@@ -396,7 +395,7 @@ namespace DavesWPFTester
 
         double _tickLabelDimension;
         double _axisLabelDimension;
-        Axis _majorTickLabels;
+        Axis _axis;
         protected override Size MeasureOverride(Size availableSize)
         {
             if (_visibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
@@ -404,16 +403,17 @@ namespace DavesWPFTester
             if (Double.IsNaN(availableSize.Height) || Double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
             _axisOptions.AxisTransform = CreateAxisTransform(_visibleRange, availableSize, true);
             _axisOptions.Screen = new Rect(availableSize);
-            _majorTickLabels = _axisLabeler.Generate(_axisOptions, MajorTicksPerInch / _pixelsPerInch);
-            var minorTickLabels = _axisLabeler.Generate(_axisOptions, MinorTicksPerInch / _pixelsPerInch);
-            var axisRange = new Range(_majorTickLabels.Labels.Min(l => l.Value), _majorTickLabels.Labels.Max(l => l.Value));
+            _axis = _axisLabeler.Generate(_axisOptions, MajorTicksPerInch / _pixelsPerInch);
+            var majorTickLabels = _axis.Labels;
+            var minorTickLabels = _axisLabeler.Generate(_axisOptions, MinorTicksPerInch / _pixelsPerInch).Labels.Except(majorTickLabels, new AxisLabelEqualityComparer()).ToList();
+            var axisRange = new Range(_axis.Labels.Min(l => l.Value), _axis.Labels.Max(l => l.Value));
             if (!axisRange.Contains(_visibleRange)) VisibleRange = axisRange.Expand(axisRange.Size * .05);
             var axisTransform = CreateAxisTransform(_visibleRange, availableSize, true);
             Children.Clear();
             AxisTicks.Clear();
             // Clear the tick cache
             _ticks.Clear();
-            foreach (var label in _majorTickLabels.Labels)
+            foreach (var label in majorTickLabels)
             {
                 var tickStart = axisTransform.Transform(new Point(label.Value, 0));
                 var tickLocation = AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? tickStart.X : tickStart.Y;
@@ -423,11 +423,19 @@ namespace DavesWPFTester
                 majorTick.Label.Measure(availableSize);
                 AxisTicks.Add(new AxisTick { Location = tickLocation, IsMajorTick = true, Value = label.Value });
             }
+            foreach (var label in minorTickLabels)
+            {
+                var tickStart = axisTransform.Transform(new Point(label.Value, 0));
+                var tickLocation = AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? tickStart.X : tickStart.Y;
+                var minorTick = new AxisTickInternal(label.Value, null, false, AxisType == AxisType.Logarithmic);
+                _ticks.Add(minorTick);
+                AxisTicks.Add(new AxisTick { Location = tickLocation, IsMajorTick = false, Value = label.Value });
+            }
             _tickLabelMaxWidth = _ticks.Where(t => t.Label != null).Max(t => t.Label.DesiredSize.Width);
             _tickLabelMaxHeight = _ticks.Where(t => t.Label != null).Max(t => t.Label.DesiredSize.Height);
-            var axisLabel = string.IsNullOrEmpty(_majorTickLabels.AxisTitleExtension) ? AxisLabel : string.Format("{0} ({1})", AxisLabel, _majorTickLabels.AxisTitleExtension);
+            var axisLabel = string.IsNullOrEmpty(_axis.AxisTitleExtension) ? AxisLabel : string.Format("{0} ({1})", AxisLabel, _axis.AxisTitleExtension);
             _axisLabel.Text = axisLabel;
-            _axisLabel.FontSize = _majorTickLabels.FontSize + 2;
+            _axisLabel.FontSize = _axis.FontSize + 2;
             Children.Add(_axisLabel);
             _axisLabel.Measure(availableSize);
             var desiredSize = new Size(availableSize.Width, availableSize.Height);
@@ -520,7 +528,7 @@ namespace DavesWPFTester
             var pen = new Pen(Brushes.Black, 1) { StartLineCap = PenLineCap.Square, EndLineCap = PenLineCap.Square };
             dc.DrawLine(pen, axisTransform.Transform(new Point(_visibleRange.Min, 0)), axisTransform.Transform(new Point(_visibleRange.Max, 0)));
             foreach (var tick in _ticks) 
-                dc.DrawLine(pen, axisTransform.Transform(new Point(tick.Value, 0)), axisTransform.Transform(new Point(tick.Value, MajorTickLength)));
+                dc.DrawLine(pen, axisTransform.Transform(new Point(tick.Value, 0)), axisTransform.Transform(new Point(tick.Value, tick.IsMajorTick ? MajorTickLength : MinorTickLength)));
         }
         #endregion
 
@@ -548,6 +556,7 @@ namespace DavesWPFTester
             public AxisTickInternal(double value, string text, bool isMajorTick, bool isMagnitude)
             {
                 Value = value;
+                IsMajorTick = isMajorTick;
                 if (!isMajorTick) return;
                 Label = new TextBlock();
                 if (isMagnitude)
@@ -562,6 +571,7 @@ namespace DavesWPFTester
 
             public TextBlock Label { get; private set; }
             public double Value { get; private set; }
+            public bool IsMajorTick { get; private set; }
             ~AxisTickInternal() { Label = null; }
         }
         #endregion

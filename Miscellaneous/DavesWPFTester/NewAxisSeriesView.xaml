@@ -8,21 +8,24 @@
              d:DesignHeight="600"
              d:DesignWidth="800"
              mc:Ignorable="d">
-    <DockPanel LastChildFill="True">
+    <DockPanel>
         <DockPanel DockPanel.Dock="Left">
-            <DockPanel LastChildFill="True">
-                <TextBlock Height="{Binding ActualHeight, ElementName=XAxis}" Background="LightPink" DockPanel.Dock="Bottom" />
-                <app:NewDataAxis x:Name="YAxis"
-                                 VerticalAlignment="Top"
-                                 AxisLabel="{Binding Label}"
-                                 AxisLocation="Left"
-                                 AxisType="{Binding AxisType}"
-                                 Background="LightBlue"
-                                 DataContext="{Binding YAxis}"
-                                 DataRange="{Binding Range}"
-                                 DockPanel.Dock="Top"
-                                 MappingFunction="{Binding MappingFunction}" />
-            </DockPanel>
+            <TextBlock Width="{Binding ActualWidth,
+                                       ElementName=YAxis}"
+                       Height="{Binding ActualHeight,
+                                        ElementName=XAxis}"
+                       Background="LightPink"
+                       DockPanel.Dock="Bottom" />
+            <app:NewDataAxis x:Name="YAxis"
+                             VerticalAlignment="Top"
+                             AxisLabel="{Binding Label}"
+                             AxisLocation="Left"
+                             AxisType="{Binding AxisType}"
+                             Background="LightBlue"
+                             DataContext="{Binding YAxis}"
+                             DataRange="{Binding Range}"
+                             DockPanel.Dock="Top"
+                             MappingFunction="{Binding MappingFunction}" />
         </DockPanel>
         <app:NewDataAxis x:Name="XAxis"
                          AxisLabel="{Binding Label}"

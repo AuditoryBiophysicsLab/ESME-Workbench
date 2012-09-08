@@ -85,5 +85,17 @@ namespace DavesWPFTester.AxisLabeling.Layout
 
         public double Value { get; private set; }
         public string Label { get; private set; }
+        public override string ToString() { return string.Format("Value = {0}, Label = {1}", Value, Label); }
+    }
+
+    public class AxisLabelEqualityComparer : EqualityComparer<AxisLabel>
+    {
+        public override bool Equals(AxisLabel x, AxisLabel y) { return Math.Abs(x.Value - y.Value) < 0.0000000001; }
+        public override int GetHashCode(AxisLabel obj)
+        {
+            if (obj == null) return 0;
+            var bytes = BitConverter.GetBytes(obj.Value);
+            return BitConverter.ToInt32(bytes, 4);
+        }
     }
 }
