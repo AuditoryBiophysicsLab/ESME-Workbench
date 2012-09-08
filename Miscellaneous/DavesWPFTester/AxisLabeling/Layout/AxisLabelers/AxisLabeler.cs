@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Media;
-using DavesWPFTester.AxisLabeling.Language;
 using ESME.Views.Controls;
 using Vector = DavesWPFTester.AxisLabeling.Language.Types.Vector;
 

@@ -3,7 +3,7 @@ using System.Windows.Threading;
 using HRC.ViewModels;
 using HRC.WPF;
 
-namespace DavesWPFTester.AxisLabeling.Language
+namespace DavesWPFTester
 {
     public class Range : ViewModelBase
     {

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using DavesWPFTester.AxisLabeling.Language;
 using DavesWPFTester.AxisLabeling.Layout.Formatters;
 using ESME.Views.Controls;
 

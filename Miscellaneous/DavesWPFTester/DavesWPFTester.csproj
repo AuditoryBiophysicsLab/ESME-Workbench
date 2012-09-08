@@ -161,16 +161,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AxisLabeling\Language\Expressions\BoxCox.cs" />
     <Compile Include="AxisLabeling\Language\Expressions\Expression.cs" />
     <Compile Include="AxisLabeling\Language\Expressions\Formula.cs" />
     <Compile Include="AxisLabeling\Language\Expressions\Symbol.cs" />
-    <Compile Include="AxisLabeling\Language\Range.cs" />
+    <Compile Include="Range.cs" />
     <Compile Include="AxisLabeling\Language\Types\Constant.cs" />
     <Compile Include="AxisLabeling\Language\Types\Factor.cs" />
     <Compile Include="AxisLabeling\Language\Types\Frame.cs" />
     <Compile Include="AxisLabeling\Language\Types\Numeric.cs" />
-    <Compile Include="AxisLabeling\Language\Utilities.cs" />
     <Compile Include="AxisLabeling\Layout\Axis.cs" />
     <Compile Include="AxisLabeling\Layout\AxisLabelers\AxisLabeler.cs" />
     <Compile Include="AxisLabeling\Layout\AxisLabelers\CategoricalAxisLabeler.cs" />

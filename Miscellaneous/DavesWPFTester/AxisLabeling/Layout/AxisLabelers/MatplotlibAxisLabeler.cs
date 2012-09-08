@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using DavesWPFTester.AxisLabeling.Language;
 using ESME.Views.Controls;
 
 namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers

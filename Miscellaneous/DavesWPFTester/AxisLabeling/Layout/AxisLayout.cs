@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows;
-using DavesWPFTester.AxisLabeling.Language;
 using DavesWPFTester.AxisLabeling.Language.Types;
 using DavesWPFTester.AxisLabeling.Layout.AxisLabelers;
 using ESME.Views.Controls;
