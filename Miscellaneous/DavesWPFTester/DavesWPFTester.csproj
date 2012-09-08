@@ -199,7 +199,7 @@
     <Compile Include="TwoAxisSeriesView.xaml.cs">
       <DependentUpon>TwoAxisSeriesView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TwoAxisSeriesViewModel.cs" />
+    <Compile Include="FourAxisSeriesViewModel.cs" />
     <Page Include="NewAxisSeriesView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

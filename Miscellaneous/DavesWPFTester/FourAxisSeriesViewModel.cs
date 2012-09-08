@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Windows;
 using System.Windows.Media;
-using DavesWPFTester.AxisLabeling.Language;
 using ESME.Views.Controls;
 using HRC;
 using HRC.Aspects;
@@ -19,6 +19,12 @@ namespace DavesWPFTester
         [UsedImplicitly] CollectionObserver _dataSeriesCollectionObserver;
         public TwoAxisSeriesViewModel()
         {
+            XAxis = BottomAxis;
+            YAxis = LeftAxis;
+            TopAxis.Label = "Top Axis";
+            BottomAxis.Label = "Bottom Axis";
+            LeftAxis.Label = "Left Axis";
+            RightAxis.Label = "Right Axis";
             XMin = XMax = YMin = YMax = double.NaN;
             XAxis.Label = "X Axis";
             YAxis.Label = "Y Axis";
@@ -39,9 +45,14 @@ namespace DavesWPFTester
             YAxisPropertyChanged();
         }
 
-        [Initialize] public DataAxisViewModel XAxis { get; set; }
-        [Initialize] public DataAxisViewModel YAxis { get; set; }
+        [Initialize] public DataAxisViewModel TopAxis { get; set; }
+        [Initialize] public DataAxisViewModel BottomAxis { get; set; }
+        [Initialize] public DataAxisViewModel LeftAxis { get; set; }
+        [Initialize] public DataAxisViewModel RightAxis { get; set; }
         [Initialize] public ObservableCollection<ISeries> DataSeriesCollection { get; set; }
+
+        public DataAxisViewModel XAxis { get; set; }
+        public DataAxisViewModel YAxis { get; set; }
         public Color MajorTickLineColor { get; set; }
         public Color MinorTickLineColor { get; set; }
         public double XMin { get; set; }
@@ -219,6 +230,7 @@ namespace DavesWPFTester
             }
         }
 
+        public Visibility Visibility { get; set; }
         public Range Range { get; private set; }
         public bool ShowMajorTicks { get; set; }
         public bool ShowMinorTicks { get; set; }

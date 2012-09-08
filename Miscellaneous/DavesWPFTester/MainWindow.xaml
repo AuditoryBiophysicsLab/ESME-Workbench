@@ -46,9 +46,9 @@
                 <StackPanel Margin="10 0 0 0"
                             DockPanel.Dock="Right"
                             Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding BottomLeft.DataSeriesCollection}" />
+                    <app:LegendView ItemsSource="{Binding UpperLeft.DataSeriesCollection}" />
                 </StackPanel>
-                <app:TwoAxisSeriesView DataContext="{Binding BottomLeft}" DockPanel.Dock="Left" />
+                <app:TwoAxisSeriesView DataContext="{Binding UpperLeft}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
         <GroupBox Grid.Row="0"
@@ -110,9 +110,9 @@
                 <StackPanel Margin="10 0 0 0"
                             DockPanel.Dock="Right"
                             Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding UpperLeft.DataSeriesCollection}" />
+                    <app:LegendView ItemsSource="{Binding BottomLeft.DataSeriesCollection}" />
                 </StackPanel>
-                <app:NewAxisSeriesView DataContext="{Binding UpperLeft}" DockPanel.Dock="Left" />
+                <app:NewAxisSeriesView DataContext="{Binding BottomLeft}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
     </Grid>

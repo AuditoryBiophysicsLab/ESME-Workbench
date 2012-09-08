@@ -65,7 +65,25 @@ namespace DavesWPFTester
         public AxisLocation AxisLocation { get { return (AxisLocation)GetValue(AxisLocationProperty); } set { SetCurrentValue(AxisLocationProperty, value); } }
 
         static void AxisLocationPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).AxisLocationPropertyChanged(); }
-        void AxisLocationPropertyChanged() { _axisOptions.AxisLocation = AxisLocation; }
+        void AxisLocationPropertyChanged()
+        {
+            switch (AxisLocation)
+            {
+                case AxisLocation.Top:
+                    break;
+                case AxisLocation.Bottom:
+                    break;
+                case AxisLocation.Left:
+                    _axisLabel.LayoutTransform = new RotateTransform(-90);
+                    break;
+                case AxisLocation.Right:
+                    _axisLabel.LayoutTransform = new RotateTransform(-90);
+                    break;
+                default:
+                    throw new NotImplementedException(string.Format("AxisLocation of {0} is not implemented", AxisLocation));
+            }
+            _axisOptions.AxisLocation = AxisLocation;
+        }
         #endregion
 
         #region dependency property AxisType AxisType
@@ -407,10 +425,11 @@ namespace DavesWPFTester
             _axisOptions.AxisTransform = CreateAxisTransform(_visibleRange, availableSize, true);
             _axisOptions.Screen = new Rect(availableSize);
             _axis = _axisLabeler.Generate(_axisOptions, MajorTicksPerInch / _pixelsPerInch);
+            if (_axis == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
             var majorTickLabels = _axis.Labels;
-            var minorAxis = _axisLabeler.Generate(_axisOptions, MinorTicksPerInch / _pixelsPerInch);
-            if (!_visibleRange.Contains(minorAxis.VisibleRange)) VisibleRange = minorAxis.VisibleRange;
-            var minorTickLabels = minorAxis.Labels.Except(majorTickLabels, new AxisLabelEqualityComparer()).ToList();
+            //var minorAxis = _axisLabeler.Generate(_axisOptions, MinorTicksPerInch / _pixelsPerInch);
+            //if (!_visibleRange.Contains(minorAxis.VisibleRange)) VisibleRange = minorAxis.VisibleRange;
+            //var minorTickLabels = minorAxis.Labels.Except(majorTickLabels, new AxisLabelEqualityComparer()).ToList();
             var axisTransform = CreateAxisTransform(_visibleRange, availableSize, true);
             Children.Clear();
             AxisTicks.Clear();
@@ -426,6 +445,7 @@ namespace DavesWPFTester
                 majorTick.Label.Measure(availableSize);
                 AxisTicks.Add(new AxisTick { Location = tickLocation, IsMajorTick = true, Value = label.Value });
             }
+#if false
             foreach (var label in minorTickLabels)
             {
                 var tickStart = axisTransform.Transform(new Point(label.Value, 0));
@@ -434,6 +454,7 @@ namespace DavesWPFTester
                 _ticks.Add(minorTick);
                 AxisTicks.Add(new AxisTick { Location = tickLocation, IsMajorTick = false, Value = label.Value });
             }
+#endif
             _tickLabelMaxWidth = _ticks.Where(t => t.Label != null).Max(t => t.Label.DesiredSize.Width);
             _tickLabelMaxHeight = _ticks.Where(t => t.Label != null).Max(t => t.Label.DesiredSize.Height);
             var axisLabel = string.IsNullOrEmpty(_axis.AxisTitleExtension) ? AxisLabel : string.Format("{0} ({1})", AxisLabel, _axis.AxisTitleExtension);
@@ -453,7 +474,7 @@ namespace DavesWPFTester
                 case AxisLocation.Left:
                 case AxisLocation.Right:
                     _tickLabelDimension = _tickLabelMaxWidth;
-                    _axisLabelDimension = _axisLabel.DesiredSize.Height;
+                    _axisLabelDimension = _axisLabel.DesiredSize.Width;
                     desiredSize.Width = MajorTickLength + 2 + _tickLabelDimension + _axisLabelDimension;
                     break;
                 default:
@@ -472,26 +493,30 @@ namespace DavesWPFTester
         {
             if (_visibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(arrangeSize.Width, 22) : new Size(arrangeSize.Height, 22);
             var axisTransform = CreateAxisTransform(_visibleRange, arrangeSize, true);
-
+            Point axisLabelPosition;
+            var midpoint = _visibleRange.Min + (_visibleRange.Size / 2);
             switch (AxisLocation)
             {
                 case AxisLocation.Top:
-                case AxisLocation.Bottom:
-                    var axisLabelPosition = axisTransform.Transform(new Point(_visibleRange.Size / 2, MajorTickLength + _tickLabelMaxHeight));
+                    axisLabelPosition = axisTransform.Transform(new Point(midpoint, MajorTickLength + _tickLabelMaxHeight + _axisLabel.DesiredSize.Height));
                     axisLabelPosition.X -= _axisLabel.DesiredSize.Width / 2;
-                    _axisLabel.Arrange(new Rect(axisLabelPosition, _axisLabel.DesiredSize));
+                    break;
+                case AxisLocation.Bottom:
+                    axisLabelPosition = axisTransform.Transform(new Point(midpoint, MajorTickLength + _tickLabelMaxHeight));
+                    axisLabelPosition.X -= _axisLabel.DesiredSize.Width / 2;
                     break;
                 case AxisLocation.Left:
+                    axisLabelPosition = axisTransform.Transform(new Point(midpoint, MajorTickLength + 2 + _tickLabelMaxWidth + _axisLabel.DesiredSize.Width));
+                    axisLabelPosition.Y -= _axisLabel.DesiredSize.Height / 2;
+                    break;
                 case AxisLocation.Right:
-                    var axisLabelCenter = axisTransform.Transform(new Point(_visibleRange.Size / 2, MajorTickLength + 2 + _tickLabelMaxWidth + _axisLabel.DesiredSize.Height));
-                    axisLabelCenter.Y -= _axisLabel.DesiredSize.Width / 2;
-                    _axisLabel.RenderTransformOrigin = new Point(0.5, 1);
-                    _axisLabel.RenderTransform = new RotateTransform(-90);
-                    _axisLabel.Arrange(new Rect(axisLabelCenter, _axisLabel.DesiredSize));
+                    axisLabelPosition = axisTransform.Transform(new Point(midpoint, MajorTickLength + _tickLabelMaxWidth));
+                    axisLabelPosition.Y -= _axisLabel.DesiredSize.Height / 2;
                     break;
                 default:
                     throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
             }
+            _axisLabel.Arrange(new Rect(axisLabelPosition, _axisLabel.DesiredSize));
 
             foreach (var tick in _ticks.Where(tick => tick.Label != null)) 
             {
@@ -500,18 +525,18 @@ namespace DavesWPFTester
                 {
                     case AxisLocation.Top:
                     case AxisLocation.Bottom:
-                        tickLabelPosition = axisTransform.Transform(new Point(tick.Value, MajorTickLength));
+                        var yPos = MajorTickLength;
+                        if (AxisLocation == AxisLocation.Top) yPos += tick.Label.DesiredSize.Height;
+                        tickLabelPosition = axisTransform.Transform(new Point(tick.Value, yPos));
                         tickLabelPosition.X -= tick.Label.DesiredSize.Width / 2;
-                        tickLabelPosition.X = Math.Max(tickLabelPosition.X, 0);
-                        tickLabelPosition.X = Math.Min(tickLabelPosition.X, arrangeSize.Width - tick.Label.DesiredSize.Width);
+                        tickLabelPosition.X = Math.Min(Math.Max(tickLabelPosition.X, 0), arrangeSize.Width - tick.Label.DesiredSize.Width);
                         break;
                     case AxisLocation.Left:
                     case AxisLocation.Right:
                         tickLabelPosition = axisTransform.Transform(new Point(tick.Value, MajorTickLength + 2));
                         if (AxisLocation == AxisLocation.Left) tickLabelPosition.X -= tick.Label.DesiredSize.Width;
                         tickLabelPosition.Y -= tick.Label.DesiredSize.Height / 2;
-                        tickLabelPosition.Y = Math.Max(tickLabelPosition.Y, 0);
-                        tickLabelPosition.Y = Math.Min(tickLabelPosition.Y, arrangeSize.Height - tick.Label.DesiredSize.Height);
+                        tickLabelPosition.Y = Math.Min(Math.Max(tickLabelPosition.Y, 0), arrangeSize.Height - tick.Label.DesiredSize.Height);
                         break;
                     default:
                         throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
@@ -532,6 +557,8 @@ namespace DavesWPFTester
             dc.DrawLine(pen, axisTransform.Transform(new Point(_visibleRange.Min, 0)), axisTransform.Transform(new Point(_visibleRange.Max, 0)));
             foreach (var tick in _ticks) 
                 dc.DrawLine(pen, axisTransform.Transform(new Point(tick.Value, 0)), axisTransform.Transform(new Point(tick.Value, tick.IsMajorTick ? MajorTickLength : MinorTickLength)));
+            // This draws a 50-pixel line in the center of the axis, used to check the centering of the axis label
+            //dc.DrawLine(pen, axisTransform.Transform(new Point(_visibleRange.Min + (_visibleRange.Size / 2), 0)), axisTransform.Transform(new Point(_visibleRange.Min + (_visibleRange.Size / 2), 50)));
         }
         #endregion
 
