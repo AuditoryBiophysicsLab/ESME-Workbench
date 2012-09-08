@@ -197,8 +197,7 @@ namespace DavesWPFTester
                 _dataRange.Max = Math.Log10(_dataRange.Max);
             }
             _axisOptions.DataRange = _dataRange;
-            VisibleRange = DataRange.Size > 0 ? DataRange.Expand(DataRange.Size * 0.05) : new Range(DataRange.Min - 0.5, DataRange.Max + 0.5);
-            InvalidateMeasure();
+            VisibleRange = DataRange.Size > 0 ? DataRange.Expand(DataRange.Size * 0.05) : new Range(DataRange.Min, DataRange.Max + 10);
         }
 
         Range _dataRange;
