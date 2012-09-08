@@ -44,14 +44,14 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
             var extraBins = (int)Math.Floor((bestMax - vMax) / scaledStep);
             nbins -= extraBins;
 
-            var labels = new List<Tuple<double, string>>();
+            var labels = new List<AxisLabel>();
             var option = options.DefaultAxis();
 
             //compute actual labels
             for (var i = 0; i <= nbins; i++)
             {
                 var labelVal = bestMin + i * scaledStep + offset;
-                labels.Add(Tuple.Create(labelVal, labelVal.ToString(CultureInfo.InvariantCulture)));
+                labels.Add(new AxisLabel(labelVal, labelVal.ToString(CultureInfo.InvariantCulture)));
             }
             option.Labels = labels;
             option.Score = 1;

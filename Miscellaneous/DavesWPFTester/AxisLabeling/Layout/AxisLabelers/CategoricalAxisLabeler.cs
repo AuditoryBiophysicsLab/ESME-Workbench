@@ -11,7 +11,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
         {
             var f = (Factor)options.Symbol;
 
-            var labels = f.AllLevels.Select(level => new Tuple<double, string>(level.LevelIndex, level.ToString())).ToList();
+            var labels = f.AllLevels.Select(level => new AxisLabel(level.LevelIndex, level.ToString())).ToList();
 
             var result = options.DefaultAxis();
             result.Labels = labels;

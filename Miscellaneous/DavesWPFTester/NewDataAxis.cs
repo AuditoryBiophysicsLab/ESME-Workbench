@@ -14,6 +14,7 @@ using DavesWPFTester.AxisLabeling.Language;
 using DavesWPFTester.AxisLabeling.Layout;
 using DavesWPFTester.AxisLabeling.Layout.AxisLabelers;
 using DavesWPFTester.Transforms;
+using ESME.NEMO;
 using ESME.Views.Controls;
 using HRC;
 using HRC.ViewModels;
@@ -260,7 +261,34 @@ namespace DavesWPFTester
 
         public double MinorTickLength { get { return (double)GetValue(MinorTickLengthProperty); } set { SetValue(MinorTickLengthProperty, value); } }
         #endregion
-    
+
+        #region dependency property double MajorTicksPerInch
+
+        public static DependencyProperty MajorTicksPerInchProperty = DependencyProperty.Register("MajorTicksPerInch",
+                                                                                 typeof(double),
+                                                                                 typeof(NewDataAxis),
+                                                                                 new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MajorTicksPerInchPropertyChanged));
+
+        public double MajorTicksPerInch { get { return (double)GetValue(MajorTicksPerInchProperty); } set { SetValue(MajorTicksPerInchProperty, value); } }
+
+        static void MajorTicksPerInchPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).MajorTicksPerInchPropertyChanged(); }
+        void MajorTicksPerInchPropertyChanged() { if (MajorTicksPerInch <= 0) throw new ParameterOutOfRangeException("MajorTicksPerInch must be greater than zero"); }
+        #endregion
+
+        #region dependency property double MinorTicksPerInch
+
+        public static DependencyProperty MinorTicksPerInchProperty = DependencyProperty.Register("MinorTicksPerInch",
+                                                                                 typeof(double),
+                                                                                 typeof(NewDataAxis),
+                                                                                 new FrameworkPropertyMetadata(4.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MinorTicksPerInchPropertyChanged));
+
+        public double MinorTicksPerInch { get { return (double)GetValue(MinorTicksPerInchProperty); } set { SetValue(MinorTicksPerInchProperty, value); } }
+
+        static void MinorTicksPerInchPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).MinorTicksPerInchPropertyChanged(); }
+        void MinorTicksPerInchPropertyChanged() { }
+        #endregion
+
+
         public NewDataAxis()
         {
             SnapsToDevicePixels = true;
@@ -275,8 +303,13 @@ namespace DavesWPFTester
                 Typeface = new Typeface(TextBlock.GetFontFamily(this), TextBlock.GetFontStyle(this), TextBlock.GetFontWeight(this), TextBlock.GetFontStretch(this))
             };
             _axisLabeler = new ExtendedAxisLabeler();
+            var presentationSource = PresentationSource.FromVisual(this);
+            if (presentationSource == null || presentationSource.CompositionTarget == null) return;
+            var matrix = presentationSource.CompositionTarget.TransformToDevice;
+            _pixelsPerInch = Math.Max(matrix.M11, matrix.M22);
         }
 
+        readonly double _pixelsPerInch = 96.0;
         GeneralTransform _mappingFunctionTransform;
 
         GeneralTransform CreateAxisTransform(Range visbleRange, Size newSize, bool includeSwapTransform)
@@ -291,29 +324,29 @@ namespace DavesWPFTester
                 case AxisLocation.Top:
                     tickDirectionScale = -1.0;
                     originScale = 1.0;
-                    axisDirectionTranslation = 0.5;
-                    tickDirectionTranslation = newSize.Height;
+                    axisDirectionTranslation = StrokeWeight / 2;
+                    tickDirectionTranslation = newSize.Height - (StrokeWeight / 2);
                     axisLength = newSize.Width;
                     break;
                 case AxisLocation.Bottom:
                     tickDirectionScale = 1.0;
                     originScale = 1.0;
-                    axisDirectionTranslation = 0.5;
-                    tickDirectionTranslation = 0.0;
+                    axisDirectionTranslation = StrokeWeight / 2;
+                    tickDirectionTranslation = StrokeWeight / 2;
                     axisLength = newSize.Width;
                     break;
                 case AxisLocation.Left:
                     tickDirectionScale = -1.0;
                     originScale = -1.0;
-                    axisDirectionTranslation = newSize.Height - 0.5;
-                    tickDirectionTranslation = newSize.Width;
+                    axisDirectionTranslation = newSize.Height - (StrokeWeight / 2);
+                    tickDirectionTranslation = newSize.Width - (StrokeWeight / 2);
                     axisLength = newSize.Height;
                     break;
                 case AxisLocation.Right:
                     tickDirectionScale = 1.0;
                     originScale = -1.0;
-                    axisDirectionTranslation = newSize.Height - 0.5;
-                    tickDirectionTranslation = 0.0;
+                    axisDirectionTranslation = newSize.Height - (StrokeWeight / 2);
+                    tickDirectionTranslation = StrokeWeight / 2;
                     axisLength = newSize.Height;
                     break;
                 default:
@@ -324,12 +357,13 @@ namespace DavesWPFTester
             // The intent of _axisTransform is to make every axis draw the same as a Bottom axis (i.e. the StartValue is at 
             // transformed-X of 0, and the axis line is drawn from top left to top right, axis ticks from top to tickLength)
             result.Children.Add(new TranslateTransform(-visbleRange.Min, 0)); // might be -lowValue
-            result.Children.Add(new ScaleTransform(originScale * ((axisLength - 1) / visbleRange.Size), tickDirectionScale));
+            result.Children.Add(new ScaleTransform(originScale * ((axisLength - StrokeWeight) / visbleRange.Size), tickDirectionScale));
             result.Children.Add(new TranslateTransform(axisDirectionTranslation, tickDirectionTranslation));
             if (includeSwapTransform && AxisLocation == AxisLocation.Left || AxisLocation == AxisLocation.Right) result.Children.Add(new SwapTransform());
             return result;
         }
 
+        const double StrokeWeight = 1.0;
         Rect ComputeLabelRect(string label, double position, Axis axis, AxisLabelerOptions options)
         {
             var axisPosition = options.AxisTransform.Transform(new Point(position, MajorTickLength));
@@ -362,7 +396,7 @@ namespace DavesWPFTester
 
         double _tickLabelDimension;
         double _axisLabelDimension;
-        Axis _tickLabels;
+        Axis _majorTickLabels;
         protected override Size MeasureOverride(Size availableSize)
         {
             if (_visibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
@@ -370,29 +404,30 @@ namespace DavesWPFTester
             if (Double.IsNaN(availableSize.Height) || Double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
             _axisOptions.AxisTransform = CreateAxisTransform(_visibleRange, availableSize, true);
             _axisOptions.Screen = new Rect(availableSize);
-            _tickLabels = _axisLabeler.Generate(_axisOptions, 1.0 / 96.0);
-            var axisRange = new Range(_tickLabels.Labels.Min(l => l.Item1), _tickLabels.Labels.Max(l => l.Item1));
-            if (!axisRange.Contains(_visibleRange)) VisibleRange = axisRange;
+            _majorTickLabels = _axisLabeler.Generate(_axisOptions, MajorTicksPerInch / _pixelsPerInch);
+            var minorTickLabels = _axisLabeler.Generate(_axisOptions, MinorTicksPerInch / _pixelsPerInch);
+            var axisRange = new Range(_majorTickLabels.Labels.Min(l => l.Value), _majorTickLabels.Labels.Max(l => l.Value));
+            if (!axisRange.Contains(_visibleRange)) VisibleRange = axisRange.Expand(axisRange.Size * .05);
             var axisTransform = CreateAxisTransform(_visibleRange, availableSize, true);
             Children.Clear();
             AxisTicks.Clear();
             // Clear the tick cache
             _ticks.Clear();
-            foreach (var label in _tickLabels.Labels)
+            foreach (var label in _majorTickLabels.Labels)
             {
-                var tickStart = axisTransform.Transform(new Point(label.Item1, 0));
+                var tickStart = axisTransform.Transform(new Point(label.Value, 0));
                 var tickLocation = AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? tickStart.X : tickStart.Y;
-                var tick = new AxisTickInternal(label.Item1, label.Item2, true, AxisType == AxisType.Logarithmic);
-                _ticks.Add(tick);
-                Children.Add(tick.Label);
-                tick.Label.Measure(availableSize);
-                AxisTicks.Add(new AxisTick { Location = tickLocation, IsMajorTick = true, Value = label.Item1 });
+                var majorTick = new AxisTickInternal(label.Value, label.Label, true, AxisType == AxisType.Logarithmic);
+                _ticks.Add(majorTick);
+                Children.Add(majorTick.Label);
+                majorTick.Label.Measure(availableSize);
+                AxisTicks.Add(new AxisTick { Location = tickLocation, IsMajorTick = true, Value = label.Value });
             }
-            _tickLabelMaxWidth = _ticks.Max(t => t.Label.DesiredSize.Width);
-            _tickLabelMaxHeight = _ticks.Max(t => t.Label.DesiredSize.Height);
-            var axisLabel = string.IsNullOrEmpty(_tickLabels.AxisTitleExtension) ? AxisLabel : string.Format("{0} ({1})", AxisLabel, _tickLabels.AxisTitleExtension);
+            _tickLabelMaxWidth = _ticks.Where(t => t.Label != null).Max(t => t.Label.DesiredSize.Width);
+            _tickLabelMaxHeight = _ticks.Where(t => t.Label != null).Max(t => t.Label.DesiredSize.Height);
+            var axisLabel = string.IsNullOrEmpty(_majorTickLabels.AxisTitleExtension) ? AxisLabel : string.Format("{0} ({1})", AxisLabel, _majorTickLabels.AxisTitleExtension);
             _axisLabel.Text = axisLabel;
-            _axisLabel.FontSize = _tickLabels.FontSize + 2;
+            _axisLabel.FontSize = _majorTickLabels.FontSize + 2;
             Children.Add(_axisLabel);
             _axisLabel.Measure(availableSize);
             var desiredSize = new Size(availableSize.Width, availableSize.Height);
@@ -432,12 +467,13 @@ namespace DavesWPFTester
                 case AxisLocation.Top:
                 case AxisLocation.Bottom:
                     var axisLabelPosition = axisTransform.Transform(new Point(_visibleRange.Size / 2, MajorTickLength + _tickLabelMaxHeight));
-                    axisLabelPosition.X -= _axisLabel.DesiredSize.Width;
+                    axisLabelPosition.X -= _axisLabel.DesiredSize.Width / 2;
                     _axisLabel.Arrange(new Rect(axisLabelPosition, _axisLabel.DesiredSize));
                     break;
                 case AxisLocation.Left:
                 case AxisLocation.Right:
                     var axisLabelCenter = axisTransform.Transform(new Point(_visibleRange.Size / 2, MajorTickLength + 2 + _tickLabelMaxWidth + _axisLabel.DesiredSize.Height));
+                    axisLabelCenter.Y -= _axisLabel.DesiredSize.Width / 2;
                     _axisLabel.RenderTransformOrigin = new Point(0.5, 1);
                     _axisLabel.RenderTransform = new RotateTransform(-90);
                     _axisLabel.Arrange(new Rect(axisLabelCenter, _axisLabel.DesiredSize));
@@ -481,10 +517,10 @@ namespace DavesWPFTester
             if (_visibleRange == null) return;
             var size = new Size(ActualWidth, ActualHeight);
             var axisTransform = CreateAxisTransform(_visibleRange, size, true);
-            var pen = new Pen(Brushes.Black, 1);
-            dc.DrawLine(pen, axisTransform.Transform(new Point(_visibleRange.Min, 0.5)), axisTransform.Transform(new Point(_visibleRange.Max, 0.5)));
+            var pen = new Pen(Brushes.Black, 1) { StartLineCap = PenLineCap.Square, EndLineCap = PenLineCap.Square };
+            dc.DrawLine(pen, axisTransform.Transform(new Point(_visibleRange.Min, 0)), axisTransform.Transform(new Point(_visibleRange.Max, 0)));
             foreach (var tick in _ticks) 
-                dc.DrawLine(pen, axisTransform.Transform(new Point(tick.Value, 0.5)), axisTransform.Transform(new Point(tick.Value, MajorTickLength + 0.5)));
+                dc.DrawLine(pen, axisTransform.Transform(new Point(tick.Value, 0)), axisTransform.Transform(new Point(tick.Value, MajorTickLength)));
         }
         #endregion
 

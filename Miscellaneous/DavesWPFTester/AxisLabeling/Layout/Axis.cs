@@ -25,7 +25,7 @@ namespace DavesWPFTester.AxisLabeling.Layout
         public AxisDirection LabelDirection { get; set; }
         
         //tick placement, label text
-        public List<Tuple<double, string>> Labels { get; set; }
+        public List<AxisLabel> Labels { get; set; }
         public string AxisTitleExtension { get; set; }
 
         // Statistics and scoring
@@ -41,7 +41,7 @@ namespace DavesWPFTester.AxisLabeling.Layout
 
         public Axis()
         {
-            Labels = new List<Tuple<double, string>>();
+            Labels = new List<AxisLabel>();
             AxisLocation = AxisLocation.Bottom;
             Score = -10000000;
             FontSize = 12;
@@ -62,7 +62,7 @@ namespace DavesWPFTester.AxisLabeling.Layout
                 Symbol = Symbol,
                 FontSize = FontSize,
                 AxisLocation = AxisLocation,
-                Labels = new List<Tuple<double, string>>(Labels),
+                Labels = new List<AxisLabel>(Labels),
                 Score = Score,
                 VisibleRange = VisibleRange,
                 LabelDirection = LabelDirection,
@@ -73,5 +73,17 @@ namespace DavesWPFTester.AxisLabeling.Layout
                 FormatStyle = FormatStyle
             };
         }
+    }
+
+    public class AxisLabel
+    {
+        public AxisLabel(double value, string label)
+        {
+            Value = value;
+            Label = label;
+        }
+
+        public double Value { get; private set; }
+        public string Label { get; private set; }
     }
 }

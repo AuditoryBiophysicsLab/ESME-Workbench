@@ -29,8 +29,8 @@ namespace DavesWPFTester.AxisLabeling.Layout.Formatters
                     f.Legibility = legibilityScoreMax(f, options);
 
                     if (ScoreAxis(f) < bestScore) continue;
-                    var labels = f.FormatStyle.FormalLabels(f.Labels.Select(x => (object)x.Item1).ToList());
-                    f.Labels = f.Labels.Select(x => x.Item1).Zip(labels.Item1, (a, b) => new Tuple<double, string>(a, b)).ToList();
+                    var labels = f.FormatStyle.FormalLabels(f.Labels.Select(x => (object)x.Value).ToList());
+                    f.Labels = f.Labels.Select(x => x.Value).Zip(labels.Item1, (value, label) => new AxisLabel(value, label)).ToList();
                     f.AxisTitleExtension = labels.Item2;
                     f.Legibility = legibilityScore(f, options);
                     f.Score = ScoreAxis(f);
@@ -43,7 +43,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.Formatters
 
         protected double legibility_format(Axis data, AxisLabelerOptions options)
         {
-            var format = data.FormatStyle.Score(data.Labels.Select(x => (object)x.Item1).ToList());
+            var format = data.FormatStyle.Score(data.Labels.Select(x => (object)x.Value).ToList());
             return format;
         }
 
@@ -63,7 +63,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.Formatters
         {
             // compute overlap score
             var em = ems[data.FontSize];
-            var rects = data.Labels.Select(s => options.ComputeLabelRect(s.Item2, s.Item1, data, options)).ToList();
+            var rects = data.Labels.Select(s => options.ComputeLabelRect(s.Label, s.Value, data, options)).ToList();
             // takes adjacent pairs of rectangles
             var take = rects.Take(rects.Count - 1).ToList();
             var skip = rects.Skip(1).ToList();

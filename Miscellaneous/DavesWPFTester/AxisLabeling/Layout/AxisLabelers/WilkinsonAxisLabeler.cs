@@ -28,7 +28,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
                 best.Score += granularity;
             }
 
-            if (best != null) best.VisibleRange = new Range(Math.Min(options.VisibleRange.Min, best.Labels.Min(t => t.Item1)), Math.Max(options.VisibleRange.Max, best.Labels.Max(t => t.Item1)));
+            if (best != null) best.VisibleRange = new Range(Math.Min(options.VisibleRange.Min, best.Labels.Min(t => t.Value)), Math.Max(options.VisibleRange.Max, best.Labels.Max(t => t.Value)));
 
             return best;
         }
@@ -66,7 +66,8 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
 
                 if (score <= snice) continue;
                 var stepSequence = Enumerable.Range(0, intervals + 1).Select(x => tmin + x * tdelta).ToList();
-                var newlabels = stepSequence.Select(value => Tuple.Create(value, value.ToString(CultureInfo.InvariantCulture))).ToList();
+                //var newlabels = stepSequence.Select(value => Tuple.Create(value, value.ToString(CultureInfo.InvariantCulture))).ToList();
+                var newlabels = stepSequence.Select(value => new AxisLabel(value, value.ToString(CultureInfo.InvariantCulture))).ToList();
 
                 var candidate = options.DefaultAxis();
                 candidate.Score = score;

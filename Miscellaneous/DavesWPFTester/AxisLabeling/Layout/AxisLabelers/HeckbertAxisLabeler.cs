@@ -42,13 +42,13 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
             var rMin = Math.Floor(vMin / d) * d;
             var rMax = Math.Ceiling(vMax / d) * d;
 
-            var labels = new List<Tuple<double, string>>();
+            var labels = new List<AxisLabel>();
             var option = options.DefaultAxis();
 
             var currX = rMin;
             while (currX <= rMax + 0.5 * d)
             {
-                labels.Add(Tuple.Create(currX, currX.ToString(CultureInfo.InvariantCulture)));
+                labels.Add(new AxisLabel(currX, currX.ToString(CultureInfo.InvariantCulture)));
                 currX += d;
             }
 

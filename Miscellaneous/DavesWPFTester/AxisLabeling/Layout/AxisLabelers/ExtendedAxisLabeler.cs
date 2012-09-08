@@ -151,7 +151,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
                                 var option = options.DefaultAxis();
 
                                 var stepSequence = Enumerable.Range(0, k).Select(x => lmin + x * step).ToList();
-                                var newlabels = stepSequence.Select(value => new Tuple<double, string>(value, value.ToString(CultureInfo.InvariantCulture))).ToList();
+                                var newlabels = stepSequence.Select(value => new AxisLabel(value, value.ToString(CultureInfo.InvariantCulture))).ToList();
 
                                 option.Labels = newlabels;
                                 option.Granularity = d;
@@ -188,7 +188,7 @@ namespace DavesWPFTester.AxisLabeling.Layout.AxisLabelers
             }
 
             if (best == null) Console.WriteLine(@"WARNING: Extended algorithm found 0 solutions");
-            else best.VisibleRange = new Range(Math.Min(options.VisibleRange.Min, best.Labels.Min(t => t.Item1)), Math.Max(options.VisibleRange.Max, best.Labels.Max(t => t.Item1)));
+            else best.VisibleRange = new Range(Math.Min(options.VisibleRange.Min, best.Labels.Min(t => t.Value)), Math.Max(options.VisibleRange.Max, best.Labels.Max(t => t.Value)));
             return best;
         }
     }
