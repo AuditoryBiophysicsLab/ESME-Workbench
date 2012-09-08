@@ -10,7 +10,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using DavesWPFTester.AxisLabeling.Language;
 using DavesWPFTester.AxisLabeling.Layout;
 using DavesWPFTester.AxisLabeling.Layout.AxisLabelers;
 using DavesWPFTester.Transforms;
@@ -166,9 +165,13 @@ namespace DavesWPFTester
         #region dependency property Range DataRange
 
         public static DependencyProperty DataRangeProperty = DependencyProperty.Register("DataRange",
-                                                                                 typeof(Range),
-                                                                                 typeof(NewDataAxis),
-                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, DataRangePropertyChanged));
+                                                                                         typeof(Range),
+                                                                                         typeof(NewDataAxis),
+                                                                                         new FrameworkPropertyMetadata(null,
+                                                                                                                       FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                       FrameworkPropertyMetadataOptions.AffectsRender |
+                                                                                                                       FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                                                                                       DataRangePropertyChanged));
 
         public Range DataRange { get { return (Range)GetValue(DataRangeProperty); } set { SetValue(DataRangeProperty, value); } }
         static void DataRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).DataRangePropertyChanged(args); }
@@ -195,6 +198,7 @@ namespace DavesWPFTester
             }
             _axisOptions.DataRange = _dataRange;
             VisibleRange = DataRange.Size > 0 ? DataRange.Expand(DataRange.Size * 0.05) : new Range(DataRange.Min - 0.5, DataRange.Max + 0.5);
+            InvalidateMeasure();
         }
 
         Range _dataRange;
@@ -405,9 +409,9 @@ namespace DavesWPFTester
             _axisOptions.Screen = new Rect(availableSize);
             _axis = _axisLabeler.Generate(_axisOptions, MajorTicksPerInch / _pixelsPerInch);
             var majorTickLabels = _axis.Labels;
-            var minorTickLabels = _axisLabeler.Generate(_axisOptions, MinorTicksPerInch / _pixelsPerInch).Labels.Except(majorTickLabels, new AxisLabelEqualityComparer()).ToList();
-            var axisRange = new Range(_axis.Labels.Min(l => l.Value), _axis.Labels.Max(l => l.Value));
-            if (!axisRange.Contains(_visibleRange)) VisibleRange = axisRange.Expand(axisRange.Size * .05);
+            var minorAxis = _axisLabeler.Generate(_axisOptions, MinorTicksPerInch / _pixelsPerInch);
+            if (!_visibleRange.Contains(minorAxis.VisibleRange)) VisibleRange = minorAxis.VisibleRange;
+            var minorTickLabels = minorAxis.Labels.Except(majorTickLabels, new AxisLabelEqualityComparer()).ToList();
             var axisTransform = CreateAxisTransform(_visibleRange, availableSize, true);
             Children.Clear();
             AxisTicks.Clear();
