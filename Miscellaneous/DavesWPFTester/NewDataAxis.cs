@@ -472,7 +472,7 @@ namespace DavesWPFTester
                 if (IsLogarithmic)
                 {
                     // Get the major tick values in descending order
-                    var majorTickLogValues = _ticks.Select(t => t.Value).Reverse().ToList();
+                    var majorTickLogValues = _ticks.Select(t => Math.Log10(t.Value)).Reverse().ToList();
                     // Add a phantom major tick at the beginning that's one greater than the actual last major tick
                     majorTickLogValues.Insert(0, majorTickLogValues[0] + 1);
                     var fullRange = new Range(Math.Pow(10, _visibleRange.Min), Math.Pow(10, _visibleRange.Max));
