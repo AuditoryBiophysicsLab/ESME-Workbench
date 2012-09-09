@@ -25,11 +25,11 @@ namespace DavesWPFTester
         Timer _timer;
         readonly Random _random = new Random();
         Dispatcher _dispatcher;
-        [Initialize] public TwoAxisSeriesViewModel UpperLeft { get; set; }
-        [Initialize] public TwoAxisSeriesViewModel UpperRight { get; set; }
-        [Initialize] public TwoAxisSeriesViewModel LowerLeft { get; set; }
-        [Initialize] public TwoAxisSeriesViewModel LowerRight { get; set; }
-        [Initialize] public TwoAxisSeriesViewModel BottomLeft { get; set; }
+        [Initialize] public FourAxisSeriesViewModel UpperLeft { get; set; }
+        [Initialize] public FourAxisSeriesViewModel UpperRight { get; set; }
+        [Initialize] public FourAxisSeriesViewModel LowerLeft { get; set; }
+        [Initialize] public FourAxisSeriesViewModel LowerRight { get; set; }
+        [Initialize] public FourAxisSeriesViewModel BottomLeft { get; set; }
         public bool AnimateUpperLeft { get; set; }
         public bool AnimateLowerLeft { get; set; }
         [ImportingConstructor]
@@ -44,6 +44,15 @@ namespace DavesWPFTester
                 CreateUpperRightSeries();
                 CreateLowerLeftSeries();
                 CreateLowerRightSeries();
+                //BottomLeft.TopAxis.Visibility = Visibility.Collapsed;
+                //BottomLeft.BottomAxis.Visibility = Visibility.Collapsed;
+                //BottomLeft.LeftAxis.Visibility = Visibility.Collapsed;
+                //BottomLeft.RightAxis.Visibility = Visibility.Collapsed;
+                BottomLeft.LeftAxis.IsInverted = true;
+                BottomLeft.BottomAxis.IsInverted = true;
+                BottomLeft.RightAxis.IsInverted = true;
+                BottomLeft.TopAxis.IsInverted = true;
+                BottomLeft.RightAxis.Range.Update(-10, 10);
                 CreateBottomLeftSeries();
 #if true
                 _timer = new Timer(state => _dispatcher.InvokeInBackgroundIfRequired(() =>
@@ -105,8 +114,6 @@ namespace DavesWPFTester
 
         void CreateBottomLeftSeries()
         {
-            BottomLeft.YAxis.Label = "Y Axis";
-            BottomLeft.XAxis.Label = "X Axis";
             const double rangeStart = 1;
             const int rangeEnd = 10;
             const double rangeStep = .5;

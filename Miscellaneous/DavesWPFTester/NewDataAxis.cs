@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -115,9 +116,13 @@ namespace DavesWPFTester
         #region dependency property bool IsInverted
 
         public static DependencyProperty IsInvertedProperty = DependencyProperty.Register("IsInverted",
-                                                                                 typeof(bool),
-                                                                                 typeof(NewDataAxis),
-                                                                                 new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, IsInvertedPropertyChanged));
+                                                                                          typeof(bool),
+                                                                                          typeof(NewDataAxis),
+                                                                                          new FrameworkPropertyMetadata(false,
+                                                                                                                        FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                        FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                                                                                        FrameworkPropertyMetadataOptions.AffectsRender,
+                                                                                                                        IsInvertedPropertyChanged));
 
         public bool IsInverted { get { return (bool)GetValue(IsInvertedProperty); } set { SetValue(IsInvertedProperty, value); } }
 
@@ -186,8 +191,7 @@ namespace DavesWPFTester
                                                                                          typeof(NewDataAxis),
                                                                                          new FrameworkPropertyMetadata(null,
                                                                                                                        FrameworkPropertyMetadataOptions.AffectsArrange |
-                                                                                                                       FrameworkPropertyMetadataOptions.AffectsRender |
-                                                                                                                       FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                                                                                       FrameworkPropertyMetadataOptions.AffectsRender,
                                                                                                                        DataRangePropertyChanged));
 
         public Range DataRange { get { return (Range)GetValue(DataRangeProperty); } set { SetValue(DataRangeProperty, value); } }
@@ -247,7 +251,7 @@ namespace DavesWPFTester
                 _visibleRange.Min = Math.Log10(_visibleRange.Min);
                 _visibleRange.Max = Math.Log10(_visibleRange.Max);
             }
-            _mappingFunctionTransform = CreateAxisTransform(_visibleRange, new Size(ActualWidth, ActualHeight), false);
+            _mappingFunctionTransform = CreateAxisTransform(_visibleRange, new Size(ActualWidth, ActualHeight), false, true);
             MappingFunction = v => _mappingFunctionTransform.Transform(new Point(v, 0)).X;
             _axisOptions.VisibleRange = _visibleRange.Expand(0);
         }
@@ -331,7 +335,7 @@ namespace DavesWPFTester
         readonly double _pixelsPerInch = 96.0;
         GeneralTransform _mappingFunctionTransform;
 
-        GeneralTransform CreateAxisTransform(Range visbleRange, Size newSize, bool includeSwapTransform)
+        GeneralTransform CreateAxisTransform(Range visbleRange, Size newSize, bool includeSwapTransform, bool includeInversion)
         {
             double tickDirectionScale;
             double originScale;
@@ -342,40 +346,39 @@ namespace DavesWPFTester
             {
                 case AxisLocation.Top:
                     tickDirectionScale = -1.0;
-                    originScale = 1.0;
-                    axisDirectionTranslation = StrokeWeight / 2;
+                    originScale = includeInversion && IsInverted ? -1.0 : 1.0;
+                    axisDirectionTranslation = includeInversion && IsInverted ? newSize.Width - (StrokeWeight / 2): StrokeWeight / 2;
                     tickDirectionTranslation = newSize.Height - (StrokeWeight / 2);
                     axisLength = newSize.Width;
                     break;
                 case AxisLocation.Bottom:
                     tickDirectionScale = 1.0;
-                    originScale = 1.0;
-                    axisDirectionTranslation = StrokeWeight / 2;
+                    originScale = includeInversion && IsInverted ? -1.0 : 1.0;
+                    axisDirectionTranslation = includeInversion && IsInverted ? newSize.Width - (StrokeWeight / 2): StrokeWeight / 2;
                     tickDirectionTranslation = StrokeWeight / 2;
                     axisLength = newSize.Width;
                     break;
                 case AxisLocation.Left:
                     tickDirectionScale = -1.0;
-                    originScale = -1.0;
-                    axisDirectionTranslation = newSize.Height - (StrokeWeight / 2);
+                    originScale = includeInversion && IsInverted ? 1.0 : -1.0;
+                    axisDirectionTranslation = includeInversion && IsInverted ? StrokeWeight / 2 : newSize.Height - (StrokeWeight / 2);
                     tickDirectionTranslation = newSize.Width - (StrokeWeight / 2);
                     axisLength = newSize.Height;
                     break;
                 case AxisLocation.Right:
                     tickDirectionScale = 1.0;
-                    originScale = -1.0;
-                    axisDirectionTranslation = newSize.Height - (StrokeWeight / 2);
+                    originScale = includeInversion && IsInverted ? 1.0 : -1.0;
+                    axisDirectionTranslation = includeInversion && IsInverted ? StrokeWeight / 2 : newSize.Height - (StrokeWeight / 2);
                     tickDirectionTranslation = StrokeWeight / 2;
                     axisLength = newSize.Height;
                     break;
                 default:
                     throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
             }
-            if (IsInverted) originScale *= -1;
             var result = new GeneralTransformGroup();
             // The intent of this transform is to make every axis draw the same as a Bottom axis (i.e. the StartValue is at 
             // transformed-X of 0, and the axis line is drawn from top left to top right, axis ticks from top to tickLength)
-            result.Children.Add(new TranslateTransform(-visbleRange.Min, 0)); // might be -lowValue
+            result.Children.Add(new TranslateTransform(-visbleRange.Min, 0));
             result.Children.Add(new ScaleTransform(originScale * ((axisLength - StrokeWeight) / visbleRange.Size), tickDirectionScale));
             result.Children.Add(new TranslateTransform(axisDirectionTranslation, tickDirectionTranslation));
             if (includeSwapTransform && AxisLocation == AxisLocation.Left || AxisLocation == AxisLocation.Right) result.Children.Add(new SwapTransform());
@@ -421,7 +424,7 @@ namespace DavesWPFTester
             if (_visibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
             if (Double.IsNaN(availableSize.Width) || Double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;
             if (Double.IsNaN(availableSize.Height) || Double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
-            _axisOptions.AxisTransform = CreateAxisTransform(_visibleRange, availableSize, true);
+            _axisOptions.AxisTransform = CreateAxisTransform(_visibleRange, availableSize, true, false);
             _axisOptions.Screen = new Rect(availableSize);
             _axis = _axisLabeler.Generate(_axisOptions, MajorTicksPerInch / _pixelsPerInch);
             if (_axis == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
@@ -430,7 +433,7 @@ namespace DavesWPFTester
             //var minorAxis = _axisLabeler.Generate(_axisOptions, MinorTicksPerInch / _pixelsPerInch);
             //if (!_visibleRange.Contains(minorAxis.VisibleRange)) VisibleRange = minorAxis.VisibleRange;
             //var minorTickLabels = minorAxis.Labels.Except(majorTickLabels, new AxisLabelEqualityComparer()).ToList();
-            var axisTransform = CreateAxisTransform(_visibleRange, availableSize, true);
+            var axisTransform = CreateAxisTransform(_visibleRange, availableSize, true, true);
             Children.Clear();
             AxisTicks.Clear();
             // Clear the tick cache
@@ -483,7 +486,7 @@ namespace DavesWPFTester
             // desiredSize = ... computed sum of children's DesiredSize ...;
             // IMPORTANT: do not allow PositiveInfinity to be returned, that will raise an exception in the caller!
             // PositiveInfinity might be an availableSize input; this means that the parent does not care about sizing
-            //Debug.WriteLine(string.Format("NewDataAxis: MeasureOverride for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
+            Debug.WriteLine(string.Format("NewDataAxis: MeasureOverride for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
             return desiredSize;
         }
 
@@ -492,7 +495,7 @@ namespace DavesWPFTester
         protected override Size ArrangeOverride(Size arrangeSize)
         {
             if (_visibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(arrangeSize.Width, 22) : new Size(arrangeSize.Height, 22);
-            var axisTransform = CreateAxisTransform(_visibleRange, arrangeSize, true);
+            var axisTransform = CreateAxisTransform(_visibleRange, arrangeSize, true, true);
             Point axisLabelPosition;
             var midpoint = _visibleRange.Min + (_visibleRange.Size / 2);
             switch (AxisLocation)
@@ -543,7 +546,7 @@ namespace DavesWPFTester
                 }
                 tick.Label.Arrange(new Rect(tickLabelPosition, tick.Label.DesiredSize));
             }
-            //Debug.WriteLine(string.Format("NewDataAxis: ArrangeOverride for {0} returning desired width {1} and height {2}", AxisLabel, arrangeSize.Width, arrangeSize.Height));
+            Debug.WriteLine(string.Format("NewDataAxis: ArrangeOverride for {0} returning desired width {1} and height {2}", AxisLabel, arrangeSize.Width, arrangeSize.Height));
             return arrangeSize;
         }
 
@@ -552,7 +555,7 @@ namespace DavesWPFTester
             base.OnRender(dc);
             if (_visibleRange == null) return;
             var size = new Size(ActualWidth, ActualHeight);
-            var axisTransform = CreateAxisTransform(_visibleRange, size, true);
+            var axisTransform = CreateAxisTransform(_visibleRange, size, true, true);
             var pen = new Pen(Brushes.Black, 1) { StartLineCap = PenLineCap.Square, EndLineCap = PenLineCap.Square };
             dc.DrawLine(pen, axisTransform.Transform(new Point(_visibleRange.Min, 0)), axisTransform.Transform(new Point(_visibleRange.Max, 0)));
             foreach (var tick in _ticks) 

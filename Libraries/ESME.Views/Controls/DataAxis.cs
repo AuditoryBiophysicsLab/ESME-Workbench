@@ -355,7 +355,7 @@ namespace ESME.Views.Controls
             // desiredSize = ... computed sum of children's DesiredSize ...;
             // IMPORTANT: do not allow PositiveInfinity to be returned, that will raise an exception in the caller!
             // PositiveInfinity might be an availableSize input; this means that the parent does not care about sizing
-            Debug.WriteLine(string.Format("DataAxis: MeasureOverride for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
+            //Debug.WriteLine(string.Format("DataAxis: MeasureOverride for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
             return desiredSize;
         }
 
@@ -451,7 +451,7 @@ namespace ESME.Views.Controls
                     tick.Label.Arrange(new Rect(location, size));
                 }
             //this.Background = Brushes.LightBlue;
-            Debug.WriteLine(string.Format("DataAxis: ArrangeOverride for {0} returning desired width {1} and height {2}", AxisLabel, arrangeSize.Width, arrangeSize.Height));
+            //Debug.WriteLine(string.Format("DataAxis: ArrangeOverride for {0} returning desired width {1} and height {2}", AxisLabel, arrangeSize.Width, arrangeSize.Height));
             return arrangeSize;
         }
 

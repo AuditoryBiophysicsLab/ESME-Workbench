@@ -5,7 +5,7 @@
              xmlns:controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             d:DataContext="{d:DesignInstance app:TwoAxisSeriesViewModel}"
+             d:DataContext="{d:DesignInstance app:FourAxisSeriesViewModel}"
              mc:Ignorable="d">
     <DockPanel LastChildFill="True">
         <DockPanel DockPanel.Dock="Left">

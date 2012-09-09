@@ -12,12 +12,12 @@ using HRC.ViewModels;
 
 namespace DavesWPFTester
 {
-    public class TwoAxisSeriesViewModel : ViewModelBase
+    public class FourAxisSeriesViewModel : ViewModelBase
     {
-        [UsedImplicitly] PropertyObserver<TwoAxisSeriesViewModel> _propertyObserver;
+        [UsedImplicitly] PropertyObserver<FourAxisSeriesViewModel> _propertyObserver;
         [UsedImplicitly] PropertyObserver<DataAxisViewModel> _xAxisObserver, _yAxisObserver;
         [UsedImplicitly] CollectionObserver _dataSeriesCollectionObserver;
-        public TwoAxisSeriesViewModel()
+        public FourAxisSeriesViewModel()
         {
             XAxis = BottomAxis;
             YAxis = LeftAxis;
@@ -26,12 +26,10 @@ namespace DavesWPFTester
             LeftAxis.Label = "Left Axis";
             RightAxis.Label = "Right Axis";
             XMin = XMax = YMin = YMax = double.NaN;
-            XAxis.Label = "X Axis";
-            YAxis.Label = "Y Axis";
             XAxis.Autorange = true;
             YAxis.Autorange = true;
 
-            _propertyObserver = new PropertyObserver<TwoAxisSeriesViewModel>(this)
+            _propertyObserver = new PropertyObserver<FourAxisSeriesViewModel>(this)
                 .RegisterHandler(d => d.DataSeriesCollection, DataSeriesCollectionPropertyChanged)
                 .RegisterHandler(d => XMin, XMinMaxPropertiesChanged)
                 .RegisterHandler(d => XMax, XMinMaxPropertiesChanged)
@@ -127,8 +125,8 @@ namespace DavesWPFTester
                             .RegisterHandler(d => d.YMax, UpdateMinMax);
                         _seriesObservers.Add(dataSeries, observer);
                         UpdateMinMax(dataSeries);
-                        dataSeries.XAxisMappingFunction = XAxis.MappingFunction;
-                        dataSeries.YAxisMappingFunction = YAxis.MappingFunction;
+                        if (dataSeries.XAxisMappingFunction == null) dataSeries.XAxisMappingFunction = XAxis.MappingFunction;
+                        if (dataSeries.YAxisMappingFunction == null) dataSeries.YAxisMappingFunction = YAxis.MappingFunction;
                         Debug.WriteLine(string.Format("Adding DataSeries: {0}", dataSeries));
                     }
                     break;
