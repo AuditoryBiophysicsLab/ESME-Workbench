@@ -28,8 +28,8 @@ namespace DavesWPFTester.Transforms
         public override bool TryTransform(Point inPoint, out Point result)
         {
             result = new Point();
-            if (inPoint.X <= 0) return false;
-            if (inPoint.Y <= 0) return false;
+            if (!double.IsNaN(XBase) && inPoint.X <= 0) return false;
+            if (!double.IsNaN(YBase) && inPoint.Y <= 0) return false;
             result.X = double.IsNaN(XBase) ? inPoint.X : Math.Log(inPoint.X, XBase);
             result.Y = double.IsNaN(YBase) ? inPoint.Y : Math.Log(inPoint.Y, YBase);
             return true;

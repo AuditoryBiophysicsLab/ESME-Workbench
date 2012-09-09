@@ -48,11 +48,15 @@ namespace DavesWPFTester
                 //BottomLeft.BottomAxis.Visibility = Visibility.Collapsed;
                 //BottomLeft.LeftAxis.Visibility = Visibility.Collapsed;
                 //BottomLeft.RightAxis.Visibility = Visibility.Collapsed;
-                BottomLeft.LeftAxis.IsInverted = true;
-                BottomLeft.BottomAxis.IsInverted = true;
-                BottomLeft.RightAxis.IsInverted = true;
-                BottomLeft.TopAxis.IsInverted = true;
-                BottomLeft.RightAxis.Range.Update(-10, 10);
+                //BottomLeft.LeftAxis.IsInverted = true;
+                //BottomLeft.BottomAxis.IsInverted = true;
+                //BottomLeft.RightAxis.IsInverted = true;
+                //BottomLeft.TopAxis.IsInverted = true;
+                BottomLeft.RightAxis.Range.Update(.000001, 10000);
+                //BottomLeft.TopAxis.AxisType = AxisType.Logarithmic;
+                //BottomLeft.BottomAxis.AxisType = AxisType.Logarithmic;
+                BottomLeft.LeftAxis.AxisType = AxisType.Logarithmic;
+                BottomLeft.RightAxis.AxisType = AxisType.Logarithmic;
                 CreateBottomLeftSeries();
 #if true
                 _timer = new Timer(state => _dispatcher.InvokeInBackgroundIfRequired(() =>

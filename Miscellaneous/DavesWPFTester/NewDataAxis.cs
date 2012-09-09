@@ -98,7 +98,12 @@ namespace DavesWPFTester
 
         public AxisType AxisType { get { return (AxisType)GetValue(AxisTypeProperty); } set { SetValue(AxisTypeProperty, value); } }
 
-        static void AxisTypePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnSizeOrVisibleRangeChanged(); }
+        static void AxisTypePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
+        {
+            ((NewDataAxis)obj).DataRangeChanged(null, null);
+            ((NewDataAxis)obj).OnSizeOrVisibleRangeChanged();
+        }
+        bool IsLogarithmic { get { return AxisType == AxisType.Logarithmic; } }
         #endregion
 
         #region dependency property string AxisLabel { get; set; }
@@ -127,7 +132,7 @@ namespace DavesWPFTester
         public bool IsInverted { get { return (bool)GetValue(IsInvertedProperty); } set { SetValue(IsInvertedProperty, value); } }
 
         static void IsInvertedPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).IsInvertedPropertyChanged(); }
-        void IsInvertedPropertyChanged() { }
+        void IsInvertedPropertyChanged() { OnSizeOrVisibleRangeChanged(); }
         #endregion
 
         #region dependency property AxisLayoutAlgorithm AxisLayoutAlgorithm
@@ -251,7 +256,7 @@ namespace DavesWPFTester
                 _visibleRange.Min = Math.Log10(_visibleRange.Min);
                 _visibleRange.Max = Math.Log10(_visibleRange.Max);
             }
-            _mappingFunctionTransform = CreateAxisTransform(_visibleRange, new Size(ActualWidth, ActualHeight), false, true);
+            _mappingFunctionTransform = CreateAxisTransform(_visibleRange, new Size(ActualWidth, ActualHeight), false, IsInverted, IsLogarithmic);
             MappingFunction = v => _mappingFunctionTransform.Transform(new Point(v, 0)).X;
             _axisOptions.VisibleRange = _visibleRange.Expand(0);
         }
@@ -335,7 +340,7 @@ namespace DavesWPFTester
         readonly double _pixelsPerInch = 96.0;
         GeneralTransform _mappingFunctionTransform;
 
-        GeneralTransform CreateAxisTransform(Range visbleRange, Size newSize, bool includeSwapTransform, bool includeInversion)
+        GeneralTransform CreateAxisTransform(Range visbleRange, Size newSize, bool includeSwapTransform, bool isInverted, bool isLogarithmic)
         {
             double tickDirectionScale;
             double originScale;
@@ -346,41 +351,50 @@ namespace DavesWPFTester
             {
                 case AxisLocation.Top:
                     tickDirectionScale = -1.0;
-                    originScale = includeInversion && IsInverted ? -1.0 : 1.0;
-                    axisDirectionTranslation = includeInversion && IsInverted ? newSize.Width - (StrokeWeight / 2): StrokeWeight / 2;
+                    originScale = 1.0;
+                    axisDirectionTranslation = isInverted ? newSize.Width - (StrokeWeight / 2): StrokeWeight / 2;
                     tickDirectionTranslation = newSize.Height - (StrokeWeight / 2);
                     axisLength = newSize.Width;
                     break;
                 case AxisLocation.Bottom:
                     tickDirectionScale = 1.0;
-                    originScale = includeInversion && IsInverted ? -1.0 : 1.0;
-                    axisDirectionTranslation = includeInversion && IsInverted ? newSize.Width - (StrokeWeight / 2): StrokeWeight / 2;
+                    originScale = 1.0;
+                    axisDirectionTranslation = isInverted ? newSize.Width - (StrokeWeight / 2): StrokeWeight / 2;
                     tickDirectionTranslation = StrokeWeight / 2;
                     axisLength = newSize.Width;
                     break;
                 case AxisLocation.Left:
                     tickDirectionScale = -1.0;
-                    originScale = includeInversion && IsInverted ? 1.0 : -1.0;
-                    axisDirectionTranslation = includeInversion && IsInverted ? StrokeWeight / 2 : newSize.Height - (StrokeWeight / 2);
+                    originScale = -1.0;
+                    axisDirectionTranslation = isInverted ? StrokeWeight / 2 : newSize.Height - (StrokeWeight / 2);
                     tickDirectionTranslation = newSize.Width - (StrokeWeight / 2);
                     axisLength = newSize.Height;
                     break;
                 case AxisLocation.Right:
                     tickDirectionScale = 1.0;
-                    originScale = includeInversion && IsInverted ? 1.0 : -1.0;
-                    axisDirectionTranslation = includeInversion && IsInverted ? StrokeWeight / 2 : newSize.Height - (StrokeWeight / 2);
+                    originScale = -1.0;
+                    axisDirectionTranslation = isInverted ? StrokeWeight / 2 : newSize.Height - (StrokeWeight / 2);
                     tickDirectionTranslation = StrokeWeight / 2;
                     axisLength = newSize.Height;
                     break;
                 default:
                     throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
             }
-            var result = new GeneralTransformGroup();
+            if (isInverted) originScale *= -1;
             // The intent of this transform is to make every axis draw the same as a Bottom axis (i.e. the StartValue is at 
             // transformed-X of 0, and the axis line is drawn from top left to top right, axis ticks from top to tickLength)
+            var result = new GeneralTransformGroup();
+            // If this is a logarithmic axis, take the log of the data point.
+            // If the data point is zero or negative, an exception will be thrown
+            if (isLogarithmic) result.Children.Add(new LogTransform(10));
+            // Reduce the data point by the minimum visible value, which normalizes the data with respect to the axis origin
             result.Children.Add(new TranslateTransform(-visbleRange.Min, 0));
+            // Scale the data by an amount that will place the maximum visible value at the end of the axis
+            // Takes axis direction (and partially axis inversion) into account with originScale, which is set according to those parameters
             result.Children.Add(new ScaleTransform(originScale * ((axisLength - StrokeWeight) / visbleRange.Size), tickDirectionScale));
+            // Shift the result so that the data point is now located at the point along the axis that corresponds to the original data value
             result.Children.Add(new TranslateTransform(axisDirectionTranslation, tickDirectionTranslation));
+            // if the includeSwapTransform parameter is true, then swap the X and Y values produced if this is a Left or Right axis
             if (includeSwapTransform && AxisLocation == AxisLocation.Left || AxisLocation == AxisLocation.Right) result.Children.Add(new SwapTransform());
             return result;
         }
@@ -424,7 +438,8 @@ namespace DavesWPFTester
             if (_visibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
             if (Double.IsNaN(availableSize.Width) || Double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;
             if (Double.IsNaN(availableSize.Height) || Double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
-            _axisOptions.AxisTransform = CreateAxisTransform(_visibleRange, availableSize, true, false);
+            // We need to fake out the layout code re: inversion and logarithmic mode so we NEVER set these two parameters to true
+            _axisOptions.AxisTransform = CreateAxisTransform(_visibleRange, availableSize, true, false, false); 
             _axisOptions.Screen = new Rect(availableSize);
             _axis = _axisLabeler.Generate(_axisOptions, MajorTicksPerInch / _pixelsPerInch);
             if (_axis == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
@@ -433,7 +448,10 @@ namespace DavesWPFTester
             //var minorAxis = _axisLabeler.Generate(_axisOptions, MinorTicksPerInch / _pixelsPerInch);
             //if (!_visibleRange.Contains(minorAxis.VisibleRange)) VisibleRange = minorAxis.VisibleRange;
             //var minorTickLabels = minorAxis.Labels.Except(majorTickLabels, new AxisLabelEqualityComparer()).ToList();
-            var axisTransform = CreateAxisTransform(_visibleRange, availableSize, true, true);
+
+            // For purposes of creating this transform, we pretend that the axis is NOT logarithmic because the
+            // labels are already the base magnitudes for the data
+            var axisTransform = CreateAxisTransform(_visibleRange, availableSize, true, IsInverted, false);
             Children.Clear();
             AxisTicks.Clear();
             // Clear the tick cache
@@ -442,7 +460,7 @@ namespace DavesWPFTester
             {
                 var tickStart = axisTransform.Transform(new Point(label.Value, 0));
                 var tickLocation = AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? tickStart.X : tickStart.Y;
-                var majorTick = new AxisTickInternal(label.Value, label.Label, true, AxisType == AxisType.Logarithmic);
+                var majorTick = new AxisTickInternal(label.Value, label.Label, true, IsLogarithmic);
                 _ticks.Add(majorTick);
                 Children.Add(majorTick.Label);
                 majorTick.Label.Measure(availableSize);
@@ -453,7 +471,7 @@ namespace DavesWPFTester
             {
                 var tickStart = axisTransform.Transform(new Point(label.Value, 0));
                 var tickLocation = AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? tickStart.X : tickStart.Y;
-                var minorTick = new AxisTickInternal(label.Value, null, false, AxisType == AxisType.Logarithmic);
+                var minorTick = new AxisTickInternal(label.Value, null, false, IsLogarithmic);
                 _ticks.Add(minorTick);
                 AxisTicks.Add(new AxisTick { Location = tickLocation, IsMajorTick = false, Value = label.Value });
             }
@@ -495,7 +513,7 @@ namespace DavesWPFTester
         protected override Size ArrangeOverride(Size arrangeSize)
         {
             if (_visibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(arrangeSize.Width, 22) : new Size(arrangeSize.Height, 22);
-            var axisTransform = CreateAxisTransform(_visibleRange, arrangeSize, true, true);
+            var axisTransform = CreateAxisTransform(_visibleRange, arrangeSize, true, IsInverted, false);
             Point axisLabelPosition;
             var midpoint = _visibleRange.Min + (_visibleRange.Size / 2);
             switch (AxisLocation)
@@ -555,7 +573,7 @@ namespace DavesWPFTester
             base.OnRender(dc);
             if (_visibleRange == null) return;
             var size = new Size(ActualWidth, ActualHeight);
-            var axisTransform = CreateAxisTransform(_visibleRange, size, true, true);
+            var axisTransform = CreateAxisTransform(_visibleRange, size, true, IsInverted, false);
             var pen = new Pen(Brushes.Black, 1) { StartLineCap = PenLineCap.Square, EndLineCap = PenLineCap.Square };
             dc.DrawLine(pen, axisTransform.Transform(new Point(_visibleRange.Min, 0)), axisTransform.Transform(new Point(_visibleRange.Max, 0)));
             foreach (var tick in _ticks) 
@@ -595,7 +613,7 @@ namespace DavesWPFTester
                 if (isMagnitude)
                 {
                     Label.Text = "10";
-                    var superscript = new TextBlock { Text = ((int)Math.Floor(Math.Log10(value))).ToString(CultureInfo.InvariantCulture), FontSize = 10 };
+                    var superscript = new TextBlock { Text = value.ToString(CultureInfo.InvariantCulture), FontSize = 10 };
                     var inline = new InlineUIContainer(superscript) { BaselineAlignment = BaselineAlignment.Superscript };
                     Label.Inlines.Add(inline);
                 }
