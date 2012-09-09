@@ -448,7 +448,7 @@ namespace DavesWPFTester
             // For purposes of creating this transform, we pretend that the axis is NOT logarithmic because the
             // labels are already the base magnitudes for the data. Also, we don't include the swap transform because
             // all we're interested in is the position along the axis, not the actual X and Y locations of the children
-            var axisTransform = CreateAxisTransform(_visibleRange, availableSize, false, IsInverted, false);
+            var axisTransform = CreateAxisTransform(_visibleRange, availableSize, false, IsInverted, IsLogarithmic);
             Children.Clear();
             AxisTicks.Clear();
             // Clear the tick cache
@@ -457,24 +457,47 @@ namespace DavesWPFTester
             {
                 // For logarithmic axes make sure we are only using integral label values
                 if (IsLogarithmic && (Math.Floor(label.Value) != label.Value)) continue;
-                var tickStart = axisTransform.Transform(new Point(label.Value, 0));
-                var majorTick = new AxisTickInternal(label.Value, label.Label, true, IsLogarithmic);
+                var labelValue = IsLogarithmic ? Math.Pow(10, label.Value) : label.Value;
+                var tickStart = axisTransform.Transform(new Point(labelValue, 0));
+                var majorTick = new AxisTickInternal(labelValue, label.Label, true, IsLogarithmic);
                 _ticks.Add(majorTick);
                 Children.Add(majorTick.Label);
                 majorTick.Label.Measure(availableSize);
-                AxisTicks.Add(new AxisTick { Location = tickStart.X, IsMajorTick = true, Value = label.Value });
+                AxisTicks.Add(new AxisTick { Location = tickStart.X, IsMajorTick = true, Value = labelValue });
             }
             // If the minor tick frequency isn't at least twice the major tick frequency, don't do any minor ticks
             var minorTicksPerMajorTick = IsLogarithmic ? 10 : (int)(MinorTicksPerInch / MajorTicksPerInch);
             if (minorTicksPerMajorTick > 1)
             {
-                var majorTickValueSpacing = majorTickLabels[1].Value - majorTickLabels[0].Value;
-                axisTransform = CreateAxisTransform(_visibleRange, availableSize, false, IsInverted, IsLogarithmic);
-                if (IsLogarithmic) {}
+                if (IsLogarithmic)
+                {
+                    // Get the major tick values in descending order
+                    var majorTickLogValues = _ticks.Select(t => t.Value).Reverse().ToList();
+                    // Add a phantom major tick at the beginning that's one greater than the actual last major tick
+                    majorTickLogValues.Insert(0, majorTickLogValues[0] + 1);
+                    var fullRange = new Range(Math.Pow(10, _visibleRange.Min), Math.Pow(10, _visibleRange.Max));
+                    foreach (var majorTickLogValue in majorTickLogValues)
+                    {
+                        var majorTickValue = Math.Pow(10, majorTickLogValue);
+                        for (var step = 0.9; step >= 0.2; step -= 0.1)
+                        {
+                            var minorTickValue = majorTickValue * step;
+                            if (minorTickValue < fullRange.Min || minorTickValue > fullRange.Max) continue;
+                            var tickStart = axisTransform.Transform(new Point(minorTickValue, 0));
+                            var minorTick = new AxisTickInternal(minorTickValue, null, false, IsLogarithmic);
+                            _ticks.Add(minorTick);
+                            AxisTicks.Add(new AxisTick { Location = tickStart.X, IsMajorTick = false, Value = minorTickValue });
+                        }
+                    }
+                }
                 else
                 {
+                    var majorTickValueSpacing = majorTickLabels[1].Value - majorTickLabels[0].Value;
                     var stepSize = majorTickValueSpacing / minorTicksPerMajorTick;
                     var majorTickValues = _ticks.Select(t => t.Value).ToList();
+                    // Add a phantom major tick to the beginning and end of the list so we can bracket
+                    // the major ticks at each end of the range with more minor ticks if they fit within the
+                    // visible range of the axis
                     majorTickValues.Insert(0, _ticks[0].Value - majorTickValueSpacing);
                     majorTickValues.Add(_ticks.Last().Value + majorTickValueSpacing);
                     for (var i = 0; i < majorTickValues.Count; i++)
@@ -488,16 +511,6 @@ namespace DavesWPFTester
                             AxisTicks.Add(new AxisTick { Location = tickStart.X, IsMajorTick = false, Value = tickValue });
                         }
                 }
-#if false
-                foreach (var label in minorTickLabels)
-                {
-                    var tickStart = axisTransform.Transform(new Point(label.Value, 0));
-                    var tickLocation = AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? tickStart.X : tickStart.Y;
-                    var minorTick = new AxisTickInternal(label.Value, null, false, IsLogarithmic);
-                    _ticks.Add(minorTick);
-                    AxisTicks.Add(new AxisTick { Location = tickLocation, IsMajorTick = false, Value = label.Value });
-                }
-#endif
             }
             _tickLabelMaxWidth = _ticks.Where(t => t.Label != null).Max(t => t.Label.DesiredSize.Width);
             _tickLabelMaxHeight = _ticks.Where(t => t.Label != null).Max(t => t.Label.DesiredSize.Height);
@@ -561,8 +574,9 @@ namespace DavesWPFTester
                     throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
             }
             _axisLabel.Arrange(new Rect(axisLabelPosition, _axisLabel.DesiredSize));
+            axisTransform = CreateAxisTransform(_visibleRange, arrangeSize, true, IsInverted, IsLogarithmic);
 
-            foreach (var tick in _ticks.Where(tick => tick.Label != null)) 
+            foreach (var tick in _ticks.Where(tick => tick.IsMajorTick)) 
             {
                 Point tickLabelPosition;
                 switch (AxisLocation)
@@ -599,6 +613,7 @@ namespace DavesWPFTester
             var axisTransform = CreateAxisTransform(_visibleRange, size, true, IsInverted, false);
             var pen = new Pen(Brushes.Black, 1) { StartLineCap = PenLineCap.Square, EndLineCap = PenLineCap.Square };
             dc.DrawLine(pen, axisTransform.Transform(new Point(_visibleRange.Min, 0)), axisTransform.Transform(new Point(_visibleRange.Max, 0)));
+            axisTransform = CreateAxisTransform(_visibleRange, size, true, IsInverted, IsLogarithmic);
             foreach (var tick in _ticks) 
                 dc.DrawLine(pen, axisTransform.Transform(new Point(tick.Value, 0)), axisTransform.Transform(new Point(tick.Value, tick.IsMajorTick ? MajorTickLength : MinorTickLength)));
             // This draws a 50-pixel line in the center of the axis, used to check the centering of the axis label
@@ -636,7 +651,7 @@ namespace DavesWPFTester
                 if (isMagnitude)
                 {
                     Label.Text = "10";
-                    var superscript = new TextBlock { Text = value.ToString(CultureInfo.InvariantCulture), FontSize = 10 };
+                    var superscript = new TextBlock { Text = Math.Round(Math.Log10(value), 1).ToString(CultureInfo.InvariantCulture), FontSize = 10 };
                     var inline = new InlineUIContainer(superscript) { BaselineAlignment = BaselineAlignment.Superscript };
                     Label.Inlines.Add(inline);
                 }
