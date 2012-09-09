@@ -445,37 +445,60 @@ namespace DavesWPFTester
             if (_axis == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
             var majorTickLabels = _axis.Labels;
             if (!_visibleRange.Contains(_axis.VisibleRange)) _visibleRange = _axis.VisibleRange;
-            //var minorAxis = _axisLabeler.Generate(_axisOptions, MinorTicksPerInch / _pixelsPerInch);
-            //if (!_visibleRange.Contains(minorAxis.VisibleRange)) VisibleRange = minorAxis.VisibleRange;
-            //var minorTickLabels = minorAxis.Labels.Except(majorTickLabels, new AxisLabelEqualityComparer()).ToList();
-
             // For purposes of creating this transform, we pretend that the axis is NOT logarithmic because the
-            // labels are already the base magnitudes for the data
-            var axisTransform = CreateAxisTransform(_visibleRange, availableSize, true, IsInverted, false);
+            // labels are already the base magnitudes for the data. Also, we don't include the swap transform because
+            // all we're interested in is the position along the axis, not the actual X and Y locations of the children
+            var axisTransform = CreateAxisTransform(_visibleRange, availableSize, false, IsInverted, false);
             Children.Clear();
             AxisTicks.Clear();
             // Clear the tick cache
             _ticks.Clear();
             foreach (var label in majorTickLabels)
             {
+                // For logarithmic axes make sure we are only using integral label values
+                if (IsLogarithmic && (Math.Floor(label.Value) != label.Value)) continue;
                 var tickStart = axisTransform.Transform(new Point(label.Value, 0));
-                var tickLocation = AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? tickStart.X : tickStart.Y;
                 var majorTick = new AxisTickInternal(label.Value, label.Label, true, IsLogarithmic);
                 _ticks.Add(majorTick);
                 Children.Add(majorTick.Label);
                 majorTick.Label.Measure(availableSize);
-                AxisTicks.Add(new AxisTick { Location = tickLocation, IsMajorTick = true, Value = label.Value });
+                AxisTicks.Add(new AxisTick { Location = tickStart.X, IsMajorTick = true, Value = label.Value });
             }
-#if false
-            foreach (var label in minorTickLabels)
+            // If the minor tick frequency isn't at least twice the major tick frequency, don't do any minor ticks
+            var minorTicksPerMajorTick = IsLogarithmic ? 10 : (int)(MinorTicksPerInch / MajorTicksPerInch);
+            if (minorTicksPerMajorTick > 1)
             {
-                var tickStart = axisTransform.Transform(new Point(label.Value, 0));
-                var tickLocation = AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? tickStart.X : tickStart.Y;
-                var minorTick = new AxisTickInternal(label.Value, null, false, IsLogarithmic);
-                _ticks.Add(minorTick);
-                AxisTicks.Add(new AxisTick { Location = tickLocation, IsMajorTick = false, Value = label.Value });
-            }
+                var majorTickValueSpacing = majorTickLabels[1].Value - majorTickLabels[0].Value;
+                axisTransform = CreateAxisTransform(_visibleRange, availableSize, false, IsInverted, IsLogarithmic);
+                if (IsLogarithmic) {}
+                else
+                {
+                    var stepSize = majorTickValueSpacing / minorTicksPerMajorTick;
+                    var majorTickValues = _ticks.Select(t => t.Value).ToList();
+                    majorTickValues.Insert(0, _ticks[0].Value - majorTickValueSpacing);
+                    majorTickValues.Add(_ticks.Last().Value + majorTickValueSpacing);
+                    for (var i = 0; i < majorTickValues.Count; i++)
+                        for (var j = 1; j < minorTicksPerMajorTick; j++)
+                        {
+                            var tickValue = majorTickValues[i] + (stepSize * j);
+                            if (tickValue < _visibleRange.Min || tickValue > _visibleRange.Max) continue;
+                            var tickStart = axisTransform.Transform(new Point(tickValue, 0));
+                            var minorTick = new AxisTickInternal(tickValue, null, false, IsLogarithmic);
+                            _ticks.Add(minorTick);
+                            AxisTicks.Add(new AxisTick { Location = tickStart.X, IsMajorTick = false, Value = tickValue });
+                        }
+                }
+#if false
+                foreach (var label in minorTickLabels)
+                {
+                    var tickStart = axisTransform.Transform(new Point(label.Value, 0));
+                    var tickLocation = AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? tickStart.X : tickStart.Y;
+                    var minorTick = new AxisTickInternal(label.Value, null, false, IsLogarithmic);
+                    _ticks.Add(minorTick);
+                    AxisTicks.Add(new AxisTick { Location = tickLocation, IsMajorTick = false, Value = label.Value });
+                }
 #endif
+            }
             _tickLabelMaxWidth = _ticks.Where(t => t.Label != null).Max(t => t.Label.DesiredSize.Width);
             _tickLabelMaxHeight = _ticks.Where(t => t.Label != null).Max(t => t.Label.DesiredSize.Height);
             var axisLabel = string.IsNullOrEmpty(_axis.AxisTitleExtension) ? AxisLabel : string.Format("{0} ({1})", AxisLabel, _axis.AxisTitleExtension);
