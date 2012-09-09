@@ -52,7 +52,7 @@ namespace DavesWPFTester
                 //BottomLeft.BottomAxis.IsInverted = true;
                 //BottomLeft.RightAxis.IsInverted = true;
                 //BottomLeft.TopAxis.IsInverted = true;
-                BottomLeft.RightAxis.Range.Update(.000001, 10000);
+                BottomLeft.RightAxis.Range.Update(.0000005, 10000);
                 //BottomLeft.TopAxis.AxisType = AxisType.Logarithmic;
                 //BottomLeft.BottomAxis.AxisType = AxisType.Logarithmic;
                 BottomLeft.LeftAxis.AxisType = AxisType.Logarithmic;

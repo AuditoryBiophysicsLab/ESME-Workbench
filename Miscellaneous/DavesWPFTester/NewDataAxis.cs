@@ -9,6 +9,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 using DavesWPFTester.AxisLabeling.Layout;
 using DavesWPFTester.AxisLabeling.Layout.AxisLabelers;
@@ -241,7 +242,22 @@ namespace DavesWPFTester
                                                                                                                           VisibleRangePropertyChanged));
 
         public Range VisibleRange { get { return (Range)GetValue(VisibleRangeProperty); } set { SetValue(VisibleRangeProperty, value); } }
-        static void VisibleRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).OnSizeOrVisibleRangeChanged(); }
+        static void VisibleRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
+        {
+            ((NewDataAxis)obj).VisibleRangePropertyChanged(args);
+        }
+        void VisibleRangePropertyChanged(DependencyPropertyChangedEventArgs args)
+        {
+            if (args.OldValue != null) ((Range)args.OldValue).RangeChanged -= VisibleRangeChanged;
+            if (args.NewValue != null) ((Range)args.NewValue).RangeChanged += VisibleRangeChanged;
+            OnSizeOrVisibleRangeChanged();
+        }
+        void VisibleRangeChanged(object sender, EventArgs args)
+        {
+            OnSizeOrVisibleRangeChanged();
+            InvalidateVisual();
+        }
+
         void OnSizeOrVisibleRangeChanged()
         {
             if (ActualWidth <= 0 || ActualHeight <= 0 || VisibleRange == null || VisibleRange.Size <= 0)
@@ -336,6 +352,17 @@ namespace DavesWPFTester
             var matrix = presentationSource.CompositionTarget.TransformToDevice;
             _pixelsPerInch = Math.Max(matrix.M11, matrix.M22);
         }
+        protected override void  OnMouseWheel(MouseWheelEventArgs e)
+        {
+            Debug.WriteLine(string.Format("{0} OnMouseWheel: {1}", AxisLabel, e.Delta));
+            e.Handled = true;
+            var direction = Math.Sign(e.Delta);
+            if (IsLogarithmic)
+            {
+                VisibleRange.Update(Math.Pow(10, _visibleRange.Min + direction), Math.Pow(10, _visibleRange.Max - direction));
+            }
+        }
+        protected override HitTestResult HitTestCore(PointHitTestParameters hitTestParameters) { return new PointHitTestResult(this, hitTestParameters.HitPoint); }
 
         readonly double _pixelsPerInch = 96.0;
         GeneralTransform _mappingFunctionTransform;
@@ -473,6 +500,20 @@ namespace DavesWPFTester
                 {
                     // Get the major tick values in descending order
                     var majorTickLogValues = _ticks.Select(t => Math.Log10(t.Value)).Reverse().ToList();
+                    var virtualMajorTicks = new List<double>();
+                    for (var i = 0; i < majorTickLogValues.Count - 1; i++)
+                    {
+                        for (var j = majorTickLogValues[i] - 1; j > majorTickLogValues[i + 1]; j--)
+                        {
+                            virtualMajorTicks.Add(j);
+                            var minorTickValue = Math.Pow(10, j);
+                            var tickStart = axisTransform.Transform(new Point(minorTickValue, 0));
+                            var minorTick = new AxisTickInternal(minorTickValue, null, false, IsLogarithmic);
+                            _ticks.Add(minorTick);
+                            AxisTicks.Add(new AxisTick { Location = tickStart.X, IsMajorTick = false, Value = minorTickValue });
+                        }
+                    }
+                    majorTickLogValues.AddRange(virtualMajorTicks);
                     // Add a phantom major tick at the beginning that's one greater than the actual last major tick
                     majorTickLogValues.Insert(0, majorTickLogValues[0] + 1);
                     var fullRange = new Range(Math.Pow(10, _visibleRange.Min), Math.Pow(10, _visibleRange.Max));
