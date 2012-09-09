@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -374,7 +373,7 @@ namespace DavesWPFTester
             }
             if (IsInverted) originScale *= -1;
             var result = new GeneralTransformGroup();
-            // The intent of _axisTransform is to make every axis draw the same as a Bottom axis (i.e. the StartValue is at 
+            // The intent of this transform is to make every axis draw the same as a Bottom axis (i.e. the StartValue is at 
             // transformed-X of 0, and the axis line is drawn from top left to top right, axis ticks from top to tickLength)
             result.Children.Add(new TranslateTransform(-visbleRange.Min, 0)); // might be -lowValue
             result.Children.Add(new ScaleTransform(originScale * ((axisLength - StrokeWeight) / visbleRange.Size), tickDirectionScale));
@@ -427,6 +426,7 @@ namespace DavesWPFTester
             _axis = _axisLabeler.Generate(_axisOptions, MajorTicksPerInch / _pixelsPerInch);
             if (_axis == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
             var majorTickLabels = _axis.Labels;
+            if (!_visibleRange.Contains(_axis.VisibleRange)) _visibleRange = _axis.VisibleRange;
             //var minorAxis = _axisLabeler.Generate(_axisOptions, MinorTicksPerInch / _pixelsPerInch);
             //if (!_visibleRange.Contains(minorAxis.VisibleRange)) VisibleRange = minorAxis.VisibleRange;
             //var minorTickLabels = minorAxis.Labels.Except(majorTickLabels, new AxisLabelEqualityComparer()).ToList();
@@ -483,7 +483,7 @@ namespace DavesWPFTester
             // desiredSize = ... computed sum of children's DesiredSize ...;
             // IMPORTANT: do not allow PositiveInfinity to be returned, that will raise an exception in the caller!
             // PositiveInfinity might be an availableSize input; this means that the parent does not care about sizing
-            Debug.WriteLine(string.Format("NewDataAxis: MeasureOverride for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
+            //Debug.WriteLine(string.Format("NewDataAxis: MeasureOverride for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
             return desiredSize;
         }
 
@@ -543,7 +543,7 @@ namespace DavesWPFTester
                 }
                 tick.Label.Arrange(new Rect(tickLabelPosition, tick.Label.DesiredSize));
             }
-            Debug.WriteLine(string.Format("NewDataAxis: ArrangeOverride for {0} returning desired width {1} and height {2}", AxisLabel, arrangeSize.Width, arrangeSize.Height));
+            //Debug.WriteLine(string.Format("NewDataAxis: ArrangeOverride for {0} returning desired width {1} and height {2}", AxisLabel, arrangeSize.Width, arrangeSize.Height));
             return arrangeSize;
         }
 
