@@ -20,6 +20,8 @@ namespace DavesWPFTester
         {
             XAxis = BottomAxis;
             YAxis = LeftAxis;
+            TopAxis.Visibility = Visibility.Collapsed;
+            RightAxis.Visibility = Visibility.Collapsed;
             TopAxis.Label = "Top Axis";
             BottomAxis.Label = "Bottom Axis";
             LeftAxis.Label = "Left Axis";

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -22,8 +21,6 @@ namespace DavesWPFTester
     public class MainWindowViewModel : ViewModelBase
     {
         readonly IViewAwareStatus _viewAwareStatus;
-        Timer _timer;
-        readonly Random _random = new Random();
         Dispatcher _dispatcher;
         [Initialize] public FourAxisSeriesViewModel UpperLeft { get; set; }
         [Initialize] public FourAxisSeriesViewModel UpperRight { get; set; }
@@ -39,58 +36,39 @@ namespace DavesWPFTester
             _viewAwareStatus.ViewLoaded += () =>
             {
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
-                var mainWindowView = (MainWindow)_viewAwareStatus.View;
                 CreateUpperLeftSeries();
                 CreateUpperRightSeries();
                 CreateLowerLeftSeries();
                 CreateLowerRightSeries();
-                //BottomLeft.TopAxis.Visibility = Visibility.Collapsed;
-                //BottomLeft.BottomAxis.Visibility = Visibility.Collapsed;
-                //BottomLeft.LeftAxis.Visibility = Visibility.Collapsed;
-                //BottomLeft.RightAxis.Visibility = Visibility.Collapsed;
-                //BottomLeft.LeftAxis.IsInverted = true;
-                //BottomLeft.BottomAxis.IsInverted = true;
-                //BottomLeft.RightAxis.IsInverted = true;
-                //BottomLeft.TopAxis.IsInverted = true;
-                //BottomLeft.RightAxis.Range.Update(.0000005, 10000);
-                //BottomLeft.TopAxis.AxisType = AxisType.Logarithmic;
-                //BottomLeft.BottomAxis.AxisType = AxisType.Logarithmic;
                 BottomLeft.LeftAxis.AxisType = AxisType.Logarithmic;
-                //BottomLeft.RightAxis.AxisType = AxisType.Logarithmic;
                 CreateBottomLeftSeries();
 #if true
-                _timer = new Timer(state => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                var timer = new DispatcherTimer(DispatcherPriority.ApplicationIdle, _dispatcher) { Interval = TimeSpan.FromMilliseconds(5) };
+                timer.Start();
+                timer.Tick += (s, e) =>
                 {
                     if (AnimateLowerLeft)
                     {
                         var selectedSeries = (BarSeriesViewModel)LowerLeft.DataSeriesCollection[0];
                         var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
                         selectedSeries.SeriesName = string.Format("y = {0:0.0} * x", _lowerLeftAmplitude);
-                        using (var d = _dispatcher.DisableProcessing())
-                        {
-                            for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, _lowerLeftAmplitude * seriesData[i].Item1);
-                        }
+                        for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, _lowerLeftAmplitude * seriesData[i].Item1);
                         _lowerLeftAmplitude += _lowerLeftAmplitudeDelta;
                         if (_lowerLeftAmplitude > 10) _lowerLeftAmplitudeDelta = -1;
                         if (_lowerLeftAmplitude < -10) _lowerLeftAmplitudeDelta = 1;
                     }
-                    if (AnimateUpperLeft)
+                    if (!AnimateUpperLeft) return;
+                    for (var seriesIndex = 0; seriesIndex < UpperLeft.DataSeriesCollection.Count; seriesIndex++)
                     {
-                        for (var seriesIndex = 0; seriesIndex < UpperLeft.DataSeriesCollection.Count; seriesIndex++)
-                        {
-                            var selectedSeries = (LineSeriesViewModel)UpperLeft.DataSeriesCollection[seriesIndex];
-                            var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
-                            selectedSeries.SeriesName = string.Format("y = ({0:0.0} * sin(x)) + {1}", _upperLeftAmplitude, 11 - seriesIndex);
-                            using (var d = _dispatcher.DisableProcessing())
-                            {
-                                for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, (_upperLeftAmplitude * Math.Sin(seriesData[i].Item1)) + (11 - seriesIndex));
-                            }
-                        }
-                        _upperLeftAmplitude += _upperLeftAmplitudeDelta;
-                        if (_upperLeftAmplitude > 10) _upperLeftAmplitudeDelta = -1;
-                        if (_upperLeftAmplitude < -10) _upperLeftAmplitudeDelta = 1;
+                        var selectedSeries = (LineSeriesViewModel)UpperLeft.DataSeriesCollection[seriesIndex];
+                        var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
+                        selectedSeries.SeriesName = string.Format("y = ({0:0.0} * sin(x)) + {1}", _upperLeftAmplitude, 11 - seriesIndex);
+                        for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, (_upperLeftAmplitude * Math.Sin(seriesData[i].Item1)) + (11 - seriesIndex));
                     }
-                }), null, 20, 20);
+                    _upperLeftAmplitude += _upperLeftAmplitudeDelta;
+                    if (_upperLeftAmplitude > 10) _upperLeftAmplitudeDelta = -1;
+                    if (_upperLeftAmplitude < -10) _upperLeftAmplitudeDelta = 1;
+                };
 #endif
             };
         }
