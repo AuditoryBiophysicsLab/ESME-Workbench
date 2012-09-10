@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -25,16 +24,13 @@ namespace DavesWPFTester
             BottomAxis.Label = "Bottom Axis";
             LeftAxis.Label = "Left Axis";
             RightAxis.Label = "Right Axis";
-            XMin = XMax = YMin = YMax = double.NaN;
             XAxis.Autorange = true;
             YAxis.Autorange = true;
+            XRange.RangeChanged += XRangeChanged;
+            YRange.RangeChanged += YRangeChanged;
 
             _propertyObserver = new PropertyObserver<FourAxisSeriesViewModel>(this)
                 .RegisterHandler(d => d.DataSeriesCollection, DataSeriesCollectionPropertyChanged)
-                .RegisterHandler(d => XMin, XMinMaxPropertiesChanged)
-                .RegisterHandler(d => XMax, XMinMaxPropertiesChanged)
-                .RegisterHandler(d => YMin, YMinMaxPropertiesChanged)
-                .RegisterHandler(d => YMax, YMinMaxPropertiesChanged)
                 .RegisterHandler(d => XAxis, XAxisPropertyChanged)
                 .RegisterHandler(d => YAxis, YAxisPropertyChanged);
 
@@ -53,10 +49,8 @@ namespace DavesWPFTester
         public DataAxisViewModel YAxis { get; set; }
         public Color MajorTickLineColor { get; set; }
         public Color MinorTickLineColor { get; set; }
-        public double XMin { get; set; }
-        public double XMax { get; set; }
-        public double YMin { get; set; }
-        public double YMax { get; set; }
+        [Initialize, UsedImplicitly] Range XRange { get; set; }
+        [Initialize, UsedImplicitly] Range YRange { get; set; }
 
         void XAxisPropertyChanged()
         {
@@ -83,22 +77,21 @@ namespace DavesWPFTester
             //Debug.WriteLine("Re-rendering all series");
             foreach (var item in DataSeriesCollection) item.RenderShapes();
         }
-
-        void XMinMaxPropertiesChanged()
+        void XRangeChanged(object sender, NotifyRangeChangedEventArgs args = null)
         {
             if (XAxis != null && XAxis.Autorange)
             {
                 //Debug.WriteLine(string.Format("Updating X Axis min/max. Old range: {0} ... {1} New range: {2} ... {3}", XAxis.StartValue, XAxis.EndValue, XMin, XMax));
-                XAxis.Range.Update(XMin, XMax);
+                XAxis.Range.Update(XRange);
             }
         }
 
-        void YMinMaxPropertiesChanged()
+        void YRangeChanged(object sender, NotifyRangeChangedEventArgs args = null)
         {
             if (YAxis != null && YAxis.Autorange)
             {
-                //Debug.WriteLine(string.Format("Updating Y Axis min/max. Old range: {0} ... {1} New range: {2} ... {3}", YAxis.StartValue, YAxis.EndValue, YMin, YMax));
-                YAxis.Range.Update(YMin, YMax);
+                //Debug.WriteLine(string.Format("Updating X Axis min/max. Old range: {0} ... {1} New range: {2} ... {3}", XAxis.StartValue, XAxis.EndValue, XMin, XMax));
+                YAxis.Range.Update(YRange);
             }
         }
 
@@ -108,9 +101,12 @@ namespace DavesWPFTester
             if (DataSeriesCollection == null) return;
             if (_dataSeriesCollectionObserver == null) _dataSeriesCollectionObserver = new CollectionObserver(DataSeriesCollection);
             _dataSeriesCollectionObserver.RegisterHandler(DataSeriesCollectionChanged);
-            UpdateMinMaxForAllSeries();
+            foreach (var series in DataSeriesCollection)
+            {
+                UpdateXRange(series.XRange);
+                UpdateYRange(series.YRange);
+            }
         }
-        readonly Dictionary<SeriesViewModelBase, PropertyObserver<SeriesViewModelBase>> _seriesObservers = new Dictionary<SeriesViewModelBase, PropertyObserver<SeriesViewModelBase>>();
         void DataSeriesCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
             switch (args.Action)
@@ -118,13 +114,10 @@ namespace DavesWPFTester
                 case NotifyCollectionChangedAction.Add:
                     foreach (SeriesViewModelBase dataSeries in args.NewItems)
                     {
-                        var observer = new PropertyObserver<SeriesViewModelBase>(dataSeries)
-                            .RegisterHandler(d => d.XMin, UpdateMinMax)
-                            .RegisterHandler(d => d.XMax, UpdateMinMax)
-                            .RegisterHandler(d => d.YMin, UpdateMinMax)
-                            .RegisterHandler(d => d.YMax, UpdateMinMax);
-                        _seriesObservers.Add(dataSeries, observer);
-                        UpdateMinMax(dataSeries);
+                        dataSeries.XRange.RangeChanged += UpdateXRange;
+                        dataSeries.YRange.RangeChanged += UpdateYRange;
+                        UpdateXRange(dataSeries.XRange);
+                        UpdateYRange(dataSeries.YRange);
                         if (dataSeries.XAxisMappingFunction == null) dataSeries.XAxisMappingFunction = XAxis.MappingFunction;
                         if (dataSeries.YAxisMappingFunction == null) dataSeries.YAxisMappingFunction = YAxis.MappingFunction;
                         Debug.WriteLine(string.Format("Adding DataSeries: {0}", dataSeries));
@@ -132,64 +125,36 @@ namespace DavesWPFTester
                     break;
                 case NotifyCollectionChangedAction.Remove:
                     foreach (SeriesViewModelBase dataSeries in args.OldItems)
-                        if (_seriesObservers.ContainsKey(dataSeries))
-                        {
-                            _seriesObservers[dataSeries]
-                                .UnregisterHandler(d => d.XMin)
-                                .UnregisterHandler(d => d.XMax)
-                                .UnregisterHandler(d => d.YMin)
-                                .UnregisterHandler(d => d.YMax);
-                            _seriesObservers.Remove(dataSeries);
-                        }
+                    {
+                        dataSeries.XRange.RangeChanged -= UpdateXRange;
+                        dataSeries.YRange.RangeChanged -= UpdateYRange;
+                    }
                     break;
                 case NotifyCollectionChangedAction.Replace:
                     foreach (SeriesViewModelBase dataSeries in args.OldItems)
-                        if (_seriesObservers.ContainsKey(dataSeries))
-                        {
-                            _seriesObservers[dataSeries]
-                                .UnregisterHandler(d => d.XMin)
-                                .UnregisterHandler(d => d.XMax)
-                                .UnregisterHandler(d => d.YMin)
-                                .UnregisterHandler(d => d.YMax);
-                            _seriesObservers.Remove(dataSeries);
-                        }
+                    {
+                        dataSeries.XRange.RangeChanged -= UpdateXRange;
+                        dataSeries.YRange.RangeChanged -= UpdateYRange;
+                    }
                     foreach (SeriesViewModelBase dataSeries in args.NewItems)
                     {
-                        var observer = new PropertyObserver<SeriesViewModelBase>(dataSeries)
-                            .RegisterHandler(d => d.XMin, UpdateMinMax)
-                            .RegisterHandler(d => d.XMax, UpdateMinMax)
-                            .RegisterHandler(d => d.YMin, UpdateMinMax)
-                            .RegisterHandler(d => d.YMax, UpdateMinMax);
-                        _seriesObservers.Add(dataSeries, observer);
-                        UpdateMinMax(dataSeries);
-                        dataSeries.XAxisMappingFunction = XAxis.MappingFunction;
-                        dataSeries.YAxisMappingFunction = YAxis.MappingFunction;
+                        dataSeries.XRange.RangeChanged += UpdateXRange;
+                        dataSeries.YRange.RangeChanged += UpdateYRange;
+                        UpdateXRange(dataSeries.XRange);
+                        UpdateYRange(dataSeries.YRange);
+                        if (dataSeries.XAxisMappingFunction == null) dataSeries.XAxisMappingFunction = XAxis.MappingFunction;
+                        if (dataSeries.YAxisMappingFunction == null) dataSeries.YAxisMappingFunction = YAxis.MappingFunction;
                     }
                     break;
                 case NotifyCollectionChangedAction.Reset:
-                    _seriesObservers.Clear();
-                    break;
+                    throw new NotImplementedException("Clear");
                 case NotifyCollectionChangedAction.Move:
                     throw new NotImplementedException("Move");
             }
         }
 
-        void UpdateMinMax(ISeries dataSeries)
-        {
-            if (double.IsNaN(XMin)) XMin = dataSeries.XMin;
-            if (double.IsNaN(XMax)) XMax = dataSeries.XMax;
-            if (double.IsNaN(YMin)) YMin = dataSeries.YMin;
-            if (double.IsNaN(YMax)) YMax = dataSeries.YMax;
-            XMin = Math.Min(XMin, dataSeries.XMin);
-            XMax = Math.Max(XMax, dataSeries.XMax);
-            YMin = Math.Min(YMin, dataSeries.YMin);
-            YMax = Math.Max(YMax, dataSeries.YMax);
-        }
-
-        void UpdateMinMaxForAllSeries()
-        {
-            foreach (var dataSeries in DataSeriesCollection) UpdateMinMax(dataSeries);
-        }
+        void UpdateXRange(object sender, NotifyRangeChangedEventArgs args = null) { XRange.Add((Range)sender); }
+        void UpdateYRange(object sender, NotifyRangeChangedEventArgs args = null) { YRange.Add((Range)sender); }
     }
 
     public class DataAxisViewModel : ViewModelBase

@@ -93,8 +93,7 @@ namespace DavesWPFTester
                                select Math.Round(point.X, XRoundingPrecision)).ToList();
             var minXDataDelta = double.MaxValue;
             for (var i = 0; i < xDataCoords.Count - 1; i++) minXDataDelta = Math.Min(minXDataDelta, xDataCoords[i + 1] - xDataCoords[i]);
-            XMin = xDataCoords.First() - (minXDataDelta / 2);
-            XMax = xDataCoords.Last() + (minXDataDelta / 2);
+            //XRange.Update(xDataCoords.First() - (minXDataDelta / 2), xDataCoords.Last() + (minXDataDelta / 2));
 
             var plotPoints = Points.Select(point => new Point(XAxisMappingFunction(point.X), YAxisMappingFunction(point.Y))).ToList();
             var xPlotCoords = (from point in plotPoints
@@ -103,8 +102,8 @@ namespace DavesWPFTester
             var minXPlotDelta = double.MaxValue;
             for (var i = 0; i < xPlotCoords.Count - 1; i++) minXPlotDelta = Math.Min(minXPlotDelta, xPlotCoords[i + 1] - xPlotCoords[i]);
             var barHalfWidth = (minXPlotDelta * BarWidth) / 2;
-            var yMinValue = Math.Min(YMin, Points.Select(p => p.Y).Min());
-            var yZeroCoordinate = YMin < 0 ? YAxisMappingFunction(0.0) : YAxisMappingFunction(yMinValue);
+            var yMinValue = Math.Min(YRange.Min, Points.Select(p => p.Y).Min());
+            var yZeroCoordinate = YRange.Min < 0 ? YAxisMappingFunction(0.0) : YAxisMappingFunction(yMinValue);
             foreach (var plotPoint in plotPoints)
             {
                 var dataPoint = Points[plotPoints.IndexOf(plotPoint)];

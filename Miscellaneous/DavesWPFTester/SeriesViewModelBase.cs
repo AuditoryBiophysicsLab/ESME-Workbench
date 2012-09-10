@@ -26,13 +26,10 @@ namespace DavesWPFTester
                 .RegisterHandler(d => d.YAxisMappingFunction, MappingFunctionChanged);
             _pointsObserver = new CollectionObserver(Points).RegisterHandler(PointsCollectionChanged);
         }
-        public double XMin { get; set; }
 
-        public double XMax { get; set; }
+        [Initialize] public Range XRange { get; set; }
 
-        public double YMin { get; set; }
-
-        public double YMax { get; set; }
+        [Initialize] public Range YRange { get; set; }
 
         public Func<object, Point> ItemToPoint { get; set; }
 
@@ -57,19 +54,15 @@ namespace DavesWPFTester
         {
             if (ItemToPoint == null || SeriesData == null || SeriesData.Count == 0) return;
             foreach (var item in SeriesData) Points.Add(ItemToPoint(item));
-            XMax = Points.Max(p => p.X);
-            XMin = Points.Min(p => p.X);
-            YMax = Points.Max(p => p.Y);
-            YMin = Points.Min(p => p.Y);
+            XRange.Update(Points.Select(p => p.X));
+            YRange.Update(Points.Select(p => p.Y));
             RenderShapes();
         }
 
         protected void UpdateMinMax(Point point)
         {
-            XMax = Math.Max(XMax, point.X);
-            XMin = Math.Min(XMin, point.X);
-            YMax = Math.Max(YMax, point.Y);
-            YMin = Math.Min(YMin, point.Y);
+            XRange.Add(point.X);
+            YRange.Add(point.Y);
         }
 
         void MappingFunctionChanged()

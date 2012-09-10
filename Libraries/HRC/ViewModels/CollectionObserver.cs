@@ -6,23 +6,23 @@ using System.Windows;
 namespace HRC.ViewModels
 {
     /// <summary>
-    /// Monitors the CollectionChanged event of an object that implements INotifyPropertyChanged,
-    /// and executes callback methods (i.e. handlers) registered for properties of that object.
+    /// Monitors the CollectionChanged event of an object that implements INotifyCollectionChanged,
+    /// and executes callback methods (i.e. handlers) registered for that object.
     /// </summary>
     public class CollectionObserver : IWeakEventListener
     {
         #region Constructor
 
         /// <summary>
-        /// Initializes a new instance of PropertyObserver, which
-        /// observes the 'propertySource' object for property changes.
+        /// Initializes a new instance of CollectionObserver, which
+        /// observes the 'collectionSource' object for collection changes.
         /// </summary>
-        /// <param name="collectionSource">The object to monitor for property changes.</param>
+        /// <param name="collectionSource">The object to monitor for collection changes.</param>
         public CollectionObserver(object collectionSource)
         {
             if (collectionSource == null)
                 throw new ArgumentNullException("collectionSource");
-            if (!(collectionSource is INotifyPropertyChanged)) throw new ArgumentException("Argument is not of type INotifyPropertyChanged", "collectionSource");
+            if (!(collectionSource is INotifyCollectionChanged)) throw new ArgumentException("Argument is not of type INotifyCollectionChanged", "collectionSource");
 
             _collectionSourceRef = new WeakReference(collectionSource);
         }
@@ -34,20 +34,20 @@ namespace HRC.ViewModels
         #region RegisterHandler
 
         /// <summary>
-        /// Registers a callback to be invoked when the PropertyChanged event has been raised for the specified property.
+        /// Registers a callback to be invoked when the CollectionChanged event has been raised for the specified collection.
         /// </summary>
-        /// <param name="handler">The callback to invoke when the property has changed.</param>
+        /// <param name="handler">The callback to invoke when the collection has changed.</param>
         /// <returns>The object on which this method was invoked, to allow for multiple invocations chained together.</returns>
         public CollectionObserver RegisterHandler(Action<INotifyCollectionChanged, NotifyCollectionChangedEventArgs> handler)
         {
             if (handler == null)
                 throw new ArgumentNullException("handler");
 
-            var propertySource = GetCollectionSource();
-            if (propertySource != null)
+            var collectionSource = GetCollectionSource();
+            if (collectionSource != null)
             {
                 _handler = handler;
-                CollectionChangedEventManager.AddListener(propertySource, this);
+                CollectionChangedEventManager.AddListener(collectionSource, this);
             }
 
             return this;
@@ -57,10 +57,10 @@ namespace HRC.ViewModels
 
         #region UnregisterHandler
         /// <summary>
-        /// Removes the callback associated with the specified property.
+        /// Removes the callback associated with the specified collection.
         /// </summary>
         /// <returns>The object on which this method was invoked, to allow for multiple invocations chained together.</returns>
-        public CollectionObserver UnregisterHandler(Action<INotifyPropertyChanged, NotifyCollectionChangedEventArgs> handler)
+        public CollectionObserver UnregisterHandler(Action<INotifyCollectionChanged, NotifyCollectionChangedEventArgs> handler)
         {
             var collectionSource = GetCollectionSource();
             if (collectionSource != null)
@@ -94,7 +94,7 @@ namespace HRC.ViewModels
             }
         }
 
-        #endregion // GetPropertySource
+        #endregion // GetCollectionSource
 
         #endregion // Private Helpers
 

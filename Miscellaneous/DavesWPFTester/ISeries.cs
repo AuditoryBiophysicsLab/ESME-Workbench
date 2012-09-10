@@ -8,10 +8,8 @@ namespace DavesWPFTester
 {
     public interface ISeries
     {
-        double XMin { get; }
-        double XMax { get; }
-        double YMin { get; }
-        double YMax { get; }
+        Range XRange { get; }
+        Range YRange { get; }
         /// <summary>
         /// Converts an item in the series to a Point.  X and Y should be whatever natural values should be plotted for that point
         /// </summary>

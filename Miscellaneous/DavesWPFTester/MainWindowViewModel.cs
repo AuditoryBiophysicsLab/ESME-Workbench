@@ -52,11 +52,11 @@ namespace DavesWPFTester
                 //BottomLeft.BottomAxis.IsInverted = true;
                 //BottomLeft.RightAxis.IsInverted = true;
                 //BottomLeft.TopAxis.IsInverted = true;
-                BottomLeft.RightAxis.Range.Update(.0000005, 10000);
+                //BottomLeft.RightAxis.Range.Update(.0000005, 10000);
                 //BottomLeft.TopAxis.AxisType = AxisType.Logarithmic;
                 //BottomLeft.BottomAxis.AxisType = AxisType.Logarithmic;
                 BottomLeft.LeftAxis.AxisType = AxisType.Logarithmic;
-                BottomLeft.RightAxis.AxisType = AxisType.Logarithmic;
+                //BottomLeft.RightAxis.AxisType = AxisType.Logarithmic;
                 CreateBottomLeftSeries();
 #if true
                 _timer = new Timer(state => _dispatcher.InvokeInBackgroundIfRequired(() =>
@@ -90,7 +90,7 @@ namespace DavesWPFTester
                         if (_upperLeftAmplitude > 10) _upperLeftAmplitudeDelta = -1;
                         if (_upperLeftAmplitude < -10) _upperLeftAmplitudeDelta = 1;
                     }
-                }), null, 500, 500);
+                }), null, 20, 20);
 #endif
             };
         }
@@ -131,6 +131,7 @@ namespace DavesWPFTester
                 SeriesName = "y = x",
                 Fill = Brushes.Blue,
             });
+            BottomLeft.BottomAxis.Range.Update(-0.5, 10.5);
         }
 
         void CreateLowerRightSeries()
@@ -149,7 +150,7 @@ namespace DavesWPFTester
                 SeriesName = "y = x^2",
                 Fill = Brushes.Blue,
             });
-            ((BarSeriesViewModel)LowerRight.DataSeriesCollection[0]).YMin = 0.1;
+            ((BarSeriesViewModel)LowerRight.DataSeriesCollection[0]).YRange.Min = 0.1;
         }
 
         void CreateLowerLeftSeries()

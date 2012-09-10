@@ -251,7 +251,7 @@ namespace ESME.Views.Controls
             var lowValue = Math.Min(startValue, endValue);
             var highValue = Math.Max(startValue, endValue);
             if (highValue == lowValue) return highValue;
-            if (value < lowValue || value > highValue) throw new ParameterOutOfRangeException("value is out of range for this axis");
+            //if (value < lowValue || value > highValue) throw new ParameterOutOfRangeException("value is out of range for this axis");
             var axisDelta = highValue - lowValue;
             var valueDelta = value - lowValue;
             var valueRatio = valueDelta / axisDelta;

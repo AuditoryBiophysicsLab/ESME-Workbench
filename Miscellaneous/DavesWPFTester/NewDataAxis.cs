@@ -216,18 +216,10 @@ namespace DavesWPFTester
                 VisibleRange = null;
                 return;
             }
-            _dataRange = DataRange.Expand(0);
-            if (AxisType == AxisType.Logarithmic)
-            {
-                if (_dataRange.Min <= 0) throw new InvalidOperationException("Cannot plot negative or zero values on a log scale");
-                _dataRange.Min = Math.Log10(_dataRange.Min);
-                _dataRange.Max = Math.Log10(_dataRange.Max);
-            }
-            _axisOptions.DataRange = _dataRange;
-            VisibleRange = DataRange.Size > 0 ? DataRange.Expand(DataRange.Size * 0.05) : new Range(DataRange.Min, DataRange.Max + 10);
+            if (AxisType == AxisType.Logarithmic && DataRange.Min <= 0) throw new InvalidOperationException("Cannot plot negative or zero values on a log scale");
+            VisibleRange = DataRange.Expand(0);
         }
 
-        Range _dataRange;
         #endregion
 
         #region dependency property Range VisibleRange
@@ -255,7 +247,7 @@ namespace DavesWPFTester
         void VisibleRangeChanged(object sender, EventArgs args)
         {
             OnSizeOrVisibleRangeChanged();
-            InvalidateVisual();
+            InvalidateMeasure();
         }
 
         void OnSizeOrVisibleRangeChanged()
@@ -265,15 +257,16 @@ namespace DavesWPFTester
                 MappingFunction = null;
                 return;
             }
+            Debug.WriteLine(string.Format("{0} Visible range changed to {1}", AxisLabel, VisibleRange));
             _visibleRange = VisibleRange.Expand(0);
             if (AxisType == AxisType.Logarithmic)
             {
-                if (VisibleRange.Min <= 0) VisibleRange.Min = _visibleRange.Min = DataRange.Min;
                 _visibleRange.Min = Math.Log10(_visibleRange.Min);
                 _visibleRange.Max = Math.Log10(_visibleRange.Max);
             }
             _mappingFunctionTransform = CreateAxisTransform(_visibleRange, new Size(ActualWidth, ActualHeight), false, IsInverted, IsLogarithmic);
             MappingFunction = v => _mappingFunctionTransform.Transform(new Point(v, 0)).X;
+            _axisOptions.DataRange = _visibleRange.Expand(0);
             _axisOptions.VisibleRange = _visibleRange.Expand(0);
         }
 
@@ -352,16 +345,17 @@ namespace DavesWPFTester
             var matrix = presentationSource.CompositionTarget.TransformToDevice;
             _pixelsPerInch = Math.Max(matrix.M11, matrix.M22);
         }
+
+#if false
         protected override void  OnMouseWheel(MouseWheelEventArgs e)
         {
-            Debug.WriteLine(string.Format("{0} OnMouseWheel: {1}", AxisLabel, e.Delta));
+            //Debug.WriteLine(string.Format("{0} OnMouseWheel: {1}", AxisLabel, e.Delta));
             e.Handled = true;
             var direction = Math.Sign(e.Delta);
-            if (IsLogarithmic)
-            {
-                VisibleRange.Update(Math.Pow(10, _visibleRange.Min + direction), Math.Pow(10, _visibleRange.Max - direction));
-            }
+            if (IsLogarithmic) VisibleRange.Update(Math.Pow(10, _visibleRange.Min + (0.1 * direction)), Math.Pow(10, _visibleRange.Max - (0.1 * direction)));
         }
+#endif
+
         protected override HitTestResult HitTestCore(PointHitTestParameters hitTestParameters) { return new PointHitTestResult(this, hitTestParameters.HitPoint); }
 
         readonly double _pixelsPerInch = 96.0;
