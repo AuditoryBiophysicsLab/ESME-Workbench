@@ -150,22 +150,22 @@ namespace DavesWPFTester
         bool IsLogarithmic { get { return AxisType == AxisType.Logarithmic; } }
         #endregion
 
-        #region dependency property Range DataRange
+        #region dependency property RangeCollection DataRange
 
         public static DependencyProperty DataRangeProperty = DependencyProperty.Register("DataRange",
-                                                                                         typeof(Range),
+                                                                                         typeof(RangeCollection),
                                                                                          typeof(NewDataAxis),
                                                                                          new FrameworkPropertyMetadata(null,
                                                                                                                        FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                                                                        FrameworkPropertyMetadataOptions.AffectsRender,
                                                                                                                        DataRangePropertyChanged));
 
-        public Range DataRange { get { return (Range)GetValue(DataRangeProperty); } set { SetValue(DataRangeProperty, value); } }
+        public RangeCollection DataRange { get { return (RangeCollection)GetValue(DataRangeProperty); } set { SetValue(DataRangeProperty, value); } }
         static void DataRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).DataRangePropertyChanged(args); }
         void DataRangePropertyChanged(DependencyPropertyChangedEventArgs args)
         {
-            if (args.OldValue != null) ((Range)args.OldValue).RangeChanged -= DataRangeChanged;
-            if (args.NewValue != null) ((Range)args.NewValue).RangeChanged += DataRangeChanged;
+            if (args.OldValue != null) ((RangeCollection)args.OldValue).RangeChanged -= DataRangeChanged;
+            if (args.NewValue != null) ((RangeCollection)args.NewValue).RangeChanged += DataRangeChanged;
             DataRangeChanged(null, null);
         }
         void DataRangeChanged(object sender, EventArgs args)
@@ -493,7 +493,7 @@ namespace DavesWPFTester
 
         Size MeasureNonEnumerated(Size availableSize)
         {
-            if (_visibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
+            if (_visibleRange == null || _visibleRange.IsEmpty) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
             if (Double.IsNaN(availableSize.Width) || Double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;
             if (Double.IsNaN(availableSize.Height) || Double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
             // We need to fake out the layout code re: inversion and logarithmic mode so we NEVER set these two parameters to true

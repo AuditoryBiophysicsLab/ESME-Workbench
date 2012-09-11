@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
@@ -7,50 +9,38 @@ using HRC.WPF;
 
 namespace DavesWPFTester
 {
-    public class Range : INotifyRangeChanged
+    public class Range : RangeBase
     {
         public Range() { Min = Max = double.NaN; }
 
         public Range(double min, double max)
         {
-            _min = min;
-            _max = max;
+            Minimum = min;
+            Maximum = max;
         }
 
-        double _min;
-        public double Min
+        public new double Min
         {
-            get { return _min; }
+            get { return Minimum; }
             set
             {
-                if (Math.Abs(_min - value) < double.Epsilon) return;
-                var oldRange = new Range(_min, Max);
-                _min = value;
+                if (Math.Abs(Minimum - value) < double.Epsilon) return;
+                var oldRange = new Range(Minimum, Max);
+                Minimum = value;
                 OnRangeChanged(oldRange);
             }
         }
-        double _max;
 
-        public double Max
+        public new double Max
         {
-            get { return _max; }
+            get { return Maximum; }
             set
             {
-                if (Math.Abs(_max - value) < double.Epsilon) return;
-                var oldRange = new Range(Min, _max);
-                _max = value;
+                if (Math.Abs(Maximum - value) < double.Epsilon) return;
+                var oldRange = new Range(Min, Maximum);
+                Maximum = value;
                 OnRangeChanged(oldRange);
             }
-        }
-        /// <summary>
-        /// Reset the range to the empty state
-        /// </summary>
-        public void Reset()
-        {
-            var oldRange = new Range(Min, Max);
-            _min = double.NaN;
-            _max = double.NaN;
-            OnRangeChanged(oldRange);
         }
         public double Size { get { return Max - Min; } }
         /// <summary>
@@ -62,23 +52,26 @@ namespace DavesWPFTester
             var valueList = values.ToList();
             Update(valueList.Min(), valueList.Max());
         }
+
         public void Update(double min, double max)
         {
             var isChanged = false;
             var oldRange = new Range(Min, Max);
-            if (!double.IsNaN(min) && !double.IsInfinity(min) && (double.IsNaN(_min) || (Math.Abs(_min - min) > double.Epsilon)))
+            if (!double.IsNaN(min) && !double.IsInfinity(min) && (double.IsNaN(Minimum) || (Math.Abs(Minimum - min) > double.Epsilon)))
             {
-                _min = min;
+                Minimum = min;
                 isChanged = true;
             }
-            if (!double.IsNaN(max) && !double.IsInfinity(max) && (double.IsNaN(_max) || (Math.Abs(_max - max) > double.Epsilon)))
+            if (!double.IsNaN(max) && !double.IsInfinity(max) && (double.IsNaN(Maximum) || (Math.Abs(Maximum - max) > double.Epsilon)))
             {
-                _max = max;
+                Maximum = max;
                 isChanged = true;
             }
             if (isChanged) OnRangeChanged(oldRange);
         }
+
         public void Update(Range range) { Update(range.Min, range.Max); }
+
         public void Update(IEnumerable<Range> ranges)
         {
             var rangeList = ranges.ToList();
@@ -115,7 +108,7 @@ namespace DavesWPFTester
             var realMax = double.IsNaN(Max) ? max : Math.Max(Max, max);
             Update(realMin, realMax);
         }
-        public void Add(Range range) { Add(range.Min, range.Max); }
+        public override void Add(IRange range) { Add(range.Min, range.Max); }
         public void Add(IEnumerable<Range> ranges)
         {
             var rangeList = ranges.ToList();
@@ -128,8 +121,114 @@ namespace DavesWPFTester
 
         public bool Contains(Range otherRange) { return Min <= otherRange.Min && Max >= otherRange.Max; }
         public bool Contains(double value) { return Min <= value && Max >= value; }
+    };
+    
+    public class RangeCollection : RangeBase
+    {
+        public RangeCollection() 
+        {
+            _ranges = new ObservableCollection<IRange>();
+            _ranges.CollectionChanged += (s, e) =>
+            {
+                switch (e.Action)
+                {
+                    case NotifyCollectionChangedAction.Add:
+                        foreach (IRange newRange in e.NewItems)
+                        {
+                            AddInternal(newRange);
+                            newRange.RangeChanged += CollectionElementChanged;
+                        }
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+                        var isRescanNeeded = false;
+                        foreach (Range oldRange in e.OldItems)
+                        {
+                            oldRange.RangeChanged -= CollectionElementChanged;
+                            isRescanNeeded = (oldRange.Max >= Maximum) || (oldRange.Min <= Minimum);
+                        }
+                        if (isRescanNeeded) Update(_ranges.Min(r => r.Min), _ranges.Max(r => r.Max));
+                        break;
+                }
+            };
+        }
 
-        public Range Expand(double amount) { return new Range(Min - amount, Max + amount); }
+        public override void Reset()
+        {
+            _ranges.Clear();
+            base.Reset();
+        }
+
+        void CollectionElementChanged(object sender, NotifyRangeChangedEventArgs notifyRangeChangedEventArgs) 
+        {
+            AddInternal((IRange)sender);
+        }
+
+        void AddInternal(IRange range)
+        {
+            var min = double.IsNaN(range.Min) ? Min : range.Min;
+            var max = double.IsNaN(range.Max) ? Max : range.Max;
+            var realMin = double.IsNaN(Min) ? min : Math.Min(Min, min);
+            var realMax = double.IsNaN(Max) ? max : Math.Max(Max, max);
+            Update(realMin, realMax);
+        }
+
+        void Update(double min, double max)
+        {
+            var isChanged = false;
+            var oldRange = new Range(Min, Max);
+            if (!double.IsNaN(min) && !double.IsInfinity(min) && (double.IsNaN(Minimum) || (Math.Abs(Minimum - min) > double.Epsilon)))
+            {
+                Minimum = min;
+                isChanged = true;
+            }
+            if (!double.IsNaN(max) && !double.IsInfinity(max) && (double.IsNaN(Maximum) || (Math.Abs(Maximum - max) > double.Epsilon)))
+            {
+                Maximum = max;
+                isChanged = true;
+            }
+            if (isChanged) OnRangeChanged(oldRange);
+        }
+        public RangeCollection(IEnumerable<IRange> ranges) : this() { foreach (var range in ranges) _ranges.Add(range); }
+
+        readonly ObservableCollection<IRange> _ranges;
+
+        public override void Add(IRange range)
+        {
+            if (range == null) throw new ArgumentNullException("range");
+            if (_ranges.Contains(range)) return;
+            _ranges.Add(range);
+        }
+    }
+
+    public abstract class RangeBase : IRange
+    {
+        protected double Minimum = double.NaN;
+        public virtual double Min
+        {
+            get { return Minimum; }
+        }
+
+        protected double Maximum = double.NaN;
+        public virtual double Max
+        {
+            get { return Maximum; }
+        }
+
+        public abstract void Add(IRange range);
+        /// <summary>
+        /// Reset the range to the empty state
+        /// </summary>
+        public virtual void Reset()
+        {
+            var oldRange = new Range(Min, Max);
+            Minimum = double.NaN;
+            Maximum = double.NaN;
+            OnRangeChanged(oldRange);
+        }
+
+        public virtual Range Expand(double amount) { return new Range(Min - amount, Max + amount); }
+
+        public double Value { get { return Max - Min; } }
 
         public event EventHandler<NotifyRangeChangedEventArgs> RangeChanged;
         protected void OnRangeChanged(Range oldRange)
@@ -147,9 +246,15 @@ namespace DavesWPFTester
                     handler(this, new NotifyRangeChangedEventArgs(oldRange));
             }
         }
+        public virtual bool IsEmpty { get { return double.IsNaN(Minimum) || double.IsNaN(Maximum); } }
         public override string ToString() { return string.Format("Range {{ Min = {0}, Max = {1} }}", Min, Max); }
-    };
-
+    }
+    public interface IRange : INotifyRangeChanged
+    {
+        double Min { get; }
+        double Max { get; }
+        double Value { get; }
+    }
     public interface INotifyRangeChanged
     {
         event EventHandler<NotifyRangeChangedEventArgs> RangeChanged;
@@ -162,7 +267,7 @@ namespace DavesWPFTester
             OldRange = oldRange;
         }
 
-        public Range OldRange { get; private set; }
+        public IRange OldRange { get; private set; }
     }
 
     public class NotifyRangeChangedEventManager : WeakEventManager

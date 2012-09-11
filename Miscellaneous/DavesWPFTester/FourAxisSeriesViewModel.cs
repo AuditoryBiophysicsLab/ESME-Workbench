@@ -91,7 +91,7 @@ namespace DavesWPFTester
     {
         public DataAxisViewModel()
         {
-            DataRange = new Range(0.1, 10);
+            DataRange = new RangeCollection();
             VisibleRange = DataRange.Expand(0);
             AxisTicks = new ObservableCollection<NewDataAxisTick>();
         }
@@ -103,7 +103,7 @@ namespace DavesWPFTester
         public ObservableCollection<NewDataAxisTick> AxisTicks { get; set; }
         [Initialize(AxisType.Linear)]
         public AxisType AxisType { get; set; }
-        public Range DataRange { get; set; }
+        public RangeCollection DataRange { get; set; }
         public bool IsInverted { get; set; }
         /// <summary>
         /// Length of a major tick, in pixels at screen resolution

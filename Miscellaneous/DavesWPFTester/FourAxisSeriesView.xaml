@@ -19,7 +19,7 @@
                              AxisTicks="{Binding AxisTicks}"
                              AxisType="{Binding AxisType}"
                              DataContext="{Binding TopAxis}"
-                             DataRange="{Binding DataRange}"
+                             DataRange="{Binding DataRange, Mode=OneWay}"
                              DockPanel.Dock="Top"
                              IsInverted="{Binding IsInverted}"
                              MajorTickLength="{Binding MajorTickLength}"
@@ -30,7 +30,7 @@
                                                        Mode=OneWayToSource}"
                              ValueToPosition="{Binding ValueToPosition,
                                                        Mode=OneWayToSource}"
-                             VisibleRange="{Binding VisibleRange}" />
+                             VisibleRange="{Binding VisibleRange, Mode=TwoWay}" />
         </DockPanel>
         <DockPanel Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Bottom" Visibility="{Binding BottomAxis.Visibility}">
             <TextBlock Width="{Binding ActualWidth, ElementName=LeftAxis}" Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Left" Visibility="{Binding LeftAxis.Visibility}" />
@@ -42,7 +42,7 @@
                              AxisTicks="{Binding AxisTicks}"
                              AxisType="{Binding AxisType}"
                              DataContext="{Binding BottomAxis}"
-                             DataRange="{Binding DataRange}"
+                             DataRange="{Binding DataRange, Mode=OneWay}"
                              DockPanel.Dock="Top"
                              IsInverted="{Binding IsInverted}"
                              MajorTickLength="{Binding MajorTickLength}"
@@ -53,7 +53,7 @@
                                                        Mode=OneWayToSource}"
                              ValueToPosition="{Binding ValueToPosition,
                                                        Mode=OneWayToSource}"
-                             VisibleRange="{Binding VisibleRange}" />
+                             VisibleRange="{Binding VisibleRange, Mode=TwoWay}" />
         </DockPanel>
         <app:NewDataAxis x:Name="LeftAxis"
                          AxisLabel="{Binding Label}"
@@ -62,7 +62,7 @@
                          AxisTicks="{Binding AxisTicks}"
                          AxisType="{Binding AxisType}"
                          DataContext="{Binding LeftAxis}"
-                         DataRange="{Binding DataRange}"
+                         DataRange="{Binding DataRange, Mode=OneWay}"
                          DockPanel.Dock="Left"
                          IsInverted="{Binding IsInverted}"
                          MajorTickLength="{Binding MajorTickLength}"
@@ -74,7 +74,7 @@
                          ValueToPosition="{Binding ValueToPosition,
                                                    Mode=OneWayToSource}"
                          Visibility="{Binding Visibility}"
-                         VisibleRange="{Binding VisibleRange}" />
+                         VisibleRange="{Binding VisibleRange, Mode=TwoWay}" />
         <app:NewDataAxis x:Name="RightAxis"
                          AxisLabel="{Binding Label}"
                          AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
@@ -82,7 +82,7 @@
                          AxisTicks="{Binding AxisTicks}"
                          AxisType="{Binding AxisType}"
                          DataContext="{Binding RightAxis}"
-                         DataRange="{Binding DataRange}"
+                         DataRange="{Binding DataRange, Mode=OneWay}"
                          DockPanel.Dock="Right"
                          IsInverted="{Binding IsInverted}"
                          MajorTickLength="{Binding MajorTickLength}"
@@ -94,7 +94,7 @@
                          ValueToPosition="{Binding ValueToPosition,
                                                    Mode=OneWayToSource}"
                          Visibility="{Binding Visibility}"
-                         VisibleRange="{Binding VisibleRange}" />
+                         VisibleRange="{Binding VisibleRange, Mode=TwoWay}" />
         <app:DataCanvas x:Name="DataCanvas"
                         MajorTickLineColor="{Binding MajorTickLineColor}"
                         MinorTickLineColor="{Binding MinorTickLineColor}"

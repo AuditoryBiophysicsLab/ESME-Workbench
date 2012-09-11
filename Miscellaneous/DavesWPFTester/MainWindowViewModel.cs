@@ -204,7 +204,7 @@ namespace DavesWPFTester
             var rangeEnd = MoreMath.TwoPi + 0.01;
             var rangeStep = MoreMath.TwoPi / 16;
             const int pointSize = 10;
-            TopLeft.XAxis.DataRange.Update(Math.Floor(rangeStart), Math.Ceiling(rangeEnd));
+            TopLeft.XAxis.VisibleRange.Update(Math.Floor(rangeStart), Math.Ceiling(rangeEnd));
             TopLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 11)).ToObservableList(),
