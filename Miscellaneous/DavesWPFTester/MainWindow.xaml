@@ -48,7 +48,7 @@
                             Orientation="Vertical">
                     <app:LegendView ItemsSource="{Binding UpperLeft.DataSeriesCollection}" />
                 </StackPanel>
-                <app:NewAxisSeriesView DataContext="{Binding UpperLeft}" DockPanel.Dock="Left" />
+                <app:FourAxisSeriesView DataContext="{Binding UpperLeft}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
         <GroupBox Grid.Row="0"
@@ -62,7 +62,7 @@
                             Orientation="Vertical">
                     <app:LegendView ItemsSource="{Binding UpperRight.DataSeriesCollection}" />
                 </StackPanel>
-                <app:NewAxisSeriesView DataContext="{Binding UpperRight}" DockPanel.Dock="Left" />
+                <app:FourAxisSeriesView DataContext="{Binding UpperRight}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
         <GroupBox Grid.Row="1"
@@ -84,7 +84,7 @@
                             Orientation="Vertical">
                     <app:LegendView ItemsSource="{Binding LowerLeft.DataSeriesCollection}" />
                 </StackPanel>
-                <app:NewAxisSeriesView DataContext="{Binding LowerLeft}" DockPanel.Dock="Left" />
+                <app:FourAxisSeriesView DataContext="{Binding LowerLeft}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
         <GroupBox Grid.Row="1"
@@ -98,7 +98,7 @@
                             Orientation="Vertical">
                     <app:LegendView ItemsSource="{Binding LowerRight.DataSeriesCollection}" />
                 </StackPanel>
-                <app:NewAxisSeriesView DataContext="{Binding LowerRight}" DockPanel.Dock="Left" />
+                <app:FourAxisSeriesView DataContext="{Binding LowerRight}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
         <GroupBox Grid.Row="2"
@@ -112,7 +112,7 @@
                             Orientation="Vertical">
                     <app:LegendView ItemsSource="{Binding BottomLeft.DataSeriesCollection}" />
                 </StackPanel>
-                <app:NewAxisSeriesView DataContext="{Binding BottomLeft}" DockPanel.Dock="Left" />
+                <app:FourAxisSeriesView DataContext="{Binding BottomLeft}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
     </Grid>

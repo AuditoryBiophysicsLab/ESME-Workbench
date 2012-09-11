@@ -182,8 +182,8 @@
     <Compile Include="AxisLabeling\Layout\Formatters\QuantitativeFormatter.cs" />
     <Compile Include="BarSeriesViewModel.cs" />
     <Compile Include="Transforms\LogTransform.cs" />
-    <Compile Include="NewAxisSeriesView.xaml.cs">
-      <DependentUpon>NewAxisSeriesView.xaml</DependentUpon>
+    <Compile Include="FourAxisSeriesView.xaml.cs">
+      <DependentUpon>FourAxisSeriesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="LineSeriesViewModel.cs" />
     <Compile Include="ISeries.cs" />
@@ -196,11 +196,8 @@
     <Compile Include="DataCanvas.cs" />
     <Compile Include="SeriesViewModelBase.cs" />
     <Compile Include="Transforms\PowTransform.cs" />
-    <Compile Include="TwoAxisSeriesView.xaml.cs">
-      <DependentUpon>TwoAxisSeriesView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="FourAxisSeriesViewModel.cs" />
-    <Page Include="NewAxisSeriesView.xaml">
+    <Page Include="FourAxisSeriesView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -220,10 +217,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="TwoAxisSeriesView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainWindowViewModel.cs" />

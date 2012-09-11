@@ -54,8 +54,8 @@ namespace DavesWPFTester
         {
             if (ItemToPoint == null || SeriesData == null || SeriesData.Count == 0) return;
             foreach (var item in SeriesData) Points.Add(ItemToPoint(item));
-            XRange.Update(Points.Select(p => p.X));
-            YRange.Update(Points.Select(p => p.Y));
+            XRange.Add(Points.Select(p => p.X));
+            YRange.Add(Points.Select(p => p.Y));
             RenderShapes();
         }
 

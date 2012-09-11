@@ -30,6 +30,8 @@ namespace DavesWPFTester
             YAxis.Autorange = true;
             XRange.RangeChanged += XRangeChanged;
             YRange.RangeChanged += YRangeChanged;
+            XAxisTicks = XAxis.AxisTicks;
+            YAxisTicks = YAxis.AxisTicks;
 
             _propertyObserver = new PropertyObserver<FourAxisSeriesViewModel>(this)
                 .RegisterHandler(d => d.DataSeriesCollection, DataSeriesCollectionPropertyChanged)
@@ -39,6 +41,8 @@ namespace DavesWPFTester
             if (DataSeriesCollection != null) DataSeriesCollectionPropertyChanged();
             XAxisPropertyChanged();
             YAxisPropertyChanged();
+            MajorTickLineColor = Colors.Black;
+            MinorTickLineColor = Colors.LightGray;
         }
 
         [Initialize] public DataAxisViewModel TopAxis { get; set; }
@@ -53,6 +57,8 @@ namespace DavesWPFTester
         public Color MinorTickLineColor { get; set; }
         [Initialize, UsedImplicitly] Range XRange { get; set; }
         [Initialize, UsedImplicitly] Range YRange { get; set; }
+        public ObservableCollection<NewDataAxisTick> XAxisTicks { get; set; }
+        public ObservableCollection<NewDataAxisTick> YAxisTicks { get; set; }
 
         void XAxisPropertyChanged()
         {
@@ -84,7 +90,7 @@ namespace DavesWPFTester
             if (XAxis != null && XAxis.Autorange)
             {
                 //Debug.WriteLine(string.Format("Updating X Axis min/max. Old range: {0} ... {1} New range: {2} ... {3}", XAxis.StartValue, XAxis.EndValue, XMin, XMax));
-                XAxis.Range.Update(XRange);
+                XAxis.Range.Add(XRange);
             }
         }
 
@@ -93,7 +99,7 @@ namespace DavesWPFTester
             if (YAxis != null && YAxis.Autorange)
             {
                 //Debug.WriteLine(string.Format("Updating X Axis min/max. Old range: {0} ... {1} New range: {2} ... {3}", XAxis.StartValue, XAxis.EndValue, XMin, XMax));
-                YAxis.Range.Update(YRange);
+                YAxis.Range.Add(YRange);
             }
         }
 
@@ -105,8 +111,8 @@ namespace DavesWPFTester
             _dataSeriesCollectionObserver.RegisterHandler(DataSeriesCollectionChanged);
             foreach (var series in DataSeriesCollection)
             {
-                UpdateXRange(series.XRange);
-                UpdateYRange(series.YRange);
+                ExpandXRange(series.XRange);
+                ExpandYRange(series.YRange);
             }
         }
         void DataSeriesCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
@@ -116,10 +122,10 @@ namespace DavesWPFTester
                 case NotifyCollectionChangedAction.Add:
                     foreach (SeriesViewModelBase dataSeries in args.NewItems)
                     {
-                        dataSeries.XRange.RangeChanged += UpdateXRange;
-                        dataSeries.YRange.RangeChanged += UpdateYRange;
-                        UpdateXRange(dataSeries.XRange);
-                        UpdateYRange(dataSeries.YRange);
+                        dataSeries.XRange.RangeChanged += ExpandXRange;
+                        dataSeries.YRange.RangeChanged += ExpandYRange;
+                        ExpandXRange(dataSeries.XRange);
+                        ExpandYRange(dataSeries.YRange);
                         if (dataSeries.XAxisMappingFunction == null) dataSeries.XAxisMappingFunction = XAxis.MappingFunction;
                         if (dataSeries.YAxisMappingFunction == null) dataSeries.YAxisMappingFunction = YAxis.MappingFunction;
                         Debug.WriteLine(string.Format("Adding DataSeries: {0}", dataSeries));
@@ -128,22 +134,22 @@ namespace DavesWPFTester
                 case NotifyCollectionChangedAction.Remove:
                     foreach (SeriesViewModelBase dataSeries in args.OldItems)
                     {
-                        dataSeries.XRange.RangeChanged -= UpdateXRange;
-                        dataSeries.YRange.RangeChanged -= UpdateYRange;
+                        dataSeries.XRange.RangeChanged -= ExpandXRange;
+                        dataSeries.YRange.RangeChanged -= ExpandYRange;
                     }
                     break;
                 case NotifyCollectionChangedAction.Replace:
                     foreach (SeriesViewModelBase dataSeries in args.OldItems)
                     {
-                        dataSeries.XRange.RangeChanged -= UpdateXRange;
-                        dataSeries.YRange.RangeChanged -= UpdateYRange;
+                        dataSeries.XRange.RangeChanged -= ExpandXRange;
+                        dataSeries.YRange.RangeChanged -= ExpandYRange;
                     }
                     foreach (SeriesViewModelBase dataSeries in args.NewItems)
                     {
-                        dataSeries.XRange.RangeChanged += UpdateXRange;
-                        dataSeries.YRange.RangeChanged += UpdateYRange;
-                        UpdateXRange(dataSeries.XRange);
-                        UpdateYRange(dataSeries.YRange);
+                        dataSeries.XRange.RangeChanged += ExpandXRange;
+                        dataSeries.YRange.RangeChanged += ExpandYRange;
+                        ExpandXRange(dataSeries.XRange);
+                        ExpandYRange(dataSeries.YRange);
                         if (dataSeries.XAxisMappingFunction == null) dataSeries.XAxisMappingFunction = XAxis.MappingFunction;
                         if (dataSeries.YAxisMappingFunction == null) dataSeries.YAxisMappingFunction = YAxis.MappingFunction;
                     }
@@ -155,8 +161,8 @@ namespace DavesWPFTester
             }
         }
 
-        void UpdateXRange(object sender, NotifyRangeChangedEventArgs args = null) { XRange.Add((Range)sender); }
-        void UpdateYRange(object sender, NotifyRangeChangedEventArgs args = null) { YRange.Add((Range)sender); }
+        void ExpandXRange(object sender, NotifyRangeChangedEventArgs args = null) { XRange.Add((Range)sender); }
+        void ExpandYRange(object sender, NotifyRangeChangedEventArgs args = null) { YRange.Add((Range)sender); }
     }
 
     public class DataAxisViewModel : ViewModelBase
@@ -166,42 +172,16 @@ namespace DavesWPFTester
         public DataAxisViewModel()
         {
             Range = new Range(0.1, 10);
-            Range.RangeChanged += (s, e) =>
-            {
-                OnPropertyChanged("StartValue");
-                OnPropertyChanged("EndValue");
-            };
+            AxisTicks = new ObservableCollection<NewDataAxisTick>();
         }
         public string Label { get; set; }
         public AxisType AxisType { get; set; }
 
-        public double StartValue
-        {
-            get { return IsInverted ? Range.Max : Range.Min; }
-            set
-            {
-                if (IsInverted) Range.Max = value;
-                else Range.Min = value;
-            }
-        }
-
-        public double EndValue
-        {
-            get { return IsInverted ? Range.Min : Range.Max; }
-            set
-            {
-                if (IsInverted) Range.Min = value;
-                else Range.Max = value;
-            }
-        }
-
         public Visibility Visibility { get; set; }
         public Range Range { get; private set; }
-        public bool ShowMajorTicks { get; set; }
-        public bool ShowMinorTicks { get; set; }
+        public ObservableCollection<NewDataAxisTick> AxisTicks { get; set; }
 
-        [Initialize("0.##")] public string TickValueFormat { get; set; }
-        public bool Autorange { get; set; }
+        [Initialize(true)] public bool Autorange { get; set; }
         public bool IsInverted { get; set; }
         public Func<double, double> MappingFunction { get; set; }
     }

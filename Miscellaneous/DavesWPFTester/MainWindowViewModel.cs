@@ -33,6 +33,8 @@ namespace DavesWPFTester
         public MainWindowViewModel(IViewAwareStatus viewAwareStatus)
         {
             _viewAwareStatus = viewAwareStatus;
+            //AnimateLowerLeft = true;
+            //AnimateUpperLeft = true;
             _viewAwareStatus.ViewLoaded += () =>
             {
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
@@ -99,8 +101,8 @@ namespace DavesWPFTester
             const double rangeStart = 1;
             const int rangeEnd = 10;
             const double rangeStep = .5;
-            BottomLeft.MajorTickLineColor = Colors.Black;
-            BottomLeft.MinorTickLineColor = Colors.AliceBlue;
+            BottomLeft.YAxis.Range.Update(0.9, 11);
+            BottomLeft.XAxis.Range.Update(-0.5, 10.5);
             BottomLeft.DataSeriesCollection.Add(new BarSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
@@ -109,7 +111,7 @@ namespace DavesWPFTester
                 SeriesName = "y = x",
                 Fill = Brushes.Blue,
             });
-            BottomLeft.BottomAxis.Range.Update(-0.5, 10.5);
+            BottomLeft.XAxisTicks = null;
         }
 
         void CreateLowerRightSeries()
@@ -117,8 +119,6 @@ namespace DavesWPFTester
             const double rangeStart = 1;
             const int rangeEnd = 10;
             const double rangeStep = 1;
-            LowerRight.MajorTickLineColor = Colors.Black;
-            LowerRight.MinorTickLineColor = Colors.AliceBlue;
             LowerRight.YAxis.AxisType = AxisType.Logarithmic;
             LowerRight.DataSeriesCollection.Add(new BarSeriesViewModel
             {
@@ -136,8 +136,6 @@ namespace DavesWPFTester
             const double rangeStart = -10;
             const int rangeEnd = 10;
             const double rangeStep = 1;
-            LowerLeft.MajorTickLineColor = Colors.Black;
-            LowerLeft.MinorTickLineColor = Colors.AliceBlue;
             LowerLeft.DataSeriesCollection.Add(new BarSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
@@ -154,10 +152,7 @@ namespace DavesWPFTester
             const double rangeStart = -9;
             const int rangeEnd = 9;
             const double rangeStep = .1;
-            UpperRight.MajorTickLineColor = Colors.Black;
-            UpperRight.MinorTickLineColor = Colors.AliceBlue;
             UpperRight.YAxis.AxisType = AxisType.Logarithmic;
-            UpperRight.YAxis.TickValueFormat = "m";
             UpperRight.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Cosh(x) + 1)).ToObservableList(),
@@ -192,8 +187,7 @@ namespace DavesWPFTester
             var rangeEnd = MoreMath.TwoPi + 0.01;
             var rangeStep = MoreMath.TwoPi / 16;
             const int pointSize = 10;
-            UpperLeft.MajorTickLineColor = Colors.Black;
-            UpperLeft.MinorTickLineColor = Colors.AliceBlue;
+            UpperLeft.XAxis.Range.Update(Math.Floor(rangeStart), Math.Ceiling(rangeEnd));
             UpperLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 11)).ToObservableList(),

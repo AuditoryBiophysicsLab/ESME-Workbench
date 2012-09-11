@@ -1,11 +1,11 @@
 ﻿namespace DavesWPFTester
 {
     /// <summary>
-    /// Interaction logic for TwoAxisSeriesView.xaml
+    /// Interaction logic for FourAxisSeriesView.xaml
     /// </summary>
-    public partial class TwoAxisSeriesView
+    public partial class FourAxisSeriesView
     {
-        public TwoAxisSeriesView()
+        public FourAxisSeriesView()
         {
             InitializeComponent();
         }
