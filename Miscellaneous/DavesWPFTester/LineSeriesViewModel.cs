@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using HRC;
@@ -34,6 +35,7 @@ namespace DavesWPFTester
         void LinePropertiesChanged()
         {
             DrawLine = LineStrokeThickness > 0 && LineStroke != null;
+            CreateLineStoryboard();
             RenderSample();
             RenderLine();
         }
@@ -41,6 +43,7 @@ namespace DavesWPFTester
         void MarkerPropertiesChanged()
         {
             DrawMarker = MarkerType != null && MarkerStrokeThickness > 0 && MarkerSize > 0 && MarkerStroke != null;
+            CreateMarkerStoryboard();
             RenderSample();
             RenderMarkers();
         }
@@ -105,6 +108,16 @@ namespace DavesWPFTester
         }
 
         Shape _lineShape;
+        void CreateLineStoryboard()
+        {
+            _lineStoryboard = null;
+            var animation = new DoubleAnimation(MarkerStrokeThickness, MarkerStrokeThickness + 5.0, new Duration(new TimeSpan(0, 0, 0, 0, 500)));
+            _lineStoryboard = new Storyboard { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever };
+            Storyboard.SetTargetProperty(_lineStoryboard, new PropertyPath(Shape.StrokeThicknessProperty));
+            _lineStoryboard.Children.Add(animation);
+        }
+
+        Storyboard _lineStoryboard;
 
         void RenderLine()
         {
@@ -144,6 +157,8 @@ namespace DavesWPFTester
                 StrokeThickness = LineStrokeThickness,
                 Data = lineGeometry,
             };
+            _lineShape.MouseEnter += (s, e) => _lineStoryboard.Begin(_lineShape, true);
+            _lineShape.MouseLeave += (s, e) => _lineStoryboard.Remove(_lineShape);
             Shapes.Insert(0, _lineShape);
         }
 
@@ -161,6 +176,17 @@ namespace DavesWPFTester
             }
         }
 
+        void CreateMarkerStoryboard()
+        {
+            _markerStoryboard = null;
+            var animation = new DoubleAnimation(MarkerStrokeThickness, MarkerStrokeThickness + 5.0, new Duration(new TimeSpan(0, 0, 0, 0, 500)));
+            _markerStoryboard = new Storyboard { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever };
+            Storyboard.SetTargetProperty(_markerStoryboard, new PropertyPath(Shape.StrokeThicknessProperty));
+            _markerStoryboard.Children.Add(animation);
+        }
+
+        Storyboard _markerStoryboard;
+
         void RenderMarker(Point point)
         {
             if (XAxisMappingFunction == null || YAxisMappingFunction == null) return;
@@ -177,6 +203,8 @@ namespace DavesWPFTester
                 Fill = Brushes.Transparent,
                 ToolTip = string.Format("{0:0.###}, {1:0.###}", point.X, point.Y),
             };
+            marker.MouseEnter += (s, e) => _markerStoryboard.Begin(marker, true);
+            marker.MouseLeave += (s, e) => _markerStoryboard.Remove(marker);
             if (!PointShapeMap.ContainsKey(point))
             {
                 PointShapeMap.Add(point, marker);
