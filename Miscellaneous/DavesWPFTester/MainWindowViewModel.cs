@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
@@ -100,9 +101,26 @@ namespace DavesWPFTester
         {
             const double rangeStart = 1;
             const int rangeEnd = 10;
-            const double rangeStep = .5;
-            BottomLeft.YAxis.Range.Update(0.9, 11);
-            BottomLeft.XAxis.Range.Update(-0.5, 10.5);
+            const double rangeStep = 1;
+            BottomLeft.XAxis.AxisType = AxisType.Enumerated;
+            BottomLeft.XAxis.AxisTicks = new ObservableCollection<NewDataAxisTick>
+            {
+                new NewDataAxisTick(-1, null, false),
+                new NewDataAxisTick(0, "Zero", false),
+                new NewDataAxisTick(1, "One", false),
+                new NewDataAxisTick(2, "Two", false),
+                new NewDataAxisTick(3, "Three", false),
+                new NewDataAxisTick(4, "Four", false),
+                new NewDataAxisTick(5, "Five", false),
+                new NewDataAxisTick(6, "Six", false),
+                new NewDataAxisTick(7, "Seven", false),
+                new NewDataAxisTick(8, "Eight", false),
+                new NewDataAxisTick(9, "Nine", false),
+                new NewDataAxisTick(10, "Ten", false),
+                new NewDataAxisTick(11, null, false),
+            };
+            BottomLeft.XRange.Update(-1, 11);
+            BottomLeft.YRange.Update(1, 11);
             BottomLeft.DataSeriesCollection.Add(new BarSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
@@ -128,7 +146,6 @@ namespace DavesWPFTester
                 SeriesName = "y = x^2",
                 Fill = Brushes.Blue,
             });
-            ((BarSeriesViewModel)LowerRight.DataSeriesCollection[0]).YRange.Min = 0.1;
         }
 
         void CreateLowerLeftSeries()
@@ -187,7 +204,7 @@ namespace DavesWPFTester
             var rangeEnd = MoreMath.TwoPi + 0.01;
             var rangeStep = MoreMath.TwoPi / 16;
             const int pointSize = 10;
-            UpperLeft.XAxis.Range.Update(Math.Floor(rangeStart), Math.Ceiling(rangeEnd));
+            UpperLeft.XAxis.DataRange.Update(Math.Floor(rangeStart), Math.Ceiling(rangeEnd));
             UpperLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 11)).ToObservableList(),

@@ -27,8 +27,9 @@ namespace DavesWPFTester
             _pointsObserver = new CollectionObserver(Points).RegisterHandler(PointsCollectionChanged);
         }
 
+        [Initialize] public DataAxisViewModel XAxis { get; set; }
+        [Initialize] public DataAxisViewModel YAxis { get; set; }
         [Initialize] public Range XRange { get; set; }
-
         [Initialize] public Range YRange { get; set; }
 
         public Func<object, Point> ItemToPoint { get; set; }

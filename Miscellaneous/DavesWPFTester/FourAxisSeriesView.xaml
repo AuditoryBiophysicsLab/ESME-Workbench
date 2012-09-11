@@ -31,10 +31,11 @@
                              AxisTicks="{Binding AxisTicks}"
                              AxisType="{Binding AxisType}"
                              DataContext="{Binding TopAxis}"
-                             DataRange="{Binding Range}"
+                             DataRange="{Binding DataRange}"
                              DockPanel.Dock="Top"
                              IsInverted="{Binding IsInverted}"
-                             MappingFunction="{Binding MappingFunction}" />
+                             MappingFunction="{Binding MappingFunction}"
+                             VisibleRange="{Binding VisibleRange}" />
         </DockPanel>
         <DockPanel Height="{Binding ActualHeight,
                                     ElementName=BottomAxis}"
@@ -58,10 +59,11 @@
                              AxisTicks="{Binding AxisTicks}"
                              AxisType="{Binding AxisType}"
                              DataContext="{Binding BottomAxis}"
-                             DataRange="{Binding Range}"
+                             DataRange="{Binding DataRange}"
                              DockPanel.Dock="Top"
                              IsInverted="{Binding IsInverted}"
-                             MappingFunction="{Binding MappingFunction}" />
+                             MappingFunction="{Binding MappingFunction}"
+                             VisibleRange="{Binding VisibleRange}" />
         </DockPanel>
         <app:NewDataAxis x:Name="LeftAxis"
                          AxisLabel="{Binding Label}"
@@ -69,22 +71,24 @@
                          AxisTicks="{Binding AxisTicks}"
                          AxisType="{Binding AxisType}"
                          DataContext="{Binding LeftAxis}"
-                         DataRange="{Binding Range}"
+                         DataRange="{Binding DataRange}"
                          DockPanel.Dock="Left"
                          IsInverted="{Binding IsInverted}"
                          MappingFunction="{Binding MappingFunction}"
-                         Visibility="{Binding Visibility}" />
+                         Visibility="{Binding Visibility}"
+                         VisibleRange="{Binding VisibleRange}" />
         <app:NewDataAxis x:Name="RightAxis"
                          AxisLabel="{Binding Label}"
                          AxisLocation="Right"
                          AxisTicks="{Binding AxisTicks}"
                          AxisType="{Binding AxisType}"
                          DataContext="{Binding RightAxis}"
-                         DataRange="{Binding Range}"
+                         DataRange="{Binding DataRange}"
                          DockPanel.Dock="Right"
                          IsInverted="{Binding IsInverted}"
                          MappingFunction="{Binding MappingFunction}"
-                         Visibility="{Binding Visibility}" />
+                         Visibility="{Binding Visibility}"
+                         VisibleRange="{Binding VisibleRange}" />
         <app:DataCanvas x:Name="DataCanvas"
                         MajorTickLineColor="{Binding MajorTickLineColor}"
                         MinorTickLineColor="{Binding MinorTickLineColor}"

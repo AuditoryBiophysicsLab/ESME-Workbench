@@ -8,6 +8,8 @@ namespace DavesWPFTester
 {
     public interface ISeries
     {
+        DataAxisViewModel XAxis { get; set; }
+        DataAxisViewModel YAxis { get; set; }
         Range XRange { get; }
         Range YRange { get; }
         /// <summary>

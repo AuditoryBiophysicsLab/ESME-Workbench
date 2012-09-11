@@ -55,8 +55,8 @@ namespace DavesWPFTester
         public DataAxisViewModel YAxis { get; set; }
         public Color MajorTickLineColor { get; set; }
         public Color MinorTickLineColor { get; set; }
-        [Initialize, UsedImplicitly] Range XRange { get; set; }
-        [Initialize, UsedImplicitly] Range YRange { get; set; }
+        [Initialize, UsedImplicitly] public Range XRange { get; set; }
+        [Initialize, UsedImplicitly] public Range YRange { get; set; }
         public ObservableCollection<NewDataAxisTick> XAxisTicks { get; set; }
         public ObservableCollection<NewDataAxisTick> YAxisTicks { get; set; }
 
@@ -90,7 +90,7 @@ namespace DavesWPFTester
             if (XAxis != null && XAxis.Autorange)
             {
                 //Debug.WriteLine(string.Format("Updating X Axis min/max. Old range: {0} ... {1} New range: {2} ... {3}", XAxis.StartValue, XAxis.EndValue, XMin, XMax));
-                XAxis.Range.Add(XRange);
+                XAxis.DataRange.Add(XRange);
             }
         }
 
@@ -99,7 +99,7 @@ namespace DavesWPFTester
             if (YAxis != null && YAxis.Autorange)
             {
                 //Debug.WriteLine(string.Format("Updating X Axis min/max. Old range: {0} ... {1} New range: {2} ... {3}", XAxis.StartValue, XAxis.EndValue, XMin, XMax));
-                YAxis.Range.Add(YRange);
+                YAxis.DataRange.Add(YRange);
             }
         }
 
@@ -122,6 +122,8 @@ namespace DavesWPFTester
                 case NotifyCollectionChangedAction.Add:
                     foreach (SeriesViewModelBase dataSeries in args.NewItems)
                     {
+                        dataSeries.XAxis = XAxis;
+                        dataSeries.YAxis = YAxis;
                         dataSeries.XRange.RangeChanged += ExpandXRange;
                         dataSeries.YRange.RangeChanged += ExpandYRange;
                         ExpandXRange(dataSeries.XRange);
@@ -167,18 +169,18 @@ namespace DavesWPFTester
 
     public class DataAxisViewModel : ViewModelBase
     {
-        [UsedImplicitly] PropertyObserver<DataAxisViewModel> _propertyObserver;
-
         public DataAxisViewModel()
         {
-            Range = new Range(0.1, 10);
+            DataRange = new Range(0.1, 10);
+            VisibleRange = DataRange.Expand(0);
             AxisTicks = new ObservableCollection<NewDataAxisTick>();
         }
         public string Label { get; set; }
         public AxisType AxisType { get; set; }
 
         public Visibility Visibility { get; set; }
-        public Range Range { get; private set; }
+        public Range DataRange { get; set; }
+        public Range VisibleRange { get; set; }
         public ObservableCollection<NewDataAxisTick> AxisTicks { get; set; }
 
         [Initialize(true)] public bool Autorange { get; set; }

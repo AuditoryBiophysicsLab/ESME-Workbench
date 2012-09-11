@@ -86,7 +86,7 @@ namespace DavesWPFTester
         [Initialize(0.85)] public double BarWidth { get; set; }
         public override void RenderShapes()
         {
-            if (XAxisMappingFunction == null || YAxisMappingFunction == null || Points.Count == 0) return;
+            if (XAxisMappingFunction == null || YAxisMappingFunction == null || Points.Count == 0 || YAxis == null || XAxis == null) return;
             //Debug.WriteLine("Starting rendering bars");
             var xDataCoords = (from point in Points
                                orderby point.X ascending
@@ -102,8 +102,8 @@ namespace DavesWPFTester
             var minXPlotDelta = double.MaxValue;
             for (var i = 0; i < xPlotCoords.Count - 1; i++) minXPlotDelta = Math.Min(minXPlotDelta, xPlotCoords[i + 1] - xPlotCoords[i]);
             var barHalfWidth = (minXPlotDelta * BarWidth) / 2;
-            var yMinValue = Math.Min(YRange.Min, Points.Select(p => p.Y).Min());
-            var yZeroCoordinate = YRange.Min < 0 ? YAxisMappingFunction(0.0) : YAxisMappingFunction(yMinValue);
+            var yMinValue = Math.Min(YAxis.VisibleRange.Min, Points.Select(p => p.Y).Min());
+            var yZeroCoordinate = YAxis.VisibleRange.Min < 0 ? YAxisMappingFunction(0.0) : YAxisMappingFunction(yMinValue);
             foreach (var plotPoint in plotPoints)
             {
                 var dataPoint = Points[plotPoints.IndexOf(plotPoint)];

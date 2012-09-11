@@ -452,13 +452,43 @@ namespace DavesWPFTester
         double _tickLabelDimension;
         double _axisLabelDimension;
         Axis _axis;
-        protected override Size MeasureOverride(Size availableSize)
+        protected override Size MeasureOverride(Size availableSize) { return AxisType == AxisType.Enumerated ? MeasureEnumerated(availableSize) : MeasureNonEnumerated(availableSize); }
+
+        Size MeasureEnumerated(Size availableSize)
         {
-            if (AxisType == AxisType.Enumerated) return MeasureEnumerated(availableSize);
-            return MeasureNonEnumerated(availableSize);
+            if (AxisTicks == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
+            if (AxisTicks.Count == 0) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
+            Children.Clear();
+            foreach (var tick in AxisTicks.Where(tick => tick.TextBlock != null))
+            {
+                Children.Add(tick.TextBlock);
+                tick.TextBlock.Measure(availableSize);
+            }
+            var tickLength = AxisTicks.Select(tick => tick.IsMajorTick ? MajorTickLength : MinorTickLength).Max();
+            var maxLabelWidth = AxisTicks.Select(tick => tick.TextBlock != null ? tick.TextBlock.DesiredSize.Width : 0).Max();
+            var maxLabelHeight = AxisTicks.Select(tick => tick.TextBlock != null ? tick.TextBlock.DesiredSize.Height : 0).Max();
+            var desiredSize = new Size(availableSize.Width, availableSize.Height);
+            switch (AxisLocation)
+            {
+                case AxisLocation.Top:
+                case AxisLocation.Bottom:
+                    _tickLabelDimension = maxLabelHeight;
+                    _axisLabelDimension = _axisLabel.DesiredSize.Height;
+                    desiredSize.Height = tickLength + _tickLabelDimension + _axisLabelDimension;
+                    break;
+                case AxisLocation.Left:
+                case AxisLocation.Right:
+                    _tickLabelDimension = maxLabelWidth;
+                    _axisLabelDimension = _axisLabel.DesiredSize.Width;
+                    desiredSize.Width = MajorTickLength + 2 + _tickLabelDimension + _axisLabelDimension;
+                    break;
+                default:
+                    throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
+            }
+            Debug.WriteLine(string.Format("NewDataAxis: MeasureEnumerated for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
+            return desiredSize;
         }
 
-        Size MeasureEnumerated(Size availableSize) { return MeasureNonEnumerated(availableSize); }
         Size MeasureNonEnumerated(Size availableSize)
         {
             if (_visibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
@@ -566,13 +596,18 @@ namespace DavesWPFTester
             // desiredSize = ... computed sum of children's DesiredSize ...;
             // IMPORTANT: do not allow PositiveInfinity to be returned, that will raise an exception in the caller!
             // PositiveInfinity might be an availableSize input; this means that the parent does not care about sizing
-            Debug.WriteLine(string.Format("NewDataAxis: MeasureOverride for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
+            Debug.WriteLine(string.Format("NewDataAxis: MeasureNonEnumerated for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
             return desiredSize;
         }
 
         double _tickLabelMaxWidth, _tickLabelMaxHeight;
 
-        protected override Size ArrangeOverride(Size arrangeSize) { return ArrangeNonEnumerated(arrangeSize); }
+        protected override Size ArrangeOverride(Size arrangeSize)
+        {
+            if (AxisType == AxisType.Enumerated)
+                return ArrangeNonEnumerated(arrangeSize);
+            return ArrangeNonEnumerated(arrangeSize);
+        }
 
         Size ArrangeNonEnumerated(Size arrangeSize)
         {
@@ -686,6 +721,7 @@ namespace DavesWPFTester
         public NewDataAxisTick(double value, string text, bool isMajorTick)
         {
             Value = value;
+            Text = text;
             IsMajorTick = isMajorTick;
             if (text != null) TextBlock = new TextBlock { Text = text };
         }
