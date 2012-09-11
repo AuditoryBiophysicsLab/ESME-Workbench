@@ -42,7 +42,16 @@ namespace DavesWPFTester
                 OnRangeChanged(oldRange);
             }
         }
-
+        /// <summary>
+        /// Reset the range to the empty state
+        /// </summary>
+        public void Reset()
+        {
+            var oldRange = new Range(Min, Max);
+            _min = double.NaN;
+            _max = double.NaN;
+            OnRangeChanged(oldRange);
+        }
         public double Size { get { return Max - Min; } }
         /// <summary>
         /// Sets the range to the minimum and maxumum values in the provided enumerable

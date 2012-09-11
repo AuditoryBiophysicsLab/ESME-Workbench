@@ -25,6 +25,8 @@ namespace DavesWPFTester
                 .RegisterHandler(d => d.XAxis, XAxisChanged)
                 .RegisterHandler(d => d.YAxis, YAxisChanged);
             _pointsObserver = new CollectionObserver(Points).RegisterHandler(PointsCollectionChanged);
+            XRange.RangeChanged += (s, e) => { if (XAxis != null) XAxis.DataRange.Add(XRange); };
+            YRange.RangeChanged += (s, e) => { if (YAxis != null) YAxis.DataRange.Add(YRange); };
         }
 
         public DataAxisViewModel XAxis { get; set; }
@@ -43,35 +45,40 @@ namespace DavesWPFTester
 
         [Initialize] public ObservableCollection<Shape> Shapes { get; set; }
 
-        [Initialize] protected ObservableCollection<Point> Points { get; [UsedImplicitly] set; }
+        [Initialize] protected ObservableCollection<Point> Points { get; set; }
 
         protected readonly Dictionary<Point, Shape> PointShapeMap = new Dictionary<Point, Shape>();
 
         protected virtual void ProcessSeriesData()
         {
             if (ItemToPoint == null || SeriesData == null || SeriesData.Count == 0) return;
-            foreach (var item in SeriesData) Points.Add(ItemToPoint(item));
-            XRange.Add(Points.Select(p => p.X));
-            YRange.Add(Points.Select(p => p.Y));
+            foreach (var point in from object item in SeriesData
+                                  select ItemToPoint(item)) Points.Add(point);
             RenderShapes();
-        }
-
-        protected void UpdateMinMax(Point point)
-        {
-            XRange.Add(point.X);
-            YRange.Add(point.Y);
         }
 
         [UsedImplicitly] PropertyObserver<DataAxisViewModel> _xAxisObserver, _yAxisObserver;
         void XAxisChanged()
         {
+            if (XAxis == null)
+            {
+                _xAxisObserver = null;
+                return;
+            }
             _xAxisObserver = new PropertyObserver<DataAxisViewModel>(XAxis)
                 .RegisterHandler(x => x.ValueToPosition, RenderShapes);
+            XAxis.DataRange.Add(XRange);
         }
         void YAxisChanged()
         {
+            if (YAxis == null)
+            {
+                _yAxisObserver = null;
+                return;
+            }
             _yAxisObserver = new PropertyObserver<DataAxisViewModel>(YAxis)
                 .RegisterHandler(y => y.ValueToPosition, RenderShapes);
+            YAxis.DataRange.Add(YRange);
         }
 
         public abstract void RenderShapes();
@@ -117,17 +124,31 @@ namespace DavesWPFTester
             switch (args.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    foreach (Point point in args.NewItems) AddPoint(point);
+                    foreach (Point point in args.NewItems)
+                    {
+                        XRange.Add(point.X);
+                        YRange.Add(point.Y);
+                        AddPoint(point);
+                    }
                     break;
                 case NotifyCollectionChangedAction.Remove:
                     foreach (Point point in args.OldItems) RemovePoint(point);
                     break;
                 case NotifyCollectionChangedAction.Replace:
-                    for (var i = 0; i < args.NewItems.Count; i++) ReplacePoint((Point)args.OldItems[i], (Point)args.NewItems[i]);
+                    for (var i = 0; i < args.NewItems.Count; i++)
+                    {
+                        var oldPoint = (Point)args.OldItems[i];
+                        var newPoint = (Point)args.NewItems[i];
+                        XRange.Add(newPoint.X);
+                        YRange.Add(newPoint.Y);
+                        ReplacePoint(oldPoint, newPoint);
+                    }
                     break;
                 case NotifyCollectionChangedAction.Reset:
                     Shapes.Clear();
                     PointShapeMap.Clear();
+                    XRange.Reset();
+                    YRange.Reset();
                     break;
                 case NotifyCollectionChangedAction.Move:
                     throw new NotImplementedException("Move not implemented for Points collection");

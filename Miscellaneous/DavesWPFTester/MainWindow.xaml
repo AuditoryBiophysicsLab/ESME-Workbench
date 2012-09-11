@@ -46,9 +46,9 @@
                 <StackPanel Margin="10 0 0 0"
                             DockPanel.Dock="Right"
                             Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding UpperLeft.DataSeriesCollection}" />
+                    <app:LegendView ItemsSource="{Binding TopLeft.DataSeriesCollection}" />
                 </StackPanel>
-                <app:FourAxisSeriesView DataContext="{Binding UpperLeft}" DockPanel.Dock="Left" />
+                <app:FourAxisSeriesView DataContext="{Binding TopLeft}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
         <GroupBox Grid.Row="0"
@@ -60,9 +60,9 @@
                 <StackPanel Margin="10 0 0 0"
                             DockPanel.Dock="Right"
                             Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding UpperRight.DataSeriesCollection}" />
+                    <app:LegendView ItemsSource="{Binding TopRight.DataSeriesCollection}" />
                 </StackPanel>
-                <app:FourAxisSeriesView DataContext="{Binding UpperRight}" DockPanel.Dock="Left" />
+                <app:FourAxisSeriesView DataContext="{Binding TopRight}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
         <GroupBox Grid.Row="1"
@@ -82,9 +82,9 @@
                 <StackPanel Margin="10 0 0 0"
                             DockPanel.Dock="Right"
                             Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding LowerLeft.DataSeriesCollection}" />
+                    <app:LegendView ItemsSource="{Binding MiddleLeft.DataSeriesCollection}" />
                 </StackPanel>
-                <app:FourAxisSeriesView DataContext="{Binding LowerLeft}" DockPanel.Dock="Left" />
+                <app:FourAxisSeriesView DataContext="{Binding MiddleLeft}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
         <GroupBox Grid.Row="1"
@@ -96,9 +96,9 @@
                 <StackPanel Margin="10 0 0 0"
                             DockPanel.Dock="Right"
                             Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding LowerRight.DataSeriesCollection}" />
+                    <app:LegendView ItemsSource="{Binding MiddleRight.DataSeriesCollection}" />
                 </StackPanel>
-                <app:FourAxisSeriesView DataContext="{Binding LowerRight}" DockPanel.Dock="Left" />
+                <app:FourAxisSeriesView DataContext="{Binding MiddleRight}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
         <GroupBox Grid.Row="2"

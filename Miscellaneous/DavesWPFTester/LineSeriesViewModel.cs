@@ -231,16 +231,9 @@ namespace DavesWPFTester
             RenderLine();
         }
 
-        protected override void AddPoint(Point newPoint)
-        {
-            UpdateMinMax(newPoint);
-            if (DrawMarker) RenderMarker(newPoint);
-        }
+        protected override void AddPoint(Point newPoint) { if (DrawMarker) RenderMarker(newPoint); }
 
-        protected override void RemovePoint(Point oldPoint)
-        {
-            RemoveMarker(oldPoint);
-        }
+        protected override void RemovePoint(Point oldPoint) { RemoveMarker(oldPoint); }
 
         /// <summary>
         /// An action that adds a Point to a StreamGeometryContext using a given size

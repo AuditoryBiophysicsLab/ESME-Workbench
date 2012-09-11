@@ -23,10 +23,10 @@ namespace DavesWPFTester
     {
         readonly IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
-        [Initialize] public FourAxisSeriesViewModel UpperLeft { get; set; }
-        [Initialize] public FourAxisSeriesViewModel UpperRight { get; set; }
-        [Initialize] public FourAxisSeriesViewModel LowerLeft { get; set; }
-        [Initialize] public FourAxisSeriesViewModel LowerRight { get; set; }
+        [Initialize] public FourAxisSeriesViewModel TopLeft { get; set; }
+        [Initialize] public FourAxisSeriesViewModel TopRight { get; set; }
+        [Initialize] public FourAxisSeriesViewModel MiddleLeft { get; set; }
+        [Initialize] public FourAxisSeriesViewModel MiddleRight { get; set; }
         [Initialize] public FourAxisSeriesViewModel BottomLeft { get; set; }
         public bool AnimateUpperLeft { get; set; }
         public bool AnimateLowerLeft { get; set; }
@@ -39,10 +39,10 @@ namespace DavesWPFTester
             _viewAwareStatus.ViewLoaded += () =>
             {
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
-                CreateUpperLeftSeries();
-                CreateUpperRightSeries();
-                CreateLowerLeftSeries();
-                CreateLowerRightSeries();
+                CreateTopLeftSeries();
+                CreateTopRightSeries();
+                CreateMiddleLeftSeries();
+                CreateMiddleRightSeries();
                 BottomLeft.LeftAxis.AxisType = AxisType.Logarithmic;
                 CreateBottomLeftSeries();
 #if true
@@ -52,7 +52,7 @@ namespace DavesWPFTester
                 {
                     if (AnimateLowerLeft)
                     {
-                        var selectedSeries = (BarSeriesViewModel)LowerLeft.DataSeriesCollection[0];
+                        var selectedSeries = (BarSeriesViewModel)MiddleLeft.DataSeriesCollection[0];
                         var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
                         selectedSeries.SeriesName = string.Format("y = {0:0.0} * x", _lowerLeftAmplitude);
                         for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, _lowerLeftAmplitude * seriesData[i].Item1);
@@ -61,9 +61,9 @@ namespace DavesWPFTester
                         if (_lowerLeftAmplitude < -10) _lowerLeftAmplitudeDelta = 1;
                     }
                     if (!AnimateUpperLeft) return;
-                    for (var seriesIndex = 0; seriesIndex < UpperLeft.DataSeriesCollection.Count; seriesIndex++)
+                    for (var seriesIndex = 0; seriesIndex < TopLeft.DataSeriesCollection.Count; seriesIndex++)
                     {
-                        var selectedSeries = (LineSeriesViewModel)UpperLeft.DataSeriesCollection[seriesIndex];
+                        var selectedSeries = (LineSeriesViewModel)TopLeft.DataSeriesCollection[seriesIndex];
                         var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
                         selectedSeries.SeriesName = string.Format("y = ({0:0.0} * sin(x)) + {1}", _upperLeftAmplitude, 11 - seriesIndex);
                         for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, (_upperLeftAmplitude * Math.Sin(seriesData[i].Item1)) + (11 - seriesIndex));
@@ -119,7 +119,7 @@ namespace DavesWPFTester
                 new NewDataAxisTick(10, "Ten", false),
                 new NewDataAxisTick(11, null, false),
             };
-            BottomLeft.XRange.Update(-1, 11);
+            BottomLeft.XAxis.VisibleRange.Update(-1, 11);
             BottomLeft.DataSeriesCollection.Add(new BarSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
@@ -132,13 +132,13 @@ namespace DavesWPFTester
             BottomLeft.YAxis.VisibleRange.Update(0.9, 10);
         }
 
-        void CreateLowerRightSeries()
+        void CreateMiddleRightSeries()
         {
             const double rangeStart = 1;
             const int rangeEnd = 10;
             const double rangeStep = 1;
-            LowerRight.YAxis.AxisType = AxisType.Logarithmic;
-            LowerRight.DataSeriesCollection.Add(new BarSeriesViewModel
+            MiddleRight.YAxis.AxisType = AxisType.Logarithmic;
+            MiddleRight.DataSeriesCollection.Add(new BarSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * x)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
@@ -148,12 +148,12 @@ namespace DavesWPFTester
             });
         }
 
-        void CreateLowerLeftSeries()
+        void CreateMiddleLeftSeries()
         {
             const double rangeStart = -10;
             const int rangeEnd = 10;
             const double rangeStep = 1;
-            LowerLeft.DataSeriesCollection.Add(new BarSeriesViewModel
+            MiddleLeft.DataSeriesCollection.Add(new BarSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
@@ -164,13 +164,13 @@ namespace DavesWPFTester
             });
         }
 
-        void CreateUpperRightSeries()
+        void CreateTopRightSeries()
         {
             const double rangeStart = -9;
             const int rangeEnd = 9;
             const double rangeStep = .1;
-            UpperRight.YAxis.AxisType = AxisType.Logarithmic;
-            UpperRight.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopRight.YAxis.AxisType = AxisType.Logarithmic;
+            TopRight.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Cosh(x) + 1)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
@@ -179,7 +179,7 @@ namespace DavesWPFTester
                 LineStroke = Brushes.DarkViolet,
                 LineStrokeThickness = 1,
             });
-            UpperRight.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopRight.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, (x * x) + 1)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
@@ -188,7 +188,7 @@ namespace DavesWPFTester
                 LineStroke = Brushes.Red,
                 LineStrokeThickness = 1,
             });
-            UpperRight.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopRight.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Exp(x))).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
@@ -198,14 +198,14 @@ namespace DavesWPFTester
                 LineStrokeThickness = 1,
             });
         }
-        void CreateUpperLeftSeries()
+        void CreateTopLeftSeries()
         {
             const double rangeStart = 0.0;
             var rangeEnd = MoreMath.TwoPi + 0.01;
             var rangeStep = MoreMath.TwoPi / 16;
             const int pointSize = 10;
-            UpperLeft.XAxis.DataRange.Update(Math.Floor(rangeStart), Math.Ceiling(rangeEnd));
-            UpperLeft.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopLeft.XAxis.DataRange.Update(Math.Floor(rangeStart), Math.Ceiling(rangeEnd));
+            TopLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 11)).ToObservableList(),
                 MarkerType = SeriesMarkerType.Plus,
@@ -217,7 +217,7 @@ namespace DavesWPFTester
                 LineStroke = Brushes.DarkViolet,
                 LineStrokeThickness = 1,
             });
-            UpperLeft.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 10)).ToObservableList(),
                 MarkerType = SeriesMarkerType.Circle,
@@ -229,7 +229,7 @@ namespace DavesWPFTester
                 LineStroke = Brushes.Red,
                 LineStrokeThickness = 1,
             });
-            UpperLeft.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 9)).ToObservableList(),
                 MarkerType = SeriesMarkerType.Asterisk,
@@ -241,7 +241,7 @@ namespace DavesWPFTester
                 LineStroke = Brushes.Green,
                 LineStrokeThickness = 1,
             });
-            UpperLeft.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 8)).ToObservableList(),
                 MarkerType = SeriesMarkerType.Cross,
@@ -253,7 +253,7 @@ namespace DavesWPFTester
                 LineStroke = Brushes.Blue,
                 LineStrokeThickness = 1,
             });
-            UpperLeft.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 7)).ToObservableList(),
                 MarkerType = SeriesMarkerType.Square,
@@ -265,7 +265,7 @@ namespace DavesWPFTester
                 LineStroke = Brushes.Cyan,
                 LineStrokeThickness = 1,
             });
-            UpperLeft.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 6)).ToObservableList(),
                 MarkerType = SeriesMarkerType.Diamond,
@@ -277,7 +277,7 @@ namespace DavesWPFTester
                 LineStroke = Brushes.Magenta,
                 LineStrokeThickness = 1,
             });
-            UpperLeft.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 5)).ToObservableList(),
                 MarkerType = SeriesMarkerType.UpTriangle,
@@ -289,7 +289,7 @@ namespace DavesWPFTester
                 LineStroke = Brushes.Cyan,
                 LineStrokeThickness = 1,
             });
-            UpperLeft.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 4)).ToObservableList(),
                 MarkerType = SeriesMarkerType.DownTriangle,
@@ -301,7 +301,7 @@ namespace DavesWPFTester
                 LineStroke = Brushes.Orange,
                 LineStrokeThickness = 1,
             });
-            UpperLeft.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 3)).ToObservableList(),
                 MarkerType = SeriesMarkerType.RightTriangle,
@@ -313,7 +313,7 @@ namespace DavesWPFTester
                 LineStroke = Brushes.DarkCyan,
                 LineStrokeThickness = 1,
             });
-            UpperLeft.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 2)).ToObservableList(),
                 MarkerType = SeriesMarkerType.LeftTriangle,
@@ -325,7 +325,7 @@ namespace DavesWPFTester
                 LineStroke = Brushes.DarkRed,
                 LineStrokeThickness = 1,
             });
-            UpperLeft.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x) + 1)).ToObservableList(),
                 MarkerType = SeriesMarkerType.Pentagram,
@@ -337,7 +337,7 @@ namespace DavesWPFTester
                 LineStroke = Brushes.DarkSeaGreen,
                 LineStrokeThickness = 1,
             });
-            UpperLeft.DataSeriesCollection.Add(new LineSeriesViewModel
+            TopLeft.DataSeriesCollection.Add(new LineSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, Math.Sin(x))).ToObservableList(),
                 MarkerType = SeriesMarkerType.Hexagram,

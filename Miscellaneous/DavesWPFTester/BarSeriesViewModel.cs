@@ -139,10 +139,6 @@ namespace DavesWPFTester
             if (!PointShapeMap.ContainsKey(oldPoint)) return;
             Shapes.Remove(PointShapeMap[oldPoint]);
         }
-        protected override void AddPoint(Point newPoint)
-        {
-            UpdateMinMax(newPoint);
-            RenderShapes();
-        }
+        protected override void AddPoint(Point newPoint) { RenderShapes(); }
     }
 }
