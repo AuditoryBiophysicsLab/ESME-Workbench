@@ -121,7 +121,7 @@ namespace DavesWPFTester
 
         void RenderLine()
         {
-            if (XAxisMappingFunction == null || YAxisMappingFunction == null) return;
+            if (XAxis == null || YAxis == null || XAxis.ValueToPosition == null || YAxis.ValueToPosition == null) return;
             if (!DrawLine)
             {
                 if (_lineShape != null)
@@ -140,7 +140,7 @@ namespace DavesWPFTester
             var lineGeometry = new StreamGeometry();
             var lineContext = lineGeometry.Open();
             var isFirst = true;
-            foreach (var plotPoint in Points.Select(point => new Point(XAxisMappingFunction(point.X), YAxisMappingFunction(point.Y)))) 
+            foreach (var plotPoint in Points.Select(point => new Point(XAxis.ValueToPosition(point.X), YAxis.ValueToPosition(point.Y)))) 
             {
                 if (isFirst)
                 {
@@ -189,8 +189,8 @@ namespace DavesWPFTester
 
         void RenderMarker(Point point)
         {
-            if (XAxisMappingFunction == null || YAxisMappingFunction == null) return;
-            var plotPoint = new Point(XAxisMappingFunction(point.X), YAxisMappingFunction(point.Y));
+            if (XAxis == null || YAxis == null || XAxis.ValueToPosition == null || YAxis.ValueToPosition == null) return;
+            var plotPoint = new Point(XAxis.ValueToPosition(point.X), YAxis.ValueToPosition(point.Y));
             var geometry = new StreamGeometry();
             var context = geometry.Open();
             MarkerType(context, plotPoint, MarkerSize);

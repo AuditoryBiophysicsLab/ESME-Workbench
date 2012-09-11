@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -23,31 +22,49 @@ namespace DavesWPFTester
     {
         static NewDataAxis() { DefaultStyleKeyProperty.OverrideMetadata(typeof(NewDataAxis), new FrameworkPropertyMetadata(typeof(NewDataAxis))); }
 
-        #region dependency property ObservableCollection<AxisTick> AxisTicks
+        #region Dependency properties
+        #region dependency property string AxisLabel { get; set; }
+        public static readonly DependencyProperty AxisLabelProperty = DependencyProperty.RegisterAttached("AxisLabel",
+                                                                                                          typeof(string),
+                                                                                                          typeof(NewDataAxis),
+                                                                                                          new FrameworkPropertyMetadata("",
+                                                                                                                                        FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                                        FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                                                                                                        FrameworkPropertyMetadataOptions.AffectsRender));
 
-        public static DependencyProperty AxisTicksProperty = DependencyProperty.Register("AxisTicks",
-                                                                                          typeof(ObservableCollection<NewDataAxisTick>),
-                                                                                          typeof(NewDataAxis),
-                                                                                          new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, AxisTicksPropertyChanged));
+        public string AxisLabel { get { return (string)GetValue(AxisLabelProperty); } set { SetCurrentValue(AxisLabelProperty, value); } }
+        #endregion
 
-        public ObservableCollection<NewDataAxisTick> AxisTicks { get { return (ObservableCollection<NewDataAxisTick>)GetValue(AxisTicksProperty); } set { SetValue(AxisTicksProperty, value); } }
-        static void AxisTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).AxisTicksPropertyChanged(); }
-        [UsedImplicitly] CollectionObserver _axisTicksObserver;
-        void AxisTicksPropertyChanged()
-        {
-            if (AxisType == AxisType.Logarithmic) throw new InvalidOperationException("Cannot set AxisTicks on a Logarithmic axis");
-            if (_axisTicksObserver != null)
+        #region dependency property AxisLayoutAlgorithm AxisLayoutAlgorithm
+
+        public static DependencyProperty AxisLayoutAlgorithmProperty = DependencyProperty.Register("AxisLayoutAlgorithm",
+                                                                                                   typeof(AxisLayoutAlgorithm),
+                                                                                                   typeof(NewDataAxis),
+                                                                                                   new FrameworkPropertyMetadata(AxisLayoutAlgorithm.ExtendedWilkinson,
+                                                                                                                                 FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                                                                                                 FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                                 FrameworkPropertyMetadataOptions.AffectsRender,
+                                                                                                                                 AxisLayoutAlgorithmPropertyChanged));
+
+        public AxisLayoutAlgorithm AxisLayoutAlgorithm { get { return (AxisLayoutAlgorithm)GetValue(AxisLayoutAlgorithmProperty); } set { SetValue(AxisLayoutAlgorithmProperty, value); } }
+        static void AxisLayoutAlgorithmPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).AxisLayoutAlgorithmPropertyChanged(); }
+        void AxisLayoutAlgorithmPropertyChanged()
+        {             
+            switch (AxisLayoutAlgorithm)
             {
-                _axisTicksObserver.UnregisterHandler(AxisTicksCollectionChanged);
-                _axisTicksObserver = null;
+                case AxisLayoutAlgorithm.Wilkinson:
+                    _axisLabeler = new WilkinsonAxisLabeler();
+                    break;
+                case AxisLayoutAlgorithm.ExtendedWilkinson:
+                    _axisLabeler = new ExtendedAxisLabeler();
+                    break;
+                case AxisLayoutAlgorithm.MatPlotLib:
+                    _axisLabeler = new MatplotlibAxisLabeler();
+                    break;
+                case AxisLayoutAlgorithm.Heckbert:
+                    _axisLabeler = new HeckbertAxisLabeler();
+                    break;
             }
-            if (AxisTicks == null) return;
-            _axisTicksObserver = new CollectionObserver(AxisTicks);
-            _axisTicksObserver.RegisterHandler(AxisTicksCollectionChanged);
-        }
-
-        static void AxisTicksCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
-        {
         }
         #endregion
 
@@ -85,6 +102,34 @@ namespace DavesWPFTester
         }
         #endregion
 
+        #region dependency property ObservableCollection<AxisTick> AxisTicks
+
+        public static DependencyProperty AxisTicksProperty = DependencyProperty.Register("AxisTicks",
+                                                                                          typeof(ObservableCollection<NewDataAxisTick>),
+                                                                                          typeof(NewDataAxis),
+                                                                                          new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, AxisTicksPropertyChanged));
+
+        public ObservableCollection<NewDataAxisTick> AxisTicks { get { return (ObservableCollection<NewDataAxisTick>)GetValue(AxisTicksProperty); } set { SetValue(AxisTicksProperty, value); } }
+        static void AxisTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).AxisTicksPropertyChanged(); }
+        [UsedImplicitly] CollectionObserver _axisTicksObserver;
+        void AxisTicksPropertyChanged()
+        {
+            if (AxisType == AxisType.Logarithmic) throw new InvalidOperationException("Cannot set AxisTicks on a Logarithmic axis");
+            if (_axisTicksObserver != null)
+            {
+                _axisTicksObserver.UnregisterHandler(AxisTicksCollectionChanged);
+                _axisTicksObserver = null;
+            }
+            if (AxisTicks == null) return;
+            _axisTicksObserver = new CollectionObserver(AxisTicks);
+            _axisTicksObserver.RegisterHandler(AxisTicksCollectionChanged);
+        }
+
+        static void AxisTicksCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+        }
+        #endregion
+
         #region dependency property AxisType AxisType
         public static DependencyProperty AxisTypeProperty = DependencyProperty.Register("AxisType",
                                                                                         typeof(AxisType),
@@ -103,89 +148,6 @@ namespace DavesWPFTester
             ((NewDataAxis)obj).OnSizeOrVisibleRangeChanged();
         }
         bool IsLogarithmic { get { return AxisType == AxisType.Logarithmic; } }
-        #endregion
-
-        #region dependency property string AxisLabel { get; set; }
-        public static readonly DependencyProperty AxisLabelProperty = DependencyProperty.RegisterAttached("AxisLabel",
-                                                                                                          typeof(string),
-                                                                                                          typeof(NewDataAxis),
-                                                                                                          new FrameworkPropertyMetadata("",
-                                                                                                                                        FrameworkPropertyMetadataOptions.AffectsArrange |
-                                                                                                                                        FrameworkPropertyMetadataOptions.AffectsMeasure |
-                                                                                                                                        FrameworkPropertyMetadataOptions.AffectsRender));
-
-        public string AxisLabel { get { return (string)GetValue(AxisLabelProperty); } set { SetCurrentValue(AxisLabelProperty, value); } }
-        #endregion
-
-        #region dependency property bool IsInverted
-
-        public static DependencyProperty IsInvertedProperty = DependencyProperty.Register("IsInverted",
-                                                                                          typeof(bool),
-                                                                                          typeof(NewDataAxis),
-                                                                                          new FrameworkPropertyMetadata(false,
-                                                                                                                        FrameworkPropertyMetadataOptions.AffectsArrange |
-                                                                                                                        FrameworkPropertyMetadataOptions.AffectsMeasure |
-                                                                                                                        FrameworkPropertyMetadataOptions.AffectsRender,
-                                                                                                                        IsInvertedPropertyChanged));
-
-        public bool IsInverted { get { return (bool)GetValue(IsInvertedProperty); } set { SetValue(IsInvertedProperty, value); } }
-
-        static void IsInvertedPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).IsInvertedPropertyChanged(); }
-        void IsInvertedPropertyChanged() { OnSizeOrVisibleRangeChanged(); }
-        #endregion
-
-        #region dependency property AxisLayoutAlgorithm AxisLayoutAlgorithm
-
-        public static DependencyProperty AxisLayoutAlgorithmProperty = DependencyProperty.Register("AxisLayoutAlgorithm",
-                                                                                 typeof(AxisLayoutAlgorithm),
-                                                                                 typeof(NewDataAxis),
-                                                                                 new FrameworkPropertyMetadata(AxisLayoutAlgorithm.ExtendedWilkinson, FrameworkPropertyMetadataOptions.None, AxisLayoutAlgorithmPropertyChanged));
-
-        public AxisLayoutAlgorithm AxisLayoutAlgorithm { get { return (AxisLayoutAlgorithm)GetValue(AxisLayoutAlgorithmProperty); } set { SetValue(AxisLayoutAlgorithmProperty, value); } }
-        static void AxisLayoutAlgorithmPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).AxisLayoutAlgorithmPropertyChanged(); }
-        void AxisLayoutAlgorithmPropertyChanged()
-        {             // Catchall property changed function, called when any of the dependency properties that might affect layout, arrange or render change
-            switch (AxisLayoutAlgorithm)
-            {
-                case AxisLayoutAlgorithm.Wilkinson:
-                    _axisLabeler = new WilkinsonAxisLabeler();
-                    break;
-                case AxisLayoutAlgorithm.ExtendedWilkinson:
-                    _axisLabeler = new ExtendedAxisLabeler();
-                    break;
-                case AxisLayoutAlgorithm.MatPlotLib:
-                    _axisLabeler = new MatplotlibAxisLabeler();
-                    break;
-                case AxisLayoutAlgorithm.Heckbert:
-                    _axisLabeler = new HeckbertAxisLabeler();
-                    break;
-            }
-        }
-        #endregion
-
-        #region dependency property Func<double, double> MappingFunction
-
-        public static DependencyProperty MappingFunctionProperty = DependencyProperty.Register("MappingFunction",
-                                                                                               typeof(Func<double, double>),
-                                                                                               typeof(NewDataAxis),
-                                                                                               new FrameworkPropertyMetadata(null,
-                                                                                                                             FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                                                                                                                             MappingFunctionPropertyChanged));
-
-        public Func<double, double> MappingFunction { get { return (Func<double, double>)GetValue(MappingFunctionProperty); } set { SetValue(MappingFunctionProperty, value); } }
-
-        static void MappingFunctionPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).MappingFunctionPropertyChanged(); }
-        void MappingFunctionPropertyChanged() { }
-        #endregion
-
-        #region dependency property NewDataAxis Axis
-
-        public static DependencyProperty AxisProperty = DependencyProperty.Register("Axis",
-                                                                                 typeof(NewDataAxis),
-                                                                                 typeof(NewDataAxis),
-                                                                                 new FrameworkPropertyMetadata(null));
-
-        public NewDataAxis Axis { get { return (NewDataAxis)GetValue(AxisProperty); } set { SetValue(AxisProperty, value); } }
         #endregion
 
         #region dependency property Range DataRange
@@ -220,6 +182,96 @@ namespace DavesWPFTester
 
         #endregion
 
+        #region dependency property bool IsInverted
+
+        public static DependencyProperty IsInvertedProperty = DependencyProperty.Register("IsInverted",
+                                                                                          typeof(bool),
+                                                                                          typeof(NewDataAxis),
+                                                                                          new FrameworkPropertyMetadata(false,
+                                                                                                                        FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                        FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                                                                                        FrameworkPropertyMetadataOptions.AffectsRender,
+                                                                                                                        IsInvertedPropertyChanged));
+
+        public bool IsInverted { get { return (bool)GetValue(IsInvertedProperty); } set { SetValue(IsInvertedProperty, value); } }
+
+        static void IsInvertedPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).IsInvertedPropertyChanged(); }
+        void IsInvertedPropertyChanged() { OnSizeOrVisibleRangeChanged(); }
+        #endregion
+
+        #region dependency property double MajorTickLength
+
+        public static DependencyProperty MajorTickLengthProperty = DependencyProperty.Register("MajorTickLength",
+                                                                                               typeof(double),
+                                                                                               typeof(NewDataAxis),
+                                                                                               new FrameworkPropertyMetadata(6.0,
+                                                                                                                             FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                                                                                             FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                             FrameworkPropertyMetadataOptions.AffectsRender));
+
+        public double MajorTickLength { get { return (double)GetValue(MajorTickLengthProperty); } set { SetValue(MajorTickLengthProperty, value); } }
+        #endregion
+
+        #region dependency property double MajorTicksPerInch
+
+        public static DependencyProperty MajorTicksPerInchProperty = DependencyProperty.Register("MajorTicksPerInch",
+                                                                                 typeof(double),
+                                                                                 typeof(NewDataAxis),
+                                                                                 new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MajorTicksPerInchPropertyChanged));
+
+        public double MajorTicksPerInch { get { return (double)GetValue(MajorTicksPerInchProperty); } set { SetValue(MajorTicksPerInchProperty, value); } }
+
+        static void MajorTicksPerInchPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).MajorTicksPerInchPropertyChanged(); }
+        void MajorTicksPerInchPropertyChanged() { if (MajorTicksPerInch <= 0) throw new ParameterOutOfRangeException("MajorTicksPerInch must be greater than zero"); }
+        #endregion
+
+        #region dependency property double MinorTickLength
+
+        public static DependencyProperty MinorTickLengthProperty = DependencyProperty.Register("MinorTickLength",
+                                                                                               typeof(double),
+                                                                                               typeof(NewDataAxis),
+                                                                                               new FrameworkPropertyMetadata(3.0,
+                                                                                                                             FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                                                                                             FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                             FrameworkPropertyMetadataOptions.AffectsRender));
+
+        public double MinorTickLength { get { return (double)GetValue(MinorTickLengthProperty); } set { SetValue(MinorTickLengthProperty, value); } }
+        #endregion
+
+        #region dependency property double MinorTicksPerInch
+
+        public static DependencyProperty MinorTicksPerInchProperty = DependencyProperty.Register("MinorTicksPerInch",
+                                                                                 typeof(double),
+                                                                                 typeof(NewDataAxis),
+                                                                                 new FrameworkPropertyMetadata(4.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MinorTicksPerInchPropertyChanged));
+
+        public double MinorTicksPerInch { get { return (double)GetValue(MinorTicksPerInchProperty); } set { SetValue(MinorTicksPerInchProperty, value); } }
+
+        static void MinorTicksPerInchPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).MinorTicksPerInchPropertyChanged(); }
+        void MinorTicksPerInchPropertyChanged() { }
+        #endregion
+
+        #region dependency property Func<double, double> PositionToValue
+
+        public static DependencyProperty PositionToValueProperty = DependencyProperty.Register("PositionToValue",
+                                                                                               typeof(Func<double, double>),
+                                                                                               typeof(NewDataAxis),
+                                                                                               new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None));
+
+        public Func<double, double> PositionToValue { get { return (Func<double, double>)GetValue(PositionToValueProperty); } set { SetValue(PositionToValueProperty, value); } }
+        #endregion
+
+        #region dependency property Func<double, double> ValueToPosition
+
+        public static DependencyProperty ValueToPositionProperty = DependencyProperty.Register("ValueToPosition",
+                                                                                               typeof(Func<double, double>),
+                                                                                               typeof(NewDataAxis),
+                                                                                               new FrameworkPropertyMetadata(null,
+                                                                                                                             FrameworkPropertyMetadataOptions.None));
+
+        public Func<double, double> ValueToPosition { get { return (Func<double, double>)GetValue(ValueToPositionProperty); } set { SetValue(ValueToPositionProperty, value); } }
+        #endregion
+
         #region dependency property Range VisibleRange
 
         public static DependencyProperty VisibleRangeProperty = DependencyProperty.Register("VisibleRange",
@@ -252,7 +304,7 @@ namespace DavesWPFTester
         {
             if (ActualWidth <= 0 || ActualHeight <= 0 || VisibleRange == null || VisibleRange.Size <= 0)
             {
-                MappingFunction = null;
+                ValueToPosition = null;
                 return;
             }
             Debug.WriteLine(string.Format("{0} Visible range changed to {1}", AxisLabel, VisibleRange));
@@ -262,8 +314,10 @@ namespace DavesWPFTester
                 _visibleRange.Min = Math.Log10(_visibleRange.Min);
                 _visibleRange.Max = Math.Log10(_visibleRange.Max);
             }
-            _mappingFunctionTransform = CreateAxisTransform(_visibleRange, new Size(ActualWidth, ActualHeight), false, IsInverted, IsLogarithmic);
-            MappingFunction = v => _mappingFunctionTransform.Transform(new Point(v, 0)).X;
+            _valueToPositionTransform = CreateAxisTransform(_visibleRange, new Size(ActualWidth, ActualHeight), false, IsInverted, IsLogarithmic);
+            _positionToValueTransform = _valueToPositionTransform.Inverse;
+            ValueToPosition = v => _valueToPositionTransform.Transform(new Point(v, 0)).X;
+            PositionToValue = p => _positionToValueTransform.Transform(new Point(p, 0)).X;
             _axisOptions.DataRange = _visibleRange.Expand(0);
             _axisOptions.VisibleRange = _visibleRange.Expand(0);
         }
@@ -271,57 +325,6 @@ namespace DavesWPFTester
         Range _visibleRange;
 
         #endregion
-
-        #region dependency property double MajorTickLength
-
-        public static DependencyProperty MajorTickLengthProperty = DependencyProperty.Register("MajorTickLength",
-                                                                                               typeof(double),
-                                                                                               typeof(NewDataAxis),
-                                                                                               new FrameworkPropertyMetadata(6.0,
-                                                                                                                             FrameworkPropertyMetadataOptions.AffectsMeasure |
-                                                                                                                             FrameworkPropertyMetadataOptions.AffectsArrange |
-                                                                                                                             FrameworkPropertyMetadataOptions.AffectsRender));
-
-        public double MajorTickLength { get { return (double)GetValue(MajorTickLengthProperty); } set { SetValue(MajorTickLengthProperty, value); } }
-        #endregion
-
-        #region dependency property double MinorTickLength
-
-        public static DependencyProperty MinorTickLengthProperty = DependencyProperty.Register("MinorTickLength",
-                                                                                               typeof(double),
-                                                                                               typeof(NewDataAxis),
-                                                                                               new FrameworkPropertyMetadata(3.0,
-                                                                                                                             FrameworkPropertyMetadataOptions.AffectsMeasure |
-                                                                                                                             FrameworkPropertyMetadataOptions.AffectsArrange |
-                                                                                                                             FrameworkPropertyMetadataOptions.AffectsRender));
-
-        public double MinorTickLength { get { return (double)GetValue(MinorTickLengthProperty); } set { SetValue(MinorTickLengthProperty, value); } }
-        #endregion
-
-        #region dependency property double MajorTicksPerInch
-
-        public static DependencyProperty MajorTicksPerInchProperty = DependencyProperty.Register("MajorTicksPerInch",
-                                                                                 typeof(double),
-                                                                                 typeof(NewDataAxis),
-                                                                                 new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MajorTicksPerInchPropertyChanged));
-
-        public double MajorTicksPerInch { get { return (double)GetValue(MajorTicksPerInchProperty); } set { SetValue(MajorTicksPerInchProperty, value); } }
-
-        static void MajorTicksPerInchPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).MajorTicksPerInchPropertyChanged(); }
-        void MajorTicksPerInchPropertyChanged() { if (MajorTicksPerInch <= 0) throw new ParameterOutOfRangeException("MajorTicksPerInch must be greater than zero"); }
-        #endregion
-
-        #region dependency property double MinorTicksPerInch
-
-        public static DependencyProperty MinorTicksPerInchProperty = DependencyProperty.Register("MinorTicksPerInch",
-                                                                                 typeof(double),
-                                                                                 typeof(NewDataAxis),
-                                                                                 new FrameworkPropertyMetadata(4.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MinorTicksPerInchPropertyChanged));
-
-        public double MinorTicksPerInch { get { return (double)GetValue(MinorTicksPerInchProperty); } set { SetValue(MinorTicksPerInchProperty, value); } }
-
-        static void MinorTicksPerInchPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).MinorTicksPerInchPropertyChanged(); }
-        void MinorTicksPerInchPropertyChanged() { }
         #endregion
 
         public NewDataAxis()
@@ -329,7 +332,6 @@ namespace DavesWPFTester
             SnapsToDevicePixels = true;
             UseLayoutRounding = true;
             AxisTicks = new ObservableCollection<NewDataAxisTick>();
-            Axis = this;
             SizeChanged += (s, e) => OnSizeOrVisibleRangeChanged();
             _axisOptions = new AxisLabelerOptions
             {
@@ -357,7 +359,7 @@ namespace DavesWPFTester
         protected override HitTestResult HitTestCore(PointHitTestParameters hitTestParameters) { return new PointHitTestResult(this, hitTestParameters.HitPoint); }
 
         readonly double _pixelsPerInch = 96.0;
-        GeneralTransform _mappingFunctionTransform;
+        GeneralTransform _valueToPositionTransform, _positionToValueTransform;
 
         GeneralTransform CreateAxisTransform(Range visbleRange, Size newSize, bool includeSwapTransform, bool isInverted, bool isLogarithmic)
         {
@@ -521,6 +523,23 @@ namespace DavesWPFTester
                 {
                     // Get the major tick values in descending order
                     var majorTickLogValues = AxisTicks.Select(t => Math.Log10(t.Value)).Reverse().ToList();
+                    // Add minor ticks at whole-number log values if any are needed
+                    for (var i = 0; i < majorTickLogValues.Count - 1; i++) 
+                        for (var j = majorTickLogValues[i] - 1; j > majorTickLogValues[i + 1]; j--) 
+                            AxisTicks.Add(new NewDataAxisTick(Math.Pow(10, j), null, false, IsLogarithmic));
+                    // Add minor ticks at the usual places for a log scale (2, 3, 4, 5, 6, 7, 8, 9)
+                    for (var baseValue = Math.Floor(_visibleRange.Min); baseValue < Math.Ceiling(_visibleRange.Max); baseValue++)
+                    {
+                        foreach (var logOffset in LogMinorTicks)
+                        {
+                            var logValue = baseValue + logOffset;
+                            if (_visibleRange.Min <= logValue && logValue <= _visibleRange.Max) 
+                                AxisTicks.Add(new NewDataAxisTick(Math.Pow(10, logValue), null, false, IsLogarithmic));
+                        }
+                    }
+#if false
+                    // Get the major tick values in descending order
+                    var majorTickLogValues = AxisTicks.Select(t => Math.Log10(t.Value)).Reverse().ToList();
                     var virtualMajorTicks = new List<double>();
                     for (var i = 0; i < majorTickLogValues.Count - 1; i++)
                     {
@@ -547,6 +566,7 @@ namespace DavesWPFTester
                             AxisTicks.Add(minorTick);
                         }
                     }
+#endif
                 }
                 else
                 {
@@ -697,6 +717,7 @@ namespace DavesWPFTester
 
         AxisLabeler _axisLabeler;
         readonly AxisLabelerOptions _axisOptions;
+        static readonly double[] LogMinorTicks = { Math.Log10(2.0), Math.Log10(3.0), Math.Log10(4.0), Math.Log10(5.0), Math.Log10(6.0), Math.Log10(7.0), Math.Log10(8.0), Math.Log10(9.0) };
         #endregion
     }
 

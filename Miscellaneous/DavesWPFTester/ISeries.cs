@@ -21,14 +21,6 @@ namespace DavesWPFTester
         /// </summary>
         ImageSource SampleImageSource { get; }
         /// <summary>
-        /// The function that maps X values to axis offsets, usually bound from an Axis control
-        /// </summary>
-        Func<double, double> XAxisMappingFunction { get; set; }
-        /// <summary>
-        /// The function that maps Y values to axis offsets, usually bound from an Axis control
-        /// </summary>
-        Func<double, double> YAxisMappingFunction { get; set; }
-        /// <summary>
         /// The name of the series, used to create a legend
         /// </summary>
         string SeriesName { get; }

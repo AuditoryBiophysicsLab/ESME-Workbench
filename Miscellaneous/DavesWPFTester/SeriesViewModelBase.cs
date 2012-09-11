@@ -22,13 +22,13 @@ namespace DavesWPFTester
             _propertyObserver = new PropertyObserver<SeriesViewModelBase>(this)
                 .RegisterHandler(d => d.SeriesData, SeriesDataChanged)
                 .RegisterHandler(d => d.ItemToPoint, ProcessSeriesData)
-                .RegisterHandler(d => d.XAxisMappingFunction, MappingFunctionChanged)
-                .RegisterHandler(d => d.YAxisMappingFunction, MappingFunctionChanged);
+                .RegisterHandler(d => d.XAxis, XAxisChanged)
+                .RegisterHandler(d => d.YAxis, YAxisChanged);
             _pointsObserver = new CollectionObserver(Points).RegisterHandler(PointsCollectionChanged);
         }
 
-        [Initialize] public DataAxisViewModel XAxis { get; set; }
-        [Initialize] public DataAxisViewModel YAxis { get; set; }
+        public DataAxisViewModel XAxis { get; set; }
+        public DataAxisViewModel YAxis { get; set; }
         [Initialize] public Range XRange { get; set; }
         [Initialize] public Range YRange { get; set; }
 
@@ -36,10 +36,6 @@ namespace DavesWPFTester
 
         public ImageSource SampleImageSource { get; set; }
         protected abstract void RenderSample();
-
-        public Func<double, double> XAxisMappingFunction { get; set; }
-
-        public Func<double, double> YAxisMappingFunction { get; set; }
 
         public string SeriesName { get; set; }
 
@@ -66,10 +62,16 @@ namespace DavesWPFTester
             YRange.Add(point.Y);
         }
 
-        void MappingFunctionChanged()
+        [UsedImplicitly] PropertyObserver<DataAxisViewModel> _xAxisObserver, _yAxisObserver;
+        void XAxisChanged()
         {
-            if (XAxisMappingFunction == null || YAxisMappingFunction == null) return;
-            RenderShapes();
+            _xAxisObserver = new PropertyObserver<DataAxisViewModel>(XAxis)
+                .RegisterHandler(x => x.ValueToPosition, RenderShapes);
+        }
+        void YAxisChanged()
+        {
+            _yAxisObserver = new PropertyObserver<DataAxisViewModel>(YAxis)
+                .RegisterHandler(y => y.ValueToPosition, RenderShapes);
         }
 
         public abstract void RenderShapes();

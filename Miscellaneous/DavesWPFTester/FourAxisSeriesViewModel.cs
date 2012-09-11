@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
+using DavesWPFTester.AxisLabeling.Layout;
 using ESME.Views.Controls;
 using HRC;
 using HRC.Aspects;
@@ -34,13 +35,9 @@ namespace DavesWPFTester
             YAxisTicks = YAxis.AxisTicks;
 
             _propertyObserver = new PropertyObserver<FourAxisSeriesViewModel>(this)
-                .RegisterHandler(d => d.DataSeriesCollection, DataSeriesCollectionPropertyChanged)
-                .RegisterHandler(d => XAxis, XAxisPropertyChanged)
-                .RegisterHandler(d => YAxis, YAxisPropertyChanged);
+                .RegisterHandler(d => d.DataSeriesCollection, DataSeriesCollectionPropertyChanged);
 
             if (DataSeriesCollection != null) DataSeriesCollectionPropertyChanged();
-            XAxisPropertyChanged();
-            YAxisPropertyChanged();
             MajorTickLineColor = Colors.Black;
             MinorTickLineColor = Colors.LightGray;
         }
@@ -60,31 +57,6 @@ namespace DavesWPFTester
         public ObservableCollection<NewDataAxisTick> XAxisTicks { get; set; }
         public ObservableCollection<NewDataAxisTick> YAxisTicks { get; set; }
 
-        void XAxisPropertyChanged()
-        {
-            AxisMappingFunctionChanged(XAxis, ref _xAxisObserver, XAxisChanged);
-            AxisMappingFunctionChanged(XAxis, ref _xAxisObserver, RenderAllSeries);
-        }
-        void YAxisPropertyChanged()
-        {
-            AxisMappingFunctionChanged(YAxis, ref _yAxisObserver, YAxisChanged);
-            AxisMappingFunctionChanged(XAxis, ref _xAxisObserver, RenderAllSeries);
-        }
-
-        static void AxisMappingFunctionChanged(DataAxisViewModel dataAxis, ref PropertyObserver<DataAxisViewModel> observer, Action action)
-        {
-            if (observer != null) observer.UnregisterHandler(d => d.MappingFunction);
-            if (dataAxis == null) return;
-            if (observer == null) observer = new PropertyObserver<DataAxisViewModel>(dataAxis);
-            observer.RegisterHandler(d => d.MappingFunction, action);
-        }
-        void XAxisChanged() { foreach (var item in DataSeriesCollection) item.XAxisMappingFunction = XAxis.MappingFunction; }
-        void YAxisChanged() { foreach (var item in DataSeriesCollection) item.YAxisMappingFunction = YAxis.MappingFunction; }
-        void RenderAllSeries()
-        {
-            //Debug.WriteLine("Re-rendering all series");
-            foreach (var item in DataSeriesCollection) item.RenderShapes();
-        }
         void XRangeChanged(object sender, NotifyRangeChangedEventArgs args = null)
         {
             if (XAxis != null && XAxis.Autorange)
@@ -122,14 +94,12 @@ namespace DavesWPFTester
                 case NotifyCollectionChangedAction.Add:
                     foreach (SeriesViewModelBase dataSeries in args.NewItems)
                     {
-                        dataSeries.XAxis = XAxis;
-                        dataSeries.YAxis = YAxis;
                         dataSeries.XRange.RangeChanged += ExpandXRange;
                         dataSeries.YRange.RangeChanged += ExpandYRange;
                         ExpandXRange(dataSeries.XRange);
                         ExpandYRange(dataSeries.YRange);
-                        if (dataSeries.XAxisMappingFunction == null) dataSeries.XAxisMappingFunction = XAxis.MappingFunction;
-                        if (dataSeries.YAxisMappingFunction == null) dataSeries.YAxisMappingFunction = YAxis.MappingFunction;
+                        if (dataSeries.XAxis == null) dataSeries.XAxis = XAxis;
+                        if (dataSeries.YAxis == null) dataSeries.YAxis = YAxis;
                         Debug.WriteLine(string.Format("Adding DataSeries: {0}", dataSeries));
                     }
                     break;
@@ -152,8 +122,8 @@ namespace DavesWPFTester
                         dataSeries.YRange.RangeChanged += ExpandYRange;
                         ExpandXRange(dataSeries.XRange);
                         ExpandYRange(dataSeries.YRange);
-                        if (dataSeries.XAxisMappingFunction == null) dataSeries.XAxisMappingFunction = XAxis.MappingFunction;
-                        if (dataSeries.YAxisMappingFunction == null) dataSeries.YAxisMappingFunction = YAxis.MappingFunction;
+                        if (dataSeries.XAxis == null) dataSeries.XAxis = XAxis;
+                        if (dataSeries.YAxis == null) dataSeries.YAxis = YAxis;
                     }
                     break;
                 case NotifyCollectionChangedAction.Reset:
@@ -175,16 +145,48 @@ namespace DavesWPFTester
             VisibleRange = DataRange.Expand(0);
             AxisTicks = new ObservableCollection<NewDataAxisTick>();
         }
+        [Initialize("Axis")]
         public string Label { get; set; }
+        [Initialize(AxisLayoutAlgorithm.ExtendedWilkinson)] 
+        public AxisLayoutAlgorithm AxisLayoutAlgorithm { get; set; }
+        [Initialize]
+        public ObservableCollection<NewDataAxisTick> AxisTicks { get; set; }
+        [Initialize(AxisType.Linear)]
         public AxisType AxisType { get; set; }
+        public Range DataRange { get; set; }
+        public bool IsInverted { get; set; }
+        /// <summary>
+        /// Length of a major tick, in pixels at screen resolution
+        /// </summary>
+        [Initialize(6.0)] 
+        public double MajorTickLength { get; set; }
+        /// <summary>
+        /// Desired number of major ticks per inch.  This is only used as a guideline for the axis 
+        /// layout algorithm and the actual result may differ from this value
+        /// </summary>
+        [Initialize(1.0)] 
+        public double MajorTicksPerInch { get; set; }
+        /// <summary>
+        /// Length of a minor tick, in pixels at screen resolution
+        /// </summary>
+        [Initialize(3.0)]
+        public double MinorTickLength { get; set; }
+        /// <summary>
+        /// Desired number of minor ticks per inch.  This is only used as a guideline for the axis 
+        /// layout algorithm and the actual result may differ from this value.
+        /// This value is only used when AxisType == AxisType.Linear.
+        /// When AxisType == AxisType.Logarithmic, minor ticks will always be created at the usual
+        /// places (2, 3, 4, 5, 6, 7, 8, and 9), and also at any power of 10 that does not already have
+        /// a major tick
+        /// </summary>
+        [Initialize(4.0)]
+        public double MinorTicksPerInch { get; set; }
+        public Func<double, double> PositionToValue { get; set; }
+        public Func<double, double> ValueToPosition { get; set; }
+        public Range VisibleRange { get; set; }
 
         public Visibility Visibility { get; set; }
-        public Range DataRange { get; set; }
-        public Range VisibleRange { get; set; }
-        public ObservableCollection<NewDataAxisTick> AxisTicks { get; set; }
 
         [Initialize(true)] public bool Autorange { get; set; }
-        public bool IsInverted { get; set; }
-        public Func<double, double> MappingFunction { get; set; }
     }
 }

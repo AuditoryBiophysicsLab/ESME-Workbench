@@ -86,7 +86,7 @@ namespace DavesWPFTester
         [Initialize(0.85)] public double BarWidth { get; set; }
         public override void RenderShapes()
         {
-            if (XAxisMappingFunction == null || YAxisMappingFunction == null || Points.Count == 0 || YAxis == null || XAxis == null) return;
+            if (Points.Count == 0 || YAxis == null || XAxis == null || XAxis.ValueToPosition == null || YAxis.ValueToPosition == null) return;
             //Debug.WriteLine("Starting rendering bars");
             var xDataCoords = (from point in Points
                                orderby point.X ascending
@@ -95,31 +95,20 @@ namespace DavesWPFTester
             for (var i = 0; i < xDataCoords.Count - 1; i++) minXDataDelta = Math.Min(minXDataDelta, xDataCoords[i + 1] - xDataCoords[i]);
             //XRange.Update(xDataCoords.First() - (minXDataDelta / 2), xDataCoords.Last() + (minXDataDelta / 2));
 
-            var plotPoints = Points.Select(point => new Point(XAxisMappingFunction(point.X), YAxisMappingFunction(point.Y))).ToList();
+            var plotPoints = Points.Select(point => new Point(XAxis.ValueToPosition(point.X), YAxis.ValueToPosition(point.Y))).ToList();
             var xPlotCoords = (from point in plotPoints
                            orderby point.X ascending
                            select Math.Round(point.X, XRoundingPrecision)).ToList();
             var minXPlotDelta = double.MaxValue;
             for (var i = 0; i < xPlotCoords.Count - 1; i++) minXPlotDelta = Math.Min(minXPlotDelta, xPlotCoords[i + 1] - xPlotCoords[i]);
             var barHalfWidth = (minXPlotDelta * BarWidth) / 2;
-            var yMinValue = Math.Min(YAxis.VisibleRange.Min, Points.Select(p => p.Y).Min());
-            var yZeroCoordinate = YAxis.VisibleRange.Min < 0 ? YAxisMappingFunction(0.0) : YAxisMappingFunction(yMinValue);
             foreach (var plotPoint in plotPoints)
             {
                 var dataPoint = Points[plotPoints.IndexOf(plotPoint)];
                 var left = plotPoint.X - barHalfWidth;
                 var right = plotPoint.X + barHalfWidth;
-                double top, bottom;
-                if (dataPoint.Y <= 0)
-                {
-                    top = yZeroCoordinate;
-                    bottom = plotPoint.Y;
-                }
-                else
-                {
-                    top = plotPoint.Y;
-                    bottom = yZeroCoordinate;
-                }
+                var top = plotPoint.Y;
+                var bottom = YAxis.ValueToPosition(Math.Max(YAxis.VisibleRange.Min, 0));
                 //Debug.WriteLine("Drawing bar from: (left: {0:0.#}, bottom: {1:0.#}) to (right: {2:0.#}, top: {3:0.#})", left, bottom, right, top);
                 var bar = new Path
                 {

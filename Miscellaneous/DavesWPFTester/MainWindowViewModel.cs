@@ -120,7 +120,6 @@ namespace DavesWPFTester
                 new NewDataAxisTick(11, null, false),
             };
             BottomLeft.XRange.Update(-1, 11);
-            BottomLeft.YRange.Update(1, 11);
             BottomLeft.DataSeriesCollection.Add(new BarSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
@@ -130,6 +129,7 @@ namespace DavesWPFTester
                 Fill = Brushes.Blue,
             });
             BottomLeft.XAxisTicks = null;
+            BottomLeft.YAxis.VisibleRange.Update(0.9, 10);
         }
 
         void CreateLowerRightSeries()

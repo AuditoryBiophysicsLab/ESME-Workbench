@@ -9,24 +9,12 @@
              d:DesignWidth="800"
              mc:Ignorable="d">
     <DockPanel>
-        <DockPanel Height="{Binding ActualHeight,
-                                    ElementName=TopAxis}"
-                   DockPanel.Dock="Top"
-                   Visibility="{Binding TopAxis.Visibility}">
-            <TextBlock Width="{Binding ActualWidth,
-                                       ElementName=LeftAxis}"
-                       Height="{Binding ActualHeight,
-                                        ElementName=TopAxis}"
-                       DockPanel.Dock="Left"
-                       Visibility="{Binding LeftAxis.Visibility}" />
-            <TextBlock Width="{Binding ActualWidth,
-                                       ElementName=RightAxis}"
-                       Height="{Binding ActualHeight,
-                                        ElementName=TopAxis}"
-                       DockPanel.Dock="Right"
-                       Visibility="{Binding RightAxis.Visibility}" />
+        <DockPanel Height="{Binding ActualHeight, ElementName=TopAxis}" DockPanel.Dock="Top" Visibility="{Binding TopAxis.Visibility}">
+            <TextBlock Width="{Binding ActualWidth, ElementName=LeftAxis}" Height="{Binding ActualHeight, ElementName=TopAxis}" DockPanel.Dock="Left" Visibility="{Binding LeftAxis.Visibility}" />
+            <TextBlock Width="{Binding ActualWidth, ElementName=RightAxis}" Height="{Binding ActualHeight, ElementName=TopAxis}" DockPanel.Dock="Right" Visibility="{Binding RightAxis.Visibility}" />
             <app:NewDataAxis x:Name="TopAxis"
                              AxisLabel="{Binding Label}"
+                             AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
                              AxisLocation="Top"
                              AxisTicks="{Binding AxisTicks}"
                              AxisType="{Binding AxisType}"
@@ -34,27 +22,22 @@
                              DataRange="{Binding DataRange}"
                              DockPanel.Dock="Top"
                              IsInverted="{Binding IsInverted}"
-                             MappingFunction="{Binding MappingFunction}"
+                             MajorTickLength="{Binding MajorTickLength}"
+                             MajorTicksPerInch="{Binding MajorTicksPerInch}"
+                             MinorTickLength="{Binding MinorTickLength}"
+                             MinorTicksPerInch="{Binding MinorTicksPerInch}"
+                             PositionToValue="{Binding PositionToValue,
+                                                       Mode=OneWayToSource}"
+                             ValueToPosition="{Binding ValueToPosition,
+                                                       Mode=OneWayToSource}"
                              VisibleRange="{Binding VisibleRange}" />
         </DockPanel>
-        <DockPanel Height="{Binding ActualHeight,
-                                    ElementName=BottomAxis}"
-                   DockPanel.Dock="Bottom"
-                   Visibility="{Binding BottomAxis.Visibility}">
-            <TextBlock Width="{Binding ActualWidth,
-                                       ElementName=LeftAxis}"
-                       Height="{Binding ActualHeight,
-                                        ElementName=BottomAxis}"
-                       DockPanel.Dock="Left"
-                       Visibility="{Binding LeftAxis.Visibility}" />
-            <TextBlock Width="{Binding ActualWidth,
-                                       ElementName=RightAxis}"
-                       Height="{Binding ActualHeight,
-                                        ElementName=BottomAxis}"
-                       DockPanel.Dock="Right"
-                       Visibility="{Binding RightAxis.Visibility}" />
+        <DockPanel Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Bottom" Visibility="{Binding BottomAxis.Visibility}">
+            <TextBlock Width="{Binding ActualWidth, ElementName=LeftAxis}" Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Left" Visibility="{Binding LeftAxis.Visibility}" />
+            <TextBlock Width="{Binding ActualWidth, ElementName=RightAxis}" Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Right" Visibility="{Binding RightAxis.Visibility}" />
             <app:NewDataAxis x:Name="BottomAxis"
                              AxisLabel="{Binding Label}"
+                             AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
                              AxisLocation="Bottom"
                              AxisTicks="{Binding AxisTicks}"
                              AxisType="{Binding AxisType}"
@@ -62,11 +45,19 @@
                              DataRange="{Binding DataRange}"
                              DockPanel.Dock="Top"
                              IsInverted="{Binding IsInverted}"
-                             MappingFunction="{Binding MappingFunction}"
+                             MajorTickLength="{Binding MajorTickLength}"
+                             MajorTicksPerInch="{Binding MajorTicksPerInch}"
+                             MinorTickLength="{Binding MinorTickLength}"
+                             MinorTicksPerInch="{Binding MinorTicksPerInch}"
+                             PositionToValue="{Binding PositionToValue,
+                                                       Mode=OneWayToSource}"
+                             ValueToPosition="{Binding ValueToPosition,
+                                                       Mode=OneWayToSource}"
                              VisibleRange="{Binding VisibleRange}" />
         </DockPanel>
         <app:NewDataAxis x:Name="LeftAxis"
                          AxisLabel="{Binding Label}"
+                         AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
                          AxisLocation="Left"
                          AxisTicks="{Binding AxisTicks}"
                          AxisType="{Binding AxisType}"
@@ -74,11 +65,19 @@
                          DataRange="{Binding DataRange}"
                          DockPanel.Dock="Left"
                          IsInverted="{Binding IsInverted}"
-                         MappingFunction="{Binding MappingFunction}"
+                         MajorTickLength="{Binding MajorTickLength}"
+                         MajorTicksPerInch="{Binding MajorTicksPerInch}"
+                         MinorTickLength="{Binding MinorTickLength}"
+                         MinorTicksPerInch="{Binding MinorTicksPerInch}"
+                         PositionToValue="{Binding PositionToValue,
+                                                   Mode=OneWayToSource}"
+                         ValueToPosition="{Binding ValueToPosition,
+                                                   Mode=OneWayToSource}"
                          Visibility="{Binding Visibility}"
                          VisibleRange="{Binding VisibleRange}" />
         <app:NewDataAxis x:Name="RightAxis"
                          AxisLabel="{Binding Label}"
+                         AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
                          AxisLocation="Right"
                          AxisTicks="{Binding AxisTicks}"
                          AxisType="{Binding AxisType}"
@@ -86,7 +85,14 @@
                          DataRange="{Binding DataRange}"
                          DockPanel.Dock="Right"
                          IsInverted="{Binding IsInverted}"
-                         MappingFunction="{Binding MappingFunction}"
+                         MajorTickLength="{Binding MajorTickLength}"
+                         MajorTicksPerInch="{Binding MajorTicksPerInch}"
+                         MinorTickLength="{Binding MinorTickLength}"
+                         MinorTicksPerInch="{Binding MinorTicksPerInch}"
+                         PositionToValue="{Binding PositionToValue,
+                                                   Mode=OneWayToSource}"
+                         ValueToPosition="{Binding ValueToPosition,
+                                                   Mode=OneWayToSource}"
                          Visibility="{Binding Visibility}"
                          VisibleRange="{Binding VisibleRange}" />
         <app:DataCanvas x:Name="DataCanvas"
