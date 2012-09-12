@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
@@ -66,8 +67,13 @@ namespace DavesWPFTester
                 return;
             }
             _xAxisObserver = new PropertyObserver<DataAxisViewModel>(XAxis)
-                .RegisterHandler(x => x.ValueToPosition, RenderShapes);
+                .RegisterHandler(x => x.ValueToPosition, XAxisValueToPositionChanged);
             XAxis.DataRange.Add(XRange);
+        }
+        void XAxisValueToPositionChanged()
+        {
+            Debug.WriteLine("XAxis.ValueToPosition changed, re-rendering...");
+            RenderShapes();
         }
         void YAxisChanged()
         {
@@ -77,8 +83,13 @@ namespace DavesWPFTester
                 return;
             }
             _yAxisObserver = new PropertyObserver<DataAxisViewModel>(YAxis)
-                .RegisterHandler(y => y.ValueToPosition, RenderShapes);
+                .RegisterHandler(y => y.ValueToPosition, YAxisValueToPositionChanged);
             YAxis.DataRange.Add(YRange);
+        }
+        void YAxisValueToPositionChanged()
+        {
+            Debug.WriteLine("YAxis.ValueToPosition changed, re-rendering...");
+            RenderShapes();
         }
 
         public abstract void RenderShapes();

@@ -30,7 +30,10 @@ namespace DavesWPFTester
             if (args.NewValue != null) ((ObservableCollection<Shape>)args.NewValue).CollectionChanged += ShapesCollectionChanged;
         }
 
-        void ShapesCollectionChanged(object sender, NotifyCollectionChangedEventArgs args) { Redraw(); }
+        void ShapesCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            //Redraw();
+        }
         #endregion
 
         #region dependency property ObservableCollection<NewDataAxisTick> XAxisTicks
@@ -86,7 +89,7 @@ namespace DavesWPFTester
         void SeriesSourcePropertyChanged(DependencyPropertyChangedEventArgs args)
         {
             if (args.OldValue != null) {((ObservableCollection<ISeries>)args.OldValue).CollectionChanged -= SeriesSourceCollectionChanged;}
-            Redraw();
+            //Redraw();
             if (args.NewValue != null) ((ObservableCollection<ISeries>)args.NewValue).CollectionChanged += SeriesSourceCollectionChanged;
         }
 
@@ -189,7 +192,6 @@ namespace DavesWPFTester
         readonly Dictionary<ObservableCollection<Shape>, List<Shape>> _seriesShapeCache = new Dictionary<ObservableCollection<Shape>, List<Shape>>();
         public DataCanvas()
         {
-            SizeChanged += (s, e) => Redraw();
             SnapsToDevicePixels = true;
             UseLayoutRounding = true;
         }

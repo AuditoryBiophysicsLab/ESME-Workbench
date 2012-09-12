@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
@@ -28,14 +29,14 @@ namespace DavesWPFTester
         [Initialize] public FourAxisSeriesViewModel MiddleLeft { get; set; }
         [Initialize] public FourAxisSeriesViewModel MiddleRight { get; set; }
         [Initialize] public FourAxisSeriesViewModel BottomLeft { get; set; }
-        public bool AnimateUpperLeft { get; set; }
-        public bool AnimateLowerLeft { get; set; }
+        public bool AnimateTopLeft { get; set; }
+        public bool AnimateMiddleLeft { get; set; }
         [ImportingConstructor]
         public MainWindowViewModel(IViewAwareStatus viewAwareStatus)
         {
             _viewAwareStatus = viewAwareStatus;
-            //AnimateLowerLeft = true;
-            //AnimateUpperLeft = true;
+            //AnimateMiddleLeft = true;
+            //AnimateTopLeft = true;
             _viewAwareStatus.ViewLoaded += () =>
             {
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
@@ -46,40 +47,42 @@ namespace DavesWPFTester
                 BottomLeft.LeftAxis.AxisType = AxisType.Logarithmic;
                 CreateBottomLeftSeries();
 #if true
-                var timer = new DispatcherTimer(DispatcherPriority.ApplicationIdle, _dispatcher) { Interval = TimeSpan.FromMilliseconds(5) };
+                var timer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher) { Interval = TimeSpan.FromMilliseconds(5) };
                 timer.Start();
                 timer.Tick += (s, e) =>
                 {
-                    if (AnimateLowerLeft)
+                    if (AnimateMiddleLeft)
                     {
                         var selectedSeries = (BarSeriesViewModel)MiddleLeft.DataSeriesCollection[0];
                         var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
-                        selectedSeries.SeriesName = string.Format("y = {0:0.0} * x", _lowerLeftAmplitude);
-                        for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, _lowerLeftAmplitude * seriesData[i].Item1);
-                        _lowerLeftAmplitude += _lowerLeftAmplitudeDelta;
-                        if (_lowerLeftAmplitude > 10) _lowerLeftAmplitudeDelta = -1;
-                        if (_lowerLeftAmplitude < -10) _lowerLeftAmplitudeDelta = 1;
+                        selectedSeries.SeriesName = string.Format("y = {0:0.0} * x", _middleLeftAmplitude);
+                        Debug.WriteLine(string.Format("Changing MiddleLeft amplitude to {0}", _middleLeftAmplitude));
+                        for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, _middleLeftAmplitude * seriesData[i].Item1);
+                        _middleLeftAmplitude += _middleLeftAmplitudeDelta;
+                        if (_middleLeftAmplitude > 10) _middleLeftAmplitudeDelta = -1;
+                        if (_middleLeftAmplitude < -10) _middleLeftAmplitudeDelta = 1;
+
                     }
-                    if (!AnimateUpperLeft) return;
+                    if (!AnimateTopLeft) return;
                     for (var seriesIndex = 0; seriesIndex < TopLeft.DataSeriesCollection.Count; seriesIndex++)
                     {
                         var selectedSeries = (LineSeriesViewModel)TopLeft.DataSeriesCollection[seriesIndex];
                         var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
-                        selectedSeries.SeriesName = string.Format("y = ({0:0.0} * sin(x)) + {1}", _upperLeftAmplitude, 11 - seriesIndex);
-                        for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, (_upperLeftAmplitude * Math.Sin(seriesData[i].Item1)) + (11 - seriesIndex));
+                        selectedSeries.SeriesName = string.Format("y = ({0:0.0} * sin(x)) + {1}", _topLeftAmplitude, 11 - seriesIndex);
+                        for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, (_topLeftAmplitude * Math.Sin(seriesData[i].Item1)) + (11 - seriesIndex));
                     }
-                    _upperLeftAmplitude += _upperLeftAmplitudeDelta;
-                    if (_upperLeftAmplitude > 10) _upperLeftAmplitudeDelta = -1;
-                    if (_upperLeftAmplitude < -10) _upperLeftAmplitudeDelta = 1;
+                    _topLeftAmplitude += _topLeftAmplitudeDelta;
+                    if (_topLeftAmplitude > 10) _topLeftAmplitudeDelta = -1;
+                    if (_topLeftAmplitude < -10) _topLeftAmplitudeDelta = 1;
                 };
 #endif
             };
         }
 
-        double _upperLeftAmplitude = 1;
-        double _upperLeftAmplitudeDelta = 1;
-        double _lowerLeftAmplitude = 1;
-        double _lowerLeftAmplitudeDelta = 1;
+        double _topLeftAmplitude = 1;
+        double _topLeftAmplitudeDelta = 1;
+        double _middleLeftAmplitude = 1;
+        double _middleLeftAmplitudeDelta = 1;
         static IEnumerable<double> Range(double start, double end, double step)
         {
             if (start == end) throw new ParameterOutOfRangeException("Start and End cannot be equal");
@@ -119,7 +122,6 @@ namespace DavesWPFTester
                 new NewDataAxisTick(10, "Ten", false),
                 new NewDataAxisTick(11, null, false),
             };
-            BottomLeft.XAxis.VisibleRange.Update(-1, 11);
             BottomLeft.DataSeriesCollection.Add(new BarSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
@@ -129,6 +131,7 @@ namespace DavesWPFTester
                 Fill = Brushes.Blue,
             });
             BottomLeft.XAxisTicks = null;
+            BottomLeft.XAxis.VisibleRange.Update(-1, 11);
             BottomLeft.YAxis.VisibleRange.Update(0.9, 10);
         }
 
@@ -162,6 +165,8 @@ namespace DavesWPFTester
                 Stroke = Brushes.DarkViolet,
                 Fill = Brushes.Red,
             });
+            MiddleLeft.XAxisTicks = null;
+            MiddleLeft.XAxis.VisibleRange.Update(rangeStart - 0.5, rangeEnd + 0.5);
         }
 
         void CreateTopRightSeries()

@@ -39,7 +39,7 @@
                     <TextBlock Text="Line series with markers, linear axes" />
                     <CheckBox Margin="40 0 0 0"
                               Content="Animate"
-                              IsChecked="{Binding AnimateUpperLeft}" />
+                              IsChecked="{Binding AnimateTopLeft}" />
                 </StackPanel>
             </GroupBox.Header>
             <DockPanel LastChildFill="True">
@@ -74,7 +74,7 @@
                     <TextBlock Text="Bar series, linear axes" />
                     <CheckBox Margin="40 0 0 0"
                               Content="Animate"
-                              IsChecked="{Binding AnimateLowerLeft}" />
+                              IsChecked="{Binding AnimateMiddleLeft}" />
                 </StackPanel>
             </GroupBox.Header>
 

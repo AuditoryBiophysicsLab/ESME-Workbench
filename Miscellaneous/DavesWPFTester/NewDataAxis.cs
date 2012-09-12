@@ -144,8 +144,7 @@ namespace DavesWPFTester
 
         static void AxisTypePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
-            ((NewDataAxis)obj).DataRangeChanged(null, null);
-            ((NewDataAxis)obj).OnSizeOrVisibleRangeChanged();
+            ((NewDataAxis)obj).UpdateVisibleRange();
         }
         bool IsLogarithmic { get { return AxisType == AxisType.Logarithmic; } }
         #endregion
@@ -196,7 +195,7 @@ namespace DavesWPFTester
         public bool IsInverted { get { return (bool)GetValue(IsInvertedProperty); } set { SetValue(IsInvertedProperty, value); } }
 
         static void IsInvertedPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).IsInvertedPropertyChanged(); }
-        void IsInvertedPropertyChanged() { OnSizeOrVisibleRangeChanged(); }
+        void IsInvertedPropertyChanged() { OnTransformChanged(); }
         #endregion
 
         #region dependency property double MajorTickLength
@@ -292,19 +291,30 @@ namespace DavesWPFTester
         {
             if (args.OldValue != null) ((Range)args.OldValue).RangeChanged -= VisibleRangeChanged;
             if (args.NewValue != null) ((Range)args.NewValue).RangeChanged += VisibleRangeChanged;
-            OnSizeOrVisibleRangeChanged();
+            UpdateVisibleRange();
         }
         void VisibleRangeChanged(object sender, EventArgs args)
         {
-            OnSizeOrVisibleRangeChanged();
-            InvalidateMeasure();
+            UpdateVisibleRange();
         }
 
-        void OnSizeOrVisibleRangeChanged()
+        void OnSizeChanged()
         {
-            if (ActualWidth <= 0 || ActualHeight <= 0 || VisibleRange == null || VisibleRange.Size <= 0)
+            if (ActualWidth <= 0 || ActualHeight <= 0)
             {
                 ValueToPosition = null;
+                PositionToValue = null;
+                return;
+            }
+            OnTransformChanged();
+        }
+
+        void UpdateVisibleRange()
+        {
+            if (VisibleRange == null || VisibleRange.IsEmpty)
+            {
+                ValueToPosition = null;
+                PositionToValue = null;
                 return;
             }
             Debug.WriteLine(string.Format("{0} Visible range changed to {1}", AxisLabel, VisibleRange));
@@ -314,12 +324,19 @@ namespace DavesWPFTester
                 _visibleRange.Min = Math.Log10(_visibleRange.Min);
                 _visibleRange.Max = Math.Log10(_visibleRange.Max);
             }
+            _axisOptions.DataRange = _visibleRange.Expand(0);
+            _axisOptions.VisibleRange = _visibleRange.Expand(0);
+            OnTransformChanged();
+        }
+
+        void OnTransformChanged()
+        {
+            if (_visibleRange == null || _visibleRange.IsEmpty) UpdateVisibleRange();
+            if (_visibleRange == null || _visibleRange.IsEmpty) return;
             _valueToPositionTransform = CreateAxisTransform(_visibleRange, new Size(ActualWidth, ActualHeight), false, IsInverted, IsLogarithmic);
             _positionToValueTransform = _valueToPositionTransform.Inverse;
             ValueToPosition = v => _valueToPositionTransform.Transform(new Point(v, 0)).X;
             PositionToValue = p => _positionToValueTransform.Transform(new Point(p, 0)).X;
-            _axisOptions.DataRange = _visibleRange.Expand(0);
-            _axisOptions.VisibleRange = _visibleRange.Expand(0);
         }
 
         Range _visibleRange;
@@ -332,7 +349,7 @@ namespace DavesWPFTester
             SnapsToDevicePixels = true;
             UseLayoutRounding = true;
             AxisTicks = new ObservableCollection<NewDataAxisTick>();
-            SizeChanged += (s, e) => OnSizeOrVisibleRangeChanged();
+            SizeChanged += (s, e) => OnSizeChanged();
             _axisOptions = new AxisLabelerOptions
             {
                 ComputeLabelRect = ComputeLabelRect,
