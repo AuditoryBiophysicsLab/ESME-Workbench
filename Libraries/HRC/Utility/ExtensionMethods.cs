@@ -84,5 +84,8 @@ namespace HRC.Utility
             var charsToCheck = fileName.ToCharArray();
             return !(from cur in charsToCheck from invalid in invalidChars where cur == invalid select cur).Any();
         }
+
+        public static IEnumerable<double> AdjacentDifferences(this IList<double> list) { return list.Take(list.Count - 1).Select((s, i) => list[i + 1] - s); }
+
     }
 }
