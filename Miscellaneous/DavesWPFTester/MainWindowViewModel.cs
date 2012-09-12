@@ -42,7 +42,6 @@ namespace DavesWPFTester
                 CreateTopRightSeries();
                 CreateMiddleLeftSeries();
                 CreateMiddleRightSeries();
-                BottomLeft.LeftAxis.AxisType = AxisType.Logarithmic;
                 CreateBottomLeftSeries();
 #if true
                 var timer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher) { Interval = TimeSpan.FromMilliseconds(5) };
@@ -127,6 +126,14 @@ namespace DavesWPFTester
                 SeriesName = "y = x",
                 Fill = Brushes.Blue,
             });
+            BottomLeft.DataSeriesCollection.Add(new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, 2.0)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "y = 2",
+                Fill = Brushes.Red,
+            });
             BottomLeft.XAxisTicks = null;
             BottomLeft.XAxis.VisibleRange.Update(-1, 11);
             BottomLeft.YAxis.VisibleRange.Update(0.9, 10);
@@ -159,8 +166,17 @@ namespace DavesWPFTester
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
                 SeriesName = "y = x",
-                Stroke = Brushes.DarkViolet,
+                Stroke = Brushes.Blue,
                 Fill = Brushes.Red,
+            });
+            MiddleLeft.DataSeriesCollection.Add(new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, -x)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "y = -x",
+                Fill = Brushes.Blue,
+                Stroke = Brushes.Red,
             });
             MiddleLeft.XAxisTicks = null;
             MiddleLeft.XAxis.VisibleRange.Update(rangeStart - 0.5, rangeEnd + 0.5);
