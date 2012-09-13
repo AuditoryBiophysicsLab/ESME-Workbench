@@ -26,8 +26,6 @@ namespace DavesWPFTester
                 .RegisterHandler(d => d.XAxis, XAxisChanged)
                 .RegisterHandler(d => d.YAxis, YAxisChanged);
             _pointsObserver = new CollectionObserver(Points).RegisterHandler(PointsCollectionChanged);
-            XRange.RangeChanged += (s, e) => { if (XAxis != null) XAxis.DataRange.Add(XRange); };
-            YRange.RangeChanged += (s, e) => { if (YAxis != null) YAxis.DataRange.Add(YRange); };
         }
 
         public DataAxisViewModel XAxis { get; set; }
@@ -59,16 +57,19 @@ namespace DavesWPFTester
         }
 
         [UsedImplicitly] PropertyObserver<DataAxisViewModel> _xAxisObserver, _yAxisObserver;
+        DataAxisViewModel _oldXAxis, _oldYAxis;
         void XAxisChanged()
         {
             if (XAxis == null)
             {
                 _xAxisObserver = null;
+                if (_oldXAxis != null) _oldXAxis.DataRange.Remove(XRange);
                 return;
             }
             _xAxisObserver = new PropertyObserver<DataAxisViewModel>(XAxis)
                 .RegisterHandler(x => x.ValueToPosition, XAxisValueToPositionChanged);
             XAxis.DataRange.Add(XRange);
+            _oldXAxis = XAxis;
         }
         void XAxisValueToPositionChanged()
         {
@@ -80,11 +81,13 @@ namespace DavesWPFTester
             if (YAxis == null)
             {
                 _yAxisObserver = null;
+                if (_oldYAxis != null) _oldYAxis.DataRange.Remove(YRange);
                 return;
             }
             _yAxisObserver = new PropertyObserver<DataAxisViewModel>(YAxis)
                 .RegisterHandler(y => y.ValueToPosition, YAxisValueToPositionChanged);
             YAxis.DataRange.Add(YRange);
+            _oldYAxis = YAxis;
         }
         void YAxisValueToPositionChanged()
         {

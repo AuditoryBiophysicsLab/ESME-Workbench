@@ -103,7 +103,7 @@ namespace DavesWPFTester
         void CreateBottomLeftSeries()
         {
             const double rangeStart = 1;
-            const int rangeEnd = 10;
+            const int rangeEnd = 2;
             const double rangeStep = 1;
             BottomLeft.XAxis.AxisType = AxisType.Enumerated;
             BottomLeft.XAxis.AxisTicks = new ObservableCollection<NewDataAxisTick>
@@ -122,8 +122,7 @@ namespace DavesWPFTester
                 new NewDataAxisTick(10, "Ten", false),
                 new NewDataAxisTick(11, null, false),
             };
-            BottomLeft.XAxis.VisibleRange.Update(-1, 11);
-            BottomLeft.XAxisTicks = null;
+            BottomLeft.YAxis.VisibleRange.Update(0, 10);
             var blueSeries = new BarSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
@@ -132,7 +131,6 @@ namespace DavesWPFTester
                 SeriesName = "(bar) y = x",
                 Fill = Brushes.Blue,
                 Stroke = Brushes.DarkGray,
-                RenderSeries = false,
             };
             var redSeries = new BarSeriesViewModel
             {
@@ -142,12 +140,16 @@ namespace DavesWPFTester
                 SeriesName = "(bar) y = 2",
                 Fill = Brushes.Red,
                 Stroke = Brushes.Green,
-                RenderSeries = false,
             };
             var stackedSeries = new StackedBarSeriesViewModel();
             stackedSeries.BarSeriesCollection.Add(blueSeries);
             stackedSeries.BarSeriesCollection.Add(redSeries);
             BottomLeft.DataSeriesCollection.Add(stackedSeries);
+            //BottomLeft.DataSeriesCollection.Add(redSeries);
+            //BottomLeft.DataSeriesCollection.Add(blueSeries);
+            //BottomLeft.YAxis.VisibleRange.Add(0, 10);
+            BottomLeft.XAxis.VisibleRange.Update(-1, 11);
+            BottomLeft.XAxisTicks = null;
         }
 
         void CreateMiddleRightSeries()

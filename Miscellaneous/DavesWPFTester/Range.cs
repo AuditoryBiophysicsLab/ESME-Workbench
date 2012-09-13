@@ -198,6 +198,12 @@ namespace DavesWPFTester
             if (_ranges.Contains(range)) return;
             _ranges.Add(range);
         }
+
+        public void Remove(IRange range)
+        {
+            if (range == null) throw new ArgumentNullException("range");
+            _ranges.Remove(range);
+        }
     }
 
     public abstract class RangeBase : IRange

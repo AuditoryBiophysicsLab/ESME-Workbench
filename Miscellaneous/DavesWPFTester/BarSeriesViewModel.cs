@@ -103,25 +103,22 @@ namespace DavesWPFTester
         protected BarSeriesBase()
         {
             _propertyObserver = new PropertyObserver<BarSeriesBase>(this)
-                .RegisterHandler(d => d.XAxis, () =>
+                .RegisterHandler(d => d.XAxis,
+                                 () =>
                                  {
                                      if (XAxis == null) return;
                                      _xAxisObserver = new PropertyObserver<DataAxisViewModel>(XAxis)
                                          .RegisterHandler(d => d.ValueToPosition, RenderShapes);
                                      RenderShapes();
                                  })
-                .RegisterHandler(d => d.YAxis, () =>
+                .RegisterHandler(d => d.YAxis,
+                                 () =>
                                  {
                                      if (YAxis == null) return;
                                      _yAxisObserver = new PropertyObserver<DataAxisViewModel>(YAxis)
                                          .RegisterHandler(d => d.ValueToPosition, RenderShapes);
                                      RenderShapes();
-                                 })
-                .RegisterHandler(d => d.RenderSeries, () =>
-                {
-                    PointShapeMap.Clear();
-                    RenderShapes();
-                });
+                                 });
         }
 
         /// <summary>
@@ -134,12 +131,6 @@ namespace DavesWPFTester
         /// The default is 0.85
         /// </summary>
         [Initialize(0.85)] public double BarWidth { get; set; }
-
-        /// <summary>
-        /// If true, the series renders itself to a list of shapes.   
-        /// If false, the series should be rendered by some other entity such as a grouping renderer
-        /// </summary>
-        [Initialize(true)] public bool RenderSeries { get; set; }
 
         internal double MinimumXPlotSpacing { get; set; }
         internal double PlotOriginY { get; set; }
@@ -166,8 +157,7 @@ namespace DavesWPFTester
 
         public override void RenderShapes()
         {
-            if (!RenderSeries || Points == null || Points.Count == 0 || XAxis == null || XAxis.ValueToPosition == null || YAxis == null || YAxis.ValueToPosition == null) return;
-            if (SeriesName.StartsWith("(bar)")) Debugger.Break();
+            if (Points == null || Points.Count == 0 || XAxis == null || XAxis.ValueToPosition == null || YAxis == null || YAxis.ValueToPosition == null) return;
             MinimumXPlotSpacing = (from point in Points.Select(point => new Point(XAxis.ValueToPosition(Math.Round(point.X, XRoundingPrecision)), YAxis.ValueToPosition(point.Y))).ToList()
                                    select point.X).ToList().AdjacentDifferences().Min();
             PlotOriginY = YAxis.ValueToPosition(Math.Max(YAxis.VisibleRange.Min, 0));
@@ -236,7 +226,6 @@ namespace DavesWPFTester
                     {
                         series.XAxis = XAxis;
                         series.YAxis = YAxis;
-                        series.RenderSeries = false;
                     }
                     break;
                 case NotifyCollectionChangedAction.Remove:
@@ -244,7 +233,6 @@ namespace DavesWPFTester
                     {
                         series.XAxis = null;
                         series.YAxis = null;
-                        series.RenderSeries = true;
                     }
                     break;
                 case NotifyCollectionChangedAction.Replace:
@@ -252,13 +240,11 @@ namespace DavesWPFTester
                     {
                         series.XAxis = null;
                         series.YAxis = null;
-                        series.RenderSeries = true;
                     }
                     foreach (BarSeriesBase series in args.NewItems)
                     {
                         series.XAxis = XAxis;
                         series.YAxis = YAxis;
-                        series.RenderSeries = false;
                     }
                     break;
                 case NotifyCollectionChangedAction.Reset:
@@ -293,7 +279,7 @@ namespace DavesWPFTester
             MinimumXPlotSpacing = xPlotCoordinates.AdjacentDifferences().Min();
             var width = MinimumXPlotSpacing * BarWidth;
             PlotOriginY = YAxis.ValueToPosition(Math.Max(YAxis.VisibleRange.Min, 0));
-            //if (YAxis.VisibleRange.Min < 1) Debugger.Break();
+            if (YAxis.VisibleRange.Min < 1) Debugger.Break();
             Shapes.Clear();
             foreach (var x in xPlotCoordinates)
             {
