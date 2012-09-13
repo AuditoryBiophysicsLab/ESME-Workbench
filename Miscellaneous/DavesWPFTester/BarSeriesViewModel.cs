@@ -69,35 +69,17 @@ namespace DavesWPFTester
         /// </summary>
         public double StrokeThickness { get; set; }
 
-        protected override void RenderShapesOverride()
+        protected override Shape RectToShape(Rect rect)
         {
-            if (Points.Count == 0 || YAxis == null || XAxis == null || XAxis.ValueToPosition == null || YAxis.ValueToPosition == null) return;
-
-            foreach (var dataPoint in Points)
+            //Debug.WriteLine("Drawing bar from: (left: {0:0.#}, bottom: {1:0.#}) to (right: {2:0.#}, top: {3:0.#})", left, bottom, right, top);
+            var bar = new Path
             {
-                var plotPoint = new Point(XAxis.ValueToPosition(dataPoint.X), YAxis.ValueToPosition(dataPoint.Y));
-                //Debug.WriteLine("Drawing bar from: (left: {0:0.#}, bottom: {1:0.#}) to (right: {2:0.#}, top: {3:0.#})", left, bottom, right, top);
-                var bar = new Path
-                {
-                    Stroke = Stroke,
-                    StrokeThickness = StrokeThickness,
-                    Fill = Fill,
-                    Data = new RectangleGeometry(CreateBarRect(plotPoint.X, plotPoint.Y, 0, 0)),
-                    ToolTip = string.Format("{0:0.###}, {1:0.###}", dataPoint.X, dataPoint.Y),
-                };
-                if (!PointShapeMap.ContainsKey(dataPoint))
-                {
-                    PointShapeMap.Add(dataPoint, bar);
-                    Shapes.Add(bar);
-                }
-                else
-                {
-                    var shapeIndex = Shapes.IndexOf(PointShapeMap[dataPoint]);
-                    PointShapeMap[dataPoint] = bar;
-                    if (shapeIndex == -1) Shapes.Add(bar);
-                    else Shapes[shapeIndex] = bar;
-                }
-            }
+                Stroke = Stroke,
+                StrokeThickness = StrokeThickness,
+                Fill = Fill,
+                Data = new RectangleGeometry(rect),
+            };
+            return bar;
             //Debug.WriteLine("Finished rendering bars");
         }
 
@@ -178,14 +160,30 @@ namespace DavesWPFTester
             if (Points == null || Points.Count == 0 || XAxis == null || XAxis.ValueToPosition == null || YAxis == null || YAxis.ValueToPosition == null) return;
             // var xAxisWidth = Math.Abs(XAxis.ValueToPosition(XAxis.VisibleRange.Max) - XAxis.ValueToPosition(XAxis.VisibleRange.Min));
             // var yAxisHeight = Math.Abs(YAxis.ValueToPosition(YAxis.VisibleRange.Max) - YAxis.ValueToPosition(YAxis.VisibleRange.Min));
-            MinimumXPlotSpacing = (from point in Points.Select(point => new Point(XAxis.ValueToPosition(point.X), YAxis.ValueToPosition(point.Y))).ToList()
+            MinimumXPlotSpacing = (from point in Points.Select(point => new Point(Math.Round(XAxis.ValueToPosition(point.X), XRoundingPrecision), YAxis.ValueToPosition(point.Y))).ToList()
                                    orderby point.X ascending
-                                   select Math.Round(point.X, XRoundingPrecision)).ToList().AdjacentDifferences().Min();
+                                   select point.X).ToList().AdjacentDifferences().Min();
             PlotOriginY = YAxis.ValueToPosition(Math.Max(YAxis.VisibleRange.Min, 0));
-            RenderShapesOverride();
+            foreach (var point in Points)
+            {
+                var rect = CreateBarRect(Math.Round(XAxis.ValueToPosition(point.X), XRoundingPrecision), YAxis.ValueToPosition(point.Y), 0, 0);
+                var shape = RectToShape(rect);
+                shape.ToolTip = string.Format("{0:0.###}, {1:0.###}", point.X, point.Y);
+                if (!PointShapeMap.ContainsKey(point))
+                {
+                    PointShapeMap.Add(point, shape);
+                    Shapes.Add(shape);
+                }
+                else
+                {
+                    var shapeIndex = Shapes.IndexOf(PointShapeMap[point]);
+                    PointShapeMap[point] = shape;
+                    if (shapeIndex == -1) Shapes.Add(shape);
+                    else Shapes[shapeIndex] = shape;
+                }
+            }
         }
-
-        protected abstract void RenderShapesOverride();
+        protected abstract Shape RectToShape(Rect rect);
     }
 
     public class StackedBarSeriesViewModel : BarSeriesViewModel
