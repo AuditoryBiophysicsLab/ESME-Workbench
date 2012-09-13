@@ -46,7 +46,7 @@ namespace DavesWPFTester
 
         [Initialize] public ObservableCollection<Shape> Shapes { get; set; }
 
-        [Initialize] protected ObservableCollection<Point> Points { get; set; }
+        [Initialize] internal ObservableCollection<Point> Points { get; set; }
 
         protected readonly Dictionary<Point, Shape> PointShapeMap = new Dictionary<Point, Shape>();
 
