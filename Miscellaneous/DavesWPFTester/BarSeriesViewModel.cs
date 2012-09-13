@@ -283,7 +283,7 @@ namespace DavesWPFTester
                     xCoordinates.Add(plotPoint.X);
                     _seriesPlotPointCache[series][plotPoint.X] = Tuple.Create(point, plotPoint.Y);
                 }
-                //series.Shapes.Clear();
+                XRange.Add(series.XRange);
             }
             var xPlotCoordinates = xCoordinates.Distinct().ToList();
             MinimumXPlotSpacing = xPlotCoordinates.AdjacentDifferences().Min();
@@ -294,16 +294,19 @@ namespace DavesWPFTester
             foreach (var x in xPlotCoordinates)
             {
                 var lastY = PlotOriginY;
+                var lastDataY = 0.0;
                 foreach (var series in BarSeriesCollection)
                 {
                     if (!_seriesPlotPointCache[series].ContainsKey(x)) continue;
                     // This series contains a Y value for the current X, turn it into a rect
                     var value = _seriesPlotPointCache[series][x];
+                    lastDataY += value.Item1.Y;
                     var y = value.Item2;
                     var rect = CreateBarRect(x, y, width, lastY, 0, PlotOriginY - lastY);
                     Shapes.Add(series.RectToShape(rect));
                     lastY = y;
                 }
+                YRange.Add(lastDataY);
             }
         }
 

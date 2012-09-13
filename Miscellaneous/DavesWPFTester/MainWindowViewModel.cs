@@ -129,7 +129,7 @@ namespace DavesWPFTester
                 StrokeThickness = 1,
                 SeriesName = "(bar) y = x",
                 Fill = Brushes.Blue,
-                Stroke = Brushes.Red,
+                Stroke = Brushes.DarkGray,
                 RenderSeries = false,
             };
             var redSeries = new BarSeriesViewModel
@@ -139,7 +139,7 @@ namespace DavesWPFTester
                 StrokeThickness = 1,
                 SeriesName = "(bar) y = 2",
                 Fill = Brushes.Red,
-                Stroke = Brushes.Blue,
+                Stroke = Brushes.Green,
                 RenderSeries = false,
             };
             var stackedSeries = new StackedBarSeriesViewModel();
