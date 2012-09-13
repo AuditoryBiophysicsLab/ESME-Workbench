@@ -44,7 +44,7 @@ namespace DavesWPFTester
                 CreateMiddleRightSeries();
                 CreateBottomLeftSeries();
 #if true
-                var timer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher) { Interval = TimeSpan.FromMilliseconds(5) };
+                var timer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher) { Interval = TimeSpan.FromMilliseconds(1000) };
                 timer.Start();
                 timer.Tick += (s, e) =>
                 {
