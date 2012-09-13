@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -166,6 +167,7 @@ namespace DavesWPFTester
         public override void RenderShapes()
         {
             if (!RenderSeries || Points == null || Points.Count == 0 || XAxis == null || XAxis.ValueToPosition == null || YAxis == null || YAxis.ValueToPosition == null) return;
+            if (SeriesName.StartsWith("(bar)")) Debugger.Break();
             MinimumXPlotSpacing = (from point in Points.Select(point => new Point(XAxis.ValueToPosition(Math.Round(point.X, XRoundingPrecision)), YAxis.ValueToPosition(point.Y))).ToList()
                                    select point.X).ToList().AdjacentDifferences().Min();
             PlotOriginY = YAxis.ValueToPosition(Math.Max(YAxis.VisibleRange.Min, 0));
@@ -273,18 +275,21 @@ namespace DavesWPFTester
             var xCoordinates = new List<double>();
             foreach (var series in BarSeriesCollection) 
             {
-                if (!_seriesPlotPointCache.ContainsKey(series)) _seriesPlotPointCache.Add(series, new Dictionary<double, double>());
+                if (!_seriesPlotPointCache.ContainsKey(series)) _seriesPlotPointCache.Add(series, new Dictionary<double, Tuple<Point, double>>());
                 _seriesPlotPointCache[series].Clear();
-                foreach (var plotPoint in series.Points.Select(point => new Point(XAxis.ValueToPosition(Math.Round(point.X, XRoundingPrecision)), YAxis.ValueToPosition(point.Y))))
+                foreach (var point in series.Points)
                 {
+                    var plotPoint = new Point(XAxis.ValueToPosition(Math.Round(point.X, XRoundingPrecision)), YAxis.ValueToPosition(point.Y));
                     xCoordinates.Add(plotPoint.X);
-                    _seriesPlotPointCache[series][plotPoint.X] = plotPoint.Y;
+                    _seriesPlotPointCache[series][plotPoint.X] = Tuple.Create(point, plotPoint.Y);
                 }
+                series.Shapes.Clear();
             }
             var xPlotCoordinates = xCoordinates.Distinct().ToList();
             MinimumXPlotSpacing = xPlotCoordinates.AdjacentDifferences().Min();
             var width = MinimumXPlotSpacing * BarWidth;
             PlotOriginY = YAxis.ValueToPosition(Math.Max(YAxis.VisibleRange.Min, 0));
+            if (YAxis.VisibleRange.Min < 1) Debugger.Break();
             Shapes.Clear();
             foreach (var x in xPlotCoordinates)
             {
@@ -293,14 +298,15 @@ namespace DavesWPFTester
                 {
                     if (!_seriesPlotPointCache[series].ContainsKey(x)) continue;
                     // This series contains a Y value for the current X, turn it into a rect
-                    var y = _seriesPlotPointCache[series][x];
-                    var rect = CreateBarRect(x, y, width, PlotOriginY, 0, curY);
+                    var value = _seriesPlotPointCache[series][x];
+                    var y = value.Item2;
+                    var rect = CreateBarRect(x, y, width, PlotOriginY, 0, -curY);
                     Shapes.Add(series.RectToShape(rect));
-                    curY += y;
+                    curY += y - PlotOriginY;
                 }
             }
         }
 
-        readonly Dictionary<BarSeriesBase, Dictionary<double, double>> _seriesPlotPointCache = new Dictionary<BarSeriesBase, Dictionary<double, double>>();
+        readonly Dictionary<BarSeriesBase, Dictionary<double, Tuple<Point, double>>> _seriesPlotPointCache = new Dictionary<BarSeriesBase, Dictionary<double, Tuple<Point, double>>>();
     }
 }

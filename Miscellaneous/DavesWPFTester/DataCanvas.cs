@@ -14,28 +14,6 @@ namespace DavesWPFTester
     {
         static DataCanvas() { DefaultStyleKeyProperty.OverrideMetadata(typeof(DataCanvas), new FrameworkPropertyMetadata(typeof(DataCanvas))); }
 
-        #region dependency property ObservableCollection<Shape> Shapes
-
-        public static DependencyProperty ShapesProperty = DependencyProperty.Register("Shapes",
-                                                                                 typeof(ObservableCollection<Shape>),
-                                                                                 typeof(DataCanvas),
-                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender, ShapesPropertyChanged));
-
-        public ObservableCollection<Shape> Shapes { get { return (ObservableCollection<Shape>)GetValue(ShapesProperty); } set { SetValue(ShapesProperty, value); } }
-
-        static void ShapesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataCanvas)obj).ShapesPropertyChanged(args); }
-        void ShapesPropertyChanged(DependencyPropertyChangedEventArgs args)
-        {
-            if (args.OldValue != null) ((ObservableCollection<Shape>)args.OldValue).CollectionChanged -= ShapesCollectionChanged;
-            if (args.NewValue != null) ((ObservableCollection<Shape>)args.NewValue).CollectionChanged += ShapesCollectionChanged;
-        }
-
-        void ShapesCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
-        {
-            //Redraw();
-        }
-        #endregion
-
         #region dependency property ObservableCollection<NewDataAxisTick> XAxisTicks
 
         public static DependencyProperty XAxisTicksProperty = DependencyProperty.Register("XAxisTicks",
@@ -194,13 +172,6 @@ namespace DavesWPFTester
         {
             SnapsToDevicePixels = true;
             UseLayoutRounding = true;
-        }
-
-        void Redraw()
-        {
-            Children.Clear();
-            if (SeriesSource != null) foreach (var series in SeriesSource) series.RenderShapes();
-            InvalidateVisual();
         }
 
         protected override void OnRender(DrawingContext dc)
