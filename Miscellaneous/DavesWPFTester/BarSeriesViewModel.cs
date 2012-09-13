@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -71,7 +69,7 @@ namespace DavesWPFTester
         /// </summary>
         public double StrokeThickness { get; set; }
 
-        public override void RenderShapes()
+        protected override void RenderShapesOverride()
         {
             if (Points.Count == 0 || YAxis == null || XAxis == null || XAxis.ValueToPosition == null || YAxis.ValueToPosition == null) return;
 
@@ -80,7 +78,6 @@ namespace DavesWPFTester
                                                 orderby point.X ascending
                                                 select Math.Round(point.X, XRoundingPrecision)).ToList().AdjacentDifferences().Min();
 
-            BarPlotWidth = minXPlotDelta * BarWidth;
             foreach (var plotPoint in plotPoints)
             {
                 var dataPoint = Points[plotPoints.IndexOf(plotPoint)];
@@ -90,7 +87,7 @@ namespace DavesWPFTester
                     Stroke = Stroke,
                     StrokeThickness = StrokeThickness,
                     Fill = Fill,
-                    Data = new RectangleGeometry(CreateBarRect(plotPoint.X, plotPoint.Y, BarPlotWidth, 0, 0)),
+                    Data = new RectangleGeometry(CreateBarRect(plotPoint.X, plotPoint.Y, 0, 0)),
                     ToolTip = string.Format("{0:0.###}, {1:0.###}", dataPoint.X, dataPoint.Y),
                 };
                 if (!PointShapeMap.ContainsKey(dataPoint))
@@ -119,7 +116,6 @@ namespace DavesWPFTester
 
     public abstract class BarSeriesBase : SeriesViewModelBase
     {
-        [UsedImplicitly] CollectionObserver _pointsObserver;
         [UsedImplicitly] PropertyObserver<SeriesViewModelBase> _propertyObserver;
 
         protected BarSeriesBase()
@@ -127,8 +123,6 @@ namespace DavesWPFTester
             _propertyObserver = new PropertyObserver<SeriesViewModelBase>(this)
                 .RegisterHandler(d => d.XAxis, XAxisChanged)
                 .RegisterHandler(d => d.YAxis, YAxisChanged);
-
-            _pointsObserver = new CollectionObserver(Points).RegisterHandler(PointsCollectionChanged);
         }
 
         /// <summary>
@@ -151,79 +145,52 @@ namespace DavesWPFTester
         {
             if (XAxis == null) return;
             _xAxisObserver = new PropertyObserver<DataAxisViewModel>(XAxis)
-                .RegisterHandler(d => d.ValueToPosition, ProcessPoints);
+                .RegisterHandler(d => d.ValueToPosition, RenderShapes);
+            RenderShapes();
         }
         [UsedImplicitly] PropertyObserver<DataAxisViewModel> _yAxisObserver;
         void YAxisChanged()
         {
             if (YAxis == null) return;
             _yAxisObserver = new PropertyObserver<DataAxisViewModel>(YAxis)
-                .RegisterHandler(d => d.ValueToPosition, ProcessPoints);
+                .RegisterHandler(d => d.ValueToPosition, RenderShapes);
         }
 
-        void PointsCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        protected Rect CreateBarRect(double x, double y, double xOffset, double yOffset)
         {
-            if (XAxis == null || XAxis.ValueToPosition == null || YAxis == null || YAxis.ValueToPosition == null) return;
-            switch (args.Action)
-            {
-                case NotifyCollectionChangedAction.Add:
-                    foreach (Point point in args.NewItems) _dataToPlotPointDictionary.Add(point, new Point(XAxis.ValueToPosition(point.X), YAxis.ValueToPosition(point.Y)));
-                    break;
-                case NotifyCollectionChangedAction.Remove:
-                    foreach (Point point in args.OldItems) _dataToPlotPointDictionary.Remove(point);
-                    break;
-                case NotifyCollectionChangedAction.Replace:
-                    for (var i = 0; i < args.OldItems.Count; i++)
-                    {
-                        var newPoint = (Point)args.NewItems[i];
-                        _dataToPlotPointDictionary.Remove((Point)args.OldItems[i]);
-                        _dataToPlotPointDictionary[newPoint] = new Point(XAxis.ValueToPosition(newPoint.X), YAxis.ValueToPosition(newPoint.Y));
-                    }
-                    break;
-                case NotifyCollectionChangedAction.Reset:
-                    _dataToPlotPointDictionary.Clear();
-                    break;
-                case NotifyCollectionChangedAction.Move:
-                    throw new NotImplementedException("Move not implemented for BarSeriesBase data point collection");
-            }
-        }
-
-        protected Rect CreateBarRect(double x, double y, double width, double xOffset, double yOffset)
-        {
-            var rect = new Rect(RectLocation(x, y), RectSize(width, y));
+            var rect = new Rect(RectLocation(x, y), RectSize(y));
             rect.Offset(xOffset, yOffset);
             return rect;
         }
 
         protected Point RectLocation(double x, double y)
         {
-            var left = x - (BarPlotWidth / 2);
+            var left = x - ((MinimumXPlotSpacing * BarWidth) / 2);
             var yOrigin = YAxis.ValueToPosition(Math.Max(YAxis.VisibleRange.Min, 0));
             var top = Math.Min(y, yOrigin);
             return new Point(left, top);
         }
 
-        protected Size RectSize(double width, double height)
+        protected Size RectSize(double height)        
         {
             var yOrigin = YAxis.ValueToPosition(Math.Max(YAxis.VisibleRange.Min, 0));
             var actualHeight = Math.Abs(height - yOrigin);
-            return new Size(BarPlotWidth, actualHeight);
+            return new Size(MinimumXPlotSpacing * BarWidth, actualHeight);
         }
 
-        void ProcessPoints()
+        public override void RenderShapes()
         {
             if (Points == null || Points.Count == 0 || XAxis == null || XAxis.ValueToPosition == null || YAxis == null || YAxis.ValueToPosition == null) return;
-            foreach (var point in Points) _dataToPlotPointDictionary[point] = new Point(XAxis.ValueToPosition(point.X), YAxis.ValueToPosition(point.Y));
-            MinimumXPlotSpacing = (from point in _dataToPlotPointDictionary.Values
+            // var xAxisWidth = Math.Abs(XAxis.ValueToPosition(XAxis.VisibleRange.Max) - XAxis.ValueToPosition(XAxis.VisibleRange.Min));
+            // var yAxisHeight = Math.Abs(YAxis.ValueToPosition(YAxis.VisibleRange.Max) - YAxis.ValueToPosition(YAxis.VisibleRange.Min));
+            MinimumXPlotSpacing = (from point in Points.Select(point => new Point(XAxis.ValueToPosition(point.X), YAxis.ValueToPosition(point.Y))).ToList()
                                    orderby point.X ascending
                                    select Math.Round(point.X, XRoundingPrecision)).ToList().AdjacentDifferences().Min();
             PlotOriginY = YAxis.ValueToPosition(Math.Max(YAxis.VisibleRange.Min, 0));
-            RenderShapes();
+            RenderShapesOverride();
         }
 
-        readonly Dictionary<Point, Point> _dataToPlotPointDictionary = new Dictionary<Point, Point>();
-
-        internal double BarPlotWidth { get; set; }
+        protected abstract void RenderShapesOverride();
     }
 
     public class StackedBarSeriesViewModel : BarSeriesViewModel
