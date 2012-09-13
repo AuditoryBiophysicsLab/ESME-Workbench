@@ -54,6 +54,10 @@ namespace DavesWPFTester
                         var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
                         selectedSeries.SeriesName = string.Format("y = {0:0.0} * x", _middleLeftAmplitude);
                         for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, _middleLeftAmplitude * seriesData[i].Item1);
+                        selectedSeries = (BarSeriesViewModel)MiddleLeft.DataSeriesCollection[1];
+                        seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
+                        selectedSeries.SeriesName = string.Format("y = {0:0.0} * x", -_middleLeftAmplitude);
+                        for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, -_middleLeftAmplitude * seriesData[i].Item1);
                         _middleLeftAmplitude += _middleLeftAmplitudeDelta;
                         if (_middleLeftAmplitude > 10) _middleLeftAmplitudeDelta = -1;
                         if (_middleLeftAmplitude < -10) _middleLeftAmplitudeDelta = 1;

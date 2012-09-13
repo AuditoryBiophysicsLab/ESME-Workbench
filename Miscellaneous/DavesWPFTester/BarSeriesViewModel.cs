@@ -236,11 +236,10 @@ namespace DavesWPFTester
         void ProcessPoints()
         {
             if (Points == null || Points.Count == 0 || XAxis == null || XAxis.ValueToPosition == null || YAxis == null || YAxis.ValueToPosition == null) return;
-            foreach (var point in Points.Where(point => !_dataToPlotPointDictionary.ContainsKey(point)))
+            foreach (var point in Points)
             {
                 var plotPoint = new Point(XAxis.ValueToPosition(point.X), YAxis.ValueToPosition(point.Y));
-                _dataToPlotPointDictionary.Add(point, plotPoint);
-                _plotXtoYDictionary.Add(plotPoint.X, plotPoint.Y);
+                _dataToPlotPointDictionary[point] = plotPoint;
             }
             RenderShapes();
         }
