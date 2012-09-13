@@ -286,6 +286,10 @@ namespace DavesWPFTester
                 XRange.Add(series.XRange);
             }
             var xPlotCoordinates = xCoordinates.Distinct().ToList();
+            foreach (var x in xPlotCoordinates)
+                YRange.Add((from series in BarSeriesCollection
+                            where _seriesPlotPointCache.ContainsKey(series)
+                            select _seriesPlotPointCache[series][x].Item1.Y).Sum());
             MinimumXPlotSpacing = xPlotCoordinates.AdjacentDifferences().Min();
             var width = MinimumXPlotSpacing * BarWidth;
             PlotOriginY = YAxis.ValueToPosition(Math.Max(YAxis.VisibleRange.Min, 0));
@@ -294,19 +298,16 @@ namespace DavesWPFTester
             foreach (var x in xPlotCoordinates)
             {
                 var lastY = PlotOriginY;
-                var lastDataY = 0.0;
                 foreach (var series in BarSeriesCollection)
                 {
                     if (!_seriesPlotPointCache[series].ContainsKey(x)) continue;
                     // This series contains a Y value for the current X, turn it into a rect
                     var value = _seriesPlotPointCache[series][x];
-                    lastDataY += value.Item1.Y;
                     var y = value.Item2;
                     var rect = CreateBarRect(x, y, width, lastY, 0, PlotOriginY - lastY);
                     Shapes.Add(series.RectToShape(rect));
                     lastY = y;
                 }
-                YRange.Add(lastDataY);
             }
         }
 
