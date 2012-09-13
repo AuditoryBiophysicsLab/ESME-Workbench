@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -78,40 +79,49 @@ namespace DavesWPFTester
                 case NotifyCollectionChangedAction.Add:
                     foreach (ISeries newItem in args.NewItems)
                     {
+                        //if (newItem.SeriesName != null && newItem.SeriesName.StartsWith("(bar)")) Debugger.Break();
+                        _seriesShapeCache.Add(newItem.Shapes, new List<Shape>());
                         newItem.RenderShapes();
                         newItem.Shapes.CollectionChanged += SeriesShapesCollectionChanged;
-                        foreach (var shape in newItem.Shapes) Children.Add(shape);
+                        foreach (var shape in newItem.Shapes)
+                        {
+                            _seriesShapeCache[newItem.Shapes].Add(shape);
+                            Children.Add(shape);
+                        }
                     }
                     break;
                 case NotifyCollectionChangedAction.Remove:
                     foreach (ISeries oldItem in args.OldItems)
                     {
                         oldItem.Shapes.CollectionChanged -= SeriesShapesCollectionChanged;
+                        foreach (var oldShape in _seriesShapeCache[oldItem.Shapes]) Children.Remove(oldShape);
                         foreach (var shape in oldItem.Shapes) Children.Remove(shape);
+                        _seriesShapeCache.Remove(oldItem.Shapes);
                     }
                     break;
                 case NotifyCollectionChangedAction.Replace:
                     foreach (ISeries oldItem in args.OldItems)
                     {
                         oldItem.Shapes.CollectionChanged -= SeriesShapesCollectionChanged;
+                        foreach (var oldShape in _seriesShapeCache[oldItem.Shapes]) Children.Remove(oldShape);
                         foreach (var shape in oldItem.Shapes) Children.Remove(shape);
+                        _seriesShapeCache.Remove(oldItem.Shapes);
                     }
                     foreach (ISeries newItem in args.NewItems)
                     {
+                        _seriesShapeCache.Add(newItem.Shapes, new List<Shape>());
                         newItem.RenderShapes();
                         newItem.Shapes.CollectionChanged += SeriesShapesCollectionChanged;
-                        foreach (var shape in newItem.Shapes) Children.Add(shape);
+                        foreach (var shape in newItem.Shapes)
+                        {
+                            _seriesShapeCache[newItem.Shapes].Add(shape);
+                            Children.Add(shape);
+                        }
                     }
                     break;
                 case NotifyCollectionChangedAction.Reset:
                     Children.Clear();
-                    //DrawAxes();
-                    if (SeriesSource != null) foreach (var item in SeriesSource)
-                    {
-                        item.RenderShapes();
-                        item.Shapes.CollectionChanged += SeriesShapesCollectionChanged;
-                        foreach (var shape in item.Shapes) Children.Add(shape);
-                    }
+                    _seriesShapeCache.Clear();
                     break;
                 case NotifyCollectionChangedAction.Move:
                     throw new NotSupportedException("Move operation not yet supported on SeriesSource");
@@ -121,6 +131,7 @@ namespace DavesWPFTester
 
         void SeriesShapesCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
+            //if (SeriesSource != null && SeriesSource.Any(s => s.SeriesName.StartsWith("(bar)"))) Debugger.Break();
             var key = (ObservableCollection<Shape>)sender;
             if (!_seriesShapeCache.ContainsKey(key)) _seriesShapeCache.Add(key, new List<Shape>());
             switch (args.Action)
