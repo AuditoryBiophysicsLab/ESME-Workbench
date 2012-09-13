@@ -73,14 +73,9 @@ namespace DavesWPFTester
         {
             if (Points.Count == 0 || YAxis == null || XAxis == null || XAxis.ValueToPosition == null || YAxis.ValueToPosition == null) return;
 
-            var plotPoints = Points.Select(point => new Point(XAxis.ValueToPosition(point.X), YAxis.ValueToPosition(point.Y))).ToList();
-            var minXPlotDelta = (from point in plotPoints
-                                                orderby point.X ascending
-                                                select Math.Round(point.X, XRoundingPrecision)).ToList().AdjacentDifferences().Min();
-
-            foreach (var plotPoint in plotPoints)
+            foreach (var dataPoint in Points)
             {
-                var dataPoint = Points[plotPoints.IndexOf(plotPoint)];
+                var plotPoint = new Point(XAxis.ValueToPosition(dataPoint.X), YAxis.ValueToPosition(dataPoint.Y));
                 //Debug.WriteLine("Drawing bar from: (left: {0:0.#}, bottom: {1:0.#}) to (right: {2:0.#}, top: {3:0.#})", left, bottom, right, top);
                 var bar = new Path
                 {
