@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using ESME.NEMO;
 using ESME.Views.Controls;
@@ -52,11 +53,11 @@ namespace DavesWPFTester
                 {
                     if (AnimateMiddleLeft)
                     {
-                        var selectedSeries = (BarSeriesViewModel)MiddleLeft.DataSeriesCollection[0];
+                        var selectedSeries = (BarSeriesViewModel)MiddleLeft.DataSeriesCollection[1];
                         var seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
                         selectedSeries.SeriesName = string.Format("y = {0:0.0} * x", _middleLeftAmplitude);
                         for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, _middleLeftAmplitude * seriesData[i].Item1);
-                        selectedSeries = (BarSeriesViewModel)MiddleLeft.DataSeriesCollection[1];
+                        selectedSeries = (BarSeriesViewModel)MiddleLeft.DataSeriesCollection[2];
                         seriesData = (ObservableList<Tuple<double, double>>)selectedSeries.SeriesData;
                         selectedSeries.SeriesName = string.Format("y = {0:0.0} * x", -_middleLeftAmplitude);
                         for (var i = 0; i < seriesData.Count; i++) seriesData[i] = Tuple.Create(seriesData[i].Item1, -_middleLeftAmplitude * seriesData[i].Item1);
@@ -379,6 +380,14 @@ namespace DavesWPFTester
             const double rangeStart = -10;
             const int rangeEnd = 10;
             const double rangeStep = 1;
+            MiddleLeft.DataSeriesCollection.Add(new ImageSeriesViewModel
+            {
+                Top = 10,
+                Left = -10,
+                Bottom = -10,
+                Right = 10,
+                ImageSource = new BitmapImage(new Uri(@"C:\Users\Dave Anderson\Desktop\onr-logo.png")),
+            });
             MiddleLeft.DataSeriesCollection.Add(new BarSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
