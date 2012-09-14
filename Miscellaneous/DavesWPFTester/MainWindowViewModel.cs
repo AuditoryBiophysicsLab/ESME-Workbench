@@ -104,10 +104,11 @@ namespace DavesWPFTester
 
         void CreateBottomRightSeries()
         {
-            const double rangeStart = 0;
+            const double rangeStart = 1;
             const int rangeEnd = 10;
             const double rangeStep = 1;
             BottomRight.XAxis.AxisType = AxisType.Enumerated;
+            BottomRight.YAxis.AxisType = AxisType.Logarithmic;
             BottomRight.XAxis.AxisTicks = new ObservableCollection<NewDataAxisTick>
             {
                 new NewDataAxisTick(-1, null, false),
@@ -126,14 +127,6 @@ namespace DavesWPFTester
             };
             //BottomRight.YAxis.DataRange.Update(0, 2);
             BottomRight.XAxis.DataRange.Update(-1, 11);
-            var blueSeries = new BarSeriesViewModel
-            {
-                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
-                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                StrokeThickness = 1,
-                SeriesName = "(blue) y = x",
-                Fill = Brushes.Blue,
-            };
             var redSeries = new BarSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x / 2.0)).ToObservableList(),
@@ -144,17 +137,61 @@ namespace DavesWPFTester
             };
             var greenSeries = new BarSeriesViewModel
             {
-                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 2.0)).ToObservableList(),
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(green) y = 2x",
+                SeriesName = "(green) y = x",
                 Fill = Brushes.Green,
             };
-            var stackedSeries = new GroupedBarSeriesViewModel();
-            stackedSeries.BarSeriesCollection.Add(redSeries);
-            stackedSeries.BarSeriesCollection.Add(blueSeries);
-            stackedSeries.BarSeriesCollection.Add(greenSeries);
-            BottomRight.DataSeriesCollection.Add(stackedSeries);
+            var blueSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 1.5)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "(blue) y = 1.5x",
+                Fill = Brushes.Blue,
+            };
+            var cyanSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 2)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "(cyan) y = 2x",
+                Fill = Brushes.Cyan,
+            };
+            var magentaSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 2.5)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "(magenta) y = 2.5x",
+                Fill = Brushes.Magenta,
+            };
+            var orangeSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 3)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "(orange) y = 3x",
+                Fill = Brushes.Orange,
+            };
+            var blackSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 3.5)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "(black) y = 3.5x",
+                Fill = Brushes.Black,
+            };
+            var groupedSeries = new GroupedBarSeriesViewModel();
+            groupedSeries.BarSeriesCollection.Add(redSeries);
+            groupedSeries.BarSeriesCollection.Add(greenSeries);
+            groupedSeries.BarSeriesCollection.Add(blueSeries);
+            groupedSeries.BarSeriesCollection.Add(cyanSeries);
+            groupedSeries.BarSeriesCollection.Add(magentaSeries);
+            groupedSeries.BarSeriesCollection.Add(orangeSeries);
+            groupedSeries.BarSeriesCollection.Add(blackSeries);
+            BottomRight.DataSeriesCollection.Add(groupedSeries);
             //BottomRight.DataSeriesCollection.Add(redSeries);
             //BottomRight.DataSeriesCollection.Add(blueSeries);
             //BottomRight.YAxis.VisibleRange.Add(0, 10);
@@ -163,10 +200,11 @@ namespace DavesWPFTester
 
         void CreateBottomLeftSeries()
         {
-            const double rangeStart = 0;
+            const double rangeStart = 1;
             const int rangeEnd = 10;
             const double rangeStep = 1;
             BottomLeft.XAxis.AxisType = AxisType.Enumerated;
+            //BottomLeft.YAxis.AxisType = AxisType.Logarithmic;
             BottomLeft.XAxis.AxisTicks = new ObservableCollection<NewDataAxisTick>
             {
                 new NewDataAxisTick(-1, null, false),
@@ -185,25 +223,70 @@ namespace DavesWPFTester
             };
             //BottomLeft.YAxis.DataRange.Update(0, 2);
             BottomLeft.XAxis.DataRange.Update(-1, 11);
-            var blueSeries = new BarSeriesViewModel
-            {
-                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
-                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
-                StrokeThickness = 1,
-                SeriesName = "(blue) y = x",
-                Fill = Brushes.Blue,
-            };
             var redSeries = new BarSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x / 2.0)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
                 SeriesName = "(red) y = x / 2",
-                Fill = Brushes.Red,
+                Fill = new SolidColorBrush(Color.FromArgb(128, 255, 0, 0)),
+            };
+            var greenSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "(green) y = x",
+                Fill = new SolidColorBrush(Color.FromArgb(128, 0, 255, 0)),
+            };
+            var blueSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 1.5)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "(blue) y = 1.5x",
+                Fill = new SolidColorBrush(Color.FromArgb(128, 0, 0, 255)),
+            };
+            var cyanSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 2)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "(cyan) y = 2x",
+                Fill = new SolidColorBrush(Color.FromArgb(128, 0, 255, 255)),
+            };
+            var magentaSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 2.5)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "(magenta) y = 2.5x",
+                Fill = new SolidColorBrush(Color.FromArgb(128, 255, 0, 255)),
+            };
+            var orangeSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 3)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "(orange) y = 3x",
+                Fill = new SolidColorBrush(Color.FromArgb(128, 255, 165, 0)),
+            };
+            var blackSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 3.5)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "(black) y = 3.5x",
+                Fill = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0)),
             };
             var stackedSeries = new StackedBarSeriesViewModel();
             stackedSeries.BarSeriesCollection.Add(redSeries);
+            stackedSeries.BarSeriesCollection.Add(greenSeries);
             stackedSeries.BarSeriesCollection.Add(blueSeries);
+            stackedSeries.BarSeriesCollection.Add(cyanSeries);
+            stackedSeries.BarSeriesCollection.Add(magentaSeries);
+            stackedSeries.BarSeriesCollection.Add(orangeSeries);
+            stackedSeries.BarSeriesCollection.Add(blackSeries);
             BottomLeft.DataSeriesCollection.Add(stackedSeries);
             //BottomLeft.DataSeriesCollection.Add(redSeries);
             //BottomLeft.DataSeriesCollection.Add(blueSeries);

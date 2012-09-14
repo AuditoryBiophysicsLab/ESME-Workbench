@@ -59,7 +59,7 @@ namespace DavesWPFTester
                     var rect = new Rect(plotX - width / 2, curPlotY - topShift, width, height);
                     //Debug.WriteLine(string.Format("Created rect for series {0}. Data: x = {1}, y = {2}  Rect: left = {3}, top = {4}, width = {5}, height = {6}, right = {7}, bottom = {8}", series.SeriesName, value.Item1.X, value.Item1.Y, rect.Left, rect.Top, rect.Width, rect.Height, rect.Right, rect.Bottom));
                     Shapes.Add(series.RectToShape(rect));
-                    lastDataY = curDataY;
+                    lastDataY += curDataY;
                 }
             }
         }
@@ -87,12 +87,9 @@ namespace DavesWPFTester
                     SeriesPlotPointCache[series][plotPoint.X] = Tuple.Create(point, plotPoint.Y);
                 }
                 XRange.Add(series.XRange);
+                YRange.Add(series.YRange);
             }
             var xPlotCoordinates = xCoordinates.Distinct().ToList();
-            foreach (var x in xPlotCoordinates)
-                YRange.Add((from series in BarSeriesCollection
-                            where SeriesPlotPointCache.ContainsKey(series)
-                            select SeriesPlotPointCache[series][x].Item1.Y).Sum());
             MinimumXPlotSpacing = xPlotCoordinates.AdjacentDifferences().Min();
             var groupWidth = MinimumXPlotSpacing * BarWidth;
             var seriesWidth = groupWidth / BarSeriesCollection.Count;
