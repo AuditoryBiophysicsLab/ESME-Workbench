@@ -95,5 +95,17 @@
                 <app:FourAxisSeriesView DataContext="{Binding BottomLeft}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
+        <GroupBox Grid.Row="2"
+                  Grid.Column="1"
+                  Margin="5"
+                  Header="Grouped bar series"
+                  Padding="5">
+            <DockPanel LastChildFill="True">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
+                    <app:LegendView ItemsSource="{Binding BottomRight.DataSeriesCollection}" />
+                </StackPanel>
+                <app:FourAxisSeriesView DataContext="{Binding BottomRight}" DockPanel.Dock="Left" />
+            </DockPanel>
+        </GroupBox>
     </Grid>
 </Window>

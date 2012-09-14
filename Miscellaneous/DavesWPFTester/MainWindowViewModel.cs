@@ -28,6 +28,8 @@ namespace DavesWPFTester
         [Initialize] public FourAxisSeriesViewModel MiddleLeft { get; set; }
         [Initialize] public FourAxisSeriesViewModel MiddleRight { get; set; }
         [Initialize] public FourAxisSeriesViewModel BottomLeft { get; set; }
+        [Initialize] public FourAxisSeriesViewModel BottomRight { get; set; }
+
         public bool AnimateTopLeft { get; set; }
         public bool AnimateMiddleLeft { get; set; }
         [ImportingConstructor]
@@ -42,8 +44,9 @@ namespace DavesWPFTester
                 CreateMiddleLeftSeries();
                 CreateMiddleRightSeries();
                 CreateBottomLeftSeries();
+                CreateBottomRightSeries();
 #if true
-                var timer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher) { Interval = TimeSpan.FromMilliseconds(1000) };
+                var timer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher) { Interval = TimeSpan.FromMilliseconds(5) };
                 timer.Start();
                 timer.Tick += (s, e) =>
                 {
@@ -98,6 +101,65 @@ namespace DavesWPFTester
         SimpleCommand<object, EventToCommandArgs> _viewClosing;
 
         #endregion
+
+        void CreateBottomRightSeries()
+        {
+            const double rangeStart = 0;
+            const int rangeEnd = 10;
+            const double rangeStep = 1;
+            BottomRight.XAxis.AxisType = AxisType.Enumerated;
+            BottomRight.XAxis.AxisTicks = new ObservableCollection<NewDataAxisTick>
+            {
+                new NewDataAxisTick(-1, null, false),
+                new NewDataAxisTick(0, "Zero", false),
+                new NewDataAxisTick(1, "One", false),
+                new NewDataAxisTick(2, "Two", false),
+                new NewDataAxisTick(3, "Three", false),
+                new NewDataAxisTick(4, "Four", false),
+                new NewDataAxisTick(5, "Five", false),
+                new NewDataAxisTick(6, "Six", false),
+                new NewDataAxisTick(7, "Seven", false),
+                new NewDataAxisTick(8, "Eight", false),
+                new NewDataAxisTick(9, "Nine", false),
+                new NewDataAxisTick(10, "Ten", false),
+                new NewDataAxisTick(11, null, false),
+            };
+            //BottomRight.YAxis.DataRange.Update(0, 2);
+            BottomRight.XAxis.DataRange.Update(-1, 11);
+            var blueSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "(blue) y = x",
+                Fill = Brushes.Blue,
+            };
+            var redSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x / 2.0)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "(red) y = x / 2",
+                Fill = Brushes.Red,
+            };
+            var greenSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 2.0)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "(green) y = 2x",
+                Fill = Brushes.Green,
+            };
+            var stackedSeries = new GroupedBarSeriesViewModel();
+            stackedSeries.BarSeriesCollection.Add(redSeries);
+            stackedSeries.BarSeriesCollection.Add(blueSeries);
+            stackedSeries.BarSeriesCollection.Add(greenSeries);
+            BottomRight.DataSeriesCollection.Add(stackedSeries);
+            //BottomRight.DataSeriesCollection.Add(redSeries);
+            //BottomRight.DataSeriesCollection.Add(blueSeries);
+            //BottomRight.YAxis.VisibleRange.Add(0, 10);
+            BottomRight.XAxisTicks = null;
+        }
 
         void CreateBottomLeftSeries()
         {
