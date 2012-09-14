@@ -93,6 +93,9 @@
       <HintPath>..\..\ESME WorkBench\External References\FileHelpers.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\ESME WorkBench\External References\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="MapSuiteCore">
       <HintPath>..\..\ESME WorkBench\External References\MapSuiteCore.dll</HintPath>
       <Private>False</Private>

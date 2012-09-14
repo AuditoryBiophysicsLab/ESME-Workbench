@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -199,6 +200,27 @@ namespace ESME.Scenarios
             }
         }
         string _storageDirectoryPath;
+
+        public void Log()
+        {
+            var log = log4net.LogManager.GetLogger(GetType());
+            var sb = new StringBuilder();
+            sb.AppendLine(string.Format("Scenario :{0}",Name ));
+            sb.AppendLine(string.Format("Location :{0}", Location.Name));
+            sb.AppendLine(string.Format("Duration :{0}",(TimeSpan)Duration ));
+            sb.AppendLine(string.Format("Time Period :{0}", (TimePeriod)TimePeriod));
+            sb.AppendLine(string.Format("Start Time :{0}", StartTime.Ticks.ToString(CultureInfo.InvariantCulture)));
+            sb.AppendLine(string.Format("Species Count :{0}", ScenarioSpecies.Count));
+            sb.AppendLine(string.Format("Platform Count  :{0}",Platforms.Count ));
+            sb.AppendLine(string.Format("Source Count :{0}", (from p in Platforms from s in p.Sources select s).Count()));
+            sb.AppendLine(string.Format("Mode Count :{0}", (from p in Platforms from s in p.Sources from m in s.Modes select m).Count()));
+            sb.AppendLine(string.Format("Perimeter Count :{0}", Perimeters.Count ));
+            sb.AppendLine(string.Format("Analysis Point Count :{0}", AnalysisPoints.Count ));
+            sb.AppendLine(string.Format("Transmission Loss Count :{0}", (from a in AnalysisPoints from t in a.TransmissionLosses select t).Count() ));
+            sb.AppendLine(string.Format("Radial Count :{0}",(from a in AnalysisPoints from t in a.TransmissionLosses from r in t.Radials select r).Count() ));
+            sb.AppendLine(string.Format("Storage Directory :{0}",StorageDirectoryPath ));
+            log.Info(sb.ToString());
+        }
 
         [NotMapped]
         public static IMasterDatabaseService Database { get; set; }

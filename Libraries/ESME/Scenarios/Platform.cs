@@ -241,7 +241,17 @@ namespace ESME.Scenarios
 #endif
             };
             var locations = PlatformBehavior.PlatformStates.Select(p => p.PlatformLocation.Location).ToList();
-            mapLayer.AddLines(locations);
+            try
+            {
+                mapLayer.AddLines(locations);
+            }
+            catch (Exception e)
+            {
+                var log = log4net.LogManager.GetLogger(GetType());
+                log.Error(string.Format("AddLines failed:{0}", e.Message));
+                log.Error(string.Format("locations.count:{0}", locations.Count));
+                Scenario.Log();
+            }
             mapLayer.Done();
             LayerSettings.MapLayerViewModel = mapLayer;
         }
