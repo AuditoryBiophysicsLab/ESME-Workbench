@@ -104,6 +104,8 @@ namespace ESME.Views.TransmissionLossViewer
                     RangeMax = _radial.Ranges.Last();
                     DepthMin = _radial.Depths.First();
                     DepthMax = _radial.Depths.Last();
+                    AxisSeriesViewModel.XAxis.VisibleRange.Update(RangeMin, RangeMax);
+                    AxisSeriesViewModel.YAxis.VisibleRange.Update(DepthMin, DepthMax);
                     AxisSeriesViewModel.XAxis.DataRange.Update(RangeMin, RangeMax);
                     AxisSeriesViewModel.YAxis.DataRange.Update(DepthMin, DepthMax);
                     _imageSeriesViewModel.Top = DepthMin;
@@ -111,6 +113,8 @@ namespace ESME.Views.TransmissionLossViewer
                     _imageSeriesViewModel.Bottom = DepthMax;
                     _imageSeriesViewModel.Right = RangeMax;
                     OnPropertyChanged("TransmissionLossRadial");
+                    AxisSeriesViewModel.XAxis.VisibleRange.RangeChanged += (sender, args) => CalculateBottomProfileGeometry();
+                    AxisSeriesViewModel.YAxis.VisibleRange.RangeChanged += (sender, args) => CalculateBottomProfileGeometry();
                     CalculateBottomProfileGeometry();
                 }
                 catch (Exception e)
@@ -129,10 +133,15 @@ namespace ESME.Views.TransmissionLossViewer
 
         void CalculateBottomProfileGeometry()
         {
-            _bottomProfileViewModel.SeriesData = Radial.BottomProfile;
-            _bottomProfileViewModel.ItemToPoint = bpp => new Point(((BottomProfilePoint)bpp).Range * 1000, ((BottomProfilePoint)bpp).Depth);
+            var profileData = Radial.BottomProfile.Select(bpp => new Point(bpp.Range * 1000, bpp.Depth)).ToList();
+            profileData.Insert(0, new Point(profileData[0].X, AxisSeriesViewModel.YAxis.VisibleRange.Max));
+            profileData.Add(new Point(profileData.Last().X, AxisSeriesViewModel.YAxis.VisibleRange.Max));
+            profileData.Add(new Point(profileData.First().X, profileData.First().Y));
+            _bottomProfileViewModel.SeriesData = profileData;
+            _bottomProfileViewModel.ItemToPoint = p => (Point)p;
             _bottomProfileViewModel.LineStrokeThickness = 5.0;
-            _bottomProfileViewModel.LineStroke = Brushes.Gray;
+            //_bottomProfileViewModel.LineStroke = Brushes.Black;
+            _bottomProfileViewModel.LineFill = Brushes.Gray;
 #if false
             if (Radial == null) return;
             var actualControlHeight = _view.OverlayCanvas.ActualHeight;
@@ -202,7 +211,7 @@ namespace ESME.Views.TransmissionLossViewer
             _view = view;
             _dispatcher = Dispatcher.CurrentDispatcher;
             ColorMapViewModel = ColorMapViewModel.Default;
-            view.SizeChanged += (s, e) => CalculateBottomProfileGeometry();
+            //view.SizeChanged += (s, e) => CalculateBottomProfileGeometry();
             AxisSeriesViewModel.DataSeriesCollection.Add(_imageSeriesViewModel);
             AxisSeriesViewModel.DataSeriesCollection.Add(_bottomProfileViewModel);
             AxisSeriesViewModel.XAxis.Label = "Range (m)";
@@ -339,9 +348,9 @@ namespace ESME.Views.TransmissionLossViewer
         public void CopyImageToClipboard() { Clipboard.SetImage(_view.ToBitmapSource()); }
 
         #region GridSizeChangedCommand
-        SimpleCommand<object, object> _gridSizeChanged;
+        //SimpleCommand<object, object> _gridSizeChanged;
 
-        public SimpleCommand<object, object> GridSizeChangedCommand { get { return _gridSizeChanged ?? (_gridSizeChanged = new SimpleCommand<object, object>(delegate { if (TransmissionLossRadial != null) CalculateBottomProfileGeometry(); })); } }
+        //public SimpleCommand<object, object> GridSizeChangedCommand { get { return _gridSizeChanged ?? (_gridSizeChanged = new SimpleCommand<object, object>(delegate { if (TransmissionLossRadial != null) CalculateBottomProfileGeometry(); })); } }
         #endregion
 
         #region MouseMoveCommand

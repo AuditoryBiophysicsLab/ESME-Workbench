@@ -23,6 +23,7 @@ namespace HRC.Plotting
                 .RegisterHandler(d => d.MarkerSize, MarkerPropertiesChanged)
                 .RegisterHandler(d => d.MarkerStroke, MarkerPropertiesChanged)
                 .RegisterHandler(d => d.LineStroke, LinePropertiesChanged)
+                .RegisterHandler(d => d.LineFill, LinePropertiesChanged)
                 .RegisterHandler(d => d.LineStrokeDashArray, LinePropertiesChanged)
                 .RegisterHandler(d => d.LineStrokeThickness, LinePropertiesChanged);
             _pointsObserver = new CollectionObserver(Points).RegisterHandler(PointsCollectionChanged);
@@ -31,7 +32,7 @@ namespace HRC.Plotting
 
         void LinePropertiesChanged()
         {
-            DrawLine = LineStrokeThickness > 0 && LineStroke != null;
+            DrawLine = LineFill != null || (LineStrokeThickness > 0 && LineStroke != null);
             CreateLineStoryboard();
             RenderSample();
             RenderLine();
@@ -141,7 +142,7 @@ namespace HRC.Plotting
             {
                 if (isFirst)
                 {
-                    lineContext.BeginFigure(plotPoint, false, false);
+                    lineContext.BeginFigure(plotPoint, LineFill != null, false);
                     isFirst = false;
                 }
                 else lineContext.LineTo(plotPoint, true, true);
@@ -152,6 +153,7 @@ namespace HRC.Plotting
                 Stroke = LineStroke,
                 StrokeDashArray = LineStrokeDashArray,
                 StrokeThickness = LineStrokeThickness,
+                Fill = LineFill,
                 Data = lineGeometry,
             };
             _lineShape.MouseEnter += (s, e) => _lineStoryboard.Begin(_lineShape, true);
@@ -256,6 +258,11 @@ namespace HRC.Plotting
         /// Brush used to stroke the line between series points.  If null, no line will be drawn
         /// </summary>
         public Brush LineStroke { get; set; }
+        /// <summary>
+        /// Brush used to fill the series line.  If this is specified, the first and last points will
+        /// be extended down to the X axis
+        /// </summary>
+        public Brush LineFill { get; set; }
         /// <summary>
         /// Each Double in the collection specifies the length of a dash or gap relative to the 
         /// Thickness of the pen. For example, a value of 1 creates a dash or gap that has the 

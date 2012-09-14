@@ -173,7 +173,8 @@ namespace HRC.Plotting
                 return;
             }
             if (AxisType == AxisType.Logarithmic && DataRange.Min <= 0) throw new InvalidOperationException("Cannot plot negative or zero values on a log scale");
-            VisibleRange = DataRange.Expand(0);
+            if (VisibleRange == null) VisibleRange = DataRange.Expand(0);
+            else VisibleRange.Update(DataRange);
         }
 
         #endregion

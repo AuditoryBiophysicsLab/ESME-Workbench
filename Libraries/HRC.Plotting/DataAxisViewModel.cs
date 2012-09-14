@@ -12,7 +12,7 @@ namespace HRC.Plotting
         public DataAxisViewModel()
         {
             DataRange = new RangeCollection();
-            VisibleRange = DataRange.Expand(0);
+            VisibleRange = new Range();
             AxisTicks = new ObservableCollection<NewDataAxisTick>();
         }
         [Initialize("Axis")]

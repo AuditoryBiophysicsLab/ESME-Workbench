@@ -53,7 +53,7 @@ namespace HRC.Plotting
             Update(valueList.Min(), valueList.Max());
         }
 
-        public void Update(Range range) { Update(range.Min, range.Max); }
+        public void Update(IRange range) { Update(range.Min, range.Max); }
 
         public void Update(IEnumerable<Range> ranges)
         {
