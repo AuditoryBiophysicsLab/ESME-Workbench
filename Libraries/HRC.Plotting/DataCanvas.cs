@@ -68,7 +68,21 @@ namespace HRC.Plotting
         {
             if (args.OldValue != null) {((ObservableCollection<ISeries>)args.OldValue).CollectionChanged -= SeriesSourceCollectionChanged;}
             //Redraw();
-            if (args.NewValue != null) ((ObservableCollection<ISeries>)args.NewValue).CollectionChanged += SeriesSourceCollectionChanged;
+            if (args.NewValue != null)
+            {
+                ((ObservableCollection<ISeries>)args.NewValue).CollectionChanged += SeriesSourceCollectionChanged;
+                foreach (var newItem in (ObservableCollection<ISeries>)args.NewValue)
+                {
+                    _seriesShapeCache.Add(newItem.Shapes, new List<Shape>());
+                    newItem.RenderShapes();
+                    newItem.Shapes.CollectionChanged += SeriesShapesCollectionChanged;
+                    foreach (var shape in newItem.Shapes)
+                    {
+                        _seriesShapeCache[newItem.Shapes].Add(shape);
+                        Children.Add(shape);
+                    }
+                }
+            }
         }
 
         void SeriesSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
@@ -204,5 +218,77 @@ namespace HRC.Plotting
             else dc.DrawLine(pen, new Point(0, location), new Point(length, location));
         }
 
+    }
+
+    public class DataPiping
+    {
+        #region DataPipes (Attached DependencyProperty)
+
+        public static readonly DependencyProperty DataPipesProperty =
+            DependencyProperty.RegisterAttached("DataPipes",
+            typeof(DataPipeCollection),
+            typeof(DataPiping),
+            new UIPropertyMetadata(null));
+
+        public static void SetDataPipes(DependencyObject o, DataPipeCollection value)
+        {
+            o.SetValue(DataPipesProperty, value);
+        }
+
+        public static DataPipeCollection GetDataPipes(DependencyObject o)
+        {
+            return (DataPipeCollection)o.GetValue(DataPipesProperty);
+        }
+
+        #endregion
+    }
+
+    public class DataPipeCollection : FreezableCollection<DataPipe>
+    {
+
+    }
+
+    public class DataPipe : Freezable
+    {
+        #region Source (DependencyProperty)
+
+        public object Source
+        {
+            get { return GetValue(SourceProperty); }
+            set { SetValue(SourceProperty, value); }
+        }
+        public static readonly DependencyProperty SourceProperty =
+            DependencyProperty.Register("Source", typeof(object), typeof(DataPipe),
+            new FrameworkPropertyMetadata(null, OnSourceChanged));
+
+        private static void OnSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ((DataPipe)d).OnSourceChanged(e);
+        }
+
+        protected virtual void OnSourceChanged(DependencyPropertyChangedEventArgs e)
+        {
+            Target = e.NewValue;
+        }
+
+        #endregion
+
+        #region Target (DependencyProperty)
+
+        public object Target
+        {
+            get { return GetValue(TargetProperty); }
+            set { SetValue(TargetProperty, value); }
+        }
+        public static readonly DependencyProperty TargetProperty =
+            DependencyProperty.Register("Target", typeof(object), typeof(DataPipe),
+            new FrameworkPropertyMetadata(null));
+
+        #endregion
+
+        protected override Freezable CreateInstanceCore()
+        {
+            return new DataPipe();
+        }
     }
 }

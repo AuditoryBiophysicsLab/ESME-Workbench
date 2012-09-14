@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
              xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
              xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
              Background="White"
@@ -17,28 +18,30 @@
             <WPF:EventToCommandTrigger Command="{Binding MouseMoveCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <DockPanel>
-        <StackPanel Height="22"
-                    DockPanel.Dock="Top"
-                    Orientation="Horizontal" />
-        <DockPanel DockPanel.Dock="Left">
-            <DockPanel>
-                <TextBlock Height="{Binding ActualHeight, ElementName=RangeAxis, Mode=OneWay}" DockPanel.Dock="Bottom" />
-                <controls:DataAxis x:Name="DepthAxis"
-                                   VerticalAlignment="Top"
-                                   AxisLabel="Depth (m)"
-                                   AxisLocation="Right"
-                                   EndValue="{Binding DepthMin}"
-                                   StartValue="{Binding DepthMax}"
-                                   TickValueFormat="0" />
-            </DockPanel>
-        </DockPanel>
-        <DockPanel DockPanel.Dock="Right">
-            <DockPanel Width="80">
-                <TextBlock Height="{Binding ActualHeight, ElementName=RangeAxis, Mode=OneWay}" DockPanel.Dock="Bottom" />
-                <DockPanel Margin="5 0 0 0"
-                           DataContext="{Binding ColorMapViewModel}"
-                           LastChildFill="False">
+    <Grid Margin="0 22 0 0">
+        <i:Interaction.Triggers>
+            <i:EventTrigger EventName="SizeChanged">
+                <WPF:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
+            </i:EventTrigger>
+        </i:Interaction.Triggers>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Background="Transparent"
+                   FontSize="24"
+                   Text="{Binding WaitToRenderText}"
+                   TextWrapping="Wrap" />
+        <DockPanel Grid.Row="0" Grid.Column="0">
+            <DockPanel Width="80" DockPanel.Dock="Right">
+                <TextBlock DockPanel.Dock="Bottom" Height="{Binding AxisSeriesViewModel.BottomAxis.ActualHeight, Mode=OneWay}" />
+                <DockPanel Margin="5 0 0 0" DataContext="{Binding ColorMapViewModel}" LastChildFill="False">
                     <controls:DataAxis AxisLabel="Transmission Loss (dB)"
                                        AxisLocation="Left"
                                        DockPanel.Dock="Right"
@@ -56,48 +59,7 @@
                                            StatisticalMinimum="{Binding StatisticalMinimum}" />
                 </DockPanel>
             </DockPanel>
+            <Plotting:FourAxisSeriesView x:Name="AxisView" DataContext="{Binding AxisSeriesViewModel}" DockPanel.Dock="Left" />
         </DockPanel>
-        <DockPanel DockPanel.Dock="Bottom">
-            <controls:DataAxis x:Name="RangeAxis"
-                               AxisLabel="Range (m)"
-                               AxisLocation="Top"
-                               EndValue="{Binding RangeMax}"
-                               StartValue="{Binding RangeMin}"
-                               TickValueFormat="0" />
-        </DockPanel>
-
-        <Grid>
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="SizeChanged">
-                    <WPF:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0"
-                       Grid.Column="0"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Background="Transparent"
-                       FontSize="24"
-                       Text="{Binding WaitToRenderText}"
-                       TextWrapping="Wrap" />
-            <Image Grid.Row="0"
-                   Grid.Column="0"
-                   Source="{Binding WriteableBitmap}"
-                   Stretch="Fill"
-                   Visibility="{Binding WriteableBitmapVisibility}" />
-
-            <Canvas x:Name="OverlayCanvas"
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    Background="Transparent">
-                <Path Data="{Binding BottomProfileGeometry}" Fill="DarkGray" Stroke="Black" StrokeThickness="0.1"/>
-            </Canvas>
-        </Grid>
-    </DockPanel>
+    </Grid>
 </UserControl>

@@ -74,13 +74,16 @@
     <Compile Include="AxisLabeling\Layout\Formatters\QuantitativeFormatter.cs" />
     <Compile Include="BarSeriesBase.cs" />
     <Compile Include="BarSeriesViewModel.cs" />
+    <Compile Include="DataAxisViewModel.cs" />
     <Compile Include="DataCanvas.cs" />
     <Compile Include="FourAxisSeriesView.xaml.cs">
       <DependentUpon>FourAxisSeriesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="FourAxisSeriesViewModel.cs" />
     <Compile Include="GroupedBarSeriesViewModel.cs" />
+    <Compile Include="ImageSeriesViewModel.cs" />
     <Compile Include="ISeries.cs" />
+    <Compile Include="LegendItemViewModel.cs" />
     <Compile Include="LegendView.xaml.cs">
       <DependentUpon>LegendView.xaml</DependentUpon>
     </Compile>

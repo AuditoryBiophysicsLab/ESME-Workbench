@@ -16,6 +16,7 @@ using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.Views.Controls;
 using HRC.Aspects;
+using HRC.Plotting;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -25,13 +26,15 @@ namespace ESME.Views.TransmissionLossViewer
     {
         readonly RadialView _view;
         readonly Dispatcher _dispatcher;
+        readonly ImageSeriesViewModel _imageSeriesViewModel = new ImageSeriesViewModel();
+        readonly LineSeriesViewModel _bottomProfileViewModel = new LineSeriesViewModel();
         TransmissionLossRadial TransmissionLossRadial { get; set; }
         public float RangeMin { get; set; }
         public float RangeMax { get; set; }
         public float DepthMin { get; set; }
         public float DepthMax { get; set; }
         public string WaitToRenderText { get; set; }
-
+        [Initialize] public FourAxisSeriesViewModel AxisSeriesViewModel { get; set; }
         public WriteableBitmap WriteableBitmap { get; set; }
 
         #region public ColorMapViewModel ColorMapViewModel { get; set; }
@@ -101,6 +104,12 @@ namespace ESME.Views.TransmissionLossViewer
                     RangeMax = _radial.Ranges.Last();
                     DepthMin = _radial.Depths.First();
                     DepthMax = _radial.Depths.Last();
+                    AxisSeriesViewModel.XAxis.DataRange.Update(RangeMin, RangeMax);
+                    AxisSeriesViewModel.YAxis.DataRange.Update(DepthMin, DepthMax);
+                    _imageSeriesViewModel.Top = DepthMin;
+                    _imageSeriesViewModel.Left = RangeMin;
+                    _imageSeriesViewModel.Bottom = DepthMax;
+                    _imageSeriesViewModel.Right = RangeMax;
                     OnPropertyChanged("TransmissionLossRadial");
                     CalculateBottomProfileGeometry();
                 }
@@ -120,6 +129,11 @@ namespace ESME.Views.TransmissionLossViewer
 
         void CalculateBottomProfileGeometry()
         {
+            _bottomProfileViewModel.SeriesData = Radial.BottomProfile;
+            _bottomProfileViewModel.ItemToPoint = bpp => new Point(((BottomProfilePoint)bpp).Range * 1000, ((BottomProfilePoint)bpp).Depth);
+            _bottomProfileViewModel.LineStrokeThickness = 5.0;
+            _bottomProfileViewModel.LineStroke = Brushes.Gray;
+#if false
             if (Radial == null) return;
             var actualControlHeight = _view.OverlayCanvas.ActualHeight;
             var actualControlWidth = _view.OverlayCanvas.ActualWidth;
@@ -149,6 +163,7 @@ namespace ESME.Views.TransmissionLossViewer
             }
             //todo ; later try to subtract half a depth cell from each depth (off-by-1/2 error on display)
             //todo: Dave changed the bottom profile format on 13 Aug 2011.  New format is a list of range/depth pairs where depth changes by more than 1cm
+#endif
         }
         #endregion
 
@@ -188,6 +203,13 @@ namespace ESME.Views.TransmissionLossViewer
             _dispatcher = Dispatcher.CurrentDispatcher;
             ColorMapViewModel = ColorMapViewModel.Default;
             view.SizeChanged += (s, e) => CalculateBottomProfileGeometry();
+            AxisSeriesViewModel.DataSeriesCollection.Add(_imageSeriesViewModel);
+            AxisSeriesViewModel.DataSeriesCollection.Add(_bottomProfileViewModel);
+            AxisSeriesViewModel.XAxis.Label = "Range (m)";
+            AxisSeriesViewModel.XAxisTicks = null;
+            AxisSeriesViewModel.YAxis.IsInverted = true;
+            AxisSeriesViewModel.YAxis.Label = "Depth (m)";
+            AxisSeriesViewModel.YAxisTicks = null;
         }
 
         void BeginRenderBitmap(Guid guid, TransmissionLossRadial transmissionLoss)
@@ -269,6 +291,7 @@ namespace ESME.Views.TransmissionLossViewer
                 OnPropertyChanged("WriteableBitmap");
                 WriteableBitmap.Unlock();
                 WriteableBitmapVisibility = Visibility.Visible;
+                _imageSeriesViewModel.ImageSource = WriteableBitmap;
             }, DispatcherPriority.Render);
             //_writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
             //_writeableBitmap.Unlock();
@@ -327,6 +350,7 @@ namespace ESME.Views.TransmissionLossViewer
 
         void MouseMoveHandler(EventToCommandArgs args)
         {
+#if false
             if (_view.OverlayCanvas.IsMouseOver && TransmissionLossRadial != null && Radial!=null)
             {
                 var e = (MouseEventArgs)args.EventArgs;
@@ -355,6 +379,7 @@ namespace ESME.Views.TransmissionLossViewer
                 MouseTLInfo = "Transmission Loss: N/A";
                 MouseSPLInfo = "Sound Pressure: N/A";
             }
+#endif
         }
         #endregion
 
