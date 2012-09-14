@@ -125,7 +125,7 @@ namespace DavesWPFTester
                 new NewDataAxisTick(10, "Ten", false),
                 new NewDataAxisTick(11, null, false),
             };
-            //BottomRight.YAxis.DataRange.Update(0, 2);
+            BottomRight.YAxis.DataRange.Update(0.1, 10);
             BottomRight.XAxis.DataRange.Update(-1, 11);
             var redSeries = new BarSeriesViewModel
             {
@@ -204,7 +204,7 @@ namespace DavesWPFTester
             const int rangeEnd = 10;
             const double rangeStep = 1;
             BottomLeft.XAxis.AxisType = AxisType.Enumerated;
-            //BottomLeft.YAxis.AxisType = AxisType.Logarithmic;
+            BottomLeft.YAxis.AxisType = AxisType.Logarithmic;
             BottomLeft.XAxis.AxisTicks = new ObservableCollection<NewDataAxisTick>
             {
                 new NewDataAxisTick(-1, null, false),
@@ -223,6 +223,7 @@ namespace DavesWPFTester
             };
             //BottomLeft.YAxis.DataRange.Update(0, 2);
             BottomLeft.XAxis.DataRange.Update(-1, 11);
+            BottomLeft.YAxis.DataRange.Update(0.1, 10);
             var redSeries = new BarSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x / 2.0)).ToObservableList(),
@@ -280,8 +281,8 @@ namespace DavesWPFTester
                 Fill = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0)),
             };
             var stackedSeries = new StackedBarSeriesViewModel();
-            stackedSeries.BarSeriesCollection.Add(redSeries);
             stackedSeries.BarSeriesCollection.Add(greenSeries);
+            stackedSeries.BarSeriesCollection.Add(redSeries);
             stackedSeries.BarSeriesCollection.Add(blueSeries);
             stackedSeries.BarSeriesCollection.Add(cyanSeries);
             stackedSeries.BarSeriesCollection.Add(magentaSeries);

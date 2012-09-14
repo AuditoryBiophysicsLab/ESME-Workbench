@@ -165,6 +165,7 @@
     <Compile Include="AxisLabeling\Language\Expressions\Formula.cs" />
     <Compile Include="AxisLabeling\Language\Expressions\Symbol.cs" />
     <Compile Include="BarSeriesBase.cs" />
+    <Compile Include="GroupedBarSeriesViewModel.cs" />
     <Compile Include="MultipleBarSeriesBase.cs" />
     <Compile Include="Range.cs" />
     <Compile Include="AxisLabeling\Language\Types\Constant.cs" />
