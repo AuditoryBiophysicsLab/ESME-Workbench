@@ -389,6 +389,10 @@
       <Name>ESME</Name>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\HRC.Plotting\HRC.Plotting.csproj">
+      <Project>{07EA1355-65C1-4335-AD7E-C7AC26550DFF}</Project>
+      <Name>HRC.Plotting</Name>
+    </ProjectReference>
     <ProjectReference Include="..\HRC\HRC.csproj">
       <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
       <Name>HRC</Name>

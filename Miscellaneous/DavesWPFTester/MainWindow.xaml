@@ -6,7 +6,7 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC" xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
         Title="Axis Control Tester"
         Width="1000"
         Height="1000"
@@ -39,9 +39,9 @@
             </GroupBox.Header>
             <DockPanel LastChildFill="True">
                 <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding TopLeft.LegendItems}" />
+                    <Plotting:LegendView ItemsSource="{Binding TopLeft.LegendItems}" />
                 </StackPanel>
-                <app:FourAxisSeriesView DataContext="{Binding TopLeft}" DockPanel.Dock="Left" />
+                <Plotting:FourAxisSeriesView DataContext="{Binding TopLeft}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
         <GroupBox Grid.Row="0"
@@ -51,9 +51,9 @@
                   Padding="5">
             <DockPanel LastChildFill="True">
                 <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding TopRight.LegendItems}" />
+                    <Plotting:LegendView ItemsSource="{Binding TopRight.LegendItems}" />
                 </StackPanel>
-                <app:FourAxisSeriesView DataContext="{Binding TopRight}" DockPanel.Dock="Left" />
+                <Plotting:FourAxisSeriesView DataContext="{Binding TopRight}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
         <GroupBox Grid.Row="1" Grid.Column="0" Margin="5" Padding="5">
@@ -66,9 +66,9 @@
 
             <DockPanel LastChildFill="True">
                 <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding MiddleLeft.LegendItems}" />
+                    <Plotting:LegendView ItemsSource="{Binding MiddleLeft.LegendItems}" />
                 </StackPanel>
-                <app:FourAxisSeriesView DataContext="{Binding MiddleLeft}" DockPanel.Dock="Left" />
+                <Plotting:FourAxisSeriesView DataContext="{Binding MiddleLeft}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
         <GroupBox Grid.Row="1"
@@ -78,9 +78,9 @@
                   Padding="5">
             <DockPanel LastChildFill="True">
                 <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding MiddleRight.LegendItems}" />
+                    <Plotting:LegendView ItemsSource="{Binding MiddleRight.LegendItems}" />
                 </StackPanel>
-                <app:FourAxisSeriesView DataContext="{Binding MiddleRight}" DockPanel.Dock="Left" />
+                <Plotting:FourAxisSeriesView DataContext="{Binding MiddleRight}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
         <GroupBox Grid.Row="2" Grid.Column="0" Margin="5" Padding="5">
@@ -94,9 +94,9 @@
 
             <DockPanel LastChildFill="True">
                 <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding BottomLeft.LegendItems}" />
+                    <Plotting:LegendView ItemsSource="{Binding BottomLeft.LegendItems}" />
                 </StackPanel>
-                <app:FourAxisSeriesView DataContext="{Binding BottomLeft}" DockPanel.Dock="Left" />
+                <Plotting:FourAxisSeriesView DataContext="{Binding BottomLeft}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
         <GroupBox Grid.Row="2" Grid.Column="1" Margin="5" Padding="5">
@@ -109,9 +109,9 @@
             </GroupBox.Header>
             <DockPanel LastChildFill="True">
                 <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding BottomRight.LegendItems}" />
+                    <Plotting:LegendView ItemsSource="{Binding BottomRight.LegendItems}" />
                 </StackPanel>
-                <app:FourAxisSeriesView DataContext="{Binding BottomRight}" DockPanel.Dock="Left" />
+                <Plotting:FourAxisSeriesView DataContext="{Binding BottomRight}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
     </Grid>

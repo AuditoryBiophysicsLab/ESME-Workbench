@@ -11,6 +11,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using ESME.NEMO;
 using HRC;
+using HRC.Plotting;
 using HRC.ViewModels;
 using Path = System.Windows.Shapes.Path;
 
@@ -643,20 +644,4 @@ namespace ESME.Views.Controls
         public double Value { get; set; }
         public bool IsMajorTick { get; set; }
     }
-
-    public enum AxisLocation
-    {
-        Top,
-        Bottom,
-        Left,
-        Right
-    }
-
-    public enum AxisType
-    {
-        Linear,
-        Logarithmic,
-        Enumerated,
-    }
-
 }

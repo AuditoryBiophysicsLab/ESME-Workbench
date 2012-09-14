@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using HRC.Aspects;
+using HRC.Plotting;
 using HRC.Utility;
 using HRC.ViewModels;
 
