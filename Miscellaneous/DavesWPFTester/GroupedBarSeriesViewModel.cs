@@ -53,7 +53,9 @@ namespace DavesWPFTester
                     if (Math.Abs(height - 0) < double.Epsilon) continue;
                     var rect = new Rect(groupPlotX, curPlotY, seriesWidth, height);
                     //Debug.WriteLine(string.Format("Created rect for series {0}. Data: x = {1}, y = {2}  Rect: left = {3}, top = {4}, width = {5}, height = {6}, right = {7}, bottom = {8}", series.SeriesName, value.Item1.X, value.Item1.Y, rect.Left, rect.Top, rect.Width, rect.Height, rect.Right, rect.Bottom));
-                    Shapes.Add(series.RectToShape(rect));
+                    var shape = series.RectToShape(rect);
+                    shape.ToolTip = string.Format("x = {0}, y = {1}", value.Item1.X, value.Item1.Y);
+                    Shapes.Add(shape);
                     groupPlotX += seriesWidth;
                 }
             }
