@@ -102,6 +102,69 @@ namespace DavesWPFTester
 
         #endregion
 
+        #region AddSeriesBottomLeftCommand
+        public SimpleCommand<object, EventToCommandArgs> AddSeriesBottomLeftCommand { get { return _addSeriesBottomLeft ?? (_addSeriesBottomLeft = new SimpleCommand<object, EventToCommandArgs>(AddSeriesBottomLeftHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _addSeriesBottomLeft;
+
+        void AddSeriesBottomLeftHandler(EventToCommandArgs args)
+        {
+            const double rangeStart = 1;
+            const int rangeEnd = 10;
+            const double rangeStep = 1;
+            var blackSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 3.5)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "y = 3.5x",
+                Fill = Brushes.Black,
+            };
+            ((StackedBarSeriesViewModel)BottomLeft.DataSeriesCollection.First()).BarSeriesCollection.Add(blackSeries);
+        }
+        #endregion
+
+        #region RemoveSeriesBottomLeftCommand
+        public SimpleCommand<object, EventToCommandArgs> RemoveSeriesBottomLeftCommand { get { return _removeSeriesBottomLeft ?? (_removeSeriesBottomLeft = new SimpleCommand<object, EventToCommandArgs>(RemoveSeriesBottomLeftHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _removeSeriesBottomLeft;
+
+        void RemoveSeriesBottomLeftHandler(EventToCommandArgs args)
+        {
+            var lastSeries = ((StackedBarSeriesViewModel)BottomLeft.DataSeriesCollection.First()).BarSeriesCollection.Last();
+            ((StackedBarSeriesViewModel)BottomLeft.DataSeriesCollection.First()).BarSeriesCollection.Remove(lastSeries);
+        }
+        #endregion
+
+        #region AddSeriesBottomRightCommand
+        public SimpleCommand<object, EventToCommandArgs> AddSeriesBottomRightCommand { get { return _addSeriesBottomRight ?? (_addSeriesBottomRight = new SimpleCommand<object, EventToCommandArgs>(AddSeriesBottomRightHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _addSeriesBottomRight;
+
+        void AddSeriesBottomRightHandler(EventToCommandArgs args)
+        {
+            const double rangeStart = 1;
+            const int rangeEnd = 10;
+            const double rangeStep = 1;
+            var blackSeries = new BarSeriesViewModel
+            {
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 3.5)).ToObservableList(),
+                ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
+                StrokeThickness = 1,
+                SeriesName = "y = 3.5x",
+                Fill = Brushes.Black,
+            };
+            ((GroupedBarSeriesViewModel)BottomRight.DataSeriesCollection.First()).BarSeriesCollection.Add(blackSeries);
+        }
+        #endregion
+
+        #region RemoveSeriesBottomRightCommand
+        public SimpleCommand<object, EventToCommandArgs> RemoveSeriesBottomRightCommand { get { return _removeSeriesBottomRight ?? (_removeSeriesBottomRight = new SimpleCommand<object, EventToCommandArgs>(RemoveSeriesBottomRightHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _removeSeriesBottomRight;
+
+        void RemoveSeriesBottomRightHandler(EventToCommandArgs args)
+        {
+            var lastSeries = ((GroupedBarSeriesViewModel)BottomRight.DataSeriesCollection.First()).BarSeriesCollection.Last();
+            ((GroupedBarSeriesViewModel)BottomRight.DataSeriesCollection.First()).BarSeriesCollection.Remove(lastSeries);
+        }
+        #endregion
         void CreateBottomRightSeries()
         {
             const double rangeStart = 1;

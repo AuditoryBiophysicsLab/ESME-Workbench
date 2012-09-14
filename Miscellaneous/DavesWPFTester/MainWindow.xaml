@@ -83,11 +83,15 @@
                 <app:FourAxisSeriesView DataContext="{Binding MiddleRight}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
-        <GroupBox Grid.Row="2"
-                  Grid.Column="0"
-                  Margin="5"
-                  Header="Stacked bar series"
-                  Padding="5">
+        <GroupBox Grid.Row="2" Grid.Column="0" Margin="5" Padding="5">
+            <GroupBox.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Stacked bar series" />
+                    <Button Margin="40 0 0 0" Command="{Binding AddSeriesBottomLeftCommand}" Content="Add series" />
+                    <Button Margin="40 0 0 0" Command="{Binding RemoveSeriesBottomLeftCommand}" Content="Remove series" />
+                </StackPanel>
+            </GroupBox.Header>
+
             <DockPanel LastChildFill="True">
                 <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
                     <app:LegendView ItemsSource="{Binding BottomLeft.LegendItems}" />
@@ -95,11 +99,14 @@
                 <app:FourAxisSeriesView DataContext="{Binding BottomLeft}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
-        <GroupBox Grid.Row="2"
-                  Grid.Column="1"
-                  Margin="5"
-                  Header="Grouped bar series"
-                  Padding="5">
+        <GroupBox Grid.Row="2" Grid.Column="1" Margin="5" Padding="5">
+            <GroupBox.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Grouped bar series" />
+                    <Button Margin="40 0 0 0" Command="{Binding AddSeriesBottomRightCommand}" Content="Add series" />
+                    <Button Margin="40 0 0 0" Command="{Binding RemoveSeriesBottomRightCommand}" Content="Remove series" />
+                </StackPanel>
+            </GroupBox.Header>
             <DockPanel LastChildFill="True">
                 <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
                     <app:LegendView ItemsSource="{Binding BottomRight.LegendItems}" />
