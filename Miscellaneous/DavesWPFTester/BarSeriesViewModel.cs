@@ -279,20 +279,28 @@ namespace DavesWPFTester
             MinimumXPlotSpacing = xPlotCoordinates.AdjacentDifferences().Min();
             var width = MinimumXPlotSpacing * BarWidth;
             PlotOriginY = YAxis.ValueToPosition(Math.Max(YAxis.VisibleRange.Min, 0));
-            if (YAxis.VisibleRange.Min < 1) Debugger.Break();
             Shapes.Clear();
-            foreach (var x in xPlotCoordinates)
+            //Debug.WriteLine("");
+            //Debug.WriteLine("Re-rendering StackedBarSeries");
+            foreach (var plotX in xPlotCoordinates)
             {
-                var lastY = PlotOriginY;
+                var lastDataY = Math.Max(YAxis.VisibleRange.Min, 0);
+                //Debug.WriteLine(string.Format("Rendering stacked bars at plotX = {0}", plotX));
                 foreach (var series in BarSeriesCollection)
                 {
-                    if (!_seriesPlotPointCache[series].ContainsKey(x)) continue;
+                    if (!_seriesPlotPointCache[series].ContainsKey(plotX)) continue;
                     // This series contains a Y value for the current X, turn it into a rect
-                    var value = _seriesPlotPointCache[series][x];
-                    var y = value.Item2;
-                    var rect = CreateBarRect(x, y, width, lastY, 0, PlotOriginY - lastY);
+                    var value = _seriesPlotPointCache[series][plotX];
+                    var curDataY = value.Item1.Y;
+                    var curPlotY = YAxis.ValueToPosition(curDataY);
+                    var height = Math.Abs(PlotOriginY - curPlotY);
+                    if (Math.Abs(height - 0) < double.Epsilon) continue;
+                    var lastPlotY = YAxis.ValueToPosition(lastDataY);
+                    var topShift = PlotOriginY - lastPlotY;
+                    var rect = new Rect(plotX - width / 2, curPlotY - topShift, width, height);
+                    //Debug.WriteLine(string.Format("Created rect for series {0}. Data: x = {1}, y = {2}  Rect: left = {3}, top = {4}, width = {5}, height = {6}, right = {7}, bottom = {8}", series.SeriesName, value.Item1.X, value.Item1.Y, rect.Left, rect.Top, rect.Width, rect.Height, rect.Right, rect.Bottom));
                     Shapes.Add(series.RectToShape(rect));
-                    lastY = y;
+                    lastDataY = curDataY;
                 }
             }
         }

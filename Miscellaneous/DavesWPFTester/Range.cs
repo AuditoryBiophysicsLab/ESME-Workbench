@@ -53,23 +53,6 @@ namespace DavesWPFTester
             Update(valueList.Min(), valueList.Max());
         }
 
-        public void Update(double min, double max)
-        {
-            var isChanged = false;
-            var oldRange = new Range(Min, Max);
-            if (!double.IsNaN(min) && !double.IsInfinity(min) && (double.IsNaN(Minimum) || (Math.Abs(Minimum - min) > double.Epsilon)))
-            {
-                Minimum = min;
-                isChanged = true;
-            }
-            if (!double.IsNaN(max) && !double.IsInfinity(max) && (double.IsNaN(Maximum) || (Math.Abs(Maximum - max) > double.Epsilon)))
-            {
-                Maximum = max;
-                isChanged = true;
-            }
-            if (isChanged) OnRangeChanged(oldRange);
-        }
-
         public void Update(Range range) { Update(range.Min, range.Max); }
 
         public void Update(IEnumerable<Range> ranges)
@@ -172,22 +155,6 @@ namespace DavesWPFTester
             Update(realMin, realMax);
         }
 
-        void Update(double min, double max)
-        {
-            var isChanged = false;
-            var oldRange = new Range(Min, Max);
-            if (!double.IsNaN(min) && !double.IsInfinity(min) && (double.IsNaN(Minimum) || (Math.Abs(Minimum - min) > double.Epsilon)))
-            {
-                Minimum = min;
-                isChanged = true;
-            }
-            if (!double.IsNaN(max) && !double.IsInfinity(max) && (double.IsNaN(Maximum) || (Math.Abs(Maximum - max) > double.Epsilon)))
-            {
-                Maximum = max;
-                isChanged = true;
-            }
-            if (isChanged) OnRangeChanged(oldRange);
-        }
         public RangeCollection(IEnumerable<IRange> ranges) : this() { foreach (var range in ranges) _ranges.Add(range); }
 
         readonly ObservableCollection<IRange> _ranges;
@@ -230,6 +197,23 @@ namespace DavesWPFTester
             Minimum = double.NaN;
             Maximum = double.NaN;
             OnRangeChanged(oldRange);
+        }
+
+        public virtual void Update(double min, double max)
+        {
+            var isChanged = false;
+            var oldRange = new Range(Min, Max);
+            if (!double.IsNaN(min) && !double.IsInfinity(min) && (double.IsNaN(Minimum) || (Math.Abs(Minimum - min) > double.Epsilon)))
+            {
+                Minimum = min;
+                isChanged = true;
+            }
+            if (!double.IsNaN(max) && !double.IsInfinity(max) && (double.IsNaN(Maximum) || (Math.Abs(Maximum - max) > double.Epsilon)))
+            {
+                Maximum = max;
+                isChanged = true;
+            }
+            if (isChanged) OnRangeChanged(oldRange);
         }
 
         public virtual Range Expand(double amount) { return new Range(Min - amount, Max + amount); }

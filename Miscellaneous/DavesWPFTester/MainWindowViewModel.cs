@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
@@ -102,8 +101,8 @@ namespace DavesWPFTester
 
         void CreateBottomLeftSeries()
         {
-            const double rangeStart = 1;
-            const int rangeEnd = 2;
+            const double rangeStart = 0;
+            const int rangeEnd = 10;
             const double rangeStep = 1;
             BottomLeft.XAxis.AxisType = AxisType.Enumerated;
             BottomLeft.XAxis.AxisTicks = new ObservableCollection<NewDataAxisTick>
@@ -122,33 +121,31 @@ namespace DavesWPFTester
                 new NewDataAxisTick(10, "Ten", false),
                 new NewDataAxisTick(11, null, false),
             };
-            BottomLeft.YAxis.VisibleRange.Update(0, 10);
+            //BottomLeft.YAxis.DataRange.Update(0, 2);
+            BottomLeft.XAxis.DataRange.Update(-1, 11);
             var blueSeries = new BarSeriesViewModel
             {
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(bar) y = x",
+                SeriesName = "(blue) y = x",
                 Fill = Brushes.Blue,
-                Stroke = Brushes.DarkGray,
             };
             var redSeries = new BarSeriesViewModel
             {
-                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, 2.0)).ToObservableList(),
+                SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x / 2.0)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(bar) y = 2",
+                SeriesName = "(red) y = x / 2",
                 Fill = Brushes.Red,
-                Stroke = Brushes.Green,
             };
             var stackedSeries = new StackedBarSeriesViewModel();
-            stackedSeries.BarSeriesCollection.Add(blueSeries);
             stackedSeries.BarSeriesCollection.Add(redSeries);
+            stackedSeries.BarSeriesCollection.Add(blueSeries);
             BottomLeft.DataSeriesCollection.Add(stackedSeries);
             //BottomLeft.DataSeriesCollection.Add(redSeries);
             //BottomLeft.DataSeriesCollection.Add(blueSeries);
             //BottomLeft.YAxis.VisibleRange.Add(0, 10);
-            BottomLeft.XAxis.VisibleRange.Update(-1, 11);
             BottomLeft.XAxisTicks = null;
         }
 

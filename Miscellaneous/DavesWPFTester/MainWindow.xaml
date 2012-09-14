@@ -30,22 +30,15 @@
             <ColumnDefinition />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
-        <GroupBox Grid.Row="0"
-                  Grid.Column="0"
-                  Margin="5"
-                  Padding="5">
+        <GroupBox Grid.Row="0" Grid.Column="0" Margin="5" Padding="5">
             <GroupBox.Header>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Line series with markers, linear axes" />
-                    <CheckBox Margin="40 0 0 0"
-                              Content="Animate"
-                              IsChecked="{Binding AnimateTopLeft}" />
+                    <CheckBox Margin="40 0 0 0" Content="Animate" IsChecked="{Binding AnimateTopLeft}" />
                 </StackPanel>
             </GroupBox.Header>
             <DockPanel LastChildFill="True">
-                <StackPanel Margin="10 0 0 0"
-                            DockPanel.Dock="Right"
-                            Orientation="Vertical">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
                     <app:LegendView ItemsSource="{Binding TopLeft.DataSeriesCollection}" />
                 </StackPanel>
                 <app:FourAxisSeriesView DataContext="{Binding TopLeft}" DockPanel.Dock="Left" />
@@ -57,31 +50,22 @@
                   Header="Line series, semilog axes"
                   Padding="5">
             <DockPanel LastChildFill="True">
-                <StackPanel Margin="10 0 0 0"
-                            DockPanel.Dock="Right"
-                            Orientation="Vertical">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
                     <app:LegendView ItemsSource="{Binding TopRight.DataSeriesCollection}" />
                 </StackPanel>
                 <app:FourAxisSeriesView DataContext="{Binding TopRight}" DockPanel.Dock="Left" />
             </DockPanel>
         </GroupBox>
-        <GroupBox Grid.Row="1"
-                  Grid.Column="0"
-                  Margin="5"
-                  Padding="5">
+        <GroupBox Grid.Row="1" Grid.Column="0" Margin="5" Padding="5">
             <GroupBox.Header>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Bar series, linear axes" />
-                    <CheckBox Margin="40 0 0 0"
-                              Content="Animate"
-                              IsChecked="{Binding AnimateMiddleLeft}" />
+                    <CheckBox Margin="40 0 0 0" Content="Animate" IsChecked="{Binding AnimateMiddleLeft}" />
                 </StackPanel>
             </GroupBox.Header>
 
             <DockPanel LastChildFill="True">
-                <StackPanel Margin="10 0 0 0"
-                            DockPanel.Dock="Right"
-                            Orientation="Vertical">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
                     <app:LegendView ItemsSource="{Binding MiddleLeft.DataSeriesCollection}" />
                 </StackPanel>
                 <app:FourAxisSeriesView DataContext="{Binding MiddleLeft}" DockPanel.Dock="Left" />
@@ -93,9 +77,7 @@
                   Header="Bar series, semilog axes"
                   Padding="5">
             <DockPanel LastChildFill="True">
-                <StackPanel Margin="10 0 0 0"
-                            DockPanel.Dock="Right"
-                            Orientation="Vertical">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
                     <app:LegendView ItemsSource="{Binding MiddleRight.DataSeriesCollection}" />
                 </StackPanel>
                 <app:FourAxisSeriesView DataContext="{Binding MiddleRight}" DockPanel.Dock="Left" />
@@ -104,12 +86,10 @@
         <GroupBox Grid.Row="2"
                   Grid.Column="0"
                   Margin="5"
-                  Header="NewAxisSeriesView"
+                  Header="Stacked bar series"
                   Padding="5">
             <DockPanel LastChildFill="True">
-                <StackPanel Margin="10 0 0 0"
-                            DockPanel.Dock="Right"
-                            Orientation="Vertical">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
                     <app:LegendView ItemsSource="{Binding BottomLeft.DataSeriesCollection}" />
                 </StackPanel>
                 <app:FourAxisSeriesView DataContext="{Binding BottomLeft}" DockPanel.Dock="Left" />
