@@ -39,7 +39,7 @@
             </GroupBox.Header>
             <DockPanel LastChildFill="True">
                 <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding TopLeft.DataSeriesCollection}" />
+                    <app:LegendView ItemsSource="{Binding TopLeft.LegendItems}" />
                 </StackPanel>
                 <app:FourAxisSeriesView DataContext="{Binding TopLeft}" DockPanel.Dock="Left" />
             </DockPanel>
@@ -51,7 +51,7 @@
                   Padding="5">
             <DockPanel LastChildFill="True">
                 <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding TopRight.DataSeriesCollection}" />
+                    <app:LegendView ItemsSource="{Binding TopRight.LegendItems}" />
                 </StackPanel>
                 <app:FourAxisSeriesView DataContext="{Binding TopRight}" DockPanel.Dock="Left" />
             </DockPanel>
@@ -66,7 +66,7 @@
 
             <DockPanel LastChildFill="True">
                 <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding MiddleLeft.DataSeriesCollection}" />
+                    <app:LegendView ItemsSource="{Binding MiddleLeft.LegendItems}" />
                 </StackPanel>
                 <app:FourAxisSeriesView DataContext="{Binding MiddleLeft}" DockPanel.Dock="Left" />
             </DockPanel>
@@ -78,7 +78,7 @@
                   Padding="5">
             <DockPanel LastChildFill="True">
                 <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding MiddleRight.DataSeriesCollection}" />
+                    <app:LegendView ItemsSource="{Binding MiddleRight.LegendItems}" />
                 </StackPanel>
                 <app:FourAxisSeriesView DataContext="{Binding MiddleRight}" DockPanel.Dock="Left" />
             </DockPanel>
@@ -90,7 +90,7 @@
                   Padding="5">
             <DockPanel LastChildFill="True">
                 <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding BottomLeft.DataSeriesCollection}" />
+                    <app:LegendView ItemsSource="{Binding BottomLeft.LegendItems}" />
                 </StackPanel>
                 <app:FourAxisSeriesView DataContext="{Binding BottomLeft}" DockPanel.Dock="Left" />
             </DockPanel>
@@ -102,7 +102,7 @@
                   Padding="5">
             <DockPanel LastChildFill="True">
                 <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
-                    <app:LegendView ItemsSource="{Binding BottomRight.DataSeriesCollection}" />
+                    <app:LegendView ItemsSource="{Binding BottomRight.LegendItems}" />
                 </StackPanel>
                 <app:FourAxisSeriesView DataContext="{Binding BottomRight}" DockPanel.Dock="Left" />
             </DockPanel>

@@ -48,34 +48,34 @@ namespace DavesWPFTester
             switch (args.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    foreach (BarSeriesBase series in args.NewItems)
+                    for (var i = 0; i < args.NewItems.Count; i++)
                     {
-                        series.XAxis = XAxis;
-                        series.YAxis = YAxis;
+                        var newItem = (SeriesViewModelBase)args.NewItems[i];
+                        var newItemIndex = args.NewStartingIndex + i;
+                        if (newItem.XAxis == null) newItem.XAxis = XAxis;
+                        if (newItem.YAxis == null) newItem.YAxis = YAxis;
+                        LegendItems.Insert(newItemIndex, new LegendItemViewModel(newItem));
                     }
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    foreach (BarSeriesBase series in args.OldItems)
+                    for (var i = 0; i < args.OldItems.Count; i++)
                     {
-                        series.XAxis = null;
-                        series.YAxis = null;
+                        var oldItemIndex = args.OldStartingIndex + i;
+                        LegendItems.RemoveAt(oldItemIndex);
                     }
                     break;
                 case NotifyCollectionChangedAction.Replace:
-                    foreach (BarSeriesBase series in args.OldItems)
+                    for (var i = 0; i < args.OldItems.Count; i++)
                     {
-                        series.XAxis = null;
-                        series.YAxis = null;
-                    }
-                    foreach (BarSeriesBase series in args.NewItems)
-                    {
-                        series.XAxis = XAxis;
-                        series.YAxis = YAxis;
+                        var newItem = (SeriesViewModelBase)args.NewItems[i];
+                        var oldItemIndex = args.OldStartingIndex + i;
+                        LegendItems[oldItemIndex] = new LegendItemViewModel(newItem);
                     }
                     break;
                 case NotifyCollectionChangedAction.Reset:
+                    throw new NotImplementedException("Reset");
                 case NotifyCollectionChangedAction.Move:
-                    break;
+                    throw new NotImplementedException("Move");
             }
             RenderShapes();
         }

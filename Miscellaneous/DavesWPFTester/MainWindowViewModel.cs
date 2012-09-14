@@ -132,7 +132,7 @@ namespace DavesWPFTester
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x / 2.0)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(red) y = x / 2",
+                SeriesName = "y = x / 2",
                 Fill = Brushes.Red,
             };
             var greenSeries = new BarSeriesViewModel
@@ -140,7 +140,7 @@ namespace DavesWPFTester
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(green) y = x",
+                SeriesName = "y = x",
                 Fill = Brushes.Green,
             };
             var blueSeries = new BarSeriesViewModel
@@ -148,7 +148,7 @@ namespace DavesWPFTester
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 1.5)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(blue) y = 1.5x",
+                SeriesName = "y = 1.5x",
                 Fill = Brushes.Blue,
             };
             var cyanSeries = new BarSeriesViewModel
@@ -156,7 +156,7 @@ namespace DavesWPFTester
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 2)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(cyan) y = 2x",
+                SeriesName = "y = 2x",
                 Fill = Brushes.Cyan,
             };
             var magentaSeries = new BarSeriesViewModel
@@ -164,7 +164,7 @@ namespace DavesWPFTester
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 2.5)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(magenta) y = 2.5x",
+                SeriesName = "y = 2.5x",
                 Fill = Brushes.Magenta,
             };
             var orangeSeries = new BarSeriesViewModel
@@ -172,7 +172,7 @@ namespace DavesWPFTester
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 3)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(orange) y = 3x",
+                SeriesName = "y = 3x",
                 Fill = Brushes.Orange,
             };
             var blackSeries = new BarSeriesViewModel
@@ -180,7 +180,7 @@ namespace DavesWPFTester
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 3.5)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(black) y = 3.5x",
+                SeriesName = "y = 3.5x",
                 Fill = Brushes.Black,
             };
             var groupedSeries = new GroupedBarSeriesViewModel();
@@ -229,7 +229,7 @@ namespace DavesWPFTester
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x / 2.0)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(red) y = x / 2",
+                SeriesName = "y = x / 2",
                 Fill = new SolidColorBrush(Color.FromArgb(128, 255, 0, 0)),
             };
             var greenSeries = new BarSeriesViewModel
@@ -237,7 +237,7 @@ namespace DavesWPFTester
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(green) y = x",
+                SeriesName = "y = x",
                 Fill = new SolidColorBrush(Color.FromArgb(128, 0, 255, 0)),
             };
             var blueSeries = new BarSeriesViewModel
@@ -245,7 +245,7 @@ namespace DavesWPFTester
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 1.5)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(blue) y = 1.5x",
+                SeriesName = "y = 1.5x",
                 Fill = new SolidColorBrush(Color.FromArgb(128, 0, 0, 255)),
             };
             var cyanSeries = new BarSeriesViewModel
@@ -253,7 +253,7 @@ namespace DavesWPFTester
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 2)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(cyan) y = 2x",
+                SeriesName = "y = 2x",
                 Fill = new SolidColorBrush(Color.FromArgb(128, 0, 255, 255)),
             };
             var magentaSeries = new BarSeriesViewModel
@@ -261,7 +261,7 @@ namespace DavesWPFTester
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 2.5)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(magenta) y = 2.5x",
+                SeriesName = "y = 2.5x",
                 Fill = new SolidColorBrush(Color.FromArgb(128, 255, 0, 255)),
             };
             var orangeSeries = new BarSeriesViewModel
@@ -269,7 +269,7 @@ namespace DavesWPFTester
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 3)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(orange) y = 3x",
+                SeriesName = "y = 3x",
                 Fill = new SolidColorBrush(Color.FromArgb(128, 255, 165, 0)),
             };
             var blackSeries = new BarSeriesViewModel
@@ -277,7 +277,7 @@ namespace DavesWPFTester
                 SeriesData = Range(rangeStart, rangeEnd, rangeStep).Select(x => Tuple.Create(x, x * 3.5)).ToObservableList(),
                 ItemToPoint = i => new Point(((Tuple<double, double>)i).Item1, ((Tuple<double, double>)i).Item2),
                 StrokeThickness = 1,
-                SeriesName = "(black) y = 3.5x",
+                SeriesName = "y = 3.5x",
                 Fill = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0)),
             };
             var stackedSeries = new StackedBarSeriesViewModel();

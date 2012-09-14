@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Windows;
@@ -43,7 +44,8 @@ namespace DavesWPFTester
         [Initialize] public DataAxisViewModel BottomAxis { get; set; }
         [Initialize] public DataAxisViewModel LeftAxis { get; set; }
         [Initialize] public DataAxisViewModel RightAxis { get; set; }
-        [Initialize] public ObservableCollection<ISeries> DataSeriesCollection { get; set; }
+        [Initialize, UsedImplicitly] public ObservableCollection<ISeries> DataSeriesCollection { get; private set; }
+        [Initialize, UsedImplicitly] public ObservableCollection<LegendItemViewModel> LegendItems { get; private set; }
 
         public DataAxisViewModel XAxis { get; set; }
         public DataAxisViewModel YAxis { get; set; }
@@ -59,32 +61,96 @@ namespace DavesWPFTester
             if (_dataSeriesCollectionObserver == null) _dataSeriesCollectionObserver = new CollectionObserver(DataSeriesCollection);
             _dataSeriesCollectionObserver.RegisterHandler(DataSeriesCollectionChanged);
         }
+        readonly Dictionary<SeriesViewModelBase,CollectionObserver> _seriesLegendItemCollectionObservers = new Dictionary<SeriesViewModelBase, CollectionObserver>();
         void DataSeriesCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
             switch (args.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    foreach (SeriesViewModelBase dataSeries in args.NewItems)
+                    foreach (SeriesViewModelBase newItem in args.NewItems) 
                     {
-                        if (dataSeries.XAxis == null) dataSeries.XAxis = XAxis;
-                        if (dataSeries.YAxis == null) dataSeries.YAxis = YAxis;
+                        if (newItem.XAxis == null) newItem.XAxis = XAxis;
+                        if (newItem.YAxis == null) newItem.YAxis = YAxis;
+                        foreach (var legendItem in newItem.LegendItems) LegendItems.Add(legendItem);
+                        _seriesLegendItemCollectionObservers.Add(newItem, new CollectionObserver(newItem.LegendItems).RegisterHandler(DataSeriesLegendItemsCollectionChanged));
                     }
                     break;
                 case NotifyCollectionChangedAction.Remove:
+                    foreach (SeriesViewModelBase oldItem in args.OldItems)
+                    {
+                        oldItem.XAxis = null;
+                        oldItem.YAxis = null;
+                        foreach (var legendItem in oldItem.LegendItems) LegendItems.Remove(legendItem);
+                        _seriesLegendItemCollectionObservers.Remove(oldItem);
+                    }
                     break;
                 case NotifyCollectionChangedAction.Replace:
-                    foreach (SeriesViewModelBase dataSeries in args.NewItems)
+                    foreach (SeriesViewModelBase oldItem in args.OldItems)
                     {
-                        if (dataSeries.XAxis == null) dataSeries.XAxis = XAxis;
-                        if (dataSeries.YAxis == null) dataSeries.YAxis = YAxis;
+                        oldItem.XAxis = null;
+                        oldItem.YAxis = null;
+                        foreach (var legendItem in oldItem.LegendItems) LegendItems.Remove(legendItem);
+                        _seriesLegendItemCollectionObservers.Remove(oldItem);
+                    }
+                    foreach (SeriesViewModelBase newItem in args.NewItems) 
+                    {
+                        if (newItem.XAxis == null) newItem.XAxis = XAxis;
+                        if (newItem.YAxis == null) newItem.YAxis = YAxis;
+                        foreach (var legendItem in newItem.LegendItems) LegendItems.Add(legendItem);
+                        _seriesLegendItemCollectionObservers.Add(newItem, new CollectionObserver(newItem.LegendItems).RegisterHandler(DataSeriesLegendItemsCollectionChanged));
                     }
                     break;
                 case NotifyCollectionChangedAction.Reset:
-                    throw new NotImplementedException("Clear");
+                    LegendItems.Clear();
+                    break;
                 case NotifyCollectionChangedAction.Move:
                     throw new NotImplementedException("Move");
             }
         }
+
+        void DataSeriesLegendItemsCollectionChanged(INotifyCollectionChanged sender, NotifyCollectionChangedEventArgs args)
+        {
+            switch (args.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (LegendItemViewModel legendItem in args.NewItems) LegendItems.Add(legendItem);
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (LegendItemViewModel legendItem in args.OldItems) LegendItems.Remove(legendItem);
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    for (var i = 0; i < args.OldItems.Count; i++)
+                    {
+                        var newItem = (LegendItemViewModel)args.NewItems[i];
+                        var oldItemIndex = args.OldStartingIndex + i;
+                        LegendItems[oldItemIndex] = newItem;
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    throw new NotImplementedException("Reset");
+                case NotifyCollectionChangedAction.Move:
+                    throw new NotImplementedException("Move");
+            }
+        }
+    }
+
+    public class LegendItemViewModel : ViewModelBase
+    {
+        [UsedImplicitly] PropertyObserver<SeriesViewModelBase> _propertyObserver;
+        public LegendItemViewModel(SeriesViewModelBase dataSeries)
+        {
+            DataSeries = dataSeries;
+            _propertyObserver = new PropertyObserver<SeriesViewModelBase>(dataSeries)
+                .RegisterHandler(s => s.SampleImageSource, series => { SampleImageSource = series.SampleImageSource; })
+                .RegisterHandler(s => s.SeriesName, series => { SeriesName = series.SeriesName; });
+
+            SampleImageSource = dataSeries.SampleImageSource;
+            SeriesName = dataSeries.SeriesName;
+        }
+
+        public ImageSource SampleImageSource { get; set; }
+        public string SeriesName { get; set; }
+        public SeriesViewModelBase DataSeries { get; private set; }
     }
 
     public class DataAxisViewModel : ViewModelBase

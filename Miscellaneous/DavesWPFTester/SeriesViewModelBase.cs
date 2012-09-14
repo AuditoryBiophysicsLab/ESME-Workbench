@@ -40,6 +40,8 @@ namespace DavesWPFTester
 
         public string SeriesName { get; set; }
 
+        [Initialize, UsedImplicitly] public ObservableCollection<LegendItemViewModel> LegendItems { get; private set; }
+
         public ICollection SeriesData { get; set; }
 
         [Initialize] public ObservableCollection<Shape> Shapes { get; set; }

@@ -18,6 +18,7 @@ namespace DavesWPFTester
                 .RegisterHandler(d => d.StrokeThickness, RenderPropertiesChanged)
                 .RegisterHandler(d => d.Stroke, RenderPropertiesChanged)
                 .RegisterHandler(d => d.Fill, RenderPropertiesChanged);
+            LegendItems.Add(new LegendItemViewModel(this));
         }
 
         void RenderPropertiesChanged()

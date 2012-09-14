@@ -30,6 +30,7 @@ namespace DavesWPFTester
                 .RegisterHandler(d => d.LineStrokeDashArray, LinePropertiesChanged)
                 .RegisterHandler(d => d.LineStrokeThickness, LinePropertiesChanged);
             _pointsObserver = new CollectionObserver(Points).RegisterHandler(PointsCollectionChanged);
+            LegendItems.Add(new LegendItemViewModel(this));
         }
 
         void LinePropertiesChanged()
