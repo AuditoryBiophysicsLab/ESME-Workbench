@@ -74,7 +74,7 @@ namespace HRC.Plotting
         }
         void XAxisValueToPositionChanged()
         {
-            Debug.WriteLine("XAxis.ValueToPosition changed, re-rendering...");
+            //Debug.WriteLine("XAxis.ValueToPosition changed, re-rendering...");
             RenderShapes();
         }
         void YAxisChanged()
@@ -92,7 +92,7 @@ namespace HRC.Plotting
         }
         void YAxisValueToPositionChanged()
         {
-            Debug.WriteLine("YAxis.ValueToPosition changed, re-rendering...");
+            //Debug.WriteLine("YAxis.ValueToPosition changed, re-rendering...");
             RenderShapes();
         }
 

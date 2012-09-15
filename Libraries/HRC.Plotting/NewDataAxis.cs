@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
 using HRC.Plotting.AxisLabeling.Layout;
@@ -277,7 +278,8 @@ namespace HRC.Plotting
                                                                                             new FrameworkPropertyMetadata(null,
                                                                                                                           FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                                                                           FrameworkPropertyMetadataOptions.AffectsRender |
-                                                                                                                          FrameworkPropertyMetadataOptions.AffectsMeasure,
+                                                                                                                          FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                                                                                          FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                                                                                                                           VisibleRangePropertyChanged));
 
         public Range VisibleRange { get { return (Range)GetValue(VisibleRangeProperty); } set { SetValue(VisibleRangeProperty, value); } }
@@ -290,10 +292,15 @@ namespace HRC.Plotting
             if (args.OldValue != null) ((Range)args.OldValue).RangeChanged -= VisibleRangeChanged;
             if (args.NewValue != null) ((Range)args.NewValue).RangeChanged += VisibleRangeChanged;
             UpdateVisibleRange();
+            var bindingExpression = GetBindingExpression(VisibleRangeProperty);
+            if (bindingExpression != null) bindingExpression.UpdateSource();
         }
         void VisibleRangeChanged(object sender, EventArgs args)
         {
             UpdateVisibleRange();
+            var bindingExpression = GetBindingExpression(VisibleRangeProperty);
+            if (bindingExpression != null) bindingExpression.UpdateSource();
+            InvalidateMeasure();
         }
 
         void OnSizeChanged()
@@ -502,7 +509,7 @@ namespace HRC.Plotting
                 default:
                     throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
             }
-            Debug.WriteLine(string.Format("NewDataAxis: MeasureEnumerated for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
+            //Debug.WriteLine(string.Format("NewDataAxis: MeasureEnumerated for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
             return desiredSize;
         }
 
@@ -631,7 +638,7 @@ namespace HRC.Plotting
             // desiredSize = ... computed sum of children's DesiredSize ...;
             // IMPORTANT: do not allow PositiveInfinity to be returned, that will raise an exception in the caller!
             // PositiveInfinity might be an availableSize input; this means that the parent does not care about sizing
-            Debug.WriteLine(string.Format("NewDataAxis: MeasureNonEnumerated for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
+            //Debug.WriteLine(string.Format("NewDataAxis: MeasureNonEnumerated for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
             return desiredSize;
         }
 
@@ -708,7 +715,7 @@ namespace HRC.Plotting
                         throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
                 }
             }
-            Debug.WriteLine(string.Format("NewDataAxis: ArrangeOverride for {0} returning desired width {1} and height {2}", AxisLabel, arrangeSize.Width, arrangeSize.Height));
+            //Debug.WriteLine(string.Format("NewDataAxis: ArrangeOverride for {0} returning desired width {1} and height {2}", AxisLabel, arrangeSize.Width, arrangeSize.Height));
             return arrangeSize;
         }
 

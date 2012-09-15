@@ -386,7 +386,7 @@ namespace DavesWPFTester
                 Left = -10,
                 Bottom = -10,
                 Right = 10,
-                ImageSource = new BitmapImage(new Uri(@"C:\Users\Dave Anderson\Desktop\onr-logo.png")),
+                ImageSource = new BitmapImage(new Uri(@"C:\Users\Dave Anderson\Desktop\ESME Splash Screen.png")),
             });
             MiddleLeft.DataSeriesCollection.Add(new BarSeriesViewModel
             {

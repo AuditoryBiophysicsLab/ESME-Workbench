@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 using HRC.Aspects;
@@ -30,7 +31,15 @@ namespace HRC.Plotting
             YAxisTicks = YAxis.AxisTicks;
 
             _propertyObserver = new PropertyObserver<FourAxisSeriesViewModel>(this)
-                .RegisterHandler(d => d.DataSeriesCollection, DataSeriesCollectionPropertyChanged);
+                .RegisterHandler(d => d.DataSeriesCollection, DataSeriesCollectionPropertyChanged)
+                .RegisterHandler(d => d.MouseLocation, () =>
+                {
+                    TopAxis.MouseDataLocation = IsMouseOver && TopAxis.Visibility == Visibility.Visible && TopAxis.PositionToValue != null ? TopAxis.PositionToValue(MouseLocation.X) : double.NaN;
+                    BottomAxis.MouseDataLocation = IsMouseOver && BottomAxis.Visibility == Visibility.Visible && BottomAxis.PositionToValue != null ? BottomAxis.PositionToValue(MouseLocation.X) : double.NaN;
+                    LeftAxis.MouseDataLocation = IsMouseOver && LeftAxis.Visibility == Visibility.Visible && LeftAxis.PositionToValue != null ? LeftAxis.PositionToValue(MouseLocation.Y) : double.NaN;
+                    RightAxis.MouseDataLocation = IsMouseOver && RightAxis.Visibility == Visibility.Visible && RightAxis.PositionToValue != null ? RightAxis.PositionToValue(MouseLocation.Y) : double.NaN;
+                    //Debug.WriteLine("Mouse data locations: Bottom: {0}, Left: {1}, Top: {2}, Right: {3}", BottomAxis.MouseDataLocation, LeftAxis.MouseDataLocation, TopAxis.MouseDataLocation, RightAxis.MouseDataLocation);
+                });
 
             if (DataSeriesCollection != null) DataSeriesCollectionPropertyChanged();
             MajorTickLineColor = Colors.Black;
@@ -52,6 +61,8 @@ namespace HRC.Plotting
         public ObservableCollection<NewDataAxisTick> YAxisTicks { get; set; }
         public double ActualWidth { get; set; }
         public double ActualHeight { get; set; }
+        public bool IsMouseOver { get; set; }
+        public Point MouseLocation { get; set; }
 
         void DataSeriesCollectionPropertyChanged()
         {

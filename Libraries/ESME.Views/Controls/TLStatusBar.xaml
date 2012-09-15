@@ -42,8 +42,5 @@
         <TextBlock Text="{Binding MouseSPLInfo}" ToolTip="Units: dB SPL re: 1 μPa" />
     </StatusBarItem>
     <Separator Grid.Column="7" />
-    <StatusBarItem Grid.Column="8">
-        <TextBlock Text="{Binding RenderThreadDebugInfo}" ToolTip="RenderThreadDebugInfo" />
-    </StatusBarItem>
 </StatusBar>
 

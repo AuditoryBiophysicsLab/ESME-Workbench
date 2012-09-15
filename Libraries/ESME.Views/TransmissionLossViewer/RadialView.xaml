@@ -19,11 +19,6 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Grid Margin="0 22 0 0">
-        <i:Interaction.Triggers>
-            <i:EventTrigger EventName="SizeChanged">
-                <WPF:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
-            </i:EventTrigger>
-        </i:Interaction.Triggers>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
         </Grid.ColumnDefinitions>

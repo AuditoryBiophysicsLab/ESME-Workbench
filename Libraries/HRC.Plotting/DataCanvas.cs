@@ -191,11 +191,23 @@ namespace HRC.Plotting
         }
         #endregion
 
+        #region dependency property Point MouseLocation
+
+        public static DependencyPropertyKey MouseLocationPropertyKey = DependencyProperty.RegisterReadOnly("MouseLocation",
+                                                                                 typeof(Point),
+                                                                                 typeof(DataCanvas),
+                                                                                 new FrameworkPropertyMetadata(new Point(), FrameworkPropertyMetadataOptions.None));
+
+        public static readonly DependencyProperty MouseLocationProperty = MouseLocationPropertyKey.DependencyProperty;
+        public Point MouseLocation { get { return (Point)GetValue(MouseLocationProperty); } private set { SetValue(MouseLocationPropertyKey, value); } }
+        #endregion
+
         readonly Dictionary<ObservableCollection<Shape>, List<Shape>> _seriesShapeCache = new Dictionary<ObservableCollection<Shape>, List<Shape>>();
         public DataCanvas()
         {
             SnapsToDevicePixels = true;
             UseLayoutRounding = true;
+            MouseMove += (s, e) => { MouseLocation = e.GetPosition(this); };
         }
 
         protected override void OnRender(DrawingContext dc)
