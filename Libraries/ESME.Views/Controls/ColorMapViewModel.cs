@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using HRC.Aspects;
+using HRC.Plotting;
 using HRC.Utility;
 using HRC.ViewModels;
 
@@ -11,6 +12,7 @@ namespace ESME.Views.Controls
 {
     public class ColorMapViewModel : ViewModelBase
     {
+        public ColorMapViewModel() { FullRange.RangeChanged += (s, e) => CurrentRange.Update(FullRange); }
         #region public properties
 
         public ObservableList<Color> Colors
@@ -27,54 +29,9 @@ namespace ESME.Views.Controls
         }
         ObservableList<Color> _colors;
 
-        public double MaxValue
-        {
-            get { return _maxValue; }
-            set
-            {
-                _maxValue = value;
-                CurMaxValue = _maxValue;
-            }
-        }
-
-        public double MinValue
-        {
-            get { return _minValue; }
-            set
-            {
-                _minValue = value;
-                CurMinValue = _minValue;
-            }
-        }
-
-        public double CurMaxValue
-        {
-            get { return _curMaxValue; }
-            set
-            {
-                lock (this)
-                {
-                    _curMaxValue = value;
-                    _curRange = _curMaxValue - _curMinValue;
-                }
-            }
-        }
-
-        public double CurMinValue
-        {
-            get { return _curMinValue; }
-            set
-            {
-                lock (this)
-                {
-                    _curMinValue = value;
-                    _curRange = _curMaxValue - _curMinValue;
-                }
-            }
-        }
-
-        public double StatisticalMaximum { get; set; }
-        public double StatisticalMinimum { get; set; }
+        [Initialize] public Range FullRange { get; set; }
+        [Initialize] public Range CurrentRange { get; set; }
+        [Initialize] public Range StatisticalRange { get; set; }
 
         public void Reverse()
         {
@@ -89,46 +46,22 @@ namespace ESME.Views.Controls
 
         public WriteableBitmap ColorBitmap { get; private set; }
 
-        public void ResetMinMax()
-        {
-            CurMaxValue = MaxValue;
-            CurMinValue = MinValue;
-        }
-
         public Color Lookup(double value)
         {
             lock (this)
             {
-                if (value >= _curMaxValue) return _firstColor;
-                if (value <= _curMinValue) return _lastColor;
-                if (Math.Abs(_curRange) < 0.000001) _curRange = _curMaxValue - _curMinValue;
+                var max = CurrentRange.Max;
+                var min = CurrentRange.Min;
+                var range = max - min;
+                if (value >= max) return _firstColor;
+                if (value <= min) return _lastColor;
 
-                if (Math.Abs(_curRange) > 0)
+                if (CurrentRange.Value > 0)
                 {
-                    var fraction = 1.0 - (value - _curMinValue) / _curRange;
+                    var fraction = 1.0 - (value - min) / range;
                     var index = (int)(fraction * _colorCount);
                     return Colors[index];
                 }
-            }
-            return System.Windows.Media.Colors.Black;
-        }
-
-        async public Task<Color> LookupAsync(double value)
-        {
-            if (value >= _curMaxValue) return _firstColor;
-            if (value <= _curMinValue) return _lastColor;
-            if (Math.Abs(_curRange) < 0.000001) _curRange = _curMaxValue - _curMinValue;
-
-            if (Math.Abs(_curRange) > 0)
-            {
-                var fraction = 1.0 - (value - _curMinValue) / _curRange;
-                while (fraction < 0)
-                {
-                    await TaskEx.Delay(5);
-                    fraction = 1.0 - (value - _curMinValue) / _curRange;
-                }
-                var index = (int)(fraction * _colorCount);
-                return Colors[index];
             }
             return System.Windows.Media.Colors.Black;
         }
@@ -160,10 +93,12 @@ namespace ESME.Views.Controls
             {
                 return new ColorMapViewModel
                        {
-                           MaxValue = 1.0,
-                           MinValue = 0.0,
-                           CurMaxValue = 1.0,
-                           CurMinValue = 0.0,
+                           FullRange = new Range(0, 1),
+                           CurrentRange = new Range(0, 1),
+                           //MaxValue = 1.0,
+                           //MinValue = 0.0,
+                           //CurMaxValue = 1.0,
+                           //CurMinValue = 0.0,
                            Colors = new ObservableList<Color>
                                     {
                                         Color.FromArgb(255, 0, 0, 143),
@@ -430,15 +365,15 @@ namespace ESME.Views.Controls
 
         int _colorCount;
 
-        double _curMaxValue,
-               _curMinValue,
-               _curRange;
+        //double _curMaxValue,
+        //       _curMinValue,
+        //       _curRange;
 
         Color _firstColor,
               _lastColor;
 
-        double _maxValue,
-               _minValue;
+        //double _maxValue,
+        //       _minValue;
 
         #endregion
     }

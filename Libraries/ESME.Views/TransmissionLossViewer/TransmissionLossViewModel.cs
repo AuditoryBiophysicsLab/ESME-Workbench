@@ -61,8 +61,9 @@ namespace ESME.Views.TransmissionLossViewer
                 if (RadialViewModel != null)
                 {
                     RadialViewModel.Radial = Radials == null ? null : Radials[_selectedRadialIndex];
-                    if (!float.IsNaN(MaxTransmissionLoss)) RadialViewModel.ColorMapViewModel.MaxValue = MaxTransmissionLoss;
-                    if (!float.IsNaN(MinTransmissionLoss)) RadialViewModel.ColorMapViewModel.MinValue = MinTransmissionLoss;
+                    //if (!float.IsNaN(MaxTransmissionLoss)) RadialViewModel.ColorMapViewModel.MaxValue = MaxTransmissionLoss;
+                    //if (!float.IsNaN(MinTransmissionLoss)) RadialViewModel.ColorMapViewModel.MinValue = MinTransmissionLoss;
+                    RadialViewModel.ColorMapViewModel.FullRange.Update(MinTransmissionLoss, MaxTransmissionLoss);
                 }
             }
         }

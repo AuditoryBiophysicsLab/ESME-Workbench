@@ -6,7 +6,6 @@ using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
 using HRC.Plotting.AxisLabeling.Layout;
@@ -147,22 +146,22 @@ namespace HRC.Plotting
         bool IsLogarithmic { get { return AxisType == AxisType.Logarithmic; } }
         #endregion
 
-        #region dependency property RangeCollection DataRange
+        #region dependency property RangeBase DataRange
 
         public static DependencyProperty DataRangeProperty = DependencyProperty.Register("DataRange",
-                                                                                         typeof(RangeCollection),
+                                                                                         typeof(RangeBase),
                                                                                          typeof(NewDataAxis),
                                                                                          new FrameworkPropertyMetadata(null,
                                                                                                                        FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                                                                        FrameworkPropertyMetadataOptions.AffectsRender,
                                                                                                                        DataRangePropertyChanged));
 
-        public RangeCollection DataRange { get { return (RangeCollection)GetValue(DataRangeProperty); } set { SetValue(DataRangeProperty, value); } }
+        public RangeBase DataRange { get { return (RangeBase)GetValue(DataRangeProperty); } set { SetValue(DataRangeProperty, value); } }
         static void DataRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).DataRangePropertyChanged(args); }
         void DataRangePropertyChanged(DependencyPropertyChangedEventArgs args)
         {
-            if (args.OldValue != null) ((RangeCollection)args.OldValue).RangeChanged -= DataRangeChanged;
-            if (args.NewValue != null) ((RangeCollection)args.NewValue).RangeChanged += DataRangeChanged;
+            if (args.OldValue != null) ((RangeBase)args.OldValue).RangeChanged -= DataRangeChanged;
+            if (args.NewValue != null) ((RangeBase)args.NewValue).RangeChanged += DataRangeChanged;
             DataRangeChanged(null, null);
         }
         void DataRangeChanged(object sender, EventArgs args)

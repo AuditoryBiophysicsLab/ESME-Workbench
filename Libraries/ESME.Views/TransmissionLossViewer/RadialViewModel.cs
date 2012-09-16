@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,107 +24,102 @@ namespace ESME.Views.TransmissionLossViewer
 {
     public class RadialViewModel : ViewModelBase
     {
+        [ImportingConstructor]
+        public RadialViewModel(RadialView view)
+        {
+            _view = view;
+            _dispatcher = Dispatcher.CurrentDispatcher;
+            ColorMapViewModel = ColorMapViewModel.Default;
+            AxisSeriesViewModel.DataSeriesCollection.Add(_imageSeriesViewModel);
+            AxisSeriesViewModel.DataSeriesCollection.Add(_bottomProfileViewModel);
+            AxisSeriesViewModel.XAxis.Label = "Range (m)";
+            AxisSeriesViewModel.XAxisTicks = null;
+            AxisSeriesViewModel.YAxis.IsInverted = true;
+            AxisSeriesViewModel.YAxis.Label = "Depth (m)";
+            AxisSeriesViewModel.YAxisTicks = null;
+            //AxisSeriesViewModel.XAxis.DataRange.RangeChanged += (sender, args) => CalculateBottomProfileGeometry();
+            //AxisSeriesViewModel.YAxis.DataRange.RangeChanged += (sender, args) => CalculateBottomProfileGeometry();
+            //AxisSeriesViewModel.XAxis.VisibleRange.RangeChanged += (sender, args) => CalculateBottomProfileGeometry();
+            AxisSeriesViewModel.YAxis.VisibleRange.RangeChanged += (sender, args) => CalculateBottomProfileGeometry();
+            _propertyObserver = new PropertyObserver<RadialViewModel>(this)
+                .RegisterHandler(r => r.Radial, RadialChanged);
+            _fourAxisSeriesObserver = new PropertyObserver<FourAxisSeriesViewModel>(AxisSeriesViewModel)
+                .RegisterHandler(a => a.IsMouseOver, UpdateStatusProperties);
+            _xAxisPropertyObserver = new PropertyObserver<DataAxisViewModel>(AxisSeriesViewModel.XAxis)
+                .RegisterHandler(x => x.MouseDataLocation, UpdateStatusProperties);
+            _yAxisPropertyObserver = new PropertyObserver<DataAxisViewModel>(AxisSeriesViewModel.YAxis)
+                .RegisterHandler(y => y.MouseDataLocation, UpdateStatusProperties);
+            ColorMapViewModel.CurrentRange.RangeChanged += (s, e) =>
+            {
+                if (Radial != null && _transmissionLossRadial != null) BeginRenderBitmap(Radial.Guid, _transmissionLossRadial);
+                else WaitToRenderText = "This radial has not yet been calculated";
+            };
+            UpdateStatusProperties();
+        }
+
+        [UsedImplicitly] readonly PropertyObserver<RadialViewModel> _propertyObserver;
+        [UsedImplicitly] readonly PropertyObserver<DataAxisViewModel> _xAxisPropertyObserver;
+        [UsedImplicitly] readonly PropertyObserver<DataAxisViewModel> _yAxisPropertyObserver;
+        [UsedImplicitly] readonly PropertyObserver<FourAxisSeriesViewModel> _fourAxisSeriesObserver;
+
         readonly RadialView _view;
         readonly Dispatcher _dispatcher;
         readonly ImageSeriesViewModel _imageSeriesViewModel = new ImageSeriesViewModel();
         readonly LineSeriesViewModel _bottomProfileViewModel = new LineSeriesViewModel();
-        TransmissionLossRadial TransmissionLossRadial { get; set; }
-        public float RangeMin { get; set; }
-        public float RangeMax { get; set; }
-        public float DepthMin { get; set; }
-        public float DepthMax { get; set; }
+        TransmissionLossRadial _transmissionLossRadial;
+
         public string WaitToRenderText { get; set; }
         [Initialize] public FourAxisSeriesViewModel AxisSeriesViewModel { get; set; }
         public WriteableBitmap WriteableBitmap { get; set; }
-
-        #region public ColorMapViewModel ColorMapViewModel { get; set; }
-        ColorMapViewModel _colorMapViewModel;
-
-        public ColorMapViewModel ColorMapViewModel
-        {
-            get { return _colorMapViewModel; }
-            set
-            {
-                _colorMapViewModel = value;
-                _colorMapViewModel.PropertyChanged += (s, e) =>
-                {
-                    switch (e.PropertyName)
-                    {
-                        case "CurMinValue":
-                        case "CurMaxValue":
-                            if (Radial != null) BeginRenderBitmap(Radial.Guid, TransmissionLossRadial);
-                            else WaitToRenderText = "This radial has not yet been calculated";
-                            break;
-                    }
-                };
-            }
-        }
-        #endregion
-
+        public ColorMapViewModel ColorMapViewModel { get; set; }
         public Visibility WriteableBitmapVisibility { get; set; }
-        #region public Radial Radial { get; set; }
-        Radial _radial;
+        public Radial Radial { get; set; }
 
-        public Radial Radial
+        void RadialChanged()
         {
-            get { return _radial; }
-            set
+            //Debug.WriteLine("TransmissionLossRadialViewModel: Initializing transmission loss radial");
+            WriteableBitmap = null;
+            WriteableBitmapVisibility = Visibility.Collapsed;
+            if (Radial == null || !Radial.IsCalculated)
             {
-                _radial = value;
-                //Debug.WriteLine("TransmissionLossRadialViewModel: Initializing transmission loss radial");
-                WriteableBitmap = null;
                 WriteableBitmapVisibility = Visibility.Collapsed;
-                if (_radial == null || !_radial.IsCalculated)
+                if (Radial == null) WaitToRenderText = "Please wait...";
+                else
                 {
-                    WriteableBitmapVisibility = Visibility.Collapsed;
-                    if (_radial == null) WaitToRenderText = "Please wait...";
+                    if (Radial.Errors.Count == 0) WaitToRenderText = "This radial has not yet been calculated";
                     else
                     {
-                        if (_radial.Errors.Count == 0) WaitToRenderText = "This radial has not yet been calculated";
-                        else
-                        {
-                            var sb = new StringBuilder();
-                            sb.AppendLine("This radial was not calculated due to the following error(s):");
-                            foreach (var error in _radial.Errors) sb.AppendLine(string.Format("  • {0}", error));
-                            WaitToRenderText = sb.ToString();
-                        }
+                        var sb = new StringBuilder();
+                        sb.AppendLine("This radial was not calculated due to the following error(s):");
+                        foreach (var error in Radial.Errors) sb.AppendLine(string.Format("  • {0}", error));
+                        WaitToRenderText = sb.ToString();
                     }
-                    return;
                 }
-                try
-                {
-                    TransmissionLossRadial = new TransmissionLossRadial((float)_radial.Bearing, new BellhopOutput(_radial.BasePath + ".shd"));
-                    if (WriteableBitmap == null) WriteableBitmap = new WriteableBitmap(TransmissionLossRadial.Ranges.Count, TransmissionLossRadial.Depths.Count, 96, 96, PixelFormats.Bgr32, null);
-                    ColorMapViewModel.StatisticalMaximum = TransmissionLossRadial.StatMax;
-                    ColorMapViewModel.StatisticalMinimum = TransmissionLossRadial.StatMin;
-                    _curMaxValue = _curMinValue = -1;
-                    BeginRenderBitmap(_radial.Guid, TransmissionLossRadial);
-                    RangeMin = _radial.Ranges.First();
-                    RangeMax = _radial.Ranges.Last();
-                    DepthMin = _radial.Depths.First();
-                    DepthMax = _radial.Depths.Last();
-                    //AxisSeriesViewModel.XAxis.VisibleRange.Update(RangeMin, RangeMax);
-                    //AxisSeriesViewModel.YAxis.VisibleRange.Update(DepthMin, DepthMax);
-                    AxisSeriesViewModel.XAxis.DataRange.Update(RangeMin, RangeMax);
-                    AxisSeriesViewModel.YAxis.DataRange.Update(DepthMin, DepthMax);
-                    _imageSeriesViewModel.Top = DepthMin;
-                    _imageSeriesViewModel.Left = RangeMin;
-                    _imageSeriesViewModel.Bottom = DepthMax;
-                    _imageSeriesViewModel.Right = RangeMax;
-                    OnPropertyChanged("TransmissionLossRadial");
-                    AxisSeriesViewModel.XAxis.VisibleRange.RangeChanged += (sender, args) => CalculateBottomProfileGeometry();
-                    AxisSeriesViewModel.YAxis.VisibleRange.RangeChanged += (sender, args) => CalculateBottomProfileGeometry();
-                    CalculateBottomProfileGeometry();
-                }
-                catch (Exception e)
-                {
-                    WriteableBitmapVisibility = Visibility.Collapsed;
-                    WaitToRenderText = e.Message;
-                    TransmissionLossRadial = null;
-                }
+                return;
+            }
+            try
+            {
+                _transmissionLossRadial = new TransmissionLossRadial((float)Radial.Bearing, new BellhopOutput(Radial.BasePath + ".shd"));
+                if (WriteableBitmap == null) WriteableBitmap = new WriteableBitmap(_transmissionLossRadial.Ranges.Count, _transmissionLossRadial.Depths.Count, 96, 96, PixelFormats.Bgr32, null);
+                _currentRange = new Range();
+                _imageSeriesViewModel.Top = Radial.Depths.First();
+                _imageSeriesViewModel.Left = Radial.Ranges.First();
+                _imageSeriesViewModel.Bottom = Radial.Depths.Last();
+                _imageSeriesViewModel.Right = Radial.Ranges.Last();
+                ColorMapViewModel.StatisticalRange.ForceUpdate(_transmissionLossRadial.StatMin, _transmissionLossRadial.StatMax);
+                ColorMapViewModel.CurrentRange.ForceUpdate(ColorMapViewModel.StatisticalRange);
+                AxisSeriesViewModel.XAxis.DataRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
+                AxisSeriesViewModel.YAxis.DataRange.Update(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
+                AxisSeriesViewModel.XAxis.VisibleRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
+                AxisSeriesViewModel.YAxis.VisibleRange.ForceUpdate(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
+            }
+            catch (Exception e)
+            {
+                WriteableBitmapVisibility = Visibility.Collapsed;
+                WaitToRenderText = e.Message;
+                _transmissionLossRadial = null;
             }
         }
-        #endregion
 
         #region public string BottomProfileGeometry { get; set; }
         void CalculateBottomProfileGeometry()
@@ -142,57 +138,10 @@ namespace ESME.Views.TransmissionLossViewer
         #endregion
 
         public Mode SelectedMode { get; set; }
-        #region public string OutputFileName { get; }
-        public string OutputFileName
-        {
-            get
-            {
-                lock (this)
-                    return Radial == null
-                               ? null
-                               : Path.Combine(Properties.Settings.Default.ExperimentReportDirectory,
-                                              string.Format("{0} {1} {2} bearing {3} degrees",
-                                                            SelectedMode.ModeName,
-                                                            SelectedMode.Source.SourceName,
-                                                            SelectedMode.Source.Platform.PlatformName,
-                                                            Radial.Bearing));
-            }
-        }
-        #endregion
-
-        [Initialize("Range: N/A")]
         public string MouseRange { get; set; }
-        [Initialize("Depth: N/A")]
         public string MouseDepth { get; set; }
-        [Initialize("Transmission Loss: N/A")]
         public string MouseTLInfo { get; set; }
-        [Initialize("Sound Pressure: N/A")]
         public string MouseSPLInfo { get; set; }
-
-        [UsedImplicitly] PropertyObserver<DataAxisViewModel> _xAxisPropertyObserver;
-        [UsedImplicitly] PropertyObserver<DataAxisViewModel> _yAxisPropertyObserver;
-        [UsedImplicitly] PropertyObserver<FourAxisSeriesViewModel> _fourAxisSeriesObserver;
-        [ImportingConstructor]
-        public RadialViewModel(RadialView view)
-        {
-            _view = view;
-            _dispatcher = Dispatcher.CurrentDispatcher;
-            ColorMapViewModel = ColorMapViewModel.Default;
-            //view.SizeChanged += (s, e) => CalculateBottomProfileGeometry();
-            AxisSeriesViewModel.DataSeriesCollection.Add(_imageSeriesViewModel);
-            AxisSeriesViewModel.DataSeriesCollection.Add(_bottomProfileViewModel);
-            AxisSeriesViewModel.XAxis.Label = "Range (m)";
-            AxisSeriesViewModel.XAxisTicks = null;
-            AxisSeriesViewModel.YAxis.IsInverted = true;
-            AxisSeriesViewModel.YAxis.Label = "Depth (m)";
-            AxisSeriesViewModel.YAxisTicks = null;
-            _fourAxisSeriesObserver = new PropertyObserver<FourAxisSeriesViewModel>(AxisSeriesViewModel)
-                .RegisterHandler(a => a.IsMouseOver, UpdateStatusProperties);
-            _xAxisPropertyObserver = new PropertyObserver<DataAxisViewModel>(AxisSeriesViewModel.XAxis)
-                .RegisterHandler(x => x.MouseDataLocation, UpdateStatusProperties);
-            _yAxisPropertyObserver = new PropertyObserver<DataAxisViewModel>(AxisSeriesViewModel.YAxis)
-                .RegisterHandler(y => y.MouseDataLocation, UpdateStatusProperties);
-        }
 
         void UpdateStatusProperties()
         {
@@ -202,17 +151,17 @@ namespace ESME.Views.TransmissionLossViewer
                 MouseDepth = string.Format("Depth: {0:0.0}m", AxisSeriesViewModel.YAxis.MouseDataLocation);
                 var px = AxisSeriesViewModel.MouseLocation.X / AxisSeriesViewModel.ActualWidth;
                 var py = AxisSeriesViewModel.MouseLocation.Y / AxisSeriesViewModel.ActualHeight;
-                var rangeIndex = Math.Min((int)(TransmissionLossRadial.Ranges.Count * px), TransmissionLossRadial.Ranges.Count - 1);
-                var depthIndex = Math.Min((int)(TransmissionLossRadial.Depths.Count * py), TransmissionLossRadial.Depths.Count - 1); MouseTLInfo = string.Format("Transmission Loss: {0:0.0}dB", TransmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
-                if (float.IsInfinity(TransmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]))
+                var rangeIndex = Math.Min((int)(_transmissionLossRadial.Ranges.Count * px), _transmissionLossRadial.Ranges.Count - 1);
+                var depthIndex = Math.Min((int)(_transmissionLossRadial.Depths.Count * py), _transmissionLossRadial.Depths.Count - 1); MouseTLInfo = string.Format("Transmission Loss: {0:0.0}dB", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
+                if (float.IsInfinity(_transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]))
                 {
                     MouseTLInfo = "Transmission Loss: N/A";
                     MouseSPLInfo = "Sound Pressure: N/A";
                 }
                 else
                 {
-                    MouseTLInfo = string.Format("Transmission Loss: {0:0.0}dB", TransmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
-                    MouseSPLInfo = string.Format("Sound Pressure: {0:0.0}dB", SelectedMode.SourceLevel - TransmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
+                    MouseTLInfo = string.Format("Transmission Loss: {0:0.0}dB", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
+                    MouseSPLInfo = string.Format("Sound Pressure: {0:0.0}dB", SelectedMode.SourceLevel - _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
                 }
             }
             else
@@ -224,6 +173,9 @@ namespace ESME.Views.TransmissionLossViewer
             }
         }
 
+        readonly object _lockObject = new object();
+        Range _currentRange;
+        volatile bool _isRendering;
         void BeginRenderBitmap(Guid guid, TransmissionLossRadial transmissionLoss)
         {
             if (transmissionLoss == null)
@@ -249,29 +201,31 @@ namespace ESME.Views.TransmissionLossViewer
                     //Debug.WriteLine("Skipping rendering at 4");
                     return;
                 }
-                if (_curMinValue == ColorMapViewModel.CurMinValue && _curMaxValue == ColorMapViewModel.CurMaxValue)
+                //if (_curMinValue == ColorMapViewModel.CurMinValue && _curMaxValue == ColorMapViewModel.CurMaxValue)
+                if (!_currentRange.IsEmpty && _currentRange == ColorMapViewModel.CurrentRange)
                 {
                     //Debug.WriteLine("Skipping rendering at 5");
                     return;
                 }
                 //Debug.WriteLine("Render starting");
                 _isRendering = true;
-                _curMinValue = ColorMapViewModel.CurMinValue;
-                _curMaxValue = ColorMapViewModel.CurMaxValue;
+                //_curMinValue = ColorMapViewModel.CurMinValue;
+                //_curMaxValue = ColorMapViewModel.CurMaxValue;
+                _currentRange.Update(ColorMapViewModel.CurrentRange);
             }
             var tokenSource = new CancellationTokenSource();
             var task = TaskEx.Run(() =>
             {
                 lock (_lockObject) _isRendering = false;
-                //Debug.WriteLine("Render completed, checking for re-render...");
                 RenderBitmapAsync(guid, transmissionLoss, tokenSource.Token);
             });
-            task.ContinueWith(t => BeginRenderBitmap(guid, transmissionLoss));
+            task.ContinueWith(t =>
+            {
+                Debug.WriteLine("Render completed, checking for re-render...");
+                BeginRenderBitmap(guid, transmissionLoss);
+            });
         }
 
-        readonly object _lockObject = new object();
-        double _curMinValue, _curMaxValue;
-        volatile bool _isRendering;
         void RenderBitmapAsync(Guid guid, TransmissionLossRadial transmissionLoss, CancellationToken token)
         {
             if (token.IsCancellationRequested) return;
@@ -280,7 +234,7 @@ namespace ESME.Views.TransmissionLossViewer
             var height = transmissionLoss.Depths.Count;
             var buffer = new int[width * height];
 
-            var infinityColor = _colorMapViewModel.Colors[0];
+            var infinityColor = ColorMapViewModel.Colors[0];
             var yValues = Enumerable.Range(0, height).AsParallel();
             yValues.ForAll(y =>
             {
@@ -305,10 +259,26 @@ namespace ESME.Views.TransmissionLossViewer
                 WriteableBitmapVisibility = Visibility.Visible;
                 _imageSeriesViewModel.ImageSource = WriteableBitmap;
             }, DispatcherPriority.Render);
-            //_writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
-            //_writeableBitmap.Unlock();
-            //_dispatcher.InvokeIfRequired(RenderFinished, DispatcherPriority.ApplicationIdle);
         }
+
+        #region File and clipboard-oriented stuff
+        #region public string OutputFileName { get; }
+        public string OutputFileName
+        {
+            get
+            {
+                lock (this)
+                    return Radial == null
+                               ? null
+                               : Path.Combine(Properties.Settings.Default.ExperimentReportDirectory,
+                                              string.Format("{0} {1} {2} bearing {3} degrees",
+                                                            SelectedMode.ModeName,
+                                                            SelectedMode.Source.SourceName,
+                                                            SelectedMode.Source.Platform.PlatformName,
+                                                            Radial.Bearing));
+            }
+        }
+        #endregion
 
         public string ToCSV()
         {
@@ -316,25 +286,23 @@ namespace ESME.Views.TransmissionLossViewer
             sb.AppendLine("Vertical Transmission Loss (dB)");
             sb.Append(",Range (m),");
 
-            foreach (var t in TransmissionLossRadial.Ranges) sb.Append(t + ","); //write out the X axis values.
+            foreach (var t in _transmissionLossRadial.Ranges) sb.Append(t + ","); //write out the X axis values.
             sb.AppendLine(); // Terminate the line
             sb.AppendLine("Depth (m)");
             // Write the slice data
-            for (var i = 0; i < TransmissionLossRadial.Depths.Count; i++)
+            for (var i = 0; i < _transmissionLossRadial.Depths.Count; i++)
             {
                 // Write out the Y axis value
-                sb.Append(TransmissionLossRadial.Depths[i] + ",,");
-                for (var j = 0; j < TransmissionLossRadial.Ranges.Count; j++)
+                sb.Append(_transmissionLossRadial.Depths[i] + ",,");
+                for (var j = 0; j < _transmissionLossRadial.Ranges.Count; j++)
                 {
-                    var tl = TransmissionLossRadial.TransmissionLoss[i, j];
+                    var tl = _transmissionLossRadial.TransmissionLoss[i, j];
                     sb.Append(float.IsInfinity(tl) ? "," : tl + ",");
                 }
                 sb.AppendLine();
             }
             return sb.ToString();
         }
-
-        public BitmapSource ToBitmapSource() { return _view.ToBitmapSource(); }
 
         public void SaveAsCSV(string fileName)
         {
@@ -344,10 +312,10 @@ namespace ESME.Views.TransmissionLossViewer
             }
         }
 
+        public BitmapSource ToBitmapSource() { return _view.ToBitmapSource(); }
         public void SaveAsImage(string fileName) { _view.ToImageFile(fileName); }
-
         public void CopyTextToClipboard() { Clipboard.SetText(ToCSV()); }
-
         public void CopyImageToClipboard() { Clipboard.SetImage(_view.ToBitmapSource()); }
+        #endregion
     }
 }

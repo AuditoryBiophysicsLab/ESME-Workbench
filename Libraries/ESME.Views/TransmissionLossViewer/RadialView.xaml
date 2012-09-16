@@ -3,21 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:ESME.Views.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
              xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
-             xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
              Background="White"
              d:DataContext="{d:DesignInstance TransmissionLossViewer:RadialViewModel}"
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="MouseMove">
-            <WPF:EventToCommandTrigger Command="{Binding MouseMoveCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
     <Grid Margin="0 22 0 0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -35,26 +28,28 @@
                    TextWrapping="Wrap" />
         <DockPanel Grid.Row="0" Grid.Column="0">
             <DockPanel Width="80" DockPanel.Dock="Right">
-                <TextBlock DockPanel.Dock="Bottom" Height="{Binding AxisSeriesViewModel.BottomAxis.ActualHeight, Mode=OneWay}" />
-                <DockPanel Margin="5 0 0 0" DataContext="{Binding ColorMapViewModel}" LastChildFill="False">
-                    <controls:DataAxis AxisLabel="Transmission Loss (dB)"
-                                       AxisLocation="Left"
-                                       DockPanel.Dock="Right"
-                                       EndValue="{Binding MaxValue}"
-                                       StartValue="{Binding MinValue}"
-                                       TickValueFormat="0.#" />
+                <TextBlock Height="{Binding AxisSeriesViewModel.BottomAxis.ActualHeight, Mode=OneWay}" DockPanel.Dock="Bottom" />
+                <DockPanel Margin="5 0 0 0"
+                           DataContext="{Binding ColorMapViewModel}"
+                           LastChildFill="False">
+                    <Plotting:NewDataAxis AxisLabel="Transmission Loss (dB)"
+                                          AxisLocation="Right"
+                                          DataRange="{Binding FullRange}"
+                                          DockPanel.Dock="Right" />
                     <controls:ColorBarView MinWidth="50"
                                            ColorBarImage="{Binding ColorBitmap}"
-                                           CurrentMaximum="{Binding CurMaxValue}"
-                                           CurrentMinimum="{Binding CurMinValue}"
+                                           CurrentMaximum="{Binding CurrentRange.Max}"
+                                           CurrentMinimum="{Binding CurrentRange.Min}"
                                            DockPanel.Dock="Right"
-                                           Maximum="{Binding MaxValue}"
-                                           Minimum="{Binding MinValue}"
-                                           StatisticalMaximum="{Binding StatisticalMaximum}"
-                                           StatisticalMinimum="{Binding StatisticalMinimum}" />
+                                           Maximum="{Binding FullRange.Max}"
+                                           Minimum="{Binding FullRange.Min}"
+                                           StatisticalMaximum="{Binding StatisticalRange.Max}"
+                                           StatisticalMinimum="{Binding StatisticalRange.Min}" />
                 </DockPanel>
             </DockPanel>
-            <Plotting:FourAxisSeriesView x:Name="AxisView" DataContext="{Binding AxisSeriesViewModel}" DockPanel.Dock="Left" />
+            <Plotting:FourAxisSeriesView x:Name="AxisView"
+                                         DataContext="{Binding AxisSeriesViewModel}"
+                                         DockPanel.Dock="Left" />
         </DockPanel>
     </Grid>
 </UserControl>

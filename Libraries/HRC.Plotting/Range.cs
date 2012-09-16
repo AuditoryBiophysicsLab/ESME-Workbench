@@ -54,6 +54,7 @@ namespace HRC.Plotting
         }
 
         public void Update(IRange range) { Update(range.Min, range.Max); }
+        public void ForceUpdate(IRange range) { ForceUpdate(range.Min, range.Max); }
 
         public void Update(IEnumerable<Range> ranges)
         {
@@ -216,6 +217,14 @@ namespace HRC.Plotting
             if (isChanged) OnRangeChanged(oldRange);
         }
 
+        public virtual void ForceUpdate(double min, double max)
+        {
+            var oldRange = new Range(Min, Max);
+            if (!double.IsNaN(min) && !double.IsInfinity(min) && (double.IsNaN(Minimum) || (Math.Abs(Minimum - min) > double.Epsilon))) Minimum = min;
+            if (!double.IsNaN(max) && !double.IsInfinity(max) && (double.IsNaN(Maximum) || (Math.Abs(Maximum - max) > double.Epsilon))) Maximum = max;
+            OnRangeChanged(oldRange);
+        }
+
         public virtual Range Expand(double amount) { return new Range(Min - amount, Max + amount); }
 
         public double Value { get { return Max - Min; } }
@@ -237,13 +246,49 @@ namespace HRC.Plotting
             }
         }
         public virtual bool IsEmpty { get { return double.IsNaN(Minimum) || double.IsNaN(Maximum); } }
+        public bool Equals(RangeBase other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+
+            // If one is empty and the other is not, return false
+            if ((IsEmpty && !other.IsEmpty) || (!IsEmpty && other.IsEmpty)) return false;
+            // If both ranges are empty, they are equal
+            if (IsEmpty && other.IsEmpty) return true;
+            return (Math.Abs(Max - other.Max) < double.Epsilon && Math.Abs(Min - other.Min) < double.Epsilon);
+        }
+
+        public bool Equals(IRange other) { return Equals((RangeBase)other); }
         public override string ToString() { return string.Format("Range {{ Min = {0}, Max = {1} }}", Min, Max); }
+        public static bool operator ==(RangeBase r1, RangeBase r2)
+        {
+            // If they're both null, they are equal
+            if (ReferenceEquals(null, r1) && ReferenceEquals(null, r2)) return true;
+            return !ReferenceEquals(null, r1) && r1.Equals(r2);
+        }
+        public static bool operator !=(RangeBase r1, RangeBase r2) { return !(r1 == r2); }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == typeof(RangeBase) && Equals((RangeBase)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Minimum.GetHashCode() * 397) ^ Maximum.GetHashCode();
+            }
+        }
     }
-    public interface IRange : INotifyRangeChanged
+    public interface IRange : INotifyRangeChanged, IEquatable<IRange>
     {
         double Min { get; }
         double Max { get; }
         double Value { get; }
+        bool IsEmpty { get; }
     }
     public interface INotifyRangeChanged
     {
