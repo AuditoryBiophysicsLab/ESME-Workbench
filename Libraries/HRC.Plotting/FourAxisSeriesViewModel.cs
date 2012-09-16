@@ -141,5 +141,21 @@ namespace HRC.Plotting
                     throw new NotImplementedException("Move");
             }
         }
+
+        public static FourAxisSeriesViewModel DesignTimeData { get; set; }
+        static FourAxisSeriesViewModel()
+        {
+            var axisRanges = new RangeCollection();
+            axisRanges.Add(new Range(0.1, 10));
+            DesignTimeData = new FourAxisSeriesViewModel();
+            DesignTimeData.BottomAxis.Visibility = Visibility.Visible;
+            DesignTimeData.LeftAxis.Visibility = Visibility.Visible;
+            DesignTimeData.TopAxis.Visibility = Visibility.Visible;
+            DesignTimeData.RightAxis.Visibility = Visibility.Visible;
+            DesignTimeData.BottomAxis.DataRange = axisRanges;
+            DesignTimeData.LeftAxis.DataRange = axisRanges;
+            DesignTimeData.TopAxis.DataRange = axisRanges;
+            DesignTimeData.RightAxis.DataRange = axisRanges;
+        }
     }
 }

@@ -93,8 +93,9 @@ namespace ESME.Views.Controls
             {
                 return new ColorMapViewModel
                        {
-                           FullRange = new Range(0, 1),
-                           CurrentRange = new Range(0, 1),
+                           FullRange = new Range(0, 200),
+                           CurrentRange = new Range(50, 150),
+                           StatisticalRange = new Range(75, 125),
                            //MaxValue = 1.0,
                            //MinValue = 0.0,
                            //CurMaxValue = 1.0,

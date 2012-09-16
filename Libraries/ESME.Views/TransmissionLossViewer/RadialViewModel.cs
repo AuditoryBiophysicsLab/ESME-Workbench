@@ -24,6 +24,8 @@ namespace ESME.Views.TransmissionLossViewer
 {
     public class RadialViewModel : ViewModelBase
     {
+        public RadialViewModel() { }
+
         [ImportingConstructor]
         public RadialViewModel(RadialView view)
         {
@@ -317,5 +319,37 @@ namespace ESME.Views.TransmissionLossViewer
         public void CopyTextToClipboard() { Clipboard.SetText(ToCSV()); }
         public void CopyImageToClipboard() { Clipboard.SetImage(_view.ToBitmapSource()); }
         #endregion
+
+        public static RadialViewModel DesignTimeData { get; set; }
+        static RadialViewModel()
+        {
+            var axisRanges = new RangeCollection();
+            axisRanges.Add(new Range(0.1, 10));
+            DesignTimeData = new RadialViewModel
+            {
+                AxisSeriesViewModel = new FourAxisSeriesViewModel
+                {
+                    BottomAxis =
+                        {
+                            Visibility = Visibility.Visible,
+                            Label = "Range (m)",
+                        },
+                    LeftAxis =
+                        {
+                            Visibility = Visibility.Visible,
+                            Label = "Depth (m)",
+                            IsInverted = true,
+                        },
+                    TopAxis = { Visibility = Visibility.Collapsed },
+                    RightAxis = { Visibility = Visibility.Collapsed },
+                    XAxisTicks = null,
+                    YAxisTicks = null,
+                },
+                ColorMapViewModel = ColorMapViewModel.Default,
+            };
+            DesignTimeData.AxisSeriesViewModel.BottomAxis.DataRange = axisRanges;
+            DesignTimeData.AxisSeriesViewModel.LeftAxis.DataRange = axisRanges;
+        }
+
     }
 }

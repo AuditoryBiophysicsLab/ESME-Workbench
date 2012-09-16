@@ -7,11 +7,13 @@
              xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
              xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
              Background="White"
-             d:DataContext="{d:DesignInstance TransmissionLossViewer:RadialViewModel}"
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
-    <Grid Margin="0 22 0 0">
+    <UserControl.Resources>
+        <TransmissionLossViewer:RadialViewModel x:Key="DesignViewModel" />
+    </UserControl.Resources>
+    <Grid Margin="0 22 0 0" d:DataContext="{Binding Source={StaticResource DesignViewModel}, Path=DesignTimeData}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
