@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Threading;
 using HRC.Aspects;
+using HRC.Plotting;
 using HRC.Utility;
 using HRC.Validation;
 using HRC.ViewModels;
@@ -73,6 +74,8 @@ namespace ESME.Views.Simulation
 
         public bool IsSimulationCanceled { get; set; }
 
+        public FourAxisSeriesViewModel AxisSeriesViewModel { get; set; }
+
         #region CancelCommand
         public SimpleCommand<object, object> CancelCommand
         {
@@ -127,5 +130,35 @@ namespace ESME.Views.Simulation
             }
         }
         #endregion
+
+        public static SimulationProgressViewModel DesignTimeData { get; set; }
+        static SimulationProgressViewModel()
+        {
+            var axisRanges = new RangeCollection();
+            axisRanges.Add(new Range(0.1, 10));
+            DesignTimeData = new SimulationProgressViewModel
+            {
+                AxisSeriesViewModel = new FourAxisSeriesViewModel()
+                {
+                    BottomAxis =
+                        {
+                            Visibility = Visibility.Visible,
+                            Label = "Sound Pressure Level (dB re: 1 µPa)",
+                        },
+                    LeftAxis =
+                        {
+                            Visibility = Visibility.Visible,
+                            Label = "Exposure count",
+                        },
+                    TopAxis = { Visibility = Visibility.Collapsed },
+                    RightAxis = { Visibility = Visibility.Collapsed },
+                    XAxisTicks = null,
+                    YAxisTicks = null,
+                },
+            };
+            DesignTimeData.AxisSeriesViewModel.BottomAxis.DataRange = axisRanges;
+            DesignTimeData.AxisSeriesViewModel.LeftAxis.DataRange = axisRanges;
+        }
+
     }
 }

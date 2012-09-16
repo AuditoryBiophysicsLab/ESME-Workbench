@@ -4,16 +4,17 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
         xmlns:Simulation="clr-namespace:ESME.Views.Simulation"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         Title="{Binding Simulation.Scenario.Name,
                         StringFormat=Scenario: {0}}"
-        d:DataContext="{d:DesignInstance Simulation:SimulationProgressViewModel}"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <Window.Resources>
+        <Simulation:SimulationProgressViewModel x:Key="DesignViewModel" />
         <Style x:Key="LabelStyle" TargetType="TextBlock">
             <Setter Property="Margin" Value="5 0 5 0" />
             <Setter Property="Height" Value="22" />
@@ -23,7 +24,9 @@
                 <Setter.Value>
                     <ControlTemplate>
                         <DockPanel LastChildFill="True">
-                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
+                            <Border BorderBrush="Red"
+                                    BorderThickness="1"
+                                    DockPanel.Dock="Left">
                                 <AdornedElementPlaceholder />
                             </Border>
                         </DockPanel>
@@ -36,10 +39,17 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed" FalseValue="Collapsed" TrueValue="Visible" />
-        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed" FalseValue="Visible" TrueValue="Collapsed" />
+        <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed"
+                                          FalseValue="Collapsed"
+                                          TrueValue="Visible" />
+        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed"
+                                          FalseValue="Visible"
+                                          TrueValue="Collapsed" />
     </Window.Resources>
-    <StackPanel Grid.IsSharedSizeScope="True" Orientation="Vertical">
+    <StackPanel d:DataContext="{Binding Source={StaticResource DesignViewModel},
+                                        Path=DesignTimeData}"
+                Grid.IsSharedSizeScope="True"
+                Orientation="Vertical">
         <Grid Margin="0 5 0 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
@@ -89,8 +99,15 @@
                        Style="{StaticResource LabelStyle}"
                        Text="Simulate animal movement:" />
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <CheckBox VerticalAlignment="Center" IsChecked="{Binding Simulation.MovingAnimats}" IsEnabled="{Binding SimulationNotRunning}" ToolTip="Simulate animal movement using the Marine Mammal Movement and Behavior Simulator" />
-                <Image Margin="5 0 0 0" Source="..\Images\information.png" ToolTip="Warning: Enabling this option will make the simulation run MUCH more slowly!" Visibility="{Binding Simulation.MovingAnimats, Converter={StaticResource TrueVisibleFalseCollapsed}}" />
+                <CheckBox VerticalAlignment="Center"
+                          IsChecked="{Binding Simulation.MovingAnimats}"
+                          IsEnabled="{Binding SimulationNotRunning}"
+                          ToolTip="Simulate animal movement using the Marine Mammal Movement and Behavior Simulator" />
+                <Image Margin="5 0 0 0"
+                       Source="..\Images\information.png"
+                       ToolTip="Warning: Enabling this option will make the simulation run MUCH more slowly!"
+                       Visibility="{Binding Simulation.MovingAnimats,
+                                            Converter={StaticResource TrueVisibleFalseCollapsed}}" />
             </StackPanel>
         </Grid>
         <Grid>
@@ -114,21 +131,35 @@
                 <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
                 <ColumnDefinition Width="*" SharedSizeGroup="ValueColumn" />
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" HorizontalAlignment="Right" Style="{StaticResource LabelStyle}" Text="Simulation progress:" />
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       Style="{StaticResource LabelStyle}"
+                       Text="Simulation progress:" />
             <Grid Grid.Column="1">
-                <ProgressBar Height="22" Margin="0 0 5 0" Value="{Binding Simulation.PercentProgress.PercentComplete}" />
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding SimulationProgressText}" />
+                <ProgressBar Height="22"
+                             Margin="0 0 5 0"
+                             Value="{Binding Simulation.PercentProgress.PercentComplete}" />
+                <TextBlock HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Text="{Binding SimulationProgressText}" />
             </Grid>
         </Grid>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
-                <ColumnDefinition Width="*" SharedSizeGroup="ValueColumn" />
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="1" Margin="0 20 5 5" Orientation="Horizontal">
-                <Button Width="75" Height="22" Command="{Binding StartCommand}" Content="Start" />
-                <Button Width="75" Height="22" Command="{Binding CancelCommand}" Content="Cancel" />
-            </StackPanel>
-        </Grid>
+        <Plotting:FourAxisSeriesView Width="600"
+                                     Height="300"
+                                     DataContext="{Binding AxisSeriesViewModel}" />
+        <StackPanel Grid.Column="1"
+                    Margin="0 20 5 5"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+            <Button Width="75"
+                    Height="22"
+                    Margin="0 0 10 0"
+                    Command="{Binding StartCommand}"
+                    Content="Start" />
+            <Button Width="75"
+                    Height="22"
+                    Command="{Binding CancelCommand}"
+                    Content="Cancel" />
+        </StackPanel>
     </StackPanel>
 </Window>
