@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
@@ -31,7 +32,43 @@ namespace ESME.Views.Simulation
                         return isOK && timeSpan.Ticks > 0;
                     },
                 });
+            AxisSeriesViewModel = new FourAxisSeriesViewModel()
+            {
+                BottomAxis =
+                    {
+                        Visibility = Visibility.Visible,
+                        AxisTicks = new ObservableCollection<NewDataAxisTick>
+                        {
+                            new NewDataAxisTick(-1, null, false),
+                            new NewDataAxisTick(0, "< 100", false),
+                            new NewDataAxisTick(1, "105", false),
+                            new NewDataAxisTick(2, "115", false),
+                            new NewDataAxisTick(3, "125", false),
+                            new NewDataAxisTick(4, "135", false),
+                            new NewDataAxisTick(5, "145", false),
+                            new NewDataAxisTick(6, "155", false),
+                            new NewDataAxisTick(7, "165", false),
+                            new NewDataAxisTick(8, "175", false),
+                            new NewDataAxisTick(9, "185", false),
+                            new NewDataAxisTick(10, "195", false),
+                            new NewDataAxisTick(11, "> 200", false),
+                            new NewDataAxisTick(12, null, false),
+                        },
+                        AxisType = AxisType.Enumerated,
+                        Label = "Exposure level ±5dB (re: 1 µPa)",
+                    },
+                LeftAxis =
+                    {
+                        Visibility = Visibility.Visible,
+                        Label = "Exposure count",
 
+                    },
+                TopAxis = { Visibility = Visibility.Collapsed },
+                RightAxis = { Visibility = Visibility.Collapsed },
+                YAxisTicks = null,
+            };
+            AxisSeriesViewModel.BottomAxis.DataRange.Update(-1, 12);
+            AxisSeriesViewModel.LeftAxis.DataRange.Update(.1, 10);
         }
 
         public Window Window { get; set; }

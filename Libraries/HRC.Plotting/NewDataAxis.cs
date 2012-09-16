@@ -488,20 +488,24 @@ namespace HRC.Plotting
                 tick.TextBlock.Measure(availableSize);
             }
             var tickLength = AxisTicks.Select(tick => tick.IsMajorTick ? MajorTickLength : MinorTickLength).Max();
-            var maxLabelWidth = AxisTicks.Select(tick => tick.TextBlock != null ? tick.TextBlock.DesiredSize.Width : 0).Max();
-            var maxLabelHeight = AxisTicks.Select(tick => tick.TextBlock != null ? tick.TextBlock.DesiredSize.Height : 0).Max();
+            _tickLabelMaxWidth = AxisTicks.Where(t => t.TextBlock != null).Max(t => t.TextBlock.DesiredSize.Width);
+            _tickLabelMaxHeight = AxisTicks.Where(t => t.TextBlock != null).Max(t => t.TextBlock.DesiredSize.Height);
+            _axisLabel.Text = AxisLabel;
+            _axisLabel.FontSize = TextBlock.GetFontSize(this) + 2;
+            Children.Add(_axisLabel);
+            _axisLabel.Measure(availableSize);
             var desiredSize = new Size(availableSize.Width, availableSize.Height);
             switch (AxisLocation)
             {
                 case AxisLocation.Top:
                 case AxisLocation.Bottom:
-                    _tickLabelDimension = maxLabelHeight;
+                    _tickLabelDimension = _tickLabelMaxHeight;
                     _axisLabelDimension = _axisLabel.DesiredSize.Height;
                     desiredSize.Height = tickLength + _tickLabelDimension + _axisLabelDimension;
                     break;
                 case AxisLocation.Left:
                 case AxisLocation.Right:
-                    _tickLabelDimension = maxLabelWidth;
+                    _tickLabelDimension = _tickLabelMaxWidth;
                     _axisLabelDimension = _axisLabel.DesiredSize.Width;
                     desiredSize.Width = MajorTickLength + 2 + _tickLabelDimension + _axisLabelDimension;
                     break;
@@ -558,36 +562,6 @@ namespace HRC.Plotting
                                 AxisTicks.Add(new NewDataAxisTick(Math.Pow(10, logValue), null, false, IsLogarithmic));
                         }
                     }
-#if false
-                    // Get the major tick values in descending order
-                    var majorTickLogValues = AxisTicks.Select(t => Math.Log10(t.Value)).Reverse().ToList();
-                    var virtualMajorTicks = new List<double>();
-                    for (var i = 0; i < majorTickLogValues.Count - 1; i++)
-                    {
-                        for (var j = majorTickLogValues[i] - 1; j > majorTickLogValues[i + 1]; j--)
-                        {
-                            virtualMajorTicks.Add(j);
-                            var minorTickValue = Math.Pow(10, j);
-                            var minorTick = new NewDataAxisTick(minorTickValue, null, false, IsLogarithmic);
-                            AxisTicks.Add(minorTick);
-                        }
-                    }
-                    majorTickLogValues.AddRange(virtualMajorTicks);
-                    // Add a phantom major tick at the beginning that's one greater than the actual last major tick
-                    majorTickLogValues.Insert(0, majorTickLogValues[0] + 1);
-                    var fullRange = new Range(Math.Pow(10, _visibleRange.Min), Math.Pow(10, _visibleRange.Max));
-                    foreach (var majorTickLogValue in majorTickLogValues)
-                    {
-                        var majorTickValue = Math.Pow(10, majorTickLogValue);
-                        for (var step = 0.9; step >= 0.2; step -= 0.1)
-                        {
-                            var minorTickValue = majorTickValue * step;
-                            if (minorTickValue < fullRange.Min || minorTickValue > fullRange.Max) continue;
-                            var minorTick = new NewDataAxisTick(minorTickValue, null, false, IsLogarithmic);
-                            AxisTicks.Add(minorTick);
-                        }
-                    }
-#endif
                 }
                 else
                 {
