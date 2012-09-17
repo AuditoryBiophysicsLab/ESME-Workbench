@@ -2,11 +2,12 @@
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Media;
 using ESME.Environment;
-using ESME.Views.Controls;
+using HRC;
 using HRC.Aspects;
+using HRC.Plotting;
 using HRC.Services;
-using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -18,59 +19,106 @@ namespace ESME.Views.Environment
 
         public SoundSpeedProfileView View { get; set; }
         public SoundSpeedProfileWindowView WindowView { get; set; }
-        public float SSPMax { get; set; }
-        public float SSPMin { get; set; }
-        public float DepthMin { get; set; }
-        public float DepthMax { get; set; }
-        [Initialize("M 0,0")] public string SoundSpeedGeometry { get; private set; }
-        [Initialize("M 0,0")] public string SoundSpeedDataPoints { get; private set; }
-        [Initialize("M 0,0")] public string MajorGrid { get; private set; }
-        [Initialize("M 0,0")] public string MinorGrid { get; private set; }
         [Initialize("Sound Speed Profile")] public string WindowTitle { get; set; }
         public string OutputFileName { get; set; }
-        public ObservableList<AxisTick> DepthAxisMajorTicks { get; set; }
-        public ObservableList<AxisTick> DepthAxisMinorTicks { get; set; }
-        public ObservableList<AxisTick> SpeedAxisMajorTicks { get; set; }
-        public ObservableList<AxisTick> SpeedAxisMinorTicks { get; set; }
-
-        #region public SoundSpeedProfile SoundSpeedProfile {get; set; }
-        SoundSpeedProfile _soundSpeedProfile;
-
-        public SoundSpeedProfile SoundSpeedProfile
+        [Initialize] public FourAxisSeriesViewModel FourAxisSeriesViewModel { get; set; }
+        public SoundSpeedProfile SoundSpeedProfile { get; set; }
+        void SoundSpeedProfileChanged()
         {
-            get { return _soundSpeedProfile; }
-            set
+            //WindowTitle = string.Format("Sound Speed Profile ({0:0.000}, {1:0.000})", SoundSpeedProfile.Latitude, SoundSpeedProfile.Longitude);
+            OutputFileName = string.Format("Sound Speed Profile lat {0:0.000} lon {1:0.000}", SoundSpeedProfile.Latitude, SoundSpeedProfile.Longitude);
+            var seriesData = (from sample in SoundSpeedProfile.Data
+                              select new Point(sample.SoundSpeed, sample.Depth)).ToList();
+            if (FourAxisSeriesViewModel.DataSeriesCollection.Count > 0) foreach (SeriesViewModelBase series in FourAxisSeriesViewModel.DataSeriesCollection) series.SeriesData = null;
+            FourAxisSeriesViewModel.DataSeriesCollection.Clear();
+            FourAxisSeriesViewModel.XAxis.DataRange.Reset();
+            FourAxisSeriesViewModel.YAxis.DataRange.Reset();
+            var lineSeries = new LineSeriesViewModel
             {
-                _soundSpeedProfile = value;
-                DepthMin = value.Data.Min(d => d.Depth);
-                DepthMax = value.Data.Max(d => d.Depth);
-                SSPMin = value.Data.Min(d => d.SoundSpeed);
-                SSPMax = value.Data.Max(d => d.SoundSpeed);
-                RenderCanvas();
-                WindowTitle = string.Format("Sound Speed Profile ({0:0.000}, {1:0.000})", _soundSpeedProfile.Latitude, _soundSpeedProfile.Longitude);
-                OutputFileName = string.Format("Sound Speed Profile lat {0:0.000} lon {1:0.000}", _soundSpeedProfile.Latitude, _soundSpeedProfile.Longitude);
-            }
+                SeriesData = seriesData,
+                MarkerType = SeriesMarkerType.Circle,
+                ItemToPoint = i => (Point)i,
+                MarkerStrokeThickness = 1,
+                MarkerStroke = Brushes.Blue,
+                MarkerSize = 10,
+                SeriesName = "Depth vs. Sound Speed",
+                LineStroke = Brushes.Black,
+                LineStrokeThickness = 1,
+            };
+            FourAxisSeriesViewModel.YAxis.IsInverted = true;
+            //FourAxisSeriesViewModel.XAxis.DataRange.Add(new Range(seriesData.Select(p => p.X).Min(), seriesData.Select(p => p.X).Max()));
+            //FourAxisSeriesViewModel.YAxis.DataRange.Add(new Range(seriesData.Select(p => p.X).Min(), seriesData.Select(p => p.X).Max()));
+            FourAxisSeriesViewModel.DataSeriesCollection.Add(lineSeries);
+            FourAxisSeriesViewModel.XAxis.VisibleRange = FourAxisSeriesViewModel.XAxis.DataRange.Expand(FourAxisSeriesViewModel.XAxis.DataRange.Value * .05);
+            FourAxisSeriesViewModel.XAxis.Label = "Sound speed (m/s)";
+            FourAxisSeriesViewModel.YAxis.Label = "Depth (m)";
+            FourAxisSeriesViewModel.PlotTitle = OutputFileName;
         }
-        #endregion
 
-        public SoundSpeedProfileViewModel(IHRCSaveFileService saveFile) { _saveFileService = saveFile; }
+        [UsedImplicitly] readonly PropertyObserver<SoundSpeedProfileViewModel> _propertyObserver;
 
-        void RenderCanvas()
+        public SoundSpeedProfileViewModel(IHRCSaveFileService saveFile)
         {
-            if (SoundSpeedProfile == null) return;
-            var height = View.OverlayCanvas.ActualHeight;
-            var width = View.OverlayCanvas.ActualWidth;
-            // ReSharper disable CompareOfFloatsByEqualityOperator
-            if (height == 0 || width == 0) return;
-            // ReSharper restore CompareOfFloatsByEqualityOperator
-
-            MajorGrid = DataAxis.GetGrid(DepthAxisMajorTicks, SpeedAxisMajorTicks, 1, height, width);
-            MinorGrid = DataAxis.GetGrid(DepthAxisMinorTicks, SpeedAxisMinorTicks, 0, height, width);
-
-            SoundSpeedGeometry = SoundSpeedProfile.GetGeometry(height, width);
-            SoundSpeedDataPoints = SoundSpeedProfile.GetGeometry(height, width, glyphStyle:GlyphStyle.Circle);
+            _saveFileService = saveFile;
+            _propertyObserver = new PropertyObserver<SoundSpeedProfileViewModel>(this)
+                .RegisterHandler(p => p.SoundSpeedProfile, SoundSpeedProfileChanged);
+            var axisRanges = new RangeCollection();
+            axisRanges.Add(new Range(0.1, 10));
+            DesignTimeData = new SoundSpeedProfileViewModel
+            {
+                FourAxisSeriesViewModel = new FourAxisSeriesViewModel
+                {
+                    BottomAxis =
+                    {
+                        Visibility = Visibility.Visible,
+                        Label = "Sound speed (m/s)",
+                    },
+                    LeftAxis =
+                    {
+                        Visibility = Visibility.Visible,
+                        Label = "Depth (m)",
+                        IsInverted = true,
+                    },
+                    TopAxis = { Visibility = Visibility.Collapsed },
+                    RightAxis = { Visibility = Visibility.Collapsed },
+                },
+            };
+            DesignTimeData.FourAxisSeriesViewModel.BottomAxis.DataRange = axisRanges;
+            DesignTimeData.FourAxisSeriesViewModel.LeftAxis.DataRange = axisRanges;
         }
 
+        /// <summary>
+        /// This constructor is only used for design time data
+        /// </summary>
+        public SoundSpeedProfileViewModel() {}
+
+        static SoundSpeedProfileViewModel()
+        {
+            var axisRanges = new RangeCollection();
+            axisRanges.Add(new Range(0.1, 10));
+            DesignTimeData = new SoundSpeedProfileViewModel
+            {
+                FourAxisSeriesViewModel = new FourAxisSeriesViewModel
+                {
+                    BottomAxis =
+                        {
+                            Visibility = Visibility.Visible,
+                            Label = "Sound speed (m/s)",
+                        },
+                    LeftAxis =
+                        {
+                            Visibility = Visibility.Visible,
+                            Label = "Depth (m)",
+                            IsInverted = true,
+                        },
+                    TopAxis = { Visibility = Visibility.Collapsed },
+                    RightAxis = { Visibility = Visibility.Collapsed },
+                },
+            };
+            DesignTimeData.FourAxisSeriesViewModel.BottomAxis.DataRange = axisRanges;
+            DesignTimeData.FourAxisSeriesViewModel.LeftAxis.DataRange = axisRanges;
+        }
+        public static SoundSpeedProfileViewModel DesignTimeData { get; private set; }
         #region commands
 
         #region SaveToCSVCommand
@@ -126,10 +174,7 @@ namespace ESME.Views.Environment
                                                               _saveFileService.OverwritePrompt = true;
                                                               _saveFileService.FileName = OutputFileName;
                                                               var result = _saveFileService.ShowDialog(WindowView);
-                                                              if (result.HasValue && result.Value)
-                                                              {
-                                                                  View.ToImageFile(_saveFileService.FileName);
-                                                              }
+                                                              if (result.HasValue && result.Value) View.ToImageFile(_saveFileService.FileName);
                                                           }));
             }
         }
@@ -185,22 +230,6 @@ namespace ESME.Views.Environment
         public SimpleCommand<object, object> ViewClosingCommand { get { return _viewClosing ?? (_viewClosing = new SimpleCommand<object, object>(ViewClosingHandler)); } }
         SimpleCommand<object, object> _viewClosing;
         static void ViewClosingHandler(object o) { Properties.Settings.Default.Save(); }
-        #endregion
-
-        #region GridSizeChangedCommand
-        public SimpleCommand<object, object> GridSizeChangedCommand
-        {
-            get
-            {
-                return _gridSizeChanged ??
-                       (_gridSizeChanged =
-                        new SimpleCommand<object, object>(delegate { GridSizeChangedHandler(); }));
-            }
-        }
-
-        SimpleCommand<object, object> _gridSizeChanged;
-
-        void GridSizeChangedHandler() { RenderCanvas(); }
         #endregion
 
         #endregion

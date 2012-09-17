@@ -62,7 +62,8 @@ namespace HRC.Plotting
         public double ActualHeight { get; set; }
         public bool IsMouseOver { get; set; }
         public Point MouseLocation { get; set; }
-
+        [Initialize("PlotTitle")] public string PlotTitle { get; set; }
+        [Initialize(14.0)] public double PlotTitleSize { get; set; }
         void DataSeriesCollectionPropertyChanged()
         {
             if (_dataSeriesCollectionObserver != null) _dataSeriesCollectionObserver.UnregisterHandler(DataSeriesCollectionChanged);

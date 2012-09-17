@@ -1,90 +1,20 @@
 ﻿<UserControl x:Class="ESME.Views.Environment.SoundSpeedProfileView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:controls="clr-namespace:ESME.Views.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:Environment="clr-namespace:ESME.Views.Environment"
-             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+             xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
              Background="White"
-             d:DataContext="{d:DesignInstance Environment:SoundSpeedProfileViewModel}"
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="SizeChanged">
-            <WPF:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
+    <UserControl.Resources>
+        <Environment:SoundSpeedProfileViewModel x:Key="DesignViewModel" />
+    </UserControl.Resources>
 
-    <DockPanel>
-        <StackPanel Height="22"
-                    DockPanel.Dock="Top"
-                    Orientation="Horizontal" />
-        <StackPanel Width="22"
-                    DockPanel.Dock="Right"
-                    Orientation="Vertical" />
-        <DockPanel DockPanel.Dock="Bottom">
-            <TextBlock Width="{Binding ActualWidth, ElementName=DepthAxis, Mode=OneWay}" DockPanel.Dock="Left" />
-            <controls:DataAxis x:Name="SSPAxis"
-                               AxisLabel="Sound Speed (m/s)"
-                               AxisLocation="Top"
-                               AxisType="Linear"
-                               EndValue="{Binding SSPMax}"
-                               MajorTicks="{Binding SpeedAxisMajorTicks,
-                                                    Mode=OneWayToSource}"
-                               MinorTicks="{Binding SpeedAxisMinorTicks,
-                                                    Mode=OneWayToSource}"
-                               StartValue="{Binding SSPMin}"
-                               TickValueFormat="0" />
-        </DockPanel>
-        <DockPanel DockPanel.Dock="Left">
-            <DockPanel>
-                <controls:DataAxis x:Name="DepthAxis"
-                                   VerticalAlignment="Top"
-                                   AxisLabel="Depth (m)"
-                                   AxisLocation="Right"
-                                   AxisType="Linear"
-                                   EndValue="{Binding DepthMin}"
-                                   MajorTicks="{Binding DepthAxisMajorTicks,
-                                                        Mode=OneWayToSource}"
-                                   MinorTicks="{Binding DepthAxisMinorTicks,
-                                                        Mode=OneWayToSource}"
-                                   StartValue="{Binding DepthMax}"
-                                   TickValueFormat="0" />
-            </DockPanel>
-        </DockPanel>
+    <Grid d:DataContext="{Binding Source={StaticResource DesignViewModel}, Path=DesignTimeData}">
+        <Plotting:FourAxisSeriesView DataContext="{Binding FourAxisSeriesViewModel}" />
+    </Grid>
 
-
-
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <Canvas x:Name="OverlayCanvas"
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    UseLayoutRounding="True">
-                <Path Data="{Binding MajorGrid}"
-                      Stroke="DarkGray"
-                      StrokeDashArray="5 1"
-                      StrokeThickness="1" />
-                <Path Data="{Binding MinorGrid}"
-                      Stroke="DarkGray"
-                      StrokeDashArray="2 1"
-                      StrokeThickness=".5" />
-                <Path Data="{Binding SoundSpeedGeometry}"
-                      Stroke="Black"
-                      StrokeThickness="1" />
-                <Path Data="{Binding SoundSpeedDataPoints}"
-                      Stroke="Blue"
-                      StrokeThickness="1" />
-            </Canvas>
-
-        </Grid>
-    </DockPanel>
 </UserControl>

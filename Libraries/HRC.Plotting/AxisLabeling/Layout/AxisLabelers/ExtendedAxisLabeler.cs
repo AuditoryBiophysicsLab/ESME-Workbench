@@ -33,21 +33,21 @@ namespace HRC.Plotting.AxisLabeling.Layout.AxisLabelers
         public ExtendedAxisLabeler()
         {
             formats = new List<Format> { new UnitFormat(1.0, "", new Range(-4, 6), false, false, 1) };
-            AddUnitFormat(1000.0, "K", new Range(3, 6), 0.75, 0.4);
-            AddUnitFormat(1000000.0, "M", new Range(6, 9), 0.75, 0.4);
-            AddUnitFormat(1000000000.0, "B", new Range(9, 12), 0.75, 0.4);
-            AddUnitFormat(100.0, "hundred", new Range(2, 3), 0.35);
-            AddUnitFormat(1000.0, "thousand", new Range(3, 6), 0.5);
-            AddUnitFormat(1000000.0, "million", new Range(6, 9), 0.5);
-            AddUnitFormat(1000000000.0, "billion", new Range(9, 12), 0.5);
-            AddUnitFormat(0.01, "hundredth", new Range(-2, -3), 0.3);
-            AddUnitFormat(0.001, "thousandth", new Range(-3, -6), 0.5);
-            AddUnitFormat(0.000001, "millionth", new Range(-6, -9), 0.5);
-            AddUnitFormat(0.000000001, "billionth", new Range(-9, -12), 0.5);
-            formats.Add(new ScientificFormat(true, false, 0.3));
-            formats.Add(new ScientificFormat(true, true, 0.3));
-            formats.Add(new ScientificFormat(false, false, 0.25));
-            formats.Add(new ScientificFormat(false, true, 0.25));
+            //AddUnitFormat(1000.0, "K", new Range(3, 6), 0.75, 0.4);
+            //AddUnitFormat(1000000.0, "M", new Range(6, 9), 0.75, 0.4);
+            //AddUnitFormat(1000000000.0, "B", new Range(9, 12), 0.75, 0.4);
+            //AddUnitFormat(100.0, "hundred", new Range(2, 3), 0.35);
+            //AddUnitFormat(1000.0, "thousand", new Range(3, 6), 0.5);
+            //AddUnitFormat(1000000.0, "million", new Range(6, 9), 0.5);
+            //AddUnitFormat(1000000000.0, "billion", new Range(9, 12), 0.5);
+            //AddUnitFormat(0.01, "hundredth", new Range(-2, -3), 0.3);
+            //AddUnitFormat(0.001, "thousandth", new Range(-3, -6), 0.5);
+            //AddUnitFormat(0.000001, "millionth", new Range(-6, -9), 0.5);
+            //AddUnitFormat(0.000000001, "billionth", new Range(-9, -12), 0.5);
+            //formats.Add(new ScientificFormat(true, false, 0.3));
+            //formats.Add(new ScientificFormat(true, true, 0.3));
+            //formats.Add(new ScientificFormat(false, false, 0.25));
+            //formats.Add(new ScientificFormat(false, true, 0.25));
         }
 
         protected double floored_mod(double a, double n) { return a - n * Math.Floor(a / n); }

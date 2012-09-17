@@ -320,7 +320,7 @@ namespace ESME.Views.TransmissionLossViewer
         public void CopyImageToClipboard() { Clipboard.SetImage(_view.ToBitmapSource()); }
         #endregion
 
-        public static RadialViewModel DesignTimeData { get; set; }
+        public static RadialViewModel DesignTimeData { get; private set; }
         static RadialViewModel()
         {
             var axisRanges = new RangeCollection();

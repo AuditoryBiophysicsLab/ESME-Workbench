@@ -11,22 +11,14 @@
         <app:FourAxisSeriesViewModel x:Key="DesignViewModel" />
     </UserControl.Resources>
     <DockPanel d:DataContext="{Binding Source={StaticResource DesignViewModel}, Path=DesignTimeData}">
-        <DockPanel Height="{Binding ActualHeight,
-                                    ElementName=TopAxis}"
+        <TextBlock Margin="0 0 0 5"
                    DockPanel.Dock="Top"
-                   Visibility="{Binding TopAxis.Visibility}">
-            <TextBlock Width="{Binding ActualWidth,
-                                       ElementName=LeftAxis}"
-                       Height="{Binding ActualHeight,
-                                        ElementName=TopAxis}"
-                       DockPanel.Dock="Left"
-                       Visibility="{Binding LeftAxis.Visibility}" />
-            <TextBlock Width="{Binding ActualWidth,
-                                       ElementName=RightAxis}"
-                       Height="{Binding ActualHeight,
-                                        ElementName=TopAxis}"
-                       DockPanel.Dock="Right"
-                       Visibility="{Binding RightAxis.Visibility}" />
+                   FontSize="{Binding PlotTitleSize}"
+                   Text="{Binding PlotTitle}"
+                   TextAlignment="Center" />
+        <DockPanel Height="{Binding ActualHeight, ElementName=TopAxis}" DockPanel.Dock="Top" Visibility="{Binding TopAxis.Visibility}">
+            <TextBlock Width="{Binding ActualWidth, ElementName=LeftAxis}" Height="{Binding ActualHeight, ElementName=TopAxis}" DockPanel.Dock="Left" Visibility="{Binding LeftAxis.Visibility}" />
+            <TextBlock Width="{Binding ActualWidth, ElementName=RightAxis}" Height="{Binding ActualHeight, ElementName=TopAxis}" DockPanel.Dock="Right" Visibility="{Binding RightAxis.Visibility}" />
             <app:NewDataAxis x:Name="TopAxis"
                              AxisLabel="{Binding Label}"
                              AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
@@ -56,22 +48,9 @@
                 </app:DataPiping.DataPipes>
             </app:NewDataAxis>
         </DockPanel>
-        <DockPanel Height="{Binding ActualHeight,
-                                    ElementName=BottomAxis}"
-                   DockPanel.Dock="Bottom"
-                   Visibility="{Binding BottomAxis.Visibility}">
-            <TextBlock Width="{Binding ActualWidth,
-                                       ElementName=LeftAxis}"
-                       Height="{Binding ActualHeight,
-                                        ElementName=BottomAxis}"
-                       DockPanel.Dock="Left"
-                       Visibility="{Binding LeftAxis.Visibility}" />
-            <TextBlock Width="{Binding ActualWidth,
-                                       ElementName=RightAxis}"
-                       Height="{Binding ActualHeight,
-                                        ElementName=BottomAxis}"
-                       DockPanel.Dock="Right"
-                       Visibility="{Binding RightAxis.Visibility}" />
+        <DockPanel Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Bottom" Visibility="{Binding BottomAxis.Visibility}">
+            <TextBlock Width="{Binding ActualWidth, ElementName=LeftAxis}" Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Left" Visibility="{Binding LeftAxis.Visibility}" />
+            <TextBlock Width="{Binding ActualWidth, ElementName=RightAxis}" Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Right" Visibility="{Binding RightAxis.Visibility}" />
             <app:NewDataAxis x:Name="BottomAxis"
                              AxisLabel="{Binding Label}"
                              AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
