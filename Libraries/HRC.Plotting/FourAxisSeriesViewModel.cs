@@ -90,7 +90,11 @@ namespace HRC.Plotting
                     {
                         oldItem.XAxis = null;
                         oldItem.YAxis = null;
-                        foreach (var legendItem in oldItem.LegendItems) LegendItems.Remove(legendItem);
+                        oldItem.SeriesData = null;
+                        foreach (var legendItem in oldItem.LegendItems)
+                        {
+                            LegendItems.Remove(legendItem);
+                        }
                         _seriesLegendItemCollectionObservers.Remove(oldItem);
                     }
                     break;
