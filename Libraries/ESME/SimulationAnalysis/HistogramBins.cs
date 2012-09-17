@@ -3,11 +3,13 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Windows.Threading;
 using System.Xml;
+using HRC.WPF;
 
 namespace ESME.SimulationAnalysis
 {
-    public class HistogramBins
+    public class HistogramBins : INotifyBinsChanged
     {
         /// <summary>
         /// Lowest tracked exposure level, in dB re: 1 uPa
@@ -37,6 +39,7 @@ namespace ESME.SimulationAnalysis
             if (value < Low) bin = 0;
             else bin = (int)Math.Min(((value - Low) / Width) + 1, Bins.Length - 1);
             Bins[bin]++;
+            OnNotifyBinsChanged(bin);
         }
 
         public void Display()
@@ -166,5 +169,34 @@ namespace ESME.SimulationAnalysis
             sourceElement.Add(exposureBins);
         } 
 #endif
+        public event EventHandler<NotifyBinsChangedEventArgs> BinsChanged;
+        protected void OnNotifyBinsChanged(params int[] binIndices)
+        {
+            var handlers = BinsChanged;
+            if (handlers == null) return;
+            foreach (EventHandler<NotifyBinsChangedEventArgs> handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                {
+                    var localHandler = handler;
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new NotifyBinsChangedEventArgs(binIndices)));
+                }
+                else
+                    handler(this, new NotifyBinsChangedEventArgs(binIndices));
+            }
+        }
     }
+
+    public interface INotifyBinsChanged
+    {
+        event EventHandler<NotifyBinsChangedEventArgs> BinsChanged;
+    }
+
+    public class NotifyBinsChangedEventArgs : EventArgs
+    {
+        public NotifyBinsChangedEventArgs(params int[] binIndices) { Array.Copy(binIndices, BinIndices, binIndices.Length); }
+
+        public int[] BinIndices { get; private set; }
+    }
+
 }

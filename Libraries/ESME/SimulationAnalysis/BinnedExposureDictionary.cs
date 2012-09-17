@@ -1,21 +1,21 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Xml;
 using ESME.Simulator;
+using HRC.Collections;
 
 namespace ESME.SimulationAnalysis
 {
     public class BinnedExposureDictionary
     {
-        public ConcurrentDictionary<int, ConcurrentDictionary<int, List<HistogramBins>>> Exposures { get; private set; }
+        public ObservableConcurrentDictionary<int, ObservableConcurrentDictionary<int, List<HistogramBins>>> Exposures { get; private set; }
         public Func<ActorExposureRecord, int?> Filter1 { get; set; }
         public Func<ActorExposureRecord, int?> Filter2 { get; set; }
 
-        public BinnedExposureDictionary() { Exposures = new ConcurrentDictionary<int, ConcurrentDictionary<int, List<HistogramBins>>>(); }
+        public BinnedExposureDictionary() { Exposures = new ObservableConcurrentDictionary<int, ObservableConcurrentDictionary<int, List<HistogramBins>>>(); }
 
         public void Expose(ActorExposureRecord exposureRecord)
         {
@@ -25,10 +25,10 @@ namespace ESME.SimulationAnalysis
             if (!key1.HasValue) return;
             var key2 = Filter2(exposureRecord);
             if (!key2.HasValue) return;
-            ConcurrentDictionary<int, List<HistogramBins>> level2;
+            ObservableConcurrentDictionary<int, List<HistogramBins>> level2;
             if (!Exposures.TryGetValue(key1.Value, out level2))
             {
-                level2 = new ConcurrentDictionary<int, List<HistogramBins>>();
+                level2 = new ObservableConcurrentDictionary<int, List<HistogramBins>>();
                 if (!Exposures.TryAdd(key1.Value, level2)) if (!Exposures.TryGetValue(key1.Value, out level2)) throw new ApplicationException("Could not add level two dictionary.");
             }
             List<HistogramBins> bins;

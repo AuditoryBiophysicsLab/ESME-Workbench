@@ -68,16 +68,18 @@ namespace HRC.Collections
         /// <param name="key">The key of the item to be added.</param>
         /// <param name="value">The value of the item to be added.</param>
         /// <returns>Whether the add was successful.</returns> 
-        private void TryAddWithNotification(TKey key, TValue value)
+        public bool TryAdd(TKey key, TValue value)
         {
-            if (_dictionary.TryAdd(key, value)) NotifyObserversOfChange();
+            var result = _dictionary.TryAdd(key, value);
+            if (result) NotifyObserversOfChange();
+            return result;
         }
 
         /// <summary>Attempts to remove an item from the dictionary, notifying observers of any changes.</summary> 
         /// <param name="key">The key of the item to be removed.</param> 
         /// <param name="value">The value of the item removed.</param> 
         /// <returns>Whether the removal was successful.</returns> 
-        private bool TryRemoveWithNotification(TKey key, out TValue value)
+        public bool TryRemove(TKey key, out TValue value)
         {
             var result = _dictionary.TryRemove(key, out value);
             if (result) NotifyObserversOfChange();
@@ -103,7 +105,7 @@ namespace HRC.Collections
         #region ICollection<KeyValuePair<TKey,TValue>> Members
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item)
         {
-            TryAddWithNotification(item.Key, item.Value);
+            TryAdd(item.Key, item.Value);
         }
 
         void ICollection<KeyValuePair<TKey, TValue>>.Clear()
@@ -135,7 +137,7 @@ namespace HRC.Collections
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
         {
             TValue temp;
-            return TryRemoveWithNotification(item.Key, out temp);
+            return TryRemove(item.Key, out temp);
         }
         #endregion
 
@@ -154,7 +156,7 @@ namespace HRC.Collections
         #region IDictionary<TKey,TValue> Members
         public void Add(TKey key, TValue value)
         {
-            TryAddWithNotification(key, value);
+            TryAdd(key, value);
         }
 
         public bool ContainsKey(TKey key)
@@ -170,7 +172,7 @@ namespace HRC.Collections
         public bool Remove(TKey key)
         {
             TValue temp;
-            return TryRemoveWithNotification(key, out temp);
+            return TryRemove(key, out temp);
         }
 
         public bool TryGetValue(TKey key, out TValue value)
