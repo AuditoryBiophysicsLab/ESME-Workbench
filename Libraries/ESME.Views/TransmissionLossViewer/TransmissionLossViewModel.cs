@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -84,12 +85,12 @@ namespace ESME.Views.TransmissionLossViewer
                     sb.Append(sb.Length == 0 ? "M" : "L");
                     x = (Math.Sin(angle) * radius) + radius;
                     y = (Math.Cos(angle) * radius) + radius;
-                    sb.Append(string.Format(" {0:0.###},{1:0.###} ", x, y));
+                    sb.Append(string.Format(CultureInfo.InvariantCulture," {0:0.###},{1:0.###} ", x, y));
                 }
                 sb.Append(string.Format("M {0:0.###}, {0:0.###} ", radius));
                 x = (Math.Sin(bearing * (Math.PI / 180)) * radius) + radius;
                 y = (-Math.Cos(bearing * (Math.PI / 180)) * radius) + radius;
-                sb.Append(string.Format("L {0:0.###},{1:0.###} ", x, y));
+                sb.Append(string.Format(CultureInfo.InvariantCulture,"L {0:0.###},{1:0.###} ", x, y));
                 return sb.ToString();
             }
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -288,18 +289,18 @@ namespace ESME.Views.TransmissionLossViewer
             sb.AppendLine("Vertical Transmission Loss (dB)");
             sb.Append(",Range (m),");
 
-            foreach (var t in _transmissionLossRadial.Ranges) sb.Append(t + ","); //write out the X axis values.
+            foreach (var t in _transmissionLossRadial.Ranges) sb.Append(string.Format(CultureInfo.InvariantCulture,"{0},",t)); //write out the X axis values.
             sb.AppendLine(); // Terminate the line
             sb.AppendLine("Depth (m)");
             // Write the slice data
             for (var i = 0; i < _transmissionLossRadial.Depths.Count; i++)
             {
                 // Write out the Y axis value
-                sb.Append(_transmissionLossRadial.Depths[i] + ",,");
+                sb.Append(string.Format(CultureInfo.InvariantCulture,"{0},,",_transmissionLossRadial.Depths[i]));
                 for (var j = 0; j < _transmissionLossRadial.Ranges.Count; j++)
                 {
                     var tl = _transmissionLossRadial.TransmissionLoss[i, j];
-                    sb.Append(float.IsInfinity(tl) ? "," : tl + ",");
+                    sb.Append(float.IsInfinity(tl) ? "," : string.Format(CultureInfo.InvariantCulture,"{0},",tl));
                 }
                 sb.AppendLine();
             }
