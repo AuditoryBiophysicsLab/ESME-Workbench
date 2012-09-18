@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -405,7 +406,7 @@ namespace HRC.Utility
 
             var fields = curLine.Trim().Split(separators, StringSplitOptions.RemoveEmptyEntries);
 
-            if (!double.TryParse(fields[0], out red) || !double.TryParse(fields[1], out green) || !double.TryParse(fields[2], out blue))
+            if (!double.TryParse(fields[0], NumberStyles.Any, CultureInfo.InvariantCulture, out red) || !double.TryParse(fields[1], NumberStyles.Any, CultureInfo.InvariantCulture, out green) || !double.TryParse(fields[2], NumberStyles.Any, CultureInfo.InvariantCulture, out blue))
                 throw new InvalidDataException("Colormap.FromStream: Invalid data encountered");
 
             Initialize(red, green, blue);

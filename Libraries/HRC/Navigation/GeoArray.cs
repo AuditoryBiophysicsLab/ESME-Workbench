@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 
 #if KML_Support
@@ -223,7 +224,7 @@ namespace HRC.Navigation
                 parts = upper.Split(new[] { '(', ')' }, StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length != 2) throw new ArgumentException(string.Format("Unknown Well Known Text format for POLYGON data: \"{0}\"", wellKnownText), "wellKnownText");
                 parts = parts[1].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                return new GeoArray(parts.Select(part => part.Split(' ')).Select(coordinates => new Geo(double.Parse(coordinates[1]), double.Parse(coordinates[0]))));
+                return new GeoArray(parts.Select(part => part.Split(' ')).Select(coordinates => new Geo(double.Parse(coordinates[1], CultureInfo.InvariantCulture), double.Parse(coordinates[0], CultureInfo.InvariantCulture))));
             }
             throw new ArgumentException(string.Format("Unable to create GeoArray from Well Known Text: \"{0}\"", wellKnownText), "wellKnownText");
         }

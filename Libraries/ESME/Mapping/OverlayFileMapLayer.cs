@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Xml.Serialization;
 using ESME.NEMO.Overlay;
@@ -55,12 +56,12 @@ namespace ESME.Mapping
             if (wellKnownText != null) _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(overlayShape.WellKnownText)));
         }
 
-        static string WellKnownText(string openTag, ICollection<Geo> geos, string closeTag)
+        public static string WellKnownText(string openTag, ICollection<Geo> geos, string closeTag)
         {
             if (geos.Count < 1) return null;
             return geos.Count == 1 ? string.Format("POINT({0})", GeosToStrings(geos)) : string.Format("{0}{1}{2}", openTag, string.Join(", ", GeosToStrings(geos)), closeTag);
         }
-        static IEnumerable<string> GeosToStrings(IEnumerable<Geo> geos) { return geos.Select(geo => string.Format("{0} {1}", geo.Longitude, geo.Latitude)); }
+        static IEnumerable<string> GeosToStrings(IEnumerable<Geo> geos) { return geos.Select(geo => string.Format("{0} {1}", geo.Longitude.ToString(CultureInfo.InvariantCulture), geo.Latitude.ToString(CultureInfo.InvariantCulture))); }
 
         public void Add(IEnumerable<OverlayShape> overlayShapes) { foreach (var shape in overlayShapes) Add(shape); }
         public void AddLines(ICollection<Geo> geos) { _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText("LINESTRING(", geos, ")")))); }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -70,7 +71,7 @@ namespace ESME.TransmissionLoss.Bellhop
             var sb = new StringBuilder();
             sb.AppendFormat("'L' \n");
             sb.AppendFormat("{0} \n", Profile.Count);
-            foreach (var point in Profile) sb.AppendFormat("{0:0.###} {1:0.###} \n", point.Range, point.Depth);
+            foreach (var point in Profile) sb.Append(string.Format(CultureInfo.InvariantCulture,"{0:0.###} {1:0.###} \n", point.Range, point.Depth));
             return sb.ToString();
         }
 
@@ -82,7 +83,7 @@ namespace ESME.TransmissionLoss.Bellhop
             for (var line = 0; line < lineCount; line++)
             {
                 var fields = lines[line + 2].Split(' ');
-                result.Add(new BottomProfilePoint{Range = float.Parse(fields[0]), Depth = float.Parse(fields[1])});
+                result.Add(new BottomProfilePoint { Range = float.Parse(fields[0], CultureInfo.InvariantCulture), Depth = float.Parse(fields[1], CultureInfo.InvariantCulture) });
             }
             return result.ToArray();
         }

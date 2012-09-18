@@ -241,6 +241,7 @@ namespace ESME.Scenarios
 #endif
             };
             var locations = PlatformBehavior.PlatformStates.Select(p => p.PlatformLocation.Location).ToList();
+            
             try
             {
                 mapLayer.AddLines(locations);
@@ -249,6 +250,7 @@ namespace ESME.Scenarios
             {
                 var log = log4net.LogManager.GetLogger(GetType());
                 log.Error(string.Format("AddLines failed:{0}", e.Message));
+                log.ErrorFormat("Malformed wellformedtext:{0}", OverlayShapeMapLayer.WellKnownText("LINESTRING(", locations, ")"));
                 log.Error(string.Format("locations.count:{0}", locations.Count));
                 Scenario.Log();
             }

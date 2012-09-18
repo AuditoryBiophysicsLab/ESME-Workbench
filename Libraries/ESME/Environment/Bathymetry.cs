@@ -67,9 +67,9 @@ namespace ESME.Environment
                 {
                     //lineCount++;
                     var fields = curLine.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-                    var latitude = double.Parse(fields[0]);
-                    var longitude = double.Parse(fields[1]);
-                    var depth = float.Parse(fields[2]) * scaleFactor;
+                    var latitude = double.Parse(fields[0],CultureInfo.InvariantCulture);
+                    var longitude = double.Parse(fields[1], CultureInfo.InvariantCulture);
+                    var depth = float.Parse(fields[2], CultureInfo.InvariantCulture) * scaleFactor;
                     samples.Add(new Geo<float>(latitude, longitude, depth));
                     curLine = stream.ReadLine();
                 }
@@ -85,7 +85,7 @@ namespace ESME.Environment
             using (var stream = new StreamWriter(fileName, false, Encoding.ASCII))
             {
                 foreach (var sample in Samples)
-                    stream.WriteLine("{0:0.0000} {1:0.0000} {2:0.00}", sample.Latitude, sample.Longitude, sample.Data * scaleFactor);
+                    stream.WriteLine(string.Format(CultureInfo.InvariantCulture,"{0:0.0000} {1:0.0000} {2:0.00}", sample.Latitude, sample.Longitude, sample.Data * scaleFactor));
             }
         }
 
