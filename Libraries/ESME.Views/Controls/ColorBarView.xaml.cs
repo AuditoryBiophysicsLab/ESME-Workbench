@@ -59,6 +59,7 @@ namespace ESME.Views.Controls
         void MinMaxPropertiesChanged()
         {
             _fullRange = (Maximum - Minimum);
+            if (Math.Abs(_fullRange) < double.Epsilon) _fullRange = 1.0;
             _steps = new StepFunction(0, 95, 95, x => _fullRange*Math.Exp(-0.047*x));
             ResetColorbarRange(0.2);
         }
