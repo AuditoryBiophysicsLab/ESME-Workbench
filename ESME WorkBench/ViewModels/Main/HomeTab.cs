@@ -486,7 +486,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             var vm = new SpeciesPropertiesViewModel(new ScenarioSpecies
             {
-                LatinName = "New Species", 
+                LatinName = "Generic odontocete", 
                 PopulationDensity = 0.01f, 
                 SpeciesDefinitionFilename = "Generic odontocete.spe"
             })

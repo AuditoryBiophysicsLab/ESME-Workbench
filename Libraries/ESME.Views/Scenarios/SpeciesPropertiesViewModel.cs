@@ -13,7 +13,7 @@ namespace ESME.Views.Scenarios
         public string WindowTitle { get; set; }
         public string LatinName { get; set; }
         public string SpeciesDefinitionFilename { get; set; }
-       public string SpeciesDirectory { get; set; }
+        public string SpeciesDirectory { get; set; }
         public float PopulationDensity { get; set; }
         public List<string> PredefinedSpecies
         {

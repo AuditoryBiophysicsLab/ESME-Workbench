@@ -83,12 +83,7 @@
                 <ListBox DisplayMemberPath="Geo"
                          ItemsSource="{Binding Scenario.AnalysisPoints}"
                          SelectedItem="{Binding AnalysisPoint}" />
-            </GroupBox>
-            <GroupBox Header="Transmission Losses">
-                <ListBox DisplayMemberPath="Mode.PSMName"
-                         ItemsSource="{Binding AnalysisPoint.TransmissionLosses}"
-                         SelectedItem="{Binding TransmissionLossViewModel.TransmissionLoss}" />
-            </GroupBox>
+            </GroupBox>            
         </StackPanel>
         <View:TransmissionLossView x:Name="TransmissionLossView"
                                    DataContext="{Binding TransmissionLossViewModel}"

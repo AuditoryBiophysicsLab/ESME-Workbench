@@ -58,10 +58,12 @@ namespace ESME.Views.TransmissionLossViewer
             set
             {
                 _selectedRadialIndex = value;
-                TitleString = Radials == null ? "<no radial selected>" : string.Format("Radial bearing: {0:000.0} degrees", Radials[_selectedRadialIndex].Bearing);
+                var nameString = Radials == null ? "<no radial selected>" : string.Format("Radial bearing: {0:000.0} degrees", Radials[_selectedRadialIndex].Bearing);
+                TitleString = nameString;
                 if (RadialViewModel != null)
                 {
                     RadialViewModel.Radial = Radials == null ? null : Radials[_selectedRadialIndex];
+                    RadialViewModel.AxisSeriesViewModel.PlotTitle = nameString;
                     //if (!float.IsNaN(MaxTransmissionLoss)) RadialViewModel.ColorMapViewModel.MaxValue = MaxTransmissionLoss;
                     //if (!float.IsNaN(MinTransmissionLoss)) RadialViewModel.ColorMapViewModel.MinValue = MinTransmissionLoss;
                     RadialViewModel.ColorMapViewModel.FullRange.Update(MinTransmissionLoss, MaxTransmissionLoss);
