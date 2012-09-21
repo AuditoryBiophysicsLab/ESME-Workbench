@@ -43,6 +43,13 @@ namespace ESME.SimulationAnalysis
             return null;
         }
 
+        string ModeNameFromActorExposureRecord(ActorExposureRecord record) { return SimulationLog.NameFromModeID(record.ModeID); }
+        string SpeciesNameFromActorExposureRecord(ActorExposureRecord record)
+        {
+            var result = SimulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid;
+            return result == null ? null : result.Name;
+        }
+
         public void Write(string outFile, string scenarioName,string locationName)
         {
             var s = new XmlWriterSettings

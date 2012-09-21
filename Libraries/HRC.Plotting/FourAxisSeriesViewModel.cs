@@ -152,11 +152,13 @@ namespace HRC.Plotting
         {
             var axisRanges = new RangeCollection();
             axisRanges.Add(new Range(0.1, 10));
-            DesignTimeData = new FourAxisSeriesViewModel();
-            DesignTimeData.BottomAxis.Visibility = Visibility.Visible;
-            DesignTimeData.LeftAxis.Visibility = Visibility.Visible;
-            DesignTimeData.TopAxis.Visibility = Visibility.Visible;
-            DesignTimeData.RightAxis.Visibility = Visibility.Visible;
+            DesignTimeData = new FourAxisSeriesViewModel
+            {
+                BottomAxis = { Visibility = Visibility.Visible },
+                LeftAxis = { Visibility = Visibility.Visible },
+                TopAxis = { Visibility = Visibility.Visible },
+                RightAxis = { Visibility = Visibility.Visible }
+            };
             DesignTimeData.BottomAxis.DataRange = axisRanges;
             DesignTimeData.LeftAxis.DataRange = axisRanges;
             DesignTimeData.TopAxis.DataRange = axisRanges;

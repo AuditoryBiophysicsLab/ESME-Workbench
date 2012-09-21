@@ -14,7 +14,6 @@
             </ResourceDictionary.MergedDictionaries>
             </ResourceDictionary>
         -->
-
         <Style x:Key="DataAvailabilityStyle" TargetType="TextBlock">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding}" Value="NotLoaded">

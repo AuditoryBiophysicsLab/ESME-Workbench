@@ -1,45 +1,71 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Windows.Threading;
+using System.Windows;
 using System.Xml;
-using HRC.WPF;
+using HRC;
+using HRC.Plotting;
+using HRC.ViewModels;
 
 namespace ESME.SimulationAnalysis
 {
-    public class HistogramBins : INotifyBinsChanged
+    public class HistogramBins : ViewModelBase
     {
+        public BarSeriesViewModel BarSeriesViewModel { get; set; }
         /// <summary>
         /// Lowest tracked exposure level, in dB re: 1 uPa
         /// </summary>
-        public float Low { get; private set; }
+        public double Low { get; private set; }
 
         /// <summary>
         /// Exposure bin width, in dB
         /// </summary>
-        public float Width { get; private set; }
+        public double Width { get; private set; }
 
         /// <summary>
         /// The actual array of recieved level bins
         /// </summary>
         public int[] Bins { get; private set; }
 
-        public HistogramBins(float low=100, float width=10, int count=10)
+        public string[] BinNames { get; set; }
+
+        public string DataSetName { get; set; }
+        readonly ObservableCollection<Point> _points;
+        [UsedImplicitly] PropertyObserver<HistogramBins> _propertyObserver;
+        public HistogramBins(double low=100, double width=10, int count=10)
         {
             Low = low;
             Width = width;
             Bins = new int[count + 2];
+            BinNames = new string[count + 2];
+            _points = new ObservableCollection<Point>();
+            for (var i = 0; i < Bins.Length; i++ )
+            {
+                _points.Add(new Point(i, 0));
+                if (i == 0) BinNames[i] = string.Format("<{0:0.##}", Low);
+                else if (i == Bins.Length - 1) BinNames[i] = string.Format(">{0:0.##}", Low + (Width * count));
+                else BinNames[i] = string.Format("{0:0.##}", Low + (Width / 2) + (Width * i));
+            }
+            BarSeriesViewModel = new BarSeriesViewModel
+            {
+                SeriesData = _points,
+                ItemToPoint = i => (Point)i,
+                StrokeThickness = 1,
+            };
+            _propertyObserver = new PropertyObserver<HistogramBins>(this)
+                .RegisterHandler(p => p.DataSetName, () => { BarSeriesViewModel.SeriesName = DataSetName; });
         }
 
-        public void Add(float value)
+        public void Add(double value)
         {
             int bin;
             if (value < Low) bin = 0;
             else bin = (int)Math.Min(((value - Low) / Width) + 1, Bins.Length - 1);
             Bins[bin]++;
-            OnNotifyBinsChanged(bin);
+            _points[bin] = new Point(bin, Bins[bin]);
         }
 
         public void Display()
@@ -71,7 +97,6 @@ namespace ESME.SimulationAnalysis
                 x.WriteElementString("Bin", value.ToString(CultureInfo.InvariantCulture));
             }
             x.WriteElementString("Bin", (Low + ((Bins.Length - 2) * Width)).ToString(CultureInfo.InvariantCulture));
-            
         }
 
         public string WriteBinTotals()
@@ -169,34 +194,5 @@ namespace ESME.SimulationAnalysis
             sourceElement.Add(exposureBins);
         } 
 #endif
-        public event EventHandler<NotifyBinsChangedEventArgs> BinsChanged;
-        protected void OnNotifyBinsChanged(params int[] binIndices)
-        {
-            var handlers = BinsChanged;
-            if (handlers == null) return;
-            foreach (EventHandler<NotifyBinsChangedEventArgs> handler in handlers.GetInvocationList())
-            {
-                if (handler.Target is DispatcherObject)
-                {
-                    var localHandler = handler;
-                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new NotifyBinsChangedEventArgs(binIndices)));
-                }
-                else
-                    handler(this, new NotifyBinsChangedEventArgs(binIndices));
-            }
-        }
     }
-
-    public interface INotifyBinsChanged
-    {
-        event EventHandler<NotifyBinsChangedEventArgs> BinsChanged;
-    }
-
-    public class NotifyBinsChangedEventArgs : EventArgs
-    {
-        public NotifyBinsChangedEventArgs(params int[] binIndices) { Array.Copy(binIndices, BinIndices, binIndices.Length); }
-
-        public int[] BinIndices { get; private set; }
-    }
-
 }

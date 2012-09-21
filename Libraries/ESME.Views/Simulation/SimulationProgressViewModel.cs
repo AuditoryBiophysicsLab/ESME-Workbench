@@ -190,7 +190,6 @@ namespace ESME.Views.Simulation
                     TopAxis = { Visibility = Visibility.Collapsed },
                     RightAxis = { Visibility = Visibility.Collapsed },
                     XAxisTicks = null,
-                    YAxisTicks = null,
                 },
             };
             DesignTimeData.AxisSeriesViewModel.BottomAxis.DataRange = axisRanges;

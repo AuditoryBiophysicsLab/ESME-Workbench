@@ -1,21 +1,26 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Xml;
 using ESME.Simulator;
+using HRC;
+using HRC.Aspects;
 using HRC.Collections;
+using HRC.Plotting;
+using HRC.ViewModels;
 
 namespace ESME.SimulationAnalysis
 {
     public class BinnedExposureDictionary
     {
-        public ObservableConcurrentDictionary<int, ObservableConcurrentDictionary<int, List<HistogramBins>>> Exposures { get; private set; }
+        public ObservableConcurrentDictionary<int, ObservableConcurrentDictionary<int, ObservableCollection<HistogramBins>>> Exposures { get; private set; }
         public Func<ActorExposureRecord, int?> Filter1 { get; set; }
         public Func<ActorExposureRecord, int?> Filter2 { get; set; }
 
-        public BinnedExposureDictionary() { Exposures = new ObservableConcurrentDictionary<int, ObservableConcurrentDictionary<int, List<HistogramBins>>>(); }
+        public BinnedExposureDictionary() { Exposures = new ObservableConcurrentDictionary<int, ObservableConcurrentDictionary<int, ObservableCollection<HistogramBins>>>(); }
 
         public void Expose(ActorExposureRecord exposureRecord)
         {
@@ -25,16 +30,16 @@ namespace ESME.SimulationAnalysis
             if (!key1.HasValue) return;
             var key2 = Filter2(exposureRecord);
             if (!key2.HasValue) return;
-            ObservableConcurrentDictionary<int, List<HistogramBins>> level2;
+            ObservableConcurrentDictionary<int, ObservableCollection<HistogramBins>> level2;
             if (!Exposures.TryGetValue(key1.Value, out level2))
             {
-                level2 = new ObservableConcurrentDictionary<int, List<HistogramBins>>();
+                level2 = new ObservableConcurrentDictionary<int, ObservableCollection<HistogramBins>>();
                 if (!Exposures.TryAdd(key1.Value, level2)) if (!Exposures.TryGetValue(key1.Value, out level2)) throw new ApplicationException("Could not add level two dictionary.");
             }
-            List<HistogramBins> bins;
+            ObservableCollection<HistogramBins> bins;
             if (!level2.TryGetValue(key2.Value, out bins))
             {
-                bins = new List<HistogramBins> { new HistogramBins(), new HistogramBins() }; //peakSPL and Energy
+                bins = new ObservableCollection<HistogramBins> { new HistogramBins(), new HistogramBins() }; //peakSPL and Energy
                 if (!level2.TryAdd(key2.Value, bins)) if (!level2.TryGetValue(key2.Value, out bins)) throw new ApplicationException("Could not add bins.");
             }
             bins[0].Add(exposureRecord.PeakSPL);
@@ -96,6 +101,43 @@ namespace ESME.SimulationAnalysis
             }
             x.WriteEndElement();
             
+        }
+    }
+
+    public class GroupedExposuresHistogram : ViewModelBase
+    {
+        readonly ObservableConcurrentDictionary<int, HistogramBins> _groupedExposures = new ObservableConcurrentDictionary<int, HistogramBins>();
+        public GroupedExposuresHistogram(double lowBinValue, double binWidth, int binCount)
+        {
+            LowBinValue = lowBinValue;
+            BinWidth = binWidth;
+            BinCount = binCount;
+        }
+
+        public string GroupName { get; set; }
+        [Initialize, UsedImplicitly] public GroupedBarSeriesViewModel GroupedBarSeriesViewModel { get; private set; }
+        public Func<ActorExposureRecord, int?> RecordToKeyFunc { get; set; }
+        public Func<int, string> ExposureNameFunc { get; set; }
+        /// <summary>
+        /// True to bin SPL exposures, false to bin Energy exposures
+        /// </summary>
+        public bool UsePressureExposures { get; set; }
+        public double LowBinValue { get; private set; }
+        public double BinWidth { get; private set; }
+        public int BinCount { get; private set; }
+        public void Expose(ActorExposureRecord exposureRecord)
+        {
+            if (RecordToKeyFunc == null) throw new ApplicationException("RecordToKeyFunc cannot be null");
+            var key = RecordToKeyFunc(exposureRecord);
+            if (!key.HasValue) return;
+            HistogramBins bins;
+            if (!_groupedExposures.TryGetValue(key.Value, out bins))
+            {
+                bins = new HistogramBins(LowBinValue, BinWidth, BinCount) { DataSetName = ExposureNameFunc(key.Value) };
+                GroupedBarSeriesViewModel.BarSeriesCollection.Add(bins.BarSeriesViewModel);
+                if (!_groupedExposures.TryAdd(key.Value, bins)) if (!_groupedExposures.TryGetValue(key.Value, out bins)) throw new ApplicationException("Could not add exposure bins to GroupedExposuresHistogram.");
+            }
+            bins.Add(UsePressureExposures ? exposureRecord.PeakSPL : exposureRecord.Energy);
         }
     }
 }
