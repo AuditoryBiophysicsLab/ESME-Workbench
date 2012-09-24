@@ -30,7 +30,7 @@ namespace ESME.Environment
                     case ".ddb":
                         return AnimatDDBFile.Load(species, fileName);
                     case ".ani":
-                        return AnimatAniFile.Load(species, fileName);
+                        return Load(fileName);
                     default:
                         throw new FileFormatException(string.Format("Unable to load animat locations.  Unrecognized file type: \"{0}\"", extension));
                 }
@@ -176,24 +176,20 @@ namespace ESME.Environment
                 }
             }
         }
-    }
-    [Serializable]
-    public class AnimatAniFile:Animat
-    {
-        public static new AnimatAniFile Load(ScenarioSpecies species, string fileName)
+
+        public static Animat Load (string fileName)
         {
-            var result = new AnimatAniFile();
+            var result = new Animat();
             using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var reader = new BinaryReader(stream))
             {
                 var header = reader.ReadBytes(4);
                 if (header[0] != 'a' && header[1] != 'n' && header[2] != 'i' && header[3] != 'm') throw new FileFormatException(string.Format("{0} is not a valid .ani file", fileName));
-                //var latinName = reader.ReadString();
-                //if (latinName != species.LatinName) throw new FileFormatException(string.Format("{0}: expected species name {1}, got {2}", fileName, species.LatinName, latinName));
                 var locationCount = reader.ReadInt32();
                 for (var i = 0; i < locationCount; i++) result.Locations.Add(new Geo<float>(reader.ReadDouble(), reader.ReadDouble(), reader.ReadSingle()));
                 return result;
             }
         }
     }
+ 
 }
