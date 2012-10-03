@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Windows;
 using ESME.SimulationAnalysis;
-using HRC;
 using HRC.Aspects;
 using HRC.Plotting;
 using HRC.ViewModels;
@@ -25,39 +23,78 @@ namespace ESME.Views.Simulation
     {
         public HistogramBinsViewModel() { }
 
-        public HistogramBinsViewModel(ObservableCollection<HistogramBins> histogramBinCollection)
+        public HistogramBinsViewModel(GroupedExposuresHistogram groupedExposuresHistogram)
         {
-            if (histogramBinCollection == null) throw new ArgumentNullException("histogramBinCollection");
-            HistogramBinCollection = histogramBinCollection;
-            var barSeries = new StackedBarSeriesViewModel();
-            HistogramBinCollection.CollectionChanged += HistogramBinsCollectionChanged;
-        }
-
-        void HistogramBinsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            switch (e.Action)
+            if (groupedExposuresHistogram == null) throw new ArgumentNullException("groupedExposuresHistogram");
+            _groupedBarSeriesViewModels = groupedExposuresHistogram.GroupedBarSeriesViewModels;
+            PressureViewModel = new FourAxisSeriesViewModel
             {
-                case NotifyCollectionChangedAction.Add:
-                    break;
-                case NotifyCollectionChangedAction.Remove:
-                    break;
-                case NotifyCollectionChangedAction.Replace:
-                    break;
-                case NotifyCollectionChangedAction.Reset:
-                    break;
-                case NotifyCollectionChangedAction.Move:
-                    break;
+                BottomAxis =
+                {
+                    Visibility = Visibility.Visible,
+                    AxisTicks = new ObservableCollection<NewDataAxisTick>(),
+                    AxisType = AxisType.Enumerated,
+                    Label = string.Format("Peak pressure per ping (±{0:0}dB) [re: 1 µPa]", groupedExposuresHistogram.BinWidth / 2)
+                },
+                LeftAxis =
+                {
+                    Visibility = Visibility.Visible,
+                    AxisType = AxisType.Logarithmic,
+                    Label = "Exposure count",
+                },
+                TopAxis = { Visibility = Visibility.Collapsed },
+                RightAxis = { Visibility = Visibility.Collapsed },
+                PlotTitle = groupedExposuresHistogram.GroupName,
+            };
+
+            EnergyViewModel = new FourAxisSeriesViewModel
+            {
+                BottomAxis =
+                {
+                    Visibility = Visibility.Visible,
+                    AxisTicks = new ObservableCollection<NewDataAxisTick>(),
+                    AxisType = AxisType.Enumerated,
+                    Label = string.Format("Received energy per ping (±{0:0}dB)", groupedExposuresHistogram.BinWidth / 2)
+                },
+                LeftAxis =
+                {
+                    Visibility = Visibility.Visible,
+                    AxisType = AxisType.Logarithmic,
+                    Label = "Exposure count",
+                },
+                TopAxis = { Visibility = Visibility.Collapsed },
+                RightAxis = { Visibility = Visibility.Collapsed },
+                PlotTitle = groupedExposuresHistogram.GroupName,
+            };
+
+            PressureViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(-1, null, false));
+            EnergyViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(-1, null, false));
+            for (var binIndex = 0; binIndex < groupedExposuresHistogram.BinNames.Length; binIndex++)
+            {
+                PressureViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(binIndex, groupedExposuresHistogram.BinNames[binIndex], false));
+                EnergyViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(binIndex, groupedExposuresHistogram.BinNames[binIndex], false));
             }
+            PressureViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(groupedExposuresHistogram.BinNames.Length, null, false));
+            EnergyViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(groupedExposuresHistogram.BinNames.Length, null, false));
+
+            PressureViewModel.LeftAxis.VisibleRange.Update(.9, 100);
+            PressureViewModel.BottomAxis.DataRange.Update(-1, 12);
+            EnergyViewModel.LeftAxis.VisibleRange.Update(.9, 100);
+            EnergyViewModel.BottomAxis.DataRange.Update(-1, 12);
+            //var barSeries = new StackedBarSeriesViewModel();
+            //HistogramBinCollection.CollectionChanged += HistogramBinsCollectionChanged;
         }
 
-        [Initialize] public FourAxisSeriesViewModel FourAxisSeriesViewModel { get; private set; }
-        public ObservableCollection<HistogramBins> HistogramBinCollection { get; private set; }
+        GroupedBarSeriesViewModel[] _groupedBarSeriesViewModels;
+
+        [Initialize] public FourAxisSeriesViewModel PressureViewModel { get; private set; }
+        [Initialize] public FourAxisSeriesViewModel EnergyViewModel { get; private set; }
         public static HistogramBinsViewModel DesignTimeData { get; set; }
         static HistogramBinsViewModel()
         {
             DesignTimeData = new HistogramBinsViewModel
             {
-                FourAxisSeriesViewModel = new FourAxisSeriesViewModel
+                PressureViewModel = new FourAxisSeriesViewModel
                 {
                     BottomAxis =
                         {
@@ -79,8 +116,8 @@ namespace ESME.Views.Simulation
                                 new NewDataAxisTick(11, ">200", false),
                                 new NewDataAxisTick(12, null, false),
                             },
-                            AxisType = AxisType.Enumerated,                            
-                            Label = "Exposure level ±5dB (re: 1 µPa)",
+                            AxisType = AxisType.Enumerated,
+                            Label = "Peak pressure per ping (±5dB) [re: 1 µPa]",
                         },
                     LeftAxis =
                         {
@@ -90,11 +127,48 @@ namespace ESME.Views.Simulation
                         },
                     TopAxis = { Visibility = Visibility.Collapsed },
                     RightAxis = { Visibility = Visibility.Collapsed },
-                    PlotTitle = "Acoustic exposures: Tursiops truncatus",
-                }
+                    PlotTitle = "1 kHz mode",
+                },
+                EnergyViewModel = new FourAxisSeriesViewModel
+                {
+                    BottomAxis =
+                        {
+                            Visibility = Visibility.Visible,
+                            AxisTicks = new ObservableCollection<NewDataAxisTick>
+                            {
+                                new NewDataAxisTick(-1, null, false),
+                                new NewDataAxisTick(0, "<100", false),
+                                new NewDataAxisTick(1, "105", false),
+                                new NewDataAxisTick(2, "115", false),
+                                new NewDataAxisTick(3, "125", false),
+                                new NewDataAxisTick(4, "135", false),
+                                new NewDataAxisTick(5, "145", false),
+                                new NewDataAxisTick(6, "155", false),
+                                new NewDataAxisTick(7, "165", false),
+                                new NewDataAxisTick(8, "175", false),
+                                new NewDataAxisTick(9, "185", false),
+                                new NewDataAxisTick(10, "195", false),
+                                new NewDataAxisTick(11, ">200", false),
+                                new NewDataAxisTick(12, null, false),
+                            },
+                            AxisType = AxisType.Enumerated,
+                            Label = "Received Energy per ping (±5dB)",
+                        },
+                    LeftAxis =
+                        {
+                            Visibility = Visibility.Visible,
+                            AxisType = AxisType.Logarithmic,
+                            Label = "Exposure count",
+                        },
+                    TopAxis = { Visibility = Visibility.Collapsed },
+                    RightAxis = { Visibility = Visibility.Collapsed },
+                    PlotTitle = "1 kHz mode",
+                },
             };
-            DesignTimeData.FourAxisSeriesViewModel.LeftAxis.VisibleRange.Update(.9, 100);
-            DesignTimeData.FourAxisSeriesViewModel.BottomAxis.DataRange.Update(-1, 12);
+            DesignTimeData.PressureViewModel.LeftAxis.VisibleRange.Update(.9, 100);
+            DesignTimeData.PressureViewModel.BottomAxis.DataRange.Update(-1, 12);
+            DesignTimeData.EnergyViewModel.LeftAxis.VisibleRange.Update(.9, 100);
+            DesignTimeData.EnergyViewModel.BottomAxis.DataRange.Update(-1, 12);
         }
     }
 }

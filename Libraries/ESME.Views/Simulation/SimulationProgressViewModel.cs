@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Threading;
+using ESME.SimulationAnalysis;
+using HRC;
 using HRC.Aspects;
 using HRC.Plotting;
 using HRC.Utility;
@@ -32,47 +35,11 @@ namespace ESME.Views.Simulation
                         return isOK && timeSpan.Ticks > 0;
                     },
                 });
-            AxisSeriesViewModel = new FourAxisSeriesViewModel()
-            {
-                BottomAxis =
-                    {
-                        Visibility = Visibility.Visible,
-                        AxisTicks = new ObservableCollection<NewDataAxisTick>
-                        {
-                            new NewDataAxisTick(-1, null, false),
-                            new NewDataAxisTick(0, "< 100", false),
-                            new NewDataAxisTick(1, "105", false),
-                            new NewDataAxisTick(2, "115", false),
-                            new NewDataAxisTick(3, "125", false),
-                            new NewDataAxisTick(4, "135", false),
-                            new NewDataAxisTick(5, "145", false),
-                            new NewDataAxisTick(6, "155", false),
-                            new NewDataAxisTick(7, "165", false),
-                            new NewDataAxisTick(8, "175", false),
-                            new NewDataAxisTick(9, "185", false),
-                            new NewDataAxisTick(10, "195", false),
-                            new NewDataAxisTick(11, "> 200", false),
-                            new NewDataAxisTick(12, null, false),
-                        },
-                        AxisType = AxisType.Enumerated,
-                        Label = "Exposure level ±5dB (re: 1 µPa)",
-                    },
-                LeftAxis =
-                    {
-                        Visibility = Visibility.Visible,
-                        Label = "Exposure count",
-
-                    },
-                TopAxis = { Visibility = Visibility.Collapsed },
-                RightAxis = { Visibility = Visibility.Collapsed },
-                YAxisTicks = null,
-            };
-            AxisSeriesViewModel.BottomAxis.DataRange.Update(-1, 12);
-            AxisSeriesViewModel.LeftAxis.DataRange.Update(.1, 10);
         }
 
         public Window Window { get; set; }
 
+        CollectionObserver _modeBinsCollectionObserver;
         [Affects("TimeStepString")]
         public Simulator.Simulation Simulation
         {
@@ -82,17 +49,30 @@ namespace ESME.Views.Simulation
                 _simulation = value;
                 if (_simulation == null) return;
                 TimeStepString = _simulation.TimeStepSize.ToString(TimeSpanFormatString);
-                ((INotifyPropertyChanged)_simulation).PropertyChanged += (s, e) =>
+                ((INotifyPropertyChanged)_simulation).PropertyChanged += (sender, args) =>
                 {
-                    switch (e.PropertyName)
+                    switch (args.PropertyName)
                     {
                         case "PercentProgress":
-                            ((INotifyPropertyChanged)_simulation.PercentProgress).PropertyChanged += (s1, e1) =>
+                            ((INotifyPropertyChanged)_simulation.PercentProgress).PropertyChanged += (s, e) =>
                             {
-                                if (e1.PropertyName != "PercentComplete") return;
-                                var percentComplete = ((PercentProgress<Simulator.Simulation>)s1).PercentComplete;
+                                if (e.PropertyName != "PercentComplete") return;
+                                var percentComplete = ((PercentProgress<Simulator.Simulation>)s).PercentComplete;
                                 SimulationProgressText = percentComplete < 100 ? percentComplete.ToString(CultureInfo.InvariantCulture) + "%" : "Complete";
                             };
+                            break;
+                        case "NewModeThresholdHistogram":
+                            _modeBinsCollectionObserver = new CollectionObserver(_simulation.NewModeThresholdHistogram.GroupedExposures.Groups)
+                                .RegisterHandler((s, e) =>
+                                {
+                                    switch (e.Action)
+                                    {
+                                        case NotifyCollectionChangedAction.Add:
+                                            foreach (GroupedExposuresHistogram histogram in e.NewItems) 
+                                                HistogramBinsViewModels.Add(new HistogramBinsViewModel(histogram));
+                                            break;
+                                    }
+                                });
                             break;
                     }
                 };
@@ -111,7 +91,7 @@ namespace ESME.Views.Simulation
 
         public bool IsSimulationCanceled { get; set; }
 
-        public FourAxisSeriesViewModel AxisSeriesViewModel { get; set; }
+        [Initialize, UsedImplicitly] public ObservableCollection<HistogramBinsViewModel> HistogramBinsViewModels { get; private set; }
 
         #region CancelCommand
         public SimpleCommand<object, object> CancelCommand
@@ -175,25 +155,11 @@ namespace ESME.Views.Simulation
             axisRanges.Add(new Range(0.1, 10));
             DesignTimeData = new SimulationProgressViewModel
             {
-                AxisSeriesViewModel = new FourAxisSeriesViewModel()
+                HistogramBinsViewModels =
                 {
-                    BottomAxis =
-                        {
-                            Visibility = Visibility.Visible,
-                            Label = "Sound Pressure Level (dB re: 1 µPa)",
-                        },
-                    LeftAxis =
-                        {
-                            Visibility = Visibility.Visible,
-                            Label = "Exposure count",
-                        },
-                    TopAxis = { Visibility = Visibility.Collapsed },
-                    RightAxis = { Visibility = Visibility.Collapsed },
-                    XAxisTicks = null,
+                    HistogramBinsViewModel.DesignTimeData
                 },
             };
-            DesignTimeData.AxisSeriesViewModel.BottomAxis.DataRange = axisRanges;
-            DesignTimeData.AxisSeriesViewModel.LeftAxis.DataRange = axisRanges;
         }
 
     }

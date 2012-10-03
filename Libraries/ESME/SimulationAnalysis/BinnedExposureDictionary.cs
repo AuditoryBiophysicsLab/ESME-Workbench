@@ -6,12 +6,14 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Windows.Data;
+using System.Windows.Media;
 using System.Xml;
 using ESME.Simulator;
 using HRC.Aspects;
 using HRC.Collections;
 using HRC.Plotting;
 using HRC.ViewModels;
+using HRC.WPF;
 
 namespace ESME.SimulationAnalysis
 {
@@ -164,7 +166,7 @@ namespace ESME.SimulationAnalysis
         {
             foreach (var curGroup in Groups)
             {
-                Debug.WriteLine(string.Format("{0}", curGroup.GroupName));
+                Debug.WriteLine(string.Format("Group: {0}", curGroup.GroupName));
                 curGroup.DebugDisplay();
             }
         }
@@ -183,9 +185,12 @@ namespace ESME.SimulationAnalysis
         readonly ObservableConcurrentDictionary<int, HistogramBins[]> _groupedExposures = new ObservableConcurrentDictionary<int, HistogramBins[]>();
         internal GroupedExposuresHistogram(double lowBinValue, double binWidth, int binCount, int groupLevel) : base(lowBinValue, binWidth, binCount, groupLevel)
         {
-            GroupedBarSeriesViewModel = new GroupedBarSeriesViewModel[2];
-            GroupedBarSeriesViewModel[0] = new GroupedBarSeriesViewModel();
-            GroupedBarSeriesViewModel[1] = new GroupedBarSeriesViewModel();
+            GroupedBarSeriesViewModels = new GroupedBarSeriesViewModel[2];
+            GroupedBarSeriesViewModels[0] = new GroupedBarSeriesViewModel();
+            GroupedBarSeriesViewModels[1] = new GroupedBarSeriesViewModel();
+            var bins = new HistogramBins(LowBinValue, BinWidth, BinCount);
+            BinNames = new string[bins.BinNames.Length];
+            Array.Copy(bins.BinNames, BinNames, bins.BinNames.Length);
             //_cvs = new CollectionViewSource();
             //var speciesPlatformConverter = new GroupingConverter(a => _simulationLog.RecordFromActorID(((ActorExposureRecord)a).ActorID) is SpeciesNameGuid ? "Species" : "Platforms");
             //var actorNameConverter = new GroupingConverter(a => _simulationLog.RecordFromActorID(((ActorExposureRecord)a).ActorID).Name);
@@ -194,7 +199,7 @@ namespace ESME.SimulationAnalysis
             //_cvs.Source = simulationLog;
         }
 
-        public GroupedBarSeriesViewModel[] GroupedBarSeriesViewModel { get; private set; }
+        public GroupedBarSeriesViewModel[] GroupedBarSeriesViewModels { get; private set; }
         public override void Expose(ActorExposureRecord exposureRecord)
         {
             if (GroupDescriptions == null || GroupDescriptions.Count < GroupLevel) throw new InvalidOperationException("There is no GroupDescription defined for this grouping level");
@@ -207,16 +212,30 @@ namespace ESME.SimulationAnalysis
             if (!_groupedExposures.TryGetValue(key, out bins))
             {
                 bins = new HistogramBins[2];
-                bins[0] = new HistogramBins(LowBinValue, BinWidth, BinCount) { DataSetName = "Peak Pressure: " + groupDescription.GroupName(exposureRecord) };
-                GroupedBarSeriesViewModel[0].BarSeriesCollection.Add(bins[0].BarSeriesViewModel);
-                bins[1] = new HistogramBins(LowBinValue, BinWidth, BinCount) { DataSetName = "Energy: " + groupDescription.GroupName(exposureRecord) };
-                GroupedBarSeriesViewModel[1].BarSeriesCollection.Add(bins[1].BarSeriesViewModel);
-                if (_groupedExposures.TryAdd(key, bins)) Debug.WriteLine(string.Format("Adding histograms for {0} at level {1}", groupDescription.GroupName(exposureRecord), GroupLevel));
+                var newColor = ColorExtensions.GetRandomNamedColor();
+                bins[0] = new HistogramBins(LowBinValue, BinWidth, BinCount)
+                {
+                    DataSetName = "Peak Pressure: " + groupDescription.GroupName(exposureRecord),
+                    BarSeriesViewModel = { Fill = new SolidColorBrush(newColor) },
+                };
+                GroupedBarSeriesViewModels[0].BarSeriesCollection.Add(bins[0].BarSeriesViewModel);
+                bins[1] = new HistogramBins(LowBinValue, BinWidth, BinCount)
+                {
+                    DataSetName = "Energy: " + groupDescription.GroupName(exposureRecord),
+                    BarSeriesViewModel = { Fill = new SolidColorBrush(newColor) },
+                };
+                GroupedBarSeriesViewModels[1].BarSeriesCollection.Add(bins[1].BarSeriesViewModel);
+                if (_groupedExposures.TryAdd(key, bins))
+                {
+                    Debug.WriteLine(string.Format("Adding histograms for {0} at level {1}", groupDescription.GroupName(exposureRecord), GroupLevel));
+                }
                 else if (!_groupedExposures.TryGetValue(key, out bins)) throw new ApplicationException("Could not add exposure bins to GroupedExposuresHistogram.");
             }
             bins[0].Add(exposureRecord.PeakSPL);
             bins[1].Add(exposureRecord.Energy);
         }
+
+        public string[] BinNames { get; set; }
         public override void DebugDisplay()
         {
             foreach (var curGroup in _groupedExposures.Values)

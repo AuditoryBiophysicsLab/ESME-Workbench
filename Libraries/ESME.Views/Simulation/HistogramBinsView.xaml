@@ -6,12 +6,22 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
              d:DesignHeight="200"
-             d:DesignWidth="400"
+             d:DesignWidth="900"
              mc:Ignorable="d">
     <UserControl.Resources>
         <l:HistogramBinsViewModel x:Key="DesignViewModel" />
     </UserControl.Resources>
     <Grid d:DataContext="{Binding Source={StaticResource DesignViewModel}, Path=DesignTimeData}">
-        <Plotting:FourAxisSeriesView Margin="0 0 10 10" DataContext="{Binding FourAxisSeriesViewModel}" />
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="400" />
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="400" />
+        </Grid.ColumnDefinitions>
+        <Plotting:FourAxisSeriesView Grid.Column="0" Margin="0 0 10 10" DataContext="{Binding PressureViewModel}" />
+        <StackPanel Grid.Column="1" Margin="0 0 10 10" DockPanel.Dock="Right" Orientation="Vertical">
+            <TextBlock Text="Legend" />
+            <Plotting:LegendView ItemsSource="{Binding PressureViewModel.LegendItems}" />
+        </StackPanel>
+        <Plotting:FourAxisSeriesView Grid.Column="2" Margin="0 0 10 10" DataContext="{Binding EnergyViewModel}" />
     </Grid>
 </UserControl>

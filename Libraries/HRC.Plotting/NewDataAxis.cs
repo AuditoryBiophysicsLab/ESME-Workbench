@@ -479,6 +479,8 @@ namespace HRC.Plotting
 
         Size MeasureEnumerated(Size availableSize)
         {
+            if (Double.IsNaN(availableSize.Width) || Double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;
+            if (Double.IsNaN(availableSize.Height) || Double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
             if (AxisTicks == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
             if (AxisTicks.Count == 0) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
             Children.Clear();
@@ -518,9 +520,9 @@ namespace HRC.Plotting
 
         Size MeasureNonEnumerated(Size availableSize)
         {
-            if (_visibleRange == null || _visibleRange.IsEmpty) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
             if (Double.IsNaN(availableSize.Width) || Double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;
             if (Double.IsNaN(availableSize.Height) || Double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
+            if (_visibleRange == null || _visibleRange.IsEmpty) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
             // We need to fake out the layout code re: inversion and logarithmic mode so we NEVER set these two parameters to true
             _axisOptions.AxisTransform = CreateAxisTransform(_visibleRange, availableSize, true, false, false); 
             _axisOptions.Screen = new Rect(availableSize);
