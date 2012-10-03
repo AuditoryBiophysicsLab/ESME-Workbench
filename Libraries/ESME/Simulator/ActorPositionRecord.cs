@@ -1,16 +1,17 @@
+using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
-using HRC.Aspects;
 using HRC.Navigation;
 
 namespace ESME.Simulator
 {
-    public class ActorPositionRecord
+    public class ActorPositionRecord : IEnumerable<ActorExposureRecord>
     {
         public float Latitude { get; set; }
         public float Longitude { get; set; }
         public float Depth { get; set; }
-        public ConcurrentBag<ActorExposureRecord> Exposures { get; set; }
+        public ConcurrentBag<ActorExposureRecord> Exposures { get; private set; }
 
         public ActorPositionRecord(float latitude, float longitude, float depth)
         {
@@ -40,5 +41,9 @@ namespace ESME.Simulator
             writer.Write(Longitude);
             writer.Write(Depth);
         }
+
+        public IEnumerator<ActorExposureRecord> GetEnumerator() { return Exposures.GetEnumerator(); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
     }
 }

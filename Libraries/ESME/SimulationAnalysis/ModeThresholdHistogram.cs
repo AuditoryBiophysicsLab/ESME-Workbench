@@ -1,7 +1,6 @@
+using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml;
 using ESME.Simulator;
 using HRC;
@@ -43,13 +42,6 @@ namespace ESME.SimulationAnalysis
             return null;
         }
 
-        string ModeNameFromActorExposureRecord(ActorExposureRecord record) { return SimulationLog.NameFromModeID(record.ModeID); }
-        string SpeciesNameFromActorExposureRecord(ActorExposureRecord record)
-        {
-            var result = SimulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid;
-            return result == null ? null : result.Name;
-        }
-
         public void Write(string outFile, string scenarioName,string locationName)
         {
             var s = new XmlWriterSettings
@@ -75,7 +67,7 @@ namespace ESME.SimulationAnalysis
                 x.WriteEndDocument();
             }
 
-#if f
+#if false
             using (var writer = new StringWriter())
             {
                 writer.WriteLine(scenarioName);
@@ -90,36 +82,42 @@ namespace ESME.SimulationAnalysis
 
         }
     }
-
-#if false
     /// <summary>
-    /// Accumulates binned data.  x-axis: modes. legend: species.
+    /// Accumulates binned data.  x-axis: species.  legend: mode.
     /// </summary>
-    public class SpeciesThresholdHistogram : ITimeStepProcessor
+    public class NewModeThresholdHistogram : ITimeStepProcessor
     {
-        public Simulation Simulation { get; set; }
-        [Initialize] public BinnedExposureDictionary<Mode, ScenarioSpecies> SpeciesBinnedExposureDictionary { get; set; }
-
-        public SpeciesThresholdHistogram(Simulation simulation)
+        public NewModeThresholdHistogram(SimulationLog simulationLog)
         {
-            SpeciesBinnedExposureDictionary.Filter1 = (actor, exposureRecord) => exposureRecord.Mode;
-            SpeciesBinnedExposureDictionary.Filter2 = (actor, exposureRecord) => actor.Species;
-            Simulation = simulation;
+            SimulationLog = simulationLog;
+            Func<ActorExposureRecord, bool> recordFilter = record => (SimulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid) != null;
+            GroupedExposures = new GroupedExposures(100, 10, 10);
+            GroupedExposures.GroupDescriptions.Add(new ExposureGroupDescription
+            {
+                GroupName = record => SimulationLog.RecordFromModeID(record.ModeID).Name,
+                RecordFilter = recordFilter,
+                RecordToKey = record => SimulationLog.ModeRecords.IndexOf(SimulationLog.RecordFromModeID(record.ModeID)),
+            });
+            GroupedExposures.GroupDescriptions.Add(new ExposureGroupDescription
+            {
+                GroupName = record => SimulationLog.RecordFromActorID(record.ActorID).Name,
+                RecordFilter = recordFilter,
+                RecordToKey = record => SimulationLog.SpeciesRecords.IndexOf(((SpeciesNameGuid)SimulationLog.RecordFromActorID(record.ActorID))),
+            });
         }
+        public SimulationLog SimulationLog { get; private set; }
+        public GroupedExposures GroupedExposures { get; private set; }
+
         public void Process(SimulationTimeStepRecord record)
         {
-            var actors = Simulation.Actors;
-            for (var i = 0; i < record.ActorPositionRecords.Count; i++)
-            {
-                foreach (var t in record.ActorPositionRecords[i].Exposures) SpeciesBinnedExposureDictionary.Expose(actors[i], t);
-            }
+            foreach (var exposure in record.ActorPositionRecords.SelectMany(actorPositionRecord => actorPositionRecord.Exposures))
+                GroupedExposures.Expose(exposure);
         }
 
-        public void Display()
+        public void DebugDisplay()
         {
-            Debug.WriteLine("Mode by Species");
-            SpeciesBinnedExposureDictionary.Display(mode => "Mode: " + mode.ModeName + ",", species => "Species: " + species.LatinName);
+            Debug.WriteLine("Histogram dump");
+            GroupedExposures.DebugDisplay();
         }
     }
-#endif
 }

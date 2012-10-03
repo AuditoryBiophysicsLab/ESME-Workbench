@@ -1,13 +1,17 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Windows.Threading;
 using ESME.Scenarios;
 using HRC.Aspects;
+using HRC.WPF;
 
 namespace ESME.Simulator
 {
-    public class SimulationLog : IDisposable
+    public class SimulationLog : IEnumerable<SimulationTimeStepRecord>, IDisposable, INotifyCollectionChanged
     {
         public const ulong Magic = 0xa57d8ee659dc45ec;
         public TimeSpan TimeStepSize { get; private set; }
@@ -153,6 +157,7 @@ namespace ESME.Simulator
                 writer.BaseStream.Flush();
                 _writer.Write(((MemoryStream)writer.BaseStream).GetBuffer());
             }
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, timeStep));
         }
 
         public void AddRange(IEnumerable<SimulationTimeStepRecord> timeSteps)
@@ -171,6 +176,7 @@ namespace ESME.Simulator
                 writer.BaseStream.Flush();
                 _writer.Write(((MemoryStream)writer.BaseStream).GetBuffer());
             }
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, timeSteps));
         }
 
         public void Close()
@@ -222,6 +228,8 @@ namespace ESME.Simulator
             _disposed = true;
         }
 
+        public IEnumerator<SimulationTimeStepRecord> GetEnumerator() { return new SimulationLogEnumerator(this); }
+
         ~SimulationLog()
         {
             // Do not re-create Dispose clean-up code here.
@@ -229,7 +237,53 @@ namespace ESME.Simulator
             // readability and maintainability.
             Dispose(false);
         }
+
+        IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
         #endregion
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+        protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            var handlers = CollectionChanged;
+            if (handlers == null) return;
+            foreach (NotifyCollectionChangedEventHandler handler in handlers.GetInvocationList())
+            {
+                var localHandler = handler;
+                try
+                {
+                    if (handler.Target is DispatcherObject)
+                        ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, e));
+                    else
+                        handler(this, e);
+                }
+                catch (Exception) { }
+            }
+        }
+    }
+
+    public class SimulationLogEnumerator : IEnumerator<SimulationTimeStepRecord>
+    {
+        readonly SimulationLog _simulationLog;
+        int _recordNumber;
+
+        public SimulationLogEnumerator(SimulationLog simulationLog)
+        {
+            _simulationLog = simulationLog;
+            Reset();
+        }
+
+        public void Dispose() { }
+
+        public bool MoveNext()
+        {
+            _recordNumber++;
+            return _recordNumber < _simulationLog.TimeStepCount;
+        }
+
+        public void Reset() { _recordNumber = -1; }
+        public SimulationTimeStepRecord Current { get { return _simulationLog[_recordNumber]; } }
+
+        object IEnumerator.Current { get { return Current; } }
     }
 
     public static class SimulationLogExtensions
@@ -254,7 +308,7 @@ namespace ESME.Simulator
             return result != null ? result.Guid : Guid.Empty;
         }
 
-        public static NameGuidRecord RecordFromModeID(this SimulationLog log, int modeID)
+        public static ActorNameGuid RecordFromModeID(this SimulationLog log, int modeID)
         {
             if (log == null) throw new ArgumentNullException("log");
             if (modeID < 0) throw new ArgumentOutOfRangeException("modeID");

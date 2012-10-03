@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,7 +8,7 @@ using HRC.Aspects;
 
 namespace ESME.Simulator
 {
-    public class SimulationTimeStepRecord
+    public class SimulationTimeStepRecord : IEnumerable<ActorPositionRecord>
     {
         public const ulong Magic = 0xd3c603dd0d7a1ee6;
 
@@ -82,5 +83,13 @@ namespace ESME.Simulator
                 return ActorPositionRecords[actorIndex];
             }
         }
+
+        public IEnumerator<ActorPositionRecord> GetEnumerator()
+        {
+            if (ActorPositionRecords.Count == 0) ReadAll();
+            return ActorPositionRecords.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
     }
 }

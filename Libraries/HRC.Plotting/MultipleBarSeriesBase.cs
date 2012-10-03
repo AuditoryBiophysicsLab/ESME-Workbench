@@ -13,8 +13,7 @@ namespace HRC.Plotting
         [UsedImplicitly] PropertyObserver<SeriesViewModelBase> _propertyObserver;
         [UsedImplicitly] PropertyObserver<DataAxisViewModel> _xAxisObserver;
         [UsedImplicitly] PropertyObserver<DataAxisViewModel> _yAxisObserver;
-        [UsedImplicitly]
-        CollectionObserver _seriesObserver;
+        [UsedImplicitly] CollectionObserver _seriesObserver;
 
         protected MultipleBarSeriesBase()
         {
@@ -78,7 +77,6 @@ namespace HRC.Plotting
             }
             RenderShapes();
         }
-        
         protected readonly Dictionary<BarSeriesBase, Dictionary<double, Tuple<Point, double>>> SeriesPlotPointCache = new Dictionary<BarSeriesBase, Dictionary<double, Tuple<Point, double>>>();
     }
 }

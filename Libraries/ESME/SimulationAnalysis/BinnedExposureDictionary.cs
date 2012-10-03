@@ -1,12 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Windows.Data;
 using System.Xml;
 using ESME.Simulator;
-using HRC;
 using HRC.Aspects;
 using HRC.Collections;
 using HRC.Plotting;
@@ -104,40 +105,145 @@ namespace ESME.SimulationAnalysis
         }
     }
 
-    public class GroupedExposuresHistogram : ViewModelBase
+    public class GroupedExposures : ViewModelBase, IGroupedExposures
     {
-        readonly ObservableConcurrentDictionary<int, HistogramBins> _groupedExposures = new ObservableConcurrentDictionary<int, HistogramBins>();
-        public GroupedExposuresHistogram(double lowBinValue, double binWidth, int binCount)
+        protected readonly int GroupLevel;
+        readonly ObservableConcurrentDictionary<int, IGroupedExposures> _groupedExposures = new ObservableConcurrentDictionary<int, IGroupedExposures>();
+
+        public GroupedExposures(double lowBinValue, double binWidth, int binCount)
         {
             LowBinValue = lowBinValue;
             BinWidth = binWidth;
             BinCount = binCount;
+            GroupLevel = 0;
         }
+        protected GroupedExposures(double lowBinValue, double binWidth, int binCount, int groupLevel) : this(lowBinValue, binWidth, binCount) { GroupLevel = groupLevel; }
 
-        public string GroupName { get; set; }
-        [Initialize, UsedImplicitly] public GroupedBarSeriesViewModel GroupedBarSeriesViewModel { get; private set; }
-        public Func<ActorExposureRecord, int?> RecordToKeyFunc { get; set; }
-        public Func<int, string> ExposureNameFunc { get; set; }
-        /// <summary>
-        /// True to bin SPL exposures, false to bin Energy exposures
-        /// </summary>
-        public bool UsePressureExposures { get; set; }
+        [Initialize] public List<ExposureGroupDescription> GroupDescriptions { get; set; }
+            
+        public string GroupName { get; private set; }
         public double LowBinValue { get; private set; }
         public double BinWidth { get; private set; }
         public int BinCount { get; private set; }
-        public void Expose(ActorExposureRecord exposureRecord)
+        public virtual void Expose(ActorExposureRecord exposureRecord)
         {
-            if (RecordToKeyFunc == null) throw new ApplicationException("RecordToKeyFunc cannot be null");
-            var key = RecordToKeyFunc(exposureRecord);
-            if (!key.HasValue) return;
-            HistogramBins bins;
-            if (!_groupedExposures.TryGetValue(key.Value, out bins))
+            if (GroupDescriptions == null || GroupDescriptions.Count < GroupLevel) throw new InvalidOperationException("There is no GroupDescription defined for this grouping level");
+            var groupDescription = GroupDescriptions[GroupLevel];
+            if (groupDescription.RecordToKey == null) throw new InvalidOperationException("RecordToKey cannot be null for the current grouping level");
+            if (groupDescription.GroupName == null) throw new InvalidOperationException("GroupName cannot be null for the current grouping level");
+            if (groupDescription.RecordFilter != null && (!groupDescription.RecordFilter(exposureRecord))) return;
+            var key = groupDescription.RecordToKey(exposureRecord);
+            IGroupedExposures value;
+            if (!_groupedExposures.TryGetValue(key, out value))
             {
-                bins = new HistogramBins(LowBinValue, BinWidth, BinCount) { DataSetName = ExposureNameFunc(key.Value) };
-                GroupedBarSeriesViewModel.BarSeriesCollection.Add(bins.BarSeriesViewModel);
-                if (!_groupedExposures.TryAdd(key.Value, bins)) if (!_groupedExposures.TryGetValue(key.Value, out bins)) throw new ApplicationException("Could not add exposure bins to GroupedExposuresHistogram.");
+                if (GroupDescriptions.Count > (GroupLevel + 2))
+                    value = new GroupedExposures(LowBinValue, BinWidth, BinCount, GroupLevel + 1)
+                    {
+                        GroupName = groupDescription.GroupName(exposureRecord),
+                        GroupDescriptions = GroupDescriptions
+                    };
+                else
+                    value = new GroupedExposuresHistogram(LowBinValue, BinWidth, BinCount, GroupLevel + 1)
+                    {
+                        GroupName = groupDescription.GroupName(exposureRecord),
+                        GroupDescriptions = GroupDescriptions
+                    };
+                if (_groupedExposures.TryAdd(key, value))
+                {
+                    Debug.WriteLine(string.Format("Adding group {0} at level {1}", groupDescription.GroupName(exposureRecord), GroupLevel));
+                    Groups.Add(value);
+                }
+                else if (!_groupedExposures.TryGetValue(key, out value)) throw new ApplicationException("Could not add new exposure group");
             }
-            bins.Add(UsePressureExposures ? exposureRecord.PeakSPL : exposureRecord.Energy);
+            value.Expose(exposureRecord);
         }
+
+        [Initialize] public virtual ObservableCollection<IGroupedExposures> Groups { get; protected set; }
+
+        public virtual void DebugDisplay()
+        {
+            foreach (var curGroup in Groups)
+            {
+                Debug.WriteLine(string.Format("{0}", curGroup.GroupName));
+                curGroup.DebugDisplay();
+            }
+        }
+    }
+
+    public class ExposureGroupDescription
+    {
+        public Func<ActorExposureRecord, bool> RecordFilter { get; set; }
+        public Func<ActorExposureRecord, int> RecordToKey { get; set; }
+        public Func<ActorExposureRecord, string> GroupName { get; set; }
+        public bool UsePressureExposures { get; set; }
+    }
+
+    public class GroupedExposuresHistogram : GroupedExposures
+    {
+        readonly ObservableConcurrentDictionary<int, HistogramBins[]> _groupedExposures = new ObservableConcurrentDictionary<int, HistogramBins[]>();
+        internal GroupedExposuresHistogram(double lowBinValue, double binWidth, int binCount, int groupLevel) : base(lowBinValue, binWidth, binCount, groupLevel)
+        {
+            GroupedBarSeriesViewModel = new GroupedBarSeriesViewModel[2];
+            GroupedBarSeriesViewModel[0] = new GroupedBarSeriesViewModel();
+            GroupedBarSeriesViewModel[1] = new GroupedBarSeriesViewModel();
+            //_cvs = new CollectionViewSource();
+            //var speciesPlatformConverter = new GroupingConverter(a => _simulationLog.RecordFromActorID(((ActorExposureRecord)a).ActorID) is SpeciesNameGuid ? "Species" : "Platforms");
+            //var actorNameConverter = new GroupingConverter(a => _simulationLog.RecordFromActorID(((ActorExposureRecord)a).ActorID).Name);
+            //_cvs.GroupDescriptions.Add(new PropertyGroupDescription(null, speciesPlatformConverter));
+            //_cvs.GroupDescriptions.Add(new PropertyGroupDescription(null, actorNameConverter));
+            //_cvs.Source = simulationLog;
+        }
+
+        public GroupedBarSeriesViewModel[] GroupedBarSeriesViewModel { get; private set; }
+        public override void Expose(ActorExposureRecord exposureRecord)
+        {
+            if (GroupDescriptions == null || GroupDescriptions.Count < GroupLevel) throw new InvalidOperationException("There is no GroupDescription defined for this grouping level");
+            var groupDescription = GroupDescriptions[GroupLevel];
+            if (groupDescription.RecordToKey == null) throw new InvalidOperationException("RecordToKey cannot be null for the current grouping level");
+            if (groupDescription.GroupName == null) throw new InvalidOperationException("GroupName cannot be null for the current grouping level");
+            if (groupDescription.RecordFilter != null && (!groupDescription.RecordFilter(exposureRecord))) return;
+            var key = groupDescription.RecordToKey(exposureRecord);
+            HistogramBins[] bins;
+            if (!_groupedExposures.TryGetValue(key, out bins))
+            {
+                bins = new HistogramBins[2];
+                bins[0] = new HistogramBins(LowBinValue, BinWidth, BinCount) { DataSetName = "Peak Pressure: " + groupDescription.GroupName(exposureRecord) };
+                GroupedBarSeriesViewModel[0].BarSeriesCollection.Add(bins[0].BarSeriesViewModel);
+                bins[1] = new HistogramBins(LowBinValue, BinWidth, BinCount) { DataSetName = "Energy: " + groupDescription.GroupName(exposureRecord) };
+                GroupedBarSeriesViewModel[1].BarSeriesCollection.Add(bins[1].BarSeriesViewModel);
+                if (_groupedExposures.TryAdd(key, bins)) Debug.WriteLine(string.Format("Adding histograms for {0} at level {1}", groupDescription.GroupName(exposureRecord), GroupLevel));
+                else if (!_groupedExposures.TryGetValue(key, out bins)) throw new ApplicationException("Could not add exposure bins to GroupedExposuresHistogram.");
+            }
+            bins[0].Add(exposureRecord.PeakSPL);
+            bins[1].Add(exposureRecord.Energy);
+        }
+        public override void DebugDisplay()
+        {
+            foreach (var curGroup in _groupedExposures.Values)
+            {
+                Debug.WriteLine(string.Format("{0}", curGroup[0].DataSetName));
+                curGroup[0].Display();
+                Debug.WriteLine(string.Format("{0}", curGroup[1].DataSetName));
+                curGroup[1].Display();
+            }
+        }
+    }
+
+    public interface IGroupedExposures
+    {
+        void Expose(ActorExposureRecord exposureRecord);
+        ObservableCollection<IGroupedExposures> Groups { get; }
+        List<ExposureGroupDescription> GroupDescriptions { get; }
+        string GroupName { get; }
+        void DebugDisplay();
+    }
+
+    [ValueConversion(typeof(object), typeof(double))]
+    public class GroupingConverter : IValueConverter
+    {
+        public GroupingConverter(Func<object, object> groupingFunction) { GroupingFunction = groupingFunction; }
+        public Func<object, object> GroupingFunction { get; private set; }
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) { return GroupingFunction(value); }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) { throw new NotImplementedException(); }
     }
 }

@@ -6,6 +6,7 @@
 // 
 //-------------------------------------------------------------------------- 
 
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -44,7 +45,7 @@ namespace HRC.Collections
         /// <summary> 
         /// Notifies observers of CollectionChanged or PropertyChanged of an update to the dictionary. 
         /// </summary> 
-        private void NotifyObserversOfChange()
+        private void NotifyObserversOfChange(Func<NotifyCollectionChangedEventArgs> newNotifyCollectionChangedEventArgs)
         {
             var collectionHandler = CollectionChanged;
             var propertyHandler = PropertyChanged;
@@ -54,7 +55,7 @@ namespace HRC.Collections
                 {
                     if (collectionHandler != null)
                     {
-                        collectionHandler(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                        collectionHandler(this, newNotifyCollectionChangedEventArgs());
                     }
                     if (propertyHandler == null) return;
                     propertyHandler(this, new PropertyChangedEventArgs("Count"));
@@ -71,7 +72,7 @@ namespace HRC.Collections
         public bool TryAdd(TKey key, TValue value)
         {
             var result = _dictionary.TryAdd(key, value);
-            if (result) NotifyObserversOfChange();
+            if (result) NotifyObserversOfChange(() => new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, value));
             return result;
         }
 
@@ -82,7 +83,8 @@ namespace HRC.Collections
         public bool TryRemove(TKey key, out TValue value)
         {
             var result = _dictionary.TryRemove(key, out value);
-            if (result) NotifyObserversOfChange();
+            var outValue = value;
+            if (result) NotifyObserversOfChange(() => new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, outValue));
             return result;
         }
 
@@ -93,13 +95,13 @@ namespace HRC.Collections
         private void UpdateWithNotification(TKey key, TValue value)
         {
             _dictionary[key] = value;
-            NotifyObserversOfChange();
+            NotifyObserversOfChange(() => new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value));
         }
 
         public void Clear()
         {
             _dictionary.Clear();
-            NotifyObserversOfChange();
+            NotifyObserversOfChange(() => new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         #region ICollection<KeyValuePair<TKey,TValue>> Members
@@ -111,7 +113,7 @@ namespace HRC.Collections
         void ICollection<KeyValuePair<TKey, TValue>>.Clear()
         {
             ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Clear();
-            NotifyObserversOfChange();
+            NotifyObserversOfChange(() => new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item)
