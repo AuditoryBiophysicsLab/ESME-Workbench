@@ -78,7 +78,7 @@ namespace ESME.Views.Simulation
             EnergyViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(groupedExposuresHistogram.BinNames.Length, null, false));
 
             PressureViewModel.DataSeriesCollection.Add(groupedExposuresHistogram.GroupedBarSeriesViewModels[0]);
-            PressureViewModel.DataSeriesCollection.Add(groupedExposuresHistogram.GroupedBarSeriesViewModels[1]);
+            EnergyViewModel.DataSeriesCollection.Add(groupedExposuresHistogram.GroupedBarSeriesViewModels[1]);
 
             PressureViewModel.LeftAxis.VisibleRange.Update(.9, 100);
             PressureViewModel.BottomAxis.DataRange.Update(-1, 12);
