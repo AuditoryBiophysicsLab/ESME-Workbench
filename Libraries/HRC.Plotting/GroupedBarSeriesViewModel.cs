@@ -24,6 +24,7 @@ namespace HRC.Plotting
                 SeriesPlotPointCache[series].Clear();
                 foreach (var point in series.Points)
                 {
+                    if (point.Y == 0) continue;
                     var plotPoint = new Point(XAxis.ValueToPosition(Math.Round(point.X, XRoundingPrecision)), YAxis.ValueToPosition(point.Y));
                     xCoordinates.Add(plotPoint.X);
                     SeriesPlotPointCache[series][plotPoint.X] = Tuple.Create(point, plotPoint.Y);
@@ -32,6 +33,7 @@ namespace HRC.Plotting
                 YRange.Add(series.YRange);
             }
             var xPlotCoordinates = xCoordinates.Distinct().ToList();
+            xPlotCoordinates.Sort();
             MinimumXPlotSpacing = xPlotCoordinates.AdjacentDifferences().Min();
             var groupWidth = MinimumXPlotSpacing * BarWidth;
             var seriesWidth = groupWidth / BarSeriesCollection.Count;

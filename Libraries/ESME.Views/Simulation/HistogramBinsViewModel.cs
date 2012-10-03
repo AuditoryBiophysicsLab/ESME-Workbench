@@ -39,7 +39,7 @@ namespace ESME.Views.Simulation
                 LeftAxis =
                 {
                     Visibility = Visibility.Visible,
-                    AxisType = AxisType.Logarithmic,
+                    AxisType = AxisType.Linear,
                     Label = "Exposure count",
                 },
                 TopAxis = { Visibility = Visibility.Collapsed },
@@ -59,7 +59,7 @@ namespace ESME.Views.Simulation
                 LeftAxis =
                 {
                     Visibility = Visibility.Visible,
-                    AxisType = AxisType.Logarithmic,
+                    AxisType = AxisType.Linear,
                     Label = "Exposure count",
                 },
                 TopAxis = { Visibility = Visibility.Collapsed },
@@ -76,6 +76,9 @@ namespace ESME.Views.Simulation
             }
             PressureViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(groupedExposuresHistogram.BinNames.Length, null, false));
             EnergyViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(groupedExposuresHistogram.BinNames.Length, null, false));
+
+            PressureViewModel.DataSeriesCollection.Add(groupedExposuresHistogram.GroupedBarSeriesViewModels[0]);
+            PressureViewModel.DataSeriesCollection.Add(groupedExposuresHistogram.GroupedBarSeriesViewModels[1]);
 
             PressureViewModel.LeftAxis.VisibleRange.Update(.9, 100);
             PressureViewModel.BottomAxis.DataRange.Update(-1, 12);

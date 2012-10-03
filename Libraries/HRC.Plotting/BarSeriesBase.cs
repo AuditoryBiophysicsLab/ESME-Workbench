@@ -72,7 +72,7 @@ namespace HRC.Plotting
         public override void RenderShapes()
         {
             if (Points == null || Points.Count == 0 || XAxis == null || XAxis.ValueToPosition == null || YAxis == null || YAxis.ValueToPosition == null) return;
-            MinimumXPlotSpacing = (from point in Points.Select(point => new Point(XAxis.ValueToPosition(Math.Round((double)point.X, XRoundingPrecision)), YAxis.ValueToPosition(point.Y))).ToList()
+            MinimumXPlotSpacing = (from point in Points.Select(point => new Point(XAxis.ValueToPosition(Math.Round(point.X, XRoundingPrecision)), YAxis.ValueToPosition(point.Y))).ToList()
                                    select point.X).ToList().AdjacentDifferences().Min();
             PlotOriginY = YAxis.ValueToPosition(Math.Max(YAxis.VisibleRange.Min, 0));
             foreach (var point in Points)
