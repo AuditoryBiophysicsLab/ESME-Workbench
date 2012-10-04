@@ -5,65 +5,11 @@
         xmlns:l="clr-namespace:ESME.Views.Scenarios"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         Title="{Binding WindowTitle}"
-        Background="#fff0f0f0"
         d:DataContext="{d:DesignInstance l:PropertiesViewModel}"
         Grid.IsSharedSizeScope="True"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
-    <Window.Resources>
-        <Style TargetType="{x:Type TextBox}">
-            <Setter Property="MinWidth" Value="150" />
-            <Setter Property="Validation.ErrorTemplate">
-                <Setter.Value>
-                    <ControlTemplate>
-                        <DockPanel LastChildFill="True">
-                            <Border BorderBrush="Red"
-                                    BorderThickness="1"
-                                    DockPanel.Dock="Left">
-                                <AdornedElementPlaceholder />
-                            </Border>
-                        </DockPanel>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="Validation.HasError" Value="true">
-                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-    </Window.Resources>
-    <DockPanel LastChildFill="True">
-        <StackPanel HorizontalAlignment="Right"
-                    DockPanel.Dock="Bottom"
-                    Orientation="Horizontal">
-            <Button Width="75"
-                    Margin="5"
-                    Command="{Binding OkCommand}"
-                    Content="OK"
-                    IsDefault="True" />
-        </StackPanel>
-        <Border BorderThickness="0"
-                DockPanel.Dock="Top"
-                Padding="5">
-            <StackPanel Orientation="Vertical">
-                <Grid Margin="5 5 5 0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0"
-                               Margin="0 0 5 0"
-                               VerticalAlignment="Center"
-                               Text="Source type"
-                               TextAlignment="Right" />
-                    <TextBox Grid.Column="1"
-                             Text="{Binding PropertyObject.SourceType}"
-                             ToolTip="This field is optional" />
-                </Grid>
-            </StackPanel>
-        </Border>
-    </DockPanel>
+    <l:SourcePropertiesControlView />
 </Window>

@@ -171,11 +171,24 @@
       <DependentUpon>CreateOrEditPerimeterView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scenarios\CreateOrEditPerimeterViewModel.cs" />
+    <Compile Include="Scenarios\ModePropertiesControlView.xaml.cs">
+      <DependentUpon>ModePropertiesControlView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Scenarios\ModePropertiesViewModel.cs" />
+    <Compile Include="Scenarios\PlatformPropertiesControlView.xaml.cs">
+      <DependentUpon>PlatformPropertiesControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\PSMContextView.xaml.cs">
+      <DependentUpon>PSMContextView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\PSMContextViewModel.cs" />
     <Compile Include="Scenarios\ScenarioPropertiesView.xaml.cs">
       <DependentUpon>ScenarioPropertiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scenarios\ScenarioPropertiesViewModel.cs" />
+    <Compile Include="Scenarios\SourcePropertiesControlView.xaml.cs">
+      <DependentUpon>SourcePropertiesControlView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Scenarios\SpeciesPropertiesView.xaml.cs">
       <DependentUpon>SpeciesPropertiesView.xaml</DependentUpon>
     </Compile>
@@ -184,12 +197,8 @@
       <DependentUpon>TreeViewItemPropertiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scenarios\TreeViewItemPropertiesViewModel.cs" />
-    <Compile Include="Scenarios\ModeDiagramView.xaml.cs">
-      <DependentUpon>ModeDiagramView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Scenarios\ModeDiagramViewModel.cs" />
-    <Compile Include="Scenarios\ModePropertiesView.xaml.cs">
-      <DependentUpon>ModePropertiesView.xaml</DependentUpon>
+    <Compile Include="Scenarios\ModePropertiesWindowView.xaml.cs">
+      <DependentUpon>ModePropertiesWindowView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scenarios\PlatformPropertiesView.xaml.cs">
       <DependentUpon>PlatformPropertiesView.xaml</DependentUpon>
@@ -300,7 +309,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Scenarios\ModePropertiesControlView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\PlatformPropertiesControlView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\PSMContextView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Scenarios\ScenarioPropertiesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\SourcePropertiesControlView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -312,11 +337,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Scenarios\ModeDiagramView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Scenarios\ModePropertiesView.xaml">
+    <Page Include="Scenarios\ModePropertiesWindowView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

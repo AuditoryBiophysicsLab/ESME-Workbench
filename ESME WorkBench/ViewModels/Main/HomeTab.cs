@@ -472,7 +472,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void ModeProperties(Mode mode)
         {
             var vm = new ModePropertiesViewModel(mode);
-            _visualizer.ShowDialog("ModePropertiesView", vm);
+            _visualizer.ShowDialog("ModePropertiesWindowView", vm);
             //_visualizer.ShowDialog("TreeViewItemPropertiesView", new ModePropertiesViewModel() { Mode = mode, });
             mode.LowFrequency = mode.HighFrequency;
             if (vm.AcousticPropertiesHaveChanged) Scenario.NotifyAcousticsChanged(mode);
