@@ -1,0 +1,2 @@
+"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -wixversion "$(ProjectDir)version.wxi" -output "$(ProjectDir) "
+heat dir "..\..\..\Utilities\3MB\Species Files" -gg -sfrag -out SpeciesFiles.wxs

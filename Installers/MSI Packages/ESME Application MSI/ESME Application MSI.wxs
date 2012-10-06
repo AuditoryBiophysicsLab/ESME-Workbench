@@ -358,10 +358,10 @@
                        Guid="144784EF-F12D-49A7-B24A-F9F2B7D1FAFF"
                        Win64="$(var.Win64)">
               <!-- 3MB Species Files TODO better way to add all 21 files -->
-              <File Id="Generic mysticete.spe"
+              <File Id="Generic_mysticete.spe"
                     Name="Generic mysticete.spe"
                     Source="$(var.UtilityRoot)\3MB\Species Files\Generic mysticete.spe" />
-              <File Id="Generic odontocete.spe"
+              <File Id="Generic_odontocete.spe"
                     Name="Generic odontocete.spe"
                     Source="$(var.UtilityRoot)\3MB\Species Files\Generic odontocete.spe" />
             </Component>
