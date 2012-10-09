@@ -1,0 +1,1 @@
+call "BuildAndDeploy.bat" download
