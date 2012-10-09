@@ -21,11 +21,11 @@ msbuild "Installers\EXE Packages\ESME Application and Databases\ESME Application
 msbuild "Installers\EXE Packages\ESME Application and Databases\ESME Application and Databases.wixproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform="x86" /t:Rebuild /v:minimal /p:DefineConstants="DownloadURLRoot=%DownloadURLRoot%"
 msbuild "Installers\EXE Packages\ESME Databases\ESME Databases.wixproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform="x86" /t:Rebuild /v:minimal /p:DefineConstants="DownloadURLRoot=%DownloadURLRoot%"
 
-copy /y "Installers\MSI Packages\ESME Application MSI\msi\*.msi" "\\earlab.bu.edu\c$\Inetpub\wwwroot\ESME\%DownloadOrDevelopment%"
-copy /y "Installers\MSI Packages\Plugins\Environmental Databases\InstallableNAVO\msi\*.msi" "\\earlab.bu.edu\c$\Inetpub\wwwroot\ESME\%DownloadOrDevelopment%"
-copy /y "Installers\EXE Packages\ESME Application\msi\*.exe" "\\earlab.bu.edu\c$\Inetpub\wwwroot\ESME\%DownloadOrDevelopment%"
-copy /y "Installers\EXE Packages\ESME Application and Databases\msi\*.exe" "\\earlab.bu.edu\c$\Inetpub\wwwroot\ESME\%DownloadOrDevelopment%"
-copy /y "Installers\EXE Packages\ESME Databases\msi\*.exe" "\\earlab.bu.edu\c$\Inetpub\wwwroot\ESME\%DownloadOrDevelopment%"
+copy /y "Installers\MSI Packages\ESME Application MSI\msi\*.msi" "\\earlab.bu.edu\c$\Inetpub\wwwroot\ESME\%1%"
+copy /y "Installers\MSI Packages\Plugins\Environmental Databases\InstallableNAVO\msi\*.msi" "\\earlab.bu.edu\c$\Inetpub\wwwroot\ESME\%1%"
+copy /y "Installers\EXE Packages\ESME Application\msi\*.exe" "\\earlab.bu.edu\c$\Inetpub\wwwroot\ESME\%1%"
+copy /y "Installers\EXE Packages\ESME Application and Databases\msi\*.exe" "\\earlab.bu.edu\c$\Inetpub\wwwroot\ESME\%1%"
+copy /y "Installers\EXE Packages\ESME Databases\msi\*.exe" "\\earlab.bu.edu\c$\Inetpub\wwwroot\ESME\%1%"
 goto End
 :ParameterRequired
 echo This script requires a parameter, which must be either 'development' or 'download'
