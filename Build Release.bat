@@ -1,11 +1,14 @@
+if "%1"=="download" goto ParameterOK
+if "%1"=="development" goto ParameterOK
+goto ParameterRequired
+:ParameterOK
 call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat"
 msbuild "ESME WorkBench\ESME Workbench.csproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform=AnyCPU /t:Rebuild /v:minimal
 msbuild "TransmissionLossViewer\TransmissionLossViewer.csproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform=AnyCPU /t:Build /v:minimal
 
 msbuild "Installers\ManagedBootstrapper\Managed Bootstrapper.csproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform=AnyCPU /t:Rebuild /v:minimal
 
-set DownloadOrDevelopment=development
-set DownloadURLRoot=http://esme.bu.edu/%DownloadOrDevelopment%
+set DownloadURLRoot=http://esme.bu.edu/%1%
 
 msbuild "Installers\MSI Packages\Plugins\Environmental Databases\InstallableNAVO\InstallableNAVOPlugin MSI.wixproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform="x64" /t:Rebuild /v:minimal
 msbuild "Installers\MSI Packages\Plugins\Environmental Databases\InstallableNAVO\InstallableNAVOPlugin MSI.wixproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform="x86" /t:Rebuild /v:minimal
@@ -23,3 +26,7 @@ copy /y "Installers\MSI Packages\Plugins\Environmental Databases\InstallableNAVO
 copy /y "Installers\EXE Packages\ESME Application\msi\*.exe" "\\earlab.bu.edu\c$\Inetpub\wwwroot\ESME\%DownloadOrDevelopment%"
 copy /y "Installers\EXE Packages\ESME Application and Databases\msi\*.exe" "\\earlab.bu.edu\c$\Inetpub\wwwroot\ESME\%DownloadOrDevelopment%"
 copy /y "Installers\EXE Packages\ESME Databases\msi\*.exe" "\\earlab.bu.edu\c$\Inetpub\wwwroot\ESME\%DownloadOrDevelopment%"
+goto End
+:ParameterRequired
+echo This script requires a parameter, which must be either 'development' or 'download'
+:End
