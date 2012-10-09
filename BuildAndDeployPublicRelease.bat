@@ -1,1 +1,1 @@
-call "BuildAndDeploy.bat" download
+rem call "BuildAndDeploy.bat" download
