@@ -8,7 +8,6 @@
   <?define MSIRoot="$(var.InstallersRoot)\MSI Packages"?>
   <?define DatabasesRoot="$(var.MSIRoot)\ESME Databases"?>
   <?define ProductName = "ESME 2012 Databases" ?>
-  <?define DownloadURLRoot="http://esme.bu.edu/download"?>
   <Bundle Name="$(var.ProductName)" 
           Version="$(var.ProductFullVersion)" 
           Manufacturer="$(var.Manufacturer)"

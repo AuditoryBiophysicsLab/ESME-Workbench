@@ -9,7 +9,6 @@
   <?define DatabasesRoot="$(var.MSIRoot)\ESME Databases"?>
   <?define ApplicationRoot="$(var.MSIRoot)\ESME Application MSI"?>
   <?define PluginsRoot="$(var.MSIRoot)\Plugins\Environmental Databases"?>
-  <?define DownloadURLRoot="http://esme.bu.edu/download"?>
   <?if $(var.Platform) = x64 ?>
   <?define Bitness="64-bit"?>
   <?else ?>

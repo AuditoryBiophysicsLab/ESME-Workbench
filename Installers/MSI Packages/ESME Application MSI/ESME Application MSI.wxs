@@ -106,6 +106,9 @@
             <File Id="HRC.dll"
                   Name="HRC.dll"
                   Source="$(var.ESMEPath)\HRC.dll" />
+            <File Id="HRC.Plotting.dll"
+                  Name="HRC.Plotting.dll"
+                  Source="$(var.ESMEPath)\HRC.Plotting.dll" />
             <File Id="TransmissionLossViewer.exe"
                   Name="TransmissionLossViewer.exe"
                   Source="$(var.TransmissionLossViewerPath)\TransmissionLossViewer.exe" />
@@ -150,6 +153,17 @@
             <File Id="PostSharp.dll"
                   Name="PostSharp.dll"
                   Source="$(var.ExternalsPath)\PostSharp.dll" />
+
+            <!-- PostSharp Logging -->
+            <File Id="Log4PostSharp.dll"
+                  Name="Log4PostSharp.dll"
+                  Source="$(var.ExternalsPath)\Log4PostSharp.dll" />
+            <File Id="log4net.dll"
+                  Name="log4net.dll"
+                  Source="$(var.ExternalsPath)\log4net.dll" />
+            <File Id="log4net.Config"
+                  Name="log4net.Config"
+                  Source="$(var.ESMERoot)\ESME WorkBench\log4net.Config" />
 
             <!-- 3MB assemblies -->
             <File Id="_3MBSLib.dll"
@@ -353,19 +367,7 @@
                     Source="$(var.GISRoot)\Countries02.shp" />
             </Component>
           </Directory>
-          <Directory Id="SpeciesDefinitionFilesFolder" Name="Species Definition Files">
-            <Component Id="SpeciesFiles"
-                       Guid="144784EF-F12D-49A7-B24A-F9F2B7D1FAFF"
-                       Win64="$(var.Win64)">
-              <!-- 3MB Species Files TODO better way to add all 21 files -->
-              <File Id="Generic_mysticete.spe"
-                    Name="Generic mysticete.spe"
-                    Source="$(var.UtilityRoot)\3MB\Species Files\Generic mysticete.spe" />
-              <File Id="Generic_odontocete.spe"
-                    Name="Generic odontocete.spe"
-                    Source="$(var.UtilityRoot)\3MB\Species Files\Generic odontocete.spe" />
-            </Component>
-          </Directory>
+          <Directory Id="SpeciesDefinitionFilesFolder" Name="Species Definition Files" />
         </Directory>
 			</Directory>
       <Directory Id="DesktopFolder" Name="Desktop" />
@@ -387,7 +389,7 @@
       <ComponentRef Id="ESMEWorkbench" />
       <MergeRef Id="vc100"/>
       <ComponentRef Id="GISFiles" />
-      <ComponentRef Id="SpeciesFiles" />
+      <ComponentGroupRef Id="SpeciesDefinitionFiles" />
       <ComponentRef Id="ESMEWorkbench_Shortcuts"/>
       <ComponentRef Id="RegistryEntries"/>
     </Feature>

@@ -12,14 +12,15 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <SuppressSpecificWarnings />
-    <DefineConstants />
-    <WixVariables />
+    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
+    <WixVariables>
+    </WixVariables>
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <SuppressSpecificWarnings />
-    <DefineConstants />
+    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
     <WixVariables />
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
@@ -40,7 +41,6 @@
   <ItemGroup>
     <Content Include="Bitmaps\bannrbmp.bmp" />
     <Content Include="Bitmaps\dlgbmp.bmp" />
-    <Content Include="prebuild.bat" />
     <Content Include="version.wxi" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
@@ -51,7 +51,7 @@ copy "$(TargetPath)" "\\corti.bu.edu\hrc-backup\ESME Workbench\$(TargetName)-$(P
 exit 0</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>heat dir "$(ProjectDir)..\..\..\Utilities\3MB\Species Files" -gg -sfrag -out SpeciesFiles.wxs
+    <PreBuildEvent>heat dir "$(ProjectDir)..\..\..\Utilities\3MB\Species Files" -srd -cg SpeciesDefinitionFiles -dr SpeciesDefinitionFilesFolder -gg -sfrag -out "$(ProjectDir)SpeciesFiles.wxs" -var var.SpeciesDefinitionFilesFolder
 if errorlevel 1 goto BuildEventFailed
 "C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -wixversion "$(ProjectDir)version.wxi" -output "$(ProjectDir) "
 if errorlevel 1 goto BuildEventFailed
@@ -61,6 +61,12 @@ echo PREBUILD for $(ProjectName) FAILED
 exit 1
 :BuildEventOK
 echo PREBUILD for $(ProjectName) COMPLETED SUCCESSFULLY</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
   </PropertyGroup>
   <!--
 To modify your build process, add your task inside one of the targets below and uncomment it.
