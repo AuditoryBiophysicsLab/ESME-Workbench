@@ -215,13 +215,13 @@ namespace ESME.SimulationAnalysis
                 var newColor = ColorExtensions.GetRandomNamedColor();
                 bins[0] = new HistogramBins(LowBinValue, BinWidth, BinCount)
                 {
-                    DataSetName = "Peak Pressure: " + groupDescription.GroupName(exposureRecord),
+                    DataSetName = groupDescription.GroupName(exposureRecord),
                     BarSeriesViewModel = { Fill = new SolidColorBrush(newColor) },
                 };
                 GroupedBarSeriesViewModels[0].BarSeriesCollection.Add(bins[0].BarSeriesViewModel);
                 bins[1] = new HistogramBins(LowBinValue, BinWidth, BinCount)
                 {
-                    DataSetName = "Energy: " + groupDescription.GroupName(exposureRecord),
+                    DataSetName = groupDescription.GroupName(exposureRecord),
                     BarSeriesViewModel = { Fill = new SolidColorBrush(newColor) },
                 };
                 GroupedBarSeriesViewModels[1].BarSeriesCollection.Add(bins[1].BarSeriesViewModel);

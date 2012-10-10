@@ -34,7 +34,9 @@ namespace HRC.Plotting
             }
             var xPlotCoordinates = xCoordinates.Distinct().ToList();
             xPlotCoordinates.Sort();
-            MinimumXPlotSpacing = xPlotCoordinates.AdjacentDifferences().Min();
+            var adjacentDifferences = xPlotCoordinates.AdjacentDifferences().ToList();
+            if (adjacentDifferences.Count == 0) return;
+            MinimumXPlotSpacing = adjacentDifferences.Min();
             var groupWidth = MinimumXPlotSpacing * BarWidth;
             var seriesWidth = groupWidth / BarSeriesCollection.Count;
             PlotOriginY = YAxis.ValueToPosition(Math.Max(YAxis.VisibleRange.Min, 0));

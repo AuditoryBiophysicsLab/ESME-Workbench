@@ -232,7 +232,10 @@ namespace ESME.Simulator
                 PercentProgress.Report(timeStepIndex);
                 var timeStepRecord = new SimulationTimeStepRecord();
                 timeStepRecord.ActorPositionRecords.AddRange(actorPositionRecords);
-                Dispatcher.InvokeIfRequired(() => NewModeThresholdHistogram.Process(timeStepRecord));
+                Dispatcher.InvokeIfRequired(() =>
+                {
+                    using (Dispatcher.DisableProcessing()) NewModeThresholdHistogram.Process(timeStepRecord);
+                });
                 //SpeciesThresholdHistogram.Process(timeStepRecord);
                 logBuffer.Post(timeStepRecord);
                 if (moveTask != null)
@@ -261,7 +264,7 @@ namespace ESME.Simulator
             Debug.WriteLine(string.Format("{0}: Exposures by species:", DateTime.Now));
             for (var i = 0; i < _exposuresBySpecies.Length; i++) Debug.WriteLine(string.Format("{0}: Species: {1}, Exposures: {2}", DateTime.Now, Scenario.ScenarioSpecies[i].LatinName, _exposuresBySpecies[i]));
             //SpeciesThresholdHistogram.Display();
-            NewModeThresholdHistogram.DebugDisplay();
+            //NewModeThresholdHistogram.DebugDisplay();
         }
 
         static List<OverlayShapeMapLayer> CreateFootprintMapLayers(Platform platform, PlatformState state)

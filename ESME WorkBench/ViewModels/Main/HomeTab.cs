@@ -666,14 +666,6 @@ namespace ESMEWorkbench.ViewModels.Main
             SimulationProgressViewModel.SimulationStarting += (s, e) => IsSimulationRunning = true;
             var window = _visualizer.ShowWindow("SimulationProgressView", SimulationProgressViewModel, false, (s, e) => IsSimulationRunning = false);
             SimulationProgressViewModel.Window = window;
-            window.Closed += (s, e) =>
-            {
-                if (!SimulationProgressViewModel.IsSimulationRunning) return;
-                if (SimulationProgressViewModel.IsSimulationCanceled && (_messageBox.ShowYesNo("Simulation was canceled by user request.  Show histogram(s) from incomplete simulation?", MessageBoxImage.Question) != MessageBoxResult.Yes)) return;
-                var filepath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), string.Format("PlotHistograms{0}.exe",Environment.Is64BitOperatingSystem ? "_x64":"_x86"));
-                var argname = "\"" + Path.Combine(simulationDirectory, name + ".xml") + "\"";
-                System.Diagnostics.Process.Start(filepath, argname);
-            };
         }
 
         public string ScenarioValidationError { get; set; }

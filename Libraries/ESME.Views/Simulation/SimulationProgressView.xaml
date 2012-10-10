@@ -103,10 +103,10 @@
                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding SimulationProgressText}" />
             </Grid>
         </Grid>
-        <ListBox Height="200" ItemsSource="{Binding HistogramBinsViewModels}">
+        <ListBox ItemsSource="{Binding HistogramBinsViewModels}" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Simulation:HistogramBinsView Height="200" Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}"/>
+                    <Simulation:HistogramBinsView Height="200" Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=ActualWidth}"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

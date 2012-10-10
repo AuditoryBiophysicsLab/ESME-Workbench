@@ -111,7 +111,10 @@ namespace ESME.SimulationAnalysis
         public void Process(SimulationTimeStepRecord record)
         {
             foreach (var exposure in record.ActorPositionRecords.SelectMany(actorPositionRecord => actorPositionRecord.Exposures))
+            {
+                var speciesGuid = SimulationLog.RecordFromActorID(exposure.ActorID).Guid;
                 GroupedExposures.Expose(exposure);
+            }
         }
 
         public void DebugDisplay()
