@@ -39,7 +39,10 @@
             <ColumnDefinition />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
-        <ListBox Grid.Column="0" ItemsSource="{Binding Platforms}" SelectedItem="{Binding SelectedPlatform}" ItemTemplate="{StaticResource SelectedPlatform}"/>
+        <!--<ListBox Grid.Column="0" ItemsSource="{Binding Platforms}" SelectedItem="{Binding SelectedPlatform}" ItemTemplate="{StaticResource SelectedPlatform}"/>-->
+        <ListBox Grid.Column="0">
+            <l:PlatformPropertiesControlView/>
+        </ListBox>
         <GridSplitter Grid.Column="1" />
         <ListBox Grid.Column="2">
             <l:SourcePropertiesControlView />

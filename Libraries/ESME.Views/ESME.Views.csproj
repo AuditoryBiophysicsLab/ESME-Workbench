@@ -48,6 +48,10 @@
     <Reference Include="Core">
       <HintPath>..\..\ESME WorkBench\External References\Core.dll</HintPath>
     </Reference>
+    <Reference Include="Devart.Data, Version=5.0.449.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
+    <Reference Include="Devart.Data.SQLite, Version=3.80.350.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
+    <Reference Include="Devart.Data.SQLite.Entity, Version=3.80.350.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
+    <Reference Include="Devart.Data.SQLite.Entity.Migrations, Version=3.80.350.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
     <Reference Include="EntityFramework, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\ESME WorkBench\External References\EntityFramework.dll</HintPath>
@@ -167,6 +171,10 @@
       <DependentUpon>BasicPropertiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
+    <Compile Include="PSM\PSMTreeView.xaml.cs">
+      <DependentUpon>PSMTreeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PSM\PSMTreeViewModel.cs" />
     <Compile Include="Scenarios\CreateOrEditPerimeterView.xaml.cs">
       <DependentUpon>CreateOrEditPerimeterView.xaml</DependentUpon>
     </Compile>
@@ -302,6 +310,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Misc\BasicPropertiesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PSM\PSMTreeView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -457,6 +469,7 @@
   <ItemGroup>
     <Resource Include="Images\information.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESME.Views -class BuildInformation -version "$(SolutionDir)VersionInfo.txt" -assemblyversion "$(ProjectDir)\Properties\AssemblyVersionInfo.cs" -output "$(ProjectDir)BuildInformation.cs"</PreBuildEvent>

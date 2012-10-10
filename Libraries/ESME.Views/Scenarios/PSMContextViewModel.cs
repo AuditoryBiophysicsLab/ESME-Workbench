@@ -17,7 +17,7 @@ namespace ESME.Views.Scenarios
     public class PSMContextViewModel : ViewModelBase
     {
         public string WindowTitle { get; set; }
-        public ObservableCollection<Platform> Platforms { get; set; }
+        public ObservableCollection<PlatformPropertiesControlView> Platforms { get; set; }
         public PlatformPropertiesControlView SelectedPlatform { get; set; }
     }
 }
