@@ -3,13 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:app="clr-namespace:HRC.Plotting"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
              d:DesignHeight="600"
              d:DesignWidth="800"
              mc:Ignorable="d">
     <UserControl.Resources>
         <app:FourAxisSeriesViewModel x:Key="DesignViewModel" />
     </UserControl.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <WPF:EventToCommandTrigger Command="{Binding ViewLoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <DockPanel d:DataContext="{Binding Source={StaticResource DesignViewModel}, Path=DesignTimeData}">
         <TextBlock Margin="0 0 0 5"
                    DockPanel.Dock="Top"

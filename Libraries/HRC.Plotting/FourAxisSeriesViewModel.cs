@@ -55,7 +55,6 @@ namespace HRC.Plotting
         [Initialize] public DataAxisViewModel RightAxis { get; set; }
         [Initialize, UsedImplicitly] public ObservableCollection<ISeries> DataSeriesCollection { get; private set; }
         [Initialize, UsedImplicitly] public ObservableCollection<LegendItemViewModel> LegendItems { get; private set; }
-
         public DataAxisViewModel XAxis { get; set; }
         public DataAxisViewModel YAxis { get; set; }
         public Color MajorTickLineColor { get; set; }
@@ -219,6 +218,18 @@ namespace HRC.Plotting
             sb.AppendLine(PlotTitle);
             //todo
             return sb.ToString();
+        }
+        #endregion
+
+        #region ViewLoadedCommand
+        public SimpleCommand<object, EventToCommandArgs> ViewLoadedCommand { get { return _viewLoaded ?? (_viewLoaded = new SimpleCommand<object, EventToCommandArgs>(ViewLoadedHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _viewLoaded;
+
+        void ViewLoadedHandler(EventToCommandArgs args)
+        {
+            var routedEventArgs = (RoutedEventArgs)args.EventArgs;
+            var source = routedEventArgs.Source;
+            _view = (FourAxisSeriesView)source;
         }
         #endregion
     }
