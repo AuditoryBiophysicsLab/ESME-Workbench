@@ -3,8 +3,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Xml;
 using ESME.Simulator;
-using HRC;
-using HRC.Aspects;
 
 namespace ESME.SimulationAnalysis
 {
@@ -13,14 +11,20 @@ namespace ESME.SimulationAnalysis
     /// </summary>
     public class ModeThresholdHistogram : ITimeStepProcessor
     {
-        public ModeThresholdHistogram(SimulationLog simulationLog)
+        public ModeThresholdHistogram(SimulationLog simulationLog, IHistogramSource histogramSource)
         {
-            ModeBinnedExposureDictionary.Filter1 = SpeciesIndexFromActorExposureRecord;
-            ModeBinnedExposureDictionary.Filter2 = record => record.ModeID;
+            _histogramSource = histogramSource;
+            ModeBinnedExposureDictionary = new BinnedExposureDictionary(_histogramSource)
+            {
+                Filter1 = SpeciesIndexFromActorExposureRecord, 
+                Filter2 = record => record.ModeID,
+            };
             SimulationLog = simulationLog;
         }
+
+        readonly IHistogramSource _histogramSource;
         public SimulationLog SimulationLog { get; private set; }
-        [Initialize, UsedImplicitly] public BinnedExposureDictionary ModeBinnedExposureDictionary { get; private set; }
+        public BinnedExposureDictionary ModeBinnedExposureDictionary { get; private set; }
 
         public void Process(SimulationTimeStepRecord record)
         {
@@ -87,22 +91,24 @@ namespace ESME.SimulationAnalysis
     /// </summary>
     public class NewModeThresholdHistogram : ITimeStepProcessor
     {
-        public NewModeThresholdHistogram(SimulationLog simulationLog)
+        public NewModeThresholdHistogram(IHistogramSource histogramSource, SimulationLog simulationLog)
         {
             SimulationLog = simulationLog;
             Func<ActorExposureRecord, bool> recordFilter = record => (SimulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid) != null;
-            GroupedExposures = new GroupedExposures(100, 10, 10);
+            GroupedExposures = new GroupedExposures(histogramSource, 100, 10, 10);
             GroupedExposures.GroupDescriptions.Add(new ExposureGroupDescription
             {
                 GroupName = record => SimulationLog.RecordFromModeID(record.ModeID).Name,
                 RecordFilter = recordFilter,
                 RecordToKey = record => SimulationLog.ModeRecords.IndexOf(SimulationLog.RecordFromModeID(record.ModeID)),
+                RecordToGuid = record => SimulationLog.RecordFromModeID(record.ModeID).Guid,
             });
             GroupedExposures.GroupDescriptions.Add(new ExposureGroupDescription
             {
                 GroupName = record => SimulationLog.RecordFromActorID(record.ActorID).Name,
                 RecordFilter = recordFilter,
                 RecordToKey = record => SimulationLog.SpeciesRecords.IndexOf(((SpeciesNameGuid)SimulationLog.RecordFromActorID(record.ActorID))),
+                RecordToGuid = record => SimulationLog.RecordFromActorID(record.ActorID).Guid,
             });
         }
         public SimulationLog SimulationLog { get; private set; }

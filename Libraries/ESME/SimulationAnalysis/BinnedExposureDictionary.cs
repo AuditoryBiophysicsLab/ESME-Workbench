@@ -13,7 +13,6 @@ using HRC.Aspects;
 using HRC.Collections;
 using HRC.Plotting;
 using HRC.ViewModels;
-using HRC.WPF;
 
 namespace ESME.SimulationAnalysis
 {
@@ -23,8 +22,13 @@ namespace ESME.SimulationAnalysis
         public Func<ActorExposureRecord, int?> Filter1 { get; set; }
         public Func<ActorExposureRecord, int?> Filter2 { get; set; }
 
-        public BinnedExposureDictionary() { Exposures = new ObservableConcurrentDictionary<int, ObservableConcurrentDictionary<int, ObservableCollection<HistogramBins>>>(); }
+        public BinnedExposureDictionary(IHistogramSource histogramSource)
+        {
+            Exposures = new ObservableConcurrentDictionary<int, ObservableConcurrentDictionary<int, ObservableCollection<HistogramBins>>>();
+            _histogramSource = histogramSource;
+        }
 
+        readonly IHistogramSource _histogramSource;
         public void Expose(ActorExposureRecord exposureRecord)
         {
             if (Filter1 == null) throw new ApplicationException("Filter1 cannot be null");
@@ -42,7 +46,7 @@ namespace ESME.SimulationAnalysis
             ObservableCollection<HistogramBins> bins;
             if (!level2.TryGetValue(key2.Value, out bins))
             {
-                bins = new ObservableCollection<HistogramBins> { new HistogramBins(), new HistogramBins() }; //peakSPL and Energy
+                bins = new ObservableCollection<HistogramBins> { new HistogramBins(_histogramSource), new HistogramBins(_histogramSource) }; //peakSPL and Energy
                 if (!level2.TryAdd(key2.Value, bins)) if (!level2.TryGetValue(key2.Value, out bins)) throw new ApplicationException("Could not add bins.");
             }
             bins[0].Add(exposureRecord.PeakSPL);
@@ -111,15 +115,17 @@ namespace ESME.SimulationAnalysis
     {
         protected readonly int GroupLevel;
         readonly ObservableConcurrentDictionary<int, IGroupedExposures> _groupedExposures = new ObservableConcurrentDictionary<int, IGroupedExposures>();
+        protected IHistogramSource HistogramSource;
 
-        public GroupedExposures(double lowBinValue, double binWidth, int binCount)
+        public GroupedExposures(IHistogramSource histogramSource, double lowBinValue, double binWidth, int binCount)
         {
+            HistogramSource = histogramSource;
             LowBinValue = lowBinValue;
             BinWidth = binWidth;
             BinCount = binCount;
             GroupLevel = 0;
         }
-        protected GroupedExposures(double lowBinValue, double binWidth, int binCount, int groupLevel) : this(lowBinValue, binWidth, binCount) { GroupLevel = groupLevel; }
+        protected GroupedExposures(IHistogramSource histogramSource, double lowBinValue, double binWidth, int binCount, int groupLevel) : this(histogramSource, lowBinValue, binWidth, binCount) { GroupLevel = groupLevel; }
 
         [Initialize] public List<ExposureGroupDescription> GroupDescriptions { get; set; }
             
@@ -139,13 +145,13 @@ namespace ESME.SimulationAnalysis
             if (!_groupedExposures.TryGetValue(key, out value))
             {
                 if (GroupDescriptions.Count > (GroupLevel + 2))
-                    value = new GroupedExposures(LowBinValue, BinWidth, BinCount, GroupLevel + 1)
+                    value = new GroupedExposures(HistogramSource, LowBinValue, BinWidth, BinCount, GroupLevel + 1)
                     {
                         GroupName = groupDescription.GroupName(exposureRecord),
                         GroupDescriptions = GroupDescriptions
                     };
                 else
-                    value = new GroupedExposuresHistogram(LowBinValue, BinWidth, BinCount, GroupLevel + 1)
+                    value = new GroupedExposuresHistogram(HistogramSource, LowBinValue, BinWidth, BinCount, GroupLevel + 1)
                     {
                         GroupName = groupDescription.GroupName(exposureRecord),
                         GroupDescriptions = GroupDescriptions
@@ -176,6 +182,7 @@ namespace ESME.SimulationAnalysis
     {
         public Func<ActorExposureRecord, bool> RecordFilter { get; set; }
         public Func<ActorExposureRecord, int> RecordToKey { get; set; }
+        public Func<ActorExposureRecord, Guid> RecordToGuid { get; set; }
         public Func<ActorExposureRecord, string> GroupName { get; set; }
         public bool UsePressureExposures { get; set; }
     }
@@ -183,12 +190,13 @@ namespace ESME.SimulationAnalysis
     public class GroupedExposuresHistogram : GroupedExposures
     {
         readonly ObservableConcurrentDictionary<int, HistogramBins[]> _groupedExposures = new ObservableConcurrentDictionary<int, HistogramBins[]>();
-        internal GroupedExposuresHistogram(double lowBinValue, double binWidth, int binCount, int groupLevel) : base(lowBinValue, binWidth, binCount, groupLevel)
+        internal GroupedExposuresHistogram(IHistogramSource histogramSource, double lowBinValue, double binWidth, int binCount, int groupLevel)
+            : base(histogramSource, lowBinValue, binWidth, binCount, groupLevel)
         {
             GroupedBarSeriesViewModels = new GroupedBarSeriesViewModel[2];
             GroupedBarSeriesViewModels[0] = new GroupedBarSeriesViewModel();
             GroupedBarSeriesViewModels[1] = new GroupedBarSeriesViewModel();
-            var bins = new HistogramBins(LowBinValue, BinWidth, BinCount);
+            var bins = new HistogramBins(HistogramSource, LowBinValue, BinWidth, BinCount);
             BinNames = new string[bins.BinNames.Length];
             Array.Copy(bins.BinNames, BinNames, bins.BinNames.Length);
             //_cvs = new CollectionViewSource();
@@ -212,17 +220,16 @@ namespace ESME.SimulationAnalysis
             if (!_groupedExposures.TryGetValue(key, out bins))
             {
                 bins = new HistogramBins[2];
-                var newColor = ColorExtensions.GetRandomNamedColor();
-                bins[0] = new HistogramBins(LowBinValue, BinWidth, BinCount)
+                bins[0] = new HistogramBins(HistogramSource, LowBinValue, BinWidth, BinCount)
                 {
                     DataSetName = groupDescription.GroupName(exposureRecord),
-                    BarSeriesViewModel = { Fill = new SolidColorBrush(newColor) },
+                    BarSeriesViewModel = { Fill = new SolidColorBrush(HistogramSource.GuidToColorMap[groupDescription.RecordToGuid(exposureRecord)]) },
                 };
                 GroupedBarSeriesViewModels[0].BarSeriesCollection.Add(bins[0].BarSeriesViewModel);
-                bins[1] = new HistogramBins(LowBinValue, BinWidth, BinCount)
+                bins[1] = new HistogramBins(HistogramSource, LowBinValue, BinWidth, BinCount)
                 {
                     DataSetName = groupDescription.GroupName(exposureRecord),
-                    BarSeriesViewModel = { Fill = new SolidColorBrush(newColor) },
+                    BarSeriesViewModel = { Fill = new SolidColorBrush(HistogramSource.GuidToColorMap[groupDescription.RecordToGuid(exposureRecord)]) },
                 };
                 GroupedBarSeriesViewModels[1].BarSeriesCollection.Add(bins[1].BarSeriesViewModel);
                 if (_groupedExposures.TryAdd(key, bins))

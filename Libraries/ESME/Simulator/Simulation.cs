@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -17,6 +16,7 @@ using ESME.Model;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using ESME.SimulationAnalysis;
+using HRC;
 using HRC.Aspects;
 using HRC.Collections;
 using HRC.Navigation;
@@ -27,7 +27,7 @@ using mbs;
 namespace ESME.Simulator
 {
     [NotifyPropertyChanged]
-    public class Simulation
+    public class Simulation : IHistogramSource
     {
         //public List<Actor> GetActors() { return _database.Actors.ToList(); }
         //public Scenario Scenario { get { return _database.Scenarios.First(); } }
@@ -60,6 +60,8 @@ namespace ESME.Simulator
                 { "physicalMemoryLimitPercentage", "50" }, 
                 { "pollingInterval", "00:05:00" }
             });
+            foreach (var species in scenario.ScenarioSpecies)
+                GuidToColorMap.Add(species.Guid, species.LayerSettings.LineOrSymbolColor);
         }
 
         public Scenario Scenario { get; private set; }
@@ -79,13 +81,12 @@ namespace ESME.Simulator
         //public SpeciesThresholdHistogram SpeciesThresholdHistogram { get; set; }
         public bool AnimateSimulation { get; set; }
         public bool MovingAnimats { get; set; }
-
         public Task Start(TimeSpan timeStepSize)
         {
             TimeStepSize = timeStepSize;
             _cancellationTokenSource = new CancellationTokenSource();
             SimulationLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), TimeStepSize, Scenario);
-            NewModeThresholdHistogram = new NewModeThresholdHistogram(SimulationLog);
+            NewModeThresholdHistogram = new NewModeThresholdHistogram(this, SimulationLog);
             //SpeciesThresholdHistogram = new SpeciesThresholdHistogram(this);
             return TaskEx.Run(() => Run(TimeStepSize, _cancellationTokenSource.Token));
         }
@@ -232,10 +233,8 @@ namespace ESME.Simulator
                 PercentProgress.Report(timeStepIndex);
                 var timeStepRecord = new SimulationTimeStepRecord();
                 timeStepRecord.ActorPositionRecords.AddRange(actorPositionRecords);
-                Dispatcher.InvokeIfRequired(() =>
-                {
-                    using (Dispatcher.DisableProcessing()) NewModeThresholdHistogram.Process(timeStepRecord);
-                });
+                Dispatcher.InvokeIfRequired(() => NewModeThresholdHistogram.Process(timeStepRecord));
+                if (timeStepIndex % 50 == 0) Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
                 //SpeciesThresholdHistogram.Process(timeStepRecord);
                 logBuffer.Post(timeStepRecord);
                 if (moveTask != null)
@@ -251,6 +250,7 @@ namespace ESME.Simulator
                 if (MovingAnimats & AnimateSimulation) Dispatcher.InvokeIfRequired(() => { foreach (var species in Scenario.ScenarioSpecies) species.UpdateMapLayers(); });
                 if (token.IsCancellationRequested) break;
             }
+            Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
             foreach (var layer in _modeFootprintMapLayers.SelectMany(layerSet => layerSet))
             {
                 var curLayer = layer;
@@ -265,6 +265,22 @@ namespace ESME.Simulator
             for (var i = 0; i < _exposuresBySpecies.Length; i++) Debug.WriteLine(string.Format("{0}: Species: {1}, Exposures: {2}", DateTime.Now, Scenario.ScenarioSpecies[i].LatinName, _exposuresBySpecies[i]));
             //SpeciesThresholdHistogram.Display();
             //NewModeThresholdHistogram.DebugDisplay();
+        }
+
+        void UpdateHistogramDisplay()
+        {
+            var handlers = GraphicsUpdate;
+            if (handlers == null) return;
+            foreach (EventHandler<EventArgs> handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                {
+                    var localHandler = handler;
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new EventArgs()));
+                }
+                else
+                    handler(this, new EventArgs());
+            }
         }
 
         static List<OverlayShapeMapLayer> CreateFootprintMapLayers(Platform platform, PlatformState state)
@@ -381,13 +397,8 @@ namespace ESME.Simulator
                 //----------------------------------------------------------------------//
                 // Initialize the scenario.
                 //----------------------------//
-#if true
                 if (mbsRESULT.OK == result) while (mbsRUNSTATE.INITIALIZING == mbs.GetRunState()) Thread.Sleep(1);
                 else throw new AnimatInterfaceMMBSException("C3mbs::Initialize FATAL error " + mbs.ResultToTc(result));
-#else
-                if (mbsRESULT.OK != (result = mbs.RunScenarioNumIterations(0))) throw new AnimatInterfaceMMBSException("C3mbs::RunScenarioNumIterations FATAL error " + _mbs[mbsIndex].ResultToTc(result));
-                while (mbs.GetRunState() == mbsRUNSTATE.INITIALIZING) Thread.Sleep(1);
-#endif
             }
             UpdateAnimatPositions();
         }
@@ -457,6 +468,8 @@ namespace ESME.Simulator
         }
 #endif
 
+        public event EventHandler<EventArgs> GraphicsUpdate;
+        [Initialize, UsedImplicitly] public Dictionary<Guid, Color> GuidToColorMap { get; private set; }
     }
 
     [Serializable]
@@ -476,5 +489,11 @@ namespace ESME.Simulator
         protected SimulationException(
             SerializationInfo info,
             StreamingContext context) : base(info, context) { }
+    }
+
+    public interface IHistogramSource
+    {
+        event EventHandler<EventArgs> GraphicsUpdate;
+        Dictionary<Guid, Color> GuidToColorMap { get; }
     }
 }
