@@ -170,7 +170,7 @@ namespace HRC.Plotting
             DesignTimeData.RightAxis.DataRange = axisRanges;
         }
 
-        FourAxisSeriesView _view; //placeholder
+        FourAxisSeriesView _view; //todo placeholder
         #region SaveAsImageCommand
         public SimpleCommand<object, EventToCommandArgs> SaveAsImageCommand
         {
