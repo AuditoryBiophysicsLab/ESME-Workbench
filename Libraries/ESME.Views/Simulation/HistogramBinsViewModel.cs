@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Windows;
 using ESME.SimulationAnalysis;
 using HRC.Aspects;
