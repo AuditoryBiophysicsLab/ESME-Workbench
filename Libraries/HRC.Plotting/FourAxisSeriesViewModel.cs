@@ -2,10 +2,14 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using HRC.Aspects;
+using HRC.Services;
 using HRC.ViewModels;
+using HRC.WPF;
 
 namespace HRC.Plotting
 {
@@ -62,6 +66,7 @@ namespace HRC.Plotting
         public double ActualHeight { get; set; }
         public bool IsMouseOver { get; set; }
         public Point MouseLocation { get; set; }
+        public HRCSaveFileService SaveFileService { get; set; }
         [Initialize("PlotTitle")] public string PlotTitle { get; set; }
         [Initialize(14.0)] public double PlotTitleSize { get; set; }
         void DataSeriesCollectionPropertyChanged()
@@ -164,5 +169,57 @@ namespace HRC.Plotting
             DesignTimeData.TopAxis.DataRange = axisRanges;
             DesignTimeData.RightAxis.DataRange = axisRanges;
         }
+
+        FourAxisSeriesView _view; //placeholder
+        #region SaveAsImageCommand
+        public SimpleCommand<object, EventToCommandArgs> SaveAsImageCommand
+        {
+            get { return _saveAsImage ?? (_saveAsImage = new SimpleCommand<object, EventToCommandArgs>(SaveAsImageHandler)); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _saveAsImage;
+
+        void SaveAsImageHandler(EventToCommandArgs args)
+        {
+            SaveFileService.Filter = "Portable Network Graphics (*.png)|*.png|JPEG (*.jpg)|*.jpg|TIFF (*.tiff)|*.tiff|Bitmap (*.bmp)|*.bmp|GIF (*.gif)|*.gif";
+            SaveFileService.OverwritePrompt = true;
+            SaveFileService.FileName = "";
+
+            var result = SaveFileService.ShowDialog();
+            if (result.HasValue && result.Value)
+            {
+                _view.ToImageFile(SaveFileService.FileName);
+            }
+        }
+        #endregion
+
+        #region SaveAsCSVCommand
+        public SimpleCommand<object, EventToCommandArgs> SaveAsCSVCommand
+        {
+            get { return _saveAsCSV ?? (_saveAsCSV = new SimpleCommand<object, EventToCommandArgs>(SaveAsCSVHandler)); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _saveAsCSV;
+
+        void SaveAsCSVHandler(EventToCommandArgs args)
+        {
+            SaveFileService.Filter = "Comma-Separated Value (*.csv)|*.csv";
+            SaveFileService.OverwritePrompt = true;
+            SaveFileService.FileName = "";
+            var result = SaveFileService.ShowDialog();
+            if (result.HasValue && result.Value)
+            {
+                //Properties.Settings.Default.LastCSVExportFileDirectory = Path.GetDirectoryName(SaveFileService.FileName);
+                using (var sw = new StreamWriter(SaveFileService.FileName)) sw.Write(ToCSV());
+            }
+        }
+        string ToCSV()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(PlotTitle);
+            //todo
+            return sb.ToString();
+        }
+        #endregion
     }
 }
