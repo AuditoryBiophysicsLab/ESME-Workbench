@@ -17,11 +17,28 @@
             <ColumnDefinition Width="Auto" MinWidth="100" />
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
-        <Plotting:FourAxisSeriesView Grid.Column="0" Margin="0 0 10 10" DataContext="{Binding PressureViewModel}" />
-        <StackPanel Grid.Column="1" Margin="0 0 10 10" DockPanel.Dock="Right" Orientation="Vertical">
+        <Plotting:FourAxisSeriesView Grid.Column="0"
+                                     Margin="0 0 10 10"
+                                     DataContext="{Binding PressureViewModel}">
+            <Plotting:FourAxisSeriesView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Command="{Binding SaveAsImageCommand}" Header="Save">
+                        <MenuItem.Icon>
+                            <Image Source="../Images/Save.png"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </Plotting:FourAxisSeriesView.ContextMenu>
+        </Plotting:FourAxisSeriesView>
+        <StackPanel Grid.Column="1"
+                    Margin="0 0 10 10"
+                    DockPanel.Dock="Right"
+                    Orientation="Vertical">
             <TextBlock Text="Legend" />
             <Plotting:LegendView ItemsSource="{Binding PressureViewModel.LegendItems}" />
         </StackPanel>
-        <Plotting:FourAxisSeriesView Grid.Column="2" Margin="0 0 10 10" DataContext="{Binding EnergyViewModel}" />
+        <Plotting:FourAxisSeriesView Grid.Column="2"
+                                     Margin="0 0 10 10"
+                                     DataContext="{Binding EnergyViewModel}" />
     </Grid>
 </UserControl>

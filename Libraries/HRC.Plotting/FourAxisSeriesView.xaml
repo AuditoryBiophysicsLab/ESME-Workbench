@@ -16,7 +16,7 @@
         <i:EventTrigger EventName="Loaded">
             <WPF:EventToCommandTrigger Command="{Binding ViewLoadedCommand}" />
         </i:EventTrigger>
-    </i:Interaction.Triggers>
+    </i:Interaction.Triggers>    
     <DockPanel d:DataContext="{Binding Source={StaticResource DesignViewModel}, Path=DesignTimeData}">
         <TextBlock Margin="0 0 0 5"
                    DockPanel.Dock="Top"

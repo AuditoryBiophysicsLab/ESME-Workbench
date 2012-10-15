@@ -4,6 +4,7 @@ using System.Windows;
 using ESME.SimulationAnalysis;
 using HRC.Aspects;
 using HRC.Plotting;
+using HRC.Services;
 using HRC.ViewModels;
 
 namespace ESME.Views.Simulation
