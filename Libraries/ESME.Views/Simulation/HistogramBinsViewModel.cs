@@ -34,7 +34,7 @@ namespace ESME.Views.Simulation
                     Visibility = Visibility.Visible,
                     AxisTicks = new ObservableCollection<NewDataAxisTick>(),
                     AxisType = AxisType.Enumerated,
-                    Label = string.Format("Peak pressure per ping (±{0:0}dB) [re: 1 µPa]", groupedExposuresHistogram.BinWidth / 2)
+                    Label = string.Format("Peak pressure per ping (±{0:0}dB) [dB re: 1 µPa]", groupedExposuresHistogram.BinWidth / 2)
                 },
                 LeftAxis =
                 {
@@ -54,7 +54,7 @@ namespace ESME.Views.Simulation
                     Visibility = Visibility.Visible,
                     AxisTicks = new ObservableCollection<NewDataAxisTick>(),
                     AxisType = AxisType.Enumerated,
-                    Label = string.Format("Received energy per ping (±{0:0}dB)", groupedExposuresHistogram.BinWidth / 2)
+                    Label = string.Format("Sound exposure level per ping (±{0:0}dB) [dB re: 1 µPa²•s]", groupedExposuresHistogram.BinWidth / 2)
                 },
                 LeftAxis =
                 {

@@ -670,33 +670,5 @@ namespace ESMEWorkbench.ViewModels.Main
 
         public string ScenarioValidationError { get; set; }
         #endregion
-
-        [MediatorMessageSink(MediatorMessage.MCRInstallationRequired), UsedImplicitly]
-        void InstallMCR(bool dummy)
-        {
-            if (_messageBox.ShowOkCancel("To display exposure histograms, ESME Workbench needs to install the Matlab Common Runtime environment.\r\n\r\n" +
-                                         "OK to download and install the MCR?", MessageBoxImage.Question) == MessageBoxResult.OK)
-            {
-                var client = new WebClient();
-                var vm = new DownloadProgressViewModel {WebClient = client, WindowTitle = "Download Progress", Message = "Downloading Matlab Common Runtime..."};
-                var window = _visualizer.ShowWindow("DownloadProgressView", vm);
-                var installerName = Environment.Is64BitOperatingSystem ? "MCR_R2012a_win64_installer.exe" : "MCR_R2012a_win32_installer.exe";
-                var downloadTarget = Path.Combine(Path.GetTempPath(), installerName);
-                client.DownloadFileAsync(new Uri("http://esme.bu.edu/download/"+installerName), downloadTarget);
-                client.DownloadProgressChanged += (s, e) =>
-                {
-                    var bytesIn = double.Parse(e.BytesReceived.ToString());
-                    var totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
-                    var percentage = bytesIn / totalBytes * 100;
-                    vm.ProgressPercent = (int)percentage;
-                };
-                client.DownloadFileCompleted += (s, e) =>
-                {
-                    window.Close();
-                    if(!vm.IsCanceled) System.Diagnostics.Process.Start(downloadTarget);
-                };
-                _messageBox.ShowInformation("Please wait for the Matlab Common Runtime installer to complete before running this simulation.");
-            }
-        }
     }
 }

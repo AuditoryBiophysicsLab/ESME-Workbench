@@ -91,8 +91,6 @@ namespace ESME
         public const string SetupAndRunQuickLookPoint = "SetupAndRunQuickLookPointMessage";
         public const string RunExperimentCommand = "RunExperimentCommandMessage";
 
-        public const string MCRInstallationRequired = "MCRInstallationRequiredMessage";
-
         public const string SetMouseGeo = "SetMouseGeoMessage";
         public const string MapLeftButtonDown = "MapLeftButtonDownMessage";
         public const string MapLeftButtonUp = "MapLeftButtonUpMessage";

@@ -90,7 +90,7 @@ namespace ESME.Views.Simulation
         public string SimulationProgressText { get; set; }
 
         public bool SimulationNotRunning { get { return !IsSimulationRunning; } }
-        public bool DisplayExposureHistograms { get; set; }
+        [Initialize(true)] public bool DisplayExposureHistograms { get; set; }
 
         [Affects("SimulationNotRunning")]
         public bool IsSimulationRunning { get; set; }
@@ -133,7 +133,7 @@ namespace ESME.Views.Simulation
             IsStartCommandEnabled = false;
             IsSimulationRunning = true;
             OnSimulationStarting();
-            _visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels));
+            if (DisplayExposureHistograms) _visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels));
         }
 
         public event EventHandler SimulationStarting;
