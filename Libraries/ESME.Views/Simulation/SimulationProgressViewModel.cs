@@ -9,6 +9,7 @@ using ESME.SimulationAnalysis;
 using HRC;
 using HRC.Aspects;
 using HRC.Plotting;
+using HRC.Services;
 using HRC.Utility;
 using HRC.Validation;
 using HRC.ViewModels;
@@ -18,10 +19,14 @@ namespace ESME.Views.Simulation
 {
     public class SimulationProgressViewModel : ValidatingViewModel
     {
+        readonly IUIVisualizerService _visualizer;
         Simulator.Simulation _simulation;
         const string TimeSpanFormatString = @"hh\:mm\:ss";
-        public SimulationProgressViewModel()
+
+        public SimulationProgressViewModel() {}
+        public SimulationProgressViewModel(IUIVisualizerService visualizer)
         {
+            _visualizer = visualizer;
             AddValidationRules(
                 new ValidationRule<SimulationProgressViewModel>
                 {
@@ -85,6 +90,7 @@ namespace ESME.Views.Simulation
         public string SimulationProgressText { get; set; }
 
         public bool SimulationNotRunning { get { return !IsSimulationRunning; } }
+        public bool DisplayExposureHistograms { get; set; }
 
         [Affects("SimulationNotRunning")]
         public bool IsSimulationRunning { get; set; }
@@ -127,6 +133,7 @@ namespace ESME.Views.Simulation
             IsStartCommandEnabled = false;
             IsSimulationRunning = true;
             OnSimulationStarting();
+            _visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels));
         }
 
         public event EventHandler SimulationStarting;

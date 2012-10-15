@@ -223,6 +223,10 @@
       <DependentUpon>HistogramBinsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Simulation\HistogramBinsViewModel.cs" />
+    <Compile Include="Simulation\SimulationExposuresView.xaml.cs">
+      <DependentUpon>SimulationExposuresView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Simulation\SimulationExposuresViewModel.cs" />
     <Compile Include="Simulation\SimulationProgressView.xaml.cs">
       <DependentUpon>SimulationProgressView.xaml</DependentUpon>
     </Compile>
@@ -366,6 +370,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Simulation\HistogramBinsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Simulation\SimulationExposuresView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

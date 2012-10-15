@@ -8,8 +8,8 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         Title="{Binding Simulation.Scenario.Name,
                         StringFormat=Scenario: {0}}"
-        d:DesignHeight="500"
-        d:DesignWidth="1000"
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize"
         mc:Ignorable="d">
     <Window.Resources>
         <Simulation:SimulationProgressViewModel x:Key="DesignViewModel" />
@@ -86,6 +86,22 @@
                        HorizontalAlignment="Right"
                        IsEnabled="{Binding SimulationNotRunning}"
                        Style="{StaticResource LabelStyle}"
+                       Text="Display exposure histograms:" />
+            <CheckBox Grid.Column="1"
+                      VerticalAlignment="Center"
+                      IsChecked="{Binding DisplayExposureHistograms}"
+                      IsEnabled="{Binding SimulationNotRunning}"
+                      ToolTip="Display exposure histograms during the simulation run" />
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
+                <ColumnDefinition Width="*" SharedSizeGroup="ValueColumn" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       IsEnabled="{Binding SimulationNotRunning}"
+                       Style="{StaticResource LabelStyle}"
                        Text="Simulate animal movement:" />
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <CheckBox VerticalAlignment="Center" IsChecked="{Binding Simulation.MovingAnimats}" IsEnabled="{Binding SimulationNotRunning}" ToolTip="Simulate animal movement using the Marine Mammal Movement and Behavior Simulator" />
@@ -103,13 +119,6 @@
                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding SimulationProgressText}" />
             </Grid>
         </Grid>
-        <ListBox ItemsSource="{Binding HistogramBinsViewModels}" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Simulation:HistogramBinsView Height="200" Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=ActualWidth}"/>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
         <StackPanel Grid.Column="1" Margin="0 20 5 5" HorizontalAlignment="Right" Orientation="Horizontal">
             <Button Width="75"
                     Height="22"
