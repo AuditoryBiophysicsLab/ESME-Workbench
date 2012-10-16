@@ -153,7 +153,7 @@ namespace ESMEWorkbench.ViewModels.Main
             progress.ProgressMessage = string.Format("Generating animat population for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
             var species = new ScenarioSpecies
             {
-                LatinName = "Sample Species", 
+                LatinName = "Generic odontocete", 
                 Scenario = scenario, 
                 SpeciesDefinitionFilename = "Generic odontocete.spe", 
                 LayerSettings =

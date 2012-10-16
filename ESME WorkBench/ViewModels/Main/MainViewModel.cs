@@ -133,7 +133,6 @@ namespace ESMEWorkbench.ViewModels.Main
             };
         }
 
-
         public ObservableCollection<Scenario> Scenarios { get; private set; }
         public IMasterDatabaseService Database { get; private set; }
         [Affects("IsRunSimulationCommandEnabled"),Initialize(false)] public bool IsTransmissionLossBusy { get; set; }

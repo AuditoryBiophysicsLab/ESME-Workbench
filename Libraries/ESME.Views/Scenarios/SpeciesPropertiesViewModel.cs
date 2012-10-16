@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ESME.Scenarios;
@@ -30,6 +29,7 @@ namespace ESME.Views.Scenarios
             {
                 _selectedSpecies = value;
                 foreach (var species in PredefinedSpecies.Where(species => _selectedSpecies == species)) SpeciesDefinitionFilename = species + ".spe";
+                LatinName = _selectedSpecies;
             }
         }
         

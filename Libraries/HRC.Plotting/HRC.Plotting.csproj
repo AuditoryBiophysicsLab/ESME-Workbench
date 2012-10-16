@@ -34,6 +34,12 @@
     <Reference Include="AsyncCtpLibrary">
       <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
     </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\ESME WorkBench\External References\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Log4PostSharp">
+      <HintPath>..\..\ESME WorkBench\External References\Log4PostSharp.dll</HintPath>
+    </Reference>
     <Reference Include="MEFedMVVM.WPF">
       <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
     </Reference>
@@ -57,6 +63,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="AxisLabeling\Language\Expressions\Expression.cs" />
     <Compile Include="AxisLabeling\Language\Expressions\Formula.cs" />
     <Compile Include="AxisLabeling\Language\Expressions\Symbol.cs" />
@@ -77,6 +84,7 @@
     <Compile Include="AxisLabeling\Layout\Formatters\QuantitativeFormatter.cs" />
     <Compile Include="BarSeriesBase.cs" />
     <Compile Include="BarSeriesViewModel.cs" />
+    <Compile Include="BuildInformation.cs" />
     <Compile Include="DataAxisViewModel.cs" />
     <Compile Include="DataCanvas.cs" />
     <Compile Include="FourAxisSeriesView.xaml.cs">
@@ -131,6 +139,9 @@
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace HRC.Plotting -class BuildInformation -version "$(SolutionDir)VersionInfo.txt" -assemblyversion "$(ProjectDir)\Properties\AssemblyVersionInfo.cs" -output "$(ProjectDir)BuildInformation.cs"</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

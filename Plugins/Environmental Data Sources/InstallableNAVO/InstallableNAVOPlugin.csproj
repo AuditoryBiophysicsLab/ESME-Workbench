@@ -35,6 +35,15 @@
       <HintPath>..\..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\..\ESME WorkBench\External References\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Log4PostSharp">
+      <HintPath>..\..\..\ESME WorkBench\External References\Log4PostSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+      <HintPath>..\..\..\ESME WorkBench\External References\PostSharp.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
