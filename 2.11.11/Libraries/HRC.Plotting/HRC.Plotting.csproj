@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{07EA1355-65C1-4335-AD7E-C7AC26550DFF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HRC.Plotting</RootNamespace>
+    <AssemblyName>HRC.Plotting</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AsyncCtpLibrary">
+      <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\ESME WorkBench\External References\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Log4PostSharp">
+      <HintPath>..\..\ESME WorkBench\External References\Log4PostSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="MEFedMVVM.WPF">
+      <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
+    </Reference>
+    <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\Program Files (x86)\PostSharp 2.1\Release\PostSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\ESME WorkBench\External References\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
+    <Compile Include="AxisLabeling\Language\Expressions\Expression.cs" />
+    <Compile Include="AxisLabeling\Language\Expressions\Formula.cs" />
+    <Compile Include="AxisLabeling\Language\Expressions\Symbol.cs" />
+    <Compile Include="AxisLabeling\Language\Types\Constant.cs" />
+    <Compile Include="AxisLabeling\Language\Types\Factor.cs" />
+    <Compile Include="AxisLabeling\Language\Types\Frame.cs" />
+    <Compile Include="AxisLabeling\Language\Types\Numeric.cs" />
+    <Compile Include="AxisLabeling\Layout\Axis.cs" />
+    <Compile Include="AxisLabeling\Layout\AxisLabelers\AxisLabeler.cs" />
+    <Compile Include="AxisLabeling\Layout\AxisLabelers\CategoricalAxisLabeler.cs" />
+    <Compile Include="AxisLabeling\Layout\AxisLabelers\ExtendedAxisLabeler.cs" />
+    <Compile Include="AxisLabeling\Layout\AxisLabelers\HeckbertAxisLabeler.cs" />
+    <Compile Include="AxisLabeling\Layout\AxisLabelers\MatplotlibAxisLabeler.cs" />
+    <Compile Include="AxisLabeling\Layout\AxisLabelers\WilkinsonAxisLabeler.cs" />
+    <Compile Include="AxisLabeling\Layout\AxisLayout.cs" />
+    <Compile Include="AxisLabeling\Layout\Formatters\Format.cs" />
+    <Compile Include="AxisLabeling\Layout\Formatters\Formatter.cs" />
+    <Compile Include="AxisLabeling\Layout\Formatters\QuantitativeFormatter.cs" />
+    <Compile Include="BarSeriesBase.cs" />
+    <Compile Include="BarSeriesViewModel.cs" />
+    <Compile Include="BuildInformation.cs" />
+    <Compile Include="DataAxisViewModel.cs" />
+    <Compile Include="DataCanvas.cs" />
+    <Compile Include="FourAxisSeriesView.xaml.cs">
+      <DependentUpon>FourAxisSeriesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FourAxisSeriesViewModel.cs" />
+    <Compile Include="GroupedBarSeriesViewModel.cs" />
+    <Compile Include="ImageSeriesViewModel.cs" />
+    <Compile Include="ISeries.cs" />
+    <Compile Include="LegendItemViewModel.cs" />
+    <Compile Include="LegendView.xaml.cs">
+      <DependentUpon>LegendView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LineSeriesViewModel.cs" />
+    <Compile Include="MultipleBarSeriesBase.cs" />
+    <Compile Include="NewDataAxis.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Range.cs" />
+    <Compile Include="SeriesMarkerType.cs" />
+    <Compile Include="SeriesViewModelBase.cs" />
+    <Compile Include="StackedBarSeriesViewModel.cs" />
+    <Compile Include="Transforms\LogTransform.cs" />
+    <Compile Include="Transforms\PowTransform.cs" />
+    <Compile Include="Transforms\SwapTransform.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="FourAxisSeriesView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LegendView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HRC\HRC.csproj">
+      <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
+      <Name>HRC</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace HRC.Plotting -class BuildInformation -version "$(SolutionDir)VersionInfo.txt" -assemblyversion "$(ProjectDir)\Properties\AssemblyVersionInfo.cs" -output "$(ProjectDir)BuildInformation.cs"</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
