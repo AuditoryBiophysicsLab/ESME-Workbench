@@ -177,6 +177,7 @@
       <DependentUpon>BasicPropertiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
+    <Compile Include="PSM\PlatformControl.cs" />
     <Compile Include="PSM\PSMTreeView.xaml.cs">
       <DependentUpon>PSMTreeView.xaml</DependentUpon>
     </Compile>

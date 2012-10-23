@@ -52,6 +52,20 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _addMode;
         #endregion
 
+         #region AddPSMModeCommand
+         public SimpleCommand<object, EventToCommandArgs> AddPSMModeCommand
+         {
+             get { return _addPSMMode ?? (_addPSMMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.AddPSMMode))); }
+         }
+
+         SimpleCommand<object, EventToCommandArgs> _addPSMMode;
+
+         static void AddPSMModeHandler(EventToCommandArgs args)
+         {
+             //var parameter = args.CommandParameter;
+         }
+         #endregion
+
         #region DeleteSourceCommand
         public SimpleCommand<object, EventToCommandArgs> DeleteSourceCommand { get { return _deleteSource ?? (_deleteSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteSource, this))); } }
         SimpleCommand<object, EventToCommandArgs> _deleteSource;

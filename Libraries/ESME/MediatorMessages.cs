@@ -37,11 +37,13 @@ namespace ESME
         public const string PlatformBoundToLayer = "PlatformBoundToLayerMessage";
 
         public const string AddSource = "AddSourceMessage";
+        public const string AddPSMSource = "AddPSMSourceMessage";
         public const string DeleteSource = "DeleteSourceMessage";
         public const string SourceProperties = "SourcePropertiesMessage";
         public const string SourceBoundToLayer = "SourceBoundToLayerMessage";
 
         public const string AddMode = "AddModeMessage";
+        public const string AddPSMMode = "AddPSMModeMessage";   
         public const string DeleteMode = "DeleteModeMessage";
         public const string RecalculateMode = "RecalculateModeMessage";
         public const string ModeProperties = "ModePropertiesMessage";

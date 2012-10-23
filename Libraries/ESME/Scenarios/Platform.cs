@@ -200,13 +200,23 @@ namespace ESME.Scenarios
         }
         #endregion
 
+        #region AddPSMSourceCommand
+        public SimpleCommand<object, EventToCommandArgs> AddPSMSourceCommand
+        {
+            get { return _addPSMSource ?? (_addPSMSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.AddPSMSource))); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _addPSMSource;
+
+        #endregion
+
         PlatformBehavior _platformBehavior;
 
         [NotMapped] public PlatformBehavior PlatformBehavior
         {
             get
             {
-                if (_platformBehavior != null) return _platformBehavior;
+                if (_platformBehavior != null && Scenario !=null) return _platformBehavior;
                 _platformBehavior = new PlatformBehavior(this, new TimeSpan(0, 0, 1, 0), (int)((TimeSpan)Scenario.Duration).TotalMinutes);
                 return _platformBehavior;
             }

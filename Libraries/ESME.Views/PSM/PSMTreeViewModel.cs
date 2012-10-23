@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using ESME.PSM;
 using ESME.Scenarios;
+using ESME.Views.Scenarios;
+using HRC;
 using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
@@ -32,7 +36,7 @@ namespace ESME.Views.PSM
         public void AddSource(Source source) { _context.Sources.Add(source); }
         public void AddMode(Mode mode) { _context.Modes.Add(mode); }
 
-        public PSMTreeViewModel(string psmDatabasePath)
+        public PSMTreeViewModel(string psmDatabasePath):this()
         {
             _context = PSMContext.Create(psmDatabasePath);
             var modes = (from mode in _context.Modes
@@ -50,7 +54,61 @@ namespace ESME.Views.PSM
                              select platform);
             Platforms = _context.Platforms.Local;
         }
-        public PSMTreeViewModel() { }
+        public PSMTreeViewModel()
+        {
+            #region Mediator Message registration
+            try
+            {
+                Mediator.Instance.Register(this);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("***********\nPSMTreeViewModel: Mediator registration failed: " + ex.Message + "\n***********");
+                throw;
+            } 
+            #endregion
+        }
+
+        public void SeedTestValues()
+        {
+            _context.Platforms.Add(new Platform()
+            {
+                PlatformName = "Platform 1",
+                Sources = new ObservableList<Source>()
+                {
+                    new Source()
+                    {
+                        SourceName = "Source 1",
+                        Modes = new ObservableList<Mode>()
+                        {
+                            new Mode()
+                            {
+                                ModeName = "Mode 1",
+                            }
+                        }
+                    }
+                }
+            });
+            _context.Platforms.Add(new Platform()
+            {
+                PlatformName = "Platform 2",
+                Sources = new ObservableList<Source>()
+                {
+                    new Source()
+                    {
+                        SourceName = "Source 2",
+                        Modes = new ObservableList<Mode>()
+                        {
+                            new Mode()
+                            {
+                                ModeName = "Mode 2",
+                            }
+                        }
+                    }
+                }
+            });
+
+        }
 
         #region Design-time data
         public static PSMTreeViewModel DesignTimeData { get; set; }
@@ -95,39 +153,24 @@ namespace ESME.Views.PSM
         }
         #endregion
 
-        #region NewCommand
-        public SimpleCommand<object, EventToCommandArgs> NewCommand
+        [MediatorMessageSink(MediatorMessage.AddPSMSource), UsedImplicitly]
+        void AddSource(bool dummy) { DisplayedView = new TextBlock {Text = "new source command selected! "}; }
+
+        [MediatorMessageSink(MediatorMessage.AddPSMMode),UsedImplicitly]
+        void AddMode(bool dummy) { DisplayedView = new TextBlock { Text = "new mode command selected! " }; }
+
+        #region NewPlatformCommand
+        public SimpleCommand<object, EventToCommandArgs> NewPlatformCommand
         {
-            get { return _new ?? (_new = new SimpleCommand<object, EventToCommandArgs>(NewHandler)); }
+            get { return _newPlatform ?? (_newPlatform = new SimpleCommand<object, EventToCommandArgs>(NewPlatformHandler)); }
         }
 
-        SimpleCommand<object, EventToCommandArgs> _new;
+        SimpleCommand<object, EventToCommandArgs> _newPlatform;
 
-        void NewHandler(EventToCommandArgs args)
+        void NewPlatformHandler(EventToCommandArgs args)
         {
-            var routedEventArgs = (RoutedEventArgs)args.EventArgs;
-            var source = routedEventArgs.Source;
-            switch (source.ToString())
-            {
-                case "Platform":
-                    NewPlatformHandler();
-                    break;
-                case "Source":
-                    NewSourceHandler();
-                    break;
-                case "Mode":
-                    NewModeHandler();
-                    break;
-                default:
-                    throw new ArgumentException("selected item type unrecognized");
-            }
+            DisplayedView = new TextBlock { Text = "new platform command selected! " }; 
         }
-
-        void NewModeHandler() { }
-
-        void NewSourceHandler() { }
-
-        void NewPlatformHandler() { }
         #endregion
 
         #region EditCommand
