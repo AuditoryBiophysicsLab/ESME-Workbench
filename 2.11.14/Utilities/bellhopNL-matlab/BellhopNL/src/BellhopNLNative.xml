@@ -1,0 +1,1446 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BellhopNLNative</name>
+    </assembly>
+    <members>
+        <member name="T:BellhopNLNative.NLDelaySum">
+            <summary>
+            The NLDelaySum class provides a CLS compliant, Object (native) interface to the
+            M-functions contained in the files:
+            <newpara></newpara>
+            C:\Projects\ESME Deliverables\Utilities\bellhopNL\NL_delaysum.m
+            <newpara></newpara>
+            C:\Projects\ESME Deliverables\Utilities\bellhopNL\read_arrivals_bin.m
+            <newpara></newpara>
+            C:\Projects\ESME Deliverables\Utilities\bellhopNL\ts_arons.m
+            <newpara></newpara>
+            C:\Projects\ESME Deliverables\Utilities\bellhopNL\ts_chapman.m
+            <newpara></newpara>
+            deployprint.m
+            <newpara></newpara>
+            printdlg.m
+            </summary>
+            <remarks>
+            @Version 4.0
+            </remarks>
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.#cctor">
+            <summary internal= "true">
+            The static constructor instantiates and initializes the MATLAB Compiler Runtime
+            instance.
+            </summary>
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.#ctor">
+            <summary>
+            Constructs a new instance of the NLDelaySum class.
+            </summary>
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.Finalize">
+            <summary internal= "true">
+            Class destructor called by the CLR garbage collector.
+            </summary>
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.Dispose">
+            <summary>
+            Frees the native resources associated with this object
+            </summary>
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.Dispose(System.Boolean)">
+            <summary internal= "true">
+            Internal dispose function
+            </summary>
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum">
+             <summary>
+             Provides a single output, 0-input Objectinterface to the NL_delaysum M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum(System.Object)">
+             <summary>
+             Provides a single output, 1-input Objectinterface to the NL_delaysum M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <param name="ARRFIL">Input argument #1</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum(System.Object,System.Object)">
+             <summary>
+             Provides a single output, 2-input Objectinterface to the NL_delaysum M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <param name="ARRFIL">Input argument #1</param>
+             <param name="z">Input argument #2</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum(System.Object,System.Object,System.Object)">
+             <summary>
+             Provides a single output, 3-input Objectinterface to the NL_delaysum M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <param name="ARRFIL">Input argument #1</param>
+             <param name="z">Input argument #2</param>
+             <param name="w">Input argument #3</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum(System.Object,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides a single output, 4-input Objectinterface to the NL_delaysum M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <param name="ARRFIL">Input argument #1</param>
+             <param name="z">Input argument #2</param>
+             <param name="w">Input argument #3</param>
+             <param name="fs">Input argument #4</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum(System.Object,System.Object,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides a single output, 5-input Objectinterface to the NL_delaysum M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <param name="ARRFIL">Input argument #1</param>
+             <param name="z">Input argument #2</param>
+             <param name="w">Input argument #3</param>
+             <param name="fs">Input argument #4</param>
+             <param name="T">Input argument #5</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum(System.Object,System.Object,System.Object,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides a single output, 6-input Objectinterface to the NL_delaysum M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <param name="ARRFIL">Input argument #1</param>
+             <param name="z">Input argument #2</param>
+             <param name="w">Input argument #3</param>
+             <param name="fs">Input argument #4</param>
+             <param name="T">Input argument #5</param>
+             <param name="model">Input argument #6</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum(System.Int32)">
+             <summary>
+             Provides the standard 0-input Object interface to the NL_delaysum M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum(System.Int32,System.Object)">
+             <summary>
+             Provides the standard 1-input Object interface to the NL_delaysum M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="ARRFIL">Input argument #1</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum(System.Int32,System.Object,System.Object)">
+             <summary>
+             Provides the standard 2-input Object interface to the NL_delaysum M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="ARRFIL">Input argument #1</param>
+             <param name="z">Input argument #2</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum(System.Int32,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides the standard 3-input Object interface to the NL_delaysum M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="ARRFIL">Input argument #1</param>
+             <param name="z">Input argument #2</param>
+             <param name="w">Input argument #3</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum(System.Int32,System.Object,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides the standard 4-input Object interface to the NL_delaysum M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="ARRFIL">Input argument #1</param>
+             <param name="z">Input argument #2</param>
+             <param name="w">Input argument #3</param>
+             <param name="fs">Input argument #4</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum(System.Int32,System.Object,System.Object,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides the standard 5-input Object interface to the NL_delaysum M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="ARRFIL">Input argument #1</param>
+             <param name="z">Input argument #2</param>
+             <param name="w">Input argument #3</param>
+             <param name="fs">Input argument #4</param>
+             <param name="T">Input argument #5</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum(System.Int32,System.Object,System.Object,System.Object,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides the standard 6-input Object interface to the NL_delaysum M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="ARRFIL">Input argument #1</param>
+             <param name="z">Input argument #2</param>
+             <param name="w">Input argument #3</param>
+             <param name="fs">Input argument #4</param>
+             <param name="T">Input argument #5</param>
+             <param name="model">Input argument #6</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.NL_delaysum(System.Int32,System.Object[]@,System.Object[],System.Object[])">
+             <summary>
+             Provides an interface for the NL_delaysum function in which the input and output
+             arguments are specified as an array of Objects.
+             </summary>
+             <remarks>
+             This method will allocate and return by reference the output argument
+             array.<newpara></newpara>
+             M-Documentation:
+             NL_DELAYSUM - Incorporates nonlinear effects using similitude equations
+             Usage: rtsmat = NL_delaysum(ARRFIL, z, w, fs, T, model)
+             Inputs:
+             ARRFIL - string containing name of (binary) BELLHOP arrivals file
+             z - charge depth (meters)
+             w - charge weight (kilograms)
+             fs - sample rate for output (Hz)
+             T - total duration of output waveform (seconds)
+             model - similitude time series model (either: 'arons' or 'chapman')
+             Output:
+             rtsmat - matrix of received time series samples (one column for each rcv)
+             rr - receiver ranges
+             rd - receiver depths
+             Based on delaysum from the Acoustics Toolbox, which computes the receiver
+             time series by summing up the echoes in the waveguide based on the
+             amplitude and delay of each echo.
+             Modified by J. Peterson to account for the nonlinear effects via
+             similitude formulas. He also added the Arons formula for the explosive
+             waveform
+             Further work by L. Henderson fixing an issue due to the fact that the
+             Hilbert transform is non-causal, i.e. starts before the original waveform
+             $Id: $
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return</param>
+             <param name= "argsOut">Array of Object output arguments</param>
+             <param name= "argsIn">Array of Object input arguments</param>
+             <param name= "varArgsIn">Array of Object representing variable input
+             arguments</param>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.read_arrivals_bin">
+             <summary>
+             Provides a single output, 0-input Objectinterface to the read_arrivals_bin
+             M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Read the arrival time/amplitude data computed by BELLHOP
+             usage:
+             [ Arr, Pos ] = read_arrivals_bin( ARRFile, Narrmx );
+             Arr is a structure containing all the arrivals information
+             Pos is a structure containing the positions of source and receivers
+             ARRFile is the name of the Arrivals File
+             Narrmx is the maximum number of arrivals allowed
+             mbp 9/96
+             </remarks>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.read_arrivals_bin(System.Object)">
+             <summary>
+             Provides a single output, 1-input Objectinterface to the read_arrivals_bin
+             M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Read the arrival time/amplitude data computed by BELLHOP
+             usage:
+             [ Arr, Pos ] = read_arrivals_bin( ARRFile, Narrmx );
+             Arr is a structure containing all the arrivals information
+             Pos is a structure containing the positions of source and receivers
+             ARRFile is the name of the Arrivals File
+             Narrmx is the maximum number of arrivals allowed
+             mbp 9/96
+             </remarks>
+             <param name="ARRFile">Input argument #1</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.read_arrivals_bin(System.Object,System.Object)">
+             <summary>
+             Provides a single output, 2-input Objectinterface to the read_arrivals_bin
+             M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Read the arrival time/amplitude data computed by BELLHOP
+             usage:
+             [ Arr, Pos ] = read_arrivals_bin( ARRFile, Narrmx );
+             Arr is a structure containing all the arrivals information
+             Pos is a structure containing the positions of source and receivers
+             ARRFile is the name of the Arrivals File
+             Narrmx is the maximum number of arrivals allowed
+             mbp 9/96
+             </remarks>
+             <param name="ARRFile">Input argument #1</param>
+             <param name="Narrmx">Input argument #2</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.read_arrivals_bin(System.Int32)">
+             <summary>
+             Provides the standard 0-input Object interface to the read_arrivals_bin
+             M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Read the arrival time/amplitude data computed by BELLHOP
+             usage:
+             [ Arr, Pos ] = read_arrivals_bin( ARRFile, Narrmx );
+             Arr is a structure containing all the arrivals information
+             Pos is a structure containing the positions of source and receivers
+             ARRFile is the name of the Arrivals File
+             Narrmx is the maximum number of arrivals allowed
+             mbp 9/96
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.read_arrivals_bin(System.Int32,System.Object)">
+             <summary>
+             Provides the standard 1-input Object interface to the read_arrivals_bin
+             M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Read the arrival time/amplitude data computed by BELLHOP
+             usage:
+             [ Arr, Pos ] = read_arrivals_bin( ARRFile, Narrmx );
+             Arr is a structure containing all the arrivals information
+             Pos is a structure containing the positions of source and receivers
+             ARRFile is the name of the Arrivals File
+             Narrmx is the maximum number of arrivals allowed
+             mbp 9/96
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="ARRFile">Input argument #1</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.read_arrivals_bin(System.Int32,System.Object,System.Object)">
+             <summary>
+             Provides the standard 2-input Object interface to the read_arrivals_bin
+             M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Read the arrival time/amplitude data computed by BELLHOP
+             usage:
+             [ Arr, Pos ] = read_arrivals_bin( ARRFile, Narrmx );
+             Arr is a structure containing all the arrivals information
+             Pos is a structure containing the positions of source and receivers
+             ARRFile is the name of the Arrivals File
+             Narrmx is the maximum number of arrivals allowed
+             mbp 9/96
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="ARRFile">Input argument #1</param>
+             <param name="Narrmx">Input argument #2</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.read_arrivals_bin(System.Int32,System.Object[]@,System.Object[],System.Object[])">
+             <summary>
+             Provides an interface for the read_arrivals_bin function in which the input and
+             output
+             arguments are specified as an array of Objects.
+             </summary>
+             <remarks>
+             This method will allocate and return by reference the output argument
+             array.<newpara></newpara>
+             M-Documentation:
+             Read the arrival time/amplitude data computed by BELLHOP
+             usage:
+             [ Arr, Pos ] = read_arrivals_bin( ARRFile, Narrmx );
+             Arr is a structure containing all the arrivals information
+             Pos is a structure containing the positions of source and receivers
+             ARRFile is the name of the Arrivals File
+             Narrmx is the maximum number of arrivals allowed
+             mbp 9/96
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return</param>
+             <param name= "argsOut">Array of Object output arguments</param>
+             <param name= "argsIn">Array of Object input arguments</param>
+             <param name= "varArgsIn">Array of Object representing variable input
+             arguments</param>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_arons">
+             <summary>
+             Provides a single output, 0-input Objectinterface to the ts_arons M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             TS_ARONS - compute the time history of an explosives generated shock wave
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_arons(System.Object)">
+             <summary>
+             Provides a single output, 1-input Objectinterface to the ts_arons M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             TS_ARONS - compute the time history of an explosives generated shock wave
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="z">Input argument #1</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_arons(System.Object,System.Object)">
+             <summary>
+             Provides a single output, 2-input Objectinterface to the ts_arons M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             TS_ARONS - compute the time history of an explosives generated shock wave
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_arons(System.Object,System.Object,System.Object)">
+             <summary>
+             Provides a single output, 3-input Objectinterface to the ts_arons M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             TS_ARONS - compute the time history of an explosives generated shock wave
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <param name="R">Input argument #3</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_arons(System.Object,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides a single output, 4-input Objectinterface to the ts_arons M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             TS_ARONS - compute the time history of an explosives generated shock wave
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <param name="R">Input argument #3</param>
+             <param name="fs">Input argument #4</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_arons(System.Object,System.Object,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides a single output, 5-input Objectinterface to the ts_arons M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             TS_ARONS - compute the time history of an explosives generated shock wave
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <param name="R">Input argument #3</param>
+             <param name="fs">Input argument #4</param>
+             <param name="T">Input argument #5</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_arons(System.Int32)">
+             <summary>
+             Provides the standard 0-input Object interface to the ts_arons M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             TS_ARONS - compute the time history of an explosives generated shock wave
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_arons(System.Int32,System.Object)">
+             <summary>
+             Provides the standard 1-input Object interface to the ts_arons M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             TS_ARONS - compute the time history of an explosives generated shock wave
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="z">Input argument #1</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_arons(System.Int32,System.Object,System.Object)">
+             <summary>
+             Provides the standard 2-input Object interface to the ts_arons M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             TS_ARONS - compute the time history of an explosives generated shock wave
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_arons(System.Int32,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides the standard 3-input Object interface to the ts_arons M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             TS_ARONS - compute the time history of an explosives generated shock wave
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <param name="R">Input argument #3</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_arons(System.Int32,System.Object,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides the standard 4-input Object interface to the ts_arons M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             TS_ARONS - compute the time history of an explosives generated shock wave
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <param name="R">Input argument #3</param>
+             <param name="fs">Input argument #4</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_arons(System.Int32,System.Object,System.Object,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides the standard 5-input Object interface to the ts_arons M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             TS_ARONS - compute the time history of an explosives generated shock wave
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <param name="R">Input argument #3</param>
+             <param name="fs">Input argument #4</param>
+             <param name="T">Input argument #5</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_arons(System.Int32,System.Object[]@,System.Object[],System.Object[])">
+             <summary>
+             Provides an interface for the ts_arons function in which the input and output
+             arguments are specified as an array of Objects.
+             </summary>
+             <remarks>
+             This method will allocate and return by reference the output argument
+             array.<newpara></newpara>
+             M-Documentation:
+             TS_ARONS - compute the time history of an explosives generated shock wave
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return</param>
+             <param name= "argsOut">Array of Object output arguments</param>
+             <param name= "argsIn">Array of Object input arguments</param>
+             <param name= "varArgsIn">Array of Object representing variable input
+             arguments</param>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_chapman">
+             <summary>
+             Provides a single output, 0-input Objectinterface to the ts_chapman M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Author: Gopu Potty
+             Organization: University of Rhode Island
+             Date
+             Function: Explosive source model to simulate the pressure time
+             history for a high explosive (e.g. TNT) charge. The primary reference
+             is: Chapman, JASA v78, no 2, 1985, p672-681
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_chapman(System.Object)">
+             <summary>
+             Provides a single output, 1-input Objectinterface to the ts_chapman M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Author: Gopu Potty
+             Organization: University of Rhode Island
+             Date
+             Function: Explosive source model to simulate the pressure time
+             history for a high explosive (e.g. TNT) charge. The primary reference
+             is: Chapman, JASA v78, no 2, 1985, p672-681
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="z">Input argument #1</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_chapman(System.Object,System.Object)">
+             <summary>
+             Provides a single output, 2-input Objectinterface to the ts_chapman M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Author: Gopu Potty
+             Organization: University of Rhode Island
+             Date
+             Function: Explosive source model to simulate the pressure time
+             history for a high explosive (e.g. TNT) charge. The primary reference
+             is: Chapman, JASA v78, no 2, 1985, p672-681
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_chapman(System.Object,System.Object,System.Object)">
+             <summary>
+             Provides a single output, 3-input Objectinterface to the ts_chapman M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Author: Gopu Potty
+             Organization: University of Rhode Island
+             Date
+             Function: Explosive source model to simulate the pressure time
+             history for a high explosive (e.g. TNT) charge. The primary reference
+             is: Chapman, JASA v78, no 2, 1985, p672-681
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <param name="R">Input argument #3</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_chapman(System.Object,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides a single output, 4-input Objectinterface to the ts_chapman M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Author: Gopu Potty
+             Organization: University of Rhode Island
+             Date
+             Function: Explosive source model to simulate the pressure time
+             history for a high explosive (e.g. TNT) charge. The primary reference
+             is: Chapman, JASA v78, no 2, 1985, p672-681
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <param name="R">Input argument #3</param>
+             <param name="fs">Input argument #4</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_chapman(System.Object,System.Object,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides a single output, 5-input Objectinterface to the ts_chapman M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Author: Gopu Potty
+             Organization: University of Rhode Island
+             Date
+             Function: Explosive source model to simulate the pressure time
+             history for a high explosive (e.g. TNT) charge. The primary reference
+             is: Chapman, JASA v78, no 2, 1985, p672-681
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <param name="R">Input argument #3</param>
+             <param name="fs">Input argument #4</param>
+             <param name="T">Input argument #5</param>
+             <returns>An Object containing the first output argument.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_chapman(System.Int32)">
+             <summary>
+             Provides the standard 0-input Object interface to the ts_chapman M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Author: Gopu Potty
+             Organization: University of Rhode Island
+             Date
+             Function: Explosive source model to simulate the pressure time
+             history for a high explosive (e.g. TNT) charge. The primary reference
+             is: Chapman, JASA v78, no 2, 1985, p672-681
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_chapman(System.Int32,System.Object)">
+             <summary>
+             Provides the standard 1-input Object interface to the ts_chapman M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Author: Gopu Potty
+             Organization: University of Rhode Island
+             Date
+             Function: Explosive source model to simulate the pressure time
+             history for a high explosive (e.g. TNT) charge. The primary reference
+             is: Chapman, JASA v78, no 2, 1985, p672-681
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="z">Input argument #1</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_chapman(System.Int32,System.Object,System.Object)">
+             <summary>
+             Provides the standard 2-input Object interface to the ts_chapman M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Author: Gopu Potty
+             Organization: University of Rhode Island
+             Date
+             Function: Explosive source model to simulate the pressure time
+             history for a high explosive (e.g. TNT) charge. The primary reference
+             is: Chapman, JASA v78, no 2, 1985, p672-681
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_chapman(System.Int32,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides the standard 3-input Object interface to the ts_chapman M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Author: Gopu Potty
+             Organization: University of Rhode Island
+             Date
+             Function: Explosive source model to simulate the pressure time
+             history for a high explosive (e.g. TNT) charge. The primary reference
+             is: Chapman, JASA v78, no 2, 1985, p672-681
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <param name="R">Input argument #3</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_chapman(System.Int32,System.Object,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides the standard 4-input Object interface to the ts_chapman M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Author: Gopu Potty
+             Organization: University of Rhode Island
+             Date
+             Function: Explosive source model to simulate the pressure time
+             history for a high explosive (e.g. TNT) charge. The primary reference
+             is: Chapman, JASA v78, no 2, 1985, p672-681
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <param name="R">Input argument #3</param>
+             <param name="fs">Input argument #4</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_chapman(System.Int32,System.Object,System.Object,System.Object,System.Object,System.Object)">
+             <summary>
+             Provides the standard 5-input Object interface to the ts_chapman M-function.
+             </summary>
+             <remarks>
+             M-Documentation:
+             Author: Gopu Potty
+             Organization: University of Rhode Island
+             Date
+             Function: Explosive source model to simulate the pressure time
+             history for a high explosive (e.g. TNT) charge. The primary reference
+             is: Chapman, JASA v78, no 2, 1985, p672-681
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return.</param>
+             <param name="z">Input argument #1</param>
+             <param name="w">Input argument #2</param>
+             <param name="R">Input argument #3</param>
+             <param name="fs">Input argument #4</param>
+             <param name="T">Input argument #5</param>
+             <returns>An Array of length "numArgsOut" containing the output
+             arguments.</returns>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.ts_chapman(System.Int32,System.Object[]@,System.Object[],System.Object[])">
+             <summary>
+             Provides an interface for the ts_chapman function in which the input and output
+             arguments are specified as an array of Objects.
+             </summary>
+             <remarks>
+             This method will allocate and return by reference the output argument
+             array.<newpara></newpara>
+             M-Documentation:
+             Author: Gopu Potty
+             Organization: University of Rhode Island
+             Date
+             Function: Explosive source model to simulate the pressure time
+             history for a high explosive (e.g. TNT) charge. The primary reference
+             is: Chapman, JASA v78, no 2, 1985, p672-681
+             Calling sequence:
+             Inputs:
+             z  - charge depth in m
+             w  - charge weight in kg
+             R  - range in m
+             fs - sample rate for output (Hz)
+             T  - total duration of output waveform
+             Output:
+             u  - waveform samples of the shock time series
+             </remarks>
+             <param name="numArgsOut">The number of output arguments to return</param>
+             <param name= "argsOut">Array of Object output arguments</param>
+             <param name= "argsIn">Array of Object input arguments</param>
+             <param name= "varArgsIn">Array of Object representing variable input
+             arguments</param>
+            
+        </member>
+        <member name="M:BellhopNLNative.NLDelaySum.WaitForFiguresToDie">
+             <summary>
+             This method will cause a MATLAB figure window to behave as a modal dialog box.
+             The method will not return until all the figure windows associated with this
+             component have been closed.
+             </summary>
+             <remarks>
+             An application should only call this method when required to keep the
+             MATLAB figure window from disappearing.  Other techniques, such as calling
+             Console.ReadLine() from the application should be considered where
+             possible.</remarks>
+            
+        </member>
+    </members>
+</doc>

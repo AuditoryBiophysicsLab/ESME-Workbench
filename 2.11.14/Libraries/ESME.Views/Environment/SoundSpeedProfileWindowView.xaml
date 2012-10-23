@@ -1,0 +1,62 @@
+﻿<Window x:Class="ESME.Views.Environment.SoundSpeedProfileWindowView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:Environment="clr-namespace:ESME.Views.Environment"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC" xmlns:Properties="clr-namespace:ESME.Views.Properties"
+        Title="{Binding WindowTitle}"
+        Width="{Binding Source={x:Static Properties:Settings.Default},
+                        Path=SSPWidth,
+                        Mode=TwoWay}"
+        Height="{Binding Source={x:Static Properties:Settings.Default},
+                         Path=SSPHeight,
+                         Mode=TwoWay}"
+         Left="{Binding Source={x:Static Properties:Settings.Default},
+                       Path=SSPLeft,
+                       Mode=TwoWay}"
+        Top="{Binding Source={x:Static Properties:Settings.Default},
+                      Path=SSPTop,
+                      Mode=TwoWay}"
+        Background="White"
+        d:DataContext="{d:DesignInstance Environment:SoundSpeedProfileViewModel}"
+        WindowStyle="ToolWindow"
+        mc:Ignorable="d">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="ContentRendered">
+            <WPF:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
+        </i:EventTrigger>
+        <i:EventTrigger EventName="Closing">
+            <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <DockPanel LastChildFill="True">
+        <ToolBarTray Height="22" DockPanel.Dock="Top">
+            <ToolBar Band="0" BandIndex="0">
+                <Button Command="{Binding SaveToCSVCommand}"
+                        ToolBar.OverflowMode="Never"
+                        ToolTip="Save to CSV">
+                    <Image Source="..\Images\CSV_16.png" />
+                </Button>
+                <Button Command="{Binding SaveToImageCommand}"
+                        ToolBar.OverflowMode="AsNeeded"
+                        ToolTip="Save to Image">
+                    <Image Source="..\Images\PNG_16.png" />
+                </Button>
+                <Button Command="{Binding CopyTextToClipboardCommand}"
+                        ToolBar.OverflowMode="Never"
+                        ToolTip="Copy text to clipboard">
+                    <Image Source="..\Images\clipboard_text_16.png" />
+                </Button>
+                <Button Command="{Binding CopyImageToClipboardCommand}"
+                        ToolBar.OverflowMode="AsNeeded"
+                        ToolTip="Copy image to clipboard">
+                    <Image Source="..\Images\clipboard_add_16.png" />
+                </Button>
+            </ToolBar>
+        </ToolBarTray>
+        <Environment:SoundSpeedProfileView x:Name="SoundSpeedProfile" />
+    </DockPanel>
+</Window>
