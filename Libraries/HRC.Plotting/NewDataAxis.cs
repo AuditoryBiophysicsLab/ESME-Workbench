@@ -691,6 +691,7 @@ namespace HRC.Plotting
                 }
             }
             //Debug.WriteLine(string.Format("NewDataAxis: ArrangeOverride for {0} returning desired width {1} and height {2}", AxisLabel, arrangeSize.Width, arrangeSize.Height));
+            InvalidateVisual();
             return arrangeSize;
         }
 
