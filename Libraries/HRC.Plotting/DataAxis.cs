@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -15,15 +14,15 @@ using HRC.ViewModels;
 
 namespace HRC.Plotting
 {
-    public class NewDataAxis : Panel
+    public class DataAxis : Panel
     {
-        static NewDataAxis() { DefaultStyleKeyProperty.OverrideMetadata(typeof(NewDataAxis), new FrameworkPropertyMetadata(typeof(NewDataAxis))); }
+        static DataAxis() { DefaultStyleKeyProperty.OverrideMetadata(typeof(DataAxis), new FrameworkPropertyMetadata(typeof(DataAxis))); }
 
         #region Dependency properties
         #region dependency property string AxisLabel { get; set; }
         public static readonly DependencyProperty AxisLabelProperty = DependencyProperty.RegisterAttached("AxisLabel",
                                                                                                           typeof(string),
-                                                                                                          typeof(NewDataAxis),
+                                                                                                          typeof(DataAxis),
                                                                                                           new FrameworkPropertyMetadata("",
                                                                                                                                         FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                                                                                         FrameworkPropertyMetadataOptions.AffectsMeasure |
@@ -36,7 +35,7 @@ namespace HRC.Plotting
 
         public static DependencyProperty AxisLayoutAlgorithmProperty = DependencyProperty.Register("AxisLayoutAlgorithm",
                                                                                                    typeof(AxisLayoutAlgorithm),
-                                                                                                   typeof(NewDataAxis),
+                                                                                                   typeof(DataAxis),
                                                                                                    new FrameworkPropertyMetadata(AxisLayoutAlgorithm.ExtendedWilkinson,
                                                                                                                                  FrameworkPropertyMetadataOptions.AffectsMeasure |
                                                                                                                                  FrameworkPropertyMetadataOptions.AffectsArrange |
@@ -44,7 +43,7 @@ namespace HRC.Plotting
                                                                                                                                  AxisLayoutAlgorithmPropertyChanged));
 
         public AxisLayoutAlgorithm AxisLayoutAlgorithm { get { return (AxisLayoutAlgorithm)GetValue(AxisLayoutAlgorithmProperty); } set { SetValue(AxisLayoutAlgorithmProperty, value); } }
-        static void AxisLayoutAlgorithmPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).AxisLayoutAlgorithmPropertyChanged(); }
+        static void AxisLayoutAlgorithmPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).AxisLayoutAlgorithmPropertyChanged(); }
         void AxisLayoutAlgorithmPropertyChanged()
         {             
             switch (AxisLayoutAlgorithm)
@@ -68,7 +67,7 @@ namespace HRC.Plotting
         #region dependency property AxisLocation AxisLocation {get; set;}
         public static readonly DependencyProperty AxisLocationProperty = DependencyProperty.Register("AxisLocation",
                                                                                                      typeof(AxisLocation),
-                                                                                                     typeof(NewDataAxis),
+                                                                                                     typeof(DataAxis),
                                                                                                      new FrameworkPropertyMetadata((AxisLocation.Bottom),
                                                                                                                                    FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                                                                                    FrameworkPropertyMetadataOptions.AffectsMeasure |
@@ -77,7 +76,7 @@ namespace HRC.Plotting
 
         public AxisLocation AxisLocation { get { return (AxisLocation)GetValue(AxisLocationProperty); } set { SetCurrentValue(AxisLocationProperty, value); } }
 
-        static void AxisLocationPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).AxisLocationPropertyChanged(); }
+        static void AxisLocationPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).AxisLocationPropertyChanged(); }
         void AxisLocationPropertyChanged()
         {
             switch (AxisLocation)
@@ -103,11 +102,11 @@ namespace HRC.Plotting
 
         public static DependencyProperty AxisTicksProperty = DependencyProperty.Register("AxisTicks",
                                                                                           typeof(ObservableCollection<NewDataAxisTick>),
-                                                                                          typeof(NewDataAxis),
+                                                                                          typeof(DataAxis),
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, AxisTicksPropertyChanged));
 
         public ObservableCollection<NewDataAxisTick> AxisTicks { get { return (ObservableCollection<NewDataAxisTick>)GetValue(AxisTicksProperty); } set { SetValue(AxisTicksProperty, value); } }
-        static void AxisTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).AxisTicksPropertyChanged(); }
+        static void AxisTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).AxisTicksPropertyChanged(); }
         [UsedImplicitly] CollectionObserver _axisTicksObserver;
         void AxisTicksPropertyChanged()
         {
@@ -130,7 +129,7 @@ namespace HRC.Plotting
         #region dependency property AxisType AxisType
         public static DependencyProperty AxisTypeProperty = DependencyProperty.Register("AxisType",
                                                                                         typeof(AxisType),
-                                                                                        typeof(NewDataAxis),
+                                                                                        typeof(DataAxis),
                                                                                         new FrameworkPropertyMetadata(AxisType.Linear,
                                                                                                                       FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                                                                       FrameworkPropertyMetadataOptions.AffectsMeasure |
@@ -141,7 +140,7 @@ namespace HRC.Plotting
 
         static void AxisTypePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
-            ((NewDataAxis)obj).UpdateVisibleRange();
+            ((DataAxis)obj).UpdateVisibleRange();
         }
         bool IsLogarithmic { get { return AxisType == AxisType.Logarithmic; } }
         #endregion
@@ -150,14 +149,14 @@ namespace HRC.Plotting
 
         public static DependencyProperty DataRangeProperty = DependencyProperty.Register("DataRange",
                                                                                          typeof(RangeBase),
-                                                                                         typeof(NewDataAxis),
+                                                                                         typeof(DataAxis),
                                                                                          new FrameworkPropertyMetadata(null,
                                                                                                                        FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                                                                        FrameworkPropertyMetadataOptions.AffectsRender,
                                                                                                                        DataRangePropertyChanged));
 
         public RangeBase DataRange { get { return (RangeBase)GetValue(DataRangeProperty); } set { SetValue(DataRangeProperty, value); } }
-        static void DataRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).DataRangePropertyChanged(args); }
+        static void DataRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).DataRangePropertyChanged(args); }
         void DataRangePropertyChanged(DependencyPropertyChangedEventArgs args)
         {
             if (args.OldValue != null) ((RangeBase)args.OldValue).RangeChanged -= DataRangeChanged;
@@ -183,7 +182,7 @@ namespace HRC.Plotting
 
         public static DependencyProperty IsInvertedProperty = DependencyProperty.Register("IsInverted",
                                                                                           typeof(bool),
-                                                                                          typeof(NewDataAxis),
+                                                                                          typeof(DataAxis),
                                                                                           new FrameworkPropertyMetadata(false,
                                                                                                                         FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                                                                         FrameworkPropertyMetadataOptions.AffectsMeasure |
@@ -192,7 +191,7 @@ namespace HRC.Plotting
 
         public bool IsInverted { get { return (bool)GetValue(IsInvertedProperty); } set { SetValue(IsInvertedProperty, value); } }
 
-        static void IsInvertedPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).IsInvertedPropertyChanged(); }
+        static void IsInvertedPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).IsInvertedPropertyChanged(); }
         void IsInvertedPropertyChanged() { OnTransformChanged(); }
         #endregion
 
@@ -200,7 +199,7 @@ namespace HRC.Plotting
 
         public static DependencyProperty MajorTickLengthProperty = DependencyProperty.Register("MajorTickLength",
                                                                                                typeof(double),
-                                                                                               typeof(NewDataAxis),
+                                                                                               typeof(DataAxis),
                                                                                                new FrameworkPropertyMetadata(6.0,
                                                                                                                              FrameworkPropertyMetadataOptions.AffectsMeasure |
                                                                                                                              FrameworkPropertyMetadataOptions.AffectsArrange |
@@ -213,12 +212,12 @@ namespace HRC.Plotting
 
         public static DependencyProperty MajorTicksPerInchProperty = DependencyProperty.Register("MajorTicksPerInch",
                                                                                  typeof(double),
-                                                                                 typeof(NewDataAxis),
+                                                                                 typeof(DataAxis),
                                                                                  new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MajorTicksPerInchPropertyChanged));
 
         public double MajorTicksPerInch { get { return (double)GetValue(MajorTicksPerInchProperty); } set { SetValue(MajorTicksPerInchProperty, value); } }
 
-        static void MajorTicksPerInchPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).MajorTicksPerInchPropertyChanged(); }
+        static void MajorTicksPerInchPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).MajorTicksPerInchPropertyChanged(); }
         void MajorTicksPerInchPropertyChanged() { if (MajorTicksPerInch <= 0) throw new ArgumentException("MajorTicksPerInch must be greater than zero"); }
         #endregion
 
@@ -226,7 +225,7 @@ namespace HRC.Plotting
 
         public static DependencyProperty MinorTickLengthProperty = DependencyProperty.Register("MinorTickLength",
                                                                                                typeof(double),
-                                                                                               typeof(NewDataAxis),
+                                                                                               typeof(DataAxis),
                                                                                                new FrameworkPropertyMetadata(3.0,
                                                                                                                              FrameworkPropertyMetadataOptions.AffectsMeasure |
                                                                                                                              FrameworkPropertyMetadataOptions.AffectsArrange |
@@ -239,12 +238,12 @@ namespace HRC.Plotting
 
         public static DependencyProperty MinorTicksPerInchProperty = DependencyProperty.Register("MinorTicksPerInch",
                                                                                  typeof(double),
-                                                                                 typeof(NewDataAxis),
+                                                                                 typeof(DataAxis),
                                                                                  new FrameworkPropertyMetadata(4.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MinorTicksPerInchPropertyChanged));
 
         public double MinorTicksPerInch { get { return (double)GetValue(MinorTicksPerInchProperty); } set { SetValue(MinorTicksPerInchProperty, value); } }
 
-        static void MinorTicksPerInchPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((NewDataAxis)obj).MinorTicksPerInchPropertyChanged(); }
+        static void MinorTicksPerInchPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).MinorTicksPerInchPropertyChanged(); }
         void MinorTicksPerInchPropertyChanged() { }
         #endregion
 
@@ -252,7 +251,7 @@ namespace HRC.Plotting
 
         public static DependencyProperty PositionToValueProperty = DependencyProperty.Register("PositionToValue",
                                                                                                typeof(Func<double, double>),
-                                                                                               typeof(NewDataAxis),
+                                                                                               typeof(DataAxis),
                                                                                                new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None));
 
         public Func<double, double> PositionToValue { get { return (Func<double, double>)GetValue(PositionToValueProperty); } set { SetValue(PositionToValueProperty, value); } }
@@ -262,7 +261,7 @@ namespace HRC.Plotting
 
         public static DependencyProperty ValueToPositionProperty = DependencyProperty.Register("ValueToPosition",
                                                                                                typeof(Func<double, double>),
-                                                                                               typeof(NewDataAxis),
+                                                                                               typeof(DataAxis),
                                                                                                new FrameworkPropertyMetadata(null,
                                                                                                                              FrameworkPropertyMetadataOptions.None));
 
@@ -273,7 +272,7 @@ namespace HRC.Plotting
 
         public static DependencyProperty VisibleRangeProperty = DependencyProperty.Register("VisibleRange",
                                                                                             typeof(Range),
-                                                                                            typeof(NewDataAxis),
+                                                                                            typeof(DataAxis),
                                                                                             new FrameworkPropertyMetadata(null,
                                                                                                                           FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                                                                           FrameworkPropertyMetadataOptions.AffectsRender |
@@ -284,7 +283,7 @@ namespace HRC.Plotting
         public Range VisibleRange { get { return (Range)GetValue(VisibleRangeProperty); } set { SetValue(VisibleRangeProperty, value); } }
         static void VisibleRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
-            ((NewDataAxis)obj).VisibleRangePropertyChanged(args);
+            ((DataAxis)obj).VisibleRangePropertyChanged(args);
         }
         void VisibleRangePropertyChanged(DependencyPropertyChangedEventArgs args)
         {
@@ -321,7 +320,7 @@ namespace HRC.Plotting
                 PositionToValue = null;
                 return;
             }
-            Debug.WriteLine(string.Format("{0} Visible range changed to {1}", AxisLabel, VisibleRange));
+            //Debug.WriteLine(string.Format("{0} Visible range changed to {1}", AxisLabel, VisibleRange));
             _visibleRange = VisibleRange.Expand(0);
             if (AxisType == AxisType.Logarithmic)
             {
@@ -339,6 +338,7 @@ namespace HRC.Plotting
             if (_visibleRange == null || _visibleRange.IsEmpty) return;
             _valueToPositionTransform = CreateAxisTransform(_visibleRange, new Size(ActualWidth, ActualHeight), false, IsInverted, IsLogarithmic);
             _positionToValueTransform = _valueToPositionTransform.Inverse;
+            //Debug.WriteLine(string.Format("{0}: Transforms changing. VisibleRange min: {1} max: {2}", AxisLabel, VisibleRange.Min, VisibleRange.Max));
             ValueToPosition = v => _valueToPositionTransform.Transform(new Point(v, 0)).X;
             PositionToValue = p => _positionToValueTransform.Transform(new Point(p, 0)).X;
         }
@@ -348,7 +348,7 @@ namespace HRC.Plotting
         #endregion
         #endregion
 
-        public NewDataAxis()
+        public DataAxis()
         {
             SnapsToDevicePixels = true;
             UseLayoutRounding = true;
@@ -420,7 +420,7 @@ namespace HRC.Plotting
                     axisLength = newSize.Height;
                     break;
                 default:
-                    throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
+                    throw new ApplicationException("DataAxis: Unknown AxisLocation value.");
             }
             if (isInverted) originScale *= -1;
             // The intent of this transform is to make every axis draw the same as a Bottom axis (i.e. the StartValue is at 
@@ -465,7 +465,7 @@ namespace HRC.Plotting
                     top -= text.Height / 2;
                     break;
                 default:
-                    throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
+                    throw new ApplicationException("DataAxis: Unknown AxisLocation value.");
             }
             return new Rect(new Point(left, top), new Size(text.Width, text.Height));
         }
@@ -512,9 +512,9 @@ namespace HRC.Plotting
                     desiredSize.Width = MajorTickLength + 2 + _tickLabelDimension + _axisLabelDimension;
                     break;
                 default:
-                    throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
+                    throw new ApplicationException("DataAxis: Unknown AxisLocation value.");
             }
-            //Debug.WriteLine(string.Format("NewDataAxis: MeasureEnumerated for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
+            //Debug.WriteLine(string.Format("DataAxis: MeasureEnumerated for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
             return desiredSize;
         }
 
@@ -528,8 +528,13 @@ namespace HRC.Plotting
             _axisOptions.Screen = new Rect(availableSize);
             _axis = _axisLabeler.Generate(_axisOptions, MajorTicksPerInch / _pixelsPerInch);
             if (_axis == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
+            //Debug.WriteLine(string.Format("{0}: MeasureNonEnumerated: _axis.VisibleRange.Min: {1} _axis.VisibleRange.Max: {2} _axis.Labels.First(): {3} _axis.Labels.Last(): {4}", AxisLabel, _axis.VisibleRange.Min, _axis.VisibleRange.Max, _axis.Labels.First().Value, _axis.Labels.Last().Value));
             var majorTickLabels = _axis.Labels;
-            if (!_visibleRange.Contains(_axis.VisibleRange)) _visibleRange = _axis.VisibleRange;
+            if (!_visibleRange.Contains(_axis.VisibleRange))
+            {
+                _visibleRange = _axis.VisibleRange;
+                OnTransformChanged();
+            }
             Children.Clear();
             AxisTicks.Clear();
             foreach (var label in majorTickLabels)
@@ -608,12 +613,12 @@ namespace HRC.Plotting
                     desiredSize.Width = MajorTickLength + 2 + _tickLabelDimension + _axisLabelDimension;
                     break;
                 default:
-                    throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
+                    throw new ApplicationException("DataAxis: Unknown AxisLocation value.");
             }
             // desiredSize = ... computed sum of children's DesiredSize ...;
             // IMPORTANT: do not allow PositiveInfinity to be returned, that will raise an exception in the caller!
             // PositiveInfinity might be an availableSize input; this means that the parent does not care about sizing
-            //Debug.WriteLine(string.Format("NewDataAxis: MeasureNonEnumerated for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
+            //Debug.WriteLine(string.Format("DataAxis: MeasureNonEnumerated for {0} returning desired width {1} and height {2}", AxisLabel, desiredSize.Width, desiredSize.Height));
             return desiredSize;
         }
 
@@ -651,7 +656,7 @@ namespace HRC.Plotting
                     axisLabelPosition.Y -= _axisLabel.DesiredSize.Height / 2;
                     break;
                 default:
-                    throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
+                    throw new ApplicationException("DataAxis: Unknown AxisLocation value.");
             }
             _axisLabel.Arrange(new Rect(axisLabelPosition, _axisLabel.DesiredSize));
             axisTransform = CreateAxisTransform(_visibleRange, arrangeSize, true, IsInverted, IsLogarithmic);
@@ -687,10 +692,10 @@ namespace HRC.Plotting
                         }
                         break;
                     default:
-                        throw new ApplicationException("NewDataAxis: Unknown AxisLocation value.");
+                        throw new ApplicationException("DataAxis: Unknown AxisLocation value.");
                 }
             }
-            //Debug.WriteLine(string.Format("NewDataAxis: ArrangeOverride for {0} returning desired width {1} and height {2}", AxisLabel, arrangeSize.Width, arrangeSize.Height));
+            //Debug.WriteLine(string.Format("DataAxis: ArrangeOverride for {0} returning desired width {1} and height {2}", AxisLabel, arrangeSize.Width, arrangeSize.Height));
             InvalidateVisual();
             return arrangeSize;
         }

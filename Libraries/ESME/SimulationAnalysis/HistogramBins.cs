@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Threading;
 using System.Xml;
 using ESME.Simulator;
 using HRC;
@@ -70,10 +71,13 @@ namespace ESME.SimulationAnalysis
             _updatePointsOnAdd = false;
             histogramSource.GraphicsUpdate += (s, e) =>
             {
-                for (var binIndex = 0; binIndex < Bins.Length; binIndex++)
+                using (Dispatcher.CurrentDispatcher.DisableProcessing())
                 {
-                    if (Bins[binIndex] == 0 && !MakePointsForEmptyBins) continue;
-                    _points[binIndex] = new Point(binIndex, Bins[binIndex]);
+                    for (var binIndex = 0; binIndex < Bins.Length; binIndex++)
+                    {
+                        if (Bins[binIndex] == 0 && !MakePointsForEmptyBins) continue;
+                        _points[binIndex] = new Point(binIndex, Bins[binIndex]);
+                    }
                 }
             };
         }

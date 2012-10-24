@@ -40,7 +40,7 @@ namespace ESME.Views.Simulation
                 {
                     Visibility = Visibility.Visible,
                     AxisType = AxisType.Linear,
-                    Label = "Exposure count",
+                    Label = "Pressure Exposure count",
                 },
                 TopAxis = { Visibility = Visibility.Collapsed },
                 RightAxis = { Visibility = Visibility.Collapsed },
@@ -60,7 +60,7 @@ namespace ESME.Views.Simulation
                 {
                     Visibility = Visibility.Visible,
                     AxisType = AxisType.Linear,
-                    Label = "Exposure count",
+                    Label = "Energy Exposure count",
                 },
                 TopAxis = { Visibility = Visibility.Collapsed },
                 RightAxis = { Visibility = Visibility.Collapsed },

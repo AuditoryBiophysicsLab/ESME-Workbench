@@ -61,6 +61,7 @@ namespace HRC.Plotting
         DataAxisViewModel _oldXAxis, _oldYAxis;
         void XAxisChanged()
         {
+            if (_xAxisObserver != null) _xAxisObserver.UnregisterHandler(x => x.ValueToPosition);
             if (XAxis == null)
             {
                 _xAxisObserver = null;
@@ -79,6 +80,7 @@ namespace HRC.Plotting
         }
         void YAxisChanged()
         {
+            if (_yAxisObserver != null) _yAxisObserver.UnregisterHandler(y => y.ValueToPosition);
             if (YAxis == null)
             {
                 _yAxisObserver = null;

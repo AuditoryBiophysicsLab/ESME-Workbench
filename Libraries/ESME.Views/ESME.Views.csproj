@@ -117,8 +117,6 @@
     <Compile Include="Controls\ColorBarView.xaml.cs">
       <DependentUpon>ColorBarView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\DataAxis.cs" />
-    <Compile Include="Controls\DataPlotViewModel.cs" />
     <Compile Include="Controls\EditableKeyValuePair.cs" />
     <Compile Include="Controls\EditableKeyValuePairListView.xaml.cs">
       <DependentUpon>EditableKeyValuePairListView.xaml</DependentUpon>
@@ -134,9 +132,6 @@
     <Compile Include="Controls\ImageToggleButton.cs" />
     <Compile Include="Controls\LayerControl.cs" />
     <Compile Include="Controls\PluginSelector.cs" />
-    <Compile Include="Controls\DataPlot.xaml.cs">
-      <DependentUpon>DataPlot.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\SlimRibbonApplicationMenu.cs" />
     <Compile Include="Controls\TLStatusBar.xaml.cs">
       <DependentUpon>TLStatusBar.xaml</DependentUpon>
@@ -279,10 +274,6 @@
     <Page Include="Controls\HeaderedPropertyDisplayPopup.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\DataPlot.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\TLStatusBar.xaml">
       <SubType>Designer</SubType>

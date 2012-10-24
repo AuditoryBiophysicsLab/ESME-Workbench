@@ -6,7 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
         Title="SimulationExposuresView"
-        Width="300"
+        Width="800"
         Height="300"
         d:DataContext="{d:DesignInstance l:SimulationExposuresViewModel}"
         mc:Ignorable="d">
