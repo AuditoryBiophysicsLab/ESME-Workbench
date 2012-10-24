@@ -1,0 +1,637 @@
+﻿<UserControl x:Class="ESMEWorkbench.Controls.LayerTreeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:Locations="clr-namespace:ESME.Locations;assembly=ESME"
+             xmlns:Main="clr-namespace:ESMEWorkbench.ViewModels.Main"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:r="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
+             xmlns:Scenarios="clr-namespace:ESME.Scenarios;assembly=ESME"
+             xmlns:Tree="clr-namespace:ESMEWorkbench.ViewModels.Tree"
+             xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+             d:DataContext="{d:DesignInstance Main:MainViewModel}"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
+             mc:Ignorable="d">
+    <DockPanel LastChildFill="True">
+        <Border Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"
+                BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}"
+                BorderThickness="1 1 1 0"
+                DockPanel.Dock="Top"
+                Padding="5 5 5 0">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Scenario" />
+                <Line Margin="-5,5,-5,2"
+                      SnapsToDevicePixels="True"
+                      Stretch="Fill"
+                      Stroke="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}"
+                      X1="0"
+                      X2="1" />
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                    <r:RibbonButton Command="{Binding CreateScenarioCommand}"
+                                    SmallImageSource="..\Images\SmallIcons\application_form_add.png"
+                                    ToolTipDescription="Create a new scenario"
+                                    ToolTipTitle="New scenario" />
+                    <r:RibbonButton Command="{Binding Scenario.DeleteScenarioCommand}"
+                                    IsEnabled="{Binding IsScenarioLoaded}"
+                                    SmallImageSource="..\Images\SmallIcons\application_form_delete.png"
+                                    ToolTipDescription="Delete the currently selected scenario"
+                                    ToolTipTitle="Delete" />
+                    <r:RibbonButton Command="{Binding Scenario.ViewScenarioPropertiesCommand}"
+                                    IsEnabled="{Binding IsScenarioLoaded}"
+                                    SmallImageSource="..\Images\SmallIcons\application_form_edit.png"
+                                    ToolTipDescription="View or change properties in the currently selected scenario"
+                                    ToolTipTitle="Properties" />
+                    <r:RibbonButton Command="{Binding Scenario.Location.ZoomToLocationCommand}"
+                                    IsEnabled="{Binding IsScenarioLoaded}"
+                                    SmallImageSource="../Images/SmallIcons/application_form_magnify.png"
+                                    ToolTipDescription="Resets the map position to the current scenario"
+                                    ToolTipTitle="Zoom" />
+                    <r:RibbonButton Command="{Binding Scenario.SaveACopyCommand}"
+                                    IsEnabled="{Binding IsScenarioLoaded}"
+                                    SmallImageSource="../Images/SmallIcons/table_save.png"
+                                    ToolTipDescription="Saves a copy of the current scenario"
+                                    ToolTipTitle="Save a copy" />
+                    <!--
+                        <r:RibbonButton Command="{Binding DisabledCommand}" SmallImageSource="..\Images\SmallIcons\application_get.png" ToolTipDescription="Not yet implemented" ToolTipTitle="Import a scenario file" />
+                        <r:RibbonButton Command="{Binding DisabledCommand}" SmallImageSource="..\Images\SmallIcons\application_put.png" ToolTipDescription="Not yet implemented" ToolTipTitle="Export the currently selected scenario to a scenario file" />
+                    -->
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <TreeView DockPanel.Dock="Top"
+                  Grid.IsSharedSizeScope="True"
+                  ItemsSource="{Binding LayerTreeViewModel.RootNodes}">
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type Scenarios:Scenario}" ItemsSource="{Binding Platforms}">
+                    <Controls:LayerControl IsMapLayer="False"
+                                           LayerName="{Binding Name,
+                                                               StringFormat=Scenario: {0}}"
+                                           TheLayerControl="{Binding LayerControl}">
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding AddPlatformCommand}" Header="Add platform">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/add.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding ViewScenarioPropertiesCommand}" Header="Properties">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/application_form_edit.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
+                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                                           IsLayerNameEditable="True"
+                                           LayerName="{Binding PlatformName,
+                                                               Mode=TwoWay}"
+                                           LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
+                                           LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}"
+                                           TheLayerControl="{Binding LayerControl}">
+                        <!--
+                            Should work, doesn't.  KeyUp is handled by TreeviewItem, not layercontrol.
+                            <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="KeyUp">
+                            <WPF:EventToCommandTrigger Command="{Binding KeyUpCommand}" />
+                            </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        -->
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeletePlatformCommand}" Header="Remove this platform">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/delete.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding AddSourceCommand}" Header="Add source">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/add.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding PlatformPropertiesCommand}" Header="Properties">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/application_form_edit.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Command="{Binding MoveLayerToFrontCommand}" Header="Move platform to front">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_front.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerForwardCommand}" Header="Move platform forward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_forwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerBackwardCommand}" Header="Move platform backward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_backwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerToBackCommand}" Header="Move platform to back">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_back.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+                <!--  Source  -->
+                <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
+                    <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
+                                           IsLayerNameEditable="True"
+                                           IsMapLayer="False"
+                                           LayerName="{Binding SourceName,
+                                                               Mode=TwoWay}"
+                                           TheLayerControl="{Binding LayerControl}">
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeleteSourceCommand}" Header="Remove this source">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/delete.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding AddModeCommand}" Header="Add mode">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/add.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding SourcePropertiesCommand}" Header="Properties">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/application_form_edit.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type Tree:EnvironmentNode}" ItemsSource="{Binding EnvironmentLayers}">
+                    <Controls:LayerControl IsChecked="{Binding Location.LayerSettings.IsChecked}"
+                                           LayerName="{Binding Location.Name}"
+                                           LineOrSymbolColor="{Binding Location.LayerSettings.LineOrSymbolColor}"
+                                           LineOrSymbolSize="{Binding Location.LayerSettings.LineOrSymbolSize}"
+                                           ToolTip="Check/uncheck to show or hide the boundary for the location containing this scenario.  Expand to show or hide environmental data layers for this scenario." />
+                </HierarchicalDataTemplate>
+                <!--  Mode  -->
+                <HierarchicalDataTemplate DataType="{x:Type Scenarios:Mode}" ItemsSource="{Binding TransmissionLosses}">
+                    <Controls:LayerControl IsChecked="{Binding Scenarios:LayerSettings.IsChecked}"
+                                           IsLayerNameEditable="True"
+                                           IsMapLayer="False"
+                                           LayerName="{Binding ModeName,
+                                                               Mode=TwoWay}"
+                                           TheLayerControl="{Binding LayerControl}">
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeleteModeCommand}" Header="Remove this mode">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/delete.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding RecalculateModeCommand}" Header="Recalculate this mode">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/arrow_rotate_clockwise.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding ModePropertiesCommand}" Header="Properties">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/application_form_edit.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Command="{Binding MoveLayerToFrontCommand}" Header="Move all transmission losses to front">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_front.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerForwardCommand}" Header="Move all transmission losses forward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_forwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerBackwardCommand}" Header="Move all transmission losses backward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_backwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerToBackCommand}" Header="Move all transmission losses to back">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_back.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+                <!--  Species subtree  -->
+                <HierarchicalDataTemplate DataType="{x:Type Tree:SpeciesNode}" ItemsSource="{Binding Scenario.ScenarioSpecies}">
+                    <Controls:LayerControl IsChecked="{Binding Scenario.ShowAllSpecies}"
+                                           IsLayerNameEditable="False"
+                                           LayerName="Species"
+                                           LineColorVisibility="Hidden">
+                        <!--
+                            Should work, doesn't.  KeyUp is handled by TreeviewItem, not layercontrol.
+                            <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="KeyUp">
+                            <WPF:EventToCommandTrigger Command="{Binding KeyUpCommand}" />
+                            </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        -->
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding AddSpeciesCommand}" Header="Add species...">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/add.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding DeleteAllSpeciesCommand}" Header="Remove all species">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/sound_delete.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding RepopulateAllSpeciesCommand}"
+                                          Header="Repopulate all species"
+                                          Visibility="{Binding AreAllSpeciesSeededByESME,
+                                                               Converter={StaticResource TrueVisibleFalseCollapsed}}">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/arrow_rotate_clockwise.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+                <DataTemplate DataType="{x:Type Scenarios:ScenarioSpecies}">
+                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                                           IsLayerNameEditable="True"
+                                           LayerName="{Binding LatinName,
+                                                               Mode=TwoWay}"
+                                           LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
+                                           LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeleteSpeciesCommand}" Header="Remove this species">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/sound_delete.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding RepopulateSpeciesCommand}"
+                                          Header="Repopulate this species"
+                                          Visibility="{Binding IsSeededByESME,
+                                                               Converter={StaticResource TrueVisibleFalseCollapsed}}">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/arrow_rotate_clockwise.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding SpeciesPropertiesCommand}" Header="Properties">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/application_form_edit.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Command="{Binding MoveLayerToFrontCommand}" Header="Move species to front">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_front.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerForwardCommand}" Header="Move species forward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_forwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerBackwardCommand}" Header="Move species backward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_backwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerToBackCommand}" Header="Move species to back">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_back.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </DataTemplate>
+                <!--  Perimeters subtree  -->
+                <HierarchicalDataTemplate DataType="{x:Type Tree:PerimetersNode}" ItemsSource="{Binding Scenario.Perimeters}">
+                    <Controls:LayerControl IsChecked="{Binding Scenario.ShowAllPerimeters}"
+                                           IsLayerNameEditable="False"
+                                           LayerName="Perimeters"
+                                           LineColorVisibility="Hidden">
+                        <!--
+                            Should work, doesn't.  KeyUp is handled by TreeviewItem, not layercontrol.
+                            <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="KeyUp">
+                            <WPF:EventToCommandTrigger Command="{Binding KeyUpCommand}" />
+                            </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        -->
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding AddPerimeterCommand}" Header="Add perimeter...">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/add.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+                <DataTemplate DataType="{x:Type Scenarios:Perimeter}">
+                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                                           IsLayerNameEditable="True"
+                                           LayerName="{Binding Name,
+                                                               Mode=TwoWay}"
+                                           LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
+                                           LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeletePerimeterCommand}" Header="Remove this perimeter">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/sound_delete.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding EditPerimeterCommand}" Header="Edit this perimeter">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/arrow_rotate_clockwise.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Command="{Binding MoveLayerToFrontCommand}" Header="Move species to front">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_front.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerForwardCommand}" Header="Move species forward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_forwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerBackwardCommand}" Header="Move species backward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_backwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerToBackCommand}" Header="Move species to back">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_back.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </DataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type Tree:WorldMapNode}" ItemsSource="{Binding Features}">
+                    <Controls:LayerControl IsChecked="{Binding IsVisible}"
+                                           LayerName="World Map"
+                                           LineOrSymbolColor="{Binding LineColor}"
+                                           LineOrSymbolSize="{Binding LineWeight}">
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding MoveLayerToFrontCommand}" Header="Move world map to front">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_front.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerForwardCommand}" Header="Move world map forward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_forwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerBackwardCommand}" Header="Move world map backward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_backwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerToBackCommand}" Header="Move world map to back">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_back.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type Tree:SedimentNode}" ItemsSource="{Binding SedimentTypes}">
+                    <Controls:LayerControl IsChecked="{Binding IsChecked}"
+                                           IsMapLayer="False"
+                                           LayerName="Sediment" />
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type Tree:AnalysisPointsNode}" ItemsSource="{Binding Scenario.AnalysisPoints}">
+                    <Controls:LayerControl IsChecked="{Binding Scenario.ShowAllAnalysisPoints}"
+                                           LayerName="Analysis Points"
+                                           LineColorVisibility="Hidden">
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeleteAllCommand}" Header="Remove all analysis points">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/sound_delete.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding RecalculateAllCommand}" Header="Recalculate all analysis points">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/arrow_rotate_clockwise.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Command="{Binding MoveLayerToFrontCommand}" Header="Move all analysis points to front">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_front.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerForwardCommand}" Header="Move all analysis points forward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_forwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerBackwardCommand}" Header="Move all analysis points backward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_backwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerToBackCommand}" Header="Move all analysis points to back">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_back.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </HierarchicalDataTemplate>
+                <DataTemplate DataType="{x:Type Scenarios:TransmissionLoss}">
+                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                                           LayerName="{Binding LayerName}"
+                                           LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
+                                           LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <WPF:EventToCommandTrigger Command="{Binding ViewTransmissionLossCommand}" CommandParameter="{Binding}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeleteTransmissionLossCommand}" Header="Remove this transmission loss">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/sound_delete.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding RecalculateTransmissionLossCommand}" Header="Recalculate this transmission loss">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/arrow_rotate_clockwise.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Command="{Binding MoveLayerToFrontCommand}" Header="Move this transmission loss to front">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_front.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerForwardCommand}" Header="Move this transmission loss forward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_forwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerBackwardCommand}" Header="Move this transmission loss backward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_backwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerToBackCommand}" Header="Move this transmission loss to back">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_back.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type Scenarios:AnalysisPoint}">
+                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                                           LayerName="{Binding LayerName}"
+                                           LineColorVisibility="Hidden">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <WPF:EventToCommandTrigger Command="{Binding ViewAnalysisPointCommand}" CommandParameter="{Binding}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding DeleteAnalysisPointCommand}" Header="Remove this analysis point">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/sound_delete.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding RecalculateAnalysisPointCommand}" Header="Recalculate this analysis point">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/arrow_rotate_clockwise.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding AnalysisPointPropertiesCommand}" Header="Properties">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/application_form_edit.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Command="{Binding MoveLayerToFrontCommand}" Header="Move analysis point to front">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_front.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerForwardCommand}" Header="Move analysis point forward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_forwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerBackwardCommand}" Header="Move analysis point backward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_backwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerToBackCommand}" Header="Move analysis point to back">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_back.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type Locations:EnvironmentalDataSet}">
+                    <Controls:LayerControl IsChecked="{Binding LayerSettings.IsChecked}"
+                                           LayerName="{Binding LayerName}"
+                                           LineOrSymbolColor="{Binding LayerSettings.LineOrSymbolColor}"
+                                           LineOrSymbolSize="{Binding LayerSettings.LineOrSymbolSize}">
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding MoveLayerToFrontCommand}" Header="Move data layer to front">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_front.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerForwardCommand}" Header="Move data layer forward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_forwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerBackwardCommand}" Header="Move data layer backward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_backwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerToBackCommand}" Header="Move data layer to back">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_back.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type Tree:WorldMapFeatureNode}">
+                    <Controls:LayerControl IsChecked="{Binding IsChecked}"
+                                           LayerName="{Binding FeatureName}"
+                                           LineColorVisibility="Hidden" />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type Tree:BitmapNode}">
+                    <Controls:LayerControl IsChecked="{Binding IsChecked}"
+                                           LayerName="{Binding LayerName}"
+                                           LineColorVisibility="Hidden">
+                        <Controls:LayerControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{Binding MoveLayerToFrontCommand}" Header="Move data layer to front">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_front.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerForwardCommand}" Header="Move data layer forward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_forwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerBackwardCommand}" Header="Move data layer backward">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_backwards.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Command="{Binding MoveLayerToBackCommand}" Header="Move data layer to back">
+                                    <MenuItem.Icon>
+                                        <Image Source="../Images/SmallIcons/shape_move_back.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Controls:LayerControl.ContextMenu>
+                    </Controls:LayerControl>
+                </DataTemplate>
+            </TreeView.Resources>
+        </TreeView>
+    </DockPanel>
+</UserControl>

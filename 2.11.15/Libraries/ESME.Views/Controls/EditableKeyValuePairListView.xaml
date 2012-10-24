@@ -1,0 +1,50 @@
+﻿<ListView x:Class="ESME.Views.Controls.EditableKeyValuePairListView"
+          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+          xmlns:Controls="clr-namespace:ESME.Views.Controls"
+          Background="Transparent"
+          Grid.IsSharedSizeScope="True">
+    <ListView.Resources>
+        <DataTemplate x:Key="NotEditableTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition SharedSizeGroup="KeyColumn" />
+                    <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0"
+                           Margin="0 0 5 0"
+                           VerticalAlignment="Top"
+                           Text="{Binding Key}"
+                           TextAlignment="Right" />
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Top"
+                           Text="{Binding Value}"
+                           TextAlignment="Left" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="EditableTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition SharedSizeGroup="KeyColumn" />
+                    <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0"
+                           Margin="0 0 5 0"
+                           VerticalAlignment="Top"
+                           Text="{Binding Key}"
+                           TextAlignment="Right" />
+                <TextBox Grid.Column="1"
+                         MinWidth="100"
+                         VerticalAlignment="Top"
+                         AcceptsReturn="True"
+                         Text="{Binding Value}"
+                         TextAlignment="Left"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto" />
+            </Grid>
+        </DataTemplate>
+    </ListView.Resources>
+    <ListView.ItemTemplateSelector>
+        <Controls:EditableKeyValuePairTemplateSelector FalseTemplate="{StaticResource NotEditableTemplate}" TrueTemplate="{StaticResource EditableTemplate}" />
+    </ListView.ItemTemplateSelector>
+</ListView>
