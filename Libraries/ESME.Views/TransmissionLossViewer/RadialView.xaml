@@ -34,7 +34,7 @@
                 <DockPanel Margin="5 0 0 0"
                            DataContext="{Binding ColorMapViewModel}"
                            LastChildFill="False">
-                    <Plotting:NewDataAxis AxisLabel="Transmission Loss (dB)"
+                    <Plotting:DataAxis AxisLabel="Transmission Loss (dB)"
                                           AxisLocation="Right"
                                           DataRange="{Binding FullRange}"
                                           DockPanel.Dock="Right" />
