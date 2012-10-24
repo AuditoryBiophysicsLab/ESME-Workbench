@@ -1,0 +1,78 @@
+Setup instructions:
+Note: I'd rather use registry entries, but can't find indication of Matlab support.
+
+Note: On my computer, I've set the install directory to MarineMammalMovementSimulator
+
+The following requires install Sheild installation program.
+1. Add 3MBS exe executable location to environmental path variable.
+2. Set "MMMB_PATH" environmental vars with 3mbs exe location
+3. Set up a separate registry entry for INPUT.
+	* Environmental Data Bathymetry
+	* Environmental Data Salinity
+	* Environmental Data Temperature
+	* Species
+	* Scenarios.
+  Note 1: The individual registry entry is updated each time a data file of it's
+          type is accessed.
+  Note 2: All folders are initially within the same super folder... i.e
+		  ..\mmmbs\mmmbs.exe
+		  ..\mmmbs\environmentalData\*.bth
+		  ..\mmmbs\environmentalData\*.slt
+		  ..\mmmbs\environmentalData\*.tem
+		  ..\mmmbs\species\*.spe
+		  ..\mmmbs\scenarios\*.sce
+  Note 3: Code will have to check if the folder exists.  If not, goes to default folder.
+
+4. Use "MMMB_PATH" for 3MBS OUTPUT.
+  Note1: 3MBS output always goes into ..\mmmbs\ouput\ folder, but creates new sub folder
+         for each run.
+	* Binary output
+	* Text output
+	* Logs
+  Note2: Has following format:
+		..\mmmbs\ouput\YYYY_MM_DD_HH_MM_SS\*.bin
+		..\mmmbs\ouput\YYYY_MM_DD_HH_MM_SS\*.txt (animat text output)
+		..\mmmbs\ouput\YYYY_MM_DD_HH_MM_SS\*.txt (various logs).
+
+
+ESME:
+ * Must explcitly tell 3MBS file and paths to use for both input.
+ * Output is optional since ESME has no dependancy upon it. If output options set
+   to TRUE, a directory must be specified.  If none specified, 3MBS will output to
+   it's default home directory "MMMB_PATH".  Since I can't force ESME to use
+   environmental variables inside the scripts I'll just create a directory and
+   hardcode it in the scripts for now.  The directory will be:
+   "D:\MarineMammalMovementSimulator\ESME_IO"
+	* Data Output.
+	* Data Input
+	* Logs
+
+
+
+
+
+BUG / FIXES list in ESME
+------------------------
+(1) ESME doesn't pass the full path of data files (bathymetry) to 3MBS, so I've
+    hardcoded the path.  This needs to be corrected!!!!
+
+(2) Lat/Lon backwards in GUI menu 'Mammal Movement'-> 'Center of Mammal Distribution'.
+
+(3) Why is there an option to set a duration in 'Mammal Movement' -> 'Duration of Simulation'?
+    Simulation duration is determined by how long the ships run.
+
+(4) Remove all the "you may proceed" dialog boxes.
+
+Test extreme cases:
+1-to-1
+1-to-all
+off-number (12, 13, ...)
+
+
+Have ESME create (by date) and pass directories to 3MBS to use. 
+3MBS uses defaults otherwise
+Have ESME pass logging options to 3MBS including passed params files, data recieved,
+etc...
+
+ESME needs to have animal depths put to a positive number?
+Improve error reporting to and from ESME/3MBS.
