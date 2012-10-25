@@ -85,7 +85,7 @@ namespace ESME.Simulator
         {
             TimeStepSize = timeStepSize;
             _cancellationTokenSource = new CancellationTokenSource();
-            SimulationLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.log"), TimeStepSize, Scenario);
+            SimulationLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.exposures"), TimeStepSize, Scenario);
             NewModeThresholdHistogram = new NewModeThresholdHistogram(this, SimulationLog);
             //SpeciesThresholdHistogram = new SpeciesThresholdHistogram(this);
             return TaskEx.Run(() => Run(TimeStepSize, _cancellationTokenSource.Token));

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Security.Principal;
 using System.Windows;
 using ESME.Views;
 using HRC;
@@ -23,21 +22,19 @@ namespace TransmissionLossViewer
 
         static App()
         {
-            Logfile = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Name), "app.log");
+            Logfile = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench"), "transmission_loss_viewer.log");
             if (File.Exists(Logfile)) File.Delete(Logfile);
             Trace.Listeners.Add(new TextWriterTraceListener(Logfile, "logfile") { TraceOutputOptions = TraceOptions.None });
             Trace.AutoFlush = true;
             Trace.WriteLine(Name + " initializing");
             if (OSInfo.OperatingSystemName != "XP")
             {
-                DumpFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "esme_crash.mdmp");
+                DumpFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "transmission_loss_viewer_crash.mdmp");
                 AppDomain.CurrentDomain.UnhandledException += LastChanceExceptionHandler;
 
             }
-#if DEBUG
             Log = new AppEventLog(Name);
             Log.Debug(EventLogEntryType.Information, "Starting");
-#endif
         }
 
         #region Initialization
@@ -47,13 +44,6 @@ namespace TransmissionLossViewer
             // You must close or flush the trace to empty the output buffer.
             Trace.WriteLine(Name + " starting up");
 
-            if (OSInfo.OperatingSystemName == "XP")
-            {
-                Trace.TraceError("This application is not supported under Windows XP");
-                MessageBox.Show("Windows XP is not currently supported by this application, pending satisfactory resolution of application startup crash");
-                Current.Shutdown();
-                return;
-            }
             try
             {
                 HRCBootstrapper.Initialise(new List<Assembly>
@@ -65,7 +55,7 @@ namespace TransmissionLossViewer
             catch (Exception e)
             {
                 Trace.Indent();
-                Trace.TraceError("CinchBootStrapper threw an exception: {0}", e.Message);
+                Trace.TraceError("HRCBootstrapper threw an exception: {0}", e.Message);
                 var inner = e.InnerException;
                 while (inner != null)
                 {
@@ -108,18 +98,5 @@ namespace TransmissionLossViewer
 
             MiniDump.Write(DumpFile, MiniDump.Option.Normal, MiniDump.ExceptionInfo.Present);
         }
-
-#if DEBUG
-        private static bool IsAdministrator
-        {
-            get
-            {
-                var wi = WindowsIdentity.GetCurrent();
-                if (wi == null) return false;
-                var wp = new WindowsPrincipal(wi);
-                return wp.IsInRole(WindowsBuiltInRole.Administrator);
-            }
-        }
-#endif
     }
 }

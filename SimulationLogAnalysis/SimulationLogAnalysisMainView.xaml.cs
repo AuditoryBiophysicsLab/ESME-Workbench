@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace SimulationLogAnalysis
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for SimulationLogAnalysisMainView.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class SimulationLogAnalysisMainView : Window
     {
-        public MainWindow()
+        public SimulationLogAnalysisMainView()
         {
             InitializeComponent();
         }

@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.Hosting;
 using System.Windows;
 using ESME.Views;
 using HRC;
@@ -22,7 +24,7 @@ namespace SimulationLogAnalysis
 
         static App()
         {
-            Logfile = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Name), "app.log");
+            Logfile = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench"), "simulation_log_analysis.log");
             if (File.Exists(Logfile)) File.Delete(Logfile);
             Trace.Listeners.Add(new TextWriterTraceListener(Logfile, "logfile") { TraceOutputOptions = TraceOptions.None });
             Trace.AutoFlush = true;
@@ -85,6 +87,13 @@ namespace SimulationLogAnalysis
         }
 
         #endregion
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            Properties["SelectedFileName"] = null;
+            if (e.Args.Length > 0) Properties["SelectedFileName"] = e.Args[0];
+            base.OnStartup(e);
+        }
 
         void ApplicationExit(object sender, ExitEventArgs e)
         {
