@@ -5,11 +5,11 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 using ESME.Views;
-using ESMEWorkbench.Properties;
 using HRC;
 using HRC.Utility;
+using SimulationLogAnalysis.Properties;
 
-namespace ESMEWorkbench
+namespace SimulationLogAnalysis
 {
     /// <summary>
     ///   Interaction logic for App.xaml
@@ -18,7 +18,7 @@ namespace ESMEWorkbench
     {
         public static AppEventLog Log { get; private set; }
         public static readonly string Logfile, DumpFile;
-        public const string Name = "ESME Workbench";
+        public const string Name = "Simulation Log Analysis";
 
         static App()
         {
@@ -27,11 +27,11 @@ namespace ESMEWorkbench
             Trace.Listeners.Add(new TextWriterTraceListener(Logfile, "logfile") { TraceOutputOptions = TraceOptions.None });
             Trace.AutoFlush = true;
             Trace.WriteLine(Name + " initializing");
+
             if (OSInfo.OperatingSystemName != "XP")
             {
-                DumpFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "esme_workbench_crash.mdmp");
+                DumpFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "simulation_log_analysis_crash.mdmp");
                 AppDomain.CurrentDomain.UnhandledException += LastChanceExceptionHandler;
-
             }
 #if DEBUG
             Log = new AppEventLog(Name);
