@@ -1,0 +1,61 @@
+﻿<UserControl x:Class="ESME.Views.TransmissionLossViewer.TransmissionLossView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:View="clr-namespace:ESME.Views.TransmissionLossViewer"
+             d:DataContext="{d:DesignInstance View:TransmissionLossViewModel}"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
+             mc:Ignorable="d">
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Bottom">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Grid.Row="0" Grid.Column="0">
+                        <Run Text="Selected radial bearing: " />
+                        <Run Text="{Binding RadialViewModel.Radial.Bearing, StringFormat={}{0:0.###}}" />
+                        <Run Text="deg" />
+                    </TextBlock>
+                    <Path Grid.Row="0"
+                          Grid.Column="1"
+                          Width="17"
+                          Height="17"
+                          Margin="20 2"
+                          Data="{Binding SelectedBearingGeometry}"
+                          Fill="Transparent"
+                          Stroke="DarkGray" />
+                </StackPanel>
+                <Slider Grid.Row="1"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Margin="5"
+                        AutoToolTipPlacement="BottomRight"
+                        AutoToolTipPrecision="0"
+                        Maximum="{Binding RadialCount}"
+                        Minimum="0"
+                        TickPlacement="BottomRight"
+                        Value="{Binding SelectedRadialIndex,
+                                        Mode=TwoWay}" />
+                <ComboBox DockPanel.Dock="Bottom"
+                          ItemsSource="{Binding TransmissionLoss.Modes}"
+                          SelectedItem="{Binding SelectedMode}"
+                          ToolTip="The available modes that match the acoustic properties of this transmission loss field">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding PSMName, StringFormat=Mode: {0}}" />
+                                <TextBlock Text=" | " />
+                                <TextBlock Text="{Binding SourceLevel, StringFormat=Source Level: {0}}" />
+                                <TextBlock Text=" | " />
+                                <TextBlock Text="{Binding MaxPropagationRadius, StringFormat=Radius: {0}}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+            </StackPanel>
+        </DockPanel>
+        <View:RadialView x:Name="TransmissionLossRadialView" DataContext="{Binding RadialViewModel}" />
+    </DockPanel>
+</UserControl>

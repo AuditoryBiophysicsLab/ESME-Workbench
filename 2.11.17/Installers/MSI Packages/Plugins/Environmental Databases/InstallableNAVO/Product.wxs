@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define ProductName = "Installable NAVO Data Sources for ESME Workbench" ?>
+  <?define ProductAuthor = "Hearing Research Center" ?>
+  <?include version.wxi ?>
+  <?define Manufacturer="Boston University"?>
+  <?define ProductAppFolder = "InstallLocation" ?>
+  <?define ESMERoot="C:\Projects\ESME Deliverables"?>
+  <?define PluginRoot="$(var.ESMERoot)\Plugins\Environmental Data Sources"?>
+  <?define PluginDLLPath="$(var.PluginRoot)\InstallableNAVO\bin\Release"?>
+  <?define SupportDLLPath="$(var.PluginRoot)\NAVODatabaseAdapter\bin\Release"?>
+  <?define HDFRoot="$(var.ESMERoot)\ESME WorkBench\External References\$(var.Platform)"?>
+
+  <?if $(var.Platform) = x64 ?>
+  <?define ProductDisplayName = "$(var.ProductName) (64-bit)" ?>
+  <?define ProductUpgradeCode = "3AD6BFB0-49A4-4857-80C8-15D282ECD6FB" ?>
+  <?define Win64 = "yes" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?else ?>
+  <?define ProductDisplayName = "$(var.ProductName)" ?>
+  <?define ProductUpgradeCode = "F67474C8-D50A-4F02-8E44-AC705FD7113F" ?>
+  <?define Win64 = "no" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+  <?endif ?>
+
+  <Product Id="*"
+           Name="$(var.ProductDisplayName)"
+           Language="1033"
+           Version="$(var.ProductFullVersion)"
+           Manufacturer="$(var.Manufacturer)"
+           UpgradeCode="$(var.ProductUpgradeCode)">
+    <Package InstallerVersion="300"
+             Compressed="yes"
+             InstallScope="perMachine"
+             Manufacturer="$(var.ProductAuthor)"/>
+
+    <Media Id="1" Cabinet="InstallableNAVOPlugin.cab" EmbedCab="yes" />
+
+    <Property Id="ESMEINSTALLLOCATION">
+      <RegistrySearch Id="ESMEInstallationKey"
+                      Root="HKLM"
+                      Key="Software\Boston University\ESME Workbench"
+                      Type="raw" 
+                      Win64="$(var.Win64)" />
+    </Property>
+    <Condition Message="This plugin requires the ESME Workbench to be installed. Please install it and try again. The ESME Workbench can be downloaded from http://esme.bu.edu/">
+      Installed OR ESMEINSTALLLOCATION
+    </Condition>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ESMEINSTALLLOCATION">
+        <Component Id="PluginDLLs" Guid="957C7013-9881-42EC-B9DD-9D32973F0242">
+          <File Id="InstallableNAVOPlugin.dll"
+                Name="InstallableNAVOPlugin.dll"
+                Source="$(var.PluginDLLPath)\InstallableNAVOPlugin.dll"
+                KeyPath="yes" />
+          <File Id="NAVODatabaseAdapter.dll"
+                Name="NAVODatabaseAdapter.dll"
+                Source="$(var.SupportDLLPath)\NAVODatabaseAdapter.dll"/>
+          <!-- HDF5 assemblies and other DLLs -->
+          <File Id="hdf5_hldll.dll"
+                Name="hdf5_hldll.dll"
+                Source="$(var.HDFRoot)\hdf5_hldll.dll" />
+          <File Id="hdf5dll.dll"
+                Name="hdf5dll.dll"
+                Source="$(var.HDFRoot)\hdf5dll.dll" />
+          <File Id="HDF5DotNet.dll"
+                Name="HDF5DotNet.dll"
+                Source="$(var.HDFRoot)\HDF5DotNet.dll" />
+          <File Id="szip.dll"
+                Name="szip.dll"
+                Source="$(var.HDFRoot)\szip.dll" />
+          <File Id="zlib.dll"
+                Name="zlib.dll"
+                Source="$(var.HDFRoot)\zlib.dll" />
+        </Component>
+      </Directory>
+    </Directory>
+
+    <Feature Id="ProductFeature" Title="$(var.ProductName)" Level="1">
+      <ComponentRef Id="PluginDLLs" />
+    </Feature>
+  </Product>
+</Wix>
