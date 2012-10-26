@@ -19,8 +19,8 @@ namespace ESME.Views.Scenarios
             SourceLevel = _mode.SourceLevel;
             LowFrequency = _mode.LowFrequency;
             HighFrequency = _mode.HighFrequency;
-            PulseIntervalString = ((TimeSpan)_mode.PulseInterval).ToString(TimeSpanFormatString);
-            PulseLengthString = ((TimeSpan)_mode.PulseLength).ToString(TimeSpanFormatString);
+            PulseIntervalString = PulseIntervalString != null ? ((TimeSpan)_mode.PulseInterval).ToString(TimeSpanFormatString) : null;
+            PulseLengthString = PulseLengthString != null ? ((TimeSpan)_mode.PulseLength).ToString(TimeSpanFormatString):null;
             HorizontalBeamWidth = _mode.HorizontalBeamWidth;
             VerticalBeamWidth = _mode.VerticalBeamWidth;
             DepressionElevationAngle = _mode.DepressionElevationAngle;
@@ -163,29 +163,35 @@ namespace ESME.Views.Scenarios
         public bool AcousticPropertiesHaveChanged { get; private set; }
         public bool RadiusHasChanged { get; private set; }
 
+        public bool IsPSMView { get; set; }
+
         #region OkCommand
         public SimpleCommand<object, EventToCommandArgs> OkCommand { get { return _ok ?? (_ok = new SimpleCommand<object, EventToCommandArgs>(OkHandler)); } }
         SimpleCommand<object, EventToCommandArgs> _ok;
 
         void OkHandler(EventToCommandArgs args)
         {
-            //var parameter = args.CommandParameter;
-            AcousticPropertiesHaveChanged = HaveAcousticPropertiesChanged();
-            RadiusHasChanged = Math.Abs(MaxPropagationRadius - _mode.MaxPropagationRadius) > 0.1;
-            _mode.ModeName = ModeName;
-            _mode.ModeType = ModeType;
-            _mode.Depth = Depth;
-            _mode.SourceLevel = SourceLevel;
-            _mode.LowFrequency = LowFrequency;
-            _mode.HighFrequency = HighFrequency;
-            _mode.PulseInterval = TimeSpan.ParseExact(PulseIntervalString, TimeSpanFormatString, null);
-            _mode.PulseLength = TimeSpan.ParseExact(PulseLengthString, TimeSpanFormatString, null);
-            _mode.HorizontalBeamWidth = HorizontalBeamWidth;
-            _mode.VerticalBeamWidth = VerticalBeamWidth;
-            _mode.DepressionElevationAngle = DepressionElevationAngle;
-            _mode.RelativeBeamAngle = RelativeBeamAngle;
-            _mode.MaxPropagationRadius = MaxPropagationRadius;
-            CloseActivePopUpCommand.Execute(true);
+            if (IsPSMView) {MediatorMessage.Send(MediatorMessage.PSMModeChanged,_mode);}
+            else
+            {
+                //var parameter = args.CommandParameter;
+                AcousticPropertiesHaveChanged = HaveAcousticPropertiesChanged();
+                RadiusHasChanged = Math.Abs(MaxPropagationRadius - _mode.MaxPropagationRadius) > 0.1;
+                _mode.ModeName = ModeName;
+                _mode.ModeType = ModeType;
+                _mode.Depth = Depth;
+                _mode.SourceLevel = SourceLevel;
+                _mode.LowFrequency = LowFrequency;
+                _mode.HighFrequency = HighFrequency;
+                _mode.PulseInterval = TimeSpan.ParseExact(PulseIntervalString, TimeSpanFormatString, null);
+                _mode.PulseLength = TimeSpan.ParseExact(PulseLengthString, TimeSpanFormatString, null);
+                _mode.HorizontalBeamWidth = HorizontalBeamWidth;
+                _mode.VerticalBeamWidth = VerticalBeamWidth;
+                _mode.DepressionElevationAngle = DepressionElevationAngle;
+                _mode.RelativeBeamAngle = RelativeBeamAngle;
+                _mode.MaxPropagationRadius = MaxPropagationRadius;
+                CloseActivePopUpCommand.Execute(true);
+            }
         }
 
         bool HaveAcousticPropertiesChanged()
@@ -205,8 +211,13 @@ namespace ESME.Views.Scenarios
         void CancelHandler(EventToCommandArgs args)
         {
             //var parameter = args.CommandParameter;
-            CloseActivePopUpCommand.Execute(false);
+            if (IsPSMView) { }
+            else
+            {
+                CloseActivePopUpCommand.Execute(false);    
+            }
         }
         #endregion
+        
     }
 }

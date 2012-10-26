@@ -1,4 +1,5 @@
-﻿using HRC.ViewModels;
+﻿using ESME.Scenarios;
+using HRC.ViewModels;
 using HRC.WPF;
 
 namespace ESME.Views.Scenarios
@@ -17,10 +18,37 @@ namespace ESME.Views.Scenarios
     {
         public string WindowTitle { get; set; }
         public object PropertyObject { get; set; }
+        public bool IsPSMView { get; set; }
+        object _propertyObject;
+        
 
         #region OkCommand
-        public SimpleCommand<object, object> OkCommand { get { return _ok ?? (_ok = new SimpleCommand<object, object>(o => CloseDialog(true))); } }
-        SimpleCommand<object, object> _ok;
+        public SimpleCommand<object, EventToCommandArgs> OkCommand
+        {
+            get { return _ok ?? (_ok = new SimpleCommand<object, EventToCommandArgs>(OkHandler)); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _ok;
+
+        void OkHandler(EventToCommandArgs args)
+        {
+            //var parameter = args.CommandParameter;
+            if (!IsPSMView)
+            {
+                CloseDialog(true);
+            }
+            else
+            {
+                if (PropertyObject is Platform)
+                {
+                    MediatorMessage.Send(MediatorMessage.PSMPlatformChanged,PropertyObject);
+                }
+                if (PropertyObject is Source)
+                {
+                    MediatorMessage.Send(MediatorMessage.PSMSourceChanged, PropertyObject);
+                }
+            }
+        }
         #endregion
     }
 }

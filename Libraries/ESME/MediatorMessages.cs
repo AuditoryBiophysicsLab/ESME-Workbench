@@ -32,18 +32,24 @@ namespace ESME
         public const string ViewScenarioProperties = "ViewScenarioPropertiesMessage";
 
         public const string AddPlatform = "AddPlatformMessage";
+        public const string EditPSMPlatform = "EditPSMPlatformMessage";
+        public const string PSMPlatformChanged = "PSMPlatformChangedMessage";
         public const string DeletePlatform = "DeletePlatformMessage";
         public const string PlatformProperties = "PlatformPropertiesMessage";
         public const string PlatformBoundToLayer = "PlatformBoundToLayerMessage";
 
         public const string AddSource = "AddSourceMessage";
         public const string AddPSMSource = "AddPSMSourceMessage";
+        public const string PSMSourceChanged = "PSMSourceChangedMessage";
+        public const string EditPSMSource = "EditPSMSourceMessage";
         public const string DeleteSource = "DeleteSourceMessage";
         public const string SourceProperties = "SourcePropertiesMessage";
         public const string SourceBoundToLayer = "SourceBoundToLayerMessage";
 
         public const string AddMode = "AddModeMessage";
-        public const string AddPSMMode = "AddPSMModeMessage";   
+        public const string AddPSMMode = "AddPSMModeMessage";
+        public const string PSMModeChanged = "PSMModeChangedMessage";
+        public const string EditPSMMode = "EditPSMModeMessage";
         public const string DeleteMode = "DeleteModeMessage";
         public const string RecalculateMode = "RecalculateModeMessage";
         public const string ModeProperties = "ModePropertiesMessage";

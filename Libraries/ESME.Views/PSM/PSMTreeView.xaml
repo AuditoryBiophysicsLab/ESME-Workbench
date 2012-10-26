@@ -13,13 +13,13 @@
                                      Path=DesignTimeData}"
              mc:Ignorable="d">
     <UserControl.Resources>
-        <l:PSMTreeViewModel x:Key="DesignViewModel" />            
+        <l:PSMTreeViewModel x:Key="DesignViewModel" />
         <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
             <TextBlock Text="{Binding PlatformName}">
                 <TextBlock.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="New source ..." Command="{Binding AddPSMSourceCommand}">                            
-                        </MenuItem>
+                        <MenuItem Command="{Binding EditPSMPlatformCommand}" Header="Edit platform ..." />
+                        <MenuItem Command="{Binding AddPSMSourceCommand}" Header="New source ..." />
                     </ContextMenu>
                 </TextBlock.ContextMenu>
             </TextBlock>
@@ -29,23 +29,23 @@
             <TextBlock Text="{Binding SourceName}">
                 <TextBlock.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="New mode ..." Command="{Binding AddPSMModeCommand}">                            
-                        </MenuItem>
+                        <MenuItem Command="{Binding EditPSMSourceCommand}" Header="Edit source ..." />
+                        <MenuItem Command="{Binding AddPSMModeCommand}" Header="New mode ..." />
                     </ContextMenu>
                 </TextBlock.ContextMenu>
             </TextBlock>
-            
+
         </HierarchicalDataTemplate>
 
         <DataTemplate DataType="{x:Type Scenarios:Mode}">
             <TextBlock Text="{Binding ModeName}">
                 <TextBlock.ContextMenu>
                     <ContextMenu>
-                        
+                        <MenuItem Command="{Binding EditPSMModeCommand}" Header="Edit mode ..." />
                     </ContextMenu>
                 </TextBlock.ContextMenu>
             </TextBlock>
-            
+
         </DataTemplate>
     </UserControl.Resources>
     <i:Interaction.Triggers>
@@ -55,33 +55,26 @@
     </i:Interaction.Triggers>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <TreeView x:Name="PSMTree"
-                  Margin="5 5 2.5 5"
                   Grid.Column="0"
+                  Margin="5 5 2.5 5"
                   ItemsSource="{Binding Platforms}">
+                
             <TreeView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="New platform ..." Command="{Binding NewPlatformCommand}">
-                    </MenuItem>
+                    <MenuItem Command="{Binding NewPlatformCommand}" Header="New platform ..." />
                 </ContextMenu>
             </TreeView.ContextMenu>
         </TreeView>
+        <GridSplitter Grid.Column="1"/>
+        <ContentControl Grid.Column="2"
+                        Margin="2.5 5 5 5"
+                        Content="{Binding DisplayedView}" />
 
-
-        <DockPanel Grid.Column="1" LastChildFill="True">
-            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
-                <Button Margin="0 5 0 5"
-                        Content="Cancel"
-                        IsCancel="True" />
-                <Button Margin="5"
-                        Command="{Binding OkCommand}"
-                        Content="Ok" />
-            </StackPanel>
-            <ContentControl Margin="2.5 5 5 5" Content="{Binding DisplayedView}" />
-        </DockPanel>
     </Grid>
 </UserControl>

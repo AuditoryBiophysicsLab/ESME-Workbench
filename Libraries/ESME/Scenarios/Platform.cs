@@ -200,17 +200,32 @@ namespace ESME.Scenarios
             }
         }
         #endregion
+        #region PSM database commands
 
         #region AddPSMSourceCommand
         public SimpleCommand<object, EventToCommandArgs> AddPSMSourceCommand
         {
-            get { return _addPSMSource ?? (_addPSMSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.AddPSMSource))); }
+            get { return _addPSMSource ?? (_addPSMSource = new SimpleCommand<object, EventToCommandArgs>(o =>
+            {
+                var source = new Source() {Platform = this, IsNew = true, SourceName = "New Source"};
+                MediatorMessage.Send(MediatorMessage.AddPSMSource,source);
+            })); }
         }
 
         SimpleCommand<object, EventToCommandArgs> _addPSMSource;
 
         #endregion
 
+        #region EditPSMPlatformCommand
+        public SimpleCommand<object, EventToCommandArgs> EditPSMPlatformCommand
+        {
+            get { return _editPSMPlatform ?? (_editPSMPlatform = new SimpleCommand<object, EventToCommandArgs>(o=>MediatorMessage.Send(MediatorMessage.EditPSMPlatform,this))); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _editPSMPlatform;
+        #endregion
+        
+        #endregion
         PlatformBehavior _platformBehavior;
 
         [NotMapped] public PlatformBehavior PlatformBehavior

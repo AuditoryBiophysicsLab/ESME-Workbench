@@ -5,6 +5,8 @@
         xmlns:p="clr-namespace:ESME.Views.PSM;assembly=ESME.Views"
         Title="{Binding WindowTitle}"
         mef:ViewModelLocator.ViewModel="MainWindowViewModel"
+        ResizeMode="NoResize"
+        WindowStyle="ToolWindow"
         SizeToContent="WidthAndHeight">
     <Grid>
         <p:PSMTreeView DataContext="{Binding TreeViewModel}" />

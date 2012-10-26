@@ -10,7 +10,7 @@ namespace GrahamsWPFTester
         public MainWindowViewModel()
         {
             WindowTitle = "PSM Tester";
-            TreeViewModel = new PSMTreeViewModel(@"C:\Users\Graham Voysey\Desktop\psm.db");
+            TreeViewModel = new PSMTreeViewModel(@"C:\Users\Graham Voysey\Desktop\");
             TreeViewModel.SeedTestValues();
         }
         

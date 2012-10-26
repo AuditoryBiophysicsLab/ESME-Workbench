@@ -52,19 +52,33 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _addMode;
         #endregion
 
-         #region AddPSMModeCommand
-         public SimpleCommand<object, EventToCommandArgs> AddPSMModeCommand
-         {
-             get { return _addPSMMode ?? (_addPSMMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.AddPSMMode))); }
-         }
+        #region PSM database commands
+        #region AddPSMModeCommand
+        public SimpleCommand<object, EventToCommandArgs> AddPSMModeCommand
+        {
+            get { return _addPSMMode ?? (_addPSMMode = new SimpleCommand<object, EventToCommandArgs>(o =>
+            {
+                var mode = new Mode() {Source = this, ModeName = "New Mode", IsNew = true};
+                MediatorMessage.Send(MediatorMessage.AddPSMMode,mode);
+            })); }
+        }
 
-         SimpleCommand<object, EventToCommandArgs> _addPSMMode;
+        SimpleCommand<object, EventToCommandArgs> _addPSMMode;
+        #endregion
 
-         static void AddPSMModeHandler(EventToCommandArgs args)
-         {
-             //var parameter = args.CommandParameter;
-         }
-         #endregion
+         
+
+        #region EditPSMSourceCommand
+        public SimpleCommand<object, EventToCommandArgs> EditPSMSourceCommand
+        {
+            get { return _editPSMSource ?? (_editPSMSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.EditPSMSource,this))); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _editPSMSource;
+
+        #endregion
+        
+        #endregion
 
         #region DeleteSourceCommand
         public SimpleCommand<object, EventToCommandArgs> DeleteSourceCommand { get { return _deleteSource ?? (_deleteSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteSource, this))); } }
