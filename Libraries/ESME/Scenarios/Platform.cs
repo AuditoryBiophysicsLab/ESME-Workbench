@@ -11,6 +11,7 @@ using ESME.Behaviors;
 using ESME.Database;
 using ESME.Locations;
 using ESME.Mapping;
+using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Services;
@@ -43,7 +44,7 @@ namespace ESME.Scenarios
             LayerSettings = new LayerSettings(platform.LayerSettings);
         }
 
-        [Import] static readonly IMessageBoxService _messageBox;
+        [Import, UsedImplicitly] static IMessageBoxService _messageBox;
 
         [Key, Initialize] public Guid Guid { get; set; }
         public string Description { get; set; }

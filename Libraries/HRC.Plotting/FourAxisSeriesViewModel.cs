@@ -17,7 +17,7 @@ namespace HRC.Plotting
     public class FourAxisSeriesViewModel : ViewModelBase
     {
         [UsedImplicitly] PropertyObserver<FourAxisSeriesViewModel> _propertyObserver;
-        [UsedImplicitly] PropertyObserver<DataAxisViewModel> _xAxisObserver, _yAxisObserver;
+        //[UsedImplicitly] PropertyObserver<DataAxisViewModel> _xAxisObserver, _yAxisObserver;
         [UsedImplicitly] CollectionObserver _dataSeriesCollectionObserver;
         public FourAxisSeriesViewModel()
         {

@@ -166,7 +166,7 @@ namespace ESMEWorkbench.ViewModels.Map
             {
                 _wpfMap.Refresh(layerOverlay);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 _wpfMap.Overlays.Remove(layerOverlay);
                 _wpfMap.Refresh();

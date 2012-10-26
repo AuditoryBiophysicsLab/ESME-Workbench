@@ -80,8 +80,6 @@ namespace ESME.Locations
 #endif
         }
 
-        [Import] IMessageBoxService _messageBoxService;
-        [Import] TransmissionLossCalculatorService _transmissionLossCalculator;
         #region Add operations
         public void Add(Perimeter perimeter)
         {
