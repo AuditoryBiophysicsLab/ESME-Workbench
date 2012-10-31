@@ -63,7 +63,10 @@ namespace ESME.PSM
             return new PSMContext(connection, true);
         }
 
-        protected override void OnModelCreating(DbModelBuilder modelBuilder) { modelBuilder.Entity<Platform>().HasOptional(p => p.Perimeter).WithMany();}
+        protected override void OnModelCreating (DbModelBuilder modelBuilder)
+        {
+           // modelBuilder.Entity<Platform>().HasOptional(p => p.Sources).WithMany();
+        }
 
         public class PSMDatabaseInitializer : CreateDatabaseIfNotExists<PSMContext>
         {

@@ -282,7 +282,7 @@ namespace ESME.Views.PSM
             
             _context.Platforms.Add(p1);
             _context.Platforms.Add(p2);
-            _context.Platforms.Add(p3);
+           // _context.Platforms.Add(p3);
 
 
         }
