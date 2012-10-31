@@ -1,19 +1,40 @@
-﻿using ESME.Views.PSM;
+﻿using System;
+using System.ComponentModel.Composition;
+using ESME.Views.PSM;
+using HRC;
+using HRC.Services;
 using HRC.ViewModels;
 using MEFedMVVM.ViewModelLocator;
 
 namespace GrahamsWPFTester
 {
     [ExportViewModel("MainWindowViewModel")]
-    class MainWindowViewModel:ViewModelBase
+    class MainWindowViewModel : ViewModelBase
     {
-        public MainWindowViewModel()
+        readonly IViewAwareStatus _viewAwareStatus;
+        readonly IMessageBoxService _messageBox;
+        readonly IUIVisualizerService _visualizer;
+        readonly IHRCSaveFileService _saveFile;
+
+        [ImportingConstructor]
+        public MainWindowViewModel([NotNull] IViewAwareStatus viewAwareStatus,
+                                                  IMessageBoxService messageBox,
+                                                  IUIVisualizerService visualizer,
+                                                  IHRCSaveFileService saveFile)
         {
-            WindowTitle = "PSM Tester";
-            TreeViewModel = new PSMTreeViewModel(@"C:\Users\Graham Voysey\Desktop\");
-            TreeViewModel.SeedTestValues();
+
+            _viewAwareStatus = viewAwareStatus;
+            _messageBox = messageBox;
+            _visualizer = visualizer;
+            _saveFile = saveFile;
+            _viewAwareStatus.ViewLoaded += () =>
+            {
+                WindowTitle = "PSM Tester";
+                TreeViewModel = new PSMTreeViewModel(@"C:\Users\Graham Voysey\Desktop\");
+                TreeViewModel.SeedTestValues();
+            };
         }
-        
+
 
         public string WindowTitle { get; set; }
         public PSMTreeViewModel TreeViewModel { get; set; }

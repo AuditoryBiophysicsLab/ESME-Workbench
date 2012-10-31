@@ -65,8 +65,9 @@ namespace ESME.PSM
 
         protected override void OnModelCreating (DbModelBuilder modelBuilder)
         {
-           // modelBuilder.Entity<Platform>().HasOptional(p => p.Sources).WithMany();
+            //modelBuilder.Entity<Platform>().HasOptional(p => p.Sources);
         }
+
 
         public class PSMDatabaseInitializer : CreateDatabaseIfNotExists<PSMContext>
         {

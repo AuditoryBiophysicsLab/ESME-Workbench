@@ -34,8 +34,19 @@ namespace ESME.Views.PSM
         public object DisplayedView { get; set; }
 
         public PSMTreeViewModel(string psmDatabasePath)
-            : this()
         {
+            #region Mediator Message registration
+            try
+            {
+                Mediator.Instance.Register(this);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("***********\nPSMTreeViewModel: Mediator registration failed: " + ex.Message + "\n***********");
+                throw;
+            }
+            #endregion
+
             _context = PSMContext.Create(psmDatabasePath);
             var modes = (from mode in _context.Modes
                          orderby mode.ModeName
@@ -52,20 +63,11 @@ namespace ESME.Views.PSM
                              select platform);
             Platforms = _context.Platforms.Local;
         }
-        public PSMTreeViewModel()
-        {
-            #region Mediator Message registration
-            try
-            {
-                Mediator.Instance.Register(this);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("***********\nPSMTreeViewModel: Mediator registration failed: " + ex.Message + "\n***********");
-                throw;
-            }
-            #endregion
+
+        public PSMTreeViewModel() {
+            
         }
+        
 
         public void AddPlatformToContext(Platform platform)
         {
@@ -84,8 +86,7 @@ namespace ESME.Views.PSM
         void NewPlatformHandler(EventToCommandArgs args)
         {
             var platform = new Platform(){PlatformName = "New Platform",IsNew = true,};
-            AddPlatformToContext(platform);
-            
+            Platforms.Add(platform);
             var vm = new PropertiesViewModel()
             {
                 PropertyObject = platform,
@@ -98,7 +99,8 @@ namespace ESME.Views.PSM
         [MediatorMessageSink(MediatorMessage.PSMPlatformChanged), UsedImplicitly]
         void UpdatePlatforms(Platform platform)
         {
-
+            AddPlatformToContext(platform);
+            //_context.SaveChanges();
         }
 
         [MediatorMessageSink(MediatorMessage.EditPSMPlatform), UsedImplicitly]
@@ -164,6 +166,18 @@ namespace ESME.Views.PSM
             DisplayedView = new ModePropertiesControlView { DataContext = vm, };
         }
 
+        [MediatorMessageSink(MediatorMessage.PSMModeChanged),UsedImplicitly]
+        void ModeChanged(Mode mode)
+        {
+            //replace it in the tree view list
+
+            //update the database context 
+
+            //propagate changes to all other sources that point to this mode -- or are we instead creating a new mode?
+
+            //save changes?
+        }
+
         #region ViewLoadedCommand
         PSMTreeView _view;
         public SimpleCommand<object, EventToCommandArgs> ViewLoadedCommand
@@ -185,9 +199,11 @@ namespace ESME.Views.PSM
         public static PSMTreeViewModel DesignTimeData { get; set; }
         static PSMTreeViewModel()
         {
+
+#if true
             DesignTimeData = new PSMTreeViewModel()
-            {
-                Platforms = new ObservableCollection<Platform>()
+                   {
+                       Platforms = new ObservableCollection<Platform>()
                 {
                     new Platform()
                     {
@@ -220,7 +236,9 @@ namespace ESME.Views.PSM
                         PlatformName = "Platform2",
                     }
                 },
-            };
+                   };
+            
+#endif
         }
         #endregion
         public void SeedTestValues()

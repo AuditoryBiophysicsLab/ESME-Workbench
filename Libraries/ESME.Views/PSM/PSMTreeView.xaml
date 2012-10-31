@@ -13,7 +13,7 @@
                                      Path=DesignTimeData}"
              mc:Ignorable="d">
     <UserControl.Resources>
-        <l:PSMTreeViewModel x:Key="DesignViewModel" />
+
         <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
             <TextBlock Text="{Binding PlatformName}">
                 <TextBlock.ContextMenu>
@@ -55,23 +55,23 @@
     </i:Interaction.Triggers>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="2"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="2" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
         <TreeView x:Name="PSMTree"
                   Grid.Column="0"
                   Margin="5 5 2.5 5"
                   ItemsSource="{Binding Platforms}">
-                
+
             <TreeView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Command="{Binding NewPlatformCommand}" Header="New platform ..." />
                 </ContextMenu>
             </TreeView.ContextMenu>
         </TreeView>
-        <GridSplitter Grid.Column="1"/>
+        <GridSplitter Grid.Column="1" />
         <ContentControl Grid.Column="2"
                         Margin="2.5 5 5 5"
                         Content="{Binding DisplayedView}" />
