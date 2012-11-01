@@ -40,7 +40,7 @@ namespace ESME.Views.Simulation
                 {
                     Visibility = Visibility.Visible,
                     AxisType = AxisType.Linear,
-                    Label = "Pressure Exposure count",
+                    Label = "Exposure count",
                 },
                 TopAxis = { Visibility = Visibility.Collapsed },
                 RightAxis = { Visibility = Visibility.Collapsed },
@@ -60,7 +60,7 @@ namespace ESME.Views.Simulation
                 {
                     Visibility = Visibility.Visible,
                     AxisType = AxisType.Linear,
-                    Label = "Energy Exposure count",
+                    Label = "Exposure count",
                 },
                 TopAxis = { Visibility = Visibility.Collapsed },
                 RightAxis = { Visibility = Visibility.Collapsed },
@@ -120,7 +120,7 @@ namespace ESME.Views.Simulation
                                 new NewDataAxisTick(12, null, false),
                             },
                             AxisType = AxisType.Enumerated,
-                            Label = "Peak pressure per ping (±5dB) [re: 1 µPa]",
+                            Label = "Peak pressure per ping (±5dB) [dB re: 1 µPa]",
                         },
                     LeftAxis =
                         {
@@ -155,7 +155,7 @@ namespace ESME.Views.Simulation
                                 new NewDataAxisTick(12, null, false),
                             },
                             AxisType = AxisType.Enumerated,
-                            Label = "Received Energy per ping (±5dB)",
+                            Label = "Sound exposure level per ping (±5dB) [dB re: 1 µPa²•s]",
                         },
                     LeftAxis =
                         {

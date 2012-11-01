@@ -10,27 +10,45 @@
         Height="300"
         d:DataContext="{d:DesignInstance l:SimulationExposuresViewModel}"
         mc:Ignorable="d">
-    <StackPanel Orientation="Vertical">
-        <ListBox ItemsSource="{Binding HistogramBinsViewModels}" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+    <DockPanel LastChildFill="True">
+        <DockPanel DockPanel.Dock="Bottom" LastChildFill="True">
+            <StackPanel Margin="0 0 10 10" HorizontalAlignment="Left" DockPanel.Dock="Left" Orientation="Vertical">
+                <TextBlock Text="Legend" />
+                <Plotting:LegendView ItemsSource="{Binding LegendItems}" />
+            </StackPanel>
+            <Button Width="75"
+                    Height="22"
+                    HorizontalAlignment="Right"
+                    Command="{Binding CloseCommand}"
+                    Content="Close"
+                    DockPanel.Dock="Right" />
+        </DockPanel>
+        <ListBox DockPanel.Dock="Top" ItemsSource="{Binding HistogramBinsViewModels}" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+            <Plotting:DataPiping.DataPipes>
+                <Plotting:DataPipeCollection>
+                    <Plotting:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=ActualHeight}" Target="{Binding Path=ActualHeight, Mode=OneWayToSource}" />
+                </Plotting:DataPipeCollection>
+            </Plotting:DataPiping.DataPipes>
+
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Grid Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=ActualWidth}" Height="200" Margin="0 0 0 5">
+                    <Grid Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=ActualWidth}" MinHeight="200" 
+                          Height="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=DataContext.RowHeight}" Margin="0 0 0 10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
                         <Plotting:FourAxisSeriesView Grid.Column="0" Margin="0 0 10 10" DataContext="{Binding PressureViewModel}" />
+                        <Separator Grid.Column="1">
+                            <Separator.LayoutTransform>
+                                <RotateTransform Angle="90" />
+                            </Separator.LayoutTransform>
+                        </Separator>
                         <Plotting:FourAxisSeriesView Grid.Column="2" Margin="0 0 10 10" DataContext="{Binding EnergyViewModel}" />
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <StackPanel Orientation="Horizontal">
-            <StackPanel Margin="0 0 10 10" DockPanel.Dock="Right" Orientation="Vertical" HorizontalAlignment="Left">
-                <TextBlock Text="Legend" />
-                <Plotting:LegendView ItemsSource="{Binding HistogramBinsViewModels[0].PressureViewModel.LegendItems}" />
-            </StackPanel>
-            <Button Width="75" Height="22" Content="Close" HorizontalAlignment="Right" Command="{Binding CloseCommand}" /> 
-        </StackPanel>
-    </StackPanel>
+    </DockPanel>
 </Window>

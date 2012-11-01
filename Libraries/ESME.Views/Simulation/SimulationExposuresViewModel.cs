@@ -1,4 +1,11 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Windows;
+using HRC;
+using HRC.Aspects;
+using HRC.Plotting;
 using HRC.ViewModels;
 
 namespace ESME.Views.Simulation
@@ -15,8 +22,47 @@ namespace ESME.Views.Simulation
     /// </summary>
     public class SimulationExposuresViewModel : ViewModelBase
     {
-        public SimulationExposuresViewModel(ObservableCollection<HistogramBinsViewModel> histogramBinsViewModels) { HistogramBinsViewModels = histogramBinsViewModels; }
+        [UsedImplicitly] readonly PropertyObserver<SimulationExposuresViewModel> _propertyObserver;
+        [UsedImplicitly] readonly CollectionObserver _collectionObserver;
+        readonly List<CollectionObserver> _axisLegendCollectionObservers = new List<CollectionObserver>();
+        public SimulationExposuresViewModel(ObservableCollection<HistogramBinsViewModel> histogramBinsViewModels)
+        {
+            HistogramBinsViewModels = histogramBinsViewModels;
+            PlotMargin = new Thickness(0, 0, 10, 10);
+            RowMargin = new Thickness(0, 0, 0, 10);
+            _propertyObserver = new PropertyObserver<SimulationExposuresViewModel>(this)
+                .RegisterHandler(p => p.ActualHeight, () => RowHeight = (ActualHeight / HistogramBinsViewModels.Count) - 10);
+            _collectionObserver = new CollectionObserver(HistogramBinsViewModels)
+                .RegisterHandler((s, e) =>
+                {
+                    switch (e.Action)
+                    {
+                        case NotifyCollectionChangedAction.Add:
+                            foreach (HistogramBinsViewModel vm in e.NewItems)
+                            {
+                                _axisLegendCollectionObservers.Add(new CollectionObserver(vm.EnergyViewModel.LegendItems).RegisterHandler(LegendItemsCollectionChangedHandler));
+                                _axisLegendCollectionObservers.Add(new CollectionObserver(vm.PressureViewModel.LegendItems).RegisterHandler(LegendItemsCollectionChangedHandler));
+                            }
+                            break;
+                    }
+                });
+        }
 
+        void LegendItemsCollectionChangedHandler(INotifyCollectionChanged notifyCollectionChanged, NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
+        {
+            switch (notifyCollectionChangedEventArgs.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (LegendItemViewModel newLegendItem in notifyCollectionChangedEventArgs.NewItems) 
+                        if (LegendItems.All(l => l.SeriesName != newLegendItem.SeriesName)) LegendItems.Add(newLegendItem);
+                    break;
+            }
+        }
+        [Initialize, UsedImplicitly] public ObservableCollection<LegendItemViewModel> LegendItems { get; private set; }
         public ObservableCollection<HistogramBinsViewModel> HistogramBinsViewModels { get; private set; }
+        public Thickness PlotMargin { get; set; }
+        public Thickness RowMargin { get; set; }
+        public double ActualHeight { get; set; }
+        public double RowHeight { get; private set; }
     }
 }
