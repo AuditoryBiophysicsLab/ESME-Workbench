@@ -6,6 +6,8 @@ call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat"
 msbuild "ESME WorkBench\ESME Workbench.csproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform=AnyCPU /t:Rebuild /v:minimal
 msbuild "TransmissionLossViewer\TransmissionLossViewer.csproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform=AnyCPU /t:Build /v:minimal
 
+msbuild "SimulationLogAnalysis\SimulationLogAnalysis.csproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform=AnyCPU /t:Build /v:minimal
+
 msbuild "Installers\ManagedBootstrapper\Managed Bootstrapper.csproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform=AnyCPU /t:Rebuild /v:minimal
 
 set DownloadURLRoot=http://esme.bu.edu/%1%
