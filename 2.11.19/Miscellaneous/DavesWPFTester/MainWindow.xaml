@@ -1,0 +1,118 @@
+﻿<Window x:Class="DavesWPFTester.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:app="clr-namespace:DavesWPFTester"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC" xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
+        Title="Axis Control Tester"
+        Width="1000"
+        Height="1000"
+        d:DataContext="{d:DesignInstance app:MainWindowViewModel}"
+        mef:ViewModelLocator.ViewModel="MainWindowViewModel"
+        SnapsToDevicePixels="True"
+        mc:Ignorable="d">
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <GroupBox Grid.Row="0" Grid.Column="0" Margin="5" Padding="5">
+            <GroupBox.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Line series with markers, linear axes" />
+                    <CheckBox Margin="40 0 0 0" Content="Animate" IsChecked="{Binding AnimateTopLeft}" />
+                </StackPanel>
+            </GroupBox.Header>
+            <DockPanel LastChildFill="True">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
+                    <Plotting:LegendView ItemsSource="{Binding TopLeft.LegendItems}" />
+                </StackPanel>
+                <Plotting:FourAxisSeriesView DataContext="{Binding TopLeft}" DockPanel.Dock="Left" />
+            </DockPanel>
+        </GroupBox>
+        <GroupBox Grid.Row="0"
+                  Grid.Column="1"
+                  Margin="5"
+                  Header="Line series, semilog axes"
+                  Padding="5">
+            <DockPanel LastChildFill="True">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
+                    <Plotting:LegendView ItemsSource="{Binding TopRight.LegendItems}" />
+                </StackPanel>
+                <Plotting:FourAxisSeriesView DataContext="{Binding TopRight}" DockPanel.Dock="Left" />
+            </DockPanel>
+        </GroupBox>
+        <GroupBox Grid.Row="1" Grid.Column="0" Margin="5" Padding="5">
+            <GroupBox.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Bar series, linear axes" />
+                    <CheckBox Margin="40 0 0 0" Content="Animate" IsChecked="{Binding AnimateMiddleLeft}" />
+                </StackPanel>
+            </GroupBox.Header>
+
+            <DockPanel LastChildFill="True">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
+                    <Plotting:LegendView ItemsSource="{Binding MiddleLeft.LegendItems}" />
+                </StackPanel>
+                <Plotting:FourAxisSeriesView DataContext="{Binding MiddleLeft}" DockPanel.Dock="Left" />
+            </DockPanel>
+        </GroupBox>
+        <GroupBox Grid.Row="1"
+                  Grid.Column="1"
+                  Margin="5"
+                  Header="Bar series, semilog axes"
+                  Padding="5">
+            <DockPanel LastChildFill="True">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
+                    <Plotting:LegendView ItemsSource="{Binding MiddleRight.LegendItems}" />
+                </StackPanel>
+                <Plotting:FourAxisSeriesView DataContext="{Binding MiddleRight}" DockPanel.Dock="Left" />
+            </DockPanel>
+        </GroupBox>
+        <GroupBox Grid.Row="2" Grid.Column="0" Margin="5" Padding="5">
+            <GroupBox.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Stacked bar series" />
+                    <Button Margin="40 0 0 0" Command="{Binding AddSeriesBottomLeftCommand}" Content="Add series" />
+                    <Button Margin="40 0 0 0" Command="{Binding RemoveSeriesBottomLeftCommand}" Content="Remove series" />
+                </StackPanel>
+            </GroupBox.Header>
+
+            <DockPanel LastChildFill="True">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
+                    <Plotting:LegendView ItemsSource="{Binding BottomLeft.LegendItems}" />
+                </StackPanel>
+                <Plotting:FourAxisSeriesView DataContext="{Binding BottomLeft}" DockPanel.Dock="Left" />
+            </DockPanel>
+        </GroupBox>
+        <GroupBox Grid.Row="2" Grid.Column="1" Margin="5" Padding="5">
+            <GroupBox.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Grouped bar series" />
+                    <Button Margin="40 0 0 0" Command="{Binding AddSeriesBottomRightCommand}" Content="Add series" />
+                    <Button Margin="40 0 0 0" Command="{Binding RemoveSeriesBottomRightCommand}" Content="Remove series" />
+                </StackPanel>
+            </GroupBox.Header>
+            <DockPanel LastChildFill="True">
+                <StackPanel Margin="10 0 0 0" DockPanel.Dock="Right" Orientation="Vertical">
+                    <Plotting:LegendView ItemsSource="{Binding BottomRight.LegendItems}" />
+                </StackPanel>
+                <Plotting:FourAxisSeriesView DataContext="{Binding BottomRight}" DockPanel.Dock="Left" />
+            </DockPanel>
+        </GroupBox>
+    </Grid>
+</Window>

@@ -1,0 +1,493 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{49221733-2EB6-468F-8833-06C0E36B3C83}</ProjectGuid>
+    <OutputType>library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ESME.Views</RootNamespace>
+    <AssemblyName>ESME.Views</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <Utf8Output>true</Utf8Output>
+    <ExpressionBlendVersion>4.0.20525.0</ExpressionBlendVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AsyncCtpLibrary">
+      <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Core">
+      <HintPath>..\..\ESME WorkBench\External References\Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Devart.Data, Version=5.0.449.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
+    <Reference Include="Devart.Data.SQLite, Version=3.80.350.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
+    <Reference Include="Devart.Data.SQLite.Entity, Version=3.80.350.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
+    <Reference Include="Devart.Data.SQLite.Entity.Migrations, Version=3.80.350.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
+    <Reference Include="EntityFramework, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ESME WorkBench\External References\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="KMLib">
+      <HintPath>..\..\ESME WorkBench\External References\KMLib.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\ESME WorkBench\External References\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Log4PostSharp">
+      <HintPath>..\..\ESME WorkBench\External References\Log4PostSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="MapSuiteCore">
+      <HintPath>..\..\ESME WorkBench\External References\MapSuiteCore.dll</HintPath>
+    </Reference>
+    <Reference Include="MEFedMVVM.WPF">
+      <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
+    <Reference Include="RibbonControlsLibrary, Version=4.0.0.11019, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\ESME WorkBench\External References\RibbonControlsLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\ESME WorkBench\External References\System.Windows.Interactivity.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WpfDesktopEdition">
+      <HintPath>..\..\ESME WorkBench\External References\WpfDesktopEdition.dll</HintPath>
+    </Reference>
+    <Reference Include="WPFToolkit.Extended">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\Extended.Wpf.Toolkit.1.6.0\lib\net40\WPFToolkit.Extended.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\ESME WorkBench\Properties\AssemblyMetadata.cs">
+      <Link>Properties\AssemblyMetadata.cs</Link>
+    </Compile>
+    <Compile Include="BuildInformation.cs" />
+    <Compile Include="ColorPicker\BindOnEnterTextBox.cs" />
+    <Compile Include="ColorPicker\ColorComboBox.cs" />
+    <Compile Include="ColorPicker\ColorPicker.cs" />
+    <Compile Include="ColorPicker\ColorSlider.cs" />
+    <Compile Include="ColorPicker\ColorUtils.cs" />
+    <Compile Include="ColorPicker\HsvControl.cs" />
+    <Compile Include="ColorPicker\SpectrumSlider.cs" />
+    <Compile Include="Controls\AutoScrollingTextBlock.xaml.cs">
+      <DependentUpon>AutoScrollingTextBlock.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ColorBarView.xaml.cs">
+      <DependentUpon>ColorBarView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\EditableKeyValuePair.cs" />
+    <Compile Include="Controls\EditableKeyValuePairListView.xaml.cs">
+      <DependentUpon>EditableKeyValuePairListView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\EditableTextBlock.xaml.cs">
+      <DependentUpon>EditableTextBlock.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\FileOrDirectorySetting.cs" />
+    <Compile Include="Controls\HeaderedPropertyDisplayPopup.xaml.cs">
+      <DependentUpon>HeaderedPropertyDisplayPopup.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\HiddenIfNull.cs" />
+    <Compile Include="Controls\ImageToggleButton.cs" />
+    <Compile Include="Controls\LayerControl.cs" />
+    <Compile Include="Controls\PluginSelector.cs" />
+    <Compile Include="Controls\SlimRibbonApplicationMenu.cs" />
+    <Compile Include="Controls\TLStatusBar.xaml.cs">
+      <DependentUpon>TLStatusBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ValidatingTextBox.xaml.cs">
+      <DependentUpon>ValidatingTextBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Environment\SoundSpeedProfileView.xaml.cs">
+      <DependentUpon>SoundSpeedProfileView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Environment\SoundSpeedProfileViewModel.cs" />
+    <Compile Include="Environment\SoundSpeedProfileWindowView.xaml.cs">
+      <DependentUpon>SoundSpeedProfileWindowView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LabelValuePair.cs" />
+    <Compile Include="Locations\EditablePolygonOverlayViewModel.cs" />
+    <Compile Include="Locations\EditableRectangleOverlayViewModel.cs" />
+    <Compile Include="Locations\MultipleSelectionsView.xaml.cs">
+      <DependentUpon>MultipleSelectionsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Locations\MultipleSelectionsViewModel.cs" />
+    <Compile Include="Locations\CreateLocationView.xaml.cs">
+      <DependentUpon>CreateLocationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Locations\CreateLocationViewModel.cs" />
+    <Compile Include="Misc\DownloadProgressView.xaml.cs">
+      <DependentUpon>DownloadProgressView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Misc\DownloadProgressViewModel.cs" />
+    <Compile Include="Misc\ModuleBuildInfoViewModel.cs" />
+    <Compile Include="Misc\ModuleBuildInfoView.xaml.cs">
+      <DependentUpon>ModuleBuildInfoView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Misc\ProjectCredits.xaml.cs">
+      <DependentUpon>ProjectCredits.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Misc\BasicPropertiesView.xaml.cs">
+      <DependentUpon>BasicPropertiesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
+    <Compile Include="PSM\PlatformControl.cs" />
+    <Compile Include="PSM\PSMTreeView.xaml.cs">
+      <DependentUpon>PSMTreeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PSM\PSMTreeViewModel.cs" />
+    <Compile Include="Scenarios\CreateOrEditPerimeterView.xaml.cs">
+      <DependentUpon>CreateOrEditPerimeterView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\CreateOrEditPerimeterViewModel.cs" />
+    <Compile Include="Scenarios\ModePropertiesControlView.xaml.cs">
+      <DependentUpon>ModePropertiesControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\ModePropertiesViewModel.cs" />
+    <Compile Include="Scenarios\PlatformPropertiesControlView.xaml.cs">
+      <DependentUpon>PlatformPropertiesControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\PSMContextView.xaml.cs">
+      <DependentUpon>PSMContextView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\PSMContextViewModel.cs" />
+    <Compile Include="Scenarios\ScenarioPropertiesView.xaml.cs">
+      <DependentUpon>ScenarioPropertiesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\ScenarioPropertiesViewModel.cs" />
+    <Compile Include="Scenarios\SourcePropertiesControlView.xaml.cs">
+      <DependentUpon>SourcePropertiesControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\SpeciesPropertiesView.xaml.cs">
+      <DependentUpon>SpeciesPropertiesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\SpeciesPropertiesViewModel.cs" />
+    <Compile Include="Scenarios\TreeViewItemPropertiesView.xaml.cs">
+      <DependentUpon>TreeViewItemPropertiesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\TreeViewItemPropertiesViewModel.cs" />
+    <Compile Include="Scenarios\ModePropertiesWindowView.xaml.cs">
+      <DependentUpon>ModePropertiesWindowView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\PlatformPropertiesView.xaml.cs">
+      <DependentUpon>PlatformPropertiesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\PropertiesViewModel.cs" />
+    <Compile Include="Scenarios\CreateScenarioView.xaml.cs">
+      <DependentUpon>CreateScenarioView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scenarios\CreateScenarioViewModel.cs" />
+    <Compile Include="Scenarios\SourcePropertiesView.xaml.cs">
+      <DependentUpon>SourcePropertiesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Simulation\HistogramBinsView.xaml.cs">
+      <DependentUpon>HistogramBinsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Simulation\HistogramBinsViewModel.cs" />
+    <Compile Include="Simulation\SimulationExposuresView.xaml.cs">
+      <DependentUpon>SimulationExposuresView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Simulation\SimulationExposuresViewModel.cs" />
+    <Compile Include="Simulation\SimulationProgressView.xaml.cs">
+      <DependentUpon>SimulationProgressView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Simulation\SimulationProgressViewModel.cs" />
+    <Compile Include="TestView.xaml.cs">
+      <DependentUpon>TestView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TestViewModel.cs" />
+    <Compile Include="Controls\ColorMapViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\AnalysisPointWindowView.xaml.cs">
+      <DependentUpon>AnalysisPointWindowView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionLossViewer\AnalysisPointViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\RadialView.xaml.cs">
+      <DependentUpon>RadialView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionLossViewer\RadialViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\TransmissionLossView.xaml.cs">
+      <DependentUpon>TransmissionLossView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionLossViewer\TransmissionLossViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\TransmissionLossWindowView.xaml.cs">
+      <DependentUpon>TransmissionLossWindowView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ValueConverters.cs" />
+    <Compile Include="VirtualToggleButton.cs" />
+    <Page Include="Controls\AutoScrollingTextBlock.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ColorBarView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\EditableKeyValuePairListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\EditableTextBlock.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\HeaderedPropertyDisplayPopup.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TLStatusBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ValidatingTextBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Environment\SoundSpeedProfileView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Environment\SoundSpeedProfileWindowView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Locations\MultipleSelectionsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Locations\CreateLocationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Misc\DownloadProgressView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Misc\ModuleBuildInfoView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Misc\ProjectCredits.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Misc\BasicPropertiesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PSM\PSMTreeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\CreateOrEditPerimeterView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Scenarios\ModePropertiesControlView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\PlatformPropertiesControlView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\PSMContextView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\ScenarioPropertiesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\SourcePropertiesControlView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\SpeciesPropertiesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\TreeViewItemPropertiesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\ModePropertiesWindowView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\PlatformPropertiesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\CreateScenarioView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scenarios\SourcePropertiesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Simulation\HistogramBinsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Simulation\SimulationExposuresView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Simulation\SimulationProgressView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TestView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\Generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TransmissionLossViewer\AnalysisPointWindowView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TransmissionLossViewer\RadialView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TransmissionLossViewer\TransmissionLossView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TransmissionLossViewer\TransmissionLossWindowView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ESME\ESME.csproj">
+      <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
+      <Name>ESME</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\HRC.Plotting\HRC.Plotting.csproj">
+      <Project>{07EA1355-65C1-4335-AD7E-C7AC26550DFF}</Project>
+      <Name>HRC.Plotting</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HRC\HRC.csproj">
+      <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
+      <Name>HRC</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Wave.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\clipboard_add.png" />
+    <Resource Include="Images\CSV.png" />
+    <Resource Include="Images\GIF.png" />
+    <Resource Include="Images\JPG.png" />
+    <Resource Include="Images\PNG.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\clipboard_add_16.png" />
+    <Resource Include="Images\CSV_16.png" />
+    <Resource Include="Images\GIF_16.png" />
+    <Resource Include="Images\JPG_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\PNG_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\clipboard_text.png" />
+    <Resource Include="Images\clipboard_text_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\exclamation.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\information.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Save.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESME.Views -class BuildInformation -version "$(SolutionDir)VersionInfo.txt" -assemblyversion "$(ProjectDir)\Properties\AssemblyVersionInfo.cs" -output "$(ProjectDir)BuildInformation.cs"</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
