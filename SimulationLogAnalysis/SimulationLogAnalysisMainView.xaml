@@ -2,17 +2,47 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:app="clr-namespace:SimulationLogAnalysis"
+        xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
-        Title="{Binding SelectedFileName,
-                        StringFormat=Simulation Log Analysis: {0}}"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" Title="Simulation Log Analyzer"
         Width="525"
         Height="350"
         d:DataContext="{d:DesignInstance app:SimulationLogAnalysisMainViewModel}"
         mef:ViewModelLocator.ViewModel="SimulationLogAnalysisMainViewModel"
         mc:Ignorable="d">
-    <DockPanel>
-        <GroupBox Header="Log file to analyze"></GroupBox>
+    <DockPanel LastChildFill="False">
+        <Controls:FileOrDirectorySetting DockPanel.Dock="Top" 
+                                         Grid.Column="2"
+                                         Margin="5 0 0 0"
+                                         Caption="Log file to analyze"
+                                         FileName="{Binding SelectedFileName}"
+                                         FileNameFilter="ESME Simulation output files (*.exposures)|*.exposures|All files (*.*)|*.*"
+                                         IsDirectoryBrowser="False" />
+        <RadioButton DockPanel.Dock="Top" GroupName="TimeRange" Content="Analyze entire log" IsChecked="{Binding AnalyzeEntireLog}"/>
+        <RadioButton DockPanel.Dock="Top" GroupName="TimeRange" IsChecked="{Binding AnalyzeTimeRange}">
+            <RadioButton.Content>
+                <StackPanel Orientation="Horizontal" IsEnabled="{Binding AnalyzeEntireLog}">
+                    <TextBlock Text="Analyze simulation from time: " />
+                    <xctk:MaskedTextBox Grid.Column="1"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Mask="00:00:00"
+                                Value="{Binding AnalysisStartTimeString,
+                                                ValidatesOnDataErrors=True,
+                                                UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Text=" to time: " />
+                    <xctk:MaskedTextBox Grid.Column="1"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Mask="00:00:00"
+                                Value="{Binding AnalysisStopTimeString,
+                                                ValidatesOnDataErrors=True,
+                                                UpdateSourceTrigger=PropertyChanged}" />
+
+                </StackPanel>
+            </RadioButton.Content>
+        </RadioButton>
     </DockPanel>
 </Window>
