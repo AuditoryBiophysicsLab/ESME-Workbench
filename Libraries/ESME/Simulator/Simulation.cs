@@ -77,7 +77,7 @@ namespace ESME.Simulator
         public void Cancel() { _cancellationTokenSource.Cancel(); }
         public TimeSpan TimeStepSize { get; private set; }
 
-        public NewModeThresholdHistogram NewModeThresholdHistogram { get; set; }
+        public ModeThresholdHistogram ModeThresholdHistogram { get; set; }
         //public SpeciesThresholdHistogram SpeciesThresholdHistogram { get; set; }
         public bool AnimateSimulation { get; set; }
         public bool MovingAnimats { get; set; }
@@ -86,7 +86,7 @@ namespace ESME.Simulator
             TimeStepSize = timeStepSize;
             _cancellationTokenSource = new CancellationTokenSource();
             SimulationLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.exposures"), TimeStepSize, Scenario);
-            NewModeThresholdHistogram = new NewModeThresholdHistogram(this, SimulationLog);
+            ModeThresholdHistogram = new ModeThresholdHistogram(this, SimulationLog);
             //SpeciesThresholdHistogram = new SpeciesThresholdHistogram(this);
             return TaskEx.Run(() => Run(TimeStepSize, _cancellationTokenSource.Token));
         }
@@ -233,7 +233,7 @@ namespace ESME.Simulator
                 PercentProgress.Report(timeStepIndex);
                 var timeStepRecord = new SimulationTimeStepRecord();
                 timeStepRecord.ActorPositionRecords.AddRange(actorPositionRecords);
-                Dispatcher.InvokeIfRequired(() => NewModeThresholdHistogram.Process(timeStepRecord));
+                Dispatcher.InvokeIfRequired(() => ModeThresholdHistogram.Process(timeStepRecord));
                 if (timeStepIndex % 50 == 0) Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
                 //SpeciesThresholdHistogram.Process(timeStepRecord);
                 logBuffer.Post(timeStepRecord);

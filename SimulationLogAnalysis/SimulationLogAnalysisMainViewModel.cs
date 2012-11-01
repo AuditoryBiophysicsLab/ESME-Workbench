@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,6 +13,7 @@ using System.Windows.Threading;
 using ESME.Locations;
 using ESME.SimulationAnalysis;
 using ESME.Simulator;
+using ESME.Views.Simulation;
 using HRC;
 using HRC.Aspects;
 using HRC.Services;
@@ -27,6 +31,7 @@ namespace SimulationLogAnalysis
         readonly IUIVisualizerService _visualizer;
         readonly IHRCSaveFileService _saveFile;
         [UsedImplicitly] readonly PropertyObserver<SimulationLogAnalysisMainViewModel> _propertyObserver;
+        [UsedImplicitly] CollectionObserver _modeBinsCollectionObserver;
 
         [ImportingConstructor]
         public SimulationLogAnalysisMainViewModel(IViewAwareStatus viewAwareStatus,
@@ -49,19 +54,34 @@ namespace SimulationLogAnalysis
         void SelectedFileNameChanged()
         {
             if (SelectedFileName == NoFileOpen || !File.Exists(SelectedFileName)) return;
+            _visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels));
             using (var log = SimulationLog.Open(SelectedFileName))
             {
                 for (var speciesIndex = 0; speciesIndex < log.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(log.SpeciesRecords[speciesIndex].Guid, _barColors[speciesIndex % _barColors.Count]);
-                NewModeThresholdHistogram = new NewModeThresholdHistogram(this, log);
+                ModeThresholdHistogram = new ModeThresholdHistogram(this, log);
+                _modeBinsCollectionObserver = new CollectionObserver(ModeThresholdHistogram.GroupedExposures.Groups)
+                    .RegisterHandler((s, e) =>
+                    {
+                        switch (e.Action)
+                        {
+                            case NotifyCollectionChangedAction.Add:
+                                foreach (GroupedExposuresHistogram histogram in e.NewItems)
+                                    HistogramBinsViewModels.Add(new HistogramBinsViewModel(histogram));
+                                break;
+                        }
+                    });
                 var timeStepIndex = 0;
                 foreach (var timeStepRecord in log)
                 {
+                    timeStepRecord.ReadAll();
                     timeStepIndex++;
-                    NewModeThresholdHistogram.Process(timeStepRecord);
+                    ModeThresholdHistogram.Process(timeStepRecord);
                     if (timeStepIndex % 50 == 0) UpdateHistogramDisplay();
                 }
             }
+            Debug.WriteLine("Finished processing simulation exposure file");
         }
+        [Initialize, UsedImplicitly] public ObservableCollection<HistogramBinsViewModel> HistogramBinsViewModels { get; private set; }
 
         void UpdateHistogramDisplay()
         {
@@ -82,7 +102,7 @@ namespace SimulationLogAnalysis
         const string NoFileOpen = "<No file open>";
         [Initialize("<No file open>")] public string SelectedFileName { get; set; }
 
-        public NewModeThresholdHistogram NewModeThresholdHistogram { get; set; }
+        public ModeThresholdHistogram ModeThresholdHistogram { get; set; }
 
         public event EventHandler<EventArgs> GraphicsUpdate;
         [Initialize] public Dictionary<Guid, Color> GuidToColorMap { get; private set; }

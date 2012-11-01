@@ -66,8 +66,8 @@ namespace ESME.Views.Simulation
                                 SimulationProgressText = percentComplete < 100 ? percentComplete.ToString(CultureInfo.InvariantCulture) + "%" : "Complete";
                             };
                             break;
-                        case "NewModeThresholdHistogram":
-                            _modeBinsCollectionObserver = new CollectionObserver(_simulation.NewModeThresholdHistogram.GroupedExposures.Groups)
+                        case "ModeThresholdHistogram":
+                            _modeBinsCollectionObserver = new CollectionObserver(_simulation.ModeThresholdHistogram.GroupedExposures.Groups)
                                 .RegisterHandler((s, e) =>
                                 {
                                     switch (e.Action)

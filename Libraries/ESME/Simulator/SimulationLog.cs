@@ -140,7 +140,7 @@ namespace ESME.Simulator
                 if (_reader == null) throw new IOException("The simulation log file has not been opened for reading");
                 if (timeStepIndex < 0 || timeStepIndex >= _timeStepOffsets.Count)
                     throw new IndexOutOfRangeException(string.Format("Requested time step index {0} is invalid.  Valid values are 0 - {1}", timeStepIndex, _timeStepOffsets.Count));
-                if (_timeStepOffsets[timeStepIndex] <= 0)
+                if (_timeStepOffsets[timeStepIndex] < 0)
                     throw new IndexOutOfRangeException("Requested time step index {0} is invalid.  The number of time steps indicates that this index SHOULD be valid, but no data were found for the requested time step.  It appears that this simulation did not complete successfully.");
                 return SimulationTimeStepRecord.ReadHeader(_reader, _timeStepOffsets[timeStepIndex]);
             }
