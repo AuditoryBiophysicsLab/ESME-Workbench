@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -80,6 +81,7 @@ namespace SimulationLogAnalysis
                     if (timeStepIndex % 10 == 0) _dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
                 }
             }
+            Thread.Sleep(1000);
             _dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
             Debug.WriteLine("Finished processing simulation exposure file");
         }

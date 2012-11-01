@@ -12,5 +12,7 @@
         d:DataContext="{d:DesignInstance app:SimulationLogAnalysisMainViewModel}"
         mef:ViewModelLocator.ViewModel="SimulationLogAnalysisMainViewModel"
         mc:Ignorable="d">
-    <Grid />
+    <DockPanel>
+        <GroupBox Header="Log file to analyze"></GroupBox>
+    </DockPanel>
 </Window>

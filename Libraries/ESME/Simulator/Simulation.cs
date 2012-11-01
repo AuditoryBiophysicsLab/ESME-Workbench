@@ -250,6 +250,7 @@ namespace ESME.Simulator
                 if (MovingAnimats & AnimateSimulation) Dispatcher.InvokeIfRequired(() => { foreach (var species in Scenario.ScenarioSpecies) species.UpdateMapLayers(); });
                 if (token.IsCancellationRequested) break;
             }
+            Thread.Sleep(1000);
             Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
             foreach (var layer in _modeFootprintMapLayers.SelectMany(layerSet => layerSet))
             {
