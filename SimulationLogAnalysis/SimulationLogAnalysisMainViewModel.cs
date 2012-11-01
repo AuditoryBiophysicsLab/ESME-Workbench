@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -52,9 +51,10 @@ namespace SimulationLogAnalysis
                 .RegisterHandler(p => SelectedFileName, () => TaskEx.Run(SelectedFileNameChanged));
         }
 
-        void SelectedFileNameChanged()
+        async void SelectedFileNameChanged()
         {
             if (SelectedFileName == NoFileOpen || !File.Exists(SelectedFileName)) return;
+            Task<bool> processTask = null;
             _dispatcher.InvokeIfRequired(() => _visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels)));
             using (var log = SimulationLog.Open(SelectedFileName))
             {
@@ -77,11 +77,12 @@ namespace SimulationLogAnalysis
                     timeStepRecord.ReadAll();
                     timeStepIndex++;
                     var record = timeStepRecord;
-                    _dispatcher.InvokeIfRequired(() => ModeThresholdHistogram.Process(record));
+                    if (processTask != null) await processTask;
+                    processTask = ModeThresholdHistogram.Process(record, _dispatcher);
                     if (timeStepIndex % 10 == 0) _dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
                 }
             }
-            Thread.Sleep(1000);
+            if (processTask != null) await processTask;
             _dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
             Debug.WriteLine("Finished processing simulation exposure file");
         }

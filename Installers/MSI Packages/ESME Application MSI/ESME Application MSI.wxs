@@ -17,7 +17,7 @@
   <?define ESMEPath="$(var.ESMERoot)\ESME Workbench\bin\Release"?>
   <?define MergeModulesPath="C:\Program Files (x86)\Common Files\Merge Modules"?>
   <?define TransmissionLossViewerPath="$(var.ESMERoot)\TransmissionLossViewer\bin\Release"?>
-  <?define MatlabBinningToolsPath="$(var.UtilityRoot)\Matlab Binning Tools\Standalone Plotter\PlotHistograms\distrib"?>
+  <?define SimulationLogAnalysisPath="$(var.ESMERoot)\SimulationLogAnalysis\bin\Release"?>
   <?define dotConnectPath="C:\Program Files (x86)\Devart\dotConnect"?>
 
   <?if $(var.Platform) = x64 ?>
@@ -89,6 +89,11 @@
                 <Verb Id="open" Command="Open" TargetFile="TransmissionLossViewer.exe" Argument='"%1"'/>
               </Extension>
             </ProgId>
+            <ProgId Id='ESMEWorkbench.exposures' Description='ESME Simulation output file'>
+              <Extension Id='exposures' ContentType='application/SimulationLogAnalysis'>
+                <Verb Id='open' Command='Open' TargetFile='SimulationLogAnalysis.exe' Argument='"%1"' />
+              </Extension>
+            </ProgId>
             <!-- Core ESME executables and assemblies -->
             <File Id="ESMEWorkbench.exe"
                   Name="ESMEWorkbench.exe"
@@ -112,6 +117,9 @@
             <File Id="TransmissionLossViewer.exe"
                   Name="TransmissionLossViewer.exe"
                   Source="$(var.TransmissionLossViewerPath)\TransmissionLossViewer.exe" />
+            <File Id="SimulationLogAnalysis.exe"
+                  Name="SimulationLogAnalysis.exe"
+                  Source="$(var.SimulationLogAnalysisPath)\SimulationLogAnalysis.exe" />
             <File Id="WebsiteLink"
                   Name="ESME.url"
                   Source="$(var.ESMERoot)\ESME.url" />
@@ -253,14 +261,6 @@
             <File Id="WPFToolkit.Extended.dll"
                   Name="WPFToolkit.Extended.dll"
                   Source="$(var.ExternalsPath)\WPFToolkit.Extended.dll" />
-
-            <!-- Matlab Binning Tools -->
-            <File Id="PlotHistograms_x86.exe"
-                  Name="PlotHistograms_x86.exe"
-                  Source="$(var.MatlabBinningToolsPath)\PlotHistograms_x86.exe" />
-            <File Id="PlotHistograms_x64.exe"
-                  Name="PlotHistograms_x64.exe"
-                  Source="$(var.MatlabBinningToolsPath)\PlotHistograms_x64.exe" />
           </Component>
           <?if $(var.Platform) = x64 ?>
           <!-- 64-bit components go here -->

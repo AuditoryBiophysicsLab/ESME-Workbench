@@ -1,8 +1,10 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Xml;
+using System.Threading.Tasks;
+using System.Windows.Threading;
 using ESME.Simulator;
+using HRC.WPF;
 
 namespace ESME.SimulationAnalysis
 {
@@ -36,11 +38,18 @@ namespace ESME.SimulationAnalysis
 
         public void Process(SimulationTimeStepRecord record)
         {
-            foreach (var exposure in record.ActorPositionRecords.SelectMany(actorPositionRecord => actorPositionRecord.Exposures))
+            foreach (var exposure in record.ActorPositionRecords.SelectMany(actorPositionRecord => actorPositionRecord.Exposures)) GroupedExposures.Expose(exposure);
+        }
+
+        public Task<bool> Process(SimulationTimeStepRecord record, Dispatcher dispatcher)
+        {
+            var completionSource = new TaskCompletionSource<bool>();
+            dispatcher.InvokeIfRequired(() =>
             {
-                var speciesGuid = SimulationLog.RecordFromActorID(exposure.ActorID).Guid;
-                GroupedExposures.Expose(exposure);
-            }
+                foreach (var exposure in record.ActorPositionRecords.SelectMany(actorPositionRecord => actorPositionRecord.Exposures)) GroupedExposures.Expose(exposure);
+            });
+            completionSource.SetResult(true);
+            return completionSource.Task;
         }
 
         public void DebugDisplay()

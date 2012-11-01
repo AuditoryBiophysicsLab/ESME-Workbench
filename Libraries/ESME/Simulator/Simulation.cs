@@ -95,9 +95,10 @@ namespace ESME.Simulator
         int[] _exposuresBySpecies;
         int[] _speciesActorIDStart;
         int[] _speciesActorIDEnd;
-        void Run(TimeSpan timeStepSize, CancellationToken token)
+        async void Run(TimeSpan timeStepSize, CancellationToken token)
         {
             Geo<float> firstAnimatPosition = null;
+            Task<bool> processTask = null;
             var timeStepCount = (int)Math.Round(((TimeSpan)Scenario.Duration).TotalSeconds / timeStepSize.TotalSeconds);
             if (MovingAnimats) Initialize3MB();
             PercentProgress = new PercentProgress<Simulation>(this) { MinimumValue = 0, MaximumValue = timeStepCount - 1 };
@@ -233,8 +234,13 @@ namespace ESME.Simulator
                 PercentProgress.Report(timeStepIndex);
                 var timeStepRecord = new SimulationTimeStepRecord();
                 timeStepRecord.ActorPositionRecords.AddRange(actorPositionRecords);
-                Dispatcher.InvokeIfRequired(() => ModeThresholdHistogram.Process(timeStepRecord));
-                if (timeStepIndex % 50 == 0) Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
+                if (processTask != null) await processTask;
+                processTask = ModeThresholdHistogram.Process(timeStepRecord, Dispatcher);
+                if (timeStepIndex % 10 == 0)
+                {
+                    await processTask;
+                    Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
+                }
                 //SpeciesThresholdHistogram.Process(timeStepRecord);
                 logBuffer.Post(timeStepRecord);
                 if (moveTask != null)
@@ -250,7 +256,7 @@ namespace ESME.Simulator
                 if (MovingAnimats & AnimateSimulation) Dispatcher.InvokeIfRequired(() => { foreach (var species in Scenario.ScenarioSpecies) species.UpdateMapLayers(); });
                 if (token.IsCancellationRequested) break;
             }
-            Thread.Sleep(1000);
+            if (processTask != null) await processTask;
             Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
             foreach (var layer in _modeFootprintMapLayers.SelectMany(layerSet => layerSet))
             {
