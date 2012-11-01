@@ -31,6 +31,19 @@ namespace HRC.Plotting
         public string AxisLabel { get { return (string)GetValue(AxisLabelProperty); } set { SetCurrentValue(AxisLabelProperty, value); } }
         #endregion
 
+        #region dependency property Thickness AxisLabelMargin
+
+        public static DependencyProperty AxisLabelMarginProperty = DependencyProperty.Register("AxisLabelMargin",
+                                                                                 typeof(Thickness),
+                                                                                 typeof(DataAxis),
+                                                                                 new FrameworkPropertyMetadata(new Thickness(0.0), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, AxisLabelMarginPropertyChanged));
+
+        public Thickness AxisLabelMargin { get { return (Thickness)GetValue(AxisLabelMarginProperty); } set { SetValue(AxisLabelMarginProperty, value); } }
+
+        static void AxisLabelMarginPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).AxisLabelMarginPropertyChanged(); }
+        void AxisLabelMarginPropertyChanged() { _axisLabel.Margin = AxisLabelMargin; }
+        #endregion
+
         #region dependency property AxisLayoutAlgorithm AxisLayoutAlgorithm
 
         public static DependencyProperty AxisLayoutAlgorithmProperty = DependencyProperty.Register("AxisLayoutAlgorithm",

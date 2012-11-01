@@ -28,8 +28,6 @@ namespace ESME.Views.Simulation
         public SimulationExposuresViewModel(ObservableCollection<HistogramBinsViewModel> histogramBinsViewModels)
         {
             HistogramBinsViewModels = histogramBinsViewModels;
-            PlotMargin = new Thickness(0, 0, 10, 10);
-            RowMargin = new Thickness(0, 0, 0, 10);
             _propertyObserver = new PropertyObserver<SimulationExposuresViewModel>(this)
                 .RegisterHandler(p => p.ActualHeight, () => RowHeight = (ActualHeight / HistogramBinsViewModels.Count) - 10);
             _collectionObserver = new CollectionObserver(HistogramBinsViewModels)
@@ -60,8 +58,6 @@ namespace ESME.Views.Simulation
         }
         [Initialize, UsedImplicitly] public ObservableCollection<LegendItemViewModel> LegendItems { get; private set; }
         public ObservableCollection<HistogramBinsViewModel> HistogramBinsViewModels { get; private set; }
-        public Thickness PlotMargin { get; set; }
-        public Thickness RowMargin { get; set; }
         public double ActualHeight { get; set; }
         public double RowHeight { get; private set; }
     }

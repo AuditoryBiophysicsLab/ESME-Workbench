@@ -16,7 +16,7 @@
         <i:EventTrigger EventName="Loaded">
             <WPF:EventToCommandTrigger Command="{Binding ViewLoadedCommand}" />
         </i:EventTrigger>
-    </i:Interaction.Triggers>    
+    </i:Interaction.Triggers>
     <DockPanel d:DataContext="{Binding Source={StaticResource DesignViewModel}, Path=DesignTimeData}">
         <TextBlock Margin="0 0 0 5"
                    DockPanel.Dock="Top"
@@ -27,26 +27,26 @@
             <TextBlock Width="{Binding ActualWidth, ElementName=LeftAxis}" Height="{Binding ActualHeight, ElementName=TopAxis}" DockPanel.Dock="Left" Visibility="{Binding LeftAxis.Visibility}" />
             <TextBlock Width="{Binding ActualWidth, ElementName=RightAxis}" Height="{Binding ActualHeight, ElementName=TopAxis}" DockPanel.Dock="Right" Visibility="{Binding RightAxis.Visibility}" />
             <app:DataAxis x:Name="TopAxis"
-                             AxisLabel="{Binding Label}"
-                             AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
-                             AxisLocation="Top"
-                             AxisTicks="{Binding AxisTicks}"
-                             AxisType="{Binding AxisType}"
-                             DataContext="{Binding TopAxis}"
-                             DataRange="{Binding DataRange,
-                                                 Mode=OneWay}"
-                             DockPanel.Dock="Top"
-                             IsInverted="{Binding IsInverted}"
-                             MajorTickLength="{Binding MajorTickLength}"
-                             MajorTicksPerInch="{Binding MajorTicksPerInch}"
-                             MinorTickLength="{Binding MinorTickLength}"
-                             MinorTicksPerInch="{Binding MinorTicksPerInch}"
-                             PositionToValue="{Binding PositionToValue,
-                                                       Mode=OneWayToSource}"
-                             ValueToPosition="{Binding ValueToPosition,
-                                                       Mode=OneWayToSource}"
-                             VisibleRange="{Binding VisibleRange,
-                                                    Mode=TwoWay}">
+                          AxisLabel="{Binding Label}"
+                          AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
+                          AxisLocation="Top"
+                          AxisTicks="{Binding AxisTicks}"
+                          AxisType="{Binding AxisType}"
+                          DataContext="{Binding TopAxis}"
+                          DataRange="{Binding DataRange,
+                                              Mode=OneWay}"
+                          DockPanel.Dock="Top"
+                          IsInverted="{Binding IsInverted}"
+                          MajorTickLength="{Binding MajorTickLength}"
+                          MajorTicksPerInch="{Binding MajorTicksPerInch}"
+                          MinorTickLength="{Binding MinorTickLength}"
+                          MinorTicksPerInch="{Binding MinorTicksPerInch}"
+                          PositionToValue="{Binding PositionToValue,
+                                                    Mode=OneWayToSource}"
+                          ValueToPosition="{Binding ValueToPosition,
+                                                    Mode=OneWayToSource}"
+                          VisibleRange="{Binding VisibleRange,
+                                                 Mode=TwoWay}">
                 <app:DataPiping.DataPipes>
                     <app:DataPipeCollection>
                         <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualWidth}" Target="{Binding Path=ActualWidth, Mode=OneWayToSource}" />
@@ -59,26 +59,27 @@
             <TextBlock Width="{Binding ActualWidth, ElementName=LeftAxis}" Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Left" Visibility="{Binding LeftAxis.Visibility}" />
             <TextBlock Width="{Binding ActualWidth, ElementName=RightAxis}" Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Right" Visibility="{Binding RightAxis.Visibility}" />
             <app:DataAxis x:Name="BottomAxis"
-                             AxisLabel="{Binding Label}"
-                             AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
-                             AxisLocation="Bottom"
-                             AxisTicks="{Binding AxisTicks}"
-                             AxisType="{Binding AxisType}"
-                             DataContext="{Binding BottomAxis}"
-                             DataRange="{Binding DataRange,
-                                                 Mode=OneWay}"
-                             DockPanel.Dock="Top"
-                             IsInverted="{Binding IsInverted}"
-                             MajorTickLength="{Binding MajorTickLength}"
-                             MajorTicksPerInch="{Binding MajorTicksPerInch}"
-                             MinorTickLength="{Binding MinorTickLength}"
-                             MinorTicksPerInch="{Binding MinorTicksPerInch}"
-                             PositionToValue="{Binding PositionToValue,
-                                                       Mode=OneWayToSource}"
-                             ValueToPosition="{Binding ValueToPosition,
-                                                       Mode=OneWayToSource}"
-                             VisibleRange="{Binding VisibleRange,
-                                                    Mode=TwoWay}">
+                          AxisLabel="{Binding Label}"
+                          AxisLabelMargin="0 0 0 5"
+                          AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
+                          AxisLocation="Bottom"
+                          AxisTicks="{Binding AxisTicks}"
+                          AxisType="{Binding AxisType}"
+                          DataContext="{Binding BottomAxis}"
+                          DataRange="{Binding DataRange,
+                                              Mode=OneWay}"
+                          DockPanel.Dock="Top"
+                          IsInverted="{Binding IsInverted}"
+                          MajorTickLength="{Binding MajorTickLength}"
+                          MajorTicksPerInch="{Binding MajorTicksPerInch}"
+                          MinorTickLength="{Binding MinorTickLength}"
+                          MinorTicksPerInch="{Binding MinorTicksPerInch}"
+                          PositionToValue="{Binding PositionToValue,
+                                                    Mode=OneWayToSource}"
+                          ValueToPosition="{Binding ValueToPosition,
+                                                    Mode=OneWayToSource}"
+                          VisibleRange="{Binding VisibleRange,
+                                                 Mode=TwoWay}">
                 <app:DataPiping.DataPipes>
                     <app:DataPipeCollection>
                         <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualWidth}" Target="{Binding Path=ActualWidth, Mode=OneWayToSource}" />
@@ -88,27 +89,27 @@
             </app:DataAxis>
         </DockPanel>
         <app:DataAxis x:Name="LeftAxis"
-                         AxisLabel="{Binding Label}"
-                         AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
-                         AxisLocation="Left"
-                         AxisTicks="{Binding AxisTicks}"
-                         AxisType="{Binding AxisType}"
-                         DataContext="{Binding LeftAxis}"
-                         DataRange="{Binding DataRange,
-                                             Mode=OneWay}"
-                         DockPanel.Dock="Left"
-                         IsInverted="{Binding IsInverted}"
-                         MajorTickLength="{Binding MajorTickLength}"
-                         MajorTicksPerInch="{Binding MajorTicksPerInch}"
-                         MinorTickLength="{Binding MinorTickLength}"
-                         MinorTicksPerInch="{Binding MinorTicksPerInch}"
-                         PositionToValue="{Binding PositionToValue,
-                                                   Mode=OneWayToSource}"
-                         ValueToPosition="{Binding ValueToPosition,
-                                                   Mode=OneWayToSource}"
-                         Visibility="{Binding Visibility}"
-                         VisibleRange="{Binding VisibleRange,
-                                                Mode=TwoWay}">
+                      AxisLabel="{Binding Label}"
+                      AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
+                      AxisLocation="Left"
+                      AxisTicks="{Binding AxisTicks}"
+                      AxisType="{Binding AxisType}"
+                      DataContext="{Binding LeftAxis}"
+                      DataRange="{Binding DataRange,
+                                          Mode=OneWay}"
+                      DockPanel.Dock="Left"
+                      IsInverted="{Binding IsInverted}"
+                      MajorTickLength="{Binding MajorTickLength}"
+                      MajorTicksPerInch="{Binding MajorTicksPerInch}"
+                      MinorTickLength="{Binding MinorTickLength}"
+                      MinorTicksPerInch="{Binding MinorTicksPerInch}"
+                      PositionToValue="{Binding PositionToValue,
+                                                Mode=OneWayToSource}"
+                      ValueToPosition="{Binding ValueToPosition,
+                                                Mode=OneWayToSource}"
+                      Visibility="{Binding Visibility}"
+                      VisibleRange="{Binding VisibleRange,
+                                             Mode=TwoWay}">
             <app:DataPiping.DataPipes>
                 <app:DataPipeCollection>
                     <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualWidth}" Target="{Binding Path=ActualWidth, Mode=OneWayToSource}" />
@@ -118,27 +119,28 @@
             </app:DataPiping.DataPipes>
         </app:DataAxis>
         <app:DataAxis x:Name="RightAxis"
-                         AxisLabel="{Binding Label}"
-                         AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
-                         AxisLocation="Right"
-                         AxisTicks="{Binding AxisTicks}"
-                         AxisType="{Binding AxisType}"
-                         DataContext="{Binding RightAxis}"
-                         DataRange="{Binding DataRange,
-                                             Mode=OneWay}"
-                         DockPanel.Dock="Right"
-                         IsInverted="{Binding IsInverted}"
-                         MajorTickLength="{Binding MajorTickLength}"
-                         MajorTicksPerInch="{Binding MajorTicksPerInch}"
-                         MinorTickLength="{Binding MinorTickLength}"
-                         MinorTicksPerInch="{Binding MinorTicksPerInch}"
-                         PositionToValue="{Binding PositionToValue,
-                                                   Mode=OneWayToSource}"
-                         ValueToPosition="{Binding ValueToPosition,
-                                                   Mode=OneWayToSource}"
-                         Visibility="{Binding Visibility}"
-                         VisibleRange="{Binding VisibleRange,
-                                                Mode=TwoWay}">
+                      AxisLabel="{Binding Label}"
+                      AxisLabelMargin="0 0 5 0"
+                      AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
+                      AxisLocation="Right"
+                      AxisTicks="{Binding AxisTicks}"
+                      AxisType="{Binding AxisType}"
+                      DataContext="{Binding RightAxis}"
+                      DataRange="{Binding DataRange,
+                                          Mode=OneWay}"
+                      DockPanel.Dock="Right"
+                      IsInverted="{Binding IsInverted}"
+                      MajorTickLength="{Binding MajorTickLength}"
+                      MajorTicksPerInch="{Binding MajorTicksPerInch}"
+                      MinorTickLength="{Binding MinorTickLength}"
+                      MinorTicksPerInch="{Binding MinorTicksPerInch}"
+                      PositionToValue="{Binding PositionToValue,
+                                                Mode=OneWayToSource}"
+                      ValueToPosition="{Binding ValueToPosition,
+                                                Mode=OneWayToSource}"
+                      Visibility="{Binding Visibility}"
+                      VisibleRange="{Binding VisibleRange,
+                                             Mode=TwoWay}">
             <app:DataPiping.DataPipes>
                 <app:DataPipeCollection>
                     <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualWidth}" Target="{Binding Path=ActualWidth, Mode=OneWayToSource}" />
