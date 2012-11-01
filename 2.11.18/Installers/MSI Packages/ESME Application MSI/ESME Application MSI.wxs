@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define ProductName = "ESME 2012" ?>
+  <?include version.wxi ?>
+  <?define ProductAuthor = "Hearing Research Center" ?>
+  <?define Manufacturer="Boston University"?>
+  <?define ProductAppFolder = "InstallLocation" ?>
+  <?define ESMERoot="C:\Projects\ESME Deliverables"?>
+  <?define LibraryRoot="$(var.ESMERoot)\Libraries"?>
+  <?define UtilityRoot="$(var.ESMERoot)\Utilities"?>
+  <?define PackagesRoot="$(var.ESMERoot)\Solutions\ESME Workbench\packages"?>
+  <?define DocRoot="$(var.ESMERoot)\Release Notes"?>
+  <?define GISRoot="$(var.ESMERoot)\ESME WorkBench\Sample GIS Data"?>
+  <?define BellhopPath="$(var.UtilityRoot)\bellhop"?>
+  <?define ExternalsPath="$(var.ESMERoot)\ESME Workbench\External References"?>
+  <?define ExternalsPathArchDependent="$(var.ExternalsPath)\$(var.Platform)"?>
+  <?define ESMEPath="$(var.ESMERoot)\ESME Workbench\bin\Release"?>
+  <?define MergeModulesPath="C:\Program Files (x86)\Common Files\Merge Modules"?>
+  <?define TransmissionLossViewerPath="$(var.ESMERoot)\TransmissionLossViewer\bin\Release"?>
+  <?define SimulationLogAnalysisPath="$(var.ESMERoot)\SimulationLogAnalysis\bin\Release"?>
+  <?define dotConnectPath="C:\Program Files (x86)\Devart\dotConnect"?>
+
+  <?if $(var.Platform) = x64 ?>
+  <?define ProductDisplayName = "$(var.ProductName) Application (64-bit)" ?>
+  <?define ProductUpgradeCode = "88D30D04-AD51-4627-98E8-A54D82F8D4FC" ?>
+  <?define Win64 = "yes" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?define sqlite3dllPath="$(var.dotConnectPath)\SQLite\x64"?>
+  <?else ?>
+  <?define ProductDisplayName = "$(var.ProductName) Application (32-bit)" ?>
+  <?define ProductUpgradeCode = "12E20F8D-0C6D-47C9-98A1-D4920B755766" ?>
+  <?define Win64 = "no" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+  <?define sqlite3dllPath="$(var.dotConnectPath)\SQLite"?>
+  <?endif ?>	
+  <Product Id="*"
+           UpgradeCode="$(var.ProductUpgradeCode)"
+           Name="$(var.ProductDisplayName)"
+           Language="1033"
+           Version="$(var.ProductFullVersion)"
+           Manufacturer="$(var.Manufacturer)">
+    <Package InstallerVersion="300"
+             Compressed="yes"
+             InstallScope="perMachine"
+             Manufacturer="$(var.ProductAuthor)"
+             Description="$(var.ProductDisplayName)" />
+
+    <Media Id="1"
+           Cabinet="ESMEWorkbench.cab"
+           EmbedCab="yes" />
+
+    <WixVariable Id="WixUIBannerBmp" Value="Bitmaps\bannrbmp.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="Bitmaps\dlgbmp.bmp" />
+
+    <MajorUpgrade AllowDowngrades="no"
+                  AllowSameVersionUpgrades="yes"
+                  Schedule="afterInstallInitialize"
+                  MigrateFeatures="yes"
+                  DowngradeErrorMessage="A later version of [ProductName] is already installed. Setup will now exit." />
+
+    <!-- Property gets value from registry to set up installation folder for upgrades -->
+    <Property Id="APPLICATIONFOLDER" Secure="yes">
+      <RegistrySearch Id='AppFolderRegistrySearch'
+                      Type='raw'
+                      Root='HKLM'
+                      Key='Software\Microsoft\Windows\CurrentVersion\Uninstall\[WIX_UPGRADE_DETECTED]'
+                      Name='$(var.ProductAppFolder)'
+                      Win64='$(var.Win64)' />
+    </Property>
+
+    <!-- Define destination folder (name of app folder only) -->
+    <Property Id="ApplicationFolderName" Value="$(var.ProductName)" />
+
+    <!-- Default to per-machine installation -->
+    <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
+
+    <!-- To disable per-user installation scope, uncomment this section
+	  <WixVariable Id="WixUISupportPerUser" Value="0" />
+  	-->
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="$(var.PlatformProgramFilesFolder)">
+				<Directory Id="APPLICATIONFOLDER" Name="$(var.ProductName)">
+          <Component Id="ESMEWorkbench" 
+                     Guid="68DE95CE-83D4-4BC0-8AB9-423655AEC06C"
+                     Win64="$(var.Win64)">
+            <ProgId Id="ESMEWorkbench.binfile" Description="CASS binary output file" Icon="TransmissionLossViewer.exe" IconIndex="1">
+              <Extension Id="bin" ContentType="application/cass">
+                <Verb Id="open" Command="Open" TargetFile="TransmissionLossViewer.exe" Argument='"%1"'/>
+              </Extension>
+            </ProgId>
+            <ProgId Id='ESMEWorkbench.exposures' Description='ESME Simulation output file'>
+              <Extension Id='exposures' ContentType='application/SimulationLogAnalysis'>
+                <Verb Id='open' Command='Open' TargetFile='SimulationLogAnalysis.exe' Argument='"%1"' />
+              </Extension>
+            </ProgId>
+            <!-- Core ESME executables and assemblies -->
+            <File Id="ESMEWorkbench.exe"
+                  Name="ESMEWorkbench.exe"
+                  Source="$(var.ESMEPath)\ESMEWorkbench.exe"
+                  KeyPath="yes"/>
+            <File Id="ESMEWorkbench.exe.config"
+                  Name="ESMEWorkbench.exe.config"
+                  Source="$(var.ESMEPath)\ESMEWorkbench.exe.config" />
+            <File Id="ESME.dll"
+                  Name="ESME.dll"
+                  Source="$(var.ESMEPath)\ESME.dll" />
+            <File Id="ESME.Views.dll"
+                  Name="ESME.Views.dll"
+                  Source="$(var.ESMEPath)\ESME.Views.dll" />
+            <File Id="HRC.dll"
+                  Name="HRC.dll"
+                  Source="$(var.ESMEPath)\HRC.dll" />
+            <File Id="HRC.Plotting.dll"
+                  Name="HRC.Plotting.dll"
+                  Source="$(var.ESMEPath)\HRC.Plotting.dll" />
+            <File Id="TransmissionLossViewer.exe"
+                  Name="TransmissionLossViewer.exe"
+                  Source="$(var.TransmissionLossViewerPath)\TransmissionLossViewer.exe" />
+            <File Id="SimulationLogAnalysis.exe"
+                  Name="SimulationLogAnalysis.exe"
+                  Source="$(var.SimulationLogAnalysisPath)\SimulationLogAnalysis.exe" />
+            <File Id="WebsiteLink"
+                  Name="ESME.url"
+                  Source="$(var.ESMERoot)\ESME.url" />
+
+            <File Id="QuickStartGuide"
+                  Name="ESME Workbench Quick Start.pdf"
+                  Source="$(var.DocRoot)\ESME Workbench Quick Start.pdf" />
+            <!--
+            <File Id="ReleaseNotes"
+                  Name="ESME Workbench Release Notes.pdf"
+                  Source="$(var.DocRoot)\ESME Workbench Release Notes.pdf" />
+            <File Id="UserManual"
+                  Name="ESME Workbench User Manual V1.pdf"
+                  Source="$(var.DocRoot)\ESME Workbench User Manual V1.pdf" />
+            <File Id="UserGuide"
+                  Name="ESME Workbench User Guide.pdf"
+                  Source="$(var.DocRoot)\ESME Workbench User Guide.pdf" />
+            <File Id="ReadMe"
+                  Name="Read Me.pdf"
+                  Source="$(var.DocRoot)\Read Me.pdf" />
+            -->
+
+            <!-- Bellhop acoustic simulator -->
+            <File Id="cyggcc_s1.dll"
+                  Name="cyggcc_s-1.dll"
+                  Source="$(var.BellhopPath)\cyggcc_s-1.dll" />
+            <File Id="cyggfortran3.dll"
+                  Name="cyggfortran-3.dll"
+                  Source="$(var.BellhopPath)\cyggfortran-3.dll" />
+            <File Id="cygwin1.dll"
+                  Name="cygwin1.dll"
+                  Source="$(var.BellhopPath)\cygwin1.dll" />
+            <File Id="bellhop.exe"
+                  Name="bellhop.exe"
+                  Source="$(var.BellhopPath)\bellhop.exe" />
+            <!-- End external executables -->
+
+            <!-- PostSharp -->
+            <File Id="PostSharp.dll"
+                  Name="PostSharp.dll"
+                  Source="$(var.ExternalsPath)\PostSharp.dll" />
+
+            <!-- PostSharp Logging -->
+            <File Id="Log4PostSharp.dll"
+                  Name="Log4PostSharp.dll"
+                  Source="$(var.ExternalsPath)\Log4PostSharp.dll" />
+            <File Id="log4net.dll"
+                  Name="log4net.dll"
+                  Source="$(var.ExternalsPath)\log4net.dll" />
+            <File Id="log4net.Config"
+                  Name="log4net.Config"
+                  Source="$(var.ESMERoot)\ESME WorkBench\log4net.Config" />
+
+            <!-- 3MB assemblies -->
+            <File Id="_3MBSLib.dll"
+                  Name="3MBSLib.dll"
+                  Source="$(var.ExternalsPathArchDependent)\3MBSLib.dll" />
+            <File Id="_3MBWrapperClass.dll"
+                  Name="3MBWrapperClass.dll"
+                  Source="$(var.ExternalsPathArchDependent)\3MBWrapperClass.dll" />
+            
+            <!-- ThinkGeo GIS assemblies -->
+            <File Id="MapSuiteCore.dll"
+                  Name="MapSuiteCore.dll"
+                  Source="$(var.ExternalsPath)\MapSuiteCore.dll" />
+            <File Id="NetTopologySuite.dll"
+                  Name="NetTopologySuite.dll"
+                  Source="$(var.ExternalsPath)\NetTopologySuite.dll" />
+            <File Id="GeoAPI.dll"
+                  Name="GeoAPI.dll"
+                  Source="$(var.ExternalsPath)\GeoAPI.dll" />
+            <File Id="WpfDesktopEdition.dll"
+                  Name="WpfDesktopEdition.dll"
+                  Source="$(var.ExternalsPath)\WpfDesktopEdition.dll" />
+
+            <!-- MVVM assemblies -->
+            <File Id="MEFedMVVM.WPF.dll"
+                  Name="MEFedMVVM.WPF.dll"
+                  Source="$(var.ExternalsPath)\MEFedMVVM.WPF.dll" />
+
+            <!-- C5 assembly -->
+            <File Id="C5.dll"
+                  Name="C5.dll"
+                  Source="$(var.ESMEPath)\C5.dll" />
+
+            <!-- Miscellaneous assemblies -->
+            <File Id="Kent.Boogaart.Converters.dll"
+                  Name="Kent.Boogaart.Converters.dll"
+                  Source="$(var.ExternalsPath)\Kent.Boogaart.Converters.dll" />
+            <File Id="Kent.Boogaart.HelperTrinity.dll"
+                  Name="Kent.Boogaart.HelperTrinity.dll"
+                  Source="$(var.ExternalsPath)\Kent.Boogaart.HelperTrinity.dll" />
+            <File Id="FileHelpers.dll"
+                  Name="FileHelpers.dll"
+                  Source="$(var.ExternalsPath)\FileHelpers.dll" />
+
+            <!-- Miscellaneous Microsoft assemblies -->
+            <File Id="Microsoft.Expression.InteractionsDLL"
+                  Name="Microsoft.Expression.Interactions.dll"
+                  Source="$(var.ExternalsPath)\Microsoft.Expression.Interactions.dll" />
+            <File Id="System.Windows.Interactivity.dll"
+                  Name="System.Windows.Interactivity.dll"
+                  Source="$(var.ExternalsPath)\System.Windows.Interactivity.dll" />
+            <File Id="Microsoft.Windows.Shell.dll"
+                  Name="Microsoft.Windows.Shell.dll"
+                  Source="$(var.ExternalsPath)\Microsoft.Windows.Shell.dll" />
+            <File Id="EntityFramework.dll"
+                  Name="EntityFramework.dll"
+                  Source="$(var.ExternalsPath)\EntityFramework.dll" />
+            <File Id="System.Threading.Tasks.Dataflow.dll"
+                  Name="System.Threading.Tasks.Dataflow.dll"
+                  Source="$(var.ExternalsPath)\System.Threading.Tasks.Dataflow.dll" />
+            <File Id="AsyncCtpLibrary.dll"
+                  Name="AsyncCtpLibrary.dll"
+                  Source="$(var.ExternalsPath)\AsyncCtpLibrary.dll" />
+
+            <!-- devart dotConnect for SQLite assemblies -->
+            <File Id="Devart.Data.dll"
+                  Name="Devart.Data.dll"
+                  Source="$(var.dotConnectPath)\SQLite\Devart.Data.dll" />
+            <File Id="Devart.Data.SQLite.dll"
+                  Name="Devart.Data.SQLite.dll"
+                  Source="$(var.dotConnectPath)\SQLite\Devart.Data.SQLite.dll" />
+            <File Id="Devart.Data.SQLite.Entity.dll"
+                  Name="Devart.Data.SQLite.Entity.dll"
+                  Source="$(var.dotConnectPath)\SQLite\Entity\EF4\Devart.Data.SQLite.Entity.dll" />
+            <File Id="Devart.Data.SQLite.Entity.Migrations.dll"
+                  Name="Devart.Data.SQLite.Entity.Migrations.dll"
+                  Source="$(var.dotConnectPath)\SQLite\Entity\EF4\Devart.Data.SQLite.Entity.Migrations.dll" />
+            <File Id="sqlite3.dll"
+                  Name="sqlite3.dll"
+                  Source="$(var.sqlite3dllPath)\sqlite3.dll" />
+            <!-- Microsoft Ribbon assembly -->
+            <File Id="RibbonControlsLibrary.dll"
+                  Name="RibbonControlsLibrary.dll"
+                  Source="$(var.ExternalsPath)\RibbonControlsLibrary.dll" />
+
+            <!-- WPF Toolkit Extended assembly -->
+            <File Id="WPFToolkit.Extended.dll"
+                  Name="WPFToolkit.Extended.dll"
+                  Source="$(var.ExternalsPath)\WPFToolkit.Extended.dll" />
+          </Component>
+          <?if $(var.Platform) = x64 ?>
+          <!-- 64-bit components go here -->
+            <Merge Id="vc100" Language="1033" SourceFile="$(var.MergeModulesPath)\Microsoft_VC100_CRT_x64.msm" DiskId="1" />
+          <?else ?>
+          <!-- 32-bit components go here -->
+            <Merge Id="vc100" Language="1033" SourceFile="$(var.MergeModulesPath)\Microsoft_VC100_CRT_x86.msm" DiskId="1" />
+          <?endif ?>
+          <Component Id="ESMEWorkbench_Shortcuts" 
+                     Guid="C7CC0E54-2890-4685-AC04-815E87C878A8"
+                     Win64="$(var.Win64)">
+            <RegistryKey Root="HKCU" Key="Software\[Manufacturer]\[ProductName]">
+              <RegistryValue Value="Uninstall" Type="string" KeyPath="yes" />
+            </RegistryKey>
+            <Shortcut Id="ESMEWorkbench_Program_Group_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="$(var.ProductName)"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]ESMEWorkbench.exe"
+                      Advertise="no" />
+            <Shortcut Id="TransmissionLossViewer_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="Transmission Loss Viewer"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]TransmissionLossViewer.exe"
+                      Advertise="no" />
+            <Shortcut Id="QuickStartGuide_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="Quick Start"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]ESME Workbench Quick Start.pdf"
+                      Advertise="no" />
+            <!-- 
+            <Shortcut Id="ReleaseNotes_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="Release Notes"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]ESME Workbench Release Notes.pdf"
+                      Advertise="no" />
+            <Shortcut Id="UserGuide_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="User Guide"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]ESME Workbench User Guide.pdf"
+                      Advertise="no" />
+            <Shortcut Id="UserManual_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="User Manual"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]ESME Workbench User Manual V1.pdf"
+                      Advertise="no" />
+            <Shortcut Id="ReadMe_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="Read Me"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]Read Me.pdf"
+                      Advertise="no" />
+            -->
+            <Shortcut Id="WebLink_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="ESME Website"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]ESME.url"
+                      Advertise="no" />
+            <Shortcut Id="ESMEWorkbench_Desktop_Shortcut"
+                      Directory="DesktopFolder"
+                      Name="$(var.ProductName)"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]ESMEWorkbench.exe"
+                      Advertise="no" />
+            <!--
+            <Shortcut Id="UninstallProduct"
+                      Directory="ProgramMenuDir"
+                      Advertise="no"
+                      Name="Uninstall $(var.ProductName)"
+                      WorkingDirectory="INSTALLDIR"
+                      Target="[SystemFolder]msiexec.exe"
+                      Arguments="/x [ProductCode]"
+                      Description="Uninstalls $(var.ProductName)" />
+            -->
+            <RemoveFolder Id="DeleteShortcutFolder"
+                          Directory="ProgramMenuDir"
+                          On="uninstall" />
+          </Component>
+          <Directory Id="GISDataFolder" Name="Sample GIS Data">
+            <Component Id="GISFiles"
+                       Guid="22C39901-AC58-4461-8BAF-15616C48649D"
+                       Win64="$(var.Win64)">
+              <File Id="Countries02.shx"
+                    Name="Countries02.shx"
+                    Source="$(var.GISRoot)\Countries02.shx"
+                    KeyPath="yes" />
+              <File Id="Countries02.dbf"
+                    Name="Countries02.dbf"
+                    Source="$(var.GISRoot)\Countries02.dbf" />
+              <File Id="Countries02.ids"
+                    Name="Countries02.ids"
+                    Source="$(var.GISRoot)\Countries02.ids" />
+              <File Id="Countries02.idx"
+                    Name="Countries02.idx"
+                    Source="$(var.GISRoot)\Countries02.idx" />
+              <File Id="Countries02.shp"
+                    Name="Countries02.shp"
+                    Source="$(var.GISRoot)\Countries02.shp" />
+            </Component>
+          </Directory>
+          <Directory Id="SpeciesDefinitionFilesFolder" Name="Species Definition Files" />
+        </Directory>
+			</Directory>
+      <Directory Id="DesktopFolder" Name="Desktop" />
+      <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ProgramMenuDir" Name="$(var.ProductName)"/>
+      </Directory>
+    </Directory>
+    
+    <DirectoryRef Id="TARGETDIR">
+      <Component Id="RegistryEntries" Guid="09115675-BD86-4095-A371-0151232D0061">
+        <RegistryKey Root="HKLM"
+                     Key="Software\Boston University\ESME Workbench">
+          <RegistryValue Type="string" Value="[APPLICATIONFOLDER]"/>
+        </RegistryKey>
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="ProductFeature" Title="ESME Workbench" Level="1" ConfigurableDirectory="TARGETDIR">
+      <ComponentRef Id="ESMEWorkbench" />
+      <MergeRef Id="vc100"/>
+      <ComponentRef Id="GISFiles" />
+      <ComponentGroupRef Id="SpeciesDefinitionFiles" />
+      <ComponentRef Id="ESMEWorkbench_Shortcuts"/>
+      <ComponentRef Id="RegistryEntries"/>
+    </Feature>
+
+
+    <!-- 
+		Set default destination folder (full path) unless it comes from registry 
+		SetDirectory schedules the action prior to WixSetDefaultPerMachineFolder;
+		code updated for manually scheduled elements to schedule between 
+		WixSetDefaultPerMachineFolder and WixSetPerMachineFolder.
+	-->
+    <SetDirectory
+      Id="APPLICATIONFOLDER"
+      Value="[$(var.PlatformProgramFilesFolder)][ApplicationFolderName]">APPLICATIONFOLDER=""</SetDirectory>
+
+    <CustomAction
+        Id="OverwriteWixSetDefaultPerMachineFolder"
+        Property="WixPerMachineFolder"
+        Value="[APPLICATIONFOLDER]"
+        Execute="immediate"
+	/>
+
+    <!-- Save destination folder in Add/Remove programs (ARP) registry key -->
+    <SetProperty
+      Id="ARPINSTALLLOCATION"
+      Value="[APPLICATIONFOLDER]"
+      After="CostFinalize"
+	/>
+
+    <InstallUISequence>
+      <!-- Corrects WixUI_Advanced bug (http://bit.ly/hrbM7Y) -->
+      <Custom Action="OverwriteWixSetDefaultPerMachineFolder" After="WixSetDefaultPerMachineFolder" />
+    </InstallUISequence>
+
+    <InstallExecuteSequence>
+      <!-- Corrects WixUI_Advanced bug (http://bit.ly/hrbM7Y) -->
+      <Custom Action="OverwriteWixSetDefaultPerMachineFolder" After="WixSetDefaultPerMachineFolder" />
+
+      <!-- Do not delete Windows service configuration on upgrade -->
+      <DeleteServices>NOT UPGRADINGPRODUCTCODE</DeleteServices>
+    </InstallExecuteSequence>
+
+    <!-- Setup wizard sequence -->
+    <UI Id="UISequence">
+      <UIRef Id="WixUI_Advanced"/>
+    </UI>
+  </Product>
+</Wix>

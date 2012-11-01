@@ -1,0 +1,57 @@
+﻿<UserControl x:Class="ESME.Views.TransmissionLossViewer.RadialView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:ESME.Views.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
+             xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
+             Background="White"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <TransmissionLossViewer:RadialViewModel x:Key="DesignViewModel" />
+    </UserControl.Resources>
+    <Grid Margin="0 22 0 0" d:DataContext="{Binding Source={StaticResource DesignViewModel}, Path=DesignTimeData}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Background="Transparent"
+                   FontSize="24"
+                   Text="{Binding WaitToRenderText}"
+                   TextWrapping="Wrap" />
+        <DockPanel Grid.Row="0" Grid.Column="0">
+            <DockPanel Width="80" DockPanel.Dock="Right">
+                <TextBlock Height="{Binding AxisSeriesViewModel.BottomAxis.ActualHeight, Mode=OneWay}" DockPanel.Dock="Bottom" />
+                <DockPanel Margin="5 0 0 0"
+                           DataContext="{Binding ColorMapViewModel}"
+                           LastChildFill="False">
+                    <Plotting:DataAxis AxisLabel="Transmission Loss (dB)"
+                                          AxisLocation="Right"
+                                          DataRange="{Binding FullRange}"
+                                          DockPanel.Dock="Right" />
+                    <controls:ColorBarView MinWidth="50"
+                                           ColorBarImage="{Binding ColorBitmap}"
+                                           CurrentMaximum="{Binding CurrentRange.Max}"
+                                           CurrentMinimum="{Binding CurrentRange.Min}"
+                                           DockPanel.Dock="Right"
+                                           Maximum="{Binding FullRange.Max}"
+                                           Minimum="{Binding FullRange.Min}"
+                                           StatisticalMaximum="{Binding StatisticalRange.Max}"
+                                           StatisticalMinimum="{Binding StatisticalRange.Min}" />
+                </DockPanel>
+            </DockPanel>
+            <Plotting:FourAxisSeriesView x:Name="AxisView"
+                                         DataContext="{Binding AxisSeriesViewModel}"
+                                         DockPanel.Dock="Left" />
+        </DockPanel>
+    </Grid>
+</UserControl>
