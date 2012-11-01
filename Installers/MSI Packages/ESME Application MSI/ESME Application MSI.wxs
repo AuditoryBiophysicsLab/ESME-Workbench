@@ -84,11 +84,6 @@
           <Component Id="ESMEWorkbench" 
                      Guid="68DE95CE-83D4-4BC0-8AB9-423655AEC06C"
                      Win64="$(var.Win64)">
-            <ProgId Id="ESMEWorkbench.binfile" Description="CASS binary output file" Icon="TransmissionLossViewer.exe" IconIndex="1">
-              <Extension Id="bin" ContentType="application/cass">
-                <Verb Id="open" Command="Open" TargetFile="TransmissionLossViewer.exe" Argument='"%1"'/>
-              </Extension>
-            </ProgId>
             <ProgId Id='ESMEWorkbench.exposures' Description='ESME Simulation output file'>
               <Extension Id='exposures' ContentType='application/SimulationLogAnalysis'>
                 <Verb Id='open' Command='Open' TargetFile='SimulationLogAnalysis.exe' Argument='"%1"' />
