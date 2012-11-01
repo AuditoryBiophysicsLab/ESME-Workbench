@@ -5,12 +5,10 @@ using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
-using ESME.Locations;
 using ESME.SimulationAnalysis;
 using ESME.Simulator;
 using ESME.Views.Simulation;
@@ -32,6 +30,7 @@ namespace SimulationLogAnalysis
         readonly IHRCSaveFileService _saveFile;
         [UsedImplicitly] readonly PropertyObserver<SimulationLogAnalysisMainViewModel> _propertyObserver;
         [UsedImplicitly] CollectionObserver _modeBinsCollectionObserver;
+        Dispatcher _dispatcher;
 
         [ImportingConstructor]
         public SimulationLogAnalysisMainViewModel(IViewAwareStatus viewAwareStatus,
@@ -45,16 +44,17 @@ namespace SimulationLogAnalysis
             _saveFile = saveFile;
             _viewAwareStatus.ViewLoaded += () =>
             {
+                _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 SelectedFileName = (string)Application.Current.Properties["SelectedFileName"] ?? NoFileOpen;
             };
             _propertyObserver = new PropertyObserver<SimulationLogAnalysisMainViewModel>(this)
-                .RegisterHandler(p => SelectedFileName, SelectedFileNameChanged);
+                .RegisterHandler(p => SelectedFileName, () => TaskEx.Run(SelectedFileNameChanged));
         }
 
         void SelectedFileNameChanged()
         {
             if (SelectedFileName == NoFileOpen || !File.Exists(SelectedFileName)) return;
-            _visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels));
+            _dispatcher.InvokeIfRequired(() => _visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels)));
             using (var log = SimulationLog.Open(SelectedFileName))
             {
                 for (var speciesIndex = 0; speciesIndex < log.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(log.SpeciesRecords[speciesIndex].Guid, _barColors[speciesIndex % _barColors.Count]);
@@ -75,10 +75,12 @@ namespace SimulationLogAnalysis
                 {
                     timeStepRecord.ReadAll();
                     timeStepIndex++;
-                    ModeThresholdHistogram.Process(timeStepRecord);
-                    if (timeStepIndex % 50 == 0) UpdateHistogramDisplay();
+                    var record = timeStepRecord;
+                    _dispatcher.InvokeIfRequired(() => ModeThresholdHistogram.Process(record));
+                    if (timeStepIndex % 10 == 0) _dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
                 }
             }
+            _dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
             Debug.WriteLine("Finished processing simulation exposure file");
         }
         [Initialize, UsedImplicitly] public ObservableCollection<HistogramBinsViewModel> HistogramBinsViewModels { get; private set; }
@@ -105,12 +107,13 @@ namespace SimulationLogAnalysis
         public ModeThresholdHistogram ModeThresholdHistogram { get; set; }
 
         public event EventHandler<EventArgs> GraphicsUpdate;
-        [Initialize] public Dictionary<Guid, Color> GuidToColorMap { get; private set; }
+        [Initialize, UsedImplicitly] public Dictionary<Guid, Color> GuidToColorMap { get; private set; }
 
         readonly List<Color> _barColors = new List<Color>
         {
             Colors.Red, Colors.Green, Colors.Blue, Colors.Cyan, Colors.Magenta, Colors.DarkKhaki, Colors.Orange, Colors.Purple, Colors.Fuchsia, Colors.Teal, Colors.Black
         };
+
     }
 
 }
