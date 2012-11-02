@@ -13,14 +13,18 @@ namespace ESME.SimulationAnalysis
     /// </summary>
     public class ModeThresholdHistogram : ITimeStepProcessor
     {
-        public ModeThresholdHistogram(IHistogramSource histogramSource, SimulationLog simulationLog)
+        public ModeThresholdHistogram(IHistogramSource histogramSource, SimulationLog simulationLog, double lowBinValue, double binWidth, int binCount)
         {
             SimulationLog = simulationLog;
             Func<ActorExposureRecord, bool> recordFilter = record => (SimulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid) != null;
-            GroupedExposures = new GroupedExposures(histogramSource, 100, 10, 10);
+            GroupedExposures = new GroupedExposures(histogramSource, lowBinValue, binWidth, binCount);
             GroupedExposures.GroupDescriptions.Add(new ExposureGroupDescription
             {
-                GroupName = record => SimulationLog.RecordFromModeID(record.ModeID).Name,
+                GroupName = record =>
+                {
+                    var modeRecord = SimulationLog.RecordFromModeID(record.ModeID);
+                    return string.Format("{0}:{1}", modeRecord.PlatformRecord.Name, modeRecord.Name);
+                },
                 RecordFilter = recordFilter,
                 RecordToKey = record => SimulationLog.ModeRecords.IndexOf(SimulationLog.RecordFromModeID(record.ModeID)),
                 RecordToGuid = record => SimulationLog.RecordFromModeID(record.ModeID).Guid,

@@ -22,7 +22,7 @@ namespace ESME.Simulator
         public int TimeStepCount { get { return _timeStepOffsets.Count; } }
         public NameGuidRecord ScenarioRecord { get; set; }
         [Initialize] public List<ActorNameGuid> PlatformRecords { get; set; }
-        [Initialize] public List<ActorNameGuid> ModeRecords { get; set; }
+        [Initialize] public List<ModeNameGuid> ModeRecords { get; set; }
         [Initialize] public List<SpeciesNameGuid> SpeciesRecords { get; set; }
         // Add any further metadata here
 
@@ -51,11 +51,12 @@ namespace ESME.Simulator
             foreach (var platform in scenario.Platforms)
             {
                 platform.ActorID = actorID++;
-                result.PlatformRecords.Add(new ActorNameGuid(platform));
+                var platformRecord = new ActorNameGuid(platform);
+                result.PlatformRecords.Add(platformRecord);
                 foreach (var mode in platform.Sources.SelectMany(source => source.Modes)) 
                 {
                     mode.ModeID = modeID++;
-                    result.ModeRecords.Add(new ActorNameGuid(mode));
+                    result.ModeRecords.Add(new ModeNameGuid(platform, mode) { PlatformRecord = platformRecord });
                 }
             }
             foreach (var species in scenario.ScenarioSpecies)
@@ -124,7 +125,12 @@ namespace ESME.Simulator
             for (var i = 0; i < count; i++) PlatformRecords.Add(ActorNameGuid.Read(_reader));
 
             count = _reader.ReadInt32();
-            for (var i = 0; i < count; i++) ModeRecords.Add(ActorNameGuid.Read(_reader));
+            for (var i = 0; i < count; i++)
+            {
+                var modeRecord = ModeNameGuid.Read(_reader);
+                modeRecord.PlatformRecord = PlatformRecords.First(p => p.Guid == modeRecord.PlatformGuid);
+                ModeRecords.Add(modeRecord);
+            }
 
             count = _reader.ReadInt32();
             for (var i = 0; i < count; i++) SpeciesRecords.Add(SpeciesNameGuid.Read(_reader));
@@ -308,7 +314,7 @@ namespace ESME.Simulator
             return result != null ? result.Guid : Guid.Empty;
         }
 
-        public static ActorNameGuid RecordFromModeID(this SimulationLog log, int modeID)
+        public static ModeNameGuid RecordFromModeID(this SimulationLog log, int modeID)
         {
             if (log == null) throw new ArgumentNullException("log");
             if (modeID < 0) throw new ArgumentOutOfRangeException("modeID");
@@ -360,6 +366,20 @@ namespace ESME.Simulator
         {
             writer.Write(ActorID);
             base.Write(writer);
+        }
+    }
+
+    public class ModeNameGuid : ActorNameGuid
+    {
+        internal ModeNameGuid(Platform platform, Mode mode) : base(mode.ModeID, mode.ModeName, mode.Guid) { PlatformGuid = platform.Guid; }
+        internal ModeNameGuid(int actorID, string name, Guid modeGuid, Guid platformGuid) : base(actorID, name, modeGuid) { PlatformGuid = platformGuid; }
+        public Guid PlatformGuid { get; set; }
+        public static new ModeNameGuid Read(BinaryReader reader) { return new ModeNameGuid(reader.ReadInt32(), reader.ReadString(), new Guid(reader.ReadBytes(16)), new Guid(reader.ReadBytes(16))); }
+        public ActorNameGuid PlatformRecord { get; set; }
+        public override void Write(BinaryWriter writer)
+        {
+            base.Write(writer);
+            writer.Write(PlatformGuid.ToByteArray());
         }
     }
 
