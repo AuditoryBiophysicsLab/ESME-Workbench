@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -47,26 +47,13 @@ namespace SimulationLogAnalysis
             _viewAwareStatus.ViewLoaded += () =>
             {
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
-                SelectedFileName = (string)Application.Current.Properties["SelectedFileName"] ?? NoFileOpen;
+                SelectedFileName = (string)Application.Current.Properties["SelectedFileName"];
             };
             _propertyObserver = new PropertyObserver<SimulationLogAnalysisMainViewModel>(this)
-                .RegisterHandler(p => p.SelectedFileName, () =>
-                {
-                    GuidToColorMap.Clear();
-                    foreach (var window in OpenWindows) window.Close();
-                    OpenWindows.Clear();
-                    if (SimulationLog != null) SimulationLog.Close();
-                    if (SelectedFileName == NoFileOpen || !File.Exists(SelectedFileName)) return;
-                    SimulationLog = SimulationLog.Open(SelectedFileName);
-                    // todo: Populate StartTimeString and StopTimeString
-                    StartTimeString = "00:00:00";
-                    var stopTime = new TimeSpan(SimulationLog.TimeStepSize.Ticks * SimulationLog.TimeStepCount);
-                    StopTimeString = stopTime.ToString(@"hh\:mm\:ss");
-                    // todo: Populate platform, mode and species lists
-                    for (var speciesIndex = 0; speciesIndex < SimulationLog.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(SimulationLog.SpeciesRecords[speciesIndex].Guid, _barColors[speciesIndex % _barColors.Count]);
-                })
+                .RegisterHandler(p => p.SelectedFileName, SelectedFileNameChanged)
                 .RegisterHandler(p => IsAnalyzeCommandEnabled, CommandManager.InvalidateRequerySuggested)
-                .RegisterHandler(p => PerformOurOnlyAnalysis, () => IsAnalyzeCommandEnabled = PerformOurOnlyAnalysis);
+                .RegisterHandler(p => PerformOurOnlyAnalysis, () => IsAnalyzeCommandEnabled = PerformOurOnlyAnalysis)
+                .RegisterHandler(p => p.SelectedPlatforms, () => { if (SelectedPlatforms) SelectedModes = true; });
         }
 
         [Initialize, UsedImplicitly] public ObservableCollection<HistogramBinsViewModel> HistogramBinsViewModels { get; private set; }
@@ -87,8 +74,32 @@ namespace SimulationLogAnalysis
             }
         }
 
-        const string NoFileOpen = "<No file open>";
-        [Initialize("<No file open>")] public string SelectedFileName { get; set; }
+        void SelectedFileNameChanged()
+        {
+            GuidToColorMap.Clear();
+            foreach (var window in OpenWindows) window.Close();
+            OpenWindows.Clear();
+            if (SimulationLog != null) SimulationLog.Close();
+            if (SelectedFileName == null || !File.Exists(SelectedFileName)) return;
+            SimulationLog = SimulationLog.Open(SelectedFileName);
+            StartTimeString = "00:00:00";
+            var stopTime = new TimeSpan(SimulationLog.TimeStepSize.Ticks * SimulationLog.TimeStepCount);
+            StopTimeString = stopTime.ToString(@"hh\:mm\:ss");
+            // todo: Populate platform, mode and species lists
+            foreach (var mode in SimulationLog.ModeRecords) AvailableModes.Add(new ContentFilterRecordBase(mode) { Name = string.Format("{0}:{1}", mode.PlatformRecord.Name, mode.Name) });
+            foreach (var platform in SimulationLog.PlatformRecords)
+            {
+                var curPlatform = platform;
+                var dependentModes = from mode in AvailableModes
+                                     where ((ModeNameGuid)mode.NameGuidRecord).PlatformGuid == curPlatform.Guid
+                                     select mode;
+                AvailablePlatforms.Add(new PlatformContentFilterRecord(curPlatform, dependentModes));
+            }
+            foreach (var species in SimulationLog.SpeciesRecords) AvailableSpecies.Add(new ContentFilterRecordBase(species));
+            for (var speciesIndex = 0; speciesIndex < SimulationLog.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(SimulationLog.SpeciesRecords[speciesIndex].Guid, _barColors[speciesIndex % _barColors.Count]);
+        }
+
+        public string SelectedFileName { get; set; }
         [Initialize(true)] public bool AllTimes { get; set; }
         [Initialize(false)] public bool SelectedTimeRange { get; set; }
         public string StartTimeString { get; set; }
@@ -149,6 +160,9 @@ namespace SimulationLogAnalysis
 
         public event EventHandler<EventArgs> GraphicsUpdate;
         [Initialize, UsedImplicitly] public Dictionary<Guid, Color> GuidToColorMap { get; private set; }
+        [Initialize, UsedImplicitly] public ObservableCollection<PlatformContentFilterRecord> AvailablePlatforms { get; private set; }
+        [Initialize, UsedImplicitly] public ObservableCollection<ContentFilterRecordBase> AvailableModes { get; private set; }
+        [Initialize, UsedImplicitly] public ObservableCollection<ContentFilterRecordBase> AvailableSpecies { get; private set; }
 
         readonly List<Color> _barColors = new List<Color>
         {
@@ -156,4 +170,35 @@ namespace SimulationLogAnalysis
         };
     }
 
+    public class ContentFilterRecordBase : ViewModelBase
+    {
+        [UsedImplicitly] readonly PropertyObserver<ContentFilterRecordBase> _propertyObserver;
+        public ContentFilterRecordBase(NameGuidRecord nameGuidRecord)
+        {
+            NameGuidRecord = nameGuidRecord;
+            Name = nameGuidRecord.Name;
+            IsSelected = true;
+            IsEnabled = true;
+            _propertyObserver = new PropertyObserver<ContentFilterRecordBase>(this)
+                .RegisterHandler(p => p.IsEnabled, () => OnPropertyChanged("IsSelected"));
+        }
+
+        bool _isSelected;
+        public bool IsSelected { get { return IsEnabled && _isSelected; } set { _isSelected = value; } }
+        public bool IsEnabled { get; set; }
+        public string Name { get; set; }
+        public NameGuidRecord NameGuidRecord { get; private set; }
+    }
+
+    public class PlatformContentFilterRecord : ContentFilterRecordBase
+    {
+        [UsedImplicitly] readonly PropertyObserver<PlatformContentFilterRecord> _propertyObserver;
+        public PlatformContentFilterRecord(NameGuidRecord platformRecord, IEnumerable<ContentFilterRecordBase> dependentModes) : base(platformRecord)
+        {
+            DependentModes = dependentModes.ToList();
+            _propertyObserver = new PropertyObserver<PlatformContentFilterRecord>(this)
+                .RegisterHandler(p => p.IsSelected, () => { foreach (var mode in DependentModes) mode.IsEnabled = IsSelected; });
+        }
+        public List<ContentFilterRecordBase> DependentModes { get; set; }
+    }
 }

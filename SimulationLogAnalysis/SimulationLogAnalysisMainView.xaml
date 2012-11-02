@@ -53,10 +53,10 @@
                 <StackPanel Orientation="Vertical">
                     <RadioButton Content="All platforms" GroupName="Platforms" IsChecked="{Binding AllPlatforms}" />
                     <RadioButton Content="Selected platforms" GroupName="Platforms" IsChecked="{Binding SelectedPlatforms}" />
-                    <ListBox Margin="16 0 0 0" IsEnabled="{Binding SelectedPlatforms}" ItemsSource="{Binding AvailablePlatforms}">
+                    <ListBox Margin="16 0 0 0" IsEnabled="{Binding SelectedPlatforms}" ItemsSource="{Binding AvailablePlatforms}" MaxHeight="200">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <CheckBox Content="{Binding PlatformName}" IsChecked="{Binding IsSelected}" />
+                                <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
@@ -66,10 +66,10 @@
                 <StackPanel Orientation="Vertical">
                     <RadioButton Content="All modes" GroupName="Modes" IsChecked="{Binding AllModes}" />
                     <RadioButton Content="Selected modes" GroupName="Modes" IsChecked="{Binding SelectedModes}" />
-                    <ListBox Margin="16 0 0 0" IsEnabled="{Binding SelectedModes}" ItemsSource="{Binding AvailableModes}">
+                    <ListBox Margin="16 0 0 0" IsEnabled="{Binding SelectedModes}" ItemsSource="{Binding AvailableModes}" MaxHeight="200">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <CheckBox Content="{Binding ModeName}" IsChecked="{Binding IsSelected}" />
+                                <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
@@ -79,10 +79,10 @@
                 <StackPanel Orientation="Vertical">
                     <RadioButton Content="All species" GroupName="Species" IsChecked="{Binding AllSpecies}" />
                     <RadioButton Content="Selected species" GroupName="Species" IsChecked="{Binding SelectedSpecies}" />
-                    <ListBox Margin="16 0 0 0" IsEnabled="{Binding SelectedSpecies}" ItemsSource="{Binding AvailableSpecies}">
+                    <ListBox Margin="16 0 0 0" IsEnabled="{Binding SelectedSpecies}" ItemsSource="{Binding AvailableSpecies}" MaxHeight="200">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <CheckBox Content="{Binding SpeciesName}" IsChecked="{Binding IsSelected}" />
+                                <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
