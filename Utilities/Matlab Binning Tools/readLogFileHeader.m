@@ -71,10 +71,11 @@ logStruct.platformRecords = platformRecords;
 numModeRecords = fread(fid,1,'int32');
 modeRecords = struct;
 for i= 1:numModeRecords,
-    [name, actorID, guid] = readActorNameGuid(fid);
+    [name, actorID, guid, platformGuid] = readModeNameGuid(fid);
     modeRecords(i).name = name;
     modeRecords(i).actorID = actorID;
     modeRecords(i).guid = guid;
+    modeRecords(i).platformGuid = platformGuid;
 end
 logStruct.modeRecords = modeRecords;
 
@@ -109,6 +110,13 @@ function [name, actorID, guid] = readActorNameGuid(fid)
 actorID = fread(fid,1,'int32');
 name = readString(fid);
 guid = readguid(fid);
+end
+
+function [name, actorID, guid, platformGuid] = readModeNameGuid(fid)
+actorID = fread(fid,1,'int32');
+name = readString(fid);
+guid = readguid(fid);
+platformGuid = readguid(fid);
 end
 
 function [name,startActorID,animatCount,guid] = readSpeciesNameGuid(fid)

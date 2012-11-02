@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project plugin="plugin.deploytool" plugin-version="1.0">
-  <configuration target="target.standalone.win" target-name="Windows Standalone Application" name="PlotHistograms" location="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter" file="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\PlotHistograms.prj" preferred-package-type="package.type.exe" build-checksum="3247313917" preferred-package-location="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter">
+  <configuration target="target.standalone.win" target-name="Windows Standalone Application" name="PlotHistograms" location="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter" file="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\PlotHistograms.prj" preferred-package-type="package.type.exe" build-checksum="3301402094" preferred-package-location="C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter">
     <param.project.name>C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools\Standalone Plotter\PlotHistograms.prj</param.project.name>
     <param.target.type>Windows Standalone Application</param.target.type>
     <param.appname>PlotHistograms</param.appname>
@@ -70,7 +70,7 @@
     </build-deliverables>
     <workflow />
     <matlab>
-      <root>C:\Program Files (x86)\MATLAB\R2012a</root>
+      <root>C:\Program Files\MATLAB\R2012a</root>
       <path>
         <directory>C:\Users\Graham Voysey\Documents\MATLAB</directory>
         <directory>C:\Projects\ESME Deliverables\Utilities\Matlab Binning Tools</directory>
@@ -340,9 +340,9 @@
       <linux>false</linux>
       <solaris>false</solaris>
       <osver>6.1</osver>
-      <os32>true</os32>
-      <os64>false</os64>
-      <arch>win32</arch>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
       <matlab>true</matlab>
     </platform>
   </configuration>
