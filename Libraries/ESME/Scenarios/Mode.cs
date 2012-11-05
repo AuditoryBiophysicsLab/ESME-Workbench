@@ -35,6 +35,9 @@ namespace ESME.Scenarios
             RelativeBeamAngle = mode.RelativeBeamAngle;
             MaxPropagationRadius = mode.MaxPropagationRadius;
         }
+
+        #region Mapped Properties
+        
         [Key, Initialize] public Guid Guid { get; set; }
         public string PSMModeGuid { get; set; }
         public string ModeName { get; set; }
@@ -101,7 +104,9 @@ namespace ESME.Scenarios
         public virtual Source Source { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
         [Initialize] public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
+        #endregion
 
+        #region Unmapped Properties
         [NotMapped] public string PSMName { get { return string.Format("{0}:{1}:{2}", Source.Platform.PlatformName, Source.SourceName, ModeName); } }
         [NotMapped] public bool IsNew { get; set; }
 
@@ -118,10 +123,15 @@ namespace ESME.Scenarios
         object _layerControl;
 
         [NotMapped] public int ModeID { get; set; }
+        #endregion
 
+        #region commands
+        
         public void CreateMapLayers() { throw new NotImplementedException(); }
         public void RemoveMapLayers() { throw new NotImplementedException(); }
-         
+        
+ 
+
         #region DeleteModeCommand
         public SimpleCommand<object, EventToCommandArgs> DeleteModeCommand { get { return _deleteMode ?? (_deleteMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteMode, this))); } }
         SimpleCommand<object, EventToCommandArgs> _deleteMode;
@@ -145,13 +155,6 @@ namespace ESME.Scenarios
         public SimpleCommand<object, EventToCommandArgs> ModePropertiesCommand { get { return _modeProperties ?? (_modeProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ModeProperties, this))); } }
         SimpleCommand<object, EventToCommandArgs> _modeProperties;
         #endregion
-
-        public void Delete()
-        {
-            Source.Modes.Remove(this);
-            foreach (var tl in TransmissionLosses.ToList()) tl.Delete();
-            Scenario.Database.Context.Modes.Remove(this);
-        }
 
         #region Layer Move commands
 
@@ -200,6 +203,38 @@ namespace ESME.Scenarios
         #endregion
 
         #endregion
+
+        #endregion
+
+        public static Mode NewPSMMode()
+        {
+            return new Mode
+            {
+                PSMModeGuid = "",
+                ModeName = "New Mode",
+                ModeType = "new mode",
+                ActiveTime = null,
+                Depth = null,
+                SourceLevel = 120,
+                LowFrequency = 1000,
+                HighFrequency = 1000,
+                PulseInterval = new TimeSpan(0,0,0,30),
+                PulseLength = new TimeSpan(0,0,0,0,500),
+                HorizontalBeamWidth = 45,
+                VerticalBeamWidth = 90,
+                DepressionElevationAngle = 90,
+                RelativeBeamAngle = 0,
+                MaxPropagationRadius = 50000,
+                Source = null,
+            };
+        }
+
+        public void Delete()
+        {
+            Source.Modes.Remove(this);
+            foreach (var tl in TransmissionLosses.ToList()) tl.Delete();
+            Scenario.Database.Context.Modes.Remove(this);
+        }
 
         public bool IsAcousticallyEquivalentTo(Mode other)
         {
