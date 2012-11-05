@@ -8,12 +8,11 @@
         xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         Title="Simulation Log Analyzer"
-        Width="525"
-        Height="350"
+        SizeToContent="WidthAndHeight"
         d:DataContext="{d:DesignInstance app:SimulationLogAnalysisMainViewModel}"
         mef:ViewModelLocator.ViewModel="SimulationLogAnalysisMainViewModel"
         mc:Ignorable="d">
-    <DockPanel LastChildFill="False" Margin="5">
+    <DockPanel Margin="5" LastChildFill="False">
         <Controls:FileOrDirectorySetting Grid.Column="2"
                                          Caption="Log file to analyze"
                                          DockPanel.Dock="Top"
@@ -22,7 +21,9 @@
                                          IsDirectoryBrowser="False" />
         <GroupBox DockPanel.Dock="Top" Header="Time range">
             <StackPanel Orientation="Vertical">
-                <RadioButton Content="All time" GroupName="TimeRange" IsChecked="{Binding AllTimes}" />
+                <RadioButton Content="All time"
+                             GroupName="TimeRange"
+                             IsChecked="{Binding AllTimes}" />
                 <RadioButton GroupName="TimeRange" IsChecked="{Binding SelectedTimeRange}">
                     <RadioButton.Content>
                         <StackPanel IsEnabled="{Binding SelectedTimeRange}" Orientation="Horizontal">
@@ -50,62 +51,93 @@
         </GroupBox>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
             <GroupBox Header="Platforms">
-                <StackPanel Orientation="Vertical">
-                    <RadioButton Content="All platforms" GroupName="Platforms" IsChecked="{Binding AllPlatforms}" />
-                    <RadioButton Content="Selected platforms" GroupName="Platforms" IsChecked="{Binding SelectedPlatforms}" />
-                    <ListBox Margin="16 0 0 0" IsEnabled="{Binding SelectedPlatforms}" ItemsSource="{Binding AvailablePlatforms}" MaxHeight="200">
+                <DockPanel LastChildFill="False" MinWidth="100">
+                    <ListBox Height="100"
+                             DockPanel.Dock="Top"
+                             BorderThickness="0"
+                             ItemsSource="{Binding AvailablePlatforms}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                </StackPanel>
+                    <Button Width="75"
+                            DockPanel.Dock="Bottom"
+                            HorizontalAlignment="Right"
+                            Command="{Binding SelectAllPlatformsCommand}"
+                            Content="Select All" />
+                </DockPanel>
             </GroupBox>
             <GroupBox Header="Modes">
-                <StackPanel Orientation="Vertical">
-                    <RadioButton Content="All modes" GroupName="Modes" IsChecked="{Binding AllModes}" />
-                    <RadioButton Content="Selected modes" GroupName="Modes" IsChecked="{Binding SelectedModes}" />
-                    <ListBox Margin="16 0 0 0" IsEnabled="{Binding SelectedModes}" ItemsSource="{Binding AvailableModes}" MaxHeight="200">
+                <DockPanel LastChildFill="False" MinWidth="100">
+                    <ListBox Height="100"
+                             DockPanel.Dock="Top"
+                             BorderThickness="0"
+                             ItemsSource="{Binding AvailableModes}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                </StackPanel>
+                    <Button Width="75"
+                            DockPanel.Dock="Bottom"
+                            HorizontalAlignment="Right"
+                            Command="{Binding SelectAllModesCommand}"
+                            Content="Select All" />
+                </DockPanel>
             </GroupBox>
             <GroupBox Header="Species">
-                <StackPanel Orientation="Vertical">
-                    <RadioButton Content="All species" GroupName="Species" IsChecked="{Binding AllSpecies}" />
-                    <RadioButton Content="Selected species" GroupName="Species" IsChecked="{Binding SelectedSpecies}" />
-                    <ListBox Margin="16 0 0 0" IsEnabled="{Binding SelectedSpecies}" ItemsSource="{Binding AvailableSpecies}" MaxHeight="200">
+                <DockPanel LastChildFill="False" MinWidth="100">
+                    <ListBox Height="100"
+                             DockPanel.Dock="Top"
+                             BorderThickness="0"
+                             ItemsSource="{Binding AvailableSpecies}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                </StackPanel>
+                    <Button Width="75"
+                            DockPanel.Dock="Bottom"
+                            HorizontalAlignment="Right"
+                            Command="{Binding SelectAllSpeciesCommand}"
+                            Content="Select All" />
+                </DockPanel>
             </GroupBox>
         </StackPanel>
         <GroupBox DockPanel.Dock="Top" Header="Analyses">
             <StackPanel Orientation="Vertical">
                 <CheckBox Content="Species exposure histogram by mode" IsChecked="{Binding PerformOurOnlyAnalysis}" />
-                <StackPanel Orientation="Horizontal" Margin="16 0 0 0">
+                <StackPanel Margin="16 0 0 0" Orientation="Horizontal">
                     <TextBlock Text="Bin results using " />
-                    <TextBox Text="{Binding BinWidth}" MinWidth="30" ToolTip="The width of each histogram bin, in dB"/>
+                    <TextBox MinWidth="30"
+                             Text="{Binding BinWidth}"
+                             ToolTip="The width of each histogram bin, in dB" />
                     <TextBlock Text=" dB bins, starting at " />
-                    <TextBox Text="{Binding StartBinValue}" MinWidth="30" ToolTip="The value of the lowest bin in the histogram, in dB"/>
+                    <TextBox MinWidth="30"
+                             Text="{Binding StartBinValue}"
+                             ToolTip="The value of the lowest bin in the histogram, in dB" />
                     <TextBlock Text=" dB, across " />
-                    <TextBox Text="{Binding BinCount}" MinWidth="30" ToolTip="The number of bins in the histogram"/>
+                    <TextBox MinWidth="30"
+                             Text="{Binding BinCount}"
+                             ToolTip="The number of bins in the histogram" />
                     <TextBlock Text=" bins " />
                 </StackPanel>
             </StackPanel>
         </GroupBox>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Bottom">
-            <Button Content="Analyze" Command="{Binding AnalyzeCommand}" Width="75" Margin="0 0 5 0"/>
-            <Button Content="Close" Command="{Binding CloseCommand}" Width="75"/>
+        <StackPanel HorizontalAlignment="Right"
+                    DockPanel.Dock="Bottom"
+                    Orientation="Horizontal">
+            <Button Width="75"
+                    Margin="0 0 5 0"
+                    Command="{Binding AnalyzeCommand}"
+                    Content="Analyze" />
+            <Button Width="75"
+                    Command="{Binding CloseCommand}"
+                    Content="Close" />
         </StackPanel>
     </DockPanel>
 </Window>
