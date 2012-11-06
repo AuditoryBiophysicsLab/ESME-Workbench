@@ -17,6 +17,7 @@ using ESME.Views.Simulation;
 using HRC;
 using HRC.Aspects;
 using HRC.Services;
+using HRC.Validation;
 using HRC.ViewModels;
 using HRC.WPF;
 using MEFedMVVM.ViewModelLocator;
@@ -24,7 +25,7 @@ using MEFedMVVM.ViewModelLocator;
 namespace SimulationLogAnalysis
 {
     [ExportViewModel("SimulationLogAnalysisMainViewModel")]
-    public class SimulationLogAnalysisMainViewModel : ViewModelBase, IHistogramSource
+    public class SimulationLogAnalysisMainViewModel : ValidatingViewModel, IHistogramSource
     {
         readonly IViewAwareStatus _viewAwareStatus;
         readonly IMessageBoxService _messageBox;
@@ -33,6 +34,10 @@ namespace SimulationLogAnalysis
         [UsedImplicitly] readonly PropertyObserver<SimulationLogAnalysisMainViewModel> _propertyObserver;
         [UsedImplicitly] CollectionObserver _modeBinsCollectionObserver;
         Dispatcher _dispatcher;
+        const string TimeSpanFormatString = @"hh\:mm\:ss";
+        TimeSpan _simulationStartTime, _simulationEndTime;
+        readonly ValidationRule<SimulationLogAnalysisMainViewModel> _startTimeValidationRule;
+        readonly ValidationRule<SimulationLogAnalysisMainViewModel> _endTimeValidationRule;
 
         [ImportingConstructor]
         public SimulationLogAnalysisMainViewModel(IViewAwareStatus viewAwareStatus,
@@ -44,6 +49,8 @@ namespace SimulationLogAnalysis
             _messageBox = messageBox;
             _visualizer = visualizer;
             _saveFile = saveFile;
+            _simulationStartTime = new TimeSpan(0);
+            _simulationEndTime = new TimeSpan(0);
             _viewAwareStatus.ViewLoaded += () =>
             {
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
@@ -51,9 +58,79 @@ namespace SimulationLogAnalysis
             };
             _propertyObserver = new PropertyObserver<SimulationLogAnalysisMainViewModel>(this)
                 .RegisterHandler(p => p.SelectedFileName, SelectedFileNameChanged)
-                .RegisterHandler(p => IsAnalyzeCommandEnabled, CommandManager.InvalidateRequerySuggested)
-                .RegisterHandler(p => PerformOurOnlyAnalysis, () => IsAnalyzeCommandEnabled = PerformOurOnlyAnalysis)
-                .RegisterHandler(p => p.SelectedPlatforms, () => { if (SelectedPlatforms) SelectedModes = true; });
+                .RegisterHandler(p => p.IsAnalyzeCommandEnabled, CommandManager.InvalidateRequerySuggested)
+                .RegisterHandler(p => p.PerformOurOnlyAnalysis, () => IsAnalyzeCommandEnabled = PerformOurOnlyAnalysis)
+                .RegisterHandler(p => p.StartTimeString, StartOrStopTimeStringsChanged)
+                .RegisterHandler(p => p.StopTimeString, StartOrStopTimeStringsChanged)
+                .RegisterHandler(p => p.AllTimes,
+                                 () =>
+                                 {
+                                     if (!AllTimes || SelectedFileName == null || !File.Exists(SelectedFileName)) return;
+                                     _filterStartTime = new TimeSpan(_simulationStartTime.Ticks);
+                                     _filterEndTime = new TimeSpan(_simulationEndTime.Ticks);
+                                     StartTimeString = _filterStartTime.ToString(TimeSpanFormatString);
+                                     StopTimeString = _filterEndTime.ToString(TimeSpanFormatString);
+                                 });
+            AddValidationRules(new ValidationRule<SimulationLogAnalysisMainViewModel>
+            {
+                PropertyName = "StartTimeString",
+                Description = "Must be a valid, non-negative time span value in the format hh:mm:ss where 00 <= hh <= 23; 00 <= mm <= 59; 00 <= ss <= 59",
+                IsRuleValid = (target, rule) =>
+                {
+                    if (AllTimes) return true;
+                    if (string.IsNullOrEmpty(target.StartTimeString)) return false;
+                    TimeSpan timeSpan;
+                    var isOK = TimeSpan.TryParseExact(target.StartTimeString, TimeSpanFormatString, null, out timeSpan);
+                    return isOK && timeSpan.Ticks >= 0;
+                },
+            }, new ValidationRule<SimulationLogAnalysisMainViewModel>
+            {
+                PropertyName = "StopTimeString",
+                Description = "Must be a valid, non-negative time span value in the format hh:mm:ss where 00 <= hh <= 23; 00 <= mm <= 59; 00 <= ss <= 59",
+                IsRuleValid = (target, rule) =>
+                {
+                    if (AllTimes) return true;
+                    if (string.IsNullOrEmpty(target.StopTimeString)) return false;
+                    TimeSpan timeSpan;
+                    var isOK = TimeSpan.TryParseExact(target.StopTimeString, TimeSpanFormatString, null, out timeSpan);
+                    return isOK && timeSpan.Ticks > 0;
+                },
+            });
+            _startTimeValidationRule = new ValidationRule<SimulationLogAnalysisMainViewModel>
+            {
+                PropertyName = "StartTimeString",
+                Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString)),
+                IsRuleValid = (target, rule) =>
+                {
+                    if (AllTimes) return true;
+                    if (_simulationStartTime.Ticks == 0 && _simulationEndTime.Ticks == 0) return true;
+                    if (string.IsNullOrEmpty(target.StartTimeString)) return false;
+                    TimeSpan timeSpan;
+                    var isOK = TimeSpan.TryParseExact(target.StartTimeString, TimeSpanFormatString, null, out timeSpan);
+                    return isOK && timeSpan.Ticks > 0;
+                },
+            };
+            _endTimeValidationRule = new ValidationRule<SimulationLogAnalysisMainViewModel>
+            {
+                PropertyName = "StopTimeString",
+                Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString)),
+                IsRuleValid = (target, rule) =>
+                {
+                    if (string.IsNullOrEmpty(target.StopTimeString)) return false;
+                    TimeSpan timeSpan;
+                    var isOK = TimeSpan.TryParseExact(target.StopTimeString, TimeSpanFormatString, null, out timeSpan);
+                    return isOK && timeSpan.Ticks > 0;
+                },
+            };
+        }
+
+        void StartOrStopTimeStringsChanged() 
+        {
+            TimeSpan timeSpan;
+            var isOK = TimeSpan.TryParseExact(StartTimeString, TimeSpanFormatString, null, out timeSpan);
+            if (isOK) _filterStartTime = timeSpan;
+            isOK = TimeSpan.TryParseExact(StopTimeString, TimeSpanFormatString, null, out timeSpan);
+            if (isOK) _filterStartTime = timeSpan;
         }
 
         [Initialize, UsedImplicitly] public ObservableCollection<HistogramBinsViewModel> HistogramBinsViewModels { get; private set; }
@@ -80,11 +157,18 @@ namespace SimulationLogAnalysis
             foreach (var window in OpenWindows) window.Close();
             OpenWindows.Clear();
             if (SimulationLog != null) SimulationLog.Close();
+            _simulationStartTime = new TimeSpan(0, 0, 0, 0);
+            _simulationEndTime = new TimeSpan(0, 0, 0, 0);
+            IsLogFileSelected = false;
             if (SelectedFileName == null || !File.Exists(SelectedFileName)) return;
+            IsLogFileSelected = true;
             SimulationLog = SimulationLog.Open(SelectedFileName);
-            StartTimeString = "00:00:00";
-            var stopTime = new TimeSpan(SimulationLog.TimeStepSize.Ticks * SimulationLog.TimeStepCount);
-            StopTimeString = stopTime.ToString(@"hh\:mm\:ss");
+            StartTimeString = _simulationStartTime.ToString(TimeSpanFormatString);
+            _simulationEndTime = new TimeSpan(SimulationLog.TimeStepSize.Ticks * SimulationLog.TimeStepCount);
+            StopTimeString = _simulationEndTime.ToString(TimeSpanFormatString);
+            _startTimeValidationRule.Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString));
+            _endTimeValidationRule.Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString));
+
             // todo: Populate platform, mode and species lists
             foreach (var mode in SimulationLog.ModeRecords) AvailableModes.Add(new ContentFilterRecordBase(mode) { Name = string.Format("{0}:{1}", mode.PlatformRecord.Name, mode.Name) });
             foreach (var platform in SimulationLog.PlatformRecords)
@@ -99,18 +183,13 @@ namespace SimulationLogAnalysis
             for (var speciesIndex = 0; speciesIndex < SimulationLog.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(SimulationLog.SpeciesRecords[speciesIndex].Guid, _barColors[speciesIndex % _barColors.Count]);
         }
 
+        public bool IsLogFileSelected { get; private set; }
         public string SelectedFileName { get; set; }
         [Initialize(true)] public bool AllTimes { get; set; }
         [Initialize(false)] public bool SelectedTimeRange { get; set; }
         public string StartTimeString { get; set; }
         public string StopTimeString { get; set; }
-
-        [Initialize(true)] public bool AllPlatforms { get; set; }
-        [Initialize(false)] public bool SelectedPlatforms { get; set; }
-        [Initialize(true)] public bool AllModes { get; set; }
-        [Initialize(false)] public bool SelectedModes { get; set; }
-        [Initialize(true)] public bool AllSpecies { get; set; }
-        [Initialize(false)] public bool SelectedSpecies { get; set; }
+        TimeSpan _filterStartTime, _filterEndTime;
 
         [Initialize(100.0)] public double StartBinValue { get; set; }
         [Initialize(10.0)] public double BinWidth { get; set; }
@@ -144,6 +223,12 @@ namespace SimulationLogAnalysis
             var timeStepIndex = 0;
             foreach (var timeStepRecord in SimulationLog)
             {
+                if (!AllTimes && _filterStartTime < timeStepRecord.StartTime && timeStepRecord.StartTime > _filterEndTime)
+                {
+                    Debug.WriteLine(string.Format("Discarding record with StartTime: {0}", timeStepRecord.StartTime));
+                    continue;
+                }
+                Debug.WriteLine(string.Format("Processing record with StartTime: {0}", timeStepRecord.StartTime));
                 timeStepRecord.ReadAll();
                 timeStepIndex++;
                 var record = timeStepRecord;

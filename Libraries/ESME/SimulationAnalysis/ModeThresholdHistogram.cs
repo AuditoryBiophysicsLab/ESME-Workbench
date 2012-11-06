@@ -56,6 +56,11 @@ namespace ESME.SimulationAnalysis
             return completionSource.Task;
         }
 
+        public void Process(ActorExposureRecord exposure)
+        {
+            GroupedExposures.Expose(exposure);
+        }
+
         public void DebugDisplay()
         {
             Debug.WriteLine("Histogram dump");

@@ -19,26 +19,28 @@
                                          FileName="{Binding SelectedFileName}"
                                          FileNameFilter="ESME Simulation output files (*.exposures)|*.exposures|All files (*.*)|*.*"
                                          IsDirectoryBrowser="False" />
-        <GroupBox DockPanel.Dock="Top" Header="Time range">
+        <GroupBox DockPanel.Dock="Top" Header="Time range" IsEnabled="{Binding IsLogFileSelected}">
             <StackPanel Orientation="Vertical">
-                <RadioButton Content="All time"
+                <RadioButton Content="Entire simulation"
                              GroupName="TimeRange"
                              IsChecked="{Binding AllTimes}" />
                 <RadioButton GroupName="TimeRange" IsChecked="{Binding SelectedTimeRange}">
                     <RadioButton.Content>
                         <StackPanel IsEnabled="{Binding SelectedTimeRange}" Orientation="Horizontal">
-                            <TextBlock Text="Between start time: " />
+                            <TextBlock Text="Exposures from time " />
                             <xctk:MaskedTextBox Grid.Column="1"
                                                 HorizontalAlignment="Left"
                                                 VerticalAlignment="Top"
+                                                ToolTip="Time to begin examining exposures (hh:mm:ss)"
                                                 Mask="00:00:00"
                                                 Value="{Binding StartTimeString,
                                                                 ValidatesOnDataErrors=True,
                                                                 UpdateSourceTrigger=PropertyChanged}" />
-                            <TextBlock Text=" and end time: " />
+                            <TextBlock Text=" through time: " />
                             <xctk:MaskedTextBox Grid.Column="1"
                                                 HorizontalAlignment="Left"
                                                 VerticalAlignment="Top"
+                                                ToolTip="Time to stop examining exposures (hh:mm:ss)"
                                                 Mask="00:00:00"
                                                 Value="{Binding StopTimeString,
                                                                 ValidatesOnDataErrors=True,
@@ -49,7 +51,7 @@
                 </RadioButton>
             </StackPanel>
         </GroupBox>
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" IsEnabled="{Binding IsLogFileSelected}">
             <GroupBox Header="Platforms">
                 <DockPanel LastChildFill="False" MinWidth="100">
                     <ListBox Height="100"
@@ -108,7 +110,7 @@
                 </DockPanel>
             </GroupBox>
         </StackPanel>
-        <GroupBox DockPanel.Dock="Top" Header="Analyses">
+        <GroupBox DockPanel.Dock="Top" Header="Analyses" IsEnabled="{Binding IsLogFileSelected}">
             <StackPanel Orientation="Vertical">
                 <CheckBox Content="Species exposure histogram by mode" IsChecked="{Binding PerformOurOnlyAnalysis}" />
                 <StackPanel Margin="16 0 0 0" Orientation="Horizontal">
