@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -99,7 +99,7 @@ namespace SimulationLogAnalysis
             _startTimeValidationRule = new ValidationRule<SimulationLogAnalysisMainViewModel>
             {
                 PropertyName = "StartTimeString",
-                Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString)),
+                Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _filterEndTime.ToString(TimeSpanFormatString)),
                 IsRuleValid = (target, rule) =>
                 {
                     if (AllTimes) return true;
@@ -113,7 +113,7 @@ namespace SimulationLogAnalysis
             _endTimeValidationRule = new ValidationRule<SimulationLogAnalysisMainViewModel>
             {
                 PropertyName = "StopTimeString",
-                Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString)),
+                Description = string.Format("Must be between {0} and {1}", _filterStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString)),
                 IsRuleValid = (target, rule) =>
                 {
                     if (string.IsNullOrEmpty(target.StopTimeString)) return false;
@@ -122,6 +122,7 @@ namespace SimulationLogAnalysis
                     return isOK && timeSpan.Ticks > 0;
                 },
             };
+            AddValidationRules(_startTimeValidationRule, _endTimeValidationRule);
         }
 
         void StartOrStopTimeStringsChanged() 
@@ -130,7 +131,7 @@ namespace SimulationLogAnalysis
             var isOK = TimeSpan.TryParseExact(StartTimeString, TimeSpanFormatString, null, out timeSpan);
             if (isOK) _filterStartTime = timeSpan;
             isOK = TimeSpan.TryParseExact(StopTimeString, TimeSpanFormatString, null, out timeSpan);
-            if (isOK) _filterStartTime = timeSpan;
+            if (isOK) _filterEndTime = timeSpan;
         }
 
         [Initialize, UsedImplicitly] public ObservableCollection<HistogramBinsViewModel> HistogramBinsViewModels { get; private set; }
@@ -223,7 +224,7 @@ namespace SimulationLogAnalysis
             var timeStepIndex = 0;
             foreach (var timeStepRecord in SimulationLog)
             {
-                if (!AllTimes && _filterStartTime < timeStepRecord.StartTime && timeStepRecord.StartTime > _filterEndTime)
+                if (SelectedTimeRange && (timeStepRecord.StartTime < _filterStartTime || _filterEndTime < timeStepRecord.StartTime))
                 {
                     Debug.WriteLine(string.Format("Discarding record with StartTime: {0}", timeStepRecord.StartTime));
                     continue;
