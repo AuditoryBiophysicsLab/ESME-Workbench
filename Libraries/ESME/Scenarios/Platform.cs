@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -187,6 +188,10 @@ namespace ESME.Scenarios
             Course = platform.Course;
             Speed = platform.Speed;
             LayerSettings = new LayerSettings(platform.LayerSettings);
+            if(platform.Sources != null)
+                foreach (var newsource in platform.Sources.Select(source => new Source(source))) {
+                    Sources.Add(newsource);
+                }
         }
 
         public static Platform NewPSMPlatform()
@@ -205,7 +210,6 @@ namespace ESME.Scenarios
                 Depth = 0,
                 Course = 0,
                 Speed = 0,
-                Scenario =  null,
                 Perimeter = new Perimeter(),
             };
         }
@@ -357,7 +361,7 @@ namespace ESME.Scenarios
             {
                 return _addPSMSource ?? (_addPSMSource = new SimpleCommand<object, EventToCommandArgs>(o =>
                 {
-                    var source = new Source { Platform = this, IsNew = true, SourceName = "New Source" };
+                    var source = Source.NewPSMSource();
                     MediatorMessage.Send(MediatorMessage.AddPSMSource, source);
                 }));
             }
@@ -373,6 +377,26 @@ namespace ESME.Scenarios
         }
 
         SimpleCommand<object, EventToCommandArgs> _editPSMPlatform;
+        #endregion
+
+        #region DeletePSMPlatformCommand
+        public SimpleCommand<object, EventToCommandArgs> DeletePSMPlatformCommand
+        {
+            get { return _deletePSMPlatform ?? (_deletePSMPlatform = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeletePSMPlatform,this))); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _deletePSMPlatform;
+
+        #endregion
+
+        #region CopyPSMPlatformCommand
+        public SimpleCommand<object, EventToCommandArgs> CopyPSMPlatformCommand
+        {
+            get { return _copyPSMPlatform ?? (_copyPSMPlatform = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.CopyPSMPlatform, this))); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _copyPSMPlatform;
+
         #endregion
 
         #endregion

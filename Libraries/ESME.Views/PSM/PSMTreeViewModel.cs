@@ -4,27 +4,18 @@ using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
-using ESME.Database;
+using ESME.PSM;
 using ESME.Scenarios;
 using ESME.Views.Scenarios;
 using HRC;
 using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
-using PSMContext = ESME.PSM.PSMContext;
 
 namespace ESME.Views.PSM
 {
     /// <summary>
-    /// To create and show the view as a dialog:
-    /// var vm = new PSMTreeViewModel {...};
-    /// var result = _visualizerService.ShowDialog("PSMTreeView", vm);
-    /// if ((!result.HasValue) || (!result.Value)) return;
-    /// 
-    /// To create and show the view as a window:
-    /// var vm = new PSMTreeViewModel {...};
-    /// var window = _visualizerService.ShowWindow("PSMTreeView", vm);
+    ///   To create and show the view as a dialog: var vm = new PSMTreeViewModel {...}; var result = _visualizerService.ShowDialog("PSMTreeView", vm); if ((!result.HasValue) || (!result.Value)) return; To create and show the view as a window: var vm = new PSMTreeViewModel {...}; var window = _visualizerService.ShowWindow("PSMTreeView", vm);
     /// </summary>
     public class PSMTreeViewModel : ViewModelBase
     {
@@ -65,16 +56,21 @@ namespace ESME.Views.PSM
             Platforms = _context.Platforms.Local;
         }
 
-        public PSMTreeViewModel()
-        {
+        public PSMTreeViewModel() { }
 
-        }
-
-
-        public void AddPlatformToContext(Platform platform)
+        public void AddPlatform(Platform platform)
         {
             _context.Platforms.Add(platform);
             Platforms.Add(platform);
+            _context.SaveChanges();
+        }
+
+        [MediatorMessageSink(MediatorMessage.CopyPSMPlatform), UsedImplicitly]
+        void CopyPlatform(Platform platform)
+        {
+            var newplatform = new Platform(platform);
+            newplatform.PlatformName = newplatform.PlatformName + " (copy)";
+            AddPlatform(newplatform);
         }
 
         #region NewPlatformCommand
@@ -87,33 +83,45 @@ namespace ESME.Views.PSM
 
         void NewPlatformHandler(EventToCommandArgs args)
         {
-            var platform = new Platform() { PlatformName = "New Platform", IsNew = true };
-            var vm = new PropertiesViewModel()
+            var platform = Platform.NewPSMPlatform();
+            var vm = new PropertiesViewModel
             {
                 PropertyObject = platform,
                 IsPSMView = true,
             };
-            DisplayedView = new PlatformPropertiesControlView() { DataContext = vm };
+            DisplayedView = new PlatformPropertiesControlView {DataContext = vm};
         }
         #endregion
 
         [MediatorMessageSink(MediatorMessage.PSMPlatformChanged), UsedImplicitly]
         void UpdatePlatforms(Platform platform)
         {
-            if (!_context.Platforms.Local.Contains(platform)) AddPlatformToContext(platform);
-            _context.SaveChanges();
             DisplayedView = null;
+            if (!_context.Platforms.Local.Contains(platform)) //this is probably the wrong test.
+            {
+                AddPlatform(platform);
+                _context.SaveChanges();
+            }
+        }
+
+        [MediatorMessageSink(MediatorMessage.DeletePSMPlatform), UsedImplicitly]
+        void DeletePlatform(Platform platform)
+        {
+            Platforms.Remove(platform);
+            foreach (var source in platform.Sources) DeleteSource(source);
+            _context.Platforms.Remove(platform);
+            _context.SaveChanges();
         }
 
         [MediatorMessageSink(MediatorMessage.EditPSMPlatform), UsedImplicitly]
         void EditPlatform(Platform platform)
         {
-            var vm = new PropertiesViewModel()
+            var vm = new PropertiesViewModel
             {
                 PropertyObject = platform,
                 IsPSMView = true,
             };
-            DisplayedView = new PlatformPropertiesControlView() { DataContext = vm };
+            DisplayedView = new PlatformPropertiesControlView {DataContext = vm};
         }
 
         public void AddSourceToContext(Source source)
@@ -125,25 +133,45 @@ namespace ESME.Views.PSM
         [MediatorMessageSink(MediatorMessage.AddPSMSource), UsedImplicitly]
         void AddSource(Source source)
         {
-            //AddSourceToContext(source);
-            //Sources.Add(source);
-            var vm = new PropertiesViewModel()
+            var vm = new PropertiesViewModel
             {
                 PropertyObject = source,
                 IsPSMView = true,
             };
-            DisplayedView = new SourcePropertiesControlView() { DataContext = vm };
+            DisplayedView = new SourcePropertiesControlView {DataContext = vm};
         }
 
         [MediatorMessageSink(MediatorMessage.EditPSMSource), UsedImplicitly]
         void EditSource(Source source)
         {
-            var vm = new PropertiesViewModel()
+            var vm = new PropertiesViewModel
             {
                 PropertyObject = source,
                 IsPSMView = true,
             };
-            DisplayedView = new SourcePropertiesControlView() { DataContext = vm };
+            DisplayedView = new SourcePropertiesControlView {DataContext = vm};
+        }
+
+        [MediatorMessageSink(MediatorMessage.DeletePSMSource), UsedImplicitly]
+        void DeleteSource(Source source)
+        {
+            Sources.Remove(source);
+            foreach (var mode in source.Modes) DeleteMode(mode);
+            _context.Sources.Remove(source);
+            _context.SaveChanges();
+        }
+
+        [MediatorMessageSink(MediatorMessage.PSMSourceChanged), UsedImplicitly]
+        void UpdateSource(Source source)
+        {
+            DisplayedView = null;
+        }
+
+        [MediatorMessageSink(MediatorMessage.CopyPSMSource), UsedImplicitly]
+        void CopySource(Source source)
+        {
+            var newsource = new Source(source);
+            Clipboard.SetData(DataFormats.Serializable, newsource);
         }
 
         public void AddModeToContext(Mode mode)
@@ -157,20 +185,29 @@ namespace ESME.Views.PSM
         {
             //   AddModeToContext(mode);
             Modes.Add(mode);
-            var vm = new ModePropertiesViewModel(mode) { IsPSMView = true, };
-            DisplayedView = new ModePropertiesControlView { DataContext = vm };
+            var vm = new ModePropertiesViewModel(mode) {IsPSMView = true,};
+            DisplayedView = new ModePropertiesControlView {DataContext = vm};
         }
 
         [MediatorMessageSink(MediatorMessage.EditPSMMode), UsedImplicitly]
         void EditMode(Mode mode)
         {
-            var vm = new ModePropertiesViewModel(mode) { IsPSMView = true, };
-            DisplayedView = new ModePropertiesControlView { DataContext = vm, };
+            var vm = new ModePropertiesViewModel(mode) {IsPSMView = true,};
+            DisplayedView = new ModePropertiesControlView {DataContext = vm,};
+        }
+
+        [MediatorMessageSink(MediatorMessage.DeletePSMMode), UsedImplicitly]
+        void DeleteMode(Mode mode)
+        {
+            Modes.Remove(mode);
+            _context.Modes.Remove(mode);
+            _context.SaveChanges();
         }
 
         [MediatorMessageSink(MediatorMessage.PSMModeChanged), UsedImplicitly]
         void ModeChanged(Mode mode)
         {
+            DisplayedView = null;
             //replace it in the tree view list
 
             //update the database context 
@@ -182,6 +219,7 @@ namespace ESME.Views.PSM
 
         #region ViewLoadedCommand
         PSMTreeView _view;
+
         public SimpleCommand<object, EventToCommandArgs> ViewLoadedCommand
         {
             get { return _viewLoaded ?? (_viewLoaded = new SimpleCommand<object, EventToCommandArgs>(ViewLoadedHandler)); }
@@ -199,72 +237,68 @@ namespace ESME.Views.PSM
 
         #region Design-time data
         public static PSMTreeViewModel DesignTimeData { get; set; }
+
         static PSMTreeViewModel()
         {
-
 #if true
-            DesignTimeData = new PSMTreeViewModel()
-                   {
-                       Platforms = new ObservableCollection<Platform>()
+            DesignTimeData = new PSMTreeViewModel
+            {
+                Platforms = new ObservableCollection<Platform>
                 {
-                    new Platform()
+                    new Platform
                     {
                         PlatformName = "Platform1",
-                        Sources = new ObservableList<Source>()
+                        Sources = new ObservableList<Source>
                         {
-                            new Source()
+                            new Source
                             {
                                 SourceName = "Source 1",
-                                Modes = new ObservableList<Mode>()
+                                Modes = new ObservableList<Mode>
                                 {
-                                    new Mode()
+                                    new Mode
                                     {
                                         ModeName = "Mode 1",
                                     },
-                                    new Mode()
+                                    new Mode
                                     {
                                         ModeName = "Mode 2",
                                     },
                                 },
                             },
-                            new Source()
+                            new Source
                             {
                                 SourceName = "Source 2"
                             },
                         },
                     },
-                    new Platform()
+                    new Platform
                     {
                         PlatformName = "Platform2",
                     }
                 },
-                   };
+            };
 
 #endif
         }
         #endregion
+
         public void SeedTestValues()
         {
-
             var m1 = Mode.NewPSMMode();
             m1.ModeName = "Mode 1";
-            _context.Modes.Add(m1);
 
             var m2 = Mode.NewPSMMode();
             m2.ModeName = "mode 2";
-            _context.Modes.Add(m2);
-            
+
             var s1 = Source.NewPSMSource();
             s1.SourceName = "Source 1";
             s1.SourceType = "demo source";
-            s1.Modes = new ObservableList<Mode>{m1};
-            _context.Sources.Add(s1);
+            s1.Modes = new ObservableList<Mode> {m1};
 
             var s2 = Source.NewPSMSource();
             s2.SourceName = "Source 2";
             s2.SourceType = "demo source";
-            s2.Modes = new ObservableList<Mode> { m2 };
-            _context.Sources.Add(s2);
+            s2.Modes = new ObservableList<Mode> {m2};
 
             var p1 = Platform.NewPSMPlatform();
             p1.PlatformName = "Platform 1";
@@ -274,20 +308,23 @@ namespace ESME.Views.PSM
             var p2 = Platform.NewPSMPlatform();
             p2.PlatformName = "Platform 2";
             p2.PlatformType = "a test platform";
-            p2.Sources = new ObservableList<Source> { s2 };
-
+            p2.Sources = new ObservableList<Source> {s2};
 
             var p3 = Platform.NewPSMPlatform();
             p3.PlatformName = "Platform 3";
             p3.PlatformType = "a test platform";
-            
+
+            _context.Modes.Add(m1);
+            _context.Modes.Add(m2);
+
+            _context.Sources.Add(s1);
+            _context.Sources.Add(s2);
+
             _context.Platforms.Add(p1);
             _context.Platforms.Add(p2);
+            _context.Platforms.Add(p3);
 
             _context.SaveChanges();
-            // _context.Platforms.Add(p3);
-
-
         }
     }
 }

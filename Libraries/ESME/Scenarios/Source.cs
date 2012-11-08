@@ -9,8 +9,8 @@ using HRC.WPF;
 
 namespace ESME.Scenarios
 {
-     [NotifyPropertyChanged]
-    public class Source : IHaveGuid
+     [NotifyPropertyChanged, Serializable]
+    public sealed class Source : IHaveGuid
     {
          public Source() {}
 
@@ -19,6 +19,10 @@ namespace ESME.Scenarios
              PSMSourceGuid = source.PSMSourceGuid;
              SourceName = source.SourceName;
              SourceType = source.SourceType;
+             if(source.Modes != null)
+                 foreach (var newmode in source.Modes.Select(mode => new Mode(mode))) {
+                     Modes.Add(newmode);
+                 }
          }
 
          public static Source NewPSMSource()
@@ -27,7 +31,6 @@ namespace ESME.Scenarios
              {
                  SourceName = "New Source",
                  SourceType = "new source",
-                 Platform = null,
                  PSMSourceGuid = "",
              };
          }
@@ -38,11 +41,11 @@ namespace ESME.Scenarios
          public string SourceName { get; set; }
          public string SourceType { get; set; }
 
-         public virtual Platform Platform { get; set; }
+         public Platform Platform { get; set; }
          [Initialize]
-         public virtual ObservableList<Mode> Modes { get; set; }
+         public ObservableList<Mode> Modes { get; set; }
          [Initialize]
-         public virtual ObservableList<LogEntry> Logs { get; set; }
+         public ObservableList<LogEntry> Logs { get; set; }
          #endregion
 
          #region Unmapped Properties
@@ -88,7 +91,24 @@ namespace ESME.Scenarios
          SimpleCommand<object, EventToCommandArgs> _addPSMMode;
          #endregion
 
+         #region CopyPSMSourceCommand
+         public SimpleCommand<object, EventToCommandArgs> CopyPSMSourceCommand
+         {
+             get { return _copyPSMSource ?? (_copyPSMSource = new SimpleCommand<object, EventToCommandArgs>(o =>MediatorMessage.Send(MediatorMessage.CopyPSMSource,this))); }
+         }
 
+         SimpleCommand<object, EventToCommandArgs> _copyPSMSource;
+         #endregion
+
+         #region DeletePSMSourceCommand
+         public SimpleCommand<object, EventToCommandArgs> DeletePSMSourceCommand
+         {
+             get { return _deletePSMSource ?? (_deletePSMSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeletePSMSource,this))); }
+         }
+
+         SimpleCommand<object, EventToCommandArgs> _deletePSMSource;
+
+         #endregion
 
          #region EditPSMSourceCommand
          public SimpleCommand<object, EventToCommandArgs> EditPSMSourceCommand

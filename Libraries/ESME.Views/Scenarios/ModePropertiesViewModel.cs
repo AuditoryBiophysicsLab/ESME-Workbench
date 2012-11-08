@@ -1,11 +1,13 @@
 ﻿using System;
 using ESME.Scenarios;
+using HRC.Aspects;
 using HRC.Validation;
 using HRC.ViewModels;
 using HRC.WPF;
 
 namespace ESME.Views.Scenarios
 {
+    [NotifyPropertyChanged]
     public class ModePropertiesViewModel : ValidatingViewModel
     {
         readonly Mode _mode;
@@ -19,8 +21,8 @@ namespace ESME.Views.Scenarios
             SourceLevel = _mode.SourceLevel;
             LowFrequency = _mode.LowFrequency;
             HighFrequency = _mode.HighFrequency;
-            PulseIntervalString = PulseIntervalString != null ? ((TimeSpan)_mode.PulseInterval).ToString(TimeSpanFormatString) : null;
-            PulseLengthString = PulseLengthString != null ? ((TimeSpan)_mode.PulseLength).ToString(TimeSpanFormatString):null;
+            PulseIntervalString = _mode.PulseInterval != null ? ((TimeSpan)_mode.PulseInterval).ToString(TimeSpanFormatString) : null;
+            PulseLengthString = _mode.PulseLength != null ? ((TimeSpan)_mode.PulseLength).ToString(TimeSpanFormatString):null;
             HorizontalBeamWidth = _mode.HorizontalBeamWidth;
             VerticalBeamWidth = _mode.VerticalBeamWidth;
             DepressionElevationAngle = _mode.DepressionElevationAngle;
@@ -161,17 +163,39 @@ namespace ESME.Views.Scenarios
         public float MaxPropagationRadius { get; set; }
 
         public bool AcousticPropertiesHaveChanged { get; private set; }
+        bool HaveAcousticPropertiesChanged()
+        {
+            if (_mode.Depth.HasValue != Depth.HasValue) return true;
+            if (_mode.Depth.HasValue && Depth.HasValue && (_mode.Depth.Value != Depth.Value)) return true;
+            if (Math.Abs(VerticalBeamWidth - _mode.VerticalBeamWidth) > 0.1) return true;
+            if (Math.Abs(DepressionElevationAngle - _mode.DepressionElevationAngle) > 0.1) return true;
+            if (Math.Abs(HighFrequency - _mode.HighFrequency) > 0.1) return true;
+            return Math.Abs(LowFrequency - _mode.LowFrequency) > 0.1;
+        }
         public bool RadiusHasChanged { get; private set; }
 
         public bool IsPSMView { get; set; }
 
+
+
+
         #region OkCommand
-        public SimpleCommand<object, EventToCommandArgs> OkCommand { get { return _ok ?? (_ok = new SimpleCommand<object, EventToCommandArgs>(OkHandler)); } }
+        public SimpleCommand<object, EventToCommandArgs> OkCommand
+        {
+            get { return _ok ?? (_ok = new SimpleCommand<object, EventToCommandArgs>(o => IsOkCommandEnabled, OkHandler)); }
+        }
+
         SimpleCommand<object, EventToCommandArgs> _ok;
+
+        bool IsOkCommandEnabled
+        {
+            get { return !IsPSMView || IsValid; }
+        }
 
         void OkHandler(EventToCommandArgs args)
         {
-            if (IsPSMView) {MediatorMessage.Send(MediatorMessage.PSMModeChanged,_mode);}
+            //var parameter = args.CommandParameter; 
+            if (IsPSMView) { MediatorMessage.Send(MediatorMessage.PSMModeChanged, _mode); }
             else
             {
                 //var parameter = args.CommandParameter;
@@ -192,16 +216,6 @@ namespace ESME.Views.Scenarios
                 _mode.MaxPropagationRadius = MaxPropagationRadius;
                 CloseActivePopUpCommand.Execute(true);
             }
-        }
-
-        bool HaveAcousticPropertiesChanged()
-        {
-            if (_mode.Depth.HasValue != Depth.HasValue) return true;
-            if (_mode.Depth.HasValue && Depth.HasValue && (_mode.Depth.Value != Depth.Value)) return true;
-            if (Math.Abs(VerticalBeamWidth - _mode.VerticalBeamWidth) > 0.1) return true;
-            if (Math.Abs(DepressionElevationAngle - _mode.DepressionElevationAngle) > 0.1) return true;
-            if (Math.Abs(HighFrequency - _mode.HighFrequency) > 0.1) return true;
-            return Math.Abs(LowFrequency - _mode.LowFrequency) > 0.1;
         }
         #endregion
         #region CancelCommand

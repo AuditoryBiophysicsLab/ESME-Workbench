@@ -146,6 +146,26 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _editPSMMode;
         #endregion
 
+        #region CopyPSMModeCommand
+        public SimpleCommand<object, EventToCommandArgs> CopyPSMModeCommand
+        {
+            get { return _copyPSMMode ?? (_copyPSMMode = new SimpleCommand<object, EventToCommandArgs>(o=> MediatorMessage.Send(MediatorMessage.CopyPSMMode,this))); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _copyPSMMode;
+
+        #endregion
+
+        #region DeletePSMModeCommand
+        public SimpleCommand<object, EventToCommandArgs> DeletePSMModeCommand
+        {
+            get { return _deletePSMMode ?? (_deletePSMMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeletePSMMode,this))); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _deletePSMMode;
+
+        #endregion
+
         #region RecalculateModeCommand
         public SimpleCommand<object, EventToCommandArgs> RecalculateModeCommand { get { return _recalculateMode ?? (_recalculateMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.RecalculateMode, this))); } }
         SimpleCommand<object, EventToCommandArgs> _recalculateMode;
@@ -155,7 +175,7 @@ namespace ESME.Scenarios
         public SimpleCommand<object, EventToCommandArgs> ModePropertiesCommand { get { return _modeProperties ?? (_modeProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ModeProperties, this))); } }
         SimpleCommand<object, EventToCommandArgs> _modeProperties;
         #endregion
-
+        
         #region Layer Move commands
 
         #region MoveLayerToFrontCommand
@@ -214,7 +234,7 @@ namespace ESME.Scenarios
                 ModeName = "New Mode",
                 ModeType = "new mode",
                 ActiveTime = null,
-                Depth = null,
+                Depth = 0,
                 SourceLevel = 120,
                 LowFrequency = 1000,
                 HighFrequency = 1000,
@@ -225,7 +245,6 @@ namespace ESME.Scenarios
                 DepressionElevationAngle = 90,
                 RelativeBeamAngle = 0,
                 MaxPropagationRadius = 50000,
-                Source = null,
             };
         }
 

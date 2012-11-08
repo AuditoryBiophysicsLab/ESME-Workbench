@@ -34,6 +34,8 @@ namespace ESME
         public const string AddPlatform = "AddPlatformMessage";
         public const string EditPSMPlatform = "EditPSMPlatformMessage";
         public const string PSMPlatformChanged = "PSMPlatformChangedMessage";
+        public const string CopyPSMPlatform = "CopyPSMPlatformMessage";
+        public const string DeletePSMPlatform = "DeletePSMPlatformMessage";
         public const string DeletePlatform = "DeletePlatformMessage";
         public const string PlatformProperties = "PlatformPropertiesMessage";
         public const string PlatformBoundToLayer = "PlatformBoundToLayerMessage";
@@ -42,7 +44,9 @@ namespace ESME
         public const string AddPSMSource = "AddPSMSourceMessage";
         public const string PSMSourceChanged = "PSMSourceChangedMessage";
         public const string EditPSMSource = "EditPSMSourceMessage";
+        public const string CopyPSMSource = "CopyPSMSourceMessage";
         public const string DeleteSource = "DeleteSourceMessage";
+        public const string DeletePSMSource = "DeletePSMSourceMessage";
         public const string SourceProperties = "SourcePropertiesMessage";
         public const string SourceBoundToLayer = "SourceBoundToLayerMessage";
 
@@ -50,7 +54,9 @@ namespace ESME
         public const string AddPSMMode = "AddPSMModeMessage";
         public const string PSMModeChanged = "PSMModeChangedMessage";
         public const string EditPSMMode = "EditPSMModeMessage";
+        public const string CopyPSMMode = "CopyPSMModeMessage";
         public const string DeleteMode = "DeleteModeMessage";
+        public const string DeletePSMMode = "DeletePSMModeMessage";
         public const string RecalculateMode = "RecalculateModeMessage";
         public const string ModeProperties = "ModePropertiesMessage";
         public const string ModeBoundToLayer = "ModeBoundToLayerMessage";

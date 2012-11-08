@@ -19,6 +19,8 @@
                 <TextBlock.ContextMenu>
                     <ContextMenu>
                         <MenuItem Command="{Binding EditPSMPlatformCommand}" Header="Edit platform ..." />
+                        <MenuItem Command="{Binding CopyPSMPlatformCommand}" Header="Copy platform ..." />
+                        <MenuItem Command="{Binding DeletePSMPlatformCommand}" Header="Delete platform ..." />                        
                         <MenuItem Command="{Binding AddPSMSourceCommand}" Header="New source ..." />
                     </ContextMenu>
                 </TextBlock.ContextMenu>
@@ -30,6 +32,8 @@
                 <TextBlock.ContextMenu>
                     <ContextMenu>
                         <MenuItem Command="{Binding EditPSMSourceCommand}" Header="Edit source ..." />
+                        <MenuItem Command="{Binding CopyPSMSourceCommand}" Header="Copy source ..." />
+                        <MenuItem Command="{Binding DeletePSMSourceCommand}" Header="Delete source ..."/>
                         <MenuItem Command="{Binding AddPSMModeCommand}" Header="New mode ..." />
                     </ContextMenu>
                 </TextBlock.ContextMenu>
@@ -42,6 +46,7 @@
                 <TextBlock.ContextMenu>
                     <ContextMenu>
                         <MenuItem Command="{Binding EditPSMModeCommand}" Header="Edit mode ..." />
+                        <MenuItem Command="{Binding DeletePSMModeCommand}" Header="Delete mode ..." />
                     </ContextMenu>
                 </TextBlock.ContextMenu>
             </TextBlock>
