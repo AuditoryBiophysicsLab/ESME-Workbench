@@ -6,12 +6,19 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
         Title="Simulation Log Analyzer"
         SizeToContent="WidthAndHeight"
         d:DataContext="{d:DesignInstance app:SimulationLogAnalysisMainViewModel}"
         mef:ViewModelLocator.ViewModel="SimulationLogAnalysisMainViewModel"
         mc:Ignorable="d">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <WPF:EventToCommandTrigger Command="{Binding CloseCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <DockPanel Margin="5" LastChildFill="False">
         <Controls:FileOrDirectorySetting Grid.Column="2"
                                          Caption="Log file to analyze"

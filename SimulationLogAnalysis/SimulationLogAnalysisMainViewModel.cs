@@ -58,8 +58,10 @@ namespace SimulationLogAnalysis
             };
             _propertyObserver = new PropertyObserver<SimulationLogAnalysisMainViewModel>(this)
                 .RegisterHandler(p => p.SelectedFileName, SelectedFileNameChanged)
-                .RegisterHandler(p => p.IsAnalyzeCommandEnabled, CommandManager.InvalidateRequerySuggested)
-                .RegisterHandler(p => p.PerformOurOnlyAnalysis, () => IsAnalyzeCommandEnabled = PerformOurOnlyAnalysis)
+                .RegisterHandler(p => p.AreAnyPlatformsSelected, CommandManager.InvalidateRequerySuggested)
+                .RegisterHandler(p => p.AreAnyModesSelected, CommandManager.InvalidateRequerySuggested)
+                .RegisterHandler(p => p.AreAnySpeciesSelected, CommandManager.InvalidateRequerySuggested)
+                .RegisterHandler(p => p.PerformOurOnlyAnalysis, CommandManager.InvalidateRequerySuggested)
                 .RegisterHandler(p => p.StartTimeString, StartOrStopTimeStringsChanged)
                 .RegisterHandler(p => p.StopTimeString, StartOrStopTimeStringsChanged)
                 .RegisterHandler(p => p.AllTimes,
@@ -107,7 +109,7 @@ namespace SimulationLogAnalysis
                     if (string.IsNullOrEmpty(target.StartTimeString)) return false;
                     TimeSpan timeSpan;
                     var isOK = TimeSpan.TryParseExact(target.StartTimeString, TimeSpanFormatString, null, out timeSpan);
-                    return isOK && timeSpan.Ticks > 0;
+                    return isOK && timeSpan >= _simulationStartTime && timeSpan < _filterEndTime;
                 },
             };
             _endTimeValidationRule = new ValidationRule<SimulationLogAnalysisMainViewModel>
@@ -116,10 +118,12 @@ namespace SimulationLogAnalysis
                 Description = string.Format("Must be between {0} and {1}", _filterStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString)),
                 IsRuleValid = (target, rule) =>
                 {
+                    if (AllTimes) return true;
+                    if (_simulationStartTime.Ticks == 0 && _simulationEndTime.Ticks == 0) return true;
                     if (string.IsNullOrEmpty(target.StopTimeString)) return false;
                     TimeSpan timeSpan;
                     var isOK = TimeSpan.TryParseExact(target.StopTimeString, TimeSpanFormatString, null, out timeSpan);
-                    return isOK && timeSpan.Ticks > 0;
+                    return isOK && timeSpan > _filterStartTime && timeSpan <= _simulationEndTime;
                 },
             };
             AddValidationRules(_startTimeValidationRule, _endTimeValidationRule);
@@ -154,6 +158,10 @@ namespace SimulationLogAnalysis
 
         void SelectedFileNameChanged()
         {
+            ResetSelectionObservers();
+            AvailablePlatforms.Clear();
+            AvailableModes.Clear();
+            AvailableSpecies.Clear();
             GuidToColorMap.Clear();
             foreach (var window in OpenWindows) window.Close();
             OpenWindows.Clear();
@@ -171,17 +179,45 @@ namespace SimulationLogAnalysis
             _endTimeValidationRule.Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString));
 
             // todo: Populate platform, mode and species lists
-            foreach (var mode in SimulationLog.ModeRecords) AvailableModes.Add(new ContentFilterRecordBase(mode) { Name = string.Format("{0}:{1}", mode.PlatformRecord.Name, mode.Name) });
+            foreach (var modeFilter in SimulationLog.ModeRecords.Select(mode => new ContentFilterRecordBase(mode) { Name = string.Format("{0}:{1}", mode.PlatformRecord.Name, mode.Name) })) 
+            {
+                _modeSelectionObservers.Add(new PropertyObserver<ContentFilterRecordBase>(modeFilter).RegisterHandler(p => p.IsSelected, ModeFilterSelectionChanged));
+                AvailableModes.Add(modeFilter);
+            }
+            ModeFilterSelectionChanged();
             foreach (var platform in SimulationLog.PlatformRecords)
             {
                 var curPlatform = platform;
                 var dependentModes = from mode in AvailableModes
                                      where ((ModeNameGuid)mode.NameGuidRecord).PlatformGuid == curPlatform.Guid
                                      select mode;
-                AvailablePlatforms.Add(new PlatformContentFilterRecord(curPlatform, dependentModes));
+                var platformFilter = new PlatformContentFilterRecord(curPlatform, dependentModes);
+                _platformSelectionObservers.Add(new PropertyObserver<ContentFilterRecordBase>(platformFilter).RegisterHandler(p => p.IsSelected, PlatformFilterSelectionChanged)); 
+                AvailablePlatforms.Add(platformFilter);
             }
-            foreach (var species in SimulationLog.SpeciesRecords) AvailableSpecies.Add(new ContentFilterRecordBase(species));
+            PlatformFilterSelectionChanged();
+            foreach (var speciesFilter in SimulationLog.SpeciesRecords.Select(species => new ContentFilterRecordBase(species))) 
+            {
+                _speciesSelectionObservers.Add(new PropertyObserver<ContentFilterRecordBase>(speciesFilter).RegisterHandler(p => p.IsSelected, SpeciesFilterSelectionChanged));
+                AvailableSpecies.Add(speciesFilter);
+            }
+            SpeciesFilterSelectionChanged();
             for (var speciesIndex = 0; speciesIndex < SimulationLog.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(SimulationLog.SpeciesRecords[speciesIndex].Guid, _barColors[speciesIndex % _barColors.Count]);
+            CommandManager.InvalidateRequerySuggested();
+        }
+
+        void PlatformFilterSelectionChanged() { AreAnyPlatformsSelected = (from p in AvailablePlatforms where p.IsSelected select p).Any(); }
+        void ModeFilterSelectionChanged() { AreAnyModesSelected = (from m in AvailableModes where m.IsSelected select m).Any(); }
+        void SpeciesFilterSelectionChanged() { AreAnySpeciesSelected = (from s in AvailableSpecies where s.IsSelected select s).Any(); }
+
+        void ResetSelectionObservers()
+        {
+            foreach (var observer in _platformSelectionObservers) observer.UnregisterHandler(p => p.IsSelected);
+            foreach (var observer in _modeSelectionObservers) observer.UnregisterHandler(p => p.IsSelected);
+            foreach (var observer in _speciesSelectionObservers) observer.UnregisterHandler(p => p.IsSelected);
+            _platformSelectionObservers.Clear();
+            _modeSelectionObservers.Clear();
+            _speciesSelectionObservers.Clear();
         }
 
         public bool IsLogFileSelected { get; private set; }
@@ -203,9 +239,46 @@ namespace SimulationLogAnalysis
         public SimpleCommand<object, EventToCommandArgs> AnalyzeCommand { get { return _analyze ?? (_analyze = new SimpleCommand<object, EventToCommandArgs>(o => IsAnalyzeCommandEnabled, AnalyzeHandler)); } }
         SimpleCommand<object, EventToCommandArgs> _analyze;
 
-        [Initialize(true)] bool IsAnalyzeCommandEnabled { get; set; }
+        bool IsAnalyzeCommandEnabled { get { return PerformOurOnlyAnalysis && AreAnyPlatformsSelected && AreAnyModesSelected && AreAnySpeciesSelected; } }
         void AnalyzeHandler(EventToCommandArgs args) { TaskEx.Run(PerformAnalysis); }
         #endregion
+
+        #region CloseCommand
+        public SimpleCommand<object, EventToCommandArgs> CloseCommand { get { return _close ?? (_close = new SimpleCommand<object, EventToCommandArgs>(CloseHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _close;
+
+        void CloseHandler(EventToCommandArgs args)
+        {
+            foreach (var window in OpenWindows) window.Close();
+            Application.Current.Shutdown();
+        }
+        #endregion
+
+        #region SelectAllPlatformsCommand
+        public SimpleCommand<object, EventToCommandArgs> SelectAllPlatformsCommand { get { return _selectAllPlatforms ?? (_selectAllPlatforms = new SimpleCommand<object, EventToCommandArgs>(SelectAllPlatformsHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _selectAllPlatforms;
+
+        void SelectAllPlatformsHandler(EventToCommandArgs args) { foreach (var platform in AvailablePlatforms) platform.IsSelected = true; }
+        #endregion
+
+        #region SelectAllModesCommand
+        public SimpleCommand<object, EventToCommandArgs> SelectAllModesCommand { get { return _selectAllModes ?? (_selectAllModes = new SimpleCommand<object, EventToCommandArgs>(SelectAllModesHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _selectAllModes;
+
+        void SelectAllModesHandler(EventToCommandArgs args) { foreach (var mode in AvailableModes) mode.IsSelected = true; }
+        #endregion
+
+        #region SelectAllSpeciesCommand
+        public SimpleCommand<object, EventToCommandArgs> SelectAllSpeciesCommand { get { return _selectAllSpecies ?? (_selectAllSpecies = new SimpleCommand<object, EventToCommandArgs>(SelectAllSpeciesHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _selectAllSpecies;
+
+        void SelectAllSpeciesHandler(EventToCommandArgs args) { foreach (var species in AvailableSpecies) species.IsSelected = true; }
+        #endregion
+
+        public bool AreAnyPlatformsSelected { get; private set; }
+        public bool AreAnyModesSelected { get; private set; }
+        public bool AreAnySpeciesSelected { get; private set; }
+
         async void PerformAnalysis()
         {
             Task<bool> processTask = null;
@@ -224,12 +297,7 @@ namespace SimulationLogAnalysis
             var timeStepIndex = 0;
             foreach (var timeStepRecord in SimulationLog)
             {
-                if (SelectedTimeRange && (timeStepRecord.StartTime < _filterStartTime || _filterEndTime < timeStepRecord.StartTime))
-                {
-                    Debug.WriteLine(string.Format("Discarding record with StartTime: {0}", timeStepRecord.StartTime));
-                    continue;
-                }
-                Debug.WriteLine(string.Format("Processing record with StartTime: {0}", timeStepRecord.StartTime));
+                if (SelectedTimeRange && (timeStepRecord.StartTime < _filterStartTime || _filterEndTime < timeStepRecord.StartTime)) continue;
                 timeStepRecord.ReadAll();
                 timeStepIndex++;
                 var record = timeStepRecord;
@@ -249,6 +317,9 @@ namespace SimulationLogAnalysis
         [Initialize, UsedImplicitly] public ObservableCollection<PlatformContentFilterRecord> AvailablePlatforms { get; private set; }
         [Initialize, UsedImplicitly] public ObservableCollection<ContentFilterRecordBase> AvailableModes { get; private set; }
         [Initialize, UsedImplicitly] public ObservableCollection<ContentFilterRecordBase> AvailableSpecies { get; private set; }
+        readonly List<PropertyObserver<ContentFilterRecordBase>> _platformSelectionObservers = new List<PropertyObserver<ContentFilterRecordBase>>();
+        readonly List<PropertyObserver<ContentFilterRecordBase>> _modeSelectionObservers = new List<PropertyObserver<ContentFilterRecordBase>>();
+        readonly List<PropertyObserver<ContentFilterRecordBase>> _speciesSelectionObservers = new List<PropertyObserver<ContentFilterRecordBase>>();
 
         readonly List<Color> _barColors = new List<Color>
         {
