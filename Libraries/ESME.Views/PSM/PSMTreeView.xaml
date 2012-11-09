@@ -15,7 +15,7 @@
     <UserControl.Resources>
 
         <HierarchicalDataTemplate DataType="{x:Type Scenarios:Platform}" ItemsSource="{Binding Sources}">
-            <TextBlock Text="{Binding PlatformName}">
+            <TextBlock Text="{Binding PlatformName}" Margin="0 0 5 0">
                 <TextBlock.ContextMenu>
                     <ContextMenu>
                         <MenuItem Command="{Binding EditPSMPlatformCommand}" Header="Edit platform ..." />
@@ -28,7 +28,7 @@
         </HierarchicalDataTemplate>
 
         <HierarchicalDataTemplate DataType="{x:Type Scenarios:Source}" ItemsSource="{Binding Modes}">
-            <TextBlock Text="{Binding SourceName}">
+            <TextBlock Text="{Binding SourceName}" Margin="0 0 5 0">
                 <TextBlock.ContextMenu>
                     <ContextMenu>
                         <MenuItem Command="{Binding EditPSMSourceCommand}" Header="Edit source ..." />
@@ -42,7 +42,7 @@
         </HierarchicalDataTemplate>
 
         <DataTemplate DataType="{x:Type Scenarios:Mode}">
-            <TextBlock Text="{Binding ModeName}">
+            <TextBlock Text="{Binding ModeName}" Margin="0 0 5 0">
                 <TextBlock.ContextMenu>
                     <ContextMenu>
                         <MenuItem Command="{Binding EditPSMModeCommand}" Header="Edit mode ..." />
@@ -56,6 +56,9 @@
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
             <WPF:EventToCommandTrigger Command="{Binding ViewLoadedCommand}" />
+        </i:EventTrigger>
+        <i:EventTrigger EventName="Closing">
+            <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Grid>

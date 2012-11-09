@@ -19,6 +19,7 @@ namespace ESME.Views.Scenarios
         public string WindowTitle { get; set; }
         public object PropertyObject { get; set; }
         public bool IsPSMView { get; set; }
+        public bool IsNew { get; set; }
         object _propertyObject;
         
 
@@ -39,13 +40,27 @@ namespace ESME.Views.Scenarios
             }
             else
             {
-                if (PropertyObject is Platform)
+                if (IsNew)
                 {
-                    MediatorMessage.Send(MediatorMessage.PSMPlatformChanged,PropertyObject);
+                    if (PropertyObject is Platform)
+                    {
+                        MediatorMessage.Send(MediatorMessage.PSMPlatformChanged, PropertyObject);
+                    }
+                    if (PropertyObject is Source)
+                    {
+                        MediatorMessage.Send(MediatorMessage.PSMSourceChanged, PropertyObject);
+                    }
                 }
-                if (PropertyObject is Source)
+                else
                 {
-                    MediatorMessage.Send(MediatorMessage.PSMSourceChanged, PropertyObject);
+                    if (PropertyObject is Platform)
+                    {
+                       // MediatorMessage.Send(MediatorMessage.PSMPlatformChanged, PropertyObject);
+                    }
+                    if (PropertyObject is Source)
+                    {
+                        //MediatorMessage.Send(MediatorMessage.PSMSourceChanged, PropertyObject);
+                    }
                 }
             }
         }

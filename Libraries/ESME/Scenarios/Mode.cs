@@ -226,7 +226,7 @@ namespace ESME.Scenarios
 
         #endregion
 
-        public static Mode NewPSMMode()
+        public static Mode NewPSMMode(Source source = null)
         {
             return new Mode
             {
@@ -245,6 +245,7 @@ namespace ESME.Scenarios
                 DepressionElevationAngle = 90,
                 RelativeBeamAngle = 0,
                 MaxPropagationRadius = 50000,
+                Source = source,
             };
         }
 

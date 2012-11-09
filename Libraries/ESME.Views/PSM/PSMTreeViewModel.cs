@@ -137,6 +137,7 @@ namespace ESME.Views.PSM
             {
                 PropertyObject = source,
                 IsPSMView = true,
+                IsNew = true,
             };
             DisplayedView = new SourcePropertiesControlView {DataContext = vm};
         }
@@ -165,6 +166,7 @@ namespace ESME.Views.PSM
         void UpdateSource(Source source)
         {
             DisplayedView = null;
+            AddSourceToContext(source);
         }
 
         [MediatorMessageSink(MediatorMessage.CopyPSMSource), UsedImplicitly]
@@ -183,8 +185,6 @@ namespace ESME.Views.PSM
         [MediatorMessageSink(MediatorMessage.AddPSMMode), UsedImplicitly]
         void AddMode(Mode mode)
         {
-            //   AddModeToContext(mode);
-            Modes.Add(mode);
             var vm = new ModePropertiesViewModel(mode) {IsPSMView = true,};
             DisplayedView = new ModePropertiesControlView {DataContext = vm};
         }
@@ -205,9 +205,10 @@ namespace ESME.Views.PSM
         }
 
         [MediatorMessageSink(MediatorMessage.PSMModeChanged), UsedImplicitly]
-        void ModeChanged(Mode mode)
+        void UpdateMode(Mode mode)
         {
             DisplayedView = null;
+            AddModeToContext(mode);
             //replace it in the tree view list
 
             //update the database context 
@@ -218,20 +219,39 @@ namespace ESME.Views.PSM
         }
 
         #region ViewLoadedCommand
-        PSMTreeView _view;
-
         public SimpleCommand<object, EventToCommandArgs> ViewLoadedCommand
         {
             get { return _viewLoaded ?? (_viewLoaded = new SimpleCommand<object, EventToCommandArgs>(ViewLoadedHandler)); }
         }
 
         SimpleCommand<object, EventToCommandArgs> _viewLoaded;
-
+        PSMTreeView _view;
         void ViewLoadedHandler(EventToCommandArgs args)
         {
             var routedEventArgs = (RoutedEventArgs)args.EventArgs;
             var source = routedEventArgs.Source;
             _view = (PSMTreeView)source;
+        }
+        #endregion
+
+        #region ViewClosingCommand
+        public SimpleCommand<object, EventToCommandArgs> ViewClosingCommand
+        {
+            get { return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(ViewClosingHandler)); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _viewClosing;
+
+        void ViewClosingHandler(EventToCommandArgs args)
+        {
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+               throw new ApplicationException("caught error in saveChanges, " + e.Message);
+            }
         }
         #endregion
 

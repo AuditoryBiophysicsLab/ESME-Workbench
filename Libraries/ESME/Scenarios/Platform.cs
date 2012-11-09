@@ -361,7 +361,7 @@ namespace ESME.Scenarios
             {
                 return _addPSMSource ?? (_addPSMSource = new SimpleCommand<object, EventToCommandArgs>(o =>
                 {
-                    var source = Source.NewPSMSource();
+                    var source = Source.NewPSMSource(this);
                     MediatorMessage.Send(MediatorMessage.AddPSMSource, source);
                 }));
             }
