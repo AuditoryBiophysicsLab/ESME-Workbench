@@ -278,12 +278,30 @@ namespace SimulationLogAnalysis
         public bool AreAnyPlatformsSelected { get; private set; }
         public bool AreAnyModesSelected { get; private set; }
         public bool AreAnySpeciesSelected { get; private set; }
-
         async void PerformAnalysis()
         {
             Task<bool> processTask = null;
+            var selectedModeIds = (from mode in AvailableModes
+                                   where mode.IsSelected
+                                   select ((ModeNameGuid)mode.NameGuidRecord).ActorID).ToList();
+            var selectedSpeciesGuids = (from species in AvailableSpecies
+                                        where species.IsSelected
+                                        select species.NameGuidRecord.Guid).ToList();
+            Func<ActorExposureRecord, bool> modeFilter = record =>
+            {
+                var speciesRecord = SimulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid;
+                if (speciesRecord == null) return false;
+                return selectedModeIds.Contains(record.ModeID);
+            };
+            Func<ActorExposureRecord, bool> speciesFilter = record =>
+            {
+                var speciesRecord = SimulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid;
+                if (speciesRecord == null) return false;
+                return selectedSpeciesGuids.Contains(speciesRecord.Guid);
+            };
+
             _dispatcher.InvokeIfRequired(() => OpenWindows.Add(_visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels))));
-            ModeThresholdHistogram = new ModeThresholdHistogram(this, SimulationLog, StartBinValue, BinWidth, BinCount);
+            ModeThresholdHistogram = new ModeThresholdHistogram(this, SimulationLog, StartBinValue, BinWidth, BinCount, modeFilter, speciesFilter);
             _modeBinsCollectionObserver = new CollectionObserver(ModeThresholdHistogram.GroupedExposures.Groups)
                 .RegisterHandler((s, e) =>
                 {
@@ -295,14 +313,15 @@ namespace SimulationLogAnalysis
                     }
                 });
             var timeStepIndex = 0;
-            foreach (var timeStepRecord in SimulationLog)
+            foreach (var timeStepRecord in SimulationLog.Where(timeStepRecord => !SelectedTimeRange || (timeStepRecord.StartTime >= _filterStartTime && _filterEndTime >= timeStepRecord.StartTime))) 
             {
-                if (SelectedTimeRange && (timeStepRecord.StartTime < _filterStartTime || _filterEndTime < timeStepRecord.StartTime)) continue;
                 timeStepRecord.ReadAll();
                 timeStepIndex++;
                 var record = timeStepRecord;
                 if (processTask != null) await processTask;
+
                 processTask = ModeThresholdHistogram.Process(record, _dispatcher);
+
                 if (timeStepIndex % 10 == 0) _dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
             }
             if (processTask != null) await processTask;

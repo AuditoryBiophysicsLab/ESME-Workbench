@@ -13,10 +13,11 @@ namespace ESME.SimulationAnalysis
     /// </summary>
     public class ModeThresholdHistogram : ITimeStepProcessor
     {
-        public ModeThresholdHistogram(IHistogramSource histogramSource, SimulationLog simulationLog, double lowBinValue, double binWidth, int binCount)
+        public ModeThresholdHistogram(IHistogramSource histogramSource, SimulationLog simulationLog, double lowBinValue, double binWidth, int binCount, Func<ActorExposureRecord, bool> modeFilter = null, Func<ActorExposureRecord, bool> speciesFilter = null)
         {
             SimulationLog = simulationLog;
-            Func<ActorExposureRecord, bool> recordFilter = record => (SimulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid) != null;
+            if (modeFilter == null) modeFilter = record => (SimulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid) != null;
+            if (speciesFilter == null) speciesFilter = modeFilter;
             GroupedExposures = new GroupedExposures(histogramSource, lowBinValue, binWidth, binCount);
             GroupedExposures.GroupDescriptions.Add(new ExposureGroupDescription
             {
@@ -25,14 +26,14 @@ namespace ESME.SimulationAnalysis
                     var modeRecord = SimulationLog.RecordFromModeID(record.ModeID);
                     return string.Format("{0}:{1}", modeRecord.PlatformRecord.Name, modeRecord.Name);
                 },
-                RecordFilter = recordFilter,
+                RecordFilter = modeFilter,
                 RecordToKey = record => SimulationLog.ModeRecords.IndexOf(SimulationLog.RecordFromModeID(record.ModeID)),
                 RecordToGuid = record => SimulationLog.RecordFromModeID(record.ModeID).Guid,
             });
             GroupedExposures.GroupDescriptions.Add(new ExposureGroupDescription
             {
                 GroupName = record => SimulationLog.RecordFromActorID(record.ActorID).Name,
-                RecordFilter = recordFilter,
+                RecordFilter = speciesFilter,
                 RecordToKey = record => SimulationLog.SpeciesRecords.IndexOf(((SpeciesNameGuid)SimulationLog.RecordFromActorID(record.ActorID))),
                 RecordToGuid = record => SimulationLog.RecordFromActorID(record.ActorID).Guid,
             });
