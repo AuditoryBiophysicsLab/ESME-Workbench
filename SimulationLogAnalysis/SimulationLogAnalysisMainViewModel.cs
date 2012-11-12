@@ -290,14 +290,12 @@ namespace SimulationLogAnalysis
             Func<ActorExposureRecord, bool> modeFilter = record =>
             {
                 var speciesRecord = SimulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid;
-                if (speciesRecord == null) return false;
-                return selectedModeIds.Contains(record.ModeID);
+                return speciesRecord != null && selectedModeIds.Contains(record.ModeID);
             };
             Func<ActorExposureRecord, bool> speciesFilter = record =>
             {
                 var speciesRecord = SimulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid;
-                if (speciesRecord == null) return false;
-                return selectedSpeciesGuids.Contains(speciesRecord.Guid);
+                return speciesRecord != null && selectedSpeciesGuids.Contains(speciesRecord.Guid);
             };
 
             _dispatcher.InvokeIfRequired(() => OpenWindows.Add(_visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels))));
