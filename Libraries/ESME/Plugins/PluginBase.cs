@@ -69,6 +69,13 @@ namespace ESME.Plugins
     }
 
     [Serializable]
+    public class TransmissionLossCalculatorPluginBase : PluginBase
+    {
+        protected override void Save() { }
+        public override void LoadSettings() { }
+    }
+
+    [Serializable]
     public abstract class EnvironmentalDataSourcePluginBase : PluginBase
     {
         protected EnvironmentalDataSourcePluginBase() { SelectionControl = null; }

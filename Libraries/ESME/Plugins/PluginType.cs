@@ -14,5 +14,8 @@ namespace ESME.Plugins
         SoundSpeed = 101,
         Sediment = 102,
         Bathymetry = 103,
+        Bellhop = 200,
+        RAMGeo = 201,
+        RAMSGeo = 202,
     }
 }
