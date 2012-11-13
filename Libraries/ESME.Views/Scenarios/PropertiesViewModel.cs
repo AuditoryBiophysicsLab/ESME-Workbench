@@ -1,4 +1,5 @@
 ﻿using ESME.Scenarios;
+using HRC.Aspects;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -14,6 +15,7 @@ namespace ESME.Views.Scenarios
     /// var vm = new CreatePlatformViewModel {...};
     /// var window = _visualizerService.ShowWindow("CreatePlatformView", vm);
     /// </summary>
+    
     public class PropertiesViewModel : ViewModelBase
     {
         public string WindowTitle { get; set; }
@@ -21,7 +23,15 @@ namespace ESME.Views.Scenarios
         public bool IsPSMView { get; set; }
         public bool IsNew { get; set; }
         object _propertyObject;
-        
+        public PropertiesViewModel(object propertyObject)
+        {
+            PropertyObject = propertyObject;
+            _propertyObject = propertyObject;
+        }
+
+        public PropertiesViewModel() {
+            
+        }
 
         #region OkCommand
         public SimpleCommand<object, EventToCommandArgs> OkCommand
@@ -44,22 +54,25 @@ namespace ESME.Views.Scenarios
                 {
                     if (PropertyObject is Platform)
                     {
-                        MediatorMessage.Send(MediatorMessage.PSMPlatformChanged, PropertyObject);
+                        MediatorMessage.Send(MediatorMessage.PSMPlatformAdded, PropertyObject);
                     }
                     if (PropertyObject is Source)
                     {
-                        MediatorMessage.Send(MediatorMessage.PSMSourceChanged, PropertyObject);
+                        MediatorMessage.Send(MediatorMessage.PSMSourceAdded, PropertyObject);
                     }
                 }
                 else
                 {
-                    if (PropertyObject is Platform)
+                    if (!_propertyObject.Equals(PropertyObject))
                     {
-                       // MediatorMessage.Send(MediatorMessage.PSMPlatformChanged, PropertyObject);
-                    }
-                    if (PropertyObject is Source)
-                    {
-                        //MediatorMessage.Send(MediatorMessage.PSMSourceChanged, PropertyObject);
+                        if (PropertyObject is Platform)
+                        {
+                             MediatorMessage.Send(MediatorMessage.PSMPlatformChanged, PropertyObject);
+                        }
+                        if (PropertyObject is Source)
+                        {
+                            MediatorMessage.Send(MediatorMessage.PSMSourceChanged, PropertyObject);
+                        }
                     }
                 }
             }

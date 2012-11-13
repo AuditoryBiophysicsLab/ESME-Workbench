@@ -194,6 +194,26 @@ namespace ESME.Scenarios
                 }
         }
 
+        public bool Equals(Platform other)
+        {
+            if (Description != other.Description) return false;
+            if (Launches != other.Launches) return false;
+            if (Tows != other.Tows) return false;
+            if (RepeatCount != other.RepeatCount) return false;
+            if (PlatformName != other.PlatformName) return false;
+            if (PlatformType != other.PlatformName) return false;
+            if (Math.Abs(Depth - other.Depth) > .1) return false;
+            if (Math.Abs(Course - other.Course) > .1) return false;
+            if (Math.Abs(Speed - other.Speed) > .1) return false;
+
+            var sources = (from s in Sources orderby s.SourceName select s).ToList();
+            var othersources = (from s in other.Sources orderby s.SourceName select s).ToList();
+            if(sources.Count()!= othersources.Count()) return false;
+            if (sources.Where((t, i) => !t.Equals(othersources[i])).Any()) return false;
+
+            return true;
+        }
+
         public static Platform NewPSMPlatform()
         {
             return new Platform()
@@ -223,6 +243,16 @@ namespace ESME.Scenarios
             LayerSettings = null;
             Scenario.Database.Context.Platforms.Remove(this);
         }
+
+        public void Refresh()
+        {
+            if (LayerSettings.MapLayerViewModel == null) return;
+            PlatformBehavior = null;
+            RemoveMapLayers();
+            CreateMapLayers();
+        }
+
+        #region Map Layer methods
 
         public void CreateMapLayers()
         {
@@ -269,17 +299,10 @@ namespace ESME.Scenarios
             mapLayer.Done();
             LayerSettings.MapLayerViewModel = mapLayer;
         }
-
-        public void Refresh()
-        {
-            if (LayerSettings.MapLayerViewModel == null) return;
-            PlatformBehavior = null;
-            RemoveMapLayers();
-            CreateMapLayers();
-        }
-
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
-
+        #endregion
+        
+        #region OnPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged(string propertyName)
@@ -294,7 +317,8 @@ namespace ESME.Scenarios
                 }
                 else handler(this, new PropertyChangedEventArgs(propertyName));
         }
-
+        #endregion
+        
         #region Commands
         #region PlatformPropertiesCommand
         public SimpleCommand<object, EventToCommandArgs> PlatformPropertiesCommand

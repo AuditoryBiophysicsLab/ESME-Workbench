@@ -249,6 +249,12 @@ namespace ESME.Scenarios
             };
         }
 
+        public bool Equals(Mode other)
+        {
+            if (!IsAcousticallyEquivalentTo(other)) return false;
+            return true;
+        }
+        
         public void Delete()
         {
             Source.Modes.Remove(this);

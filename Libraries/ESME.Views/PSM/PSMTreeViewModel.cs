@@ -84,10 +84,10 @@ namespace ESME.Views.PSM
         void NewPlatformHandler(EventToCommandArgs args)
         {
             var platform = Platform.NewPSMPlatform();
-            var vm = new PropertiesViewModel
+            var vm = new PropertiesViewModel(platform)
             {
-                PropertyObject = platform,
                 IsPSMView = true,
+                IsNew = true,
             };
             DisplayedView = new PlatformPropertiesControlView {DataContext = vm};
         }
@@ -98,10 +98,14 @@ namespace ESME.Views.PSM
         {
             DisplayedView = null;
             if (!_context.Platforms.Local.Contains(platform)) //this is probably the wrong test.
-            {
                 AddPlatform(platform);
-                _context.SaveChanges();
-            }
+        }
+
+        [MediatorMessageSink(MediatorMessage.PSMPlatformAdded),UsedImplicitly]
+        void NewPlatform(Platform platform)
+        {
+            DisplayedView = null;
+            AddPlatform(platform);
         }
 
         [MediatorMessageSink(MediatorMessage.DeletePSMPlatform), UsedImplicitly]
@@ -116,9 +120,8 @@ namespace ESME.Views.PSM
         [MediatorMessageSink(MediatorMessage.EditPSMPlatform), UsedImplicitly]
         void EditPlatform(Platform platform)
         {
-            var vm = new PropertiesViewModel
+            var vm = new PropertiesViewModel(platform)
             {
-                PropertyObject = platform,
                 IsPSMView = true,
             };
             DisplayedView = new PlatformPropertiesControlView {DataContext = vm};
@@ -133,9 +136,8 @@ namespace ESME.Views.PSM
         [MediatorMessageSink(MediatorMessage.AddPSMSource), UsedImplicitly]
         void AddSource(Source source)
         {
-            var vm = new PropertiesViewModel
+            var vm = new PropertiesViewModel(source)
             {
-                PropertyObject = source,
                 IsPSMView = true,
                 IsNew = true,
             };
@@ -145,9 +147,8 @@ namespace ESME.Views.PSM
         [MediatorMessageSink(MediatorMessage.EditPSMSource), UsedImplicitly]
         void EditSource(Source source)
         {
-            var vm = new PropertiesViewModel
+            var vm = new PropertiesViewModel(source)
             {
-                PropertyObject = source,
                 IsPSMView = true,
             };
             DisplayedView = new SourcePropertiesControlView {DataContext = vm};
@@ -162,12 +163,20 @@ namespace ESME.Views.PSM
             _context.SaveChanges();
         }
 
+        [MediatorMessageSink(MediatorMessage.PSMSourceAdded), UsedImplicitly]
+        void NewSource(Source source)
+        {
+            DisplayedView = null;
+            AddSourceToContext(source);
+        }
+
         [MediatorMessageSink(MediatorMessage.PSMSourceChanged), UsedImplicitly]
         void UpdateSource(Source source)
         {
             DisplayedView = null;
             AddSourceToContext(source);
         }
+
 
         [MediatorMessageSink(MediatorMessage.CopyPSMSource), UsedImplicitly]
         void CopySource(Source source)

@@ -69,6 +69,18 @@ namespace ESME.Scenarios
 
         #endregion
 
+        public bool Equals(Source other)
+        {
+            if (SourceName != other.SourceName) return false;
+            if (SourceType != other.SourceType) return false;
+            var modes = (from m in Modes orderby m.ModeName select m).ToList();
+            var othermodes = (from m in other.Modes orderby m.ModeName select m).ToList();
+            if (modes.Count != othermodes.Count) return false;
+            if (modes.Where((t, i) => !t.Equals(othermodes[i])).Any()) return false;
+
+            return true;
+        }
+
         #region commands
 
         #region AddModeCommand

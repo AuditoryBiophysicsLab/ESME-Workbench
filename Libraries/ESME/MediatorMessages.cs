@@ -33,6 +33,7 @@ namespace ESME
 
         public const string AddPlatform = "AddPlatformMessage";
         public const string EditPSMPlatform = "EditPSMPlatformMessage";
+        public const string PSMPlatformAdded = "PSMPlatformAddedMessage";
         public const string PSMPlatformChanged = "PSMPlatformChangedMessage";
         public const string CopyPSMPlatform = "CopyPSMPlatformMessage";
         public const string DeletePSMPlatform = "DeletePSMPlatformMessage";
@@ -43,6 +44,7 @@ namespace ESME
         public const string AddSource = "AddSourceMessage";
         public const string AddPSMSource = "AddPSMSourceMessage";
         public const string PSMSourceChanged = "PSMSourceChangedMessage";
+        public const string PSMSourceAdded = "PSMSourceAddedMessage";
         public const string EditPSMSource = "EditPSMSourceMessage";
         public const string CopyPSMSource = "CopyPSMSourceMessage";
         public const string DeleteSource = "DeleteSourceMessage";
