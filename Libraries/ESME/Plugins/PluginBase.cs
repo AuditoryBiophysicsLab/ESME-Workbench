@@ -71,6 +71,7 @@ namespace ESME.Plugins
     [Serializable]
     public class TransmissionLossCalculatorPluginBase : PluginBase
     {
+        public TransmissionLossCalculatorPluginBase() { PluginType = PluginType.TransmissionLossCalculator; }
         protected override void Save() { }
         public override void LoadSettings() { }
     }

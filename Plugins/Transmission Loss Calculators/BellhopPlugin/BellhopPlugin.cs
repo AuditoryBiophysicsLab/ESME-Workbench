@@ -10,8 +10,13 @@ namespace BellhopPlugin
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ESMEPlugin(Name = "Bellhop",
-                Description = "Bellhop is a highly efficient ray tracing program, written by Michael Porter of Heat, Light and Sound Research (hlsresearch.com) as part of the Acoustic Toolbox.")]
+                Description = "Bellhop is a highly efficient ray tracing program, written by Michael Porter of hlsresearch.com as part of the Acoustic Toolbox.")]
     public class BellhopPlugin : TransmissionLossCalculatorPluginBase
     {
+        public BellhopPlugin() 
+        {
+            //SetPropertiesFromAttributes(GetType());
+            PluginSubtype = PluginSubtype.Bellhop;
+        }
     }
 }
