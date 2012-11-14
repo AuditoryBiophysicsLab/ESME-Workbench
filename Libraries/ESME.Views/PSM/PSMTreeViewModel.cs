@@ -58,19 +58,13 @@ namespace ESME.Views.PSM
 
         public PSMTreeViewModel() { }
 
+        #region platforms
+
         public void AddPlatform(Platform platform)
         {
             _context.Platforms.Add(platform);
             Platforms.Add(platform);
             _context.SaveChanges();
-        }
-
-        [MediatorMessageSink(MediatorMessage.CopyPSMPlatform), UsedImplicitly]
-        void CopyPlatform(Platform platform)
-        {
-            var newplatform = new Platform(platform);
-            newplatform.PlatformName = newplatform.PlatformName + " (copy)";
-            AddPlatform(newplatform);
         }
 
         #region NewPlatformCommand
@@ -84,28 +78,38 @@ namespace ESME.Views.PSM
         void NewPlatformHandler(EventToCommandArgs args)
         {
             var platform = Platform.NewPSMPlatform();
-            var vm = new PropertiesViewModel(platform)
+            var vm = new PropertiesViewModel
             {
+                PropertyObject = platform,
                 IsPSMView = true,
-                IsNew = true,
             };
-            DisplayedView = new PlatformPropertiesControlView {DataContext = vm};
+            DisplayedView = new PlatformPropertiesControlView { DataContext = vm };
         }
         #endregion
+
+        [MediatorMessageSink(MediatorMessage.CopyPSMPlatform), UsedImplicitly]
+        void CopyPlatform(Platform platform)
+        {
+            var newplatform = new Platform(platform);
+            newplatform.PlatformName = newplatform.PlatformName + " (copy)";
+            AddPlatform(newplatform);
+        }
+
+        [MediatorMessageSink(MediatorMessage.EditPSMPlatform), UsedImplicitly]
+        void EditPlatform(Platform platform)
+        {
+            var vm = new PropertiesViewModel
+            {
+                PropertyObject = platform,
+                IsPSMView = true,
+            };
+            DisplayedView = new PlatformPropertiesControlView { DataContext = vm };
+        }
 
         [MediatorMessageSink(MediatorMessage.PSMPlatformChanged), UsedImplicitly]
         void UpdatePlatforms(Platform platform)
         {
             DisplayedView = null;
-            if (!_context.Platforms.Local.Contains(platform)) //this is probably the wrong test.
-                AddPlatform(platform);
-        }
-
-        [MediatorMessageSink(MediatorMessage.PSMPlatformAdded),UsedImplicitly]
-        void NewPlatform(Platform platform)
-        {
-            DisplayedView = null;
-            AddPlatform(platform);
         }
 
         [MediatorMessageSink(MediatorMessage.DeletePSMPlatform), UsedImplicitly]
@@ -116,17 +120,9 @@ namespace ESME.Views.PSM
             _context.Platforms.Remove(platform);
             _context.SaveChanges();
         }
+        #endregion
 
-        [MediatorMessageSink(MediatorMessage.EditPSMPlatform), UsedImplicitly]
-        void EditPlatform(Platform platform)
-        {
-            var vm = new PropertiesViewModel(platform)
-            {
-                IsPSMView = true,
-            };
-            DisplayedView = new PlatformPropertiesControlView {DataContext = vm};
-        }
-
+        #region sources
         public void AddSourceToContext(Source source)
         {
             _context.Sources.Add(source);
@@ -136,23 +132,34 @@ namespace ESME.Views.PSM
         [MediatorMessageSink(MediatorMessage.AddPSMSource), UsedImplicitly]
         void AddSource(Source source)
         {
-            var vm = new PropertiesViewModel(source)
+            var vm = new PropertiesViewModel
             {
+                PropertyObject = source,
                 IsPSMView = true,
-                IsNew = true,
             };
-            DisplayedView = new SourcePropertiesControlView {DataContext = vm};
+            DisplayedView = new SourcePropertiesControlView { DataContext = vm };
+        }
+
+        [MediatorMessageSink(MediatorMessage.CopyPSMSource), UsedImplicitly]
+        void CopySource(Source source)
+        {
+            var newsource = new Source(source);
+            //  Clipboard.SetData(DataFormats.Serializable, newsource);
         }
 
         [MediatorMessageSink(MediatorMessage.EditPSMSource), UsedImplicitly]
         void EditSource(Source source)
         {
-            var vm = new PropertiesViewModel(source)
+            var vm = new PropertiesViewModel
             {
+                PropertyObject = source,
                 IsPSMView = true,
             };
-            DisplayedView = new SourcePropertiesControlView {DataContext = vm};
+            DisplayedView = new SourcePropertiesControlView { DataContext = vm };
         }
+
+        [MediatorMessageSink(MediatorMessage.PSMSourceChanged), UsedImplicitly]
+        void UpdateSource(Source source) { DisplayedView = null; }
 
         [MediatorMessageSink(MediatorMessage.DeletePSMSource), UsedImplicitly]
         void DeleteSource(Source source)
@@ -162,28 +169,9 @@ namespace ESME.Views.PSM
             _context.Sources.Remove(source);
             _context.SaveChanges();
         }
+        #endregion
 
-        [MediatorMessageSink(MediatorMessage.PSMSourceAdded), UsedImplicitly]
-        void NewSource(Source source)
-        {
-            DisplayedView = null;
-            AddSourceToContext(source);
-        }
-
-        [MediatorMessageSink(MediatorMessage.PSMSourceChanged), UsedImplicitly]
-        void UpdateSource(Source source)
-        {
-            DisplayedView = null;
-            AddSourceToContext(source);
-        }
-
-
-        [MediatorMessageSink(MediatorMessage.CopyPSMSource), UsedImplicitly]
-        void CopySource(Source source)
-        {
-            var newsource = new Source(source);
-            Clipboard.SetData(DataFormats.Serializable, newsource);
-        }
+        #region modes
 
         public void AddModeToContext(Mode mode)
         {
@@ -194,16 +182,25 @@ namespace ESME.Views.PSM
         [MediatorMessageSink(MediatorMessage.AddPSMMode), UsedImplicitly]
         void AddMode(Mode mode)
         {
-            var vm = new ModePropertiesViewModel(mode) {IsPSMView = true,};
-            DisplayedView = new ModePropertiesControlView {DataContext = vm};
+            var vm = new ModePropertiesViewModel(mode) { IsPSMView = true, };
+            DisplayedView = new ModePropertiesControlView { DataContext = vm };
+        }
+
+        [MediatorMessageSink(MediatorMessage.CopyPSMMode), UsedImplicitly]
+        void CopyMode(Mode mode)
+        {
+            var newmode = new Mode(mode);
         }
 
         [MediatorMessageSink(MediatorMessage.EditPSMMode), UsedImplicitly]
         void EditMode(Mode mode)
         {
-            var vm = new ModePropertiesViewModel(mode) {IsPSMView = true,};
-            DisplayedView = new ModePropertiesControlView {DataContext = vm,};
+            var vm = new ModePropertiesViewModel(mode) { IsPSMView = true, };
+            DisplayedView = new ModePropertiesControlView { DataContext = vm, };
         }
+
+        [MediatorMessageSink(MediatorMessage.PSMModeChanged), UsedImplicitly]
+        void UpdateMode(Mode mode) { DisplayedView = null; }
 
         [MediatorMessageSink(MediatorMessage.DeletePSMMode), UsedImplicitly]
         void DeleteMode(Mode mode)
@@ -213,19 +210,7 @@ namespace ESME.Views.PSM
             _context.SaveChanges();
         }
 
-        [MediatorMessageSink(MediatorMessage.PSMModeChanged), UsedImplicitly]
-        void UpdateMode(Mode mode)
-        {
-            DisplayedView = null;
-            AddModeToContext(mode);
-            //replace it in the tree view list
-
-            //update the database context 
-
-            //propagate changes to all other sources that point to this mode -- or are we instead creating a new mode?
-
-            //save changes?
-        }
+        #endregion
 
         #region ViewLoadedCommand
         public SimpleCommand<object, EventToCommandArgs> ViewLoadedCommand
@@ -259,7 +244,7 @@ namespace ESME.Views.PSM
             }
             catch (Exception e)
             {
-               throw new ApplicationException("caught error in saveChanges, " + e.Message);
+                throw new ApplicationException("caught error in saveChanges, " + e.Message);
             }
         }
         #endregion
@@ -322,22 +307,22 @@ namespace ESME.Views.PSM
             var s1 = Source.NewPSMSource();
             s1.SourceName = "Source 1";
             s1.SourceType = "demo source";
-            s1.Modes = new ObservableList<Mode> {m1};
+            s1.Modes = new ObservableList<Mode> { m1 };
 
             var s2 = Source.NewPSMSource();
             s2.SourceName = "Source 2";
             s2.SourceType = "demo source";
-            s2.Modes = new ObservableList<Mode> {m2};
+            s2.Modes = new ObservableList<Mode> { m2 };
 
             var p1 = Platform.NewPSMPlatform();
             p1.PlatformName = "Platform 1";
             p1.PlatformType = "a test platform";
-            p1.Sources = new ObservableList<Source> {s1};
+            p1.Sources = new ObservableList<Source> { s1 };
 
             var p2 = Platform.NewPSMPlatform();
             p2.PlatformName = "Platform 2";
             p2.PlatformType = "a test platform";
-            p2.Sources = new ObservableList<Source> {s2};
+            p2.Sources = new ObservableList<Source> { s2 };
 
             var p3 = Platform.NewPSMPlatform();
             p3.PlatformName = "Platform 3";

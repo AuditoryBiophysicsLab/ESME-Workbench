@@ -71,6 +71,7 @@ namespace ESME.Scenarios
 
         public bool Equals(Source other)
         {
+            if (Guid != other.Guid) return false;
             if (SourceName != other.SourceName) return false;
             if (SourceType != other.SourceType) return false;
             var modes = (from m in Modes orderby m.ModeName select m).ToList();

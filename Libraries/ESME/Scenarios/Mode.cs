@@ -248,12 +248,6 @@ namespace ESME.Scenarios
                 Source = source,
             };
         }
-
-        public bool Equals(Mode other)
-        {
-            if (!IsAcousticallyEquivalentTo(other)) return false;
-            return true;
-        }
         
         public void Delete()
         {

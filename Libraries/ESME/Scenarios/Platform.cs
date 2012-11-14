@@ -196,6 +196,7 @@ namespace ESME.Scenarios
 
         public bool Equals(Platform other)
         {
+            if (Guid != other.Guid) return false;
             if (Description != other.Description) return false;
             if (Launches != other.Launches) return false;
             if (Tows != other.Tows) return false;

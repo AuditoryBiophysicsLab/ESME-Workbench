@@ -22,7 +22,7 @@ namespace ESME.Views.Scenarios
             LowFrequency = _mode.LowFrequency;
             HighFrequency = _mode.HighFrequency;
             PulseIntervalString = _mode.PulseInterval != null ? ((TimeSpan)_mode.PulseInterval).ToString(TimeSpanFormatString) : null;
-            PulseLengthString = _mode.PulseLength != null ? ((TimeSpan)_mode.PulseLength).ToString(TimeSpanFormatString):null;
+            PulseLengthString = _mode.PulseLength != null ? ((TimeSpan)_mode.PulseLength).ToString(TimeSpanFormatString) : null;
             HorizontalBeamWidth = _mode.HorizontalBeamWidth;
             VerticalBeamWidth = _mode.VerticalBeamWidth;
             DepressionElevationAngle = _mode.DepressionElevationAngle;
@@ -195,27 +195,26 @@ namespace ESME.Views.Scenarios
         void OkHandler(EventToCommandArgs args)
         {
             //var parameter = args.CommandParameter; 
-            if (IsPSMView) { MediatorMessage.Send(MediatorMessage.PSMModeChanged, _mode); }
-            else
-            {
-                //var parameter = args.CommandParameter;
-                AcousticPropertiesHaveChanged = HaveAcousticPropertiesChanged();
-                RadiusHasChanged = Math.Abs(MaxPropagationRadius - _mode.MaxPropagationRadius) > 0.1;
-                _mode.ModeName = ModeName;
-                _mode.ModeType = ModeType;
-                _mode.Depth = Depth;
-                _mode.SourceLevel = SourceLevel;
-                _mode.LowFrequency = LowFrequency;
-                _mode.HighFrequency = HighFrequency;
-                _mode.PulseInterval = TimeSpan.ParseExact(PulseIntervalString, TimeSpanFormatString, null);
-                _mode.PulseLength = TimeSpan.ParseExact(PulseLengthString, TimeSpanFormatString, null);
-                _mode.HorizontalBeamWidth = HorizontalBeamWidth;
-                _mode.VerticalBeamWidth = VerticalBeamWidth;
-                _mode.DepressionElevationAngle = DepressionElevationAngle;
-                _mode.RelativeBeamAngle = RelativeBeamAngle;
-                _mode.MaxPropagationRadius = MaxPropagationRadius;
-                CloseActivePopUpCommand.Execute(true);
-            }
+
+
+            //var parameter = args.CommandParameter;
+            AcousticPropertiesHaveChanged = HaveAcousticPropertiesChanged();
+            RadiusHasChanged = Math.Abs(MaxPropagationRadius - _mode.MaxPropagationRadius) > 0.1;
+            _mode.ModeName = ModeName;
+            _mode.ModeType = ModeType;
+            _mode.Depth = Depth;
+            _mode.SourceLevel = SourceLevel;
+            _mode.LowFrequency = LowFrequency;
+            _mode.HighFrequency = HighFrequency;
+            _mode.PulseInterval = TimeSpan.ParseExact(PulseIntervalString, TimeSpanFormatString, null);
+            _mode.PulseLength = TimeSpan.ParseExact(PulseLengthString, TimeSpanFormatString, null);
+            _mode.HorizontalBeamWidth = HorizontalBeamWidth;
+            _mode.VerticalBeamWidth = VerticalBeamWidth;
+            _mode.DepressionElevationAngle = DepressionElevationAngle;
+            _mode.RelativeBeamAngle = RelativeBeamAngle;
+            _mode.MaxPropagationRadius = MaxPropagationRadius;
+            if (IsPSMView) MediatorMessage.Send(MediatorMessage.PSMModeChanged, _mode);
+            else CloseActivePopUpCommand.Execute(true);
         }
         #endregion
         #region CancelCommand
@@ -228,10 +227,10 @@ namespace ESME.Views.Scenarios
             if (IsPSMView) { }
             else
             {
-                CloseActivePopUpCommand.Execute(false);    
+                CloseActivePopUpCommand.Execute(false);
             }
         }
         #endregion
-        
+
     }
 }
