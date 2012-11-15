@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows;
 using ESME.PSM;
 using ESME.Scenarios;
@@ -144,7 +145,24 @@ namespace ESME.Views.PSM
         void CopySource(Source source)
         {
             var newsource = new Source(source);
-            //  Clipboard.SetData(DataFormats.Serializable, newsource);
+            if(IsSerializable(source)) Clipboard.SetData(DataFormats.Serializable, newsource);
+        }
+
+        private static bool IsSerializable(object obj)
+        {
+            System.IO.MemoryStream mem = new System.IO.MemoryStream();
+            BinaryFormatter bin = new BinaryFormatter();
+            try
+            {
+                bin.Serialize(mem, obj);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Your object cannot be serialized." +
+                                 " The reason is: " + ex.ToString());
+                return false;
+            }
         }
 
         [MediatorMessageSink(MediatorMessage.EditPSMSource), UsedImplicitly]

@@ -12,7 +12,7 @@ using HRC.WPF;
 
 namespace ESME.Scenarios
 {
-    [NotifyPropertyChanged]
+    [NotifyPropertyChanged,Serializable]
     public class Mode : IHaveGuid
     {
         public Mode() {}
@@ -119,7 +119,7 @@ namespace ESME.Scenarios
                 MediatorMessage.Send(MediatorMessage.ModeBoundToLayer, this);
             }
         }
-
+        
         object _layerControl;
 
         [NotMapped] public int ModeID { get; set; }
@@ -130,10 +130,9 @@ namespace ESME.Scenarios
         public void CreateMapLayers() { throw new NotImplementedException(); }
         public void RemoveMapLayers() { throw new NotImplementedException(); }
         
- 
-
         #region DeleteModeCommand
         public SimpleCommand<object, EventToCommandArgs> DeleteModeCommand { get { return _deleteMode ?? (_deleteMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteMode, this))); } }
+         
         SimpleCommand<object, EventToCommandArgs> _deleteMode;
         #endregion
 
@@ -142,7 +141,7 @@ namespace ESME.Scenarios
         {
             get { return _editPSMMode ?? (_editPSMMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.EditPSMMode, this))); }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _editPSMMode;
         #endregion
 
@@ -151,7 +150,7 @@ namespace ESME.Scenarios
         {
             get { return _copyPSMMode ?? (_copyPSMMode = new SimpleCommand<object, EventToCommandArgs>(o=> MediatorMessage.Send(MediatorMessage.CopyPSMMode,this))); }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _copyPSMMode;
 
         #endregion
@@ -161,18 +160,20 @@ namespace ESME.Scenarios
         {
             get { return _deletePSMMode ?? (_deletePSMMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeletePSMMode,this))); }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _deletePSMMode;
 
         #endregion
 
         #region RecalculateModeCommand
         public SimpleCommand<object, EventToCommandArgs> RecalculateModeCommand { get { return _recalculateMode ?? (_recalculateMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.RecalculateMode, this))); } }
+         
         SimpleCommand<object, EventToCommandArgs> _recalculateMode;
         #endregion
 
         #region ModePropertiesCommand
         public SimpleCommand<object, EventToCommandArgs> ModePropertiesCommand { get { return _modeProperties ?? (_modeProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.ModeProperties, this))); } }
+         
         SimpleCommand<object, EventToCommandArgs> _modeProperties;
         #endregion
         
@@ -180,6 +181,7 @@ namespace ESME.Scenarios
 
         #region MoveLayerToFrontCommand
         public SimpleCommand<object, EventToCommandArgs> MoveLayerToFrontCommand { get { return _moveLayerToFront ?? (_moveLayerToFront = new SimpleCommand<object, EventToCommandArgs>(MoveLayerToFront)); } }
+         
         SimpleCommand<object, EventToCommandArgs> _moveLayerToFront;
 
         void MoveLayerToFront(EventToCommandArgs args)
@@ -191,6 +193,7 @@ namespace ESME.Scenarios
 
         #region MoveLayerForwardCommand
         public SimpleCommand<object, EventToCommandArgs> MoveLayerForwardCommand { get { return _moveLayerForward ?? (_moveLayerForward = new SimpleCommand<object, EventToCommandArgs>(MoveLayerForward)); } }
+         
         SimpleCommand<object, EventToCommandArgs> _moveLayerForward;
 
         void MoveLayerForward(EventToCommandArgs args)
@@ -202,6 +205,7 @@ namespace ESME.Scenarios
 
         #region MoveLayerBackwardCommand
         public SimpleCommand<object, EventToCommandArgs> MoveLayerBackwardCommand { get { return _moveLayerBackward ?? (_moveLayerBackward = new SimpleCommand<object, EventToCommandArgs>(MoveLayerBackward)); } }
+        
         SimpleCommand<object, EventToCommandArgs> _moveLayerBackward;
 
         void MoveLayerBackward(EventToCommandArgs args)
@@ -213,6 +217,7 @@ namespace ESME.Scenarios
 
         #region MoveLayerToBackCommand
         public SimpleCommand<object, EventToCommandArgs> MoveLayerToBackCommand { get { return _moveLayerToBack ?? (_moveLayerToBack = new SimpleCommand<object, EventToCommandArgs>(MoveLayerToBack)); } }
+        
         SimpleCommand<object, EventToCommandArgs> _moveLayerToBack;
 
         void MoveLayerToBack(EventToCommandArgs args)

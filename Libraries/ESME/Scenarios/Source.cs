@@ -1,6 +1,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Windows;
 using ESME.Locations;
 using HRC.Aspects;
 using HRC.Utility;
@@ -50,6 +53,7 @@ namespace ESME.Scenarios
         public ObservableList<LogEntry> Logs { get; set; }
         #endregion
 
+
         #region Unmapped Properties
         [NotMapped]
         public string PSMName { get { return string.Format("{0}:{1}", Platform.PlatformName, SourceName); } }
@@ -65,6 +69,7 @@ namespace ESME.Scenarios
                 MediatorMessage.Send(MediatorMessage.SourceBoundToLayer, this);
             }
         }
+         
         object _layerControl;
 
         #endregion
@@ -85,7 +90,11 @@ namespace ESME.Scenarios
         #region commands
 
         #region AddModeCommand
-        public SimpleCommand<object, EventToCommandArgs> AddModeCommand { get { return _addMode ?? (_addMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.AddMode, this))); } }
+        public SimpleCommand<object, EventToCommandArgs> AddModeCommand
+        {
+            get { return _addMode ?? (_addMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.AddMode, this))); }
+        }
+         
         SimpleCommand<object, EventToCommandArgs> _addMode;
         #endregion
 
@@ -102,7 +111,7 @@ namespace ESME.Scenarios
                 }));
             }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _addPSMMode;
         #endregion
 
@@ -111,7 +120,7 @@ namespace ESME.Scenarios
         {
             get { return _copyPSMSource ?? (_copyPSMSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.CopyPSMSource, this))); }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _copyPSMSource;
         #endregion
 
@@ -120,7 +129,7 @@ namespace ESME.Scenarios
         {
             get { return _deletePSMSource ?? (_deletePSMSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeletePSMSource, this))); }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _deletePSMSource;
 
         #endregion
@@ -130,7 +139,7 @@ namespace ESME.Scenarios
         {
             get { return _editPSMSource ?? (_editPSMSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.EditPSMSource, this))); }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _editPSMSource;
 
         #endregion
@@ -139,15 +148,17 @@ namespace ESME.Scenarios
 
         #region DeleteSourceCommand
         public SimpleCommand<object, EventToCommandArgs> DeleteSourceCommand { get { return _deleteSource ?? (_deleteSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeleteSource, this))); } }
+         
         SimpleCommand<object, EventToCommandArgs> _deleteSource;
         #endregion
 
         #region SourcePropertiesCommand
         public SimpleCommand<object, EventToCommandArgs> SourcePropertiesCommand { get { return _sourceProperties ?? (_sourceProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.SourceProperties, this))); } }
+         
         SimpleCommand<object, EventToCommandArgs> _sourceProperties;
         #endregion
         #endregion
-
+        
         public void Delete()
         {
             Platform.Sources.Remove(this);

@@ -22,6 +22,7 @@
                         <MenuItem Command="{Binding CopyPSMPlatformCommand}" Header="Copy platform ..." />
                         <MenuItem Command="{Binding DeletePSMPlatformCommand}" Header="Delete platform ..." />
                         <MenuItem Command="{Binding AddPSMSourceCommand}" Header="New source ..." />
+                        <MenuItem Command="{Binding PastePSMSourceCommand}" Header="Paste source ..." />
                     </ContextMenu>
                 </TextBlock.ContextMenu>
             </TextBlock>

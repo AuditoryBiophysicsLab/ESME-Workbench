@@ -23,7 +23,7 @@ using log4net;
 
 namespace ESME.Scenarios
 {
-    [NotifyPropertyChanged]
+    [NotifyPropertyChanged,Serializable]
     public class Platform : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
     {
         #region Mapped Properties
@@ -65,7 +65,7 @@ namespace ESME.Scenarios
         public float Speed { get; set; }
 
         public virtual Scenario Scenario { get; set; }
-
+         
         Perimeter _perimeter;
 
         [Affects("TrackTypeDisplay")]
@@ -93,6 +93,7 @@ namespace ESME.Scenarios
         #endregion
 
         #region Unmapped Properties
+         
         PlatformBehavior _platformBehavior;
         [NotMapped]
         public PlatformBehavior PlatformBehavior
@@ -144,7 +145,7 @@ namespace ESME.Scenarios
 
         [NotMapped]
         public bool IsDeleted { get; set; }
-        
+         
         object _layerControl;
         [NotMapped]
         public object LayerControl
@@ -162,8 +163,9 @@ namespace ESME.Scenarios
 
         [Import, UsedImplicitly]
         static IMessageBoxService _messageBox;
-
+         
         static readonly List<TrackType> StationaryOnly = new List<TrackType> { Behaviors.TrackType.Stationary };
+         
         static readonly List<TrackType> AllTrackTypes = new List<TrackType> { Behaviors.TrackType.Stationary, Behaviors.TrackType.PerimeterBounce };
 
         #endregion
@@ -192,27 +194,6 @@ namespace ESME.Scenarios
                 foreach (var newsource in platform.Sources.Select(source => new Source(source))) {
                     Sources.Add(newsource);
                 }
-        }
-
-        public bool Equals(Platform other)
-        {
-            if (Guid != other.Guid) return false;
-            if (Description != other.Description) return false;
-            if (Launches != other.Launches) return false;
-            if (Tows != other.Tows) return false;
-            if (RepeatCount != other.RepeatCount) return false;
-            if (PlatformName != other.PlatformName) return false;
-            if (PlatformType != other.PlatformName) return false;
-            if (Math.Abs(Depth - other.Depth) > .1) return false;
-            if (Math.Abs(Course - other.Course) > .1) return false;
-            if (Math.Abs(Speed - other.Speed) > .1) return false;
-
-            var sources = (from s in Sources orderby s.SourceName select s).ToList();
-            var othersources = (from s in other.Sources orderby s.SourceName select s).ToList();
-            if(sources.Count()!= othersources.Count()) return false;
-            if (sources.Where((t, i) => !t.Equals(othersources[i])).Any()) return false;
-
-            return true;
         }
 
         public static Platform NewPSMPlatform()
@@ -304,6 +285,7 @@ namespace ESME.Scenarios
         #endregion
         
         #region OnPropertyChanged
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged(string propertyName)
@@ -330,7 +312,7 @@ namespace ESME.Scenarios
                        (_platformProperties = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.PlatformProperties, this)));
             }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _platformProperties;
         #endregion
 
@@ -339,7 +321,7 @@ namespace ESME.Scenarios
         {
             get { return _deletePlatform ?? (_deletePlatform = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeletePlatform, this))); }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _deletePlatform;
         #endregion
 
@@ -348,7 +330,7 @@ namespace ESME.Scenarios
         {
             get { return _addSource ?? (_addSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.AddSource, this))); }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _addSource;
         #endregion
 
@@ -357,7 +339,7 @@ namespace ESME.Scenarios
         {
             get { return _keyUp ?? (_keyUp = new SimpleCommand<object, EventToCommandArgs>(KeyUpHandler)); }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _keyUp;
 
         void KeyUpHandler(EventToCommandArgs args)
@@ -391,8 +373,31 @@ namespace ESME.Scenarios
                 }));
             }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _addPSMSource;
+        #endregion
+
+        #region PastePSMSourceCommand
+        public SimpleCommand<object, EventToCommandArgs> PastePSMSourceCommand
+        {
+            get { return _pastePSMSource ?? (_pastePSMSource = new SimpleCommand<object, EventToCommandArgs>(o => IsPastePSMSourceCommandEnabled, PastePSMSourceHandler)); }
+        }
+         
+        SimpleCommand<object, EventToCommandArgs> _pastePSMSource;
+
+        static bool IsPastePSMSourceCommandEnabled
+        {
+            get { return true; }
+        }
+
+        void PastePSMSourceHandler(EventToCommandArgs args)
+        {
+            //take the source from the clipboard
+            var source = (Source)Clipboard.GetData(DataFormats.Serializable);
+            // change its platform to this
+            source.Platform = this;
+            //update.
+        }
         #endregion
 
         #region EditPSMPlatformCommand
@@ -400,7 +405,7 @@ namespace ESME.Scenarios
         {
             get { return _editPSMPlatform ?? (_editPSMPlatform = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.EditPSMPlatform, this))); }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _editPSMPlatform;
         #endregion
 
@@ -409,7 +414,7 @@ namespace ESME.Scenarios
         {
             get { return _deletePSMPlatform ?? (_deletePSMPlatform = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeletePSMPlatform,this))); }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _deletePSMPlatform;
 
         #endregion
@@ -419,7 +424,7 @@ namespace ESME.Scenarios
         {
             get { return _copyPSMPlatform ?? (_copyPSMPlatform = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.CopyPSMPlatform, this))); }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _copyPSMPlatform;
 
         #endregion
@@ -440,7 +445,7 @@ namespace ESME.Scenarios
                 }));
             }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _moveLayerToFront;
         #endregion
 
@@ -456,7 +461,7 @@ namespace ESME.Scenarios
                 }));
             }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _moveLayerForward;
         #endregion
 
@@ -472,7 +477,7 @@ namespace ESME.Scenarios
                 }));
             }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _moveLayerBackward;
         #endregion
 
@@ -488,7 +493,7 @@ namespace ESME.Scenarios
                 }));
             }
         }
-
+         
         SimpleCommand<object, EventToCommandArgs> _moveLayerToBack;
         #endregion
 
