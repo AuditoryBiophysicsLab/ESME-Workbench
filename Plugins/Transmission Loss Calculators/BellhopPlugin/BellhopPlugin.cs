@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
 using ESME.Environment;
+using ESME.Model;
 using ESME.Plugins;
+using ESME.Scenarios;
+using ESME.TransmissionLoss.Bellhop;
 
 namespace BellhopPlugin
 {
@@ -15,8 +15,18 @@ namespace BellhopPlugin
     {
         public BellhopPlugin() 
         {
-            //SetPropertiesFromAttributes(GetType());
             PluginSubtype = PluginSubtype.Bellhop;
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            SetPropertiesFromAttributes(GetType());
+        }
+
+        public void CreateInputFiles(Mode mode, Radial radial, IEnumerable<SoundSpeedProfile> soundSpeedProfiles, BottomProfile bottomProfile, SedimentType sedimentType, double frequency)
+        {
+            
         }
     }
 }

@@ -63,6 +63,13 @@ namespace ESME.Plugins
         [XmlIgnore] public bool IsConfigurable { get { return ConfigurationControl != null; } }
         [XmlIgnore] public bool IsSelectable { get; protected set; }
         [XmlIgnore] public virtual bool IsConfigured { get; protected set; }
+        protected virtual void SetPropertiesFromAttributes(Type type)
+        {
+            var pluginAttribute = (ESMEPluginAttribute)type.GetCustomAttributes(typeof(ESMEPluginAttribute), false)[0];
+            PluginType = PluginType.EnvironmentalDataSource;
+            PluginName = pluginAttribute.Name;
+            PluginDescription = pluginAttribute.Description;
+        }
 
         protected abstract void Save();
         public abstract void LoadSettings();
@@ -103,10 +110,9 @@ namespace ESME.Plugins
         {
         }
 
-        protected void SetPropertiesFromAttributes(Type type)
+        protected override void SetPropertiesFromAttributes(Type type)
         {
-            var pluginAttribute = (EnvironmentDataSourceAttribute)type.GetCustomAttributes(typeof(ESMEPluginAttribute), false)[0];
-            PluginType = PluginType.EnvironmentalDataSource;
+            var pluginAttribute = (EnvironmentDataSourceAttribute)type.GetCustomAttributes(typeof(EnvironmentDataSourceAttribute), false)[0];
             EnvironmentDataType = pluginAttribute.EnvironmentDataType;
             switch (EnvironmentDataType)
             {
@@ -123,8 +129,7 @@ namespace ESME.Plugins
                     PluginSubtype = PluginSubtype.Bathymetry;
                     break;
             }
-            PluginName = pluginAttribute.Name;
-            PluginDescription = pluginAttribute.Description;
+            base.SetPropertiesFromAttributes(type);
         }
     }
 
