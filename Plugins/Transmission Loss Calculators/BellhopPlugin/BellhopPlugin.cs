@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Globalization;
+using System.IO;
 using ESME.Environment;
 using ESME.Model;
 using ESME.Plugins;
@@ -24,9 +27,95 @@ namespace BellhopPlugin
             SetPropertiesFromAttributes(GetType());
         }
 
-        public void CreateInputFiles(Mode mode, Radial radial, IEnumerable<SoundSpeedProfile> soundSpeedProfiles, BottomProfile bottomProfile, SedimentType sedimentType, double frequency)
+        public double RangeCellSize { get; set; }
+        public double DepthCellSize { get; set; }
+        public bool UseSurfaceReflection { get; set; }
+        public bool GenerateArrivalsFile { get; set; }
+        public int RayCount { get; set; }
+        public void CreateInputFiles(Platform platform, Mode mode, Radial radial, IList<Tuple<double, SoundSpeedProfile>> profilesAlongRadial, BottomProfile bottomProfile, SedimentType sedimentType, double windSpeed, double frequency)
         {
-            
+            var depthCellCount = (int)Math.Ceiling(bottomProfile.MaxDepth / DepthCellSize);
+            var rangeCellCount = (int)Math.Ceiling(mode.MaxPropagationRadius / RangeCellSize);
+            var startProfile = profilesAlongRadial[0].Item2;
+            var sourceDepth = platform.Depth;
+            if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
+            var maxCalculationDepthMeters = bottomProfile.MaxDepth * 1.01;
+            using (var envFile = new StreamWriter(radial.BasePath + ".env", false))
+            {
+                envFile.WriteLine("'Bellhop'");
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0}", frequency));
+                envFile.WriteLine("1"); // was NMEDIA in gui_genbellhopenv.m
+                envFile.WriteLine(UseSurfaceReflection ? "'QFLT'" : "'QVLT'");
+
+                //if (depthCellCount < 5) throw new BathymetryTooShallowException("Error: Maximum depth of transect (" + maxCalculationDepthMeters + " meters) less than minimum required for transmission loss calculations.\nPlease choose a different location for this transect.");
+
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "0, 0.0, {0}", startProfile.Data[startProfile.Data.Count - 1].Depth));
+                foreach (var soundSpeedSample in startProfile.Data)
+                    envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0} {1} 0.0 1.0 0.0 0.0", soundSpeedSample.Depth, soundSpeedSample.SoundSpeed));
+
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "'A*' 0.0")); // A = Acoustic halfspace, * = read bathymetry file 'BTYFIL', 0.0 = bottom roughness (currently ignored)
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3} {4} {5} /", maxCalculationDepthMeters, sedimentType.CompressionWaveSpeed, sedimentType.ShearWaveSpeed, sedimentType.Density, sedimentType.LossParameter, 0));
+                // Source and Receiver Depths and Ranges
+                envFile.WriteLine("1"); // Number of Source Depths
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0} /", sourceDepth)); // source depth
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0}", depthCellCount)); // Number of Receiver Depths
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "0.0 {0} /", maxCalculationDepthMeters));
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0}", rangeCellCount)); // Number of receiver ranges
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "0.0 {0} /", mode.MaxPropagationRadius / 1000.0));
+
+                envFile.WriteLine(GenerateArrivalsFile ? "'AB'" : "'I'");
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0}", RayCount)); // Number of beams
+                var verticalHalfAngle = mode.VerticalBeamWidth / 2;
+                var angle1 = mode.DepressionElevationAngle - verticalHalfAngle;
+                var angle2 = mode.DepressionElevationAngle + verticalHalfAngle;
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0} {1} /", angle1, angle2)); // Beam fan half-angles (negative angles are toward the surface
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "0.0 {0} {1}", maxCalculationDepthMeters, (mode.MaxPropagationRadius / 1000.0) * 1.01)); // step zbox(meters) rbox(km)
+            }
+            using (var sspFile = new StreamWriter(radial.BasePath + ".ssp", false))
+            {
+                sspFile.WriteLine("{0}", profilesAlongRadial.Count);
+                foreach (var rangeProfileTuple in profilesAlongRadial) sspFile.Write("{0,-10:0.###}", rangeProfileTuple.Item1);
+                //sspFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0,-10:0.###}{1,-10:0.###}{2,-10:0.###}", 0.0, bottomProfile.Profile[bottomProfile.Profile.Count / 2].Range, bottomProfile.Profile[bottomProfile.Profile.Count - 1].Range));
+                for (var depthIndex = 0; depthIndex < startProfile.Data.Count; depthIndex++)
+                    foreach (var rangeProfileTuple in profilesAlongRadial) sspFile.Write("{0,-10:0.###}", rangeProfileTuple.Item2.Data[depthIndex].SoundSpeed);
+                //sspFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0,-10:0.###}{1,-10:0.###}{2,-10:0.###}", startProfile.Data[depthIndex].SoundSpeed, middleProfile.Data[depthIndex].SoundSpeed, endProfile.Data[depthIndex].SoundSpeed));
+            }
+            using (var trcFile = new StreamWriter(radial.BasePath + ".trc", false))
+            {
+                var topReflectionCoefficients = GenerateReflectionCoefficients(windSpeed, frequency);
+                trcFile.WriteLine(topReflectionCoefficients.GetLength(0));
+                for (var rowIndex = 0; rowIndex < topReflectionCoefficients.GetLength(0); rowIndex++)
+                    trcFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} ", topReflectionCoefficients[rowIndex, 0], topReflectionCoefficients[rowIndex, 1], topReflectionCoefficients[rowIndex, 2]));
+            }
+            using (var writer = new StreamWriter(radial.BasePath + ".bty")) writer.Write(bottomProfile.ToBellhopString());
         }
+
+        static double[,] GenerateReflectionCoefficients(double windSpeed, double frequency, double startAngle = 0, double endAngle = 90.0, double angleStep = 1.0)
+        {
+            //if (double.IsNaN(windSpeed) || (windSpeed < 0) || (windSpeed > 13)) throw new ArgumentException("Valid values are 0 - 13", "windSpeed");
+            //if (double.IsNaN(frequency) || (frequency < 0) || (frequency > 4000)) throw new ArgumentException("Valid values are 0 - 4000", "frequency");
+            //if ((windSpeed > 5) && (frequency > 1000)) throw new ArgumentException("Frequency values under 1000 require windSpeed values under 5");
+            //if ((frequency < 1000) && (windSpeed < 5)) { }
+
+            frequency /= 1000;  // Frequency is expressed in kHz in the formula
+
+            var sampleCount = (int)((endAngle - startAngle) / angleStep) + 1;
+
+            var result = new double[sampleCount, 3];
+
+            var f32 = Math.Pow(frequency, 3.0 / 2.0);
+            var wind4 = Math.Pow(windSpeed / 10, 4.0);
+            var eta = 3.4 * f32 * wind4;
+            var angle = startAngle;
+            for (var angleIndex = 0; angleIndex < sampleCount; angleIndex++)
+            {
+                result[angleIndex, 0] = angle;
+                result[angleIndex, 1] = Math.Exp(-eta * Math.Sin(angle * (Math.PI / 180.0)));
+                result[angleIndex, 2] = 180;
+                angle += angleStep;
+            }
+            return result;
+        }
+
     }
 }
