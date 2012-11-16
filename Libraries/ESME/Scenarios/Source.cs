@@ -12,7 +12,7 @@ using HRC.WPF;
 
 namespace ESME.Scenarios
 {
-    [NotifyPropertyChanged, Serializable]
+    [NotifyPropertyChanged]
     public sealed class Source : IHaveGuid
     {
         public Source() { }

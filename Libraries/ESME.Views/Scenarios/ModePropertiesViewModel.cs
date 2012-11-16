@@ -1,13 +1,11 @@
 ﻿using System;
 using ESME.Scenarios;
-using HRC.Aspects;
 using HRC.Validation;
 using HRC.ViewModels;
 using HRC.WPF;
 
 namespace ESME.Views.Scenarios
 {
-    [NotifyPropertyChanged]
     public class ModePropertiesViewModel : ValidatingViewModel
     {
         readonly Mode _mode;

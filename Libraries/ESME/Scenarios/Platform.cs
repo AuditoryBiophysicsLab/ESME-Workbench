@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -23,7 +24,7 @@ using log4net;
 
 namespace ESME.Scenarios
 {
-    [NotifyPropertyChanged,Serializable]
+    [NotifyPropertyChanged]
     public class Platform : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
     {
         #region Mapped Properties
@@ -170,7 +171,10 @@ namespace ESME.Scenarios
 
         #endregion
 
-        public Platform() { TrackType = Behaviors.TrackType.Stationary; }
+        public Platform()
+        {
+           TrackType = Behaviors.TrackType.Stationary;
+        }
 
         public Platform(Platform platform) { Copy(platform); }
 
@@ -377,6 +381,9 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _addPSMSource;
         #endregion
 
+        [MediatorMessageSink(MediatorMessage.CopyPSMSource),UsedImplicitly]
+        void EnablePaste(bool dummy) { IsPastePSMSourceCommandEnabled = true; }
+
         #region PastePSMSourceCommand
         public SimpleCommand<object, EventToCommandArgs> PastePSMSourceCommand
         {
@@ -385,18 +392,11 @@ namespace ESME.Scenarios
          
         SimpleCommand<object, EventToCommandArgs> _pastePSMSource;
 
-        static bool IsPastePSMSourceCommandEnabled
-        {
-            get { return true; }
-        }
+        bool IsPastePSMSourceCommandEnabled { get; set; }
 
         void PastePSMSourceHandler(EventToCommandArgs args)
         {
-            //take the source from the clipboard
-            var source = (Source)Clipboard.GetData(DataFormats.Serializable);
-            // change its platform to this
-            source.Platform = this;
-            //update.
+            MediatorMessage.Send(MediatorMessage.PastePSMSource,this);
         }
         #endregion
 

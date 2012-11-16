@@ -40,6 +40,7 @@ namespace ESME
         public const string DeletePlatform = "DeletePlatformMessage";
         public const string PlatformProperties = "PlatformPropertiesMessage";
         public const string PlatformBoundToLayer = "PlatformBoundToLayerMessage";
+        public const string PastePSMSource = "PastePSMSourceMessage";
 
         public const string AddSource = "AddSourceMessage";
         public const string AddPSMSource = "AddPSMSourceMessage";

@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows;
 using ESME.PSM;
 using ESME.Scenarios;
@@ -25,7 +24,7 @@ namespace ESME.Views.PSM
         public ObservableCollection<Source> Sources { get; set; }
         public ObservableCollection<Mode> Modes { get; set; }
         public object DisplayedView { get; set; }
-
+        public object CopiedObject { get; set; }
         public PSMTreeViewModel(string psmDatabasePath)
         {
             #region Mediator Message registration
@@ -121,6 +120,15 @@ namespace ESME.Views.PSM
             _context.Platforms.Remove(platform);
             _context.SaveChanges();
         }
+
+        [MediatorMessageSink(MediatorMessage.PastePSMSource),UsedImplicitly]
+        void PasteSource(Platform platform)
+        {
+            if (!(CopiedObject is Source)) return;
+            var source = (Source)CopiedObject;
+            source.Platform = platform;
+        }
+
         #endregion
 
         #region sources
@@ -142,28 +150,7 @@ namespace ESME.Views.PSM
         }
 
         [MediatorMessageSink(MediatorMessage.CopyPSMSource), UsedImplicitly]
-        void CopySource(Source source)
-        {
-            var newsource = new Source(source);
-            if(IsSerializable(source)) Clipboard.SetData(DataFormats.Serializable, newsource);
-        }
-
-        private static bool IsSerializable(object obj)
-        {
-            System.IO.MemoryStream mem = new System.IO.MemoryStream();
-            BinaryFormatter bin = new BinaryFormatter();
-            try
-            {
-                bin.Serialize(mem, obj);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("Your object cannot be serialized." +
-                                 " The reason is: " + ex.ToString());
-                return false;
-            }
-        }
+        void CopySource(Source source) { CopiedObject = source; }
 
         [MediatorMessageSink(MediatorMessage.EditPSMSource), UsedImplicitly]
         void EditSource(Source source)
