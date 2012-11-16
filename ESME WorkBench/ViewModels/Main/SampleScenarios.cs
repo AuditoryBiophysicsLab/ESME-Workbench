@@ -26,7 +26,7 @@ namespace ESMEWorkbench.ViewModels.Main
             if (wind == null || soundSpeed == null || bathymetry == null || sediment == null) return;
             var result = _visualizer.ShowDialog("FirstRunQuestionView", new FirstRunQuestionViewModel { MessageBoxService = _messageBox });
             if (!result.HasValue || !result.Value) return;
-            var progress = new FirstRunProgressViewModel { ItemCount = 20, CurrentItem = 0 };
+            var progress = new FirstRunProgressViewModel { ItemCount = 12, CurrentItem = 0 };
             var window = _visualizer.ShowWindow("FirstRunProgressView", progress, true);
             _openPopups.Add(window);
             await TaskEx.Delay(10);
@@ -168,13 +168,14 @@ namespace ESMEWorkbench.ViewModels.Main
             //Database.SaveChanges();
             progress.ProgressMessage = string.Format("Extracting environmental data for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
             await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
+            progress.CurrentItem++;
             _dispatcher.InvokeIfRequired(() =>
             {
                 progress.ProgressMessage = string.Format("Adding analysis point(s) to scenario \"{0}\"", scenarioDescriptor.ScenarioName);
-                progress.CurrentItem++;
                 scenario.ShowAllAnalysisPoints = true;
                 if (scenarioDescriptor.AnalysisPointGeos == null || scenarioDescriptor.AnalysisPointGeos.Count < 1) scenario.Add(new AnalysisPoint { Geo = new Geo(((GeoRect)location.GeoRect).Center) });
                 else foreach (var geo in scenarioDescriptor.AnalysisPointGeos) scenario.Add(new AnalysisPoint { Geo = new Geo(geo) });
+                progress.CurrentItem++;
             });
         }
     }
