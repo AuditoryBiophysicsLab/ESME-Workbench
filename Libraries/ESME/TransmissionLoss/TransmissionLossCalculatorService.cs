@@ -216,7 +216,7 @@ namespace ESME.TransmissionLoss
                 
                 var bottomProfile = new BottomProfile(128, radial.Segment, bathymetry);
 
-                var profilesAlongRadial = ProfilesAlongRadial(radial.Segment, 0.0, null, null, bottomProfile, soundSpeed[timePeriod].EnvironmentData, deepestProfile).ToList();
+                //var profilesAlongRadial = ProfilesAlongRadial(radial.Segment, 0.0, null, null, bottomProfile, soundSpeed[timePeriod].EnvironmentData, deepestProfile).ToList();
 
                 var sourceDepth = platform.Depth;
                 if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
