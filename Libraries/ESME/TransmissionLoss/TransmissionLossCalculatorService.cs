@@ -215,9 +215,7 @@ namespace ESME.TransmissionLoss
                                          : sediment.Samples.GetNearestPoint(radial.Segment.Center);
                 
                 var bottomProfile = new BottomProfile(128, radial.Segment, bathymetry);
-
-                //var profilesAlongRadial = ProfilesAlongRadial(radial.Segment, 0.0, null, null, bottomProfile, soundSpeed[timePeriod].EnvironmentData, deepestProfile).ToList();
-
+                var profilesAlongRadial = ProfilesAlongRadial(radial.Segment, 0.0, null, null, bottomProfile, soundSpeed[timePeriod].EnvironmentData, deepestProfile).ToList();
                 var sourceDepth = platform.Depth;
                 if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
 
@@ -345,7 +343,7 @@ namespace ESME.TransmissionLoss
                                         : soundSpeedData.GetNearestPoint(segment.Center).Extend(deepestProfile);
 
             yield return Tuple.Create(NearestBottomProfileDistanceTo(bottomProfile, lengthOffset), startProfile);
-            if (!ReferenceEquals(startProfile, middleProfile))
+            if (startProfile.DistanceKilometers(middleProfile) > 0.01)
             {
                 // If the start and middle profiles are not the same, recursively call the iterator to get the new midpoint
                 var newOffset = lengthOffset;
@@ -353,16 +351,16 @@ namespace ESME.TransmissionLoss
                 foreach (var tuple in ProfilesAlongRadial(firstHalfSegment, newOffset, middleProfile, endProfile, bottomProfile, soundSpeedData, deepestProfile)) yield return tuple;
             }
             // If the center profile is different from BOTH endpoints, we can return it here
-            if (!ReferenceEquals(startProfile, middleProfile) && !ReferenceEquals(middleProfile, endProfile)) 
+            if (startProfile.DistanceKilometers(middleProfile) > 0.01 && middleProfile.DistanceKilometers(endProfile) > 0.01)
                 yield return Tuple.Create(Geo.RadiansToMeters(segment[0].DistanceRadians(segment.Center)), middleProfile);
-            if (!ReferenceEquals(middleProfile, endProfile))
+            if (middleProfile.DistanceKilometers(endProfile) > 0.01)
             {
                 // If the middle and end profiles are not the same, recursively call the iterator to get the new midpoint
                 var newOffset = lengthOffset + Geo.RadiansToMeters(segment[0].DistanceRadians(segment.Center));
                 var secondHalfSegment = new GeoSegment(segment.Center, segment[1]);
                 foreach (var tuple in ProfilesAlongRadial(secondHalfSegment, newOffset, middleProfile, endProfile, bottomProfile, soundSpeedData, deepestProfile)) yield return tuple;
             }
-            if (!ReferenceEquals(startProfile, endProfile)) yield return Tuple.Create(lengthOffset + Geo.RadiansToMeters(segment.LengthRadians), endProfile);
+            if (startProfile.DistanceKilometers(endProfile) > 0.01) yield return Tuple.Create(lengthOffset + Geo.RadiansToMeters(segment.LengthRadians), endProfile);
         }
 
         static double NearestBottomProfileDistanceTo(BottomProfile bottomProfile, double desiredDistance)
