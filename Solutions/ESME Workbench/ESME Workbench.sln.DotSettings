@@ -198,6 +198,37 @@ static void $COMMANDNAME$Handler(EventToCommandArgs args)&#xD;
 	//var parameter = args.CommandParameter; &#xD;
 }&#xD;
 #endregion</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/@KeyIndexDefined">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Description/@EntryValue">Attached Property</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Field/=Class/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Field/=Class/Expression/@EntryValue">typeName()</s:String>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Field/=Class/InitialRange/@EntryValue">-1</s:Int64>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Field/=Class/Order/@EntryValue">3</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Field/=Default/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Field/=Default/Order/@EntryValue">2</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Field/=Name/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Field/=Name/Expression/@EntryValue">complete()</s:String>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Field/=Name/Order/@EntryValue">1</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Field/=Type/@KeyIndexDefined">True</s:Boolean>
+	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Field/=Type/Order/@EntryValue">0</s:Int64>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/CustomProperties/=minimumLanguageVersion/@EntryIndexedValue">3.0</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Scope/=B68999B9D6B43E47A02B22C12A54C3CC/Type/@EntryValue">InCSharpTypeMember</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Shortcut/@EntryValue">ap</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=81D1A5F6A5885E4DA88AE3A91273EA54/Text/@EntryValue">#region attached property $Type$ $Name$&#xD;
+&#xD;
+public static readonly DependencyProperty $Name$Property = DependencyProperty.RegisterAttached("$Name$", typeof($Type$), typeof($Class$), &#xD;
+                                                                              new FrameworkPropertyMetadata($Default$, FrameworkPropertyMetadataOptions.Inherits | FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender, $Name$PropertyChanged));&#xD;
+&#xD;
+public static void Set$Name$(UIElement element, $Type$ value) { element.SetValue($Name$Property, value); }&#xD;
+public static $Type$ Get$Name$(UIElement element) { return ($Type$)element.GetValue($Name$Property); }&#xD;
+static void $Name$PropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { (($Class$)obj).$Name$PropertyChanged(args); }&#xD;
+void $Name$PropertyChanged(DependencyPropertyChangedEventArgs args) { }&#xD;
+#endregion&#xD;
+</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=994016DC67C2AE43B0DA8517607CC665/@KeyIndexDefined">True</s:Boolean>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=994016DC67C2AE43B0DA8517607CC665/Applicability/=Live/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=994016DC67C2AE43B0DA8517607CC665/Description/@EntryValue">Dependency Property</s:String>
@@ -220,7 +251,7 @@ static void $COMMANDNAME$Handler(EventToCommandArgs args)&#xD;
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=994016DC67C2AE43B0DA8517607CC665/Text/@EntryValue">#region dependency property $Type$ $Name$&#xD;
 &#xD;
 public static DependencyProperty $Name$Property = DependencyProperty.Register("$Name$", typeof($Type$), typeof($Class$), &#xD;
-                                                                              new FrameworkPropertyMetadata($Default$, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));&#xD;
+                                                                              new FrameworkPropertyMetadata($Default$, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, $Name$PropertyChanged));&#xD;
 &#xD;
 public $Type$ $Name$&#xD;
 {&#xD;
@@ -228,6 +259,8 @@ public $Type$ $Name$&#xD;
     set { SetValue($Name$Property, value); }&#xD;
 }&#xD;
 &#xD;
+static void $Name$PropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { (($Class$)obj).$Name$PropertyChanged(); }&#xD;
+void $Name$PropertyChanged() { }&#xD;
 #endregion&#xD;
 </s:String>
 	
