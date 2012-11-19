@@ -141,6 +141,7 @@ namespace ESME.Views.PSM
         [MediatorMessageSink(MediatorMessage.AddPSMSource), UsedImplicitly]
         void AddSource(Source source)
         {
+            AddSourceToContext(source);
             var vm = new PropertiesViewModel
             {
                 PropertyObject = source,
