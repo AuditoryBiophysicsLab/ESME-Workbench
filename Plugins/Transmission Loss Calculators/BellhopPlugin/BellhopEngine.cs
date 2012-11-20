@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
+using System.Threading;
+using ESME;
 using ESME.Environment;
 using ESME.Model;
 using ESME.Plugins;
 using ESME.Scenarios;
+using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 
 namespace BellhopPlugin
@@ -32,7 +37,7 @@ namespace BellhopPlugin
         public bool UseSurfaceReflection { get; set; }
         public bool GenerateArrivalsFile { get; set; }
         public int RayCount { get; set; }
-        public override void CreateInputFiles(Platform platform, Mode mode, Radial radial, BottomProfile bottomProfile, SedimentType sedimentType, double windSpeed, IList<Tuple<double, SoundSpeedProfile>> soundSpeedProfilesAlongRadial)
+        public override void CalculateTransmissionLoss(Platform platform, Mode mode, Radial radial, BottomProfile bottomProfile, SedimentType sedimentType, double windSpeed, IList<Tuple<double, SoundSpeedProfile>> soundSpeedProfilesAlongRadial)
         {
             var depthCellCount = (int)Math.Ceiling(bottomProfile.MaxDepth / DepthCellSize);
             var rangeCellCount = (int)Math.Ceiling(mode.MaxPropagationRadius / RangeCellSize);
@@ -41,7 +46,11 @@ namespace BellhopPlugin
             var frequency = (float)Math.Sqrt(mode.HighFrequency * mode.LowFrequency);
             if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
             var maxCalculationDepthMeters = bottomProfile.MaxDepth * 1.01;
-            using (var envFile = new StreamWriter(radial.BasePath + ".env.test", false))
+            var directoryPath = Path.GetDirectoryName(radial.BasePath);
+            if (directoryPath == null) throw new NullReferenceException("radial.BasePath does not point to a valid directory");
+            if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
+
+            using (var envFile = new StreamWriter(radial.BasePath + ".env", false))
             {
                 envFile.WriteLine("'Bellhop'");
                 envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0}", frequency));
@@ -72,7 +81,7 @@ namespace BellhopPlugin
                 envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0} {1} /", angle1, angle2)); // Beam fan half-angles (negative angles are toward the surface
                 envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "0.0 {0} {1}", maxCalculationDepthMeters, (mode.MaxPropagationRadius / 1000.0) * 1.01)); // step zbox(meters) rbox(km)
             }
-            using (var sspFile = new StreamWriter(radial.BasePath + ".ssp.test", false))
+            using (var sspFile = new StreamWriter(radial.BasePath + ".ssp", false))
             {
                 sspFile.WriteLine("{0}", soundSpeedProfilesAlongRadial.Count);
                 foreach (var rangeProfileTuple in soundSpeedProfilesAlongRadial) sspFile.Write("{0,-10:0.###}", rangeProfileTuple.Item1);
@@ -85,16 +94,44 @@ namespace BellhopPlugin
                 }
                 //sspFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0,-10:0.###}{1,-10:0.###}{2,-10:0.###}", startProfile.Data[depthIndex].SoundSpeed, middleProfile.Data[depthIndex].SoundSpeed, endProfile.Data[depthIndex].SoundSpeed));
             }
-            using (var trcFile = new StreamWriter(radial.BasePath + ".trc.test", false))
+            using (var trcFile = new StreamWriter(radial.BasePath + ".trc", false))
             {
                 var topReflectionCoefficients = GenerateReflectionCoefficients(windSpeed, frequency);
                 trcFile.WriteLine(topReflectionCoefficients.GetLength(0));
                 for (var rowIndex = 0; rowIndex < topReflectionCoefficients.GetLength(0); rowIndex++)
                     trcFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} ", topReflectionCoefficients[rowIndex, 0], topReflectionCoefficients[rowIndex, 1], topReflectionCoefficients[rowIndex, 2]));
             }
-            using (var writer = new StreamWriter(radial.BasePath + ".bty.test")) writer.Write(bottomProfile.ToBellhopString());
+            using (var writer = new StreamWriter(radial.BasePath + ".bty")) writer.Write(bottomProfile.ToBellhopString());
+
+            // Now that we've got the files ready to go, we can launch bellhop to do the actual calculations
+            var bellhopProcess = new TransmissionLossProcess
+            {
+                StartInfo = new ProcessStartInfo(Path.Combine(AssemblyLocation, "bellhop.exe"), radial.Filename)
+                {
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    RedirectStandardInput = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    WorkingDirectory = directoryPath
+                }
+            };
+            if (radial.IsDeleted) throw new RadialDeletedByUserException();
+            bellhopProcess.Start();
+            bellhopProcess.PriorityClass = ProcessPriorityClass.Idle;
+            bellhopProcess.BeginOutputReadLine();
+            while (!bellhopProcess.HasExited)
+            {
+                if (radial.IsDeleted)
+                {
+                    bellhopProcess.Kill();
+                    throw new RadialDeletedByUserException();
+                }
+                Thread.Sleep(20);
+            }
         }
 
+        static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
         static double[,] GenerateReflectionCoefficients(double windSpeed, double frequency, double startAngle = 0, double endAngle = 90.0, double angleStep = 1.0)
         {
             //if (double.IsNaN(windSpeed) || (windSpeed < 0) || (windSpeed > 13)) throw new ArgumentException("Valid values are 0 - 13", "windSpeed");

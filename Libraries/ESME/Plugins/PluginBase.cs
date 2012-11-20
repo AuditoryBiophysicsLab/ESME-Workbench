@@ -86,7 +86,7 @@ namespace ESME.Plugins
         protected override void Save() { }
         public override void LoadSettings() { }
 
-        public abstract void CreateInputFiles(Platform platform,
+        public abstract void CalculateTransmissionLoss(Platform platform,
                                               Mode mode,
                                               Radial radial,
                                               BottomProfile bottomProfile,
