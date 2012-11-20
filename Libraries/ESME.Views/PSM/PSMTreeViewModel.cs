@@ -188,6 +188,7 @@ namespace ESME.Views.PSM
         [MediatorMessageSink(MediatorMessage.AddPSMMode), UsedImplicitly]
         void AddMode(Mode mode)
         {
+            AddModeToContext(mode);
             var vm = new ModePropertiesViewModel(mode) { IsPSMView = true, };
             DisplayedView = new ModePropertiesControlView { DataContext = vm };
         }
