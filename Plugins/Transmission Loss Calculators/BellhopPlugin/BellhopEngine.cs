@@ -14,9 +14,9 @@ namespace BellhopPlugin
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ESMEPlugin(Name = "Bellhop",
                 Description = "Bellhop is a highly efficient ray tracing program, written by Michael Porter of hlsresearch.com as part of the Acoustic Toolbox.")]
-    public class BellhopPlugin : TransmissionLossCalculatorPluginBase
+    public class BellhopEngine : TransmissionLossCalculatorPluginBase
     {
-        public BellhopPlugin() 
+        public BellhopEngine() 
         {
             PluginSubtype = PluginSubtype.Bellhop;
             Initialize();
@@ -32,12 +32,13 @@ namespace BellhopPlugin
         public bool UseSurfaceReflection { get; set; }
         public bool GenerateArrivalsFile { get; set; }
         public int RayCount { get; set; }
-        public void CreateInputFiles(Platform platform, Mode mode, Radial radial, IList<Tuple<double, SoundSpeedProfile>> profilesAlongRadial, BottomProfile bottomProfile, SedimentType sedimentType, double windSpeed, double frequency)
+        public override void CreateInputFiles(Platform platform, Mode mode, Radial radial, BottomProfile bottomProfile, SedimentType sedimentType, double windSpeed, IList<Tuple<double, SoundSpeedProfile>> soundSpeedProfilesAlongRadial)
         {
             var depthCellCount = (int)Math.Ceiling(bottomProfile.MaxDepth / DepthCellSize);
             var rangeCellCount = (int)Math.Ceiling(mode.MaxPropagationRadius / RangeCellSize);
-            var startProfile = profilesAlongRadial[0].Item2;
+            var startProfile = soundSpeedProfilesAlongRadial[0].Item2;
             var sourceDepth = platform.Depth;
+            var frequency = (float)Math.Sqrt(mode.HighFrequency * mode.LowFrequency);
             if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
             var maxCalculationDepthMeters = bottomProfile.MaxDepth * 1.01;
             using (var envFile = new StreamWriter(radial.BasePath + ".env.test", false))
@@ -73,11 +74,15 @@ namespace BellhopPlugin
             }
             using (var sspFile = new StreamWriter(radial.BasePath + ".ssp.test", false))
             {
-                sspFile.WriteLine("{0}", profilesAlongRadial.Count);
-                foreach (var rangeProfileTuple in profilesAlongRadial) sspFile.Write("{0,-10:0.###}", rangeProfileTuple.Item1);
+                sspFile.WriteLine("{0}", soundSpeedProfilesAlongRadial.Count);
+                foreach (var rangeProfileTuple in soundSpeedProfilesAlongRadial) sspFile.Write("{0,-10:0.###}", rangeProfileTuple.Item1);
+                sspFile.WriteLine();
                 //sspFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0,-10:0.###}{1,-10:0.###}{2,-10:0.###}", 0.0, bottomProfile.Profile[bottomProfile.Profile.Count / 2].Range, bottomProfile.Profile[bottomProfile.Profile.Count - 1].Range));
                 for (var depthIndex = 0; depthIndex < startProfile.Data.Count; depthIndex++)
-                    foreach (var rangeProfileTuple in profilesAlongRadial) sspFile.Write("{0,-10:0.###}", rangeProfileTuple.Item2.Data[depthIndex].SoundSpeed);
+                {
+                    foreach (var rangeProfileTuple in soundSpeedProfilesAlongRadial) sspFile.Write("{0,-10:0.###}", rangeProfileTuple.Item2.Data[depthIndex].SoundSpeed);
+                    sspFile.WriteLine();
+                }
                 //sspFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0,-10:0.###}{1,-10:0.###}{2,-10:0.###}", startProfile.Data[depthIndex].SoundSpeed, middleProfile.Data[depthIndex].SoundSpeed, endProfile.Data[depthIndex].SoundSpeed));
             }
             using (var trcFile = new StreamWriter(radial.BasePath + ".trc.test", false))

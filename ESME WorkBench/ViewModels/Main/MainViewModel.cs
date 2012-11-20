@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using BellhopPlugin;
 using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
@@ -74,6 +75,7 @@ namespace ESMEWorkbench.ViewModels.Main
             _visualizer = visualizer;
             _saveFile = saveFile;
             _transmissionLoss = transmissionLoss;
+            transmissionLoss.PluginUnderTest = new BellhopEngine { RangeCellSize = 10, DepthCellSize = 10, RayCount = 1500, UseSurfaceReflection = true };
             ScenarioExensions.TransmissionLossCalculator = _transmissionLoss;
             Radial.TransmissionLossCalculator = _transmissionLoss;
             _plugins = plugins;

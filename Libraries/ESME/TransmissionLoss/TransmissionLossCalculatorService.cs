@@ -140,6 +140,9 @@ namespace ESME.TransmissionLoss
             Calculate(new PercentProgress<Radial>(radial));
         }
 
+        public TransmissionLossCalculatorPluginBase PluginUnderTest { get; set; }
+        volatile object _lockObject = new object();
+        bool _once = true;
         void Calculate(PercentProgress<Radial> item)
         {
             var radial = item.ProgressTarget;
@@ -215,13 +218,33 @@ namespace ESME.TransmissionLoss
                                          : sediment.Samples.GetNearestPoint(radial.Segment.Center);
                 
                 var bottomProfile = new BottomProfile(128, radial.Segment, bathymetry);
-                var profilesAlongRadial = ProfilesAlongRadial(radial.Segment, 0.0, null, null, bottomProfile, soundSpeed[timePeriod].EnvironmentData, deepestProfile).ToList();
                 var sourceDepth = platform.Depth;
                 if (mode.Depth.HasValue) sourceDepth += mode.Depth.Value;
 
                 var directoryPath = Path.GetDirectoryName(radial.BasePath);
                 if (directoryPath == null) return;
                 if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
+#if false
+                if (_once)
+                    lock (_lockObject)
+                    {
+                        if (_once)
+                        {
+                            if (PluginUnderTest != null && radial.Bearing == 0.0)
+                            {
+                                var profilesAlongRadial = ProfilesAlongRadial(radial.Segment, 0.0, null, null, bottomProfile, soundSpeed[timePeriod].EnvironmentData, deepestProfile).ToList();
+                                PluginUnderTest.CreateInputFiles(platform, mode, radial, bottomProfile, sedimentSample, windSample.Data, profilesAlongRadial);
+                                _once = false;
+                            }
+                        }
+                    }
+#else
+                if (PluginUnderTest != null && radial.Bearing == 0.0)
+                {
+                    var profilesAlongRadial = ProfilesAlongRadial(radial.Segment, 0.0, null, null, bottomProfile, soundSpeed[timePeriod].EnvironmentData, deepestProfile).ToList();
+                    PluginUnderTest.CreateInputFiles(platform, mode, radial, bottomProfile, sedimentSample, windSample.Data, profilesAlongRadial);
+                }
+#endif
                 CreateBellhopEnvironmentFiles(radial.BasePath,
                                               startProfile, 
                                               middleProfile, 
@@ -327,40 +350,73 @@ namespace ESME.TransmissionLoss
         }
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-        static IEnumerable<Tuple<double, SoundSpeedProfile>> ProfilesAlongRadial(GeoSegment segment, double lengthOffset, SoundSpeedProfile startProfile, SoundSpeedProfile endProfile, BottomProfile bottomProfile, EnvironmentData<SoundSpeedProfile> soundSpeedData, SoundSpeedProfile deepestProfile)
+        static IEnumerable<Tuple<double, SoundSpeedProfile>> ProfilesAlongRadial(GeoSegment segment, double startDistance, SoundSpeedProfile startProfile, SoundSpeedProfile endProfile, BottomProfile bottomProfile, EnvironmentData<SoundSpeedProfile> soundSpeedData, SoundSpeedProfile deepestProfile)
         {
+            var returnStartProfile = false;
+            var returnEndProfile = false;
             if (startProfile == null)
+            {
+                returnStartProfile = true;
                 startProfile = soundSpeedData.IsFast2DLookupAvailable
                                    ? soundSpeedData.GetNearestPointAsync(segment[0]).Result.Extend(deepestProfile)
                                    : soundSpeedData.GetNearestPoint(segment[0]).Extend(deepestProfile);
+            }
             if (endProfile == null)
+            {
+                returnEndProfile = true;
                 endProfile = soundSpeedData.IsFast2DLookupAvailable
                                  ? soundSpeedData.GetNearestPointAsync(segment[1]).Result.Extend(deepestProfile)
                                  : soundSpeedData.GetNearestPoint(segment[1]).Extend(deepestProfile);
+            }
+            Debug.WriteLine(returnStartProfile ? "Initial call to ProfilesAlongRadial" : "Recursive call to ProfilesAlongRadial");
+            Debug.WriteLine(string.Format("segment start = {0}", segment[0]));
+            Debug.WriteLine(string.Format("          end = {0}", segment[1]));
+            Debug.WriteLine(string.Format("       length = {0} km", Geo.RadiansToKilometers(segment.LengthRadians)));
+            Debug.WriteLine(string.Format("startDistance = {0}", startDistance));
+            Debug.WriteLine(string.Format(" startProfile = {0}", startProfile));
+            Debug.WriteLine(string.Format("   endProfile = {0}", endProfile));
+            Debug.WriteLine(string.Format("start-end distance = {0}", startProfile.DistanceKilometers(endProfile)));
+            if (returnStartProfile)
+            {
+                Debug.WriteLine(string.Format("Returning startProfile = {0}", startProfile));
+                yield return Tuple.Create(NearestBottomProfileDistanceTo(bottomProfile, startDistance), startProfile);
+            }
+            // If the start and end profiles are the same, we're done
+            if (startProfile.DistanceKilometers(endProfile) <= 0.01) yield break;
 
+            // If not, create a middle profile
             var middleProfile = soundSpeedData.IsFast2DLookupAvailable
-                                        ? soundSpeedData.GetNearestPointAsync(segment.Center).Result.Extend(deepestProfile)
-                                        : soundSpeedData.GetNearestPoint(segment.Center).Extend(deepestProfile);
-
-            yield return Tuple.Create(NearestBottomProfileDistanceTo(bottomProfile, lengthOffset), startProfile);
-            if (startProfile.DistanceKilometers(middleProfile) > 0.01)
-            {
-                // If the start and middle profiles are not the same, recursively call the iterator to get the new midpoint
-                var newOffset = lengthOffset;
-                var firstHalfSegment = new GeoSegment(segment[0], segment.Center);
-                foreach (var tuple in ProfilesAlongRadial(firstHalfSegment, newOffset, middleProfile, endProfile, bottomProfile, soundSpeedData, deepestProfile)) yield return tuple;
-            }
-            // If the center profile is different from BOTH endpoints, we can return it here
+                                    ? soundSpeedData.GetNearestPointAsync(segment.Center).Result.Extend(deepestProfile)
+                                    : soundSpeedData.GetNearestPoint(segment.Center).Extend(deepestProfile);
+            // If the center profile is different from BOTH endpoints
             if (startProfile.DistanceKilometers(middleProfile) > 0.01 && middleProfile.DistanceKilometers(endProfile) > 0.01)
-                yield return Tuple.Create(Geo.RadiansToMeters(segment[0].DistanceRadians(segment.Center)), middleProfile);
-            if (middleProfile.DistanceKilometers(endProfile) > 0.01)
             {
-                // If the middle and end profiles are not the same, recursively call the iterator to get the new midpoint
-                var newOffset = lengthOffset + Geo.RadiansToMeters(segment[0].DistanceRadians(segment.Center));
+                Debug.WriteLine(string.Format("middleProfile = {0}", middleProfile));
+                Debug.WriteLine(string.Format("start-middle distance = {0}", startProfile.DistanceKilometers(middleProfile)));
+                Debug.WriteLine(string.Format("middle-end distance = {0}", middleProfile.DistanceKilometers(endProfile)));
+
+                // Recursively create and return any new sound speed profiles between the start and the center
+                var firstHalfSegment = new GeoSegment(segment[0], segment.Center);
+                Debug.WriteLine(string.Format("Recursively calling ProfilesAlongRadial for start-to-middle"));
+                foreach (var tuple in ProfilesAlongRadial(firstHalfSegment, startDistance, startProfile, middleProfile, bottomProfile, soundSpeedData, deepestProfile)) yield return tuple;
+
+                var centerDistance = startDistance + Geo.RadiansToKilometers(segment[0].DistanceRadians(segment.Center));
+                // return the center profile
+                Debug.WriteLine(string.Format("Returning middleProfile = {0}", startProfile));
+                yield return Tuple.Create(NearestBottomProfileDistanceTo(bottomProfile, centerDistance), middleProfile);
+
+                // Recursively create and return any new sound speed profiles between the center and the end
                 var secondHalfSegment = new GeoSegment(segment.Center, segment[1]);
-                foreach (var tuple in ProfilesAlongRadial(secondHalfSegment, newOffset, middleProfile, endProfile, bottomProfile, soundSpeedData, deepestProfile)) yield return tuple;
+                Debug.WriteLine(string.Format("Recursively calling ProfilesAlongRadial for middle-to-end"));
+                foreach (var tuple in ProfilesAlongRadial(secondHalfSegment, centerDistance, middleProfile, endProfile, bottomProfile, soundSpeedData, deepestProfile)) yield return tuple;
             }
-            if (startProfile.DistanceKilometers(endProfile) > 0.01) yield return Tuple.Create(lengthOffset + Geo.RadiansToMeters(segment.LengthRadians), endProfile);
+            var endDistance = startDistance + Geo.RadiansToKilometers(segment.LengthRadians);
+            // return the end profile
+            if (returnEndProfile)
+            {
+                Debug.WriteLine(string.Format("Returning endProfile = {0}", startProfile));
+                yield return Tuple.Create(NearestBottomProfileDistanceTo(bottomProfile, endDistance), endProfile);
+            }
         }
 
         static double NearestBottomProfileDistanceTo(BottomProfile bottomProfile, double desiredDistance)
@@ -368,12 +424,12 @@ namespace ESME.TransmissionLoss
             var profilePoints = bottomProfile.Profile;
             for (var i = 0; i < profilePoints.Count - 1; i++)
             {
-                if (desiredDistance < profilePoints[i + 1].Range) continue;
+                if (desiredDistance > profilePoints[i + 1].Range) continue;
                 var distanceToNearerPoint = desiredDistance - profilePoints[i].Range;
                 var distanceToFartherPoint = profilePoints[i + 1].Range - desiredDistance;
                 return distanceToNearerPoint <= distanceToFartherPoint ? profilePoints[i].Range : profilePoints[i + 1].Range;
             }
-            return double.NaN;
+            return profilePoints.Last().Range;
         }
 
         public static void CreateBellhopEnvironmentFiles(string baseFilename, SoundSpeedProfile startProfile, SoundSpeedProfile middleProfile, SoundSpeedProfile endProfile, SedimentType sediment, BottomProfile bottomProfile, float windSpeed, float frequency, float sourceDepth, float radius, float verticalBeamWidth, float depressionElevationAngle, float maxCalculationDepthMeters, float rangeCellSize, float depthCellSize, bool useSurfaceReflection, bool generateArrivalsFile, int beamCount)

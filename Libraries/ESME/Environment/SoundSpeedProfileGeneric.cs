@@ -104,7 +104,7 @@ namespace ESME.Environment
             //System.Diagnostics.Debug.WriteLine("Extending SSP {0} to new depth {1}", this, templateSSP.MaxDepth);
 
             if (templateSSP.MaxDepth <= MaxDepth) throw new InvalidOperationException("Cannot extend a sound speed profile using a template profile that is shorter than the current profile");
-            var result = new SoundSpeedProfile((Geo)templateSSP);
+            var result = new SoundSpeedProfile((Geo)this);
             if (Data.Count == 0)
             {
                 //System.Diagnostics.Debug.WriteLine("  Original SSP is zero length, copying templateSSP.");

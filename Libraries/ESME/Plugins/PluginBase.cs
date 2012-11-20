@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Controls;
 using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Locations;
+using ESME.Model;
 using ESME.NEMO;
+using ESME.Scenarios;
+using ESME.TransmissionLoss.Bellhop;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
@@ -76,11 +80,19 @@ namespace ESME.Plugins
     }
 
     [Serializable]
-    public class TransmissionLossCalculatorPluginBase : PluginBase
+    public abstract class TransmissionLossCalculatorPluginBase : PluginBase
     {
-        public TransmissionLossCalculatorPluginBase() { PluginType = PluginType.TransmissionLossCalculator; }
+        protected TransmissionLossCalculatorPluginBase() { PluginType = PluginType.TransmissionLossCalculator; }
         protected override void Save() { }
         public override void LoadSettings() { }
+
+        public abstract void CreateInputFiles(Platform platform,
+                                              Mode mode,
+                                              Radial radial,
+                                              BottomProfile bottomProfile,
+                                              SedimentType sedimentType,
+                                              double windSpeed,
+                                              IList<Tuple<double, SoundSpeedProfile>> soundSpeedProfilesAlongRadial);
     }
 
     [Serializable]
