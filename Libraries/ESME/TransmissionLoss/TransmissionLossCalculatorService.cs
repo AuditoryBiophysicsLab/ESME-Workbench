@@ -239,7 +239,7 @@ namespace ESME.TransmissionLoss
                         }
                     }
 #else
-                if (PluginUnderTest != null && radial.Bearing == 0.0)
+                if (PluginUnderTest != null)
                 {
                     var profilesAlongRadial = ProfilesAlongRadial(radial.Segment, 0.0, null, null, bottomProfile, soundSpeed[timePeriod].EnvironmentData, deepestProfile).ToList();
                     PluginUnderTest.CreateInputFiles(platform, mode, radial, bottomProfile, sedimentSample, windSample.Data, profilesAlongRadial);
@@ -368,6 +368,7 @@ namespace ESME.TransmissionLoss
                                  ? soundSpeedData.GetNearestPointAsync(segment[1]).Result.Extend(deepestProfile)
                                  : soundSpeedData.GetNearestPoint(segment[1]).Extend(deepestProfile);
             }
+#if false
             Debug.WriteLine(returnStartProfile ? "Initial call to ProfilesAlongRadial" : "Recursive call to ProfilesAlongRadial");
             Debug.WriteLine(string.Format("segment start = {0}", segment[0]));
             Debug.WriteLine(string.Format("          end = {0}", segment[1]));
@@ -376,9 +377,10 @@ namespace ESME.TransmissionLoss
             Debug.WriteLine(string.Format(" startProfile = {0}", startProfile));
             Debug.WriteLine(string.Format("   endProfile = {0}", endProfile));
             Debug.WriteLine(string.Format("start-end distance = {0}", startProfile.DistanceKilometers(endProfile)));
+#endif
             if (returnStartProfile)
             {
-                Debug.WriteLine(string.Format("Returning startProfile = {0}", startProfile));
+                //Debug.WriteLine(string.Format("Returning startProfile = {0}", startProfile));
                 yield return Tuple.Create(NearestBottomProfileDistanceTo(bottomProfile, startDistance), startProfile);
             }
             // If the start and end profiles are the same, we're done
@@ -391,30 +393,32 @@ namespace ESME.TransmissionLoss
             // If the center profile is different from BOTH endpoints
             if (startProfile.DistanceKilometers(middleProfile) > 0.01 && middleProfile.DistanceKilometers(endProfile) > 0.01)
             {
+#if false
                 Debug.WriteLine(string.Format("middleProfile = {0}", middleProfile));
                 Debug.WriteLine(string.Format("start-middle distance = {0}", startProfile.DistanceKilometers(middleProfile)));
                 Debug.WriteLine(string.Format("middle-end distance = {0}", middleProfile.DistanceKilometers(endProfile)));
+#endif
 
                 // Recursively create and return any new sound speed profiles between the start and the center
                 var firstHalfSegment = new GeoSegment(segment[0], segment.Center);
-                Debug.WriteLine(string.Format("Recursively calling ProfilesAlongRadial for start-to-middle"));
+                //Debug.WriteLine(string.Format("Recursively calling ProfilesAlongRadial for start-to-middle"));
                 foreach (var tuple in ProfilesAlongRadial(firstHalfSegment, startDistance, startProfile, middleProfile, bottomProfile, soundSpeedData, deepestProfile)) yield return tuple;
 
                 var centerDistance = startDistance + Geo.RadiansToKilometers(segment[0].DistanceRadians(segment.Center));
                 // return the center profile
-                Debug.WriteLine(string.Format("Returning middleProfile = {0}", startProfile));
+                //Debug.WriteLine(string.Format("Returning middleProfile = {0}", startProfile));
                 yield return Tuple.Create(NearestBottomProfileDistanceTo(bottomProfile, centerDistance), middleProfile);
 
                 // Recursively create and return any new sound speed profiles between the center and the end
                 var secondHalfSegment = new GeoSegment(segment.Center, segment[1]);
-                Debug.WriteLine(string.Format("Recursively calling ProfilesAlongRadial for middle-to-end"));
+                //Debug.WriteLine(string.Format("Recursively calling ProfilesAlongRadial for middle-to-end"));
                 foreach (var tuple in ProfilesAlongRadial(secondHalfSegment, centerDistance, middleProfile, endProfile, bottomProfile, soundSpeedData, deepestProfile)) yield return tuple;
             }
             var endDistance = startDistance + Geo.RadiansToKilometers(segment.LengthRadians);
             // return the end profile
             if (returnEndProfile)
             {
-                Debug.WriteLine(string.Format("Returning endProfile = {0}", startProfile));
+                //Debug.WriteLine(string.Format("Returning endProfile = {0}", startProfile));
                 yield return Tuple.Create(NearestBottomProfileDistanceTo(bottomProfile, endDistance), endProfile);
             }
         }
