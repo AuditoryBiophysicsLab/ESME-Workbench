@@ -75,16 +75,13 @@ namespace ESMEWorkbench.ViewModels.Main
             _visualizer = visualizer;
             _saveFile = saveFile;
             _transmissionLoss = transmissionLoss;
-            transmissionLoss.PluginUnderTest = new BellhopEngine { RangeCellSize = 10, DepthCellSize = 10, RayCount = 1500, UseSurfaceReflection = true };
+            _transmissionLoss.PluginManagerService = plugins;
             ScenarioExensions.TransmissionLossCalculator = _transmissionLoss;
             Radial.TransmissionLossCalculator = _transmissionLoss;
             _plugins = plugins;
             _cache = cache;
             MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
             Cursor = Cursors.Arrow;
-            _transmissionLoss.RangeCellSize = Globals.AppSettings.BellhopSettings.RangeCellSize;
-            _transmissionLoss.DepthCellSize = Globals.AppSettings.BellhopSettings.DepthCellSize;
-            _transmissionLoss.RayCount = Globals.AppSettings.BellhopSettings.RayCount;
             _transmissionLoss.WorkQueue.PropertyChanged +=
                 (s, e) =>
                 {

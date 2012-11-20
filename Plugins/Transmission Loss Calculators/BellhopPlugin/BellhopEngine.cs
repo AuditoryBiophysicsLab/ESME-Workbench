@@ -13,6 +13,10 @@ using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
+using HRC;
+using HRC.Aspects;
+using HRC.Utility;
+using HRC.ViewModels;
 
 namespace BellhopPlugin
 {
@@ -21,22 +25,49 @@ namespace BellhopPlugin
                 Description = "Bellhop is a highly efficient ray tracing program, written by Michael Porter of hlsresearch.com as part of the Acoustic Toolbox.")]
     public class BellhopEngine : TransmissionLossCalculatorPluginBase
     {
+        [UsedImplicitly] PropertyObserver<BellhopEngine> _propertyObserver;
         public BellhopEngine() 
         {
             PluginSubtype = PluginSubtype.Bellhop;
             Initialize();
+            _propertyObserver = new PropertyObserver<BellhopEngine>(this)
+                .RegisterHandler(p => p.RangeCellSize, Save)
+                .RegisterHandler(p => p.DepthCellSize, Save)
+                .RegisterHandler(p => p.UseSurfaceReflection, Save)
+                .RegisterHandler(p => p.GenerateArrivalsFile, Save)
+                .RegisterHandler(p => p.RayCount, Save);
         }
 
         void Initialize()
         {
             SetPropertiesFromAttributes(GetType());
+            if (!File.Exists(ConfigurationFile)) Save();
+            IsConfigured = true;
         }
 
-        public double RangeCellSize { get; set; }
-        public double DepthCellSize { get; set; }
-        public bool UseSurfaceReflection { get; set; }
-        public bool GenerateArrivalsFile { get; set; }
-        public int RayCount { get; set; }
+        protected override void Save()
+        {
+            var serializer = new XmlSerializer<BellhopEngine> { Data = this };
+            serializer.Save(ConfigurationFile, null);
+        }
+
+        public override void LoadSettings()
+        {
+            var settings = XmlSerializer<BellhopEngine>.LoadExistingFile(ConfigurationFile, null);
+            if (settings == null) return;
+            RangeCellSize = settings.RangeCellSize;
+            DepthCellSize = settings.DepthCellSize;
+            UseSurfaceReflection = settings.UseSurfaceReflection;
+            GenerateArrivalsFile = settings.GenerateArrivalsFile;
+            RayCount = settings.RayCount;
+        }
+
+        [Initialize(10.0)]  public double RangeCellSize { get; set; }
+        [Initialize(10.0)]  public double DepthCellSize { get; set; }
+        [Initialize(true)]  public bool UseSurfaceReflection { get; set; }
+        [Initialize(false)] public bool GenerateArrivalsFile { get; set; }
+        [Initialize(1500)]  public int RayCount { get; set; }
+
         public override void CalculateTransmissionLoss(Platform platform, Mode mode, Radial radial, BottomProfile bottomProfile, SedimentType sedimentType, double windSpeed, IList<Tuple<double, SoundSpeedProfile>> soundSpeedProfilesAlongRadial)
         {
             var depthCellCount = (int)Math.Ceiling(bottomProfile.MaxDepth / DepthCellSize);
@@ -134,11 +165,6 @@ namespace BellhopPlugin
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
         static double[,] GenerateReflectionCoefficients(double windSpeed, double frequency, double startAngle = 0, double endAngle = 90.0, double angleStep = 1.0)
         {
-            //if (double.IsNaN(windSpeed) || (windSpeed < 0) || (windSpeed > 13)) throw new ArgumentException("Valid values are 0 - 13", "windSpeed");
-            //if (double.IsNaN(frequency) || (frequency < 0) || (frequency > 4000)) throw new ArgumentException("Valid values are 0 - 4000", "frequency");
-            //if ((windSpeed > 5) && (frequency > 1000)) throw new ArgumentException("Frequency values under 1000 require windSpeed values under 5");
-            //if ((frequency < 1000) && (windSpeed < 5)) { }
-
             frequency /= 1000;  // Frequency is expressed in kHz in the formula
 
             var sampleCount = (int)((endAngle - startAngle) / angleStep) + 1;

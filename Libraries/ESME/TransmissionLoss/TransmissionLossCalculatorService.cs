@@ -12,7 +12,6 @@ using ESME.Locations;
 using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.TransmissionLoss.Bellhop;
-using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
 using HRC.ViewModels;
@@ -44,9 +43,6 @@ namespace ESME.TransmissionLoss
         }
         [Import] IMasterDatabaseService _databaseService;
         [Import] EnvironmentalCacheService _cacheService;
-        [Initialize(float.NaN)] public float RangeCellSize { get; set; }
-        [Initialize(float.NaN)] public float DepthCellSize { get; set; }
-        [Initialize(-1)] public int RayCount { get; set; }
         public Dispatcher Dispatcher { get; set; }
         public ObservableConcurrentDictionary<Guid, PercentProgress<Radial>> WorkQueue { get; private set; }
         readonly ActionBlock<PercentProgress<Radial>> _calculator;
@@ -54,7 +50,7 @@ namespace ESME.TransmissionLoss
 
         public void OnImportsSatisfied()
         {
-            if (Dispatcher == null || float.IsNaN(RangeCellSize) || float.IsNaN(DepthCellSize) || _databaseService.MasterDatabaseDirectory == null) return;
+            if (Dispatcher == null || _databaseService.MasterDatabaseDirectory == null) return;
             Start();
         }
 
@@ -62,7 +58,7 @@ namespace ESME.TransmissionLoss
         bool _isStarted;
         public void Start()
         {
-            if (Dispatcher == null || float.IsNaN(RangeCellSize) || float.IsNaN(DepthCellSize)) return;
+            if (Dispatcher == null) return;
 
             lock (LockObject)
             {
@@ -100,19 +96,6 @@ namespace ESME.TransmissionLoss
                 }
                 if (!File.Exists(radial.BasePath + ".shd")) Add(radial);
             }
-#if false
-            _databaseService.Context.Radials.Local.CollectionChanged += (sender, args) =>
-            {
-                switch (args.Action)
-                {
-                    case NotifyCollectionChangedAction.Add:
-                        foreach (var radial in from Radial radial in args.NewItems
-                                               where !radial.IsCalculated && !File.Exists(radial.BasePath + ".shd")
-                                               select radial) Add(radial);
-                        break;
-                }
-            };
-#endif
         }
 
         public void Add(Radial radial)
@@ -136,7 +119,7 @@ namespace ESME.TransmissionLoss
             Calculate(new PercentProgress<Radial>(radial));
         }
 
-        public TransmissionLossCalculatorPluginBase PluginUnderTest { get; set; }
+        public IPluginManagerService PluginManagerService { get; set; }
         void Calculate(PercentProgress<Radial> item)
         {
             var radial = item.ProgressTarget;
@@ -171,12 +154,6 @@ namespace ESME.TransmissionLoss
                     return;
                 }
 
-                var depthCellSize = DepthCellSize;
-                if (Math.Abs(depthAtAnalysisPoint.Data / depthCellSize) < 10)
-                {
-                    depthCellSize = Math.Abs(depthAtAnalysisPoint.Data / 10);
-                }
-
                 var windData = wind[timePeriod].EnvironmentData;
                 var windSample = windData.IsFast2DLookupAvailable
                                      ? windData.GetNearestPointAsync(radial.Segment.Center).Result
@@ -191,12 +168,14 @@ namespace ESME.TransmissionLoss
                 var directoryPath = Path.GetDirectoryName(radial.BasePath);
                 if (directoryPath == null) return;
                 if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
-                if (PluginUnderTest != null)
+                if (PluginManagerService != null && PluginManagerService[PluginType.TransmissionLossCalculator] != null)
                 {
+                    var pluginUnderTest = (TransmissionLossCalculatorPluginBase)PluginManagerService[PluginType.TransmissionLossCalculator][PluginSubtype.Bellhop].DefaultPlugin;
+                    if (pluginUnderTest == null) return;
                     var profilesAlongRadial = ProfilesAlongRadial(radial.Segment, 0.0, null, null, bottomProfile, soundSpeed[timePeriod].EnvironmentData, deepestProfile).ToList();
                     if (radial.IsDeleted) return;
                     radial.CalculationStarted = DateTime.Now;
-                    PluginUnderTest.CalculateTransmissionLoss(platform, mode, radial, bottomProfile, sedimentSample, windSample.Data, profilesAlongRadial);
+                    pluginUnderTest.CalculateTransmissionLoss(platform, mode, radial, bottomProfile, sedimentSample, windSample.Data, profilesAlongRadial);
                     radial.CalculationCompleted = DateTime.Now;
                     radial.Length = mode.MaxPropagationRadius;
                     radial.IsCalculated = true;
@@ -212,6 +191,26 @@ namespace ESME.TransmissionLoss
             }
         }
 
+        /// <summary>
+        /// Recursively calculates the nearest sound speed profiles along a given radial using a binary search-like algorithm
+        /// 1. If start and end points are provided, use them, otherwise find the nearest SSP to each of those points
+        /// 2. If the start point was calculated, add the SSP closest to the calculated start point to the enumerable
+        /// 2. If the SSPs closest to the start and end points are within 10m of each other they are considered identical and there are 
+        ///    assumed to be no more intervening points
+        /// 3. If the SSPs closest to the start and end points are NOT within 10m of each other, calculate the midpoint of the segment 
+        ///    and find the nearest SSP to that point.
+        /// 4. If the SSP nearest the midpoint is not within 10m of the SSP nearest to the start point, recursively call this function to
+        ///    find the new midpoint between the start point and the current midpoint
+        /// 5. Return the
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="startDistance"></param>
+        /// <param name="startProfile"></param>
+        /// <param name="endProfile"></param>
+        /// <param name="bottomProfile"></param>
+        /// <param name="soundSpeedData"></param>
+        /// <param name="deepestProfile"></param>
+        /// <returns></returns>
         static IEnumerable<Tuple<double, SoundSpeedProfile>> ProfilesAlongRadial(GeoSegment segment, double startDistance, SoundSpeedProfile startProfile, SoundSpeedProfile endProfile, BottomProfile bottomProfile, EnvironmentData<SoundSpeedProfile> soundSpeedData, SoundSpeedProfile deepestProfile)
         {
             var returnStartProfile = false;
@@ -230,21 +229,7 @@ namespace ESME.TransmissionLoss
                                  ? soundSpeedData.GetNearestPointAsync(segment[1]).Result.Extend(deepestProfile)
                                  : soundSpeedData.GetNearestPoint(segment[1]).Extend(deepestProfile);
             }
-#if false
-            Debug.WriteLine(returnStartProfile ? "Initial call to ProfilesAlongRadial" : "Recursive call to ProfilesAlongRadial");
-            Debug.WriteLine(string.Format("segment start = {0}", segment[0]));
-            Debug.WriteLine(string.Format("          end = {0}", segment[1]));
-            Debug.WriteLine(string.Format("       length = {0} km", Geo.RadiansToKilometers(segment.LengthRadians)));
-            Debug.WriteLine(string.Format("startDistance = {0}", startDistance));
-            Debug.WriteLine(string.Format(" startProfile = {0}", startProfile));
-            Debug.WriteLine(string.Format("   endProfile = {0}", endProfile));
-            Debug.WriteLine(string.Format("start-end distance = {0}", startProfile.DistanceKilometers(endProfile)));
-#endif
-            if (returnStartProfile)
-            {
-                //Debug.WriteLine(string.Format("Returning startProfile = {0}", startProfile));
-                yield return Tuple.Create(NearestBottomProfileDistanceTo(bottomProfile, startDistance), startProfile);
-            }
+            if (returnStartProfile) yield return Tuple.Create(NearestBottomProfileDistanceTo(bottomProfile, startDistance), startProfile);
             // If the start and end profiles are the same, we're done
             if (startProfile.DistanceKilometers(endProfile) <= 0.01) yield break;
 
@@ -255,34 +240,21 @@ namespace ESME.TransmissionLoss
             // If the center profile is different from BOTH endpoints
             if (startProfile.DistanceKilometers(middleProfile) > 0.01 && middleProfile.DistanceKilometers(endProfile) > 0.01)
             {
-#if false
-                Debug.WriteLine(string.Format("middleProfile = {0}", middleProfile));
-                Debug.WriteLine(string.Format("start-middle distance = {0}", startProfile.DistanceKilometers(middleProfile)));
-                Debug.WriteLine(string.Format("middle-end distance = {0}", middleProfile.DistanceKilometers(endProfile)));
-#endif
-
                 // Recursively create and return any new sound speed profiles between the start and the center
                 var firstHalfSegment = new GeoSegment(segment[0], segment.Center);
-                //Debug.WriteLine(string.Format("Recursively calling ProfilesAlongRadial for start-to-middle"));
                 foreach (var tuple in ProfilesAlongRadial(firstHalfSegment, startDistance, startProfile, middleProfile, bottomProfile, soundSpeedData, deepestProfile)) yield return tuple;
 
                 var centerDistance = startDistance + Geo.RadiansToKilometers(segment[0].DistanceRadians(segment.Center));
                 // return the center profile
-                //Debug.WriteLine(string.Format("Returning middleProfile = {0}", startProfile));
                 yield return Tuple.Create(NearestBottomProfileDistanceTo(bottomProfile, centerDistance), middleProfile);
 
                 // Recursively create and return any new sound speed profiles between the center and the end
                 var secondHalfSegment = new GeoSegment(segment.Center, segment[1]);
-                //Debug.WriteLine(string.Format("Recursively calling ProfilesAlongRadial for middle-to-end"));
                 foreach (var tuple in ProfilesAlongRadial(secondHalfSegment, centerDistance, middleProfile, endProfile, bottomProfile, soundSpeedData, deepestProfile)) yield return tuple;
             }
             var endDistance = startDistance + Geo.RadiansToKilometers(segment.LengthRadians);
             // return the end profile
-            if (returnEndProfile)
-            {
-                //Debug.WriteLine(string.Format("Returning endProfile = {0}", startProfile));
-                yield return Tuple.Create(NearestBottomProfileDistanceTo(bottomProfile, endDistance), endProfile);
-            }
+            if (returnEndProfile) yield return Tuple.Create(NearestBottomProfileDistanceTo(bottomProfile, endDistance), endProfile);
         }
 
         static double NearestBottomProfileDistanceTo(BottomProfile bottomProfile, double desiredDistance)

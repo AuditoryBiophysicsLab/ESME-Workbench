@@ -70,7 +70,6 @@ namespace ESME.Plugins
         protected virtual void SetPropertiesFromAttributes(Type type)
         {
             var pluginAttribute = (ESMEPluginAttribute)type.GetCustomAttributes(typeof(ESMEPluginAttribute), false)[0];
-            PluginType = PluginType.EnvironmentalDataSource;
             PluginName = pluginAttribute.Name;
             PluginDescription = pluginAttribute.Description;
         }
@@ -125,6 +124,7 @@ namespace ESME.Plugins
         protected override void SetPropertiesFromAttributes(Type type)
         {
             var pluginAttribute = (EnvironmentDataSourceAttribute)type.GetCustomAttributes(typeof(EnvironmentDataSourceAttribute), false)[0];
+            PluginType = PluginType.EnvironmentalDataSource;
             EnvironmentDataType = pluginAttribute.EnvironmentDataType;
             switch (EnvironmentDataType)
             {
