@@ -2,7 +2,6 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:ESME="clr-namespace:ESME;assembly=ESME"
         xmlns:Main="clr-namespace:ESMEWorkbench.ViewModels.Main"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Views="clr-namespace:ESMEWorkbench.Views"
@@ -13,9 +12,7 @@
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <DockPanel LastChildFill="True">
-        <DockPanel Margin="10"
-                   DockPanel.Dock="Bottom"
-                   LastChildFill="False">
+        <DockPanel Margin="10" DockPanel.Dock="Bottom" LastChildFill="False">
             <Button Width="75"
                     Margin="10 0 0 0"
                     Content="Cancel"
@@ -29,17 +26,18 @@
         </DockPanel>
         <TabControl>
             <TabItem Header="Acoustic Simulators">
-                <Views:AcousticSimulatorOptionsControl DataContext="{Binding AppSettings}" />
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="Select transmission loss engine" />
+                    <ComboBox ItemsSource="{Binding AvailableTransmissionLossEngines}" SelectedValue="{Binding SelectedTransmissionLossEngine}" />
+                    <Views:AcousticSimulatorOptionsControl Margin="0 10 0 0" DataContext="{Binding AppSettings}" />
+                </StackPanel>
             </TabItem>
             <TabItem Header="Performance">
                 <GroupBox Header="Database Importing" Padding="5">
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Maximum number of import threads per database: " />
-                            <ComboBox DisplayMemberPath="Key"
-                                      ItemsSource="{Binding MaxImportThreadCountChoices}"
-                                      SelectedValue="{Binding AppSettings.MaxImportThreadCount}"
-                                      SelectedValuePath="Value" />
+                            <ComboBox DisplayMemberPath="Key" ItemsSource="{Binding MaxImportThreadCountChoices}" SelectedValue="{Binding AppSettings.MaxImportThreadCount}" SelectedValuePath="Value" />
                         </StackPanel>
                         <TextBlock MaxWidth="400"
                                    HorizontalAlignment="Left"

@@ -4,6 +4,7 @@ using System.IO;
 using System.Xml.Serialization;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
+using HRC;
 using HRC.Aspects;
 using HRC.Collections;
 using HRC.Utility;
@@ -19,6 +20,13 @@ namespace ESME.Data
         {
             typeof (NAVOConfiguration),
         };
+
+        [UsedImplicitly] PropertyObserver<AppSettings> _propertyObserver;
+        public AppSettings()
+        {
+            _propertyObserver = new PropertyObserver<AppSettings>(this)
+                .RegisterHandler(p => p.PluginManagerService, PluginManagerServiceChanged);
+        }
 
         static string _appSettingsDirectory;
         
@@ -74,41 +82,17 @@ namespace ESME.Data
         [Initialize(-1)]
         public int MaxImportThreadCount { get; set; }
 
-        #region public List<PluginIdentifier> DefaultPluginIdentifiers { get; set; }
-        // DefaultPluginIdentifiers should always come from the PluginManagerService.DefaultPluginIdentifiers
-        // During application startup (initial deserialization of AppSettings, specificially), PluginManagerService has not yet been set.
-        // Therefore, when PluginManagerService is null, we temporarily store DefaultPluginIdentifiers in _defaultPluginIdentifiers
-        // When PluginManagerService gets set, PluginManagerService.DefaultPluginIdentifiers gets initialized from _defaultPluginIdentifiers
-        public List<PluginIdentifier> DefaultPluginIdentifiers
+        [XmlIgnore] public IPluginManagerService PluginManagerService { get; set; }
+        void PluginManagerServiceChanged()
         {
-            get
-            {
-                return PluginManagerService == null ? _defaultPluginIdentifiers : PluginManagerService.DefaultPluginIdentifiers;
-            }
-            set
-            {
-                if (PluginManagerService == null) _defaultPluginIdentifiers = value;
-                else PluginManagerService.DefaultPluginIdentifiers = value;
-            }
+            AvailableTransmissionLossEngines.Clear();
+            if (PluginManagerService == null) return;
+            var availableEngines = PluginManagerService[PluginType.TransmissionLossCalculator];
+            foreach (var key in availableEngines.Keys)
+                AvailableTransmissionLossEngines.Add(availableEngines[key].DefaultPlugin.PluginName);
         }
-
-        List<PluginIdentifier> _defaultPluginIdentifiers;
-
-        IPluginManagerService _pluginManagerService;
-
-        // This is not serialized, but rather is set when the main application starts up (for ESME Workbench, that's in the MainViewModel
-        // constructor).  The collection of default plugin identifiers is cached in _defaultPluginIdentifiers
-        [XmlIgnore]
-        public IPluginManagerService PluginManagerService
-        {
-            get { return _pluginManagerService; }
-            set
-            {
-                _pluginManagerService = value;
-                if (_pluginManagerService != null) _pluginManagerService.DefaultPluginIdentifiers = _defaultPluginIdentifiers;
-            }
-        }
-        #endregion
+        [XmlIgnore, Initialize] public List<string> AvailableTransmissionLossEngines { get; set; }
+        public string SelectedTransmissionLossEngine { get; set; }
 
         public string DatabaseDirectory { get; set; }
     }
