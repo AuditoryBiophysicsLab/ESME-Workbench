@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
-using BellhopPlugin;
 using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
@@ -117,7 +116,6 @@ namespace ESMEWorkbench.ViewModels.Main
                 ScenarioExensions.Dispatcher = _dispatcher;
                 _plugins.PluginDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-                Globals.AppSettings.PluginManagerService = _plugins;
                 _transmissionLoss.Dispatcher = _dispatcher;
                 _transmissionLoss.Start();
                 NAVOImporter.PluginManagerService = _plugins;

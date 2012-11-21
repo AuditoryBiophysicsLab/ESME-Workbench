@@ -16,10 +16,6 @@
             <TextBlock Text="Depth cell size (m)" />
             <Controls:ValidatingTextBox BoundField="DepthCellSize" />
         </StackPanel>
-        <StackPanel Margin="0 0 0 5" Orientation="Vertical">
-            <TextBlock Text="Number of rays" />
-            <Controls:ValidatingTextBox BoundField="RayCount" />
-        </StackPanel>
-        <CheckBox Margin="0 0 0 5" Content="Use surface reflection" IsChecked="{Binding UseSurfaceReflection}" />
+        <StackPanel Margin="0 0 0 5" Orientation="Vertical" />
     </StackPanel>
 </UserControl>

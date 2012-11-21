@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:Main="clr-namespace:ESMEWorkbench.ViewModels.Main"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:Views="clr-namespace:ESMEWorkbench.Views"
         Title="User Options"
         d:DataContext="{d:DesignInstance Type=Main:ApplicationOptionsViewModel}"
         ResizeMode="NoResize"
@@ -12,7 +11,9 @@
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <DockPanel LastChildFill="True">
-        <DockPanel Margin="10" DockPanel.Dock="Bottom" LastChildFill="False">
+        <DockPanel Margin="10"
+                   DockPanel.Dock="Bottom"
+                   LastChildFill="False">
             <Button Width="75"
                     Margin="10 0 0 0"
                     Content="Cancel"
@@ -27,9 +28,23 @@
         <TabControl>
             <TabItem Header="Acoustic Simulators">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock Text="Select transmission loss engine" />
-                    <ComboBox ItemsSource="{Binding AvailableTransmissionLossEngines}" SelectedValue="{Binding SelectedTransmissionLossEngine}" />
-                    <Views:AcousticSimulatorOptionsControl Margin="0 10 0 0" DataContext="{Binding AppSettings}" />
+                    <TextBlock Text="Selected acoustic simulator" />
+                    <ComboBox DisplayMemberPath="PluginName"
+                              ItemsSource="{Binding AvailableTransmissionLossEngines}"
+                              SelectedItem="{Binding SelectedTransmissionLossEngine}" />
+                    <TextBlock Margin="0 10 0 0" Text="Acoustic simulator configuration options" />
+                    <TabControl ItemsSource="{Binding AvailableTransmissionLossEngines}" SelectedIndex="0">
+                        <TabControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding PluginName}" />
+                            </DataTemplate>
+                        </TabControl.ItemTemplate>
+                        <TabControl.ContentTemplate>
+                            <DataTemplate>
+                                <ContentControl Content="{Binding ConfigurationControl}" />
+                            </DataTemplate>
+                        </TabControl.ContentTemplate>
+                    </TabControl>
                 </StackPanel>
             </TabItem>
             <TabItem Header="Performance">
@@ -37,7 +52,10 @@
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Maximum number of import threads per database: " />
-                            <ComboBox DisplayMemberPath="Key" ItemsSource="{Binding MaxImportThreadCountChoices}" SelectedValue="{Binding AppSettings.MaxImportThreadCount}" SelectedValuePath="Value" />
+                            <ComboBox DisplayMemberPath="Key"
+                                      ItemsSource="{Binding MaxImportThreadCountChoices}"
+                                      SelectedValue="{Binding AppSettings.MaxImportThreadCount}"
+                                      SelectedValuePath="Value" />
                         </StackPanel>
                         <TextBlock MaxWidth="400"
                                    HorizontalAlignment="Left"

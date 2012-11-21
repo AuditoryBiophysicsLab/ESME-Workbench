@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using BellhopPlugin.Controls;
 using ESME;
 using ESME.Environment;
 using ESME.Model;
@@ -29,6 +30,7 @@ namespace BellhopPlugin
         public BellhopEngine() 
         {
             PluginSubtype = PluginSubtype.Bellhop;
+            ConfigurationControl = new BellhopConfigurationControl { DataContext = this };
             Initialize();
             _propertyObserver = new PropertyObserver<BellhopEngine>(this)
                 .RegisterHandler(p => p.RangeCellSize, Save)
@@ -66,7 +68,7 @@ namespace BellhopPlugin
         [Initialize(10.0)]  public double DepthCellSize { get; set; }
         [Initialize(true)]  public bool UseSurfaceReflection { get; set; }
         [Initialize(false)] public bool GenerateArrivalsFile { get; set; }
-        [Initialize(1500)]  public int RayCount { get; set; }
+        [Initialize(3000)]  public int RayCount { get; set; }
 
         public override void CalculateTransmissionLoss(Platform platform, Mode mode, Radial radial, BottomProfile bottomProfile, SedimentType sedimentType, double windSpeed, IList<Tuple<double, SoundSpeedProfile>> soundSpeedProfilesAlongRadial)
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using BellhopPlugin.Controls;
 using ESME.Environment;
 using ESME.Model;
 using ESME.Plugins;
@@ -22,7 +23,8 @@ namespace BellhopPlugin
         [UsedImplicitly] PropertyObserver<RAMGeoEngine> _propertyObserver;
         public RAMGeoEngine()
         {
-            PluginSubtype = PluginSubtype.Bellhop;
+            PluginSubtype = PluginSubtype.RAMGeo;
+            ConfigurationControl = new RAMGeoConfigurationControl { DataContext = this };
             Initialize();
             _propertyObserver = new PropertyObserver<RAMGeoEngine>(this)
                 .RegisterHandler(p => p.RangeCellSize, Save)
@@ -50,8 +52,8 @@ namespace BellhopPlugin
             DepthCellSize = settings.DepthCellSize;
         } 
 
-        [Initialize(10.0)] public double RangeCellSize { get; set; }
-        [Initialize(10.0)] public double DepthCellSize { get; set; }
+        [Initialize(50.0)] public double RangeCellSize { get; set; }
+        [Initialize(25.0)] public double DepthCellSize { get; set; }
 
         public override void CalculateTransmissionLoss(Platform platform, Mode mode, Radial radial, BottomProfile bottomProfile, SedimentType sedimentType, double windSpeed, IList<Tuple<double, SoundSpeedProfile>> soundSpeedProfilesAlongRadial)
         {

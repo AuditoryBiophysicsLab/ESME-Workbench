@@ -1,19 +1,36 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using ESME;
 using ESME.Data;
 using ESME.Environment;
-using HRC.Services;
+using ESME.Plugins;
+using HRC;
+using HRC.Aspects;
 using HRC.ViewModels;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
     public class ApplicationOptionsViewModel : ViewModelBase
     {
-        readonly IMessageBoxService _messageBoxService;
-        public ApplicationOptionsViewModel(IMessageBoxService messageBoxService)
+        [UsedImplicitly] PropertyObserver<ApplicationOptionsViewModel> _propertyObserver;
+        public ApplicationOptionsViewModel(IPluginManagerService pluginManagerService)
         {
-            _messageBoxService = messageBoxService;
+            PluginManagerService = pluginManagerService;
             Globals.AppSettings = AppSettings.Load();
             AppSettings = Globals.AppSettings;
+
+            if (PluginManagerService == null) return;
+            var availableEngines = PluginManagerService[PluginType.TransmissionLossCalculator];
+            foreach (var key in availableEngines.Keys)
+                AvailableTransmissionLossEngines.Add((PluginBase)availableEngines[key].DefaultPlugin);
+            if (Globals.AppSettings.SelectedTransmissionLossEngine == null) Globals.AppSettings.SelectedTransmissionLossEngine = ((PluginBase)availableEngines.Values.First().DefaultPlugin).PluginIdentifier.Type;
+            foreach (var engine in AvailableTransmissionLossEngines.Where(engine => engine.PluginIdentifier.Type == Globals.AppSettings.SelectedTransmissionLossEngine)) 
+            {
+                SelectedTransmissionLossEngine = engine;
+                break;
+            }
+            _propertyObserver = new PropertyObserver<ApplicationOptionsViewModel>(this)
+                .RegisterHandler(p => p.SelectedTransmissionLossEngine, () => { Globals.AppSettings.SelectedTransmissionLossEngine = SelectedTransmissionLossEngine.PluginIdentifier.Type; });
         }
 
         public void DesignTimeInitialization() { AppSettings = AppSettings.Load(); }
@@ -129,5 +146,10 @@ namespace ESMEWorkbench.ViewModels.Main
         Dictionary<string, int> _maxImportThreadCountChoices;
 
         #endregion
+
+        [Initialize] public List<PluginBase> AvailableTransmissionLossEngines { get; set; }
+        public PluginBase SelectedTransmissionLossEngine { get; set; }
+
+        public IPluginManagerService PluginManagerService { get; set; }
     }
 }

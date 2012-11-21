@@ -20,7 +20,7 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 return _editOptions ?? (_editOptions = new SimpleCommand<object, object>(obj =>
                 {
-                    var programOptionsViewModel = new ApplicationOptionsViewModel(_messageBox);
+                    var programOptionsViewModel = new ApplicationOptionsViewModel(_plugins);
                     var result = _visualizer.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
                     if ((result.HasValue) && (result.Value)) ESME.Globals.AppSettings.Save();
                     ESME.Globals.AppSettings = AppSettings.Load();
