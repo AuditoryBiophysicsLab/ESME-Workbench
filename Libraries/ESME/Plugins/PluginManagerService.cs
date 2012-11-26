@@ -152,7 +152,7 @@ namespace ESME.Plugins
     }
 
     [Serializable]
-    public class PluginIdentifier
+    public class PluginIdentifier : IEquatable<PluginIdentifier>
     {
         public PluginIdentifier() {}
         public PluginIdentifier(PluginIdentifier pluginIdentifier) 
@@ -165,5 +165,32 @@ namespace ESME.Plugins
         public PluginType PluginType { get; set; }
         public PluginSubtype PluginSubtype { get; set; }
         public string Type { get; set; }
+        public static bool operator==(PluginIdentifier x, PluginIdentifier y) { return x.Equals(y); }
+        public static bool operator !=(PluginIdentifier x, PluginIdentifier y) { return !(x == y); }
+
+        public bool Equals(PluginIdentifier other) 
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(other.PluginType, PluginType) && Equals(other.PluginSubtype, PluginSubtype) && Equals(other.Type, Type);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == typeof(PluginIdentifier) && Equals((PluginIdentifier)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var result = PluginType.GetHashCode();
+                result = (result * 397) ^ PluginSubtype.GetHashCode();
+                result = (result * 397) ^ (Type != null ? Type.GetHashCode() : 0);
+                return result;
+            }
+        }
     }
 }

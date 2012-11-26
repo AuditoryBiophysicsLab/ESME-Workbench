@@ -125,6 +125,8 @@ namespace ESME.TransmissionLoss
             var radial = item.ProgressTarget;
             try
             {
+                var selectedTransmissionLossPlugin = Globals.AppSettings.SelectedTransmissionLossEngine;
+                var foo = PluginManagerService[PluginType.TransmissionLossCalculator];
                 var scenario = radial.TransmissionLoss.AnalysisPoint.Scenario;
                 var mode = (from m in radial.TransmissionLoss.Modes
                             orderby m.MaxPropagationRadius
@@ -170,7 +172,7 @@ namespace ESME.TransmissionLoss
                 if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
                 if (PluginManagerService != null && PluginManagerService[PluginType.TransmissionLossCalculator] != null)
                 {
-                    var pluginUnderTest = (TransmissionLossCalculatorPluginBase)PluginManagerService[PluginType.TransmissionLossCalculator][PluginSubtype.Bellhop].DefaultPlugin;
+                    var pluginUnderTest = (TransmissionLossCalculatorPluginBase)PluginManagerService[selectedTransmissionLossPlugin.PluginType][selectedTransmissionLossPlugin.PluginSubtype].DefaultPlugin;
                     if (pluginUnderTest == null) return;
                     var profilesAlongRadial = ProfilesAlongRadial(radial.Segment, 0.0, null, null, bottomProfile, soundSpeed[timePeriod].EnvironmentData, deepestProfile).ToList();
                     if (radial.IsDeleted) return;

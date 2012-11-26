@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ESME;
 using ESME.Data;
 using ESME.Environment;
 using ESME.Plugins;
@@ -23,14 +22,14 @@ namespace ESMEWorkbench.ViewModels.Main
             var availableEngines = PluginManagerService[PluginType.TransmissionLossCalculator];
             foreach (var key in availableEngines.Keys)
                 AvailableTransmissionLossEngines.Add((PluginBase)availableEngines[key].DefaultPlugin);
-            if (Globals.AppSettings.SelectedTransmissionLossEngine == null) Globals.AppSettings.SelectedTransmissionLossEngine = ((PluginBase)availableEngines.Values.First().DefaultPlugin).PluginIdentifier.Type;
-            foreach (var engine in AvailableTransmissionLossEngines.Where(engine => engine.PluginIdentifier.Type == Globals.AppSettings.SelectedTransmissionLossEngine)) 
+            if (AppSettings.SelectedTransmissionLossEngine == null) AppSettings.SelectedTransmissionLossEngine = ((PluginBase)availableEngines.Values.First().DefaultPlugin).PluginIdentifier;
+            foreach (var engine in AvailableTransmissionLossEngines.Where(engine => engine.PluginIdentifier == AppSettings.SelectedTransmissionLossEngine)) 
             {
                 SelectedTransmissionLossEngine = engine;
                 break;
             }
             _propertyObserver = new PropertyObserver<ApplicationOptionsViewModel>(this)
-                .RegisterHandler(p => p.SelectedTransmissionLossEngine, () => { Globals.AppSettings.SelectedTransmissionLossEngine = SelectedTransmissionLossEngine.PluginIdentifier.Type; });
+                .RegisterHandler(p => p.SelectedTransmissionLossEngine, () => { Globals.AppSettings.SelectedTransmissionLossEngine = SelectedTransmissionLossEngine.PluginIdentifier; });
         }
 
         public void DesignTimeInitialization() { AppSettings = AppSettings.Load(); }

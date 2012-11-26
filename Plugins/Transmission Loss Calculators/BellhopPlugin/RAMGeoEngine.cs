@@ -188,11 +188,11 @@ namespace BellhopPlugin
             // if dz > 1m round dz down to either [1     2    2.5    5  ] m  ... or mulitples of 10^+n of these numbers
             var dz = RelativeDepthResolution * lambda;
             // todo: Port this function or find an equivalent dz = fix2x10pN(dz, [1 2 2.5 5 ]);
-            var ndz = Math.Max(1.0, Math.Floor(MinimumOutputDepthResolution / dz));
+            var ndz = (int)Math.Max(1.0, Math.Floor(MinimumOutputDepthResolution / dz));
             //  similar for dr and assoc. grid decimation
             var dr = RelativeRangeResolution * dz;
             // todo: Port this function or find an equivalent dr = fix2x10pN(dr, [1 2 2.5 5 ]);
-            var ndr = Math.Max(1, Math.Floor(MinimumOutputRangeResolution / dr));
+            var ndr = (int)Math.Max(1, Math.Floor(MinimumOutputRangeResolution / dr));
             //  attenuation layer (round up to nearest dz)
             var attenLayerDz = Math.Ceiling(AttenuationLayerThickness * lambda / dz) * dz;
             var cpMax = sedimentType.CompressionWaveSpeed;
@@ -208,16 +208,17 @@ namespace BellhopPlugin
             using (var envFile = new StreamWriter(radial.BasePath + ".env", false))
             {
                 envFile.WriteLine("RAMGeo");
-                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0}\t{1}\t{2}\t f [Frequency (Hz)], zs [Source Depth (m)], zrec0 [First receiever depth (m)]", frequency, sourceDepth, MinimumOutputDepthResolution));
-                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0}\t{1}\t{2}\t rmax[Max range (m)], dr [Range resolution (m)], ndr [Number of receiver ranges (1 for horizontal array)]", mode.MaxPropagationRadius, MinimumOutputRangeResolution, ndr));
-                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0}\t{1}\t{2}\t{3}\t zmax [Max computational depth (m)], dz [Depth resolution (m)], ndz [z grid decimation factor], zmplot [Maximum depth to plot (m)]", zmax, dz, ndz, zmplt));
+                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2:0.000000}\t\tf [Frequency (Hz)], zs [Source Depth (m)], zrec0 [First receiever depth (m)]", frequency, sourceDepth, MinimumOutputDepthResolution);
+                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t\t\trmax[Max range (m)], dr [Range resolution (m)], ndr [Number of receiver ranges (1 for horizontal array)]", mode.MaxPropagationRadius, MinimumOutputRangeResolution, ndr);
+                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t{3:0.000000}\tzmax [Max computational depth (m)], dz [Depth resolution (m)], ndz [z grid decimation factor], zmplot [Maximum depth to plot (m)]", zmax, dz, ndz, zmplt);
+                envFile.WriteLine("{0:0.000000}\t{1}\t{2}\t{3:0.000000}\t\tc0 [Reference sound speed (m/s)], np [Number of terms in Padé expansion], ns [Number of stability constraints], rs [Maximum range of stability constraints (m)]", ReferenceSoundSpeed, PadeExpansionTerms, StabilityConstraints, StabilityConstraintMaxRange);
                 // todo: different stuff goes here for RAMSGeo
 
                 // bathymetry data
                 var first = true;
                 foreach (var profilePoint in bottomProfile.Profile)
                 {
-                    envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0}\t{1}{2}", profilePoint.Range * 1000, profilePoint.Depth, first ? "\tbathymetry data [range (m), depth (m)]" : ""));
+                    envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:0.######}\t{1:0.######}{2}", profilePoint.Range * 1000, profilePoint.Depth, first ? "\t\t\t\t\t\tbathymetry data [range (m), depth (m)]" : ""));
                     first = false;
                 }
                 envFile.WriteLine("-1\t-1");
@@ -227,12 +228,13 @@ namespace BellhopPlugin
                 foreach (var rangeProfileTuple in soundSpeedProfilesAlongRadial)
                 {
                     // Range of profile only written for second and subsequent profiles
-                    if (!firstRangeProfile) envFile.WriteLine("{0}\t\t\t\tProfile range (m)", rangeProfileTuple.Item1);
+                    if (!firstRangeProfile) envFile.WriteLine("{0:0.#}\t\t\t\t\t\t\tProfile range (m)", rangeProfileTuple.Item1 * 1000);
 
                     var firstSoundSpeedProfile = true;
                     foreach (var profilePoint in rangeProfileTuple.Item2.Data)
                     {
-                        envFile.WriteLine("{0}\t{1}{2}", profilePoint.Depth, profilePoint.SoundSpeed, firstSoundSpeedProfile ? "\t\t\tsound speed profile in water [depth (m), sound speed (m/s)]" : "");
+                        if (double.IsNaN(profilePoint.SoundSpeed)) break;
+                        envFile.WriteLine("{0:0.######}\t{1:0.######}{2}", profilePoint.Depth, profilePoint.SoundSpeed, firstSoundSpeedProfile ? "\t\t\t\t\tsound speed profile in water [depth (m), sound speed (m/s)]" : "");
                         firstSoundSpeedProfile = false;
                     }
                     envFile.WriteLine("-1\t-1");
@@ -242,16 +244,16 @@ namespace BellhopPlugin
                     // A sediment layer is analogous to a sound speed profile point
                     // For range-dependent sediment, the sediment samples have to be at the same ranges as the sound speed profiles
                     // so we might want to change the API to include sediment properties in what is the current range and sound speed profile tuple
-                    envFile.WriteLine("{0}\t{1}\t\t\tcompressive sound speed profile in substrate [depth (m), sound speed (m/s)]", 5.0, sedimentType.CompressionWaveSpeed);
+                    envFile.WriteLine("{0:0.######}\t{1:0.######}\t\t\t\t\t\tcompressive sound speed profile in substrate [depth (m), sound speed (m/s)]", 5.0, sedimentType.CompressionWaveSpeed);
                     envFile.WriteLine("-1\t-1");
-                    envFile.WriteLine("{0}\t{1}\t\t\tdensity profile in substrate [depth (m), rhob (g/cm³)]", 5.0, sedimentType.Density);
+                    envFile.WriteLine("{0:0.######}\t{1:0.######}\t\t\t\t\t\tdensity profile in substrate [depth (m), rhob (g/cm³)]", 5.0, sedimentType.Density);
                     envFile.WriteLine("-1\t-1");
-                    envFile.WriteLine("{0}\t{1}\t\t\tcompressive attenuation profile in substrate [depth (m), attnp (db/lambda)]", 5.0, 0.0);
+                    envFile.WriteLine("{0:0.######}\t{1:0.######}\t\t\t\t\t\tcompressive attenuation profile in substrate [depth (m), attnp (db/lambda)]", 5.0, 0.0);
                     envFile.WriteLine("-1\t-1");
                     firstRangeProfile = false;
                 }
             }
-
+#if false
             // Now that we've got the files ready to go, we can launch bellhop to do the actual calculations
             var bellhopProcess = new TransmissionLossProcess
             {
@@ -278,6 +280,7 @@ namespace BellhopPlugin
                 }
                 Thread.Sleep(20);
             }
+#endif
         }
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);

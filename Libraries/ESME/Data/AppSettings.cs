@@ -66,7 +66,7 @@ namespace ESME.Data
         [Initialize(-1)]
         public int MaxImportThreadCount { get; set; }
 
-        public string SelectedTransmissionLossEngine { get; set; }
+        public PluginIdentifier SelectedTransmissionLossEngine { get; set; }
 
         public string DatabaseDirectory { get; set; }
     }
