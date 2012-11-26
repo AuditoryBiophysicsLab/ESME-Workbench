@@ -26,7 +26,13 @@ namespace ESME.Model
 
         public string Name { get; private set; }
         public int HFEVACategory { get; private set; }
+        /// <summary>
+        /// Density, in grams per cubic centimeter
+        /// </summary>
         public float Density { get; private set; }
+        /// <summary>
+        /// Compression wave speed, in meters per second
+        /// </summary>
         public float CompressionWaveSpeed { get; private set; }
         public float CompressionWaveCoefficient { get; private set; }
         public float ShearWaveSpeed { get; private set; }

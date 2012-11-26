@@ -153,7 +153,13 @@ namespace ESME.TransmissionLoss.Bellhop
 
     public class BottomProfilePoint
     {
+        /// <summary>
+        /// Range from beginning of profile, in kilometers
+        /// </summary>
         public double Range;
+        /// <summary>
+        /// Depth, in meters
+        /// </summary>
         public double Depth;
         public override string ToString() { return string.Format("{0},{1}", Range, Depth); }
     }
