@@ -164,7 +164,6 @@
     </Compile>
     <Compile Include="ViewModels\Main\HomeTab.cs" />
     <Compile Include="ViewModels\Main\OverrideCursor.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\AcousticSimulatorOptionsViewModel.cs" />
     <Compile Include="ViewModels\Tree\LocationNode.cs" />
     <Compile Include="ViewModels\Tree\LocationEnvironmentNode.cs" />
     <Compile Include="ViewModels\Tree\LocationScenarioNode.cs" />
@@ -181,12 +180,6 @@
     </Compile>
     <Compile Include="Views\AcousticEngineParameterConfigurationView.xaml.cs">
       <DependentUpon>AcousticEngineParameterConfigurationView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\AcousticSimulatorOptionsControl.xaml.cs">
-      <DependentUpon>AcousticSimulatorOptionsControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\AcousticSimulatorOptionsView.xaml.cs">
-      <DependentUpon>AcousticSimulatorOptionsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\AnalysisPointCalculationPreviewView.xaml.cs">
       <DependentUpon>AnalysisPointCalculationPreviewView.xaml</DependentUpon>
@@ -263,14 +256,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\AcousticEngineParameterConfigurationView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\AcousticSimulatorOptionsControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\AcousticSimulatorOptionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

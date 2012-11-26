@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Xml.Serialization;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
+using HRC;
 using HRC.Aspects;
 using HRC.Collections;
 using HRC.Utility;
@@ -18,6 +21,17 @@ namespace ESME.Data
             typeof (NAVOConfiguration),
         };
 
+        [UsedImplicitly] PropertyObserver<AppSettings> _propertyObserver;
+        public AppSettings()
+        {
+            _propertyObserver = new PropertyObserver<AppSettings>(this)
+                .RegisterHandler(p => p.PluginManagerService,
+                                 () =>
+                                 {
+                                     if (PluginManagerService != null && (object)SelectedTransmissionLossEngine == null) 
+                                         SelectedTransmissionLossEngine = ((PluginBase)PluginManagerService[PluginType.TransmissionLossCalculator].Values.First().DefaultPlugin).PluginIdentifier;
+                                 });
+        }
         static string _appSettingsDirectory;
         
         public static string ApplicationName
@@ -67,6 +81,7 @@ namespace ESME.Data
         public int MaxImportThreadCount { get; set; }
 
         public PluginIdentifier SelectedTransmissionLossEngine { get; set; }
+        [XmlIgnore] public IPluginManagerService PluginManagerService { get; set; }
 
         public string DatabaseDirectory { get; set; }
     }

@@ -115,7 +115,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 ScenarioExensions.Dispatcher = _dispatcher;
                 _plugins.PluginDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-
+                Globals.AppSettings.PluginManagerService = _plugins;
                 _transmissionLoss.Dispatcher = _dispatcher;
                 _transmissionLoss.Start();
                 NAVOImporter.PluginManagerService = _plugins;

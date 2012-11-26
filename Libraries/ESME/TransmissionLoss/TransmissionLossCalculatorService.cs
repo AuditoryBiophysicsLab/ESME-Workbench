@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks.Dataflow;
 using System.Windows.Threading;
+using ESME.Data;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
@@ -126,7 +127,6 @@ namespace ESME.TransmissionLoss
             try
             {
                 var selectedTransmissionLossPlugin = Globals.AppSettings.SelectedTransmissionLossEngine;
-                var foo = PluginManagerService[PluginType.TransmissionLossCalculator];
                 var scenario = radial.TransmissionLoss.AnalysisPoint.Scenario;
                 var mode = (from m in radial.TransmissionLoss.Modes
                             orderby m.MaxPropagationRadius
