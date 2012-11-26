@@ -165,7 +165,7 @@ namespace ESME.TransmissionLoss
                                          ? sediment.Samples.GetNearestPointAsync(radial.Segment.Center).Result
                                          : sediment.Samples.GetNearestPoint(radial.Segment.Center);
                 
-                var bottomProfile = new BottomProfile(128, radial.Segment, bathymetry);
+                var bottomProfile = new BottomProfile(99, radial.Segment, bathymetry);
 
                 var directoryPath = Path.GetDirectoryName(radial.BasePath);
                 if (directoryPath == null) return;

@@ -74,7 +74,7 @@ namespace BellhopPlugin
         /// 
         /// dz_lambda
         /// </summary>
-        [Initialize(0.0500)] public double RelativeDepthResolution { get; set; }
+        [Initialize(0.1)] public double RelativeDepthResolution { get; set; }
 
         /// <summary>
         /// Minimum output depth cell resolution, in meters
@@ -209,8 +209,8 @@ namespace BellhopPlugin
             {
                 envFile.WriteLine("RAMGeo");
                 envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2:0.000000}\t\tf [Frequency (Hz)], zs [Source Depth (m)], zrec0 [First receiever depth (m)]", frequency, sourceDepth, MinimumOutputDepthResolution);
-                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t\t\trmax[Max range (m)], dr [Range resolution (m)], ndr [Number of receiver ranges (1 for horizontal array)]", mode.MaxPropagationRadius, MinimumOutputRangeResolution, ndr);
-                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t{3:0.000000}\tzmax [Max computational depth (m)], dz [Depth resolution (m)], ndz [z grid decimation factor], zmplot [Maximum depth to plot (m)]", zmax, dz, ndz, zmplt);
+                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t\t\trmax[Max range (m)], dr [Range resolution (m)], ndr [Range grid decimation factor]", mode.MaxPropagationRadius, MinimumOutputRangeResolution, ndr);
+                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t{3:0.000000}\tzmax [Max computational depth (m)], dz [Depth resolution (m)], ndz [Depth grid decimation factor], zmplot [Maximum depth to plot (m)]", zmax, dz, ndz, zmplt);
                 envFile.WriteLine("{0:0.000000}\t{1}\t{2}\t{3:0.000000}\t\tc0 [Reference sound speed (m/s)], np [Number of terms in Padé expansion], ns [Number of stability constraints], rs [Maximum range of stability constraints (m)]", ReferenceSoundSpeed, PadeExpansionTerms, StabilityConstraints, StabilityConstraintMaxRange);
                 // todo: different stuff goes here for RAMSGeo
 
@@ -218,7 +218,7 @@ namespace BellhopPlugin
                 var first = true;
                 foreach (var profilePoint in bottomProfile.Profile)
                 {
-                    envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:0.######}\t{1:0.######}{2}", profilePoint.Range * 1000, profilePoint.Depth, first ? "\t\t\t\t\t\tbathymetry data [range (m), depth (m)]" : ""));
+                    envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:0.000000}\t{1:0.000000}{2}", profilePoint.Range * 1000, profilePoint.Depth, first ? "\t\t\t\t\tbathymetry data [range (m), depth (m)]" : ""));
                     first = false;
                 }
                 envFile.WriteLine("-1\t-1");
@@ -254,9 +254,10 @@ namespace BellhopPlugin
                 }
             }
             var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(envFileName));
+            Debug.WriteLine(string.Format("Env File: {0} temp path: {1}", envFileName, tempDirectory));
             Directory.CreateDirectory(tempDirectory);
             File.Copy(envFileName, Path.Combine(tempDirectory, "ramgeo.in"));
-            Debug.WriteLine(string.Format("Env File: {0} copied to: {1}", envFileName, tempDirectory));
+            //Debug.WriteLine(string.Format("Env File: {0} copied to: {1}", envFileName, tempDirectory));
             // Now that we've got the files ready to go, we can launch bellhop to do the actual calculations
             var ramProcess = new TransmissionLossProcess
             {
@@ -273,7 +274,7 @@ namespace BellhopPlugin
             if (radial.IsDeleted) throw new RadialDeletedByUserException();
             ramProcess.Start();
             ramProcess.PriorityClass = ProcessPriorityClass.Idle;
-            ramProcess.BeginOutputReadLine();
+            //ramProcess.BeginOutputReadLine();
             while (!ramProcess.HasExited)
             {
                 if (radial.IsDeleted)
@@ -283,11 +284,24 @@ namespace BellhopPlugin
                 }
                 Thread.Sleep(20);
             }
-            File.Delete(Path.Combine(tempDirectory, "ramgeo.in"));
-            File.Move(Path.Combine(tempDirectory, "tl.grid"), radial.BasePath + ".grid");
-            File.Move(Path.Combine(tempDirectory, "tl.line"), radial.BasePath + ".line");
-            File.Move(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
-            File.Move(Path.Combine(tempDirectory, "p.line"), radial.BasePath + ".pline");
+            var ramError = ramProcess.StandardError.ReadToEnd();
+            if (ramProcess.ExitCode == 0)
+            {
+                File.Delete(Path.Combine(tempDirectory, "ramgeo.in"));
+                File.Delete(radial.BasePath + ".grid");
+                File.Move(Path.Combine(tempDirectory, "tl.grid"), radial.BasePath + ".grid");
+                File.Delete(radial.BasePath + ".line");
+                File.Move(Path.Combine(tempDirectory, "tl.line"), radial.BasePath + ".line");
+                File.Delete(radial.BasePath + ".pgrid");
+                File.Move(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
+                File.Delete(radial.BasePath + ".pline");
+                File.Move(Path.Combine(tempDirectory, "p.line"), radial.BasePath + ".pline");
+            }
+            else
+            {
+                Debug.WriteLine("RAMGeo process for radial {0} exited with error code {1:X}", radial.BasePath, ramProcess.ExitCode);
+                Debug.WriteLine(ramError);
+            }
             Directory.Delete(tempDirectory, true);
             Debug.WriteLine(string.Format("Env File: {0} temp directory deleted: {1}", envFileName, tempDirectory));
         }

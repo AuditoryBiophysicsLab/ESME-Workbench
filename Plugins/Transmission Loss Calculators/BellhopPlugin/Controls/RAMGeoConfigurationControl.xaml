@@ -9,12 +9,12 @@
              mc:Ignorable="d">
     <StackPanel Orientation="Vertical">
         <StackPanel Margin="0 0 0 5" Orientation="Vertical">
-            <TextBlock Text="Range cell size (m)" />
-            <Controls:ValidatingTextBox BoundField="RangeCellSize" />
+            <TextBlock Text="Minimum range resolution (m)" />
+            <Controls:ValidatingTextBox BoundField="MinimumOutputRangeResolution" />
         </StackPanel>
         <StackPanel Margin="0 0 0 5" Orientation="Vertical">
-            <TextBlock Text="Depth cell size (m)" />
-            <Controls:ValidatingTextBox BoundField="DepthCellSize" />
+            <TextBlock Text="Minimum depth resolution (m)" />
+            <Controls:ValidatingTextBox BoundField="MinimumOutputDepthResolution" />
         </StackPanel>
         <StackPanel Margin="0 0 0 5" Orientation="Vertical" />
     </StackPanel>
