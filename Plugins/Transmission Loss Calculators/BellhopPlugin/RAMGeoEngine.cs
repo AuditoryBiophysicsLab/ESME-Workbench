@@ -183,9 +183,9 @@ namespace BellhopPlugin
             // Derived Parameters
             // ==================
             var lambda = ReferenceSoundSpeed / frequency;
-            // if dz < 1m round dz down to either [1/10, 1/5, 1/4 or 1/2] m  ... or mulitples of 10^-n of these numbers
+            // if dz < 1m round dz down to either [1/10, 1/5, 1/4 or 1/2] m  ... or multiples of 10^-n of these numbers
             //                                  = [1     2    2.5 or 5  ] x 0.1m  "   " ...
-            // if dz > 1m round dz down to either [1     2    2.5    5  ] m  ... or mulitples of 10^+n of these numbers
+            // if dz > 1m round dz down to either [1     2    2.5    5  ] m  ... or multiples of 10^+n of these numbers
             var dz = RelativeDepthResolution * lambda;
             // todo: Port this function or find an equivalent dz = fix2x10pN(dz, [1 2 2.5 5 ]);
             var ndz = (int)Math.Max(1.0, Math.Floor(MinimumOutputDepthResolution / dz));
@@ -204,8 +204,8 @@ namespace BellhopPlugin
             //  zmax is the z-limit for the PE calc from top of the water column to the bottom of the last substrate layer 
             // (including the attentuation layer if, as recommended, this is included)
             var zmax = maxSubstrateDepth + attenLayerDz;
-
-            using (var envFile = new StreamWriter(radial.BasePath + ".env", false))
+            var envFileName = radial.BasePath + ".env";
+            using (var envFile = new StreamWriter(envFileName, false))
             {
                 envFile.WriteLine("RAMGeo");
                 envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2:0.000000}\t\tf [Frequency (Hz)], zs [Source Depth (m)], zrec0 [First receiever depth (m)]", frequency, sourceDepth, MinimumOutputDepthResolution);
@@ -253,34 +253,43 @@ namespace BellhopPlugin
                     firstRangeProfile = false;
                 }
             }
-#if false
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(envFileName));
+            Directory.CreateDirectory(tempDirectory);
+            File.Copy(envFileName, Path.Combine(tempDirectory, "ramgeo.in"));
+            Debug.WriteLine(string.Format("Env File: {0} copied to: {1}", envFileName, tempDirectory));
             // Now that we've got the files ready to go, we can launch bellhop to do the actual calculations
-            var bellhopProcess = new TransmissionLossProcess
+            var ramProcess = new TransmissionLossProcess
             {
-                StartInfo = new ProcessStartInfo(Path.Combine(AssemblyLocation, "bellhop.exe"), radial.Filename)
+                StartInfo = new ProcessStartInfo(Path.Combine(AssemblyLocation, "RAMGeo.exe"))
                 {
                     CreateNoWindow = true,
                     UseShellExecute = false,
                     RedirectStandardInput = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    WorkingDirectory = directoryPath
+                    WorkingDirectory = tempDirectory
                 }
             };
             if (radial.IsDeleted) throw new RadialDeletedByUserException();
-            bellhopProcess.Start();
-            bellhopProcess.PriorityClass = ProcessPriorityClass.Idle;
-            bellhopProcess.BeginOutputReadLine();
-            while (!bellhopProcess.HasExited)
+            ramProcess.Start();
+            ramProcess.PriorityClass = ProcessPriorityClass.Idle;
+            ramProcess.BeginOutputReadLine();
+            while (!ramProcess.HasExited)
             {
                 if (radial.IsDeleted)
                 {
-                    bellhopProcess.Kill();
+                    ramProcess.Kill();
                     throw new RadialDeletedByUserException();
                 }
                 Thread.Sleep(20);
             }
-#endif
+            File.Delete(Path.Combine(tempDirectory, "ramgeo.in"));
+            File.Move(Path.Combine(tempDirectory, "tl.grid"), radial.BasePath + ".grid");
+            File.Move(Path.Combine(tempDirectory, "tl.line"), radial.BasePath + ".line");
+            File.Move(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
+            File.Move(Path.Combine(tempDirectory, "p.line"), radial.BasePath + ".pline");
+            Directory.Delete(tempDirectory, true);
+            Debug.WriteLine(string.Format("Env File: {0} temp directory deleted: {1}", envFileName, tempDirectory));
         }
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
