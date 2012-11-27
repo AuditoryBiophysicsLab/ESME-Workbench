@@ -314,6 +314,11 @@ namespace BellhopPlugin
                 File.Move(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
                 File.Delete(radial.BasePath + ".pline");
                 File.Move(Path.Combine(tempDirectory, "p.line"), radial.BasePath + ".pline");
+                var path = radial.BasePath + ".pgrid";
+                var result = ReadRAMPGrid(path);
+                WritePGridCompare(path+".reals",result,true);
+                WritePGridCompare(path + ".imags", result, false);
+
             }
             else
             {
@@ -326,105 +331,100 @@ namespace BellhopPlugin
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
+        static void WritePGridCompare(string fileName, IEnumerable<Complex[]> pgrid, bool writeReal)
+        {
+            using (var writer = new StreamWriter(fileName))
+            {
+                foreach (var row in pgrid)
+                {
+                    foreach (var complex in row)
+                    {
+                        writer.Write(string.Format("{0} ", writeReal ? complex.Real : complex.Imaginary));
+                    }
+                    writer.WriteLine();
+                }
+            }
+        }
+        
+        //object _lockObject = new object();
         List<Complex[]> ReadRAMPGrid(string fileName, string ramType = "RAMGEO")
         {
-            if (ramType != "RAMGEO") throw new NotImplementedException("no forms of RAM other than RAMGEO are currently implemented.");
-            //true for RAMGeo and "AUTO" version only. 
-            // ver = "1.5C00.03.00";
-            // headJunkFieldNum = 1;
-            // headJunkFieldSiz = "uint32";
-            // dataJunkFieldNum = 2;
-            // dataJunkFieldSiz = "uint32";
-            // nzFieldSiz = "int32";
-            // dataFieldNum = -1;           // -1 = record length dependent
-            // dataFieldSiz = "float32";
-
-            using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+            //lock (_lockObject)
             {
-                //if RAMGEO, skip one uint's worth of header.
-                reader.ReadUInt32(); //headJunkFieldNum,headJunkFieldSiz
-                
-                var numRecords = reader.ReadInt32();
-                var recLen = numRecords;
-                if(numRecords>0)
+                if (ramType != "RAMGEO") throw new NotImplementedException("no forms of RAM other than RAMGEO are currently implemented.");
+                //true for RAMGeo and "AUTO" version only. 
+                // ver = "1.5C00.03.00";
+                // headJunkFieldNum = 1;
+                // headJunkFieldSiz = "uint32";
+                // dataJunkFieldNum = 2;
+                // dataJunkFieldSiz = "uint32";
+                // nzFieldSiz = "int32";
+                // dataFieldNum = -1;           // -1 = record length dependent
+                // dataFieldSiz = "float32";
+
+                using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
-                    var doneAll = false;
-                    var pGrid = new List<Complex[]>();//zeros(Nz, 1);
-                    var pColumn = new Complex[numRecords];//zeros(Nz, 1);
+                    //if RAMGEO, skip one uint's worth of header.
+                    var numRows = reader.ReadUInt32(); //headJunkFieldNum,headJunkFieldSiz
 
-                    var iCol = 1;
-                    while (!doneAll)
+                    var numDepths = reader.ReadInt32();
+                    var recLen = numDepths;
+                    if (numDepths > 0)
                     {
-                        var doneCol = false;
-                        var startSub = 1;
+                        var doneAll = false;
+                        var pGrid = new List<Complex[]>(); //zeros(Nz, 1);
+                        var pColumn = new Complex[numDepths]; //zeros(Nz, 1);
 
-                        while(!doneCol && !doneAll)
+                        while (!doneAll)
                         {
-                            var endSub = startSub + 2 * recLen - 1;
-                            if (endSub > 2 * numRecords)
-                            {
-                                endSub = 2 * numRecords;
-                                doneCol = true;
-                            }
-                            var nRead = ((endSub - startSub) + 1) / 2;
-                            if (nRead > 0)
-                            {
-                                try
-                                {
-                                    // Skip junk at  start of each column / data record
-                                    //[Junk,Count0] = fread(FileID, DataJunkFieldNum, DataJunkFieldSiz);
-                                    reader.ReadUInt32();
-                                    reader.ReadUInt32();
-                                }
-                                catch (Exception e)
-                                {
-                                    doneAll = true;
-                                }
-                                try
-                                {
-                                    //[PFlat,Count2] =fread(FileID, 2 * NRead, DataFieldSiz);
-                                    var pFlat = new double[2 * nRead];
-                                    for (var i = 0; i < pFlat.Length; i++)
-                                    {
-                                        pFlat[i] = reader.ReadUInt32(); //will this work? what kind of complex number is this?
-                                    }
+                            var doneCol = false;
+                            var startSub = 1;
 
-                                    var istart = ((startSub + 1) / 2)-1; //added a minus one 
-                                    var iend = (endSub / 2) - 1; //added a minus one 
-                                    //pColumn(istart: iend, 1) = PFlat(StartSub: 2: (EndSub - 1)) + sqrt(-1) * PFlat((startSub + 1): 2: EndSub);
-                                    for (var i = istart; i < iend; i++)
-                                    {
-                                        for (var j = startSub; j < endSub -1; j += 2)
-                                        {
-                                            for (var k = startSub+1; k <endSub; k += 2)
-                                            {
-                                                //pColumn[i] = pFlat[j] + Complex.ImaginaryOne * pFlat[k];
-                                                pColumn[i] = new Complex(pFlat[j], pFlat[k]); // ... maybe?
-                                            }
-                                        }
-                                    }
-                                    
-                                    
-                                    startSub = endSub + 1;
-                                }
-                                catch (Exception e)
+                            while (!doneCol && !doneAll)
+                            {
+                                var endSub = startSub + 2 * recLen - 1;
+                                if (endSub > 2 * numDepths)
                                 {
-                                    // premature eof or other problem?
-                                    doneAll = true;
+                                    endSub = 2 * numDepths;
+                                    doneCol = true;
                                 }
+                                var nRead = ((endSub - startSub) + 1) / 2;
+                                if (nRead > 0)
+                                {
+                                    try
+                                    {
+                                        // Skip junk at  start of each column / data record
+                                        //[Junk,Count0] = fread(FileID, DataJunkFieldNum, DataJunkFieldSiz);
+                                        reader.ReadUInt32();
+                                        reader.ReadUInt32();
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        doneAll = true;
+                                    }
+                                    try
+                                    {
+                                        for (var i = 0; i < nRead; i++) pColumn[i] = new Complex(reader.ReadSingle(), reader.ReadSingle());
+                                        startSub = endSub + 1;
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        // premature eof or other problem?
+                                        doneAll = true;
+                                    }
+                                }
+                                else doneCol = true;
                             }
-                            else doneCol = true;
+                            if (!doneAll)
+                            {
+                                pGrid.Add(pColumn);
+                            }
                         }
-                        if (!doneAll)
-                        {
-                            pGrid.Add(pColumn);
-                            iCol++;
-                        }
+                        //loop's done, write it out and return it;
+                        return pGrid;
                     }
-                    //loop's done, write it out and return it; 
-                    return pGrid;
+                    return null;
                 }
-                return null;
             }
         }
 
