@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Numerics;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -396,7 +397,7 @@ namespace BellhopPlugin
                                             for (var k = startSub+1; k <endSub; k += 2)
                                             {
                                                 //pColumn[i] = pFlat[j] + Complex.ImaginaryOne * pFlat[k];
-                                                pColumn[i] = Complex.FromPolarCoordinates(pFlat[j], pFlat[k]); // ... maybe?
+                                                pColumn[i] = new Complex(pFlat[j], pFlat[k]); // ... maybe?
                                             }
                                         }
                                     }
@@ -421,31 +422,31 @@ namespace BellhopPlugin
                     //loop's done, write it out and return it; 
                     return pGrid;
                 }
+                return null;
             }
-            return null;
         }
 
-        void WriteShadeFile(string fileName, string title, double freq, double[] sourceDepths, double[] receiverDepths, double[] receiverRanges, double[, ,] pressures, string plotType = "          ", double xs = 0, double ys = 0, double theta = 0)
+        void WriteShadeFile(string fileName, string title, double freq, double[] sourceDepths, double[] receiverDepths, double[] receiverRanges, List<Complex[]> pressures, string plotType = "          ", double xs = 0, double ys = 0, double theta = 0)
         {
-
+            var size_cmplx = 8;
+            var recl = pressures[0].Length * size_cmplx;
+            var bytes_uchar = 1;
+            var bytes_int32 = 4;
+            Int32 reclf = pressures[0].Length * 2;
+            if(title.Length + bytes_int32 > recl) title = new string(title.Take(recl).ToArray()); //truncate to fit
+            using (var writer = new StreamWriter(fileName))
+            {
+                writer.Write(reclf);
+                writer.Write(title);
+                var skip = recl - bytes_int32 - title.Length * bytes_uchar;
+                for (var i = 0; i < skip; i++)
+                {
+                    writer.Write("-1,");
+                }
+            }
         }
 
-        void GetRAMVersionData(string ramType)
-        {
-            if (ramType != "RAMGEO") throw new NotImplementedException("no forms of RAM other than RAMGEO are currently implemented.");
-            var ver = "1.5C00.03.00";
-            var exeName = "RAMGeo.exe";
-            var inName = "ramgeo.in";
-            var pGridName = "p.grid";
-            var pLineName = "p.line";
-            var tlGridName = "tl.grid";
-            var tlLineName = "tl.line";
-            var maxNumBath = 100;
-            var maxNumZ = 20000;
-            var maxNumPade = 10;
-            // var pGridFormat = GridFormats(1);
-
-        }
+       
 
 
     }
