@@ -323,7 +323,7 @@ namespace BellhopPlugin
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-        Complex[,] ReadRAMPGrid(string fileName, string ramType = "RAMGEO")
+        List<Complex[]> ReadRAMPGrid(string fileName, string ramType = "RAMGEO")
         {
             if (ramType != "RAMGEO") throw new NotImplementedException("no forms of RAM other than RAMGEO are currently implemented.");
             //true for RAMGeo and "AUTO" version only. 
@@ -339,14 +339,14 @@ namespace BellhopPlugin
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
                 //if RAMGEO, skip one uint's worth of header.
-                reader.ReadUInt32();
+                reader.ReadUInt32(); //headJunkFieldNum,headJunkFieldSiz
                 
                 var numRecords = reader.ReadInt32();
                 var recLen = numRecords;
                 if(numRecords>0)
                 {
                     var doneAll = false;
-                    var pGrid = new Complex[numRecords];//zeros(Nz, 1);
+                    var pGrid = new List<Complex[]>();//zeros(Nz, 1);
                     var pColumn = new Complex[numRecords];//zeros(Nz, 1);
 
                     var iCol = 1;
@@ -380,20 +380,28 @@ namespace BellhopPlugin
                                 try
                                 {
                                     //[PFlat,Count2] =fread(FileID, 2 * NRead, DataFieldSiz);
-                                    var pFlat = new Complex[2 * nRead];
+                                    var pFlat = new double[2 * nRead];
                                     for (var i = 0; i < pFlat.Length; i++)
                                     {
                                         pFlat[i] = reader.ReadUInt32(); //will this work? what kind of complex number is this?
                                     }
 
-                                    // OK?
-                                    var istart = ((startSub + 1) / 2)-1;
-                                    var iend = (endSub / 2)-1;
+                                    var istart = ((startSub + 1) / 2)-1; //added a minus one 
+                                    var iend = (endSub / 2) - 1; //added a minus one 
+                                    //pColumn(istart: iend, 1) = PFlat(StartSub: 2: (EndSub - 1)) + sqrt(-1) * PFlat((startSub + 1): 2: EndSub);
                                     for (var i = istart; i < iend; i++)
                                     {
-                                        
+                                        for (var j = startSub; j < endSub -1; j += 2)
+                                        {
+                                            for (var k = startSub+1; k <endSub; k += 2)
+                                            {
+                                                //pColumn[i] = pFlat[j] + Complex.ImaginaryOne * pFlat[k];
+                                                pColumn[i] = Complex.FromPolarCoordinates(pFlat[j], pFlat[k]); // ... maybe?
+                                            }
+                                        }
                                     }
-                                    //pColumn(istart: iend, 1) = PFlat(StartSub: 2: (EndSub - 1)) + sqrt(-1) * PFlat((startSub + 1): 2: EndSub);
+                                    
+                                    
                                     startSub = endSub + 1;
                                 }
                                 catch (Exception e)
@@ -406,12 +414,12 @@ namespace BellhopPlugin
                         }
                         if (!doneAll)
                         {
-                           // pGrid(:,iCol) = pColumn(:);
+                            pGrid.Add(pColumn);
                             iCol++;
                         }
                     }
                     //loop's done, write it out and return it; 
-                    return null;
+                    return pGrid;
                 }
             }
             return null;
