@@ -26,7 +26,8 @@ namespace BellhopPlugin
                 Description = "RAMGeo")]
     public class RAMGeoEngine : TransmissionLossCalculatorPluginBase
     {
-        [UsedImplicitly] PropertyObserver<RAMGeoEngine> _propertyObserver;
+        [UsedImplicitly]
+        PropertyObserver<RAMGeoEngine> _propertyObserver;
         public RAMGeoEngine()
         {
             PluginSubtype = PluginSubtype.RAMGeo;
@@ -65,7 +66,8 @@ namespace BellhopPlugin
         /// 
         /// zmplt
         /// </summary>
-        [Initialize(-1.0)] public double MaximumOutputDepth { get; set; }
+        [Initialize(-1.0)]
+        public double MaximumOutputDepth { get; set; }
 
         /// <summary>
         /// RAMGEO computational depth grid spacing, in wavelengths
@@ -74,14 +76,16 @@ namespace BellhopPlugin
         /// 
         /// dz_lambda
         /// </summary>
-        [Initialize(0.1)] public double RelativeDepthResolution { get; set; }
+        [Initialize(0.1)]
+        public double RelativeDepthResolution { get; set; }
 
         /// <summary>
         /// Minimum output depth cell resolution, in meters
         /// 
         /// dzgridmin
         /// </summary>
-        [Initialize(10.0)] public double MinimumOutputDepthResolution { get; set; }
+        [Initialize(10.0)]
+        public double MinimumOutputDepthResolution { get; set; }
 
         /// <summary>
         /// RAMGEO computational range grid spacing, relative to depth resolution
@@ -89,63 +93,72 @@ namespace BellhopPlugin
         /// 
         /// dr_dz
         /// </summary>
-        [Initialize(2.0)] public double RelativeRangeResolution { get; set; }
+        [Initialize(2.0)]
+        public double RelativeRangeResolution { get; set; }
 
         /// <summary>
         /// Minimum output range cell resolution, in meters
         /// 
         /// drgridmin
         /// </summary>
-        [Initialize(10.0)] public double MinimumOutputRangeResolution { get; set; }
+        [Initialize(10.0)]
+        public double MinimumOutputRangeResolution { get; set; }
 
         /// <summary>
         /// Reference sound speed, in meters per second
         /// 
         /// c0
         /// </summary>
-        [Initialize(1500.0)] public double ReferenceSoundSpeed { get; set; }
+        [Initialize(1500.0)]
+        public double ReferenceSoundSpeed { get; set; }
 
         /// <summary>
         /// Number of terms in the Pade expansion (max 10)
         /// 
         /// np
         /// </summary>
-        [Initialize(6)] public int PadeExpansionTerms { get; set; }
+        [Initialize(6)]
+        public int PadeExpansionTerms { get; set; }
 
         /// <summary>
         /// Number of stability constraints
         /// 
         /// ns
         /// </summary>
-        [Initialize(1)] public int StabilityConstraints { get; set; }
+        [Initialize(1)]
+        public int StabilityConstraints { get; set; }
 
         /// <summary>
         /// Maximum range of stability constraints, in meters (0 = full range)
         /// 
         /// rs
         /// </summary>
-        [Initialize(0)] public int StabilityConstraintMaxRange { get; set; }
+        [Initialize(0)]
+        public int StabilityConstraintMaxRange { get; set; }
 
         /// <summary>
         /// Attenuation layer thickness, in wavelengths
         /// 
         /// AttenLayerDz_lambda
         /// </summary>
-        [Initialize(10.0)] public double AttenuationLayerThickness { get; set; }
+        [Initialize(10.0)]
+        public double AttenuationLayerThickness { get; set; }
 
         /// <summary>
         /// Attenuation layer maximum p-wave attenuation, in dB per wavelength
         /// 
         /// AttenLayerAttenPMax
         /// </summary>
-        [Initialize(10.0)] public double AttenuationLayerMaxPWaveAttenuation { get; set; }
+        [Initialize(10.0)]
+        public double AttenuationLayerMaxPWaveAttenuation { get; set; }
 
         /// <summary>
         /// Attenuation layer maximum s-wave attenuation, in dB per wavelength
         /// 
         /// AttenLayerAttenSMax [RAMSGeo]
         /// </summary>
-        [Initialize(10.0)] public double AttenuationLayerMaxSWaveAttenuation { get; set; }
+        [Initialize(10.0)]
+        public double AttenuationLayerMaxSWaveAttenuation { get; set; }
 
         /// <summary>
         /// Minimum shear velocity in substrate, in meters per second
@@ -158,7 +171,7 @@ namespace BellhopPlugin
         /// irot [RAMSGeo]
         /// </summary>
         public double IRot { get; set; }
-        
+
         /// <summary>
         /// theta [RAMSGeo]
         /// </summary>
@@ -169,7 +182,8 @@ namespace BellhopPlugin
         /// 
         /// LastLayerDz_lambda
         /// </summary>
-        [Initialize(10.0)] public double LastLayerThickness { get; set; }
+        [Initialize(10.0)]
+        public double LastLayerThickness { get; set; }
 
         public override void CalculateTransmissionLoss(Platform platform, Mode mode, Radial radial, BottomProfile bottomProfile, SedimentType sedimentType, double windSpeed, IList<Tuple<double, SoundSpeedProfile>> soundSpeedProfilesAlongRadial)
         {
@@ -308,5 +322,115 @@ namespace BellhopPlugin
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
+        double[,] ReadRAMPGrid(string fileName, string ramType = "RAMGEO")
+        {
+            if (ramType != "RAMGEO") throw new NotImplementedException("no forms of RAM other than RAMGEO are currently implemented.");
+            //true for RAMGeo and "AUTO" version only. 
+            // ver = "1.5C00.03.00";
+            // headJunkFieldNum = 1;
+            // headJunkFieldSiz = "uint32";
+            // dataJunkFieldNum = 2;
+            // dataJunkFieldSiz = "uint32";
+            // nzFieldSiz = "int32";
+            // dataFieldNum = -1;           // -1 = record length dependent
+            // dataFieldSiz = "float32";
+
+            using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+            {
+                //if RAMGEO, skip one uint's worth of header.
+                reader.ReadUInt32();
+                
+                var numRecords = reader.ReadInt32();
+                var recLen = numRecords;
+                if(numRecords>0)
+                {
+                    var doneAll = false;
+                    var pGrid = new double[numRecords];//zeros(Nz, 1);
+                    var pColumn = new double[numRecords];//zeros(Nz, 1);
+
+                    var iCol = 1;
+                    while (!doneAll)
+                    {
+                        var doneCol = false;
+                        var startSub = 1;
+
+                        while(!doneCol && !doneAll)
+                        {
+                            var endSub = startSub + 2 * recLen - 1;
+                            if (endSub > 2 * numRecords)
+                            {
+                                endSub = 2 * numRecords;
+                                doneCol = true;
+                            }
+                            var nRead = ((endSub - startSub) + 1) / 2;
+                            if (nRead > 0)
+                            {
+                                try
+                                {
+                                    // Skip junk at  start of each column / data record
+                                    //[Junk,Count0] = fread(FileID, DataJunkFieldNum, DataJunkFieldSiz);
+                                    reader.ReadUInt32();
+                                    reader.ReadUInt32();
+                                }
+                                catch (Exception e)
+                                {
+                                    doneAll = true;
+                                }
+                                try
+                                {
+                                    //[PFlat,Count2] =fread(FileID, 2 * NRead, DataFieldSiz);
+                                    // OK?
+                                    var istart = (startSub + 1) / 2;
+                                    var iend = endSub / 2;
+
+                                    //pColumn(istart: iend, 1) = PFlat(StartSub: 2: (EndSub - 1)) + sqrt(-1) * PFlat((startSub + 1): 2: EndSub);
+                                    startSub = endSub + 1;
+                                }
+                                catch (Exception e)
+                                {
+                                    // premature eof or other problem?
+                                    doneAll = true;
+                                }
+                            }
+                            else doneCol = true;
+                        }
+                        if (!doneAll)
+                        {
+                           // pGrid(:,iCol) = pColumn(:);
+                            iCol++;
+                        }
+                        
+                    }
+                    //loop's done, write it out and return it; 
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        void WriteShadeFile(string fileName, string title, double freq, double[] sourceDepths, double[] receiverDepths, double[] receiverRanges, double[, ,] pressures, string plotType = "          ", double xs = 0, double ys = 0, double theta = 0)
+        {
+
+        }
+
+        void GetRAMVersionData(string ramType)
+        {
+            if (ramType != "RAMGEO") throw new NotImplementedException("no forms of RAM other than RAMGEO are currently implemented.");
+            var ver = "1.5C00.03.00";
+            var exeName = "RAMGeo.exe";
+            var inName = "ramgeo.in";
+            var pGridName = "p.grid";
+            var pLineName = "p.line";
+            var tlGridName = "tl.grid";
+            var tlLineName = "tl.line";
+            var maxNumBath = 100;
+            var maxNumZ = 20000;
+            var maxNumPade = 10;
+            // var pGridFormat = GridFormats(1);
+
+        }
+
+
     }
+
 }
