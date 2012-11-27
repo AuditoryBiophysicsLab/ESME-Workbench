@@ -11,9 +11,7 @@
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <DockPanel LastChildFill="True">
-        <DockPanel Margin="10"
-                   DockPanel.Dock="Bottom"
-                   LastChildFill="False">
+        <DockPanel Margin="10" DockPanel.Dock="Bottom" LastChildFill="False">
             <Button Width="75"
                     Margin="10 0 0 0"
                     Content="Cancel"
@@ -28,11 +26,13 @@
         <TabControl>
             <TabItem Header="Acoustic Simulators">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock Text="Selected acoustic simulator" />
-                    <ComboBox DisplayMemberPath="PluginName"
-                              ItemsSource="{Binding AvailableTransmissionLossEngines}"
-                              SelectedItem="{Binding SelectedTransmissionLossEngine}" />
-                    <TextBlock Margin="0 10 0 0" Text="Acoustic simulator configuration options" />
+                    <!--
+                        <TextBlock Text="Selected acoustic simulator" />
+                        <ComboBox DisplayMemberPath="PluginName"
+                        ItemsSource="{Binding AvailableTransmissionLossEngines}"
+                        SelectedItem="{Binding SelectedTransmissionLossEngine}" />
+                        <TextBlock Margin="0 10 0 0" Text="Acoustic simulator configuration options" />
+                    -->
                     <TabControl ItemsSource="{Binding AvailableTransmissionLossEngines}" SelectedIndex="0">
                         <TabControl.ItemTemplate>
                             <DataTemplate>
@@ -52,10 +52,7 @@
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Maximum number of import threads per database: " />
-                            <ComboBox DisplayMemberPath="Key"
-                                      ItemsSource="{Binding MaxImportThreadCountChoices}"
-                                      SelectedValue="{Binding AppSettings.MaxImportThreadCount}"
-                                      SelectedValuePath="Value" />
+                            <ComboBox DisplayMemberPath="Key" ItemsSource="{Binding MaxImportThreadCountChoices}" SelectedValue="{Binding AppSettings.MaxImportThreadCount}" SelectedValuePath="Value" />
                         </StackPanel>
                         <TextBlock MaxWidth="400"
                                    HorizontalAlignment="Left"

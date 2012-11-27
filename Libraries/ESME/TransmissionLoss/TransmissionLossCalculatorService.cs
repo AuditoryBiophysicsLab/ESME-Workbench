@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Data.Entity;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks.Dataflow;
@@ -126,7 +127,6 @@ namespace ESME.TransmissionLoss
             var radial = item.ProgressTarget;
             try
             {
-                var selectedTransmissionLossPlugin = Globals.AppSettings.SelectedTransmissionLossEngine;
                 var scenario = radial.TransmissionLoss.AnalysisPoint.Scenario;
                 var mode = (from m in radial.TransmissionLoss.Modes
                             orderby m.MaxPropagationRadius
@@ -172,24 +172,22 @@ namespace ESME.TransmissionLoss
                 if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
                 if (PluginManagerService != null && PluginManagerService[PluginType.TransmissionLossCalculator] != null)
                 {
-                    var pluginUnderTest = (TransmissionLossCalculatorPluginBase)PluginManagerService[selectedTransmissionLossPlugin.PluginType][selectedTransmissionLossPlugin.PluginSubtype].DefaultPlugin;
-                    if (pluginUnderTest == null) return;
                     var profilesAlongRadial = ProfilesAlongRadial(radial.Segment, 0.0, null, null, bottomProfile, soundSpeed[timePeriod].EnvironmentData, deepestProfile).ToList();
                     if (radial.IsDeleted) return;
                     radial.CalculationStarted = DateTime.Now;
-                    pluginUnderTest.CalculateTransmissionLoss(platform, mode, radial, bottomProfile, sedimentSample, windSample.Data, profilesAlongRadial);
+                    mode.GetTransmissionLossPlugin(PluginManagerService).CalculateTransmissionLoss(platform, mode, radial, bottomProfile, sedimentSample, windSample.Data, profilesAlongRadial);
                     radial.CalculationCompleted = DateTime.Now;
                     radial.Length = mode.MaxPropagationRadius;
                     radial.IsCalculated = true;
                 }
             }
-            catch (ArgumentOutOfRangeException e)
+            catch (Exception e)
             {
                 Debug.WriteLine("{0}: FAIL: Calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}.  Exception: {4}",
                                 DateTime.Now,
-                                radial.Bearing,
-                                radial.TransmissionLoss.Modes[0],
-                                (Geo)radial.TransmissionLoss.AnalysisPoint.Geo, e.Message);
+                                radial == null ? "(null)" : radial.Bearing.ToString(CultureInfo.InvariantCulture),
+                                radial == null || radial.TransmissionLoss == null || radial.TransmissionLoss.Modes == null || radial.TransmissionLoss.Modes.Count == 0 ? "(null)" : radial.TransmissionLoss.Modes[0].ToString(),
+                                radial == null || radial.TransmissionLoss == null || radial.TransmissionLoss.AnalysisPoint == null || radial.TransmissionLoss.AnalysisPoint.Geo == null ? "(null)" : ((Geo)radial.TransmissionLoss.AnalysisPoint.Geo).ToString(), e.Message);
             }
         }
 

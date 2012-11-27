@@ -17,6 +17,7 @@ using ESME.Locations;
 using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
+using ESME.Views.Scenarios;
 using ESME.Views.TransmissionLossViewer;
 using ESMEWorkbench.ViewModels.Map;
 using ESMEWorkbench.ViewModels.Tree;
@@ -116,6 +117,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 ScenarioExensions.Dispatcher = _dispatcher;
                 _plugins.PluginDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
                 Globals.AppSettings.PluginManagerService = _plugins;
+                ModePropertiesViewModel.PluginManagerService = _plugins;
                 _transmissionLoss.Dispatcher = _dispatcher;
                 _transmissionLoss.Start();
                 NAVOImporter.PluginManagerService = _plugins;
@@ -437,7 +439,6 @@ namespace ESMEWorkbench.ViewModels.Main
                     {
                         var analysisPoint = new AnalysisPoint { Geo = new Geo(geo) };
                         Scenario.Add(analysisPoint);
-                        _dispatcher.InvokeIfRequired(analysisPoint.CreateMapLayers);
                     });
                 }
                 IsInAnalysisPointMode = false;
@@ -454,7 +455,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void MapDoubleClick(Geo geo) { Debug.WriteLine("Map double click at {0}", geo); }
 
         [MediatorMessageSink(MediatorMessage.ViewTransmissionLoss), UsedImplicitly]
-        void ViewTransmissionLoss(ESME.Scenarios.TransmissionLoss transmissionLoss)
+        void ViewTransmissionLoss(TransmissionLoss transmissionLoss)
         {
             var transmissionLossViewModel = new TransmissionLossViewModel {TransmissionLoss = transmissionLoss,};
 

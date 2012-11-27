@@ -271,6 +271,8 @@ namespace BellhopPlugin
             }
             var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(envFileName));
             Debug.WriteLine(string.Format("Env File: {0} temp path: {1}", envFileName, tempDirectory));
+            if (Directory.Exists(tempDirectory)) Directory.Delete(tempDirectory, true);
+            if (File.Exists(tempDirectory)) File.Delete(tempDirectory);
             Directory.CreateDirectory(tempDirectory);
             File.Copy(envFileName, Path.Combine(tempDirectory, "ramgeo.in"));
             //Debug.WriteLine(string.Format("Env File: {0} copied to: {1}", envFileName, tempDirectory));

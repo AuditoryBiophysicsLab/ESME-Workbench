@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Data;
 using ESME.Database;
 using ESME.Locations;
+using ESME.Plugins;
 using HRC.Aspects;
 using HRC.Utility;
 using HRC.ViewModels;
@@ -101,6 +102,11 @@ namespace ESME.Scenarios
         /// </summary>
         public float MaxPropagationRadius { get; set; }
 
+        /// <summary>
+        /// The class name of the transmission loss engine that will be used to calculate the radials of this mode
+        /// </summary>
+        public string TransmissionLossPluginType { get; set; }
+
         public virtual Source Source { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
         [Initialize] public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
@@ -123,6 +129,15 @@ namespace ESME.Scenarios
         object _layerControl;
 
         [NotMapped] public int ModeID { get; set; }
+        public TransmissionLossCalculatorPluginBase GetTransmissionLossPlugin(IPluginManagerService pluginManagerService)
+        {
+            return (from engine in
+                        from pluginSubtype in pluginManagerService[PluginType.TransmissionLossCalculator].Keys
+                        select (TransmissionLossCalculatorPluginBase)pluginManagerService[PluginType.TransmissionLossCalculator][pluginSubtype].DefaultPlugin
+                    where engine.PluginIdentifier.Type == TransmissionLossPluginType
+                    select engine).FirstOrDefault() 
+                    ?? ((TransmissionLossCalculatorPluginBase)pluginManagerService[PluginType.TransmissionLossCalculator].Values.First().DefaultPlugin);
+        }
         #endregion
 
         #region commands

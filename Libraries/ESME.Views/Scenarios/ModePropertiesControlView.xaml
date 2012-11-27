@@ -9,22 +9,18 @@
              Background="#fff0f0f0"
              d:DataContext="{d:DesignInstance l:ModePropertiesViewModel}"
              d:DesignHeight="500"
-             d:DesignWidth="450"
+             d:DesignWidth="300"
              Grid.IsSharedSizeScope="True"
              mc:Ignorable="d">
     <UserControl.Resources>
-        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed"
-                                          FalseValue="Visible"
-                                          TrueValue="Collapsed" />        
+        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed" FalseValue="Visible" TrueValue="Collapsed" />
         <Style TargetType="{x:Type TextBox}">
             <Setter Property="MinWidth" Value="75" />
             <Setter Property="Validation.ErrorTemplate">
                 <Setter.Value>
                     <ControlTemplate>
                         <DockPanel LastChildFill="True">
-                            <Border BorderBrush="Red"
-                                    BorderThickness="1"
-                                    DockPanel.Dock="Left">
+                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
                                 <AdornedElementPlaceholder />
                             </Border>
                         </DockPanel>
@@ -42,9 +38,7 @@
                 <Setter.Value>
                     <ControlTemplate>
                         <DockPanel LastChildFill="True">
-                            <Border BorderBrush="Red"
-                                    BorderThickness="1"
-                                    DockPanel.Dock="Left">
+                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
                                 <AdornedElementPlaceholder />
                             </Border>
                         </DockPanel>
@@ -58,55 +52,52 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <DockPanel LastChildFill="True">
-        <StackPanel HorizontalAlignment="Right"
-                    DockPanel.Dock="Bottom"
-                    Orientation="Horizontal">
+    <DockPanel Grid.IsSharedSizeScope="True" LastChildFill="True">
+        <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
             <Button Width="75"
                     Margin="5"
                     Command="{Binding OkCommand}"
                     Content="OK"
                     IsDefault="True"
                     IsEnabled="{Binding IsValid}" />
-            <Button Width="75"
-                    Margin="5"
-                    Command="{Binding CancelCommand}"
-                    Content="Cancel" />
+            <Button Width="75" Margin="5" Command="{Binding CancelCommand}" Content="Cancel" />
         </StackPanel>
-        <Border BorderThickness="0"
-                DockPanel.Dock="Top"
-                Padding="5">
+        <Border BorderThickness="0" DockPanel.Dock="Top" Padding="5">
             <StackPanel Orientation="Vertical">
-                <Grid Margin="5 5 5 0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0"
-                               Margin="0 0 5 0"
-                               VerticalAlignment="Center"
-                               Text="Mode name"
-                               TextAlignment="Right" />
-                    <TextBox Grid.Column="1" Text="{Binding ModeName}" />
-                </Grid>
-                <Grid Margin="5 5 5 0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0"
-                               Margin="0 0 5 0"
-                               VerticalAlignment="Center"
-                               Text="Mode type"
-                               TextAlignment="Right" />
-                    <TextBox Grid.Column="1" Text="{Binding ModeType}" />
-                </Grid>
+                <GroupBox Header="General properties">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Mode name"
+                                       TextAlignment="Right" />
+                            <TextBox Grid.Column="1" Text="{Binding ModeName}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Mode type"
+                                       TextAlignment="Right" />
+                            <TextBox Grid.Column="1" Text="{Binding ModeType}" />
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
                 <GroupBox Header="Acoustic simulator parameters" Padding="5">
                     <StackPanel Orientation="Vertical">
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                                <ColumnDefinition />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0"
                                        Margin="0 0 5 0"
@@ -119,7 +110,7 @@
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                                <ColumnDefinition />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0"
                                        Margin="0 0 5 0"
@@ -132,7 +123,7 @@
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                                <ColumnDefinition />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0"
                                        Margin="0 0 5 0"
@@ -145,7 +136,7 @@
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                                <ColumnDefinition />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0"
                                        Margin="0 0 5 0"
@@ -158,7 +149,7 @@
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                                <ColumnDefinition />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0"
                                        Margin="0 0 5 0"
@@ -177,7 +168,7 @@
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                                <ColumnDefinition />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0"
                                        Margin="0 0 5 0"
@@ -193,6 +184,19 @@
                                                                 ValidatesOnDataErrors=True,
                                                                 UpdateSourceTrigger=PropertyChanged}" />
                         </Grid>
+                        <Grid Margin="5 5 5 0" Visibility="{Binding IsPSMView, Converter={StaticResource FalseVisibleTrueCollapsed}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Acoustic simulator"
+                                       TextAlignment="Right"
+                                       ToolTip="The acoustic simulation engine that will be used to simulate the sound fields produced by this mode" />
+                            <ComboBox Grid.Column="1" DisplayMemberPath="PluginName" ItemsSource="{Binding AvailableTransmissionLossEngines}" SelectedItem="{Binding SelectedTransmissionLossEngine}" />
+                        </Grid>
                     </StackPanel>
                 </GroupBox>
                 <GroupBox Header="Horizontal beam pattern" Padding="5">
@@ -200,7 +204,7 @@
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                                <ColumnDefinition />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Margin="0,1,5,5"
                                        VerticalAlignment="Center"
@@ -212,7 +216,7 @@
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                                <ColumnDefinition />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Margin="0,1,5,5"
                                        VerticalAlignment="Center"
@@ -228,7 +232,7 @@
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                                <ColumnDefinition />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Margin="0,1,5,5"
                                        VerticalAlignment="Center"
@@ -240,7 +244,7 @@
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="LabelColumn" />
-                                <ColumnDefinition />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0"
                                        Margin="0 0 5 0"

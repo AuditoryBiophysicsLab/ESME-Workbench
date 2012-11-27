@@ -350,6 +350,7 @@ namespace ESME.Scenarios
                 if (sourceDepth >= depthAtAnalysisPoint) continue;
                 analysisPoint.Add((from item in collectionViewGroup.Items select (Mode)item).ToList());
             }
+            if (Dispatcher != null) Dispatcher.InvokeIfRequired(analysisPoint.CreateMapLayers);
             //Log(analysisPoint, "Added new analysis point at {0} to scenario {1} in location {2}", (Geo)analysisPoint.Geo, analysisPoint.Scenario.Name, analysisPoint.Scenario.Location.Name);
         }
 
@@ -460,7 +461,8 @@ namespace ESME.Scenarios
                 var analysisPoint = transmissionLoss.AnalysisPoint;
                 transmissionLoss.Modes.Remove(mode);
                 if (transmissionLoss.Modes.Count == 0) transmissionLoss.Delete();
-                analysisPoint.Add(new List<Mode> { mode });
+                if (analysisPoint.Scenario == null) scenario.Add(new AnalysisPoint { Geo = analysisPoint.Geo });
+                else analysisPoint.Add(new List<Mode> { mode });
             }
         }
 

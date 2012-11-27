@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using ESME.Plugins;
 using ESME.Scenarios;
+using HRC;
+using HRC.Aspects;
 using HRC.Validation;
 using HRC.ViewModels;
 using HRC.WPF;
@@ -10,6 +15,8 @@ namespace ESME.Views.Scenarios
     {
         readonly Mode _mode;
         const string TimeSpanFormatString = @"hh\:mm\:ss\.fff";
+        public static IPluginManagerService PluginManagerService { get; set; }
+        [UsedImplicitly] PropertyObserver<ModePropertiesViewModel> _propertyObserver;
         public ModePropertiesViewModel(Mode mode)
         {
             _mode = mode;
@@ -26,6 +33,14 @@ namespace ESME.Views.Scenarios
             DepressionElevationAngle = _mode.DepressionElevationAngle;
             RelativeBeamAngle = _mode.RelativeBeamAngle;
             MaxPropagationRadius = _mode.MaxPropagationRadius;
+
+            AvailableTransmissionLossEngines.AddRange(from key in PluginManagerService[PluginType.TransmissionLossCalculator].Keys
+                                                      select (TransmissionLossCalculatorPluginBase)PluginManagerService[PluginType.TransmissionLossCalculator][key].DefaultPlugin);
+
+            SelectedTransmissionLossEngine = _mode.GetTransmissionLossPlugin(PluginManagerService);
+
+            _propertyObserver = new PropertyObserver<ModePropertiesViewModel>(this)
+                .RegisterHandler(p => p.SelectedTransmissionLossEngine, () => { });
             WindowTitle = string.Format("Mode properties: {0}", _mode.ModeName);
             AddValidationRules(
                 new ValidationRule<ModePropertiesViewModel>
@@ -168,14 +183,15 @@ namespace ESME.Views.Scenarios
             if (Math.Abs(VerticalBeamWidth - _mode.VerticalBeamWidth) > 0.1) return true;
             if (Math.Abs(DepressionElevationAngle - _mode.DepressionElevationAngle) > 0.1) return true;
             if (Math.Abs(HighFrequency - _mode.HighFrequency) > 0.1) return true;
+            if (_mode.TransmissionLossPluginType != SelectedTransmissionLossEngine.PluginIdentifier.Type) return true;
             return Math.Abs(LowFrequency - _mode.LowFrequency) > 0.1;
         }
         public bool RadiusHasChanged { get; private set; }
 
         public bool IsPSMView { get; set; }
 
-
-
+        [Initialize] public List<TransmissionLossCalculatorPluginBase> AvailableTransmissionLossEngines { get; set; }
+        public TransmissionLossCalculatorPluginBase SelectedTransmissionLossEngine { get; set; }
 
         #region OkCommand
         public SimpleCommand<object, EventToCommandArgs> OkCommand
@@ -211,6 +227,7 @@ namespace ESME.Views.Scenarios
             _mode.DepressionElevationAngle = DepressionElevationAngle;
             _mode.RelativeBeamAngle = RelativeBeamAngle;
             _mode.MaxPropagationRadius = MaxPropagationRadius;
+            _mode.TransmissionLossPluginType = SelectedTransmissionLossEngine.PluginIdentifier.Type;
             if (IsPSMView) MediatorMessage.Send(MediatorMessage.PSMModeChanged, _mode);
             else CloseActivePopUpCommand.Execute(true);
         }
