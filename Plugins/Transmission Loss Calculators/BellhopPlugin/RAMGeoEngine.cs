@@ -347,7 +347,7 @@ namespace BellhopPlugin
         }
         
         //object _lockObject = new object();
-        List<Complex[]> ReadRAMPGrid(string fileName, string ramType = "RAMGEO")
+        public List<Complex[]> ReadRAMPGrid(string fileName, string ramType = "RAMGEO")
         {
             //lock (_lockObject)
             {

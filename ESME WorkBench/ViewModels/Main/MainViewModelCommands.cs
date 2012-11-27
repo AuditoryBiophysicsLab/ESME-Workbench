@@ -2,8 +2,11 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Windows;
+using BellhopPlugin;
 using ESME;
 using ESME.Data;
+using ESME.Plugins;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -109,6 +112,22 @@ namespace ESMEWorkbench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _about;
+        #endregion
+
+        #region TestCommand
+        public SimpleCommand<object, EventToCommandArgs> TestCommand { get { return _test ?? (_test = new SimpleCommand<object, EventToCommandArgs>(TestHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _test;
+
+        void TestHandler(EventToCommandArgs args)
+        {
+            if (Scenario != null) _openFile.InitialDirectory = Scenario.StorageDirectoryPath;
+            _openFile.Filter = "PGRID files (*.pgrid)|*.pgrid|All files (*.*)|*.*";
+            var result = _openFile.ShowDialog((Window)_viewAwareStatus.View);
+            if (result.HasValue && result.Value)
+            {
+                ((RAMGeoEngine)_plugins[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin).ReadRAMPGrid(_openFile.FileName);
+            }
+        }
         #endregion
 
         #endregion

@@ -211,6 +211,14 @@
                                     ToolTipTitle="Run" />
 
                 </r:RibbonGroup>
+                <r:RibbonGroup Header="Testing">
+                    <r:RibbonButton Command="{Binding TestCommand}"
+                                    Label="Open PGRID file"
+                                    LargeImageSource="..\Images\LargeIcons\open-icon.png"
+                                    ToolTipDescription="Open PGRID file"
+                                    ToolTipTitle="Open PGRID file" />
+
+                </r:RibbonGroup>
             </r:RibbonTab>
         </r:Ribbon>
         <Grid>

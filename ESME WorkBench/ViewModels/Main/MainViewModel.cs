@@ -37,6 +37,7 @@ namespace ESMEWorkbench.ViewModels.Main
     {
         #region Private fields
         readonly IHRCSaveFileService _saveFile;
+        readonly IHRCOpenFileService _openFile;
         readonly IPluginManagerService _plugins;
         readonly EnvironmentalCacheService _cache;
         readonly TransmissionLossCalculatorService _transmissionLoss;
@@ -56,6 +57,7 @@ namespace ESMEWorkbench.ViewModels.Main
                              IMessageBoxService messageBox,
                              IUIVisualizerService visualizer,
                              IHRCSaveFileService saveFile,
+                             IHRCOpenFileService openFile,
                              TransmissionLossCalculatorService transmissionLoss,
                              IPluginManagerService plugins,
                              EnvironmentalCacheService cache)
@@ -74,6 +76,7 @@ namespace ESMEWorkbench.ViewModels.Main
             Database = database;
             _visualizer = visualizer;
             _saveFile = saveFile;
+            _openFile = openFile;
             _transmissionLoss = transmissionLoss;
             _transmissionLoss.PluginManagerService = plugins;
             ScenarioExensions.TransmissionLossCalculator = _transmissionLoss;
