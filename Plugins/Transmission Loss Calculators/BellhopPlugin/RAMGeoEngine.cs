@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -322,7 +323,7 @@ namespace BellhopPlugin
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-        double[,] ReadRAMPGrid(string fileName, string ramType = "RAMGEO")
+        Complex[,] ReadRAMPGrid(string fileName, string ramType = "RAMGEO")
         {
             if (ramType != "RAMGEO") throw new NotImplementedException("no forms of RAM other than RAMGEO are currently implemented.");
             //true for RAMGeo and "AUTO" version only. 
@@ -345,8 +346,8 @@ namespace BellhopPlugin
                 if(numRecords>0)
                 {
                     var doneAll = false;
-                    var pGrid = new double[numRecords];//zeros(Nz, 1);
-                    var pColumn = new double[numRecords];//zeros(Nz, 1);
+                    var pGrid = new Complex[numRecords];//zeros(Nz, 1);
+                    var pColumn = new Complex[numRecords];//zeros(Nz, 1);
 
                     var iCol = 1;
                     while (!doneAll)
@@ -379,10 +380,19 @@ namespace BellhopPlugin
                                 try
                                 {
                                     //[PFlat,Count2] =fread(FileID, 2 * NRead, DataFieldSiz);
-                                    // OK?
-                                    var istart = (startSub + 1) / 2;
-                                    var iend = endSub / 2;
+                                    var pFlat = new Complex[2 * nRead];
+                                    for (var i = 0; i < pFlat.Length; i++)
+                                    {
+                                        pFlat[i] = reader.ReadUInt32(); //will this work? what kind of complex number is this?
+                                    }
 
+                                    // OK?
+                                    var istart = ((startSub + 1) / 2)-1;
+                                    var iend = (endSub / 2)-1;
+                                    for (var i = istart; i < iend; i++)
+                                    {
+                                        
+                                    }
                                     //pColumn(istart: iend, 1) = PFlat(StartSub: 2: (EndSub - 1)) + sqrt(-1) * PFlat((startSub + 1): 2: EndSub);
                                     startSub = endSub + 1;
                                 }
@@ -399,7 +409,6 @@ namespace BellhopPlugin
                            // pGrid(:,iCol) = pColumn(:);
                             iCol++;
                         }
-                        
                     }
                     //loop's done, write it out and return it; 
                     return null;
