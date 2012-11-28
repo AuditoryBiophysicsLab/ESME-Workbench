@@ -206,12 +206,12 @@ namespace BellhopPlugin
             var fixpoints = new List<double>{1, 2, 2.5, 5};
             var dz = RelativeDepthResolution * lambda;
             dz = Fix2X10pN(dz, fixpoints);
-            // todo: Port this function or find an equivalent dz = fix2x10pN(dz, [1 2 2.5 5 ]);
+            
             var ndz = (int)Math.Max(1.0, Math.Floor(MinimumOutputDepthResolution / dz));
             //  similar for dr and assoc. grid decimation
             var dr = RelativeRangeResolution * dz;
             dr = Fix2X10pN(dr, fixpoints);
-            // todo: Port this function or find an equivalent dr = fix2x10pN(dr, [1 2 2.5 5 ]);
+            
             var ndr = (int)Math.Max(1, Math.Floor(MinimumOutputRangeResolution / dr));
             //  attenuation layer (round up to nearest dz)
             var attenLayerDz = Math.Ceiling(AttenuationLayerThickness * lambda / dz) * dz;
