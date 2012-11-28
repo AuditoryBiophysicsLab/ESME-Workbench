@@ -12,6 +12,7 @@ using BellhopPlugin.Controls;
 using ESME;
 using ESME.Environment;
 using ESME.Model;
+using ESME.NEMO;
 using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
@@ -202,11 +203,14 @@ namespace BellhopPlugin
             // if dz < 1m round dz down to either [1/10, 1/5, 1/4 or 1/2] m  ... or multiples of 10^-n of these numbers
             //                                  = [1     2    2.5 or 5  ] x 0.1m  "   " ...
             // if dz > 1m round dz down to either [1     2    2.5    5  ] m  ... or multiples of 10^+n of these numbers
+            var fixpoints = new List<double>{1, 2, 2.5, 5};
             var dz = RelativeDepthResolution * lambda;
+            dz = Fix2X10pN(dz, fixpoints);
             // todo: Port this function or find an equivalent dz = fix2x10pN(dz, [1 2 2.5 5 ]);
             var ndz = (int)Math.Max(1.0, Math.Floor(MinimumOutputDepthResolution / dz));
             //  similar for dr and assoc. grid decimation
             var dr = RelativeRangeResolution * dz;
+            dr = Fix2X10pN(dr, fixpoints);
             // todo: Port this function or find an equivalent dr = fix2x10pN(dr, [1 2 2.5 5 ]);
             var ndr = (int)Math.Max(1, Math.Floor(MinimumOutputRangeResolution / dr));
             //  attenuation layer (round up to nearest dz)
@@ -359,6 +363,38 @@ namespace BellhopPlugin
             }
         }
 #endif
+
+        double Fix2X10pN(double x, List<double> fixpoints)
+        {
+            fixpoints.Sort();
+            if(fixpoints.First() < 1) throw new ParameterOutOfRangeException("No negative numbers.");
+            if(Math.Abs(fixpoints.First() - 1) > .001) fixpoints.Insert(0,1);
+            if(fixpoints.Last()>10) throw new ParameterOutOfRangeException("Fixpoints  must be between 1 and 10");
+
+            var px = Math.Floor(Math.Log10(x));
+            var fx = x * Math.Pow(10, -px);
+
+            var done = false;
+            var ii = 2;
+            var n = fixpoints.Count;
+
+            while (!done)
+            {
+                if (fx < fixpoints[ii])
+                {
+                    fx = fixpoints[ii - 1];
+                    done = true;
+                }
+                else if (ii == n)
+                {
+                    fx = fixpoints.Last();
+                    done = true;
+                }
+                ii++;
+            }
+            return (fx * Math.Pow(10,px));
+        }
+
 
         //object _lockObject = new object();
         public List<Complex[]> ReadRamPGrid(string fileName)
