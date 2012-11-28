@@ -206,15 +206,21 @@ namespace BellhopPlugin
             var fixpoints = new List<double>{1, 2, 2.5, 5};
             var dz = RelativeDepthResolution * lambda;
             dz = Fix2X10pN(dz, fixpoints);
-            
+
             var ndz = (int)Math.Max(1.0, Math.Floor(MinimumOutputDepthResolution / dz));
+            //var ndz = (int)Math.Max(1.0, Math.Floor(MinimumOutputDepthResolution / lambda));
+            //ndz = 1;
             //  similar for dr and assoc. grid decimation
             var dr = RelativeRangeResolution * dz;
             dr = Fix2X10pN(dr, fixpoints);
-            
+
             var ndr = (int)Math.Max(1, Math.Floor(MinimumOutputRangeResolution / dr));
+            //var ndr = (int)Math.Max(1, Math.Floor(MinimumOutputRangeResolution / lambda));
+            //ndr = 1;
             //  attenuation layer (round up to nearest dz)
-            var attenLayerDz = Math.Ceiling(AttenuationLayerThickness * lambda / dz) * dz;
+            var sedimentLambda = sedimentType.CompressionWaveSpeed / frequency;
+            //var attenLayerDz = Math.Ceiling(AttenuationLayerThickness * lambda / dz) * dz;
+            var attenLayerDz = Math.Ceiling(AttenuationLayerThickness * sedimentLambda / dz) * dz;
             var cpMax = sedimentType.CompressionWaveSpeed;
             var lastLayerDz = LastLayerThickness * cpMax / frequency;
             lastLayerDz = Math.Ceiling(lastLayerDz / dz) * dz;
@@ -223,7 +229,7 @@ namespace BellhopPlugin
             // Maximum Depth for PE calc ->  zmax 
             //  zmax is the z-limit for the PE calc from top of the water column to the bottom of the last substrate layer 
             // (including the attentuation layer if, as recommended, this is included)
-            var zmax = maxSubstrateDepth + attenLayerDz;
+            var zmax = maxSubstrateDepth + attenLayerDz * 2;
             var envFileName = radial.BasePath + ".env";
             using (var envFile = new StreamWriter(envFileName, false))
             {
@@ -264,11 +270,12 @@ namespace BellhopPlugin
                     // A sediment layer is analogous to a sound speed profile point
                     // For range-dependent sediment, the sediment samples have to be at the same ranges as the sound speed profiles
                     // so we might want to change the API to include sediment properties in what is the current range and sound speed profile tuple
-                    envFile.WriteLine("{0:0.######}\t{1:0.######}\t\t\t\t\t\tcompressive sound speed profile in substrate [depth (m), sound speed (m/s)]", 5.0, sedimentType.CompressionWaveSpeed);
+                    envFile.WriteLine("{0:0.######}\t{1:0.######}\t\t\t\t\t\tcompressive sound speed profile in substrate [depth (m), sound speed (m/s)]", 0.0, sedimentType.CompressionWaveSpeed);
                     envFile.WriteLine("-1\t-1");
-                    envFile.WriteLine("{0:0.######}\t{1:0.######}\t\t\t\t\t\tdensity profile in substrate [depth (m), rhob (g/cm³)]", 5.0, sedimentType.Density);
+                    envFile.WriteLine("{0:0.######}\t{1:0.######}\t\t\t\t\t\tdensity profile in substrate [depth (m), rhob (g/cm³)]", 0.0, sedimentType.Density);
                     envFile.WriteLine("-1\t-1");
-                    envFile.WriteLine("{0:0.######}\t{1:0.######}\t\t\t\t\t\tcompressive attenuation profile in substrate [depth (m), attnp (db/lambda)]", 5.0, 0.0);
+                    envFile.WriteLine("{0:0.######}\t{1:0.######}\t\t\t\t\t\tcompressive attenuation profile in substrate [depth (m), attnp (db/lambda)]", 0.0, 0.0);
+                    envFile.WriteLine("{0:0.######}\t{1:0.######}", attenLayerDz, 40);
                     envFile.WriteLine("-1\t-1");
                     firstRangeProfile = false;
                 }
@@ -364,7 +371,7 @@ namespace BellhopPlugin
         }
 #endif
 
-        double Fix2X10pN(double x, List<double> fixpoints)
+        static double Fix2X10pN(double x, List<double> fixpoints)
         {
             fixpoints.Sort();
             if(fixpoints.First() < 1) throw new ParameterOutOfRangeException("No negative numbers.");
