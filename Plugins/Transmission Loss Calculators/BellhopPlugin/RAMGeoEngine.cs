@@ -331,10 +331,23 @@ namespace BellhopPlugin
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-        static void WritePGridCompare(string fileName, IEnumerable<Complex[]> pgrid, bool writeReal)
+        static void WritePGridCompare(string fileName, List<Complex[]> pgrid, bool writeReal)
         {
             using (var writer = new StreamWriter(fileName))
             {
+                var rangeCount = pgrid.Count();
+                var depthCount = pgrid[0].Length;
+                for (var i = 0; i < depthCount; i++)
+                {
+                    for (var j = 0; j < rangeCount; j++)
+                    {
+                        var complex = pgrid[j][i];
+                        writer.Write(string.Format("{0} ", writeReal ? complex.Real : complex.Imaginary));
+                    }
+                    writer.WriteLine();
+                }
+
+#if false
                 foreach (var row in pgrid)
                 {
                     foreach (var complex in row)
@@ -342,7 +355,8 @@ namespace BellhopPlugin
                         writer.Write(string.Format("{0} ", writeReal ? complex.Real : complex.Imaginary));
                     }
                     writer.WriteLine();
-                }
+                } 
+#endif
             }
         }
         
@@ -413,7 +427,7 @@ namespace BellhopPlugin
                                         doneAll = true;
                                     }
                                 }
-                                else doneCol = true;
+                                else{ doneCol = true;}
                             }
                             if (!doneAll)
                             {
