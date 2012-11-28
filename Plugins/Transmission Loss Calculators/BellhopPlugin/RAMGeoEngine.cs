@@ -270,7 +270,7 @@ namespace BellhopPlugin
                 }
             }
             var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(envFileName));
-            Debug.WriteLine(string.Format("Env File: {0} temp path: {1}", envFileName, tempDirectory));
+            //Debug.WriteLine(string.Format("Env File: {0} temp path: {1}", envFileName, tempDirectory));
             if (Directory.Exists(tempDirectory)) Directory.Delete(tempDirectory, true);
             if (File.Exists(tempDirectory)) File.Delete(tempDirectory);
             Directory.CreateDirectory(tempDirectory);
@@ -316,7 +316,7 @@ namespace BellhopPlugin
                 File.Move(Path.Combine(tempDirectory, "p.line"), radial.BasePath + ".pline");
 
                 using (var writer = new StreamWriter(radial.BasePath + ".bty")) writer.Write(bottomProfile.ToBellhopString());
-                var pressures = ReadRAMPGrid(radial.BasePath + ".pgrid");
+                var pressures = ReadRamPGrid(radial.BasePath + ".pgrid");
                 var rangeCount = pressures.Count;
                 var depthCount = pressures[0].Length;
                 var dzplt = dz * ndz;
@@ -335,11 +335,12 @@ namespace BellhopPlugin
                 Debug.WriteLine(ramError);
             }
             Directory.Delete(tempDirectory, true);
-            Debug.WriteLine(string.Format("Env File: {0} temp directory deleted: {1}", envFileName, tempDirectory));
+            //Debug.WriteLine(string.Format("Env File: {0} temp directory deleted: {1}", envFileName, tempDirectory));
         }
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
+#if false
         static void WritePGridCompare(string fileName, List<Complex[]> pgrid, bool writeReal)
         {
             using (var writer = new StreamWriter(fileName))
@@ -357,86 +358,60 @@ namespace BellhopPlugin
                 }
             }
         }
-        
+#endif
+
         //object _lockObject = new object();
-        public List<Complex[]> ReadRAMPGrid(string fileName, string ramType = "RAMGEO")
+        public List<Complex[]> ReadRamPGrid(string fileName)
         {
-            //lock (_lockObject)
+            using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
-                if (ramType != "RAMGEO") throw new NotImplementedException("no forms of RAM other than RAMGEO are currently implemented.");
-                //true for RAMGeo and "AUTO" version only. 
-                // ver = "1.5C00.03.00";
-                // headJunkFieldNum = 1;
-                // headJunkFieldSiz = "uint32";
-                // dataJunkFieldNum = 2;
-                // dataJunkFieldSiz = "uint32";
-                // nzFieldSiz = "int32";
-                // dataFieldNum = -1;           // -1 = record length dependent
-                // dataFieldSiz = "float32";
+                reader.ReadUInt32(); 
 
-                using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                var numDepths = reader.ReadInt32();
+                var recLen = numDepths;
+                if (numDepths > 0)
                 {
-                    //if RAMGEO, skip one uint's worth of header.
-                    var numRows = reader.ReadUInt32(); //headJunkFieldNum,headJunkFieldSiz
+                    var doneAll = false;
+                    var pGrid = new List<Complex[]>(); 
 
-                    var numDepths = reader.ReadInt32();
-                    var recLen = numDepths;
-                    if (numDepths > 0)
+                    while (!doneAll)
                     {
-                        var doneAll = false;
-                        var pGrid = new List<Complex[]>(); //zeros(Nz, 1);
+                        var pColumn = new Complex[numDepths]; 
+                        var doneCol = false;
+                        var startSub = 1;
 
-                        while (!doneAll)
+                        while (!doneCol && !doneAll)
                         {
-                            var pColumn = new Complex[numDepths]; //zeros(Nz, 1);
-                            var doneCol = false;
-                            var startSub = 1;
-
-                            while (!doneCol && !doneAll)
+                            var endSub = startSub + 2 * recLen - 1;
+                            if (endSub > 2 * numDepths)
                             {
-                                var endSub = startSub + 2 * recLen - 1;
-                                if (endSub > 2 * numDepths)
-                                {
-                                    endSub = 2 * numDepths;
-                                    doneCol = true;
-                                }
-                                var nRead = ((endSub - startSub) + 1) / 2;
-                                if (nRead > 0)
-                                {
-                                    try
-                                    {
-                                        // Skip junk at  start of each column / data record
-                                        //[Junk,Count0] = fread(FileID, DataJunkFieldNum, DataJunkFieldSiz);
-                                        reader.ReadUInt32();
-                                        reader.ReadUInt32();
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        doneAll = true;
-                                    }
-                                    try
-                                    {
-                                        for (var i = 0; i < nRead; i++) pColumn[i] = new Complex(reader.ReadSingle(), reader.ReadSingle());
-                                        startSub = endSub + 1;
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        // premature eof or other problem?
-                                        doneAll = true;
-                                    }
-                                }
-                                else{ doneCol = true;}
+                                endSub = 2 * numDepths;
+                                doneCol = true;
                             }
-                            if (!doneAll)
+                            var nRead = ((endSub - startSub) + 1) / 2;
+                            if (nRead > 0)
                             {
-                                pGrid.Add(pColumn);
+                                try
+                                {
+                                    reader.ReadUInt32();
+                                    reader.ReadUInt32();
+                                    for (var i = 0; i < nRead; i++) pColumn[i] = new Complex(reader.ReadSingle(), reader.ReadSingle());
+                                    startSub = endSub + 1;
+                                }
+                                catch (Exception)
+                                {
+                                    // premature eof or other problem?
+                                    doneAll = true;
+                                }
                             }
+                            else doneCol = true;
                         }
-                        //loop's done, write it out and return it;
-                        return pGrid;
+                        if (!doneAll) pGrid.Add(pColumn);
                     }
-                    return null;
+                    //loop's done, write it out and return it;
+                    return pGrid;
                 }
+                return null;
             }
         }
     }

@@ -125,7 +125,7 @@ namespace ESMEWorkbench.ViewModels.Main
             var result = _openFile.ShowDialog((Window)_viewAwareStatus.View);
             if (result.HasValue && result.Value)
             {
-                ((RAMGeoEngine)_plugins[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin).ReadRAMPGrid(_openFile.FileName);
+                ((RAMGeoEngine)_plugins[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin).ReadRamPGrid(_openFile.FileName);
             }
         }
         #endregion
