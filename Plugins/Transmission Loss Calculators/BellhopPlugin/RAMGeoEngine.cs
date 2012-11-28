@@ -346,17 +346,6 @@ namespace BellhopPlugin
                     }
                     writer.WriteLine();
                 }
-
-#if false
-                foreach (var row in pgrid)
-                {
-                    foreach (var complex in row)
-                    {
-                        writer.Write(string.Format("{0} ", writeReal ? complex.Real : complex.Imaginary));
-                    }
-                    writer.WriteLine();
-                } 
-#endif
             }
         }
         
