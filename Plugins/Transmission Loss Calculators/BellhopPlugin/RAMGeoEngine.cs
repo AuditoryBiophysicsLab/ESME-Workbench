@@ -373,10 +373,10 @@ namespace BellhopPlugin
                     {
                         var doneAll = false;
                         var pGrid = new List<Complex[]>(); //zeros(Nz, 1);
-                        var pColumn = new Complex[numDepths]; //zeros(Nz, 1);
 
                         while (!doneAll)
                         {
+                            var pColumn = new Complex[numDepths]; //zeros(Nz, 1);
                             var doneCol = false;
                             var startSub = 1;
 
