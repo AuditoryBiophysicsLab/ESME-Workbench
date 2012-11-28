@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading;
 
 namespace ESME.TransmissionLoss.Bellhop
@@ -35,7 +36,7 @@ namespace ESME.TransmissionLoss.Bellhop
                 TransmissionLoss = new float[ReceiverDepths.Length,ReceiverRanges.Length];
 
                 reader.BaseStream.Seek(3*recordLength, SeekOrigin.Begin);
-                for (var curTheta = 0; curTheta < thetaCount; curTheta++) /*Theta[CurTheta] = */ reader.ReadSingle();
+                for (var curTheta = 0; curTheta < thetaCount; curTheta++) reader.ReadSingle();
 
                 reader.BaseStream.Seek(4*recordLength, SeekOrigin.Begin);
                 for (var source = 0; source < SourceDepths.Length; source++) SourceDepths[source] = reader.ReadSingle();
@@ -74,6 +75,49 @@ namespace ESME.TransmissionLoss.Bellhop
             DataMin = StatMin = float.MaxValue;
             DataMax = StatMax = float.MinValue;
             ProcessRawData();
+        }
+
+        public static void WriteShadeFile(string fileName, double sourceDepth, double frequency, double[] receiverDepths, double[] receiverRanges, List<Complex[]> pressures)
+        {
+            var rangeCount = pressures.Count;
+            var depthCount = pressures[0].Length;
+            if (receiverRanges.Length != rangeCount) throw new ArgumentOutOfRangeException("receiverRanges", "receiverRanges.Length must equal pressures.Count");
+            if (receiverDepths.Length != depthCount) throw new ArgumentOutOfRangeException("receiverDepths", "receiverDepths.Length must equal pressures[0].Length");
+            var recordLength = rangeCount * 8;
+            using (var writer = new BinaryWriter(new FileStream(fileName, FileMode.Create, FileAccess.Write)))
+            {
+                writer.Write(recordLength / 4);
+                writer.Write(new string(' ', 80).ToCharArray());
+                writer.BaseStream.Seek(recordLength, SeekOrigin.Begin);
+                writer.Write(new string(' ', 10).ToCharArray());
+                writer.Write(0.0f); // Xs
+                writer.Write(0.0f); // Ys
+                writer.BaseStream.Seek(2 * recordLength, SeekOrigin.Begin);
+                writer.Write((float)frequency);
+                writer.Write(1); // thetaCount
+                writer.Write(1); // sourceDepths
+                writer.Write(depthCount);
+                writer.Write(rangeCount);
+                // Skipping over the theta record, we don't use it in ESME
+                // writer.BaseStream.Seek(3 * recordLength, SeekOrigin.Begin);
+                writer.BaseStream.Seek(4 * recordLength, SeekOrigin.Begin);
+                writer.Write((float)sourceDepth); // depth of the single source
+                writer.BaseStream.Seek(5 * recordLength, SeekOrigin.Begin);
+                foreach (var depth in receiverDepths) writer.Write((float)depth);
+                writer.BaseStream.Seek(6 * recordLength, SeekOrigin.Begin);
+                foreach (var depth in receiverRanges) writer.Write((float)depth);
+                foreach (var range in receiverRanges) writer.Write((float)range);
+                for (var depthIndex = 0; depthIndex < depthCount; depthIndex++)
+                {
+                    writer.BaseStream.Seek((7 + depthIndex) * recordLength, SeekOrigin.Begin);
+                    for (var rangeIndex = 0; rangeIndex < rangeCount; rangeIndex++)
+                    {
+                        var curPressure = pressures[rangeIndex][depthIndex];
+                        writer.Write((float)curPressure.Real);
+                        writer.Write((float)curPressure.Imaginary);
+                    }
+                }
+            }
         }
 
         public string Title { get; private set; }

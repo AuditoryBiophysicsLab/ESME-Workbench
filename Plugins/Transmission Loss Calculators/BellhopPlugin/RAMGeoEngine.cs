@@ -314,11 +314,20 @@ namespace BellhopPlugin
                 File.Move(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
                 File.Delete(radial.BasePath + ".pline");
                 File.Move(Path.Combine(tempDirectory, "p.line"), radial.BasePath + ".pline");
-                var path = radial.BasePath + ".pgrid";
-                var result = ReadRAMPGrid(path);
-                WritePGridCompare(path+".reals",result,true);
-                WritePGridCompare(path + ".imags", result, false);
 
+                using (var writer = new StreamWriter(radial.BasePath + ".bty")) writer.Write(bottomProfile.ToBellhopString());
+                var pressures = ReadRAMPGrid(radial.BasePath + ".pgrid");
+                var rangeCount = pressures.Count;
+                var depthCount = pressures[0].Length;
+                var dzplt = dz * ndz;
+                var drplt = dr * ndr;
+                var rr = new double[rangeCount];
+                for (var rangeIndex = 0; rangeIndex < rr.Length; rangeIndex++) rr[rangeIndex] = (rangeIndex + 1) * drplt;
+                var rd = new double[depthCount];
+                for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++) rd[depthIndex] = (depthIndex + 1) * dzplt;
+                BellhopOutput.WriteShadeFile(radial.BasePath + ".shd", sourceDepth, frequency, rd, rr, pressures);
+                //WritePGridCompare(path+".reals",result,true);
+                //WritePGridCompare(path + ".imags", result, false);
             }
             else
             {
@@ -430,30 +439,5 @@ namespace BellhopPlugin
                 }
             }
         }
-
-        void WriteShadeFile(string fileName, string title, double freq, double[] sourceDepths, double[] receiverDepths, double[] receiverRanges, List<Complex[]> pressures, string plotType = "          ", double xs = 0, double ys = 0, double theta = 0)
-        {
-            var size_cmplx = 8;
-            var recl = pressures[0].Length * size_cmplx;
-            var bytes_uchar = 1;
-            var bytes_int32 = 4;
-            Int32 reclf = pressures[0].Length * 2;
-            if(title.Length + bytes_int32 > recl) title = new string(title.Take(recl).ToArray()); //truncate to fit
-            using (var writer = new StreamWriter(fileName))
-            {
-                writer.Write(reclf);
-                writer.Write(title);
-                var skip = recl - bytes_int32 - title.Length * bytes_uchar;
-                for (var i = 0; i < skip; i++)
-                {
-                    writer.Write("-1,");
-                }
-            }
-        }
-
-       
-
-
     }
-
 }
