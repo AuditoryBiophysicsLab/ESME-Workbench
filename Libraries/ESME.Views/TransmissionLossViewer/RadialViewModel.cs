@@ -135,8 +135,8 @@ namespace ESME.Views.TransmissionLossViewer
             _bottomProfileViewModel.SeriesData = profileData;
             _bottomProfileViewModel.ItemToPoint = p => (Point)p;
             _bottomProfileViewModel.LineStrokeThickness = 5.0;
-            //_bottomProfileViewModel.LineStroke = Brushes.Black;
-            _bottomProfileViewModel.LineFill = Brushes.Gray;
+            _bottomProfileViewModel.LineStroke = Brushes.Black;
+            //_bottomProfileViewModel.LineFill = Colors.Transparent;
         }
         #endregion
 

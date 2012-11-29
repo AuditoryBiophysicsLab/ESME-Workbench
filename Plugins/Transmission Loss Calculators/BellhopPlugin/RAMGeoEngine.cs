@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using BellhopPlugin.Controls;
 using ESME;
@@ -187,7 +188,7 @@ namespace BellhopPlugin
         /// </summary>
         [Initialize(10.0)]
         public double LastLayerThickness { get; set; }
-
+        object _lockObject = new object();
         public override void CalculateTransmissionLoss(Platform platform, Mode mode, Radial radial, BottomProfile bottomProfile, SedimentType sedimentType, double windSpeed, IList<Tuple<double, SoundSpeedProfile>> soundSpeedProfilesAlongRadial)
         {
             var sourceDepth = platform.Depth;
@@ -199,44 +200,55 @@ namespace BellhopPlugin
 
             // Derived Parameters
             // ==================
+            // Note: All the specific calculations given in the comments below assume a frequency of 1kHz
+            // lambda is wavelength, in meters
             var lambda = ReferenceSoundSpeed / frequency;
             // if dz < 1m round dz down to either [1/10, 1/5, 1/4 or 1/2] m  ... or multiples of 10^-n of these numbers
             //                                  = [1     2    2.5 or 5  ] x 0.1m  "   " ...
             // if dz > 1m round dz down to either [1     2    2.5    5  ] m  ... or multiples of 10^+n of these numbers
             var fixpoints = new List<double>{1, 2, 2.5, 5};
+            // dz = 0.1 * lambda
             var dz = RelativeDepthResolution * lambda;
+            // make dz a 'pretty' number
             dz = Fix2X10pN(dz, fixpoints);
 
+            // ndz is the depth decimation factor
+            // MinimumOutputDepthResolution is 10m
+            // dz is 0.1 * lambda (dz = 0.15 for a 1 kHz signal, 'pretty' dz = 0.2 @ 1kHz)
+            // so ndz = (10 / 0.2) = 50 @ 1kHz
+            // this means that we will only output every 50 computational depth cells, giving us a depth
+            // resolution of 50 * 0.2m = 10m @ 1kHz which is what we want it to be.  Outstanding.
             var ndz = (int)Math.Max(1.0, Math.Floor(MinimumOutputDepthResolution / dz));
-            //var ndz = (int)Math.Max(1.0, Math.Floor(MinimumOutputDepthResolution / lambda));
-            //ndz = 1;
-            //  similar for dr and assoc. grid decimation
-            var dr = RelativeRangeResolution * dz;
-            dr = Fix2X10pN(dr, fixpoints);
 
+            //  similar for dr and assoc. grid decimation
+            // RelativeRangeResolution is 2, so with our 'pretty' dz = 0.2, dr = 0.4
+            var dr = RelativeRangeResolution * dz;
+            // make dr a 'pretty' number, in this case 0.25
+            dr = Fix2X10pN(dr, fixpoints);
+            // ndr is the range decimation factor
+            // MinimumOutputRangeResolution is 10m
+            // dr is 0.25 * lambda, so (10 / 0.25) gives us an ndr of 40
+            // this means that we will only output every 40 computational range cells, giving us a range
+            // resolution of 40 * 0.25m = 10m @ 1kHz which is what we want it to be.  Outstanding.
             var ndr = (int)Math.Max(1, Math.Floor(MinimumOutputRangeResolution / dr));
-            //var ndr = (int)Math.Max(1, Math.Floor(MinimumOutputRangeResolution / lambda));
-            //ndr = 1;
+
             //  attenuation layer (round up to nearest dz)
             var sedimentLambda = sedimentType.CompressionWaveSpeed / frequency;
-            //var attenLayerDz = Math.Ceiling(AttenuationLayerThickness * lambda / dz) * dz;
-            var attenLayerDz = Math.Ceiling(AttenuationLayerThickness * sedimentLambda / dz) * dz;
-            var cpMax = sedimentType.CompressionWaveSpeed;
-            var lastLayerDz = LastLayerThickness * cpMax / frequency;
-            lastLayerDz = Math.Ceiling(lastLayerDz / dz) * dz;
-            var maxSubstrateDepth = bottomProfile.MaxDepth + lastLayerDz;
-            var zmplt = maxSubstrateDepth + 2 * ndz * dz;
+            var sedimentLayerDz = Math.Ceiling(LastLayerThickness * sedimentLambda / dz) * dz;
+            var attenuationLayerDz = Math.Ceiling(AttenuationLayerThickness * sedimentLambda / dz) * dz;
+            var maxSubstrateDepth = bottomProfile.MaxDepth + sedimentLayerDz;
+            var zmplt = maxSubstrateDepth + attenuationLayerDz;
             // Maximum Depth for PE calc ->  zmax 
             //  zmax is the z-limit for the PE calc from top of the water column to the bottom of the last substrate layer 
             // (including the attentuation layer if, as recommended, this is included)
-            var zmax = maxSubstrateDepth + attenLayerDz * 2;
+            var zmax = maxSubstrateDepth + attenuationLayerDz;
             var envFileName = radial.BasePath + ".env";
             using (var envFile = new StreamWriter(envFileName, false))
             {
                 envFile.WriteLine("RAMGeo");
-                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2:0.000000}\t\tf [Frequency (Hz)], zs [Source Depth (m)], zrec0 [First receiever depth (m)]", frequency, sourceDepth, MinimumOutputDepthResolution);
-                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t\t\trmax[Max range (m)], dr [Range resolution (m)], ndr [Range grid decimation factor]", mode.MaxPropagationRadius, MinimumOutputRangeResolution, ndr);
-                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t{3:0.000000}\tzmax [Max computational depth (m)], dz [Depth resolution (m)], ndz [Depth grid decimation factor], zmplot [Maximum depth to plot (m)]", zmax, dz, ndz, zmplt);
+                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2:0.000000}\t\tf [Frequency (Hz)], zs [Source Depth (m)], zrec0 [First receiever depth (m)]", frequency, sourceDepth, 0.1);
+                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t\t\trmax[Max range (m)], dr [Range resolution (m)], ndr [Range grid decimation factor]", mode.MaxPropagationRadius, MinimumOutputRangeResolution, 1);
+                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t{3:0.000000}\tzmax [Max computational depth (m)], dz [Depth resolution (m)], ndz [Depth grid decimation factor], zmplot [Maximum depth to plot (m)]", zmax, MinimumOutputDepthResolution, 1, zmplt);
                 envFile.WriteLine("{0:0.000000}\t{1}\t{2}\t{3:0.000000}\t\tc0 [Reference sound speed (m/s)], np [Number of terms in Padé expansion], ns [Number of stability constraints], rs [Maximum range of stability constraints (m)]", ReferenceSoundSpeed, PadeExpansionTerms, StabilityConstraints, StabilityConstraintMaxRange);
                 // todo: different stuff goes here for RAMSGeo
 
@@ -275,7 +287,7 @@ namespace BellhopPlugin
                     envFile.WriteLine("{0:0.######}\t{1:0.######}\t\t\t\t\t\tdensity profile in substrate [depth (m), rhob (g/cm³)]", 0.0, sedimentType.Density);
                     envFile.WriteLine("-1\t-1");
                     envFile.WriteLine("{0:0.######}\t{1:0.######}\t\t\t\t\t\tcompressive attenuation profile in substrate [depth (m), attnp (db/lambda)]", 0.0, 0.0);
-                    envFile.WriteLine("{0:0.######}\t{1:0.######}", attenLayerDz, 40);
+                    envFile.WriteLine("{0:0.######}\t{1:0.######}", attenuationLayerDz, 40);
                     envFile.WriteLine("-1\t-1");
                     firstRangeProfile = false;
                 }
@@ -330,12 +342,27 @@ namespace BellhopPlugin
                 var pressures = ReadRamPGrid(radial.BasePath + ".pgrid");
                 var rangeCount = pressures.Count;
                 var depthCount = pressures[0].Length;
-                var dzplt = dz * ndz;
-                var drplt = dr * ndr;
                 var rr = new double[rangeCount];
-                for (var rangeIndex = 0; rangeIndex < rr.Length; rangeIndex++) rr[rangeIndex] = (rangeIndex + 1) * drplt;
                 var rd = new double[depthCount];
-                for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++) rd[depthIndex] = (depthIndex + 1) * dzplt;
+                var sbRanges = new StringBuilder();
+                sbRanges.Append("Ranges: ");
+                for (var rangeIndex = 0; rangeIndex < rr.Length; rangeIndex++)
+                {
+                    rr[rangeIndex] = (rangeIndex + 1) * MinimumOutputRangeResolution;
+                    sbRanges.AppendFormat("{0} ", rr[rangeIndex]);
+                }
+                var sbDepths = new StringBuilder();
+                sbDepths.Append("Depths: ");
+                for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++)
+                {
+                    rd[depthIndex] = (depthIndex + 1) * MinimumOutputDepthResolution;
+                    sbDepths.AppendFormat("{0} ", rd[depthIndex]);
+                }
+                lock (_lockObject)
+                {
+                    Debug.WriteLine(sbRanges);
+                    Debug.WriteLine(sbDepths);
+                }
                 BellhopOutput.WriteShadeFile(radial.BasePath + ".shd", sourceDepth, frequency, rd, rr, pressures);
                 //WritePGridCompare(path+".reals",result,true);
                 //WritePGridCompare(path + ".imags", result, false);
