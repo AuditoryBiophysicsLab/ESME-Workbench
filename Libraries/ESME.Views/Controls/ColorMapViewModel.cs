@@ -48,20 +48,17 @@ namespace ESME.Views.Controls
 
         public Color Lookup(double value)
         {
-            lock (this)
-            {
-                var max = CurrentRange.Max;
-                var min = CurrentRange.Min;
-                var range = max - min;
-                if (value >= max) return _firstColor;
-                if (value <= min) return _lastColor;
+            var max = CurrentRange.Max;
+            var min = CurrentRange.Min;
+            var range = max - min;
+            if (value >= max) return _firstColor;
+            if (value <= min) return _lastColor;
 
-                if (CurrentRange.Value > 0)
-                {
-                    var fraction = 1.0 - (value - min) / range;
-                    var index = (int)(fraction * _colorCount);
-                    return Colors[index];
-                }
+            if (CurrentRange.Value > 0)
+            {
+                var fraction = 1.0 - (value - min) / range;
+                var index = (int)(fraction * _colorCount);
+                return Colors[index];
             }
             return System.Windows.Media.Colors.Black;
         }

@@ -35,9 +35,9 @@
                            DataContext="{Binding ColorMapViewModel}"
                            LastChildFill="False">
                     <Plotting:DataAxis AxisLabel="Transmission Loss (dB)"
-                                          AxisLocation="Right"
-                                          DataRange="{Binding FullRange}"
-                                          DockPanel.Dock="Right" />
+                                       AxisLocation="Right"
+                                       DataRange="{Binding FullRange}"
+                                       DockPanel.Dock="Right" />
                     <controls:ColorBarView MinWidth="50"
                                            ColorBarImage="{Binding ColorBitmap}"
                                            CurrentMaximum="{Binding CurrentRange.Max}"

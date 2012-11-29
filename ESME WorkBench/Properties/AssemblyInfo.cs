@@ -47,4 +47,4 @@ using Log4PostSharp;
 
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
 
-[assembly: Log(AttributeTargetTypes = "*", EntryLevel = LogLevel.Info, ExitLevel = LogLevel.Info, ExceptionLevel = LogLevel.Error)]
+// [assembly: Log(AttributeTargetTypes = "*", EntryLevel = LogLevel.Info, ExitLevel = LogLevel.Info, ExceptionLevel = LogLevel.Error)]

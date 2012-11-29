@@ -37,4 +37,4 @@ using Log4PostSharp;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: Log(AttributeTargetTypes = "*", EntryLevel = LogLevel.Info, ExitLevel = LogLevel.Info, ExceptionLevel = LogLevel.Error)]
+// [assembly: Log(AttributeTargetTypes = "*", EntryLevel = LogLevel.Info, ExitLevel = LogLevel.Info, ExceptionLevel = LogLevel.Error)]

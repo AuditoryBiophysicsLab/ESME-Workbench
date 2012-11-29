@@ -460,26 +460,39 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.ViewTransmissionLoss), UsedImplicitly]
         void ViewTransmissionLoss(TransmissionLoss transmissionLoss)
         {
+            try
+            {
             var transmissionLossViewModel = new TransmissionLossViewModel {TransmissionLoss = transmissionLoss,};
-
             var window = _visualizer.ShowWindow("TransmissionLossWindowView", transmissionLossViewModel);
             _openPopups.Add(window);
             transmissionLossViewModel.Window = window;
             transmissionLossViewModel.SaveFileService = _saveFile;
             transmissionLossViewModel.SelectedRadialIndex = 0;
             transmissionLossViewModel.RadialViewModel.WaitToRenderText = "Please wait...";
+            }
+            catch (InvalidOperationException ex)
+            {
+                _messageBox.ShowError(string.Format("Error displaying transmission loss: {0}", ex.Message));
+            }
         }
 
         [MediatorMessageSink(MediatorMessage.ViewAnalysisPoint), UsedImplicitly]
         void ViewAnalysisPoint(AnalysisPoint analysisPoint)
         {
-            var analysisPointViewModel = new AnalysisPointViewModel(analysisPoint);
-            var window = _visualizer.ShowWindow("AnalysisPointWindowView", analysisPointViewModel);
-            _openPopups.Add(window);
-            analysisPointViewModel.TransmissionLossViewModel.Window = window;
-            analysisPointViewModel.TransmissionLossViewModel.SaveFileService = _saveFile;
-            analysisPointViewModel.TransmissionLossViewModel.SelectedRadialIndex = 0;
-            analysisPointViewModel.TransmissionLossViewModel.RadialViewModel.WaitToRenderText = "Please wait...";
+            try
+            {
+                var analysisPointViewModel = new AnalysisPointViewModel(analysisPoint);
+                var window = _visualizer.ShowWindow("AnalysisPointWindowView", analysisPointViewModel);
+                _openPopups.Add(window);
+                analysisPointViewModel.TransmissionLossViewModel.Window = window;
+                analysisPointViewModel.TransmissionLossViewModel.SaveFileService = _saveFile;
+                analysisPointViewModel.TransmissionLossViewModel.SelectedRadialIndex = 0;
+                analysisPointViewModel.TransmissionLossViewModel.RadialViewModel.WaitToRenderText = "Please wait...";
+            }
+            catch (InvalidOperationException ex)
+            {
+                _messageBox.ShowError(string.Format("Error displaying analysis point: {0}", ex.Message));
+            }
         }
     }
 }

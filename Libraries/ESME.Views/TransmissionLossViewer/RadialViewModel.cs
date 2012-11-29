@@ -264,6 +264,40 @@ namespace ESME.Views.TransmissionLossViewer
             }, DispatcherPriority.Render);
         }
 
+        void RenderBitmap(Guid guid, TransmissionLossRadial transmissionLoss, CancellationToken token)
+        {
+            if (token.IsCancellationRequested) return;
+
+            var width = transmissionLoss.Ranges.Count;
+            var height = transmissionLoss.Depths.Count;
+            var buffer = new int[width * height];
+
+            var infinityColor = ColorMapViewModel.Colors[0];
+            for (var y = 0; y < height; y++)
+            {
+                var curOffset = y * width;
+                for (var x = 0; x < width; x++)
+                {
+                    if (token.IsCancellationRequested) return;
+                    var curValue = transmissionLoss[y, x];
+                    var curColor = float.IsInfinity(curValue) ? infinityColor : ColorMapViewModel.Lookup(curValue);
+                    buffer[curOffset++] = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
+                }
+            }
+            _dispatcher.InvokeIfRequired(() =>
+            {
+                if (guid != Radial.Guid) return;
+                var rect = new Int32Rect(0, 0, width, height);
+                WriteableBitmap.Lock();
+                WriteableBitmap.WritePixels(rect, buffer, WriteableBitmap.BackBufferStride, 0, 0);
+                WriteableBitmap.AddDirtyRect(rect);
+                OnPropertyChanged("WriteableBitmap");
+                WriteableBitmap.Unlock();
+                WriteableBitmapVisibility = Visibility.Visible;
+                _imageSeriesViewModel.ImageSource = WriteableBitmap;
+            }, DispatcherPriority.Render);
+        }
+
         #region File and clipboard-oriented stuff
         #region public string OutputFileName { get; }
         public string OutputFileName
