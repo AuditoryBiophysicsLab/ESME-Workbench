@@ -298,11 +298,12 @@ namespace BellhopPlugin
             if (File.Exists(tempDirectory)) File.Delete(tempDirectory);
             Directory.CreateDirectory(tempDirectory);
             File.Copy(envFileName, Path.Combine(tempDirectory, "ramgeo.in"));
+            File.Copy(Path.Combine(AssemblyLocation, "sra.in"), Path.Combine(tempDirectory, "sra.in"));
             //Debug.WriteLine(string.Format("Env File: {0} copied to: {1}", envFileName, tempDirectory));
             // Now that we've got the files ready to go, we can launch bellhop to do the actual calculations
             var ramProcess = new TransmissionLossProcess
             {
-                StartInfo = new ProcessStartInfo(Path.Combine(AssemblyLocation, "RAMGeo.exe"))
+                StartInfo = new ProcessStartInfo(Path.Combine(AssemblyLocation, "ramgeo.exe"))
                 {
                     CreateNoWindow = true,
                     UseShellExecute = false,
@@ -329,16 +330,18 @@ namespace BellhopPlugin
             if (ramProcess.ExitCode == 0)
             {
                 File.Delete(Path.Combine(tempDirectory, "ramgeo.in"));
+                File.Delete(Path.Combine(tempDirectory, "sra.in"));
                 File.Delete(radial.BasePath + ".grid");
                 File.Move(Path.Combine(tempDirectory, "tl.grid"), radial.BasePath + ".grid");
                 File.Delete(radial.BasePath + ".line");
                 File.Move(Path.Combine(tempDirectory, "tl.line"), radial.BasePath + ".line");
                 File.Delete(radial.BasePath + ".pgrid");
                 File.Move(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
-                File.Delete(radial.BasePath + ".pline");
-                File.Move(Path.Combine(tempDirectory, "p.line"), radial.BasePath + ".pline");
+                //File.Delete(radial.BasePath + ".pline");
+                //File.Move(Path.Combine(tempDirectory, "p.line"), radial.BasePath + ".pline");
 
                 using (var writer = new StreamWriter(radial.BasePath + ".bty")) writer.Write(bottomProfile.ToBellhopString());
+                //var pressures = ReadRamGrid(radial.BasePath + ".grid");
                 var pressures = ReadRamPGrid(radial.BasePath + ".pgrid");
                 var rangeCount = pressures.Count;
                 var depthCount = pressures[0].Length;
@@ -429,6 +432,39 @@ namespace BellhopPlugin
             return (fx * Math.Pow(10,px));
         }
 
+        public List<Complex[]> ReadRamGrid(string fileName)
+        {
+            using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+            {
+                reader.ReadUInt32(); 
+
+                var numDepths = reader.ReadInt32();
+                if (numDepths > 0)
+                {
+                    var pGrid = new List<Complex[]>();
+
+                    while (true)
+                    {
+                        var pColumn = new Complex[numDepths];
+
+                        try
+                        {
+                            reader.ReadUInt32();
+                            reader.ReadUInt32();
+                            for (var i = 0; i < numDepths; i++) pColumn[i] = new Complex(reader.ReadSingle(), 0.0);
+                        }
+                        catch (Exception)
+                        {
+                            // premature eof or other problem?
+                            break;
+                        }
+                        pGrid.Add(pColumn);
+                    }
+                    return pGrid;
+                }
+                return null;
+            }
+        }
 
         //object _lockObject = new object();
         public List<Complex[]> ReadRamPGrid(string fileName)

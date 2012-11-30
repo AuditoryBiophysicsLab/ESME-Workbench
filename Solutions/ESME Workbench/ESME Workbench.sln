@@ -146,7 +146,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VersionInfoIncrementer", ".
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimulationLogAnalysis", "..\..\SimulationLogAnalysis\SimulationLogAnalysis.csproj", "{D50F1793-5C91-4F22-8BFB-6E7E9B45BBD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BellhopPlugin", "..\..\Plugins\Transmission Loss Calculators\BellhopPlugin\BellhopPlugin.csproj", "{FDC82E04-2167-40DB-B7B6-8C0C12D7CD12}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardTransmissionLossEngines", "..\..\Plugins\Transmission Loss Calculators\BellhopPlugin\StandardTransmissionLossEngines.csproj", "{FDC82E04-2167-40DB-B7B6-8C0C12D7CD12}"
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
