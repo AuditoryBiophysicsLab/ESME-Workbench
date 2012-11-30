@@ -10,6 +10,7 @@ using ESME.Locations;
 using ESME.Plugins;
 using ESME.Scenarios;
 using HRC.Navigation;
+using HRC.Utility;
 using HRC.WPF;
 
 namespace ESMEWorkbench.ViewModels.Main
@@ -148,8 +149,13 @@ namespace ESMEWorkbench.ViewModels.Main
                 LayerSettings = { IsChecked = true },
             };
             scenario.Perimeters.Add(perimeter);
+            AddMode(AddSource(platform, "High Frequency Source", false), "1 KHz mode", false);
+            platform.Sources[0].Modes[0].Depth = 5;
+            AddMode(AddSource(platform, "Low Frequency Source", false), "100 Hz mode", false);
+            platform.Sources[1].Modes[0].Depth = 10;
+            platform.Sources[1].Modes[0].HighFrequency = 100;
+            platform.Sources[1].Modes[0].TransmissionLossPluginType = "RAMGeo";//[PluginType.TransmissionLossCalculator, PluginSubtype.RAMGeo].PluginIdentifier.Type;
             AddPlatform(scenario, platform);
-            AddMode(AddSource(platform, "Sample Source", false), "1 KHz mode", false);
             progress.ProgressMessage = string.Format("Generating animat population for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
             var species = new ScenarioSpecies
             {
