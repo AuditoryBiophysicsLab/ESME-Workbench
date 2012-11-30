@@ -148,7 +148,7 @@ namespace ESME.Views.TransmissionLossViewer
 
         void UpdateStatusProperties()
         {
-            if (AxisSeriesViewModel.IsMouseOver)
+            if (AxisSeriesViewModel.IsMouseOver && _transmissionLossRadial != null)
             {
                 MouseRange = string.Format("Range: {0:0.0}m", AxisSeriesViewModel.XAxis.MouseDataLocation);
                 MouseDepth = string.Format("Depth: {0:0.0}m", AxisSeriesViewModel.YAxis.MouseDataLocation);
