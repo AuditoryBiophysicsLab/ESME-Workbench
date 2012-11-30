@@ -247,8 +247,8 @@ namespace StandardTransmissionLossEngines
             {
                 envFile.WriteLine("RAMGeo");
                 envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2:0.000000}\t\tf [Frequency (Hz)], zs [Source Depth (m)], zrec0 [First receiever depth (m)]", frequency, sourceDepth, 0.1);
-                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t\t\trmax[Max range (m)], dr [Range resolution (m)], ndr [Range grid decimation factor]", mode.MaxPropagationRadius, MinimumOutputRangeResolution, 1);
-                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t{3:0.000000}\tzmax [Max computational depth (m)], dz [Depth resolution (m)], ndz [Depth grid decimation factor], zmplot [Maximum depth to plot (m)]", zmax, MinimumOutputDepthResolution, 1, zmplt);
+                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t\t\trmax[Max range (m)], dr [Range resolution (m)], ndr [Range grid decimation factor]", mode.MaxPropagationRadius, dr, ndr);
+                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t{3:0.000000}\tzmax [Max computational depth (m)], dz [Depth resolution (m)], ndz [Depth grid decimation factor], zmplot [Maximum depth to plot (m)]", zmax, dz, ndz, zmplt);
                 envFile.WriteLine("{0:0.000000}\t{1}\t{2}\t{3:0.000000}\t\tc0 [Reference sound speed (m/s)], np [Number of terms in Padé expansion], ns [Number of stability constraints], rs [Maximum range of stability constraints (m)]", ReferenceSoundSpeed, PadeExpansionTerms, StabilityConstraints, StabilityConstraintMaxRange);
                 // todo: different stuff goes here for RAMSGeo
 
@@ -298,6 +298,7 @@ namespace StandardTransmissionLossEngines
             if (File.Exists(tempDirectory)) File.Delete(tempDirectory);
             Directory.CreateDirectory(tempDirectory);
             File.Copy(envFileName, Path.Combine(tempDirectory, "ramgeo.in"));
+            File.Copy(Path.Combine(AssemblyLocation, "sra.in"), Path.Combine(tempDirectory, "sra.in"));
             //Debug.WriteLine(string.Format("Env File: {0} copied to: {1}", envFileName, tempDirectory));
             // Now that we've got the files ready to go, we can launch bellhop to do the actual calculations
             var ramProcess = new TransmissionLossProcess
@@ -335,8 +336,8 @@ namespace StandardTransmissionLossEngines
                 File.Move(Path.Combine(tempDirectory, "tl.line"), radial.BasePath + ".line");
                 File.Delete(radial.BasePath + ".pgrid");
                 File.Move(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
-                File.Delete(radial.BasePath + ".pline");
-                File.Move(Path.Combine(tempDirectory, "p.line"), radial.BasePath + ".pline");
+                //File.Delete(radial.BasePath + ".pline");
+                //File.Move(Path.Combine(tempDirectory, "p.line"), radial.BasePath + ".pline");
 
                 using (var writer = new StreamWriter(radial.BasePath + ".bty")) writer.Write(bottomProfile.ToBellhopString());
                 var pressures = ReadRamPGrid(radial.BasePath + ".pgrid");
