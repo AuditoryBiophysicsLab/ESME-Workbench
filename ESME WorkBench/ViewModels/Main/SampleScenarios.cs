@@ -149,12 +149,10 @@ namespace ESMEWorkbench.ViewModels.Main
                 LayerSettings = { IsChecked = true },
             };
             scenario.Perimeters.Add(perimeter);
-            AddMode(AddSource(platform, "High Frequency Source", false), "1 KHz mode", false);
-            platform.Sources[0].Modes[0].Depth = 5;
-            AddMode(AddSource(platform, "Low Frequency Source", false), "100 Hz mode", false);
-            platform.Sources[1].Modes[0].Depth = 10;
-            platform.Sources[1].Modes[0].HighFrequency = 100;
-            platform.Sources[1].Modes[0].TransmissionLossPluginType = "RAMGeo";//[PluginType.TransmissionLossCalculator, PluginSubtype.RAMGeo].PluginIdentifier.Type;
+            AddMode(AddSource(platform, "High Frequency Source", false), "3 kHz mode", false, 3000, 5);
+            AddMode(AddSource(platform, "Low Frequency Source", false), "100 Hz mode", false, 100, 10);
+
+            platform.Sources[1].Modes[0].TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin.PluginIdentifier.Type;
             AddPlatform(scenario, platform);
             progress.ProgressMessage = string.Format("Generating animat population for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
             var species = new ScenarioSpecies

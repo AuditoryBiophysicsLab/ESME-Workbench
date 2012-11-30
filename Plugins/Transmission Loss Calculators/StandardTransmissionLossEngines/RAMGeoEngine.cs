@@ -312,30 +312,35 @@ namespace StandardTransmissionLossEngines
                     var emitterSize = (0.886 * lambda) / (mode.VerticalBeamWidth * (Math.PI / 180.0));
                     var emitterSpacing = dz * 2;
                     var emitterCount = (int)(emitterSize / emitterSpacing);
-#if true
-                    // chebyshev window calculations for relative emitter strength across the array
-                    var discreteFourierTransform = new MathNet.Numerics.IntegralTransforms.Algorithms.DiscreteFourierTransform();
-                    const double sideLobeAttenuation_dB = 30.0;
-                    var r0 = Math.Pow(10, sideLobeAttenuation_dB / 20);
-                    var n = emitterCount - 1;
-                    var a = Complex.Cosh((1.0 / n) * Acosh(r0));
-                    var am = new Complex[n];
-                    for (var m = 0; m < n; m++) am[m] = a * Complex.Cos(Math.PI * m / n);
-                    var wm = new Complex[n];
-                    var sign = 1;
-                    for (var i = 0; i < n; i++)
+                    List<double> weights;
+                    if (emitterCount > 1)
                     {
-                        if (am[i].Magnitude > 1) wm[i] = sign * Complex.Cosh(n * Acosh(am[i]));
-                        else wm[i] = sign * Complex.Cos(n * Complex.Acos(am[i]));
-                        sign *= -1;
-                    }
-                    discreteFourierTransform.BluesteinInverse(wm, FourierOptions.Default);
-                    var weights = wm.Select(e => e.Real).ToList();
-                    weights[0] /= 2;
-                    weights.Add(weights[0]);
-                    var maxWeight = weights.Max();
-                    for (var i = 0; i < weights.Count; i++) weights[i] /= maxWeight;
+#if true
+                        // chebyshev window calculations for relative emitter strength across the array
+                        var discreteFourierTransform = new MathNet.Numerics.IntegralTransforms.Algorithms.DiscreteFourierTransform();
+                        const double sideLobeAttenuation_dB = 30.0;
+                        var r0 = Math.Pow(10, sideLobeAttenuation_dB / 20);
+                        var n = emitterCount - 1;
+                        var a = Complex.Cosh((1.0 / n) * Acosh(r0));
+                        var am = new Complex[n];
+                        for (var m = 0; m < n; m++) am[m] = a * Complex.Cos(Math.PI * m / n);
+                        var wm = new Complex[n];
+                        var sign = 1;
+                        for (var i = 0; i < n; i++)
+                        {
+                            if (am[i].Magnitude > 1) wm[i] = sign * Complex.Cosh(n * Acosh(am[i]));
+                            else wm[i] = sign * Complex.Cos(n * Complex.Acos(am[i]));
+                            sign *= -1;
+                        }
+                        discreteFourierTransform.BluesteinInverse(wm, FourierOptions.Default);
+                        weights = wm.Select(e => e.Real).ToList();
+                        weights[0] /= 2;
+                        weights.Add(weights[0]);
+                        var maxWeight = weights.Max();
+                        for (var i = 0; i < weights.Count; i++) weights[i] /= maxWeight;
 #endif
+                    }
+                    else weights = new List<double> { 1 };
                     steerableArrayFile.WriteLine("{0}\t{1}\t{2}", emitterCount, emitterSpacing, mode.DepressionElevationAngle);
                     for (var i = 0; i < emitterCount; i++) steerableArrayFile.WriteLine("{0}", weights[i]);
                 }
