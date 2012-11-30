@@ -37,6 +37,12 @@
     <Reference Include="Log4PostSharp">
       <HintPath>..\..\..\ESME WorkBench\External References\Log4PostSharp.dll</HintPath>
     </Reference>
+    <Reference Include="MathNet.Numerics">
+      <HintPath>..\..\..\Solutions\ESME Workbench\packages\MathNet.Numerics.2.3.0\lib\net40\MathNet.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="MathNet.Numerics.IO">
+      <HintPath>..\..\..\Solutions\ESME Workbench\packages\MathNet.Numerics.2.3.0\lib\net40\MathNet.Numerics.IO.dll</HintPath>
+    </Reference>
     <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
       <HintPath>..\..\..\ESME WorkBench\External References\PostSharp.dll</HintPath>
     </Reference>
@@ -54,6 +60,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
+    <Reference Include="zlib.net">
+      <HintPath>..\..\..\Solutions\ESME Workbench\packages\zlib.net.1.0.4.0\lib\zlib.net.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BellhopEngine.cs" />
@@ -89,6 +98,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_Readme\MathNet.Numerics.authors.txt" />
+    <Content Include="App_Readme\MathNet.Numerics.copyright.txt" />
+    <Content Include="App_Readme\MathNet.Numerics.readme.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
