@@ -8,8 +8,8 @@
     <ProjectGuid>{FDC82E04-2167-40DB-B7B6-8C0C12D7CD12}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>StandardTransmissionLossEngines</RootNamespace>
-    <AssemblyName>StandardTransmissionLossEngines</AssemblyName>
+    <RootNamespace>BellhopPlugin</RootNamespace>
+    <AssemblyName>BellhopPlugin</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

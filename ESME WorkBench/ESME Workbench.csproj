@@ -681,6 +681,10 @@
       <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
       <Name>HRC</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Plugins\Transmission Loss Calculators\StandardTransmissionLossEngines\StandardTransmissionLossEngines.csproj">
+      <Project>{FDC82E04-2167-40DB-B7B6-8C0C12D7CD12}</Project>
+      <Name>StandardTransmissionLossEngines</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

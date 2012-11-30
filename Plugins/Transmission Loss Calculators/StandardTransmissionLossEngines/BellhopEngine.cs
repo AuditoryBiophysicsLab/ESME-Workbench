@@ -6,7 +6,6 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
-using BellhopPlugin.Controls;
 using ESME;
 using ESME.Environment;
 using ESME.Model;
@@ -18,8 +17,9 @@ using HRC;
 using HRC.Aspects;
 using HRC.Utility;
 using HRC.ViewModels;
+using StandardTransmissionLossEngines.Controls;
 
-namespace BellhopPlugin
+namespace StandardTransmissionLossEngines
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ESMEPlugin(Name = "Bellhop",

@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
-using BellhopPlugin;
+using StandardTransmissionLossEngines;
 using ESME;
 using ESME.Data;
 using ESME.Plugins;
