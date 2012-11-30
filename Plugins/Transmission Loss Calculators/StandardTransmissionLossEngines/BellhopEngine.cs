@@ -15,6 +15,7 @@ using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using HRC;
 using HRC.Aspects;
+using HRC.Navigation;
 using HRC.Utility;
 using HRC.ViewModels;
 using StandardTransmissionLossEngines.Controls;
@@ -116,6 +117,7 @@ namespace StandardTransmissionLossEngines
             }
             using (var sspFile = new StreamWriter(radial.BasePath + ".ssp", false))
             {
+                if (soundSpeedProfilesAlongRadial.Count == 1) soundSpeedProfilesAlongRadial.Add(Tuple.Create(Geo.RadiansToKilometers(radial.Segment.LengthRadians), new SoundSpeedProfile(soundSpeedProfilesAlongRadial[0].Item2)));
                 sspFile.WriteLine("{0}", soundSpeedProfilesAlongRadial.Count);
                 foreach (var rangeProfileTuple in soundSpeedProfilesAlongRadial) sspFile.Write("{0,-10:0.###}", rangeProfileTuple.Item1);
                 sspFile.WriteLine();
@@ -152,7 +154,7 @@ namespace StandardTransmissionLossEngines
             if (radial.IsDeleted) throw new RadialDeletedByUserException();
             bellhopProcess.Start();
             bellhopProcess.PriorityClass = ProcessPriorityClass.Idle;
-            bellhopProcess.BeginOutputReadLine();
+            //bellhopProcess.BeginOutputReadLine();
             while (!bellhopProcess.HasExited)
             {
                 if (radial.IsDeleted)
@@ -161,6 +163,14 @@ namespace StandardTransmissionLossEngines
                     throw new RadialDeletedByUserException();
                 }
                 Thread.Sleep(20);
+            }
+            if (!File.Exists(radial.BasePath + ".shd"))
+            {
+                Debug.WriteLine(string.Format("Bellhop failed to write shade file for mode {0} location {1} radial {2}", mode.ModeName, radial.TransmissionLoss.AnalysisPoint.Geo, radial.Bearing));
+                Debug.WriteLine(string.Format("radial.BasePath: {0}", radial.BasePath));
+                Debug.WriteLine(string.Format("Bellhop standard output: {0}", bellhopProcess.StandardOutput.ReadToEnd()));
+                Debug.WriteLine(string.Format("Bellhop standard error: {0}", bellhopProcess.StandardError.ReadToEnd()));
+                Debugger.Break();
             }
         }
 
