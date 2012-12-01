@@ -51,7 +51,7 @@ c
 c
 c     mr=bathymetry points, mz=depth grid, mp=pade terms.
 c
-      parameter (mr=100,mz=8000,mp=10)
+      parameter (mr=100,mz=32000,mp=10)
       dimension rb(mr),zb(mr),cw(mz),cb(mz),rhob(mz),attn(mz),alpw(mz),
      >   alpb(mz),f1(mz),f2(mz),f3(mz),ksq(mz),ksqw(mz),ksqb(mz),u(mz),
      >   v(mz),tlg(mz),r1(mz,mp),r2(mz,mp),r3(mz,mp),s1(mz,mp),

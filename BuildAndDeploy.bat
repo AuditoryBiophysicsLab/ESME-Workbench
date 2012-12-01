@@ -8,6 +8,10 @@ msbuild "TransmissionLossViewer\TransmissionLossViewer.csproj" /p:SolutionDir="C
 
 msbuild "SimulationLogAnalysis\SimulationLogAnalysis.csproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform=AnyCPU /t:Build /v:minimal
 
+msbuild "Plugins\Environmental Data Sources\InstallableNAVO\InstallableNAVOPlugin.csproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform=AnyCPU /t:Rebuild /v:minimal
+
+msbuild "Plugins\Transmission Loss Calculators\StandardTransmissionLossEngines\StandardTransmissionLossEngines.csproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform=AnyCPU /t:Rebuild /v:minimal
+
 msbuild "Installers\ManagedBootstrapper\Managed Bootstrapper.csproj" /p:SolutionDir="C:\Projects\ESME Deliverables\Solutions\ESME Workbench\\";Configuration=Release;Platform=AnyCPU /t:Rebuild /v:minimal
 
 set DownloadURLRoot=http://esme.bu.edu/%1%

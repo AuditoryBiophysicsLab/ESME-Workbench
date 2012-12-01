@@ -8,10 +8,13 @@
   <?define ESMERoot="C:\Projects\ESME Deliverables"?>
   <?define LibraryRoot="$(var.ESMERoot)\Libraries"?>
   <?define UtilityRoot="$(var.ESMERoot)\Utilities"?>
+  <?define PluginRoot="$(var.ESMERoot)\Plugins"?>
   <?define PackagesRoot="$(var.ESMERoot)\Solutions\ESME Workbench\packages"?>
   <?define DocRoot="$(var.ESMERoot)\Release Notes"?>
   <?define GISRoot="$(var.ESMERoot)\ESME WorkBench\Sample GIS Data"?>
   <?define BellhopPath="$(var.UtilityRoot)\bellhop"?>
+  <?define RAMGeoPath="$(var.UtilityRoot)\ramgeo"?>
+  <?define StandardTLCalculatorsPath="$(var.PluginRoot)\Transmission Loss Calculators\StandardTransmissionLossEngines"?>
   <?define ExternalsPath="$(var.ESMERoot)\ESME Workbench\External References"?>
   <?define ExternalsPathArchDependent="$(var.ExternalsPath)\$(var.Platform)"?>
   <?define ESMEPath="$(var.ESMERoot)\ESME Workbench\bin\Release"?>
@@ -167,6 +170,17 @@
             <File Id="log4net.Config"
                   Name="log4net.Config"
                   Source="$(var.ESMERoot)\ESME WorkBench\log4net.Config" />
+
+            <!-- MathNet Numerics library -->
+            <File Id="MathNet.Numerics.dll"
+                  Name="MathNet.Numerics.dll"
+                  Source="$(var.ExternalsPath)\MathNet.Numerics.dll" />
+            <File Id="MathNet.Numerics.IO.dll"
+                  Name="MathNet.Numerics.IO.dll"
+                  Source="$(var.ExternalsPath)\MathNet.Numerics.IO.dll" />
+            <File Id="zlib.net.dll"
+                  Name="zlib.net.dll"
+                  Source="$(var.ExternalsPath)\zlib.net.dll" />
 
             <!-- 3MB assemblies -->
             <File Id="_3MBSLib.dll"
