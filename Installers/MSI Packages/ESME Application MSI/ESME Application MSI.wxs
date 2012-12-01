@@ -14,7 +14,7 @@
   <?define GISRoot="$(var.ESMERoot)\ESME WorkBench\Sample GIS Data"?>
   <?define BellhopPath="$(var.UtilityRoot)\bellhop"?>
   <?define RAMGeoPath="$(var.UtilityRoot)\ramgeo"?>
-  <?define StandardTLCalculatorsPath="$(var.PluginRoot)\Transmission Loss Calculators\StandardTransmissionLossEngines"?>
+  <?define StandardTLCalculatorsPath="$(var.PluginRoot)\Transmission Loss Calculators\StandardTransmissionLossEngines\bin\Release"?>
   <?define ExternalsPath="$(var.ESMERoot)\ESME Workbench\External References"?>
   <?define ExternalsPathArchDependent="$(var.ExternalsPath)\$(var.Platform)"?>
   <?define ESMEPath="$(var.ESMERoot)\ESME Workbench\bin\Release"?>
@@ -141,6 +141,16 @@
             -->
 
             <!-- Bellhop acoustic simulator -->
+            <File Id="bellhop.exe"
+                  Name="bellhop.exe"
+                  Source="$(var.BellhopPath)\bellhop.exe" />
+
+            <!-- RAMGeo acoustic simulator -->
+            <File Id="ramgeo.exe"
+                  Name="ramgeo.exe"
+                  Source="$(var.RAMGeoPath)\ramgeo.exe" />
+
+            <!-- Required cygwin runtime DLLs for Bellhop and/or RAMGeo -->
             <File Id="cyggcc_s1.dll"
                   Name="cyggcc_s-1.dll"
                   Source="$(var.BellhopPath)\cyggcc_s-1.dll" />
@@ -150,10 +160,11 @@
             <File Id="cygwin1.dll"
                   Name="cygwin1.dll"
                   Source="$(var.BellhopPath)\cygwin1.dll" />
-            <File Id="bellhop.exe"
-                  Name="bellhop.exe"
-                  Source="$(var.BellhopPath)\bellhop.exe" />
-            <!-- End external executables -->
+            
+            <!-- Standard Transmission Loss Engines plugin (interface between ESME and Bellhop/RAMGeo) -->
+            <File Id="StandardTransmissionLossEngines.dll"
+                  Name="StandardTransmissionLossEngines.dll"
+                  Source="$(var.StandardTLCalculatorsPath)\StandardTransmissionLossEngines.dll" />
 
             <!-- PostSharp -->
             <File Id="PostSharp.dll"
