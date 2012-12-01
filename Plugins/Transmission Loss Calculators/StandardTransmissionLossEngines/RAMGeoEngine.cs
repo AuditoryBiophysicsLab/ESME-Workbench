@@ -374,18 +374,18 @@ namespace StandardTransmissionLossEngines
             if (ramProcess.ExitCode == 0)
             {
                 //File.Delete(Path.Combine(tempDirectory, "ramgeo.in"));
-                File.Delete(radial.BasePath + ".grid");
+                //File.Delete(radial.BasePath + ".grid");
                 //File.Move(Path.Combine(tempDirectory, "tl.grid"), radial.BasePath + ".grid");
-                File.Delete(radial.BasePath + ".line");
+                //File.Delete(radial.BasePath + ".line");
                 //File.Move(Path.Combine(tempDirectory, "tl.line"), radial.BasePath + ".line");
-                File.Delete(radial.BasePath + ".pgrid");
-                File.Move(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
-                File.Delete(radial.BasePath + ".sra");
-                File.Move(Path.Combine(tempDirectory, "sra.in"), radial.BasePath + ".sra");
+                //File.Delete(radial.BasePath + ".pgrid");
+                //File.Move(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
+                //File.Delete(radial.BasePath + ".sra");
+                //File.Move(Path.Combine(tempDirectory, "sra.in"), radial.BasePath + ".sra");
 
                 using (var writer = new StreamWriter(radial.BasePath + ".bty")) writer.Write(bottomProfile.ToBellhopString());
-                var pressures = ReadRamPGrid(radial.BasePath + ".pgrid");
-                File.Delete(radial.BasePath + ".pgrid");
+                var pressures = ReadRamPGrid(Path.Combine(tempDirectory, "p.grid"));
+                //File.Delete(radial.BasePath + ".pgrid");
                 var rangeCount = pressures.Count;
                 var depthCount = pressures[0].Length;
                 var rr = new double[rangeCount];
