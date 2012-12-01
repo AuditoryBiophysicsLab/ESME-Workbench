@@ -207,10 +207,10 @@ namespace ESME.Scenarios
                 {
                     if (debugIndex >= 0 && rangeIndex == debugIndex)
                     {
-                        var maxTL = tlValuesAboveBottom.Max();
-                        var maxTLDepthIndex = transmissionLoss[rangeIndex].IndexOf(maxTL);
-                        var maxTLDepth = _depths[maxTLDepthIndex];
-                        Debug.WriteLine(string.Format("Maximum TL value for this field found at radial bearing {0}, range {1}, depth {2}, TL {3}, bottom depth at this range {4}", Bearing, curRange, maxTLDepth, maxTL, depthAtThisRange));
+                        var maxTransmissionLoss = tlValuesAboveBottom.Max();
+                        var maxTransmissionLossDepthIndex = transmissionLoss[rangeIndex].IndexOf(maxTransmissionLoss);
+                        var maxTransmissionLossDepth = _depths[maxTransmissionLossDepthIndex];
+                        Debug.WriteLine(string.Format("Maximum TL value for this field found at radial bearing {0}, range {1}, depth {2}, TL {3}, bottom depth at this range {4}", Bearing, curRange, maxTransmissionLossDepth, maxTransmissionLoss, depthAtThisRange));
                     }
                     MinimumTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Min();
                     MaximumTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Max();

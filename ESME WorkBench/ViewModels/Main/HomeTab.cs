@@ -417,7 +417,7 @@ namespace ESMEWorkbench.ViewModels.Main
             OnPropertyChanged("CanPlaceAnalysisPoint");
         }
 
-        static void AddMode(Source source, string name, bool isNew, float frequency = 1000f, float depth = 0f)
+        static void AddMode(Source source, string name, bool isNew, float frequency = 1000f, float depth = 0f, float maxPropagationRadius = 25000f)
         {
             var mode = new Mode
             {
@@ -426,7 +426,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 DepressionElevationAngle = 0f,
                 HighFrequency = frequency,
                 LowFrequency = frequency,
-                MaxPropagationRadius = 25000f,
+                MaxPropagationRadius = maxPropagationRadius,
                 ModeName = name,
                 ModeType = null,
                 PulseInterval = new TimeSpan(0, 0, 0, 30),

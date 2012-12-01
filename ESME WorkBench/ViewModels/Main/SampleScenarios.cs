@@ -150,7 +150,7 @@ namespace ESMEWorkbench.ViewModels.Main
             };
             scenario.Perimeters.Add(perimeter);
             AddMode(AddSource(platform, "High Frequency Source", false), "3 kHz mode", false, 3000, 5);
-            AddMode(AddSource(platform, "Low Frequency Source", false), "100 Hz mode", false, 100, 10);
+            AddMode(AddSource(platform, "Low Frequency Source", false), "100 Hz mode", false, 100, 10, 50000);
 
             platform.Sources[1].Modes[0].TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin.PluginIdentifier.Type;
             AddPlatform(scenario, platform);

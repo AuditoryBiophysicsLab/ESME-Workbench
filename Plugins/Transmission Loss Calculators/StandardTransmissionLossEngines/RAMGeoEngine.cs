@@ -183,13 +183,16 @@ namespace StandardTransmissionLossEngines
         public double Theta { get; set; }
 
         /// <summary>
+        /// Attenuation factor, in dB for side lobes of the beam pattern
+        /// </summary>
+        [Initialize(40.0)] public double SideLobeAttenuation { get; set; }
+        /// <summary>
         /// Last layer thickness, in wavelengths  
         /// 
         /// LastLayerDz_lambda
         /// </summary>
         [Initialize(10.0)]
         public double LastLayerThickness { get; set; }
-        object _lockObject = new object();
         public override void CalculateTransmissionLoss(Platform platform, Mode mode, Radial radial, BottomProfile bottomProfile, SedimentType sedimentType, double windSpeed, IList<Tuple<double, SoundSpeedProfile>> soundSpeedProfilesAlongRadial)
         {
             var sourceDepth = platform.Depth;
@@ -211,7 +214,7 @@ namespace StandardTransmissionLossEngines
             // dz = 0.1 * lambda
             var dz = RelativeDepthResolution * lambda;
             // make dz a 'pretty' number
-            dz = Fix2X10pN(dz, fixpoints);
+            //dz = Fix2X10pN(dz, fixpoints);
 
             // ndz is the depth decimation factor
             // MinimumOutputDepthResolution is 10m
@@ -225,7 +228,7 @@ namespace StandardTransmissionLossEngines
             // RelativeRangeResolution is 2, so with our 'pretty' dz = 0.2, dr = 0.4
             var dr = RelativeRangeResolution * dz;
             // make dr a 'pretty' number, in this case 0.25
-            dr = Fix2X10pN(dr, fixpoints);
+            //dr = Fix2X10pN(dr, fixpoints);
             // ndr is the range decimation factor
             // MinimumOutputRangeResolution is 10m
             // dr is 0.25 * lambda, so (10 / 0.25) gives us an ndr of 40
@@ -299,51 +302,45 @@ namespace StandardTransmissionLossEngines
             if (File.Exists(tempDirectory)) File.Delete(tempDirectory);
             Directory.CreateDirectory(tempDirectory);
             File.Copy(envFileName, Path.Combine(tempDirectory, "ramgeo.in"));
-            lock (_lockObject)
+            using (var steerableArrayFile = new StreamWriter(Path.Combine(tempDirectory, "sra.in"), false))
             {
-                using (var steerableArrayFile = new StreamWriter(Path.Combine(tempDirectory, "sra.in"), false))
+                // From http://www.activefrance.com/Antennas/Introduction%20to%20Phased%20Array%20Design.pdf
+                // theta3 = 3dB beam width, in degrees
+                // emitterSize = size of emitter array, in meters
+                // theta3 = (0.886 * lambda / arrayLength) * 180 / pi
+                // so, doing the algebra and solving for arrayLength, you get:
+                // emitterSize = (0.886 * lambda) / (theta3 * (pi / 180))
+                var emitterSize = (0.886 * lambda) / (mode.VerticalBeamWidth * (Math.PI / 180.0));
+                var emitterCount = (int)(emitterSize / (dz * 2));
+                var emitterSpacing = 1.0;
+                var weights = new List<double> { 1 };
+                if (emitterCount > 1)
                 {
-                    // From http://www.activefrance.com/Antennas/Introduction%20to%20Phased%20Array%20Design.pdf
-                    // theta3 = 3dB beam width, in degrees
-                    // emitterSize = size of emitter array, in meters
-                    // theta3 = (0.886 * lambda / arrayLength) * 180 / pi
-                    // so, doing the algebra and solving for arrayLength, you get:
-                    // emitterSize = (0.886 * lambda) / (theta3 * (pi / 180))
-                    var emitterSize = (0.886 * lambda) / (mode.VerticalBeamWidth * (Math.PI / 180.0));
-                    var emitterSpacing = dz * 2;
-                    var emitterCount = (int)(emitterSize / emitterSpacing);
-                    List<double> weights;
-                    if (emitterCount > 1)
+                    emitterSpacing = emitterSize / (emitterCount - 1);
+                    // chebyshev window calculations for relative emitter strength across the array
+                    var discreteFourierTransform = new MathNet.Numerics.IntegralTransforms.Algorithms.DiscreteFourierTransform();
+                    var r0 = Math.Pow(10, SideLobeAttenuation / 20);
+                    var n = emitterCount - 1;
+                    var a = Complex.Cosh((1.0 / n) * Acosh(r0));
+                    var am = new Complex[n];
+                    for (var m = 0; m < n; m++) am[m] = a * Complex.Cos(Math.PI * m / n);
+                    var wm = new Complex[n];
+                    var sign = 1;
+                    for (var i = 0; i < n; i++)
                     {
-#if true
-                        // chebyshev window calculations for relative emitter strength across the array
-                        var discreteFourierTransform = new MathNet.Numerics.IntegralTransforms.Algorithms.DiscreteFourierTransform();
-                        const double sideLobeAttenuation_dB = 30.0;
-                        var r0 = Math.Pow(10, sideLobeAttenuation_dB / 20);
-                        var n = emitterCount - 1;
-                        var a = Complex.Cosh((1.0 / n) * Acosh(r0));
-                        var am = new Complex[n];
-                        for (var m = 0; m < n; m++) am[m] = a * Complex.Cos(Math.PI * m / n);
-                        var wm = new Complex[n];
-                        var sign = 1;
-                        for (var i = 0; i < n; i++)
-                        {
-                            if (am[i].Magnitude > 1) wm[i] = sign * Complex.Cosh(n * Acosh(am[i]));
-                            else wm[i] = sign * Complex.Cos(n * Complex.Acos(am[i]));
-                            sign *= -1;
-                        }
-                        discreteFourierTransform.BluesteinInverse(wm, FourierOptions.Default);
-                        weights = wm.Select(e => e.Real).ToList();
-                        weights[0] /= 2;
-                        weights.Add(weights[0]);
-                        var maxWeight = weights.Max();
-                        for (var i = 0; i < weights.Count; i++) weights[i] /= maxWeight;
-#endif
+                        if (am[i].Magnitude > 1) wm[i] = sign * Complex.Cosh(n * Acosh(am[i]));
+                        else wm[i] = sign * Complex.Cos(n * Complex.Acos(am[i]));
+                        sign *= -1;
                     }
-                    else weights = new List<double> { 1 };
-                    steerableArrayFile.WriteLine("{0}\t{1}\t{2}", emitterCount, emitterSpacing, mode.DepressionElevationAngle);
-                    for (var i = 0; i < emitterCount; i++) steerableArrayFile.WriteLine("{0}", weights[i]);
+                    discreteFourierTransform.BluesteinInverse(wm, FourierOptions.Default);
+                    weights = wm.Select(e => e.Real).ToList();
+                    weights[0] /= 2;
+                    weights.Add(weights[0]);
+                    var maxWeight = weights.Max();
+                    for (var i = 0; i < weights.Count; i++) weights[i] /= maxWeight;
                 }
+                steerableArrayFile.WriteLine("{0}\t{1}\t{2}", emitterCount, emitterSpacing, mode.DepressionElevationAngle);
+                for (var i = 0; i < emitterCount; i++) steerableArrayFile.WriteLine("{0}", weights[i]);
             }
             //File.Copy(Path.Combine(AssemblyLocation, "sra.in"), Path.Combine(tempDirectory, "sra.in"));
             //Debug.WriteLine(string.Format("Env File: {0} copied to: {1}", envFileName, tempDirectory));
@@ -376,11 +373,11 @@ namespace StandardTransmissionLossEngines
             var ramError = ramProcess.StandardError.ReadToEnd();
             if (ramProcess.ExitCode == 0)
             {
-                File.Delete(Path.Combine(tempDirectory, "ramgeo.in"));
+                //File.Delete(Path.Combine(tempDirectory, "ramgeo.in"));
                 File.Delete(radial.BasePath + ".grid");
-                File.Move(Path.Combine(tempDirectory, "tl.grid"), radial.BasePath + ".grid");
+                //File.Move(Path.Combine(tempDirectory, "tl.grid"), radial.BasePath + ".grid");
                 File.Delete(radial.BasePath + ".line");
-                File.Move(Path.Combine(tempDirectory, "tl.line"), radial.BasePath + ".line");
+                //File.Move(Path.Combine(tempDirectory, "tl.line"), radial.BasePath + ".line");
                 File.Delete(radial.BasePath + ".pgrid");
                 File.Move(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
                 File.Delete(radial.BasePath + ".sra");
@@ -388,32 +385,15 @@ namespace StandardTransmissionLossEngines
 
                 using (var writer = new StreamWriter(radial.BasePath + ".bty")) writer.Write(bottomProfile.ToBellhopString());
                 var pressures = ReadRamPGrid(radial.BasePath + ".pgrid");
+                File.Delete(radial.BasePath + ".pgrid");
                 var rangeCount = pressures.Count;
                 var depthCount = pressures[0].Length;
                 var rr = new double[rangeCount];
                 var rd = new double[depthCount];
-                var sbRanges = new StringBuilder();
-                sbRanges.Append("Ranges: ");
-                for (var rangeIndex = 0; rangeIndex < rr.Length; rangeIndex++)
-                {
-                    rr[rangeIndex] = (rangeIndex + 1) * MinimumOutputRangeResolution;
-                    sbRanges.AppendFormat("{0} ", rr[rangeIndex]);
-                }
-                var sbDepths = new StringBuilder();
-                sbDepths.Append("Depths: ");
-                for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++)
-                {
-                    rd[depthIndex] = (depthIndex + 1) * MinimumOutputDepthResolution;
-                    sbDepths.AppendFormat("{0} ", rd[depthIndex]);
-                }
-                lock (_lockObject)
-                {
-                    Debug.WriteLine(sbRanges);
-                    Debug.WriteLine(sbDepths);
-                }
+                for (var rangeIndex = 0; rangeIndex < rr.Length; rangeIndex++) rr[rangeIndex] = (rangeIndex + 1) * MinimumOutputRangeResolution;
+                for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++) rd[depthIndex] = (depthIndex + 1) * MinimumOutputDepthResolution;
                 BellhopOutput.WriteShadeFile(radial.BasePath + ".shd", sourceDepth, frequency, rd, rr, pressures);
-                //WritePGridCompare(path+".reals",result,true);
-                //WritePGridCompare(path + ".imags", result, false);
+                radial.ExtractAxisData();
             }
             else
             {
@@ -424,66 +404,10 @@ namespace StandardTransmissionLossEngines
             //Debug.WriteLine(string.Format("Env File: {0} temp directory deleted: {1}", envFileName, tempDirectory));
         }
 
-        static Complex Acosh(Complex x)
-        {
-            return Complex.Log(x + Complex.Sqrt(x + 1) * Complex.Sqrt(x - 1));
-        }
+        static Complex Acosh(Complex x) { return Complex.Log(x + Complex.Sqrt(x + 1) * Complex.Sqrt(x - 1)); }
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-#if false
-        static void WritePGridCompare(string fileName, List<Complex[]> pgrid, bool writeReal)
-        {
-            using (var writer = new StreamWriter(fileName))
-            {
-                var rangeCount = pgrid.Count();
-                var depthCount = pgrid[0].Length;
-                for (var i = 0; i < depthCount; i++)
-                {
-                    for (var j = 0; j < rangeCount; j++)
-                    {
-                        var complex = pgrid[j][i];
-                        writer.Write(string.Format("{0} ", writeReal ? complex.Real : complex.Imaginary));
-                    }
-                    writer.WriteLine();
-                }
-            }
-        }
-#endif
-
-        static double Fix2X10pN(double x, List<double> fixpoints)
-        {
-            fixpoints.Sort();
-            if(fixpoints.First() < 1) throw new ParameterOutOfRangeException("No negative numbers.");
-            if(Math.Abs(fixpoints.First() - 1) > .001) fixpoints.Insert(0,1);
-            if(fixpoints.Last()>10) throw new ParameterOutOfRangeException("Fixpoints  must be between 1 and 10");
-
-            var px = Math.Floor(Math.Log10(x));
-            var fx = x * Math.Pow(10, -px);
-
-            var done = false;
-            var ii = 2;
-            var n = fixpoints.Count;
-
-            while (!done)
-            {
-                if (fx < fixpoints[ii])
-                {
-                    fx = fixpoints[ii - 1];
-                    done = true;
-                }
-                else if (ii == n)
-                {
-                    fx = fixpoints.Last();
-                    done = true;
-                }
-                ii++;
-            }
-            return (fx * Math.Pow(10,px));
-        }
-
-
-        //object _lockObject = new object();
         public List<Complex[]> ReadRamPGrid(string fileName)
         {
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
