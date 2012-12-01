@@ -1,0 +1,3 @@
+# !UNKNOWN,0,0,
+# Sim Area Name, Latitude(degrees), Logitude(degrees), Height(meters),GeoidSeparation(meters),OpsLimitFile,SimLimitFile
+Southern Ocean,-30.0,120.0,0.0,0.0,Southern Ocean_OpArea.ovr,Southern Ocean_SimArea.ovr
