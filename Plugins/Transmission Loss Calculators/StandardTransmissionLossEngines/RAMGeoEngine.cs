@@ -249,7 +249,11 @@ namespace StandardTransmissionLossEngines
             var envFileName = radial.BasePath + ".env";
             using (var envFile = new StreamWriter(envFileName, false))
             {
-                envFile.WriteLine("RAMGeo");
+                envFile.WriteLine("Scenario: '{0}' Analysis point: '{1}' Mode '{2}' Bearing '{3}'",
+                                  radial.TransmissionLoss.AnalysisPoint.Scenario.Name,
+                                  radial.TransmissionLoss.AnalysisPoint.Geo,
+                                  radial.TransmissionLoss.Modes[0].ModeName,
+                                  radial.Bearing);
                 envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2:0.000000}\t\tf [Frequency (Hz)], zs [Source Depth (m)], zrec0 [First receiever depth (m)]", frequency, sourceDepth, 0.1);
                 envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t\t\trmax[Max range (m)], dr [Range resolution (m)], ndr [Range grid decimation factor]", mode.MaxPropagationRadius, dr, ndr);
                 envFile.WriteLine(

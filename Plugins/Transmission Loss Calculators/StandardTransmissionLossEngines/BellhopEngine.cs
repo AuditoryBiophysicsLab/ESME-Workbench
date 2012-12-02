@@ -86,7 +86,11 @@ namespace StandardTransmissionLossEngines
 
             using (var envFile = new StreamWriter(radial.BasePath + ".env", false))
             {
-                envFile.WriteLine("'Bellhop'");
+                envFile.WriteLine("Scenario: '{0}' Mode: '{2}' Analysis point: {1} Bearing: {3}",
+                                  radial.TransmissionLoss.AnalysisPoint.Scenario.Name,
+                                  radial.TransmissionLoss.AnalysisPoint.Geo,
+                                  radial.TransmissionLoss.Modes[0].ModeName,
+                                  radial.Bearing);
                 envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0}", frequency));
                 envFile.WriteLine("1"); // was NMEDIA in gui_genbellhopenv.m
                 envFile.WriteLine(UseSurfaceReflection ? "'QFLT'" : "'QVLT'");
