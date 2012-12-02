@@ -249,7 +249,7 @@ namespace StandardTransmissionLossEngines
             var envFileName = radial.BasePath + ".env";
             using (var envFile = new StreamWriter(envFileName, false))
             {
-                envFile.WriteLine("Scenario: '{0}' Analysis point: '{1}' Mode '{2}' Bearing '{3}'",
+                envFile.WriteLine("Scenario: '{0}' Mode: '{2}' Analysis point: {1} Bearing: {3}",
                                   radial.TransmissionLoss.AnalysisPoint.Scenario.Name,
                                   radial.TransmissionLoss.AnalysisPoint.Geo,
                                   radial.TransmissionLoss.Modes[0].ModeName,
