@@ -191,6 +191,13 @@ namespace ESME.Scenarios
                                         let desiredRange = Math.Abs((profilePoint.Range * 1000) - curRange)
                                         orderby desiredRange
                                         select profilePoint.Depth).Take(2).Min();
+                if (depthAtThisRange < _depths[0])
+                {
+                    MinimumTransmissionLossValues[rangeIndex] = float.NaN;
+                    MaximumTransmissionLossValues[rangeIndex] = float.NaN;
+                    MeanTransmissionLossValues[rangeIndex] = float.NaN;
+                    continue;
+                }
                 var bottomDepthIndex = _depths.ToList().IndexOf((from depth in _depths
                                                                  let curDepth = depthAtThisRange - depth
                                                                  where curDepth > 0
@@ -202,20 +209,23 @@ namespace ESME.Scenarios
                     MinimumTransmissionLossValues[rangeIndex] = float.NaN;
                     MaximumTransmissionLossValues[rangeIndex] = float.NaN;
                     MeanTransmissionLossValues[rangeIndex] = float.NaN;
+                    continue;
                 }
-                else
+                if (debugIndex >= 0 && rangeIndex == debugIndex)
                 {
-                    if (debugIndex >= 0 && rangeIndex == debugIndex)
-                    {
-                        var maxTransmissionLoss = tlValuesAboveBottom.Max();
-                        var maxTransmissionLossDepthIndex = transmissionLoss[rangeIndex].IndexOf(maxTransmissionLoss);
-                        var maxTransmissionLossDepth = _depths[maxTransmissionLossDepthIndex];
-                        Debug.WriteLine(string.Format("Maximum TL value for this field found at radial bearing {0}, range {1}, depth {2}, TL {3}, bottom depth at this range {4}", Bearing, curRange, maxTransmissionLossDepth, maxTransmissionLoss, depthAtThisRange));
-                    }
-                    MinimumTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Min();
-                    MaximumTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Max();
-                    MeanTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Average();
+                    var maxTransmissionLoss = tlValuesAboveBottom.Max();
+                    var maxTransmissionLossDepthIndex = transmissionLoss[rangeIndex].IndexOf(maxTransmissionLoss);
+                    var maxTransmissionLossDepth = _depths[maxTransmissionLossDepthIndex];
+                    Debug.WriteLine(string.Format("Maximum TL value for this field found at radial bearing {0}, range {1}, depth {2}, TL {3}, bottom depth at this range {4}",
+                                                  Bearing,
+                                                  curRange,
+                                                  maxTransmissionLossDepth,
+                                                  maxTransmissionLoss,
+                                                  depthAtThisRange));
                 }
+                MinimumTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Min();
+                MaximumTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Max();
+                MeanTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Average();
             }
             using (var writer = new BinaryWriter(new FileStream(BasePath + ".axs", FileMode.Create)))
             {

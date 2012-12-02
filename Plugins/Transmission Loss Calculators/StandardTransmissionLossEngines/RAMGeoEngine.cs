@@ -210,7 +210,7 @@ namespace StandardTransmissionLossEngines
             // if dz < 1m round dz down to either [1/10, 1/5, 1/4 or 1/2] m  ... or multiples of 10^-n of these numbers
             //                                  = [1     2    2.5 or 5  ] x 0.1m  "   " ...
             // if dz > 1m round dz down to either [1     2    2.5    5  ] m  ... or multiples of 10^+n of these numbers
-            var fixpoints = new List<double>{1, 2, 2.5, 5};
+            var fixpoints = new List<double> { 1, 2, 2.5, 5 };
             // dz = 0.1 * lambda
             var dz = RelativeDepthResolution * lambda;
             // make dz a 'pretty' number
@@ -252,15 +252,29 @@ namespace StandardTransmissionLossEngines
                 envFile.WriteLine("RAMGeo");
                 envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2:0.000000}\t\tf [Frequency (Hz)], zs [Source Depth (m)], zrec0 [First receiever depth (m)]", frequency, sourceDepth, 0.1);
                 envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t\t\trmax[Max range (m)], dr [Range resolution (m)], ndr [Range grid decimation factor]", mode.MaxPropagationRadius, dr, ndr);
-                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t{3:0.000000}\tzmax [Max computational depth (m)], dz [Depth resolution (m)], ndz [Depth grid decimation factor], zmplot [Maximum depth to plot (m)]", zmax, dz, ndz, zmplt);
-                envFile.WriteLine("{0:0.000000}\t{1}\t{2}\t{3:0.000000}\t\tc0 [Reference sound speed (m/s)], np [Number of terms in Padé expansion], ns [Number of stability constraints], rs [Maximum range of stability constraints (m)]", ReferenceSoundSpeed, PadeExpansionTerms, StabilityConstraints, StabilityConstraintMaxRange);
+                envFile.WriteLine(
+                                  "{0:0.000000}\t{1:0.000000}\t{2}\t{3:0.000000}\tzmax [Max computational depth (m)], dz [Depth resolution (m)], ndz [Depth grid decimation factor], zmplot [Maximum depth to plot (m)]",
+                                  zmax,
+                                  dz,
+                                  ndz,
+                                  zmplt);
+                envFile.WriteLine(
+                                  "{0:0.000000}\t{1}\t{2}\t{3:0.000000}\t\tc0 [Reference sound speed (m/s)], np [Number of terms in Padé expansion], ns [Number of stability constraints], rs [Maximum range of stability constraints (m)]",
+                                  ReferenceSoundSpeed,
+                                  PadeExpansionTerms,
+                                  StabilityConstraints,
+                                  StabilityConstraintMaxRange);
                 // todo: different stuff goes here for RAMSGeo
 
                 // bathymetry data
                 var first = true;
                 foreach (var profilePoint in bottomProfile.Profile)
                 {
-                    envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:0.000000}\t{1:0.000000}{2}", profilePoint.Range * 1000, profilePoint.Depth, first ? "\t\t\t\t\tbathymetry data [range (m), depth (m)]" : ""));
+                    envFile.WriteLine(string.Format(CultureInfo.InvariantCulture,
+                                                    "{0:0.000000}\t{1:0.000000}{2}",
+                                                    profilePoint.Range * 1000,
+                                                    profilePoint.Depth,
+                                                    first ? "\t\t\t\t\tbathymetry data [range (m), depth (m)]" : ""));
                     first = false;
                 }
                 envFile.WriteLine("-1\t-1");
@@ -276,7 +290,10 @@ namespace StandardTransmissionLossEngines
                     foreach (var profilePoint in rangeProfileTuple.Item2.Data)
                     {
                         if (double.IsNaN(profilePoint.SoundSpeed)) break;
-                        envFile.WriteLine("{0:0.######}\t{1:0.######}{2}", profilePoint.Depth, profilePoint.SoundSpeed, firstSoundSpeedProfile ? "\t\t\t\t\tsound speed profile in water [depth (m), sound speed (m/s)]" : "");
+                        envFile.WriteLine("{0:0.######}\t{1:0.######}{2}",
+                                          profilePoint.Depth,
+                                          profilePoint.SoundSpeed,
+                                          firstSoundSpeedProfile ? "\t\t\t\t\tsound speed profile in water [depth (m), sound speed (m/s)]" : "");
                         firstSoundSpeedProfile = false;
                     }
                     envFile.WriteLine("-1\t-1");
@@ -371,34 +388,43 @@ namespace StandardTransmissionLossEngines
                 Thread.Sleep(20);
             }
             var ramError = ramProcess.StandardError.ReadToEnd();
-            if (ramProcess.ExitCode == 0)
-            {
-                //File.Delete(Path.Combine(tempDirectory, "ramgeo.in"));
-                //File.Delete(radial.BasePath + ".grid");
-                //File.Move(Path.Combine(tempDirectory, "tl.grid"), radial.BasePath + ".grid");
-                //File.Delete(radial.BasePath + ".line");
-                //File.Move(Path.Combine(tempDirectory, "tl.line"), radial.BasePath + ".line");
-                //File.Delete(radial.BasePath + ".pgrid");
-                //File.Move(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
-                //File.Delete(radial.BasePath + ".sra");
-                //File.Move(Path.Combine(tempDirectory, "sra.in"), radial.BasePath + ".sra");
+            //File.Delete(Path.Combine(tempDirectory, "ramgeo.in"));
+            //File.Delete(radial.BasePath + ".grid");
+            //File.Move(Path.Combine(tempDirectory, "tl.grid"), radial.BasePath + ".grid");
+            //File.Delete(radial.BasePath + ".line");
+            //File.Move(Path.Combine(tempDirectory, "tl.line"), radial.BasePath + ".line");
+            //File.Delete(radial.BasePath + ".pgrid");
+            //File.Move(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
+            //File.Delete(radial.BasePath + ".sra");
+            //File.Move(Path.Combine(tempDirectory, "sra.in"), radial.BasePath + ".sra");
 
-                using (var writer = new StreamWriter(radial.BasePath + ".bty")) writer.Write(bottomProfile.ToBellhopString());
+            using (var writer = new StreamWriter(radial.BasePath + ".bty")) writer.Write(bottomProfile.ToBellhopString());
+            if (File.Exists(Path.Combine(tempDirectory, "p.grid")))
+            {
                 var pressures = ReadRamPGrid(Path.Combine(tempDirectory, "p.grid"));
                 //File.Delete(radial.BasePath + ".pgrid");
                 var rangeCount = pressures.Count;
                 var depthCount = pressures[0].Length;
                 var rr = new double[rangeCount];
                 var rd = new double[depthCount];
-                for (var rangeIndex = 0; rangeIndex < rr.Length; rangeIndex++) rr[rangeIndex] = (rangeIndex + 1) * MinimumOutputRangeResolution;
-                for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++) rd[depthIndex] = (depthIndex + 1) * MinimumOutputDepthResolution;
+                for (var rangeIndex = 0; rangeIndex < rr.Length; rangeIndex++) rr[rangeIndex] = (rangeIndex + 1) * dr * ndr;
+                for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++) rd[depthIndex] = (depthIndex + 1) * dz * ndz;
                 BellhopOutput.WriteShadeFile(radial.BasePath + ".shd", sourceDepth, frequency, rd, rr, pressures);
                 radial.ExtractAxisData();
             }
             else
             {
-                Debug.WriteLine("RAMGeo process for radial {0} exited with error code {1:X}", radial.BasePath, ramProcess.ExitCode);
-                Debug.WriteLine(ramError);
+                Debug.WriteLine("Scenario: {0} Analysis point: {1} Mode {2} Bearing {3}",
+                                radial.TransmissionLoss.AnalysisPoint.Scenario.Name,
+                                radial.TransmissionLoss.AnalysisPoint.Geo,
+                                radial.TransmissionLoss.Modes[0].ModeName,
+                                radial.Bearing);
+                Debug.WriteLine("p.grid file not found in RAMGeo output directory");
+                if (ramProcess.ExitCode != 0)
+                {
+                    Debug.WriteLine("RAMGeo process for radial {0} exited with error code {1:X}", radial.BasePath, ramProcess.ExitCode);
+                    Debug.WriteLine(ramError);
+                }
             }
             Directory.Delete(tempDirectory, true);
             //Debug.WriteLine(string.Format("Env File: {0} temp directory deleted: {1}", envFileName, tempDirectory));

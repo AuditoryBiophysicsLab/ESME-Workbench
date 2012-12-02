@@ -164,14 +164,7 @@ namespace StandardTransmissionLossEngines
                 }
                 Thread.Sleep(20);
             }
-            if (!File.Exists(radial.BasePath + ".shd"))
-            {
-                Debug.WriteLine(string.Format("Bellhop failed to write shade file for mode {0} location {1} radial {2}", mode.ModeName, radial.TransmissionLoss.AnalysisPoint.Geo, radial.Bearing));
-                Debug.WriteLine(string.Format("radial.BasePath: {0}", radial.BasePath));
-                Debug.WriteLine(string.Format("Bellhop standard output: {0}", bellhopProcess.StandardOutput.ReadToEnd()));
-                Debug.WriteLine(string.Format("Bellhop standard error: {0}", bellhopProcess.StandardError.ReadToEnd()));
-                Debugger.Break();
-            }
+            if (bellhopProcess.ExitCode == 0) radial.ExtractAxisData();
         }
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
