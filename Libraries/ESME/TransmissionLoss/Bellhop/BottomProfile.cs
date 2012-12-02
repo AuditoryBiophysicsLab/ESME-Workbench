@@ -26,7 +26,7 @@ namespace ESME.TransmissionLoss.Bellhop
             var curRange = 0.0;
             for (var i = 0; i < numberOfPointsInTransect; i++)
             {
-                var curDepth = Math.Round(Math.Abs(TwoDBilinearApproximation(bathymetry, currentPoint)), 2);
+                var curDepth = Math.Round(-1.0 * TwoDBilinearApproximation(bathymetry, currentPoint), 2);
                 Profile.Add(new BottomProfilePoint { Depth = curDepth, Range = (curRange / 1000.0) });
                 if (MaxDepth < curDepth)
                 {
