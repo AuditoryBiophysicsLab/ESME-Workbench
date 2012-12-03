@@ -200,6 +200,8 @@ namespace ESME.Simulator
                             // Look up the TL value at the actor's range and depth
                             var peakSPL = mode.SourceLevel - tlTask.Result.TransmissionLossRadial[Geo.RadiansToMeters(radiansToActor), -record.Depth];
                             Debug.Assert(platformState != null, "platformState != null");
+                            Debug.Assert(platformState.ModeActiveTimes != null, "platformState.ModeActiveTimes != null");
+                            Debug.Assert(platformState.ModeActiveTimes.ContainsKey(mode), "platformState.ModeActiveTimes does not contain key");
                             var energy = (float)(peakSPL + (10 * Math.Log10(platformState.ModeActiveTimes[mode].TotalSeconds)));
                             record.Exposures.Add(new ActorExposureRecord(index, mode, peakSPL, energy));
                             Interlocked.Increment(ref _totalExposureCount);
