@@ -33,7 +33,7 @@ namespace ESME.TransmissionLoss
             {
                 if (!job.ProgressTarget.IsDeleted) Calculate(job);
                 WorkQueue.Remove(job.ProgressTarget.Guid);
-            }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
+            }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = -1 });
             _queue = new BufferBlock<PercentProgress<Radial>>(new DataflowBlockOptions { BoundedCapacity = -1 });
             _queue.LinkTo(_calculator);
         }
@@ -43,6 +43,7 @@ namespace ESME.TransmissionLoss
             _databaseService = databaseService;
             _cacheService = cacheService;
         }
+
         [Import] IMasterDatabaseService _databaseService;
         [Import] EnvironmentalCacheService _cacheService;
         public Dispatcher Dispatcher { get; set; }

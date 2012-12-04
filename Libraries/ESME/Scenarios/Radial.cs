@@ -243,6 +243,15 @@ namespace ESME.Scenarios
             //MediatorMessage.Send(MediatorMessage.TransmissionLossLayerChanged, TransmissionLoss);
         }
 
+        public void ReleaseAxisData()
+        {
+            _ranges = null;
+            _depths = null;
+            _bottomProfile = null;
+            _minimumTransmissionLossValues = null;
+            _maximumTransmissionLossValues = null;
+        }
+
         void ReadAxisFile()
         {
             if (!File.Exists(BasePath + ".axs")) ExtractAxisData();

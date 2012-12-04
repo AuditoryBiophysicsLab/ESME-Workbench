@@ -168,7 +168,9 @@ namespace StandardTransmissionLossEngines
                 }
                 Thread.Sleep(20);
             }
-            if (bellhopProcess.ExitCode == 0) radial.ExtractAxisData();
+            if (bellhopProcess.ExitCode != 0) return;
+            radial.ExtractAxisData();
+            radial.ReleaseAxisData();
         }
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);

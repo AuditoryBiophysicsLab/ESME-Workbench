@@ -419,6 +419,7 @@ namespace StandardTransmissionLossEngines
                 for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++) rd[depthIndex] = (depthIndex + 1) * dz * ndz;
                 BellhopOutput.WriteShadeFile(radial.BasePath + ".shd", sourceDepth, frequency, rd, rr, pressures);
                 radial.ExtractAxisData();
+                radial.ReleaseAxisData();
             }
             else
             {
