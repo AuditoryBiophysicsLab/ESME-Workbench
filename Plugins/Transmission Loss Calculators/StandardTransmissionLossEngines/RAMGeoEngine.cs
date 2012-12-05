@@ -323,8 +323,12 @@ namespace StandardTransmissionLossEngines
             }
             var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(envFileName));
             //Debug.WriteLine(string.Format("Env File: {0} temp path: {1}", envFileName, tempDirectory));
-            if (Directory.Exists(tempDirectory)) Directory.Delete(tempDirectory, true);
-            if (File.Exists(tempDirectory)) File.Delete(tempDirectory);
+            if (Directory.Exists(tempDirectory))
+            {
+                var files = Directory.GetFiles(tempDirectory, "*.*");
+                foreach (var file in files) File.Delete(file);
+                Directory.Delete(tempDirectory, true);
+            } else if (File.Exists(tempDirectory)) File.Delete(tempDirectory);
             Directory.CreateDirectory(tempDirectory);
             File.Copy(envFileName, Path.Combine(tempDirectory, "ramgeo.in"));
             using (var steerableArrayFile = new StreamWriter(Path.Combine(tempDirectory, "sra.in"), false))
@@ -418,8 +422,6 @@ namespace StandardTransmissionLossEngines
                 for (var rangeIndex = 0; rangeIndex < rr.Length; rangeIndex++) rr[rangeIndex] = (rangeIndex + 1) * dr * ndr;
                 for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++) rd[depthIndex] = (depthIndex + 1) * dz * ndz;
                 BellhopOutput.WriteShadeFile(radial.BasePath + ".shd", sourceDepth, frequency, rd, rr, pressures);
-                radial.ExtractAxisData();
-                radial.ReleaseAxisData();
             }
             else
             {

@@ -174,6 +174,7 @@ namespace ESME.Scenarios
 
         public void ExtractAxisData(TransmissionLossRadial transmissionLoss = null, int debugIndex = -1)
         {
+            if (File.Exists(BasePath + ".axs") || !File.Exists(BasePath + ".shd")) return;
             if (transmissionLoss == null) transmissionLoss = new TransmissionLossRadial((float)Bearing, new BellhopOutput(BasePath + ".shd"));
             _ranges = transmissionLoss.Ranges.ToArray();
             _depths = transmissionLoss.Depths.ToArray();

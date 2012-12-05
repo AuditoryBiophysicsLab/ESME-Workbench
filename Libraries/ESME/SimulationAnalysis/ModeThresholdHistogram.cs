@@ -43,7 +43,12 @@ namespace ESME.SimulationAnalysis
 
         public void Process(SimulationTimeStepRecord record)
         {
-            foreach (var exposure in record.ActorPositionRecords.SelectMany(actorPositionRecord => actorPositionRecord.Exposures)) GroupedExposures.Expose(exposure);
+            var exposures = from r in record.ActorPositionRecords
+                            where r.Exposures != null
+                            from e in r.Exposures
+                            select e;
+
+            foreach (var exposure in exposures) GroupedExposures.Expose(exposure);
         }
 
         public Task<bool> Process(SimulationTimeStepRecord record, Dispatcher dispatcher)
@@ -51,7 +56,12 @@ namespace ESME.SimulationAnalysis
             var completionSource = new TaskCompletionSource<bool>();
             dispatcher.InvokeIfRequired(() =>
             {
-                foreach (var exposure in record.ActorPositionRecords.SelectMany(actorPositionRecord => actorPositionRecord.Exposures)) GroupedExposures.Expose(exposure);
+                var exposures = from r in record.ActorPositionRecords
+                                where r.Exposures != null
+                                from e in r.Exposures
+                                select e;
+                foreach (var exposure in exposures) GroupedExposures.Expose(exposure);
+                //foreach (var exposure in record.ActorPositionRecords.SelectMany(actorPositionRecord => actorPositionRecord.Exposures)) GroupedExposures.Expose(exposure);
             });
             completionSource.SetResult(true);
             return completionSource.Task;

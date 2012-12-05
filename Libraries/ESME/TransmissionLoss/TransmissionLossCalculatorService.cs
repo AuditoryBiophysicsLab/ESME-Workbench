@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks.Dataflow;
 using System.Windows.Threading;
-using ESME.Data;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
@@ -33,9 +32,18 @@ namespace ESME.TransmissionLoss
             {
                 if (!job.ProgressTarget.IsDeleted) Calculate(job);
                 WorkQueue.Remove(job.ProgressTarget.Guid);
-            }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = -1 });
-            _queue = new BufferBlock<PercentProgress<Radial>>(new DataflowBlockOptions { BoundedCapacity = -1 });
-            _queue.LinkTo(_calculator);
+                _shadeFileProcessorQueue.Post(job.ProgressTarget);
+            }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
+            _calculatorQueue = new BufferBlock<PercentProgress<Radial>>(new DataflowBlockOptions { BoundedCapacity = -1 });
+            _calculatorQueue.LinkTo(_calculator);
+            _shadeFileProcessor = new ActionBlock<Radial>(r =>
+            {
+                if (File.Exists(r.BasePath + ".axs") || !File.Exists(r.BasePath + ".shd")) return;
+                r.ExtractAxisData();
+                r.ReleaseAxisData();
+            }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
+            _shadeFileProcessorQueue = new BufferBlock<Radial>(new DataflowBlockOptions { BoundedCapacity = -1 });
+            _shadeFileProcessorQueue.LinkTo(_shadeFileProcessor);
         }
 
         public TransmissionLossCalculatorService(IMasterDatabaseService databaseService, IPluginManagerService pluginService, EnvironmentalCacheService cacheService) : this()
@@ -49,7 +57,9 @@ namespace ESME.TransmissionLoss
         public Dispatcher Dispatcher { get; set; }
         public ObservableConcurrentDictionary<Guid, PercentProgress<Radial>> WorkQueue { get; private set; }
         readonly ActionBlock<PercentProgress<Radial>> _calculator;
-        readonly BufferBlock<PercentProgress<Radial>> _queue;
+        readonly BufferBlock<PercentProgress<Radial>> _calculatorQueue;
+        readonly ActionBlock<Radial> _shadeFileProcessor;
+        readonly BufferBlock<Radial> _shadeFileProcessorQueue;
 
         public void OnImportsSatisfied()
         {
@@ -114,7 +124,7 @@ namespace ESME.TransmissionLoss
             if (WorkQueue.TryGetValue(radial.Guid, out radialProgress)) return;
             radialProgress = new PercentProgress<Radial>(radial);
             WorkQueue.Add(radial.Guid, radialProgress);
-            _queue.Post(radialProgress);
+            _calculatorQueue.Post(radialProgress);
         }
 
         public void TestAdd(Radial radial)

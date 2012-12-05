@@ -157,8 +157,8 @@ namespace ESME.Views.TransmissionLossViewer
                         {
                             var maxIndex = radial.MaximumTransmissionLossValues.ToList().IndexOf(MaxTransmissionLoss);
                             if (maxIndex == -1) continue;
-                            Debug.WriteLine(string.Format("Maximum TL value of {0} found in radial bearing {1} at range {2}", MaxTransmissionLoss, radial.Bearing, radial.Ranges[maxIndex]));
-                            radial.ExtractAxisData(null, maxIndex);
+                            //Debug.WriteLine(string.Format("Maximum TL value of {0} found in radial bearing {1} at range {2}", MaxTransmissionLoss, radial.Bearing, radial.Ranges[maxIndex]));
+                            //radial.ExtractAxisData(null, maxIndex);
                         }
 #endif
 

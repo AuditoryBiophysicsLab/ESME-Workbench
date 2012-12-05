@@ -199,11 +199,13 @@ namespace ESME.Simulator
                             await tlTask;
                             // Look up the TL value at the actor's range and depth
                             var peakSPL = mode.SourceLevel - tlTask.Result.TransmissionLossRadial[Geo.RadiansToMeters(radiansToActor), -record.Depth];
-                            Debug.Assert(platformState != null, "platformState != null");
-                            Debug.Assert(platformState.ModeActiveTimes != null, "platformState.ModeActiveTimes != null");
-                            Debug.Assert(platformState.ModeActiveTimes.ContainsKey(mode), "platformState.ModeActiveTimes does not contain key");
+                            //Debug.Assert(platformState != null, "platformState != null");
+                            //Debug.Assert(platformState.ModeActiveTimes != null, "platformState.ModeActiveTimes != null");
+                            //Debug.Assert(platformState.ModeActiveTimes.ContainsKey(mode), "platformState.ModeActiveTimes does not contain key");
+                            //Debug.Assert(record != null, "record != null");
+                            //Debug.Assert(record.Exposures != null, "record.Exposures != null");
                             var energy = (float)(peakSPL + (10 * Math.Log10(platformState.ModeActiveTimes[mode].TotalSeconds)));
-                            record.Exposures.Add(new ActorExposureRecord(index, mode, peakSPL, energy));
+                            record.Expose(new ActorExposureRecord(index, mode, peakSPL, energy));
                             Interlocked.Increment(ref _totalExposureCount);
                             for (var i = 0; i < Scenario.ScenarioSpecies.Count; i++)
                                 if (_speciesActorIDStart[i] <= index && index <= _speciesActorIDEnd[i]) Interlocked.Increment(ref _exposuresBySpecies[i]);

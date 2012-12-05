@@ -37,7 +37,7 @@ namespace ESME.Simulator
             for (var i = 0; i < _exposureRecordCount; i++)
             {
                 var exposure = ActorExposureRecord.Read(_reader);
-                ActorPositionRecords[exposure.ActorID].Exposures.Add(exposure);
+                ActorPositionRecords[exposure.ActorID].Expose(exposure);
             }
         }
 
@@ -69,10 +69,16 @@ namespace ESME.Simulator
             foreach (var actorPositionRecord in ActorPositionRecords)
             {
                 actorPositionRecord.Write(writer);
+                if (actorPositionRecord.Exposures == null) continue;
                 _exposureRecordCount += actorPositionRecord.Exposures.Count;
             }
             writer.Write(_exposureRecordCount);
-            foreach (var exposure in ActorPositionRecords.SelectMany(actorPositionRecord => actorPositionRecord.Exposures)) exposure.Write(writer);
+
+            var exposures = from r in ActorPositionRecords
+                            where r.Exposures != null
+                            from e in r.Exposures
+                            select e;
+            foreach (var exposure in exposures) exposure.Write(writer);
         }
 
         public ActorPositionRecord this[int actorIndex]
