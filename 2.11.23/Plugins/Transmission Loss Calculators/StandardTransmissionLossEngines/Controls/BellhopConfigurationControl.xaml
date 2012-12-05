@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="StandardTransmissionLossEngines.Controls.BellhopConfigurationControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
+             mc:Ignorable="d">
+    <StackPanel Orientation="Vertical">
+        <StackPanel Margin="0 0 0 5" Orientation="Vertical">
+            <TextBlock Text="Range cell size (m)" />
+            <Controls:ValidatingTextBox BoundField="RangeCellSize" />
+        </StackPanel>
+        <StackPanel Margin="0 0 0 5" Orientation="Vertical">
+            <TextBlock Text="Depth cell size (m)" />
+            <Controls:ValidatingTextBox BoundField="DepthCellSize" />
+        </StackPanel>
+        <StackPanel Margin="0 0 0 5" Orientation="Vertical">
+            <TextBlock Text="Number of rays" />
+            <Controls:ValidatingTextBox BoundField="RayCount" />
+        </StackPanel>
+        <CheckBox Margin="0 0 0 5" Content="Use surface reflection" IsChecked="{Binding UseSurfaceReflection}" />
+    </StackPanel>
+</UserControl>
