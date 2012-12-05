@@ -101,11 +101,7 @@ namespace ESME.Simulator
             Geo<float> firstAnimatPosition = null;
             Task<bool> processTask = null;
             var timeStepCount = (int)Math.Round(((TimeSpan)Scenario.Duration).TotalSeconds / timeStepSize.TotalSeconds);
-
-            if (MovingAnimats)
-                try { Initialize3MB(); }
-                catch (AnimatInterfaceMMBSException a) { throw new SimulationException("Error running simulation: ", a); }
-
+            if(MovingAnimats) Initialize3MB();
             PercentProgress = new PercentProgress<Simulation>(this) { MinimumValue = 0, MaximumValue = timeStepCount - 1 };
             Actors = new List<Actor>();
             foreach (var platform in Scenario.Platforms)

@@ -541,7 +541,16 @@ namespace ESME.Scenarios
                                         from radial in transmissionLoss.Radials
                                         where !File.Exists(radial.BasePath + ".shd")
                                         select radial).Count();
-            if (radialsNotCalculated != 0) return string.Format("There are still {0} radials awaiting calculation in this scenario.", radialsNotCalculated);
+            if (radialsNotCalculated != 0)
+            {
+                var radialList = (from analysisPoint in scenario.AnalysisPoints
+                                  from transmissionLoss in analysisPoint.TransmissionLosses
+                                  from radial in transmissionLoss.Radials
+                                  where !File.Exists(radial.BasePath + ".shd")
+                                  select radial).ToList();
+                return string.Format("There are still {0} radials awaiting calculation in this scenario.", radialsNotCalculated);
+            }
+
 
             var missingSpecies = MissingSpeciesText(scenario);
             if (missingSpecies.Length != 0) return missingSpecies;
