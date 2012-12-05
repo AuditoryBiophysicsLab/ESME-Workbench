@@ -7,6 +7,7 @@ using HRC;
 using HRC.Aspects;
 using HRC.Plotting;
 using HRC.ViewModels;
+using HRC.WPF;
 
 namespace ESME.Views.Simulation
 {
@@ -60,5 +61,19 @@ namespace ESME.Views.Simulation
         public ObservableCollection<HistogramBinsViewModel> HistogramBinsViewModels { get; private set; }
         public double ActualHeight { get; set; }
         public double RowHeight { get; private set; }
+
+        #region CloseCommand
+        public SimpleCommand<object, EventToCommandArgs> CloseCommand
+        {
+            get { return _close ?? (_close = new SimpleCommand<object, EventToCommandArgs>(o=> CloseDialog(true))); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _close;
+
+        static void CloseHandler(EventToCommandArgs args)
+        {
+            //var parameter = args.CommandParameter;
+        }
+        #endregion
     }
 }

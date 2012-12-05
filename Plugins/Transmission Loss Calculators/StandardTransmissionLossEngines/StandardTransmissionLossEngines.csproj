@@ -38,10 +38,10 @@
       <HintPath>..\..\..\ESME WorkBench\External References\Log4PostSharp.dll</HintPath>
     </Reference>
     <Reference Include="MathNet.Numerics">
-      <HintPath>..\..\..\Solutions\ESME Workbench\packages\MathNet.Numerics.2.3.0\lib\net40\MathNet.Numerics.dll</HintPath>
+      <HintPath>..\..\..\ESME WorkBench\External References\MathNet.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="MathNet.Numerics.IO">
-      <HintPath>..\..\..\Solutions\ESME Workbench\packages\MathNet.Numerics.2.3.0\lib\net40\MathNet.Numerics.IO.dll</HintPath>
+      <HintPath>..\..\..\ESME WorkBench\External References\MathNet.Numerics.IO.dll</HintPath>
     </Reference>
     <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
       <HintPath>..\..\..\ESME WorkBench\External References\PostSharp.dll</HintPath>
@@ -61,7 +61,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
     <Reference Include="zlib.net">
-      <HintPath>..\..\..\Solutions\ESME Workbench\packages\zlib.net.1.0.4.0\lib\zlib.net.dll</HintPath>
+      <HintPath>..\..\..\ESME WorkBench\External References\zlib.net.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

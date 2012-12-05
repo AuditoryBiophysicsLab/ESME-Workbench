@@ -3,9 +3,11 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using ESME.SimulationAnalysis;
+using ESME.Simulator;
 using HRC;
 using HRC.Aspects;
 using HRC.Plotting;
@@ -20,13 +22,15 @@ namespace ESME.Views.Simulation
     public class SimulationProgressViewModel : ValidatingViewModel
     {
         readonly IUIVisualizerService _visualizer;
+        readonly IMessageBoxService _messageBox;
         Simulator.Simulation _simulation;
         const string TimeSpanFormatString = @"hh\:mm\:ss";
 
         public SimulationProgressViewModel() {}
-        public SimulationProgressViewModel(IUIVisualizerService visualizer)
+        public SimulationProgressViewModel(IUIVisualizerService visualizer, IMessageBoxService messageBox)
         {
             _visualizer = visualizer;
+            _messageBox = messageBox;
             AddValidationRules(
                 new ValidationRule<SimulationProgressViewModel>
                 {
@@ -128,12 +132,17 @@ namespace ESME.Views.Simulation
 
         void StartHandler(object o)
         {
-            var task = Simulation.Start(TimeSpan.ParseExact(TimeStepString, TimeSpanFormatString, null));
-            task.ContinueWith(t => Window.Dispatcher.InvokeIfRequired(Window.Close));
-            IsStartCommandEnabled = false;
-            IsSimulationRunning = true;
-            OnSimulationStarting();
-            if (DisplayExposureHistograms) _visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels));
+                var task = Simulation.Start(TimeSpan.ParseExact(TimeStepString, TimeSpanFormatString, null));
+                task.ContinueWith(t =>
+                {
+                    if (t.IsFaulted) _messageBox.ShowError(string.Format("The simulation encountered an error: {0}", t.Exception.InnerExceptions[0].Message));
+                    else Window.Dispatcher.InvokeIfRequired(Window.Close);
+                },TaskScheduler.FromCurrentSynchronizationContext());
+                IsStartCommandEnabled = false;
+                IsSimulationRunning = true;
+                OnSimulationStarting();
+                if (DisplayExposureHistograms) _visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels));
+
         }
 
         public event EventHandler SimulationStarting;

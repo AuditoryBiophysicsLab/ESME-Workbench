@@ -10,7 +10,6 @@ using ESME.Locations;
 using ESME.Plugins;
 using ESME.Scenarios;
 using HRC.Navigation;
-using HRC.Utility;
 using HRC.WPF;
 
 namespace ESMEWorkbench.ViewModels.Main

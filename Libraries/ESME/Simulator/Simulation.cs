@@ -88,7 +88,14 @@ namespace ESME.Simulator
             SimulationLog = SimulationLog.Create(Path.Combine(_simulationDirectory, "simulation.exposures"), TimeStepSize, Scenario);
             ModeThresholdHistogram = new ModeThresholdHistogram(this, SimulationLog, 100.0, 10.0, 10);
             //SpeciesThresholdHistogram = new SpeciesThresholdHistogram(this);
-            return TaskEx.Run(() => Run(TimeStepSize, _cancellationTokenSource.Token));
+
+            return TaskEx.Run(() => Run(TimeStepSize, _cancellationTokenSource.Token)).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    throw new SimulationException(t.Exception.InnerExceptions[0].Message);
+                }
+            });
         }
 
         int _totalExposureCount;
@@ -100,7 +107,11 @@ namespace ESME.Simulator
             Geo<float> firstAnimatPosition = null;
             Task<bool> processTask = null;
             var timeStepCount = (int)Math.Round(((TimeSpan)Scenario.Duration).TotalSeconds / timeStepSize.TotalSeconds);
-            if (MovingAnimats) Initialize3MB();
+
+            if (MovingAnimats)
+                try { Initialize3MB(); }
+                catch (AnimatInterfaceMMBSException a) { throw new SimulationException("Error running simulation: ", a); }
+
             PercentProgress = new PercentProgress<Simulation>(this) { MinimumValue = 0, MaximumValue = timeStepCount - 1 };
             Actors = new List<Actor>();
             foreach (var platform in Scenario.Platforms)
@@ -330,7 +341,7 @@ namespace ESME.Simulator
             mapLayer.AddPolygon(geos);
             mapLayer.Done();
         }
-        
+
         class AnimatContext
         {
             public ScenarioSpecies Species { get; set; }
@@ -350,15 +361,15 @@ namespace ESME.Simulator
             var contexts = new List<AnimatContext>();
             foreach (var species in Scenario.ScenarioSpecies)
             {
-                if (!_speciesNameToIndex.ContainsKey(species.SpeciesDefinitionFilePath)) 
+                if (!_speciesNameToIndex.ContainsKey(species.SpeciesDefinitionFilePath))
                     _speciesNameToIndex.Add(species.SpeciesDefinitionFilePath, nextSpeciesIndex++);
                 var speciesInstanceIndex = _speciesNameToIndex[species.SpeciesDefinitionFilePath];
                 var curSpecies = species;
                 species.ReloadOrReseedAnimats();
                 contexts.AddRange(species.Animat.Locations.Select((t, speciesIndex) => new AnimatContext
                 {
-                    Species = curSpecies, 
-                    SpeciesInstanceIndex = speciesInstanceIndex, 
+                    Species = curSpecies,
+                    SpeciesInstanceIndex = speciesInstanceIndex,
                     SpeciesAnimatIndex = speciesIndex
                 }));
             }
@@ -371,7 +382,7 @@ namespace ESME.Simulator
                 mbsRESULT result;
                 var mbs = new C3mbs();
                 _mbs[mbsIndex] = mbs;
-                
+
                 // set the output directory
                 if (mbsRESULT.OK != (result = mbs.SetOutputDirectory(_simulationDirectory)))
                     throw new AnimatInterfaceMMBSException("SetOutputDirectory Error:" + mbs.ResultToTc(result));
@@ -400,7 +411,9 @@ namespace ESME.Simulator
                     var geo = species.Animat.Locations[context[animatIndex].SpeciesAnimatIndex];
                     _animatContext[mbsIndex][animatIndex] = new AnimatContext { Species = species, SpeciesAnimatIndex = context[animatIndex].SpeciesAnimatIndex };
                     result = mbs.AddIndividualAnimat(context[animatIndex].SpeciesInstanceIndex, new mbsPosition { latitude = geo.Latitude, longitude = geo.Longitude, depth = 0 });
-                    if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException(string.Format("C3mbs::AddIndividualAnimat FATAL error {0}", mbs.ResultToTc(result)));
+                    if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException(string.Format("An error was found with animat species {0}. Please verify that this species is appropriate for use in the location \"{1}\".C3mbs::AddIndividualAnimat FATAL error {2}", species.LatinName, Scenario.Location.Name,mbs.ResultToTc(result)));
+                    //throw new AnimatInterfaceMMBSException("this is a test error.");
+                    
                     //Debug.WriteLine("Animat {0} lat: {1:0.####} lon: {2:0.####} depth: {3:0.#}, bathy: {4:0.#}", animatIndex, geo.Latitude, geo.Longitude, geo.Data, Scenario.BathymetryData.Samples.GetNearestPoint(geo).Data);
                 }
                 mbs.SetDuration((int)((TimeSpan)Scenario.Duration).TotalSeconds);
@@ -457,7 +470,7 @@ namespace ESME.Simulator
             foreach (var mbs in _mbs)
             {
                 var result = mbs.FinishRun();
-                if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException("C3mbs::FinishRun FATAL error " + mbs.ResultToTc(result)); 
+                if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException("C3mbs::FinishRun FATAL error " + mbs.ResultToTc(result));
             }
         }
 
@@ -481,7 +494,8 @@ namespace ESME.Simulator
 #endif
 
         public event EventHandler<EventArgs> GraphicsUpdate;
-        [Initialize, UsedImplicitly] public Dictionary<Guid, Color> GuidToColorMap { get; private set; }
+        [Initialize, UsedImplicitly]
+        public Dictionary<Guid, Color> GuidToColorMap { get; private set; }
     }
 
     [Serializable]
@@ -500,7 +514,8 @@ namespace ESME.Simulator
 
         protected SimulationException(
             SerializationInfo info,
-            StreamingContext context) : base(info, context) { }
+            StreamingContext context)
+            : base(info, context) { }
     }
 
     public interface IHistogramSource
