@@ -96,6 +96,7 @@ namespace ESME.Views.TransmissionLossViewer
                         sb.AppendLine("This radial was not calculated due to the following error(s):");
                         foreach (var error in Radial.Errors) sb.AppendLine(string.Format("  • {0}", error));
                         WaitToRenderText = sb.ToString();
+                        WriteableBitmap = null;
                     }
                 }
                 return;
