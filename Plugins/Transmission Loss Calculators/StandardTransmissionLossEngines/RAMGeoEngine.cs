@@ -440,7 +440,6 @@ namespace StandardTransmissionLossEngines
             Directory.Delete(tempDirectory, true);
             //Debug.WriteLine(string.Format("Env File: {0} temp directory deleted: {1}", envFileName, tempDirectory));
         }
-        readonly object _lockObject = new object();
 
         static Complex Acosh(Complex x) { return Complex.Log(x + Complex.Sqrt(x + 1) * Complex.Sqrt(x - 1)); }
 
