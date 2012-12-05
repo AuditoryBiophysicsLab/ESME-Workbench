@@ -35,7 +35,7 @@
     </StatusBarItem>
     <Separator Grid.Column="3" />
     <StatusBarItem Grid.Column="4">
-        <TextBlock Width="147" Text="{Binding MouseTLInfo}" ToolTip="Units: dB re: 1 μPa" />
+        <TextBlock Width="147" Text="{Binding MouseTransmissionLossInfo}" ToolTip="Units: dB re: 1 μPa" />
     </StatusBarItem>
     <Separator Grid.Column="5" />
     <StatusBarItem Grid.Column="6">

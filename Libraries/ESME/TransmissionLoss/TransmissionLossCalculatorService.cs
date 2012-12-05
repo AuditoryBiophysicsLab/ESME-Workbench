@@ -36,12 +36,8 @@ namespace ESME.TransmissionLoss
             }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
             _calculatorQueue = new BufferBlock<PercentProgress<Radial>>(new DataflowBlockOptions { BoundedCapacity = -1 });
             _calculatorQueue.LinkTo(_calculator);
-            _shadeFileProcessor = new ActionBlock<Radial>(r =>
-            {
-                if (File.Exists(r.BasePath + ".axs") || !File.Exists(r.BasePath + ".shd")) return;
-                r.ExtractAxisData();
-                r.ReleaseAxisData();
-            }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
+            _shadeFileProcessor = new ActionBlock<Radial>(r => { if (r.ExtractAxisData()) r.ReleaseAxisData(); },
+                                                          new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
             _shadeFileProcessorQueue = new BufferBlock<Radial>(new DataflowBlockOptions { BoundedCapacity = -1 });
             _shadeFileProcessorQueue.LinkTo(_shadeFileProcessor);
         }
@@ -108,6 +104,7 @@ namespace ESME.TransmissionLoss
                                     select s).Single();
                 }
                 if (!File.Exists(radial.BasePath + ".shd")) Add(radial);
+                else _shadeFileProcessorQueue.Post(radial);
             }
         }
 

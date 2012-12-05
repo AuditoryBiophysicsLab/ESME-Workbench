@@ -145,7 +145,9 @@ namespace ESME.Scenarios
             while (pointLayer.PointSymbolType == PointSymbolType.Cross) pointLayer.PointSymbolType = (PointSymbolType)(Random.Next(8));
             pointLayer.PointStyle = MapLayerViewModel.CreatePointStyle(pointLayer.PointSymbolType, LayerSettings.LineOrSymbolColor, (int)LayerSettings.LineOrSymbolSize);
             pointLayer.Clear();
-            pointLayer.AddPoints(Animat.Locations.Select(l => new Geo(l.Latitude, l.Longitude)).ToList());
+            var seededAnimats = Animat.Locations.Select(l => new Geo(l.Latitude, l.Longitude)).ToList();
+            if (seededAnimats.Count == 0) throw new SpeciesSeedingException(string.Format("No individuals of the species '{0}' were successfully placed in the scenario, possibly due to water depth or other restrictions in the species file.  Please try another species.", LatinName));
+            pointLayer.AddPoints(seededAnimats);
             pointLayer.Done();
             LayerSettings.MapLayerViewModel = pointLayer;
             if (Scenario.ShowAllSpecies) LayerSettings.IsChecked = true;

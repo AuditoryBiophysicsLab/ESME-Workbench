@@ -502,12 +502,20 @@ namespace ESMEWorkbench.ViewModels.Main
                 PopulationDensity = vm.PopulationDensity,
                 SpeciesDefinitionFilename = vm.SpeciesDefinitionFilename,
             };
-                
-            scenario.ScenarioSpecies.Add(species);
-            species.LayerSettings.LineOrSymbolSize = 3;
-            var animats = await Animat.SeedAsync(species, scenario.Location.GeoRect, scenario.BathymetryData);
-            animats.Save(species.PopulationFilePath);
-            species.CreateMapLayers();
+
+            try
+            {
+                scenario.ScenarioSpecies.Add(species);
+                species.LayerSettings.LineOrSymbolSize = 3;
+                var animats = await Animat.SeedAsync(species, scenario.Location.GeoRect, scenario.BathymetryData);
+                animats.Save(species.PopulationFilePath);
+                species.CreateMapLayers();
+            }
+            catch (Exception e)
+            {
+                scenario.ScenarioSpecies.Remove(species);
+                _messageBox.ShowError(e.Message);
+            }
             OnPropertyChanged("IsRunSimulationCommandEnabled");
         }
 

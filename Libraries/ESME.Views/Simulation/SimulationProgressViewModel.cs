@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading.Tasks;
 using System.Windows;
@@ -132,17 +133,26 @@ namespace ESME.Views.Simulation
 
         void StartHandler(object o)
         {
+            try
+            {
                 var task = Simulation.Start(TimeSpan.ParseExact(TimeStepString, TimeSpanFormatString, null));
+
                 task.ContinueWith(t =>
                 {
                     if (t.IsFaulted) _messageBox.ShowError(string.Format("The simulation encountered an error: {0}", t.Exception.InnerExceptions[0].Message));
                     else Window.Dispatcher.InvokeIfRequired(Window.Close);
-                },TaskScheduler.FromCurrentSynchronizationContext());
+                },
+                                  TaskScheduler.FromCurrentSynchronizationContext());
                 IsStartCommandEnabled = false;
                 IsSimulationRunning = true;
                 OnSimulationStarting();
                 if (DisplayExposureHistograms) _visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels));
-
+                //task.Wait();
+            }
+            catch (Exception e)
+            {
+                Debugger.Break();
+            }
         }
 
         public event EventHandler SimulationStarting;

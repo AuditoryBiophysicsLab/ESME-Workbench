@@ -172,9 +172,9 @@ namespace ESME.Scenarios
             }
         }
 
-        public void ExtractAxisData(TransmissionLossRadial transmissionLoss = null, int debugIndex = -1)
+        public bool ExtractAxisData(TransmissionLossRadial transmissionLoss = null, int debugIndex = -1)
         {
-            if (File.Exists(BasePath + ".axs") || !File.Exists(BasePath + ".shd")) return;
+            if (File.Exists(BasePath + ".axs") || !File.Exists(BasePath + ".shd")) return false;
             if (transmissionLoss == null) transmissionLoss = new TransmissionLossRadial((float)Bearing, new BellhopOutput(BasePath + ".shd"));
             _ranges = transmissionLoss.Ranges.ToArray();
             _depths = transmissionLoss.Depths.ToArray();
@@ -242,6 +242,7 @@ namespace ESME.Scenarios
                 foreach (var tl in _meanTransmissionLossValues) writer.Write(tl);
             }
             //MediatorMessage.Send(MediatorMessage.TransmissionLossLayerChanged, TransmissionLoss);
+            return true;
         }
 
         public void ReleaseAxisData()

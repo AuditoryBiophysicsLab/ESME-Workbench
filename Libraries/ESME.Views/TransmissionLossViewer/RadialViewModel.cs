@@ -143,7 +143,7 @@ namespace ESME.Views.TransmissionLossViewer
         public Mode SelectedMode { get; set; }
         public string MouseRange { get; set; }
         public string MouseDepth { get; set; }
-        public string MouseTLInfo { get; set; }
+        public string MouseTransmissionLossInfo { get; set; }
         public string MouseSPLInfo { get; set; }
 
         void UpdateStatusProperties()
@@ -154,16 +154,16 @@ namespace ESME.Views.TransmissionLossViewer
                 MouseDepth = string.Format("Depth: {0:0.0}m", AxisSeriesViewModel.YAxis.MouseDataLocation);
                 var px = AxisSeriesViewModel.MouseLocation.X / AxisSeriesViewModel.ActualWidth;
                 var py = AxisSeriesViewModel.MouseLocation.Y / AxisSeriesViewModel.ActualHeight;
-                var rangeIndex = Math.Min((int)(_transmissionLossRadial.Ranges.Count * px), _transmissionLossRadial.Ranges.Count - 1);
-                var depthIndex = Math.Min((int)(_transmissionLossRadial.Depths.Count * py), _transmissionLossRadial.Depths.Count - 1); MouseTLInfo = string.Format("Transmission Loss: {0:0.0}dB", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
+                var rangeIndex = Math.Max(0, Math.Min((int)(_transmissionLossRadial.Ranges.Count * px), _transmissionLossRadial.Ranges.Count - 1));
+                var depthIndex = Math.Max(0, Math.Min((int)(_transmissionLossRadial.Depths.Count * py), _transmissionLossRadial.Depths.Count - 1)); MouseTransmissionLossInfo = string.Format("Transmission Loss: {0:0.0}dB", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
                 if (float.IsInfinity(_transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]))
                 {
-                    MouseTLInfo = "Transmission Loss: N/A";
+                    MouseTransmissionLossInfo = "Transmission Loss: N/A";
                     MouseSPLInfo = "Sound Pressure: N/A";
                 }
                 else
                 {
-                    MouseTLInfo = string.Format("Transmission Loss: {0:0.0}dB", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
+                    MouseTransmissionLossInfo = string.Format("Transmission Loss: {0:0.0}dB", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
                     MouseSPLInfo = string.Format("Sound Pressure: {0:0.0}dB", SelectedMode.SourceLevel - _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
                 }
             }
@@ -171,7 +171,7 @@ namespace ESME.Views.TransmissionLossViewer
             {
                 MouseDepth = "Depth: N/A";
                 MouseRange = "Range: N/A";
-                MouseTLInfo = "Transmission Loss: N/A";
+                MouseTransmissionLossInfo = "Transmission Loss: N/A";
                 MouseSPLInfo = "Sound Pressure: N/A";
             }
         }

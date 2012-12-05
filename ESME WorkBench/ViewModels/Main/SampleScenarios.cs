@@ -103,7 +103,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 GeoRect = new GeoRect(27, 22, -73.5, -79), 
                 TimePeriod = (TimePeriod)DateTime.Today.Month,
                 PerimeterGeos = new List<Geo>{new Geo(25.3470671337664, -78.0021554441618), new Geo(25.3744018554687, -77.6507568359375), new Geo(25.7589233398437, -77.2332763671875), new Geo(25.3853881835937, -76.9696044921875), new Geo(25.0338256835937, -77.7056884765625), new Geo(24.4845092773437, -77.3431396484375), new Geo(23.7985296289286, -77.1489493545971), new Geo(23.8309538525164, -77.0243722410368), new Geo(23.7870085400164, -76.6508370847868), new Geo(23.5123503368914, -76.7057687254118), new Geo(23.5453093212664, -77.2221261472868), new Geo(25.3470671337664, -78.0021554441618), },
-                AnalysisPointGeos = new List<Geo>{new Geo(23.7042602539, -76.9696044922), new Geo(24.4403442383, -77.48046875), new Geo(25.3412231445, -77.4200439453)},
+                AnalysisPointGeos = new List<Geo>{new Geo(23.7042602539, -76.9696044922), new Geo(24.4403442383, -77.48046875), new Geo(25.3512231445, -77.4300439453)},
             },
         };
         class SampleScenarioDescriptor

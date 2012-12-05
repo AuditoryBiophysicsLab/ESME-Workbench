@@ -89,20 +89,14 @@ namespace ESME.Simulator
             ModeThresholdHistogram = new ModeThresholdHistogram(this, SimulationLog, 100.0, 10.0, 10);
             //SpeciesThresholdHistogram = new SpeciesThresholdHistogram(this);
 
-            return TaskEx.Run(() => Run(TimeStepSize, _cancellationTokenSource.Token)).ContinueWith(t =>
-            {
-                if (t.IsFaulted)
-                {
-                    throw new SimulationException(t.Exception.InnerExceptions[0].Message);
-                }
-            });
+            return Run(TimeStepSize, _cancellationTokenSource.Token);
         }
 
         int _totalExposureCount;
         int[] _exposuresBySpecies;
         int[] _speciesActorIDStart;
         int[] _speciesActorIDEnd;
-        async void Run(TimeSpan timeStepSize, CancellationToken token)
+        async Task Run(TimeSpan timeStepSize, CancellationToken token)
         {
             Geo<float> firstAnimatPosition = null;
             Task<bool> processTask = null;
@@ -412,7 +406,7 @@ namespace ESME.Simulator
                     _animatContext[mbsIndex][animatIndex] = new AnimatContext { Species = species, SpeciesAnimatIndex = context[animatIndex].SpeciesAnimatIndex };
                     result = mbs.AddIndividualAnimat(context[animatIndex].SpeciesInstanceIndex, new mbsPosition { latitude = geo.Latitude, longitude = geo.Longitude, depth = 0 });
                     if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException(string.Format("An error was found with animat species {0}. Please verify that this species is appropriate for use in the location \"{1}\".C3mbs::AddIndividualAnimat FATAL error {2}", species.LatinName, Scenario.Location.Name,mbs.ResultToTc(result)));
-                    //throw new AnimatInterfaceMMBSException("this is a test error.");
+                    throw new AnimatInterfaceMMBSException("this is a test error.");
                     
                     //Debug.WriteLine("Animat {0} lat: {1:0.####} lon: {2:0.####} depth: {3:0.#}, bathy: {4:0.#}", animatIndex, geo.Latitude, geo.Longitude, geo.Data, Scenario.BathymetryData.Samples.GetNearestPoint(geo).Data);
                 }
