@@ -133,26 +133,19 @@ namespace ESME.Views.Simulation
 
         void StartHandler(object o)
         {
-            try
-            {
-                var task = Simulation.Start(TimeSpan.ParseExact(TimeStepString, TimeSpanFormatString, null));
+            var task = Simulation.Start(TimeSpan.ParseExact(TimeStepString, TimeSpanFormatString, null));
 
-                task.ContinueWith(t =>
-                {
-                    if (t.IsFaulted) _messageBox.ShowError(string.Format("The simulation encountered an error: {0}", t.Exception.InnerExceptions[0].Message));
-                    else Window.Dispatcher.InvokeIfRequired(Window.Close);
-                },
-                                  TaskScheduler.FromCurrentSynchronizationContext());
-                IsStartCommandEnabled = false;
-                IsSimulationRunning = true;
-                OnSimulationStarting();
-                if (DisplayExposureHistograms) _visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels));
-                //task.Wait();
-            }
-            catch (Exception e)
+            task.ContinueWith(t =>
             {
-                Debugger.Break();
-            }
+                if (t.IsFaulted) _messageBox.ShowError(string.Format("The simulation encountered an error: {0}", t.Exception.InnerExceptions[0].Message));
+                else Window.Dispatcher.InvokeIfRequired(Window.Close);
+            },
+                              TaskScheduler.FromCurrentSynchronizationContext());
+            IsStartCommandEnabled = false;
+            IsSimulationRunning = true;
+            OnSimulationStarting();
+            if (DisplayExposureHistograms) _visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels));
+            //task.Wait();
         }
 
         public event EventHandler SimulationStarting;
