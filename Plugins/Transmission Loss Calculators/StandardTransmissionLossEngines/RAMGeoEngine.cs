@@ -259,7 +259,7 @@ namespace StandardTransmissionLossEngines
                                   sourceDepth,
                                   0.1);
                 envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t\t\trmax[Max range (m)], dr [Range resolution (m)], ndr [Range grid decimation factor]",
-                                  mode.MaxPropagationRadius * (dr * ndr),
+                                  mode.MaxPropagationRadius + (dr * ndr),
                                   dr,
                                   ndr);
                 envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t{3:0.000000}\tzmax [Max computational depth (m)], dz [Depth resolution (m)], ndz [Depth grid decimation factor], zmplot [Maximum depth to plot (m)]",
@@ -440,6 +440,7 @@ namespace StandardTransmissionLossEngines
             Directory.Delete(tempDirectory, true);
             //Debug.WriteLine(string.Format("Env File: {0} temp directory deleted: {1}", envFileName, tempDirectory));
         }
+        readonly object _lockObject = new object();
 
         static Complex Acosh(Complex x) { return Complex.Log(x + Complex.Sqrt(x + 1) * Complex.Sqrt(x - 1)); }
 
