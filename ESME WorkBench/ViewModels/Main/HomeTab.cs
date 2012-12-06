@@ -210,7 +210,7 @@ namespace ESMEWorkbench.ViewModels.Main
             }
             else
             {
-                if (_messageBox.ShowYesNo(string.Format("Are you sure you want to the scenario \"{0}\"?", scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+                if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the scenario \"{0}\"?", scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
                 scenario.Delete();
             }
         }
