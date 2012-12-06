@@ -85,14 +85,19 @@ namespace ESMEWorkbench.ViewModels.Main
             _cache = cache;
             MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
             Cursor = Cursors.Arrow;
+            
             _transmissionLoss.WorkQueue.PropertyChanged +=
                 (s, e) =>
                 {
                     if (e.PropertyName == "Count")
                     {
-                        TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0 ? string.Format("Acoustic Simulator: {0} items", _transmissionLoss.WorkQueue.Keys.Count) : "Acoustic Simulator: idle";
-                       // Debug.WriteLine(string.Format("TransmissionLossActivity: {0}", TransmissionLossActivity));
-                        IsTransmissionLossBusy = _transmissionLoss.WorkQueue.Keys.Count > 0;
+                            TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0
+                                                           ? string.Format("Acoustic Simulator: {0} items", _transmissionLoss.WorkQueue.Keys.Count)
+                                                           : "Acoustic Simulator: idle";
+                            // Debug.WriteLine(string.Format("TransmissionLossActivity: {0}", TransmissionLossActivity));
+                            var isBusy = _transmissionLoss.WorkQueue.Keys.Count > 0;
+                            IsTransmissionLossBusy = isBusy;
+                        
                     }
                 };
 

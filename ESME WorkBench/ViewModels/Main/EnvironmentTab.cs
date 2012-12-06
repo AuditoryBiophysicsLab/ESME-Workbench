@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows;
 using ESME;
 using ESME.Locations;
-using ESME.Scenarios;
 using ESME.Views.Locations;
-using ESME.Views.Scenarios;
 using ESMEWorkbench.ViewModels.Tree;
 using HRC;
 using HRC.Navigation;
@@ -20,9 +17,20 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.DeleteLocation), UsedImplicitly]
         void DeleteLocation(Location location)
         {
-            if (_messageBox.ShowYesNo(string.Format("Deleting a location also deletes all scenarios defined in that location.\n\nAre you sure you want to delete the location \"{0}\"?", location.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-            if (Scenario != null && Scenario.Location.Guid == location.Guid) Scenario = null;
-            location.Delete();
+            if (IsSimulationRunning || (_transmissionLoss.WorkQueue.Keys.Count > 0))
+            {
+                _messageBox.ShowInformation("A location cannot be deleted while a simulation is running or transmission losses are being calculated.  Please wait until these tasks finish.");
+            }
+            else
+            {
+                if (
+                    _messageBox.ShowYesNo(
+                                          string.Format("Deleting a location also deletes all scenarios defined in that location.\n\nAre you sure you want to delete the location \"{0}\"?",
+                                                        location.Name),
+                                          MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+                if (Scenario != null && Scenario.Location.Guid == location.Guid) Scenario = null;
+                location.Delete();
+            }
         }
 
         #region CreateLocationCommand
