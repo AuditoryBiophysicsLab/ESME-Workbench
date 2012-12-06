@@ -54,23 +54,39 @@ namespace ESMEWorkbench.ViewModels.Main
                     _scenario.CreateMapLayers();
                     _cache[_scenario.Wind].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
-                        _scenario.Wind.CreateMapLayers();
-                        _scenario.Wind.LayerSettings.MoveLayerToBack();
+                        if (_scenario.Wind.SampleCount == 0) _messageBox.ShowError(string.Format("No wind data was found in this location using source {0}", _plugins[_scenario.Wind.SourcePlugin].PluginName));
+                        else
+                        {
+                            _scenario.Wind.CreateMapLayers();
+                            _scenario.Wind.LayerSettings.MoveLayerToBack();
+                        }
                     }));
                     _cache[_scenario.SoundSpeed].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
-                        _scenario.SoundSpeed.CreateMapLayers();
-                        _scenario.SoundSpeed.LayerSettings.MoveLayerToBack();
+                        if (_scenario.SoundSpeed.SampleCount == 0) _messageBox.ShowError(string.Format("No sound speed data was found in this location using source {0}", _plugins[_scenario.SoundSpeed.SourcePlugin].PluginName));
+                        else
+                        {
+                            _scenario.SoundSpeed.CreateMapLayers();
+                            _scenario.SoundSpeed.LayerSettings.MoveLayerToBack();
+                        }
                     }));
                     _cache[_scenario.Bathymetry].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
-                        _scenario.Bathymetry.CreateMapLayers();
-                        _scenario.Bathymetry.LayerSettings.MoveLayerToBack();
+                        if (_scenario.Bathymetry.SampleCount == 0) _messageBox.ShowError(string.Format("No bathymetry data was found in this location using source {0}", _plugins[_scenario.Bathymetry.SourcePlugin].PluginName));
+                        else
+                        {
+                            _scenario.Bathymetry.CreateMapLayers();
+                            _scenario.Bathymetry.LayerSettings.MoveLayerToBack();
+                        }
                     }));
                     _cache[_scenario.Sediment].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
-                        _scenario.Sediment.CreateMapLayers();
-                        _scenario.Sediment.LayerSettings.MoveLayerToBack();
+                        if (_scenario.Sediment.SampleCount == 0) _messageBox.ShowError(string.Format("No sediment data was found in this location using source {0}", _plugins[_scenario.Sediment.SourcePlugin].PluginName));
+                        else
+                        {
+                            _scenario.Sediment.CreateMapLayers();
+                            _scenario.Sediment.LayerSettings.MoveLayerToBack();
+                        }
                     }));
 
                     _scenario.Location.LayerSettings.IsChecked = true;
@@ -100,6 +116,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 var modes = (from platform in Scenario.Platforms from source in platform.Sources from mode in source.Modes select mode).ToList();
                 if (modes.Count == 0) return false;
                 if (IsSimulationRunning) return false;
+                if (Scenario.Validate() != null) return false;
                 return Scenario.Wind != null && Scenario.SoundSpeed != null && Scenario.Bathymetry != null && Scenario.Sediment != null;
             }
         }

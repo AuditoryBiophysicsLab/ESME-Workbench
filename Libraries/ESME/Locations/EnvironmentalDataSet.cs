@@ -80,6 +80,7 @@ namespace ESME.Locations
             switch (dataType)
             {
                 case PluginSubtype.SoundSpeed:
+                    if (Location.Cache[this].Result == null || ((SoundSpeed)Location.Cache[this].Result).SoundSpeedFields[0].EnvironmentData.Count == 0) break;
                     var pointLayer = new OverlayShapeMapLayer
                     {
                         Name = string.Format("{0}", Guid),
@@ -95,12 +96,15 @@ namespace ESME.Locations
                     LayerSettings.MapLayerViewModel = pointLayer;
                     break;
                 case PluginSubtype.Wind:
+                    if (Location.Cache[this].Result == null || ((Wind)Location.Cache[this].Result).TimePeriods[0].EnvironmentData.Count == 0) break;
                     CreateRasterLayer(Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"), Location.GeoRect);
                     break;
                 case PluginSubtype.Bathymetry:
+                    if (Location.Cache[this].Result == null || ((Bathymetry)Location.Cache[this].Result).Samples.Count == 0) break;
                     CreateRasterLayer(Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"), ((Bathymetry)Location.Cache[this].Result).Samples.GeoRect);
                     break;
                 case PluginSubtype.Sediment:
+                    if (Location.Cache[this].Result == null || ((Sediment)Location.Cache[this].Result).Samples.Count == 0) break;
                     CreateRasterLayer(Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"), ((Sediment)Location.Cache[this].Result).Samples.GeoRect);
                     break;
                 default:

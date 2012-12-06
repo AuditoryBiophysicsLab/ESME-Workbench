@@ -85,8 +85,6 @@ namespace ESMEWorkbench.ViewModels.Main
         }
         #endregion
 
-        
-
         public int SelectedLocationIndex { get; set; }
         public Location SelectedLocation { get; set; }
 

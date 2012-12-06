@@ -210,7 +210,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     Cursor = Cursors.Arrow;
                 }
             }
-            if (Scenario != null && Scenario.Bathymetry != null && _cache.IsCached(Scenario.Bathymetry))
+            if (Scenario != null && Scenario.Bathymetry != null && _cache.IsCached(Scenario.Bathymetry) && Scenario.Bathymetry.SampleCount > 0)
             {
                 if (_bathymetryTask == null)
                 {
@@ -236,7 +236,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 MouseDepth = null;
                 MouseDepthInfo = string.Format("Depth: N/A");
             }
-            if (Scenario != null && Scenario.Wind != null && _cache.IsCached(Scenario.Wind))
+            if (Scenario != null && Scenario.Wind != null && _cache.IsCached(Scenario.Wind) && Scenario.Wind.SampleCount > 0)
             {
                 if (_windTask == null)
                 {
@@ -262,7 +262,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 MouseWindSpeed = null;
                 MouseWindSpeedInfo = string.Format("Wind: N/A");
             }
-            if (Scenario != null && Scenario.SoundSpeed != null && _cache.IsCached(Scenario.SoundSpeed))
+            if (Scenario != null && Scenario.SoundSpeed != null && _cache.IsCached(Scenario.SoundSpeed) && Scenario.SoundSpeed.SampleCount > 0)
             {
                 if (_soundSpeedTask == null)
                 {
@@ -290,7 +290,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 MouseSoundSpeedInfo = string.Format("Sound Speed: N/A");
                 MapViewModel.MouseSoundSpeedProfile = MouseSoundSpeed;
             }
-            if (Scenario != null && Scenario.Sediment != null && _cache.IsCached(Scenario.Sediment))
+            if (Scenario != null && Scenario.Sediment != null && _cache.IsCached(Scenario.Sediment) && Scenario.Sediment.SampleCount > 0)
             {
                 if (_sedimentTask == null)
                 {

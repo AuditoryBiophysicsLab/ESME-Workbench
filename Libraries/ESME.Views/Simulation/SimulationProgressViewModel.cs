@@ -137,17 +137,6 @@ namespace ESME.Views.Simulation
         {
             var task = Simulation.Start(TimeSpan.ParseExact(TimeStepString, TimeSpanFormatString, null));
 
-            task.ContinueWith(t =>
-            {
-                if (t.IsFaulted)
-                {
-                    CloseDialog(true);
-                    if (SimulationExposuresViewModel != null) SimulationExposuresViewModel.CloseDialog(false);
-                    _messageBox.ShowError(string.Format("The simulation encountered an error: {0}", t.Exception.InnerExceptions[0].Message));
-                }
-                else Window.Dispatcher.InvokeIfRequired(Window.Close);
-            },
-                              TaskScheduler.FromCurrentSynchronizationContext());
             IsStartCommandEnabled = false;
             IsSimulationRunning = true;
             OnSimulationStarting();
@@ -156,6 +145,17 @@ namespace ESME.Views.Simulation
                 SimulationExposuresViewModel = new SimulationExposuresViewModel(HistogramBinsViewModels);
                 _visualizer.ShowWindow("SimulationExposuresView", SimulationExposuresViewModel);
             }
+            task.ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    if (SimulationExposuresViewModel != null) SimulationExposuresViewModel.CloseDialog(false);
+                    _messageBox.ShowError(string.Format("The simulation encountered an error: {0}", t.Exception.InnerExceptions[0].Message));
+                    CloseDialog(true);
+                }
+                else Window.Dispatcher.InvokeIfRequired(Window.Close);
+            },
+                              TaskScheduler.FromCurrentSynchronizationContext());
             
         }
 

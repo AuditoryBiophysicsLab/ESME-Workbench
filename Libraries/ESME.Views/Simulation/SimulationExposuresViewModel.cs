@@ -61,6 +61,7 @@ namespace ESME.Views.Simulation
         public ObservableCollection<HistogramBinsViewModel> HistogramBinsViewModels { get; private set; }
         public double ActualHeight { get; set; }
         public double RowHeight { get; private set; }
+        public string WindowTitle { get; set; }
 
         #region CloseCommand
         public SimpleCommand<object, EventToCommandArgs> CloseCommand

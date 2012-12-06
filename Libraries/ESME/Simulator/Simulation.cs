@@ -89,7 +89,8 @@ namespace ESME.Simulator
             ModeThresholdHistogram = new ModeThresholdHistogram(this, SimulationLog, 100.0, 10.0, 10);
             //SpeciesThresholdHistogram = new SpeciesThresholdHistogram(this);
 
-            return Run(TimeStepSize, _cancellationTokenSource.Token);
+            return TaskEx.Run(() => Run(TimeStepSize, _cancellationTokenSource.Token));
+            //return Run(TimeStepSize, _cancellationTokenSource.Token);
         }
 
         int _totalExposureCount;
@@ -101,7 +102,7 @@ namespace ESME.Simulator
             Geo<float> firstAnimatPosition = null;
             Task<bool> processTask = null;
             var timeStepCount = (int)Math.Round(((TimeSpan)Scenario.Duration).TotalSeconds / timeStepSize.TotalSeconds);
-            if(MovingAnimats) Initialize3MB();
+            if (MovingAnimats) Initialize3MB();
             PercentProgress = new PercentProgress<Simulation>(this) { MinimumValue = 0, MaximumValue = timeStepCount - 1 };
             Actors = new List<Actor>();
             foreach (var platform in Scenario.Platforms)

@@ -142,6 +142,7 @@ namespace ESME.Locations
                     {
                         var wind = ((EnvironmentalDataSourcePluginBase<Wind>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, dataSet.TimePeriod, curJob);
                         dataSet.SampleCount = (from period in wind.TimePeriods select period.EnvironmentData.Count).Sum();
+                        if (dataSet.SampleCount == 0) return null;
                         wind.Serialize(fileName);
                         var windColormap = new Colormap(Colormap.CoolComponents, 512);
                         ToBitmap(wind[dataSet.TimePeriod].EnvironmentData, fileName, v => v == null ? 0 : v.Data, windColormap.ToPixelValues);
@@ -154,6 +155,7 @@ namespace ESME.Locations
                     {
                         var sediment = ((EnvironmentalDataSourcePluginBase<Sediment>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, TimePeriod.Invalid, curJob);
                         dataSet.SampleCount = sediment.Samples.Count;
+                        if (dataSet.SampleCount == 0) return null;
                         sediment.Serialize(fileName);
                         var sedimentColormap = new Colormap(Colormap.HotComponents, 24);
                         sedimentColormap.Map.Insert(0, Colors.Black);
@@ -168,6 +170,7 @@ namespace ESME.Locations
                     {
                         var soundSpeed = ((EnvironmentalDataSourcePluginBase<SoundSpeed>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, dataSet.TimePeriod, curJob);
                         dataSet.SampleCount = (from field in soundSpeed.SoundSpeedFields select field.EnvironmentData.Count).Sum();
+                        if (dataSet.SampleCount == 0) return null;
                         soundSpeed.Serialize(fileName);
                         Debug.WriteLine("Importer: Imported {0}min Sound Speed [{1}] from plugin {2}", dataSet.Resolution, (TimePeriod)dataSet.TimePeriod, sourcePlugin.PluginName);
                         return soundSpeed;
@@ -178,6 +181,7 @@ namespace ESME.Locations
                     {
                         var bathymetry = ((EnvironmentalDataSourcePluginBase<Bathymetry>)sourcePlugin).Extract(dataSet.Location.GeoRect, dataSet.Resolution, TimePeriod.Invalid, curJob);
                         dataSet.SampleCount = bathymetry.Samples.Count;
+                        if (dataSet.SampleCount == 0) return null;
                         bathymetry.Save(fileName);
                         //var bathymetryColormap = new Colormap(Colormap.OceanComponents, 1024);
                         var dualColormap = new DualColormap(Colormap.Summer, Colormap.Jet) { Threshold = 0 };
