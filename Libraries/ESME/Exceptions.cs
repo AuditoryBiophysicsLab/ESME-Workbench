@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace ESME
 {
@@ -44,5 +45,28 @@ namespace ESME
         protected SpeciesSeedingException(
             SerializationInfo info,
             StreamingContext context) : base(info, context) { }
+    }
+
+    public static class ExceptionHelpers
+    {
+        public static string ToString(this AggregateException ex, int indentLevel = 0)
+        {
+            var sb = new StringBuilder();
+            if (ex.InnerExceptions.Count > 1)
+            {
+                sb.AppendLine("Multiple exceptions occurred");
+                indentLevel += 2;
+            }
+            foreach (var e in ex.InnerExceptions) sb.AppendLine(e.ToString(indentLevel));
+            return sb.ToString();
+        }
+
+        public static string ToString(this Exception ex, int indentLevel = 0)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(new string(' ', indentLevel) + ex.Message);
+            if (ex.InnerException != null) sb.AppendLine(ex.InnerException.ToString(indentLevel + 2));
+            return sb.ToString();
+        }
     }
 }

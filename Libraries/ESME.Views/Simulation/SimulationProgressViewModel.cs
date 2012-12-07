@@ -150,7 +150,7 @@ namespace ESME.Views.Simulation
                 if (t.IsFaulted)
                 {
                     if (SimulationExposuresViewModel != null) SimulationExposuresViewModel.CloseDialog(false);
-                    _messageBox.ShowError(string.Format("The simulation encountered an error: {0}", t.Exception));
+                    _messageBox.ShowError(t.Exception.ToString(0));
                     CloseDialog(true);
                 }
                 else Window.Dispatcher.InvokeIfRequired(Window.Close);

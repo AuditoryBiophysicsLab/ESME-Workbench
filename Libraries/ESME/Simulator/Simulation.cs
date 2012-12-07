@@ -404,14 +404,13 @@ namespace ESME.Simulator
                 //_animatPositions[mbsIndex] = new mbsPosition[context.Count];
                 //Debug.WriteLine("Thread {0} contains {1} animats", mbsIndex, context.Count);
                 for (var animatIndex = 0; animatIndex < context.Count; animatIndex++)
-                //for (var animatIndex = 0; animatIndex < 1; animatIndex++)
                 {
                     var species = context[animatIndex].Species;
                     var geo = species.Animat.Locations[context[animatIndex].SpeciesAnimatIndex];
                     _animatContext[mbsIndex][animatIndex] = new AnimatContext { Species = species, SpeciesAnimatIndex = context[animatIndex].SpeciesAnimatIndex };
                     result = mbs.AddIndividualAnimat(context[animatIndex].SpeciesInstanceIndex, new mbsPosition { latitude = geo.Latitude, longitude = geo.Longitude, depth = 0 });
                     if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException(string.Format("An error was found with animat species {0}. Please verify that this species is appropriate for use in the location \"{1}\".C3mbs::AddIndividualAnimat FATAL error {2}", species.LatinName, Scenario.Location.Name,mbs.ResultToTc(result)));
-                    throw new AnimatInterfaceMMBSException("this is a test error.");
+                    //throw new AnimatInterfaceMMBSException("this is a test error.");
                     
                     //Debug.WriteLine("Animat {0} lat: {1:0.####} lon: {2:0.####} depth: {3:0.#}, bathy: {4:0.#}", animatIndex, geo.Latitude, geo.Longitude, geo.Data, Scenario.BathymetryData.Samples.GetNearestPoint(geo).Data);
                 }
