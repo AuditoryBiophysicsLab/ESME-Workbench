@@ -207,18 +207,20 @@
                                     IsEnabled="{Binding IsRunSimulationCommandEnabled}"
                                     Label="Run"
                                     LargeImageSource="..\Images\LargeIcons\hourglass_go.png"
-                                    ToolTipDescription="Run the current scenario"
-                                    ToolTipTitle="Run" />
+                                    ToolTipDescription="{Binding RunSimulationCommandToolTip}"
+                                    ToolTipTitle="Run the current scenario" />
 
                 </r:RibbonGroup>
-               <!-- <r:RibbonGroup Header="Testing">
+                <!--
+                    <r:RibbonGroup Header="Testing">
                     <r:RibbonButton Command="{Binding TestCommand}"
-                                    Label="Open PGRID file"
-                                    LargeImageSource="..\Images\LargeIcons\open-icon.png"
-                                    ToolTipDescription="Open PGRID file"
-                                    ToolTipTitle="Open PGRID file" />
-
-                </r:RibbonGroup> -->
+                    Label="Open PGRID file"
+                    LargeImageSource="..\Images\LargeIcons\open-icon.png"
+                    ToolTipDescription="Open PGRID file"
+                    ToolTipTitle="Open PGRID file" />
+                    
+                    </r:RibbonGroup>
+                -->
             </r:RibbonTab>
         </r:Ribbon>
         <Grid>

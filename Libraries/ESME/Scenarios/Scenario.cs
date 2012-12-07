@@ -504,14 +504,6 @@ namespace ESME.Scenarios
                     select mode).AcousticallyDistinct();
         }
 
-        public static string MissingSpeciesText(this Scenario scenario)
-        {
-            if (!scenario.ScenarioSpecies.Any()) return "There are no species specified in this scenario.";
-            var sb = new StringBuilder();
-            foreach (var species in scenario.ScenarioSpecies.Where(species => !species.Animat.Locations.Any())) sb.AppendLine(string.Format("There are no animats seeded for species {0}", species.LatinName));
-            return sb.ToString();
-        }
-
         public static TransmissionLoss ClosestTransmissionLoss(this Scenario scenario, Geo geo, Mode mode)
         {
             var closest = (from ap in scenario.AnalysisPoints
@@ -522,17 +514,29 @@ namespace ESME.Scenarios
                            select new { d, tl }).FirstOrDefault();
             return closest != null ? closest.tl : null;
         }
-        public static bool CanScenarioBeSimulated(this Scenario scenario) { return (scenario.AnalysisPoints.Count > 0 && Validate(scenario)==null && MissingSpeciesText(scenario).Length==0); }
-        public static string Validate(this Scenario scenario)
+        public static bool CanBeSimulated(this Scenario scenario) { return (GenerateCanBeSimulatedErrorString(scenario) == null); }
+        public static bool CanPlaceAnalysisPoints(this Scenario scenario) { return (GenerateCanBeSimulatedErrorString(scenario) == null); }
+
+        public static string GenerateCanPlaceAnalysisPointsErrorString(this Scenario scenario)
         {
+            var sb = new StringBuilder();
+
             if (scenario == null) return "Scenario is null";
-            if (scenario.Platforms == null || scenario.Platforms.Count == 0) return "No platforms have been defined";
+            if (scenario.Platforms == null || scenario.Platforms.Count == 0) sb.AppendLine("  • No platforms have been defined");
 
             var distinctScenarioModes = AcousticallyDistinctModes(scenario).ToList();
-            if (distinctScenarioModes.Count == 0) return "No modes have been defined";
-        
-            var missingScenarioModes = distinctScenarioModes.Except(GetDistinctAnalysisPointModes(scenario).ToList()).ToList();
-            if (missingScenarioModes.Count != 0 && scenario.AnalysisPoints.Count >0) return "The following modes do not appear in any currently defined analysis points: " + string.Join(", ", missingScenarioModes.Select(m => m.ModeName));
+            if (distinctScenarioModes.Count == 0) sb.AppendLine("  • No modes have been defined");
+
+            return sb.Length == 0 ? null : sb.ToString();
+        }
+
+        public static string GenerateCanBeSimulatedErrorString(this Scenario scenario)
+        {
+            var sb = new StringBuilder();
+
+            if (scenario == null) return "Scenario is null";
+            var result = scenario.GenerateCanPlaceAnalysisPointsErrorString();
+            if (result != null) sb.AppendLine(result);
 
             var radialsNotCalculated = (from analysisPoint in scenario.AnalysisPoints
                                         from transmissionLoss in analysisPoint.TransmissionLosses
@@ -541,22 +545,18 @@ namespace ESME.Scenarios
                                         select radial).Count();
             if (radialsNotCalculated != 0)
             {
-                var radialList = (from analysisPoint in scenario.AnalysisPoints
-                                  from transmissionLoss in analysisPoint.TransmissionLosses
-                                  from radial in transmissionLoss.Radials
-                                  where !File.Exists(radial.BasePath + ".shd")
-                                  select radial).ToList();
-                return string.Format("There are still {0} radials awaiting calculation in this scenario.", radialsNotCalculated);
+                //var radialList = (from analysisPoint in scenario.AnalysisPoints
+                //                  from transmissionLoss in analysisPoint.TransmissionLosses
+                //                  from radial in transmissionLoss.Radials
+                //                  where !File.Exists(radial.BasePath + ".shd")
+                //                  select radial).ToList();
+                sb.AppendLine(string.Format("  • There are still {0} radials awaiting calculation in this scenario.", radialsNotCalculated));
             }
 
+            if (!scenario.ScenarioSpecies.Any()) sb.AppendLine("  • There are no species specified in this scenario.");
+            foreach (var species in scenario.ScenarioSpecies.Where(species => !species.Animat.Locations.Any())) sb.AppendLine(string.Format("  • There are no animats seeded for species {0}", species.LatinName));
 
-#if false
-            var missingSpecies = MissingSpeciesText(scenario);
-            if (missingSpecies.Length != 0) return missingSpecies; 
-#endif
-
-            //todo warn if there are ghost platforms
-            return null;
+            return sb.Length == 0 ? null : sb.ToString();
         }
     }
 }

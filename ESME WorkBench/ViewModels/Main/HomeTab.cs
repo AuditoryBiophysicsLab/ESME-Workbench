@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using ESME;
@@ -116,7 +117,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 var modes = (from platform in Scenario.Platforms from source in platform.Sources from mode in source.Modes select mode).ToList();
                 if (modes.Count == 0) return false;
                 if (IsSimulationRunning) return false;
-                if (Scenario.Validate() != null) return false;
+                if (Scenario.GenerateCanBeSimulatedErrorString() != null) return false;
                 return Scenario.Wind != null && Scenario.SoundSpeed != null && Scenario.Bathymetry != null && Scenario.Sediment != null;
             }
         }
@@ -678,8 +679,28 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             get
             {
-                if (Scenario == null || IsTransmissionLossBusy || IsSimulationRunning || Scenario.AnalysisPoints.Count == 0 || Scenario.ScenarioSpecies.Count == 0) return false;
-                return (Scenario.CanScenarioBeSimulated());
+                var sb = new StringBuilder();
+                if (Scenario == null || IsTransmissionLossBusy || IsSimulationRunning)
+                {
+                    sb.AppendLine("Running a scenario is currently disabled for the following reason(s):");
+                    if (Scenario == null) sb.AppendLine("  • No scenario is selected");
+                    else
+                    {
+                        if (IsTransmissionLossBusy) sb.AppendLine("  • The acoustic simulator is currently running");
+                        if (IsSimulationRunning) sb.AppendLine("  • Another scenario simulation is currently running");
+                    }
+                    RunSimulationCommandToolTip = sb.ToString();
+                    return false;
+                }
+                var result = Scenario.CanBeSimulated();
+                if (!result)
+                {
+                    sb.AppendLine("Running a scenario is currently disabled for the following reason(s):");
+                    sb.AppendLine(Scenario.GenerateCanBeSimulatedErrorString());
+                    return false;
+                }
+                RunSimulationCommandToolTip = string.Empty;
+                return true;
             }
         }
 
@@ -698,8 +719,8 @@ namespace ESMEWorkbench.ViewModels.Main
             var window = _visualizer.ShowWindow("SimulationProgressView", SimulationProgressViewModel, false, (s, e) => IsSimulationRunning = false);
             SimulationProgressViewModel.Window = window;
         }
-
-        public string ScenarioValidationError { get; set; }
+            
+        public string RunSimulationCommandToolTip { get; set; }
         #endregion
     }
 }
