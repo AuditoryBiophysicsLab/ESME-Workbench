@@ -679,8 +679,7 @@ namespace ESMEWorkbench.ViewModels.Main
             get
             {
                 if (Scenario == null || IsTransmissionLossBusy || IsSimulationRunning || Scenario.AnalysisPoints.Count == 0 || Scenario.ScenarioSpecies.Count == 0) return false;
-                ScenarioValidationError = Scenario.Validate();
-                return string.IsNullOrEmpty(ScenarioValidationError);
+                return (Scenario.CanScenarioBeSimulated());
             }
         }
 

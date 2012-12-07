@@ -522,7 +522,7 @@ namespace ESME.Scenarios
                            select new { d, tl }).FirstOrDefault();
             return closest != null ? closest.tl : null;
         }
-
+        public static bool CanScenarioBeSimulated(this Scenario scenario) { return (scenario.AnalysisPoints.Count > 0 && Validate(scenario) == null); }
         public static string Validate(this Scenario scenario)
         {
             if (scenario == null) return "Scenario is null";
@@ -530,11 +530,9 @@ namespace ESME.Scenarios
 
             var distinctScenarioModes = AcousticallyDistinctModes(scenario).ToList();
             if (distinctScenarioModes.Count == 0) return "No modes have been defined";
-
-            if (scenario.AnalysisPoints.Count == 0) return "No analysis points have been defined";
-
+        
             var missingScenarioModes = distinctScenarioModes.Except(GetDistinctAnalysisPointModes(scenario).ToList()).ToList();
-            if (missingScenarioModes.Count != 0) return "The following modes do not appear in any currently defined analysis points: " + string.Join(", ", missingScenarioModes.Select(m => m.ModeName));
+            if (missingScenarioModes.Count != 0 && scenario.AnalysisPoints.Count >0) return "The following modes do not appear in any currently defined analysis points: " + string.Join(", ", missingScenarioModes.Select(m => m.ModeName));
 
             var radialsNotCalculated = (from analysisPoint in scenario.AnalysisPoints
                                         from transmissionLoss in analysisPoint.TransmissionLosses
