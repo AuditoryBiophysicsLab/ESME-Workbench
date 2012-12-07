@@ -522,7 +522,7 @@ namespace ESME.Scenarios
                            select new { d, tl }).FirstOrDefault();
             return closest != null ? closest.tl : null;
         }
-        public static bool CanScenarioBeSimulated(this Scenario scenario) { return (scenario.AnalysisPoints.Count > 0 && Validate(scenario) == null); }
+        public static bool CanScenarioBeSimulated(this Scenario scenario) { return (scenario.AnalysisPoints.Count > 0 && Validate(scenario)==null && MissingSpeciesText(scenario) == null); }
         public static string Validate(this Scenario scenario)
         {
             if (scenario == null) return "Scenario is null";
@@ -550,8 +550,10 @@ namespace ESME.Scenarios
             }
 
 
+#if false
             var missingSpecies = MissingSpeciesText(scenario);
-            if (missingSpecies.Length != 0) return missingSpecies;
+            if (missingSpecies.Length != 0) return missingSpecies; 
+#endif
 
             //todo warn if there are ghost platforms
             return null;
