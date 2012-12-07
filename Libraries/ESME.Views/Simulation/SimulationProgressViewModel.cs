@@ -142,7 +142,7 @@ namespace ESME.Views.Simulation
             OnSimulationStarting();
             if (DisplayExposureHistograms)
             {
-                SimulationExposuresViewModel = new SimulationExposuresViewModel(HistogramBinsViewModels);
+                SimulationExposuresViewModel = new SimulationExposuresViewModel(HistogramBinsViewModels) { WindowTitle = "Per-ping peak pressure and sound exposure levels by platform:mode"};
                 _visualizer.ShowWindow("SimulationExposuresView", SimulationExposuresViewModel);
             }
             task.ContinueWith(t =>
@@ -150,7 +150,7 @@ namespace ESME.Views.Simulation
                 if (t.IsFaulted)
                 {
                     if (SimulationExposuresViewModel != null) SimulationExposuresViewModel.CloseDialog(false);
-                    _messageBox.ShowError(string.Format("The simulation encountered an error: {0}", t.Exception.InnerExceptions[0].Message));
+                    _messageBox.ShowError(string.Format("The simulation encountered an error: {0}", t.Exception));
                     CloseDialog(true);
                 }
                 else Window.Dispatcher.InvokeIfRequired(Window.Close);

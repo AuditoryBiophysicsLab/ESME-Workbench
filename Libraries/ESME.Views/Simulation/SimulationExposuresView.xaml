@@ -11,14 +11,16 @@
         d:DataContext="{d:DesignInstance l:SimulationExposuresViewModel}"
         mc:Ignorable="d">
     <DockPanel Margin="5" LastChildFill="True">
-        <DockPanel Margin="5" DockPanel.Dock="Bottom" LastChildFill="True">
+        <DockPanel DockPanel.Dock="Bottom" LastChildFill="False">
             <StackPanel Margin="0 0 10 10" HorizontalAlignment="Left" DockPanel.Dock="Left" Orientation="Vertical">
                 <TextBlock Text="Legend" />
                 <Plotting:LegendView ItemsSource="{Binding LegendItems}" />
             </StackPanel>
             <Button Width="75"
                     Height="22"
+                    Margin="0 0 10 10"
                     HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
                     Command="{Binding CloseCommand}"
                     Content="Close"
                     DockPanel.Dock="Right" />

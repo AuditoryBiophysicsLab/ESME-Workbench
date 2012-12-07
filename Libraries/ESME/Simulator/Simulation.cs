@@ -81,7 +81,7 @@ namespace ESME.Simulator
         //public SpeciesThresholdHistogram SpeciesThresholdHistogram { get; set; }
         public bool AnimateSimulation { get; set; }
         public bool MovingAnimats { get; set; }
-        public Task Start(TimeSpan timeStepSize)
+        public async Task Start(TimeSpan timeStepSize)
         {
             TimeStepSize = timeStepSize;
             _cancellationTokenSource = new CancellationTokenSource();
@@ -89,7 +89,15 @@ namespace ESME.Simulator
             ModeThresholdHistogram = new ModeThresholdHistogram(this, SimulationLog, 100.0, 10.0, 10);
             //SpeciesThresholdHistogram = new SpeciesThresholdHistogram(this);
 
-            return TaskEx.Run(() => Run(TimeStepSize, _cancellationTokenSource.Token));
+            try
+            {
+                var result = TaskEx.Run(() => Run(TimeStepSize, _cancellationTokenSource.Token));
+                await result;
+            }
+            catch (Exception e)
+            {
+                throw new SimulationException("Simulation failed", e);
+            }
             //return Run(TimeStepSize, _cancellationTokenSource.Token);
         }
 
@@ -97,7 +105,7 @@ namespace ESME.Simulator
         int[] _exposuresBySpecies;
         int[] _speciesActorIDStart;
         int[] _speciesActorIDEnd;
-        async Task Run(TimeSpan timeStepSize, CancellationToken token)
+        void Run(TimeSpan timeStepSize, CancellationToken token)
         {
             Geo<float> firstAnimatPosition = null;
             Task<bool> processTask = null;
@@ -241,11 +249,11 @@ namespace ESME.Simulator
                 PercentProgress.Report(timeStepIndex);
                 var timeStepRecord = new SimulationTimeStepRecord();
                 timeStepRecord.ActorPositionRecords.AddRange(actorPositionRecords);
-                if (processTask != null) await processTask;
+                if (processTask != null) processTask.Wait();
                 processTask = ModeThresholdHistogram.Process(timeStepRecord, Dispatcher);
                 if (timeStepIndex % 10 == 0)
                 {
-                    await processTask;
+                    processTask.Wait();
                     Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
                 }
                 //SpeciesThresholdHistogram.Process(timeStepRecord);
@@ -263,7 +271,7 @@ namespace ESME.Simulator
                 if (MovingAnimats & AnimateSimulation) Dispatcher.InvokeIfRequired(() => { foreach (var species in Scenario.ScenarioSpecies) species.UpdateMapLayers(); });
                 if (token.IsCancellationRequested) break;
             }
-            if (processTask != null) await processTask;
+            if (processTask != null) processTask.Wait();
             Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
             foreach (var layer in _modeFootprintMapLayers.SelectMany(layerSet => layerSet))
             {
