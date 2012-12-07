@@ -117,7 +117,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 var modes = (from platform in Scenario.Platforms from source in platform.Sources from mode in source.Modes select mode).ToList();
                 if (modes.Count == 0) return false;
                 if (IsSimulationRunning) return false;
-                if (Scenario.GenerateCanBeSimulatedErrorString() != null) return false;
+                if (Scenario.GenerateCanPlaceAnalysisPointsErrorString() != null) return false;
                 return Scenario.Wind != null && Scenario.SoundSpeed != null && Scenario.Bathymetry != null && Scenario.Sediment != null;
             }
         }
