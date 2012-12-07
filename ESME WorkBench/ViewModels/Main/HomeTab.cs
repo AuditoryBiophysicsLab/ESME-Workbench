@@ -107,20 +107,32 @@ namespace ESMEWorkbench.ViewModels.Main
             if (e.PropertyName == "Name") OnPropertyChanged("MainWindowTitle");
         }
         public bool IsScenarioLoaded { get { return Scenario != null; } }
+        public string CanPlaceAnalysisPointTooltip { get; set; }
 
         public bool CanPlaceAnalysisPoint
         {
             get
             {
-                if (Scenario == null) return false;
-                if (Scenario.Platforms.Count == 0) return false;
-                var modes = (from platform in Scenario.Platforms from source in platform.Sources from mode in source.Modes select mode).ToList();
-                if (modes.Count == 0) return false;
-                if (IsSimulationRunning) return false;
-                if (Scenario.GenerateCanPlaceAnalysisPointsErrorString() != null) return false;
-                return Scenario.Wind != null && Scenario.SoundSpeed != null && Scenario.Bathymetry != null && Scenario.Sediment != null;
+                var sb = new StringBuilder();
+                sb.AppendLine("Placing an analysis point is currently disabled for the following reason(s):");
+                if (IsSimulationRunning)
+                {
+                    sb.AppendLine("  • A simulation is currently running");
+                    CanPlaceAnalysisPointTooltip = sb.ToString();
+                    return false;
+                }
+
+                if (Scenario.CanPlaceAnalysisPoints())
+                {
+                    sb.AppendLine(Scenario.GenerateCanPlaceAnalysisPointsErrorString());
+                    CanPlaceAnalysisPointTooltip = sb.ToString();
+                    return false;
+                }
+                CanPlaceAnalysisPointTooltip = string.Empty;
+                return true;
             }
         }
+
         [Affects("CanPlaceAnalysisPoint", "IsRunSimulationCommandEnabled")]
         public bool IsSimulationRunning { get; set; }
 
@@ -144,38 +156,6 @@ namespace ESMEWorkbench.ViewModels.Main
             if (location == null) _lastCreateScenarioLocation = vm.Location;
             var scenario = CreateScenario(vm.Location, vm.ScenarioName, vm.Comments, vm.TimePeriod, vm.Duration, vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet);
             Scenario = scenario;
-#if false
-            var wind = Database.LoadOrCreateEnvironmentalDataSet(vm.Location,
-                                                                 vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet.Resolution,
-                                                                 vm.TimePeriod,
-                                                                 vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet.SourcePlugin);
-            var soundSpeed = Database.LoadOrCreateEnvironmentalDataSet(vm.Location,
-                                                                       vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet.Resolution,
-                                                                       vm.TimePeriod,
-                                                                       vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet.SourcePlugin);
-            var bathymetry = Database.LoadOrCreateEnvironmentalDataSet(vm.Location,
-                                                                       vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet.Resolution,
-                                                                       TimePeriod.Invalid,
-                                                                       vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet.SourcePlugin);
-            var sediment = Database.LoadOrCreateEnvironmentalDataSet(vm.Location,
-                                                                     vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet.Resolution,
-                                                                     TimePeriod.Invalid,
-                                                                     vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet.SourcePlugin);
-            var scenario = new Scenario
-            {
-                Wind = wind,
-                SoundSpeed = soundSpeed,
-                Bathymetry = bathymetry,
-                Sediment = sediment,
-                Name = vm.ScenarioName,
-                Location = vm.Location,
-                Comments = vm.Comments,
-                TimePeriod = vm.TimePeriod,
-            };
-            vm.Location.Scenarios.Add(scenario);
-            Database.Add(scenario);
-            Database.SaveChanges();
-#endif
         }
 
         Scenario CreateScenario(Location location, string scenarioName, string comments, TimePeriod timePeriod, TimeSpan duration, EnvironmentalDataSet wind, EnvironmentalDataSet soundSpeed, EnvironmentalDataSet bathymetry, EnvironmentalDataSet sediment)

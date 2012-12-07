@@ -523,7 +523,6 @@ namespace ESME.Scenarios
 
             if (scenario == null) return "Scenario is null";
             if (scenario.Platforms == null || scenario.Platforms.Count == 0) sb.AppendLine("  • No platforms have been defined");
-
             var distinctScenarioModes = AcousticallyDistinctModes(scenario).ToList();
             if (distinctScenarioModes.Count == 0) sb.AppendLine("  • No modes have been defined");
 
