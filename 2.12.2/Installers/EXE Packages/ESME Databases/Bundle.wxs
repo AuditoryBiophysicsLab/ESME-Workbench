@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define ProductFullVersion = "1.0.0.0" ?>
+  <?define ProductAuthor = "Hearing Research Center" ?>
+  <?define Manufacturer="Boston University"?>
+  <?define ProductAppFolder = "InstallLocation" ?>
+  <?define InstallersRoot="C:\Projects\ESME Deliverables\Installers"?>
+  <?define MSIRoot="$(var.InstallersRoot)\MSI Packages"?>
+  <?define DatabasesRoot="$(var.MSIRoot)\ESME Databases"?>
+  <?define ProductName = "ESME 2012 Databases" ?>
+  <Bundle Name="$(var.ProductName)" 
+          Version="$(var.ProductFullVersion)" 
+          Manufacturer="$(var.Manufacturer)"
+          UpgradeCode="86F5F4D6-9212-4B95-B545-9490C6A25D67" 
+          IconSourceFile="..\Common Files\Wave.ico"
+          SplashScreenSourceFile="..\Common Files\ESMELogo.bmp" 
+          AboutUrl="http://esme.bu.edu/" 
+          UpdateUrl="http://esme.bu.edu"
+          Compressed="no">
+    <Variable Name="BundleLongName" Value="Effects of Sound on the Marine Environment" />
+    <Variable Name="BundleShortName" Value="ESME 2012" />
+    <Variable Name="ProductLongName" Value="$(var.ProductName)" />
+    <Variable Name="ProductShortName" Value="Databases" />
+    <Variable Name="ProductFullVersion" Value="$(var.ProductFullVersion)" />
+    <Variable Name="BackgroundColor" Value="#FF3DB320" />
+    <Variable Name="ProgressBarColor" Value="#FF2C8017" />
+    <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">
+      <Payload Name="BootstrapperCore.config" 
+               SourceFile="..\..\ManagedBootstrapper\Bootstrapper.BootstrapperCore.config" />
+      <Payload Name="Bootstrapper.dll" 
+               SourceFile="..\..\ManagedBootstrapper\bin\Release\Bootstrapper.dll" />
+      <Payload Name="License.htm" 
+               SourceFile="..\Common Files\license.htm" />
+      <Payload Name="NetFxLicense.rtf" 
+               SourceFile="..\dotNetFx40\NetFxLicense.rtf" />
+    </BootstrapperApplicationRef>
+    <Chain>
+      <PackageGroupRef Id="Netfx4Full" />
+
+      <MsiPackage DownloadUrl="$(var.DownloadURLRoot)/SMGC_2.0_Minimal.msi"
+                  SourceFile="$(var.DatabasesRoot)\SMGC_2.0_Minimal\bin\x86\Release\SMGC_2.0_Minimal.msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Visible="yes"
+                  Vital="no">
+        <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
+      </MsiPackage>
+      <MsiPackage DownloadUrl="$(var.DownloadURLRoot)/BST_2.0.msi"
+                  SourceFile="$(var.DatabasesRoot)\BST_2.0\bin\x86\Release\BST_2.0.msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Visible="yes"
+                  Vital="no">
+        <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
+      </MsiPackage>
+      <MsiPackage DownloadUrl="$(var.DownloadURLRoot)/DBDB-V_5.4.msi"
+                  SourceFile="$(var.DatabasesRoot)\DBDB-V_5.4\bin\x86\Release\DBDB-V_5.4.msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Visible="yes"
+                  Vital="no">
+        <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
+      </MsiPackage>
+      <MsiPackage DownloadUrl="$(var.DownloadURLRoot)/GDEM-V_3.0.msi"
+                  SourceFile="$(var.DatabasesRoot)\GDEM-V_3.0\bin\x86\Release\GDEM-V_3.0.msi"
+                  Permanent="no"
+                  Compressed="no"
+                  Visible="yes"
+                  Vital="no">
+        <!-- <MsiProperty Name="INSTALLLOCATION" Value="[InstallLocation]"/> -->
+      </MsiPackage>
+    </Chain>
+  </Bundle>
+</Wix>
