@@ -514,8 +514,8 @@ namespace ESME.Scenarios
                            select new { d, tl }).FirstOrDefault();
             return closest != null ? closest.tl : null;
         }
-        public static bool CanBeSimulated(this Scenario scenario) { return (GenerateCanBeSimulatedErrorString(scenario) == null); }
-        public static bool CanPlaceAnalysisPoints(this Scenario scenario) { return (GenerateCanBeSimulatedErrorString(scenario) == null); }
+        public static bool CanBeSimulated(this Scenario scenario) { return scenario.GenerateCanBeSimulatedErrorString() == null; }
+        public static bool CanPlaceAnalysisPoints(this Scenario scenario) { return scenario.GenerateCanPlaceAnalysisPointsErrorString() == null; }
 
         public static string GenerateCanPlaceAnalysisPointsErrorString(this Scenario scenario)
         {

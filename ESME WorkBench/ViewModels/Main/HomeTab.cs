@@ -114,21 +114,23 @@ namespace ESMEWorkbench.ViewModels.Main
             get
             {
                 var sb = new StringBuilder();
-                sb.AppendLine("Placing an analysis point is currently disabled for the following reason(s):");
-                if (IsSimulationRunning)
+                if (Scenario == null | IsSimulationRunning)
                 {
-                    sb.AppendLine("  • A simulation is currently running");
+                    sb.AppendLine("You can't place an analysis point right now because:");
+                    if (Scenario == null) sb.AppendLine("  • No scenario is selected");
+                    if (IsSimulationRunning) sb.AppendLine("  • A simulation is currently running");
                     CanPlaceAnalysisPointTooltip = sb.ToString();
                     return false;
                 }
 
                 if (Scenario.CanPlaceAnalysisPoints())
                 {
+                    sb.AppendLine("You can't place an analysis point right now because:");
                     sb.AppendLine(Scenario.GenerateCanPlaceAnalysisPointsErrorString());
                     CanPlaceAnalysisPointTooltip = sb.ToString();
                     return false;
                 }
-                CanPlaceAnalysisPointTooltip = string.Empty;
+                CanPlaceAnalysisPointTooltip = "After clicking on this button, click within the simulation boundaries on the map to place a new analysis point";
                 return true;
             }
         }
@@ -662,7 +664,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 var sb = new StringBuilder();
                 if (Scenario == null || IsTransmissionLossBusy || IsSimulationRunning)
                 {
-                    sb.AppendLine("Running a scenario is currently disabled for the following reason(s):");
+                    sb.AppendLine("You can't run a scenario right now because:");
                     if (Scenario == null) sb.AppendLine("  • No scenario is selected");
                     else
                     {
@@ -675,11 +677,12 @@ namespace ESMEWorkbench.ViewModels.Main
                 var result = Scenario.CanBeSimulated();
                 if (!result)
                 {
-                    sb.AppendLine("Running a scenario is currently disabled for the following reason(s):");
+                    sb.AppendLine("You can't run a scenario right now because:");
                     sb.AppendLine(Scenario.GenerateCanBeSimulatedErrorString());
+                    RunSimulationCommandToolTip = sb.ToString();
                     return false;
                 }
-                RunSimulationCommandToolTip = string.Empty;
+                RunSimulationCommandToolTip = "The scenario simulator is ready";
                 return true;
             }
         }
