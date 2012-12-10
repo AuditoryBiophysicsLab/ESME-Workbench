@@ -1,0 +1,20 @@
+﻿<Window x:Class="GrahamsWPFTester.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
+        xmlns:p="clr-namespace:ESME.Views.PSM;assembly=ESME.Views" xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+        Title="{Binding WindowTitle}"
+        mef:ViewModelLocator.ViewModel="MainWindowViewModel"
+        ResizeMode="NoResize"
+        WindowStyle="ToolWindow"
+        SizeToContent="WidthAndHeight">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <WPF:EventToCommandTrigger Command="{Binding TreeViewModel.ViewClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid>
+        <p:PSMTreeView DataContext="{Binding TreeViewModel}" />
+    </Grid>   
+</Window>

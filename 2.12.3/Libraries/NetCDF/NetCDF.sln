@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCDF_Wrapper", "NetCDF_Wrapper.csproj", "{AC11645F-AFD3-4DDE-9E2F-E1F2FEB22A55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCDF_Explorer", "..\NetCDF_Explorer\NetCDF_Explorer.csproj", "{073A8CED-BB05-47E7-A055-8F2692563D46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME.Environment", "..\ESME.Environment\ESME.Environment.csproj", "{D94A0311-8E0E-4E0A-BC6C-F98DD76D581C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCDF_Importer", "..\NetCDF_Importer\NetCDF_Importer.csproj", "{1F119DDB-FF19-4651-A9A1-0BB409713069}"
+EndProject
+Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AC11645F-AFD3-4DDE-9E2F-E1F2FEB22A55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC11645F-AFD3-4DDE-9E2F-E1F2FEB22A55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC11645F-AFD3-4DDE-9E2F-E1F2FEB22A55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC11645F-AFD3-4DDE-9E2F-E1F2FEB22A55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{073A8CED-BB05-47E7-A055-8F2692563D46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{073A8CED-BB05-47E7-A055-8F2692563D46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{073A8CED-BB05-47E7-A055-8F2692563D46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{073A8CED-BB05-47E7-A055-8F2692563D46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D94A0311-8E0E-4E0A-BC6C-F98DD76D581C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D94A0311-8E0E-4E0A-BC6C-F98DD76D581C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D94A0311-8E0E-4E0A-BC6C-F98DD76D581C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D94A0311-8E0E-4E0A-BC6C-F98DD76D581C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F119DDB-FF19-4651-A9A1-0BB409713069}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F119DDB-FF19-4651-A9A1-0BB409713069}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F119DDB-FF19-4651-A9A1-0BB409713069}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F119DDB-FF19-4651-A9A1-0BB409713069}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
