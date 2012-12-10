@@ -17,7 +17,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.DeleteLocation), UsedImplicitly]
         void DeleteLocation(Location location)
         {
-            if (IsSimulationRunning || (_transmissionLoss.WorkQueue.Keys.Count > 0))
+            if (IsSimulationRunning || IsTransmissionLossBusy)
             {
                 _messageBox.ShowInformation("A location cannot be deleted while a simulation is running or transmission losses are being calculated.  Please wait until these tasks finish.");
             }

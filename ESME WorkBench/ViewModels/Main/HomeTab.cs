@@ -204,7 +204,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.DeleteScenario), UsedImplicitly]
         void DeleteScenario(Scenario scenario)
         {
-            if (IsSimulationRunning || (_transmissionLoss.WorkQueue.Keys.Count > 0))
+            if (IsSimulationRunning || IsTransmissionLossBusy)
             {
                 _messageBox.ShowInformation("A scenario cannot be deleted while a simulation is running or transmission losses are being calculated.  Please wait until these tasks finish.");
             }
