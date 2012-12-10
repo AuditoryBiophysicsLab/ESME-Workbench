@@ -47,6 +47,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     {
                         _scenario.RemoveMapLayers();
                         _scenario.PropertyChanged -= ScenarioPropertyChangedMonitor;
+                        _scenario.IsLoaded = false;
                     }
                     _scenario = value;
                     LayerTreeViewModel.Scenario = _scenario;
@@ -89,7 +90,7 @@ namespace ESMEWorkbench.ViewModels.Main
                             _scenario.Sediment.LayerSettings.MoveLayerToBack();
                         }
                     }));
-
+                    _scenario.IsLoaded = true;
                     _scenario.Location.LayerSettings.IsChecked = true;
                     MediatorMessage.Send(MediatorMessage.SetMapExtent, (GeoRect)_scenario.Location.GeoRect);
                     MediatorMessage.Send(MediatorMessage.RefreshMap, true);
@@ -120,6 +121,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     if (Scenario == null) sb.AppendLine("  • No scenario is selected");
                     if (IsSimulationRunning) sb.AppendLine("  • A simulation is currently running");
                     CanPlaceAnalysisPointTooltip = sb.ToString();
+                    OnPropertyChanged("IsRunSimulationCommandEnabled");
                     return false;
                 }
 
@@ -128,9 +130,11 @@ namespace ESMEWorkbench.ViewModels.Main
                     sb.AppendLine("You can't place an analysis point right now because:");
                     sb.AppendLine(Scenario.GenerateCanPlaceAnalysisPointsErrorString());
                     CanPlaceAnalysisPointTooltip = sb.ToString();
+                    OnPropertyChanged("IsRunSimulationCommandEnabled");
                     return false;
                 }
                 CanPlaceAnalysisPointTooltip = "After clicking on this button, click within the simulation boundaries on the map to place a new analysis point";
+                OnPropertyChanged("IsRunSimulationCommandEnabled");
                 return true;
             }
         }

@@ -183,6 +183,7 @@ namespace ESME.Scenarios
 
         public void Add(Platform platform) { Platforms.Add(platform); }
 
+        [NotMapped] public bool IsLoaded { get; set; }
         [NotMapped] public Wind WindData { get { return ((Wind)Cache[Wind].Result); } }
         [NotMapped] public SoundSpeed SoundSpeedData { get { return ((SoundSpeed)Cache[SoundSpeed].Result); } }
         [NotMapped] public Bathymetry BathymetryData { get { return ((Bathymetry)Cache[Bathymetry].Result); } }
@@ -535,8 +536,8 @@ namespace ESME.Scenarios
 
             if (scenario == null) return "Scenario is null";
             var result = scenario.GenerateCanPlaceAnalysisPointsErrorString();
-            if (result != null) sb.AppendLine(result);
-            if (scenario.AnalysisPoints.Count == 0) sb.AppendLine("  • There are no analyis points specified.");
+            if (result != null) sb.Append(result);
+            if (scenario.AnalysisPoints.Count == 0) sb.AppendLine("  • There are no analysis points specified.");
             else
             {
                 var radialsNotCalculated = (from analysisPoint in scenario.AnalysisPoints

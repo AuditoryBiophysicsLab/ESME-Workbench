@@ -26,6 +26,7 @@ namespace ESME.Scenarios
             var lineColor = LayerSettings.LineOrSymbolColor;
             lineColor.ScA = 0.5f;   // Set the default alpha channel for this TransmissionLoss to 50%
             LayerSettings.LineOrSymbolColor = lineColor;
+            LayerSettings.DisplayIfScenarioIsLoadedFunc = () => AnalysisPoint.Scenario.IsLoaded;
         }
 
         public bool IsReadyToCalculate { get; set; }

@@ -40,6 +40,11 @@ namespace ESME.Scenarios
             set
             {
                 _isChecked = value;
+                if (DisplayIfScenarioIsLoadedFunc != null && !DisplayIfScenarioIsLoadedFunc())
+                {
+                    if (MapLayerViewModel != null) MediatorMessage.Send(MediatorMessage.HideMapLayer, MapLayerViewModel);
+                    return;
+                }
                 if (MapLayerViewModel != null) MediatorMessage.Send(_isChecked ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, MapLayerViewModel);
             }
         }
@@ -65,6 +70,7 @@ namespace ESME.Scenarios
         }
         double _lineOrSymbolSize;
 
+        [NotMapped] public Func<bool> DisplayIfScenarioIsLoadedFunc { get; set; }
         [NotMapped] public PointSymbolType SymbolType
         {
             get { return _symbolType; }
