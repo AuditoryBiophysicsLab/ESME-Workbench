@@ -536,20 +536,23 @@ namespace ESME.Scenarios
             if (scenario == null) return "Scenario is null";
             var result = scenario.GenerateCanPlaceAnalysisPointsErrorString();
             if (result != null) sb.AppendLine(result);
-
-            var radialsNotCalculated = (from analysisPoint in scenario.AnalysisPoints
-                                        from transmissionLoss in analysisPoint.TransmissionLosses
-                                        from radial in transmissionLoss.Radials
-                                        where !File.Exists(radial.BasePath + ".shd")
-                                        select radial).Count();
-            if (radialsNotCalculated != 0)
+            if (scenario.AnalysisPoints.Count == 0) sb.AppendLine("  • There are no analyis points specified.");
+            else
             {
-                //var radialList = (from analysisPoint in scenario.AnalysisPoints
-                //                  from transmissionLoss in analysisPoint.TransmissionLosses
-                //                  from radial in transmissionLoss.Radials
-                //                  where !File.Exists(radial.BasePath + ".shd")
-                //                  select radial).ToList();
-                sb.AppendLine(string.Format("  • There are still {0} radials awaiting calculation in this scenario.", radialsNotCalculated));
+                var radialsNotCalculated = (from analysisPoint in scenario.AnalysisPoints
+                                            from transmissionLoss in analysisPoint.TransmissionLosses
+                                            from radial in transmissionLoss.Radials
+                                            where !File.Exists(radial.BasePath + ".shd")
+                                            select radial).Count();
+                if (radialsNotCalculated != 0)
+                {
+                    //var radialList = (from analysisPoint in scenario.AnalysisPoints
+                    //                  from transmissionLoss in analysisPoint.TransmissionLosses
+                    //                  from radial in transmissionLoss.Radials
+                    //                  where !File.Exists(radial.BasePath + ".shd")
+                    //                  select radial).ToList();
+                    sb.AppendLine(string.Format("  • There are still {0} radials awaiting calculation in this scenario.", radialsNotCalculated));
+                }
             }
 
             if (!scenario.ScenarioSpecies.Any()) sb.AppendLine("  • There are no species specified in this scenario.");

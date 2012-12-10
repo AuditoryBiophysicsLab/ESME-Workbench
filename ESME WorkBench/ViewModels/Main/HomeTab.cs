@@ -123,7 +123,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     return false;
                 }
 
-                if (Scenario.CanPlaceAnalysisPoints())
+                if (!Scenario.CanPlaceAnalysisPoints())
                 {
                     sb.AppendLine("You can't place an analysis point right now because:");
                     sb.AppendLine(Scenario.GenerateCanPlaceAnalysisPointsErrorString());
@@ -326,6 +326,7 @@ namespace ESMEWorkbench.ViewModels.Main
             };
             scenario.Platforms.Add(platform);
             platform.CreateMapLayers();
+            OnPropertyChanged("CanPlaceAnalysisPoint");
         }
 
         static void AddPlatform(Scenario scenario, Platform platform)
