@@ -1,0 +1,462 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{89EBF8EB-C38A-47C0-ABF7-60CB20722FBD}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MBSGUI</RootNamespace>
+    <AssemblyName>3mbSpeciesBuilder</AssemblyName>
+    <Win32Resource>
+    </Win32Resource>
+    <ApplicationIcon>Icon1.ico</ApplicationIcon>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.0</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BitmapBasic.cs" />
+    <Compile Include="BitmapModelingMain.cs" />
+    <Compile Include="BitmapSingleBehTransTime.cs" />
+    <Compile Include="BitmapDepthScale.cs" />
+    <Compile Include="BitmapSpe.cs" />
+    <Compile Include="BitmapSpeDiveProfile.cs" />
+    <Compile Include="BitmapTimeScale.cs" />
+    <Compile Include="BitmapSpeMovement.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="FmMsgBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FmMsgBox.Designer.cs">
+      <DependentUpon>FmMsgBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormConfirmDecision.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormConfirmDecision.Designer.cs">
+      <DependentUpon>FormConfirmDecision.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormSpan.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSpan.Designer.cs">
+      <DependentUpon>FormSpan.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormDepthValues.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormDepthValues.Designer.cs">
+      <DependentUpon>FormDepthValues.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormTest.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTest.Designer.cs">
+      <DependentUpon>FormTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmTransitionTest.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmTransitionTest.Designer.cs">
+      <DependentUpon>FrmTransitionTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormSpeciesDescription.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSpeciesDescription.Designer.cs">
+      <DependentUpon>FormSpeciesDescription.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormAcstcAvrsnDecayFnc.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormAcstcAvrsnDecayFnc.Designer.cs">
+      <DependentUpon>FormAcstcAvrsnDecayFnc.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormReversalGauss.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormReversalGauss.Designer.cs">
+      <DependentUpon>FormReversalGauss.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormTravelGauss.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTravelGauss.Designer.cs">
+      <DependentUpon>FormTravelGauss.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormGaussParams.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormGaussParams.Designer.cs">
+      <DependentUpon>FormGaussParams.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form3mbsMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form3mbsMain.Designer.cs">
+      <DependentUpon>Form3mbsMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormExperimental.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormExperimental.Designer.cs">
+      <DependentUpon>FormExperimental.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RmInitBeh.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RmInitBeh.Designer.cs">
+      <DependentUpon>RmInitBeh.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormAcstcAvrsn.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormAcstcAvrsn.Designer.cs">
+      <DependentUpon>FormAcstcAvrsn.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormModelingMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormModelingMain.Designer.cs">
+      <DependentUpon>FormModelingMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormBehavior.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormBehavior.Designer.cs">
+      <DependentUpon>FormBehavior.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormNormalModelSelect.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormNormalModelSelect.Designer.cs">
+      <DependentUpon>FormNormalModelSelect.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormPodFollow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormPodFollow.Designer.cs">
+      <DependentUpon>FormPodFollow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form1Input.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1Input.Designer.cs">
+      <DependentUpon>Form1Input.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormDepth.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormDepth.Designer.cs">
+      <DependentUpon>FormDepth.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormReversal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormReversal.Designer.cs">
+      <DependentUpon>FormReversal.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormSurfIntvl.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSurfIntvl.Designer.cs">
+      <DependentUpon>FormSurfIntvl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormTravel.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTravel.Designer.cs">
+      <DependentUpon>FormTravel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormRate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormRate.Designer.cs">
+      <DependentUpon>FormRate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RmBehTransVec.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RmBehTransVec.Designer.cs">
+      <DependentUpon>RmBehTransVec.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormBehTrans.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormBehTrans.Designer.cs">
+      <DependentUpon>FormBehTrans.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IconResource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>IconResource.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="FmMsgBox.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FmMsgBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormConfirmDecision.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormConfirmDecision.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSpan.resx">
+      <DependentUpon>FormSpan.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormDepthValues.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormDepthValues.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTest.resx">
+      <DependentUpon>FormTest.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmTransitionTest.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FrmTransitionTest.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSpeciesDescription.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormSpeciesDescription.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormAcstcAvrsnDecayFnc.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormAcstcAvrsnDecayFnc.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormReversalGauss.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormReversalGauss.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTravelGauss.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormTravelGauss.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormGaussParams.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormGaussParams.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form3mbsMain.resx">
+      <DependentUpon>Form3mbsMain.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormExperimental.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormExperimental.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RmInitBeh.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>RmInitBeh.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormAcstcAvrsn.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormAcstcAvrsn.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormModelingMain.resx">
+      <DependentUpon>FormModelingMain.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormBehavior.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormBehavior.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormNormalModelSelect.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormNormalModelSelect.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormPodFollow.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormPodFollow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form1Input.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>Form1Input.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormDepth.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormDepth.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormReversal.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormReversal.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSurfIntvl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormSurfIntvl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTravel.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormTravel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormRate.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormRate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RmBehTransVec.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>RmBehTransVec.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormBehTrans.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FormBehTrans.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="IconResource.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>IconResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\3MBSLibCsharp\3MBSLibCsharp.csproj">
+      <Project>{3FEA9121-2D56-4E41-8B9C-D59656D6C46E}</Project>
+      <Name>3MBSLibCsharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\3MBSWrapperClass\3mbsClrInterface.vcxproj">
+      <Project>{748066FE-0DD9-4DD7-8EB8-C2B71E186A5F}</Project>
+      <Name>3MBWrapperClass</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Icon1.ico" />
+    <None Include="Resources\WhaleIconSpeBuilder.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PostBuildEvent>mkdir $(SolutionDir)..\install\
+del $(SolutionDir)..\install\$(TargetFileName)
+copy $(TargetPath) $(SolutionDir)..\install\ /Y
+
+rem: Copy the install directory into the solution
+rem: directory so that the demo projects can link
+rem: to the dll(s).
+rem: Delete an already existing directory first
+rem rmdir $(SolutionDir)install /s /q
+rem mkdir $(SolutionDir)install
+rem xcopy $(SolutionDir)..\install $(SolutionDir)install /E
+
+
+rem copy $(TargetDir)*.exe ..\..\..\..\..\..\install\
+rem copy $(TargetDir)*.dll ..\..\..\..\..\..\install\</PostBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+</Project>
