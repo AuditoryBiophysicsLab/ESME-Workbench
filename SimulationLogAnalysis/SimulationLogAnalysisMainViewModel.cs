@@ -1,4 +1,4 @@
-﻿ using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -137,8 +137,6 @@ namespace SimulationLogAnalysis
             isOK = TimeSpan.TryParseExact(StopTimeString, TimeSpanFormatString, null, out timeSpan);
             if (isOK) _filterEndTime = timeSpan;
         }
-
-        [Initialize, UsedImplicitly] public ObservableCollection<HistogramBinsViewModel> HistogramBinsViewModels { get; private set; }
 
         void UpdateHistogramDisplay()
         {
@@ -297,16 +295,17 @@ namespace SimulationLogAnalysis
                 var speciesRecord = SimulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid;
                 return speciesRecord != null && selectedSpeciesGuids.Contains(speciesRecord.Guid);
             };
+            var histogramBinsViewModels = new ObservableCollection<HistogramBinsViewModel>();
 
-            _dispatcher.InvokeIfRequired(() => OpenWindows.Add(_visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(HistogramBinsViewModels))));
-            ModeThresholdHistogram = new ModeThresholdHistogram(this, SimulationLog, StartBinValue, BinWidth, BinCount, modeFilter, speciesFilter);
-            _modeBinsCollectionObserver = new CollectionObserver(ModeThresholdHistogram.GroupedExposures.Groups)
+            _dispatcher.InvokeIfRequired(() => OpenWindows.Add(_visualizer.ShowWindow("SimulationExposuresView", new SimulationExposuresViewModel(histogramBinsViewModels))));
+            var modeThresholdHistogram = new ModeThresholdHistogram(this, SimulationLog, StartBinValue, BinWidth, BinCount, modeFilter, speciesFilter);
+            _modeBinsCollectionObserver = new CollectionObserver(modeThresholdHistogram.GroupedExposures.Groups)
                 .RegisterHandler((s, e) =>
                 {
                     switch (e.Action)
                     {
                         case NotifyCollectionChangedAction.Add:
-                            foreach (GroupedExposuresHistogram histogram in e.NewItems) HistogramBinsViewModels.Add(new HistogramBinsViewModel(histogram));
+                            foreach (GroupedExposuresHistogram histogram in e.NewItems) histogramBinsViewModels.Add(new HistogramBinsViewModel(histogram));
                             break;
                     }
                 });
@@ -318,7 +317,7 @@ namespace SimulationLogAnalysis
                 var record = timeStepRecord;
                 if (processTask != null) await processTask;
 
-                processTask = ModeThresholdHistogram.Process(record, _dispatcher);
+                processTask = modeThresholdHistogram.Process(record, _dispatcher);
 
                 if (timeStepIndex % 10 == 0) _dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
             }
@@ -326,8 +325,6 @@ namespace SimulationLogAnalysis
             _dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
             Debug.WriteLine("Finished processing simulation exposure file");
         }
-
-        public ModeThresholdHistogram ModeThresholdHistogram { get; set; }
 
         public event EventHandler<EventArgs> GraphicsUpdate;
         [Initialize, UsedImplicitly] public Dictionary<Guid, Color> GuidToColorMap { get; private set; }
