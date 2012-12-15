@@ -307,6 +307,12 @@
                       WorkingDirectory="APPLICATIONFOLDER"
                       Target="[APPLICATIONFOLDER]TransmissionLossViewer.exe"
                       Advertise="no" />
+            <Shortcut Id="SimulationLogAnalysis_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="Simulation Log Analyzer"
+                      WorkingDirectory="APPLICATIONFOLDER"
+                      Target="[APPLICATIONFOLDER]SimulationLogAnalysis.exe"
+                      Advertise="no" />
             <Shortcut Id="QuickStartGuide_Shortcut"
                       Directory="ProgramMenuDir"
                       Name="Quick Start"

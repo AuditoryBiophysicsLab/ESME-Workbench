@@ -241,7 +241,7 @@ namespace StandardTransmissionLossEngines
             var sedimentLayerDz = Math.Ceiling(LastLayerThickness * sedimentLambda / dz) * dz;
             var attenuationLayerDz = Math.Ceiling(AttenuationLayerThickness * sedimentLambda / dz) * dz;
             var maxSubstrateDepth = bottomProfile.MaxDepth + sedimentLayerDz;
-            var zmplt = maxSubstrateDepth + attenuationLayerDz;
+            var zmplt = (dz * ndz) + Math.Ceiling(bottomProfile.MaxDepth * 1.01 / (dz * ndz)) * (dz * ndz);
             // Maximum Depth for PE calc ->  zmax 
             //  zmax is the z-limit for the PE calc from top of the water column to the bottom of the last substrate layer 
             // (including the attentuation layer if, as recommended, this is included)
@@ -420,7 +420,7 @@ namespace StandardTransmissionLossEngines
                 var rr = new double[rangeCount];
                 var rd = new double[depthCount];
                 for (var rangeIndex = 0; rangeIndex < rr.Length; rangeIndex++) rr[rangeIndex] = (rangeIndex + 1) * dr * ndr;
-                for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++) rd[depthIndex] = (depthIndex + 1) * dz * ndz;
+                for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++) rd[depthIndex] = depthIndex * dz * ndz;
                 BellhopOutput.WriteShadeFile(radial.BasePath + ".shd", sourceDepth, frequency, rd, rr, pressures);
             }
             else

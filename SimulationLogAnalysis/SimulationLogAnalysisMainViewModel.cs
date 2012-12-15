@@ -138,31 +138,15 @@ namespace SimulationLogAnalysis
             if (isOK) _filterEndTime = timeSpan;
         }
 
-        void UpdateHistogramDisplay()
-        {
-            var handlers = GraphicsUpdate;
-            if (handlers == null) return;
-            foreach (EventHandler<EventArgs> handler in handlers.GetInvocationList())
-            {
-                if (handler.Target is DispatcherObject)
-                {
-                    var localHandler = handler;
-                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new EventArgs()));
-                }
-                else
-                    handler(this, new EventArgs());
-            }
-        }
-
         void SelectedFileNameChanged()
         {
             ResetSelectionObservers();
             AvailablePlatforms.Clear();
             AvailableModes.Clear();
             AvailableSpecies.Clear();
-            GuidToColorMap.Clear();
             foreach (var window in OpenWindows) window.Close();
             OpenWindows.Clear();
+            GuidToColorMap.Clear();
             if (SimulationLog != null) SimulationLog.Close();
             _simulationStartTime = new TimeSpan(0, 0, 0, 0);
             _simulationEndTime = new TimeSpan(0, 0, 0, 0);
@@ -200,7 +184,7 @@ namespace SimulationLogAnalysis
                 AvailableSpecies.Add(speciesFilter);
             }
             SpeciesFilterSelectionChanged();
-            for (var speciesIndex = 0; speciesIndex < SimulationLog.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(SimulationLog.SpeciesRecords[speciesIndex].Guid, _barColors[speciesIndex % _barColors.Count]);
+            for (var speciesIndex = 0; speciesIndex < SimulationLog.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(SimulationLog.SpeciesRecords[speciesIndex].Guid, BarColors[speciesIndex % BarColors.Count]);
             CommandManager.InvalidateRequerySuggested();
         }
 
@@ -233,12 +217,37 @@ namespace SimulationLogAnalysis
         [Initialize(true)] public bool PerformOurOnlyAnalysis { get; set; }
         public SimulationLog SimulationLog { get; set; }
         [Initialize, UsedImplicitly] List<Window> OpenWindows { get; set; }
+
+        [Initialize, UsedImplicitly] List<SimulationLogAnalyzer> Analyzers { get; set; }
+
         #region AnalyzeCommand
         public SimpleCommand<object, EventToCommandArgs> AnalyzeCommand { get { return _analyze ?? (_analyze = new SimpleCommand<object, EventToCommandArgs>(o => IsAnalyzeCommandEnabled, AnalyzeHandler)); } }
         SimpleCommand<object, EventToCommandArgs> _analyze;
 
         bool IsAnalyzeCommandEnabled { get { return PerformOurOnlyAnalysis && AreAnyPlatformsSelected && AreAnyModesSelected && AreAnySpeciesSelected; } }
-        void AnalyzeHandler(EventToCommandArgs args) { TaskEx.Run(PerformAnalysis); }
+        void AnalyzeHandler(EventToCommandArgs args)
+        {
+            PerformAnalysis();
+#if false
+            var analyzer = new SimulationLogAnalyzer
+            {
+                LogFilename = SelectedFileName, 
+                BinCount = BinCount, 
+                BinWidth = BinWidth, 
+                FilterStartTime = _filterStartTime, 
+                FilterEndTime = _filterEndTime,
+                SelectedModeIds = (from mode in AvailableModes
+                                   where mode.IsSelected
+                                   select ((ModeNameGuid)mode.NameGuidRecord).ActorID).ToList(),
+                SelectedSpeciesGuids = (from species in AvailableSpecies
+                                        where species.IsSelected
+                                        select species.NameGuidRecord.Guid).ToList(),
+                StartBinValue = StartBinValue,
+            };
+            var remoteAnalysis = analyzer.Analyze(_dispatcher, _visualizer);
+#endif
+
+        }
         #endregion
 
         #region CloseCommand
@@ -276,12 +285,13 @@ namespace SimulationLogAnalysis
         public bool AreAnyPlatformsSelected { get; private set; }
         public bool AreAnyModesSelected { get; private set; }
         public bool AreAnySpeciesSelected { get; private set; }
-        async void PerformAnalysis()
+
+#if true
+        void PerformAnalysis()
         {
             var filterStartTime = _filterStartTime;
             var filterEndTime = _filterEndTime;
             var selectedTimeRange = SelectedTimeRange;
-            var simulationLog = SimulationLog;
             Task<bool> processTask = null;
             var selectedModeIds = (from mode in AvailableModes
                                    where mode.IsSelected
@@ -300,7 +310,7 @@ namespace SimulationLogAnalysis
                 return speciesRecord != null && selectedSpeciesGuids.Contains(speciesRecord.Guid);
             };
             var histogramBinsViewModels = new ObservableCollection<HistogramBinsViewModel>();
-            var viewModel = new SimulationExposuresViewModel(histogramBinsViewModels);
+            var viewModel = new SimulationExposuresViewModel(histogramBinsViewModels) { WindowTitle = "Test" };
             _dispatcher.InvokeIfRequired(() => OpenWindows.Add(_visualizer.ShowWindow("SimulationExposuresView", viewModel)));
             var modeThresholdHistogram = new ModeThresholdHistogram(this, SimulationLog, StartBinValue, BinWidth, BinCount, modeFilter, speciesFilter);
             _modeBinsCollectionObserver = new CollectionObserver(modeThresholdHistogram.GroupedExposures.Groups)
@@ -310,6 +320,7 @@ namespace SimulationLogAnalysis
                     {
                         case NotifyCollectionChangedAction.Add:
                             foreach (GroupedExposuresHistogram histogram in e.NewItems) histogramBinsViewModels.Add(new HistogramBinsViewModel(histogram));
+                            if (histogramBinsViewModels.Count == 1) histogramBinsViewModels[0].PressureViewModel.LeftAxis.DebugOutputEnabled = true;
                             break;
                     }
                 });
@@ -319,98 +330,23 @@ namespace SimulationLogAnalysis
                 timeStepRecord.ReadAll();
                 timeStepIndex++;
                 var record = timeStepRecord;
-                if (processTask != null) await processTask;
+                if (processTask != null) processTask.Wait();
 
                 processTask = modeThresholdHistogram.Process(record, _dispatcher);
 
-                if (timeStepIndex % 10 == 0) _dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
+                if (timeStepIndex % 10 == 0) UpdateHistogramDisplay();
             }
-            if (processTask != null) await processTask;
-            _dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
+            if (processTask != null) processTask.Wait();
+            UpdateHistogramDisplay();
             Debug.WriteLine("Finished processing simulation exposure file");
         }
 
         public event EventHandler<EventArgs> GraphicsUpdate;
         [Initialize, UsedImplicitly] public Dictionary<Guid, Color> GuidToColorMap { get; private set; }
-        [Initialize, UsedImplicitly] public ObservableCollection<PlatformContentFilterRecord> AvailablePlatforms { get; private set; }
-        [Initialize, UsedImplicitly] public ObservableCollection<ContentFilterRecordBase> AvailableModes { get; private set; }
-        [Initialize, UsedImplicitly] public ObservableCollection<ContentFilterRecordBase> AvailableSpecies { get; private set; }
-        readonly List<PropertyObserver<ContentFilterRecordBase>> _platformSelectionObservers = new List<PropertyObserver<ContentFilterRecordBase>>();
-        readonly List<PropertyObserver<ContentFilterRecordBase>> _modeSelectionObservers = new List<PropertyObserver<ContentFilterRecordBase>>();
-        readonly List<PropertyObserver<ContentFilterRecordBase>> _speciesSelectionObservers = new List<PropertyObserver<ContentFilterRecordBase>>();
-
-        readonly List<Color> _barColors = new List<Color>
+        static readonly List<Color> BarColors = new List<Color>
         {
             Colors.Red, Colors.Green, Colors.Blue, Colors.Cyan, Colors.Magenta, Colors.DarkKhaki, Colors.Orange, Colors.Purple, Colors.Fuchsia, Colors.Teal, Colors.Black
         };
-    }
-
-    public class SimulationLogAnalyzer : IHistogramSource
-    {
-        public static Dispatcher Dispatcher { get; set; }
-        public static IUIVisualizerService VisualizerService { get; set; }
-
-        public string LogFilename { get; set; }
-        public TimeSpan FilterStartTime { get; set; }
-        public TimeSpan FilterEndTime { get; set; }
-        public List<int> SelectedModeIds { get; set; }
-        public List<Guid> SelectedSpeciesGuids { get; set; }
-        public double StartBinValue { get; set; }
-        public double BinWidth { get; set; }
-        public int BinCount { get; set; }
-        public Window Window { get; private set; }
-
-        [UsedImplicitly] CollectionObserver _modeBinsCollectionObserver;
-
-        async void PerformAnalysis()
-        {
-            var simulationLog = SimulationLog.Open(LogFilename);
-            Func<ActorExposureRecord, bool> modeFilter = record =>
-            {
-                var speciesRecord = simulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid;
-                return speciesRecord != null && SelectedModeIds.Contains(record.ModeID);
-            };
-            Func<ActorExposureRecord, bool> speciesFilter = record =>
-            {
-                var speciesRecord = simulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid;
-                return speciesRecord != null && SelectedSpeciesGuids.Contains(speciesRecord.Guid);
-            };
-            var histogramBinsViewModels = new ObservableCollection<HistogramBinsViewModel>();
-            var viewModel = new SimulationExposuresViewModel(histogramBinsViewModels);
-            var shortFileName = Path.GetDirectoryName(LogFilename);
-            Dispatcher.InvokeIfRequired(() =>
-            {
-                Window = VisualizerService.ShowWindow("SimulationExposuresView", viewModel);
-                Window.Closed += (s, e) => { };
-            });
-            var modeThresholdHistogram = new ModeThresholdHistogram(this, simulationLog, StartBinValue, BinWidth, BinCount, modeFilter, speciesFilter);
-            _modeBinsCollectionObserver = new CollectionObserver(modeThresholdHistogram.GroupedExposures.Groups)
-                .RegisterHandler((s, e) =>
-                {
-                    switch (e.Action)
-                    {
-                        case NotifyCollectionChangedAction.Add:
-                            foreach (GroupedExposuresHistogram histogram in e.NewItems) histogramBinsViewModels.Add(new HistogramBinsViewModel(histogram));
-                            break;
-                    }
-                });
-            var timeStepIndex = 0;
-            Task<bool> processTask = null;
-            foreach (var timeStepRecord in simulationLog.Where(timeStepRecord => timeStepRecord.StartTime >= FilterStartTime && FilterEndTime >= timeStepRecord.StartTime))
-            {
-                timeStepRecord.ReadAll();
-                timeStepIndex++;
-                var record = timeStepRecord;
-                if (processTask != null) await processTask;
-
-                processTask = modeThresholdHistogram.Process(record, Dispatcher);
-
-                if (timeStepIndex % 10 == 0) Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
-            }
-            if (processTask != null) await processTask;
-            Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
-            Debug.WriteLine("Finished processing simulation exposure file");
-        }
 
         void UpdateHistogramDisplay()
         {
@@ -428,8 +364,126 @@ namespace SimulationLogAnalysis
             }
         }
 
+#endif
+
+        [Initialize, UsedImplicitly] public ObservableCollection<PlatformContentFilterRecord> AvailablePlatforms { get; private set; }
+        [Initialize, UsedImplicitly] public ObservableCollection<ContentFilterRecordBase> AvailableModes { get; private set; }
+        [Initialize, UsedImplicitly] public ObservableCollection<ContentFilterRecordBase> AvailableSpecies { get; private set; }
+        readonly List<PropertyObserver<ContentFilterRecordBase>> _platformSelectionObservers = new List<PropertyObserver<ContentFilterRecordBase>>();
+        readonly List<PropertyObserver<ContentFilterRecordBase>> _modeSelectionObservers = new List<PropertyObserver<ContentFilterRecordBase>>();
+        readonly List<PropertyObserver<ContentFilterRecordBase>> _speciesSelectionObservers = new List<PropertyObserver<ContentFilterRecordBase>>();
+    }
+
+    public class SimulationLogAnalyzer : IHistogramSource
+    {
+        public string LogFilename { get; set; }
+        public TimeSpan FilterStartTime { get; set; }
+        public TimeSpan FilterEndTime { get; set; }
+        public List<int> SelectedModeIds { get; set; }
+        public List<Guid> SelectedSpeciesGuids { get; set; }
+        [Initialize(double.NaN)] public double StartBinValue { get; set; }
+        [Initialize(double.NaN)] public double BinWidth { get; set; }
+        [Initialize(-1)] public int BinCount { get; set; }
+        public Window Window { get; private set; }
+        [Initialize, UsedImplicitly] public Dictionary<Guid, Color> GuidToColorMap { get; private set; }
+
         public event EventHandler<EventArgs> GraphicsUpdate;
-        public Dictionary<Guid, Color> GuidToColorMap { get { throw new NotImplementedException(); } }
+
+        static readonly List<Color> BarColors = new List<Color>
+        {
+            Colors.Red, Colors.Green, Colors.Blue, Colors.Cyan, Colors.Magenta, Colors.DarkKhaki, Colors.Orange, Colors.Purple, Colors.Fuchsia, Colors.Teal, Colors.Black
+        };
+
+        [UsedImplicitly] CollectionObserver _modeBinsCollectionObserver;
+
+        public async Task Analyze(Dispatcher dispatcher, IUIVisualizerService visualizer)
+        {
+            if (SelectedModeIds == null) throw new NullReferenceException("SelectedModeIds may not be null");
+            if (SelectedSpeciesGuids == null) throw new NullReferenceException("SelectedSpeciesGuids may not be null");
+            if (SelectedModeIds.Count == 0) throw new InvalidOperationException("SelectedModeIds may not be an empty list");
+            if (SelectedSpeciesGuids.Count == 0) throw new InvalidOperationException("SelectedSpeciesGuids may not be an empty list");
+            if (double.IsNaN(StartBinValue) || (StartBinValue < 0)) throw new InvalidOperationException("StartBinValue must be a positive value");
+            if (double.IsNaN(BinWidth) || (BinWidth < 0)) throw new InvalidOperationException("BinWidth must be a positive value");
+            if (BinCount <= 0) throw new InvalidOperationException("BinCount must be a positive value");
+            if (FilterStartTime.Ticks < 0) throw new InvalidOperationException("FilterStartTime must be a positive value");
+            if (FilterEndTime.Ticks < 0) throw new InvalidOperationException("FilterEndTime must be a positive value");
+            if (FilterEndTime.Ticks <= FilterStartTime.Ticks) throw new InvalidOperationException("FilterEndTime must be greater than FilterStartTime");
+            SimulationLog simulationLog = null;
+            try
+            {
+                simulationLog = SimulationLog.Open(LogFilename);
+                if (FilterEndTime.Ticks > (simulationLog.TimeStepSize.Ticks * simulationLog.TimeStepCount)) throw new InvalidOperationException("FilterEndTime cannot be greater than the last time step in the simulation");
+                for (var speciesIndex = 0; speciesIndex < simulationLog.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(simulationLog.SpeciesRecords[speciesIndex].Guid, BarColors[speciesIndex % BarColors.Count]);
+
+                Func<ActorExposureRecord, bool> modeFilter = record =>
+                {
+                    var speciesRecord = simulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid;
+                    return speciesRecord != null && SelectedModeIds.Contains(record.ModeID);
+                };
+                Func<ActorExposureRecord, bool> speciesFilter = record =>
+                {
+                    var speciesRecord = simulationLog.RecordFromActorID(record.ActorID) as SpeciesNameGuid;
+                    return speciesRecord != null && SelectedSpeciesGuids.Contains(speciesRecord.Guid);
+                };
+                var histogramBinsViewModels = new ObservableCollection<HistogramBinsViewModel>();
+                var scenarioName = simulationLog.ScenarioRecord.Name;
+                var simulationStartTime = simulationLog.StartTime;
+                SimulationExposuresViewModel viewModel = null;
+                dispatcher.InvokeIfRequired(() =>
+                {
+                    viewModel = new SimulationExposuresViewModel(histogramBinsViewModels) { WindowTitle = string.Format("Scenario: {0} simulated on {1} (Processing)", scenarioName, simulationStartTime) };
+                    Window = visualizer.ShowWindow("SimulationExposuresView", viewModel);
+                });
+                var modeThresholdHistogram = new ModeThresholdHistogram(this, simulationLog, StartBinValue, BinWidth, BinCount, modeFilter, speciesFilter);
+                _modeBinsCollectionObserver = new CollectionObserver(modeThresholdHistogram.GroupedExposures.Groups)
+                    .RegisterHandler((s, e) =>
+                    {
+                        switch (e.Action)
+                        {
+                            case NotifyCollectionChangedAction.Add:
+                                foreach (GroupedExposuresHistogram histogram in e.NewItems) histogramBinsViewModels.Add(new HistogramBinsViewModel(histogram));
+                                break;
+                        }
+                    });
+                var timeStepIndex = 0;
+                Task<bool> processTask = null;
+                foreach (var timeStepRecord in simulationLog.Where(timeStepRecord => timeStepRecord.StartTime >= FilterStartTime && FilterEndTime >= timeStepRecord.StartTime))
+                {
+                    timeStepRecord.ReadAll();
+                    timeStepIndex++;
+                    var record = timeStepRecord;
+                    if (processTask != null) await processTask;
+
+                    processTask = modeThresholdHistogram.Process(record, dispatcher);
+
+                    if (timeStepIndex % 10 == 0) UpdateHistogramDisplay();
+                }
+                if (processTask != null) await processTask;
+                UpdateHistogramDisplay();
+                viewModel.WindowTitle = string.Format("Scenario: {0} simulated on {1}", scenarioName, simulationStartTime);
+                Debug.WriteLine("Finished processing simulation exposure file");
+            }
+            finally
+            {
+                if (simulationLog != null) simulationLog.Close();
+            }
+        }
+
+        void UpdateHistogramDisplay()
+        {
+            var handlers = GraphicsUpdate;
+            if (handlers == null) return;
+            foreach (EventHandler<EventArgs> handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                {
+                    var localHandler = handler;
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new EventArgs()));
+                }
+                else
+                    handler(this, new EventArgs());
+            }
+        }
     }
 
     public class ContentFilterRecordBase : ViewModelBase

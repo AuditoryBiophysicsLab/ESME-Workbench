@@ -125,10 +125,9 @@ namespace ESME.Views.TransmissionLossViewer
             }
         }
 
-        #region public string BottomProfileGeometry { get; set; }
         void CalculateBottomProfileGeometry()
         {
-            var profileData = Radial.BottomProfile.Select(bpp => new Point(bpp.Range * 1000, bpp.Depth)).ToList();
+            var profileData = Radial.BottomProfile.Select(bpp => new Point(bpp.Range * 1000, Math.Max(0.0, bpp.Depth))).ToList();
             var yRange = AxisSeriesViewModel.YAxis.VisibleRange == null || AxisSeriesViewModel.YAxis.VisibleRange.IsEmpty ? AxisSeriesViewModel.YAxis.DataRange : (IRange)AxisSeriesViewModel.YAxis.VisibleRange;
             profileData.Insert(0, new Point(profileData[0].X, yRange.Max));
             profileData.Add(new Point(profileData.Last().X, yRange.Max));
@@ -136,10 +135,9 @@ namespace ESME.Views.TransmissionLossViewer
             _bottomProfileViewModel.SeriesData = profileData;
             _bottomProfileViewModel.ItemToPoint = p => (Point)p;
             _bottomProfileViewModel.LineStrokeThickness = 5.0;
-            _bottomProfileViewModel.LineStroke = Brushes.Black;
-            //_bottomProfileViewModel.LineFill = Colors.Transparent;
+            //_bottomProfileViewModel.LineStroke = Brushes.Black;
+            _bottomProfileViewModel.LineFill = Brushes.LightGray;
         }
-        #endregion
 
         public Mode SelectedMode { get; set; }
         public string MouseRange { get; set; }
