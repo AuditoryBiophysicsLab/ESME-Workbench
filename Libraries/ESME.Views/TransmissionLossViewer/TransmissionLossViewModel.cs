@@ -59,7 +59,8 @@ namespace ESME.Views.TransmissionLossViewer
             set
             {
                 _selectedRadialIndex = value;
-                var nameString = Radials == null ? "<no radial selected>" : string.Format("Radial bearing: {0:000.0} degrees", Radials[_selectedRadialIndex].Bearing);
+                var tlstring = SelectedMode.GetTransmissionLossPlugin(PluginManager).PluginName;
+                var nameString = Radials == null ? "<no radial selected>" : string.Format("Radial bearing: {0:000.0} degrees. Calculator: {1}", Radials[_selectedRadialIndex].Bearing,tlstring);
                 TitleString = nameString;
                 if (RadialViewModel != null)
                 {

@@ -72,8 +72,7 @@ namespace ESME.Views.Scenarios
             var propOpj = (AnalysisPoint)PropertyObject;
             WindowTitle = "Analysis Point Properties: " + propOpj.Geo;
             Properties.Add(new EditableKeyValuePair<string, string>("Location:", propOpj.Geo.ToString()));
-            Properties.Add(new EditableKeyValuePair<string, string>("Number of Platforms:", propOpj.Scenario.Platforms.Count.ToString(CultureInfo.InvariantCulture)));
-            Properties.Add(new EditableKeyValuePair<string, string>("Number of Transmission Losses:", propOpj.TransmissionLosses.Count.ToString(CultureInfo.InvariantCulture)));
+            Properties.Add(new EditableKeyValuePair<string, string>("Number of Distinct Modes:", propOpj.TransmissionLosses.Count.ToString(CultureInfo.InvariantCulture)));
             Properties.Add(new EditableKeyValuePair<string, string>("Number of Computed Radials:", propOpj.TransmissionLosses.SelectMany(r => r.Radials).Count().ToString(CultureInfo.InvariantCulture)));
             Properties.Add(new EditableKeyValuePair<string, string>("Size on Disk:", AnalysisPointSize));
         }
