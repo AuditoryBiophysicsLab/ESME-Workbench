@@ -151,6 +151,7 @@ namespace ESMEWorkbench.ViewModels.Main
             AddMode(AddSource(platform, "High Frequency Source", false), "3 kHz mode", false, 3000, 5);
             AddMode(AddSource(platform, "Low Frequency Source", false), "100 Hz mode", false, 100, 10, 50000);
 
+            platform.Sources[0].Modes[0].TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.Bellhop].DefaultPlugin.PluginIdentifier.Type;
             platform.Sources[1].Modes[0].TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin.PluginIdentifier.Type;
             AddPlatform(scenario, platform);
             progress.ProgressMessage = string.Format("Generating animat population for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
