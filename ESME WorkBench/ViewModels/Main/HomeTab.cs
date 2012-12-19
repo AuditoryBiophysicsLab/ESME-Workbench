@@ -429,7 +429,7 @@ namespace ESMEWorkbench.ViewModels.Main
             OnPropertyChanged("CanPlaceAnalysisPoint");
         }
 
-        static void AddMode(Source source, string name, bool isNew, float frequency = 1000f, float depth = 0f, float maxPropagationRadius = 25000f)
+        void AddMode(Source source, string name, bool isNew, float frequency = 1000f, float depth = 0f, float maxPropagationRadius = 25000f)
         {
             var mode = new Mode
             {
@@ -449,6 +449,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 VerticalBeamWidth = 180f,
                 HorizontalBeamWidth = 90,
                 IsNew = isNew,
+                TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.Bellhop].DefaultPlugin.PluginIdentifier.Type,
             };
             source.Modes.Add(mode);
             source.Platform.Scenario.Add(mode);
