@@ -361,6 +361,7 @@ namespace ESMEWorkbench.ViewModels.Map
                 if (_soundSpeedProfileWindowView == null)
                 {
                     _soundSpeedProfileWindowView = (SoundSpeedProfileWindowView)_visualizer.ShowWindow("SoundSpeedProfileWindowView", SoundSpeedProfileViewModel, false, (sender, args) => { _soundSpeedProfileWindowView = null; });
+                    _soundSpeedProfileWindowView.Closed += (s, e1) => { SoundSpeedProfileViewModel = null; };
                     SoundSpeedProfileViewModel.View = _soundSpeedProfileWindowView.FindChildren<SoundSpeedProfileView>().First();
                     SoundSpeedProfileViewModel.WindowView = _soundSpeedProfileWindowView;
                 }

@@ -113,7 +113,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 if (Directory.Exists(databaseDirectory) && File.Exists(databaseFile))
                 {
                     var fileInfo = new FileInfo(databaseFile);
-                    var cutoffTime = new DateTime(2012, 12, 1, 00, 00, 00);
+                    var cutoffTime = new DateTime(2012, 12, 19, 00, 00, 00);
                     if (fileInfo.CreationTime < cutoffTime) Directory.Delete(databaseDirectory, true);
                 }
                 Database.MasterDatabaseDirectory = databaseDirectory;
