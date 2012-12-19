@@ -126,6 +126,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 _plugins.PluginDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
                 Globals.AppSettings.PluginManagerService = _plugins;
                 ModePropertiesViewModel.PluginManagerService = _plugins;
+                TransmissionLossViewModel.PluginManager = _plugins;
                 _transmissionLoss.Dispatcher = _dispatcher;
                 _transmissionLoss.Start();
                 NAVOImporter.PluginManagerService = _plugins;

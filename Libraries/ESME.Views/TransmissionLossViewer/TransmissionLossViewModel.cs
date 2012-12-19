@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using ESME.Plugins;
 using ESME.Scenarios;
 using HRC.Aspects;
 using HRC.Services;
@@ -114,6 +115,8 @@ namespace ESME.Views.TransmissionLossViewer
             }
         }
         #endregion
+
+        public static IPluginManagerService PluginManager { get; set; }
 
         Mode _selectedMode;
 
