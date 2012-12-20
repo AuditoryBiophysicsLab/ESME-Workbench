@@ -247,6 +247,12 @@ namespace StandardTransmissionLossEngines
             // (including the attentuation layer if, as recommended, this is included)
             var zmax = maxSubstrateDepth + attenuationLayerDz;
             var envFileName = radial.BasePath + ".env";
+            Debug.WriteLine("Scenario: '{0}' Mode: '{2}' Analysis point: {1} Bearing: {3}, zmplt: {4}",
+                            radial.TransmissionLoss.AnalysisPoint.Scenario.Name,
+                            radial.TransmissionLoss.AnalysisPoint.Geo,
+                            radial.TransmissionLoss.Modes[0].ModeName,
+                            radial.Bearing, zmplt);
+
             using (var envFile = new StreamWriter(envFileName, false))
             {
                 envFile.WriteLine("Scenario: '{0}' Mode: '{2}' Analysis point: {1} Bearing: {3}",
@@ -414,6 +420,7 @@ namespace StandardTransmissionLossEngines
             if (File.Exists(Path.Combine(tempDirectory, "p.grid")))
             {
                 var pressures = ReadRamPGrid(Path.Combine(tempDirectory, "p.grid"));
+                File.Copy(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
                 //File.Delete(radial.BasePath + ".pgrid");
                 var rangeCount = pressures.Count;
                 var depthCount = pressures[0].Length;
@@ -421,6 +428,15 @@ namespace StandardTransmissionLossEngines
                 var rd = new double[depthCount];
                 for (var rangeIndex = 0; rangeIndex < rr.Length; rangeIndex++) rr[rangeIndex] = (rangeIndex + 1) * dr * ndr;
                 for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++) rd[depthIndex] = depthIndex * dz * ndz;
+                Debug.WriteLine("Scenario: '{0}' Mode: '{2}' Analysis point: {1} Bearing: {3}, zmplt: {4}, zstep: {5}, maxDepth: {6}, fileName: {7}",
+                                radial.TransmissionLoss.AnalysisPoint.Scenario.Name,
+                                radial.TransmissionLoss.AnalysisPoint.Geo,
+                                radial.TransmissionLoss.Modes[0].ModeName,
+                                radial.Bearing,
+                                zmplt,
+                                dz * ndz,
+                                rd.Last(),
+                                Path.GetFileNameWithoutExtension(radial.BasePath));
                 BellhopOutput.WriteShadeFile(radial.BasePath + ".shd", sourceDepth, frequency, rd, rr, pressures);
             }
             else
