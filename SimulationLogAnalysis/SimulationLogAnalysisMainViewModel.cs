@@ -320,7 +320,6 @@ namespace SimulationLogAnalysis
                     {
                         case NotifyCollectionChangedAction.Add:
                             foreach (GroupedExposuresHistogram histogram in e.NewItems) histogramBinsViewModels.Add(new HistogramBinsViewModel(histogram));
-                            if (histogramBinsViewModels.Count == 1) histogramBinsViewModels[0].PressureViewModel.LeftAxis.DebugOutputEnabled = true;
                             break;
                     }
                 });
