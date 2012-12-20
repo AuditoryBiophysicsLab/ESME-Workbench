@@ -241,7 +241,8 @@ namespace StandardTransmissionLossEngines
             var sedimentLayerDz = Math.Ceiling(LastLayerThickness * sedimentLambda / dz) * dz;
             var attenuationLayerDz = Math.Ceiling(AttenuationLayerThickness * sedimentLambda / dz) * dz;
             var maxSubstrateDepth = bottomProfile.MaxDepth + sedimentLayerDz;
-            var zmplt = (dz * ndz) + Math.Ceiling(bottomProfile.MaxDepth * 1.01 / (dz * ndz)) * (dz * ndz);
+            var zstep = dz * ndz;
+            var zmplt = Math.Ceiling((bottomProfile.MaxDepth + 2 * zstep) / zstep) * zstep;
             // Maximum Depth for PE calc ->  zmax 
             //  zmax is the z-limit for the PE calc from top of the water column to the bottom of the last substrate layer 
             // (including the attentuation layer if, as recommended, this is included)
@@ -419,7 +420,7 @@ namespace StandardTransmissionLossEngines
             using (var writer = new StreamWriter(radial.BasePath + ".bty")) writer.Write(bottomProfile.ToBellhopString());
             if (File.Exists(Path.Combine(tempDirectory, "p.grid")))
             {
-                var pressures = ReadRamPGrid(Path.Combine(tempDirectory, "p.grid"));
+                var pressures = ReadPGrid(Path.Combine(tempDirectory, "p.grid"));
                 File.Copy(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
                 //File.Delete(radial.BasePath + ".pgrid");
                 var rangeCount = pressures.Count;
@@ -427,16 +428,18 @@ namespace StandardTransmissionLossEngines
                 var rr = new double[rangeCount];
                 var rd = new double[depthCount];
                 for (var rangeIndex = 0; rangeIndex < rr.Length; rangeIndex++) rr[rangeIndex] = (rangeIndex + 1) * dr * ndr;
-                for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++) rd[depthIndex] = depthIndex * dz * ndz;
-                Debug.WriteLine("Scenario: '{0}' Mode: '{2}' Analysis point: {1} Bearing: {3}, zmplt: {4}, zstep: {5}, maxDepth: {6}, fileName: {7}",
+                for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++) rd[depthIndex] = depthIndex * zstep;
+                Debug.WriteLine("Scenario: '{0}' Mode: '{2}' Analysis point: {1} Bearing: {3}, zmplt: {4}, zstep: {5}, maxDepth: {6}, fileName: {7}, reqDepthCells: {8}, actualDepthCells: {9}",
                                 radial.TransmissionLoss.AnalysisPoint.Scenario.Name,
                                 radial.TransmissionLoss.AnalysisPoint.Geo,
                                 radial.TransmissionLoss.Modes[0].ModeName,
                                 radial.Bearing,
                                 zmplt,
-                                dz * ndz,
+                                zstep,
                                 rd.Last(),
-                                Path.GetFileNameWithoutExtension(radial.BasePath));
+                                Path.GetFileNameWithoutExtension(radial.BasePath),
+                                zmplt / zstep,
+                                depthCount);
                 BellhopOutput.WriteShadeFile(radial.BasePath + ".shd", sourceDepth, frequency, rd, rr, pressures);
             }
             else
@@ -461,7 +464,44 @@ namespace StandardTransmissionLossEngines
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-        public List<Complex[]> ReadRamPGrid(string fileName)
+        static List<Complex[]> ReadPGrid(string fileName)
+        {
+            var pGrid = new List<Complex[]>();
+            try
+            {
+                using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                {
+                    // Toss the first 4 bytes
+                    reader.ReadUInt32();
+
+                    var numDepths = reader.ReadInt32();
+                    if (numDepths <= 0) return null;
+
+                    // Toss the next 4 bytes
+                    reader.ReadUInt32();
+                    while (true)
+                    {
+                        // This is the record header, should be the number of bytes in the record
+                        var recordHeader = reader.ReadUInt32();
+                        // The record header should be the number of depths * 8 (4 bytes per float, 2 floats per complex number)
+                        if (recordHeader != numDepths * 8) throw new FormatException("Record header does not match number of depths");
+                        var depthCells = new Complex[numDepths];
+                        for (var depthIndex = 0; depthIndex < numDepths; depthIndex++) depthCells[depthIndex] = new Complex(reader.ReadSingle(), reader.ReadSingle());
+                        pGrid.Add(depthCells);
+                        // This is the record header, should be the number of bytes in the record
+                        var recordFooter = reader.ReadUInt32();
+                        // The record footer should be the number of depths * 8 (4 bytes per float, 2 floats per complex number)
+                        if (recordFooter != numDepths * 8) throw new FormatException("Record footer does not match number of depths");
+                    }
+                }
+            }
+            catch (EndOfStreamException)
+            {
+                return pGrid;
+            }
+        }
+
+        List<Complex[]> ReadRamPGrid(string fileName)
         {
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
