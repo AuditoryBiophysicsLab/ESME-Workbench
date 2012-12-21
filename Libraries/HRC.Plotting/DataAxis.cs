@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -11,6 +12,7 @@ using HRC.Plotting.AxisLabeling.Layout;
 using HRC.Plotting.AxisLabeling.Layout.AxisLabelers;
 using HRC.Plotting.Transforms;
 using HRC.ViewModels;
+using log4net;
 
 namespace HRC.Plotting
 {
@@ -164,6 +166,7 @@ namespace HRC.Plotting
                                                                                          typeof(RangeBase),
                                                                                          typeof(DataAxis),
                                                                                          new FrameworkPropertyMetadata(null,
+                                                                                                                       FrameworkPropertyMetadataOptions.AffectsMeasure |
                                                                                                                        FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                                                                        FrameworkPropertyMetadataOptions.AffectsRender,
                                                                                                                        DataRangePropertyChanged));
@@ -186,7 +189,7 @@ namespace HRC.Plotting
             }
             if (AxisType == AxisType.Logarithmic && DataRange.Min <= 0) throw new InvalidOperationException("Cannot plot negative or zero values on a log scale");
             if (VisibleRange == null) VisibleRange = DataRange.Expand(0);
-            else VisibleRange.Update(DataRange);
+            else VisibleRange.Update(DataRange.Min, DataRange.Max);
         }
 
         #endregion
@@ -303,15 +306,16 @@ namespace HRC.Plotting
             if (args.OldValue != null) ((Range)args.OldValue).RangeChanged -= VisibleRangeChanged;
             if (args.NewValue != null) ((Range)args.NewValue).RangeChanged += VisibleRangeChanged;
             UpdateVisibleRange();
-            var bindingExpression = GetBindingExpression(VisibleRangeProperty);
-            if (bindingExpression != null) bindingExpression.UpdateSource();
+            //var bindingExpression = GetBindingExpression(VisibleRangeProperty);
+            //if (bindingExpression != null) bindingExpression.UpdateSource();
+            //InvalidateMeasure();
         }
         void VisibleRangeChanged(object sender, EventArgs args)
         {
             UpdateVisibleRange();
-            var bindingExpression = GetBindingExpression(VisibleRangeProperty);
-            if (bindingExpression != null) bindingExpression.UpdateSource();
-            InvalidateMeasure();
+            //var bindingExpression = GetBindingExpression(VisibleRangeProperty);
+            //if (bindingExpression != null) bindingExpression.UpdateSource();
+            //InvalidateMeasure();
         }
 
         void OnSizeChanged()
@@ -333,7 +337,8 @@ namespace HRC.Plotting
                 PositionToValue = null;
                 return;
             }
-            //Debug.WriteLine(string.Format("{0} Visible range changed to {1}", AxisLabel, VisibleRange));
+            //if (VisibleRange.Min == 0.9 && VisibleRange.Max == 100) Debugger.Break();
+            Debug.WriteLine(string.Format("{0} Visible range changed to {1}", AxisLabel, VisibleRange));
             _visibleRange = VisibleRange.Expand(0);
             if (AxisType == AxisType.Logarithmic)
             {

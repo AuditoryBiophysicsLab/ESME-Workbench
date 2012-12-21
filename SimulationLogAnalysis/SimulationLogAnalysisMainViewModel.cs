@@ -160,6 +160,8 @@ namespace SimulationLogAnalysis
             _startTimeValidationRule.Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString));
             _endTimeValidationRule.Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString));
 
+            for (var speciesIndex = 0; speciesIndex < SimulationLog.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(SimulationLog.SpeciesRecords[speciesIndex].Guid, BarColors[speciesIndex % BarColors.Count]);
+
             // todo: Populate platform, mode and species lists
             foreach (var modeFilter in SimulationLog.ModeRecords.Select(mode => new ContentFilterRecordBase(mode) { Name = string.Format("{0}:{1}", mode.PlatformRecord.Name, mode.Name) })) 
             {
@@ -184,7 +186,6 @@ namespace SimulationLogAnalysis
                 AvailableSpecies.Add(speciesFilter);
             }
             SpeciesFilterSelectionChanged();
-            for (var speciesIndex = 0; speciesIndex < SimulationLog.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(SimulationLog.SpeciesRecords[speciesIndex].Guid, BarColors[speciesIndex % BarColors.Count]);
             CommandManager.InvalidateRequerySuggested();
         }
 
@@ -246,7 +247,6 @@ namespace SimulationLogAnalysis
             };
             var remoteAnalysis = analyzer.Analyze(_dispatcher, _visualizer);
 #endif
-
         }
         #endregion
 
@@ -333,7 +333,7 @@ namespace SimulationLogAnalysis
 
                 processTask = modeThresholdHistogram.Process(record, _dispatcher);
 
-                if (timeStepIndex % 10 == 0) UpdateHistogramDisplay();
+                //if (timeStepIndex % 10 == 0) UpdateHistogramDisplay();
             }
             if (processTask != null) processTask.Wait();
             UpdateHistogramDisplay();

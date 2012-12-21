@@ -10,22 +10,31 @@ namespace HRC.Plotting
 {
     public class DataAxisViewModel : ViewModelBase
     {
-        //[UsedImplicitly] PropertyObserver<DataAxisViewModel> _propertyObserver;
+        [UsedImplicitly] PropertyObserver<DataAxisViewModel> _propertyObserver;
         public DataAxisViewModel()
         {
-#if false
+            DataRange = new RangeCollection();
+            Label = "Axis";
+#if true
             _propertyObserver = new PropertyObserver<DataAxisViewModel>(this)
-                .RegisterHandler(d => d.VisibleRange, () => Debug.WriteLine(string.Format("{0} VisibleRange changed, new value: {1}", Label, VisibleRange == null ? "(null)" : VisibleRange.ToString())))
-                .RegisterHandler(d => d.ActualHeight, () => Debug.WriteLine(string.Format("{0} ActualHeight changed, new value: {1}", Label, ActualHeight)))
-                .RegisterHandler(d => d.ActualHeight, () => Debug.WriteLine(string.Format("{0} ActualWidth changed, new value: {1}", Label, ActualWidth)));
+                .RegisterHandler(d => d.VisibleRange, () => Debug.WriteLine(string.Format("{0} VisibleRange changed, new value: {1}", Label, VisibleRange == null ? "(null)" : VisibleRange.ToString())));
+            //.RegisterHandler(d => d.ActualHeight, () => Debug.WriteLine(string.Format("{0} ActualHeight changed, new value: {1}", Label, ActualHeight)))
+            //.RegisterHandler(d => d.ActualHeight, () => Debug.WriteLine(string.Format("{0} ActualWidth changed, new value: {1}", Label, ActualWidth)));
+            VisibleRange = new Range();
             VisibleRange.RangeChanged += (sender, args) => Debug.WriteLine(string.Format("{0} VisibleRange RangeChanged, new value: {1}", Label, VisibleRange == null ? "(null)" : VisibleRange.ToString()));
+            DataRange.RangeChanged += (sender, args) =>
+            {
+                Debug.WriteLine(string.Format("{0} DataRange RangeChanged, new value: {1}", Label, DataRange == null ? "(null)" : DataRange.ToString()));
+                VisibleRange.Update(DataRange);
+            };
 #endif
         }
-        [Initialize("Axis")] public string Label { get; set; }
+
+        public string Label { get; set; }
         [Initialize(AxisLayoutAlgorithm.ExtendedWilkinson)] public AxisLayoutAlgorithm AxisLayoutAlgorithm { get; set; }
         [Initialize] public ObservableCollection<NewDataAxisTick> AxisTicks { get; set; }
         [Initialize(AxisType.Linear)] public AxisType AxisType { get; set; }
-        [Initialize] public RangeCollection DataRange { get; set; }
+        public RangeCollection DataRange { get; set; }
         public bool IsInverted { get; set; }
         /// <summary>
         /// Length of a major tick, in pixels at screen resolution
@@ -51,7 +60,7 @@ namespace HRC.Plotting
         [Initialize(4.0)] public double MinorTicksPerInch { get; set; }
         public Func<double, double> PositionToValue { get; set; }
         public Func<double, double> ValueToPosition { get; set; }
-        [Initialize] public Range VisibleRange { get; set; }
+        public Range VisibleRange { get; set; }
         public double ActualWidth { get; set; }
         public double ActualHeight { get; set; }
 

@@ -26,7 +26,6 @@ namespace ESME.Views.Simulation
         public HistogramBinsViewModel(GroupedExposuresHistogram groupedExposuresHistogram)
         {
             if (groupedExposuresHistogram == null) throw new ArgumentNullException("groupedExposuresHistogram");
-            _groupedBarSeriesViewModels = groupedExposuresHistogram.GroupedBarSeriesViewModels;
             PressureViewModel = new FourAxisSeriesViewModel
             {
                 BottomAxis =
@@ -84,11 +83,11 @@ namespace ESME.Views.Simulation
             PressureViewModel.BottomAxis.DataRange.Update(-1, 12);
             EnergyViewModel.LeftAxis.VisibleRange.Update(.9, 100);
             EnergyViewModel.BottomAxis.DataRange.Update(-1, 12);
+
             //var barSeries = new StackedBarSeriesViewModel();
             //HistogramBinCollection.CollectionChanged += HistogramBinsCollectionChanged;
         }
 
-        GroupedBarSeriesViewModel[] _groupedBarSeriesViewModels;
 
         [Initialize] public FourAxisSeriesViewModel PressureViewModel { get; private set; }
         [Initialize] public FourAxisSeriesViewModel EnergyViewModel { get; private set; }
