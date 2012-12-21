@@ -1,0 +1,664 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EntityDeveloperDiagram>
+  <Diagram Version="1.10.0.59">
+    <DiagramModel>
+      <Model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xsi:type="ContextVwModel">
+        <CustomProperties>
+          <OID>0</OID>
+          <BackgroundColor>Window</BackgroundColor>
+        </CustomProperties>
+        <Children>
+          <Model xsi:type="ClassVwModel">
+            <CustomProperties>
+              <OID>1</OID>
+              <Parent>0</Parent>
+            </CustomProperties>
+            <Children>
+              <Model xsi:type="PropertiesVwModel">
+                <CustomProperties>
+                  <OID>2</OID>
+                  <Parent>1</Parent>
+                </CustomProperties>
+                <Children>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>3</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.IdField</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>4</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>16 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.IsCalculated</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>5</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>32 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.Latitude_degrees</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>6</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>48 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.Longitude_degrees</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>7</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>64 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.SourceDepth_meters</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>8</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>80 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.VerticalBeamWidth_degrees</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>9</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>96 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.VerticalLookAngle_degrees</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>10</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>112 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.LowFrequency_Hz</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>11</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>128 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.HighFrequency_Hz</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>12</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>144 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.MaxCalculationDepth_meters</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>13</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>160 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.Radius_meters</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>14</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>176 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.DataDirectoryPath</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>15</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>192 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.BinaryFileName</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>16</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>208 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.RangeAxisBytes</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>17</OID>
+                      <Parent>2</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>224 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field.DepthAxisBytes</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                </Children>
+                <Size>
+                  <Width>148 px</Width>
+                  <Height>241 px</Height>
+                </Size>
+                <MaxSize>
+                  <Width>0 px</Width>
+                  <Height>241 px</Height>
+                </MaxSize>
+              </Model>
+              <Model xsi:type="RelationPropertiesVwModel">
+                <CustomProperties>
+                  <OID>18</OID>
+                  <Parent>1</Parent>
+                </CustomProperties>
+                <Children>
+                  <Model xsi:type="RelationPropertyVwModel">
+                    <CustomProperties>
+                      <OID>19</OID>
+                      <Parent>18</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Size>
+                      <Width>0 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field_Radial.Radials</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqRelationProperty</TypeName>
+                    </Oid>
+                  </Model>
+                </Children>
+                <Location>
+                  <X>0 px</X>
+                  <Y>241 px</Y>
+                </Location>
+                <Size>
+                  <Width>148 px</Width>
+                  <Height>35 px</Height>
+                </Size>
+                <MaxSize>
+                  <Width>0 px</Width>
+                  <Height>35 px</Height>
+                </MaxSize>
+                <Hidden>false</Hidden>
+                <IsCollapsed>true</IsCollapsed>
+              </Model>
+            </Children>
+            <Location>
+              <X>40 px</X>
+              <Y>40 px</Y>
+            </Location>
+            <Size>
+              <Width>150 px</Width>
+              <Height>315 px</Height>
+            </Size>
+            <MinSize>
+              <Width>120 px</Width>
+              <Height>315 px</Height>
+            </MinSize>
+            <MaxSize>
+              <Width>300 px</Width>
+              <Height>315 px</Height>
+            </MaxSize>
+            <Ports />
+            <Oid xsi:type="SchemaModelOID">
+              <Path>Field</Path>
+              <TypeName>EntityDeveloper.Linq.LinqClass</TypeName>
+            </Oid>
+            <FixedHeight>44 px</FixedHeight>
+          </Model>
+          <Model xsi:type="ClassVwModel">
+            <CustomProperties>
+              <OID>20</OID>
+              <Parent>0</Parent>
+            </CustomProperties>
+            <Children>
+              <Model xsi:type="PropertiesVwModel">
+                <CustomProperties>
+                  <OID>21</OID>
+                  <Parent>20</Parent>
+                </CustomProperties>
+                <Children>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>22</OID>
+                      <Parent>21</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Radial.IdRadial</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>23</OID>
+                      <Parent>21</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>16 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Radial.IdField</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>24</OID>
+                      <Parent>21</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>32 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Radial.IsCalculated</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>25</OID>
+                      <Parent>21</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>48 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Radial.CalculationStarted</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>26</OID>
+                      <Parent>21</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>64 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Radial.CalculationFinished</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>27</OID>
+                      <Parent>21</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>80 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Radial.BearingFromSource_degrees</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>28</OID>
+                      <Parent>21</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>96 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Radial.BellhopConfiguration</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                  <Model xsi:type="ClassPropertyVwModel">
+                    <CustomProperties>
+                      <OID>29</OID>
+                      <Parent>21</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Location>
+                      <X>0 px</X>
+                      <Y>112 px</Y>
+                    </Location>
+                    <Size>
+                      <Width>148 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Radial.BottomProfile</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqProperty</TypeName>
+                    </Oid>
+                  </Model>
+                </Children>
+                <Size>
+                  <Width>148 px</Width>
+                  <Height>129 px</Height>
+                </Size>
+                <MaxSize>
+                  <Width>0 px</Width>
+                  <Height>129 px</Height>
+                </MaxSize>
+              </Model>
+              <Model xsi:type="RelationPropertiesVwModel">
+                <CustomProperties>
+                  <OID>30</OID>
+                  <Parent>20</Parent>
+                </CustomProperties>
+                <Children>
+                  <Model xsi:type="RelationPropertyVwModel">
+                    <CustomProperties>
+                      <OID>31</OID>
+                      <Parent>30</Parent>
+                    </CustomProperties>
+                    <Children />
+                    <Size>
+                      <Width>0 px</Width>
+                      <Height>16 px</Height>
+                    </Size>
+                    <Oid xsi:type="SchemaModelOID">
+                      <Path>Field_Radial.Field</Path>
+                      <TypeName>EntityDeveloper.Linq.LinqRelationProperty</TypeName>
+                    </Oid>
+                  </Model>
+                </Children>
+                <Location>
+                  <X>0 px</X>
+                  <Y>129 px</Y>
+                </Location>
+                <Size>
+                  <Width>148 px</Width>
+                  <Height>35 px</Height>
+                </Size>
+                <MaxSize>
+                  <Width>0 px</Width>
+                  <Height>35 px</Height>
+                </MaxSize>
+                <Hidden>false</Hidden>
+                <IsCollapsed>true</IsCollapsed>
+              </Model>
+            </Children>
+            <Location>
+              <X>270 px</X>
+              <Y>40 px</Y>
+            </Location>
+            <Size>
+              <Width>150 px</Width>
+              <Height>203 px</Height>
+            </Size>
+            <MinSize>
+              <Width>120 px</Width>
+              <Height>203 px</Height>
+            </MinSize>
+            <MaxSize>
+              <Width>300 px</Width>
+              <Height>203 px</Height>
+            </MaxSize>
+            <Ports />
+            <Oid xsi:type="SchemaModelOID">
+              <Path>Radial</Path>
+              <TypeName>EntityDeveloper.Linq.LinqClass</TypeName>
+            </Oid>
+            <FixedHeight>44 px</FixedHeight>
+          </Model>
+          <Model xsi:type="AssociationVwModel">
+            <CustomProperties>
+              <OID>32</OID>
+              <OutModel>1</OutModel>
+              <InModel>20</InModel>
+              <OutPort>33</OutPort>
+              <InPort>34</InPort>
+              <Parent>0</Parent>
+            </CustomProperties>
+            <PortAnchors>
+              <Port>
+                <Location>
+                  <X>0 px</X>
+                  <Y>101.5 px</Y>
+                </Location>
+                <Anchors>Top Bottom</Anchors>
+                <Align>Right</Align>
+                <CustomProperties>
+                  <OID>33</OID>
+                  <PortType>FloatAnchor</PortType>
+                </CustomProperties>
+              </Port>
+              <Port>
+                <Location>
+                  <X>0 px</X>
+                  <Y>101.5 px</Y>
+                </Location>
+                <Anchors>Top Bottom</Anchors>
+                <Align>Left</Align>
+                <CustomProperties>
+                  <OID>34</OID>
+                  <PortType>FloatAnchor</PortType>
+                </CustomProperties>
+              </Port>
+            </PortAnchors>
+            <IsManuallyRouted>false</IsManuallyRouted>
+            <Oid xsi:type="SchemaModelOID">
+              <Path>Field_Radial</Path>
+              <TypeName>EntityDeveloper.Linq.LinqAssociation</TypeName>
+            </Oid>
+          </Model>
+        </Children>
+        <GridSize>8 px</GridSize>
+        <ViewPort>
+          <ScaleMode>Free</ScaleMode>
+          <Scale>1</Scale>
+          <Location>
+            <X>-203 px</X>
+            <Y>-154 px</Y>
+          </Location>
+        </ViewPort>
+        <Oid xsi:type="SchemaModelOID">
+          <Path>TLDataContext</Path>
+          <TypeName>EntityDeveloper.Linq.LinqContextModel</TypeName>
+        </Oid>
+      </Model>
+    </DiagramModel>
+  </Diagram>
+</EntityDeveloperDiagram>

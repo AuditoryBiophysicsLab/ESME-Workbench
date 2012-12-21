@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="ESME.Views.Misc.ProjectCredits" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <GroupBox Header="Credits">
+        <StackPanel Margin="2 5 5 5" HorizontalAlignment="Stretch" Orientation="Vertical">
+            <GroupBox Header="Project Leadership">
+                <StackPanel Margin="2 5 5 5" HorizontalAlignment="Stretch" Orientation="Vertical">
+                    <TextBlock Text="Dave Mountain" ToolTip="Boston University" />
+                    <TextBlock Text="Mike Weise" ToolTip="Office of Naval Research" />
+                    <TextBlock Text="Bob Gisiner" ToolTip="US Navy OPNAV N45" />
+                    <!--
+                        <TextBlock Text="Karen Shearman" />
+                        <TextBlock Text="Heather Havens" />
+                        <TextBlock Text="Linda Petitpas" />
+                    -->
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Header="Developers">
+                <StackPanel Margin="2 5 5 5" HorizontalAlignment="Stretch" Orientation="Vertical">
+                    <TextBlock Text="Dave Anderson" ToolTip="Boston University" />
+                    <TextBlock Text="Graham Voysey" ToolTip="Boston University" />
+                </StackPanel>
+            </GroupBox>
+            <!--
+                <GroupBox Header="NUWC Team">
+                <StackPanel Orientation="Vertical"
+                Margin="2 5 5 5"
+                HorizontalAlignment="Stretch">
+                <TextBlock Text="Peter Hulton" />
+                <TextBlock Text="Bill Sutphin" />
+                <TextBlock Text="Bert Neales" />
+                <TextBlock Text="Dave Venne" />
+                </StackPanel>
+                </GroupBox>
+            -->
+            <GroupBox Header="Testers">
+                <StackPanel Margin="2 5 5 5" HorizontalAlignment="Stretch" Orientation="Vertical">
+                    <TextBlock Text="Chris Butler" />
+                    <TextBlock Text="Scott Schecklman" ToolTip="Portland State University" />
+                    <TextBlock Text="Lenley Woodard" ToolTip="Boston University" />
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+    </GroupBox>
+</UserControl>
