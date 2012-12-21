@@ -37,3 +37,5 @@ using System.Windows;
     //(used if a resource is not found in the page, 
     // app, or any theme specific resource dictionaries)
 )]
+
+// [assembly: Log(AttributeTargetTypes = "*", EntryLevel = LogLevel.Info, ExitLevel = LogLevel.Info, ExceptionLevel = LogLevel.Error)]
