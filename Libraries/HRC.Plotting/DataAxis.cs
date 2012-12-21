@@ -308,14 +308,14 @@ namespace HRC.Plotting
             UpdateVisibleRange();
             //var bindingExpression = GetBindingExpression(VisibleRangeProperty);
             //if (bindingExpression != null) bindingExpression.UpdateSource();
-            //InvalidateMeasure();
+            InvalidateMeasure();
         }
         void VisibleRangeChanged(object sender, EventArgs args)
         {
             UpdateVisibleRange();
             //var bindingExpression = GetBindingExpression(VisibleRangeProperty);
             //if (bindingExpression != null) bindingExpression.UpdateSource();
-            //InvalidateMeasure();
+            InvalidateMeasure();
         }
 
         void OnSizeChanged()

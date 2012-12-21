@@ -228,8 +228,8 @@ namespace SimulationLogAnalysis
         bool IsAnalyzeCommandEnabled { get { return PerformOurOnlyAnalysis && AreAnyPlatformsSelected && AreAnyModesSelected && AreAnySpeciesSelected; } }
         void AnalyzeHandler(EventToCommandArgs args)
         {
-            PerformAnalysis();
-#if false
+            //PerformAnalysis();
+#if true
             var analyzer = new SimulationLogAnalyzer
             {
                 LogFilename = SelectedFileName, 

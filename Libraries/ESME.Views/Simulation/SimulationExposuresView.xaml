@@ -51,7 +51,7 @@
                                 <RotateTransform Angle="90" />
                             </Separator.LayoutTransform>
                         </Separator>
-                        <Plotting:FourAxisSeriesView Grid.Column="2" Margin="10" DataContext="{Binding EnergyViewModel}" />
+                        <Plotting:FourAxisSeriesView Grid.Column="2" Margin="10 10 30 10" DataContext="{Binding EnergyViewModel}" />
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
