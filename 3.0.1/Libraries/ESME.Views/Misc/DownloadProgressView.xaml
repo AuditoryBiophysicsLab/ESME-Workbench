@@ -1,0 +1,22 @@
+﻿<Window x:Class="ESME.Views.Misc.DownloadProgressView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:l="clr-namespace:ESME.Views.Misc"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="{Binding WindowTitle}"
+        WindowStyle="ToolWindow"
+        SizeToContent="WidthAndHeight"
+        MinWidth="200"
+        d:DataContext="{d:DesignInstance l:DownloadProgressViewModel}"
+        mc:Ignorable="d">
+    <StackPanel Orientation="Vertical">
+        <Grid Margin="5 5 5 2">
+        <ProgressBar Value="{Binding ProgressPercent}"/>
+        <TextBlock Text="{Binding ProgressPercent, StringFormat={}{0}%}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
+        <TextBlock Text="{Binding Message}" Margin="5 0 5 5"/>
+        <Separator />
+        <Button Margin="5" IsCancel="True" Width="100" Content="Cancel" Command="{Binding CancelCommand}" HorizontalAlignment="Right" />
+    </StackPanel>
+</Window>

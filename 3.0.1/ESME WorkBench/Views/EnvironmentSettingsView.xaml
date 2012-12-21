@@ -1,0 +1,70 @@
+﻿<Window x:Class="ESMEWorkbench.Views.EnvironmentSettingsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
+        mef:ViewModelLocator.ViewModel="EnvironmentSettingsViewModel"
+        Title="Environment Settings" Height="300" Width="300">
+    <Window.Resources>
+        <Style TargetType="{x:Type ComboBoxItem}" x:Key="HighlightSelectedItemStyle">
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="Background" Value="LightBlue" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <DockPanel LastChildFill="True">
+        <DockPanel LastChildFill="False"
+		           Margin="10"
+		           DockPanel.Dock="Bottom">
+            <Button Width="75"
+			        Margin="10 0 0 0"
+			        IsCancel="True"
+			        Content="Cancel"
+			        DockPanel.Dock="Right" />
+            <Button Width="75"
+			        IsDefault="True"
+			        Content="OK"
+			        DockPanel.Dock="Right"
+			        Command="{Binding OkCommand}" />
+        </DockPanel>
+        <StackPanel Orientation="Vertical"
+				            Width="Auto"
+				            Height="Auto">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Scenario time frame" Margin="2"/>
+                <ComboBox ItemsSource="{Binding TimeFrames}" 
+                          SelectedItem="{Binding SelectedTimeFrameItem}"
+                          ItemContainerStyle="{StaticResource HighlightSelectedItemStyle}"
+                          ToolTip="Choose a time frame from the dropdown list (month or season)">
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Wind data file" Margin="2"/>
+                <ComboBox ItemsSource="{Binding WindSpeedData}" 
+                          ItemContainerStyle="{StaticResource HighlightSelectedItemStyle}"
+                          SelectedItem="{Binding WindSpeedData.SelectedItem}"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Sound speed data file" Margin="2"/>
+                <ComboBox ItemsSource="{Binding SoundSpeedData}" 
+                          ItemContainerStyle="{StaticResource HighlightSelectedItemStyle}"
+                          SelectedItem="{Binding SoundSpeedData.SelectedItem}"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Bottom type data file" Margin="2"/>
+                <ComboBox ItemsSource="{Binding BottomTypeData}"  
+                          ItemContainerStyle="{StaticResource HighlightSelectedItemStyle}"
+                          SelectedItem="{Binding BottomTypeData.SelectedItem}"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Bathymetry data file" Margin="2"/>
+                <ComboBox ItemsSource="{Binding BathymetryData}"  
+                          ItemContainerStyle="{StaticResource HighlightSelectedItemStyle}"
+                          SelectedItem="{Binding BathymetryData.SelectedItem}"/>
+            </StackPanel>
+        </StackPanel>
+
+    </DockPanel>
+</Window>
