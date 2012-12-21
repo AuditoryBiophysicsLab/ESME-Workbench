@@ -25,14 +25,14 @@ using MEFedMVVM.ViewModelLocator;
 namespace SimulationLogAnalysis
 {
     [ExportViewModel("SimulationLogAnalysisMainViewModel")]
-    public class SimulationLogAnalysisMainViewModel : ValidatingViewModel, IHistogramSource
+    public class SimulationLogAnalysisMainViewModel : ValidatingViewModel
     {
         readonly IViewAwareStatus _viewAwareStatus;
         readonly IMessageBoxService _messageBox;
         readonly IUIVisualizerService _visualizer;
         readonly IHRCSaveFileService _saveFile;
         [UsedImplicitly] readonly PropertyObserver<SimulationLogAnalysisMainViewModel> _propertyObserver;
-        [UsedImplicitly] CollectionObserver _modeBinsCollectionObserver;
+        //[UsedImplicitly] CollectionObserver _modeBinsCollectionObserver;
         Dispatcher _dispatcher;
         const string TimeSpanFormatString = @"hh\:mm\:ss";
         TimeSpan _simulationStartTime, _simulationEndTime;
@@ -146,7 +146,7 @@ namespace SimulationLogAnalysis
             AvailableSpecies.Clear();
             foreach (var window in OpenWindows) window.Close();
             OpenWindows.Clear();
-            GuidToColorMap.Clear();
+            //GuidToColorMap.Clear();
             if (SimulationLog != null) SimulationLog.Close();
             _simulationStartTime = new TimeSpan(0, 0, 0, 0);
             _simulationEndTime = new TimeSpan(0, 0, 0, 0);
@@ -160,7 +160,7 @@ namespace SimulationLogAnalysis
             _startTimeValidationRule.Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString));
             _endTimeValidationRule.Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString));
 
-            for (var speciesIndex = 0; speciesIndex < SimulationLog.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(SimulationLog.SpeciesRecords[speciesIndex].Guid, BarColors[speciesIndex % BarColors.Count]);
+            //for (var speciesIndex = 0; speciesIndex < SimulationLog.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(SimulationLog.SpeciesRecords[speciesIndex].Guid, BarColors[speciesIndex % BarColors.Count]);
 
             // todo: Populate platform, mode and species lists
             foreach (var modeFilter in SimulationLog.ModeRecords.Select(mode => new ContentFilterRecordBase(mode) { Name = string.Format("{0}:{1}", mode.PlatformRecord.Name, mode.Name) })) 
@@ -286,7 +286,7 @@ namespace SimulationLogAnalysis
         public bool AreAnyModesSelected { get; private set; }
         public bool AreAnySpeciesSelected { get; private set; }
 
-#if true
+#if false
         void PerformAnalysis()
         {
             var filterStartTime = _filterStartTime;

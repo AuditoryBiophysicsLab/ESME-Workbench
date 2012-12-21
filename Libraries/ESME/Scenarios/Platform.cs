@@ -160,8 +160,7 @@ namespace ESME.Scenarios
 
         #region Private members
 
-        [Import, UsedImplicitly]
-        static IMessageBoxService _messageBox;
+        [Import, UsedImplicitly] static IMessageBoxService _messageBox;
          
         static readonly List<TrackType> StationaryOnly = new List<TrackType> { Behaviors.TrackType.Stationary };
          

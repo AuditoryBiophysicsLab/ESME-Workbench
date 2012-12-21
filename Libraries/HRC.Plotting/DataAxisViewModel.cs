@@ -1,6 +1,5 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows;
 using HRC.Aspects;
 using HRC.Plotting.AxisLabeling.Layout;
@@ -10,24 +9,21 @@ namespace HRC.Plotting
 {
     public class DataAxisViewModel : ViewModelBase
     {
-        [UsedImplicitly] PropertyObserver<DataAxisViewModel> _propertyObserver;
+        //[UsedImplicitly] PropertyObserver<DataAxisViewModel> _propertyObserver;
         public DataAxisViewModel()
         {
             DataRange = new RangeCollection();
             Label = "Axis";
-#if true
-            _propertyObserver = new PropertyObserver<DataAxisViewModel>(this)
-                .RegisterHandler(d => d.VisibleRange, () => Debug.WriteLine(string.Format("{0} VisibleRange changed, new value: {1}", Label, VisibleRange == null ? "(null)" : VisibleRange.ToString())));
+#if false
+            //_propertyObserver = new PropertyObserver<DataAxisViewModel>(this)
+            //    .RegisterHandler(d => d.VisibleRange, () => Debug.WriteLine(string.Format("{0} VisibleRange changed, new value: {1}", Label, VisibleRange == null ? "(null)" : VisibleRange.ToString())));
             //.RegisterHandler(d => d.ActualHeight, () => Debug.WriteLine(string.Format("{0} ActualHeight changed, new value: {1}", Label, ActualHeight)))
             //.RegisterHandler(d => d.ActualHeight, () => Debug.WriteLine(string.Format("{0} ActualWidth changed, new value: {1}", Label, ActualWidth)));
-            VisibleRange = new Range();
-            VisibleRange.RangeChanged += (sender, args) => Debug.WriteLine(string.Format("{0} VisibleRange RangeChanged, new value: {1}", Label, VisibleRange == null ? "(null)" : VisibleRange.ToString()));
-            DataRange.RangeChanged += (sender, args) =>
-            {
-                Debug.WriteLine(string.Format("{0} DataRange RangeChanged, new value: {1}", Label, DataRange == null ? "(null)" : DataRange.ToString()));
-                VisibleRange.Update(DataRange);
-            };
+            //VisibleRange.RangeChanged += (sender, args) => Debug.WriteLine(string.Format("{0} VisibleRange RangeChanged, new value: {1}", Label, VisibleRange == null ? "(null)" : VisibleRange.ToString()));
+            //DataRange.RangeChanged += (sender, args) => Debug.WriteLine(string.Format("{0} DataRange RangeChanged, new value: {1}", Label, DataRange == null ? "(null)" : DataRange.ToString()));
 #endif
+            VisibleRange = new Range();
+            DataRange.RangeChanged += (sender, args) => VisibleRange.Update(DataRange);
         }
 
         public string Label { get; set; }
