@@ -642,7 +642,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 MapViewModel.EditablePolygonOverlayViewModel.LocationBounds = locationGeoRect;
                 MapViewModel.EditablePolygonOverlayViewModel.AreCrossingSegmentsAllowed = false;
                 perimeter.RemoveMapLayers();
-                foreach (var platform in Scenario.Platforms.Where(platform => platform.Perimeter.Guid == perimeter.Guid)) platform.RemoveMapLayers();
+                foreach (var platform in Scenario.Platforms.Where(platform => (platform.Perimeter!=null && platform.Perimeter.Guid == perimeter.Guid))) platform.RemoveMapLayers();
                 _visualizer.ShowWindow("CreateOrEditPerimeterView",
                                        new CreateOrEditPerimeterViewModel { EditablePolygonOverlayViewModel = MapViewModel.EditablePolygonOverlayViewModel, PerimeterName = perimeter.Name, DialogTitle = "Edit perimeter" },
                                        true,
@@ -652,7 +652,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                            var vm = (CreateOrEditPerimeterViewModel)args.State;
                                            if (!vm.IsCanceled) perimeter.SetPerimeterCoordinates(MapViewModel.EditablePolygonOverlayViewModel.GeoArray);
                                            perimeter.CreateMapLayers();
-                                           foreach (var platform in Scenario.Platforms.Where(platform => platform.Perimeter.Guid == perimeter.Guid)) platform.CreateMapLayers();
+                                           foreach (var platform in Scenario.Platforms.Where(platform => (platform.Perimeter!=null && platform.Perimeter.Guid == perimeter.Guid))) platform.CreateMapLayers();
                                        });
             }
             catch (Exception e) { _messageBox.ShowError(e.Message); }
