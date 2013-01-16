@@ -111,9 +111,11 @@ namespace ESME.Locations
         #region Create operations for Locations
         public EnvironmentalDataSet LoadOrCreateEnvironmentalDataSet(Location location, float resolution, TimePeriod timePeriod, PluginIdentifier sourcePlugin)
         {
+            var timePeriodAsByte = ((DbTimePeriod)timePeriod).TimePeriodAsByte;
             var existing = (from e in Context.EnvironmentalDataSets
                             where e.Location.Guid == location.Guid && 
                             e.SourcePlugin.Type == sourcePlugin.Type && 
+                            e.TimePeriod.TimePeriodAsByte == timePeriodAsByte &&
                             e.Resolution == resolution
                             select e).FirstOrDefault();
             if (existing != null) return existing;
