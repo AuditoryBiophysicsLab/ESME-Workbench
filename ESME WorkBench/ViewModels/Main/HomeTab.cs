@@ -650,7 +650,11 @@ namespace ESMEWorkbench.ViewModels.Main
                                        {
                                            MapViewModel.EditablePolygonOverlayViewModel.IsVisible = false;
                                            var vm = (CreateOrEditPerimeterViewModel)args.State;
-                                           if (!vm.IsCanceled) perimeter.SetPerimeterCoordinates(MapViewModel.EditablePolygonOverlayViewModel.GeoArray);
+                                           if (!vm.IsCanceled)
+                                           {
+                                               perimeter.SetPerimeterCoordinates(MapViewModel.EditablePolygonOverlayViewModel.GeoArray);
+                                               perimeter.Name = vm.PerimeterName;
+                                           }
                                            perimeter.CreateMapLayers();
                                            foreach (var platform in Scenario.Platforms.Where(platform => (platform.Perimeter!=null && platform.Perimeter.Guid == perimeter.Guid))) platform.CreateMapLayers();
                                        });
