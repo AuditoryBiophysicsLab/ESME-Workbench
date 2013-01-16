@@ -1,0 +1,203 @@
+﻿<UserControl x:Class="ESME.Views.Scenarios.PlatformPropertiesControlView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
+             xmlns:l="clr-namespace:ESME.Views.Scenarios"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+             Background="#fff0f0f0"
+             d:DataContext="{d:DesignInstance l:PropertiesViewModel}"
+             d:DesignHeight="300"
+             d:DesignWidth="300"             
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed"
+                                          FalseValue="Visible"
+                                          TrueValue="Collapsed" />
+        <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed"
+                                          FalseValue="Collapsed"
+                                          TrueValue="Visible" />
+        <WPF:BooleanInverter x:Key="BooleanInverter" />
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="MinWidth" Value="150" />
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <DockPanel LastChildFill="True">
+                            <Border BorderBrush="Red"
+                                    BorderThickness="1"
+                                    DockPanel.Dock="Left">
+                                <AdornedElementPlaceholder />
+                            </Border>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <DockPanel LastChildFill="True">
+        <StackPanel HorizontalAlignment="Right"
+                    DockPanel.Dock="Bottom"
+                    Orientation="Horizontal">
+            <Button Width="75"
+                    Height="22"
+                    Margin="5"
+                    Command="{Binding OkCommand}"
+                    Content="OK"
+                    IsDefault="True" />
+        </StackPanel>
+        <Border BorderThickness="0"
+                DockPanel.Dock="Top"
+                Padding="5">
+            <StackPanel Orientation="Vertical">
+                <Grid Margin="5 5 5 0" Visibility="{Binding IsPSMView, Converter={StaticResource TrueVisibleFalseCollapsed}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Top"
+                               Text="Platform Name"
+                               TextAlignment="Right" />
+                    <TextBox Grid.Column="1"
+                             Height="Auto"
+                             Text="{Binding PropertyObject.PlatformName}"
+                              />
+                </Grid>
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Top"
+                               Text="Platform Type"
+                               TextAlignment="Right" />
+                    <TextBox Grid.Column="1"
+                             Height="Auto"
+                             Text="{Binding PropertyObject.PlatformType}"
+                             ToolTip="This field is optional" />
+                </Grid>
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Top"
+                               Text="Description"
+                               TextAlignment="Right" />
+                    <TextBox Grid.Column="1"
+                             Height="Auto"
+                             MinHeight="50"
+                             AcceptsReturn="True"
+                             Text="{Binding PropertyObject.Description}"
+                             TextWrapping="Wrap"
+                             ToolTip="This field is optional" />
+                </Grid>
+                <Grid Margin="5 5 5 0" Visibility="{Binding IsPSMView, Converter={StaticResource FalseVisibleTrueCollapsed}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Top"
+                               Text="Speed"
+                               TextAlignment="Right"
+                               ToolTip="Speed in knots (nautical miles per hour). A speed greater than zero is required before you can choose the PerimeterBounce behavior." />
+                    <TextBox Grid.Column="1"
+                             Height="Auto"
+                             Text="{Binding PropertyObject.Speed}"
+                             ToolTip="Speed in knots (nautical miles per hour)" />
+                </Grid>
+                <Grid Margin="5 5 5 0" Visibility="{Binding IsPSMView, Converter={StaticResource FalseVisibleTrueCollapsed}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Top"
+                               Text="Perimeter"
+                               TextAlignment="Right" />
+                    <ComboBox Grid.Column="1"
+                              DisplayMemberPath="Name"
+                              ItemsSource="{Binding PropertyObject.Scenario.Perimeters}"
+                              SelectedItem="{Binding PropertyObject.Perimeter}"
+                              ToolTip="A perimeter must be chosen before you can select the PerimeterBounce behavior" />
+                </Grid>
+                <Grid Margin="5 5 5 0" Visibility="{Binding IsPSMView, Converter={StaticResource FalseVisibleTrueCollapsed}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Top"
+                               Text="Behavior"
+                               TextAlignment="Right" />
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding PropertyObject.TrackTypeDisplay}"
+                              SelectedItem="{Binding PropertyObject.SelectedTrackType}"
+                              ToolTip="A speed greater than zero must be entered, and a perimeter selected, before you can choose the PerimeterBounce behavior." />
+                </Grid>
+
+                <GroupBox Visibility="{Binding IsPSMView, Converter={StaticResource FalseVisibleTrueCollapsed}}">
+                    <GroupBox.Header>
+                        <CheckBox x:Name="RandomizeCheckBox"
+                                  Content="Randomize"
+                                  IsChecked="{Binding PropertyObject.IsRandom}" />
+                    </GroupBox.Header>
+                    <StackPanel IsEnabled="{Binding ElementName=RandomizeCheckBox, Path=IsChecked, Converter={StaticResource BooleanInverter}}" Orientation="Vertical">
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Top"
+                                       Text="Starting Latitude"
+                                       TextAlignment="Right" />
+                            <TextBox Grid.Column="1" Text="{Binding PropertyObject.Geo.Latitude}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Top"
+                                       Text="Starting Longitude"
+                                       TextAlignment="Right" />
+                            <TextBox Grid.Column="1" Text="{Binding PropertyObject.Geo.Longitude}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Top"
+                                       Text="Starting Course"
+                                       TextAlignment="Right" />
+                            <TextBox Grid.Column="1" Text="{Binding PropertyObject.Course}" />
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </Border>
+    </DockPanel>
+</UserControl>
