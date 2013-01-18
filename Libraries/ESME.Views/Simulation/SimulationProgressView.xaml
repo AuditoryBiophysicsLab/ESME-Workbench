@@ -3,13 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
+        xmlns:MaskedTextBox="clr-namespace:ESME.Views.MaskedTextBox"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:Simulation="clr-namespace:ESME.Views.Simulation"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:Simulation="clr-namespace:ESME.Views.Simulation" xmlns:System="clr-namespace:System;assembly=mscorlib"
         Title="{Binding Simulation.Scenario.Name,
                         StringFormat=Scenario: {0}}"
-        SizeToContent="WidthAndHeight"
         ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
         mc:Ignorable="d">
     <Window.Resources>
         <Simulation:SimulationProgressViewModel x:Key="DesignViewModel" />
@@ -17,7 +17,7 @@
             <Setter Property="Margin" Value="5 0 5 0" />
             <Setter Property="Height" Value="22" />
         </Style>
-        <Style TargetType="{x:Type xctk:MaskedTextBox}">
+        <Style TargetType="{x:Type MaskedTextBox:MaskedTextBox}">
             <Setter Property="Validation.ErrorTemplate">
                 <Setter.Value>
                     <ControlTemplate>
@@ -52,14 +52,15 @@
                        Text="Time Step Length:"
                        TextAlignment="Left"
                        ToolTip="The length of a single time step, in hh:mm:ss format" />
-            <xctk:MaskedTextBox Grid.Column="1"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Top"
-                                IsEnabled="{Binding SimulationNotRunning}"
-                                Mask="00:00:00"
-                                Value="{Binding TimeStepString,
-                                                ValidatesOnDataErrors=True,
-                                                UpdateSourceTrigger=PropertyChanged}" />
+            <MaskedTextBox:MaskedTextBox Grid.Column="1"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Top"
+                                         IsEnabled="{Binding SimulationNotRunning}"
+                                         ValueDataType="{x:Type System:String}"
+                                         Mask="00:00:00"
+                                         Value="{Binding TimeStepString,
+                                                         ValidatesOnDataErrors=True,
+                                                         UpdateSourceTrigger=PropertyChanged}" />
         </Grid>
         <Grid>
             <Grid.ColumnDefinitions>

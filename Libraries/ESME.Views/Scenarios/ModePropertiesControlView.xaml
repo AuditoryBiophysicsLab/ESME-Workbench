@@ -4,8 +4,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
              xmlns:l="clr-namespace:ESME.Views.Scenarios"
+             xmlns:MaskedTextBox="clr-namespace:ESME.Views.MaskedTextBox"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
              Background="#fff0f0f0"
              d:DataContext="{d:DesignInstance l:ModePropertiesViewModel}"
              d:DesignHeight="500"
@@ -33,7 +34,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style TargetType="{x:Type xctk:MaskedTextBox}">
+        <Style TargetType="{x:Type MaskedTextBox:MaskedTextBox}">
             <Setter Property="Validation.ErrorTemplate">
                 <Setter.Value>
                     <ControlTemplate>
@@ -157,13 +158,14 @@
                                        Text="Pulse Length"
                                        TextAlignment="Right"
                                        ToolTip="Length of time the sound emitter is actually transmitting" />
-                            <xctk:MaskedTextBox Grid.Column="1"
-                                                HorizontalAlignment="Left"
-                                                VerticalAlignment="Top"
-                                                Mask="00:00:00.000"
-                                                Value="{Binding PulseLengthString,
-                                                                ValidatesOnDataErrors=True,
-                                                                UpdateSourceTrigger=PropertyChanged}" />
+                            <MaskedTextBox:MaskedTextBox Grid.Column="1"
+                                                         HorizontalAlignment="Left"
+                                                         VerticalAlignment="Top"
+                                                         Mask="00:00:00.000"
+                                                         ValueDataType="{x:Type System:String}"
+                                                         Value="{Binding PulseLengthString,
+                                                                         ValidatesOnDataErrors=True,
+                                                                         UpdateSourceTrigger=PropertyChanged}" />
                         </Grid>
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>
@@ -176,13 +178,14 @@
                                        Text="Pulse Interval"
                                        TextAlignment="Right"
                                        ToolTip="The time between the start of consecutive pulses" />
-                            <xctk:MaskedTextBox Grid.Column="1"
-                                                HorizontalAlignment="Left"
-                                                VerticalAlignment="Top"
-                                                Mask="00:00:00.000"
-                                                Value="{Binding PulseIntervalString,
-                                                                ValidatesOnDataErrors=True,
-                                                                UpdateSourceTrigger=PropertyChanged}" />
+                            <MaskedTextBox:MaskedTextBox Grid.Column="1"
+                                                         HorizontalAlignment="Left"
+                                                         VerticalAlignment="Top"
+                                                         Mask="00:00:00.000"
+                                                         ValueDataType="{x:Type System:String}"
+                                                         Value="{Binding PulseIntervalString,
+                                                                         ValidatesOnDataErrors=True,
+                                                                         UpdateSourceTrigger=PropertyChanged}" />
                         </Grid>
                         <Grid Margin="5 5 5 0" Visibility="{Binding IsPSMView, Converter={StaticResource FalseVisibleTrueCollapsed}}">
                             <Grid.ColumnDefinitions>

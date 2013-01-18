@@ -5,11 +5,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:l="clr-namespace:ESME.Views.Scenarios"
+        xmlns:MaskedTextBox="clr-namespace:ESME.Views.MaskedTextBox"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:NAVO="clr-namespace:ESME.Environment.NAVO;assembly=ESME"
         xmlns:Properties="clr-namespace:ESME.Views.Properties"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
         xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         Title="Create Scenario"
         d:DataContext="{d:DesignInstance l:CreateScenarioViewModel}"
         Grid.IsSharedSizeScope="True"
@@ -42,7 +43,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style TargetType="{x:Type xctk:MaskedTextBox}">
+        <Style TargetType="{x:Type MaskedTextBox:MaskedTextBox}">
             <Setter Property="Validation.ErrorTemplate">
                 <Setter.Value>
                     <ControlTemplate>
@@ -138,13 +139,14 @@
                                Text="Duration"
                                TextAlignment="Right"
                                ToolTip="Length of simulated time the scenario runs (hh:mm)" />
-                    <xctk:MaskedTextBox Grid.Column="1"
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Top"
-                                        Mask="00:00"
-                                        Value="{Binding DurationString,
-                                                        ValidatesOnDataErrors=True,
-                                                        UpdateSourceTrigger=PropertyChanged}" />
+                    <MaskedTextBox:MaskedTextBox Grid.Column="1"
+                                                 HorizontalAlignment="Left"
+                                                 VerticalAlignment="Top"
+                                                 Mask="00:00"
+                                                 ValueDataType="{x:Type System:String}"
+                                                 Value="{Binding DurationString,
+                                                                 ValidatesOnDataErrors=True,
+                                                                 UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
             </StackPanel>
         </Border>

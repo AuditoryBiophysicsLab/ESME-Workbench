@@ -95,9 +95,6 @@
     <Reference Include="WpfDesktopEdition">
       <HintPath>..\..\ESME WorkBench\External References\WpfDesktopEdition.dll</HintPath>
     </Reference>
-    <Reference Include="WPFToolkit.Extended">
-      <HintPath>..\..\Solutions\ESME Workbench\packages\Extended.Wpf.Toolkit.1.6.0\lib\net40\WPFToolkit.Extended.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\ESME WorkBench\Properties\AssemblyMetadata.cs">
@@ -157,6 +154,18 @@
       <DependentUpon>CreateLocationView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Locations\CreateLocationViewModel.cs" />
+    <Compile Include="MaskedTextBox\AutoCompletingMaskEventArgs.cs" />
+    <Compile Include="MaskedTextBox\AutoSelectBehaviorEnum.cs" />
+    <Compile Include="MaskedTextBox\AutoSelectTextBox.cs" />
+    <Compile Include="MaskedTextBox\CachedTextInfo.cs" />
+    <Compile Include="MaskedTextBox\InsertKeyModeEnum.cs" />
+    <Compile Include="MaskedTextBox\MaskedTextBox.cs" />
+    <Compile Include="MaskedTextBox\MaskFormatEnum.cs" />
+    <Compile Include="MaskedTextBox\QueryMoveFocusEventArgs.cs" />
+    <Compile Include="MaskedTextBox\QueryTextFromValueEventArgs.cs" />
+    <Compile Include="MaskedTextBox\QueryValueFromTextEventArgs.cs" />
+    <Compile Include="MaskedTextBox\TreeHelper.cs" />
+    <Compile Include="MaskedTextBox\ValueRangeTextBox.cs" />
     <Compile Include="Misc\DownloadProgressView.xaml.cs">
       <DependentUpon>DownloadProgressView.xaml</DependentUpon>
     </Compile>
@@ -479,6 +488,7 @@
   <ItemGroup>
     <Resource Include="Images\Save.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESME.Views -class BuildInformation -version "$(SolutionDir)VersionInfo.txt" -assemblyversion "$(ProjectDir)\Properties\AssemblyVersionInfo.cs" -output "$(ProjectDir)BuildInformation.cs"</PreBuildEvent>

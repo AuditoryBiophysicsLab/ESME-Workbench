@@ -3,8 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:l="clr-namespace:ESME.Views.Scenarios"
+        xmlns:MaskedTextBox="clr-namespace:ESME.Views.MaskedTextBox"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
         Title="{Binding Scenario.Name,
                         StringFormat=Scenario properties: {0}}"
         Background="#fff0f0f0"
@@ -34,7 +35,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style TargetType="{x:Type xctk:MaskedTextBox}">
+        <Style TargetType="{x:Type MaskedTextBox:MaskedTextBox}">
             <Setter Property="Validation.ErrorTemplate">
                 <Setter.Value>
                     <ControlTemplate>
@@ -93,14 +94,15 @@
                                Text="Duration:"
                                TextAlignment="Right"
                                ToolTip="Duration of the scenario (hh:mm)" />
-                    <xctk:MaskedTextBox Grid.Column="1"
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Top"
-                                        Mask="00:00"
-                                        Value="{Binding DurationString,
-                                                        Mode=TwoWay,
-                                                        ValidatesOnDataErrors=True,
-                                                        UpdateSourceTrigger=PropertyChanged}" />
+                    <MaskedTextBox:MaskedTextBox Grid.Column="1"
+                                                 HorizontalAlignment="Left"
+                                                 VerticalAlignment="Top"
+                                                 Mask="00:00"
+                                                 ValueDataType="{x:Type System:String}"
+                                                 Value="{Binding DurationString,
+                                                                 Mode=TwoWay,
+                                                                 ValidatesOnDataErrors=True,
+                                                                 UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>

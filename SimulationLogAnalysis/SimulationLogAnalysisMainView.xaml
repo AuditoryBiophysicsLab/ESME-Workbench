@@ -4,15 +4,16 @@
         xmlns:app="clr-namespace:SimulationLogAnalysis"
         xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:MaskedTextBox="clr-namespace:ESME.Views.MaskedTextBox;assembly=ESME.Views"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
         xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
         Title="Simulation Log Analyzer"
-        SizeToContent="WidthAndHeight"
         d:DataContext="{d:DesignInstance app:SimulationLogAnalysisMainViewModel}"
         mef:ViewModelLocator.ViewModel="SimulationLogAnalysisMainViewModel"
+        SizeToContent="WidthAndHeight"
         mc:Ignorable="d">
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
@@ -28,43 +29,40 @@
                                          IsDirectoryBrowser="False" />
         <GroupBox DockPanel.Dock="Top" Header="Time range" IsEnabled="{Binding IsLogFileSelected}">
             <StackPanel Orientation="Vertical">
-                <RadioButton Content="Entire simulation"
-                             GroupName="TimeRange"
-                             IsChecked="{Binding AllTimes}" />
+                <RadioButton Content="Entire simulation" GroupName="TimeRange" IsChecked="{Binding AllTimes}" />
                 <RadioButton GroupName="TimeRange" IsChecked="{Binding SelectedTimeRange}">
                     <RadioButton.Content>
                         <StackPanel IsEnabled="{Binding SelectedTimeRange}" Orientation="Horizontal">
                             <TextBlock Text="Exposures from time " />
-                            <xctk:MaskedTextBox Grid.Column="1"
-                                                HorizontalAlignment="Left"
-                                                VerticalAlignment="Top"
-                                                ToolTip="Time to begin examining exposures (hh:mm:ss)"
-                                                Mask="00:00:00"
-                                                Value="{Binding StartTimeString,
-                                                                ValidatesOnDataErrors=True,
-                                                                UpdateSourceTrigger=PropertyChanged}" />
+                            <MaskedTextBox:MaskedTextBox Grid.Column="1"
+                                                         HorizontalAlignment="Left"
+                                                         VerticalAlignment="Top"
+                                                         Mask="00:00:00"
+                                                         ToolTip="Time to begin examining exposures (hh:mm:ss)"
+                                                         ValueDataType="{x:Type System:String}"
+                                                         Value="{Binding StartTimeString,
+                                                                         ValidatesOnDataErrors=True,
+                                                                         UpdateSourceTrigger=PropertyChanged}" />
                             <TextBlock Text=" through time: " />
-                            <xctk:MaskedTextBox Grid.Column="1"
-                                                HorizontalAlignment="Left"
-                                                VerticalAlignment="Top"
-                                                ToolTip="Time to stop examining exposures (hh:mm:ss)"
-                                                Mask="00:00:00"
-                                                Value="{Binding StopTimeString,
-                                                                ValidatesOnDataErrors=True,
-                                                                UpdateSourceTrigger=PropertyChanged}" />
+                            <MaskedTextBox:MaskedTextBox Grid.Column="1"
+                                                         HorizontalAlignment="Left"
+                                                         VerticalAlignment="Top"
+                                                         Mask="00:00:00"
+                                                         ToolTip="Time to stop examining exposures (hh:mm:ss)"
+                                                         ValueDataType="{x:Type System:String}"
+                                                         Value="{Binding StopTimeString,
+                                                                         ValidatesOnDataErrors=True,
+                                                                         UpdateSourceTrigger=PropertyChanged}" />
 
                         </StackPanel>
                     </RadioButton.Content>
                 </RadioButton>
             </StackPanel>
         </GroupBox>
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" IsEnabled="{Binding IsLogFileSelected}">
+        <StackPanel DockPanel.Dock="Top" IsEnabled="{Binding IsLogFileSelected}" Orientation="Horizontal">
             <GroupBox Header="Platforms">
-                <DockPanel LastChildFill="False" MinWidth="100">
-                    <ListBox Height="100"
-                             DockPanel.Dock="Top"
-                             BorderThickness="0"
-                             ItemsSource="{Binding AvailablePlatforms}">
+                <DockPanel MinWidth="100" LastChildFill="False">
+                    <ListBox Height="100" BorderThickness="0" DockPanel.Dock="Top" ItemsSource="{Binding AvailablePlatforms}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
@@ -72,18 +70,15 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                     <Button Width="75"
-                            DockPanel.Dock="Bottom"
                             HorizontalAlignment="Right"
                             Command="{Binding SelectAllPlatformsCommand}"
-                            Content="Select All" />
+                            Content="Select All"
+                            DockPanel.Dock="Bottom" />
                 </DockPanel>
             </GroupBox>
             <GroupBox Header="Modes">
-                <DockPanel LastChildFill="False" MinWidth="100">
-                    <ListBox Height="100"
-                             DockPanel.Dock="Top"
-                             BorderThickness="0"
-                             ItemsSource="{Binding AvailableModes}">
+                <DockPanel MinWidth="100" LastChildFill="False">
+                    <ListBox Height="100" BorderThickness="0" DockPanel.Dock="Top" ItemsSource="{Binding AvailableModes}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
@@ -91,18 +86,15 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                     <Button Width="75"
-                            DockPanel.Dock="Bottom"
                             HorizontalAlignment="Right"
                             Command="{Binding SelectAllModesCommand}"
-                            Content="Select All" />
+                            Content="Select All"
+                            DockPanel.Dock="Bottom" />
                 </DockPanel>
             </GroupBox>
             <GroupBox Header="Species">
-                <DockPanel LastChildFill="False" MinWidth="100">
-                    <ListBox Height="100"
-                             DockPanel.Dock="Top"
-                             BorderThickness="0"
-                             ItemsSource="{Binding AvailableSpecies}">
+                <DockPanel MinWidth="100" LastChildFill="False">
+                    <ListBox Height="100" BorderThickness="0" DockPanel.Dock="Top" ItemsSource="{Binding AvailableSpecies}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
@@ -110,10 +102,10 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                     <Button Width="75"
-                            DockPanel.Dock="Bottom"
                             HorizontalAlignment="Right"
                             Command="{Binding SelectAllSpeciesCommand}"
-                            Content="Select All" />
+                            Content="Select All"
+                            DockPanel.Dock="Bottom" />
                 </DockPanel>
             </GroupBox>
         </StackPanel>
@@ -122,31 +114,18 @@
                 <CheckBox Content="Species exposure histogram by mode" IsChecked="{Binding PerformOurOnlyAnalysis}" />
                 <StackPanel Margin="16 0 0 0" Orientation="Horizontal">
                     <TextBlock Text="Bin results using " />
-                    <TextBox MinWidth="30"
-                             Text="{Binding BinWidth}"
-                             ToolTip="The width of each histogram bin, in dB" />
+                    <TextBox MinWidth="30" Text="{Binding BinWidth}" ToolTip="The width of each histogram bin, in dB" />
                     <TextBlock Text=" dB bins, starting at " />
-                    <TextBox MinWidth="30"
-                             Text="{Binding StartBinValue}"
-                             ToolTip="The value of the lowest bin in the histogram, in dB" />
+                    <TextBox MinWidth="30" Text="{Binding StartBinValue}" ToolTip="The value of the lowest bin in the histogram, in dB" />
                     <TextBlock Text=" dB, across " />
-                    <TextBox MinWidth="30"
-                             Text="{Binding BinCount}"
-                             ToolTip="The number of bins in the histogram" />
+                    <TextBox MinWidth="30" Text="{Binding BinCount}" ToolTip="The number of bins in the histogram" />
                     <TextBlock Text=" bins " />
                 </StackPanel>
             </StackPanel>
         </GroupBox>
-        <StackPanel HorizontalAlignment="Right"
-                    DockPanel.Dock="Bottom"
-                    Orientation="Horizontal">
-            <Button Width="75"
-                    Margin="0 0 5 0"
-                    Command="{Binding AnalyzeCommand}"
-                    Content="Analyze" />
-            <Button Width="75"
-                    Command="{Binding CloseCommand}"
-                    Content="Close" />
+        <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
+            <Button Width="75" Margin="0 0 5 0" Command="{Binding AnalyzeCommand}" Content="Analyze" />
+            <Button Width="75" Command="{Binding CloseCommand}" Content="Close" />
         </StackPanel>
     </DockPanel>
 </Window>
