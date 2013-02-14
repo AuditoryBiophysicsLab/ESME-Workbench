@@ -286,5 +286,36 @@ namespace ESME.Views.Controls
         public Control TheLayerControl { get { return (Control)GetValue(TheLayerControlProperty); } set { SetValue(TheLayerControlProperty, value); } }
 
         #endregion
+
+        #region dependency property string ErrorIcon
+
+        public static DependencyProperty ErrorIconProperty = DependencyProperty.Register("ErrorIcon",
+                                                                                 typeof(string),
+                                                                                 typeof(LayerControl),
+                                                                                 new FrameworkPropertyMetadata(null));
+
+        public string ErrorIcon { get { return (string)GetValue(ErrorIconProperty); } set { SetValue(ErrorIconProperty, value); } }
+        #endregion
+
+        #region dependency property Visibility ErrorIconVisibility
+
+        public static DependencyProperty ErrorIconVisibilityProperty = DependencyProperty.Register("ErrorIconVisibility",
+                                                                                 typeof(Visibility),
+                                                                                 typeof(LayerControl),
+                                                                                 new FrameworkPropertyMetadata(Visibility.Visible));
+
+        public Visibility ErrorIconVisibility { get { return (Visibility)GetValue(ErrorIconVisibilityProperty); } set { SetValue(ErrorIconVisibilityProperty, value); } }
+        #endregion
+
+        #region dependency property string ErrorString
+
+        public static DependencyProperty ErrorStringProperty = DependencyProperty.Register("ErrorString",
+                                                                                 typeof(string),
+                                                                                 typeof(LayerControl),
+                                                                                 new FrameworkPropertyMetadata(null));
+
+        public string ErrorString { get { return (string)GetValue(ErrorStringProperty); } set { SetValue(ErrorStringProperty, value); } }
+        #endregion
+
     }
 }

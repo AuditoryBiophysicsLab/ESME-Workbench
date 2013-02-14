@@ -447,6 +447,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     {
                         var analysisPoint = new AnalysisPoint { Geo = new Geo(geo) };
                         Scenario.Add(analysisPoint);
+                        analysisPoint.CheckForErrors();
                     });
                 }
                 IsInAnalysisPointMode = false;

@@ -17,12 +17,14 @@ namespace ESMEWorkbench
     public partial class App
     {
         public static AppEventLog Log { get; private set; }
-        public static readonly string Logfile, DumpFile;
+        public static readonly string ApplicationDirectory, Logfile, DumpFile;
         public const string Name = "ESME Workbench";
 
         static App()
         {
-            Logfile = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Name), "app.log");
+            ApplicationDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Name);
+            if (!Directory.Exists(ApplicationDirectory)) Directory.CreateDirectory(ApplicationDirectory);
+            Logfile = Path.Combine(ApplicationDirectory, "app.log");
             if (File.Exists(Logfile)) File.Delete(Logfile);
             Trace.Listeners.Add(new TextWriterTraceListener(Logfile, "logfile") { TraceOutputOptions = TraceOptions.None });
             Trace.AutoFlush = true;

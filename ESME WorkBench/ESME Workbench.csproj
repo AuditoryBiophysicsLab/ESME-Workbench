@@ -480,6 +480,7 @@
     <None Include="External References\WpfDesktopEdition.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\SmallIcons\exclamation.png" />
     <Resource Include="App_Readme\MathNet.Numerics.readme.txt" />
     <Resource Include="App_Readme\MathNet.Numerics.copyright.txt" />
     <Resource Include="App_Readme\MathNet.Numerics.authors.txt" />

@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -34,6 +35,27 @@ namespace ESME.Scenarios
         [Initialize] public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
 
         [NotMapped] public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", Geo.Latitude, Geo.Longitude); } }
+        [NotMapped] public bool HasErrors { get; set; }
+        [NotMapped] public string Errors { get; set; }
+        public void CheckForErrors()
+        {
+            var radialsOutsideScenarioBounds = (from transmissionLoss in TransmissionLosses
+                                                from radial in transmissionLoss.Radials
+                                                where !((GeoRect)Scenario.Location.GeoRect).Contains(radial.Segment[1])
+                                                select radial).ToList();
+            if (radialsOutsideScenarioBounds.Count > 0)
+            {
+                Errors = string.Format("  • One or more radials extend outside the location boundaries.");
+                Debug.WriteLine("Analysis point at {0}, one or more radials extend outside the location boundaries.", (Geo)Geo);
+                HasErrors = true;
+            }
+            else
+            {
+                Errors = string.Empty;
+                HasErrors = false;
+            }
+        }
+
         #region INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)

@@ -443,16 +443,20 @@ namespace ESME.Scenarios
         /// <param name="mode"></param>
         public static void NotifyRadiusChanged(this Scenario scenario, Mode mode)
         {
-            foreach (var transmissionLoss in from tl in mode.TransmissionLosses
+            var affectedTranmissionLosses = (from tl in mode.TransmissionLosses
                                              let maxRadius = tl.Modes.Max(m => m.MaxPropagationRadius)
                                              where tl.Radials != null && tl.Radials.Count > 0 && tl.Radials[0].Length < maxRadius
-                                             select tl)
+                                             select tl).ToList();
+            var affectedAnalysisPoints = (from tl in affectedTranmissionLosses
+                                          select tl.AnalysisPoint).Distinct().ToList();
+            foreach (var transmissionLoss in affectedTranmissionLosses)
             {
                 var depth = mode.Source.Platform.Depth;
                 if (mode.Depth.HasValue) depth += mode.Depth.Value;
                 Debug.WriteLine(string.Format("Recalculating TL: {0}Hz, {1}Hz, {2}m, {3}deg, {4}deg in analysis point at ({5:0.###}, {6:0.###}) due to radius change. Old radius: {7}m, new radius {8}m", mode.HighFrequency, mode.LowFrequency, depth, mode.VerticalBeamWidth, mode.DepressionElevationAngle, transmissionLoss.AnalysisPoint.Geo.Latitude, transmissionLoss.AnalysisPoint.Geo.Longitude, transmissionLoss.Radials[0].Length, transmissionLoss.Modes.Max(m => m.MaxPropagationRadius)));
                 transmissionLoss.Recalculate();
             }
+            foreach (var analysisPoint in affectedAnalysisPoints) analysisPoint.CheckForErrors();
         }
 
         public static void NotifyAcousticsChanged(this Scenario scenario, Mode mode)
@@ -544,15 +548,27 @@ namespace ESME.Scenarios
                                             from transmissionLoss in analysisPoint.TransmissionLosses
                                             from radial in transmissionLoss.Radials
                                             where !File.Exists(radial.BasePath + ".shd")
-                                            select radial).Count();
-                if (radialsNotCalculated != 0)
+                                            select radial).ToList();
+                if (radialsNotCalculated.Count != 0)
                 {
                     //var radialList = (from analysisPoint in scenario.AnalysisPoints
                     //                  from transmissionLoss in analysisPoint.TransmissionLosses
                     //                  from radial in transmissionLoss.Radials
                     //                  where !File.Exists(radial.BasePath + ".shd")
                     //                  select radial).ToList();
-                    sb.AppendLine(string.Format("  • There are still {0} radials awaiting calculation in this scenario.", radialsNotCalculated));
+
+                    var radialsOutsideScenarioBounds = (from radial in radialsNotCalculated
+                                                        where !((GeoRect)scenario.Location.GeoRect).Contains(radial.Segment[1])
+                                                        select radial).ToList();
+                    var analysisPointsInError = (from radial in radialsOutsideScenarioBounds
+                                                 where !((GeoRect)scenario.Location.GeoRect).Contains(radial.Segment[1])
+                                                 select radial.TransmissionLoss.AnalysisPoint).Distinct().ToList();
+                    var radialsNotYetCalculatedCount = radialsNotCalculated.Except(radialsOutsideScenarioBounds).Count();
+                    if (radialsNotYetCalculatedCount > 0) sb.AppendLine(string.Format("  • There are still {0} radials awaiting calculation in this scenario.", radialsNotYetCalculatedCount));
+                    if (analysisPointsInError.Count > 0)
+                        sb.AppendLine(analysisPointsInError.Count == 1
+                                          ? string.Format("  • An analysis point has one or more radials that extend outside the location boundaries.")
+                                          : string.Format("  • {0} analysis points have radials that extend outside the location boundaries.", analysisPointsInError.Count));
                 }
             }
 

@@ -33,6 +33,7 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <CheckBox Grid.Row="0"
@@ -65,7 +66,7 @@
                                     </ToggleButton.Template>
                                 </ToggleButton>
                                 <Popup x:Name="LineColorPopup" IsOpen="{Binding IsChecked, ElementName=LineColorToggle}" StaysOpen="False">
-                                    <Border BorderBrush="Black" BorderThickness="1" Background="LightYellow">
+                                    <Border Background="LightYellow" BorderBrush="Black" BorderThickness="1">
                                         <StackPanel Orientation="Vertical">
                                             <TextBlock Margin="5 5 5 2" Text="Color" />
                                             <colorPicker:ColorPicker Padding="5" SelectedColor="{Binding Path=LineOrSymbolColor, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:LayerControl}}, Mode=TwoWay}" />
@@ -83,7 +84,12 @@
                                         </StackPanel>
                                     </Border>
                                 </Popup>
-                                <ContentPresenter x:Name="LayerName" Grid.Row="0" Grid.Column="2" Content="{TemplateBinding LayerNameContentControl}" />
+                                <Image Grid.Row="0"
+                                       Grid.Column="2"
+                                       Source="{TemplateBinding ErrorIcon}"
+                                       ToolTip="{TemplateBinding ErrorString}"
+                                       Visibility="{TemplateBinding ErrorIconVisibility}" />
+                                <ContentPresenter x:Name="LayerName" Grid.Row="0" Grid.Column="3" Content="{TemplateBinding LayerNameContentControl}" />
                                 <!--
                                     <ContentPresenter x:Name="ContextControls"
                                     Grid.Row="1"
