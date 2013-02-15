@@ -1,6 +1,10 @@
+using System;
+using System.Collections.Specialized;
 using System.Linq;
 using ESME;
 using ESME.Scenarios;
+using HRC;
+using HRC.Navigation;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -8,14 +12,56 @@ namespace ESMEWorkbench.ViewModels.Tree
 {
     public class AnalysisPointsNode : ViewModelBase, IMouseOverAware
     {
-        public AnalysisPointsNode(Scenario scenario) { Scenario = scenario; }
+        [UsedImplicitly] PropertyObserver<AnalysisPointsNode> _propertyObserver;
+        CollectionObserver _collectionObserver;
+        public AnalysisPointsNode(Scenario scenario)
+        {
+            _propertyObserver = new PropertyObserver<AnalysisPointsNode>(this)
+                .RegisterHandler(p => p.Scenario,
+                                 () =>
+                                 {
+                                     if (_collectionObserver != null) _collectionObserver.UnregisterHandler(AnalysisPointCollectionChanged);
+                                     else _collectionObserver = new CollectionObserver(Scenario.AnalysisPoints);
+                                     _collectionObserver.RegisterHandler(AnalysisPointCollectionChanged);
+                                 }
+                );
+            Scenario = scenario;
+            CheckForErrors();
+        }
+
+        void AnalysisPointCollectionChanged(INotifyCollectionChanged notifyCollectionChanged, NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
+        {
+            CheckForErrors();
+        }
 
         public Scenario Scenario { get; set; }
 
         public bool IsMouseOver
         {
-            get { throw new System.NotImplementedException(); }
-            set { throw new System.NotImplementedException(); }
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+        public bool HasErrors { get; set; }
+        public string Errors { get; set; }
+        public void CheckForErrors()
+        {
+            var analysisPointsWithRadialsOutsideLocationBounds = (from analysisPoint in Scenario.AnalysisPoints
+                                                                  from transmissionLoss in analysisPoint.TransmissionLosses
+                                                                  from radial in transmissionLoss.Radials
+                                                                  where !((GeoRect)Scenario.Location.GeoRect).Contains(radial.Segment[1])
+                                                                  select analysisPoint).Distinct().ToList();
+            if (analysisPointsWithRadialsOutsideLocationBounds.Count > 0)
+            {
+                Errors = analysisPointsWithRadialsOutsideLocationBounds.Count == 1
+                             ? string.Format("An analysis point has one or more radials that extend outside the location boundaries")
+                             : string.Format("{0} analysis points have radials that extend outside the location boundaries", analysisPointsWithRadialsOutsideLocationBounds.Count);
+                HasErrors = true;
+            }
+            else
+            {
+                Errors = string.Empty;
+                HasErrors = false;
+            }
         }
 
         #region DeleteAllCommand

@@ -45,7 +45,7 @@ namespace ESME.Scenarios
                                                 select radial).ToList();
             if (radialsOutsideScenarioBounds.Count > 0)
             {
-                Errors = string.Format("  • One or more radials extend outside the location boundaries.");
+                Errors = string.Format("One or more radials extend outside the location boundaries");
                 Debug.WriteLine("Analysis point at {0}, one or more radials extend outside the location boundaries.", (Geo)Geo);
                 HasErrors = true;
             }

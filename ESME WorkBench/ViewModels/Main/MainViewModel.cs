@@ -448,6 +448,8 @@ namespace ESMEWorkbench.ViewModels.Main
                         var analysisPoint = new AnalysisPoint { Geo = new Geo(geo) };
                         Scenario.Add(analysisPoint);
                         analysisPoint.CheckForErrors();
+                        var analysisPointsNode = (AnalysisPointsNode)LayerTreeViewModel.RootNodes.FirstOrDefault(n => n.GetType() == typeof(AnalysisPointsNode));
+                        if (analysisPointsNode != null) analysisPointsNode.CheckForErrors();
                     });
                 }
                 IsInAnalysisPointMode = false;

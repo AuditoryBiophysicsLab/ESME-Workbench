@@ -421,7 +421,7 @@ namespace StandardTransmissionLossEngines
             if (File.Exists(Path.Combine(tempDirectory, "p.grid")))
             {
                 var pressures = ReadPGrid(Path.Combine(tempDirectory, "p.grid"));
-                File.Copy(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid");
+                File.Copy(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid", true);
                 //File.Delete(radial.BasePath + ".pgrid");
                 var rangeCount = pressures.Count;
                 var depthCount = pressures[0].Length;

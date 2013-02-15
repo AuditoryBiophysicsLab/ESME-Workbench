@@ -73,8 +73,15 @@
             </Style.Triggers>
         </Style>
         <hrc:BooleanNegatingConverter x:Key="NegatingConverter" />
-        <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed" FalseValue="Collapsed" TrueValue="Visible" />
-        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed" FalseValue="Visible" TrueValue="Collapsed" />
+        <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed"
+                                          FalseValue="Collapsed"
+                                          TrueValue="Visible" />
+        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed"
+                                          FalseValue="Visible"
+                                          TrueValue="Collapsed" />
+        <hrc:BooleanToVisibilityConverter x:Key="FalseHiddenTrueCollapsed"
+                                          FalseValue="Hidden"
+                                          TrueValue="Collapsed" />
         <ResourceDictionary x:Key="ControlTemplates">
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="ControlTemplates\Shared.xaml" />
