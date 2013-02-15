@@ -485,7 +485,7 @@
                     </Controls:LayerControl>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type Scenarios:AnalysisPoint}">
-                    <Controls:LayerControl ErrorIcon="../Images/SmallIcons/exclamation.png"
+                    <Controls:LayerControl ErrorIcon="../Images/SmallIcons/error_small.png"
                                            ErrorString="{Binding Errors}"
                                            ErrorIconVisibility="{Binding HasErrors, Converter={StaticResource TrueVisibleFalseCollapsed}}"
                                            IsChecked="{Binding LayerSettings.IsChecked}"
