@@ -86,9 +86,15 @@
                                 </Popup>
                                 <Image Grid.Row="0"
                                        Grid.Column="2"
-                                       Source="{TemplateBinding ErrorIcon}"
-                                       ToolTip="{TemplateBinding ErrorString}"
-                                       Visibility="{TemplateBinding ErrorIconVisibility}" />
+                                       Source="{Binding Path=ErrorIcon,
+                                                        RelativeSource={RelativeSource FindAncestor,
+                                                                                       AncestorType={x:Type Controls:LayerControl}}}"
+                                       ToolTip="{Binding Path=ErrorString,
+                                                         RelativeSource={RelativeSource FindAncestor,
+                                                                                        AncestorType={x:Type Controls:LayerControl}}}"
+                                       Visibility="{Binding Path=ErrorIconVisibility,
+                                                            RelativeSource={RelativeSource FindAncestor,
+                                                                                           AncestorType={x:Type Controls:LayerControl}}}" />
                                 <ContentPresenter x:Name="LayerName" Grid.Row="0" Grid.Column="3" Content="{TemplateBinding LayerNameContentControl}" />
                                 <!--
                                     <ContentPresenter x:Name="ContextControls"

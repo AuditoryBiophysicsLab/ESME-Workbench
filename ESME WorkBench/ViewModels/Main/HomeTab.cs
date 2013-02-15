@@ -94,6 +94,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     _scenario.Location.LayerSettings.IsChecked = true;
                     MediatorMessage.Send(MediatorMessage.SetMapExtent, (GeoRect)_scenario.Location.GeoRect);
                     MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+                    foreach (var analysisPoint in _scenario.AnalysisPoints) analysisPoint.CheckForErrors();
                 }
                 catch (Exception e)
                 {
