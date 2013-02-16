@@ -89,7 +89,7 @@ namespace ESME.Views.TransmissionLossViewer
                 if (Radial == null) WaitToRenderText = "Please wait...";
                 else
                 {
-                    if (Radial.Errors.Count == 0) WaitToRenderText = "This radial has not yet been calculated";
+                    if (!Radial.HasErrors) WaitToRenderText = "This radial has not yet been calculated";
                     else
                     {
                         var sb = new StringBuilder();

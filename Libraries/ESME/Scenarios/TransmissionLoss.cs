@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Windows.Threading;
 using ESME.Locations;
 using ESME.Mapping;
+using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
@@ -19,14 +22,72 @@ namespace ESME.Scenarios
     public class TransmissionLoss : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
     {
         [Key, Initialize] public Guid Guid { get; set; }
+        [UsedImplicitly] CollectionObserver _collectionObserver;
+        Dictionary<Guid, PropertyObserver<Radial>> _radialObservers;
         public TransmissionLoss() { Initialize(); }
 
         void Initialize()
         {
+            Radials = new ObservableList<Radial>();
+            _radialObservers = new Dictionary<Guid, PropertyObserver<Radial>>();
+            _collectionObserver = new CollectionObserver(Radials).RegisterHandler(RadialCollectionChanged);
             var lineColor = LayerSettings.LineOrSymbolColor;
             lineColor.ScA = 0.5f;   // Set the default alpha channel for this TransmissionLoss to 50%
             LayerSettings.LineOrSymbolColor = lineColor;
             LayerSettings.DisplayIfScenarioIsLoadedFunc = () => AnalysisPoint.Scenario.IsLoaded;
+        }
+        void RadialCollectionChanged(INotifyCollectionChanged collection, NotifyCollectionChangedEventArgs args)
+        {
+            switch (args.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (Radial newItem in args.NewItems) 
+                        _radialObservers.Add(newItem.Guid, new PropertyObserver<Radial>(newItem).RegisterHandler(p => p.HasErrors, CheckForErrors));
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (Radial oldItem in args.OldItems)
+                    {
+                        _radialObservers[oldItem.Guid].UnregisterHandler(p => p.HasErrors);
+                        _radialObservers.Remove(oldItem.Guid);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    foreach (Radial oldItem in args.OldItems)
+                    {
+                        _radialObservers[oldItem.Guid].UnregisterHandler(p => p.HasErrors);
+                        _radialObservers.Remove(oldItem.Guid);
+                    }
+                    foreach (Radial newItem in args.NewItems) 
+                        _radialObservers.Add(newItem.Guid, new PropertyObserver<Radial>(newItem).RegisterHandler(p => p.HasErrors, CheckForErrors));
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    foreach (var observer in _radialObservers) observer.Value.UnregisterHandler(p => p.HasErrors);
+                    _radialObservers.Clear();
+                    break;
+            }
+            CheckForErrors();
+        }
+
+        [NotMapped] public bool HasErrors { get; private set; }
+        [NotMapped] public string Errors { get; private set; }
+        public void CheckForErrors()
+        {
+            var radialsWithErrors = (from radial in Radials
+                                     orderby radial.Bearing
+                                     where radial.HasErrors
+                                     select radial).ToList();
+            var sb = new StringBuilder();
+            if (radialsWithErrors.Count > 0)
+            {
+                var maxMode = (from mode in Modes
+                               orderby mode.MaxPropagationRadius descending
+                               select mode).First();
+                sb.AppendLine(string.Format("Sound field for mode {0}:{1}:{2}{3} contains errors", maxMode.Source.Platform.PlatformName, maxMode.Source.SourceName, maxMode.ModeName, Modes.Count == 1 ? "" : string.Format(" [and {0} other(s)]", Modes.Count - 1)));
+                foreach (var radial in Modes.SelectMany(mode => radialsWithErrors)) sb.AppendLine(String.Format("  • {0}", radial.Errors));
+            }
+            Errors = sb.ToString().TrimEnd();
+            if (!string.IsNullOrEmpty(Errors)) Debug.WriteLine(Errors);
+            HasErrors = string.IsNullOrEmpty(Errors);
         }
 
         public bool IsReadyToCalculate { get; set; }
@@ -34,7 +95,7 @@ namespace ESME.Scenarios
         //public virtual Mode Mode { get; set; }
         [Initialize] public virtual ObservableList<Mode> Modes { get; set; }
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
-        [Initialize] public virtual ObservableList<Radial> Radials { get; set; }
+        public virtual ObservableList<Radial> Radials { get; set; }
         #region INotifyPropertyChanged implementation
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)

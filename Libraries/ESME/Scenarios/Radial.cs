@@ -1,24 +1,37 @@
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using ESME.Database;
 using ESME.Locations;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
+using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
-using HRC.Utility;
+using HRC.ViewModels;
+using HRC.WPF;
 
 namespace ESME.Scenarios
 {
     [NotifyPropertyChanged]
-    public class Radial : IHaveGuid
+    public class Radial : IHaveGuid, INotifyPropertyChanged
     {
         public static TransmissionLossCalculatorService TransmissionLossCalculator;
-        public Radial() { Filename = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()); }
+        [UsedImplicitly] PropertyObserver<Radial> _propertyObserver;
+        public Radial()
+        {
+            _propertyObserver = new PropertyObserver<Radial>(this)
+                .RegisterHandler(p => p.Bearing, CheckForErrors)
+                .RegisterHandler(p => p.Length, CheckForErrors)
+                .RegisterHandler(p => p.TransmissionLoss, CheckForErrors);
+            Filename = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+        }
+
         public Radial(Radial radial) : this()
         {
             IsCalculated = radial.IsCalculated;
@@ -27,6 +40,7 @@ namespace ESME.Scenarios
             Bearing = radial.Bearing;
             Length = radial.Length;
         }
+
         public void CopyFiles(Radial radial)
         {
             var files = Directory.GetFiles(Path.GetDirectoryName(radial.BasePath), Path.GetFileNameWithoutExtension(radial.BasePath) + ".*");
@@ -105,12 +119,32 @@ namespace ESME.Scenarios
             Scenario.Database.Context.Radials.Remove(this);
         }
 
-        [NotMapped, Initialize] public ObservableList<string> Errors { get; set; }
         [NotMapped] public BottomProfilePoint[] BottomProfile { get { return _bottomProfile ?? (_bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty")); } }
         BottomProfilePoint[] _bottomProfile;
 
-        [NotMapped]
-        public GeoSegment Segment { get { return new GeoSegment(TransmissionLoss.AnalysisPoint.Geo, Length, Bearing); } }
+        [NotMapped] public GeoSegment Segment { get { return new GeoSegment(TransmissionLoss.AnalysisPoint.Geo, Length, Bearing); } }
+
+        [NotMapped] public bool HasErrors { get; private set; }
+
+        [NotMapped] public string Errors { get; private set; }
+
+        public void CheckForErrors()
+        {
+            if (TransmissionLoss == null || TransmissionLoss.AnalysisPoint == null || TransmissionLoss.AnalysisPoint.Geo == null) return;
+            var segment = Segment;
+            var geoRect = (GeoRect)TransmissionLoss.AnalysisPoint.Scenario.Location.GeoRect;
+            if (!geoRect.Contains(segment[1]))
+            {
+                Errors = String.Format("Radial at bearing {0:0.##} degrees extends outside the location boundary", Bearing);
+                //Debug.WriteLine(Errors);
+                HasErrors = true;
+            }
+            else
+            {
+                Errors = string.Empty;
+                HasErrors = false;
+            }
+        }
 
         [NotMapped] public bool IsDeleted { get; set; }
 
@@ -295,5 +329,24 @@ namespace ESME.Scenarios
             foreach (var file in files) File.Delete(file);
             TransmissionLossCalculator.Add(this);
         }
+
+        #region INotifyPropertyChanged implementation
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            var handlers = PropertyChanged;
+            if (handlers == null) return;
+            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                {
+                    var localHandler = handler;
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new PropertyChangedEventArgs(propertyName)));
+                }
+                else
+                    handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
     }
 }

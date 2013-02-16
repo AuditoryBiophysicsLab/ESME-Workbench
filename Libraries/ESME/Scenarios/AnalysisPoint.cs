@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Input;
 using System.Windows.Threading;
 using ESME.Database;
 using ESME.Locations;
+using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
@@ -19,41 +22,78 @@ namespace ESME.Scenarios
     [NotifyPropertyChanged]
     public class AnalysisPoint : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
     {
-        public AnalysisPoint() { }
-        public AnalysisPoint(AnalysisPoint analysisPoint) { Copy(analysisPoint); }
+        [UsedImplicitly] CollectionObserver _collectionObserver;
+        Dictionary<Guid, PropertyObserver<TransmissionLoss>> _transmissionLossObservers;
+
+        public AnalysisPoint() { Initialize(); }
+        public AnalysisPoint(AnalysisPoint analysisPoint): this() { Copy(analysisPoint); }
         void Copy(AnalysisPoint analysisPoint)
         {
             Geo = new Geo(analysisPoint.Geo);
             LayerSettings = new LayerSettings(analysisPoint.LayerSettings);
         }
-
+        void Initialize()
+        {
+            TransmissionLosses = new ObservableList<TransmissionLoss>();
+            _transmissionLossObservers = new Dictionary<Guid, PropertyObserver<TransmissionLoss>>();
+            _collectionObserver = new CollectionObserver(TransmissionLosses).RegisterHandler(TransmissionLossCollectionChanged);
+        }
+        void TransmissionLossCollectionChanged(INotifyCollectionChanged collection, NotifyCollectionChangedEventArgs args)
+        {
+            switch (args.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (TransmissionLoss newItem in args.NewItems)
+                        _transmissionLossObservers.Add(newItem.Guid, new PropertyObserver<TransmissionLoss>(newItem).RegisterHandler(p => p.HasErrors, CheckForErrors));
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (Radial oldItem in args.OldItems)
+                    {
+                        _transmissionLossObservers[oldItem.Guid].UnregisterHandler(p => p.HasErrors);
+                        _transmissionLossObservers.Remove(oldItem.Guid);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    foreach (Radial oldItem in args.OldItems)
+                    {
+                        _transmissionLossObservers[oldItem.Guid].UnregisterHandler(p => p.HasErrors);
+                        _transmissionLossObservers.Remove(oldItem.Guid);
+                    }
+                    foreach (TransmissionLoss newItem in args.NewItems)
+                        _transmissionLossObservers.Add(newItem.Guid, new PropertyObserver<TransmissionLoss>(newItem).RegisterHandler(p => p.HasErrors, CheckForErrors));
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    foreach (var observer in _transmissionLossObservers) observer.Value.UnregisterHandler(p => p.HasErrors);
+                    _transmissionLossObservers.Clear();
+                    break;
+            }
+            CheckForErrors();
+        }
         [Key, Initialize] public Guid Guid { get; set; }
         public DbGeo Geo { get; set; }
 
         public virtual Scenario Scenario { get; set; }
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
-        [Initialize] public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
+        public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
 
         [NotMapped] public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", Geo.Latitude, Geo.Longitude); } }
         [NotMapped] public bool HasErrors { get; set; }
         [NotMapped] public string Errors { get; set; }
         public void CheckForErrors()
         {
-            var radialsOutsideScenarioBounds = (from transmissionLoss in TransmissionLosses
-                                                from radial in transmissionLoss.Radials
-                                                where !((GeoRect)Scenario.Location.GeoRect).Contains(radial.Segment[1])
-                                                select radial).ToList();
-            if (radialsOutsideScenarioBounds.Count > 0)
+            var transmissionLossesWithErrors = (from transmissionLoss in TransmissionLosses
+                                                where transmissionLoss.HasErrors
+                                                orderby transmissionLoss.Modes[0].HighFrequency
+                                                select transmissionLoss).ToList();
+            var sb = new StringBuilder();
+            if (transmissionLossesWithErrors.Count > 0)
             {
-                Errors = string.Format("One or more radials extend outside the location boundaries");
-                Debug.WriteLine("Analysis point at {0}, one or more radials extend outside the location boundaries.", (Geo)Geo);
-                HasErrors = true;
+                sb.AppendLine(string.Format("Analysis point at {0} has {1}:", (Geo)Geo, transmissionLossesWithErrors.Count == 1 ? "an error" : "errors"));
+                foreach (var transmissionLoss in transmissionLossesWithErrors) sb.AppendLine("+ " + transmissionLoss.Errors);
             }
-            else
-            {
-                Errors = string.Empty;
-                HasErrors = false;
-            }
+            Errors = sb.ToString().TrimEnd();
+            if (!string.IsNullOrEmpty(Errors)) Debug.WriteLine(Errors);
+            HasErrors = string.IsNullOrEmpty(Errors);
         }
 
         #region INotifyPropertyChanged implementation
