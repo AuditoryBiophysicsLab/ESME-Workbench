@@ -82,7 +82,7 @@ namespace ESME.Scenarios
         public void CheckForErrors()
         {
             var transmissionLossesWithErrors = (from transmissionLoss in TransmissionLosses
-                                                where transmissionLoss.HasErrors
+                                                where transmissionLoss.HasErrors && transmissionLoss.Modes != null && transmissionLoss.Modes.Count > 0
                                                 orderby transmissionLoss.Modes[0].HighFrequency
                                                 select transmissionLoss).ToList();
             var sb = new StringBuilder();
@@ -93,7 +93,7 @@ namespace ESME.Scenarios
             }
             Errors = sb.ToString().TrimEnd();
             if (!string.IsNullOrEmpty(Errors)) Debug.WriteLine(Errors);
-            HasErrors = string.IsNullOrEmpty(Errors);
+            HasErrors = !string.IsNullOrEmpty(Errors);
         }
 
         #region INotifyPropertyChanged implementation

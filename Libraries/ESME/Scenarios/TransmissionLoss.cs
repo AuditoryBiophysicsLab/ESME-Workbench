@@ -87,7 +87,7 @@ namespace ESME.Scenarios
             }
             Errors = sb.ToString().TrimEnd();
             if (!string.IsNullOrEmpty(Errors)) Debug.WriteLine(Errors);
-            HasErrors = string.IsNullOrEmpty(Errors);
+            HasErrors = !string.IsNullOrEmpty(Errors);
         }
 
         public bool IsReadyToCalculate { get; set; }
