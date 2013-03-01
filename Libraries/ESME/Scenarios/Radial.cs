@@ -5,31 +5,37 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 using ESME.Database;
 using ESME.Locations;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
-using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
-using HRC.ViewModels;
-using HRC.WPF;
 
 namespace ESME.Scenarios
 {
     [NotifyPropertyChanged]
-    public class Radial : IHaveGuid, INotifyPropertyChanged
+    public class Radial : IHaveGuid
     {
         public static TransmissionLossCalculatorService TransmissionLossCalculator;
-        [UsedImplicitly] PropertyObserver<Radial> _propertyObserver;
         public Radial()
         {
-            _propertyObserver = new PropertyObserver<Radial>(this)
-                .RegisterHandler(p => p.Bearing, CheckForErrors)
-                .RegisterHandler(p => p.Length, CheckForErrors)
-                .RegisterHandler(p => p.TransmissionLoss, CheckForErrors);
             Filename = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+            var npc = (INotifyPropertyChanged)this;
+            npc.PropertyChanged += (s, e) =>
+            {
+                // For reasons I don't fully understand, using the WeakEventListener pattern here (via PropertyObserver<Radial>)
+                // causes some kind of aberrant behavior whereby adding a new AnalysisPoint won't cause the TL's to calculate
+                // properly.  Doing it old-school like this DOES seem to work.
+                switch (e.PropertyName)
+                {
+                    case "Bearing":
+                    case "Length":
+                    case "TransmissionLoss":
+                        CheckForErrors();
+                        break;
+                }
+            };
         }
 
         public Radial(Radial radial) : this()
@@ -131,19 +137,28 @@ namespace ESME.Scenarios
         public void CheckForErrors()
         {
             if (TransmissionLoss == null || TransmissionLoss.AnalysisPoint == null || TransmissionLoss.AnalysisPoint.Geo == null) return;
-            var segment = Segment;
-            var geoRect = (GeoRect)TransmissionLoss.AnalysisPoint.Scenario.Location.GeoRect;
-            if (!geoRect.Contains(segment[1]))
+            if (Length <= 0)
             {
-                Errors = String.Format("Radial at bearing {0:0.##} degrees extends outside the location boundary", Bearing);
-                //Debug.WriteLine(Errors);
+                Errors = String.Format("Radial at bearing {0:0.##} has an invalid length ({1:0:0.#}m)", Bearing, Length);
                 HasErrors = true;
             }
             else
             {
-                Errors = string.Empty;
-                HasErrors = false;
+                var segment = Segment;
+                var geoRect = (GeoRect)TransmissionLoss.AnalysisPoint.Scenario.Location.GeoRect;
+                if (!geoRect.Contains(segment[1]))
+                {
+                    Errors = String.Format("Radial at bearing {0:0.##} degrees extends outside the location boundary", Bearing);
+                    //Debug.WriteLine(Errors);
+                    HasErrors = true;
+                }
+                else
+                {
+                    Errors = string.Empty;
+                    HasErrors = false;
+                }
             }
+            TransmissionLoss.CheckForErrors();
         }
 
         [NotMapped] public bool IsDeleted { get; set; }
@@ -329,24 +344,5 @@ namespace ESME.Scenarios
             foreach (var file in files) File.Delete(file);
             TransmissionLossCalculator.Add(this);
         }
-
-        #region INotifyPropertyChanged implementation
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-        {
-            var handlers = PropertyChanged;
-            if (handlers == null) return;
-            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
-            {
-                if (handler.Target is DispatcherObject)
-                {
-                    var localHandler = handler;
-                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new PropertyChangedEventArgs(propertyName)));
-                }
-                else
-                    handler(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-        #endregion
     }
 }

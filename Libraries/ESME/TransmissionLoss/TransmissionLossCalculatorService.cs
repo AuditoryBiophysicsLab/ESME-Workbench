@@ -108,6 +108,7 @@ namespace ESME.TransmissionLoss
             }
         }
 
+#if false
         public void Add(Radial radial)
         {
             if (radial.HasErrors) return;
@@ -117,6 +118,23 @@ namespace ESME.TransmissionLoss
             WorkQueue.Add(radial.Guid, radialProgress);
             _calculatorQueue.Post(radialProgress);
         }
+#else
+        public void Add(Radial radial)
+        {
+            var geoRect = (GeoRect)radial.TransmissionLoss.AnalysisPoint.Scenario.Location.GeoRect;
+            if (!geoRect.Contains(radial.Segment[0]) || !geoRect.Contains(radial.Segment[1]))
+            {
+                //radial.Errors.Add("This radial extends beyond the location boundaries");
+                return;
+            }
+            //Debug.WriteLine("{0}: Queueing calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}", DateTime.Now, radial.Bearing, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo); 
+            PercentProgress<Radial> radialProgress;
+            if (WorkQueue.TryGetValue(radial.Guid, out radialProgress)) return;
+            radialProgress = new PercentProgress<Radial>(radial);
+            WorkQueue.Add(radial.Guid, radialProgress);
+            _calculatorQueue.Post(radialProgress);
+        }
+#endif
 
         public void TestAdd(Radial radial)
         {

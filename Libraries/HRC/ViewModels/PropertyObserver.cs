@@ -15,7 +15,7 @@ namespace HRC.ViewModels
     /// </summary>
     /// <typeparam name="TPropertySource">The type of object to monitor for property changes.</typeparam>
     public class PropertyObserver<TPropertySource> : IWeakEventListener
-        where TPropertySource : class, INotifyPropertyChanged
+        where TPropertySource : class
     {
         #region Constructor
 
@@ -59,10 +59,10 @@ namespace HRC.ViewModels
                 throw new ArgumentNullException("handler");
 
             var propertySource = GetPropertySource();
-            if (propertySource != null)
+            if (propertySource != null && propertySource is INotifyPropertyChanged)
             {
                 _propertyNameToHandlerWithArgumentMap[propertyName] = handler;
-                PropertyChangedEventManager.AddListener(propertySource, this, propertyName);
+                PropertyChangedEventManager.AddListener((INotifyPropertyChanged)propertySource, this, propertyName);
             }
 
             return this;
@@ -87,10 +87,10 @@ namespace HRC.ViewModels
                 throw new ArgumentNullException("handler");
 
             var propertySource = GetPropertySource();
-            if (propertySource != null)
+            if (propertySource != null && propertySource is INotifyPropertyChanged)
             {
                 _propertyNameToHandlerWithoutArgumentMap[propertyName] = handler;
-                PropertyChangedEventManager.AddListener(propertySource, this, propertyName);
+                PropertyChangedEventManager.AddListener((INotifyPropertyChanged)propertySource, this, propertyName);
             }
 
             return this;
@@ -113,17 +113,17 @@ namespace HRC.ViewModels
                 throw new ArgumentException("'expression' did not provide a property name.");
 
             var propertySource = GetPropertySource();
-            if (propertySource != null)
+            if (propertySource != null && propertySource is INotifyPropertyChanged)
             {
                 if (_propertyNameToHandlerWithArgumentMap.ContainsKey(propertyName))
                 {
                     _propertyNameToHandlerWithArgumentMap.Remove(propertyName);
-                    PropertyChangedEventManager.RemoveListener(propertySource, this, propertyName);
+                    PropertyChangedEventManager.RemoveListener((INotifyPropertyChanged)propertySource, this, propertyName);
                 }
                 if (_propertyNameToHandlerWithoutArgumentMap.ContainsKey(propertyName))
                 {
                     _propertyNameToHandlerWithoutArgumentMap.Remove(propertyName);
-                    PropertyChangedEventManager.RemoveListener(propertySource, this, propertyName);
+                    PropertyChangedEventManager.RemoveListener((INotifyPropertyChanged)propertySource, this, propertyName);
                 }
             }
 

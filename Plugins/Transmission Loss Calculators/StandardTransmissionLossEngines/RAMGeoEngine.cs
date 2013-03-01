@@ -7,12 +7,10 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using ESME;
 using ESME.Environment;
 using ESME.Model;
-using ESME.NEMO;
 using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
@@ -210,7 +208,7 @@ namespace StandardTransmissionLossEngines
             // if dz < 1m round dz down to either [1/10, 1/5, 1/4 or 1/2] m  ... or multiples of 10^-n of these numbers
             //                                  = [1     2    2.5 or 5  ] x 0.1m  "   " ...
             // if dz > 1m round dz down to either [1     2    2.5    5  ] m  ... or multiples of 10^+n of these numbers
-            var fixpoints = new List<double> { 1, 2, 2.5, 5 };
+            // var fixpoints = new List<double> { 1, 2, 2.5, 5 };
             // dz = 0.1 * lambda
             var dz = RelativeDepthResolution * lambda;
             // make dz a 'pretty' number
@@ -248,11 +246,11 @@ namespace StandardTransmissionLossEngines
             // (including the attentuation layer if, as recommended, this is included)
             var zmax = maxSubstrateDepth + attenuationLayerDz;
             var envFileName = radial.BasePath + ".env";
-            Debug.WriteLine("Scenario: '{0}' Mode: '{2}' Analysis point: {1} Bearing: {3}, zmplt: {4}",
-                            radial.TransmissionLoss.AnalysisPoint.Scenario.Name,
-                            radial.TransmissionLoss.AnalysisPoint.Geo,
-                            radial.TransmissionLoss.Modes[0].ModeName,
-                            radial.Bearing, zmplt);
+            //Debug.WriteLine("Scenario: '{0}' Mode: '{2}' Analysis point: {1} Bearing: {3}, zmplt: {4}",
+            //                radial.TransmissionLoss.AnalysisPoint.Scenario.Name,
+            //                radial.TransmissionLoss.AnalysisPoint.Geo,
+            //                radial.TransmissionLoss.Modes[0].ModeName,
+            //                radial.Bearing, zmplt);
 
             using (var envFile = new StreamWriter(envFileName, false))
             {
@@ -429,27 +427,27 @@ namespace StandardTransmissionLossEngines
                 var rd = new double[depthCount];
                 for (var rangeIndex = 0; rangeIndex < rr.Length; rangeIndex++) rr[rangeIndex] = (rangeIndex + 1) * dr * ndr;
                 for (var depthIndex = 0; depthIndex < rd.Length; depthIndex++) rd[depthIndex] = depthIndex * zstep;
-                Debug.WriteLine("Scenario: '{0}' Mode: '{2}' Analysis point: {1} Bearing: {3}, zmplt: {4}, zstep: {5}, maxDepth: {6}, fileName: {7}, reqDepthCells: {8}, actualDepthCells: {9}",
-                                radial.TransmissionLoss.AnalysisPoint.Scenario.Name,
-                                radial.TransmissionLoss.AnalysisPoint.Geo,
-                                radial.TransmissionLoss.Modes[0].ModeName,
-                                radial.Bearing,
-                                zmplt,
-                                zstep,
-                                rd.Last(),
-                                Path.GetFileNameWithoutExtension(radial.BasePath),
-                                zmplt / zstep,
-                                depthCount);
+                //Debug.WriteLine("Scenario: '{0}' Mode: '{2}' Analysis point: {1} Bearing: {3}, zmplt: {4}, zstep: {5}, maxDepth: {6}, fileName: {7}, reqDepthCells: {8}, actualDepthCells: {9}",
+                //                radial.TransmissionLoss.AnalysisPoint.Scenario.Name,
+                //                radial.TransmissionLoss.AnalysisPoint.Geo,
+                //                radial.TransmissionLoss.Modes[0].ModeName,
+                //                radial.Bearing,
+                //                zmplt,
+                //                zstep,
+                //                rd.Last(),
+                //                Path.GetFileNameWithoutExtension(radial.BasePath),
+                //                zmplt / zstep,
+                //                depthCount);
                 BellhopOutput.WriteShadeFile(radial.BasePath + ".shd", sourceDepth, frequency, rd, rr, pressures);
             }
             else
             {
-                Debug.WriteLine("Scenario: {0} Analysis point: {1} Mode {2} Bearing {3}",
-                                radial.TransmissionLoss.AnalysisPoint.Scenario.Name,
-                                radial.TransmissionLoss.AnalysisPoint.Geo,
-                                radial.TransmissionLoss.Modes[0].ModeName,
-                                radial.Bearing);
-                Debug.WriteLine("p.grid file not found in RAMGeo output directory");
+                //Debug.WriteLine("Scenario: {0} Analysis point: {1} Mode {2} Bearing {3}",
+                //                radial.TransmissionLoss.AnalysisPoint.Scenario.Name,
+                //                radial.TransmissionLoss.AnalysisPoint.Geo,
+                //                radial.TransmissionLoss.Modes[0].ModeName,
+                //                radial.Bearing);
+                //Debug.WriteLine("p.grid file not found in RAMGeo output directory");
                 if (ramProcess.ExitCode != 0)
                 {
                     Debug.WriteLine("RAMGeo process for radial {0} exited with error code {1:X}", radial.BasePath, ramProcess.ExitCode);
@@ -498,60 +496,6 @@ namespace StandardTransmissionLossEngines
             catch (EndOfStreamException)
             {
                 return pGrid;
-            }
-        }
-
-        List<Complex[]> ReadRamPGrid(string fileName)
-        {
-            using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
-            {
-                reader.ReadUInt32(); 
-
-                var numDepths = reader.ReadInt32();
-                var recLen = numDepths;
-                if (numDepths > 0)
-                {
-                    var doneAll = false;
-                    var pGrid = new List<Complex[]>(); 
-
-                    while (!doneAll)
-                    {
-                        var pColumn = new Complex[numDepths]; 
-                        var doneCol = false;
-                        var startSub = 1;
-
-                        while (!doneCol && !doneAll)
-                        {
-                            var endSub = startSub + 2 * recLen - 1;
-                            if (endSub > 2 * numDepths)
-                            {
-                                endSub = 2 * numDepths;
-                                doneCol = true;
-                            }
-                            var nRead = ((endSub - startSub) + 1) / 2;
-                            if (nRead > 0)
-                            {
-                                try
-                                {
-                                    reader.ReadUInt32();
-                                    reader.ReadUInt32();
-                                    for (var i = 0; i < nRead; i++) pColumn[i] = new Complex(reader.ReadSingle(), reader.ReadSingle());
-                                    startSub = endSub + 1;
-                                }
-                                catch (Exception)
-                                {
-                                    // premature eof or other problem?
-                                    doneAll = true;
-                                }
-                            }
-                            else doneCol = true;
-                        }
-                        if (!doneAll) pGrid.Add(pColumn);
-                    }
-                    //loop's done, write it out and return it;
-                    return pGrid;
-                }
-                return null;
             }
         }
     }

@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Windows.Input;
-using System.Windows.Threading;
 using ESME.Database;
 using ESME.Locations;
-using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
@@ -20,11 +16,8 @@ using HRC.WPF;
 namespace ESME.Scenarios
 {
     [NotifyPropertyChanged]
-    public class AnalysisPoint : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
+    public class AnalysisPoint : IHaveGuid, IHaveLayerSettings
     {
-        [UsedImplicitly] CollectionObserver _collectionObserver;
-        Dictionary<Guid, PropertyObserver<TransmissionLoss>> _transmissionLossObservers;
-
         public AnalysisPoint() { Initialize(); }
         public AnalysisPoint(AnalysisPoint analysisPoint): this() { Copy(analysisPoint); }
         void Copy(AnalysisPoint analysisPoint)
@@ -35,40 +28,8 @@ namespace ESME.Scenarios
         void Initialize()
         {
             TransmissionLosses = new ObservableList<TransmissionLoss>();
-            _transmissionLossObservers = new Dictionary<Guid, PropertyObserver<TransmissionLoss>>();
-            _collectionObserver = new CollectionObserver(TransmissionLosses).RegisterHandler(TransmissionLossCollectionChanged);
         }
-        void TransmissionLossCollectionChanged(INotifyCollectionChanged collection, NotifyCollectionChangedEventArgs args)
-        {
-            switch (args.Action)
-            {
-                case NotifyCollectionChangedAction.Add:
-                    foreach (TransmissionLoss newItem in args.NewItems)
-                        _transmissionLossObservers.Add(newItem.Guid, new PropertyObserver<TransmissionLoss>(newItem).RegisterHandler(p => p.HasErrors, CheckForErrors));
-                    break;
-                case NotifyCollectionChangedAction.Remove:
-                    foreach (Radial oldItem in args.OldItems)
-                    {
-                        _transmissionLossObservers[oldItem.Guid].UnregisterHandler(p => p.HasErrors);
-                        _transmissionLossObservers.Remove(oldItem.Guid);
-                    }
-                    break;
-                case NotifyCollectionChangedAction.Replace:
-                    foreach (Radial oldItem in args.OldItems)
-                    {
-                        _transmissionLossObservers[oldItem.Guid].UnregisterHandler(p => p.HasErrors);
-                        _transmissionLossObservers.Remove(oldItem.Guid);
-                    }
-                    foreach (TransmissionLoss newItem in args.NewItems)
-                        _transmissionLossObservers.Add(newItem.Guid, new PropertyObserver<TransmissionLoss>(newItem).RegisterHandler(p => p.HasErrors, CheckForErrors));
-                    break;
-                case NotifyCollectionChangedAction.Reset:
-                    foreach (var observer in _transmissionLossObservers) observer.Value.UnregisterHandler(p => p.HasErrors);
-                    _transmissionLossObservers.Clear();
-                    break;
-            }
-            CheckForErrors();
-        }
+
         [Key, Initialize] public Guid Guid { get; set; }
         public DbGeo Geo { get; set; }
 
@@ -95,25 +56,6 @@ namespace ESME.Scenarios
             if (!string.IsNullOrEmpty(Errors)) Debug.WriteLine(Errors);
             HasErrors = !string.IsNullOrEmpty(Errors);
         }
-
-        #region INotifyPropertyChanged implementation
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-        {
-            var handlers = PropertyChanged;
-            if (handlers == null) return;
-            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
-            {
-                if (handler.Target is DispatcherObject)
-                {
-                    var localHandler = handler;
-                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new PropertyChangedEventArgs(propertyName)));
-                }
-                else
-                    handler(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-        #endregion
 
         #region ViewAnalysisPointCommand
         public SimpleCommand<object, EventToCommandArgs> ViewAnalysisPointCommand

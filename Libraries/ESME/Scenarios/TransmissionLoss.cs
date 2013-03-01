@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Windows.Threading;
 using ESME.Locations;
 using ESME.Mapping;
-using HRC;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
@@ -19,53 +15,18 @@ using HRC.WPF;
 namespace ESME.Scenarios
 {
     [NotifyPropertyChanged]
-    public class TransmissionLoss : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
+    public class TransmissionLoss : IHaveGuid, IHaveLayerSettings
     {
         [Key, Initialize] public Guid Guid { get; set; }
-        [UsedImplicitly] CollectionObserver _collectionObserver;
-        Dictionary<Guid, PropertyObserver<Radial>> _radialObservers;
         public TransmissionLoss() { Initialize(); }
 
         void Initialize()
         {
             Radials = new ObservableList<Radial>();
-            _radialObservers = new Dictionary<Guid, PropertyObserver<Radial>>();
-            _collectionObserver = new CollectionObserver(Radials).RegisterHandler(RadialCollectionChanged);
             var lineColor = LayerSettings.LineOrSymbolColor;
             lineColor.ScA = 0.5f;   // Set the default alpha channel for this TransmissionLoss to 50%
             LayerSettings.LineOrSymbolColor = lineColor;
             LayerSettings.DisplayIfScenarioIsLoadedFunc = () => AnalysisPoint.Scenario.IsLoaded;
-        }
-        void RadialCollectionChanged(INotifyCollectionChanged collection, NotifyCollectionChangedEventArgs args)
-        {
-            switch (args.Action)
-            {
-                case NotifyCollectionChangedAction.Add:
-                    foreach (Radial newItem in args.NewItems) 
-                        _radialObservers.Add(newItem.Guid, new PropertyObserver<Radial>(newItem).RegisterHandler(p => p.HasErrors, CheckForErrors));
-                    break;
-                case NotifyCollectionChangedAction.Remove:
-                    foreach (Radial oldItem in args.OldItems)
-                    {
-                        _radialObservers[oldItem.Guid].UnregisterHandler(p => p.HasErrors);
-                        _radialObservers.Remove(oldItem.Guid);
-                    }
-                    break;
-                case NotifyCollectionChangedAction.Replace:
-                    foreach (Radial oldItem in args.OldItems)
-                    {
-                        _radialObservers[oldItem.Guid].UnregisterHandler(p => p.HasErrors);
-                        _radialObservers.Remove(oldItem.Guid);
-                    }
-                    foreach (Radial newItem in args.NewItems) 
-                        _radialObservers.Add(newItem.Guid, new PropertyObserver<Radial>(newItem).RegisterHandler(p => p.HasErrors, CheckForErrors));
-                    break;
-                case NotifyCollectionChangedAction.Reset:
-                    foreach (var observer in _radialObservers) observer.Value.UnregisterHandler(p => p.HasErrors);
-                    _radialObservers.Clear();
-                    break;
-            }
-            CheckForErrors();
         }
 
         [NotMapped] public bool HasErrors { get; private set; }
@@ -88,6 +49,7 @@ namespace ESME.Scenarios
             Errors = sb.ToString().TrimEnd();
             if (!string.IsNullOrEmpty(Errors)) Debug.WriteLine(Errors);
             HasErrors = !string.IsNullOrEmpty(Errors);
+            AnalysisPoint.CheckForErrors();
         }
 
         public bool IsReadyToCalculate { get; set; }
@@ -96,24 +58,6 @@ namespace ESME.Scenarios
         [Initialize] public virtual ObservableList<Mode> Modes { get; set; }
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         public virtual ObservableList<Radial> Radials { get; set; }
-        #region INotifyPropertyChanged implementation
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-        {
-            var handlers = PropertyChanged;
-            if (handlers == null) return;
-            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
-            {
-                if (handler.Target is DispatcherObject)
-                {
-                    var localHandler = handler;
-                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new PropertyChangedEventArgs(propertyName)));
-                }
-                else
-                    handler(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-        #endregion
         [NotMapped]
         public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", AnalysisPoint.Geo.Latitude, AnalysisPoint.Geo.Longitude); } }
         [NotMapped] public bool IsDeleted { get; set; }
