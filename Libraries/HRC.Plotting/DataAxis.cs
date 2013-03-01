@@ -338,7 +338,7 @@ namespace HRC.Plotting
                 return;
             }
             //if (VisibleRange.Min == 0.9 && VisibleRange.Max == 100) Debugger.Break();
-            Debug.WriteLine(string.Format("{0} Visible range changed to {1}", AxisLabel, VisibleRange));
+            //Debug.WriteLine(string.Format("{0} Visible range changed to {1}", AxisLabel, VisibleRange));
             _visibleRange = VisibleRange.Expand(0);
             if (AxisType == AxisType.Logarithmic)
             {

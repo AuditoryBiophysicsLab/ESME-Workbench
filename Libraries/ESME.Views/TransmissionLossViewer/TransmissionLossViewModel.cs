@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -196,7 +197,7 @@ namespace ESME.Views.TransmissionLossViewer
                         }
                     }
 #endif
-                    _transmissionLoss.PropertyChanged += (s, e) =>
+                    ((INotifyPropertyChanged)_transmissionLoss).PropertyChanged += (s, e) =>
                     {
                         if (e.PropertyName == "IsDeleted" && Window != null)
                         {

@@ -110,7 +110,7 @@ namespace ESME.Views.TransmissionLossViewer
                 _imageSeriesViewModel.Left = Radial.Ranges.First();
                 _imageSeriesViewModel.Bottom = Radial.Depths.Last();
                 _imageSeriesViewModel.Right = Radial.Ranges.Last();
-                Debug.WriteLine(string.Format("Radial max depth: {0} max range: {1}", Radial.Depths.Last(), Radial.Ranges.Last()));
+                //Debug.WriteLine(string.Format("Radial max depth: {0} max range: {1}", Radial.Depths.Last(), Radial.Ranges.Last()));
                 ColorMapViewModel.StatisticalRange.ForceUpdate(_transmissionLossRadial.StatMin, _transmissionLossRadial.StatMax);
                 ColorMapViewModel.CurrentRange.ForceUpdate(ColorMapViewModel.StatisticalRange);
                 AxisSeriesViewModel.XAxis.DataRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
@@ -133,7 +133,7 @@ namespace ESME.Views.TransmissionLossViewer
                                 where !double.IsNaN(profile.Y)
                                 orderby profile.Y descending
                                 select profile).FirstOrDefault();
-            Debug.WriteLine(string.Format("CalculateBottomProfileGeometry: Deepest point: {0}m at range {1}m", deepestPoint.Y, deepestPoint.X));
+            //Debug.WriteLine(string.Format("CalculateBottomProfileGeometry: Deepest point: {0}m at range {1}m", deepestPoint.Y, deepestPoint.X));
             var yRange = AxisSeriesViewModel.YAxis.VisibleRange == null || AxisSeriesViewModel.YAxis.VisibleRange.IsEmpty ? AxisSeriesViewModel.YAxis.DataRange : (IRange)AxisSeriesViewModel.YAxis.VisibleRange;
             profileData.Insert(0, new Point(profileData[0].X, yRange.Max));
             profileData.Add(new Point(profileData.Last().X, yRange.Max));
@@ -229,7 +229,7 @@ namespace ESME.Views.TransmissionLossViewer
             });
             task.ContinueWith(t =>
             {
-                Debug.WriteLine("Render completed, checking for re-render...");
+                //Debug.WriteLine("Render completed, checking for re-render...");
                 BeginRenderBitmap(guid, transmissionLoss);
             });
         }

@@ -20,22 +20,26 @@ namespace ESME.Scenarios
         public static TransmissionLossCalculatorService TransmissionLossCalculator;
         public Radial()
         {
+            // For reasons I don't fully understand, using the WeakEventListener pattern here (via PropertyObserver<Radial>)
+            // causes some kind of aberrant behavior whereby adding a new AnalysisPoint won't cause the TL's to calculate
+            // properly.  Doing it old-school like this DOES seem to work.
             Filename = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
-            var npc = (INotifyPropertyChanged)this;
-            npc.PropertyChanged += (s, e) =>
+            ((INotifyPropertyChanged)this).PropertyChanged += PropertyChangedHandler;
+        }
+
+        void PropertyChangedHandler(object sender, PropertyChangedEventArgs args)
+        {
+            switch (args.PropertyName)
             {
-                // For reasons I don't fully understand, using the WeakEventListener pattern here (via PropertyObserver<Radial>)
-                // causes some kind of aberrant behavior whereby adding a new AnalysisPoint won't cause the TL's to calculate
-                // properly.  Doing it old-school like this DOES seem to work.
-                switch (e.PropertyName)
-                {
-                    case "Bearing":
-                    case "Length":
-                    case "TransmissionLoss":
-                        CheckForErrors();
-                        break;
-                }
-            };
+                case "Bearing":
+                case "Length":
+                case "TransmissionLoss":
+                    CheckForErrors();
+                    break;
+                case "IsDeleted":
+                    ((INotifyPropertyChanged)sender).PropertyChanged -= PropertyChangedHandler;
+                    break;
+            }
         }
 
         public Radial(Radial radial) : this()
@@ -161,7 +165,7 @@ namespace ESME.Scenarios
             TransmissionLoss.CheckForErrors();
         }
 
-        [NotMapped] public bool IsDeleted { get; set; }
+        [NotMapped] public bool IsDeleted { get; private set; }
 
         [NotMapped] public float[] MinimumTransmissionLossValues
         {
