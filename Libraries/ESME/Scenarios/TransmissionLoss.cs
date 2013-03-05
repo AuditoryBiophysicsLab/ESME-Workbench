@@ -54,7 +54,6 @@ namespace ESME.Scenarios
 
         public bool IsReadyToCalculate { get; set; }
         public virtual AnalysisPoint AnalysisPoint { get; set; }
-        //public virtual Mode Mode { get; set; }
         [Initialize] public virtual ObservableList<Mode> Modes { get; set; }
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         public virtual ObservableList<Radial> Radials { get; set; }
