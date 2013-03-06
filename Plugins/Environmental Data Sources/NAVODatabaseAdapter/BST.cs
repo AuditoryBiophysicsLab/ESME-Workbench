@@ -10,6 +10,8 @@ namespace NAVODatabaseAdapter
 {
     public static class BST
     {
+        const short NoData = 888;
+
         public static Sediment Extract(string bstDirectory, GeoRect region, float resolution, PercentProgress progress = null)
         {
             if (progress != null) lock (progress) progress.Report(0);
@@ -29,6 +31,7 @@ namespace NAVODatabaseAdapter
             for (var lat = south; lat < north; lat++)
                 for (var lon = west; lon < east; lon++)
                 {
+                    //var data = ReadDataset(highResGroup, 0.1, lowResGroup, 5.0, resolution, (int)lat, (int)lon);
                     var data = ReadDatasetHierarchical(highResGroup, 0.1, lowResGroup, 5.0, resolution, (int)lat, (int)lon);
                     if (data != null) dedupeList.AddAll(data);
                     if (progress != null) lock (progress) progress.Report(totalProgress++);
@@ -110,10 +113,10 @@ namespace NAVODatabaseAdapter
             var resolutionStepCount = (int)(1.0 / resolutionStepSize);
             if (highResData != null && (highResData.GetLength(0) != resolutionStepCount || highResData.GetLength(1) != resolutionStepCount)) throw new IndexOutOfRangeException("High resolution dataset is not the correct size");
             if (lowResData != null && (lowResData.GetLength(0) != resolutionStepCount || lowResData.GetLength(1) != resolutionStepCount)) throw new IndexOutOfRangeException("Low resolution dataset is not the correct size");
-            Func<int, int, short> highResDataFunc = (i, j) => highResData[i, j] > 0 && highResData[i, j] < 24 ? highResData[i, j] : (short)0;
-            Func<int, int, short> lowResDataFunc = (i, j) => lowResData[i, j] > 0 && lowResData[i, j] < 24 ? lowResData[i, j] : (short)0;
+            Func<int, int, short> highResDataFunc = (i, j) => highResData[i, j] == NoData ? (short)0 : highResData[i, j];
+            Func<int, int, short> lowResDataFunc = (i, j) => lowResData[i, j] == NoData ? (short)0 : lowResData[i, j];
             Func<int, int, short> dataFunc;
-            if (highResData != null && lowResData != null) dataFunc = (i, j) => highResDataFunc(i, j) > 0 ? highResDataFunc(i, j) : lowResDataFunc(i, j);
+            if (highResData != null && lowResData != null) dataFunc = (i, j) => highResDataFunc(i, j) == 0 ? lowResDataFunc(i, j) : highResDataFunc(i, j);
             else
                 if (highResData != null) dataFunc = highResDataFunc;
                 else dataFunc = lowResDataFunc;

@@ -177,6 +177,10 @@ namespace ESME.Views.TransmissionLossViewer
                     {
                         Debug.WriteLine(string.Format("I/O exception loading radial: {0}", ex.Message));
                     }
+                    catch (InvalidOperationException ex)
+                    {
+                        Debug.WriteLine(string.Format("Invalid operation exception loading radial: {0}", ex.Message));
+                    }
 #if false
                     foreach (var radial in _transmissionLoss.Radials)
                     {
