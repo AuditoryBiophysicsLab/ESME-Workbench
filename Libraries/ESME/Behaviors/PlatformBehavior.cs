@@ -186,6 +186,10 @@ namespace ESME.Behaviors
                             if (timeStepsRemaining <= 0) break;
                         }
                         break;
+                    case TrackType.WaypointFile:
+                        while (Platform.ShipTrack.Waypoints != null && Platform.ShipTrack.Waypoints.Count > 0)
+                        { }
+                        break;
                 }
             }
         }

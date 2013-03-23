@@ -39,8 +39,8 @@ namespace ESME.Scenarios
 
         public DbTrackType TrackType { get; set; }
         public DbGeo Geo { get; set; }
-        bool _isRandom = true;
 
+        bool _isRandom = true;
         public bool IsRandom
         {
             get { return _isRandom; }
@@ -66,7 +66,6 @@ namespace ESME.Scenarios
         public virtual Scenario Scenario { get; set; }
          
         Perimeter _perimeter;
-
         [Affects("TrackTypeDisplay")]
         public virtual Perimeter Perimeter
         {
@@ -81,14 +80,25 @@ namespace ESME.Scenarios
             }
         }
 
-        [Initialize]
-        public virtual LayerSettings LayerSettings { get; set; }
+        ShipTrack _shipTrack;
+        public virtual ShipTrack ShipTrack
+        {
+            get { return _shipTrack; }
+            set
+            {
+                _shipTrack = value;
+                if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
+                RemoveMapLayers();
+                PlatformBehavior = null;
+                CreateMapLayers();
+            }
+        }
 
-        [Initialize]
-        public virtual ObservableList<Source> Sources { get; set; }
+        [Initialize] public virtual LayerSettings LayerSettings { get; set; }
 
-        [Initialize]
-        public virtual ObservableList<LogEntry> Logs { get; set; }
+        [Initialize] public virtual ObservableList<Source> Sources { get; set; }
+
+        [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
         #endregion
 
         #region Unmapped Properties
@@ -161,19 +171,25 @@ namespace ESME.Scenarios
         #region Private members
 
         [Import, UsedImplicitly] static IMessageBoxService _messageBox;
+
+        static readonly List<TrackType> StationaryOnly = new List<TrackType> { Behaviors.TrackType.Stationary, Behaviors.TrackType.WaypointFile };
          
-        static readonly List<TrackType> StationaryOnly = new List<TrackType> { Behaviors.TrackType.Stationary };
-         
-        static readonly List<TrackType> AllTrackTypes = new List<TrackType> { Behaviors.TrackType.Stationary, Behaviors.TrackType.PerimeterBounce };
+        static readonly List<TrackType> AllTrackTypes = new List<TrackType> { Behaviors.TrackType.Stationary, Behaviors.TrackType.PerimeterBounce, Behaviors.TrackType.WaypointFile };
 
         #endregion
 
-        public Platform()
+        public Platform() { Initialize(); }
+
+        void Initialize()
         {
-           TrackType = Behaviors.TrackType.Stationary;
+            TrackType = Behaviors.TrackType.Stationary;
+            ShipTrack = new ShipTrack(this);
         }
 
-        public Platform(Platform platform) { Copy(platform); }
+        public Platform(Platform platform)
+        {
+            Copy(platform);
+        }
 
         void Copy(Platform platform)
         {
@@ -191,15 +207,13 @@ namespace ESME.Scenarios
             Course = platform.Course;
             Speed = platform.Speed;
             LayerSettings = new LayerSettings(platform.LayerSettings);
-            if(platform.Sources != null)
-                foreach (var newsource in platform.Sources.Select(source => new Source(source))) {
-                    Sources.Add(newsource);
-                }
+            if (platform.Sources != null) foreach (var newsource in platform.Sources.Select(source => new Source(source))) Sources.Add(newsource);
+            ShipTrack = new ShipTrack(this, platform.ShipTrack);
         }
 
         public static Platform NewPSMPlatform()
         {
-            return new Platform()
+            var platform = new Platform
             {
                 Description = "New Platform",
                 Launches = false,
@@ -214,7 +228,10 @@ namespace ESME.Scenarios
                 Course = 0,
                 Speed = 0,
                 Perimeter = new Perimeter(),
+                ShipTrack = new ShipTrack(),
             };
+            platform.ShipTrack.Platform = platform;
+            return platform;
         }
 
         public void Delete()
@@ -265,7 +282,15 @@ namespace ESME.Scenarios
   
 #endif
             };
-            var locations = PlatformBehavior.PlatformStates.Select(p => p.PlatformLocation.Location).ToList();
+            List<Geo> locations;
+            try
+            {
+                locations = PlatformBehavior.PlatformStates.Select(p => p.PlatformLocation.Location).ToList();
+            }
+            catch (NullReferenceException)
+            {
+                return;
+            }
 
             try
             {

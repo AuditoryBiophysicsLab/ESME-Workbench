@@ -253,6 +253,7 @@
     <Compile Include="Plugins\PluginType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scenarios\ScenarioSpecies.cs" />
+    <Compile Include="Scenarios\ShipTrack.cs" />
     <Compile Include="Scenarios\Source.cs" />
     <Compile Include="Scenarios\TrackDefinition.cs" />
     <Compile Include="Scenarios\TransmissionLoss.cs" />

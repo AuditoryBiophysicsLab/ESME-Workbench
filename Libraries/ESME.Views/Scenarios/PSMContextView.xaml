@@ -10,10 +10,10 @@
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <Window.Resources>
-        <DataTemplate x:Key="SelectedPlatform" DataType="{x:Type l:PropertiesViewModel}">
+        <DataTemplate x:Key="SelectedPlatform" DataType="{x:Type l:PlatformPropertiesViewModel}">
             <l:PlatformPropertiesControlView/>
         </DataTemplate>
-        <DataTemplate x:Key="CollapsedPlatform" DataType="{x:Type l:PropertiesViewModel}">
+        <DataTemplate x:Key="CollapsedPlatform" DataType="{x:Type l:PlatformPropertiesViewModel}">
             <TextBlock Text="{Binding PropertyObject.Name}"/>
         </DataTemplate>
 

@@ -12,7 +12,7 @@ using HRC.WPF;
 
 namespace ESME.Scenarios
 {
-     [NotifyPropertyChanged]
+    [NotifyPropertyChanged]
     public class Perimeter : IHaveGuid, IHaveLayerSettings
     {
          public Perimeter() {}

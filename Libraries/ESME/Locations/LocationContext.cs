@@ -53,6 +53,8 @@ namespace ESME.Locations
         public DbSet<Scenarios.TransmissionLoss> TransmissionLosses { get; set; }
         public DbSet<Radial> Radials { get; set; }
         public DbSet<LayerSettings> LayerSettings { get; set; }
+        public DbSet<ShipTrack> ShipTracks { get; set; }
+        public DbSet<Waypoint> Waypoints { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -130,6 +132,8 @@ namespace ESME.Locations
             modelBuilder.Entity<AnimatLocation>().HasRequired(a => a.ScenarioSpecies);
 #endif
             modelBuilder.Entity<Platform>().HasOptional(p => p.Perimeter).WithMany();
+            modelBuilder.Entity<Platform>().HasRequired(p => p.ShipTrack).WithRequiredPrincipal(p => p.Platform);
+            modelBuilder.Entity<ShipTrack>().HasMany(p => p.Waypoints).WithRequired(p => p.ShipTrack);
             //modelBuilder.Entity<Radial>().Map()
         }
 
@@ -141,6 +145,6 @@ namespace ESME.Locations
             }
         }
 
-        public DbConnection CreateConnection(string nameOrConnectionString) { throw new System.NotImplementedException(); }
+        public DbConnection CreateConnection(string nameOrConnectionString) { throw new NotImplementedException(); }
     }
 }

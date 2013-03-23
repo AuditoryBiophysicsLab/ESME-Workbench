@@ -1,5 +1,11 @@
-﻿using ESME.Scenarios;
+﻿using System;
+using System.ComponentModel;
+using System.Windows;
+using ESME.Behaviors;
+using ESME.Scenarios;
+using HRC;
 using HRC.Aspects;
+using HRC.Services;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -47,6 +53,77 @@ namespace ESME.Views.Scenarios
                 {
                     MediatorMessage.Send(MediatorMessage.PSMSourceChanged, PropertyObject);
                 }
+            }
+        }
+        #endregion
+    }
+
+    public class PlatformPropertiesViewModel : ViewModelBase
+    {
+        [UsedImplicitly] PropertyObserver<Platform> _platformObserver;
+        [UsedImplicitly] PropertyObserver<PlatformPropertiesViewModel> _viewModelObserver;
+        public PlatformPropertiesViewModel(Platform platform, IHRCOpenFileService openFileService, IMessageBoxService messageBoxService)
+        {
+            Platform = platform;
+            _openFileService = openFileService;
+            _messageBoxService = messageBoxService;
+            _platformObserver = new PropertyObserver<Platform>(Platform)
+                .RegisterHandler(p => p.SelectedTrackType, SelectedTrackTypeChanged)
+                .RegisterHandler(p => p.PlatformName, WindowTitleChanged);
+            _viewModelObserver = new PropertyObserver<PlatformPropertiesViewModel>(this)
+                .RegisterHandler(p => p.IsPSMView, RandomizeSectionVisibilityChanged);
+            WindowTitleChanged();
+            SelectedTrackTypeChanged();
+            RandomizeSectionVisibilityChanged();
+        }
+
+        public bool IsPSMView { get; set; }
+        public Platform Platform { get; set; }
+        public string WindowTitle { get; set; }
+        public Visibility ImportWaypointFileVisibility { get; set; }
+        public Visibility RandomizeSectionVisibility { get; set; }
+        readonly IHRCOpenFileService _openFileService;
+        readonly IMessageBoxService _messageBoxService;
+        void WindowTitleChanged() { WindowTitle = string.Format("Platform Properties: {0}", Platform.PlatformName); }
+        void SelectedTrackTypeChanged()
+        {
+            ImportWaypointFileVisibility = _openFileService != null && Platform.SelectedTrackType == TrackType.WaypointFile ? Visibility.Visible : Visibility.Collapsed;
+            RandomizeSectionVisibilityChanged();
+        }
+        void RandomizeSectionVisibilityChanged() { RandomizeSectionVisibility = IsPSMView || (Platform.SelectedTrackType == TrackType.WaypointFile) ? Visibility.Collapsed : Visibility.Visible; }
+        #region OkCommand
+        public SimpleCommand<object, EventToCommandArgs> OkCommand
+        {
+            get { return _ok ?? (_ok = new SimpleCommand<object, EventToCommandArgs>(OkHandler)); }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _ok;
+
+        void OkHandler(EventToCommandArgs args)
+        {
+            if (!IsPSMView) CloseDialog(true);
+            else MediatorMessage.Send(MediatorMessage.PSMPlatformChanged, Platform);
+        }
+        #endregion
+
+        #region ImportWaypointFileCommand
+        public SimpleCommand<object, EventToCommandArgs> ImportWaypointFileCommand { get { return _importWaypointFile ?? (_importWaypointFile = new SimpleCommand<object, EventToCommandArgs>(ImportWaypointFileHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _importWaypointFile;
+
+        void ImportWaypointFileHandler(EventToCommandArgs args)
+        {
+            //var parameter = args.CommandParameter;
+            _openFileService.Title = "Import waypoint file";
+            _openFileService.Filter = "Waypoint files (*.wpt)|*.wpt|Text files (*.txt)|*.txt|All files (*.*)|*.*";
+            var result = _openFileService.ShowDialog(null);
+            if (!result.HasValue || !result.Value) return;
+            try
+            {
+                Platform.ShipTrack.ReadWaypointFile(_openFileService.FileName);
+            }
+            catch (Exception ex)
+            {
+                _messageBoxService.ShowError(ex.Message);
             }
         }
         #endregion

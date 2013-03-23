@@ -61,6 +61,19 @@ namespace ESME.Views.Controls
 
         #endregion
 
+        #region dependency property Visibility CaptionVisibility
+
+        public static DependencyProperty CaptionVisibilityProperty = DependencyProperty.Register("CaptionVisibility",
+                                                                                 typeof(Visibility),
+                                                                                 typeof(FileOrDirectorySetting),
+                                                                                 new FrameworkPropertyMetadata(Visibility.Visible, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, CaptionVisibilityPropertyChanged));
+
+        public Visibility CaptionVisibility { get { return (Visibility)GetValue(CaptionVisibilityProperty); } set { SetValue(CaptionVisibilityProperty, value); } }
+
+        static void CaptionVisibilityPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((FileOrDirectorySetting)obj).CaptionVisibilityPropertyChanged(); }
+        void CaptionVisibilityPropertyChanged() { }
+        #endregion
+
         public static DependencyProperty CaptionProperty = DependencyProperty.Register("Caption", typeof(string), typeof(FileOrDirectorySetting), new FrameworkPropertyMetadata("Caption", FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         public string Caption

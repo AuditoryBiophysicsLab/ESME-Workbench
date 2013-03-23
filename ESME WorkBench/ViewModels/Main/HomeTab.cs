@@ -361,7 +361,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.PlatformProperties), UsedImplicitly]
         void PlatformProperties(Platform platform)
         {
-            var vm = new PropertiesViewModel { PropertyObject = platform, WindowTitle = "Platform Properties: " + platform.PlatformName };
+            var vm = new PlatformPropertiesViewModel(platform, _openFile, _messageBox);
             _visualizer.ShowDialog("PlatformPropertiesView", vm);
             //_visualizer.ShowDialog("TreeViewItemPropertiesView", new PlatformPropertiesViewModel { Platform = platform });
         }

@@ -5,5 +5,6 @@
         Stationary = 0,
         StraightLine = 1,
         PerimeterBounce = 2,
+        WaypointFile = 3,
     }
 }

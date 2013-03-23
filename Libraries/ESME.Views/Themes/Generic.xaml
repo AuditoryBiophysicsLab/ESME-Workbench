@@ -190,7 +190,7 @@
                 <ControlTemplate TargetType="{x:Type Controls:FileOrDirectorySetting}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="{TemplateBinding Caption}" />
+                            <TextBlock Text="{TemplateBinding Caption}" Visibility="{TemplateBinding CaptionVisibility}" />
                             <DockPanel LastChildFill="True">
                                 <ContentPresenter MinWidth="30" Margin=" 5 0 0 0" Content="{TemplateBinding BrowserButton}" DockPanel.Dock="Right" />
                                 <TextBox x:Name="FileOrDirectoryName" DockPanel.Dock="Left" Text="{Binding Path=FileName, RelativeSource={RelativeSource TemplatedParent}, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" ToolTip="{TemplateBinding FileName}" />
