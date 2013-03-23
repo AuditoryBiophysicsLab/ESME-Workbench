@@ -276,6 +276,20 @@ namespace ESME.Scenarios
             Scenario.Database.Context.Modes.Remove(this);
         }
 
+        /// <summary>
+        /// True if this mode is acoustically equivalent to the other mode
+        /// Acoustic equivalence means that the following are ALL TRUE
+        /// depths are within 0.001 m
+        /// vertical beam widths are within 0.1 deg
+        /// depression/elevation angles are within 0.1 deg
+        /// high frequencies are within 0.1 Hz
+        /// low frequencies are within 0.1 Hz
+        /// 
+        /// As of 22 Feb 2013, the transmission loss plugins selected to 
+        /// compute the sound fields must also be identical
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
         public bool IsAcousticallyEquivalentTo(Mode other)
         {
             var myDepth = Source.Platform.Depth;
@@ -286,7 +300,8 @@ namespace ESME.Scenarios
             if (Math.Abs(VerticalBeamWidth - other.VerticalBeamWidth) > 0.1) return false;
             if (Math.Abs(DepressionElevationAngle - other.DepressionElevationAngle) > 0.1) return false;
             if (Math.Abs(HighFrequency - other.HighFrequency) > 0.1) return false;
-            return Math.Abs(LowFrequency - other.LowFrequency) <= 0.1;
+            if (Math.Abs(LowFrequency - other.LowFrequency) > 0.1) return false;
+            return TransmissionLossPluginType == other.TransmissionLossPluginType;
         }
 
         public int GetHashCode(Mode obj) { return obj.GetHashCode(); }
@@ -294,7 +309,7 @@ namespace ESME.Scenarios
         {
             var depth = Source.Platform.Depth;
             if (Depth.HasValue) depth += Depth.Value;
-            return string.Format("HiFreq: {0}Hz | LoFreq: {1}Hz | Depth: {2}m | VBW: {3}deg | D/E: {4}deg", HighFrequency, LowFrequency, depth, VerticalBeamWidth, DepressionElevationAngle);
+            return string.Format("HiFreq: {0}Hz | LoFreq: {1}Hz | Depth: {2}m | VBW: {3}deg | D/E: {4}deg | Plugin: {5}", HighFrequency, LowFrequency, depth, VerticalBeamWidth, DepressionElevationAngle, TransmissionLossPluginType);
         }
     }
 

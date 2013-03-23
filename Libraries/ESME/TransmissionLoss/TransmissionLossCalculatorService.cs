@@ -14,7 +14,6 @@ using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.TransmissionLoss.Bellhop;
 using HRC.Navigation;
-using HRC.Utility;
 using HRC.ViewModels;
 using MEFedMVVM.ViewModelLocator;
 using HRC.Collections;
@@ -27,14 +26,28 @@ namespace ESME.TransmissionLoss
     {
         public TransmissionLossCalculatorService()
         {
-            WorkQueue = new ObservableConcurrentDictionary<Guid, PercentProgress<Radial>>();
-            _calculator = new ActionBlock<PercentProgress<Radial>>(job =>
+            WorkQueue = new ObservableConcurrentDictionary<Guid, Radial>();
+            _calculator = new ActionBlock<Radial>(radial =>
             {
-                if (!job.ProgressTarget.IsDeleted) Calculate(job);
-                WorkQueue.Remove(job.ProgressTarget.Guid);
-                _shadeFileProcessorQueue.Post(job.ProgressTarget);
+                if (!radial.IsDeleted)
+                {
+                    var longestRadiusMode = (from mode in radial.TransmissionLoss.Modes
+                                             orderby mode.MaxPropagationRadius descending
+                                             select mode).FirstOrDefault();
+                    if (longestRadiusMode != null)
+                    {
+                        var modeName = string.Format("{0}|{1}|{2}", longestRadiusMode.Source.Platform.PlatformName, longestRadiusMode.Source.SourceName, longestRadiusMode.ModeName);
+                        var geo = (Geo)radial.TransmissionLoss.AnalysisPoint.Geo;
+                        Debug.WriteLine(string.Format("About to calculate radial {0}[{1:0.###},{2:0.###}]/{3:0.#} deg", modeName, geo.Latitude, geo.Longitude, radial.Bearing));
+                    }
+                    else 
+                        Debug.WriteLine("TransmissionLossCalculatorService: longestRadiusMode is null!");
+                    Calculate(radial);
+                }
+                WorkQueue.Remove(radial.Guid);
+                _shadeFileProcessorQueue.Post(radial);
             }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
-            _calculatorQueue = new BufferBlock<PercentProgress<Radial>>(new DataflowBlockOptions { BoundedCapacity = -1 });
+            _calculatorQueue = new BufferBlock<Radial>(new DataflowBlockOptions { BoundedCapacity = -1 });
             _calculatorQueue.LinkTo(_calculator);
             _shadeFileProcessor = new ActionBlock<Radial>(r => { if (r.ExtractAxisData()) r.ReleaseAxisData(); },
                                                           new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
@@ -51,9 +64,9 @@ namespace ESME.TransmissionLoss
         [Import] IMasterDatabaseService _databaseService;
         [Import] EnvironmentalCacheService _cacheService;
         public Dispatcher Dispatcher { get; set; }
-        public ObservableConcurrentDictionary<Guid, PercentProgress<Radial>> WorkQueue { get; private set; }
-        readonly ActionBlock<PercentProgress<Radial>> _calculator;
-        readonly BufferBlock<PercentProgress<Radial>> _calculatorQueue;
+        public ObservableConcurrentDictionary<Guid, Radial> WorkQueue { get; private set; }
+        readonly ActionBlock<Radial> _calculator;
+        readonly BufferBlock<Radial> _calculatorQueue;
         readonly ActionBlock<Radial> _shadeFileProcessor;
         readonly BufferBlock<Radial> _shadeFileProcessorQueue;
 
@@ -111,12 +124,15 @@ namespace ESME.TransmissionLoss
 #if false
         public void Add(Radial radial)
         {
-            if (radial.HasErrors) return;
-            PercentProgress<Radial> radialProgress;
-            if (WorkQueue.TryGetValue(radial.Guid, out radialProgress)) return;
-            radialProgress = new PercentProgress<Radial>(radial);
-            WorkQueue.Add(radial.Guid, radialProgress);
-            _calculatorQueue.Post(radialProgress);
+            if (radial.HasErrors)
+            {
+                Debug.WriteLine(string.Format("Radial at bearing {0} has errors. Calculation aborted.", radial.Bearing));
+                return;
+            }
+            Radial outRadial;
+            if (WorkQueue.TryGetValue(radial.Guid, out outRadial)) return;
+            WorkQueue.Add(radial.Guid, radial);
+            _calculatorQueue.Post(radial);
         }
 #else
         public void Add(Radial radial)
@@ -138,13 +154,12 @@ namespace ESME.TransmissionLoss
 
         public void TestAdd(Radial radial)
         {
-            Calculate(new PercentProgress<Radial>(radial));
+            Calculate(radial);
         }
 
         public IPluginManagerService PluginManagerService { get; set; }
-        void Calculate(PercentProgress<Radial> item)
+        void Calculate(Radial radial)
         {
-            var radial = item.ProgressTarget;
             try
             {
                 var scenario = radial.TransmissionLoss.AnalysisPoint.Scenario;
@@ -200,6 +215,7 @@ namespace ESME.TransmissionLoss
                     radial.Length = mode.MaxPropagationRadius;
                     radial.IsCalculated = true;
                 }
+                else Debug.WriteLine("TransmissionLossCalculatorService: PluginManagerService is not initialized, or there are no transmission loss calculator plugins defined");
             }
             catch (Exception e)
             {

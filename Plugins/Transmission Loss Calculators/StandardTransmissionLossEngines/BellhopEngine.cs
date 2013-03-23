@@ -168,7 +168,7 @@ namespace StandardTransmissionLossEngines
                 }
                 Thread.Sleep(20);
             }
-            if (bellhopProcess.ExitCode != 0) return;
+            //if (bellhopProcess.ExitCode != 0) return;
         }
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
