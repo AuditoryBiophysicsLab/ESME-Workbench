@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -24,11 +23,6 @@ namespace ESME.Scenarios
 
         void Initialize(Platform platform)
         {
-            Waypoints.CollectionChanged += (s, e) =>
-            {
-                if (Waypoints == null || Waypoints.Count == 0) HasTimestamps = false;
-                HasTimestamps = Waypoints.Any(w => w.TimeAtWaypoint.Ticks > 0);
-            };
             if (platform != null) Platform = platform;
         }
 
@@ -49,14 +43,14 @@ namespace ESME.Scenarios
 
         [NotMapped] public bool HasTimestamps { get; private set; }
 
-        public void ReadWaypointFile(string filename)
+        public static ShipTrack ReadWaypointFile(string filename)
         {
-            if (string.IsNullOrEmpty(filename) || !File.Exists(filename)) return;
+            var shipTrack = new ShipTrack();
             var lines = File.ReadAllLines(filename);
             char[] separators = {' ', ',', '\t'};
             var lineNumber = 0;
-            var waypoints = new List<Waypoint>();
             var lastTimeSpan = TimeSpan.Zero;
+            shipTrack.Waypoints.Clear();
             foreach (var line in lines)
             {
                 var timeSpan = TimeSpan.Zero;
@@ -72,11 +66,12 @@ namespace ESME.Scenarios
                 if (longitude < -360.0 || longitude > 360.0) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: Invalid longitude value. Longitude must be between -360 and +360", lineNumber));
                 if (timeSpan.Ticks < 0) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: Invalid time stamp value. Time stamp value cannot be negative", lineNumber));
                 if (lastTimeSpan.Ticks > 0 && timeSpan.Ticks < lastTimeSpan.Ticks) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: Invalid time stamp value. Time stamp value must be greater than the time stamp value specified for the previous waypoint", lineNumber));
-                waypoints.Add(new Waypoint { Geo = new Geo(latitude, longitude), TimeAtWaypoint = timeSpan, ShipTrack = this });
+                shipTrack.Waypoints.Add(new Waypoint { Geo = new Geo(latitude, longitude), TimeAtWaypoint = timeSpan, ShipTrack = shipTrack });
                 lastTimeSpan = timeSpan;
             }
-            Waypoints.Clear();
-            Waypoints.AddRange(waypoints);
+            if (shipTrack.Waypoints == null || shipTrack.Waypoints.Count == 0) shipTrack.HasTimestamps = false;
+            else shipTrack.HasTimestamps = shipTrack.Waypoints.Any(w => w.TimeAtWaypoint.Ticks > 0);
+            return shipTrack;
         }
 
         public void WriteWaypointFile(string filename, bool includeTimestampsIfPresent)

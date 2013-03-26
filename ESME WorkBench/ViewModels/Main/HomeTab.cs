@@ -150,7 +150,14 @@ namespace ESMEWorkbench.ViewModels.Main
         #region CreateScenarioCommand
         public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand { get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => IsCreateScenarioCommandEnabled, o => CreateScenarioHandler())); } }
         SimpleCommand<object, EventToCommandArgs> _createScenario;
-        bool IsCreateScenarioCommandEnabled { get { return Database != null && Database.Context != null && Database.Context.Locations.Local.Count > 0; } }
+
+        bool IsCreateScenarioCommandEnabled
+        {
+            get
+            {
+                return Database != null && Database.Context != null && Database.Context.Locations.Local.Count > 0;
+            }
+        }
 
         Location _lastCreateScenarioLocation;
         [MediatorMessageSink(MediatorMessage.CreateScenario)]
@@ -188,9 +195,7 @@ namespace ESMEWorkbench.ViewModels.Main
                             select s).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A scenario named {0} already exists in location {1}, choose another name", scenario.Name, scenario.Location.Name));
             location.Scenarios.Add(scenario);
-           // Database.Context.Locations.Add(location);
             Database.Context.Scenarios.Add(scenario);
-            //Database.Add(scenario);
             return scenario;
         }
         #endregion
@@ -361,7 +366,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.PlatformProperties), UsedImplicitly]
         void PlatformProperties(Platform platform)
         {
-            var vm = new PlatformPropertiesViewModel(platform, _openFile, _messageBox);
+            var vm = new PlatformPropertiesViewModel(platform, _openFile, _messageBox, Database);
             _visualizer.ShowDialog("PlatformPropertiesView", vm);
             //_visualizer.ShowDialog("TreeViewItemPropertiesView", new PlatformPropertiesViewModel { Platform = platform });
         }

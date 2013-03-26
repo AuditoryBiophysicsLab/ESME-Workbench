@@ -131,10 +131,20 @@ namespace ESME.Locations
             modelBuilder.Entity<AnimatLocation>().HasKey(a => a.ID);
             modelBuilder.Entity<AnimatLocation>().HasRequired(a => a.ScenarioSpecies);
 #endif
-            modelBuilder.Entity<Platform>().HasOptional(p => p.Perimeter).WithMany();
-            modelBuilder.Entity<Platform>().HasRequired(p => p.ShipTrack).WithRequiredPrincipal(p => p.Platform);
-            modelBuilder.Entity<ShipTrack>().HasMany(p => p.Waypoints).WithRequired(p => p.ShipTrack);
-            //modelBuilder.Entity<Radial>().Map()
+            modelBuilder.Entity<Platform>()
+                .HasOptional(p => p.Perimeter)
+                .WithMany();
+#if true
+            modelBuilder.Entity<ShipTrack>()
+                .HasRequired(p => p.Platform)
+                .WithOptional();
+            modelBuilder.Entity<ShipTrack>()
+                .HasMany(p => p.Waypoints)
+                .WithRequired();
+            modelBuilder.Entity<Waypoint>()
+                .HasRequired(p => p.ShipTrack)
+                .WithMany();
+#endif
         }
 
         public class LocationDatabaseInitializer : CreateDatabaseIfNotExists<LocationContext>

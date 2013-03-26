@@ -78,7 +78,7 @@ namespace ESME.Views.PSM
         void NewPlatformHandler(EventToCommandArgs args)
         {
             var platform = Platform.NewPSMPlatform();
-            var vm = new PlatformPropertiesViewModel(platform, null, null)
+            var vm = new PlatformPropertiesViewModel(platform, null, null, null)
             {
                 IsPSMView = true,
             };
@@ -97,7 +97,7 @@ namespace ESME.Views.PSM
         [MediatorMessageSink(MediatorMessage.EditPSMPlatform), UsedImplicitly]
         void EditPlatform(Platform platform)
         {
-            var vm = new PlatformPropertiesViewModel(platform, null, null)
+            var vm = new PlatformPropertiesViewModel(platform, null, null, null)
             {
                 IsPSMView = true,
             };

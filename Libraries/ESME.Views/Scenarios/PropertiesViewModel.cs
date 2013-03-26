@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Windows;
 using ESME.Behaviors;
+using ESME.Locations;
 using ESME.Scenarios;
 using HRC;
 using HRC.Aspects;
@@ -62,11 +63,12 @@ namespace ESME.Views.Scenarios
     {
         [UsedImplicitly] PropertyObserver<Platform> _platformObserver;
         [UsedImplicitly] PropertyObserver<PlatformPropertiesViewModel> _viewModelObserver;
-        public PlatformPropertiesViewModel(Platform platform, IHRCOpenFileService openFileService, IMessageBoxService messageBoxService)
+        public PlatformPropertiesViewModel(Platform platform, IHRCOpenFileService openFileService, IMessageBoxService messageBoxService, IMasterDatabaseService databaseService)
         {
             Platform = platform;
             _openFileService = openFileService;
             _messageBoxService = messageBoxService;
+            _databaseService = databaseService;
             _platformObserver = new PropertyObserver<Platform>(Platform)
                 .RegisterHandler(p => p.SelectedTrackType, SelectedTrackTypeChanged)
                 .RegisterHandler(p => p.PlatformName, WindowTitleChanged);
@@ -84,6 +86,7 @@ namespace ESME.Views.Scenarios
         public Visibility RandomizeSectionVisibility { get; set; }
         readonly IHRCOpenFileService _openFileService;
         readonly IMessageBoxService _messageBoxService;
+        readonly IMasterDatabaseService _databaseService;
         void WindowTitleChanged() { WindowTitle = string.Format("Platform Properties: {0}", Platform.PlatformName); }
         void SelectedTrackTypeChanged()
         {
@@ -119,7 +122,10 @@ namespace ESME.Views.Scenarios
             if (!result.HasValue || !result.Value) return;
             try
             {
-                Platform.ShipTrack.ReadWaypointFile(_openFileService.FileName);
+                var shipTrack = ShipTrack.ReadWaypointFile(_openFileService.FileName);
+                _databaseService.Context.ShipTracks.Add(shipTrack);
+                shipTrack.Platform = Platform;
+                Platform.ShipTrack = shipTrack;
             }
             catch (Exception ex)
             {

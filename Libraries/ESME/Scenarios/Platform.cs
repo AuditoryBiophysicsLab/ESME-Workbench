@@ -80,19 +80,7 @@ namespace ESME.Scenarios
             }
         }
 
-        ShipTrack _shipTrack;
-        public virtual ShipTrack ShipTrack
-        {
-            get { return _shipTrack; }
-            set
-            {
-                _shipTrack = value;
-                if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
-                RemoveMapLayers();
-                PlatformBehavior = null;
-                CreateMapLayers();
-            }
-        }
+        public virtual ShipTrack ShipTrack { get; set; }
 
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
 
@@ -183,7 +171,6 @@ namespace ESME.Scenarios
         void Initialize()
         {
             TrackType = Behaviors.TrackType.Stationary;
-            ShipTrack = new ShipTrack(this);
         }
 
         public Platform(Platform platform)
@@ -208,7 +195,7 @@ namespace ESME.Scenarios
             Speed = platform.Speed;
             LayerSettings = new LayerSettings(platform.LayerSettings);
             if (platform.Sources != null) foreach (var newsource in platform.Sources.Select(source => new Source(source))) Sources.Add(newsource);
-            ShipTrack = new ShipTrack(this, platform.ShipTrack);
+            if (platform.ShipTrack != null) ShipTrack = new ShipTrack(this, platform.ShipTrack);
         }
 
         public static Platform NewPSMPlatform()
@@ -227,8 +214,6 @@ namespace ESME.Scenarios
                 Depth = 0,
                 Course = 0,
                 Speed = 0,
-                Perimeter = new Perimeter(),
-                ShipTrack = new ShipTrack(),
             };
             platform.ShipTrack.Platform = platform;
             return platform;

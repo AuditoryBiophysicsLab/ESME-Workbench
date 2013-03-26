@@ -69,10 +69,10 @@ namespace ESME.Locations
             Context.LayerSettings.Load();
             Context.PerimeterCoordinates.Load();
             Context.Perimeters.Load();
+            Context.Waypoints.Load();
+            Context.ShipTracks.Load();
 #if false
             Context.EnvironmentalDataSets.Load();
-            Context.Platforms.Load();
-            Context.Sources.Load();
             Context.ScenarioSpecies.Load();
             Context.AnalysisPoints.Load();
             Context.TransmissionLosses.Load();

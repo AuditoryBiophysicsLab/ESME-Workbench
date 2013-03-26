@@ -144,11 +144,10 @@ namespace ESME.TransmissionLoss
                 return;
             }
             //Debug.WriteLine("{0}: Queueing calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}", DateTime.Now, radial.Bearing, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo); 
-            PercentProgress<Radial> radialProgress;
-            if (WorkQueue.TryGetValue(radial.Guid, out radialProgress)) return;
-            radialProgress = new PercentProgress<Radial>(radial);
-            WorkQueue.Add(radial.Guid, radialProgress);
-            _calculatorQueue.Post(radialProgress);
+            Radial outRadial;
+            if (WorkQueue.TryGetValue(radial.Guid, out outRadial)) return;
+            WorkQueue.Add(radial.Guid, radial);
+            _calculatorQueue.Post(radial);
         }
 #endif
 
