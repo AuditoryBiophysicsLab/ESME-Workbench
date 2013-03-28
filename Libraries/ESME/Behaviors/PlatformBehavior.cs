@@ -188,8 +188,8 @@ namespace ESME.Behaviors
                         break;
                     case TrackType.WaypointFile:
                         if (Platform.ShipTrack == null) yield break;
-                        while (Platform.ShipTrack.Waypoints != null && Platform.ShipTrack.Waypoints.Count > 0)
-                        { }
+                        //while (Platform.ShipTrack.Waypoints != null && Platform.ShipTrack.Waypoints.Count > 0)
+                        //{ }
                         break;
                 }
             }

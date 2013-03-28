@@ -29,6 +29,7 @@ namespace ESME.Scenarios
         {
             StorageDirectory = Path.Combine("scenarios", MasterDatabaseService.RandomFilenameWithoutExension);
             Duration = new TimeSpan(0, 1, 0, 0);
+            ((INotifyPropertyChanged)this).PropertyChanged += NotifyPropertyChanged;
         }
 
         public Scenario(Scenario scenario) : this()
@@ -182,6 +183,17 @@ namespace ESME.Scenarios
         public virtual ObservableList<LogEntry> Logs { get; set; }
 
         public void Add(Platform platform) { Platforms.Add(platform); }
+
+        void NotifyPropertyChanged(object sender, PropertyChangedEventArgs args)
+        {
+            switch (args.PropertyName)
+            {
+                case "IsLoaded":
+                    if (IsLoaded) CreateMapLayers();
+                    else RemoveMapLayers();
+                    break;
+            }
+        }
 
         [NotMapped] public bool IsLoaded { get; set; }
         [NotMapped] public Wind WindData { get { return ((Wind)Cache[Wind].Result); } }

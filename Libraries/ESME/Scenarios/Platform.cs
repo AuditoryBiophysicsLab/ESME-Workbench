@@ -72,6 +72,7 @@ namespace ESME.Scenarios
             get
             {
                 if (_platformBehavior != null && Scenario != null) return _platformBehavior;
+                if (Scenario == null) return null;
                 _platformBehavior = new PlatformBehavior(this, new TimeSpan(0, 0, 1, 0), (int)((TimeSpan)Scenario.Duration).TotalMinutes);
                 return _platformBehavior;
             }
@@ -219,7 +220,6 @@ namespace ESME.Scenarios
 
         public void Refresh()
         {
-            if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
             RemoveMapLayers();
             PlatformBehavior = null;
             CreateMapLayers();
@@ -229,6 +229,8 @@ namespace ESME.Scenarios
 
         public void CreateMapLayers()
         {
+            if (Scenario == null || LayerSettings == null) return;
+            if (!Scenario.IsLoaded) return;
             var mapLayer = new OverlayShapeMapLayer
             {
                 Name = string.Format("{0}", Guid),
@@ -280,7 +282,7 @@ namespace ESME.Scenarios
             mapLayer.Done();
             LayerSettings.MapLayerViewModel = mapLayer;
         }
-        public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
+        public void RemoveMapLayers() { if (LayerSettings != null) LayerSettings.MapLayerViewModel = null; }
         #endregion
         
         #region Commands
