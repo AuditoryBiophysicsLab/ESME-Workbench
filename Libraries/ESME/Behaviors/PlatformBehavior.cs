@@ -86,8 +86,6 @@ namespace ESME.Behaviors
                 Course course;
                 GeoArray perimeter = null;
                 GeoArray bounceTrack = null;
-                List<Waypoint> waypoints;
-                int waypointIndex;
                 var trackType = (TrackType)Platform.TrackType;
 
                 if (trackType == TrackType.PerimeterBounce && Platform.Perimeter == null) throw new PerimeterInvalidException("Must have a perimeter specified for PerimeterBounce behavior");
@@ -189,16 +187,20 @@ namespace ESME.Behaviors
                         }
                         break;
                     case TrackType.WaypointFile:
-                        waypoints = (from w in Platform.ShipTrack.Waypoints
-                                     orderby w.Order
-                                     select w).ToList();
+                        var waypoints = (from w in Platform.ShipTrack.Waypoints
+                                         orderby w.Order
+                                         select w).ToList();
                         timeStepsRemaining = _timeStepCount;
-                        for (waypointIndex = 0; waypointIndex < waypoints.Count - 1; waypointIndex++)
+                        for (var waypointIndex = 0; waypointIndex < waypoints.Count - 1; waypointIndex++)
                         {
                             var segment = new GeoSegment(waypoints[waypointIndex].Geo, waypoints[waypointIndex + 1].Geo);
                             var segmentLength = Geo.RadiansToMeters(segment.LengthRadians);
+                            if (!Platform.ShipTrack.OverrideTimestamps)
+                            {
+                                var segmentDuration = (TimeSpan)waypoints[waypointIndex + 1].TimeAtWaypoint - waypoints[waypointIndex].TimeAtWaypoint;
+                                metersPerTimeStep = segmentLength / (segmentDuration.TotalSeconds / _timeStep.TotalSeconds);
+                            }
                             var stepsInSegment = Math.Round(segmentLength / metersPerTimeStep);
-                            Debug.WriteLine(string.Format("Waypoint segment {0}. Steps {1}", waypointIndex, stepsInSegment));
                             for (double curStep = 0; curStep < stepsInSegment; curStep++)
                             {
                                 var oldLocation = location;
