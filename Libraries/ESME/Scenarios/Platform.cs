@@ -156,6 +156,7 @@ namespace ESME.Scenarios
                 case "Perimeter":
                 case "SelectedTrackType":
                 case "Geo":
+                case "ShipTrack":
                     Refresh();
                     break;
             }

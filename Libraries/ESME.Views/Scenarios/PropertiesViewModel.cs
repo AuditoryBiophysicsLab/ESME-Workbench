@@ -132,6 +132,7 @@ namespace ESME.Views.Scenarios
             if (!result.HasValue || !result.Value) return;
             try
             {
+                if (Platform.ShipTrack != null) _databaseService.Context.ShipTracks.Remove(Platform.ShipTrack);
                 var shipTrack = ShipTrack.ReadWaypointFile(_openFileService.FileName);
                 _databaseService.Context.ShipTracks.Add(shipTrack);
                 shipTrack.Platform = Platform;

@@ -140,7 +140,8 @@ namespace ESME.Locations
                 .WithRequired(p => p.Platform); // The ShipTrack MUST refer back to the platform
             modelBuilder.Entity<ShipTrack>()
                 .HasMany(p => p.Waypoints)      // A ShipTrack can have many Waypoints
-                .WithRequired();                // Each Waypoint must refer back to the ShipTrack
+                .WithRequired()                 // Each Waypoint must refer back to the ShipTrack
+                .WillCascadeOnDelete(true);
         }
 
         public class LocationDatabaseInitializer : CreateDatabaseIfNotExists<LocationContext>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -51,6 +52,7 @@ namespace ESME.Scenarios
             var lineNumber = 0;
             var lastTimeSpan = TimeSpan.Zero;
             shipTrack.Waypoints.Clear();
+            var order = 0;
             foreach (var line in lines)
             {
                 var timeSpan = TimeSpan.Zero;
@@ -66,7 +68,7 @@ namespace ESME.Scenarios
                 if (longitude < -360.0 || longitude > 360.0) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: Invalid longitude value. Longitude must be between -360 and +360", lineNumber));
                 if (timeSpan.Ticks < 0) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: Invalid time stamp value. Time stamp value cannot be negative", lineNumber));
                 if (lastTimeSpan.Ticks > 0 && timeSpan.Ticks < lastTimeSpan.Ticks) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: Invalid time stamp value. Time stamp value must be greater than the time stamp value specified for the previous waypoint", lineNumber));
-                shipTrack.Waypoints.Add(new Waypoint { Geo = new Geo(latitude, longitude), TimeAtWaypoint = timeSpan, ShipTrack = shipTrack });
+                shipTrack.Waypoints.Add(new Waypoint { Geo = new Geo(latitude, longitude), TimeAtWaypoint = timeSpan, ShipTrack = shipTrack, Order = order++ });
                 lastTimeSpan = timeSpan;
             }
             if (shipTrack.Waypoints == null || shipTrack.Waypoints.Count == 0) shipTrack.HasTimestamps = false;
@@ -104,7 +106,7 @@ namespace ESME.Scenarios
         /// The time offset from the start of the scenario that the platform arrives at this waypoint
         /// </summary>
         public DbTimeSpan TimeAtWaypoint { get; set; }
-
+        public int Order { get; set; }
         public virtual ShipTrack ShipTrack { get; set; }
     }
 }
