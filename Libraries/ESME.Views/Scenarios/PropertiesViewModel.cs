@@ -2,10 +2,12 @@
 using System.ComponentModel;
 using System.Windows;
 using ESME.Behaviors;
+using ESME.Database;
 using ESME.Locations;
 using ESME.Scenarios;
 using HRC;
 using HRC.Aspects;
+using HRC.Navigation;
 using HRC.Services;
 using HRC.ViewModels;
 using HRC.WPF;
@@ -66,6 +68,8 @@ namespace ESME.Views.Scenarios
         public PlatformPropertiesViewModel(Platform platform, IHRCOpenFileService openFileService, IMessageBoxService messageBoxService, IMasterDatabaseService databaseService)
         {
             Platform = platform;
+            Latitude = platform.Geo.Latitude;
+            Longitude = platform.Geo.Longitude;
             _openFileService = openFileService;
             _messageBoxService = messageBoxService;
             _databaseService = databaseService;
@@ -73,7 +77,9 @@ namespace ESME.Views.Scenarios
                 .RegisterHandler(p => p.SelectedTrackType, SelectedTrackTypeChanged)
                 .RegisterHandler(p => p.PlatformName, WindowTitleChanged);
             _viewModelObserver = new PropertyObserver<PlatformPropertiesViewModel>(this)
-                .RegisterHandler(p => p.IsPSMView, RandomizeSectionVisibilityChanged);
+                .RegisterHandler(p => p.IsPSMView, RandomizeSectionVisibilityChanged)
+                .RegisterHandler(p => p.Latitude, () => { _isGeoChanged = true; })
+                .RegisterHandler(p => p.Longitude, () => { _isGeoChanged = true; });
             WindowTitleChanged();
             SelectedTrackTypeChanged();
             RandomizeSectionVisibilityChanged();
@@ -87,6 +93,9 @@ namespace ESME.Views.Scenarios
         readonly IHRCOpenFileService _openFileService;
         readonly IMessageBoxService _messageBoxService;
         readonly IMasterDatabaseService _databaseService;
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        bool _isGeoChanged;
         void WindowTitleChanged() { WindowTitle = string.Format("Platform Properties: {0}", Platform.PlatformName); }
         void SelectedTrackTypeChanged()
         {
@@ -104,6 +113,7 @@ namespace ESME.Views.Scenarios
 
         void OkHandler(EventToCommandArgs args)
         {
+            if (_isGeoChanged) Platform.Geo = new Geo(Latitude, Longitude);
             if (!IsPSMView) CloseDialog(true);
             else MediatorMessage.Send(MediatorMessage.PSMPlatformChanged, Platform);
         }

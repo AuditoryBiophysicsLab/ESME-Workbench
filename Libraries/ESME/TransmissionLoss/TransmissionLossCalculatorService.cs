@@ -116,7 +116,11 @@ namespace ESME.TransmissionLoss
                                     where s.Guid == radial.TransmissionLoss.AnalysisPoint.Scenario.Guid
                                     select s).Single();
                 }
-                if (!File.Exists(radial.BasePath + ".shd")) Add(radial);
+                if (!File.Exists(radial.BasePath + ".shd"))
+                {
+                    _databaseService.Context.Radials.
+                    Add(radial);
+                }
                 else _shadeFileProcessorQueue.Post(radial);
             }
         }

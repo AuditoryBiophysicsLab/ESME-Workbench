@@ -6,7 +6,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq; 
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
 using ESME.Behaviors;
 using ESME.Database;
 using ESME.Locations;
@@ -23,7 +22,7 @@ using log4net;
 namespace ESME.Scenarios
 {
     [NotifyPropertyChanged]
-    public class Platform : IHaveGuid, IHaveLayerSettings, INotifyPropertyChanged
+    public class Platform : IHaveGuid, IHaveLayerSettings
     {
         #region Mapped Properties
         [Key, Initialize]
@@ -40,20 +39,7 @@ namespace ESME.Scenarios
         public DbTrackType TrackType { get; set; }
         public DbGeo Geo { get; set; }
 
-        bool _isRandom = true;
-        public bool IsRandom
-        {
-            get { return _isRandom; }
-            set
-            {
-                _isRandom = value;
-                if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
-                RemoveMapLayers();
-                PlatformBehavior = null;
-                CreateMapLayers();
-            }
-        }
-
+        public bool IsRandom { get; set; }
         public float Depth { get; set; }
         public float Course { get; set; }
 
@@ -64,21 +50,9 @@ namespace ESME.Scenarios
         public float Speed { get; set; }
 
         public virtual Scenario Scenario { get; set; }
-         
-        Perimeter _perimeter;
+
         [Affects("TrackTypeDisplay")]
-        public virtual Perimeter Perimeter
-        {
-            get { return _perimeter; }
-            set
-            {
-                _perimeter = value;
-                if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
-                RemoveMapLayers();
-                PlatformBehavior = null;
-                CreateMapLayers();
-            }
-        }
+        public virtual Perimeter Perimeter { get; set; }
 
         public virtual ShipTrack ShipTrack { get; set; }
 
@@ -120,16 +94,15 @@ namespace ESME.Scenarios
                 try
                 {
                     TrackType = value;
-                    if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
-                    RemoveMapLayers();
-                    PlatformBehavior = null;
-                    CreateMapLayers();
                 }
                 catch (Exception e)
                 {
                     if (_messageBox != null) _messageBox.ShowError(e.Message);
                     TrackType = oldValue;
-                    OnPropertyChanged("SelectedTrackType");
+                }
+                finally
+                {
+                    Refresh();
                 }
             }
         }
@@ -171,11 +144,26 @@ namespace ESME.Scenarios
         void Initialize()
         {
             TrackType = Behaviors.TrackType.Stationary;
+            ((INotifyPropertyChanged)this).PropertyChanged += NotifyPropertyChanged;
+        }
+
+        void NotifyPropertyChanged(object sender, PropertyChangedEventArgs args)
+        {
+            switch (args.PropertyName)
+            {
+                case "IsRandom":
+                case "Perimeter":
+                case "SelectedTrackType":
+                case "Geo":
+                    Refresh();
+                    break;
+            }
         }
 
         public Platform(Platform platform)
         {
             Copy(platform);
+            ((INotifyPropertyChanged)this).PropertyChanged += NotifyPropertyChanged;
         }
 
         void Copy(Platform platform)
@@ -231,9 +219,9 @@ namespace ESME.Scenarios
 
         public void Refresh()
         {
-            if (LayerSettings.MapLayerViewModel == null) return;
-            PlatformBehavior = null;
+            if (LayerSettings == null || LayerSettings.MapLayerViewModel == null) return;
             RemoveMapLayers();
+            PlatformBehavior = null;
             CreateMapLayers();
         }
 
@@ -293,24 +281,6 @@ namespace ESME.Scenarios
             LayerSettings.MapLayerViewModel = mapLayer;
         }
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
-        #endregion
-        
-        #region OnPropertyChanged
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged(string propertyName)
-        {
-            var handlers = PropertyChanged;
-            if (handlers == null) return;
-            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
-                if (handler.Target is DispatcherObject)
-                {
-                    var localHandler = handler;
-                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new PropertyChangedEventArgs(propertyName)));
-                }
-                else handler(this, new PropertyChangedEventArgs(propertyName));
-        }
         #endregion
         
         #region Commands
