@@ -75,7 +75,8 @@ namespace ESME.Views.Scenarios
             _databaseService = databaseService;
             _platformObserver = new PropertyObserver<Platform>(Platform)
                 .RegisterHandler(p => p.SelectedTrackType, SelectedTrackTypeChanged)
-                .RegisterHandler(p => p.PlatformName, WindowTitleChanged);
+                .RegisterHandler(p => p.PlatformName, WindowTitleChanged)
+                .RegisterHandler(p => p.ShipTrack, ShipTrackChanged);
             _viewModelObserver = new PropertyObserver<PlatformPropertiesViewModel>(this)
                 .RegisterHandler(p => p.IsPSMView, RandomizeSectionVisibilityChanged)
                 .RegisterHandler(p => p.Latitude, () => { _isGeoChanged = true; })
@@ -83,8 +84,11 @@ namespace ESME.Views.Scenarios
             WindowTitleChanged();
             SelectedTrackTypeChanged();
             RandomizeSectionVisibilityChanged();
+            ShipTrackChanged();
+            CheckIsSpeedEnabled();
         }
 
+        public bool IsSpeedEnabled { get; set; }
         public bool IsPSMView { get; set; }
         public Platform Platform { get; set; }
         public string WindowTitle { get; set; }
@@ -96,9 +100,46 @@ namespace ESME.Views.Scenarios
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         bool _isGeoChanged;
+        [UsedImplicitly]PropertyObserver<ShipTrack> _shipTrackObserver;
+        void ShipTrackChanged()
+        {
+            if (_shipTrackObserver != null) _shipTrackObserver.UnregisterHandler(p => p.OverrideTimestamps);
+            _shipTrackObserver = null;
+            if (Platform.ShipTrack != null)
+            {
+                Platform.ShipTrack.CheckTimestamps();
+                _shipTrackObserver = new PropertyObserver<ShipTrack>(Platform.ShipTrack)
+                    .RegisterHandler(p => p.OverrideTimestamps,
+                                     () =>
+                                     {
+                                         Platform.Refresh();
+                                         CheckIsSpeedEnabled();
+                                     }
+                    );
+            }
+            Platform.Refresh();
+            CheckIsSpeedEnabled();
+        }
         void WindowTitleChanged() { WindowTitle = string.Format("Platform Properties: {0}", Platform.PlatformName); }
+        void CheckIsSpeedEnabled()
+        {
+            switch (Platform.SelectedTrackType)
+            {
+                case TrackType.Stationary:
+                    IsSpeedEnabled = false;
+                    break;
+                case TrackType.StraightLine:
+                case TrackType.PerimeterBounce:
+                    IsSpeedEnabled = true;
+                    break;
+                case TrackType.WaypointFile:
+                    IsSpeedEnabled = Platform.ShipTrack != null && Platform.ShipTrack.OverrideTimestamps;
+                    break;
+            }
+        }
         void SelectedTrackTypeChanged()
         {
+            CheckIsSpeedEnabled();
             ImportWaypointFileVisibility = _openFileService != null && Platform.SelectedTrackType == TrackType.WaypointFile ? Visibility.Visible : Visibility.Collapsed;
             RandomizeSectionVisibilityChanged();
         }

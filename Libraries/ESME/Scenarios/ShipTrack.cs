@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -44,6 +43,12 @@ namespace ESME.Scenarios
 
         [NotMapped] public bool HasTimestamps { get; private set; }
 
+        public void CheckTimestamps()
+        {
+            if (Waypoints == null || Waypoints.Count == 0) HasTimestamps = false;
+            else HasTimestamps = Waypoints.Any(w => w.TimeAtWaypoint.Ticks > 0);
+        }
+
         public static ShipTrack ReadWaypointFile(string filename)
         {
             var shipTrack = new ShipTrack();
@@ -51,6 +56,7 @@ namespace ESME.Scenarios
             char[] separators = {' ', ',', '\t'};
             var lineNumber = 0;
             var lastTimeSpan = TimeSpan.Zero;
+            var hasTimestamps = false;
             shipTrack.Waypoints.Clear();
             var order = 0;
             foreach (var line in lines)
@@ -59,22 +65,26 @@ namespace ESME.Scenarios
                 lineNumber++;
                 var fields = line.Split(separators, StringSplitOptions.RemoveEmptyEntries);
                 double latitude, longitude;
-                if (fields.Length < 2) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: each line should contain a minimum two fields (a latitude and a longitude)", lineNumber));
-                if (fields.Length > 3) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: each line should contain a maximum of three fields (a latitude, a longitude and a time stamp)", lineNumber));
-                if (!Double.TryParse(fields[0], out latitude)) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: Invalid number format for latitude value", lineNumber));
-                if (!Double.TryParse(fields[1], out longitude)) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: Invalid number format for longitude value", lineNumber));
-                if (fields.Length == 3 && !TimeSpan.TryParse(fields[2], out timeSpan)) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: Invalid TimeSpan format for time stamp value. Format is hh:mm:ss", lineNumber));
-                if (latitude < -90.0 || latitude > 90.0) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: Invalid latitude value. Latitude must be between -90 and +90", lineNumber));
-                if (longitude < -360.0 || longitude > 360.0) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: Invalid longitude value. Longitude must be between -360 and +360", lineNumber));
-                if (timeSpan.Ticks < 0) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: Invalid time stamp value. Time stamp value cannot be negative", lineNumber));
-                if (lastTimeSpan.Ticks > 0 && timeSpan.Ticks < lastTimeSpan.Ticks) throw new FormatException(string.Format("Illegal waypoint file format at line {0}: Invalid time stamp value. Time stamp value must be greater than the time stamp value specified for the previous waypoint", lineNumber));
+                if (fields.Length < 2) WaypointFormatException(lineNumber, "Each line should contain a minimum two fields (a latitude and a longitude)");
+                if (fields.Length > 3)  WaypointFormatException(lineNumber, "Each line should contain a maximum of three fields (a latitude, a longitude and a time stamp)");
+                if (!Double.TryParse(fields[0], out latitude)) WaypointFormatException(lineNumber, "Invalid number format for latitude value");
+                if (!Double.TryParse(fields[1], out longitude)) WaypointFormatException(lineNumber, "Invalid number format for longitude value");
+                if (fields.Length == 3 && !TimeSpan.TryParse(fields[2], out timeSpan)) WaypointFormatException(lineNumber, "Invalid TimeSpan format for time stamp value. Format is hh:mm:ss");
+                if (latitude < -90.0 || latitude > 90.0) WaypointFormatException(lineNumber, "Invalid latitude value. Latitude must be between -90 and +90");
+                if (longitude < -360.0 || longitude > 360.0) WaypointFormatException(lineNumber, "Invalid longitude value. Longitude must be between -360 and +360");
+                if (timeSpan.Ticks < 0) WaypointFormatException(lineNumber, "Invalid time stamp value. Time stamp value cannot be negative");
+                if (lineNumber == 1 && timeSpan.Ticks != 0) WaypointFormatException(lineNumber, "Initial postion time stamp is required to be 00:00:00 if present");
+                if (timeSpan.Ticks > 0 && lineNumber > 2 && !hasTimestamps) WaypointFormatException(lineNumber, "A waypoint file that has any timestamps is required to have timestamps on every line");
+                if (timeSpan.Ticks > 0) hasTimestamps = true;
+                if (lastTimeSpan.Ticks > 0 && timeSpan.Ticks < lastTimeSpan.Ticks) WaypointFormatException(lineNumber, "Invalid time stamp value. Time stamp value must be greater than the time stamp value specified for the previous waypoint");
                 shipTrack.Waypoints.Add(new Waypoint { Geo = new Geo(latitude, longitude), TimeAtWaypoint = timeSpan, ShipTrack = shipTrack, Order = order++ });
                 lastTimeSpan = timeSpan;
             }
-            if (shipTrack.Waypoints == null || shipTrack.Waypoints.Count == 0) shipTrack.HasTimestamps = false;
-            else shipTrack.HasTimestamps = shipTrack.Waypoints.Any(w => w.TimeAtWaypoint.Ticks > 0);
+            shipTrack.CheckTimestamps();
             return shipTrack;
         }
+
+        static void WaypointFormatException(int lineNumber, string message) { throw new WaypointFileFormatException(string.Format("Illegal waypoint file format at line {0}: {1}", lineNumber, message)); }
 
         public void WriteWaypointFile(string filename, bool includeTimestampsIfPresent)
         {

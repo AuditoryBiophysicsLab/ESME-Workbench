@@ -195,7 +195,7 @@ namespace ESME.Behaviors
                         {
                             var segment = new GeoSegment(waypoints[waypointIndex].Geo, waypoints[waypointIndex + 1].Geo);
                             var segmentLength = Geo.RadiansToMeters(segment.LengthRadians);
-                            if (!Platform.ShipTrack.OverrideTimestamps)
+                            if (Platform.ShipTrack.HasTimestamps && !Platform.ShipTrack.OverrideTimestamps)
                             {
                                 var segmentDuration = (TimeSpan)waypoints[waypointIndex + 1].TimeAtWaypoint - waypoints[waypointIndex].TimeAtWaypoint;
                                 metersPerTimeStep = segmentLength / (segmentDuration.TotalSeconds / _timeStep.TotalSeconds);

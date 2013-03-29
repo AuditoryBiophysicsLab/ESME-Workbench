@@ -157,7 +157,11 @@ namespace StandardTransmissionLossEngines
             };
             if (radial.IsDeleted) throw new RadialDeletedByUserException();
             bellhopProcess.Start();
-            bellhopProcess.PriorityClass = ProcessPriorityClass.Idle;
+            try
+            {
+                bellhopProcess.PriorityClass = ProcessPriorityClass.Idle;
+            }
+            catch (InvalidOperationException) {}
             //bellhopProcess.BeginOutputReadLine();
             while (!bellhopProcess.HasExited)
             {

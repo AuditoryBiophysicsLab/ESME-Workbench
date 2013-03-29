@@ -10,11 +10,15 @@
              Background="#fff0f0f0"
              d:DataContext="{d:DesignInstance l:PlatformPropertiesViewModel}"
              d:DesignHeight="400"
-             d:DesignWidth="300"
+             d:DesignWidth="400"
              mc:Ignorable="d">
     <UserControl.Resources>
-        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed" FalseValue="Visible" TrueValue="Collapsed" />
-        <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed" FalseValue="Collapsed" TrueValue="Visible" />
+        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed"
+                                          FalseValue="Visible"
+                                          TrueValue="Collapsed" />
+        <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed"
+                                          FalseValue="Collapsed"
+                                          TrueValue="Visible" />
         <WPF:BooleanInverter x:Key="BooleanInverter" />
         <Style TargetType="{x:Type TextBox}">
             <Setter Property="MinWidth" Value="150" />
@@ -22,7 +26,9 @@
                 <Setter.Value>
                     <ControlTemplate>
                         <DockPanel LastChildFill="True">
-                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
+                            <Border BorderBrush="Red"
+                                    BorderThickness="1"
+                                    DockPanel.Dock="Left">
                                 <AdornedElementPlaceholder />
                             </Border>
                         </DockPanel>
@@ -37,7 +43,9 @@
         </Style>
     </UserControl.Resources>
     <DockPanel LastChildFill="True">
-        <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
+        <StackPanel HorizontalAlignment="Right"
+                    DockPanel.Dock="Bottom"
+                    Orientation="Horizontal">
             <Button Width="75"
                     Height="22"
                     Margin="5"
@@ -45,7 +53,9 @@
                     Content="OK"
                     IsDefault="True" />
         </StackPanel>
-        <Border BorderThickness="0" DockPanel.Dock="Top" Padding="5">
+        <Border BorderThickness="0"
+                DockPanel.Dock="Top"
+                Padding="5">
             <StackPanel Orientation="Vertical">
                 <Grid Margin="5 5 5 0" Visibility="{Binding IsPSMView, Converter={StaticResource TrueVisibleFalseCollapsed}}">
                     <Grid.ColumnDefinitions>
@@ -57,7 +67,10 @@
                                VerticalAlignment="Top"
                                Text="Platform Name"
                                TextAlignment="Right" />
-                    <TextBox Grid.Column="1" Height="Auto" Text="{Binding Platform.PlatformName}" />
+                    <TextBox Grid.Column="1"
+                             Height="Auto"
+                             Text="{Binding Platform.PlatformName,
+                                            UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -69,7 +82,10 @@
                                VerticalAlignment="Top"
                                Text="Platform Type"
                                TextAlignment="Right" />
-                    <TextBox Grid.Column="1" Height="Auto" Text="{Binding Platform.PlatformType}" ToolTip="This field is optional" />
+                    <TextBox Grid.Column="1"
+                             Height="Auto"
+                             Text="{Binding Platform.PlatformType}"
+                             ToolTip="This field is optional" />
                 </Grid>
                 <Grid Margin="5 5 5 0">
                     <Grid.ColumnDefinitions>
@@ -89,7 +105,10 @@
                              TextWrapping="Wrap"
                              ToolTip="This field is optional" />
                 </Grid>
-                <Grid Margin="5 5 5 0" Visibility="{Binding IsPSMView, Converter={StaticResource FalseVisibleTrueCollapsed}}">
+                <Grid Margin="5 5 5 0"
+                      IsEnabled="{Binding IsSpeedEnabled}"
+                      Visibility="{Binding IsPSMView,
+                                           Converter={StaticResource FalseVisibleTrueCollapsed}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition SharedSizeGroup="LabelColumn" />
                         <ColumnDefinition />
@@ -100,7 +119,10 @@
                                Text="Speed"
                                TextAlignment="Right"
                                ToolTip="Speed in knots (nautical miles per hour). A speed greater than zero is required before you can choose the PerimeterBounce behavior." />
-                    <TextBox Grid.Column="1" Height="Auto" Text="{Binding Platform.Speed}" ToolTip="Speed in knots (nautical miles per hour)" />
+                    <TextBox Grid.Column="1"
+                             Height="Auto"
+                             Text="{Binding Platform.Speed}"
+                             ToolTip="Speed in knots (nautical miles per hour)" />
                 </Grid>
                 <Grid Margin="5 5 5 0" Visibility="{Binding IsPSMView, Converter={StaticResource FalseVisibleTrueCollapsed}}">
                     <Grid.ColumnDefinitions>
@@ -128,19 +150,37 @@
                                VerticalAlignment="Top"
                                Text="Behavior"
                                TextAlignment="Right" />
-                    <ComboBox Grid.Column="1" ItemsSource="{Binding Platform.TrackTypeDisplay}" SelectedItem="{Binding Platform.SelectedTrackType}" ToolTip="A speed greater than zero must be entered, and a perimeter selected, before you can choose the PerimeterBounce behavior." />
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding Platform.TrackTypeDisplay}"
+                              SelectedItem="{Binding Platform.SelectedTrackType}"
+                              ToolTip="A speed greater than zero must be entered, and a perimeter selected, before you can choose the PerimeterBounce behavior." />
                 </Grid>
                 <Grid Margin="5 5 5 0" Visibility="{Binding ImportWaypointFileVisibility}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition SharedSizeGroup="LabelColumn" />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="1" Command="{Binding ImportWaypointFileCommand}" Content="Import waypoint file..." />
+                    <Button Grid.Column="1"
+                            Command="{Binding ImportWaypointFileCommand}"
+                            Content="Import waypoint file..." />
+                </Grid>
+                <Grid Margin="5 5 5 0" Visibility="{Binding ImportWaypointFileVisibility}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Grid.Column="1"
+                              Content="Override timestamps"
+                              IsChecked="{Binding Platform.ShipTrack.OverrideTimestamps}"
+                              IsEnabled="{Binding Platform.ShipTrack.HasTimestamps}"
+                              ToolTip="Override timestamps specified in the waypoint file, which will cause the platform to follow the ship track at the speed shown in the Speed property. If this check box is disabled, the waypoint file did not contain timestamps." />
                 </Grid>
 
                 <GroupBox Visibility="{Binding RandomizeSectionVisibility}">
                     <GroupBox.Header>
-                        <CheckBox x:Name="RandomizeCheckBox" Content="Randomize" IsChecked="{Binding Platform.IsRandom}" />
+                        <CheckBox x:Name="RandomizeCheckBox"
+                                  Content="Randomize"
+                                  IsChecked="{Binding Platform.IsRandom}" />
                     </GroupBox.Header>
                     <StackPanel IsEnabled="{Binding ElementName=RandomizeCheckBox, Path=IsChecked, Converter={StaticResource BooleanInverter}}" Orientation="Vertical">
                         <Grid Margin="5 5 5 0">
