@@ -21,7 +21,7 @@
     <DefineConstants>TRACE;DEBUG;SkipPostSharp</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
+    <SkipPostSharp>True</SkipPostSharp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,7 +30,7 @@
     <DefineConstants>TRACE;SkipPostSharp</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
+    <SkipPostSharp>True</SkipPostSharp>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AsyncCtpLibrary">

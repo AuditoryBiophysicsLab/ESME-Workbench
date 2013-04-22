@@ -43,6 +43,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PostSharpSearchPath>C:\Projects\ESME Deliverables\ESME WorkBench\External References\x86;C:\Projects\ESME Deliverables\ESME WorkBench\External References\x64;C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable\v4.0\Profile\Profile1</PostSharpSearchPath>
+    <PostSharpHost>Managed</PostSharpHost>
     <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -53,18 +55,23 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PostSharpSearchPath>C:\Projects\ESME Deliverables\ESME WorkBench\External References\x86;C:\Projects\ESME Deliverables\ESME WorkBench\External References\x64;C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable\v4.0\Profile\Profile1</PostSharpSearchPath>
+    <PostSharpHost>Managed</PostSharpHost>
     <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="3MBSLib">
+    <Reference Include="3MBSLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <HintPath>..\..\ESME WorkBench\External References\x64\3MBSLib.dll</HintPath>
     </Reference>
-    <Reference Include="3MBWrapperClass">
+    <Reference Include="3MBWrapperClass, Version=1.0.4574.28957, Culture=neutral, processorArchitecture=AMD64">
       <HintPath>..\..\ESME WorkBench\External References\x64\3MBWrapperClass.dll</HintPath>
     </Reference>
     <Reference Include="AsyncCtpLibrary">
       <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="C5">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\C5.2.2.4822.42600\lib\portable-win+net40+sl40+wp+Xbox40\C5.dll</HintPath>
     </Reference>
     <Reference Include="Devart.Data, Version=5.0.449.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\Program Files (x86)\Devart\dotConnect\SQLite\Devart.Data.dll</HintPath>
@@ -329,11 +336,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\C5\C5.csproj">
-      <Project>{7029F5D5-ABBB-4564-B170-39802AD65C62}</Project>
-      <Name>C5</Name>
-      <Private>False</Private>
-    </ProjectReference>
     <ProjectReference Include="..\HRC.Plotting\HRC.Plotting.csproj">
       <Project>{07EA1355-65C1-4335-AD7E-C7AC26550DFF}</Project>
       <Name>HRC.Plotting</Name>

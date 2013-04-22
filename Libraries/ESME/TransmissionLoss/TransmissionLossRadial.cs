@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using ESME.TransmissionLoss.Bellhop;
-using HRC.Navigation;
 
 namespace ESME.TransmissionLoss
 {
@@ -61,6 +59,7 @@ namespace ESME.TransmissionLoss
             DataMin = min;
             StatMin = min;
         }
+
         public TransmissionLossRadial(float bearingFromSource, float[,] pressureField, IEnumerable<float> depths, IEnumerable<float> ranges, float sourceLevel)
             : this(bearingFromSource, pressureField, sourceLevel)
         {

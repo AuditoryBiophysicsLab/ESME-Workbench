@@ -141,10 +141,6 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Libraries\C5\C5.csproj">
-      <Project>{7029F5D5-ABBB-4564-B170-39802AD65C62}</Project>
-      <Name>C5</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Libraries\ESME.Views\ESME.Views.csproj">
       <Project>{49221733-2EB6-468F-8833-06C0E36B3C83}</Project>
       <Name>ESME.Views</Name>

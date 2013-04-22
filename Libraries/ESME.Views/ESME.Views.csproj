@@ -45,6 +45,9 @@
       <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="C5">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\C5.2.2.4822.42600\lib\portable-win+net40+sl40+wp+Xbox40\C5.dll</HintPath>
+    </Reference>
     <Reference Include="Core">
       <HintPath>..\..\ESME WorkBench\External References\Core.dll</HintPath>
     </Reference>

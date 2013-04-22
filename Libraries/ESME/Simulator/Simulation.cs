@@ -336,7 +336,7 @@ namespace ESME.Simulator
             if (mode.HorizontalBeamWidth < 360) geos.Add(initialGeo);
             for (var arcPointBearing = footprintArcStartBearing; arcPointBearing < footprintArcEndBearing; arcPointBearing++) geos.Add(initialGeo.Offset(Geo.MetersToRadians(mode.MaxPropagationRadius), Geo.DegreesToRadians(arcPointBearing)));
             geos.Add(initialGeo.Offset(Geo.MetersToRadians(mode.MaxPropagationRadius), Geo.DegreesToRadians(footprintArcEndBearing)));
-            if (mode.HorizontalBeamWidth < 360) geos.Add(initialGeo);
+            geos.Add(mode.HorizontalBeamWidth < 360 ? initialGeo : initialGeo.Offset(Geo.MetersToRadians(mode.MaxPropagationRadius), Geo.DegreesToRadians(footprintArcStartBearing)));
             mapLayer.AddPolygon(geos);
             mapLayer.Done();
         }

@@ -55,10 +55,10 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="wix">
-      <HintPath>..\..\..\..\..\Program Files (x86)\WiX Toolset v3.6\bin\wix.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\WiX Toolset v3.7\bin\wix.dll</HintPath>
     </Reference>
     <Reference Include="WixUIExtension">
-      <HintPath>..\..\..\..\..\Program Files (x86)\WiX Toolset v3.6\bin\WixUIExtension.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\WiX Toolset v3.7\bin\WixUIExtension.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

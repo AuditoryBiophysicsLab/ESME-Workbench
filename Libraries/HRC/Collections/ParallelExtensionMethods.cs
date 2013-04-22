@@ -30,7 +30,7 @@ namespace HRC.Collections
                 Parallel.For(0, cpuCount, () => 0, (i, loop, j) =>
                 {
                     //System.Diagnostics.Debug.WriteLine("{0}: ParallelSort: Starting thread to sort from index {1} to {2}", DateTime.Now, arraySliceLength * i, arraySliceLength * (i + 1));
-                    Sorting.ParallelIntroSort(array, arraySliceLength * i, arraySliceLength, comparer);
+                    Sorting.IntroSort(array, arraySliceLength * i, arraySliceLength, comparer);
                     //System.Diagnostics.Debug.WriteLine("{0}: ParallelSort: Finished sorting from index {1} to {2}", DateTime.Now, arraySliceLength * i, arraySliceLength * (i + 1));
                     return arraySliceLength;
                 },

@@ -38,8 +38,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="C5">
-      <HintPath>..\..\..\Libraries\C5\bin\Debug\C5.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\Solutions\ESME Workbench\packages\C5.2.2.4822.42600\lib\portable-win+net40+sl40+wp+Xbox40\C5.dll</HintPath>
     </Reference>
     <Reference Include="HDF5DotNet">
       <HintPath>..\..\..\ESME WorkBench\External References\x64\HDF5DotNet.dll</HintPath>
@@ -73,6 +72,9 @@
       <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
       <Name>HRC</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

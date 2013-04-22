@@ -133,15 +133,6 @@
       <Project>{409DC754-EEBD-4E49-8DDF-3960F2FFCE73}</Project>
       <Name>NAVODatabaseAdapter</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Plugins\Environmental Data Sources\StandaloneNAVO\StandaloneNAVOPlugin.csproj">
-      <Project>{DDC1E22A-276A-4910-A934-6F72CD22DE31}</Project>
-      <Name>StandaloneNAVOPlugin</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\C5\C5.csproj">
-      <Project>{7029F5D5-ABBB-4564-B170-39802AD65C62}</Project>
-      <Name>C5</Name>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\ESME\ESME.csproj">
       <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
       <Name>ESME</Name>

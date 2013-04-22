@@ -31,13 +31,8 @@
         <DockPanel Grid.Row="0" Grid.Column="0">
             <DockPanel Width="80" DockPanel.Dock="Right">
                 <TextBlock Height="{Binding AxisSeriesViewModel.BottomAxis.ActualHeight, Mode=OneWay}" DockPanel.Dock="Bottom" />
-                <DockPanel Margin="5 0 0 0"
-                           DataContext="{Binding ColorMapViewModel}"
-                           LastChildFill="False">
-                    <Plotting:DataAxis AxisLabel="Transmission Loss (dB)"
-                                       AxisLocation="Right"
-                                       DataRange="{Binding FullRange}"
-                                       DockPanel.Dock="Right" />
+                <DockPanel Margin="5 0 0 0" DataContext="{Binding ColorMapViewModel}" LastChildFill="False">
+                    <Plotting:DataAxis AxisLabel="Transmission Loss (dB)" AxisLocation="Right" DataRange="{Binding FullRange}" DockPanel.Dock="Right" />
                     <controls:ColorBarView MinWidth="50"
                                            ColorBarImage="{Binding ColorBitmap}"
                                            CurrentMaximum="{Binding CurrentRange.Max}"
@@ -49,9 +44,7 @@
                                            StatisticalMinimum="{Binding StatisticalRange.Min}" />
                 </DockPanel>
             </DockPanel>
-            <Plotting:FourAxisSeriesView x:Name="AxisView"
-                                         DataContext="{Binding AxisSeriesViewModel}"
-                                         DockPanel.Dock="Left" />
+            <Plotting:FourAxisSeriesView x:Name="AxisView" DataContext="{Binding AxisSeriesViewModel}" DockPanel.Dock="Left" />
         </DockPanel>
     </Grid>
 </UserControl>

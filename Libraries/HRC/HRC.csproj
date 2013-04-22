@@ -59,6 +59,9 @@
     <Reference Include="AsyncCtpLibrary">
       <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
     </Reference>
+    <Reference Include="C5">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\C5.2.2.4822.42600\lib\portable-win+net40+sl40+wp+Xbox40\C5.dll</HintPath>
+    </Reference>
     <Reference Include="Core">
       <HintPath>..\..\ESME WorkBench\External References\Core.dll</HintPath>
     </Reference>
@@ -279,13 +282,6 @@
     <EmbeddedResource Include="Resources\haxby.map" />
     <EmbeddedResource Include="Resources\jet.map" />
     <EmbeddedResource Include="Resources\summer.map" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\C5\C5.csproj">
-      <Project>{7029F5D5-ABBB-4564-B170-39802AD65C62}</Project>
-      <Name>C5</Name>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Page Include="Behaviors\CircularProgressBar.xaml">

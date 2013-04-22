@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using ESME.Plugins;
 using ESME.Scenarios;
 using HRC.Aspects;
 using HRC.Services;
@@ -158,7 +157,7 @@ namespace ESME.Views.TransmissionLossViewer
                                                from maximumValue in radial.MaximumTransmissionLossValues
                                                where !double.IsNaN(maximumValue) && !double.IsInfinity(maximumValue)
                                                select maximumValue).Max();
-#if DEBUG
+#if false
                         foreach (var radial in _transmissionLoss.Radials)
                         {
                             var maxIndex = radial.MaximumTransmissionLossValues.ToList().IndexOf(MaxTransmissionLoss);
@@ -167,7 +166,6 @@ namespace ESME.Views.TransmissionLossViewer
                             //radial.ExtractAxisData(null, maxIndex);
                         }
 #endif
-
                     }
                     catch (FileNotFoundException ex)
                     {

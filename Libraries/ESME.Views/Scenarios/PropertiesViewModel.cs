@@ -1,12 +1,9 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Windows;
 using ESME.Behaviors;
-using ESME.Database;
 using ESME.Locations;
 using ESME.Scenarios;
 using HRC;
-using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Services;
 using HRC.ViewModels;
@@ -126,8 +123,6 @@ namespace ESME.Views.Scenarios
             switch (Platform.SelectedTrackType)
             {
                 case TrackType.Stationary:
-                    IsSpeedEnabled = false;
-                    break;
                 case TrackType.StraightLine:
                 case TrackType.PerimeterBounce:
                     IsSpeedEnabled = true;

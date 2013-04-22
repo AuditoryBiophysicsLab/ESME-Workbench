@@ -46,15 +46,17 @@ namespace ESME.Views.Controls
 
         public WriteableBitmap ColorBitmap { get; private set; }
 
-        public Color Lookup(double value)
+        public Color Lookup(double value) { return Lookup(value, CurrentRange); }
+
+        public Color Lookup(double value, Range currentRange)
         {
-            var max = CurrentRange.Max;
-            var min = CurrentRange.Min;
+            var max = currentRange.Max;
+            var min = currentRange.Min;
             var range = max - min;
             if (value >= max) return _firstColor;
             if (value <= min) return _lastColor;
 
-            if (CurrentRange.Value > 0)
+            if (currentRange.Value > 0)
             {
                 var fraction = 1.0 - (value - min) / range;
                 var index = (int)(fraction * _colorCount);

@@ -69,6 +69,10 @@
       <HintPath>External References\x64\3MBWrapperClass.dll</HintPath>
     </Reference>
     <Reference Include="AsyncCtpLibrary, Version=1.0.4107.18181, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="C5, Version=2.2.4822.42600, Culture=neutral, PublicKeyToken=282361b99ded7e8e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Solutions\ESME Workbench\packages\C5.2.2.4822.42600\lib\portable-win+net40+sl40+wp+Xbox40\C5.dll</HintPath>
+    </Reference>
     <Reference Include="Devart.Data, Version=5.0.449.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <Private>True</Private>
     </Reference>
@@ -679,10 +683,6 @@
     <ProjectReference Include="..\Libraries\ESME.Views\ESME.Views.csproj">
       <Project>{49221733-2EB6-468F-8833-06C0E36B3C83}</Project>
       <Name>ESME.Views</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Libraries\C5\C5.csproj">
-      <Project>{7029F5D5-ABBB-4564-B170-39802AD65C62}</Project>
-      <Name>C5</Name>
     </ProjectReference>
     <ProjectReference Include="..\Libraries\ESME\ESME.csproj">
       <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
