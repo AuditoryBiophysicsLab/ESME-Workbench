@@ -21,20 +21,17 @@
   <?define MergeModulesPath="C:\Program Files (x86)\Common Files\Merge Modules"?>
   <?define TransmissionLossViewerPath="$(var.ESMERoot)\TransmissionLossViewer\bin\Release"?>
   <?define SimulationLogAnalysisPath="$(var.ESMERoot)\SimulationLogAnalysis\bin\Release"?>
-  <?define dotConnectPath="C:\Program Files (x86)\Devart\dotConnect"?>
 
   <?if $(var.Platform) = x64 ?>
   <?define ProductDisplayName = "$(var.ProductName) Application (64-bit)" ?>
   <?define ProductUpgradeCode = "88D30D04-AD51-4627-98E8-A54D82F8D4FC" ?>
   <?define Win64 = "yes" ?>
   <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
-  <?define sqlite3dllPath="$(var.dotConnectPath)\SQLite\x64"?>
   <?else ?>
   <?define ProductDisplayName = "$(var.ProductName) Application (32-bit)" ?>
   <?define ProductUpgradeCode = "12E20F8D-0C6D-47C9-98A1-D4920B755766" ?>
   <?define Win64 = "no" ?>
   <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
-  <?define sqlite3dllPath="$(var.dotConnectPath)\SQLite"?>
   <?endif ?>	
   <Product Id="*"
            UpgradeCode="$(var.ProductUpgradeCode)"
@@ -150,17 +147,6 @@
                   Name="ramgeo.exe"
                   Source="$(var.RAMGeoPath)\ramgeo.exe" />
 
-            <!-- Required cygwin runtime DLLs for Bellhop and/or RAMGeo -->
-            <File Id="cyggcc_s1.dll"
-                  Name="cyggcc_s-1.dll"
-                  Source="$(var.BellhopPath)\cyggcc_s-1.dll" />
-            <File Id="cyggfortran3.dll"
-                  Name="cyggfortran-3.dll"
-                  Source="$(var.BellhopPath)\cyggfortran-3.dll" />
-            <File Id="cygwin1.dll"
-                  Name="cygwin1.dll"
-                  Source="$(var.BellhopPath)\cygwin1.dll" />
-            
             <!-- Standard Transmission Loss Engines plugin (interface between ESME and Bellhop/RAMGeo) -->
             <File Id="StandardTransmissionLossEngines.dll"
                   Name="StandardTransmissionLossEngines.dll"
@@ -256,22 +242,32 @@
                   Name="AsyncCtpLibrary.dll"
                   Source="$(var.ExternalsPath)\AsyncCtpLibrary.dll" />
 
-            <!-- devart dotConnect for SQLite assemblies -->
-            <File Id="Devart.Data.dll"
-                  Name="Devart.Data.dll"
-                  Source="$(var.dotConnectPath)\SQLite\Devart.Data.dll" />
-            <File Id="Devart.Data.SQLite.dll"
-                  Name="Devart.Data.SQLite.dll"
-                  Source="$(var.dotConnectPath)\SQLite\Devart.Data.SQLite.dll" />
-            <File Id="Devart.Data.SQLite.Entity.dll"
-                  Name="Devart.Data.SQLite.Entity.dll"
-                  Source="$(var.dotConnectPath)\SQLite\Entity\EF4\Devart.Data.SQLite.Entity.dll" />
-            <File Id="Devart.Data.SQLite.Entity.Migrations.dll"
-                  Name="Devart.Data.SQLite.Entity.Migrations.dll"
-                  Source="$(var.dotConnectPath)\SQLite\Entity\EF4\Devart.Data.SQLite.Entity.Migrations.dll" />
-            <File Id="sqlite3.dll"
-                  Name="sqlite3.dll"
-                  Source="$(var.sqlite3dllPath)\sqlite3.dll" />
+            <!-- SQL Server Compact Edition assemblies -->
+            <File Id="System.Data.SqlServerCe.dll"
+                  Name="System.Data.SqlServerCe.dll"
+                  Source="$(var.ExternalsPath)\System.Data.SqlServerCe.dll" />
+            <File Id="System.Data.SqlServerCe.Entity.dll"
+                  Name="System.Data.SqlServerCe.Entity.dll"
+                  Source="$(var.ExternalsPath)\System.Data.SqlServerCe.Entity.dll" />
+            <File Id="sqlceca40.dll"
+                  Name="sqlceca40.dll"
+                  Source="$(var.ExternalsPathArchDependent)\sqlceca40.dll" />
+            <File Id="sqlcecompact40.dll"
+                  Name="sqlcecompact40.dll"
+                  Source="$(var.ExternalsPathArchDependent)\sqlcecompact40.dll" />
+            <File Id="sqlceer40EN.dll"
+                  Name="sqlceer40EN.dll"
+                  Source="$(var.ExternalsPathArchDependent)\sqlceer40EN.dll" />
+            <File Id="sqlceme40.dll"
+                  Name="sqlceme40.dll"
+                  Source="$(var.ExternalsPathArchDependent)\sqlceme40.dll" />
+            <File Id="sqlceqp40.dll"
+                  Name="sqlceqp40.dll"
+                  Source="$(var.ExternalsPathArchDependent)\sqlceqp40.dll" />
+            <File Id="sqlcese40.dll"
+                  Name="sqlcese40.dll"
+                  Source="$(var.ExternalsPathArchDependent)\sqlcese40.dll" />
+
             <!-- Microsoft Ribbon assembly -->
             <File Id="RibbonControlsLibrary.dll"
                   Name="RibbonControlsLibrary.dll"

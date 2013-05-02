@@ -50,8 +50,14 @@ copy "$(TargetPath)" "$(ProjectDir)msi\$(TargetName)-$(PlatformName)$(TargetExt)
 copy "$(TargetPath)" "\\corti.bu.edu\hrc-backup\ESME Workbench\$(TargetName)-$(PlatformName)$(TargetExt)" /Y /V 2&gt;nul 1&gt;nul
 exit 0</PostBuildEvent>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>heat dir "$(ProjectDir)..\..\..\Utilities\3MB\Species Files" -srd -cg SpeciesDefinitionFiles -dr SpeciesDefinitionFilesFolder -gg -sfrag -out "$(ProjectDir)SpeciesFiles.wxs" -var var.SpeciesDefinitionFilesFolder
+    <PreBuildEvent>"C:\Program Files (x86)\WiX Toolset v3.7\bin\heat" dir "$(ProjectDir)..\..\..\Utilities\3MB\Species Files" -srd -cg SpeciesDefinitionFiles -dr SpeciesDefinitionFilesFolder -gg -sfrag -out "$(ProjectDir)SpeciesFiles.wxs" -var var.SpeciesDefinitionFilesFolder
 if errorlevel 1 goto BuildEventFailed
 "C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -wixversion "$(ProjectDir)version.wxi" -output "$(ProjectDir) "
 if errorlevel 1 goto BuildEventFailed
@@ -61,12 +67,6 @@ echo PREBUILD for $(ProjectName) FAILED
 exit 1
 :BuildEventOK
 echo PREBUILD for $(ProjectName) COMPLETED SUCCESSFULLY</PreBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
   </PropertyGroup>
   <!--
 To modify your build process, add your task inside one of the targets below and uncomment it.
