@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Data;
-using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
@@ -11,18 +8,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Windows;
-using System.Windows.Data;
-using Devart.Data.SQLite;
-using Devart.Data.SQLite.Entity.Configuration;
 using ESME.Database;
 using ESME.Environment;
 using ESME.Plugins;
 using ESME.Scenarios;
-using ESME.TransmissionLoss;
 using HRC;
 using HRC.Aspects;
-using HRC.Services;
 using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;   
 
@@ -160,17 +151,8 @@ namespace ESME.Locations
                 Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, "locations"));
                 Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, "scenarios"));
             }
-            SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
-            SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.Enabled = true;
-            SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.BatchSize = 30;
-            SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.AsynchronousBatch = true;
-            var connectionStringBuilder = new SQLiteConnectionStringBuilder
-            {
-                FailIfMissing = false,
-                DataSource = Path.Combine(MasterDatabaseDirectory, "esme.db"),
-                BinaryGUID = true,
-            };
-            DbConnection connection = new SQLiteConnection(connectionStringBuilder.ToString());
+            var connectionFactory = new SqlCeConnectionFactory("System.Data.SqlServerCe.4.0");
+            var connection = connectionFactory.CreateConnection(Path.Combine(MasterDatabaseDirectory, "esme.db"));
             Context = new LocationContext(connection, true);
             Refresh();
             OnPropertyChanged("Locations");

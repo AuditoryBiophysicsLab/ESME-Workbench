@@ -131,7 +131,6 @@ namespace ESME.Locations
             modelBuilder.Entity<AnimatLocation>().HasKey(a => a.ID);
             modelBuilder.Entity<AnimatLocation>().HasRequired(a => a.ScenarioSpecies);
 #endif
-            
             modelBuilder.Entity<Platform>()
                 .HasOptional(p => p.Perimeter)  // Platform has an optional Perimeter
                 .WithMany();                    // A single perimeter can be attached to many platforms

@@ -9,13 +9,26 @@ namespace ESME.Locations
     public class LogEntry : IHaveGuid
     {
         public LogEntry() {}
-        public LogEntry(IHaveGuid haveGuid) { SourceGuid = haveGuid.Guid; }
+        public LogEntry(IHaveGuid guid) { Initialize(guid); }
+        void Initialize(IHaveGuid guid)
+        {
+            if (guid is Location) Location = (Location)guid;
+            else if (guid is EnvironmentalDataSet) EnvironmentalDataSet = (EnvironmentalDataSet)guid;
+            else if (guid is Scenario) Scenario = (Scenario)guid;
+            else if (guid is Platform) Platform = (Platform)guid;
+            else if (guid is Source) Source = (Source)guid;
+            else if (guid is Mode) Mode = (Mode)guid;
+            else if (guid is Perimeter) Perimeter = (Perimeter)guid;
+            else if (guid is ScenarioSpecies) ScenarioSpecies = (ScenarioSpecies)guid;
+            else if (guid is AnalysisPoint) AnalysisPoint = (AnalysisPoint)guid;
+            else if (guid is Scenarios.TransmissionLoss) TransmissionLoss = (Scenarios.TransmissionLoss)guid;
+            else if (guid is Radial) Radial = (Radial)guid;
+        }
 
         [Key, Initialize]
         public Guid Guid { get; set; }
         public DbWhoWhenWhere MessageSource { get; set; }
         public string Message { get; set; }
-        public Guid SourceGuid { get; set; }
 #if true
         public virtual Location Location { get; set; }
         public virtual EnvironmentalDataSet EnvironmentalDataSet { get; set; }

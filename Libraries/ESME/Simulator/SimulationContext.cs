@@ -1,6 +1,6 @@
 using System.Data.Common;
 using System.Data.Entity;
-using Devart.Data.SQLite;
+using System.Data.Entity.Infrastructure;
 using ESME.Locations;
 using ESME.Scenarios;
 
@@ -10,13 +10,8 @@ namespace ESME.Simulator
     {
         public static SimulationContext OpenOrCreate(string filename)
         {
-            var connectionStringBuilder = new SQLiteConnectionStringBuilder
-            {
-                FailIfMissing = false,
-                DataSource = filename,
-                BinaryGUID = true,
-            };
-            DbConnection connection = new SQLiteConnection(connectionStringBuilder.ToString());
+            var connectionFactory = new SqlCeConnectionFactory("System.Data.SqlServerCe.4.0");
+            var connection = connectionFactory.CreateConnection(filename);
             return new SimulationContext(connection, true);
         }
 
@@ -27,10 +22,6 @@ namespace ESME.Simulator
             Configuration.ProxyCreationEnabled = true;
             Configuration.LazyLoadingEnabled = true;
             Configuration.ValidateOnSaveEnabled = true;
-            Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
-            Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.Enabled = true;
-            Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.BatchSize = 30;
-            Devart.Data.SQLite.Entity.Configuration.SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.AsynchronousBatch = true;
             System.Data.Entity.Database.SetInitializer(new LocationContext.LocationDatabaseInitializer());
         }
 

@@ -6,8 +6,6 @@ using System.Data.Entity.Infrastructure;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Devart.Data.SQLite;
-using Devart.Data.SQLite.Entity.Configuration;
 using ESME.Scenarios;
 
 namespace ESME.PSM
@@ -49,17 +47,8 @@ namespace ESME.PSM
         {
             if (String.IsNullOrEmpty(directoryPath)) throw new ApplicationException("PSMDatabaseDirectory cannot be null or empty");
             if (!Directory.Exists(directoryPath)){Directory.CreateDirectory(directoryPath);}
-            SQLiteEntityProviderConfig.Instance.Workarounds.IgnoreSchemaName = true;
-            SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.Enabled = true;
-            SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.BatchSize = 30;
-            SQLiteEntityProviderConfig.Instance.DmlOptions.BatchUpdates.AsynchronousBatch = true;
-            var connectionStringBuilder = new SQLiteConnectionStringBuilder
-            {
-                FailIfMissing = false,
-                DataSource = Path.Combine(directoryPath, "psm.db"),
-                BinaryGUID = true,
-            };
-            DbConnection connection = new SQLiteConnection(connectionStringBuilder.ToString());
+            var connectionFactory = new SqlCeConnectionFactory("System.Data.SqlServerCe.4.0");
+            var connection = connectionFactory.CreateConnection(Path.Combine(directoryPath, "psm.db"));
             return new PSMContext(connection, true);
         }
 
