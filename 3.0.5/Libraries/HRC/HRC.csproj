@@ -1,0 +1,319 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HRC</RootNamespace>
+    <AssemblyName>HRC</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AsyncCtpLibrary">
+      <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="C5">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\C5.2.2.4822.42600\lib\portable-win+net40+sl40+wp+Xbox40\C5.dll</HintPath>
+    </Reference>
+    <Reference Include="Core">
+      <HintPath>..\..\ESME WorkBench\External References\Core.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ESME WorkBench\External References\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="KMLib">
+      <HintPath>..\..\ESME WorkBench\External References\KMLib.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\ESME WorkBench\External References\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Log4PostSharp">
+      <HintPath>..\..\ESME WorkBench\External References\Log4PostSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="MEFedMVVM.WPF">
+      <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
+    <Reference Include="PresentationCore">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationFramework">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=0.0.4098.29463, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\ESME WorkBench\External References\System.Threading.Tasks.Dataflow.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\ESME WorkBench\External References\System.Windows.Interactivity.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Annotations.cs" />
+    <Compile Include="Aspects\InitializeAttribute.cs" />
+    <Compile Include="Aspects\NotifyPropertyChangedAttribute.cs" />
+    <Compile Include="Aspects\AffectsAttribute.cs" />
+    <Compile Include="Behaviors\BusyIndicatorBehavior.cs" />
+    <Compile Include="Behaviors\CircularProgressBar.xaml.cs">
+      <DependentUpon>CircularProgressBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Behaviors\NumericTextBoxBehavior.cs" />
+    <Compile Include="BuildInformation.cs" />
+    <Compile Include="Collections\BinarySearchTree.cs" />
+    <Compile Include="Collections\BinaryTree.cs" />
+    <Compile Include="Collections\BinaryTreeNode.cs" />
+    <Compile Include="Collections\HeaderedKeyValuePairListBase.cs" />
+    <Compile Include="Collections\KeyedList.cs" />
+    <Compile Include="Collections\LinqExtensions.cs" />
+    <Compile Include="Collections\Node.cs" />
+    <Compile Include="Collections\NodeList.cs" />
+    <Compile Include="Collections\ObservableConcurrentDictionary.cs" />
+    <Compile Include="Collections\ParallelExtensionMethods.cs" />
+    <Compile Include="Collections\RedBlack.cs" />
+    <Compile Include="Collections\RedBlackEnumerator.cs" />
+    <Compile Include="Collections\RedBlackException.cs" />
+    <Compile Include="Collections\RedBlackNode.cs" />
+    <Compile Include="Collections\SerializableDictionary.cs" />
+    <Compile Include="Collections\TraversalMethods.cs" />
+    <Compile Include="Composition\FilteredCatalog.cs" />
+    <Compile Include="Converters.cs" />
+    <Compile Include="Database\MySqlWrapper.cs" />
+    <Compile Include="HRCBootstrapper.cs" />
+    <Compile Include="Interactivity\CommandAction.cs" />
+    <Compile Include="Interactivity\DragBehavior.cs" />
+    <Compile Include="Interactivity\HyperlinkAction.cs" />
+    <Compile Include="Interactivity\PlayStoryboardAction.cs" />
+    <Compile Include="Interactivity\RandomMovementBehavior.cs" />
+    <Compile Include="Interactivity\RemoveElementAction.cs" />
+    <Compile Include="Interactivity\ShowMessageBoxAction.cs" />
+    <Compile Include="Interactivity\StopStoryboardAction.cs" />
+    <Compile Include="Interactivity\TextBoxAutoSelectBehavior.cs" />
+    <Compile Include="Interactivity\TextBoxSelectionHandler.cs" />
+    <Compile Include="Interfaces.cs" />
+    <Compile Include="LinqStatistics\EnumerableStats.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsCovariance.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsMedian.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsMode.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsPearson.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsRange.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsStandardDeviation.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsStandardDeviationP.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsVariance.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsVarianceP.cs" />
+    <Compile Include="Navigation\BoundingCircle.cs" />
+    <Compile Include="Navigation\ConvexHull.cs" />
+    <Compile Include="Navigation\GeoArray.cs" />
+    <Compile Include="Navigation\GeoArrayExtensions.cs" />
+    <Compile Include="Navigation\GeoExtensions.cs" />
+    <Compile Include="Navigation\GeoArc.cs" />
+    <Compile Include="Navigation\GeoSegmentExtensions.cs" />
+    <Compile Include="Navigation\MatchCollector.cs" />
+    <Compile Include="Navigation\MatchFilter.cs" />
+    <Compile Include="Navigation\MatchParameters.cs" />
+    <Compile Include="Navigation\MoreMath.cs" />
+    <Compile Include="Navigation\Course.cs" />
+    <Compile Include="Navigation\Geo.cs" />
+    <Compile Include="Navigation\GeoPath.cs" />
+    <Compile Include="Navigation\GeoPoint.cs" />
+    <Compile Include="Navigation\GeoSegment.cs" />
+    <Compile Include="Navigation\IGeoExtent.cs" />
+    <Compile Include="Navigation\GeoRect.cs" />
+    <Compile Include="Navigation\Intersection.cs" />
+    <Compile Include="Navigation\Length.cs" />
+    <Compile Include="Navigation\Limits.cs" />
+    <Compile Include="Navigation\Planet.cs" />
+    <Compile Include="Navigation\Rotation.cs" />
+    <Compile Include="Navigation\UTM.cs" />
+    <Compile Include="NetCDF\NetCDFFile.cs" />
+    <Compile Include="NetCDF\NcAtt.cs" />
+    <Compile Include="NetCDF\NetCDFConstants.cs" />
+    <Compile Include="NetCDF\NcDim.cs" />
+    <Compile Include="NetCDF\NcString.cs" />
+    <Compile Include="NetCDF\NcVar.cs" />
+    <Compile Include="NetCDF\NetCDFReaders.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
+    <Compile Include="Services\HRCColorPickerService.cs" />
+    <Compile Include="Services\HRCOpenFileService.cs" />
+    <Compile Include="Services\HRCSaveFileService.cs" />
+    <Compile Include="Services\MessageBoxService.cs" />
+    <Compile Include="Services\UIVisualizerService.cs" />
+    <Compile Include="Services\ViewAwareStatus.cs" />
+    <Compile Include="Utility\AppEventLog.cs" />
+    <Compile Include="Utility\AssemblyTricks.cs" />
+    <Compile Include="Utility\BitFields.cs" />
+    <Compile Include="Utility\BitmapWriter.cs" />
+    <Compile Include="Utility\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Utility\Colormap.cs" />
+    <Compile Include="Utility\CpuInfo.cs" />
+    <Compile Include="Utility\Decimator2D.cs" />
+    <Compile Include="Utility\EmbeddedResources.cs" />
+    <Compile Include="Utility\Exceptions.cs" />
+    <Compile Include="Utility\ExtensionMethods.cs" />
+    <Compile Include="Utility\GenericBackgroundTask.cs" />
+    <Compile Include="Utility\GenericWeakReference.cs" />
+    <Compile Include="Collections\EditableKeyValuePair.cs" />
+    <Compile Include="Utility\MsiUtilityFunctions.cs" />
+    <Compile Include="Utility\MediatorBase.cs" />
+    <Compile Include="Utility\Minidump.cs" />
+    <Compile Include="Utility\NotifyIcon.cs" />
+    <Compile Include="Utility\NotifyIcon.Interop.cs" />
+    <Compile Include="Utility\NTFS.cs" />
+    <Compile Include="Utility\OSInfo.cs" />
+    <Compile Include="Utility\PercentProgress.cs" />
+    <Compile Include="Utility\ProgressInfo.cs" />
+    <Compile Include="Utility\PropertyChangedBase.cs" />
+    <Compile Include="Utility\TriggerTracing.cs" />
+    <Compile Include="Utility\WeakEventHelper.cs" />
+    <Compile Include="Utility\XmlSerializer.cs" />
+    <Compile Include="Utility\ObservableList.cs" />
+    <Compile Include="Triggers\RoutedEventTrigger.cs" />
+    <Compile Include="Validation\RegexRule.cs" />
+    <Compile Include="Validation\ValidationRuleBase.cs" />
+    <Compile Include="Validation\ValidationRule.cs" />
+    <Compile Include="Validation\ValidatingViewModel.cs" />
+    <Compile Include="Triggers\ValidationErrorEventTrigger.cs" />
+    <Compile Include="ViewModels\CollectionObserver.cs" />
+    <Compile Include="ViewModels\Mediator.cs" />
+    <Compile Include="ViewModels\MenuItemViewModelBase.cs" />
+    <Compile Include="ViewModels\PopupNameToViewLookupKeyMetadata.cs" />
+    <Compile Include="ViewModels\PropertyObserver.cs" />
+    <Compile Include="ViewModels\SimpleCommand.cs" />
+    <Compile Include="ViewModels\ViewModelBase.cs" />
+    <Compile Include="ViewModels\WeakActionEvent.cs" />
+    <Compile Include="WPF\BindingExtensions.cs" />
+    <Compile Include="WPF\ColorExtensions.cs" />
+    <Compile Include="WPF\ComparisonBinding.cs" />
+    <Compile Include="WPF\DispatcherExtensions.cs" />
+    <Compile Include="WPF\Dynamic.cs" />
+    <Compile Include="WPF\EventToCommandArgs.cs" />
+    <Compile Include="WPF\EventToCommandTrigger.cs" />
+    <Compile Include="WPF\BooleanTemplateSelector.cs" />
+    <Compile Include="WPF\LambdaExtension.cs" />
+    <Compile Include="WPF\Palette.cs" />
+    <Compile Include="WPF\PlotHelpers.cs" />
+    <Compile Include="WPF\TreeHelper.cs" />
+    <Compile Include="WPF\TriggerTracing.cs" />
+    <Compile Include="WPF\TreeViewHelper.cs" />
+    <Compile Include="WPF\ValueConverters.cs" />
+    <Compile Include="WPF\ViewPropertyBinding.cs" />
+    <Compile Include="WPF\VisualExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\haxby.map" />
+    <EmbeddedResource Include="Resources\jet.map" />
+    <EmbeddedResource Include="Resources\summer.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Behaviors\CircularProgressBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Utility\TaskProgressInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="WPF\xaml2svg.xsl" />
+    <Content Include="WPF\xaml2svg\animation.xsl" />
+    <Content Include="WPF\xaml2svg\brushes.xsl" />
+    <Content Include="WPF\xaml2svg\canvas.xsl" />
+    <Content Include="WPF\xaml2svg\geometry.xsl" />
+    <Content Include="WPF\xaml2svg\properties.xsl" />
+    <Content Include="WPF\xaml2svg\shapes.xsl" />
+    <Content Include="WPF\xaml2svg\transform.xsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace HRC -class BuildInformation -version "$(SolutionDir)VersionInfo.txt" -assemblyversion "$(ProjectDir)\Properties\AssemblyVersionInfo.cs" -output "$(ProjectDir)BuildInformation.cs"</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

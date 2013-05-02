@@ -1,0 +1,13 @@
+﻿<TextBox x:Class="ESME.Views.Controls.ValidatingTextBox"
+         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" 
+         xmlns:Triggers="clr-namespace:HRC.Triggers;assembly=HRC" 
+         xmlns:Interactivity="clr-namespace:HRC.Interactivity;assembly=HRC" 
+         Style="{StaticResource ValidatingTextBoxStyle}">
+    <i:Interaction.Triggers>
+        <Triggers:ValidationErrorEventTrigger>
+            <Interactivity:CommandAction Command="{Binding ValidationErrorCommand}" />
+        </Triggers:ValidationErrorEventTrigger>
+    </i:Interaction.Triggers>
+</TextBox>

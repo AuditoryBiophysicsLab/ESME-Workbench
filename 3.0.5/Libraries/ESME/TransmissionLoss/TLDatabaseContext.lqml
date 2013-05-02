@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Database Name="transmission_loss" EntityNamespace="ESME.TransmissionLoss" ContextNamespace="ESME.TransmissionLoss" Class="TLDataContext" FilePerClass="false" Provider="Devart.Data.MySql.Linq.Provider.MySqlDataProvider, Devart.Data.MySql.Linq" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="ConnectionString" ConnectionString="User Id=root;Password=a;Host=localhost;Database=transmission_loss;Persist Security Info=True" Provider="Devart.Data.MySql" />
+  <Table Name="transmission_loss.fields" Member="Fields">
+    <Type Name="Field">
+      <Column Name="idField" Member="IdField" AutoSync="OnInsert" Type="System.Int64" DbType="int(10) NOT NULL AUTO_INCREMENT" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Column Name="IsCalculated" Type="System.Boolean" DbType="bit(1) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="Latitude_degrees" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Column Name="Longitude_degrees" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Column Name="SourceDepth_meters" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Column Name="VerticalBeamWidth_degrees" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Column Name="VerticalLookAngle_degrees" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Column Name="LowFrequency_Hz" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Column Name="HighFrequency_Hz" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Column Name="MaxCalculationDepth_meters" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Column Name="Radius_meters" Type="System.Int64" DbType="int(6) NOT NULL" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Column Name="DataDirectoryPath" Type="System.String" DbType="text NOT NULL" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Column Name="BinaryFileName" Type="System.String" DbType="text" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="RangeAxisBytes" Type="System.Byte[]" DbType="blob" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="DepthAxisBytes" Type="System.Byte[]" DbType="blob" CanBeNull="true" UpdateCheck="Never" />
+      <Association Name="Field_Radial" Member="Radials" ThisKey="IdField" OtherKey="IdField" Type="Radial" />
+    </Type>
+  </Table>
+  <Table Name="transmission_loss.radials" Member="Radials">
+    <Type Name="Radial">
+      <Column Name="idRadial" Member="IdRadial" AutoSync="OnInsert" Type="System.Int64" DbType="int(10) NOT NULL AUTO_INCREMENT" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Column Name="idField" Member="IdField" Type="System.Int64" DbType="int(10)" CanBeNull="true" UpdateCheck="WhenChanged" />
+      <Column Name="IsCalculated" Type="System.Boolean" DbType="bit(1) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="CalculationStarted" Type="System.DateTime" DbType="datetime" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="CalculationFinished" Type="System.DateTime" DbType="datetime" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="BearingFromSource_degrees" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Column Name="BellhopConfiguration" Type="System.String" DbType="text NOT NULL" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Column Name="BottomProfile" Type="System.String" DbType="text NOT NULL" CanBeNull="false" UpdateCheck="WhenChanged" />
+      <Association Name="Field_Radial" Member="Field" ThisKey="IdField" OtherKey="IdField" Type="Field" IsForeignKey="true" />
+    </Type>
+  </Table>
+</Database>

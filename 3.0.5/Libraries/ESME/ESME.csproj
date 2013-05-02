@@ -1,0 +1,360 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ESME</RootNamespace>
+    <AssemblyName>ESME</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PostSharpSearchPath>C:\Projects\ESME Deliverables\ESME WorkBench\External References\x86;C:\Projects\ESME Deliverables\ESME WorkBench\External References\x64;C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable\v4.0\Profile\Profile1</PostSharpSearchPath>
+    <PostSharpHost>Managed</PostSharpHost>
+    <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;UseAspects</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PostSharpSearchPath>C:\Projects\ESME Deliverables\ESME WorkBench\External References\x86;C:\Projects\ESME Deliverables\ESME WorkBench\External References\x64;C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable\v4.0\Profile\Profile1</PostSharpSearchPath>
+    <PostSharpHost>Managed</PostSharpHost>
+    <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="3MBSLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\..\ESME WorkBench\External References\x64\3MBSLib.dll</HintPath>
+    </Reference>
+    <Reference Include="3MBWrapperClass, Version=1.0.4574.28957, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\..\ESME WorkBench\External References\x64\3MBWrapperClass.dll</HintPath>
+    </Reference>
+    <Reference Include="AsyncCtpLibrary">
+      <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="C5">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\C5.2.2.4822.42600\lib\portable-win+net40+sl40+wp+Xbox40\C5.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ESME WorkBench\External References\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="FileHelpers">
+      <HintPath>..\..\ESME WorkBench\External References\FileHelpers.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\ESME WorkBench\External References\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Log4PostSharp">
+      <HintPath>..\..\ESME WorkBench\External References\Log4PostSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="MapSuiteCore">
+      <HintPath>..\..\ESME WorkBench\External References\MapSuiteCore.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3, processorArchitecture=MSIL">
+      <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
+    <Reference Include="PresentationCore">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationFramework">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\..\Solutions\ESME Workbench\packages\Microsoft.SqlServer.Compact.4.0.8876.1\lib\net40\System.Data.SqlServerCe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SqlServerCe.Entity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\..\Solutions\ESME Workbench\packages\EntityFramework.SqlServerCompact.4.3.6\lib\net40\System.Data.SqlServerCe.Entity.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=0.0.4098.29463, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\ESME WorkBench\External References\System.Threading.Tasks.Dataflow.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WpfDesktopEdition">
+      <HintPath>..\..\ESME WorkBench\External References\WpfDesktopEdition.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\ESME WorkBench\Properties\AssemblyMetadata.cs">
+      <Link>Properties\AssemblyMetadata.cs</Link>
+    </Compile>
+    <Compile Include="Behaviors\PlatformBehavior.cs" />
+    <Compile Include="Behaviors\TrackType.cs" />
+    <Compile Include="BuildInformation.cs" />
+    <Compile Include="Database\BlobHelpers.cs" />
+    <Compile Include="Database\DbColor.cs" />
+    <Compile Include="Database\DbPointSymbolType.cs" />
+    <Compile Include="Database\DbTimePeriod.cs" />
+    <Compile Include="Database\DbTrackType.cs" />
+    <Compile Include="Database\DbWhoWhenWhere.cs" />
+    <Compile Include="Database\DbDateTime.cs" />
+    <Compile Include="Database\DbPluginIdentifier.cs" />
+    <Compile Include="Database\DbGeo.cs" />
+    <Compile Include="Database\DbGeoRect.cs" />
+    <Compile Include="Database\DbTimeSpan.cs" />
+    <Compile Include="Database\Importers\NemoFile.cs" />
+    <Compile Include="Database\Importers\PSMFile.cs" />
+    <Compile Include="Database\Importers\PSMFileRecord.cs" />
+    <Compile Include="Environment\AnimatDDBFile.cs" />
+    <Compile Include="Environment\Animat3MBFile.cs" />
+    <Compile Include="Environment\SoundSpeedProfileExtensions.cs" />
+    <Compile Include="Locations\EnvironmentalDataSet.cs" />
+    <Compile Include="Locations\Location.cs" />
+    <Compile Include="Database\PSMContext.cs" />
+    <Compile Include="Locations\LocationContext.cs" />
+    <Compile Include="Locations\LogEntry.cs" />
+    <Compile Include="Mapping\CustomEditOverlay.cs" />
+    <Compile Include="Mapping\EditableRectangleInteractiveOverlay.cs" />
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
+    <Compile Include="PSM\PSMContext.cs" />
+    <Compile Include="Scenarios\AnalysisPoint.cs" />
+    <Compile Include="Scenarios\AnimatLocation.cs" />
+    <Compile Include="Scenarios\LayerSettings.cs" />
+    <Compile Include="Scenarios\Mode.cs" />
+    <Compile Include="Scenarios\Perimeter.cs" />
+    <Compile Include="Scenarios\PerimeterCoordinate.cs" />
+    <Compile Include="Scenarios\Platform.cs" />
+    <Compile Include="Scenarios\Radial.cs" />
+    <Compile Include="Scenarios\Scenario.cs" />
+    <Compile Include="Data\AppSettings.cs" />
+    <Compile Include="Delegates.cs" />
+    <Compile Include="Environment\Bathymetry.cs" />
+    <Compile Include="Environment\BottomLoss.cs" />
+    <Compile Include="Environment\EnvironmentData.cs" />
+    <Compile Include="Environment\EnvironmentDataSetBase.cs" />
+    <Compile Include="Environment\EnvironmentImporter.cs" />
+    <Compile Include="Environment\NAVO\BottomSedimentTypeTable.cs" />
+    <Compile Include="Environment\NAVO\ChenMilleroLi.cs" />
+    <Compile Include="Environment\NAVO\NAVOConfiguration.cs" />
+    <Compile Include="Environment\SeasonConfiguration.cs" />
+    <Compile Include="Environment\SoundSpeedSample.cs" />
+    <Compile Include="Environment\TimePeriod.cs" />
+    <Compile Include="Environment\IEnvironmentalDataSource.cs" />
+    <Compile Include="Exceptions.cs" />
+    <Compile Include="Locations\EnvironmentalCacheService.cs" />
+    <Compile Include="Locations\MasterDatabaseService.cs" />
+    <Compile Include="Mapping\CustomStartEndLineStyle.cs" />
+    <Compile Include="Mapping\MapLayerViewModel.cs" />
+    <Compile Include="Mapping\OverlayFileMapLayer.cs" />
+    <Compile Include="Mapping\RasterMapLayer.cs" />
+    <Compile Include="Mapping\ShapefileMapLayer.cs" />
+    <Compile Include="Metadata\PropertiesViewModel.cs" />
+    <Compile Include="Environment\Sediment.cs" />
+    <Compile Include="Environment\SoundSpeed.cs" />
+    <Compile Include="Environment\SoundSpeedField.cs" />
+    <Compile Include="Environment\SoundSpeedProfileGeneric.cs" />
+    <Compile Include="Environment\Transect.cs" />
+    <Compile Include="Environment\Wind.cs" />
+    <Compile Include="MediatorMessages.cs" />
+    <Compile Include="NEMO\Exceptions.cs" />
+    <Compile Include="NEMO\Overlay\Exceptions.cs" />
+    <Compile Include="NEMO\Overlay\OverlayCircle.cs" />
+    <Compile Include="NEMO\Overlay\OverlayFile.cs" />
+    <Compile Include="NEMO\Overlay\OverlayLabel.cs" />
+    <Compile Include="NEMO\Overlay\OverlayLineSegments.cs" />
+    <Compile Include="NEMO\Overlay\OverlayParser.cs" />
+    <Compile Include="NEMO\Overlay\OverlayPoint.cs" />
+    <Compile Include="NEMO\Overlay\OverlayShape.cs" />
+    <Compile Include="NEMO\Overlay\LineStyle.cs" />
+    <Compile Include="Globals.cs" />
+    <Compile Include="NEMO\NemoAnimals.cs" />
+    <Compile Include="NEMO\NemoMode.cs" />
+    <Compile Include="NEMO\NemoPlatform.cs" />
+    <Compile Include="NEMO\NemoScenario.cs" />
+    <Compile Include="NEMO\NemoSource.cs" />
+    <Compile Include="NEMO\NemoSpecies.cs" />
+    <Compile Include="NEMO\NemoTrackdef.cs" />
+    <Compile Include="NEMO\ActiveTimeStep.cs" />
+    <Compile Include="Behaviors\BehaviorModel.cs" />
+    <Compile Include="Behaviors\BehaviorModelTest.cs" />
+    <Compile Include="Behaviors\Exceptions.cs" />
+    <Compile Include="Behaviors\PlatformLocation.cs" />
+    <Compile Include="Plugins\DefaultEnvironmentalDataSources.cs" />
+    <Compile Include="Plugins\ESMEPluginAttribute.cs" />
+    <Compile Include="Plugins\PluginManagerExceptions.cs" />
+    <Compile Include="Plugins\PluginManagerService.cs" />
+    <Compile Include="Plugins\PluginBase.cs" />
+    <Compile Include="Plugins\PluginType.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scenarios\ScenarioSpecies.cs" />
+    <Compile Include="Scenarios\ShipTrack.cs" />
+    <Compile Include="Scenarios\Source.cs" />
+    <Compile Include="Scenarios\TrackDefinition.cs" />
+    <Compile Include="Scenarios\TransmissionLoss.cs" />
+    <Compile Include="Settings\Exceptions.cs" />
+    <Compile Include="Settings\SettingsBase.cs" />
+    <Compile Include="Settings\SettingsService.cs" />
+    <Compile Include="SimulationAnalysis\ScatterExposureDictionary.cs" />
+    <Compile Include="SimulationAnalysis\BinnedExposureDictionary.cs" />
+    <Compile Include="Simulator\Actor.cs" />
+    <Compile Include="Simulator\ActorExposureRecord.cs" />
+    <Compile Include="Simulator\ActorPositionRecord.cs" />
+    <Compile Include="SimulationAnalysis\SpeciesScatterplot.cs" />
+    <Compile Include="Simulator\Interfaces.cs" />
+    <Compile Include="Simulator\Simulation.cs" />
+    <Compile Include="Simulator\SimulationContext.cs" />
+    <Compile Include="Simulator\SimulationLog.cs" />
+    <Compile Include="Simulator\SimulationTimeStepRecord.cs" />
+    <Compile Include="SimulationAnalysis\ModeThresholdHistogram.cs" />
+    <Compile Include="TransmissionLoss\BellhopNL\BellhopNLInput.cs" />
+    <Compile Include="TransmissionLoss\BellhopNL\BellhopNLOutput.cs" />
+    <Compile Include="TransmissionLoss\CASS\CASSOutput.cs" />
+    <Compile Include="TransmissionLoss\RAM\RamOutput.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\BellhopOutput.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
+    <Compile Include="TransmissionLoss\RAM\Ram.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TransmissionLoss\TransmissionLossCache.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossCalculatorService.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossRadial.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossProcess.cs">
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Interfaces.cs" />
+    <Compile Include="TransmissionLoss\AcousticProperties.cs" />
+    <Compile Include="Environment\Animat.cs" />
+    <Compile Include="Model\EnvironmentInformation.cs" />
+    <Compile Include="Model\Exceptions.cs" />
+    <Compile Include="SimulationAnalysis\HistogramBins.cs" />
+    <Compile Include="Model\Generics.cs" />
+    <Compile Include="Model\ProgressTracking.cs" />
+    <Compile Include="Model\SedimentType.cs" />
+    <Compile Include="Model\Species.cs" />
+    <Compile Include="NEMO\NemoBase.cs" />
+    <Compile Include="NEMO\NemoFile.cs" />
+    <Compile Include="NEMO\NemoPSM.cs" />
+    <Compile Include="NEMO\Overlay\LineReader.cs" />
+    <Compile Include="NEMO\Overlay\OverlayLineSegment.cs" />
+    <Compile Include="NEMO\Overlay\Tokenizer.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\Bellhop.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HRC.Plotting\HRC.Plotting.csproj">
+      <Project>{07EA1355-65C1-4335-AD7E-C7AC26550DFF}</Project>
+      <Name>HRC.Plotting</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HRC\HRC.csproj">
+      <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
+      <Name>HRC</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESME -class BuildInformation -version "$(SolutionDir)VersionInfo.txt" -assemblyversion "$(ProjectDir)\Properties\AssemblyVersionInfo.cs" -output "$(ProjectDir)BuildInformation.cs"</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    if not exist "$(TargetDir)x86" md "$(TargetDir)x86"
+    xcopy /s /y "$(SolutionDir)packages\Microsoft.SqlServer.Compact.4.0.8876.1\NativeBinaries\x86\*.*" "$(TargetDir)x86"
+    if not exist "$(TargetDir)amd64" md "$(TargetDir)amd64"
+    xcopy /s /y "$(SolutionDir)packages\Microsoft.SqlServer.Compact.4.0.8876.1\NativeBinaries\amd64\*.*" "$(TargetDir)amd64"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

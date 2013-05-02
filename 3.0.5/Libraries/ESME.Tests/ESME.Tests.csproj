@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{30119915-93B3-4B5F-8678-9FB7B0CF8FC2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ESME.Tests</RootNamespace>
+    <AssemblyName>ESME.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AsyncCtpLibrary">
+      <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="Core">
+      <HintPath>..\..\ESME WorkBench\External References\Core.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ESME WorkBench\External References\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="FileHelpers">
+      <HintPath>..\..\ESME WorkBench\External References\FileHelpers.dll</HintPath>
+    </Reference>
+    <Reference Include="GeoAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL">
+      <HintPath>..\..\ESME WorkBench\External References\GeoAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="HDF5DotNet">
+      <HintPath>..\..\ESME WorkBench\External References\x64\HDF5DotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="KMLib">
+      <HintPath>..\..\ESME WorkBench\External References\KMLib.dll</HintPath>
+    </Reference>
+    <Reference Include="MapSuiteCore">
+      <HintPath>..\..\ESME WorkBench\External References\MapSuiteCore.dll</HintPath>
+    </Reference>
+    <Reference Include="NetTopologySuite, Version=1.7.3.31740, Culture=neutral, PublicKeyToken=f580a05016ebada1, processorArchitecture=MSIL">
+      <HintPath>..\..\ESME WorkBench\External References\NetTopologySuite.dll</HintPath>
+    </Reference>
+    <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
+    <Reference Include="System">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.ComponentModel.Composition">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data.Entity">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data.SQLite, Version=1.0.74.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ESME WorkBench\External References\System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.Linq, Version=1.0.74.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ESME WorkBench\External References\System.Data.SQLite.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WindowsBase">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WpfDesktopEdition">
+      <HintPath>..\..\ESME WorkBench\External References\WpfDesktopEdition.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Animats\AnimatSeedingTests.cs" />
+    <Compile Include="Behaviors\ActivityTimelineTests.cs" />
+    <Compile Include="Behaviors\PlatformBehaviorTests.cs" />
+    <Compile Include="Common\TestLocation.cs" />
+    <Compile Include="Environment\EnvironmentDataTests.cs" />
+    <Compile Include="Locations\MasterDatabaseServiceTests.cs" />
+    <Compile Include="Plugins\PluginManagerTests.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scenarios\AnalysisPointTests.cs" />
+    <Compile Include="Settings\SettingsBaseTests.cs" />
+    <Compile Include="Settings\SettingsServiceTests.cs" />
+    <Compile Include="Simulator\SimulationLogTests.cs" />
+    <Compile Include="Simulator\SimulationTests.cs" />
+    <Compile Include="Simulator\SimulatorServiceTests.cs" />
+    <Compile Include="SQLite\SQLiteTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Databases\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Plugins\Environmental Data Sources\InstallableNAVO\InstallableNAVOPlugin.csproj">
+      <Project>{1EBCF466-ABAD-416F-AA32-4DA99AE8A9C7}</Project>
+      <Name>InstallableNAVOPlugin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Plugins\Environmental Data Sources\NAVODatabaseAdapter\NAVODatabaseAdapter.csproj">
+      <Project>{409DC754-EEBD-4E49-8DDF-3960F2FFCE73}</Project>
+      <Name>NAVODatabaseAdapter</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ESME\ESME.csproj">
+      <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
+      <Name>ESME</Name>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\HRC\HRC.csproj">
+      <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
+      <Name>HRC</Name>
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="Test Files\Simulation Areas\Jacksonville\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr" />
+    <None Include="Test Files\Simulation Areas\Jacksonville\Sim Areas\Jacksonville\Areas\Jax_Sim_Area.ovr" />
+    <None Include="Test Files\Simulation Areas\Jacksonville\Sim Areas\SimAreas.csv" />
+    <None Include="Test Files\Simulation Areas\NBOA\Sim Areas\NBOA\Areas\Dave.ovr" />
+    <None Include="Test Files\Simulation Areas\NBOA\Sim Areas\NBOA\Areas\NBOA.ovr" />
+    <None Include="Test Files\Simulation Areas\NBOA\Sim Areas\NBOA\Areas\OpArea29_30x30nm.ovr" />
+    <None Include="Test Files\Simulation Areas\NBOA\Sim Areas\SimAreas.csv" />
+    <None Include="Test Files\Simulation Areas\Southern Ocean\Sim Areas\SimAreas.csv" />
+    <None Include="Test Files\Simulation Areas\Southern Ocean\Sim Areas\Southern Ocean\Areas\Southern Ocean_OpArea.ovr" />
+    <None Include="Test Files\Simulation Areas\Southern Ocean\Sim Areas\Southern Ocean\Areas\Southern Ocean_SimArea.ovr" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
