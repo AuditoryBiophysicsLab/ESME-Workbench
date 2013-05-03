@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading;
 using ESME.Database;
 using ESME.Environment;
+using ESME.Migrations;
 using ESME.Plugins;
 using ESME.Scenarios;
 using HRC;
@@ -151,8 +152,9 @@ namespace ESME.Locations
                 Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, "locations"));
                 Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, "scenarios"));
             }
-            var connectionFactory = new SqlCeConnectionFactory("System.Data.SqlServerCe.4.0");
-            var connection = connectionFactory.CreateConnection(Path.Combine(MasterDatabaseDirectory, "esme.db"));
+            System.Data.Entity.Database.DefaultConnectionFactory = new SqlCeConnectionFactory("System.Data.SqlServerCe.4.0");
+            System.Data.Entity.Database.SetInitializer(new Initializer());
+            var connection = System.Data.Entity.Database.DefaultConnectionFactory.CreateConnection(Path.Combine(MasterDatabaseDirectory, "esme.db"));
             Context = new LocationContext(connection, true);
             Refresh();
             OnPropertyChanged("Locations");

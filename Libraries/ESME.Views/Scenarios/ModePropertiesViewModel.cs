@@ -33,6 +33,7 @@ namespace ESME.Views.Scenarios
             DepressionElevationAngle = _mode.DepressionElevationAngle;
             RelativeBeamAngle = _mode.RelativeBeamAngle;
             MaxPropagationRadius = _mode.MaxPropagationRadius;
+            RadialCount = _mode.RadialCount;
 
             AvailableTransmissionLossEngines.AddRange(from key in PluginManagerService[PluginType.TransmissionLossCalculator].Keys
                                                       select (TransmissionLossCalculatorPluginBase)PluginManagerService[PluginType.TransmissionLossCalculator][key].DefaultPlugin);
@@ -175,6 +176,8 @@ namespace ESME.Views.Scenarios
         /// </summary>
         public float MaxPropagationRadius { get; set; }
 
+        public int RadialCount { get; set; }
+
         public bool AcousticPropertiesHaveChanged { get; private set; }
         bool HaveAcousticPropertiesChanged()
         {
@@ -184,6 +187,7 @@ namespace ESME.Views.Scenarios
             if (Math.Abs(DepressionElevationAngle - _mode.DepressionElevationAngle) > 0.1) return true;
             if (Math.Abs(HighFrequency - _mode.HighFrequency) > 0.1) return true;
             if (_mode.TransmissionLossPluginType != SelectedTransmissionLossEngine.PluginIdentifier.Type) return true;
+            if (_mode.RadialCount != RadialCount) return true;
             return Math.Abs(LowFrequency - _mode.LowFrequency) > 0.1;
         }
         public bool RadiusHasChanged { get; private set; }
@@ -228,6 +232,7 @@ namespace ESME.Views.Scenarios
             _mode.RelativeBeamAngle = RelativeBeamAngle;
             _mode.MaxPropagationRadius = MaxPropagationRadius;
             _mode.TransmissionLossPluginType = SelectedTransmissionLossEngine.PluginIdentifier.Type;
+            _mode.RadialCount = RadialCount;
             if (IsPSMView) MediatorMessage.Send(MediatorMessage.PSMModeChanged, _mode);
             else CloseActivePopUpCommand.Execute(true);
         }

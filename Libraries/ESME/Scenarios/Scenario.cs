@@ -376,6 +376,7 @@ namespace ESME.Scenarios
         public static void Add(this AnalysisPoint analysisPoint, IList<Mode> modes)
         {
             var modeMaxRadius = modes.Max(m => m.MaxPropagationRadius);
+            var modeRadialCount = modes.Max(m => m.RadialCount);
             var matchingTL = (from tl in analysisPoint.TransmissionLosses
                               where tl.Modes.Count > 0 && modes[0].IsAcousticallyEquivalentTo(tl.Modes[0])
                               select tl).FirstOrDefault();
@@ -398,7 +399,9 @@ namespace ESME.Scenarios
                 var transmisionLoss = new TransmissionLoss { AnalysisPoint = analysisPoint };
                 analysisPoint.TransmissionLosses.Add(transmisionLoss);
                 transmisionLoss.Modes.AddRange(modes);
-                var radialCount = modeMaxRadius <= 10000 ? 8 : 16;
+                int radialCount;
+                if (modeRadialCount <= 0) radialCount = modeMaxRadius <= 10000 ? 8 : 16;
+                else radialCount = modeRadialCount;
                 var mode = transmisionLoss.Modes[0];
                 var depth = mode.Source.Platform.Depth;
                 if (mode.Depth.HasValue) depth += mode.Depth.Value;

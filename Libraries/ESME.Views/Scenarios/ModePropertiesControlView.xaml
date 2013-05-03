@@ -142,6 +142,19 @@
                             <TextBlock Grid.Column="0"
                                        Margin="0 0 5 0"
                                        VerticalAlignment="Center"
+                                       Text="Number of radials"
+                                       TextAlignment="Right"
+                                       ToolTip="Number of radials to compute for this mode. 0=Auto" />
+                            <TextBox Grid.Column="1" Text="{Binding RadialCount, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
                                        Text="Maximum propagation radius (m)"
                                        TextAlignment="Right"
                                        ToolTip="Maximum propagation radius of this mode, in meters. This field is required" />

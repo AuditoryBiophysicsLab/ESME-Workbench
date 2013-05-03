@@ -107,6 +107,8 @@ namespace ESME.Scenarios
         /// </summary>
         public string TransmissionLossPluginType { get; set; }
 
+        public int RadialCount { get; set; }
+
         public virtual Source Source { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
         [Initialize] public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
