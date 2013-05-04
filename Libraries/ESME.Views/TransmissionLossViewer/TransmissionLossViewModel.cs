@@ -149,11 +149,11 @@ namespace ESME.Views.TransmissionLossViewer
                 {
                     try
                     {
-                        MinTransmissionLoss = (from radial in _transmissionLoss.Radials
+                        MinTransmissionLoss = (from radial in Radials
                                                from minimumValue in radial.MinimumTransmissionLossValues
                                                where !double.IsNaN(minimumValue) && !double.IsInfinity(minimumValue)
                                                select minimumValue).Min();
-                        MaxTransmissionLoss = (from radial in _transmissionLoss.Radials
+                        MaxTransmissionLoss = (from radial in Radials
                                                from maximumValue in radial.MaximumTransmissionLossValues
                                                where !double.IsNaN(maximumValue) && !double.IsInfinity(maximumValue)
                                                select maximumValue).Max();
