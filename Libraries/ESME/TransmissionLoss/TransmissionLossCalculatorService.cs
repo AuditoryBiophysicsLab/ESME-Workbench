@@ -155,6 +155,11 @@ namespace ESME.TransmissionLoss
             WorkQueue.Add(radial.Guid, radial);
             _calculatorQueue.Post(radial);
         }
+
+        public void Remove(Radial radial)
+        {
+            WorkQueue.Remove(radial.Guid);
+        }
 #endif
 
         public void TestAdd(Radial radial)

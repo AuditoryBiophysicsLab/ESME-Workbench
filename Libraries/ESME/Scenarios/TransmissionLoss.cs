@@ -123,10 +123,10 @@ namespace ESME.Scenarios
             {
                 if (IsDeleted) return;
                 LayerSettings.IsChecked = false;
-                var mapLayer = new OverlayShapeMapLayer { Name = string.Format("{0}", Guid) };
+                var mapLayer = (LayerSettings.MapLayerViewModel != null) ? (OverlayShapeMapLayer)LayerSettings.MapLayerViewModel : new OverlayShapeMapLayer { Name = string.Format("{0}", Guid) };
                 mapLayer.Clear();
                 var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
-                Debug.WriteLine(string.Format("Creating map layers for TL {0} of radius {1} for mode [{2}] at {3}", Guid, maxPropagationRadius, Modes.First(), (Geo)AnalysisPoint.Geo));
+                Debug.WriteLine(string.Format("Creating map layers for TL {0} of radius {1} for mode [{2}] at {3}", Guid, maxPropagationRadius, Modes.First().ModeName, (Geo)AnalysisPoint.Geo));
                 var perimeterGeos = new List<Geo>();
                 var perimeterSegmentCount = Math.Max(Radials.Count, 32);
                 for (var perimeterSegmentIndex = 0; perimeterSegmentIndex < perimeterSegmentCount; perimeterSegmentIndex++) perimeterGeos.Add(((Geo)AnalysisPoint.Geo).Offset(Geo.KilometersToRadians(maxPropagationRadius / 1000), Geo.DegreesToRadians((360.0 / perimeterSegmentCount) * perimeterSegmentIndex)));
@@ -149,8 +149,11 @@ namespace ESME.Scenarios
 
         public void RemoveMapLayers()
         {
-            var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
-            Debug.WriteLine(string.Format("Removing map layers for TL {0} of radius {1} for mode [{2}] at {3}", Guid, maxPropagationRadius, Modes.First(), (Geo)AnalysisPoint.Geo));
+            if (Modes != null && Modes.Count > 0)
+            {
+                var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
+                Debug.WriteLine(string.Format("Removing map layers for TL {0} of radius {1} for mode [{2}] at {3}", Guid, maxPropagationRadius, Modes.First().ModeName, (Geo)AnalysisPoint.Geo));
+            }
             LayerSettings.MapLayerViewModel = null;
         }
 

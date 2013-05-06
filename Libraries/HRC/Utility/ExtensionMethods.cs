@@ -86,6 +86,46 @@ namespace HRC.Utility
         }
 
         public static IEnumerable<double> AdjacentDifferences(this IList<double> list) { return list.Take(list.Count - 1).Select((s, i) => list[i + 1] - s); }
+    }
 
+    public struct LumaChromaColor
+    {
+        // Algorithm taken from http://en.wikipedia.org/wiki/YUV#Conversion_to.2Ffrom_RGB
+        const float Wr = 0.299f;
+        const float Wb = 0.115f;
+        const float Wg = 0.587f;
+        const float Umax = 0.436f;
+        const float Vmax = 0.615f;
+
+        public static LumaChromaColor FromColor(Color color)
+        {
+            var y = Wr * color.ScR + Wg * color.ScG + Wb * color.ScB;
+            var u = Umax * ((color.ScB - y) / (1.0f - Wb));
+            var v = Vmax * ((color.ScR - y) / (1.0f - Wr));
+            return new LumaChromaColor(y, u, v);
+        }
+
+        public LumaChromaColor(float y, float u, float v)
+            : this()
+        {
+            Y = y;
+            U = u;
+            V = v;
+        }
+
+        public float Y { get; set; }
+        public float U { get; set; }
+        public float V { get; set; }
+
+        public Color Color
+        {
+            get
+            {
+                var scR = Y + V / 0.877f;
+                var scG = Y - 0.395f * U - 0.581f * V;
+                var scB = Y + U / 0.492f;
+                return Color.FromScRgb(1.0f, scR, scG, scB);
+            }
+        }
     }
 }

@@ -172,7 +172,13 @@ namespace StandardTransmissionLossEngines
                 }
                 Thread.Sleep(20);
             }
-            //if (bellhopProcess.ExitCode != 0) return;
+            if (bellhopProcess.ExitCode == 0) return;
+            var bellhopOutput = bellhopProcess.StandardOutput.ReadToEnd();
+            var bellhopError = bellhopProcess.StandardError.ReadToEnd();
+            Debug.WriteLine("Bellhop process for radial {0} exited with error code {1:X}", radial.BasePath, bellhopProcess.ExitCode);
+            Debug.WriteLine("Bellhop stdout: " + bellhopOutput);
+            Debug.WriteLine("Bellhop stderr: " + bellhopError);
+            radial.CleanupFiles();
         }
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);

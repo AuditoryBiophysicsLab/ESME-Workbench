@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +7,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Threading;
 using ESME.Database;
@@ -340,155 +338,6 @@ namespace ESME.Scenarios
         public static TransmissionLossCalculatorService TransmissionLossCalculator;
         public static Dispatcher Dispatcher;
 
-#if false
-        /// <summary>
-        /// Adds a new analysis point to the scenario, creating TLs for all acoustically distinct modes
-        /// </summary>
-        /// <param name="scenario"> </param>
-        /// <param name="analysisPoint"></param>
-        public static void Add(this Scenario scenario, AnalysisPoint analysisPoint)
-        {
-            analysisPoint.Scenario = scenario;
-            scenario.AnalysisPoints.Add(analysisPoint);
-            var groupedModes = scenario.GroupEquivalentModes();
-            if (groupedModes == null || groupedModes.Groups == null) throw new ApplicationException("groupedModes or groupedModes.Groups is null");
-            foreach (CollectionViewGroup collectionViewGroup in groupedModes.Groups) analysisPoint.Add((from item in collectionViewGroup.Items select (Mode)item).ToList());
-            if (Dispatcher != null) Dispatcher.InvokeIfRequired(analysisPoint.CreateMapLayers);
-            //Log(analysisPoint, "Added new analysis point at {0} to scenario {1} in location {2}", (Geo)analysisPoint.Geo, analysisPoint.Scenario.Name, analysisPoint.Scenario.Location.Name);
-        }
-
-        /// <summary>
-        /// Adds a new TransmissionLoss with the specified list of acoustically-identical modes 
-        /// to the current AnalysisPoint if appropriate, and queues the resulting radials for calculation
-        /// </summary>
-        /// <param name="analysisPoint"></param>
-        /// <param name="modes"> </param>
-        public static void Add(this AnalysisPoint analysisPoint, IList<Mode> modes)
-        {
-#if true
-            // Get the bathymetry for the scenario that the AnalysisPoint belongs to
-            var bathymetry = analysisPoint.Scenario.BathymetryData;
-            // Look up the depth at the AnalysisPoint
-            var depthAtAnalysisPoint = bathymetry.Samples.IsFast2DLookupAvailable
-                                           ? -bathymetry.Samples.GetNearestPointAsync(analysisPoint.Geo).Result.Data
-                                           : -bathymetry.Samples.GetNearestPoint(analysisPoint.Geo).Data;
-            // Get a representative mode from the list of modes
-            var firstMode = modes.First();
-            // Calculate the actual source depth of the mode
-            var sourceDepth = firstMode.Source.Platform.Depth;
-            if (firstMode.Depth.HasValue) sourceDepth += firstMode.Depth.Value;
-            // If the source depth is greater than the depth at this AnalysisPoint, 
-            // then don't add a TransmissionLoss for this list of modes to the current AnalysisPoint
-            if (sourceDepth >= depthAtAnalysisPoint) return; 
-            // The depth check is OK, so create a new TransmissionLoss
-            var transmissionLoss = new TransmissionLoss { AnalysisPoint = analysisPoint };
-            // Add the list of modes to the TransmissionLoss
-            transmissionLoss.Modes.AddRange(modes);
-            // Add the TransmissionLoss to the current AnalysisPoint
-            analysisPoint.TransmissionLosses.Add(transmissionLoss);
-            // Verify the TransmissionLoss, which will create the radials and queue them for calculation
-            transmissionLoss.Update();
-#else
-            var modeMaxRadius = modes.Max(m => m.MaxPropagationRadius);
-            var modeRadialCount = modes.Max(m => m.RadialCount);
-            var matchingTL = (from tl in analysisPoint.TransmissionLosses
-                              where tl.Modes.Count > 0 && modes[0].IsAcousticallyEquivalentTo(tl.Modes[0])
-                              select tl).FirstOrDefault();
-            if (matchingTL != null)
-            {
-                matchingTL.Modes.AddRange(modes);
-                if (modeMaxRadius <= matchingTL.Radials[0].Length)
-                {
-                    Debug.WriteLine(string.Format("Added mode(s) matching an existing TL to analysis point at ({0:0.###}, {1:0.###}). No recalculation required.", matchingTL.AnalysisPoint.Geo.Latitude, matchingTL.AnalysisPoint.Geo.Longitude));
-                    return;
-                }
-                var mode = matchingTL.Modes[0];
-                var depth = mode.Source.Platform.Depth;
-                if (mode.Depth.HasValue) depth += mode.Depth.Value;
-                Debug.WriteLine(string.Format("Recalculating TL: {0}Hz, {1}Hz, {2}m, {3}deg, {4}deg in analysis point at ({5:0.###}, {6:0.###}) after adding mode(s) with longer radius. Old radius: {7}m, new radius {8}m", mode.HighFrequency, mode.LowFrequency, depth, mode.VerticalBeamWidth, mode.DepressionElevationAngle, matchingTL.AnalysisPoint.Geo.Latitude, matchingTL.AnalysisPoint.Geo.Longitude, matchingTL.Radials[0].Length, modeMaxRadius));
-                matchingTL.Recalculate();
-            }
-            else
-            {
-                var transmissionLoss = new TransmissionLoss { AnalysisPoint = analysisPoint };
-                analysisPoint.TransmissionLosses.Add(transmissionLoss);
-                transmissionLoss.Modes.AddRange(modes);
-                int radialCount;
-                if (modeRadialCount <= 0) radialCount = modeMaxRadius <= 10000 ? 8 : 16;
-                else radialCount = modeRadialCount;
-                var mode = transmissionLoss.Modes[0];
-                var depth = mode.Source.Platform.Depth;
-                if (mode.Depth.HasValue) depth += mode.Depth.Value;
-                Debug.WriteLine(string.Format("Adding TL: {0}Hz, {1}Hz, {2}m, {3}deg, {4}deg to analysis point at ({5:0.###}, {6:0.###})", mode.HighFrequency, mode.LowFrequency, depth, mode.VerticalBeamWidth, mode.DepressionElevationAngle, transmissionLoss.AnalysisPoint.Geo.Latitude, transmissionLoss.AnalysisPoint.Geo.Longitude));
-                for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
-                {
-                    var radial = new Radial
-                    {
-                        TransmissionLoss = transmissionLoss,
-                        CalculationCompleted = DateTime.MaxValue,
-                        CalculationStarted = DateTime.MaxValue,
-                        Bearing = (360.0 / radialCount) * radialIndex,
-                        Length = modeMaxRadius,
-                        IsCalculated = false,
-                    };
-                    transmissionLoss.Radials.Add(radial);
-                    TransmissionLossCalculator.Add(radial);
-                }
-                Dispatcher.InvokeIfRequired(transmissionLoss.CreateMapLayers);
-            }
-#endif
-        }
-        /// <summary>
-        /// Add a new mode to the scenario.
-        /// </summary>
-        /// <param name="scenario"></param>
-        /// <param name="mode"></param>
-        public static void Add(this Scenario scenario, Mode mode)
-        {
-#if true
-            // Loop through all existing analysis points
-            foreach (var analysisPoint in scenario.AnalysisPoints.ToList())
-            {
-                // Find a TransmissionLoss contained in the current AnalysisPoint that matches the specified mode, if one exists
-                var matchingTransmissionLoss = (from transmissionLoss in analysisPoint.TransmissionLosses
-                                                where transmissionLoss.Modes != null &&
-                                                      transmissionLoss.Modes.Count > 0 &&
-                                                      transmissionLoss.Modes[0].IsAcousticallyEquivalentTo(mode)
-                                                select transmissionLoss).FirstOrDefault();
-                if (matchingTransmissionLoss != null)
-                {
-                    // If a matching TransmissionLoss exists, add the new mode to it
-                    matchingTransmissionLoss.Modes.Add(mode);
-                    // Verify that the matching TransmissionLoss is still valid, recalculating if it's not
-                    matchingTransmissionLoss.Update();
-                    Debug.WriteLine(string.Format("Mode {0}:{1}:{2} was added to analysis point at {3}", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName, (Geo)analysisPoint.Geo));
-                    return;
-                }
-                // A matching TransmissionLoss does not exist, so add one for the new mode
-                analysisPoint.Add(new List<Mode> { mode });
-            }
-#else
-            var apCount = 0;
-            foreach (var ap in scenario.AnalysisPoints)
-            {
-                var foundMatch = false;
-                foreach (var tl in ap.TransmissionLosses.Where(tl => mode.IsAcousticallyEquivalentTo(tl.Modes[0]))) 
-                {
-                    if (mode.MaxPropagationRadius > tl.Modes.Max(m => m.MaxPropagationRadius))
-                        tl.Recalculate();
-                    tl.Modes.Add(mode);
-                    foundMatch = true;
-                }
-                if (foundMatch) continue;
-                Debug.WriteLine(string.Format("Adding mode {0}:{1}:{2} to analysis point at ({3:0.###}, {4:0.###})", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName, ap.Geo.Latitude, ap.Geo.Longitude));
-                ap.Add(new List<Mode> { mode });
-                apCount++;
-            }
-            Debug.WriteLine(string.Format("Mode {0}:{1}:{2} was added to {3} analysis points", mode.Source.Platform.PlatformName, mode.Source.SourceName, mode.ModeName, apCount));
-#endif
-        }
-#endif
-
         /// <summary>
         /// Update all the AnalysisPoints contained in a specified Scenario, ensuring that all modes are properly represented across
         /// all AnalysisPoints
@@ -532,7 +381,7 @@ namespace ESME.Scenarios
                     // If no current mode group matches the representative Mode
                     if (matchingModeGroup == null)
                     {
-                        Debug.WriteLine(string.Format("Deleting TL [{0}] at {1}", transmissionLoss.Modes.First(), (Geo)transmissionLoss.AnalysisPoint.Geo));
+                        Debug.WriteLine(string.Format("Deleting TL [{0}:{1}] at {2}", transmissionLoss.Modes.First().ModeName, transmissionLoss.Modes.First().MaxPropagationRadius, (Geo)transmissionLoss.AnalysisPoint.Geo));
                         // Delete the current TransmissionLoss
                         transmissionLoss.Delete();
                         // And look at the next one
@@ -544,7 +393,7 @@ namespace ESME.Scenarios
                     // Remove the unmatched original modes in the current TransmissionLoss
                     unmatchedOriginalModes.ForEach(m =>
                     {
-                        Debug.WriteLine(string.Format("Removing mode [{0}] from [{1}] at {2}", m, transmissionLoss.Modes.First(), (Geo)transmissionLoss.AnalysisPoint.Geo));
+                        Debug.WriteLine(string.Format("Removing mode [{0}:{1}] from [{2}:{3}] at {4}", m.ModeName, m.MaxPropagationRadius, transmissionLoss.Modes.First().ModeName, transmissionLoss.Modes.First().MaxPropagationRadius, (Geo)transmissionLoss.AnalysisPoint.Geo));
                         transmissionLoss.Modes.Remove(m);
                         m.TransmissionLosses.Remove(transmissionLoss);
                     });
@@ -554,7 +403,7 @@ namespace ESME.Scenarios
                     // Add those new modes to the current TransmissionLoss
                     unmatchedNewModes.ForEach(m =>
                     {
-                        Debug.WriteLine(string.Format("Adding mode [{0}] to [{1}] at {2}", m, transmissionLoss.Modes.First(), (Geo)transmissionLoss.AnalysisPoint.Geo));
+                        Debug.WriteLine(string.Format("Adding mode [{0}:{1}] to [{2}:{3}] at {4}", m.ModeName, m.MaxPropagationRadius, transmissionLoss.Modes.First().ModeName, transmissionLoss.Modes.First().MaxPropagationRadius, (Geo)transmissionLoss.AnalysisPoint.Geo));
                         m.TransmissionLosses.Add(transmissionLoss);
                         transmissionLoss.Modes.Add(m);
                     });
@@ -577,7 +426,6 @@ namespace ESME.Scenarios
                                                    : -bathymetry.Samples.GetNearestPoint(analysisPoint.Geo).Data;
                     // Get a representative mode from the list of modes
                     var firstMode = newModeGroup.First();
-                    Debug.Write(string.Format("No TL found for mode [{0}] at {1}: ", firstMode, (Geo)analysisPoint.Geo));
                     // Calculate the actual source depth of the mode
                     var sourceDepth = firstMode.Source.Platform.Depth;
                     if (firstMode.Depth.HasValue) sourceDepth += firstMode.Depth.Value;
@@ -585,16 +433,16 @@ namespace ESME.Scenarios
                     // then don't add a TransmissionLoss for this list of modes to the current AnalysisPoint
                     if (sourceDepth >= depthAtAnalysisPoint)
                     {
-                        Debug.WriteLine("Depth is less than source depth, skipping this location");
+                        Debug.WriteLine(string.Format("Skipping TL mode [{0}:{1}] at {2} because depth is too shallow ", firstMode.ModeName, firstMode.MaxPropagationRadius, (Geo)analysisPoint.Geo));
                         return;
                     }
-                    Debug.WriteLine("Adding");
                     // The depth check is OK, so create a new TransmissionLoss
+                    Debug.WriteLine(string.Format("Creating new TL for mode [{0}:{1}] at {2}", firstMode.ModeName, firstMode.MaxPropagationRadius, (Geo)analysisPoint.Geo));
                     var transmissionLoss = new TransmissionLoss { AnalysisPoint = analysisPoint };
                     // Add the list of modes to the TransmissionLoss
                     newModeGroup.ForEach(m =>
                     {
-                        Debug.WriteLine(string.Format("Adding mode [{0}] to new TL at {1}", m, (Geo)transmissionLoss.AnalysisPoint.Geo));
+                        Debug.WriteLine(string.Format("Adding mode [{0}:{1}] to new TL at {2}", m.ModeName, m.MaxPropagationRadius, (Geo)transmissionLoss.AnalysisPoint.Geo));
                         transmissionLoss.Modes.Add(m);
                         m.TransmissionLosses.Add(transmissionLoss);
                     });
@@ -637,7 +485,12 @@ namespace ESME.Scenarios
 
             // If there are any radials already defined, and if the count of those radials is the same as the max radial count
             // and the length of all radials is greater than or equal to the required max radius, this TransmissionLoss is valid
-            if (transmissionLoss.Radials != null && transmissionLoss.Radials.Count == modeRadialCount && transmissionLoss.Radials.All(radial => radial.Length >= modeMaxRadius)) return;
+            if (transmissionLoss.Radials != null && transmissionLoss.Radials.Count == modeRadialCount && transmissionLoss.Radials.All(radial => radial.Length >= modeMaxRadius))
+            {
+                // Redraw the map layers to display the new TransmissionLoss as it should be
+                Dispatcher.InvokeIfRequired(transmissionLoss.CreateMapLayers);
+                return;
+            }
 
             // If the list of radials is null, create a list
             if (transmissionLoss.Radials == null) transmissionLoss.Radials = new ObservableList<Radial>();
@@ -656,7 +509,7 @@ namespace ESME.Scenarios
                 // If there is a radial that matches the bearing AND that radial is too short to meet the current length requirements
                 if (currentRadial != null && currentRadial.Length < modeMaxRadius)
                 {
-                    Debug.WriteLine(string.Format("Deleting too-short radial [{0}] from mode [{1}] at {2}", currentRadial, transmissionLoss.Modes.First(), (Geo)transmissionLoss.AnalysisPoint.Geo));
+                    //Debug.WriteLine(string.Format("Deleting too-short radial [{0}] from mode [{1}] at {2}", currentRadial, transmissionLoss.Modes.First(), (Geo)transmissionLoss.AnalysisPoint.Geo));
                     // Delete the radial
                     currentRadial.Delete();
                     // Pretend that we didn't find a matching radial, so we will create one below
@@ -675,64 +528,18 @@ namespace ESME.Scenarios
                     Length = modeMaxRadius,
                     IsCalculated = false,
                 };
-                Debug.WriteLine(string.Format("Adding new radial [{0}] to mode [{1}] at {2}", radial, transmissionLoss.Modes.First(), (Geo)transmissionLoss.AnalysisPoint.Geo));
+                //Debug.WriteLine(string.Format("Adding new radial [{0}] to mode [{1}] at {2}", radial, transmissionLoss.Modes.First(), (Geo)transmissionLoss.AnalysisPoint.Geo));
                 // Add the new Radial to the TransmissionLoss
                 transmissionLoss.Radials.Add(radial);
                 // Queue the new Radial for calculation
                 TransmissionLossCalculator.Add(radial);
             }
             // Delete any radials in the current TransmissionLoss that are no longer required
-            transmissionLoss.Radials.FindAll(r => !requiredBearings.Contains(r.Bearing)).ForEach(r =>
-            {
-                Debug.WriteLine(string.Format("Deleting now-unused radial [{0}] from mode [{1}] at {2}", r.ToString(), transmissionLoss.Modes.First(), (Geo)transmissionLoss.AnalysisPoint.Geo));
-                r.Delete();
-            });
+            //  Debug.WriteLine(string.Format("Deleting now-unused radial [{0}] from mode [{1}] at {2}", r.ToString(), transmissionLoss.Modes.First(), (Geo)transmissionLoss.AnalysisPoint.Geo));
+            transmissionLoss.Radials.FindAll(r => !requiredBearings.Contains(r.Bearing)).ForEach(r => r.Delete());
             // Redraw the map layers to display the new TransmissionLoss as it should be
-            Dispatcher.InvokeIfRequired(async () =>
-            {
-                await TaskEx.Delay(100);
-                transmissionLoss.RemoveMapLayers();
-                transmissionLoss.CreateMapLayers();
-            });
+            Dispatcher.InvokeIfRequired(transmissionLoss.CreateMapLayers);
         }
-
-#if false
-        /// <summary>
-        /// Notifies the scenario that the radius on an existing mode has changed.
-        /// If it is now the mode with the longest propagation radius, all TLs containing this mode will be recalculated.
-        /// </summary>
-        /// <param name="scenario"> </param>
-        /// <param name="mode"></param>
-        public static void NotifyRadiusChanged(this Scenario scenario, Mode mode)
-        {
-            var affectedTranmissionLosses = (from tl in mode.TransmissionLosses
-                                             let maxRadius = tl.Modes.Max(m => m.MaxPropagationRadius)
-                                             where tl.Radials != null && tl.Radials.Count > 0 && tl.Radials[0].Length < maxRadius
-                                             select tl).ToList();
-            var affectedAnalysisPoints = (from tl in affectedTranmissionLosses
-                                          select tl.AnalysisPoint).Distinct().ToList();
-            foreach (var transmissionLoss in affectedTranmissionLosses)
-            {
-                var depth = mode.Source.Platform.Depth;
-                if (mode.Depth.HasValue) depth += mode.Depth.Value;
-                Debug.WriteLine(string.Format("Recalculating TL: {0}Hz, {1}Hz, {2}m, {3}deg, {4}deg in analysis point at ({5:0.###}, {6:0.###}) due to radius change. Old radius: {7}m, new radius {8}m", mode.HighFrequency, mode.LowFrequency, depth, mode.VerticalBeamWidth, mode.DepressionElevationAngle, transmissionLoss.AnalysisPoint.Geo.Latitude, transmissionLoss.AnalysisPoint.Geo.Longitude, transmissionLoss.Radials[0].Length, transmissionLoss.Modes.Max(m => m.MaxPropagationRadius)));
-                transmissionLoss.Recalculate();
-            }
-            foreach (var analysisPoint in affectedAnalysisPoints) analysisPoint.CheckForErrors();
-        }
-
-        public static void NotifyAcousticsChanged(this Scenario scenario, Mode mode)
-        {
-            foreach (var transmissionLoss in mode.TransmissionLosses.ToList())
-            {
-                var analysisPoint = transmissionLoss.AnalysisPoint;
-                transmissionLoss.Modes.Remove(mode);
-                if (transmissionLoss.Modes.Count == 0) transmissionLoss.Delete();
-                if (analysisPoint.Scenario == null) scenario.Add(new AnalysisPoint { Geo = analysisPoint.Geo });
-                else analysisPoint.Add(new List<Mode> { mode });
-            }
-        }
-#endif
 
         private static ListCollectionView GroupEquivalentModes(this Scenario scenario)
         {
@@ -744,32 +551,6 @@ namespace ESME.Scenarios
             if (cv == null || cv.GroupDescriptions == null) throw new ApplicationException("ListCollectionView is null or GroupDescriptions is null");
             cv.GroupDescriptions.Add(new PropertyGroupDescription(null, new ModeGroupingConverter()));
             return cv;
-        }
-
-        public static IEnumerable<Mode> AcousticallyDistinct(this IEnumerable<Mode> source)
-        {
-            var distinctModes = new ConcurrentBag<Mode>();
-            foreach (var mode in source.Where(mode => !distinctModes.Any(mode.IsAcousticallyEquivalentTo)))
-            {
-                distinctModes.Add(mode);
-                yield return mode;
-            }
-        }
-
-        public static IEnumerable<Mode> AcousticallyDistinctModes(this Scenario scenario)
-        {
-            return (from p in scenario.Platforms 
-                    from s in p.Sources 
-                    from m in s.Modes 
-                    select m).AcousticallyDistinct();
-        }
-
-        public static IEnumerable<Mode> GetDistinctAnalysisPointModes(this Scenario scenario)
-        {
-            return (from analysisPoint in scenario.AnalysisPoints
-                    from transmissionLoss in analysisPoint.TransmissionLosses
-                    from mode in transmissionLoss.Modes
-                    select mode).AcousticallyDistinct();
         }
 
         public static TransmissionLoss ClosestTransmissionLoss(this Scenario scenario, Geo geo, Mode mode)
@@ -791,8 +572,11 @@ namespace ESME.Scenarios
 
             if (scenario == null) return "Scenario is null";
             if (scenario.Platforms == null || scenario.Platforms.Count == 0) sb.AppendLine("  • No platforms have been defined");
-            var distinctScenarioModes = AcousticallyDistinctModes(scenario).ToList();
-            if (distinctScenarioModes.Count == 0) sb.AppendLine("  • No modes have been defined");
+            var scenarioModeCount = (from platform in scenario.Platforms
+                                     from source in platform.Sources
+                                     from mode in source.Modes
+                                     select mode).Count();
+            if (scenarioModeCount == 0) sb.AppendLine("  • No modes have been defined");
 
             return sb.Length == 0 ? null : sb.ToString();
         }

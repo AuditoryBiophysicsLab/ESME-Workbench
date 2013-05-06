@@ -404,7 +404,15 @@ namespace StandardTransmissionLossEngines
                 }
                 Thread.Sleep(20);
             }
+            var ramOutput = ramProcess.StandardOutput.ReadToEnd();
             var ramError = ramProcess.StandardError.ReadToEnd();
+            if (ramProcess.ExitCode != 0)
+            {
+                Debug.WriteLine("RAMGeo process for radial {0} exited with error code {1:X}", radial.BasePath, ramProcess.ExitCode);
+                Debug.WriteLine(ramError);
+                Directory.Delete(tempDirectory, true);
+                return;
+            }
             //File.Delete(Path.Combine(tempDirectory, "ramgeo.in"));
             //File.Delete(radial.BasePath + ".grid");
             //File.Move(Path.Combine(tempDirectory, "tl.grid"), radial.BasePath + ".grid");
@@ -421,7 +429,14 @@ namespace StandardTransmissionLossEngines
                 var pressures = ReadPGrid(Path.Combine(tempDirectory, "p.grid"));
                 File.Copy(Path.Combine(tempDirectory, "p.grid"), radial.BasePath + ".pgrid", true);
                 //File.Delete(radial.BasePath + ".pgrid");
-                if (pressures.Count == 0) Debugger.Break();
+                if (pressures.Count == 0)
+                {
+                    Debug.WriteLine("Temp directory: " + tempDirectory);
+                    Debug.WriteLine("RAMGeo stdout: " + ramOutput);
+                    Debug.WriteLine("RAMGeo stderr: " + ramError);
+                    Directory.Delete(tempDirectory, true);
+                    return;
+                }
                 var rangeCount = pressures.Count;
                 var depthCount = pressures[0].Length;
                 var rr = new double[rangeCount];
@@ -449,11 +464,6 @@ namespace StandardTransmissionLossEngines
                 //                radial.TransmissionLoss.Modes[0].ModeName,
                 //                radial.Bearing);
                 //Debug.WriteLine("p.grid file not found in RAMGeo output directory");
-                if (ramProcess.ExitCode != 0)
-                {
-                    Debug.WriteLine("RAMGeo process for radial {0} exited with error code {1:X}", radial.BasePath, ramProcess.ExitCode);
-                    Debug.WriteLine(ramError);
-                }
             }
             Directory.Delete(tempDirectory, true);
             //Debug.WriteLine(string.Format("Env File: {0} temp directory deleted: {1}", envFileName, tempDirectory));

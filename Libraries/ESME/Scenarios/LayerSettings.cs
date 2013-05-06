@@ -6,6 +6,7 @@ using ESME.Database;
 using ESME.Locations;
 using ESME.Mapping;
 using HRC.Aspects;
+using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
 using ThinkGeo.MapSuite.Core;
@@ -18,7 +19,14 @@ namespace ESME.Scenarios
         public LayerSettings()
         {
             PointSymbolType = new DbPointSymbolType {PointSymbolTypeAsInt = Random.Next(8)};
-            LineOrSymbolDbColor = new DbColor(ColorExtensions.GetRandomNamedColor());
+            Color curColor;
+            while (true)
+            {
+                curColor = ColorExtensions.GetRandomNamedColor();
+                var curYUV = LumaChromaColor.FromColor(curColor);
+                if (curYUV.Y >= 0.5f) break;
+            }
+            LineOrSymbolDbColor = new DbColor(curColor);
             AreaDbColor = new DbColor(Colors.Transparent);
         }
 
@@ -124,6 +132,11 @@ namespace ESME.Scenarios
             set
             {
                 if (value == null && _mapLayerViewModel != null) MediatorMessage.Send(MediatorMessage.RemoveMapLayer, _mapLayerViewModel);
+                else if (_mapLayerViewModel == value)
+                {
+                    MediatorMessage.Send(MediatorMessage.RefreshMapLayer, _mapLayerViewModel);
+                    return;
+                }
                 _mapLayerViewModel = value;
                 if (_mapLayerViewModel == null) return;
                 MediatorMessage.Send(MediatorMessage.AddMapLayer, _mapLayerViewModel);

@@ -125,6 +125,7 @@ namespace ESME.Scenarios
             IsDeleted = true;
             ((INotifyPropertyChanged)this).PropertyChanged -= PropertyChangedHandler;
             CleanupFiles();
+            TransmissionLossCalculator.Remove(this);
             TransmissionLoss.Radials.Remove(this);
             Scenario.Database.Context.Radials.Remove(this);
         }
@@ -255,82 +256,90 @@ namespace ESME.Scenarios
         {
             try
             {
-                if (BasePath == null || File.Exists(BasePath + ".axs") || !File.Exists(BasePath + ".shd")) return false;
-                if (transmissionLoss == null) transmissionLoss = new TransmissionLossRadial((float)Bearing, new BellhopOutput(BasePath + ".shd"));
-            }
-            catch (EndOfStreamException)
-            {
-                FileDeleteWithRetry(BasePath + ".shd");
-                TransmissionLossCalculator.Add(this);
-                return false;
-            }
-            _ranges = transmissionLoss.Ranges.ToArray();
-            _depths = transmissionLoss.Depths.ToArray();
-            IsCalculated = true;
-            _bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty");
-            _minimumTransmissionLossValues = new float[Ranges.Length];
-            _maximumTransmissionLossValues = new float[Ranges.Length];
-            _meanTransmissionLossValues = new float[Ranges.Length];
-            for (var rangeIndex = 0; rangeIndex < Ranges.Length; rangeIndex++)
-            {
-                //if (debugIndex >= 0 && rangeIndex == debugIndex) Debugger.Break();
-                // Updated to ignore values below the bottom
-                var curRange = _ranges[rangeIndex];
-                var depthAtThisRange = (from profilePoint in BottomProfile
-                                        let desiredRange = Math.Abs((profilePoint.Range * 1000) - curRange)
-                                        orderby desiredRange
-                                        select profilePoint.Depth).Take(2).Min();
-                if (depthAtThisRange <= _depths[0])
+                try
                 {
-                    MinimumTransmissionLossValues[rangeIndex] = float.NaN;
-                    MaximumTransmissionLossValues[rangeIndex] = float.NaN;
-                    MeanTransmissionLossValues[rangeIndex] = float.NaN;
-                    continue;
+                    if (BasePath == null || File.Exists(BasePath + ".axs") || !File.Exists(BasePath + ".shd")) return false;
+                    if (transmissionLoss == null) transmissionLoss = new TransmissionLossRadial((float)Bearing, new BellhopOutput(BasePath + ".shd"));
                 }
-                var bottomDepthIndex = _depths.ToList().IndexOf((from depth in _depths
-                                                                 let curDepth = depthAtThisRange - depth
-                                                                 where curDepth > 0
-                                                                 orderby curDepth
-                                                                 select depth).First());
-                var tlValuesAboveBottom = transmissionLoss[rangeIndex].Take(bottomDepthIndex).Where(v => !float.IsNaN(v) && !float.IsInfinity(v)).ToList();
-                if (tlValuesAboveBottom.Count == 0)
+                catch (EndOfStreamException)
                 {
-                    MinimumTransmissionLossValues[rangeIndex] = float.NaN;
-                    MaximumTransmissionLossValues[rangeIndex] = float.NaN;
-                    MeanTransmissionLossValues[rangeIndex] = float.NaN;
-                    continue;
+                    FileDeleteWithRetry(BasePath + ".shd");
+                    TransmissionLossCalculator.Add(this);
+                    return false;
                 }
-                if (debugIndex >= 0 && rangeIndex == debugIndex)
+                _ranges = transmissionLoss.Ranges.ToArray();
+                _depths = transmissionLoss.Depths.ToArray();
+                IsCalculated = true;
+                _bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty");
+                _minimumTransmissionLossValues = new float[Ranges.Length];
+                _maximumTransmissionLossValues = new float[Ranges.Length];
+                _meanTransmissionLossValues = new float[Ranges.Length];
+                for (var rangeIndex = 0; rangeIndex < Ranges.Length; rangeIndex++)
                 {
-                    var maxTransmissionLoss = tlValuesAboveBottom.Max();
-                    var maxTransmissionLossDepthIndex = transmissionLoss[rangeIndex].IndexOf(maxTransmissionLoss);
-                    var maxTransmissionLossDepth = _depths[maxTransmissionLossDepthIndex];
-                    Debug.WriteLine(string.Format("Maximum TL value for this field found at radial bearing {0}, range {1}, depth {2}, TL {3}, bottom depth at this range {4}",
-                                                  Bearing,
-                                                  curRange,
-                                                  maxTransmissionLossDepth,
-                                                  maxTransmissionLoss,
-                                                  depthAtThisRange));
+                    //if (debugIndex >= 0 && rangeIndex == debugIndex) Debugger.Break();
+                    // Updated to ignore values below the bottom
+                    var curRange = _ranges[rangeIndex];
+                    var depthAtThisRange = (from profilePoint in BottomProfile
+                                            let desiredRange = Math.Abs((profilePoint.Range * 1000) - curRange)
+                                            orderby desiredRange
+                                            select profilePoint.Depth).Take(2).Min();
+                    if (depthAtThisRange <= _depths[0])
+                    {
+                        MinimumTransmissionLossValues[rangeIndex] = float.NaN;
+                        MaximumTransmissionLossValues[rangeIndex] = float.NaN;
+                        MeanTransmissionLossValues[rangeIndex] = float.NaN;
+                        continue;
+                    }
+                    var bottomDepthIndex = _depths.ToList().IndexOf((from depth in _depths
+                                                                     let curDepth = depthAtThisRange - depth
+                                                                     where curDepth > 0
+                                                                     orderby curDepth
+                                                                     select depth).First());
+                    var tlValuesAboveBottom = transmissionLoss[rangeIndex].Take(bottomDepthIndex).Where(v => !float.IsNaN(v) && !float.IsInfinity(v)).ToList();
+                    if (tlValuesAboveBottom.Count == 0)
+                    {
+                        MinimumTransmissionLossValues[rangeIndex] = float.NaN;
+                        MaximumTransmissionLossValues[rangeIndex] = float.NaN;
+                        MeanTransmissionLossValues[rangeIndex] = float.NaN;
+                        continue;
+                    }
+                    if (debugIndex >= 0 && rangeIndex == debugIndex)
+                    {
+                        var maxTransmissionLoss = tlValuesAboveBottom.Max();
+                        var maxTransmissionLossDepthIndex = transmissionLoss[rangeIndex].IndexOf(maxTransmissionLoss);
+                        var maxTransmissionLossDepth = _depths[maxTransmissionLossDepthIndex];
+                        Debug.WriteLine(string.Format("Maximum TL value for this field found at radial bearing {0}, range {1}, depth {2}, TL {3}, bottom depth at this range {4}",
+                                                      Bearing,
+                                                      curRange,
+                                                      maxTransmissionLossDepth,
+                                                      maxTransmissionLoss,
+                                                      depthAtThisRange));
+                    }
+                    MinimumTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Min();
+                    MaximumTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Max();
+                    MeanTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Average();
                 }
-                MinimumTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Min();
-                MaximumTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Max();
-                MeanTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Average();
+                using (var writer = new BinaryWriter(new FileStream(BasePath + ".axs", FileMode.Create)))
+                {
+                    writer.Write(_ranges.Length);
+                    foreach (var range in _ranges) writer.Write(range);
+                    writer.Write(_depths.Length);
+                    foreach (var depth in _depths) writer.Write(depth);
+                    writer.Write(_minimumTransmissionLossValues.Length);
+                    foreach (var tl in _minimumTransmissionLossValues) writer.Write(tl);
+                    writer.Write(_maximumTransmissionLossValues.Length);
+                    foreach (var tl in _maximumTransmissionLossValues) writer.Write(tl);
+                    writer.Write(_meanTransmissionLossValues.Length);
+                    foreach (var tl in _meanTransmissionLossValues) writer.Write(tl);
+                }
+                //MediatorMessage.Send(MediatorMessage.TransmissionLossLayerChanged, TransmissionLoss);
+                return true;
             }
-            using (var writer = new BinaryWriter(new FileStream(BasePath + ".axs", FileMode.Create)))
+            catch (Exception)
             {
-                writer.Write(_ranges.Length);
-                foreach (var range in _ranges) writer.Write(range);
-                writer.Write(_depths.Length);
-                foreach (var depth in _depths) writer.Write(depth);
-                writer.Write(_minimumTransmissionLossValues.Length);
-                foreach (var tl in _minimumTransmissionLossValues) writer.Write(tl);
-                writer.Write(_maximumTransmissionLossValues.Length);
-                foreach (var tl in _maximumTransmissionLossValues) writer.Write(tl);
-                writer.Write(_meanTransmissionLossValues.Length);
-                foreach (var tl in _meanTransmissionLossValues) writer.Write(tl);
+                if (IsDeleted) return false;
+                throw;
             }
-            //MediatorMessage.Send(MediatorMessage.TransmissionLossLayerChanged, TransmissionLoss);
-            return true;
         }
 
         public void ReleaseAxisData()

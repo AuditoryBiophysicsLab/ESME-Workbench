@@ -16,9 +16,11 @@ namespace ESME.Scenarios
     [NotifyPropertyChanged]
     public class Mode : IHaveGuid
     {
-        public Mode() {}
+        public Mode() { }
 
-        public Mode(Mode mode)
+        public Mode(Mode mode) { Copy(mode); }
+
+        void Copy(Mode mode)
         {
             PSMModeGuid = mode.PSMModeGuid;
             ModeName = mode.ModeName;
@@ -35,8 +37,10 @@ namespace ESME.Scenarios
             DepressionElevationAngle = mode.DepressionElevationAngle;
             RelativeBeamAngle = mode.RelativeBeamAngle;
             MaxPropagationRadius = mode.MaxPropagationRadius;
+            TransmissionLossPluginType = mode.TransmissionLossPluginType;
+            RadialCount = mode.RadialCount;
+            Source = mode.Source;
         }
-
         #region Mapped Properties
         
         [Key, Initialize] public Guid Guid { get; set; }

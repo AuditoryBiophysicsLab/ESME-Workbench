@@ -37,12 +37,11 @@ namespace ESMEWorkbench.ViewModels.Main
             MediatorMessage.Send(MediatorMessage.SetMapExtent, new GeoRect(45, 22, -65, -120));
             foreach (var scenario in _sampleScenarios)
             {
+                //await TestCreateSample(scenario, progress, windData, soundSpeedData, bathymetryData, sedimentData);
                 await CreateSample(scenario, progress, windData, soundSpeedData, bathymetryData, sedimentData);
-                if (progress.IsCanceled)
-                {
-                    window.Close();
-                    return;
-                }
+                if (!progress.IsCanceled) continue;
+                window.Close();
+                return;
             }
             progress.ProgressMessage = string.Format("Updating database...");
             progress.CurrentItem++;
@@ -52,7 +51,7 @@ namespace ESMEWorkbench.ViewModels.Main
         }
         readonly List<SampleScenarioDescriptor> _sampleScenarios = new List<SampleScenarioDescriptor>
         {
-            #if false
+#if false
 		new SampleScenarioDescriptor
             {
                 LocationName = "Gulf of Maine", 
@@ -77,7 +76,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 TimePeriod = (TimePeriod)DateTime.Today.Month,
                 PerimeterGeos = new List<Geo>{new Geo(29.5, -86), new Geo(29.51923828125, -84.94482421875), new Geo(29.78291015625, -84.0439453125), new Geo(28.94794921875, -83.0771484375), new Geo(28.24482421875, -83.033203125), new Geo(27.40986328125, -82.83544921875), new Geo(26, -82), new Geo(26, -86), new Geo(29.5, -86), },
             },
-	        #endif
+#endif
             new SampleScenarioDescriptor
             {
                 LocationName = "Carolina Coast", 
@@ -87,7 +86,6 @@ namespace ESMEWorkbench.ViewModels.Main
                 PerimeterGeos = new List<Geo>{new Geo(34.505712890625, -76.8515625), new Geo(34.714453125, -76.357177734375), new Geo(35.340673828125, -75.99462890625), new Geo(34.78037109375, -75.478271484375), new Geo(33.978369140625, -75.412353515625), new Geo(33.33017578125, -76.291259765625), new Geo(33.74765625, -77.323974609375), new Geo(34.505712890625, -76.8515625), },
                 AnalysisPointGeos = new List<Geo>{new Geo(34.0223144531, -75.5991210938), new Geo(33.6487792969, -76.4450683594), new Geo(33.8465332031, -77.0383300781), new Geo(34.8462890625, -75.9616699219)}
             },
-            
             new SampleScenarioDescriptor
             {
                 LocationName = "Southern California", 
@@ -114,6 +112,79 @@ namespace ESMEWorkbench.ViewModels.Main
             public List<Geo> PerimeterGeos { get; set; }
             public List<Geo> AnalysisPointGeos { get; set; }
             public TimePeriod TimePeriod { get; set; }
+        }
+
+        async Task TestCreateSample(SampleScenarioDescriptor scenarioDescriptor, FirstRunProgressViewModel progress, EnvironmentalDataSet windData, EnvironmentalDataSet soundSpeedData, EnvironmentalDataSet bathymetryData, EnvironmentalDataSet sedimentData)
+        {
+            progress.ProgressMessage = string.Format("Creating sample location \"{0}\"", scenarioDescriptor.LocationName);
+            progress.CurrentItem++;
+            await TaskEx.Delay(10);
+            var location = CreateLocation(scenarioDescriptor.LocationName, "Created as a sample location", scenarioDescriptor.GeoRect);
+            location.CreateMapLayers();
+            progress.ProgressMessage = string.Format("Creating sample scenario \"{0}\"", scenarioDescriptor.ScenarioName);
+            progress.CurrentItem++;
+            await TaskEx.Delay(10);
+            var scenario = CreateScenario(location, scenarioDescriptor.ScenarioName, "Created as a sample scenario", scenarioDescriptor.TimePeriod, new TimeSpan(0, 1, 0, 0), windData, soundSpeedData, bathymetryData, sedimentData);
+            var perimeterGeoArray = new GeoArray(scenarioDescriptor.PerimeterGeos);
+            Perimeter perimeter = (GeoArray)perimeterGeoArray.Closed;
+            perimeter.Name = "Sample Perimeter";
+            perimeter.Scenario = scenario;
+            var platform = new Platform
+            {
+                Scenario = scenario,
+                Course = 0,
+                Depth = 0,
+                Description = null,
+                Geo = ((GeoRect)scenario.Location.GeoRect).Center,
+                PlatformName = "Sample Platform",
+                Perimeter = perimeter,
+                Speed = 10,
+                IsRandom = true,
+                Launches = false,
+                TrackType = TrackType.PerimeterBounce,
+                IsNew = false,
+                LayerSettings = { IsChecked = true },
+            };
+            scenario.Perimeters.Add(perimeter);
+            //AddMode(AddSource(platform, "High Frequency Source", false), "3 kHz mode", false, 3000, 5);
+            AddMode(AddSource(platform, "100 Hz 50000", false), "100 Hz mode", false, 100, 10, 50000);
+            AddMode(AddSource(platform, "300 Hz 37500", false), "300 Hz mode", false, 300, 10, 37500);
+            AddMode(AddSource(platform, "300 Hz 25000", false), "300 Hz mode", false, 300, 10, 25000);
+
+            platform.Sources[0].Modes[0].TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin.PluginIdentifier.Type;
+            platform.Sources[1].Modes[0].TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin.PluginIdentifier.Type;
+            platform.Sources[2].Modes[0].TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.Bellhop].DefaultPlugin.PluginIdentifier.Type;
+            AddPlatform(scenario, platform);
+            progress.ProgressMessage = string.Format("Generating animat population for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
+            var species = new ScenarioSpecies
+            {
+                LatinName = "Generic odontocete",
+                Scenario = scenario,
+                SpeciesDefinitionFilename = "Generic odontocete.spe",
+                LayerSettings =
+                {
+                    LineOrSymbolSize = 3
+                }
+            };
+            scenario.ScenarioSpecies.Add(species);
+            scenario.RemoveMapLayers();
+            var animats = await Animat.SeedAsync(species, scenarioDescriptor.GeoRect, (Bathymetry)_cache[scenario.Bathymetry].Result);
+            animats.Save(species.PopulationFilePath);
+            //Database.SaveChanges();
+            progress.ProgressMessage = string.Format("Extracting environmental data for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
+            await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
+            progress.CurrentItem++;
+            _dispatcher.InvokeIfRequired(() =>
+            {
+                progress.ProgressMessage = string.Format("Adding analysis point(s) to scenario \"{0}\"", scenarioDescriptor.ScenarioName);
+                scenario.ShowAllAnalysisPoints = true;
+                //if (scenarioDescriptor.AnalysisPointGeos == null || scenarioDescriptor.AnalysisPointGeos.Count < 1) scenario.Add(new AnalysisPoint { Geo = new Geo(((GeoRect)location.GeoRect).Center) });
+                //else foreach (var geo in scenarioDescriptor.AnalysisPointGeos) scenario.Add(new AnalysisPoint { Geo = new Geo(geo) });
+                if (scenarioDescriptor.AnalysisPointGeos == null || scenarioDescriptor.AnalysisPointGeos.Count < 1) scenario.AnalysisPoints.Add(new AnalysisPoint { Geo = new Geo(((GeoRect)location.GeoRect).Center), Scenario = scenario });
+                else foreach (var geo in scenarioDescriptor.AnalysisPointGeos) scenario.AnalysisPoints.Add(new AnalysisPoint { Geo = new Geo(geo), Scenario = scenario });
+                scenario.UpdateAnalysisPoints();
+                progress.CurrentItem++;
+            });
         }
 
         async Task CreateSample(SampleScenarioDescriptor scenarioDescriptor, FirstRunProgressViewModel progress, EnvironmentalDataSet windData, EnvironmentalDataSet soundSpeedData, EnvironmentalDataSet bathymetryData, EnvironmentalDataSet sedimentData)

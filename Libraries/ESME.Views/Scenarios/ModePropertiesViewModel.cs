@@ -14,38 +14,40 @@ namespace ESME.Views.Scenarios
 {
     public class ModePropertiesViewModel : ValidatingViewModel
     {
-        readonly Mode _mode;
+        readonly Mode _editedMode;
+        readonly Mode _originalMode;
         const string TimeSpanFormatString = @"hh\:mm\:ss\.fff";
         public static IPluginManagerService PluginManagerService { get; set; }
         [UsedImplicitly] PropertyObserver<ModePropertiesViewModel> _propertyObserver;
 
         public ModePropertiesViewModel(Mode mode)
         {
-            _mode = mode;
-            ModeName = _mode.ModeName;
-            ModeType = _mode.ModeType;
-            Depth = _mode.Depth;
-            SourceLevel = _mode.SourceLevel;
-            LowFrequency = _mode.LowFrequency;
-            HighFrequency = _mode.HighFrequency;
-            PulseIntervalString = _mode.PulseInterval != null ? ((TimeSpan)_mode.PulseInterval).ToString(TimeSpanFormatString) : null;
-            PulseLengthString = _mode.PulseLength != null ? ((TimeSpan)_mode.PulseLength).ToString(TimeSpanFormatString) : null;
-            HorizontalBeamWidth = _mode.HorizontalBeamWidth;
-            VerticalBeamWidth = _mode.VerticalBeamWidth;
-            DepressionElevationAngle = _mode.DepressionElevationAngle;
-            RelativeBeamAngle = _mode.RelativeBeamAngle;
-            MaxPropagationRadius = _mode.MaxPropagationRadius;
+            _editedMode = mode;
+            _originalMode = new Mode(mode);
+            ModeName = _editedMode.ModeName;
+            ModeType = _editedMode.ModeType;
+            Depth = _editedMode.Depth;
+            SourceLevel = _editedMode.SourceLevel;
+            LowFrequency = _editedMode.LowFrequency;
+            HighFrequency = _editedMode.HighFrequency;
+            PulseIntervalString = _editedMode.PulseInterval != null ? ((TimeSpan)_editedMode.PulseInterval).ToString(TimeSpanFormatString) : null;
+            PulseLengthString = _editedMode.PulseLength != null ? ((TimeSpan)_editedMode.PulseLength).ToString(TimeSpanFormatString) : null;
+            HorizontalBeamWidth = _editedMode.HorizontalBeamWidth;
+            VerticalBeamWidth = _editedMode.VerticalBeamWidth;
+            DepressionElevationAngle = _editedMode.DepressionElevationAngle;
+            RelativeBeamAngle = _editedMode.RelativeBeamAngle;
+            MaxPropagationRadius = _editedMode.MaxPropagationRadius;
             ValidRadialCounts = new List<string> { "Auto", "4", "8", "16", "32", "64", "128" };
-            RadialCountString = _mode.RadialCount == 0 ? ValidRadialCounts[0] : _mode.RadialCount.ToString(CultureInfo.InvariantCulture);
+            RadialCountString = _editedMode.RadialCount == 0 ? ValidRadialCounts[0] : _editedMode.RadialCount.ToString(CultureInfo.InvariantCulture);
 
             AvailableTransmissionLossEngines.AddRange(from key in PluginManagerService[PluginType.TransmissionLossCalculator].Keys
                                                       select (TransmissionLossCalculatorPluginBase)PluginManagerService[PluginType.TransmissionLossCalculator][key].DefaultPlugin);
 
-            SelectedTransmissionLossEngine = _mode.GetTransmissionLossPlugin(PluginManagerService);
+            SelectedTransmissionLossEngine = _editedMode.GetTransmissionLossPlugin(PluginManagerService);
 
             _propertyObserver = new PropertyObserver<ModePropertiesViewModel>(this)
                 .RegisterHandler(p => p.SelectedTransmissionLossEngine, () => { });
-            WindowTitle = string.Format("Mode properties: {0}", _mode.ModeName);
+            WindowTitle = string.Format("Mode properties: {0}", _editedMode.ModeName);
             AddValidationRules(
                 new ValidationRule<ModePropertiesViewModel>
                 {
@@ -202,22 +204,23 @@ namespace ESME.Views.Scenarios
 
         void OkHandler(EventToCommandArgs args)
         {
-            _mode.ModeName = ModeName;
-            _mode.ModeType = ModeType;
-            _mode.Depth = Depth;
-            _mode.SourceLevel = SourceLevel;
-            _mode.LowFrequency = LowFrequency;
-            _mode.HighFrequency = HighFrequency;
-            _mode.PulseInterval = TimeSpan.ParseExact(PulseIntervalString, TimeSpanFormatString, null);
-            _mode.PulseLength = TimeSpan.ParseExact(PulseLengthString, TimeSpanFormatString, null);
-            _mode.HorizontalBeamWidth = HorizontalBeamWidth;
-            _mode.VerticalBeamWidth = VerticalBeamWidth;
-            _mode.DepressionElevationAngle = DepressionElevationAngle;
-            _mode.RelativeBeamAngle = RelativeBeamAngle;
-            _mode.MaxPropagationRadius = MaxPropagationRadius;
-            _mode.TransmissionLossPluginType = SelectedTransmissionLossEngine.PluginIdentifier.Type;
-            _mode.RadialCount = RadialCountString == "Auto" ? 0 : int.Parse(RadialCountString);
-            if (IsPSMView) MediatorMessage.Send(MediatorMessage.PSMModeChanged, _mode);
+            _editedMode.ModeName = ModeName;
+            _editedMode.ModeType = ModeType;
+            _editedMode.Depth = Depth;
+            _editedMode.SourceLevel = SourceLevel;
+            _editedMode.LowFrequency = LowFrequency;
+            _editedMode.HighFrequency = HighFrequency;
+            _editedMode.PulseInterval = TimeSpan.ParseExact(PulseIntervalString, TimeSpanFormatString, null);
+            _editedMode.PulseLength = TimeSpan.ParseExact(PulseLengthString, TimeSpanFormatString, null);
+            _editedMode.HorizontalBeamWidth = HorizontalBeamWidth;
+            _editedMode.VerticalBeamWidth = VerticalBeamWidth;
+            _editedMode.DepressionElevationAngle = DepressionElevationAngle;
+            _editedMode.RelativeBeamAngle = RelativeBeamAngle;
+            _editedMode.MaxPropagationRadius = MaxPropagationRadius;
+            _editedMode.TransmissionLossPluginType = SelectedTransmissionLossEngine.PluginIdentifier.Type;
+            _editedMode.RadialCount = RadialCountString == "Auto" ? 0 : int.Parse(RadialCountString);
+            if (!_originalMode.IsAcousticallyEquivalentTo(_editedMode) || _originalMode.TransmissionLossPluginType != _editedMode.TransmissionLossPluginType) _editedMode.TransmissionLosses.ForEach(tl => tl.Modes.Remove(_editedMode));
+            if (IsPSMView) MediatorMessage.Send(MediatorMessage.PSMModeChanged, _editedMode);
             else CloseActivePopUpCommand.Execute(true);
         }
         #endregion
