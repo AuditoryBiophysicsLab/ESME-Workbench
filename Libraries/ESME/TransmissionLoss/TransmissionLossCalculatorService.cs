@@ -31,6 +31,7 @@ namespace ESME.TransmissionLoss
             {
                 if (!radial.IsDeleted)
                 {
+#if false
                     var longestRadiusMode = (from mode in radial.TransmissionLoss.Modes
                                              orderby mode.MaxPropagationRadius descending
                                              select mode).FirstOrDefault();
@@ -42,6 +43,7 @@ namespace ESME.TransmissionLoss
                     }
                     else 
                         Debug.WriteLine("TransmissionLossCalculatorService: longestRadiusMode is null!");
+#endif
                     Calculate(radial);
                 }
                 WorkQueue.Remove(radial.Guid);
@@ -49,7 +51,7 @@ namespace ESME.TransmissionLoss
             }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
             _calculatorQueue = new BufferBlock<Radial>(new DataflowBlockOptions { BoundedCapacity = -1 });
             _calculatorQueue.LinkTo(_calculator);
-            _shadeFileProcessor = new ActionBlock<Radial>(r => { if (r.ExtractAxisData()) r.ReleaseAxisData(); },
+            _shadeFileProcessor = new ActionBlock<Radial>(r => { if (!r.IsDeleted && r.ExtractAxisData()) r.ReleaseAxisData(); },
                                                           new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
             _shadeFileProcessorQueue = new BufferBlock<Radial>(new DataflowBlockOptions { BoundedCapacity = -1 });
             _shadeFileProcessorQueue.LinkTo(_shadeFileProcessor);
@@ -213,7 +215,14 @@ namespace ESME.TransmissionLoss
                     var profilesAlongRadial = ProfilesAlongRadial(radial.Segment, 0.0, null, null, bottomProfile, soundSpeed[timePeriod].EnvironmentData, deepestProfile).ToList();
                     if (radial.IsDeleted) return;
                     radial.CalculationStarted = DateTime.Now;
-                    mode.GetTransmissionLossPlugin(PluginManagerService).CalculateTransmissionLoss(platform, mode, radial, bottomProfile, sedimentSample, windSample.Data, profilesAlongRadial);
+                    try
+                    {
+                        mode.GetTransmissionLossPlugin(PluginManagerService).CalculateTransmissionLoss(platform, mode, radial, bottomProfile, sedimentSample, windSample.Data, profilesAlongRadial);
+                    }
+                    catch (RadialDeletedByUserException)
+                    {
+                        radial.CleanupFiles();
+                    }
                     radial.CalculationCompleted = DateTime.Now;
                     radial.Length = mode.MaxPropagationRadius;
                     radial.IsCalculated = true;

@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Windows.Data;
 using ESME.Locations;
 using ESME.Mapping;
 using HRC.Aspects;
@@ -112,6 +114,7 @@ namespace ESME.Scenarios
         {
             if (Modes == null || Modes.Count == 0)
             {
+                Debug.WriteLine(string.Format("Deleting map layers for TL {0} at {1} because Modes is null or empty", Guid, (Geo)AnalysisPoint.Geo));
                 Delete();
                 return;
             }
@@ -122,22 +125,34 @@ namespace ESME.Scenarios
                 LayerSettings.IsChecked = false;
                 var mapLayer = new OverlayShapeMapLayer { Name = string.Format("{0}", Guid) };
                 mapLayer.Clear();
-                var geos = new List<Geo>();
                 var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
-                foreach (var radial in Radials)
+                Debug.WriteLine(string.Format("Creating map layers for TL {0} of radius {1} for mode [{2}] at {3}", Guid, maxPropagationRadius, Modes.First(), (Geo)AnalysisPoint.Geo));
+                var perimeterGeos = new List<Geo>();
+                var perimeterSegmentCount = Math.Max(Radials.Count, 32);
+                for (var perimeterSegmentIndex = 0; perimeterSegmentIndex < perimeterSegmentCount; perimeterSegmentIndex++) perimeterGeos.Add(((Geo)AnalysisPoint.Geo).Offset(Geo.KilometersToRadians(maxPropagationRadius / 1000), Geo.DegreesToRadians((360.0 / perimeterSegmentCount) * perimeterSegmentIndex)));
+                perimeterGeos.Add(perimeterGeos.First());
+                var radialGeos = new List<Geo>();
+                foreach (var radial in Radials.OrderBy(r => r.Bearing))
                 {
-                    geos.Add(AnalysisPoint.Geo);
-                    geos.Add(((Geo)AnalysisPoint.Geo).Offset(Geo.KilometersToRadians(maxPropagationRadius / 1000), Geo.DegreesToRadians(radial.Bearing)));
+                    radialGeos.Add(AnalysisPoint.Geo);
+                    var radialEndGeo = ((Geo)AnalysisPoint.Geo).Offset(Geo.KilometersToRadians(maxPropagationRadius / 1000), Geo.DegreesToRadians(radial.Bearing));
+                    radialGeos.Add(radialEndGeo);
                 }
-                geos.Add(AnalysisPoint.Geo);
-                mapLayer.AddLines(geos);
+                radialGeos.Add(AnalysisPoint.Geo);
+                mapLayer.AddLines(radialGeos);
+                mapLayer.AddPolygon(perimeterGeos);
                 mapLayer.Done();
                 LayerSettings.MapLayerViewModel = mapLayer;
                 if (AnalysisPoint.LayerSettings.IsChecked) LayerSettings.IsChecked = true;
             }
         }
 
-        public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
+        public void RemoveMapLayers()
+        {
+            var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
+            Debug.WriteLine(string.Format("Removing map layers for TL {0} of radius {1} for mode [{2}] at {3}", Guid, maxPropagationRadius, Modes.First(), (Geo)AnalysisPoint.Geo));
+            LayerSettings.MapLayerViewModel = null;
+        }
 
         public void Delete()
         {
@@ -190,5 +205,23 @@ namespace ESME.Scenarios
             }
             CreateMapLayers();
         }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            if (Modes == null || Modes.Count == 0) sb.AppendLine("(no modes)");
+            else sb.AppendLine("Mode: " + Modes.First());
+            if (Radials == null || Radials.Count == 0) sb.AppendLine("(no radials)");
+            else foreach (var radial in Radials.OrderBy(r => r.Bearing)) sb.AppendLine(radial.ToString());
+            return sb.ToString();
+        }
     }
+
+    [ValueConversion(typeof(TransmissionLoss), typeof(string))]
+    public class TransmissionLossGroupingConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) { return value.ToString(); }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) { throw new NotImplementedException(); }
+    }
+
 }

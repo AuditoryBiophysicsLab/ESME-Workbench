@@ -14,14 +14,18 @@
              Grid.IsSharedSizeScope="True"
              mc:Ignorable="d">
     <UserControl.Resources>
-        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed" FalseValue="Visible" TrueValue="Collapsed" />
+        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed"
+                                          FalseValue="Visible"
+                                          TrueValue="Collapsed" />
         <Style TargetType="{x:Type TextBox}">
             <Setter Property="MinWidth" Value="75" />
             <Setter Property="Validation.ErrorTemplate">
                 <Setter.Value>
                     <ControlTemplate>
                         <DockPanel LastChildFill="True">
-                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
+                            <Border BorderBrush="Red"
+                                    BorderThickness="1"
+                                    DockPanel.Dock="Left">
                                 <AdornedElementPlaceholder />
                             </Border>
                         </DockPanel>
@@ -39,7 +43,9 @@
                 <Setter.Value>
                     <ControlTemplate>
                         <DockPanel LastChildFill="True">
-                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
+                            <Border BorderBrush="Red"
+                                    BorderThickness="1"
+                                    DockPanel.Dock="Left">
                                 <AdornedElementPlaceholder />
                             </Border>
                         </DockPanel>
@@ -54,16 +60,23 @@
         </Style>
     </UserControl.Resources>
     <DockPanel Grid.IsSharedSizeScope="True" LastChildFill="True">
-        <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
+        <StackPanel HorizontalAlignment="Right"
+                    DockPanel.Dock="Bottom"
+                    Orientation="Horizontal">
             <Button Width="75"
                     Margin="5"
                     Command="{Binding OkCommand}"
                     Content="OK"
                     IsDefault="True"
                     IsEnabled="{Binding IsValid}" />
-            <Button Width="75" Margin="5" Command="{Binding CancelCommand}" Content="Cancel" />
+            <Button Width="75"
+                    Margin="5"
+                    Command="{Binding CancelCommand}"
+                    Content="Cancel" />
         </StackPanel>
-        <Border BorderThickness="0" DockPanel.Dock="Top" Padding="5">
+        <Border BorderThickness="0"
+                DockPanel.Dock="Top"
+                Padding="5">
             <StackPanel Orientation="Vertical">
                 <GroupBox Header="General properties">
                     <StackPanel Orientation="Vertical">
@@ -145,7 +158,9 @@
                                        Text="Number of radials"
                                        TextAlignment="Right"
                                        ToolTip="Number of radials to compute for this mode. 0=Auto" />
-                            <TextBox Grid.Column="1" Text="{Binding RadialCount, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding ValidRadialCounts}"
+                                      SelectedItem="{Binding RadialCountString}" />
                         </Grid>
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>
@@ -211,7 +226,10 @@
                                        Text="Acoustic simulator"
                                        TextAlignment="Right"
                                        ToolTip="The acoustic simulation engine that will be used to simulate the sound fields produced by this mode" />
-                            <ComboBox Grid.Column="1" DisplayMemberPath="PluginName" ItemsSource="{Binding AvailableTransmissionLossEngines}" SelectedItem="{Binding SelectedTransmissionLossEngine}" />
+                            <ComboBox Grid.Column="1"
+                                      DisplayMemberPath="PluginName"
+                                      ItemsSource="{Binding AvailableTransmissionLossEngines}"
+                                      SelectedItem="{Binding SelectedTransmissionLossEngine}" />
                         </Grid>
                     </StackPanel>
                 </GroupBox>

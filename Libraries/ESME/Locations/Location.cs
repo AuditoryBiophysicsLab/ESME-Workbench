@@ -33,6 +33,12 @@ namespace ESME.Locations
         SimpleCommand<object, EventToCommandArgs> MoveLayerToBackCommand { get; }
     }
 
+    public class GuidComparer<TGuid> : IEqualityComparer<TGuid> where TGuid : IHaveGuid
+    {
+        public bool Equals(TGuid x, TGuid y) { return x.Guid.Equals(y.Guid); }
+        public int GetHashCode(TGuid obj) { return obj.Guid.GetHashCode(); }
+    }
+
     public class Location : IHaveGuid, IHaveLayerSettings
     {
         public Location()

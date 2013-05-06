@@ -458,7 +458,8 @@ namespace ESMEWorkbench.ViewModels.Main
                 TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.Bellhop].DefaultPlugin.PluginIdentifier.Type,
             };
             source.Modes.Add(mode);
-            source.Platform.Scenario.Add(mode);
+            //source.Platform.Scenario.Add(mode);
+            source.Platform.Scenario.UpdateAnalysisPoints();
         }
 
         [MediatorMessageSink(MediatorMessage.ModeBoundToLayer), UsedImplicitly]
@@ -491,11 +492,10 @@ namespace ESMEWorkbench.ViewModels.Main
         void ModeProperties(Mode mode)
         {
             var vm = new ModePropertiesViewModel(mode);
-            _visualizer.ShowDialog("ModePropertiesWindowView", vm);
-            //_visualizer.ShowDialog("TreeViewItemPropertiesView", new ModePropertiesViewModel() { Mode = mode, });
+            var result = _visualizer.ShowDialog("ModePropertiesWindowView", vm);
+            if (!(result.HasValue && result.Value)) return;
             mode.LowFrequency = mode.HighFrequency;
-            if (vm.AcousticPropertiesHaveChanged) Scenario.NotifyAcousticsChanged(mode);
-            else if (vm.RadiusHasChanged) Scenario.NotifyRadiusChanged(mode);
+            Scenario.UpdateAnalysisPoints();
         }
         #endregion
 

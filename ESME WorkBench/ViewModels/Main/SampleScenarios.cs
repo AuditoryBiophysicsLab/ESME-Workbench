@@ -177,8 +177,11 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 progress.ProgressMessage = string.Format("Adding analysis point(s) to scenario \"{0}\"", scenarioDescriptor.ScenarioName);
                 scenario.ShowAllAnalysisPoints = true;
-                if (scenarioDescriptor.AnalysisPointGeos == null || scenarioDescriptor.AnalysisPointGeos.Count < 1) scenario.Add(new AnalysisPoint { Geo = new Geo(((GeoRect)location.GeoRect).Center) });
-                else foreach (var geo in scenarioDescriptor.AnalysisPointGeos) scenario.Add(new AnalysisPoint { Geo = new Geo(geo) });
+                //if (scenarioDescriptor.AnalysisPointGeos == null || scenarioDescriptor.AnalysisPointGeos.Count < 1) scenario.Add(new AnalysisPoint { Geo = new Geo(((GeoRect)location.GeoRect).Center) });
+                //else foreach (var geo in scenarioDescriptor.AnalysisPointGeos) scenario.Add(new AnalysisPoint { Geo = new Geo(geo) });
+                if (scenarioDescriptor.AnalysisPointGeos == null || scenarioDescriptor.AnalysisPointGeos.Count < 1) scenario.AnalysisPoints.Add(new AnalysisPoint { Geo = new Geo(((GeoRect)location.GeoRect).Center), Scenario = scenario });
+                else foreach (var geo in scenarioDescriptor.AnalysisPointGeos) scenario.AnalysisPoints.Add(new AnalysisPoint { Geo = new Geo(geo), Scenario = scenario });
+                scenario.UpdateAnalysisPoints();
                 progress.CurrentItem++;
             });
         }

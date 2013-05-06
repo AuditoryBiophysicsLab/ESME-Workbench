@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using ESME.Plugins;
 using ESME.Scenarios;
@@ -17,6 +18,7 @@ namespace ESME.Views.Scenarios
         const string TimeSpanFormatString = @"hh\:mm\:ss\.fff";
         public static IPluginManagerService PluginManagerService { get; set; }
         [UsedImplicitly] PropertyObserver<ModePropertiesViewModel> _propertyObserver;
+
         public ModePropertiesViewModel(Mode mode)
         {
             _mode = mode;
@@ -33,7 +35,8 @@ namespace ESME.Views.Scenarios
             DepressionElevationAngle = _mode.DepressionElevationAngle;
             RelativeBeamAngle = _mode.RelativeBeamAngle;
             MaxPropagationRadius = _mode.MaxPropagationRadius;
-            RadialCount = _mode.RadialCount;
+            ValidRadialCounts = new List<string> { "Auto", "4", "8", "16", "32", "64", "128" };
+            RadialCountString = _mode.RadialCount == 0 ? ValidRadialCounts[0] : _mode.RadialCount.ToString(CultureInfo.InvariantCulture);
 
             AvailableTransmissionLossEngines.AddRange(from key in PluginManagerService[PluginType.TransmissionLossCalculator].Keys
                                                       select (TransmissionLossCalculatorPluginBase)PluginManagerService[PluginType.TransmissionLossCalculator][key].DefaultPlugin);
@@ -176,21 +179,8 @@ namespace ESME.Views.Scenarios
         /// </summary>
         public float MaxPropagationRadius { get; set; }
 
-        public int RadialCount { get; set; }
-
-        public bool AcousticPropertiesHaveChanged { get; private set; }
-        bool HaveAcousticPropertiesChanged()
-        {
-            if (_mode.Depth.HasValue != Depth.HasValue) return true;
-            if (_mode.Depth.HasValue && Depth.HasValue && (_mode.Depth.Value != Depth.Value)) return true;
-            if (Math.Abs(VerticalBeamWidth - _mode.VerticalBeamWidth) > 0.1) return true;
-            if (Math.Abs(DepressionElevationAngle - _mode.DepressionElevationAngle) > 0.1) return true;
-            if (Math.Abs(HighFrequency - _mode.HighFrequency) > 0.1) return true;
-            if (_mode.TransmissionLossPluginType != SelectedTransmissionLossEngine.PluginIdentifier.Type) return true;
-            if (_mode.RadialCount != RadialCount) return true;
-            return Math.Abs(LowFrequency - _mode.LowFrequency) > 0.1;
-        }
-        public bool RadiusHasChanged { get; private set; }
+        public string RadialCountString { get; set; }
+        public List<string> ValidRadialCounts { get; private set; }
 
         public bool IsPSMView { get; set; }
 
@@ -212,12 +202,6 @@ namespace ESME.Views.Scenarios
 
         void OkHandler(EventToCommandArgs args)
         {
-            //var parameter = args.CommandParameter; 
-
-
-            //var parameter = args.CommandParameter;
-            AcousticPropertiesHaveChanged = HaveAcousticPropertiesChanged();
-            RadiusHasChanged = Math.Abs(MaxPropagationRadius - _mode.MaxPropagationRadius) > 0.1;
             _mode.ModeName = ModeName;
             _mode.ModeType = ModeType;
             _mode.Depth = Depth;
@@ -232,7 +216,7 @@ namespace ESME.Views.Scenarios
             _mode.RelativeBeamAngle = RelativeBeamAngle;
             _mode.MaxPropagationRadius = MaxPropagationRadius;
             _mode.TransmissionLossPluginType = SelectedTransmissionLossEngine.PluginIdentifier.Type;
-            _mode.RadialCount = RadialCount;
+            _mode.RadialCount = RadialCountString == "Auto" ? 0 : int.Parse(RadialCountString);
             if (IsPSMView) MediatorMessage.Send(MediatorMessage.PSMModeChanged, _mode);
             else CloseActivePopUpCommand.Execute(true);
         }

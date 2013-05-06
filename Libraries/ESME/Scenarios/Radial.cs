@@ -123,10 +123,36 @@ namespace ESME.Scenarios
         {
             if (IsDeleted) return;
             IsDeleted = true;
-            var files = Directory.GetFiles(Path.GetDirectoryName(BasePath), Path.GetFileNameWithoutExtension(BasePath) + ".*");
-            foreach (var file in files) File.Delete(file);
+            ((INotifyPropertyChanged)this).PropertyChanged -= PropertyChangedHandler;
+            CleanupFiles();
             TransmissionLoss.Radials.Remove(this);
             Scenario.Database.Context.Radials.Remove(this);
+        }
+
+        public void CleanupFiles()
+        {
+            var files = Directory.GetFiles(Path.GetDirectoryName(BasePath), Path.GetFileNameWithoutExtension(BasePath) + ".*");
+            foreach (var file in files) FileDeleteWithRetry(file);
+        }
+
+        static readonly TimeSpan FileDeleteDelayTime = new TimeSpan(0, 0, 0, 0, 50);
+        static async void FileDeleteWithRetry(string fileName, int retryCount = 20)
+        {
+            while (retryCount > 0)
+            {
+                var deleteFailed = false;
+                try
+                {
+                    File.Delete(fileName);
+                }
+                catch (IOException)
+                {
+                    deleteFailed = true;
+                }
+                if (!deleteFailed) break;
+                await TaskEx.Delay(FileDeleteDelayTime);
+                retryCount--;
+            }
         }
 
         [NotMapped] public BottomProfilePoint[] BottomProfile { get { return _bottomProfile ?? (_bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty")); } }
@@ -234,7 +260,7 @@ namespace ESME.Scenarios
             }
             catch (EndOfStreamException)
             {
-                File.Delete(BasePath + ".shd");
+                FileDeleteWithRetry(BasePath + ".shd");
                 TransmissionLossCalculator.Add(this);
                 return false;
             }
@@ -254,7 +280,7 @@ namespace ESME.Scenarios
                                         let desiredRange = Math.Abs((profilePoint.Range * 1000) - curRange)
                                         orderby desiredRange
                                         select profilePoint.Depth).Take(2).Min();
-                if (depthAtThisRange < _depths[0])
+                if (depthAtThisRange <= _depths[0])
                 {
                     MinimumTransmissionLossValues[rangeIndex] = float.NaN;
                     MaximumTransmissionLossValues[rangeIndex] = float.NaN;
@@ -345,8 +371,10 @@ namespace ESME.Scenarios
             _depths = _ranges = null;
             _minimumTransmissionLossValues = _maximumTransmissionLossValues = _meanTransmissionLossValues = null;
             var files = Directory.GetFiles(Path.GetDirectoryName(BasePath), Path.GetFileNameWithoutExtension(BasePath) + ".*");
-            foreach (var file in files) File.Delete(file);
+            foreach (var file in files) FileDeleteWithRetry(file);
             TransmissionLossCalculator.Add(this);
         }
+
+        public override string ToString() { return string.Format("Bearing: {0:0.#}deg | Length: {1:0.#}m", Bearing, Length); }
     }
 }

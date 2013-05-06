@@ -107,6 +107,9 @@ namespace ESME.Scenarios
         /// </summary>
         public string TransmissionLossPluginType { get; set; }
 
+        /// <summary>
+        /// The number of radials to be calculated for this mode. 0 = default
+        /// </summary>
         public int RadialCount { get; set; }
 
         public virtual Source Source { get; set; }
@@ -311,7 +314,7 @@ namespace ESME.Scenarios
         {
             var depth = Source.Platform.Depth;
             if (Depth.HasValue) depth += Depth.Value;
-            return string.Format("HiFreq: {0}Hz | LoFreq: {1}Hz | Depth: {2}m | VBW: {3}deg | D/E: {4}deg | Plugin: {5}", HighFrequency, LowFrequency, depth, VerticalBeamWidth, DepressionElevationAngle, TransmissionLossPluginType);
+            return string.Format("HiFreq: {0:0.#}Hz | LoFreq: {1:0.#}Hz | Depth: {2:0.###}m | VBW: {3:0.#}deg | D/E: {4:0.#}deg | Plugin: {5}", HighFrequency, LowFrequency, depth, VerticalBeamWidth, DepressionElevationAngle, TransmissionLossPluginType.Replace("StandardTransmissionLossEngines.", "").Replace("Engine", ""));
         }
     }
 

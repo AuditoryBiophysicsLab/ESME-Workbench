@@ -445,8 +445,9 @@ namespace ESMEWorkbench.ViewModels.Main
                 {
                     TaskEx.Run(() =>
                     {
-                        var analysisPoint = new AnalysisPoint { Geo = new Geo(geo) };
-                        Scenario.Add(analysisPoint);
+                        var analysisPoint = new AnalysisPoint { Geo = new Geo(geo), Scenario = Scenario };
+                        Scenario.AnalysisPoints.Add(analysisPoint);
+                        Scenario.UpdateAnalysisPoints();
                         analysisPoint.CheckForErrors();
                         var analysisPointsNode = (AnalysisPointsNode)LayerTreeViewModel.RootNodes.FirstOrDefault(n => n.GetType() == typeof(AnalysisPointsNode));
                         if (analysisPointsNode != null) analysisPointsNode.CheckForErrors();
