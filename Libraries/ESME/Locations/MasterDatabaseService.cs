@@ -152,7 +152,7 @@ namespace ESME.Locations
                 Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, "locations"));
                 Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, "scenarios"));
             }
-            System.Data.Entity.Database.DefaultConnectionFactory = new SqlCeConnectionFactory("System.Data.SqlServerCe.4.0");
+            //System.Data.Entity.Database.DefaultConnectionFactory = new SqlCeConnectionFactory("System.Data.SqlServerCe.4.0");
             System.Data.Entity.Database.SetInitializer(new Initializer());
             var connection = System.Data.Entity.Database.DefaultConnectionFactory.CreateConnection(Path.Combine(MasterDatabaseDirectory, "esme.db"));
             Context = new LocationContext(connection, true);

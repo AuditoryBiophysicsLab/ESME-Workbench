@@ -434,7 +434,7 @@ namespace ESME.Scenarios
                     if (sourceDepth >= depthAtAnalysisPoint)
                     {
                         Debug.WriteLine(string.Format("Skipping TL mode [{0}:{1}] at {2} because depth is too shallow ", firstMode.ModeName, firstMode.MaxPropagationRadius, (Geo)analysisPoint.Geo));
-                        return;
+                        continue;
                     }
                     // The depth check is OK, so create a new TransmissionLoss
                     Debug.WriteLine(string.Format("Creating new TL for mode [{0}:{1}] at {2}", firstMode.ModeName, firstMode.MaxPropagationRadius, (Geo)analysisPoint.Geo));
@@ -466,7 +466,7 @@ namespace ESME.Scenarios
         /// recalculate the TransmissionLoss
         /// </summary>
         /// <param name="transmissionLoss"></param>
-        public static void Update(this TransmissionLoss transmissionLoss)
+        static void Update(this TransmissionLoss transmissionLoss)
         {
             if (transmissionLoss.Modes == null || transmissionLoss.Modes.Count == 0)
             {
