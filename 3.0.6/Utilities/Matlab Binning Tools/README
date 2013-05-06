@@ -1,0 +1,37 @@
+ESME Workbench 2012 - MATLAB log file interface
+
+The MATLAB log file interface has three primary functions that offer 
+different levels of granularity for data access.
+
+1.  logread : this function, given the path to a simulation log, returns a 
+    struct containing ALL the data present in a given simulation *.log
+    file. Since this data is cached in memory, this may not be an option 
+    for very large simulations.
+
+For long simulations, or fine-grained access, two other functions are
+provided: 
+
+2.  readLogFileHeader: given the path to a simulation log, this returns a 
+    small struct containing the metadata present in the log file.  Most 
+    importantly, this includes: a list of byte offset addresses for the
+    results of the simulation at each time step; a list of ID keys for each
+    platform, mode, and animat in the simulation; and the duration and size
+    of each simulation time step. 
+
+using (2), individual time step results can be accessed with fread() and 
+
+3.  readTimeStepRecord: given a file handle and a byte offset obtained from
+    (2), this returns a struct containing a given time step's time, the 
+    position of every platform and animat in the scenario at that time
+    step, and a list of all animats that were exposed to sound at that time
+    step along with the ID of the mode that exposed them, the sound level, 
+    and the total energy accumulated at that time step.
+
+From these three functions, a complete reconstruction of the simulation may
+be made, and any number of types of post-processing may be performed. 
+
+For demonstration and basic purposes, PlotSpeciesModeHistograms.m performs
+one example of this.  Operating on a .xml file generated simultaneously
+with the simulation log, it plots a histogram of sound exposures for each
+species, binned into ten 10 dB bins and separated by contributing mode.
+    

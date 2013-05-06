@@ -1,0 +1,95 @@
+﻿<Application x:Class="ESMEWorkbench.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
+             xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
+             Exit="ApplicationExit"
+             StartupUri="Views/MainView.xaml">
+    <Application.Resources>
+        <!--  Resources scoped at the Application level should be defined here.  -->
+        <!--
+            <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary Source="Themes/WhistlerBlue.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            </ResourceDictionary>
+        -->
+        <Style x:Key="DataAvailabilityStyle" TargetType="TextBlock">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding}" Value="NotLoaded">
+                    <Setter Property="Foreground" Value="Black" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="Loading">
+                    <Setter Property="Foreground" Value="Orange" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding}" Value="Available">
+                    <Setter Property="Foreground" Value="Green" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ContextMenuItemStyle">
+            <Setter Property="MenuItem.Header" Value="{Binding Header}" />
+            <Setter Property="MenuItem.ItemsSource" Value="{Binding Children}" />
+            <Setter Property="MenuItem.Command" Value="{Binding Command}" />
+            <Setter Property="MenuItem.CommandParameter" Value="{Binding CommandParameter}" />
+            <Setter Property="MenuItem.Icon" Value="{Binding Icon}" />
+            <Setter Property="MenuItem.IsChecked" Value="{Binding IsChecked}" />
+            <Setter Property="MenuItem.IsCheckable" Value="{Binding IsCheckable}" />
+        </Style>
+        <Style x:Key="ValidatingTextBoxStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <DockPanel>
+                            <Border BorderBrush="Red" BorderThickness="1">
+                                <AdornedElementPlaceholder />
+                            </Border>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ValidatingFileOrDirectorySettingStyle" TargetType="{x:Type Controls:FileOrDirectorySetting}">
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <DockPanel>
+                            <Border BorderBrush="Red" BorderThickness="1">
+                                <AdornedElementPlaceholder />
+                            </Border>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <hrc:BooleanNegatingConverter x:Key="NegatingConverter" />
+        <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed"
+                                          FalseValue="Collapsed"
+                                          TrueValue="Visible" />
+        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed"
+                                          FalseValue="Visible"
+                                          TrueValue="Collapsed" />
+        <hrc:BooleanToVisibilityConverter x:Key="FalseHiddenTrueCollapsed"
+                                          FalseValue="Hidden"
+                                          TrueValue="Collapsed" />
+        <ResourceDictionary x:Key="ControlTemplates">
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="ControlTemplates\Shared.xaml" />
+                <ResourceDictionary Source="ControlTemplates\ProgressBar.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+    <JumpList.JumpList>
+        <JumpList ShowFrequentCategory="True" ShowRecentCategory="True" />
+    </JumpList.JumpList>
+</Application>
