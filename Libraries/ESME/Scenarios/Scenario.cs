@@ -455,6 +455,7 @@ namespace ESME.Scenarios
                 unmatchedModeGroups.AddRange(matchedModeGroups);
                 // Clear the matched mode group list for the next iteration
                 matchedModeGroups.Clear();
+                Dispatcher.InvokeIfRequired(analysisPoint.CreateMapLayers);
             }
         }
 
