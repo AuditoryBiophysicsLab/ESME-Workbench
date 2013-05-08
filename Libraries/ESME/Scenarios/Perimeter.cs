@@ -47,16 +47,13 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _editPerimeter;
         #endregion
 
-        public void CreateMapLayers()
+        public void UpdateMapLayers()
         {
             if (IsDeleted) return;
             if (LayerSettings.MapLayerViewModel != null) return;
-            var mapLayer = new OverlayShapeMapLayer
-            {
-                Name = string.Format("{0}", Guid),
-                LineColor = LayerSettings.LineOrSymbolColor,
-                LineWidth = (float)LayerSettings.LineOrSymbolSize,
-            };
+            var mapLayer = (LayerSettings.MapLayerViewModel != null) ? (OverlayShapeMapLayer)LayerSettings.MapLayerViewModel : new OverlayShapeMapLayer { Name = string.Format("{0}", Guid) };
+            mapLayer.LineColor = LayerSettings.LineOrSymbolColor;
+            mapLayer.LineWidth = (float)LayerSettings.LineOrSymbolSize;
             var geos = (from p in PerimeterCoordinates
                         orderby p.Order
                         select (Geo)p.Geo).ToList();

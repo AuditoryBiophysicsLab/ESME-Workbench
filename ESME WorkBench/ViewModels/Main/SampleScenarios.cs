@@ -22,7 +22,7 @@ namespace ESMEWorkbench.ViewModels.Main
             var soundSpeed = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed];
             var bathymetry = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry];
             var sediment = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment];
-            foreach (var locations in Database.Context.Locations.Local) locations.CreateMapLayers();
+            foreach (var locations in Database.Context.Locations.Local) locations.UpdateMapLayers();
             if (wind == null || soundSpeed == null || bathymetry == null || sediment == null) return;
             var result = _visualizer.ShowDialog("FirstRunQuestionView", new FirstRunQuestionViewModel { MessageBoxService = _messageBox });
             if (!result.HasValue || !result.Value) return;
@@ -120,7 +120,7 @@ namespace ESMEWorkbench.ViewModels.Main
             progress.CurrentItem++;
             await TaskEx.Delay(10);
             var location = CreateLocation(scenarioDescriptor.LocationName, "Created as a sample location", scenarioDescriptor.GeoRect);
-            location.CreateMapLayers();
+            location.UpdateMapLayers();
             progress.ProgressMessage = string.Format("Creating sample scenario \"{0}\"", scenarioDescriptor.ScenarioName);
             progress.CurrentItem++;
             await TaskEx.Delay(10);
@@ -193,7 +193,7 @@ namespace ESMEWorkbench.ViewModels.Main
             progress.CurrentItem++;
             await TaskEx.Delay(10);
             var location = CreateLocation(scenarioDescriptor.LocationName, "Created as a sample location", scenarioDescriptor.GeoRect);
-            location.CreateMapLayers();
+            location.UpdateMapLayers();
             progress.ProgressMessage = string.Format("Creating sample scenario \"{0}\"", scenarioDescriptor.ScenarioName);
             progress.CurrentItem++;
             await TaskEx.Delay(10);

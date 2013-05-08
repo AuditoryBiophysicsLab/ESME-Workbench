@@ -53,13 +53,13 @@ namespace ESMEWorkbench.ViewModels.Main
                     LayerTreeViewModel.Scenario = _scenario;
                     if (_scenario == null) return;
                     _scenario.PropertyChanged += ScenarioPropertyChangedMonitor;
-                    _scenario.CreateMapLayers();
+                    _scenario.UpdateMapLayers();
                     _cache[_scenario.Wind].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
                         if (_scenario.Wind.SampleCount == 0) _messageBox.ShowError(string.Format("No wind data was found in this location using source {0}", _plugins[_scenario.Wind.SourcePlugin].PluginName));
                         else
                         {
-                            _scenario.Wind.CreateMapLayers();
+                            _scenario.Wind.UpdateMapLayers();
                             _scenario.Wind.LayerSettings.MoveLayerToBack();
                         }
                     }));
@@ -68,7 +68,7 @@ namespace ESMEWorkbench.ViewModels.Main
                         if (_scenario.SoundSpeed.SampleCount == 0) _messageBox.ShowError(string.Format("No sound speed data was found in this location using source {0}", _plugins[_scenario.SoundSpeed.SourcePlugin].PluginName));
                         else
                         {
-                            _scenario.SoundSpeed.CreateMapLayers();
+                            _scenario.SoundSpeed.UpdateMapLayers();
                             _scenario.SoundSpeed.LayerSettings.MoveLayerToBack();
                         }
                     }));
@@ -77,7 +77,7 @@ namespace ESMEWorkbench.ViewModels.Main
                         if (_scenario.Bathymetry.SampleCount == 0) _messageBox.ShowError(string.Format("No bathymetry data was found in this location using source {0}", _plugins[_scenario.Bathymetry.SourcePlugin].PluginName));
                         else
                         {
-                            _scenario.Bathymetry.CreateMapLayers();
+                            _scenario.Bathymetry.UpdateMapLayers();
                             _scenario.Bathymetry.LayerSettings.MoveLayerToBack();
                         }
                     }));
@@ -86,7 +86,7 @@ namespace ESMEWorkbench.ViewModels.Main
                         if (_scenario.Sediment.SampleCount == 0) _messageBox.ShowError(string.Format("No sediment data was found in this location using source {0}", _plugins[_scenario.Sediment.SourcePlugin].PluginName));
                         else
                         {
-                            _scenario.Sediment.CreateMapLayers();
+                            _scenario.Sediment.UpdateMapLayers();
                             _scenario.Sediment.LayerSettings.MoveLayerToBack();
                         }
                     }));
@@ -311,7 +311,7 @@ namespace ESMEWorkbench.ViewModels.Main
             _dispatcher.InvokeInBackgroundIfRequired(() =>
             {
                 transmissionLoss.RemoveMapLayers();
-                if (!transmissionLoss.IsDeleted) transmissionLoss.CreateMapLayers();
+                if (!transmissionLoss.IsDeleted) transmissionLoss.UpdateMapLayers();
             });
         }
         #endregion
@@ -335,14 +335,14 @@ namespace ESMEWorkbench.ViewModels.Main
                 IsNew = true,
             };
             scenario.Platforms.Add(platform);
-            platform.CreateMapLayers();
+            platform.UpdateMapLayers();
             OnPropertyChanged("CanPlaceAnalysisPoint");
         }
 
         static void AddPlatform(Scenario scenario, Platform platform)
         {
             scenario.Platforms.Add(platform);
-            platform.CreateMapLayers();
+            platform.UpdateMapLayers();
         }
 
         [MediatorMessageSink(MediatorMessage.PlatformBoundToLayer), UsedImplicitly]
@@ -528,7 +528,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 species.LayerSettings.LineOrSymbolSize = 3;
                 var animats = await Animat.SeedAsync(species, scenario.Location.GeoRect, scenario.BathymetryData);
                 animats.Save(species.PopulationFilePath);
-                species.CreateMapLayers();
+                species.UpdateMapLayers();
             }
             catch (Exception e)
             {
@@ -575,7 +575,7 @@ namespace ESMEWorkbench.ViewModels.Main
             species.RemoveMapLayers();
             species.Animat = await Animat.SeedAsync(species, species.Scenario.Location.GeoRect, species.Scenario.BathymetryData);
             species.Animat.Save(species.PopulationFilePath);
-            species.CreateMapLayers();
+            species.UpdateMapLayers();
         }
 
         [MediatorMessageSink(MediatorMessage.SpeciesProperties), UsedImplicitly]
@@ -624,7 +624,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                            perimeter.Name = vm.PerimeterName;
                                            perimeter.Scenario = Scenario;
                                            Scenario.Perimeters.Add(perimeter);
-                                           perimeter.CreateMapLayers();
+                                           perimeter.UpdateMapLayers();
                                            perimeter.LayerSettings.IsChecked = true;
                                        });
             }
@@ -661,8 +661,8 @@ namespace ESMEWorkbench.ViewModels.Main
                                                perimeter.SetPerimeterCoordinates(MapViewModel.EditablePolygonOverlayViewModel.GeoArray);
                                                perimeter.Name = vm.PerimeterName;
                                            }
-                                           perimeter.CreateMapLayers();
-                                           foreach (var platform in Scenario.Platforms.Where(platform => (platform.Perimeter!=null && platform.Perimeter.Guid == perimeter.Guid))) platform.CreateMapLayers();
+                                           perimeter.UpdateMapLayers();
+                                           foreach (var platform in Scenario.Platforms.Where(platform => (platform.Perimeter!=null && platform.Perimeter.Guid == perimeter.Guid))) platform.UpdateMapLayers();
                                        });
             }
             catch (Exception e) { _messageBox.ShowError(e.Message); }

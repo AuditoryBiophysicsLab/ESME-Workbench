@@ -80,7 +80,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 LayerSettings = { IsChecked = true, LineOrSymbolSize = 5 }
             };
             Database.Context.Locations.Local.Add(location);
-            location.CreateMapLayers();
+            location.UpdateMapLayers();
             return location;
         }
         #endregion

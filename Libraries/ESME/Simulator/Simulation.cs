@@ -123,7 +123,7 @@ namespace ESME.Simulator
                 Dispatcher.InvokeIfRequired(() =>
                                             {
                                                 curPlatform.RemoveMapLayers();
-                                                curPlatform.CreateMapLayers();
+                                                curPlatform.UpdateMapLayers();
                                                 var mapLayers = CreateFootprintMapLayers(curPlatform, behaviors[0]).ToArray();
                                                 _modeFootprintMapLayers.Add(mapLayers);
                                                 foreach (var layer in mapLayers)

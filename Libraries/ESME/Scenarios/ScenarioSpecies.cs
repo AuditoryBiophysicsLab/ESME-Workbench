@@ -134,39 +134,22 @@ namespace ESME.Scenarios
         #endregion
 
         protected static readonly Random Random = new Random();
-        public void CreateMapLayers()
+        public void UpdateMapLayers()
         {
             if (IsDeleted) return;
-            var pointLayer = new OverlayShapeMapLayer
-            {
-                Name = string.Format("{0}", Guid),
-                PointSymbolType = (PointSymbolType)(Random.Next(8)),
-            };
-            while (pointLayer.PointSymbolType == PointSymbolType.Cross) pointLayer.PointSymbolType = (PointSymbolType)(Random.Next(8));
-            pointLayer.PointStyle = MapLayerViewModel.CreatePointStyle(pointLayer.PointSymbolType, LayerSettings.LineOrSymbolColor, (int)LayerSettings.LineOrSymbolSize);
-            pointLayer.Clear();
+            var mapLayer = (LayerSettings.MapLayerViewModel != null) ? (OverlayShapeMapLayer)LayerSettings.MapLayerViewModel : new OverlayShapeMapLayer { Name = string.Format("{0}", Guid) };
+            mapLayer.PointSymbolType = (PointSymbolType)(Random.Next(8));
+            while (mapLayer.PointSymbolType == PointSymbolType.Cross) mapLayer.PointSymbolType = (PointSymbolType)(Random.Next(8));
+            mapLayer.PointStyle = MapLayerViewModel.CreatePointStyle(mapLayer.PointSymbolType, LayerSettings.LineOrSymbolColor, (int)LayerSettings.LineOrSymbolSize);
+            mapLayer.Clear();
             var seededAnimats = Animat.Locations.Select(l => new Geo(l.Latitude, l.Longitude)).ToList();
             if (seededAnimats.Count == 0) throw new SpeciesSeedingException(string.Format("No individuals of the species '{0}' were successfully placed in the scenario, possibly due to water depth or other restrictions in the species file.  Please try another species.", LatinName));
-            pointLayer.AddPoints(seededAnimats);
-            pointLayer.Done();
-            LayerSettings.MapLayerViewModel = pointLayer;
+            mapLayer.AddPoints(seededAnimats);
+            mapLayer.Done();
+            LayerSettings.MapLayerViewModel = mapLayer;
             if (Scenario.ShowAllSpecies) LayerSettings.IsChecked = true;
         }
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }
-
-        public void UpdateMapLayers()
-        {
-            if (LayerSettings == null || LayerSettings.MapLayerViewModel == null)
-            {
-                CreateMapLayers();
-                return;
-            }
-            var pointLayer = (OverlayShapeMapLayer)LayerSettings.MapLayerViewModel;
-            pointLayer.Clear();
-            pointLayer.AddPoints(Animat.Locations.Select(l => new Geo(l.Latitude, l.Longitude)).ToList());
-            pointLayer.Done();
-            LayerSettings.RefreshMapLayer();
-        }
 
         public void Delete()
         {

@@ -24,7 +24,7 @@ namespace ESME.Locations
     public interface IHaveLayerSettings
     {
         LayerSettings LayerSettings { get; set; }
-        void CreateMapLayers();
+        void UpdateMapLayers();
         void RemoveMapLayers();
         bool IsDeleted { get; }
         SimpleCommand<object, EventToCommandArgs> MoveLayerToFrontCommand { get; }
@@ -108,13 +108,10 @@ namespace ESME.Locations
         #endregion
         #endregion
 
-        public void CreateMapLayers()
+        public void UpdateMapLayers()
         {
-            foreach (var dataSet in EnvironmentalDataSets) dataSet.CreateMapLayers();
-            var mapLayer = new OverlayShapeMapLayer
-            {
-                Name = string.Format("{0}", Guid),
-            };
+            foreach (var dataSet in EnvironmentalDataSets) dataSet.UpdateMapLayers();
+            var mapLayer = (LayerSettings.MapLayerViewModel != null) ? (OverlayShapeMapLayer)LayerSettings.MapLayerViewModel : new OverlayShapeMapLayer { Name = string.Format("{0}", Guid) };
             var geoRect = (GeoRect)GeoRect;
             mapLayer.AddPolygon(new List<Geo> { geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest });
             mapLayer.Done();

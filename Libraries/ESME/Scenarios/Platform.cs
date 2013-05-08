@@ -223,41 +223,17 @@ namespace ESME.Scenarios
         {
             RemoveMapLayers();
             PlatformBehavior = null;
-            CreateMapLayers();
+            UpdateMapLayers();
         }
 
         #region Map Layer methods
 
-        public void CreateMapLayers()
+        public void UpdateMapLayers()
         {
             if (Scenario == null || LayerSettings == null) return;
             if (!Scenario.IsLoaded) return;
-            var mapLayer = new OverlayShapeMapLayer
-            {
-                Name = string.Format("{0}", Guid),
-#if true
-                CustomLineStyleFunc = m => new CustomStartEndLineStyle("Wingdings",
-                                                                       0x6C,
-                                                                       Colors.Green,
-                                                                       m.LineWidth + 8,
-                                                                       "Wingdings",
-                                                                       0x6E,
-                                                                       Colors.Red,
-                                                                       m.LineWidth + 8,
-                                                                       m.LineColor,
-                                                                       m.LineWidth),
-#else
-		                CustomLineStyleFunc = m => new CustomStartEndLineStyle(PointSymbolType.Circle,
-                                                                       Colors.Green,
-                                                                       (int)Math.Round(m.LineWidth + 5),
-                                                                       PointSymbolType.Square,
-                                                                       Colors.Red,
-                                                                       (int)Math.Round(m.LineWidth + 5),
-                                                                       m.LineColor,
-                                                                       m.LineWidth),
-  
-#endif
-            };
+            var mapLayer = (LayerSettings.MapLayerViewModel != null) ? (OverlayShapeMapLayer)LayerSettings.MapLayerViewModel : new OverlayShapeMapLayer { Name = string.Format("{0}", Guid) };
+            mapLayer.CustomLineStyleFunc = m => new CustomStartEndLineStyle("Wingdings", 0x6C, Colors.Green, m.LineWidth + 8, "Wingdings", 0x6E, Colors.Red, m.LineWidth + 8, m.LineColor, m.LineWidth);
             List<Geo> locations;
             try
             {

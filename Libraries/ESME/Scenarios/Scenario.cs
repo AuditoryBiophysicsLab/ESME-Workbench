@@ -188,7 +188,7 @@ namespace ESME.Scenarios
             switch (args.PropertyName)
             {
                 case "IsLoaded":
-                    if (IsLoaded) CreateMapLayers();
+                    if (IsLoaded) UpdateMapLayers();
                     else RemoveMapLayers();
                     break;
             }
@@ -253,12 +253,12 @@ namespace ESME.Scenarios
         object _layerControl;
 
 
-        public void CreateMapLayers()
+        public void UpdateMapLayers()
         {
-            if (Platforms != null) foreach (var platform in Platforms) platform.CreateMapLayers();
-            foreach (var analysisPoint in AnalysisPoints.ToList()) analysisPoint.CreateMapLayers();
-            foreach (var species in ScenarioSpecies.ToList()) species.CreateMapLayers();
-            foreach (var perimeter in Perimeters.ToList()) perimeter.CreateMapLayers();
+            if (Platforms != null) foreach (var platform in Platforms) platform.UpdateMapLayers();
+            foreach (var analysisPoint in AnalysisPoints.ToList()) analysisPoint.UpdateMapLayers();
+            foreach (var species in ScenarioSpecies.ToList()) species.UpdateMapLayers();
+            foreach (var perimeter in Perimeters.ToList()) perimeter.UpdateMapLayers();
         }
 
         public void RemoveMapLayers()
@@ -455,7 +455,7 @@ namespace ESME.Scenarios
                 unmatchedModeGroups.AddRange(matchedModeGroups);
                 // Clear the matched mode group list for the next iteration
                 matchedModeGroups.Clear();
-                Dispatcher.InvokeIfRequired(analysisPoint.CreateMapLayers);
+                Dispatcher.InvokeIfRequired(analysisPoint.UpdateMapLayers);
             }
         }
 
@@ -489,7 +489,7 @@ namespace ESME.Scenarios
             if (transmissionLoss.Radials != null && transmissionLoss.Radials.Count == modeRadialCount && transmissionLoss.Radials.All(radial => radial.Length >= modeMaxRadius))
             {
                 // Redraw the map layers to display the new TransmissionLoss as it should be
-                Dispatcher.InvokeIfRequired(transmissionLoss.CreateMapLayers);
+                Dispatcher.InvokeIfRequired(transmissionLoss.UpdateMapLayers);
                 return;
             }
 
@@ -539,7 +539,7 @@ namespace ESME.Scenarios
             //  Debug.WriteLine(string.Format("Deleting now-unused radial [{0}] from mode [{1}] at {2}", r.ToString(), transmissionLoss.Modes.First(), (Geo)transmissionLoss.AnalysisPoint.Geo));
             transmissionLoss.Radials.FindAll(r => !requiredBearings.Contains(r.Bearing)).ForEach(r => r.Delete());
             // Redraw the map layers to display the new TransmissionLoss as it should be
-            Dispatcher.InvokeIfRequired(transmissionLoss.CreateMapLayers);
+            Dispatcher.InvokeIfRequired(transmissionLoss.UpdateMapLayers);
         }
 
         private static ListCollectionView GroupEquivalentModes(this Scenario scenario)

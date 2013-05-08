@@ -109,8 +109,8 @@ namespace ESME.Scenarios
             return closestRadial;
         }
 
-        volatile object _createMapLayerLock = new object();
-        public void CreateMapLayers()
+        volatile object _updateMapLayerLock = new object();
+        public void UpdateMapLayers()
         {
             if (Modes == null || Modes.Count == 0)
             {
@@ -119,7 +119,7 @@ namespace ESME.Scenarios
                 return;
             }
             if (IsDeleted) return;
-            lock (_createMapLayerLock)
+            lock (_updateMapLayerLock)
             {
                 if (IsDeleted) return;
                 LayerSettings.IsChecked = false;
@@ -160,7 +160,7 @@ namespace ESME.Scenarios
         public void Delete()
         {
             if (IsDeleted) return;
-            lock (_createMapLayerLock)
+            lock (_updateMapLayerLock)
             {
                 if (IsDeleted) return;
                 IsDeleted = true;
@@ -206,7 +206,7 @@ namespace ESME.Scenarios
                 radial.Recalculate();
                 Debug.WriteLine(string.Format("Recalculating radial at bearing {0} with radius of {1}", radial.Bearing, radial.Length));
             }
-            CreateMapLayers();
+            UpdateMapLayers();
         }
 
         public override string ToString()

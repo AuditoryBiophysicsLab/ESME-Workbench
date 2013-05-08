@@ -106,12 +106,12 @@ namespace ESME.Scenarios
 
         [NotMapped] public bool IsDeleted { get; set; }
 
-        public void CreateMapLayers()
+        public void UpdateMapLayers()
         {
             if (IsDeleted) return;
             if (Scenario.ShowAllAnalysisPoints) LayerSettings.IsChecked = true;
             LayerSettings.PropertyChanged += LayerSettingsChanged;
-            foreach (var transmissionLoss in TransmissionLosses.ToList()) transmissionLoss.CreateMapLayers();
+            foreach (var transmissionLoss in TransmissionLosses.ToList()) transmissionLoss.UpdateMapLayers();
         }
 
         public void RemoveMapLayers()

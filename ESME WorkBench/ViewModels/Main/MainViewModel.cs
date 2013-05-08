@@ -134,7 +134,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 else foreach (var location in Database.Context.Locations.Local)
                 {
                     locationsExtent = locationsExtent == null ? new GeoRect(location.GeoRect) : GeoRect.Union(locationsExtent, (GeoRect)location.GeoRect);
-                    location.CreateMapLayers();
+                    location.UpdateMapLayers();
                 }
                 if (Database.Context.Locations.Local.Count > 0) MediatorMessage.Send(MediatorMessage.SetMapExtent, locationsExtent);
             };

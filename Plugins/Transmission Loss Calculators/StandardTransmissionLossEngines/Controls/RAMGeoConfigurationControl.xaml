@@ -16,9 +16,5 @@
             <TextBlock Text="Minimum depth resolution (m)" />
             <Controls:ValidatingTextBox BoundField="MinimumOutputDepthResolution" />
         </StackPanel>
-        <StackPanel Margin="0 0 0 5" Orientation="Vertical">
-            <TextBlock Text="Side lobe attenuation (dB)" />
-            <Controls:ValidatingTextBox BoundField="SideLobeAttenuation" ToolTip="Attenuation factor, in dB for side lobes of any beam width that might be specified" />
-        </StackPanel>
     </StackPanel>
 </UserControl>
