@@ -125,8 +125,8 @@ namespace ESME.Scenarios
                 if (IsDeleted) return;
                 LayerSettings.IsChecked = false;
                 var mapLayer = (LayerSettings.MapLayerViewModel != null) ? (OverlayShapeMapLayer)LayerSettings.MapLayerViewModel : new OverlayShapeMapLayer { Name = string.Format("{0}", Guid) };
-                mapLayer.LineColor = Color.FromArgb(32, mapLayer.LineColor.R, mapLayer.LineColor.G, mapLayer.LineColor.B);
-                mapLayer.AreaColor = mapLayer.LineColor;
+                mapLayer.LineColor = Color.FromArgb(64, mapLayer.LineColor.R, mapLayer.LineColor.G, mapLayer.LineColor.B);
+                mapLayer.AreaColor = Color.FromArgb(32, mapLayer.LineColor.R, mapLayer.LineColor.G, mapLayer.LineColor.B); ;
                 mapLayer.Clear();
                 var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
                 Debug.WriteLine(string.Format("Creating map layers for TL {0} of radius {1} for mode [{2}] at {3}", Guid, maxPropagationRadius, Modes.First().ModeName, (Geo)AnalysisPoint.Geo));
@@ -174,7 +174,6 @@ namespace ESME.Scenarios
             foreach (var radial in Radials.ToList()) radial.Delete();
             AnalysisPoint.TransmissionLosses.Remove(this);
             foreach (var mode in Modes) mode.TransmissionLosses.Remove(this); // Remove this TL from all matching modes' list of TLs
-            if (AnalysisPoint.TransmissionLosses.Count == 0) AnalysisPoint.Delete();
             Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
             Scenario.Database.Context.TransmissionLosses.Remove(this);
         }
