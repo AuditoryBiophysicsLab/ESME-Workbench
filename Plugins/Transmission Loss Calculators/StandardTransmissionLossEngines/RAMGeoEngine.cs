@@ -181,10 +181,6 @@ namespace StandardTransmissionLossEngines
         public double Theta { get; set; }
 
         /// <summary>
-        /// Attenuation factor, in dB for side lobes of the beam pattern
-        /// </summary>
-        [Initialize(40.0)] public double SideLobeAttenuation { get; set; }
-        /// <summary>
         /// Last layer thickness, in wavelengths  
         /// 
         /// LastLayerDz_lambda
@@ -353,7 +349,7 @@ namespace StandardTransmissionLossEngines
                     emitterSpacing = emitterSize / (emitterCount - 1);
                     // chebyshev window calculations for relative emitter strength across the array
                     var discreteFourierTransform = new MathNet.Numerics.IntegralTransforms.Algorithms.DiscreteFourierTransform();
-                    var r0 = Math.Pow(10, SideLobeAttenuation / 20);
+                    var r0 = Math.Pow(10, mode.SideLobeAttenuation / 20.0);
                     var n = emitterCount - 1;
                     var a = Complex.Cosh((1.0 / n) * Acosh(r0));
                     var am = new Complex[n];

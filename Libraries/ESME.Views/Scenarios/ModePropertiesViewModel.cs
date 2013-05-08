@@ -39,6 +39,7 @@ namespace ESME.Views.Scenarios
             MaxPropagationRadius = _editedMode.MaxPropagationRadius;
             ValidRadialCounts = new List<string> { "Auto", "4", "8", "16", "32", "64", "128" };
             RadialCountString = _editedMode.RadialCount == 0 ? ValidRadialCounts[0] : _editedMode.RadialCount.ToString(CultureInfo.InvariantCulture);
+            SideLobeAttenuation = _editedMode.SideLobeAttenuation;
 
             AvailableTransmissionLossEngines.AddRange(from key in PluginManagerService[PluginType.TransmissionLossCalculator].Keys
                                                       select (TransmissionLossCalculatorPluginBase)PluginManagerService[PluginType.TransmissionLossCalculator][key].DefaultPlugin);
@@ -184,6 +185,10 @@ namespace ESME.Views.Scenarios
         public string RadialCountString { get; set; }
         public List<string> ValidRadialCounts { get; private set; }
 
+        /// <summary>
+        /// The side lobe attenuation, in dB
+        /// </summary>
+        public float SideLobeAttenuation { get; set; }
         public bool IsPSMView { get; set; }
 
         [Initialize] public List<TransmissionLossCalculatorPluginBase> AvailableTransmissionLossEngines { get; set; }
@@ -218,6 +223,7 @@ namespace ESME.Views.Scenarios
             _editedMode.RelativeBeamAngle = RelativeBeamAngle;
             _editedMode.MaxPropagationRadius = MaxPropagationRadius;
             _editedMode.TransmissionLossPluginType = SelectedTransmissionLossEngine.PluginIdentifier.Type;
+            _editedMode.SideLobeAttenuation = SideLobeAttenuation;
             _editedMode.RadialCount = RadialCountString == "Auto" ? 0 : int.Parse(RadialCountString);
             if (!_originalMode.IsAcousticallyEquivalentTo(_editedMode) || _originalMode.TransmissionLossPluginType != _editedMode.TransmissionLossPluginType) _editedMode.TransmissionLosses.ForEach(tl => tl.Modes.Remove(_editedMode));
             if (IsPSMView) MediatorMessage.Send(MediatorMessage.PSMModeChanged, _editedMode);

@@ -9,7 +9,6 @@
              xmlns:System="clr-namespace:System;assembly=mscorlib"
              Background="#fff0f0f0"
              d:DataContext="{d:DesignInstance l:ModePropertiesViewModel}"
-             d:DesignHeight="500"
              d:DesignWidth="300"
              Grid.IsSharedSizeScope="True"
              mc:Ignorable="d">
@@ -274,6 +273,18 @@
                                        TextAlignment="Right"
                                        ToolTip="Beam width of this mode in the vertical dimension, in degrees. This field is required" />
                             <TextBox Grid.Column="1" Text="{Binding VerticalBeamWidth, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="0,1,5,5"
+                                       VerticalAlignment="Center"
+                                       Text="Side lobe attenuation (dB)"
+                                       TextAlignment="Right"
+                                       ToolTip="Attenuation factor, in dB for side lobes of any beam width that might be specified" />
+                            <TextBox Grid.Column="1" Text="{Binding SideLobeAttenuation, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                         </Grid>
                         <Grid Margin="5 5 5 0">
                             <Grid.ColumnDefinitions>

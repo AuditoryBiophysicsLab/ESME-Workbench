@@ -116,6 +116,11 @@ namespace ESME.Scenarios
         /// </summary>
         public int RadialCount { get; set; }
 
+        /// <summary>
+        /// The side lobe attenuation, in dB
+        /// </summary>
+        [Initialize(40.0f)] public float SideLobeAttenuation { get; set; }
+
         public virtual Source Source { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
         [Initialize] public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
@@ -318,7 +323,7 @@ namespace ESME.Scenarios
         {
             var depth = Source.Platform.Depth;
             if (Depth.HasValue) depth += Depth.Value;
-            return string.Format("HiFreq: {0:0.#}Hz | LoFreq: {1:0.#}Hz | Depth: {2:0.###}m | VBW: {3:0.#}deg | D/E: {4:0.#}deg | Plugin: {5}", HighFrequency, LowFrequency, depth, VerticalBeamWidth, DepressionElevationAngle, TransmissionLossPluginType.Replace("StandardTransmissionLossEngines.", "").Replace("Engine", ""));
+            return string.Format("HiFreq: {0:0.#}Hz | LoFreq: {1:0.#}Hz | Depth: {2:0.###}m | VBW: {3:0.#}deg | SideLobeAttn: {4:0.#}dB | D/E: {5:0.#}deg | Plugin: {6}", HighFrequency, LowFrequency, depth, VerticalBeamWidth, SideLobeAttenuation, DepressionElevationAngle, TransmissionLossPluginType.Replace("StandardTransmissionLossEngines.", "").Replace("Engine", ""));
         }
     }
 
