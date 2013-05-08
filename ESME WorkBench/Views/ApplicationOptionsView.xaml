@@ -24,6 +24,9 @@
                     IsDefault="True" />
         </DockPanel>
         <TabControl>
+            <TabItem Header="Display">
+                <GroupBox Header="Analysis points" Padding="5" />
+            </TabItem>
             <TabItem Header="Acoustic Simulators">
                 <StackPanel Orientation="Vertical">
                     <!--
@@ -63,35 +66,6 @@
                     </StackPanel>
                 </GroupBox>
             </TabItem>
-            <!--
-                <TabItem Header="Misc">
-                <StackPanel Orientation="Vertical">
-                <GroupBox Header="Propagation files">
-                <StackPanel Margin="5" Orientation="Horizontal">
-                <CheckBox VerticalAlignment="Center"
-                Content="Display threshold contour of "
-                IsChecked="{Binding AppSettings.DisplayContoursOnTransmissionLoss}" />
-                <TextBox Width="30"
-                VerticalAlignment="Center"
-                Text="{Binding AppSettings.TransmissionLossContourThreshold}" />
-                <TextBlock VerticalAlignment="Center" Text=" dB on transmission loss points" />
-                </StackPanel>
-                </GroupBox>
-                <GroupBox Header="Environment data export" Visibility="{Binding ESME:Configuration.IsClassifiedModel, Converter={StaticResource TrueVisibleFalseCollapsed}}">
-                <StackPanel Orientation="Vertical">
-                <CheckBox Margin="5"
-                VerticalAlignment="Center"
-                Content="Export environment files when all data are available"
-                IsChecked="{Binding AppSettings.DisplayContoursOnTransmissionLoss}" />
-                <CheckBox Margin="5 0 5 5"
-                VerticalAlignment="Center"
-                Content="Export bathymetry files when all data are available"
-                IsChecked="{Binding AppSettings.DisplayContoursOnTransmissionLoss}" />
-                </StackPanel>
-                </GroupBox>
-                </StackPanel>
-                </TabItem>
-            -->
         </TabControl>
     </DockPanel>
 </Window>

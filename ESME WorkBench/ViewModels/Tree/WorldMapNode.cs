@@ -59,8 +59,8 @@ namespace ESMEWorkbench.ViewModels.Tree
 
         readonly MapLayerViewModel _worldMapLayer = new ShapefileMapLayer
         {
-            AreaColor = Colors.Transparent,
-            AreaStyle = MapLayerViewModel.CreateAreaStyle(Settings.Default.WorldMapLineColor, (float)Settings.Default.WorldMapLineWeight, Colors.Transparent),
+            AreaColor = Colors.DarkKhaki,
+            AreaStyle = MapLayerViewModel.CreateAreaStyle(Settings.Default.WorldMapLineColor, (float)Settings.Default.WorldMapLineWeight, Colors.DarkKhaki),
             ShapefileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"),
             Name = "World Map",
         };

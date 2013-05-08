@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Windows.Data;
+using System.Windows.Media;
 using ESME.Locations;
 using ESME.Mapping;
 using HRC.Aspects;
@@ -124,6 +125,8 @@ namespace ESME.Scenarios
                 if (IsDeleted) return;
                 LayerSettings.IsChecked = false;
                 var mapLayer = (LayerSettings.MapLayerViewModel != null) ? (OverlayShapeMapLayer)LayerSettings.MapLayerViewModel : new OverlayShapeMapLayer { Name = string.Format("{0}", Guid) };
+                mapLayer.LineColor = Color.FromArgb(32, mapLayer.LineColor.R, mapLayer.LineColor.G, mapLayer.LineColor.B);
+                mapLayer.AreaColor = mapLayer.LineColor;
                 mapLayer.Clear();
                 var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
                 Debug.WriteLine(string.Format("Creating map layers for TL {0} of radius {1} for mode [{2}] at {3}", Guid, maxPropagationRadius, Modes.First().ModeName, (Geo)AnalysisPoint.Geo));
@@ -131,6 +134,7 @@ namespace ESME.Scenarios
                 var perimeterSegmentCount = Math.Max(Radials.Count, 32);
                 for (var perimeterSegmentIndex = 0; perimeterSegmentIndex < perimeterSegmentCount; perimeterSegmentIndex++) perimeterGeos.Add(((Geo)AnalysisPoint.Geo).Offset(Geo.KilometersToRadians(maxPropagationRadius / 1000), Geo.DegreesToRadians((360.0 / perimeterSegmentCount) * perimeterSegmentIndex)));
                 perimeterGeos.Add(perimeterGeos.First());
+#if false
                 var radialGeos = new List<Geo>();
                 foreach (var radial in Radials.OrderBy(r => r.Bearing))
                 {
@@ -140,6 +144,7 @@ namespace ESME.Scenarios
                 }
                 radialGeos.Add(AnalysisPoint.Geo);
                 mapLayer.AddLines(radialGeos);
+#endif
                 mapLayer.AddPolygon(perimeterGeos);
                 mapLayer.Done();
                 LayerSettings.MapLayerViewModel = mapLayer;

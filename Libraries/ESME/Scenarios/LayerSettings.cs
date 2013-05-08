@@ -23,8 +23,7 @@ namespace ESME.Scenarios
             while (true)
             {
                 curColor = ColorExtensions.GetRandomNamedColor();
-                var curYUV = LumaChromaColor.FromColor(curColor);
-                if (curYUV.Y >= 0.5f) break;
+                if (LumaChromaColor.FromColor(curColor).Y >= 0.5f) break;
             }
             LineOrSymbolDbColor = new DbColor(curColor);
             AreaDbColor = new DbColor(Colors.Transparent);
