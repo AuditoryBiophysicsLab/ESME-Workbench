@@ -1,6 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Windows;
 using System.Windows.Input;
 using ESME;
@@ -12,6 +14,7 @@ using ESMEWorkbench.ViewModels.Layers;
 using ESMEWorkbench.ViewModels.Main;
 using ESMEWorkbench.Views;
 using HRC;
+using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Services;
 using HRC.ViewModels;
@@ -61,6 +64,8 @@ namespace ESMEWorkbench.ViewModels.Map
             if (Designer.IsInDesignMode) return;
 
             _wpfMap = ((MainView)_viewAwareStatus.View).MapView.WpfMap;
+            CreateMouseEventStreams();
+            SubscribeToMouseEventStreams();
             EditableRectangleOverlayViewModel = new EditableRectangleOverlayViewModel(_wpfMap);
             EditablePolygonOverlayViewModel = new EditablePolygonOverlayViewModel(_wpfMap);
             //SoundSpeedProfileViewModel = new SoundSpeedProfileViewModel(((MainView)_viewAwareStatus.View).MapView.SoundSpeedProfileView);
@@ -126,7 +131,8 @@ namespace ESMEWorkbench.ViewModels.Map
             }
         }
 
-        [MediatorMessageSink(MediatorMessage.ApplicationClosing), UsedImplicitly] void ApplicationClosing(bool mode) { if (_soundSpeedProfileWindowView != null) _soundSpeedProfileWindowView.Close(); }
+        [MediatorMessageSink(MediatorMessage.ApplicationClosing), UsedImplicitly] 
+        void ApplicationClosing(bool mode) { if (_soundSpeedProfileWindowView != null) _soundSpeedProfileWindowView.Close(); }
 
         public SoundSpeedProfile MouseSoundSpeedProfile { get; set; }
         public bool IsSoundSpeedProfilePopupOpen { get; set; }
@@ -232,72 +238,86 @@ namespace ESMEWorkbench.ViewModels.Map
         }
         #endregion
 
-        #region Mouse events
+        #region Mouse event streams
 
-        #region MouseLeftButtonDownCommand
-        public SimpleCommand<object, EventToCommandArgs> MouseLeftButtonDownCommand
+        [Initialize, UsedImplicitly] public Subject<Geo> LeftButtonDown { get; private set; }
+        [Initialize, UsedImplicitly] public Subject<Geo> LeftButtonUp { get; private set; }
+        [Initialize, UsedImplicitly] public Subject<Geo> RightButtonDown { get; private set; }
+        [Initialize, UsedImplicitly] public Subject<Geo> RightButtonUp { get; private set; }
+        [Initialize, UsedImplicitly] public Subject<Geo> MouseGeo { get; private set; }
+        [Initialize, UsedImplicitly] public Subject<Geo> Click { get; private set; }
+        [Initialize, UsedImplicitly] public Subject<Geo> DoubleClick { get; private set; }
+
+        void SubscribeToMouseEventStreams()
         {
-            get { return _mouseLeftButtonDown ?? (_mouseLeftButtonDown = new SimpleCommand<object, EventToCommandArgs>(MouseLeftButtonDownHandler)); }
+            MouseGeo.Subscribe(g =>
+            {
+                _hoveringOverlays.ForEach(l => l.MouseIsHovering.OnNext(false));
+                _hoveringOverlays.Clear();
+            });
+            MouseGeo.Throttle(TimeSpan.FromMilliseconds(300)).DistinctUntilChanged()
+                .Where(g => g != null)
+                .Select(g => new PointShape(g.Longitude, g.Latitude))
+                .Subscribe(p =>
+                {
+                    foreach (var activeLayerOverlay in _wpfMap.Overlays.OfType<ActiveLayerOverlay>())
+                    {
+                        foreach (var featureLayer in activeLayerOverlay.Layers.OfType<FeatureLayer>())
+                        {
+                            featureLayer.Open();
+                            if (featureLayer.QueryTools.GetFeaturesContaining(p, ReturningColumnsType.NoColumns).Count != 0 && activeLayerOverlay.MouseIsHovering != null)
+                            {
+                                activeLayerOverlay.MouseIsHovering.OnNext(true);
+                                _hoveringOverlays.Add(activeLayerOverlay);
+                            }
+                            featureLayer.Close();
+                        }
+                    }
+                });
+            DoubleClick.Subscribe(g =>
+            {
+                if (MouseSoundSpeedProfile != null)
+                {
+                    if (SoundSpeedProfileViewModel == null) SoundSpeedProfileViewModel = new SoundSpeedProfileViewModel(_saveFile);
+                    if (_soundSpeedProfileWindowView == null)
+                    {
+                        _soundSpeedProfileWindowView = (SoundSpeedProfileWindowView)_visualizer.ShowWindow("SoundSpeedProfileWindowView", SoundSpeedProfileViewModel, false, (sender, args) => { _soundSpeedProfileWindowView = null; });
+                        _soundSpeedProfileWindowView.Closed += (s, e1) => { SoundSpeedProfileViewModel = null; };
+                        SoundSpeedProfileViewModel.View = _soundSpeedProfileWindowView.FindChildren<SoundSpeedProfileView>().First();
+                        SoundSpeedProfileViewModel.WindowView = _soundSpeedProfileWindowView;
+                    }
+                    SoundSpeedProfileViewModel.SoundSpeedProfile = MouseSoundSpeedProfile;
+                }
+                IsSoundSpeedProfilePopupOpen = true;
+            });
         }
-
-        SimpleCommand<object, EventToCommandArgs> _mouseLeftButtonDown;
-
-        void MouseLeftButtonDownHandler(EventToCommandArgs arg)
+        void CreateMouseEventStreams()
         {
-            var geo = GetMouseEventArgsGeo((MouseButtonEventArgs)arg.EventArgs);
-            Debug.WriteLine("Mouse left button down at {0}", geo);
-            MediatorMessage.Send(MediatorMessage.MapLeftButtonDown, geo);
+            Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseDown").ObserveOnDispatcher()
+                .Select(e => new { Button = e.EventArgs.ChangedButton, Geo = GetMouseEventArgsGeo(e.EventArgs) })
+                .Subscribe(e =>
+                {
+                    if (e.Button == MouseButton.Left) LeftButtonDown.OnNext(e.Geo);
+                    if (e.Button == MouseButton.Right) RightButtonDown.OnNext(e.Geo);
+                });
+            Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseUp").ObserveOnDispatcher()
+                .Select(e => new { Button = e.EventArgs.ChangedButton, Geo = GetMouseEventArgsGeo(e.EventArgs) })
+                .Subscribe(e =>
+                {
+                    if (e.Button == MouseButton.Left) LeftButtonUp.OnNext(e.Geo);
+                    if (e.Button == MouseButton.Right) RightButtonUp.OnNext(e.Geo);
+                });
+            Observable.FromEventPattern<MouseEventArgs>(_wpfMap, "MouseLeave").ObserveOnDispatcher() 
+                .Subscribe(e => MouseGeo.OnNext(null));
+            Observable.FromEventPattern<MouseEventArgs>(_wpfMap, "MouseMove").ObserveOnDispatcher()
+                .Subscribe(e => MouseGeo.OnNext(GetMouseEventArgsGeo(e.EventArgs)));
+            Observable.FromEventPattern<MapClickWpfMapEventArgs>(_wpfMap, "MapClick").ObserveOnDispatcher()
+                .Subscribe(e => Click.OnNext(new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX)));
+            Observable.FromEventPattern<MapClickWpfMapEventArgs>(_wpfMap, "MapDoubleClick").ObserveOnDispatcher()
+                .Subscribe(e => DoubleClick.OnNext(new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX)));
         }
-
-        #endregion
-
-        #region MouseLeftButtonUpCommand
-        public SimpleCommand<object, EventToCommandArgs> MouseLeftButtonUpCommand
-        {
-            get { return _mouseLeftButtonUp ?? (_mouseLeftButtonUp = new SimpleCommand<object, EventToCommandArgs>(MouseLeftButtonUpHandler)); }
-        }
-
-        SimpleCommand<object, EventToCommandArgs> _mouseLeftButtonUp;
-
-        void MouseLeftButtonUpHandler(EventToCommandArgs arg)
-        {
-            var geo = GetMouseEventArgsGeo((MouseButtonEventArgs)arg.EventArgs);
-            Debug.WriteLine("Mouse left button up at {0}", geo);
-            MediatorMessage.Send(MediatorMessage.MapLeftButtonUp, geo);
-        }
-        #endregion
-
-        #region MouseRightButtonDownCommand
-        public SimpleCommand<object, EventToCommandArgs> MouseRightButtonDownCommand
-        {
-            get { return _mouseRightButtonDown ?? (_mouseRightButtonDown = new SimpleCommand<object, EventToCommandArgs>(MouseRightButtonDownHandler)); }
-        }
-
-        SimpleCommand<object, EventToCommandArgs> _mouseRightButtonDown;
-
-        void MouseRightButtonDownHandler(EventToCommandArgs arg)
-        {
-            var geo = GetMouseEventArgsGeo((MouseButtonEventArgs)arg.EventArgs);
-            Debug.WriteLine("Mouse right button down at {0}", geo);
-            MediatorMessage.Send(MediatorMessage.MapRightButtonDown, geo);
-        }
-        #endregion
-
-        #region MouseRightButtonUpCommand
-        public SimpleCommand<object, EventToCommandArgs> MouseRightButtonUpCommand
-        {
-            get { return _mouseRightButtonUp ?? (_mouseRightButtonUp = new SimpleCommand<object, EventToCommandArgs>(MouseRightButtonUpHandler)); }
-        }
-
-        SimpleCommand<object, EventToCommandArgs> _mouseRightButtonUp;
-
-        void MouseRightButtonUpHandler(EventToCommandArgs arg)
-        {
-            var geo = GetMouseEventArgsGeo((MouseButtonEventArgs)arg.EventArgs);
-            Debug.WriteLine("Mouse right button up at {0}", geo);
-            MediatorMessage.Send(MediatorMessage.MapRightButtonUp, geo);
-        }
-        #endregion
+        SoundSpeedProfileWindowView _soundSpeedProfileWindowView;
+        readonly List<ActiveLayerOverlay> _hoveringOverlays = new List<ActiveLayerOverlay>();
 
         Geo GetMouseEventArgsGeo(MouseEventArgs e)
         {
@@ -305,73 +325,6 @@ namespace ESMEWorkbench.ViewModels.Map
             var pointShape = ExtentHelper.ToWorldCoordinate(_wpfMap.CurrentExtent, (float)point.X, (float)point.Y, (float)_wpfMap.ActualWidth, (float)_wpfMap.ActualHeight);
             return new Geo(pointShape.Y, pointShape.X);
         }
-
-        #region MouseLeaveCommand
-        public SimpleCommand<object, EventToCommandArgs> MouseLeaveCommand { get { return _mouseLeave ?? (_mouseLeave = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.SetMouseGeo, (Geo)null))); } }
-        SimpleCommand<object, EventToCommandArgs> _mouseLeave;
-        #endregion
-
-        #region MouseMoveCommand
-        public SimpleCommand<object, EventToCommandArgs> MouseMoveCommand
-        {
-            get { return _mouseMove ?? (_mouseMove = new SimpleCommand<object, EventToCommandArgs>(MouseMoveHandler)); }
-        }
-
-        SimpleCommand<object, EventToCommandArgs> _mouseMove;
-
-        void MouseMoveHandler(EventToCommandArgs arg)
-        {
-            var e = (MouseEventArgs)arg.EventArgs;
-            var point = e.MouseDevice.GetPosition(_wpfMap);
-            var pointShape = ExtentHelper.ToWorldCoordinate(_wpfMap.CurrentExtent, (float)point.X, (float)point.Y, (float)_wpfMap.ActualWidth, (float)_wpfMap.ActualHeight);
-            MediatorMessage.Send(MediatorMessage.SetMouseGeo, new Geo(pointShape.Y, pointShape.X));
-        }
-        #endregion
-
-        #region MapClickCommand
-        public SimpleCommand<object, EventToCommandArgs> MapClickCommand
-        {
-            get { return _mapClick ?? (_mapClick = new SimpleCommand<object, EventToCommandArgs>(MapClickHandler)); }
-        }
-
-        SimpleCommand<object, EventToCommandArgs> _mapClick;
-
-        static void MapClickHandler(EventToCommandArgs arg)
-        {
-            var e = (MapClickWpfMapEventArgs)arg.EventArgs;
-            MediatorMessage.Send(MediatorMessage.MapClick, new Geo(e.WorldY, e.WorldX));
-        }
-        #endregion
-
-        #region MapDoubleClickCommand
-        public SimpleCommand<object, EventToCommandArgs> MapDoubleClickCommand
-        {
-            get { return _mapDoubleClick ?? (_mapDoubleClick = new SimpleCommand<object, EventToCommandArgs>(MapDoubleClickHandler)); }
-        }
-
-        SimpleCommand<object, EventToCommandArgs> _mapDoubleClick;
-
-        void MapDoubleClickHandler(EventToCommandArgs arg)
-        {
-            var e = (MapClickWpfMapEventArgs)arg.EventArgs;
-            MediatorMessage.Send(MediatorMessage.MapDoubleClick, new Geo(e.WorldY, e.WorldX));
-            if (MouseSoundSpeedProfile != null)
-            {
-                if (SoundSpeedProfileViewModel == null) SoundSpeedProfileViewModel = new SoundSpeedProfileViewModel(_saveFile);
-                if (_soundSpeedProfileWindowView == null)
-                {
-                    _soundSpeedProfileWindowView = (SoundSpeedProfileWindowView)_visualizer.ShowWindow("SoundSpeedProfileWindowView", SoundSpeedProfileViewModel, false, (sender, args) => { _soundSpeedProfileWindowView = null; });
-                    _soundSpeedProfileWindowView.Closed += (s, e1) => { SoundSpeedProfileViewModel = null; };
-                    SoundSpeedProfileViewModel.View = _soundSpeedProfileWindowView.FindChildren<SoundSpeedProfileView>().First();
-                    SoundSpeedProfileViewModel.WindowView = _soundSpeedProfileWindowView;
-                }
-                SoundSpeedProfileViewModel.SoundSpeedProfile = MouseSoundSpeedProfile;
-            }
-            IsSoundSpeedProfilePopupOpen = true;
-        }
-
-        SoundSpeedProfileWindowView _soundSpeedProfileWindowView;
-        #endregion
 
         #endregion
 

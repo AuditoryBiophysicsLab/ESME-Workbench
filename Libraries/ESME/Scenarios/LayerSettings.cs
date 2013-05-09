@@ -76,6 +76,7 @@ namespace ESME.Scenarios
             }
         }
         double _lineOrSymbolSize;
+        [NotMapped] public Action LineOrSymbolSizeChanged { get; set; }
 
         [NotMapped] public Func<bool> DisplayIfScenarioIsLoadedFunc { get; set; }
         [NotMapped] public PointSymbolType SymbolType
@@ -90,6 +91,7 @@ namespace ESME.Scenarios
             }
         }
         PointSymbolType _symbolType;
+        [NotMapped] public Action SymbolTypeChanged { get; set; }
 
         [NotMapped]
         public Color LineOrSymbolColor
@@ -103,6 +105,7 @@ namespace ESME.Scenarios
                 MediatorMessage.Send(MediatorMessage.RefreshMapLayer, MapLayerViewModel);
             }
         }
+        [NotMapped] public Action LineOrSymbolColorChanged { get; set; }
 
         [NotMapped]
         public Color AreaColor
@@ -116,6 +119,7 @@ namespace ESME.Scenarios
                 MediatorMessage.Send(MediatorMessage.RefreshMapLayer, MapLayerViewModel);
             }
         }
+        [NotMapped] public Action AreaColorChanged { get; set; }
 
         public void MoveLayerToFront() { if (_mapLayerViewModel != null) MediatorMessage.Send(MediatorMessage.MoveLayerToFront, _mapLayerViewModel); }
         public void MoveLayerForward() { if (_mapLayerViewModel != null) MediatorMessage.Send(MediatorMessage.MoveLayerForward, _mapLayerViewModel); }
@@ -130,7 +134,11 @@ namespace ESME.Scenarios
             [MethodImpl(MethodImplOptions.Synchronized)]
             set
             {
-                if (value == null && _mapLayerViewModel != null) MediatorMessage.Send(MediatorMessage.RemoveMapLayer, _mapLayerViewModel);
+                if (value == null && _mapLayerViewModel != null)
+                {
+                    MediatorMessage.Send(MediatorMessage.RemoveMapLayer, _mapLayerViewModel);
+                    _mapLayerViewModel.LayerOverlay.MouseIsHovering.Dispose();
+                }
                 else if (_mapLayerViewModel == value)
                 {
                     MediatorMessage.Send(MediatorMessage.RefreshMapLayer, _mapLayerViewModel);

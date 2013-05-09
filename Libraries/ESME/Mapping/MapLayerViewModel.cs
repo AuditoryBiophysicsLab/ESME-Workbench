@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Reactive.Subjects;
 using System.Windows.Media;
+using HRC;
+using HRC.Aspects;
 using HRC.ViewModels;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
@@ -27,7 +30,7 @@ namespace ESME.Mapping
 
         public MapLayerViewModel()
         {
-            LayerOverlay = new LayerOverlay { TileType = TileType.SingleTile };
+            LayerOverlay = new ActiveLayerOverlay { TileType = TileType.SingleTile };
             AreaColor = Colors.Transparent;
             AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
             LineStyle = CreateLineStyle(LineColor, LineWidth);
@@ -45,9 +48,9 @@ namespace ESME.Mapping
             }
         }
 
-        LayerOverlay _layerOverlay;
+        ActiveLayerOverlay _layerOverlay;
 
-        public LayerOverlay LayerOverlay
+        public ActiveLayerOverlay LayerOverlay
         {
             get { return _layerOverlay; }
             set
@@ -208,5 +211,10 @@ namespace ESME.Mapping
             }
         }
         #endregion
+    }
+
+    public class ActiveLayerOverlay : LayerOverlay
+    {
+        [Initialize, UsedImplicitly] public Subject<bool> MouseIsHovering { get; private set; }
     }
 }

@@ -2,42 +2,13 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:Map="clr-namespace:ESMEWorkbench.ViewModels.Map"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
              xmlns:WpfDesktopEdition="clr-namespace:ThinkGeo.MapSuite.WpfDesktopEdition;assembly=WpfDesktopEdition"
              AllowDrop="True"
              d:DataContext="{d:DesignInstance Map:MapViewModel}"
              mc:Ignorable="d">
-    <DockPanel LastChildFill="True">
-        <WpfDesktopEdition:WpfMap x:Name="WpfMap">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="MouseLeftButtonUp">
-                    <WPF:EventToCommandTrigger Command="{Binding MouseLeftButtonUpCommand}" />
-                </i:EventTrigger>
-                <i:EventTrigger EventName="MouseLeftButtonDown">
-                    <WPF:EventToCommandTrigger Command="{Binding MouseLeftButtonDownCommand}" />
-                </i:EventTrigger>
-                <i:EventTrigger EventName="MouseRightButtonUp">
-                    <WPF:EventToCommandTrigger Command="{Binding MouseRightButtonUpCommand}" />
-                </i:EventTrigger>
-                <i:EventTrigger EventName="MouseRightButtonDown">
-                    <WPF:EventToCommandTrigger Command="{Binding MouseRightButtonDownCommand}" />
-                </i:EventTrigger>
-                <i:EventTrigger EventName="MouseMove">
-                    <WPF:EventToCommandTrigger Command="{Binding MouseMoveCommand}" />
-                </i:EventTrigger>
-                <i:EventTrigger EventName="MouseLeave">
-                    <WPF:EventToCommandTrigger Command="{Binding MouseLeaveCommand}" />
-                </i:EventTrigger>
-                <i:EventTrigger EventName="MapClick">
-                    <WPF:EventToCommandTrigger Command="{Binding MapClickCommand}" />
-                </i:EventTrigger>
-                <i:EventTrigger EventName="MapDoubleClick">
-                    <WPF:EventToCommandTrigger Command="{Binding MapDoubleClickCommand}" />
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </WpfDesktopEdition:WpfMap>
-    </DockPanel>
+    <Grid>
+        <WpfDesktopEdition:WpfMap x:Name="WpfMap" />
+    </Grid>
 </UserControl>

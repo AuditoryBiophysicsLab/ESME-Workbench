@@ -84,6 +84,8 @@ namespace ESMEWorkbench.ViewModels.Main
             _plugins = plugins;
             _cache = cache;
             MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
+            MapViewModel.MouseGeo.Subscribe(SetMouseEarthCoordinate);
+            MapViewModel.Click.Subscribe(MapClick);
             Cursor = Cursors.Arrow;
             
             _transmissionLoss.WorkQueue.PropertyChanged +=
@@ -153,7 +155,6 @@ namespace ESMEWorkbench.ViewModels.Main
         public Geo MouseGeo { get; set; }
         AnalysisPoint _fakeAnalysisPoint;
 
-        [MediatorMessageSink(MediatorMessage.SetMouseGeo), UsedImplicitly]
         void SetMouseEarthCoordinate(Geo mouseGeo)
         {
             MouseGeo = mouseGeo;
@@ -435,10 +436,8 @@ namespace ESMEWorkbench.ViewModels.Main
 
         public Cursor Cursor { get; set; }
 
-        [MediatorMessageSink(MediatorMessage.MapClick), UsedImplicitly]
         void MapClick(Geo geo)
         {
-            Debug.WriteLine("Map click at {0}", geo);
             if (IsInAnalysisPointMode)
             {
                 if (Scenario != null && geo != null && Scenario.GeoRect.Contains(geo))
@@ -462,9 +461,6 @@ namespace ESMEWorkbench.ViewModels.Main
                 _fakeAnalysisPoint = null;
             }
         }
-
-        [MediatorMessageSink(MediatorMessage.MapDoubleClick), UsedImplicitly]
-        void MapDoubleClick(Geo geo) { Debug.WriteLine("Map double click at {0}", geo); }
 
         [MediatorMessageSink(MediatorMessage.ViewTransmissionLoss), UsedImplicitly]
         void ViewTransmissionLoss(TransmissionLoss transmissionLoss)
