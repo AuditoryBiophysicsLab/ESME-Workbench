@@ -260,17 +260,23 @@ namespace ESMEWorkbench.ViewModels.Map
                 .Select(g => new PointShape(g.Longitude, g.Latitude))
                 .Subscribe(p =>
                 {
-                    foreach (var activeLayerOverlay in _wpfMap.Overlays.OfType<ActiveLayerOverlay>())
+                    foreach (var activeLayerOverlay in _wpfMap.Overlays.OfType<ActiveLayerOverlay>().ToList())
                     {
-                        foreach (var featureLayer in activeLayerOverlay.Layers.OfType<FeatureLayer>())
+                        foreach (var featureLayer in activeLayerOverlay.Layers.OfType<FeatureLayer>().ToList())
                         {
                             featureLayer.Open();
-                            if (featureLayer.QueryTools.GetFeaturesContaining(p, ReturningColumnsType.NoColumns).Count != 0 && activeLayerOverlay.MouseIsHovering != null)
+                            try
                             {
-                                activeLayerOverlay.MouseIsHovering.OnNext(true);
-                                _hoveringOverlays.Add(activeLayerOverlay);
+                                var featureCollection = featureLayer.QueryTools.GetFeaturesContaining(p, ReturningColumnsType.NoColumns);
+                                if (featureCollection.Count != 0)
+                                {
+                                    activeLayerOverlay.MouseIsHovering.OnNext(true);
+                                    _hoveringOverlays.Add(activeLayerOverlay);
+                                }
                             }
-                            featureLayer.Close();
+                            catch (IndexOutOfRangeException) { }
+                            catch (NullReferenceException) {}
+                            if (featureLayer.IsOpen) featureLayer.Close();
                         }
                     }
                 });

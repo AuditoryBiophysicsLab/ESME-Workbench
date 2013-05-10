@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Windows;
 using System.Windows.Threading;
 using HRC.WPF;
@@ -232,6 +234,7 @@ namespace HRC.Plotting
         public event EventHandler<NotifyRangeChangedEventArgs> RangeChanged;
         protected void OnRangeChanged(Range oldRange)
         {
+            _subject.OnNext(this);
             var handlers = RangeChanged;
             if (handlers == null) return;
             foreach (EventHandler<NotifyRangeChangedEventArgs> handler in handlers.GetInvocationList())
@@ -282,8 +285,25 @@ namespace HRC.Plotting
                 return (Minimum.GetHashCode() * 397) ^ Maximum.GetHashCode();
             }
         }
+
+        public IDisposable Subscribe(IObserver<IRange> observer)
+        {
+            return _subject.DistinctUntilChanged(s =>
+            {
+                // If one is empty and the other is not, return false
+                if ((IsEmpty && !s.IsEmpty) || (!IsEmpty && s.IsEmpty)) return false;
+                // If both ranges are empty, they are equal
+                if (IsEmpty && s.IsEmpty) return true;
+                return (Math.Abs(Max - s.Max) < double.Epsilon && Math.Abs(Min - s.Min) < double.Epsilon);
+            }).Subscribe(observer);
+        }
+
+        public void OnNext(IRange value) { _subject.OnNext(value); }
+        public void OnError(Exception error) { _subject.OnError(error); }
+        public void OnCompleted() { _subject.OnCompleted(); }
+        readonly Subject<IRange> _subject = new Subject<IRange>();
     }
-    public interface IRange : INotifyRangeChanged, IEquatable<IRange>
+    public interface IRange : INotifyRangeChanged, IEquatable<IRange>, ISubject<IRange>
     {
         double Min { get; }
         double Max { get; }
@@ -297,11 +317,7 @@ namespace HRC.Plotting
 
     public class NotifyRangeChangedEventArgs : EventArgs
     {
-        public NotifyRangeChangedEventArgs(Range oldRange)
-        {
-            OldRange = oldRange;
-        }
-
+        public NotifyRangeChangedEventArgs(IRange oldRange) { OldRange = oldRange; }
         public IRange OldRange { get; private set; }
     }
 

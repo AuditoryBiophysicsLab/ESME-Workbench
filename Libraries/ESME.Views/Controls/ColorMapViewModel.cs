@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using HRC;
 using HRC.Aspects;
 using HRC.Plotting;
 using HRC.Utility;
@@ -12,7 +15,11 @@ namespace ESME.Views.Controls
 {
     public class ColorMapViewModel : ViewModelBase
     {
-        public ColorMapViewModel() { FullRange.RangeChanged += (s, e) => CurrentRange.Update(FullRange); }
+        public ColorMapViewModel()
+        {
+            FullRange.RangeChanged += (s, e) => CurrentRange.Update(FullRange);
+            FullRange.Merge(CurrentRange).Merge(StatisticalRange).Subscribe(e => ColorMapChanged.OnNext(true));
+        }
         #region public properties
 
         public ObservableList<Color> Colors
@@ -28,6 +35,8 @@ namespace ESME.Views.Controls
             }
         }
         ObservableList<Color> _colors;
+
+        [Initialize, UsedImplicitly] public Subject<bool> ColorMapChanged { get; private set; }
 
         [Initialize] public Range FullRange { get; set; }
         [Initialize] public Range CurrentRange { get; set; }

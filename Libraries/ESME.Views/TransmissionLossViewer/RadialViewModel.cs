@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -57,6 +58,7 @@ namespace ESME.Views.TransmissionLossViewer
                 if (Radial != null && _transmissionLossRadial != null) BeginRenderBitmap(Radial.Guid, _transmissionLossRadial);
                 else WaitToRenderText = "This radial has not yet been calculated";
             };
+            ColorMapViewModel.ColorMapChanged.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(e => Debug.WriteLine("Color map has changed"));
             UpdateStatusProperties();
         }
 

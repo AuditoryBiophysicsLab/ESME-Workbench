@@ -389,7 +389,11 @@ namespace StandardTransmissionLossEngines
             };
             if (radial.IsDeleted) throw new RadialDeletedByUserException();
             ramProcess.Start();
-            ramProcess.PriorityClass = ProcessPriorityClass.Idle;
+            try
+            {
+                ramProcess.PriorityClass = ProcessPriorityClass.Idle;
+            }
+            catch (InvalidOperationException) { }
             //ramProcess.BeginOutputReadLine();
             while (!ramProcess.HasExited)
             {
