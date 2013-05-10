@@ -2,13 +2,11 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using ESME.SimulationAnalysis;
-using ESME.Simulator;
 using HRC;
 using HRC.Aspects;
 using HRC.Plotting;
@@ -154,9 +152,8 @@ namespace ESME.Views.Simulation
                     CloseDialog(true);
                 }
                 else Window.Dispatcher.InvokeIfRequired(Window.Close);
-            },
-                              TaskScheduler.FromCurrentSynchronizationContext());
-            
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+
         }
 
         public event EventHandler SimulationStarting;
