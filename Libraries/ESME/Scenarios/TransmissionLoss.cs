@@ -165,7 +165,7 @@ namespace ESME.Scenarios
             }
         }
 
-        bool _isHovering = false;
+        bool _isHovering;
 
         //This overload handles any type of EventHandler
         public static void SetAnyHandler<T, TDelegate, TArgs>(

@@ -64,9 +64,25 @@ namespace ESME.Mapping
         static IEnumerable<string> GeosToStrings(IEnumerable<Geo> geos) { return geos.Select(geo => string.Format("{0} {1}", geo.Longitude.ToString(CultureInfo.InvariantCulture), geo.Latitude.ToString(CultureInfo.InvariantCulture))); }
 
         public void Add(IEnumerable<OverlayShape> overlayShapes) { foreach (var shape in overlayShapes) Add(shape); }
-        public void AddLines(ICollection<Geo> geos) { _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText("LINESTRING(", geos, ")")))); }
-        public void AddPoints(ICollection<Geo> geos) { _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText("MULTIPOINT(", geos, ")")))); }
-        public void AddPolygon(ICollection<Geo> geos) { _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText("POLYGON((", geos, "))")))); }
+        public Feature AddLines(ICollection<Geo> geos)
+        {
+            var feature = new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText("LINESTRING(", geos, ")")));
+            _layer.InternalFeatures.Add(feature);
+            return feature;
+        }
+        public Feature AddPoints(ICollection<Geo> geos)
+        {
+            var feature = new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText("MULTIPOINT(", geos, ")")));
+            _layer.InternalFeatures.Add(feature);
+            return feature;
+        }
+        public Feature AddPolygon(ICollection<Geo> geos)
+        {
+            var feature = new Feature(BaseShape.CreateShapeFromWellKnownData(WellKnownText("POLYGON((", geos, "))")));
+            _layer.InternalFeatures.Add(feature);
+            return feature;
+        }
+
         public void Clear() { _layer.InternalFeatures.Clear(); }
 
         public void Done()
