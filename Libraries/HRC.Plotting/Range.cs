@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows;
@@ -288,22 +289,12 @@ namespace HRC.Plotting
 
         public IDisposable Subscribe(IObserver<IRange> observer)
         {
-            return _subject.DistinctUntilChanged(s =>
-            {
-                // If one is empty and the other is not, return false
-                if ((IsEmpty && !s.IsEmpty) || (!IsEmpty && s.IsEmpty)) return false;
-                // If both ranges are empty, they are equal
-                if (IsEmpty && s.IsEmpty) return true;
-                return (Math.Abs(Max - s.Max) < double.Epsilon && Math.Abs(Min - s.Min) < double.Epsilon);
-            }).Subscribe(observer);
+            return _subject.Subscribe(observer);
         }
 
-        public void OnNext(IRange value) { _subject.OnNext(value); }
-        public void OnError(Exception error) { _subject.OnError(error); }
-        public void OnCompleted() { _subject.OnCompleted(); }
         readonly Subject<IRange> _subject = new Subject<IRange>();
     }
-    public interface IRange : INotifyRangeChanged, IEquatable<IRange>, ISubject<IRange>
+    public interface IRange : INotifyRangeChanged, IEquatable<IRange>, IObservable<IRange>
     {
         double Min { get; }
         double Max { get; }

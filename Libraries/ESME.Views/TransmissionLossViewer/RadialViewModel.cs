@@ -34,6 +34,7 @@ namespace ESME.Views.TransmissionLossViewer
             _view = view;
             _dispatcher = Dispatcher.CurrentDispatcher;
             ColorMapViewModel = ColorMapViewModel.Default;
+
             AxisSeriesViewModel.DataSeriesCollection.Add(_imageSeriesViewModel);
             AxisSeriesViewModel.DataSeriesCollection.Add(_bottomProfileViewModel);
             AxisSeriesViewModel.XAxis.Label = "Range (m)";
@@ -55,10 +56,15 @@ namespace ESME.Views.TransmissionLossViewer
                 .RegisterHandler(y => y.MouseDataLocation, UpdateStatusProperties);
             ColorMapViewModel.CurrentRange.RangeChanged += (s, e) =>
             {
+                //if (Radial != null && _transmissionLossRadial != null) BeginRenderBitmap(Radial.Guid, _transmissionLossRadial);
+                //else WaitToRenderText = "This radial has not yet been calculated";
+            };
+            ColorMapViewModel.CurrentRange.Throttle(TimeSpan.FromMilliseconds(50)).Subscribe(e =>
+            {
+                Debug.WriteLine(string.Format("{0:HH:mm:ss.ffff} ColorMap changed", DateTime.Now));
                 if (Radial != null && _transmissionLossRadial != null) BeginRenderBitmap(Radial.Guid, _transmissionLossRadial);
                 else WaitToRenderText = "This radial has not yet been calculated";
-            };
-            ColorMapViewModel.ColorMapChanged.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(e => Debug.WriteLine("Color map has changed"));
+            });
             UpdateStatusProperties();
         }
 
