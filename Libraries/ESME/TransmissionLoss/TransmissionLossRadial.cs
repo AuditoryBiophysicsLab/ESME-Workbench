@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Media;
 using ESME.TransmissionLoss.Bellhop;
 
 namespace ESME.TransmissionLoss
@@ -219,7 +220,44 @@ namespace ESME.TransmissionLoss
             TransmissionLoss = null;
             IsSaved = true;
         }
+    }
 
-        
+    public static class TransmissionLossRadialExtensions
+    {
+        public static int[] RenderToPixelBuffer(this TransmissionLossRadial transmissionLossRadial, Func<float, Color> valueToColorFunc, int width = 0, int height = 0)
+        {
+            if (width < 0) throw new ArgumentOutOfRangeException("width", "width must be non-negative");
+            if (height < 0) throw new ArgumentOutOfRangeException("height", "height must be non-negative");
+
+            if (width == 0) width = transmissionLossRadial.Ranges.Count;
+            if (height == 0) height = transmissionLossRadial.Depths.Count;
+
+            var buffer = new int[width * height];
+            var rangeStep = transmissionLossRadial.Ranges.Count / (float)width;
+            var depthStep = transmissionLossRadial.Depths.Count / (float)height;
+#if false
+            var yValues = Enumerable.Range(0, height).AsParallel();
+            yValues.ForAll(y =>
+            {
+                var curOffset = y * width;
+                for (var x = 0; x < width; x++)
+                {
+                    var curColor = valueToColorFunc(transmissionLossRadial[(int)(y * depthStep), (int)(x * rangeStep)]);
+                    buffer[curOffset++] = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
+                }
+            });
+#else
+            for (var y = 0; y < height; y++)
+            {
+                var curOffset = y * width;
+                for (var x = 0; x < width; x++)
+                {
+                    var curColor = valueToColorFunc(transmissionLossRadial[(int)(y * depthStep), (int)(x * rangeStep)]);
+                    buffer[curOffset++] = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
+                }
+            }
+#endif
+            return buffer;
+        }
     }
 }

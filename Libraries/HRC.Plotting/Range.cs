@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows;
 using System.Windows.Threading;
@@ -14,7 +12,16 @@ namespace HRC.Plotting
 {
     public class Range : RangeBase
     {
-        public Range() { Min = Max = double.NaN; }
+        public Range()
+        {
+            Minimum = Maximum = double.NaN;
+        }
+
+        public Range(Range source)
+        {
+            Minimum = source.Minimum;
+            Maximum = source.Maximum;
+        }
 
         public Range(double min, double max)
         {

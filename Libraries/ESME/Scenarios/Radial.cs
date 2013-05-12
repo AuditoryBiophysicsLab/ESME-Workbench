@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 using ESME.Database;
 using ESME.Locations;
 using ESME.TransmissionLoss;

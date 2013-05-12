@@ -5,9 +5,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -26,7 +27,9 @@ namespace ESME.Views.TransmissionLossViewer
 {
     public class RadialViewModel : ViewModelBase
     {
-        public RadialViewModel() { }
+        public RadialViewModel()
+        {
+        }
 
         [ImportingConstructor]
         public RadialViewModel(RadialView view)
@@ -54,19 +57,75 @@ namespace ESME.Views.TransmissionLossViewer
                 .RegisterHandler(x => x.MouseDataLocation, UpdateStatusProperties);
             _yAxisPropertyObserver = new PropertyObserver<DataAxisViewModel>(AxisSeriesViewModel.YAxis)
                 .RegisterHandler(y => y.MouseDataLocation, UpdateStatusProperties);
-            ColorMapViewModel.CurrentRange.RangeChanged += (s, e) =>
-            {
-                //if (Radial != null && _transmissionLossRadial != null) BeginRenderBitmap(Radial.Guid, _transmissionLossRadial);
-                //else WaitToRenderText = "This radial has not yet been calculated";
-            };
-            ColorMapViewModel.CurrentRange.Throttle(TimeSpan.FromMilliseconds(50)).Subscribe(e =>
-            {
-                Debug.WriteLine(string.Format("{0:HH:mm:ss.ffff} ColorMap changed", DateTime.Now));
-                if (Radial != null && _transmissionLossRadial != null) BeginRenderBitmap(Radial.Guid, _transmissionLossRadial);
-                else WaitToRenderText = "This radial has not yet been calculated";
-            });
+            Observable.FromEventPattern<SizeChangedEventArgs>(view, "SizeChanged")
+                .Subscribe(e => Render());
+            ColorMapViewModel.CurrentRange.Throttle(TimeSpan.FromMilliseconds(20))
+                .Subscribe(e => Render());
+            _displayQueue.ObserveOnDispatcher()
+                .Subscribe(result =>
+                {
+                    var pixelBuffer = result.Item1;
+                    var renderRect = result.Item2;
+                    var sequenceNumber = result.Item3;
+                    //Debug.WriteLine(string.Format("Got completed event for sequence number {0} completed", sequenceNumber));
+                    if (sequenceNumber < _displayedSequenceNumber || WriteableBitmap == null)
+                    {
+                        Debug.WriteLine("Discarding image buffer");
+                        return;
+                    }
+                    if (WriteableBitmap.PixelWidth != renderRect.Width || WriteableBitmap.PixelHeight != renderRect.Height)
+                    {
+                        Debug.WriteLine("Image size mismatch");
+                        return;
+                    }
+                    _displayedSequenceNumber = sequenceNumber;
+                    WriteableBitmap.Lock();
+                    WriteableBitmap.WritePixels(renderRect, pixelBuffer, WriteableBitmap.BackBufferStride, 0, 0);
+                    WriteableBitmap.AddDirtyRect(renderRect);
+                    OnPropertyChanged("WriteableBitmap");
+                    WriteableBitmap.Unlock();
+                    WriteableBitmapVisibility = Visibility.Visible;
+                    _imageSeriesViewModel.ImageSource = WriteableBitmap;
+                });
             UpdateStatusProperties();
         }
+
+        void Render()
+        {
+            if (_transmissionLossRadial == null || (int)AxisSeriesViewModel.ActualWidth == 0 || (int)AxisSeriesViewModel.ActualHeight == 0)
+            {
+                Debug.WriteLine("Skipping render");
+                return;
+            }
+            var width = (int)Math.Min(_transmissionLossRadial.Ranges.Count, AxisSeriesViewModel.ActualWidth);
+            var height = (int)Math.Min(_transmissionLossRadial.Depths.Count, AxisSeriesViewModel.ActualHeight);
+            if (WriteableBitmap == null) _dispatcher.InvokeIfRequired(() => WriteableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null));
+            var renderRect = new Int32Rect(0, 0, width, height);
+            if (Radial != null && _transmissionLossRadial != null) _renderQueue.Post(Tuple.Create(_transmissionLossRadial, ColorMapViewModel, renderRect, new Range(ColorMapViewModel.CurrentRange), _sourceSequenceNumber, _displayQueue));
+            else WaitToRenderText = "This radial has not yet been calculated";
+            Interlocked.Increment(ref _sourceSequenceNumber);
+        }
+
+        readonly Subject<Tuple<int[], Int32Rect, long>> _displayQueue = new Subject<Tuple<int[], Int32Rect, long>>();
+        long _sourceSequenceNumber, _displayedSequenceNumber;
+        readonly ActionBlock<Tuple<TransmissionLossRadial, ColorMapViewModel, Int32Rect, Range, long, Subject<Tuple<int[], Int32Rect, long>>>> _renderQueue = new ActionBlock<Tuple<TransmissionLossRadial, ColorMapViewModel, Int32Rect, Range, long, Subject<Tuple<int[], Int32Rect, long>>>>(job =>
+        {
+            var tlRadial = job.Item1;
+            var colorMap = job.Item2;
+            var renderRect = job.Item3;
+            var range = job.Item4;
+            var sequenceNumber = job.Item5;
+            var displayQueue = job.Item6;
+            //Debug.WriteLine(string.Format("Begin rendering sequence number {0}", sequenceNumber));
+            var buffer = tlRadial.RenderToPixelBuffer(v => float.IsInfinity(v) ? colorMap.Colors[0] : colorMap.Lookup(v, range), renderRect.Width, renderRect.Height);
+            //Debug.WriteLine(string.Format("Done rendering sequence number {0}", sequenceNumber));
+            displayQueue.OnNext(Tuple.Create(buffer, renderRect, sequenceNumber));
+        },
+        new ExecutionDataflowBlockOptions
+        {
+            BoundedCapacity = -1,
+            MaxDegreeOfParallelism = System.Environment.ProcessorCount
+        });
 
         [UsedImplicitly] readonly PropertyObserver<RadialViewModel> _propertyObserver;
         [UsedImplicitly] readonly PropertyObserver<DataAxisViewModel> _xAxisPropertyObserver;
@@ -112,8 +171,6 @@ namespace ESME.Views.TransmissionLossViewer
             try
             {
                 _transmissionLossRadial = new TransmissionLossRadial((float)Radial.Bearing, new BellhopOutput(Radial.BasePath + ".shd"));
-                if (WriteableBitmap == null) WriteableBitmap = new WriteableBitmap(_transmissionLossRadial.Ranges.Count, _transmissionLossRadial.Depths.Count, 96, 96, PixelFormats.Bgr32, null);
-                _currentRange = new Range();
                 _imageSeriesViewModel.Top = Radial.Depths.First();
                 _imageSeriesViewModel.Left = Radial.Ranges.First();
                 _imageSeriesViewModel.Bottom = Radial.Depths.Last();
@@ -125,6 +182,7 @@ namespace ESME.Views.TransmissionLossViewer
                 AxisSeriesViewModel.YAxis.DataRange.Update(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
                 AxisSeriesViewModel.XAxis.VisibleRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
                 AxisSeriesViewModel.YAxis.VisibleRange.ForceUpdate(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
+                //Render();
             }
             catch (Exception e)
             {
@@ -137,10 +195,10 @@ namespace ESME.Views.TransmissionLossViewer
         void CalculateBottomProfileGeometry()
         {
             var profileData = Radial.BottomProfile.Select(bpp => new Point(bpp.Range * 1000, Math.Max(0.0, bpp.Depth))).ToList();
-            var deepestPoint = (from profile in profileData
-                                where !double.IsNaN(profile.Y)
-                                orderby profile.Y descending
-                                select profile).FirstOrDefault();
+            //var deepestPoint = (from profile in profileData
+            //                    where !double.IsNaN(profile.Y)
+            //                    orderby profile.Y descending
+            //                    select profile).FirstOrDefault();
             //Debug.WriteLine(string.Format("CalculateBottomProfileGeometry: Deepest point: {0}m at range {1}m", deepestPoint.Y, deepestPoint.X));
             var yRange = AxisSeriesViewModel.YAxis.VisibleRange == null || AxisSeriesViewModel.YAxis.VisibleRange.IsEmpty ? AxisSeriesViewModel.YAxis.DataRange : (IRange)AxisSeriesViewModel.YAxis.VisibleRange;
             profileData.Insert(0, new Point(profileData[0].X, yRange.Max));
@@ -187,128 +245,6 @@ namespace ESME.Views.TransmissionLossViewer
                 MouseTransmissionLossInfo = "Transmission Loss: N/A";
                 MouseSPLInfo = "Sound Pressure: N/A";
             }
-        }
-
-        readonly object _lockObject = new object();
-        Range _currentRange;
-        volatile bool _isRendering;
-        void BeginRenderBitmap(Guid guid, TransmissionLossRadial transmissionLoss)
-        {
-            if (transmissionLoss == null)
-            {
-                //Debug.WriteLine("Skipping rendering at 1");
-                WaitToRenderText = "This radial has not yet been calculated";
-                return;
-            }
-            if (WriteableBitmap == null)
-            {
-                //Debug.WriteLine("Skipping rendering at 2");
-                return;
-            }
-            if (_isRendering)
-            {
-                //Debug.WriteLine("Skipping rendering at 3");
-                return;
-            }
-            lock (_lockObject)
-            {
-                if (_isRendering)
-                {
-                    //Debug.WriteLine("Skipping rendering at 4");
-                    return;
-                }
-                //if (_curMinValue == ColorMapViewModel.CurMinValue && _curMaxValue == ColorMapViewModel.CurMaxValue)
-                if (!_currentRange.IsEmpty && _currentRange == ColorMapViewModel.CurrentRange)
-                {
-                    //Debug.WriteLine("Skipping rendering at 5");
-                    return;
-                }
-                //Debug.WriteLine("Render starting");
-                _isRendering = true;
-                //_curMinValue = ColorMapViewModel.CurMinValue;
-                //_curMaxValue = ColorMapViewModel.CurMaxValue;
-                _currentRange.Update(ColorMapViewModel.CurrentRange);
-            }
-            var tokenSource = new CancellationTokenSource();
-            var task = TaskEx.Run(() =>
-            {
-                lock (_lockObject) _isRendering = false;
-                RenderBitmapAsync(guid, transmissionLoss, tokenSource.Token);
-            });
-            task.ContinueWith(t =>
-            {
-                //Debug.WriteLine("Render completed, checking for re-render...");
-                BeginRenderBitmap(guid, transmissionLoss);
-            });
-        }
-
-        void RenderBitmapAsync(Guid guid, TransmissionLossRadial transmissionLoss, CancellationToken token)
-        {
-            if (token.IsCancellationRequested) return;
-
-            var width = transmissionLoss.Ranges.Count;
-            var height = transmissionLoss.Depths.Count;
-            var buffer = new int[width * height];
-
-            var infinityColor = ColorMapViewModel.Colors[0];
-            var yValues = Enumerable.Range(0, height).AsParallel();
-            yValues.ForAll(y =>
-            {
-                var curOffset = y * width;
-                for (var x = 0; x < width; x++)
-                {
-                    if (token.IsCancellationRequested) return;
-                    var curValue = transmissionLoss[y, x];
-                    var curColor = float.IsInfinity(curValue) ? infinityColor : ColorMapViewModel.Lookup(curValue);
-                    buffer[curOffset++] = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
-                }
-            });
-            _dispatcher.InvokeIfRequired(() =>
-            {
-                if (guid != Radial.Guid) return;
-                var rect = new Int32Rect(0, 0, width, height);
-                WriteableBitmap.Lock();
-                WriteableBitmap.WritePixels(rect, buffer, WriteableBitmap.BackBufferStride, 0, 0);
-                WriteableBitmap.AddDirtyRect(rect);
-                OnPropertyChanged("WriteableBitmap");
-                WriteableBitmap.Unlock();
-                WriteableBitmapVisibility = Visibility.Visible;
-                _imageSeriesViewModel.ImageSource = WriteableBitmap;
-            }, DispatcherPriority.Render);
-        }
-
-        void RenderBitmap(Guid guid, TransmissionLossRadial transmissionLoss, CancellationToken token)
-        {
-            if (token.IsCancellationRequested) return;
-
-            var width = transmissionLoss.Ranges.Count;
-            var height = transmissionLoss.Depths.Count;
-            var buffer = new int[width * height];
-
-            var infinityColor = ColorMapViewModel.Colors[0];
-            for (var y = 0; y < height; y++)
-            {
-                var curOffset = y * width;
-                for (var x = 0; x < width; x++)
-                {
-                    if (token.IsCancellationRequested) return;
-                    var curValue = transmissionLoss[y, x];
-                    var curColor = float.IsInfinity(curValue) ? infinityColor : ColorMapViewModel.Lookup(curValue);
-                    buffer[curOffset++] = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
-                }
-            }
-            _dispatcher.InvokeIfRequired(() =>
-            {
-                if (guid != Radial.Guid) return;
-                var rect = new Int32Rect(0, 0, width, height);
-                WriteableBitmap.Lock();
-                WriteableBitmap.WritePixels(rect, buffer, WriteableBitmap.BackBufferStride, 0, 0);
-                WriteableBitmap.AddDirtyRect(rect);
-                OnPropertyChanged("WriteableBitmap");
-                WriteableBitmap.Unlock();
-                WriteableBitmapVisibility = Visibility.Visible;
-                _imageSeriesViewModel.ImageSource = WriteableBitmap;
-            }, DispatcherPriority.Render);
         }
 
         #region File and clipboard-oriented stuff
