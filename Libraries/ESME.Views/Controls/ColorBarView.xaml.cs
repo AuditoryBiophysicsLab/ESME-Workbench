@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using HRC.Plotting;
 
 namespace ESME.Views.Controls
 {
@@ -19,6 +20,7 @@ namespace ESME.Views.Controls
         Point _previousPoint;
         StepFunction _steps;
         Image _colorBarImage;
+        IDisposable _currentRangeObserver, _fullRangeObserver, _statisticalRangeObserver;
 
         public ColorBarView() { InitializeComponent(); }
 
@@ -26,7 +28,7 @@ namespace ESME.Views.Controls
 
         #region public WriteableBitmap ColorBarImage {get; set;}
 
-        public static readonly DependencyProperty ColorBarImageProperty = DependencyProperty.Register("ColorBarImage", typeof (WriteableBitmap), typeof (ColorBarView), new FrameworkPropertyMetadata(new PropertyChangedCallback(ColorBarImagePropertyChanged)));
+        public static readonly DependencyProperty ColorBarImageProperty = DependencyProperty.Register("ColorBarImage", typeof (WriteableBitmap), typeof (ColorBarView), new FrameworkPropertyMetadata(ColorBarImagePropertyChanged));
 
         public WriteableBitmap ColorBarImage
         {
@@ -42,6 +44,73 @@ namespace ESME.Views.Controls
             InvalidateVisual();
         }
 
+        #endregion
+
+        #region dependency property Range CurrentRange
+
+        public static DependencyProperty CurrentRangeProperty = DependencyProperty.Register("CurrentRange",
+                                                                                 typeof(Range),
+                                                                                 typeof(ColorBarView),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, CurrentRangePropertyChanged));
+
+        public Range CurrentRange { get { return (Range)GetValue(CurrentRangeProperty); } set { SetValue(CurrentRangeProperty, value); } }
+
+        static void CurrentRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarView)obj).CurrentRangePropertyChanged(); }
+        void CurrentRangePropertyChanged()
+        {
+            if (_currentRangeObserver != null) _currentRangeObserver.Dispose();
+            if (CurrentRange == null) return;
+            _currentRangeObserver = CurrentRange.Subscribe(e =>
+            {
+                if (CurrentRange == null) return;
+                _curRange = CurrentRange.Max - CurrentRange.Min;
+                var topHeight = ActualHeight * (FullRange.Max - CurrentRange.Max) / _fullRange;
+                var botHeight = ActualHeight * (CurrentRange.Min - FullRange.Min) / _fullRange;
+                if (topHeight >= 0) topMargin.Height = ActualHeight * (FullRange.Max - CurrentRange.Max) / _fullRange;
+                else topMargin.Height = 0;
+                if (botHeight >= 0) botMargin.Height = ActualHeight * (CurrentRange.Min - FullRange.Min) / _fullRange;
+                else botMargin.Height = 0;
+            });
+        }
+
+        #endregion
+
+        #region dependency property Range FullRange
+
+        public static DependencyProperty FullRangeProperty = DependencyProperty.Register("FullRange",
+                                                                                 typeof(Range),
+                                                                                 typeof(ColorBarView),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, FullRangePropertyChanged));
+
+        public Range FullRange { get { return (Range)GetValue(FullRangeProperty); } set { SetValue(FullRangeProperty, value); } }
+
+        static void FullRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarView)obj).FullRangePropertyChanged(); }
+        void FullRangePropertyChanged()
+        {
+            if (_fullRangeObserver != null) _fullRangeObserver.Dispose();
+            if (FullRange == null) return;
+            _fullRangeObserver = FullRange.Subscribe(e =>
+            {
+                if (FullRange == null) return;
+                _fullRange = (CurrentRange.Max - CurrentRange.Min);
+                if (Math.Abs(_fullRange) < double.Epsilon) _fullRange = 1.0;
+                _steps = new StepFunction(0, 95, 95, x => _fullRange * Math.Exp(-0.047 * x));
+                ResetColorbarRange(0.2);
+            });
+        }
+        #endregion
+
+        #region dependency property Range StatisticalRange
+
+        public static DependencyProperty StatisticalRangeProperty = DependencyProperty.Register("StatisticalRange",
+                                                                                 typeof(Range),
+                                                                                 typeof(ColorBarView),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, StatisticalRangePropertyChanged));
+
+        public Range StatisticalRange { get { return (Range)GetValue(StatisticalRangeProperty); } set { SetValue(StatisticalRangeProperty, value); } }
+
+        static void StatisticalRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarView)obj).StatisticalRangePropertyChanged(); }
+        void StatisticalRangePropertyChanged() { }
         #endregion
 
         #region public double Maximum {get; set;}
@@ -66,14 +135,6 @@ namespace ESME.Views.Controls
 
         #endregion
 
-        #region dependency property double StatisticalMaximum
-
-        public static DependencyProperty StatisticalMaximumProperty = DependencyProperty.Register("StatisticalMaximum", typeof(double), typeof(ColorBarView), new FrameworkPropertyMetadata(double.NaN, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-
-        public double StatisticalMaximum { get { return (double)GetValue(StatisticalMaximumProperty); } set { SetValue(StatisticalMaximumProperty, value); } }
-
-        #endregion
-
         #region public double Minimum {get; set;}
 
         public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register("Minimum", typeof (double), typeof (ColorBarView), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MinMaxPropertiesChanged));
@@ -83,6 +144,14 @@ namespace ESME.Views.Controls
             get { return (double) GetValue(MinimumProperty); }
             set { SetCurrentValue(MinimumProperty, value); }
         }
+
+        #endregion
+
+        #region dependency property double StatisticalMaximum
+
+        public static DependencyProperty StatisticalMaximumProperty = DependencyProperty.Register("StatisticalMaximum", typeof(double), typeof(ColorBarView), new FrameworkPropertyMetadata(double.NaN, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+        public double StatisticalMaximum { get { return (double)GetValue(StatisticalMaximumProperty); } set { SetValue(StatisticalMaximumProperty, value); } }
 
         #endregion
 
@@ -118,13 +187,12 @@ namespace ESME.Views.Controls
         void CurRangePropertiesChanged()
         {
             _curRange = CurrentMaximum - CurrentMinimum;
-            double topHeight = ActualHeight*(Maximum - CurrentMaximum)/_fullRange;
-            double botHeight = ActualHeight*(CurrentMinimum - Minimum)/_fullRange;
-            if (topHeight >= 0) topMargin.Height = ActualHeight*(Maximum - CurrentMaximum)/_fullRange;
+            var topHeight = ActualHeight * (Maximum - CurrentMaximum) / _fullRange;
+            var botHeight = ActualHeight * (CurrentMinimum - Minimum) / _fullRange;
+            if (topHeight >= 0) topMargin.Height = ActualHeight * (Maximum - CurrentMaximum) / _fullRange;
             else topMargin.Height = 0;
-            if (botHeight >= 0) botMargin.Height = ActualHeight*(CurrentMinimum - Minimum)/_fullRange;
+            if (botHeight >= 0) botMargin.Height = ActualHeight * (CurrentMinimum - Minimum) / _fullRange;
             else botMargin.Height = 0;
-            //botMargin.Height = 0;
         }
 
         #endregion
@@ -197,7 +265,7 @@ namespace ESME.Views.Controls
         {
             var newRange = e.Delta < 0 ? _steps.StepForward(_curRange) : _steps.StepBack(_curRange);
 
-            double newDelta = (_curRange - newRange)/2;
+            var newDelta = (_curRange - newRange)/2;
             CurrentMaximum -= newDelta;
             CurrentMinimum += newDelta;
         }

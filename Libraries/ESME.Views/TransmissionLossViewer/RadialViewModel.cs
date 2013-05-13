@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Globalization;
@@ -45,9 +46,6 @@ namespace ESME.Views.TransmissionLossViewer
             AxisSeriesViewModel.YAxis.IsInverted = true;
             AxisSeriesViewModel.YAxis.Label = "Depth (m)";
             AxisSeriesViewModel.YAxisTicks = null;
-            //AxisSeriesViewModel.XAxis.DataRange.RangeChanged += (sender, args) => CalculateBottomProfileGeometry();
-            //AxisSeriesViewModel.YAxis.DataRange.RangeChanged += (sender, args) => CalculateBottomProfileGeometry();
-            //AxisSeriesViewModel.XAxis.VisibleRange.RangeChanged += (sender, args) => CalculateBottomProfileGeometry();
             AxisSeriesViewModel.YAxis.VisibleRange.RangeChanged += (sender, args) => CalculateBottomProfileGeometry();
             _propertyObserver = new PropertyObserver<RadialViewModel>(this)
                 .RegisterHandler(r => r.Radial, RadialChanged);
@@ -57,10 +55,8 @@ namespace ESME.Views.TransmissionLossViewer
                 .RegisterHandler(x => x.MouseDataLocation, UpdateStatusProperties);
             _yAxisPropertyObserver = new PropertyObserver<DataAxisViewModel>(AxisSeriesViewModel.YAxis)
                 .RegisterHandler(y => y.MouseDataLocation, UpdateStatusProperties);
-            Observable.FromEventPattern<SizeChangedEventArgs>(view, "SizeChanged")
-                .Subscribe(e => Render());
-            ColorMapViewModel.CurrentRange.Throttle(TimeSpan.FromMilliseconds(20))
-                .Subscribe(e => Render());
+            _observers.Add(Observable.FromEventPattern<SizeChangedEventArgs>(view, "SizeChanged").Subscribe(e => Render()));
+            _observers.Add(ColorMapViewModel.CurrentRange.Throttle(TimeSpan.FromMilliseconds(20)).Subscribe(e => Render()));
             _displayQueue.ObserveOnDispatcher()
                 .Subscribe(result =>
                 {
@@ -68,14 +64,12 @@ namespace ESME.Views.TransmissionLossViewer
                     var renderRect = result.Item2;
                     var sequenceNumber = result.Item3;
                     //Debug.WriteLine(string.Format("Got completed event for sequence number {0} completed", sequenceNumber));
-                    if (sequenceNumber < _displayedSequenceNumber || WriteableBitmap == null)
+                    if (sequenceNumber < _displayedSequenceNumber || WriteableBitmap == null || WriteableBitmap.PixelWidth != renderRect.Width || WriteableBitmap.PixelHeight != renderRect.Height)
                     {
-                        Debug.WriteLine("Discarding image buffer");
-                        return;
-                    }
-                    if (WriteableBitmap.PixelWidth != renderRect.Width || WriteableBitmap.PixelHeight != renderRect.Height)
-                    {
-                        Debug.WriteLine("Image size mismatch");
+                        Debug.WriteLine(string.Format("Discarding image buffer:{0}{1}", 
+                            sequenceNumber < _displayedSequenceNumber ? " Old image sequence" : "", 
+                            WriteableBitmap == null ? " No bitmap" : 
+                            WriteableBitmap.PixelWidth != renderRect.Width || WriteableBitmap.PixelHeight != renderRect.Height ? " Size mismatch" : ""));
                         return;
                     }
                     _displayedSequenceNumber = sequenceNumber;
@@ -87,14 +81,24 @@ namespace ESME.Views.TransmissionLossViewer
                     WriteableBitmapVisibility = Visibility.Visible;
                     _imageSeriesViewModel.ImageSource = WriteableBitmap;
                 });
+            _observers.Add(Observable.FromEventPattern<RoutedEventArgs>(view, "Unloaded").Subscribe(e =>
+            {
+                _renderQueue.Complete();
+                _displayQueue.Dispose();
+                _observers.ForEach(o => o.Dispose());
+            }));
             UpdateStatusProperties();
         }
+
+        readonly List<IDisposable> _observers = new List<IDisposable>();
 
         void Render()
         {
             if (_transmissionLossRadial == null || (int)AxisSeriesViewModel.ActualWidth == 0 || (int)AxisSeriesViewModel.ActualHeight == 0)
             {
-                Debug.WriteLine("Skipping render");
+                Debug.WriteLine(string.Format("Skipping render:{0}{1}",
+                    _transmissionLossRadial == null ? " No radial" : "",
+                    (int)AxisSeriesViewModel.ActualWidth == 0 || (int)AxisSeriesViewModel.ActualHeight == 0 ? " Invalid render size" : ""));
                 return;
             }
             var width = (int)Math.Min(_transmissionLossRadial.Ranges.Count, AxisSeriesViewModel.ActualWidth);
@@ -148,7 +152,6 @@ namespace ESME.Views.TransmissionLossViewer
         void RadialChanged()
         {
             //Debug.WriteLine("TransmissionLossRadialViewModel: Initializing transmission loss radial");
-            WriteableBitmap = null;
             WriteableBitmapVisibility = Visibility.Collapsed;
             if (Radial == null || !Radial.IsCalculated)
             {
