@@ -251,6 +251,8 @@ namespace HRC.Navigation
 
         public static explicit operator GeoArray(Geo[] geos) { return new GeoArray(geos); }
 
+        public static explicit operator GeoArray(GeoRect rect){ return new GeoArray(rect.NorthWest,rect.SouthEast);}
+
         #endregion
         #region IEnumerable<Geo> support
         public IEnumerator<Geo> GetEnumerator()
