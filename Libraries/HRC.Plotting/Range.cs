@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Reactive.Subjects;
 using System.Windows;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using HRC.WPF;
 
@@ -63,8 +64,14 @@ namespace HRC.Plotting
             Update(valueList.Min(), valueList.Max());
         }
 
-        public void Update(IRange range) { Update(range.Min, range.Max); }
-        public void ForceUpdate(IRange range) { ForceUpdate(range.Min, range.Max); }
+        public void Update(IRange range)
+        {
+            Update(range.Min, range.Max);
+        }
+        public void ForceUpdate(IRange range)
+        {
+            ForceUpdate(range.Min, range.Max);
+        }
 
         public void Update(IEnumerable<Range> ranges)
         {
@@ -102,7 +109,10 @@ namespace HRC.Plotting
             var realMax = double.IsNaN(Max) ? max : Math.Max(Max, max);
             Update(realMin, realMax);
         }
-        public override void Add(IRange range) { Add(range.Min, range.Max); }
+        public override void Add(IRange range)
+        {
+            Add(range.Min, range.Max);
+        }
         public void Add(IEnumerable<Range> ranges)
         {
             var rangeList = ranges.ToList();
@@ -235,7 +245,10 @@ namespace HRC.Plotting
             OnRangeChanged(oldRange);
         }
 
-        public virtual Range Expand(double amount) { return new Range(Min - amount, Max + amount); }
+        public virtual Range Expand(double amount)
+        {
+            return new Range(Min - amount, Max + amount);
+        }
 
         public double Value { get { return Max - Min; } }
 
@@ -261,12 +274,7 @@ namespace HRC.Plotting
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-
-            // If one is empty and the other is not, return false
-            if ((IsEmpty && !other.IsEmpty) || (!IsEmpty && other.IsEmpty)) return false;
-            // If both ranges are empty, they are equal
-            if (IsEmpty && other.IsEmpty) return true;
-            return (Math.Abs(Max - other.Max) < double.Epsilon && Math.Abs(Min - other.Min) < double.Epsilon);
+            return other.Minimum.Equals(Minimum) && other.Maximum.Equals(Maximum) && Equals(other._subject, _subject);
         }
 
         public bool Equals(IRange other) { return Equals((RangeBase)other); }
@@ -275,9 +283,16 @@ namespace HRC.Plotting
         {
             // If they're both null, they are equal
             if (ReferenceEquals(null, r1) && ReferenceEquals(null, r2)) return true;
-            return !ReferenceEquals(null, r1) && r1.Equals(r2);
+            if (ReferenceEquals(null, r1)) return false;
+            if (ReferenceEquals(null, r2)) return false;
+            return (Math.Abs(r1.Min - r2.Min) < double.Epsilon) && (Math.Abs(r1.Max - r2.Max) < double.Epsilon);
         }
-        public static bool operator !=(RangeBase r1, RangeBase r2) { return !(r1 == r2); }
+        public static bool operator !=(RangeBase r1, RangeBase r2)
+        {
+            if (ReferenceEquals(null, r1) && !ReferenceEquals(null, r2)) return true;
+            if (!ReferenceEquals(null, r1) && ReferenceEquals(null, r2)) return true;
+            return !(r1 == r2);
+        }
 
         public override bool Equals(object obj)
         {
@@ -301,6 +316,7 @@ namespace HRC.Plotting
 
         readonly Subject<IRange> _subject = new Subject<IRange>();
     }
+
     public interface IRange : INotifyRangeChanged, IEquatable<IRange>, IObservable<IRange>
     {
         double Min { get; }
@@ -340,6 +356,76 @@ namespace HRC.Plotting
                 }
                 return manager;
             }
+        }
+    }
+    public class RangeAnimation : AnimationTimeline
+    {
+        #region dependency property Range From
+
+        public static DependencyProperty FromProperty = DependencyProperty.Register("From",
+                                                                                 typeof(Range),
+                                                                                 typeof(RangeAnimation),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, FromPropertyChanged));
+
+        public Range From { get { return (Range)GetValue(FromProperty); } set { SetValue(FromProperty, value); } }
+
+        static void FromPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((RangeAnimation)obj).FromPropertyChanged(); }
+        void FromPropertyChanged() { _from = new Range(From); }
+        #endregion
+
+        #region dependency property Range To
+
+        public static DependencyProperty ToProperty = DependencyProperty.Register("To",
+                                                                                 typeof(Range),
+                                                                                 typeof(RangeAnimation),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, ToPropertyChanged));
+
+        public Range To { get { return (Range)GetValue(ToProperty); } set { SetValue(ToProperty, value); } }
+
+        static void ToPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((RangeAnimation)obj).ToPropertyChanged(); }
+        void ToPropertyChanged() { }
+        #endregion
+
+        #region dependency property IEasingFunction EasingFunction
+
+        public static DependencyProperty EasingFunctionProperty = DependencyProperty.Register("EasingFunction",
+                                                                                 typeof(IEasingFunction),
+                                                                                 typeof(RangeAnimation),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, EasingFunctionPropertyChanged));
+
+        public IEasingFunction EasingFunction { get { return (IEasingFunction)GetValue(EasingFunctionProperty); } set { SetValue(EasingFunctionProperty, value); } }
+
+        static void EasingFunctionPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((RangeAnimation)obj).EasingFunctionPropertyChanged(); }
+        void EasingFunctionPropertyChanged() { }
+        #endregion
+
+        public RangeAnimation() {}
+        public RangeAnimation(Range from, Range to, Duration duration, FillBehavior fillBehavior = FillBehavior.Stop, IEasingFunction easingFunction = null)
+        {
+            From = from;
+            To = to;
+            Duration = duration;
+            FillBehavior = fillBehavior;
+            EasingFunction = easingFunction;
+        }
+
+        Range _from;
+        protected override Freezable CreateInstanceCore() { return new RangeAnimation(); }
+        public override Type TargetPropertyType { get { return typeof(Range); } }
+        public override object GetCurrentValue(object defaultOriginValue, object defaultDestinationValue, AnimationClock animationClock)
+        {
+            if (!animationClock.CurrentProgress.HasValue) return From;
+
+            var progress = (EasingFunction != null) ? EasingFunction.Ease(animationClock.CurrentProgress.Value) : animationClock.CurrentProgress.Value;
+
+            double newMin, newMax;
+            if (_from.Min > To.Min) newMin = (1 - progress) * (_from.Min - To.Min) + To.Min;
+            else newMin = progress * (To.Min - _from.Min) + _from.Min;
+            if (_from.Max > To.Max) newMax = (1 - progress) * (_from.Max - To.Max) + To.Max;
+            else newMax = progress * (To.Max - _from.Max) + _from.Max;
+            From.Update(newMin, newMax);
+            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} GetCurrentValue returning: {1}", DateTime.Now, From));
+            return From;
         }
     }
 }

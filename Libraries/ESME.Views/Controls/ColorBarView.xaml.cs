@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -60,19 +61,22 @@ namespace ESME.Views.Controls
         {
             if (_currentRangeObserver != null) _currentRangeObserver.Dispose();
             if (CurrentRange == null) return;
-            _currentRangeObserver = CurrentRange.Subscribe(e =>
-            {
-                if (CurrentRange == null) return;
-                _curRange = CurrentRange.Max - CurrentRange.Min;
-                var topHeight = ActualHeight * (FullRange.Max - CurrentRange.Max) / _fullRange;
-                var botHeight = ActualHeight * (CurrentRange.Min - FullRange.Min) / _fullRange;
-                if (topHeight >= 0) topMargin.Height = ActualHeight * (FullRange.Max - CurrentRange.Max) / _fullRange;
-                else topMargin.Height = 0;
-                if (botHeight >= 0) botMargin.Height = ActualHeight * (CurrentRange.Min - FullRange.Min) / _fullRange;
-                else botMargin.Height = 0;
-            });
+            _currentRangeObserver = CurrentRange.Subscribe(e => CurrentRangeChanged());
         }
-
+        void CurrentRangeChanged()
+        {
+            if (CurrentRange == null) return;
+            if (_steps != null)
+            {
+                CurrentRange.Max = Math.Min(CurrentRange.Max, FullRange.Max);
+                CurrentRange.Min = Math.Max(CurrentRange.Min, FullRange.Min);
+                if ((CurrentRange.Min >= (CurrentRange.Max - _steps.Last().Y)) &&
+                    ((CurrentRange.Max <= (CurrentRange.Min + _steps.Last().Y)))) return;
+            }
+            _curRange = CurrentRange.Max - CurrentRange.Min;
+            topMargin.Height = Math.Max(0, ActualHeight * (FullRange.Max - CurrentRange.Max) / _fullRange);
+            botMargin.Height = Math.Max(0, ActualHeight * (CurrentRange.Min - FullRange.Min) / _fullRange);
+        }
         #endregion
 
         #region dependency property Range FullRange
@@ -89,14 +93,16 @@ namespace ESME.Views.Controls
         {
             if (_fullRangeObserver != null) _fullRangeObserver.Dispose();
             if (FullRange == null) return;
-            _fullRangeObserver = FullRange.Subscribe(e =>
-            {
-                if (FullRange == null) return;
-                _fullRange = (CurrentRange.Max - CurrentRange.Min);
-                if (Math.Abs(_fullRange) < double.Epsilon) _fullRange = 1.0;
-                _steps = new StepFunction(0, 95, 95, x => _fullRange * Math.Exp(-0.047 * x));
-                ResetColorbarRange(0.2);
-            });
+            _fullRangeObserver = FullRange.Subscribe(e => FullRangeChanged());
+            FullRangeChanged();
+        }
+        void FullRangeChanged()
+        {
+            if (FullRange == null) return;
+            _fullRange = FullRange.Value;
+            if (Math.Abs(_fullRange) < double.Epsilon) _fullRange = 1.0;
+            _steps = new StepFunction(0, 95, 95, x => _fullRange * Math.Exp(-0.047 * x));
+            NewResetColorbarRange(0.2);
         }
         #endregion
 
@@ -110,9 +116,16 @@ namespace ESME.Views.Controls
         public Range StatisticalRange { get { return (Range)GetValue(StatisticalRangeProperty); } set { SetValue(StatisticalRangeProperty, value); } }
 
         static void StatisticalRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarView)obj).StatisticalRangePropertyChanged(); }
-        void StatisticalRangePropertyChanged() { }
+        void StatisticalRangePropertyChanged()
+        {
+            if (_statisticalRangeObserver != null) _statisticalRangeObserver.Dispose();
+            if (StatisticalRange == null) return;
+            _statisticalRangeObserver = StatisticalRange.Subscribe(e => StatisticalRangeChanged());
+            StatisticalRangeChanged();
+        }
+        void StatisticalRangeChanged() { }
         #endregion
-
+#if false
         #region public double Maximum {get; set;}
 
         public static readonly DependencyProperty MaximumProperty = DependencyProperty.Register("Maximum", typeof (double), typeof (ColorBarView), new FrameworkPropertyMetadata(100.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MinMaxPropertiesChanged));
@@ -179,20 +192,14 @@ namespace ESME.Views.Controls
         {
             if (_steps == null) return;
             if ((double)args.NewValue > Maximum) CurrentMaximum = Maximum;
-            // else if (CurrentMinimum >= ((double) args.NewValue - _steps.Last().Y)) CurrentMinimum = (double) args.NewValue - _steps.Last().Y;
-            else if (CurrentMinimum >= ((double)args.NewValue - _steps.Last().Y)) return;
-            else CurRangePropertiesChanged();
+            else if (CurrentMinimum < ((double)args.NewValue - _steps.Last().Y)) CurRangePropertiesChanged();
         }
 
         void CurRangePropertiesChanged()
         {
             _curRange = CurrentMaximum - CurrentMinimum;
-            var topHeight = ActualHeight * (Maximum - CurrentMaximum) / _fullRange;
-            var botHeight = ActualHeight * (CurrentMinimum - Minimum) / _fullRange;
-            if (topHeight >= 0) topMargin.Height = ActualHeight * (Maximum - CurrentMaximum) / _fullRange;
-            else topMargin.Height = 0;
-            if (botHeight >= 0) botMargin.Height = ActualHeight * (CurrentMinimum - Minimum) / _fullRange;
-            else botMargin.Height = 0;
+            topMargin.Height = Math.Max(0, ActualHeight * (Maximum - CurrentMaximum) / _fullRange);
+            botMargin.Height = Math.Max(0, ActualHeight * (CurrentMinimum - Minimum) / _fullRange);
         }
 
         #endregion
@@ -213,17 +220,16 @@ namespace ESME.Views.Controls
         {
             if (_steps == null) return;
             if ((double)args.NewValue < Minimum) CurrentMinimum = Minimum;
-            //else if (CurrentMaximum <= ((double) args.NewValue + _steps.Last().Y)) CurrentMaximum = (double) args.NewValue + _steps.Last().Y;
-            else if (CurrentMaximum <= ((double)args.NewValue + _steps.Last().Y)) return;
-            else CurRangePropertiesChanged();
+            else if (CurrentMaximum > ((double)args.NewValue + _steps.Last().Y)) CurRangePropertiesChanged();
         }
 
         #endregion
+#endif
 
         #endregion
 
         #region Colorbar Animation
-
+#if false
         // Animates the colorbar returning to its full range over a specified number of seconds
         void ResetColorbarRange(double transitionTimeSeconds)
         {
@@ -258,7 +264,59 @@ namespace ESME.Views.Controls
                 BeginAnimation(CurrentMinimumProperty, curMinAnimation);
             }
         }
+#endif
 
+        // Animates the colorbar returning to its full range over a specified number of seconds
+        void NewResetColorbarRange(double transitionTimeSeconds)
+        {
+            //var maxTarget = FullRange.Max;
+            //var minTarget = FullRange.Min;
+            _animationTarget = FullRange;
+            if (CurrentRange == FullRange && !StatisticalRange.IsEmpty)
+            {
+                //maxTarget = StatisticalRange.Max;
+                //minTarget = StatisticalRange.Min;
+                _animationTarget = StatisticalRange;
+            }
+            if (transitionTimeSeconds <= 0)
+            {
+                //CurrentRange.Update(maxTarget, minTarget);
+                CurrentRange.Update(_animationTarget);
+            }
+            else
+            {
+                var duration = new Duration(TimeSpan.FromSeconds(transitionTimeSeconds));
+                //var curMaxAnimation = new DoubleAnimation(maxTarget, duration, FillBehavior.Stop);
+                //var curMinAnimation = new DoubleAnimation(minTarget, duration, FillBehavior.Stop);
+                _rangeAnimation = new RangeAnimation(CurrentRange, _animationTarget, duration);
+                _rangeAnimation.Completed += RangeAnimationCompleted;
+                //curMaxAnimation.Completed += () => 
+                //{
+                //    BeginAnimation(CurrentMaximumProperty, null);
+                //    CurrentMaximum = maxTarget;
+                //};
+                //curMinAnimation.Completed += () =>
+                //{
+                //    BeginAnimation(CurrentMinimumProperty, null);
+                //    CurrentMinimum = minTarget;
+                //};
+                //BeginAnimation(CurrentMaximumProperty, curMaxAnimation);
+                //BeginAnimation(CurrentMinimumProperty, curMinAnimation);
+                //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} BeginAnimation From: {1} To: {2}", DateTime.Now, CurrentRange, _animationTarget));
+                BeginAnimation(CurrentRangeProperty, _rangeAnimation);
+            }
+        }
+
+        Range _animationTarget;
+        RangeAnimation _rangeAnimation;
+
+        void RangeAnimationCompleted(object sender, EventArgs args)
+        {
+            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} AnimationCompleted", DateTime.Now));
+            BeginAnimation(CurrentRangeProperty, null);
+            CurrentRange.Update(_animationTarget);
+            _rangeAnimation.Completed -= RangeAnimationCompleted;
+        }
         #endregion
 
         void Image_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -266,8 +324,9 @@ namespace ESME.Views.Controls
             var newRange = e.Delta < 0 ? _steps.StepForward(_curRange) : _steps.StepBack(_curRange);
 
             var newDelta = (_curRange - newRange)/2;
-            CurrentMaximum -= newDelta;
-            CurrentMinimum += newDelta;
+            //CurrentMaximum -= newDelta;
+            //CurrentMinimum += newDelta;
+            CurrentRange.Update(CurrentRange.Min - newDelta, CurrentRange.Max + newDelta);
         }
 
         void Image_MouseMove(object sender, MouseEventArgs e)
@@ -283,8 +342,9 @@ namespace ESME.Views.Controls
                 var yDeltaValue = (_previousPoint.Y - e.GetPosition(this).Y)*deltaValuePerPixel;
                 var xDeltaValue = (e.GetPosition(this).X - _previousPoint.X)*deltaValuePerPixel;
                 var netMouseMove = (xDeltaValue / 2) - yDeltaValue;
-                CurrentMaximum = CurrentMaximum - netMouseMove;
-                CurrentMinimum = CurrentMinimum - netMouseMove;
+                //CurrentMaximum = CurrentMaximum - netMouseMove;
+                //CurrentMinimum = CurrentMinimum - netMouseMove;
+                CurrentRange.Update(CurrentRange.Min - netMouseMove, CurrentRange.Max - netMouseMove);
             }
             _previousPoint = e.GetPosition(this);
         }
@@ -299,7 +359,7 @@ namespace ESME.Views.Controls
                     Mouse.Capture(_colorBarImage, CaptureMode.Element);
                     break;
                 case 2:
-                    ResetColorbarRange(0.2);
+                    NewResetColorbarRange(0.2);
                     break;
                 default:
                     break;

@@ -56,7 +56,7 @@ namespace ESME.Views.TransmissionLossViewer
             _yAxisPropertyObserver = new PropertyObserver<DataAxisViewModel>(AxisSeriesViewModel.YAxis)
                 .RegisterHandler(y => y.MouseDataLocation, UpdateStatusProperties);
             _observers.Add(Observable.FromEventPattern<SizeChangedEventArgs>(view, "SizeChanged").Subscribe(e => Render()));
-            _observers.Add(ColorMapViewModel.CurrentRange.Throttle(TimeSpan.FromMilliseconds(20)).Subscribe(e => Render()));
+            _observers.Add(ColorMapViewModel.CurrentRange.Sample(TimeSpan.FromMilliseconds(50)).Subscribe(e => Render()));
             _displayQueue.ObserveOnDispatcher()
                 .Subscribe(result =>
                 {
@@ -105,8 +105,10 @@ namespace ESME.Views.TransmissionLossViewer
             var height = (int)Math.Min(_transmissionLossRadial.Depths.Count, AxisSeriesViewModel.ActualHeight);
             if (WriteableBitmap == null) _dispatcher.InvokeIfRequired(() => WriteableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null));
             var renderRect = new Int32Rect(0, 0, width, height);
+            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} Starting render", DateTime.Now));
             if (Radial != null && _transmissionLossRadial != null) _renderQueue.Post(Tuple.Create(_transmissionLossRadial, ColorMapViewModel, renderRect, new Range(ColorMapViewModel.CurrentRange), _sourceSequenceNumber, _displayQueue));
             else WaitToRenderText = "This radial has not yet been calculated";
+            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} Render complete", DateTime.Now));
             Interlocked.Increment(ref _sourceSequenceNumber);
         }
 
