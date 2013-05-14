@@ -40,8 +40,8 @@ namespace ESME.Environment
         {
             var bounds = new GeoArray(geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest);
             var result = new Animat { ScenarioSpecies = species };
-            var radius = Planet.wgs84_earthEquatorialRadiusMeters_D / 1000;
-            var area = bounds.Area * radius * radius;
+
+            var area = bounds.Area;
             //Debug.WriteLine("Area: {0}",area);
             var population = (int)Math.Floor(area * species.PopulationDensity);
             for (var i = 0; i < population; i++)
@@ -58,8 +58,8 @@ namespace ESME.Environment
         {
             var bounds = new GeoArray(geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest);
             var result = new Animat { ScenarioSpecies = species };
-            var radius = Planet.wgs84_earthEquatorialRadiusMeters_D / 1000;
-            var area = bounds.Area * radius * radius;
+            
+            var area = bounds.Area;
             //Debug.WriteLine("Area: {0}",area);
             var transformManyBlock = new TransformManyBlock<int, Geo<float>>(count =>
             {
@@ -114,8 +114,8 @@ namespace ESME.Environment
 
             var bounds = new GeoArray(geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest);
             var result = new Animat { ScenarioSpecies = species };
-            var radius = Planet.wgs84_earthEquatorialRadiusMeters_D / 1000;
-            var area = bounds.Area * radius * radius;
+            
+            var area = bounds.Area;
             //Debug.WriteLine("Area: {0}",area);
             var transformManyBlock = new TransformManyBlock<int, Geo<float>>(count =>
             {
