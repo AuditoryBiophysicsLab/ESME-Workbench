@@ -80,6 +80,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="INotifyRangeChanged.cs" />
+    <Compile Include="IRange.cs" />
+    <Compile Include="NotifyRangeChangedEventArgs.cs" />
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="AxisLabeling\Language\Expressions\Expression.cs" />
     <Compile Include="AxisLabeling\Language\Expressions\Formula.cs" />
@@ -125,6 +128,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Range.cs" />
+    <Compile Include="RangeAnimation.cs" />
+    <Compile Include="RangeBase.cs" />
+    <Compile Include="RangeCollection.cs" />
     <Compile Include="SeriesMarkerType.cs" />
     <Compile Include="SeriesViewModelBase.cs" />
     <Compile Include="StackedBarSeriesViewModel.cs" />

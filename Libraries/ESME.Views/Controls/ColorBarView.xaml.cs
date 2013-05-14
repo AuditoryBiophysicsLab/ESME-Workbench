@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using HRC.Plotting;
 
@@ -125,106 +123,6 @@ namespace ESME.Views.Controls
         }
         void StatisticalRangeChanged() { }
         #endregion
-#if false
-        #region public double Maximum {get; set;}
-
-        public static readonly DependencyProperty MaximumProperty = DependencyProperty.Register("Maximum", typeof (double), typeof (ColorBarView), new FrameworkPropertyMetadata(100.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MinMaxPropertiesChanged));
-
-        public double Maximum
-        {
-            get { return (double) GetValue(MaximumProperty); }
-            set { SetCurrentValue(MaximumProperty, value); }
-        }
-
-        static void MinMaxPropertiesChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarView) obj).MinMaxPropertiesChanged(); }
-
-        void MinMaxPropertiesChanged()
-        {
-            _fullRange = (Maximum - Minimum);
-            if (Math.Abs(_fullRange) < double.Epsilon) _fullRange = 1.0;
-            _steps = new StepFunction(0, 95, 95, x => _fullRange*Math.Exp(-0.047*x));
-            ResetColorbarRange(0.2);
-        }
-
-        #endregion
-
-        #region public double Minimum {get; set;}
-
-        public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register("Minimum", typeof (double), typeof (ColorBarView), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, MinMaxPropertiesChanged));
-
-        public double Minimum
-        {
-            get { return (double) GetValue(MinimumProperty); }
-            set { SetCurrentValue(MinimumProperty, value); }
-        }
-
-        #endregion
-
-        #region dependency property double StatisticalMaximum
-
-        public static DependencyProperty StatisticalMaximumProperty = DependencyProperty.Register("StatisticalMaximum", typeof(double), typeof(ColorBarView), new FrameworkPropertyMetadata(double.NaN, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-
-        public double StatisticalMaximum { get { return (double)GetValue(StatisticalMaximumProperty); } set { SetValue(StatisticalMaximumProperty, value); } }
-
-        #endregion
-
-        #region dependency property double StatisticalMinimum
-
-        public static DependencyProperty StatisticalMinimumProperty = DependencyProperty.Register("StatisticalMinimum", typeof(double), typeof(ColorBarView), new FrameworkPropertyMetadata(double.NaN, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-
-        public double StatisticalMinimum { get { return (double)GetValue(StatisticalMinimumProperty); } set { SetValue(StatisticalMinimumProperty, value); } }
-
-        #endregion
-
-        #region public double CurrentMaximum {get; set;}
-
-        public static readonly DependencyProperty CurrentMaximumProperty = DependencyProperty.Register("CurrentMaximum", typeof (double), typeof (ColorBarView), new FrameworkPropertyMetadata(100.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, CurMaximumPropertyChanged));
-
-        public double CurrentMaximum
-        {
-            get { return (double) GetValue(CurrentMaximumProperty); }
-            set { SetCurrentValue(CurrentMaximumProperty, value); }
-        }
-
-        static void CurMaximumPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarView) obj).CurMaximumPropertyChanged(args); }
-
-        void CurMaximumPropertyChanged(DependencyPropertyChangedEventArgs args)
-        {
-            if (_steps == null) return;
-            if ((double)args.NewValue > Maximum) CurrentMaximum = Maximum;
-            else if (CurrentMinimum < ((double)args.NewValue - _steps.Last().Y)) CurRangePropertiesChanged();
-        }
-
-        void CurRangePropertiesChanged()
-        {
-            _curRange = CurrentMaximum - CurrentMinimum;
-            topMargin.Height = Math.Max(0, ActualHeight * (Maximum - CurrentMaximum) / _fullRange);
-            botMargin.Height = Math.Max(0, ActualHeight * (CurrentMinimum - Minimum) / _fullRange);
-        }
-
-        #endregion
-
-        #region public double CurrentMinimum {get; set;}
-
-        public static readonly DependencyProperty CurrentMinimumProperty = DependencyProperty.Register("CurrentMinimum", typeof (double), typeof (ColorBarView), new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, CurMinimumPropertyChanged));
-
-        public double CurrentMinimum
-        {
-            get { return (double) GetValue(CurrentMinimumProperty); }
-            set { SetCurrentValue(CurrentMinimumProperty, value); }
-        }
-
-        static void CurMinimumPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarView) obj).CurMinimumPropertyChanged(args); }
-
-        void CurMinimumPropertyChanged(DependencyPropertyChangedEventArgs args)
-        {
-            if (_steps == null) return;
-            if ((double)args.NewValue < Minimum) CurrentMinimum = Minimum;
-            else if (CurrentMaximum > ((double)args.NewValue + _steps.Last().Y)) CurRangePropertiesChanged();
-        }
-
-        #endregion
-#endif
 
         #endregion
 
@@ -324,8 +222,6 @@ namespace ESME.Views.Controls
             var newRange = e.Delta < 0 ? _steps.StepForward(_curRange) : _steps.StepBack(_curRange);
 
             var newDelta = (_curRange - newRange)/2;
-            //CurrentMaximum -= newDelta;
-            //CurrentMinimum += newDelta;
             CurrentRange.Update(CurrentRange.Min - newDelta, CurrentRange.Max + newDelta);
         }
 
@@ -342,8 +238,6 @@ namespace ESME.Views.Controls
                 var yDeltaValue = (_previousPoint.Y - e.GetPosition(this).Y)*deltaValuePerPixel;
                 var xDeltaValue = (e.GetPosition(this).X - _previousPoint.X)*deltaValuePerPixel;
                 var netMouseMove = (xDeltaValue / 2) - yDeltaValue;
-                //CurrentMaximum = CurrentMaximum - netMouseMove;
-                //CurrentMinimum = CurrentMinimum - netMouseMove;
                 CurrentRange.Update(CurrentRange.Min - netMouseMove, CurrentRange.Max - netMouseMove);
             }
             _previousPoint = e.GetPosition(this);
