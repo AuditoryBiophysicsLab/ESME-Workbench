@@ -302,40 +302,13 @@ namespace ESMEWorkbench.ViewModels.Map
                     if (_timeObserver != null) _timeObserver.Dispose();
                     _mouseHover = _timeObserver = null;
                 }
-                
                 _timeObserver = Observable.Interval(TimeSpan.FromMilliseconds(200)).Subscribe(f =>
                 {
                     if (_mouseHover != null) return;
-                    _mouseHover = MouseGeo.Throttle(TimeSpan.FromMilliseconds(300)).DistinctUntilChanged()
-                        .Where(g => g != null)
-                        .Select(g => new PointShape(g.Longitude, g.Latitude))
-                        .Subscribe(p =>
-                        {
-                            foreach (var activeLayerOverlay in _wpfMap.Overlays.OfType<ActiveLayerOverlay>().ToList())
-                            {
-                                foreach (var featureLayer in activeLayerOverlay.Layers.OfType<FeatureLayer>().ToList())
-                                {
-                                    featureLayer.Open();
-                                    try
-                                    {
-                                        var featureCollection = featureLayer.QueryTools.GetFeaturesContaining(p, ReturningColumnsType.NoColumns);
-                                        if (featureCollection.Count != 0)
-                                        {
-                                            activeLayerOverlay.MouseIsHovering.OnNext(true);
-                                            _hoveringOverlays.Add(activeLayerOverlay);
-                                        }
-                                    }
-                                    catch {}
-                                    if (featureLayer.IsOpen) featureLayer.Close();
-                                }
-                            }
-                        });
+                    MouseHover();
                     _timeObserver.Dispose();
                 });
-
             });
-            
-           
             Observable.FromEventPattern<MouseEventArgs>(_wpfMap, "MouseLeave").ObserveOnDispatcher() 
                 .Subscribe(e => MouseGeo.OnNext(null));
             Observable.FromEventPattern<MouseEventArgs>(_wpfMap, "MouseMove").ObserveOnDispatcher()
@@ -344,7 +317,35 @@ namespace ESMEWorkbench.ViewModels.Map
                 .Subscribe(e => Click.OnNext(new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX)));
             Observable.FromEventPattern<MapClickWpfMapEventArgs>(_wpfMap, "MapDoubleClick").ObserveOnDispatcher()
                 .Subscribe(e => DoubleClick.OnNext(new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX)));
-            
+            MouseHover();
+        }
+
+        void MouseHover()
+        {
+            _mouseHover = MouseGeo.Throttle(TimeSpan.FromMilliseconds(300)).DistinctUntilChanged()
+                      .Where(g => g != null)
+                      .Select(g => new PointShape(g.Longitude, g.Latitude))
+                      .Subscribe(p =>
+                      {
+                          foreach (var activeLayerOverlay in _wpfMap.Overlays.OfType<ActiveLayerOverlay>().ToList())
+                          {
+                              foreach (var featureLayer in activeLayerOverlay.Layers.OfType<FeatureLayer>().ToList())
+                              {
+                                  featureLayer.Open();
+                                  try
+                                  {
+                                      var featureCollection = featureLayer.QueryTools.GetFeaturesContaining(p, ReturningColumnsType.NoColumns);
+                                      if (featureCollection.Count != 0)
+                                      {
+                                          activeLayerOverlay.MouseIsHovering.OnNext(true);
+                                          _hoveringOverlays.Add(activeLayerOverlay);
+                                      }
+                                  }
+                                  catch { }
+                                  if (featureLayer.IsOpen) featureLayer.Close();
+                              }
+                          }
+                      });
         }
         SoundSpeedProfileWindowView _soundSpeedProfileWindowView;
         readonly List<ActiveLayerOverlay> _hoveringOverlays = new List<ActiveLayerOverlay>();
