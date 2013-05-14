@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using ESME;
@@ -247,6 +248,7 @@ namespace ESMEWorkbench.ViewModels.Map
         [Initialize, UsedImplicitly] public Subject<Geo> MouseGeo { get; private set; }
         [Initialize, UsedImplicitly] public Subject<Geo> Click { get; private set; }
         [Initialize, UsedImplicitly] public Subject<Geo> DoubleClick { get; private set; }
+        [Initialize, UsedImplicitly] public Subject<Geo> MouseWheel { get; private set; }
 
         void SubscribeToMouseEventStreams()
         {
@@ -255,31 +257,8 @@ namespace ESMEWorkbench.ViewModels.Map
                 _hoveringOverlays.ForEach(l => l.MouseIsHovering.OnNext(false));
                 _hoveringOverlays.Clear();
             });
-            MouseGeo.Throttle(TimeSpan.FromMilliseconds(300)).DistinctUntilChanged()
-                .Where(g => g != null)
-                .Select(g => new PointShape(g.Longitude, g.Latitude))
-                .Subscribe(p =>
-                {
-                    foreach (var activeLayerOverlay in _wpfMap.Overlays.OfType<ActiveLayerOverlay>().ToList())
-                    {
-                        foreach (var featureLayer in activeLayerOverlay.Layers.OfType<FeatureLayer>().ToList())
-                        {
-                            featureLayer.Open();
-                            try
-                            {
-                                var featureCollection = featureLayer.QueryTools.GetFeaturesContaining(p, ReturningColumnsType.NoColumns);
-                                if (featureCollection.Count != 0)
-                                {
-                                    activeLayerOverlay.MouseIsHovering.OnNext(true);
-                                    _hoveringOverlays.Add(activeLayerOverlay);
-                                }
-                            }
-                            catch (IndexOutOfRangeException) { }
-                            catch (NullReferenceException) {}
-                            if (featureLayer.IsOpen) featureLayer.Close();
-                        }
-                    }
-                });
+            
+            
             DoubleClick.Subscribe(g =>
             {
                 if (MouseSoundSpeedProfile != null)
@@ -297,6 +276,8 @@ namespace ESMEWorkbench.ViewModels.Map
                 IsSoundSpeedProfilePopupOpen = true;
             });
         }
+
+        IDisposable _mouseHover, _timeObserver;
         void CreateMouseEventStreams()
         {
             Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseDown").ObserveOnDispatcher()
@@ -313,6 +294,48 @@ namespace ESMEWorkbench.ViewModels.Map
                     if (e.Button == MouseButton.Left) LeftButtonUp.OnNext(e.Geo);
                     if (e.Button == MouseButton.Right) RightButtonUp.OnNext(e.Geo);
                 });
+            Observable.FromEventPattern<MouseWheelEventArgs>(_wpfMap, "MouseWheel").ObserveOnDispatcher().Subscribe(e =>
+            {
+                if (_mouseHover != null || _timeObserver != null)
+                {
+                    if (_mouseHover != null) _mouseHover.Dispose();
+                    if (_timeObserver != null) _timeObserver.Dispose();
+                    _mouseHover = _timeObserver = null;
+                }
+                
+                _timeObserver = Observable.Interval(TimeSpan.FromMilliseconds(200)).Subscribe(f =>
+                {
+                    if (_mouseHover != null) return;
+                    _mouseHover = MouseGeo.Throttle(TimeSpan.FromMilliseconds(300)).DistinctUntilChanged()
+                        .Where(g => g != null)
+                        .Select(g => new PointShape(g.Longitude, g.Latitude))
+                        .Subscribe(p =>
+                        {
+                            foreach (var activeLayerOverlay in _wpfMap.Overlays.OfType<ActiveLayerOverlay>().ToList())
+                            {
+                                foreach (var featureLayer in activeLayerOverlay.Layers.OfType<FeatureLayer>().ToList())
+                                {
+                                    featureLayer.Open();
+                                    try
+                                    {
+                                        var featureCollection = featureLayer.QueryTools.GetFeaturesContaining(p, ReturningColumnsType.NoColumns);
+                                        if (featureCollection.Count != 0)
+                                        {
+                                            activeLayerOverlay.MouseIsHovering.OnNext(true);
+                                            _hoveringOverlays.Add(activeLayerOverlay);
+                                        }
+                                    }
+                                    catch {}
+                                    if (featureLayer.IsOpen) featureLayer.Close();
+                                }
+                            }
+                        });
+                    _timeObserver.Dispose();
+                });
+
+            });
+            
+           
             Observable.FromEventPattern<MouseEventArgs>(_wpfMap, "MouseLeave").ObserveOnDispatcher() 
                 .Subscribe(e => MouseGeo.OnNext(null));
             Observable.FromEventPattern<MouseEventArgs>(_wpfMap, "MouseMove").ObserveOnDispatcher()
@@ -321,6 +344,7 @@ namespace ESMEWorkbench.ViewModels.Map
                 .Subscribe(e => Click.OnNext(new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX)));
             Observable.FromEventPattern<MapClickWpfMapEventArgs>(_wpfMap, "MapDoubleClick").ObserveOnDispatcher()
                 .Subscribe(e => DoubleClick.OnNext(new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX)));
+            
         }
         SoundSpeedProfileWindowView _soundSpeedProfileWindowView;
         readonly List<ActiveLayerOverlay> _hoveringOverlays = new List<ActiveLayerOverlay>();
