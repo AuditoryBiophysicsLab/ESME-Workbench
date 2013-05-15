@@ -168,7 +168,7 @@ namespace ESME.Scenarios
 
         public void CheckForErrors()
         {
-            if (TransmissionLoss == null || TransmissionLoss.AnalysisPoint == null || TransmissionLoss.AnalysisPoint.Geo == null) return;
+            if (TransmissionLoss == null || TransmissionLoss.AnalysisPoint == null || TransmissionLoss.AnalysisPoint.Geo == null || TransmissionLoss.AnalysisPoint.Scenario.Location == null) return;
             if (Length <= 0)
             {
                 Errors = String.Format("Radial at bearing {0:0.##} has an invalid length ({1:0:0.#}m)", Bearing, Length);

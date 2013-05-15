@@ -39,6 +39,7 @@ namespace HRC.Navigation
     public class GeoArray : IGeoArray, IEnumerable<Geo>
     {
         protected Geo[] MyGeoArray;
+        const double Radius = Planet.wgs84_earthEquatorialRadiusMeters_D / 1000;
 
         #region Constructors
         protected GeoArray() {}
@@ -137,6 +138,8 @@ namespace HRC.Navigation
         /// method will treat both open and closed polygons as closed and return
         /// the area enclosed by the points
         /// For more information see: http://math.rice.edu/~pcmi/sphere/
+        /// 
+        /// This now returns Area in square kilometers referenced to the Planet radius (per WGS84)
         /// </summary>
         public double Area
         {
@@ -173,9 +176,10 @@ namespace HRC.Navigation
                 p2 = new Geo(v1);
                 area += p0.Angle(p1, p2);
 
-                return Math.Abs(area - ((count - 2)*Math.PI));
+                return Math.Abs(area - ((count - 2)*Math.PI)) * Radius * Radius;
             }
         }
+        
         #endregion
         #region Helper functions
         public double[] ToLatLonArray(bool isDegrees)
@@ -251,7 +255,7 @@ namespace HRC.Navigation
 
         public static explicit operator GeoArray(Geo[] geos) { return new GeoArray(geos); }
 
-        public static explicit operator GeoArray(GeoRect rect){ return new GeoArray(rect.NorthWest,rect.SouthEast);}
+        public static explicit operator GeoArray(GeoRect rect){ return new GeoArray(rect.NorthWest,rect.SouthWest,rect.SouthEast,rect.NorthEast);}
 
         #endregion
         #region IEnumerable<Geo> support

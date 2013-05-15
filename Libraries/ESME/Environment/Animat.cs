@@ -186,6 +186,7 @@ namespace ESME.Environment
                 if (header[0] != 'a' && header[1] != 'n' && header[2] != 'i' && header[3] != 'm') throw new FileFormatException(string.Format("{0} is not a valid .ani file", fileName));
                 var locationCount = reader.ReadInt32();
                 for (var i = 0; i < locationCount; i++) result.Locations.Add(new Geo<float>(reader.ReadDouble(), reader.ReadDouble(), reader.ReadSingle()));
+                result.TotalAnimats = locationCount;
                 return result;
             }
         }

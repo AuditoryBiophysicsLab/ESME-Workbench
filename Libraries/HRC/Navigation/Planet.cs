@@ -17,7 +17,7 @@ namespace HRC.Navigation
     public static float wgs84_earthPolarRadiusMeters = 6356752.3142f;
     public static double wgs84_earthPolarRadiusMeters_D = 6356752.3142;
     public static float wgs84_earthEquatorialRadiusMeters = 6378137.0f;
-    public static double wgs84_earthEquatorialRadiusMeters_D = 6378137.0;
+    public const double wgs84_earthEquatorialRadiusMeters_D = 6378137.0;
     /* 1 - (minor/major) = 1/298.257 */
     public static float wgs84_earthFlat = 1 - (wgs84_earthPolarRadiusMeters / wgs84_earthEquatorialRadiusMeters);
     /* sqrt(2*f - f^2) = 0.081819221f */
