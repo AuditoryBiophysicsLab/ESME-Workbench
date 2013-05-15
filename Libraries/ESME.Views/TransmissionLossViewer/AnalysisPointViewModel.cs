@@ -14,7 +14,7 @@ namespace ESME.Views.TransmissionLossViewer
         public AnalysisPointViewModel(AnalysisPoint analysisPoint)
         {
             AnalysisPoint = analysisPoint;
-            AnalysisPoint.PropertyChanged += (s, e) =>
+            ((INotifyPropertyChanged)AnalysisPoint).PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == "IsDeleted")
                 {
@@ -26,16 +26,16 @@ namespace ESME.Views.TransmissionLossViewer
             if (_oldTL != null)
             {
                 _oldIndex = AnalysisPoint.TransmissionLosses.IndexOf(_oldTL);
-                _oldTL.PropertyChanged += TransmissionLossChanged;
+                ((INotifyPropertyChanged)_oldTL).PropertyChanged += TransmissionLossChanged;
             }
             TransmissionLossViewModel.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == "TransmissionLoss")
                 {
-                    if (_oldTL != null) _oldTL.PropertyChanged -= TransmissionLossChanged;
+                    if (_oldTL != null) ((INotifyPropertyChanged)_oldTL).PropertyChanged -= TransmissionLossChanged;
                     if (TransmissionLossViewModel.TransmissionLoss != null)
                     {
-                        TransmissionLossViewModel.TransmissionLoss.PropertyChanged += TransmissionLossChanged;
+                        ((INotifyPropertyChanged)TransmissionLossViewModel.TransmissionLoss).PropertyChanged += TransmissionLossChanged;
                         _oldIndex = AnalysisPoint.TransmissionLosses.IndexOf(_oldTL);
                     }
                     _oldTL = TransmissionLossViewModel.TransmissionLoss;

@@ -103,7 +103,7 @@ namespace ESME.Views.Controls
             Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarView: FullRange changed to {1}", DateTime.Now, FullRange));
             if (Math.Abs(_fullRange) < double.Epsilon) _fullRange = 1.0;
             _steps = new StepFunction(0, 95, 95, x => _fullRange * Math.Exp(-0.047 * x));
-            if (animate) ResetColorbarRange(0.2);
+            if (animate) ResetColorbarRange(0.0);
         }
         #endregion
 
