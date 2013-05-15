@@ -48,14 +48,27 @@ namespace ESME.Views.TransmissionLossViewer
             AxisSeriesViewModel.YAxis.IsInverted = true;
             AxisSeriesViewModel.YAxis.Label = "Depth (m)";
             AxisSeriesViewModel.YAxisTicks = null;
-            AxisSeriesViewModel.YAxis.VisibleRange.RangeChanged += (sender, args) => CalculateBottomProfileGeometry();
             _fourAxisSeriesObserver = new PropertyObserver<FourAxisSeriesViewModel>(AxisSeriesViewModel)
                 .RegisterHandler(a => a.IsMouseOver, UpdateStatusProperties);
             _xAxisPropertyObserver = new PropertyObserver<DataAxisViewModel>(AxisSeriesViewModel.XAxis)
                 .RegisterHandler(x => x.MouseDataLocation, UpdateStatusProperties);
             _yAxisPropertyObserver = new PropertyObserver<DataAxisViewModel>(AxisSeriesViewModel.YAxis)
                 .RegisterHandler(y => y.MouseDataLocation, UpdateStatusProperties);
-            _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged").ObserveOnDispatcher().Subscribe(e => { if (e.EventArgs.PropertyName == "Radial") RadialChanged(); }));
+            _instanceObservers.Add(AxisSeriesViewModel.YAxis.VisibleRange.Subscribe(e => CalculateBottomProfileGeometry()));
+            _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged").ObserveOnDispatcher()
+                .Subscribe(e =>
+                {
+                    if (e.EventArgs.PropertyName == "Radial") RadialChanged();
+                }));
+            _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(AxisSeriesViewModel, "PropertyChanged").ObserveOnDispatcher()
+                .Subscribe(e =>
+                {
+                    if (e.EventArgs.PropertyName == "ActualWidth" || e.EventArgs.PropertyName == "ActualHeight")
+                    {
+                        ColorMapViewModel.CurrentRange.ForceUpdate(ColorMapViewModel.CurrentRange);
+                        Render();
+                    }
+                }));
             _instanceObservers.Add(Observable.FromEventPattern<SizeChangedEventArgs>(view, "SizeChanged").Subscribe(e => Render()));
             _displayQueue.ObserveOnDispatcher()
                 .Subscribe(result =>
@@ -83,6 +96,7 @@ namespace ESME.Views.TransmissionLossViewer
                 });
             _instanceObservers.Add(Observable.FromEventPattern<RoutedEventArgs>(view, "Unloaded").Subscribe(e =>
             {
+                Debug.WriteLine("Unload event");
                 _renderQueue.Complete();
                 _displayQueue.Dispose();
                 _instanceObservers.ForEach(o => o.Dispose());
@@ -152,10 +166,9 @@ namespace ESME.Views.TransmissionLossViewer
         public ColorMapViewModel ColorMapViewModel { get; set; }
         public Visibility WriteableBitmapVisibility { get; set; }
         public Radial Radial { get; set; }
-        int _entryCount;
+
         void RadialChanged()
         {
-            Debug.WriteLine("Entering RadialChanged. EntryCount: " + _entryCount++);
             _radialObservers.ForEach(o => o.Dispose());
             WriteableBitmapVisibility = Visibility.Collapsed;
             WriteableBitmap = null;
@@ -175,7 +188,6 @@ namespace ESME.Views.TransmissionLossViewer
                     else WaitToRenderText = "This radial has not yet been calculated";
                     WriteableBitmap = null;
                 }
-                Debug.WriteLine("Leaving RadialChanged early. EntryCount: " + _entryCount--);
                 return;
             }
             try
@@ -186,14 +198,19 @@ namespace ESME.Views.TransmissionLossViewer
                 _imageSeriesViewModel.Bottom = Radial.Depths.Last();
                 _imageSeriesViewModel.Right = Radial.Ranges.Last();
                 //Debug.WriteLine(string.Format("Radial max depth: {0} max range: {1}", Radial.Depths.Last(), Radial.Ranges.Last()));
-                ColorMapViewModel.StatisticalRange.Update(_transmissionLossRadial.StatMin, _transmissionLossRadial.StatMax);
-                ColorMapViewModel.CurrentRange.Update(_transmissionLossRadial.StatMin, _transmissionLossRadial.StatMax);
+                ColorMapViewModel.StatisticalRange.ForceUpdate(_transmissionLossRadial.StatMin, _transmissionLossRadial.StatMax);
                 AxisSeriesViewModel.XAxis.DataRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
                 AxisSeriesViewModel.YAxis.DataRange.Update(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
                 AxisSeriesViewModel.XAxis.VisibleRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
                 AxisSeriesViewModel.YAxis.VisibleRange.ForceUpdate(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
-                _radialObservers.Add(ColorMapViewModel.CurrentRange.Sample(TimeSpan.FromMilliseconds(50)).Subscribe(e => Render()));
+                Debug.WriteLine("Creating CurrentRange sampler");
+                _radialObservers.Add(ColorMapViewModel.CurrentRange.Sample(TimeSpan.FromMilliseconds(50)).Subscribe(e =>
+                {
+                    Debug.WriteLine("CurrentRange: " + ColorMapViewModel.CurrentRange);
+                    Render();
+                }));
                 Render();
+                //_radialObservers.Add(ColorMapViewModel.CurrentRange.Subscribe(e => Debug.WriteLine("CurrentRange: " + ColorMapViewModel.CurrentRange)));
             }
             catch (Exception e)
             {
@@ -201,7 +218,6 @@ namespace ESME.Views.TransmissionLossViewer
                 WaitToRenderText = e.Message;
                 _transmissionLossRadial = null;
             }
-            Debug.WriteLine("Leaving RadialChanged. EntryCount: " + _entryCount--);
         }
 
         void CalculateBottomProfileGeometry()

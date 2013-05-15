@@ -91,16 +91,16 @@ namespace ESME.Views.Controls
         {
             if (_fullRangeObserver != null) _fullRangeObserver.Dispose();
             if (FullRange == null) return;
-            _fullRangeObserver = FullRange.Subscribe(e => FullRangeChanged());
-            FullRangeChanged();
+            _fullRangeObserver = FullRange.Subscribe(e => FullRangeChanged(true));
+            FullRangeChanged(false);
         }
-        void FullRangeChanged()
+        void FullRangeChanged(bool animate)
         {
             if (FullRange == null) return;
             _fullRange = FullRange.Value;
             if (Math.Abs(_fullRange) < double.Epsilon) _fullRange = 1.0;
             _steps = new StepFunction(0, 95, 95, x => _fullRange * Math.Exp(-0.047 * x));
-            NewResetColorbarRange(0.2);
+            if (animate) ResetColorbarRange(0.2);
         }
         #endregion
 
@@ -127,80 +127,17 @@ namespace ESME.Views.Controls
         #endregion
 
         #region Colorbar Animation
-#if false
         // Animates the colorbar returning to its full range over a specified number of seconds
         void ResetColorbarRange(double transitionTimeSeconds)
         {
-            var maxTarget = Maximum;
-            var minTarget = Minimum;
-            if (CurrentMaximum == Maximum && CurrentMinimum == Minimum && !double.IsNaN(StatisticalMaximum) && !double.IsNaN(StatisticalMinimum))
-            {
-                maxTarget = StatisticalMaximum;
-                minTarget = StatisticalMinimum;
-            }
-            if (transitionTimeSeconds <= 0)
-            {
-                CurrentMaximum = maxTarget;
-                CurrentMinimum = minTarget;
-            }
-            else
-            {
-                var duration = new Duration(TimeSpan.FromSeconds(transitionTimeSeconds));
-                var curMaxAnimation = new DoubleAnimation(maxTarget, duration, FillBehavior.Stop);
-                var curMinAnimation = new DoubleAnimation(minTarget, duration, FillBehavior.Stop);
-                curMaxAnimation.Completed += delegate
-                                             {
-                                                 BeginAnimation(CurrentMaximumProperty, null);
-                                                 CurrentMaximum = maxTarget;
-                                             };
-                curMinAnimation.Completed += delegate
-                                             {
-                                                 BeginAnimation(CurrentMinimumProperty, null);
-                                                 CurrentMinimum = minTarget;
-                                             };
-                BeginAnimation(CurrentMaximumProperty, curMaxAnimation);
-                BeginAnimation(CurrentMinimumProperty, curMinAnimation);
-            }
-        }
-#endif
-
-        // Animates the colorbar returning to its full range over a specified number of seconds
-        void NewResetColorbarRange(double transitionTimeSeconds)
-        {
-            //var maxTarget = FullRange.Max;
-            //var minTarget = FullRange.Min;
             _animationTarget = FullRange;
-            if (CurrentRange == FullRange && !StatisticalRange.IsEmpty)
-            {
-                //maxTarget = StatisticalRange.Max;
-                //minTarget = StatisticalRange.Min;
-                _animationTarget = StatisticalRange;
-            }
-            if (transitionTimeSeconds <= 0)
-            {
-                //CurrentRange.Update(maxTarget, minTarget);
-                CurrentRange.Update(_animationTarget);
-            }
+            if (CurrentRange == FullRange && !StatisticalRange.IsEmpty) _animationTarget = StatisticalRange;
+            if (transitionTimeSeconds <= 0) CurrentRange.Update(_animationTarget);
             else
             {
                 var duration = new Duration(TimeSpan.FromSeconds(transitionTimeSeconds));
-                //var curMaxAnimation = new DoubleAnimation(maxTarget, duration, FillBehavior.Stop);
-                //var curMinAnimation = new DoubleAnimation(minTarget, duration, FillBehavior.Stop);
                 _rangeAnimation = new RangeAnimation(CurrentRange, _animationTarget, duration);
                 _rangeAnimation.Completed += RangeAnimationCompleted;
-                //curMaxAnimation.Completed += () => 
-                //{
-                //    BeginAnimation(CurrentMaximumProperty, null);
-                //    CurrentMaximum = maxTarget;
-                //};
-                //curMinAnimation.Completed += () =>
-                //{
-                //    BeginAnimation(CurrentMinimumProperty, null);
-                //    CurrentMinimum = minTarget;
-                //};
-                //BeginAnimation(CurrentMaximumProperty, curMaxAnimation);
-                //BeginAnimation(CurrentMinimumProperty, curMinAnimation);
-                //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} BeginAnimation From: {1} To: {2}", DateTime.Now, CurrentRange, _animationTarget));
                 BeginAnimation(CurrentRangeProperty, _rangeAnimation);
             }
         }
@@ -253,7 +190,7 @@ namespace ESME.Views.Controls
                     Mouse.Capture(_colorBarImage, CaptureMode.Element);
                     break;
                 case 2:
-                    NewResetColorbarRange(0.2);
+                    ResetColorbarRange(0.2);
                     break;
                 default:
                     break;

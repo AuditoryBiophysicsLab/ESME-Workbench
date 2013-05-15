@@ -67,11 +67,10 @@ namespace ESME.Views.TransmissionLossViewer
                 TitleString = nameString;
                 if (RadialViewModel != null)
                 {
+                    RadialViewModel.ColorMapViewModel.FullRange.Update(MinTransmissionLoss, MaxTransmissionLoss);
                     RadialViewModel.Radial = Radials == null ? null : Radials[_selectedRadialIndex];
                     RadialViewModel.AxisSeriesViewModel.PlotTitle = nameString;
-                    //if (!float.IsNaN(MaxTransmissionLoss)) RadialViewModel.ColorMapViewModel.MaxValue = MaxTransmissionLoss;
-                    //if (!float.IsNaN(MinTransmissionLoss)) RadialViewModel.ColorMapViewModel.MinValue = MinTransmissionLoss;
-                    RadialViewModel.ColorMapViewModel.FullRange.Update(MinTransmissionLoss, MaxTransmissionLoss);
+                    if (RadialViewModel.Radial != null) RadialViewModel.ColorMapViewModel.CurrentRange.ForceUpdate(RadialViewModel.ColorMapViewModel.StatisticalRange);
                 }
             }
         }
@@ -114,7 +113,7 @@ namespace ESME.Views.TransmissionLossViewer
                 _window = value;
                 if (RadialViewModel == null)
                 {
-                    RadialViewModel = new RadialViewModel(_window.FindChildren<RadialView>().First()) {Radial = Radials == null ? null : Radials[_selectedRadialIndex]};
+                    RadialViewModel = new RadialViewModel(_window.FindChildren<RadialView>().First());
                 }
             }
         }

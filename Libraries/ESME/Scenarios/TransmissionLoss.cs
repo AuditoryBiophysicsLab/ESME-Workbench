@@ -141,7 +141,7 @@ namespace ESME.Scenarios
                 mapLayer.AreaColor = Color.FromArgb(32, mapLayer.LineColor.R, mapLayer.LineColor.G, mapLayer.LineColor.B); ;
                 mapLayer.Clear();
                 var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
-                Debug.WriteLine(string.Format("Creating map layers for TL {0} of radius {1} for mode [{2}] at {3}", Guid, maxPropagationRadius, Modes.First().ModeName, (Geo)AnalysisPoint.Geo));
+                //Debug.WriteLine(string.Format("Creating map layers for TL {0} of radius {1} for mode [{2}] at {3}", Guid, maxPropagationRadius, Modes.First().ModeName, (Geo)AnalysisPoint.Geo));
                 var perimeterGeos = new List<Geo>();
                 var perimeterSegmentCount = Math.Max(Radials.Count, 32);
                 for (var perimeterSegmentIndex = 0; perimeterSegmentIndex < perimeterSegmentCount; perimeterSegmentIndex++) perimeterGeos.Add(((Geo)AnalysisPoint.Geo).Offset(Geo.KilometersToRadians(maxPropagationRadius / 1000), Geo.DegreesToRadians((360.0 / perimeterSegmentCount) * perimeterSegmentIndex)));
