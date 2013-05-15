@@ -12,7 +12,6 @@ using HRC.Plotting.AxisLabeling.Layout;
 using HRC.Plotting.AxisLabeling.Layout.AxisLabelers;
 using HRC.Plotting.Transforms;
 using HRC.ViewModels;
-using log4net;
 
 namespace HRC.Plotting
 {
@@ -338,7 +337,7 @@ namespace HRC.Plotting
                 return;
             }
             //if (VisibleRange.Min == 0.9 && VisibleRange.Max == 100) Debugger.Break();
-            //Debug.WriteLine(string.Format("{0} Visible range changed to {1}", AxisLabel, VisibleRange));
+            if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis: Visible range on axis {1} changed to {2}", DateTime.Now, AxisLabel, VisibleRange));
             _visibleRange = VisibleRange.Expand(0);
             if (AxisType == AxisType.Logarithmic)
             {
@@ -364,6 +363,21 @@ namespace HRC.Plotting
         Range _visibleRange;
 
         #endregion
+
+        #region dependency property bool ShowDebugMessages
+
+        public static DependencyProperty ShowDebugMessagesProperty = DependencyProperty.Register("ShowDebugMessages",
+                                                                                 typeof(bool),
+                                                                                 typeof(DataAxis),
+                                                                                 new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, ShowDebugMessagesPropertyChanged));
+
+        public bool ShowDebugMessages { get { return (bool)GetValue(ShowDebugMessagesProperty); } set { SetValue(ShowDebugMessagesProperty, value); } }
+
+        static void ShowDebugMessagesPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).ShowDebugMessagesPropertyChanged(); }
+        void ShowDebugMessagesPropertyChanged() { _showDebugMessages = ShowDebugMessages; }
+        bool _showDebugMessages;
+        #endregion
+
         #endregion
 
         public DataAxis()
@@ -546,11 +560,14 @@ namespace HRC.Plotting
             _axisOptions.Screen = new Rect(availableSize);
             _axis = _axisLabeler.Generate(_axisOptions, MajorTicksPerInch / _pixelsPerInch);
             if (_axis == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
-            //Debug.WriteLine(string.Format("{0}: MeasureNonEnumerated: _axis.VisibleRange.Min: {1} _axis.VisibleRange.Max: {2} _axis.Labels.First(): {3} _axis.Labels.Last(): {4}", AxisLabel, _axis.VisibleRange.Min, _axis.VisibleRange.Max, _axis.Labels.First().Value, _axis.Labels.Last().Value));
+            if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis.MeasureNonEnumerated: Axis \"{1}\": _axis.VisibleRange {2} _axis.Labels.First(): {3} _axis.Labels.Last(): {4}", DateTime.Now, AxisLabel, _axis.VisibleRange, _axis.Labels.First().Value, _axis.Labels.Last().Value));
             var majorTickLabels = _axis.Labels;
+            if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis.MeasureNonEnumerated: Axis \"{1}\": _visibleRange {2} _visibleRange.Contains(_axis.VisibleRange): {3}", DateTime.Now, AxisLabel, _visibleRange, _visibleRange.Contains(_axis.VisibleRange)));
             if (!_visibleRange.Contains(_axis.VisibleRange))
             {
-                _visibleRange = _axis.VisibleRange;
+                if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis.MeasureNonEnumerated: Axis \"{1}\": Updating VisbleRange. Pre-update: {2}", DateTime.Now, AxisLabel, VisibleRange));
+                VisibleRange.Update(_axis.VisibleRange);
+                if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis.MeasureNonEnumerated: Axis \"{1}\": Updated VisbleRange. Post-update: {2}", DateTime.Now, AxisLabel, VisibleRange));
                 OnTransformChanged();
             }
             Children.Clear();

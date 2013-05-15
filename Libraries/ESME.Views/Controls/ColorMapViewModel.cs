@@ -15,7 +15,15 @@ namespace ESME.Views.Controls
     {
         public ColorMapViewModel()
         {
-            FullRange.RangeChanged += (s, e) => CurrentRange.Update(FullRange);
+            DataRange.RangeChanged += (s, e) =>
+            {
+                if (!DataRange.Contains(CurrentRange)) CurrentRange.Update(DataRange);
+            };
+            FullAxisRange.RangeChanged += (s, e) =>
+            {
+                Debug.WriteLine(string.Format("{0:HH:mm:ss:fff} ColorMapViewModel.FullAxisRange changed to {1}", DateTime.Now, FullAxisRange));
+                if (!DataRange.Contains(FullAxisRange)) DataRange.Update(FullAxisRange);
+            };
         }
 
         #region public properties
@@ -34,7 +42,8 @@ namespace ESME.Views.Controls
         }
         ObservableList<Color> _colors;
 
-        [Initialize] public Range FullRange { get; set; }
+        [Initialize] public Range FullAxisRange { get; set; }
+        [Initialize] public Range DataRange { get; set; }
         [Initialize] public Range CurrentRange { get; set; }
         [Initialize] public Range StatisticalRange { get; set; }
 
@@ -97,7 +106,7 @@ namespace ESME.Views.Controls
             {
                 return new ColorMapViewModel
                 {
-                    FullRange = new Range(0, 200),
+                    DataRange = new Range(0, 200),
                     CurrentRange = new Range(50, 150),
                     StatisticalRange = new Range(75, 125),
                     //MaxValue = 1.0,

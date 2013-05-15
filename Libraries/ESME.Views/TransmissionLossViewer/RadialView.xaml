@@ -36,13 +36,15 @@
                            LastChildFill="False">
                     <Plotting:DataAxis AxisLabel="Transmission Loss (dB)"
                                        AxisLocation="Right"
-                                       DataRange="{Binding FullRange}"
-                                       DockPanel.Dock="Right" />
+                                       DataRange="{Binding DataRange}"
+                                       DockPanel.Dock="Right"
+                                       ShowDebugMessages="False"
+                                       VisibleRange="{Binding FullAxisRange}" />
                     <controls:ColorBarView MinWidth="50"
                                            ColorBarImage="{Binding ColorBitmap}"
                                            CurrentRange="{Binding CurrentRange}"
                                            DockPanel.Dock="Right"
-                                           FullRange="{Binding FullRange}"
+                                           FullRange="{Binding DataRange}"
                                            StatisticalRange="{Binding StatisticalRange}" />
                 </DockPanel>
             </DockPanel>

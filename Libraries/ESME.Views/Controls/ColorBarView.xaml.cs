@@ -60,12 +60,12 @@ namespace ESME.Views.Controls
         {
             if (_currentRangeObserver != null) _currentRangeObserver.Dispose();
             if (CurrentRange == null) return;
-            _currentRangeObserver = CurrentRange.Subscribe(e => CurrentRangeChanged());
+            _currentRangeObserver = CurrentRange.ObserveOnDispatcher().Subscribe(e => CurrentRangeChanged());
         }
         void CurrentRangeChanged()
         {
             if (CurrentRange == null) return;
-            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarView: CurrentRange changed to {1}", DateTime.Now, CurrentRange));
+            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarView: CurrentRange changed to {1}", DateTime.Now, CurrentRange));
             if (_steps != null)
             {
                 CurrentRange.Max = Math.Min(CurrentRange.Max, FullRange.Max);
@@ -93,14 +93,14 @@ namespace ESME.Views.Controls
         {
             if (_fullRangeObserver != null) _fullRangeObserver.Dispose();
             if (FullRange == null) return;
-            _fullRangeObserver = FullRange.Subscribe(e => FullRangeChanged(true));
+            _fullRangeObserver = FullRange.ObserveOnDispatcher().Subscribe(e => FullRangeChanged(true));
             FullRangeChanged(false);
         }
         void FullRangeChanged(bool animate)
         {
             if (FullRange == null) return;
             _fullRange = FullRange.Value;
-            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarView: FullRange changed to {1}", DateTime.Now, FullRange));
+            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarView: FullRange changed to {1}", DateTime.Now, FullRange));
             if (Math.Abs(_fullRange) < double.Epsilon) _fullRange = 1.0;
             _steps = new StepFunction(0, 95, 95, x => _fullRange * Math.Exp(-0.047 * x));
             if (animate) ResetColorbarRange(0.0);
@@ -121,12 +121,12 @@ namespace ESME.Views.Controls
         {
             if (_statisticalRangeObserver != null) _statisticalRangeObserver.Dispose();
             if (StatisticalRange == null) return;
-            _statisticalRangeObserver = StatisticalRange.Subscribe(e => StatisticalRangeChanged());
+            _statisticalRangeObserver = StatisticalRange.ObserveOnDispatcher().Subscribe(e => StatisticalRangeChanged());
             StatisticalRangeChanged();
         }
         void StatisticalRangeChanged()
         {
-            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarView: StatisticalRange changed to {1}", DateTime.Now, StatisticalRange));
+            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarView: StatisticalRange changed to {1}", DateTime.Now, StatisticalRange));
         }
         #endregion
 

@@ -68,7 +68,7 @@ namespace ESME.Views.TransmissionLossViewer
                 TitleString = nameString;
                 if (RadialViewModel != null)
                 {
-                    RadialViewModel.ColorMapViewModel.FullRange.Update(MinTransmissionLoss, MaxTransmissionLoss);
+                    RadialViewModel.ColorMapViewModel.DataRange.Update(MinTransmissionLoss, MaxTransmissionLoss);
                     RadialViewModel.Radial = Radials == null ? null : Radials[_selectedRadialIndex];
                     RadialViewModel.AxisSeriesViewModel.PlotTitle = nameString;
                 }

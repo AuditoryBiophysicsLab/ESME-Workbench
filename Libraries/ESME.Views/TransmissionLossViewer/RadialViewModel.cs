@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
@@ -205,14 +204,8 @@ namespace ESME.Views.TransmissionLossViewer
                 AxisSeriesViewModel.YAxis.DataRange.Update(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
                 AxisSeriesViewModel.XAxis.VisibleRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
                 AxisSeriesViewModel.YAxis.VisibleRange.ForceUpdate(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
-                Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Creating CurrentRange sampler", DateTime.Now));
-                _radialObservers.Add(ColorMapViewModel.CurrentRange.Sample(TimeSpan.FromMilliseconds(50)).Subscribe(e =>
-                {
-                    Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: CurrentRange sampled as {1}", DateTime.Now, ColorMapViewModel.CurrentRange));
-                    Render();
-                }));
+                _radialObservers.Add(ColorMapViewModel.CurrentRange.Sample(TimeSpan.FromMilliseconds(50)).Subscribe(e => Render()));
                 Render();
-                //_radialObservers.Add(ColorMapViewModel.CurrentRange.Subscribe(e => Debug.WriteLine("CurrentRange: " + ColorMapViewModel.CurrentRange)));
             }
             catch (Exception e)
             {

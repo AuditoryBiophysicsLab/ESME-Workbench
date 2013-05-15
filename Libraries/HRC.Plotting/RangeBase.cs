@@ -1,4 +1,6 @@
 using System;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Threading;
 using HRC.WPF;
@@ -7,6 +9,12 @@ namespace HRC.Plotting
 {
     public abstract class RangeBase : IRange
     {
+        protected RangeBase()
+        {
+            Observable.FromEventPattern<NotifyRangeChangedEventArgs>(this, "RangeChanged")
+                .ObserveOn(ThreadPoolScheduler.Instance).Subscribe(e => _subject.OnNext((IRange)e.Sender));
+        }
+
         protected double Minimum = double.NaN;
         public virtual double Min
         {
@@ -66,7 +74,6 @@ namespace HRC.Plotting
         public event EventHandler<NotifyRangeChangedEventArgs> RangeChanged;
         protected void OnRangeChanged(Range oldRange)
         {
-            _subject.OnNext(this);
             var handlers = RangeChanged;
             if (handlers == null) return;
             foreach (EventHandler<NotifyRangeChangedEventArgs> handler in handlers.GetInvocationList())
@@ -76,8 +83,7 @@ namespace HRC.Plotting
                     var localHandler = handler;
                     ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, new NotifyRangeChangedEventArgs(oldRange)));
                 }
-                else
-                    handler(this, new NotifyRangeChangedEventArgs(oldRange));
+                else handler(this, new NotifyRangeChangedEventArgs(oldRange));
             }
         }
         public virtual bool IsEmpty { get { return double.IsNaN(Minimum) || double.IsNaN(Maximum); } }
@@ -89,7 +95,7 @@ namespace HRC.Plotting
         }
 
         public bool Equals(IRange other) { return Equals((RangeBase)other); }
-        public override string ToString() { return string.Format("Range {{ Min = {0}, Max = {1} }}", Min, Max); }
+        public override string ToString() { return string.Format("Range {{ Min = {0:0.##}, Max = {1:0.##} }}", Min, Max); }
         public static bool operator ==(RangeBase r1, RangeBase r2)
         {
             // If they're both null, they are equal
@@ -123,6 +129,16 @@ namespace HRC.Plotting
         public IDisposable Subscribe(IObserver<IRange> observer)
         {
             return _subject.Subscribe(observer);
+        }
+
+        public IDisposable SubscribeOnDispatcher(IObserver<IRange> observer)
+        {
+            return _subject.ObserveOnDispatcher().Subscribe(observer);
+        }
+
+        public IObservable<IRange> ObserveOnDispatcher()
+        {
+            return _subject.ObserveOnDispatcher();
         }
 
         readonly Subject<IRange> _subject = new Subject<IRange>();
