@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using ESME.Scenarios;
+using ESME.Views.Controls;
 using HRC.Aspects;
 using HRC.Services;
 using HRC.Utility;
@@ -70,7 +71,6 @@ namespace ESME.Views.TransmissionLossViewer
                     RadialViewModel.ColorMapViewModel.FullRange.Update(MinTransmissionLoss, MaxTransmissionLoss);
                     RadialViewModel.Radial = Radials == null ? null : Radials[_selectedRadialIndex];
                     RadialViewModel.AxisSeriesViewModel.PlotTitle = nameString;
-                    if (RadialViewModel.Radial != null) RadialViewModel.ColorMapViewModel.CurrentRange.ForceUpdate(RadialViewModel.ColorMapViewModel.StatisticalRange);
                 }
             }
         }

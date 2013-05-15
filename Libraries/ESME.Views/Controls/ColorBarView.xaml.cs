@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -64,6 +65,7 @@ namespace ESME.Views.Controls
         void CurrentRangeChanged()
         {
             if (CurrentRange == null) return;
+            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarView: CurrentRange changed to {1}", DateTime.Now, CurrentRange));
             if (_steps != null)
             {
                 CurrentRange.Max = Math.Min(CurrentRange.Max, FullRange.Max);
@@ -98,6 +100,7 @@ namespace ESME.Views.Controls
         {
             if (FullRange == null) return;
             _fullRange = FullRange.Value;
+            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarView: FullRange changed to {1}", DateTime.Now, FullRange));
             if (Math.Abs(_fullRange) < double.Epsilon) _fullRange = 1.0;
             _steps = new StepFunction(0, 95, 95, x => _fullRange * Math.Exp(-0.047 * x));
             if (animate) ResetColorbarRange(0.2);
@@ -121,7 +124,10 @@ namespace ESME.Views.Controls
             _statisticalRangeObserver = StatisticalRange.Subscribe(e => StatisticalRangeChanged());
             StatisticalRangeChanged();
         }
-        void StatisticalRangeChanged() { }
+        void StatisticalRangeChanged()
+        {
+            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarView: StatisticalRange changed to {1}", DateTime.Now, StatisticalRange));
+        }
         #endregion
 
         #endregion
@@ -135,6 +141,7 @@ namespace ESME.Views.Controls
             if (transitionTimeSeconds <= 0) CurrentRange.Update(_animationTarget);
             else
             {
+                Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarView: Animating CurrentRange from {1} to {2}", DateTime.Now, CurrentRange, _animationTarget));
                 var duration = new Duration(TimeSpan.FromSeconds(transitionTimeSeconds));
                 _rangeAnimation = new RangeAnimation(CurrentRange, _animationTarget, duration);
                 _rangeAnimation.Completed += RangeAnimationCompleted;

@@ -67,6 +67,7 @@ namespace ESME.Views.TransmissionLossViewer
                     {
                         ColorMapViewModel.CurrentRange.ForceUpdate(ColorMapViewModel.CurrentRange);
                         Render();
+                        CalculateBottomProfileGeometry();
                     }
                 }));
             _instanceObservers.Add(Observable.FromEventPattern<SizeChangedEventArgs>(view, "SizeChanged").Subscribe(e => Render()));
@@ -199,14 +200,15 @@ namespace ESME.Views.TransmissionLossViewer
                 _imageSeriesViewModel.Right = Radial.Ranges.Last();
                 //Debug.WriteLine(string.Format("Radial max depth: {0} max range: {1}", Radial.Depths.Last(), Radial.Ranges.Last()));
                 ColorMapViewModel.StatisticalRange.ForceUpdate(_transmissionLossRadial.StatMin, _transmissionLossRadial.StatMax);
+                ColorMapViewModel.CurrentRange.ForceUpdate(ColorMapViewModel.StatisticalRange);
                 AxisSeriesViewModel.XAxis.DataRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
                 AxisSeriesViewModel.YAxis.DataRange.Update(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
                 AxisSeriesViewModel.XAxis.VisibleRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
                 AxisSeriesViewModel.YAxis.VisibleRange.ForceUpdate(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
-                Debug.WriteLine("Creating CurrentRange sampler");
+                Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Creating CurrentRange sampler", DateTime.Now));
                 _radialObservers.Add(ColorMapViewModel.CurrentRange.Sample(TimeSpan.FromMilliseconds(50)).Subscribe(e =>
                 {
-                    Debug.WriteLine("CurrentRange: " + ColorMapViewModel.CurrentRange);
+                    Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: CurrentRange sampled as {1}", DateTime.Now, ColorMapViewModel.CurrentRange));
                     Render();
                 }));
                 Render();
