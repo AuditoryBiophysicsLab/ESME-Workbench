@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
@@ -53,24 +54,31 @@ namespace ESME.Views.TransmissionLossViewer
                 .RegisterHandler(x => x.MouseDataLocation, UpdateStatusProperties);
             _yAxisPropertyObserver = new PropertyObserver<DataAxisViewModel>(AxisSeriesViewModel.YAxis)
                 .RegisterHandler(y => y.MouseDataLocation, UpdateStatusProperties);
-            _instanceObservers.Add(AxisSeriesViewModel.YAxis.VisibleRange.Subscribe(e => CalculateBottomProfileGeometry()));
-            _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged").ObserveOnDispatcher()
-                .Subscribe(e =>
-                {
-                    if (e.EventArgs.PropertyName == "Radial") RadialChanged();
-                }));
-            _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(AxisSeriesViewModel, "PropertyChanged").ObserveOnDispatcher()
-                .Subscribe(e =>
-                {
-                    if (e.EventArgs.PropertyName == "ActualWidth" || e.EventArgs.PropertyName == "ActualHeight")
-                    {
-                        ColorMapViewModel.CurrentRange.ForceUpdate(ColorMapViewModel.CurrentRange);
-                        Render();
-                        CalculateBottomProfileGeometry();
-                    }
-                }));
-            _instanceObservers.Add(Observable.FromEventPattern<SizeChangedEventArgs>(view, "SizeChanged").Subscribe(e => Render()));
-            _displayQueue.ObserveOnDispatcher()
+            _instanceObservers.Add(AxisSeriesViewModel.YAxis.VisibleRange
+                                       .ObserveOn(TaskPoolScheduler.Default)
+                                       .Subscribe(e => CalculateBottomProfileGeometry()));
+            _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged")
+                                       .ObserveOnDispatcher()
+                                       .Subscribe(e =>
+                                       {
+                                           if (e.EventArgs.PropertyName == "Radial") RadialChanged();
+                                       }));
+            _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(AxisSeriesViewModel, "PropertyChanged")
+                                       .ObserveOnDispatcher()
+                                       .Subscribe(e =>
+                                       {
+                                           if (e.EventArgs.PropertyName == "ActualWidth" || e.EventArgs.PropertyName == "ActualHeight")
+                                           {
+                                               ColorMapViewModel.CurrentRange.ForceUpdate(ColorMapViewModel.CurrentRange);
+                                               Render();
+                                               CalculateBottomProfileGeometry();
+                                           }
+                                       }));
+            _instanceObservers.Add(Observable.FromEventPattern<SizeChangedEventArgs>(view, "SizeChanged")
+                                       .ObserveOn(TaskPoolScheduler.Default)
+                                       .Subscribe(e => Render()));
+            _displayQueue
+                .ObserveOnDispatcher()
                 .Subscribe(result =>
                 {
                     var pixelBuffer = result.Item1;
@@ -79,10 +87,11 @@ namespace ESME.Views.TransmissionLossViewer
                     //Debug.WriteLine(string.Format("Got completed event for sequence number {0} completed", sequenceNumber));
                     if (sequenceNumber < _displayedSequenceNumber || WriteableBitmap == null || WriteableBitmap.PixelWidth != renderRect.Width || WriteableBitmap.PixelHeight != renderRect.Height)
                     {
-                        Debug.WriteLine(string.Format("Discarding image buffer:{0}{1}", 
-                            sequenceNumber < _displayedSequenceNumber ? " Old image sequence" : "", 
-                            WriteableBitmap == null ? " No bitmap" : 
-                            WriteableBitmap.PixelWidth != renderRect.Width || WriteableBitmap.PixelHeight != renderRect.Height ? " Size mismatch" : ""));
+                        Debug.WriteLine(string.Format("Discarding image buffer:{0}{1}",
+                                                      sequenceNumber < _displayedSequenceNumber ? " Old image sequence" : "",
+                                                      WriteableBitmap == null
+                                                          ? " No bitmap"
+                                                          : WriteableBitmap.PixelWidth != renderRect.Width || WriteableBitmap.PixelHeight != renderRect.Height ? " Size mismatch" : ""));
                         return;
                     }
                     _displayedSequenceNumber = sequenceNumber;
@@ -94,14 +103,15 @@ namespace ESME.Views.TransmissionLossViewer
                     WriteableBitmapVisibility = Visibility.Visible;
                     _imageSeriesViewModel.ImageSource = WriteableBitmap;
                 });
-            _instanceObservers.Add(Observable.FromEventPattern<RoutedEventArgs>(view, "Unloaded").Subscribe(e =>
-            {
-                Debug.WriteLine("Unload event");
-                _renderQueue.Complete();
-                _displayQueue.Dispose();
-                _instanceObservers.ForEach(o => o.Dispose());
-                _radialObservers.ForEach(o => o.Dispose());
-            }));
+            _instanceObservers.Add(Observable.FromEventPattern<RoutedEventArgs>(view, "Unloaded")
+                                       .Subscribe(e =>
+                                       {
+                                           Debug.WriteLine("Unload event");
+                                           _renderQueue.Complete();
+                                           _displayQueue.Dispose();
+                                           _instanceObservers.ForEach(o => o.Dispose());
+                                           _radialObservers.ForEach(o => o.Dispose());
+                                       }));
             UpdateStatusProperties();
         }
 
@@ -149,7 +159,6 @@ namespace ESME.Views.TransmissionLossViewer
             MaxDegreeOfParallelism = System.Environment.ProcessorCount
         });
 
-        [UsedImplicitly] readonly PropertyObserver<RadialViewModel> _propertyObserver;
         [UsedImplicitly] readonly PropertyObserver<DataAxisViewModel> _xAxisPropertyObserver;
         [UsedImplicitly] readonly PropertyObserver<DataAxisViewModel> _yAxisPropertyObserver;
         [UsedImplicitly] readonly PropertyObserver<FourAxisSeriesViewModel> _fourAxisSeriesObserver;
@@ -204,7 +213,7 @@ namespace ESME.Views.TransmissionLossViewer
                 AxisSeriesViewModel.YAxis.DataRange.Update(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
                 AxisSeriesViewModel.XAxis.VisibleRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
                 AxisSeriesViewModel.YAxis.VisibleRange.ForceUpdate(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
-                _radialObservers.Add(ColorMapViewModel.CurrentRange.Sample(TimeSpan.FromMilliseconds(50)).Subscribe(e => Render()));
+                _radialObservers.Add(ColorMapViewModel.CurrentRange.ObserveOn(TaskPoolScheduler.Default).Sample(TimeSpan.FromMilliseconds(50)).Subscribe(e => Render()));
                 Render();
             }
             catch (Exception e)

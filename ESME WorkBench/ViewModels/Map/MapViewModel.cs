@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using ESME;
@@ -15,7 +14,6 @@ using ESMEWorkbench.ViewModels.Layers;
 using ESMEWorkbench.ViewModels.Main;
 using ESMEWorkbench.Views;
 using HRC;
-using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Services;
 using HRC.ViewModels;
@@ -65,8 +63,10 @@ namespace ESMEWorkbench.ViewModels.Map
             if (Designer.IsInDesignMode) return;
 
             _wpfMap = ((MainView)_viewAwareStatus.View).MapView.WpfMap;
+
             CreateMouseEventStreams();
             SubscribeToMouseEventStreams();
+            
             EditableRectangleOverlayViewModel = new EditableRectangleOverlayViewModel(_wpfMap);
             EditablePolygonOverlayViewModel = new EditablePolygonOverlayViewModel(_wpfMap);
             //SoundSpeedProfileViewModel = new SoundSpeedProfileViewModel(((MainView)_viewAwareStatus.View).MapView.SoundSpeedProfileView);
@@ -241,14 +241,14 @@ namespace ESMEWorkbench.ViewModels.Map
 
         #region Mouse event streams
 
-        [Initialize, UsedImplicitly] public Subject<Geo> LeftButtonDown { get; private set; }
-        [Initialize, UsedImplicitly] public Subject<Geo> LeftButtonUp { get; private set; }
-        [Initialize, UsedImplicitly] public Subject<Geo> RightButtonDown { get; private set; }
-        [Initialize, UsedImplicitly] public Subject<Geo> RightButtonUp { get; private set; }
-        [Initialize, UsedImplicitly] public Subject<Geo> MouseGeo { get; private set; }
-        [Initialize, UsedImplicitly] public Subject<Geo> Click { get; private set; }
-        [Initialize, UsedImplicitly] public Subject<Geo> DoubleClick { get; private set; }
-        [Initialize, UsedImplicitly] public Subject<Geo> MouseWheel { get; private set; }
+        public IObservable<Geo> LeftButtonDown { get; private set; }
+        public IObservable<Geo> LeftButtonUp { get; private set; }
+        public IObservable<Geo> RightButtonDown { get; private set; }
+        public IObservable<Geo> RightButtonUp { get; private set; }
+        public IObservable<Geo> MouseGeo { get; private set; }
+        public IObservable<Geo> Click { get; private set; }
+        public IObservable<Geo> DoubleClick { get; private set; }
+        public IObservable<Geo> MouseHoverGeo { get; private set; }
 
         void SubscribeToMouseEventStreams()
         {
@@ -280,73 +280,86 @@ namespace ESMEWorkbench.ViewModels.Map
         IDisposable _mouseHover, _timeObserver;
         void CreateMouseEventStreams()
         {
-            Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseDown").ObserveOnDispatcher()
-                .Select(e => new { Button = e.EventArgs.ChangedButton, Geo = GetMouseEventArgsGeo(e.EventArgs) })
+            LeftButtonDown = Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseDown")
+                .Where(e => e.EventArgs.ChangedButton == MouseButton.Left)
+                .Select(e => GetMouseEventArgsGeo(e.EventArgs));
+            RightButtonDown = Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseDown")
+                .Where(e => e.EventArgs.ChangedButton == MouseButton.Right)
+                .Select(e => GetMouseEventArgsGeo(e.EventArgs));
+            LeftButtonUp = Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseUp")
+                .Where(e => e.EventArgs.ChangedButton == MouseButton.Left)
+                .Select(e => GetMouseEventArgsGeo(e.EventArgs));
+            RightButtonUp = Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseUp")
+                .Where(e => e.EventArgs.ChangedButton == MouseButton.Right)
+                .Select(e => GetMouseEventArgsGeo(e.EventArgs));
+            MouseGeo = Observable.FromEventPattern<MouseEventArgs>(_wpfMap, "MouseMove")
+                .Select(e => GetMouseEventArgsGeo(e.EventArgs))
+                .Merge(Observable.FromEventPattern<MouseEventArgs>(_wpfMap, "MouseLeave")
+                           .Select(e => (Geo)null));
+            Click = Observable.FromEventPattern<MapClickWpfMapEventArgs>(_wpfMap, "MapClick")
+                .Select(e => new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX));
+            DoubleClick = Observable.FromEventPattern<MapClickWpfMapEventArgs>(_wpfMap, "MapDoubleClick")
+                .Select(e => new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX));
+#if false
+            Observable.FromEventPattern<MouseWheelEventArgs>(_wpfMap, "MouseWheel")
+                .ObserveOn(TaskPoolScheduler.Default)
                 .Subscribe(e =>
                 {
-                    if (e.Button == MouseButton.Left) LeftButtonDown.OnNext(e.Geo);
-                    if (e.Button == MouseButton.Right) RightButtonDown.OnNext(e.Geo);
+                    if (_mouseHover != null || _timeObserver != null)
+                    {
+                        if (_mouseHover != null) _mouseHover.Dispose();
+                        if (_timeObserver != null) _timeObserver.Dispose();
+                        _mouseHover = _timeObserver = null;
+                    }
+                    _timeObserver = Observable.Interval(TimeSpan.FromMilliseconds(200)).Subscribe(f =>
+                    {
+                        if (_mouseHover != null) return;
+                        MouseHover();
+                        _timeObserver.Dispose();
+                    });
                 });
-            Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseUp").ObserveOnDispatcher()
-                .Select(e => new { Button = e.EventArgs.ChangedButton, Geo = GetMouseEventArgsGeo(e.EventArgs) })
-                .Subscribe(e =>
-                {
-                    if (e.Button == MouseButton.Left) LeftButtonUp.OnNext(e.Geo);
-                    if (e.Button == MouseButton.Right) RightButtonUp.OnNext(e.Geo);
-                });
-            Observable.FromEventPattern<MouseWheelEventArgs>(_wpfMap, "MouseWheel").ObserveOnDispatcher().Subscribe(e =>
-            {
-                if (_mouseHover != null || _timeObserver != null)
-                {
-                    if (_mouseHover != null) _mouseHover.Dispose();
-                    if (_timeObserver != null) _timeObserver.Dispose();
-                    _mouseHover = _timeObserver = null;
-                }
-                _timeObserver = Observable.Interval(TimeSpan.FromMilliseconds(200)).Subscribe(f =>
-                {
-                    if (_mouseHover != null) return;
-                    MouseHover();
-                    _timeObserver.Dispose();
-                });
-            });
-            Observable.FromEventPattern<MouseEventArgs>(_wpfMap, "MouseLeave").ObserveOnDispatcher() 
-                .Subscribe(e => MouseGeo.OnNext(null));
-            Observable.FromEventPattern<MouseEventArgs>(_wpfMap, "MouseMove").ObserveOnDispatcher()
-                .Subscribe(e => MouseGeo.OnNext(GetMouseEventArgsGeo(e.EventArgs)));
-            Observable.FromEventPattern<MapClickWpfMapEventArgs>(_wpfMap, "MapClick").ObserveOnDispatcher()
-                .Subscribe(e => Click.OnNext(new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX)));
-            Observable.FromEventPattern<MapClickWpfMapEventArgs>(_wpfMap, "MapDoubleClick").ObserveOnDispatcher()
-                .Subscribe(e => DoubleClick.OnNext(new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX)));
+#endif
             MouseHover();
         }
 
         void MouseHover()
         {
-            _mouseHover = MouseGeo.Throttle(TimeSpan.FromMilliseconds(300)).DistinctUntilChanged()
-                      .Where(g => g != null)
-                      .Select(g => new PointShape(g.Longitude, g.Latitude))
-                      .Subscribe(p =>
-                      {
-                          foreach (var activeLayerOverlay in _wpfMap.Overlays.OfType<ActiveLayerOverlay>().ToList())
-                          {
-                              foreach (var featureLayer in activeLayerOverlay.Layers.OfType<FeatureLayer>().ToList())
-                              {
-                                  featureLayer.Open();
-                                  try
-                                  {
-                                      var featureCollection = featureLayer.QueryTools.GetFeaturesContaining(p, ReturningColumnsType.NoColumns);
-                                      if (featureCollection.Count != 0)
-                                      {
-                                          activeLayerOverlay.MouseIsHovering.OnNext(true);
-                                          _hoveringOverlays.Add(activeLayerOverlay);
-                                      }
-                                  }
-                                  catch { }
-                                  if (featureLayer.IsOpen) featureLayer.Close();
-                              }
-                          }
-                      });
+            MouseHoverGeo = MouseGeo.Merge(Observable.FromEventPattern<MouseWheelEventArgs>(_wpfMap, "MouseWheel")
+                                               .Select(e => (Geo)null));
+            _mouseHover = MouseHoverGeo.ObserveOn(TaskPoolScheduler.Default)
+                .Throttle(TimeSpan.FromMilliseconds(300))
+                .DistinctUntilChanged()
+                .Where(g => g != null)
+                .Select(g => new PointShape(g.Longitude, g.Latitude))
+                .Subscribe(p =>
+                {
+                    foreach (var activeLayerOverlay in _wpfMap.Overlays.OfType<ActiveLayerOverlay>().ToList())
+                    {
+                        foreach (var featureLayer in activeLayerOverlay.Layers.OfType<FeatureLayer>().ToList())
+                        {
+                            featureLayer.Open();
+                            try
+                            {
+                                var featureCollection = featureLayer.QueryTools.GetFeaturesContaining(p, ReturningColumnsType.NoColumns);
+                                if (featureCollection.Count != 0)
+                                {
+                                    activeLayerOverlay.MouseIsHovering.OnNext(true);
+                                    _hoveringOverlays.Add(activeLayerOverlay);
+                                }
+                            }
+                            catch {}
+                            if (featureLayer.IsOpen) featureLayer.Close();
+                        }
+                    }
+                });
+            MouseHoverGeo.ObserveOn(TaskPoolScheduler.Default)
+                .Subscribe(g =>
+                {
+                    _hoveringOverlays.ForEach(o => o.MouseIsHovering.OnNext(false));
+                    _hoveringOverlays.Clear();
+                });
         }
+
         SoundSpeedProfileWindowView _soundSpeedProfileWindowView;
         readonly List<ActiveLayerOverlay> _hoveringOverlays = new List<ActiveLayerOverlay>();
 

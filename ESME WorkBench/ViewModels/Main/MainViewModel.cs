@@ -84,8 +84,6 @@ namespace ESMEWorkbench.ViewModels.Main
             _plugins = plugins;
             _cache = cache;
             MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
-            MapViewModel.MouseGeo.Subscribe(SetMouseEarthCoordinate);
-            MapViewModel.Click.Subscribe(MapClick);
             Cursor = Cursors.Arrow;
             
             _transmissionLoss.WorkQueue.PropertyChanged +=
@@ -108,7 +106,10 @@ namespace ESMEWorkbench.ViewModels.Main
             _viewAwareStatus.ViewLoaded += () =>
             {
                 if (Designer.IsInDesignMode) return;
-                
+
+                MapViewModel.MouseGeo.Subscribe(SetMouseEarthCoordinate);
+                MapViewModel.Click.Subscribe(MapClick);
+
                 if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"))) Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
                 var databaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
                 var databaseFile = Path.Combine(databaseDirectory, "esme.db");
