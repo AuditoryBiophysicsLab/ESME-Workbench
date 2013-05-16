@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -15,17 +18,28 @@ namespace ESME.Views.Controls
     {
         public ColorMapViewModel()
         {
-            DataRange.RangeChanged += (s, e) =>
-            {
-                if (!DataRange.Contains(CurrentRange)) CurrentRange.Update(DataRange);
-            };
-            FullAxisRange.RangeChanged += (s, e) =>
-            {
-                Debug.WriteLine(string.Format("{0:HH:mm:ss:fff} ColorMapViewModel.FullAxisRange changed to {1}", DateTime.Now, FullAxisRange));
-                if (!DataRange.Contains(FullAxisRange)) DataRange.Update(FullAxisRange);
-            };
+            _observers.Add(DataRange
+                               .ObserveOn(TaskPoolScheduler.Default)
+                               .Subscribe(r =>
+                               {
+                                   Debug.WriteLine(string.Format("{0:HH:mm:ss:fff} ColorMapViewModel.DataRange changed to {1}", DateTime.Now, DataRange));
+                                   if (!DataRange.Contains(CurrentRange)) CurrentRange.Update(DataRange);
+                               }));
+            _observers.Add(FullAxisRange
+                               .ObserveOn(TaskPoolScheduler.Default)
+                               .Subscribe(r =>
+                               {
+                                   Debug.WriteLine(string.Format("{0:HH:mm:ss:fff} ColorMapViewModel.FullAxisRange changed to {1}", DateTime.Now, FullAxisRange));
+                                   if (!DataRange.Contains(FullAxisRange)) DataRange.Update(FullAxisRange);
+                               }));
+            _observers.Add(CurrentRange
+                               .ObserveOn(TaskPoolScheduler.Default)
+                               .Subscribe(r => Debug.WriteLine(string.Format("{0:HH:mm:ss:fff} ColorMapViewModel.CurrentRange changed to {1}", DateTime.Now, CurrentRange))));
+            _observers.Add(StatisticalRange
+                               .ObserveOn(TaskPoolScheduler.Default)
+                               .Subscribe(r => Debug.WriteLine(string.Format("{0:HH:mm:ss:fff} ColorMapViewModel.StatisticalRange changed to {1}", DateTime.Now, StatisticalRange))));
         }
-
+        readonly List<IDisposable> _observers = new List<IDisposable>();
         #region public properties
 
         public ObservableList<Color> Colors
@@ -379,15 +393,8 @@ namespace ESME.Views.Controls
 
         int _colorCount;
 
-        //double _curMaxValue,
-        //       _curMinValue,
-        //       _curRange;
-
         Color _firstColor,
               _lastColor;
-
-        //double _maxValue,
-        //       _minValue;
 
         #endregion
     }
