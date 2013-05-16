@@ -324,35 +324,43 @@ namespace ESMEWorkbench.ViewModels.Map
 
         void MouseHover()
         {
-            MouseHoverGeo = MouseGeo.Merge(Observable.FromEventPattern<MouseWheelEventArgs>(_wpfMap, "MouseWheel")
-                                               .Select(e => (Geo)null));
-            _mouseHover = MouseHoverGeo.ObserveOn(TaskPoolScheduler.Default)
+            // Here create an event stream called mouseGeosWithMouseWheelNulls, which consists of the MouseGeo event stream, 
+            // merged with another stream that produces a null every time the mouse wheel is moved
+            var mouseGeoWithMouseWheelNull = MouseGeo.Merge(Observable.FromEventPattern<MouseWheelEventArgs>(_wpfMap, "MouseWheel")
+                                                                .Select(e => (Geo)null));
+
+            // Here create an event stream called MouseHoverGeo, which consists of mouseGeosWithMouseWheelNulls events 
+            // filtered to only give us an event after 300 ms of inactivity with duplicate events and null events removed
+            MouseHoverGeo = mouseGeoWithMouseWheelNull
                 .Throttle(TimeSpan.FromMilliseconds(300))
                 .DistinctUntilChanged()
-                .Where(g => g != null)
-                .Select(g => new PointShape(g.Longitude, g.Latitude))
-                .Subscribe(p =>
+                .Where(g => g != null);
+
+            // Observe the MouseHoveGeo event stream on the TaskPool
+            _mouseHover = MouseHoverGeo.ObserveOn(TaskPoolScheduler.Default)
+                .Subscribe(g =>
                 {
+                    var pointShape = new PointShape(g.Longitude, g.Latitude);
                     foreach (var activeLayerOverlay in _wpfMap.Overlays.OfType<ActiveLayerOverlay>().ToList())
                     {
                         foreach (var featureLayer in activeLayerOverlay.Layers.OfType<FeatureLayer>().ToList())
                         {
-                            featureLayer.Open();
                             try
                             {
-                                var featureCollection = featureLayer.QueryTools.GetFeaturesContaining(p, ReturningColumnsType.NoColumns);
-                                if (featureCollection.Count != 0)
-                                {
-                                    activeLayerOverlay.MouseIsHovering.OnNext(true);
-                                    _hoveringOverlays.Add(activeLayerOverlay);
-                                }
+                                featureLayer.Open();
+                                var featureCollection = featureLayer.QueryTools.GetFeaturesContaining(pointShape, ReturningColumnsType.NoColumns);
+                                if (featureCollection.Count == 0) continue;
+                                activeLayerOverlay.MouseIsHovering.OnNext(true);
+                                _hoveringOverlays.Add(activeLayerOverlay);
                             }
-                            catch {}
-                            if (featureLayer.IsOpen) featureLayer.Close();
+                            finally
+                            {
+                                if (featureLayer.IsOpen) featureLayer.Close();
+                            }
                         }
                     }
                 });
-            MouseHoverGeo.ObserveOn(TaskPoolScheduler.Default)
+            mouseGeoWithMouseWheelNull.ObserveOn(TaskPoolScheduler.Default)
                 .Subscribe(g =>
                 {
                     _hoveringOverlays.ForEach(o => o.MouseIsHovering.OnNext(false));
