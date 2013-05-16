@@ -4,6 +4,8 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -49,9 +51,12 @@ namespace ESMEWorkbench.ViewModels.Main
                         _scenario.PropertyChanged -= ScenarioPropertyChangedMonitor;
                         _scenario.IsLoaded = false;
                     }
+                    if (_mouseHoverSubscription != null) _mouseHoverSubscription.Dispose();
+                    _mouseHoverSubscription = null;
                     _scenario = value;
                     LayerTreeViewModel.Scenario = _scenario;
                     if (_scenario == null) return;
+                    _mouseHoverSubscription = MapViewModel.MouseHoverGeo.ObserveOnDispatcher().Subscribe(g => _scenario.MouseHoverGeo = g);
                     _scenario.PropertyChanged += ScenarioPropertyChangedMonitor;
                     _scenario.UpdateMapLayers();
                     _cache[_scenario.Wind].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
@@ -104,6 +109,9 @@ namespace ESMEWorkbench.ViewModels.Main
                 }
             }
         }
+
+        IDisposable _mouseHoverSubscription;
+
         void ScenarioPropertyChangedMonitor(object s, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "Name") OnPropertyChanged("MainWindowTitle");

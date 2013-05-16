@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -252,13 +250,6 @@ namespace ESMEWorkbench.ViewModels.Map
 
         void SubscribeToMouseEventStreams()
         {
-            MouseGeo.Subscribe(g =>
-            {
-                _hoveringOverlays.ForEach(l => l.MouseIsHovering.OnNext(false));
-                _hoveringOverlays.Clear();
-            });
-            
-            
             DoubleClick.Subscribe(g =>
             {
                 if (MouseSoundSpeedProfile != null)
@@ -277,7 +268,7 @@ namespace ESMEWorkbench.ViewModels.Map
             });
         }
 
-        IDisposable _mouseHover, _timeObserver;
+        //IDisposable _mouseHover, _timeObserver;
         void CreateMouseEventStreams()
         {
             LeftButtonDown = Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseDown")
@@ -300,25 +291,6 @@ namespace ESMEWorkbench.ViewModels.Map
                 .Select(e => new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX));
             DoubleClick = Observable.FromEventPattern<MapClickWpfMapEventArgs>(_wpfMap, "MapDoubleClick")
                 .Select(e => new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX));
-#if false
-            Observable.FromEventPattern<MouseWheelEventArgs>(_wpfMap, "MouseWheel")
-                .ObserveOn(TaskPoolScheduler.Default)
-                .Subscribe(e =>
-                {
-                    if (_mouseHover != null || _timeObserver != null)
-                    {
-                        if (_mouseHover != null) _mouseHover.Dispose();
-                        if (_timeObserver != null) _timeObserver.Dispose();
-                        _mouseHover = _timeObserver = null;
-                    }
-                    _timeObserver = Observable.Interval(TimeSpan.FromMilliseconds(200)).Subscribe(f =>
-                    {
-                        if (_mouseHover != null) return;
-                        MouseHover();
-                        _timeObserver.Dispose();
-                    });
-                });
-#endif
             MouseHover();
         }
 
@@ -326,17 +298,17 @@ namespace ESMEWorkbench.ViewModels.Map
         {
             // Here create an event stream called mouseGeosWithMouseWheelNulls, which consists of the MouseGeo event stream, 
             // merged with another stream that produces a null every time the mouse wheel is moved
-            var mouseGeoWithMouseWheelNull = MouseGeo.Merge(Observable.FromEventPattern<MouseWheelEventArgs>(_wpfMap, "MouseWheel")
-                                                                .Select(e => (Geo)null));
-
             // Here create an event stream called MouseHoverGeo, which consists of mouseGeosWithMouseWheelNulls events 
             // filtered to only give us an event after 300 ms of inactivity with duplicate events and null events removed
-            MouseHoverGeo = mouseGeoWithMouseWheelNull
-                .Throttle(TimeSpan.FromMilliseconds(300))
-                .DistinctUntilChanged()
-                .Where(g => g != null);
+            MouseHoverGeo = MouseGeo.Throttle(TimeSpan.FromMilliseconds(300))
+                .Merge(Observable.FromEventPattern<MouseWheelEventArgs>(_wpfMap, "MouseWheel")
+                                                                .Select(e => (Geo)null))
+                .Merge(MouseGeo.Select(e => (Geo)null))
+                .DistinctUntilChanged();
+            //MouseHoverGeo.ObserveOn(TaskPoolScheduler.Default).Subscribe(g => Debug.WriteLine(string.Format("{0:HH:mm:ss:fff} MouseHoverGeo is now {1}", DateTime.Now, g)));
 
-            // Observe the MouseHoveGeo event stream on the TaskPool
+#if false
+    // Observe the MouseHoveGeo event stream on the TaskPool
             _mouseHover = MouseHoverGeo.ObserveOn(TaskPoolScheduler.Default)
                 .Subscribe(g =>
                 {
@@ -363,13 +335,17 @@ namespace ESMEWorkbench.ViewModels.Map
             mouseGeoWithMouseWheelNull.ObserveOn(TaskPoolScheduler.Default)
                 .Subscribe(g =>
                 {
-                    _hoveringOverlays.ForEach(o => o.MouseIsHovering.OnNext(false));
-                    _hoveringOverlays.Clear();
+                    while (!_hoveringOverlays.IsEmpty)
+                    {
+                        ActiveLayerOverlay overlay;
+                        if (_hoveringOverlays.TryTake(out overlay)) overlay.MouseIsHovering.OnNext(false);
+                    }
                 });
+#endif
         }
 
         SoundSpeedProfileWindowView _soundSpeedProfileWindowView;
-        readonly List<ActiveLayerOverlay> _hoveringOverlays = new List<ActiveLayerOverlay>();
+        //readonly ConcurrentBag<ActiveLayerOverlay> _hoveringOverlays = new ConcurrentBag<ActiveLayerOverlay>();
 
         Geo GetMouseEventArgsGeo(MouseEventArgs e)
         {

@@ -33,7 +33,24 @@ namespace ESME.Scenarios
             LayerSettings.DisplayIfScenarioIsLoadedFunc = () => AnalysisPoint.Scenario.IsLoaded;
             LayerSettings.LineOrSymbolColorChanged += UpdateMapLayers;
         }
-
+        Geo _mouseHoverGeo;
+        [NotMapped] public Geo MouseHoverGeo
+        {
+            get { return _mouseHoverGeo; }
+            set
+            {
+                _mouseHoverGeo = value;
+                if (_mouseHoverGeo == null)
+                {
+                    _isHovering = false;
+                    UpdateMapLayers();
+                    return;
+                }
+                if ((_mouseHoverGeo.DistanceKilometers(AnalysisPoint.Geo) * 1000) > Modes.Max(m => m.MaxPropagationRadius)) return;
+                _isHovering = true;
+                UpdateMapLayers();
+            }
+        }
         [NotMapped] public bool HasErrors { get; private set; }
         [NotMapped] public string Errors { get; private set; }
         public void CheckForErrors()

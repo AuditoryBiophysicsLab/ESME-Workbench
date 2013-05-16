@@ -194,6 +194,16 @@ namespace ESME.Scenarios
             }
         }
 
+        Geo _mouseHoverGeo;
+        [NotMapped] public Geo MouseHoverGeo
+        {
+            get { return _mouseHoverGeo; }
+            set
+            {
+                _mouseHoverGeo = value;
+                AnalysisPoints.ForEach(a => a.MouseHoverGeo = _mouseHoverGeo);
+            }
+        }
         [NotMapped] public bool IsLoaded { get; set; }
         [NotMapped] public Wind WindData { get { return ((Wind)Cache[Wind].Result); } }
         [NotMapped] public SoundSpeed SoundSpeedData { get { return ((SoundSpeed)Cache[SoundSpeed].Result); } }

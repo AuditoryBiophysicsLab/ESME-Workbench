@@ -37,6 +37,16 @@ namespace ESME.Scenarios
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
 
+        Geo _mouseHoverGeo;
+        [NotMapped] public Geo MouseHoverGeo
+        {
+            get { return _mouseHoverGeo; }
+            set
+            {
+                _mouseHoverGeo = value;
+                TransmissionLosses.ForEach(t => t.MouseHoverGeo = _mouseHoverGeo);
+            }
+        }
         [NotMapped] public string LayerName { get { return string.Format("[{0:0.###}, {1:0.###}]", Geo.Latitude, Geo.Longitude); } }
         [NotMapped] public bool HasErrors { get; set; }
         [NotMapped] public string Errors { get; set; }
