@@ -7,13 +7,15 @@
              xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
              xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
              Background="White"
+             d:DataContext="{Binding Source={StaticResource DesignViewModel},
+                                     Path=DesignTimeData}"
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
     <UserControl.Resources>
         <TransmissionLossViewer:RadialViewModel x:Key="DesignViewModel" />
     </UserControl.Resources>
-    <Grid Margin="0 22 0 0" d:DataContext="{Binding Source={StaticResource DesignViewModel}, Path=DesignTimeData}">
+    <Grid Margin="0 22 0 0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
@@ -31,26 +33,14 @@
         <DockPanel Grid.Row="0" Grid.Column="0">
             <DockPanel Width="80" DockPanel.Dock="Right">
                 <TextBlock Height="{Binding AxisSeriesViewModel.BottomAxis.ActualHeight, Mode=OneWay}" DockPanel.Dock="Bottom" />
-                <DockPanel Margin="5 0 0 0"
-                           DataContext="{Binding ColorMapViewModel}"
-                           LastChildFill="False">
-                    <Plotting:DataAxis AxisLabel="Transmission Loss (dB)"
-                                       AxisLocation="Right"
-                                       DataRange="{Binding DataRange}"
-                                       DockPanel.Dock="Right"
-                                       ShowDebugMessages="False"
-                                       VisibleRange="{Binding FullAxisRange}" />
-                    <controls:ColorBarView MinWidth="50"
-                                           ColorBarImage="{Binding ColorBitmap}"
-                                           CurrentRange="{Binding CurrentRange}"
-                                           DockPanel.Dock="Right"
-                                           FullRange="{Binding DataRange}"
-                                           StatisticalRange="{Binding StatisticalRange}" />
-                </DockPanel>
+                <controls:ColorBarControl Margin="5 0 0 0" 
+                                          AxisTitle="{Binding ColorMapViewModel.Name}"
+                                          ColorBarImage="{Binding ColorMapViewModel.ColorBitmap}"
+                                          CurrentRange="{Binding ColorMapViewModel.CurrentRange}" 
+                                          FullRange="{Binding ColorMapViewModel.DataRange}" 
+                                          StatisticalRange="{Binding ColorMapViewModel.StatisticalRange}"/>
             </DockPanel>
-            <Plotting:FourAxisSeriesView x:Name="AxisView"
-                                         DataContext="{Binding AxisSeriesViewModel}"
-                                         DockPanel.Dock="Left" />
+            <Plotting:FourAxisSeriesView x:Name="AxisView" DataContext="{Binding AxisSeriesViewModel}" DockPanel.Dock="Left" />
         </DockPanel>
     </Grid>
 </UserControl>

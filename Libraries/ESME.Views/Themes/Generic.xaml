@@ -3,6 +3,7 @@
                     xmlns:colorPicker="clr-namespace:ESME.Views.ColorPicker"
                     xmlns:Controls="clr-namespace:ESME.Views.Controls"
                     xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
+                    xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
                     xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC">
     <WPF:BooleanInverter x:Key="BooleanInverter" />
     <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed" FalseValue="Collapsed" TrueValue="Visible" />
@@ -15,6 +16,27 @@
                             <ImageBrush ImageSource="{Binding Path=ImageSource, RelativeSource={RelativeSource TemplatedParent}}" />
                         </Rectangle.Fill>
                     </Rectangle>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="{x:Type Controls:ColorBarControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Controls:ColorBarControl}">
+                    <DockPanel>
+                        <Plotting:DataAxis AxisLabel="{TemplateBinding AxisTitle}"
+                                           AxisLocation="Right"
+                                           DataRange="{TemplateBinding FullRange}"
+                                           DockPanel.Dock="Right"
+                                           ShowDebugMessages="False"
+                                           VisibleRange="{TemplateBinding FullRange}" />
+                        <DockPanel>
+                            <DockPanel.RenderTransformOrigin>0.5,0.5</DockPanel.RenderTransformOrigin>
+                            <Image x:Name="PART_Image" Margin="{TemplateBinding ColorbarAdjustmentMargins}" Source="{TemplateBinding ColorBarImage}" Stretch="Fill" />
+                        </DockPanel>
+                    </DockPanel>
+
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

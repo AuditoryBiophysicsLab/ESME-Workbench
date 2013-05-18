@@ -1,27 +1,29 @@
 ﻿<UserControl x:Class="ESME.Views.Controls.ColorBarView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
-             xmlns:Controls="clr-namespace:ESME.Views.Controls">
-    <DockPanel LastChildFill="True"
-               MouseLeftButtonDown="DockPanel_MouseLeftButtonDown"
-               MouseWheel="Image_MouseWheel">
-        <DockPanel.RenderTransformOrigin>
-            0.5,0.5
-        </DockPanel.RenderTransformOrigin>
-        <Border BorderBrush="Black" 
-                BorderThickness="0" 
-                x:Name="topMargin" 
-                Height="0" 
-                DockPanel.Dock="Top"/>
-        <Border BorderBrush="Black" 
-                BorderThickness="0" 
-                x:Name="botMargin" 
-                Height="0" 
-                DockPanel.Dock="Bottom"/>
-        <Image Source="{Binding Path=ColorBarImage, RelativeSource={RelativeSource AncestorType={x:Type Controls:ColorBarView}}}"
-               Stretch="Fill" 
-               MouseMove="Image_MouseMove"
-               MouseDown="Image_MouseDown"
-               MouseUp="ColorBarImageMouseUp"/>
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                       xmlns:Controls="clr-namespace:ESME.Views.Controls"
+                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                       xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
+                       d:DataContext="{Binding Source={StaticResource DesignViewModel},
+                                               Path=DesignTimeData}"
+                       d:DesignHeight="300"
+                       d:DesignWidth="100"
+                       mc:Ignorable="d">
+    <UserControl.Resources>
+        <Controls:ColorMapViewModel x:Key="DesignViewModel" />
+    </UserControl.Resources>
+
+    <DockPanel>
+        <Plotting:DataAxis AxisLabel="{Binding Name}"
+                           AxisLocation="Right"
+                           DataRange="{Binding DataRange}"
+                           DockPanel.Dock="Right"
+                           ShowDebugMessages="False"
+                           VisibleRange="{Binding FullAxisRange}" />
+        <DockPanel>
+            <DockPanel.RenderTransformOrigin>0.5,0.5</DockPanel.RenderTransformOrigin>
+            <Image Margin="{Binding ColorbarAdjustmentMargins}"  Source="{Binding ColorBitmap}" Stretch="Fill" />
+        </DockPanel>
     </DockPanel>
 </UserControl>

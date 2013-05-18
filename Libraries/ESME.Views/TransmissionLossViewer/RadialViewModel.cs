@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -28,19 +27,13 @@ using HRC.WPF;
 
 namespace ESME.Views.TransmissionLossViewer
 {
-    public class RadialViewModel : ViewModelBase
+    public class RadialViewModel : ViewModelBase, IDisposable
     {
-        public RadialViewModel()
+        public void Initialize()
         {
-        }
-
-        [ImportingConstructor]
-        public RadialViewModel(RadialView view)
-        {
-            _view = view;
+            _view = RadialView;
             _dispatcher = Dispatcher.CurrentDispatcher;
-            ColorMapViewModel = ColorMapViewModel.Default;
-
+        
             AxisSeriesViewModel.DataSeriesCollection.Add(_imageSeriesViewModel);
             AxisSeriesViewModel.DataSeriesCollection.Add(_bottomProfileViewModel);
             AxisSeriesViewModel.XAxis.Label = "Range (m)";
@@ -74,7 +67,7 @@ namespace ESME.Views.TransmissionLossViewer
                                                CalculateBottomProfileGeometry();
                                            }
                                        }));
-            _instanceObservers.Add(Observable.FromEventPattern<SizeChangedEventArgs>(view, "SizeChanged")
+            _instanceObservers.Add(Observable.FromEventPattern<SizeChangedEventArgs>(_view, "SizeChanged")
                                        .ObserveOn(TaskPoolScheduler.Default)
                                        .Subscribe(e => Render()));
             _displayQueue
@@ -103,21 +96,14 @@ namespace ESME.Views.TransmissionLossViewer
                     WriteableBitmapVisibility = Visibility.Visible;
                     _imageSeriesViewModel.ImageSource = WriteableBitmap;
                 });
-            _instanceObservers.Add(Observable.FromEventPattern<RoutedEventArgs>(view, "Unloaded")
-                                       .Subscribe(e =>
-                                       {
-                                           Debug.WriteLine("Unload event");
-                                           _renderQueue.Complete();
-                                           _displayQueue.Dispose();
-                                           _instanceObservers.ForEach(o => o.Dispose());
-                                           _radialObservers.ForEach(o => o.Dispose());
-                                       }));
+            //_instanceObservers.Add(Observable.FromEventPattern<RoutedEventArgs>(view, "Unloaded").Subscribe(e => Dispose()));
             UpdateStatusProperties();
+            Render();
         }
 
         readonly List<IDisposable> _instanceObservers = new List<IDisposable>();
         readonly List<IDisposable> _radialObservers = new List<IDisposable>();
-
+        public RadialView RadialView { get; set; }
         void Render()
         {
             if (_transmissionLossRadial == null || (int)AxisSeriesViewModel.ActualWidth == 0 || (int)AxisSeriesViewModel.ActualHeight == 0)
@@ -159,12 +145,12 @@ namespace ESME.Views.TransmissionLossViewer
             MaxDegreeOfParallelism = System.Environment.ProcessorCount
         });
 
-        [UsedImplicitly] readonly PropertyObserver<DataAxisViewModel> _xAxisPropertyObserver;
-        [UsedImplicitly] readonly PropertyObserver<DataAxisViewModel> _yAxisPropertyObserver;
-        [UsedImplicitly] readonly PropertyObserver<FourAxisSeriesViewModel> _fourAxisSeriesObserver;
+        [UsedImplicitly] PropertyObserver<DataAxisViewModel> _xAxisPropertyObserver;
+        [UsedImplicitly] PropertyObserver<DataAxisViewModel> _yAxisPropertyObserver;
+        [UsedImplicitly] PropertyObserver<FourAxisSeriesViewModel> _fourAxisSeriesObserver;
 
-        readonly RadialView _view;
-        readonly Dispatcher _dispatcher;
+        RadialView _view;
+        Dispatcher _dispatcher;
         readonly ImageSeriesViewModel _imageSeriesViewModel = new ImageSeriesViewModel();
         readonly LineSeriesViewModel _bottomProfileViewModel = new LineSeriesViewModel();
         TransmissionLossRadial _transmissionLossRadial;
@@ -172,7 +158,7 @@ namespace ESME.Views.TransmissionLossViewer
         public string WaitToRenderText { get; set; }
         [Initialize] public FourAxisSeriesViewModel AxisSeriesViewModel { get; set; }
         public WriteableBitmap WriteableBitmap { get; set; }
-        public ColorMapViewModel ColorMapViewModel { get; set; }
+        [Initialize] public ColorMapViewModel ColorMapViewModel { get; set; }
         public Visibility WriteableBitmapVisibility { get; set; }
         public Radial Radial { get; set; }
 
@@ -361,11 +347,71 @@ namespace ESME.Views.TransmissionLossViewer
                     XAxisTicks = null,
                     YAxisTicks = null,
                 },
-                ColorMapViewModel = ColorMapViewModel.Default,
+                ColorMapViewModel = ColorMapViewModel.DesignTimeData,
             };
             DesignTimeData.AxisSeriesViewModel.BottomAxis.DataRange = axisRanges;
             DesignTimeData.AxisSeriesViewModel.LeftAxis.DataRange = axisRanges;
+            DesignTimeData.ColorMapViewModel.Name = "Transmission loss (dB)";
         }
 
+        #region IDisposable implementation
+        // Implement IDisposable.
+        // Do not make this method virtual.
+        // A derived class should not be able to override this method.
+        public void Dispose()
+        {
+            Dispose(true);
+            // This object will be cleaned up by the Dispose method.
+            // Therefore, you should call GC.SupressFinalize to
+            // take this object off the finalization queue
+            // and prevent finalization code for this object
+            // from executing a second time.
+            GC.SuppressFinalize(this);
+        }
+        bool _disposed;
+        
+        // Dispose(bool disposing) executes in two distinct scenarios.
+        // If disposing equals true, the method has been called directly
+        // or indirectly by a user's code. Managed and unmanaged resources
+        // can be disposed.
+        // If disposing equals false, the method has been called by the
+        // runtime from inside the finalizer and you should not reference
+        // other objects. Only unmanaged resources can be disposed.
+        protected virtual void Dispose(bool disposing)
+        {
+            // Check to see if Dispose has already been called.
+            if (_disposed) return;
+            // If disposing equals true, dispose all managed
+            // and unmanaged resources.
+            if (disposing)
+            {
+                // Dispose managed resources.
+                if (_renderQueue != null) _renderQueue.Complete();
+                if (_displayQueue != null) _displayQueue.Dispose();
+                if (_instanceObservers != null) _instanceObservers.ForEach(o => o.Dispose());
+                if (_radialObservers != null) _radialObservers.ForEach(o => o.Dispose());
+            }
+
+            // Call the appropriate methods to clean up
+            // unmanaged resources here.
+            // If disposing is false,
+            // only the following code is executed.
+
+            // Note disposing has been done.
+            _disposed = true;
+        }
+        // Use C# destructor syntax for finalization code.
+        // This destructor will run only if the Dispose method
+        // does not get called.
+        // It gives your base class the opportunity to finalize.
+        // Do not provide destructors in types derived from this class.
+        ~RadialViewModel()
+        {
+            // Do not re-create Dispose clean-up code here.
+            // Calling Dispose(false) is optimal in terms of
+            // readability and maintainability.
+            Dispose(false);
+        }
+        #endregion
     }
 }

@@ -63,7 +63,8 @@ namespace TransmissionLossViewer
             {
                 viewAwareStatus.ViewLoaded += () =>
                                                   {
-                                                      TransmissionLossViewModel.RadialViewModel = new RadialViewModel(((Window) viewAwareStatus.View).FindChildren<RadialView>().First());
+                                                      TransmissionLossViewModel.RadialViewModel = new RadialViewModel { RadialView = ((Window)viewAwareStatus.View).FindChildren<RadialView>().First() };
+                                                      TransmissionLossViewModel.RadialViewModel.Initialize();
                                                       TransmissionLossViewModel.SaveFileService = saveFileService;
                                                       TransmissionLossViewModel.RadialViewModel.WaitToRenderText = "No Scenario Selected";
                                                   };

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -7,10 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using ESME.Scenarios;
-using ESME.Views.Controls;
 using HRC.Aspects;
 using HRC.Services;
-using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -19,7 +18,6 @@ namespace ESME.Views.TransmissionLossViewer
     public class TransmissionLossViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         public IHRCSaveFileService SaveFileService { get; set; }
-        [Affects("RadialCount")] public ObservableList<Radial> Radials { get; set; }
         
         #region RadialViewModel RadialViewModel { get; set; }
         RadialViewModel _radialViewModel;
@@ -30,7 +28,7 @@ namespace ESME.Views.TransmissionLossViewer
             {
                 _radialViewModel = value;
                 _radialViewModel.SelectedMode = SelectedMode;
-                _radialViewModel.PropertyChanged += (s, e) => { if (e.PropertyName == "WriteableBitmap" && Window!=null) Window.Activate(); };
+                _radialViewModel.PropertyChanged += (s, e) => { if (e.PropertyName == "WriteableBitmap" && Window != null) Window.Activate(); };
             }
         } 
         #endregion
@@ -60,11 +58,12 @@ namespace ESME.Views.TransmissionLossViewer
             set
             {
                 _selectedRadialIndex = value;
+                CurrentRadialView = RadialViews[value];
                // var foo = SelectedMode.TransmissionLossPluginType. some regex here.
                 var tlstring = "";
                 if (SelectedMode.TransmissionLossPluginType.ToLowerInvariant().Contains("bellhop")) tlstring = "Bellhop";
                 if (SelectedMode.TransmissionLossPluginType.ToLowerInvariant().Contains("ramgeo")) tlstring = "RAMGeo";
-                var nameString = Radials == null ? "<no radial selected>" : string.Format("Radial bearing: {0:000.0} degrees. Calculator: {1}", Radials[_selectedRadialIndex].Bearing,tlstring);
+                var nameString = Radials == null ? "<no radial selected>" : string.Format("OLD: Radial bearing: {0:000.0} degrees. Calculator: {1}", Radials[_selectedRadialIndex].Bearing,tlstring);
                 TitleString = nameString;
                 if (RadialViewModel != null)
                 {
@@ -113,7 +112,9 @@ namespace ESME.Views.TransmissionLossViewer
                 _window = value;
                 if (RadialViewModel == null)
                 {
-                    RadialViewModel = new RadialViewModel(_window.FindChildren<RadialView>().First());
+                    RadialViewModel = new RadialViewModel();
+                    //RadialViewModel.RadialView = _window.FindChildren<RadialView>().First();
+                    //RadialViewModel.Initialize();
                 }
             }
         }
@@ -141,11 +142,20 @@ namespace ESME.Views.TransmissionLossViewer
             set
             {
                 _transmissionLoss = value;
-                Radials = _transmissionLoss == null ? null : new ObservableList<Radial>(from r in _transmissionLoss.Radials orderby r.Bearing select r);
                 //var maxTransmissionLoss = float.NaN;
                 //var minTransmissionLoss = float.NaN;
+                RadialViewModels.ForEach(r => r.Dispose());
+                Radials.Clear();
+                RadialViewModels.Clear();
+                RadialViews.Clear();
                 if (_transmissionLoss != null)
                 {
+                    Radials = _transmissionLoss == null ? null : _transmissionLoss.Radials.OrderBy(r => r.Bearing).ToList();
+                    if (Radials == null)
+                    {
+                        Debug.WriteLine("This transmission loss contains no radials");
+                        return;
+                    }
                     try
                     {
                         MinTransmissionLoss = (from radial in Radials
@@ -156,15 +166,6 @@ namespace ESME.Views.TransmissionLossViewer
                                                from maximumValue in radial.MaximumTransmissionLossValues
                                                where !double.IsNaN(maximumValue) && !double.IsInfinity(maximumValue)
                                                select maximumValue).Max();
-#if false
-                        foreach (var radial in _transmissionLoss.Radials)
-                        {
-                            var maxIndex = radial.MaximumTransmissionLossValues.ToList().IndexOf(MaxTransmissionLoss);
-                            if (maxIndex == -1) continue;
-                            //Debug.WriteLine(string.Format("Maximum TL value of {0} found in radial bearing {1} at range {2}", MaxTransmissionLoss, radial.Bearing, radial.Ranges[maxIndex]));
-                            //radial.ExtractAxisData(null, maxIndex);
-                        }
-#endif
                     }
                     catch (FileNotFoundException ex)
                     {
@@ -178,26 +179,6 @@ namespace ESME.Views.TransmissionLossViewer
                     {
                         Debug.WriteLine(string.Format("Invalid operation exception loading radial: {0}", ex.Message));
                     }
-#if false
-                    foreach (var radial in _transmissionLoss.Radials)
-                    {
-                        try
-                        {
-                            var curMax = radial.MaximumTransmissionLossValues.Where(v => !double.IsNaN(v) && !double.IsInfinity(v)).Max();
-                            var curMin = radial.MinimumTransmissionLossValues.Where(v => !double.IsNaN(v) && !double.IsInfinity(v)).Min(v => !double.IsInfinity(v) ? v : 1000);
-                            maxTransmissionLoss = float.IsNaN(maxTransmissionLoss) ? curMax : Math.Max(maxTransmissionLoss, curMax);
-                            minTransmissionLoss = float.IsNaN(minTransmissionLoss) ? curMin : Math.Min(minTransmissionLoss, curMin);
-                        }
-                        catch (FileNotFoundException)
-                        {
-                            Debug.WriteLine(string.Format("File not found exception loading radial: {0}", radial.Filename));
-                        }
-                        catch (IOException)
-                        {
-                            Debug.WriteLine(string.Format("I/O exception loading radial: {0}", radial.Filename));
-                        }
-                    }
-#endif
                     ((INotifyPropertyChanged)_transmissionLoss).PropertyChanged += (s, e) =>
                     {
                         if (e.PropertyName == "IsDeleted" && Window != null)
@@ -208,21 +189,43 @@ namespace ESME.Views.TransmissionLossViewer
                     SelectedMode = (from m in _transmissionLoss.Modes
                                     orderby m.MaxPropagationRadius
                                     select m).Last();
+                    var tlstring = "";
+                    if (SelectedMode.TransmissionLossPluginType.ToLowerInvariant().Contains("bellhop")) tlstring = "Bellhop";
+                    if (SelectedMode.TransmissionLossPluginType.ToLowerInvariant().Contains("ramgeo")) tlstring = "RAMGeo";
+                    foreach (var radial in Radials)
+                    {
+                        var radialViewModel = new RadialViewModel();
+                        radialViewModel.ColorMapViewModel.DataRange.Update(MinTransmissionLoss, MaxTransmissionLoss);
+                        radialViewModel.SelectedMode = SelectedMode;
+                        radialViewModel.AxisSeriesViewModel.PlotTitle = string.Format("NEW: Radial bearing: {0:000.0} degrees. Calculator: {1}", radial.Bearing, tlstring);
+                        radialViewModel.WaitToRenderText = "Please wait...";
+                        var radialView = new RadialView { DataContext = radialViewModel };
+                        radialViewModel.RadialView = radialView;
+                        radialViewModel.Initialize();
+                        radialViewModel.Radial = radial;
+                        RadialViews.Add(radialView);
+                        RadialViewModels.Add(radialViewModel);
+                    }
                 }
-                //MaxTransmissionLoss = maxTransmissionLoss;
-                //MinTransmissionLoss = minTransmissionLoss;
                 SelectedRadialIndex = 0;
             }
         }
         #endregion
+
+        [Initialize] public List<RadialView> RadialViews { get; set; }
+        [Initialize] public List<RadialViewModel> RadialViewModels { get; set; }
+        [Initialize] public List<Radial> Radials { get; set; }
+        public RadialView CurrentRadialView { get; set; }
 
         public float MaxTransmissionLoss { get; set; }
         public float MinTransmissionLoss { get; set; }
 
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
         {
-            if (RadialViewModel == null)
-                RadialViewModel = new RadialViewModel(((Window)viewAwareStatusService.View).FindChildren<RadialView>().First());
+            if (RadialViewModel != null) return;
+            RadialViewModel = new RadialViewModel { RadialView = ((Window)viewAwareStatusService.View).FindChildren<RadialView>().First() };
+            RadialViewModel.Initialize();
+            RadialViewModels.ForEach(r => r.Initialize());
         }
 
         #region commands
@@ -333,5 +336,22 @@ namespace ESME.Views.TransmissionLossViewer
         #endregion
 
         #endregion
+        public static TransmissionLossViewModel DesignTimeData { get; private set; }
+
+        static TransmissionLossViewModel()
+        {
+            DesignTimeData = new TransmissionLossViewModel
+                {
+                    RadialViewModel = RadialViewModel.DesignTimeData,
+                    RadialViewModels = new List<RadialViewModel> { RadialViewModel.DesignTimeData, RadialViewModel.DesignTimeData },
+                    RadialViews = new List<RadialView>
+                    {
+                        new RadialView { DataContext = RadialViewModel.DesignTimeData },
+                        new RadialView { DataContext = RadialViewModel.DesignTimeData },
+                        new RadialView { DataContext = RadialViewModel.DesignTimeData },
+                    }
+                };
+        }
+
     }
 }

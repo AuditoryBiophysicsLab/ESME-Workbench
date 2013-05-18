@@ -128,6 +128,7 @@
     <Compile Include="Controls\AutoScrollingTextBlock.xaml.cs">
       <DependentUpon>AutoScrollingTextBlock.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ColorBarControl.cs" />
     <Compile Include="Controls\ColorBarView.xaml.cs">
       <DependentUpon>ColorBarView.xaml</DependentUpon>
     </Compile>
