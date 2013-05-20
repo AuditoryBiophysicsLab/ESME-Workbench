@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
@@ -11,31 +12,18 @@ using HRC.Plotting;
 namespace ESME.Views.Controls
 {
     [TemplatePart(Name = "PART_Image", Type = typeof(Image))]
+    [TemplatePart(Name = "PART_DataAxis", Type = typeof(DataAxis))]
     public class ColorBarControl : Control
     {
         static ColorBarControl() { DefaultStyleKeyProperty.OverrideMetadata(typeof(ColorBarControl), new FrameworkPropertyMetadata(typeof(ColorBarControl))); }
 
-        public ColorBarControl() { ColorbarAdjustmentMargins = _colorbarAdjustmentMargins; }
         double _curRange;
-        double _fullRange;
+        double _axisRange;
         Point _previousPoint;
         StepFunction _steps;
-        IDisposable _currentRangeObserver, _fullRangeObserver, _statisticalRangeObserver;
+        IDisposable _currentRangeObserver, _axisRangeObserver, _animationTargetRangeObserver;
 
         #region Dependency Properties
-
-        #region dependency property ColorMapViewModel ColorMapViewModel
-
-        public static DependencyProperty ColorMapViewModelProperty = DependencyProperty.Register("ColorMapViewModel",
-                                                                                                 typeof(ColorMapViewModel),
-                                                                                                 typeof(ColorBarControl),
-                                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, ColorMapViewModelPropertyChanged));
-
-        public ColorMapViewModel ColorMapViewModel { get { return (ColorMapViewModel)GetValue(ColorMapViewModelProperty); } set { SetValue(ColorMapViewModelProperty, value); } }
-
-        static void ColorMapViewModelPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarControl)obj).ColorMapViewModelPropertyChanged(); }
-        void ColorMapViewModelPropertyChanged() { }
-        #endregion
 
         #region public WriteableBitmap ColorBarImage {get; set;}
 
@@ -68,73 +56,79 @@ namespace ESME.Views.Controls
             if (_currentRangeObserver != null) _currentRangeObserver.Dispose();
             if (CurrentRange == null) return;
             _currentRangeObserver = CurrentRange.ObserveOnDispatcher().Subscribe(e => CurrentRangeChanged());
+            CurrentRangeChanged();
         }
+
         void CurrentRangeChanged()
         {
-            if (CurrentRange == null) return;
-            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: CurrentRange changed to {1}", DateTime.Now, CurrentRange));
+            var axisVisibleRange = _axisVisibleRange ?? FullRange;
+            if (CurrentRange == null || CurrentRange.IsEmpty || axisVisibleRange == null || axisVisibleRange.IsEmpty) return;
+            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: CurrentRange changed to {1}", DateTime.Now, CurrentRange));
             if (_steps != null)
             {
-                CurrentRange.Max = Math.Min(CurrentRange.Max, FullRange.Max);
-                CurrentRange.Min = Math.Max(CurrentRange.Min, FullRange.Min);
-                if ((CurrentRange.Min >= (CurrentRange.Max - _steps.Last().Y)) &&
+                CurrentRange.Update(Math.Max(CurrentRange.Min, axisVisibleRange.Min), Math.Min(CurrentRange.Max, axisVisibleRange.Max));
+                if ((CurrentRange.Min >= (CurrentRange.Max - _steps.Last().Y)) && 
                     ((CurrentRange.Max <= (CurrentRange.Min + _steps.Last().Y)))) return;
             }
-            _curRange = CurrentRange.Max - CurrentRange.Min;
-            _colorbarAdjustmentMargins.Top = Math.Max(0, ActualHeight * (FullRange.Max - CurrentRange.Max) / _fullRange);
-            _colorbarAdjustmentMargins.Bottom = Math.Max(0, ActualHeight * (CurrentRange.Min - FullRange.Min) / _fullRange);
-            ColorbarAdjustmentMargins = _colorbarAdjustmentMargins;
+            _curRange = CurrentRange.Value;
+            var top = Math.Max(0, ActualHeight * (axisVisibleRange.Max - CurrentRange.Max) / _axisRange);
+            var bottom = Math.Max(0, ActualHeight * (CurrentRange.Min - axisVisibleRange.Min) / _axisRange);
+            ColorbarAdjustmentMargins = new Thickness(0, top, 0, bottom);
         }
         #endregion
 
         #region dependency property Range FullRange
 
         public static DependencyProperty FullRangeProperty = DependencyProperty.Register("FullRange",
-                                                                                         typeof(Range),
-                                                                                         typeof(ColorBarControl),
-                                                                                         new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, FullRangePropertyChanged));
+                                                                                 typeof(Range),
+                                                                                 typeof(ColorBarControl),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, FullRangePropertyChanged));
 
         public Range FullRange { get { return (Range)GetValue(FullRangeProperty); } set { SetValue(FullRangeProperty, value); } }
 
         static void FullRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarControl)obj).FullRangePropertyChanged(); }
         void FullRangePropertyChanged()
         {
-            if (_fullRangeObserver != null) _fullRangeObserver.Dispose();
-            if (FullRange == null) return;
-            _fullRangeObserver = FullRange.ObserveOnDispatcher().Subscribe(e => FullRangeChanged(true));
-            FullRangeChanged(false);
-        }
-        void FullRangeChanged(bool animate)
-        {
-            if (FullRange == null) return;
-            _fullRange = FullRange.Value;
-            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: FullRange changed to {1}", DateTime.Now, FullRange));
-            if (Math.Abs(_fullRange) < double.Epsilon) _fullRange = 1.0;
-            _steps = new StepFunction(0, 95, 95, x => _fullRange * Math.Exp(-0.047 * x));
-            if (animate) ResetColorbarRange(0.0);
+            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: FullRange changed to {1}", DateTime.Now, FullRange));
+            if (_axisVisibleRange == null) AxisRangeChanged(FullRange);
         }
         #endregion
 
-        #region dependency property Range StatisticalRange
+        #region dependency property Range AnimationTargetRange
 
-        public static DependencyProperty StatisticalRangeProperty = DependencyProperty.Register("StatisticalRange",
+        public static DependencyProperty AnimationTargetRangeProperty = DependencyProperty.Register("AnimationTargetRange",
                                                                                                 typeof(Range),
                                                                                                 typeof(ColorBarControl),
-                                                                                                new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, StatisticalRangePropertyChanged));
+                                                                                                new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, AnimationTargetRangePropertyChanged));
 
-        public Range StatisticalRange { get { return (Range)GetValue(StatisticalRangeProperty); } set { SetValue(StatisticalRangeProperty, value); } }
+        public Range AnimationTargetRange { get { return (Range)GetValue(AnimationTargetRangeProperty); } set { SetValue(AnimationTargetRangeProperty, value); } }
 
-        static void StatisticalRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarControl)obj).StatisticalRangePropertyChanged(); }
-        void StatisticalRangePropertyChanged()
+        static void AnimationTargetRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarControl)obj).AnimationTargetRangePropertyChanged(); }
+        void AnimationTargetRangePropertyChanged()
         {
-            if (_statisticalRangeObserver != null) _statisticalRangeObserver.Dispose();
-            if (StatisticalRange == null) return;
-            _statisticalRangeObserver = StatisticalRange.ObserveOnDispatcher().Subscribe(e => StatisticalRangeChanged());
-            StatisticalRangeChanged();
+            if (_animationTargetRangeObserver != null) _animationTargetRangeObserver.Dispose();
+            if (AnimationTargetRange == null) return;
+            _animationTargetRangeObserver = AnimationTargetRange.ObserveOnDispatcher().Subscribe(e => AnimationTargetRangeChanged());
+            AnimationTargetRangeChanged();
         }
-        void StatisticalRangeChanged()
+        void AnimationTargetRangeChanged()
         {
-            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: StatisticalRange changed to {1}", DateTime.Now, StatisticalRange));
+            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: AnimationTargetRange changed to {1}", DateTime.Now, AnimationTargetRange));
+            if (AnimationTargetRange == null || AnimationTargetRange.IsEmpty || CurrentRange == null) return;
+            if (AnimationTime.Ticks <= 0) CurrentRange.Update(AnimationTargetRange);
+            else
+            {
+                //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Animating CurrentRange from {1} to {2}", DateTime.Now, CurrentRange, _animationTarget));
+                var duration = new Duration(AnimationTime);
+                var rangeAnimation = new RangeAnimation(CurrentRange, AnimationTargetRange, duration);
+                Observable.FromEventPattern<EventArgs>(rangeAnimation, "Completed").Subscribe(e =>
+                {
+                    //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} AnimationCompleted", DateTime.Now));
+                    BeginAnimation(CurrentRangeProperty, null);
+                    CurrentRange.Update(AnimationTargetRange);
+                });
+                BeginAnimation(CurrentRangeProperty, rangeAnimation);
+            }
         }
         #endregion
 
@@ -151,6 +145,20 @@ namespace ESME.Views.Controls
         void AxisTitlePropertyChanged() { }
         #endregion
 
+        #region dependency property TimeSpan AnimationTime
+
+        public static DependencyProperty AnimationTimeProperty = DependencyProperty.Register("AnimationTime",
+                                                                                 typeof(TimeSpan),
+                                                                                 typeof(ColorBarControl),
+                                                                                 new FrameworkPropertyMetadata(TimeSpan.FromSeconds(0), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, AnimationTimePropertyChanged));
+
+        public TimeSpan AnimationTime { get { return (TimeSpan)GetValue(AnimationTimeProperty); } set { SetValue(AnimationTimeProperty, value); } }
+
+        static void AnimationTimePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarControl)obj).AnimationTimePropertyChanged(); }
+        void AnimationTimePropertyChanged() { }
+        #endregion
+    
+        #region Read-only Dependency Properties
 
         #region dependency property Thickness ColorbarAdjustmentMargins
 
@@ -158,37 +166,55 @@ namespace ESME.Views.Controls
                                                                                                                          typeof(Thickness),
                                                                                                                          typeof(ColorBarControl),
                                                                                                                          new FrameworkPropertyMetadata(new Thickness(0),
-                                                                                                                                                       FrameworkPropertyMetadataOptions.
-                                                                                                                                                           BindsTwoWayByDefault,
+                                                                                                                                                       FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                                                                                                                                                        ColorbarAdjustmentMarginsPropertyChanged));
         public static readonly DependencyProperty ColorbarAdjustmentMarginsProperty = ColorbarAdjustmentMarginsPropertyKey.DependencyProperty;
         public Thickness ColorbarAdjustmentMargins { get { return (Thickness)GetValue(ColorbarAdjustmentMarginsProperty); } protected set { SetValue(ColorbarAdjustmentMarginsPropertyKey, value); } }
 
         static void ColorbarAdjustmentMarginsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarControl)obj).ColorbarAdjustmentMarginsPropertyChanged(); }
         void ColorbarAdjustmentMarginsPropertyChanged() { }
-        Thickness _colorbarAdjustmentMargins = new Thickness(0);
         #endregion
 
+        #endregion
 
         #endregion
 
-        protected override void OnTemplateChanged(ControlTemplate oldTemplate, ControlTemplate newTemplate)
+        Range _axisVisibleRange;
+        void AxisRangeChanged(IRange axisVisibleRange)
         {
-            base.OnTemplateChanged(oldTemplate, newTemplate);
-            var imageInTemplate = (Image)newTemplate.FindName("PART_Image", this);
-            if (imageInTemplate == null)
+            if (axisVisibleRange == null) return;
+            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: AxisRange changed to {1}", DateTime.Now, axisVisibleRange));
+            _axisRange = axisVisibleRange.Value;
+            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: AxisRange changed to {1}", DateTime.Now, AxisRange));
+            if (Math.Abs(_axisRange) < double.Epsilon) _axisRange = 1.0;
+            _steps = new StepFunction(0, 95, 95, x => _axisRange * Math.Exp(-0.047 * x));
+            CurrentRangeChanged();
+            //ResetColorbarRange();
+        }
+
+        public override void OnApplyTemplate()
+        {
+            base.OnApplyTemplate();
+            if (_mouseClicks != null) _mouseClicks.Dispose();
+            if (_mouseMoves != null) _mouseMoves.Dispose();
+            if (_mouseWheels != null) _mouseWheels.Dispose();
+            if (_axisRangeObserver != null) _axisRangeObserver.Dispose();
+            var imageInTemplate = (Image)GetTemplateChild("PART_Image");
+            var dataAxisInTemplate = GetTemplateChild("PART_DataAxis") as DataAxis;
+            if (dataAxisInTemplate != null)
             {
-                if (_mouseClicks != null) _mouseClicks.Dispose();
-                if (_mouseMoves != null) _mouseMoves.Dispose();
-                if (_mouseWheels != null) _mouseWheels.Dispose();
-                return;
+                _axisVisibleRange = dataAxisInTemplate.VisibleRange;
+                _axisRangeObserver = dataAxisInTemplate.VisibleRange.Subscribe(AxisRangeChanged);
+                AxisRangeChanged(dataAxisInTemplate.VisibleRange);
             }
+            if (imageInTemplate == null) return;
+            if (imageInTemplate.ToolTip == null) imageInTemplate.ToolTip = new ToolTip { Content = new TextBlock { Text = "Left-click and drag or use the mouse wheel to change colorbar range" } };
             _mouseClicks = Observable.FromEventPattern<MouseButtonEventArgs>(imageInTemplate, "MouseDown")
                 .Where(e => e.EventArgs.ChangedButton == MouseButton.Left)
-                .Select(e => new { IsDown = true, e.EventArgs.ClickCount, Location = e.EventArgs.GetPosition(imageInTemplate) })
+                .Select(e => new { IsDown = true, e.EventArgs.ClickCount, Location = e.EventArgs.GetPosition(imageInTemplate), e.EventArgs.MouseDevice, e.EventArgs.Timestamp })
                 .Merge(Observable.FromEventPattern<MouseButtonEventArgs>(imageInTemplate, "MouseUp")
                            .Where(e => e.EventArgs.ChangedButton == MouseButton.Left)
-                           .Select(e => new { IsDown = false, e.EventArgs.ClickCount, Location = e.EventArgs.GetPosition(imageInTemplate) }))
+                           .Select(e => new { IsDown = false, e.EventArgs.ClickCount, Location = e.EventArgs.GetPosition(imageInTemplate), e.EventArgs.MouseDevice, e.EventArgs.Timestamp }))
                 .Subscribe(leftButton =>
                 {
                     if (leftButton.IsDown)
@@ -198,15 +224,17 @@ namespace ESME.Views.Controls
                         {
                             case 1:
                                 Mouse.Capture(imageInTemplate, CaptureMode.Element);
+                                Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Mouse captured", DateTime.Now));
                                 break;
                             case 2:
-                                ResetColorbarRange(0.2);
+                                RaiseEvent(new RoutedEventArgs(MouseDoubleClickEvent));
                                 break;
                         }
                     }
                     else
                     {
                         Mouse.Capture(null);
+                        Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Mouse released", DateTime.Now));
                         //InvalidateVisual();
                     }
                     _isLeftButtonDown = leftButton.IsDown;
@@ -219,16 +247,23 @@ namespace ESME.Views.Controls
                     {
                         //Detect if moving up or down, left or right:
                         //Up Positive, Down Negative, Left Negative, Right Positive.
-                        //FullRange / ActualHeightInPixels -> DeltaValuePP
+                        //AxisRange / ActualHeightInPixels -> DeltaValuePP
                         //XMove changes min, max by DeltaValuePP /2
                         //YMove changes min/max by +/-DeltaValuePP
-                        var deltaValuePerPixel = _fullRange / imageInTemplate.ActualHeight;
+                        var deltaValuePerPixel = _axisRange / ActualHeight;
+                        Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: deltaValuePerPixel is now {1}", DateTime.Now, deltaValuePerPixel));
+                        Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: mouseDeltaY is {1}", DateTime.Now, _previousPoint.Y - mouseLocation.Y));
                         var yDeltaValue = (_previousPoint.Y - mouseLocation.Y) * deltaValuePerPixel;
-                        var xDeltaValue = (mouseLocation.X - _previousPoint.X) * deltaValuePerPixel;
-                        var netMouseMove = (xDeltaValue / 2) - yDeltaValue;
-                        CurrentRange.Update(CurrentRange.Min - netMouseMove, CurrentRange.Max - netMouseMove);
+                        Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: yDeltaValue is now {1}", DateTime.Now, yDeltaValue));
+                        //var xDeltaValue = (mouseLocation.X - _previousPoint.X) * deltaValuePerPixel;
+                        //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: xDeltaValue is now {1}", DateTime.Now, xDeltaValue));
+                        //var netMouseMove = (xDeltaValue / 2) - yDeltaValue;
+                        //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: netMouseMove is now {1}", DateTime.Now, netMouseMove));
+                        CurrentRange.Update(CurrentRange.Min + yDeltaValue, CurrentRange.Max + yDeltaValue);
+                        Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: CurrentRange is now {1}", DateTime.Now, CurrentRange));
                     }
                     _previousPoint = mouseLocation;
+                    Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: _previousPoint is now {1}", DateTime.Now, _previousPoint.ToString()));
 
                 });
             _mouseWheels = Observable.FromEventPattern<MouseWheelEventArgs>(imageInTemplate, "MouseWheel")
@@ -239,22 +274,24 @@ namespace ESME.Views.Controls
 
                     var newDelta = (_curRange - newRange) / 2;
                     CurrentRange.Update(CurrentRange.Min - newDelta, CurrentRange.Max + newDelta);
+                    Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Expanding current range by {1}", DateTime.Now, newDelta));
                 });
         }
 
         IDisposable _mouseClicks, _mouseMoves, _mouseWheels;
         bool _isLeftButtonDown;
+#if false
         #region Colorbar Animation
         // Animates the colorbar returning to its full range over a specified number of seconds
-        void ResetColorbarRange(double transitionTimeSeconds)
+        void ResetColorbarRange()
         {
-            _animationTarget = FullRange;
-            if (CurrentRange == FullRange && !StatisticalRange.IsEmpty) _animationTarget = StatisticalRange;
-            if (transitionTimeSeconds <= 0) CurrentRange.Update(_animationTarget);
+            _animationTarget = AxisRange;
+            if (CurrentRange == AxisRange && !AnimationTargetRange.IsEmpty) _animationTarget = AnimationTargetRange;
+            if (AnimationTime.Ticks <= 0) CurrentRange.Update(_animationTarget);
             else
             {
-                Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Animating CurrentRange from {1} to {2}", DateTime.Now, CurrentRange, _animationTarget));
-                var duration = new Duration(TimeSpan.FromSeconds(transitionTimeSeconds));
+                //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Animating CurrentRange from {1} to {2}", DateTime.Now, CurrentRange, _animationTarget));
+                var duration = new Duration(AnimationTime);
                 _rangeAnimation = new RangeAnimation(CurrentRange, _animationTarget, duration);
                 _rangeAnimation.Completed += RangeAnimationCompleted;
                 BeginAnimation(CurrentRangeProperty, _rangeAnimation);
@@ -272,7 +309,6 @@ namespace ESME.Views.Controls
             _rangeAnimation.Completed -= RangeAnimationCompleted;
         }
         #endregion
-#if false
         void Image_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             var newRange = e.Delta < 0 ? _steps.StepForward(_curRange) : _steps.StepBack(_curRange);
@@ -287,10 +323,10 @@ namespace ESME.Views.Controls
             {
                 //Detect if moving up or down, left or right:
                 //Up Positive, Down Negative, Left Negative, Right Positive.
-                //FullRange / ActualHeightInPixels -> DeltaValuePP
+                //AxisRange / ActualHeightInPixels -> DeltaValuePP
                 //XMove changes min, max by DeltaValuePP /2
                 //YMove changes min/max by +/-DeltaValuePP
-                var deltaValuePerPixel = _fullRange/ActualHeight;
+                var deltaValuePerPixel = _AxisRange/ActualHeight;
                 var yDeltaValue = (_previousPoint.Y - e.GetPosition(this).Y)*deltaValuePerPixel;
                 var xDeltaValue = (e.GetPosition(this).X - _previousPoint.X)*deltaValuePerPixel;
                 var netMouseMove = (xDeltaValue / 2) - yDeltaValue;
@@ -326,5 +362,46 @@ namespace ESME.Views.Controls
             }
         }
 #endif
+    }
+
+    internal class StepFunction : List<Point>
+    {
+        public StepFunction(double startX, double endX, int numSteps, Func<double, double> mappingFunction)
+        {
+            for (var x = startX; x <= endX; x += (endX - startX) / numSteps)
+                Add(new Point(x, mappingFunction(x)));
+        }
+
+        Point? FindY(double currentY)
+        {
+            for (var i = 0; i < this.Count() - 1; i++)
+                if ((this[i].Y <= currentY) && (currentY > this[i + 1].Y))
+                    return this[i];
+            return null;
+        }
+
+        public double StepForward(double currentY)
+        {
+            var curStep = FindY(currentY);
+
+            if (curStep == null) return this[Count - 1].Y;
+
+            var nextIndex = IndexOf(curStep.Value) + 1;
+
+            if (nextIndex >= Count) return this[Count - 1].Y;
+            return currentY + this[nextIndex].Y - curStep.Value.Y;
+        }
+
+        public double StepBack(double currentY)
+        {
+            var curStep = FindY(currentY);
+
+            if (curStep == null) return this[0].Y;
+
+            var prevIndex = IndexOf(curStep.Value) - 1;
+
+            if (prevIndex < 0) return this[0].Y;
+            return currentY + this[prevIndex].Y - curStep.Value.Y;
+        }
     }
 }

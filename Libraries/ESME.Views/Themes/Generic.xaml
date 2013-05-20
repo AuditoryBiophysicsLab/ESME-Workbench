@@ -6,7 +6,9 @@
                     xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
                     xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC">
     <WPF:BooleanInverter x:Key="BooleanInverter" />
-    <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed" FalseValue="Collapsed" TrueValue="Visible" />
+    <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed"
+                                      FalseValue="Collapsed"
+                                      TrueValue="Visible" />
     <Style TargetType="{x:Type Controls:ImageToggleButton}">
         <Setter Property="Template">
             <Setter.Value>
@@ -25,15 +27,18 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Controls:ColorBarControl}">
                     <DockPanel>
-                        <Plotting:DataAxis AxisLabel="{TemplateBinding AxisTitle}"
+                        <Plotting:DataAxis Name="PART_DataAxis"
+                                           AxisLabel="{TemplateBinding AxisTitle}"
                                            AxisLocation="Right"
                                            DataRange="{TemplateBinding FullRange}"
                                            DockPanel.Dock="Right"
-                                           ShowDebugMessages="False"
-                                           VisibleRange="{TemplateBinding FullRange}" />
+                                           ShowDebugMessages="True" />
                         <DockPanel>
-                            <DockPanel.RenderTransformOrigin>0.5,0.5</DockPanel.RenderTransformOrigin>
-                            <Image x:Name="PART_Image" Margin="{TemplateBinding ColorbarAdjustmentMargins}" Source="{TemplateBinding ColorBarImage}" Stretch="Fill" />
+                            <Image Name="PART_Image"
+                                   Margin="{TemplateBinding ColorbarAdjustmentMargins}"
+                                   Source="{TemplateBinding ColorBarImage}"
+                                   Stretch="Fill"
+                                   ToolTip="{TemplateBinding ToolTip}" />
                         </DockPanel>
                     </DockPanel>
 
@@ -45,7 +50,9 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Controls:LayerControl}">
-                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
                         <StackPanel Orientation="Horizontal">
                             <Grid DockPanel.Dock="Top">
                                 <Grid.RowDefinitions>
@@ -79,7 +86,10 @@
                                               Visibility="{TemplateBinding LineColorVisibility}">
                                     <ToggleButton.Template>
                                         <ControlTemplate>
-                                            <Rectangle Width="12" Height="12" RadiusX="3" RadiusY="3">
+                                            <Rectangle Width="12"
+                                                       Height="12"
+                                                       RadiusX="3"
+                                                       RadiusY="3">
                                                 <Rectangle.Fill>
                                                     <SolidColorBrush Color="{Binding Path=LineOrSymbolColor, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:LayerControl}}}" />
                                                 </Rectangle.Fill>
@@ -87,8 +97,13 @@
                                         </ControlTemplate>
                                     </ToggleButton.Template>
                                 </ToggleButton>
-                                <Popup x:Name="LineColorPopup" IsOpen="{Binding IsChecked, ElementName=LineColorToggle}" StaysOpen="False">
-                                    <Border Background="LightYellow" BorderBrush="Black" BorderThickness="1">
+                                <Popup x:Name="LineColorPopup"
+                                       IsOpen="{Binding IsChecked,
+                                                        ElementName=LineColorToggle}"
+                                       StaysOpen="False">
+                                    <Border Background="LightYellow"
+                                            BorderBrush="Black"
+                                            BorderThickness="1">
                                         <StackPanel Orientation="Vertical">
                                             <TextBlock Margin="5 5 5 2" Text="Color" />
                                             <colorPicker:ColorPicker Padding="5" SelectedColor="{Binding Path=LineOrSymbolColor, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:LayerControl}}, Mode=TwoWay}" />
@@ -117,7 +132,10 @@
                                        Visibility="{Binding Path=ErrorIconVisibility,
                                                             RelativeSource={RelativeSource FindAncestor,
                                                                                            AncestorType={x:Type Controls:LayerControl}}}" />
-                                <ContentPresenter x:Name="LayerName" Grid.Row="0" Grid.Column="3" Content="{TemplateBinding LayerNameContentControl}" />
+                                <ContentPresenter x:Name="LayerName"
+                                                  Grid.Row="0"
+                                                  Grid.Column="3"
+                                                  Content="{TemplateBinding LayerNameContentControl}" />
                                 <!--
                                     <ContentPresenter x:Name="ContextControls"
                                     Grid.Row="1"
@@ -138,7 +156,9 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Controls:PluginSelector}">
-                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
                         <StackPanel HorizontalAlignment="Stretch" Orientation="Vertical">
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -210,12 +230,25 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Controls:FileOrDirectorySetting}">
-                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="{TemplateBinding Caption}" Visibility="{TemplateBinding CaptionVisibility}" />
                             <DockPanel LastChildFill="True">
-                                <ContentPresenter MinWidth="30" Margin=" 5 0 0 0" Content="{TemplateBinding BrowserButton}" DockPanel.Dock="Right" />
-                                <TextBox x:Name="FileOrDirectoryName" DockPanel.Dock="Left" Text="{Binding Path=FileName, RelativeSource={RelativeSource TemplatedParent}, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" ToolTip="{TemplateBinding FileName}" />
+                                <ContentPresenter MinWidth="30"
+                                                  Margin=" 5 0 0 0"
+                                                  Content="{TemplateBinding BrowserButton}"
+                                                  DockPanel.Dock="Right" />
+                                <TextBox x:Name="FileOrDirectoryName"
+                                         DockPanel.Dock="Left"
+                                         Text="{Binding Path=FileName,
+                                                        RelativeSource={RelativeSource TemplatedParent},
+                                                        ValidatesOnDataErrors=True,
+                                                        ValidatesOnExceptions=True,
+                                                        NotifyOnValidationError=True,
+                                                        UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="{TemplateBinding FileName}" />
                             </DockPanel>
                         </StackPanel>
                     </Border>
@@ -241,7 +274,9 @@
                     <Grid Width="9" Height="12">
                         <Polygon Fill="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}" Points="4.5,0 9,5 9,12 0,12 0,5" />
                         <Polygon Fill="Black" Points="4.5,1 8,5 1,5" />
-                        <Polygon Points="7.5,5.5 7.5,10.5 1.5,10.5 1.5,5.5" Stroke="Black" StrokeThickness="1" />
+                        <Polygon Points="7.5,5.5 7.5,10.5 1.5,10.5 1.5,5.5"
+                                 Stroke="Black"
+                                 StrokeThickness="1" />
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -252,7 +287,9 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <Grid Width="16" Height="9" Background="Transparent">
+                    <Grid Width="16"
+                          Height="9"
+                          Background="Transparent">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="6" />
                             <ColumnDefinition Width="4" />
@@ -273,7 +310,10 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <DrawingBrush x:Key="CheckersBrush" TileMode="Tile" Viewport="0,0,11,11" ViewportUnits="Absolute">
+    <DrawingBrush x:Key="CheckersBrush"
+                  TileMode="Tile"
+                  Viewport="0,0,11,11"
+                  ViewportUnits="Absolute">
         <DrawingBrush.Drawing>
             <DrawingGroup>
                 <GeometryDrawing Brush="White" Geometry="M0,0 L2,0 2,2, 0,2Z" />
@@ -286,10 +326,18 @@
             <Setter.Value>
                 <ControlTemplate>
                     <Grid>
-                        <Border Margin="0,1" BorderBrush="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}" BorderThickness="1,0,0,0" />
-                        <Border Margin="1,0" BorderBrush="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}" BorderThickness="0,1,0,0" />
-                        <Border Margin="0,1" BorderBrush="#F8F8F8" BorderThickness="0,0,1,0" />
-                        <Border Margin="1,0" BorderBrush="#F8F8F8" BorderThickness="0,0,0,1" />
+                        <Border Margin="0,1"
+                                BorderBrush="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
+                                BorderThickness="1,0,0,0" />
+                        <Border Margin="1,0"
+                                BorderBrush="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
+                                BorderThickness="0,1,0,0" />
+                        <Border Margin="0,1"
+                                BorderBrush="#F8F8F8"
+                                BorderThickness="0,0,1,0" />
+                        <Border Margin="1,0"
+                                BorderBrush="#F8F8F8"
+                                BorderThickness="0,0,0,1" />
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -310,7 +358,9 @@
                             <RowDefinition Height="13" />
                             <RowDefinition Height="12*" />
                         </Grid.RowDefinitions>
-                        <Border Grid.Row="1" Margin="1" Background="{TemplateBinding Background}" />
+                        <Border Grid.Row="1"
+                                Margin="1"
+                                Background="{TemplateBinding Background}" />
                         <Border Grid.Row="1" Margin="1">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
@@ -320,7 +370,9 @@
                             </Border.Background>
                         </Border>
                         <Label Grid.Row="1" Style="{StaticResource SunkenFrameStyle}" />
-                        <Track x:Name="PART_Track" Grid.Row="1" Margin="-3,0,-2,0">
+                        <Track x:Name="PART_Track"
+                               Grid.Row="1"
+                               Margin="-3,0,-2,0">
                             <Track.DecreaseRepeatButton>
                                 <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource ColorPickerRepeatButtonStyle}" />
                             </Track.DecreaseRepeatButton>
@@ -358,7 +410,9 @@
                             <Border Margin="1" Background="{TemplateBinding Background}" />
                             <Label Style="{StaticResource SunkenFrameStyle}" />
                         </Grid>
-                        <Track x:Name="PART_Track" Grid.Column="1" Margin="0,-3">
+                        <Track x:Name="PART_Track"
+                               Grid.Column="1"
+                               Margin="0,-3">
                             <Track.DecreaseRepeatButton>
                                 <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource ColorPickerRepeatButtonStyle}" />
                             </Track.DecreaseRepeatButton>
@@ -432,7 +486,10 @@
                             <Border BorderBrush="#A0F0F0F0" BorderThickness="0,0,1,1" />
                         </Grid>
                         <Canvas ClipToBounds="true">
-                            <Thumb x:Name="PART_Thumb" Canvas.Left="-5" Canvas.Top="-5" Style="{StaticResource HsvControlThumbStyle}">
+                            <Thumb x:Name="PART_Thumb"
+                                   Canvas.Left="-5"
+                                   Canvas.Top="-5"
+                                   Style="{StaticResource HsvControlThumbStyle}">
                                 <Thumb.RenderTransform>
                                     <TranslateTransform X="0" Y="0" />
                                 </Thumb.RenderTransform>
@@ -453,7 +510,10 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="{TemplateBinding Padding}">
                         <Grid Width="270" Height="80">
                             <Grid.RowDefinitions>
                                 <RowDefinition />
@@ -468,7 +528,10 @@
                                 <ColumnDefinition Width="110" />
                                 <ColumnDefinition Width="40" />
                             </Grid.ColumnDefinitions>
-                            <colorPicker:HsvControl x:Name="PART_HsvControl" Grid.Row="0" Grid.RowSpan="4" Grid.Column="0" />
+                            <colorPicker:HsvControl x:Name="PART_HsvControl"
+                                                    Grid.Row="0"
+                                                    Grid.RowSpan="4"
+                                                    Grid.Column="0" />
                             <colorPicker:SpectrumSlider x:Name="PART_SpectrumSlider1"
                                                         Grid.RowSpan="4"
                                                         Grid.Column="1"
@@ -477,10 +540,22 @@
                                                         Hue="0"
                                                         LargeChange="30"
                                                         SmallChange="10" />
-                            <TextBlock Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" Text="R" />
-                            <TextBlock Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" Text="G" />
-                            <TextBlock Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" Text="B" />
-                            <TextBlock Grid.Row="3" Grid.Column="2" HorizontalAlignment="Center" Text="A" />
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="2"
+                                       HorizontalAlignment="Center"
+                                       Text="R" />
+                            <TextBlock Grid.Row="1"
+                                       Grid.Column="2"
+                                       HorizontalAlignment="Center"
+                                       Text="G" />
+                            <TextBlock Grid.Row="2"
+                                       Grid.Column="2"
+                                       HorizontalAlignment="Center"
+                                       Text="B" />
+                            <TextBlock Grid.Row="3"
+                                       Grid.Column="2"
+                                       HorizontalAlignment="Center"
+                                       Text="A" />
                             <colorPicker:BindOnEnterTextBox x:Name="RedTextBox"
                                                             Grid.Row="0"
                                                             Grid.Column="4"
@@ -559,7 +634,10 @@
                             <RowDefinition Height="25" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <Border x:Name="OverallBorder" Grid.Row="1" BorderBrush="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" BorderThickness="1" />
+                        <Border x:Name="OverallBorder"
+                                Grid.Row="1"
+                                BorderBrush="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"
+                                BorderThickness="1" />
                         <Grid Grid.Row="1" Background="Transparent">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="25" />
@@ -575,19 +653,37 @@
                                 </Rectangle>
                                 <!--  <Border BorderBrush="Black" BorderThickness="1"/>  -->
                             </Grid>
-                            <TextBlock Grid.Column="1" Margin="5,0" VerticalAlignment="Center" Text="{Binding SelectedColor, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ColorToStringConverter}}" />
+                            <TextBlock Grid.Column="1"
+                                       Margin="5,0"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding SelectedColor,
+                                                      RelativeSource={RelativeSource TemplatedParent},
+                                                      Converter={StaticResource ColorToStringConverter}}" />
                             <Grid Grid.Column="2">
-                                <Border x:Name="ToggleButtonFill" Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}" Visibility="Hidden" />
-                                <Border x:Name="ToggleButtonGlass" Background="{StaticResource GlassBrush}" Visibility="Hidden" />
-                                <Border x:Name="ToggleButtonBorder" BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" BorderThickness="1" Visibility="Hidden" />
-                                <ToggleButton x:Name="PART_ToggleButton" Focusable="False" IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}">
+                                <Border x:Name="ToggleButtonFill"
+                                        Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
+                                        Visibility="Hidden" />
+                                <Border x:Name="ToggleButtonGlass"
+                                        Background="{StaticResource GlassBrush}"
+                                        Visibility="Hidden" />
+                                <Border x:Name="ToggleButtonBorder"
+                                        BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+                                        BorderThickness="1"
+                                        Visibility="Hidden" />
+                                <ToggleButton x:Name="PART_ToggleButton"
+                                              Focusable="False"
+                                              IsChecked="{Binding IsDropDownOpen,
+                                                                  RelativeSource={RelativeSource TemplatedParent}}">
                                     <ToggleButton.Style>
                                         <Style TargetType="ToggleButton">
                                             <Setter Property="Template">
                                                 <Setter.Value>
                                                     <ControlTemplate>
                                                         <Grid Background="Transparent">
-                                                            <Path HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 3.5 4 L 7 0 Z" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+                                                            <Path HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"
+                                                                  Data="M 0 0 L 3.5 4 L 7 0 Z"
+                                                                  Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
                                                         </Grid>
                                                     </ControlTemplate>
                                                 </Setter.Value>
@@ -606,7 +702,10 @@
                                    StaysOpen="False">
                                 <!--  IsOpen="{Binding IsChecked, ElementName=PART_ToggleButton}">  -->
                                 <!--  IsOpen="{TemplateBinding IsDropDownOpen}">  -->
-                                <Border Background="#F6F6F6" BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}" BorderThickness="1" Padding="5">
+                                <Border Background="#F6F6F6"
+                                        BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}"
+                                        BorderThickness="1"
+                                        Padding="5">
                                     <colorPicker:ColorPicker x:Name="PART_ColorPicker" />
                                 </Border>
                             </Popup>

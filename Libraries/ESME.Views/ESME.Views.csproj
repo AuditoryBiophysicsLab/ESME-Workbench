@@ -129,9 +129,6 @@
       <DependentUpon>AutoScrollingTextBlock.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\ColorBarControl.cs" />
-    <Compile Include="Controls\ColorBarView.xaml.cs">
-      <DependentUpon>ColorBarView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\EditableKeyValuePair.cs" />
     <Compile Include="Controls\EditableKeyValuePairListView.xaml.cs">
       <DependentUpon>EditableKeyValuePairListView.xaml</DependentUpon>
@@ -285,10 +282,6 @@
     <Page Include="Controls\AutoScrollingTextBlock.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\ColorBarView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\EditableKeyValuePairListView.xaml">
       <SubType>Designer</SubType>

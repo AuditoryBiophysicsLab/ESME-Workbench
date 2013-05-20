@@ -283,19 +283,20 @@ namespace HRC.Plotting
         public Func<double, double> ValueToPosition { get { return (Func<double, double>)GetValue(ValueToPositionProperty); } set { SetValue(ValueToPositionProperty, value); } }
         #endregion
 
-        #region dependency property Range VisibleRange
+        #region readonly dependency property Range VisibleRange
 
-        public static DependencyProperty VisibleRangeProperty = DependencyProperty.Register("VisibleRange",
-                                                                                            typeof(Range),
-                                                                                            typeof(DataAxis),
-                                                                                            new FrameworkPropertyMetadata(null,
-                                                                                                                          FrameworkPropertyMetadataOptions.AffectsArrange |
-                                                                                                                          FrameworkPropertyMetadataOptions.AffectsRender |
-                                                                                                                          FrameworkPropertyMetadataOptions.AffectsMeasure |
-                                                                                                                          FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                                                                                                                          VisibleRangePropertyChanged));
+        static readonly DependencyPropertyKey VisibleRangePropertyKey = DependencyProperty.RegisterReadOnly("VisibleRange",
+                                                                                                            typeof(Range),
+                                                                                                            typeof(DataAxis),
+                                                                                                            new FrameworkPropertyMetadata(null,
+                                                                                                                                          FrameworkPropertyMetadataOptions.AffectsArrange |
+                                                                                                                                          FrameworkPropertyMetadataOptions.AffectsRender |
+                                                                                                                                          FrameworkPropertyMetadataOptions.AffectsMeasure |
+                                                                                                                                          FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                                                                                                                                          VisibleRangePropertyChanged));
 
-        public Range VisibleRange { get { return (Range)GetValue(VisibleRangeProperty); } set { SetValue(VisibleRangeProperty, value); } }
+        public static readonly DependencyProperty VisibleRangeProperty = VisibleRangePropertyKey.DependencyProperty;
+        public Range VisibleRange { get { return (Range)GetValue(VisibleRangeProperty); } protected set { SetValue(VisibleRangePropertyKey, value); } }
         static void VisibleRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             ((DataAxis)obj).VisibleRangePropertyChanged(args);
@@ -393,6 +394,8 @@ namespace HRC.Plotting
                 Typeface = new Typeface(TextBlock.GetFontFamily(this), TextBlock.GetFontStyle(this), TextBlock.GetFontWeight(this), TextBlock.GetFontStretch(this))
             };
             _axisLabeler = new ExtendedAxisLabeler();
+            VisibleRange = new Range();
+
             var presentationSource = PresentationSource.FromVisual(this);
             if (presentationSource == null || presentationSource.CompositionTarget == null) return;
             var matrix = presentationSource.CompositionTarget.TransformToDevice;

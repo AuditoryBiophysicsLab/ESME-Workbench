@@ -23,9 +23,22 @@
                    FontSize="{Binding PlotTitleSize}"
                    Text="{Binding PlotTitle}"
                    TextAlignment="Center" />
-        <DockPanel Height="{Binding ActualHeight, ElementName=TopAxis}" DockPanel.Dock="Top" Visibility="{Binding TopAxis.Visibility}">
-            <TextBlock Width="{Binding ActualWidth, ElementName=LeftAxis}" Height="{Binding ActualHeight, ElementName=TopAxis}" DockPanel.Dock="Left" Visibility="{Binding LeftAxis.Visibility}" />
-            <TextBlock Width="{Binding ActualWidth, ElementName=RightAxis}" Height="{Binding ActualHeight, ElementName=TopAxis}" DockPanel.Dock="Right" Visibility="{Binding RightAxis.Visibility}" />
+        <DockPanel Height="{Binding ActualHeight,
+                                    ElementName=TopAxis}"
+                   DockPanel.Dock="Top"
+                   Visibility="{Binding TopAxis.Visibility}">
+            <TextBlock Width="{Binding ActualWidth,
+                                       ElementName=LeftAxis}"
+                       Height="{Binding ActualHeight,
+                                        ElementName=TopAxis}"
+                       DockPanel.Dock="Left"
+                       Visibility="{Binding LeftAxis.Visibility}" />
+            <TextBlock Width="{Binding ActualWidth,
+                                       ElementName=RightAxis}"
+                       Height="{Binding ActualHeight,
+                                        ElementName=TopAxis}"
+                       DockPanel.Dock="Right"
+                       Visibility="{Binding RightAxis.Visibility}" />
             <app:DataAxis x:Name="TopAxis"
                           AxisLabel="{Binding Label}"
                           AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
@@ -45,18 +58,32 @@
                                                     Mode=OneWayToSource}"
                           ValueToPosition="{Binding ValueToPosition,
                                                     Mode=OneWayToSource}"
-                          VisibleRange="{Binding VisibleRange}">
+                          Visibility="{Binding Visibility}">
                 <app:DataPiping.DataPipes>
                     <app:DataPipeCollection>
                         <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualWidth}" Target="{Binding Path=ActualWidth, Mode=OneWayToSource}" />
                         <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualHeight}" Target="{Binding Path=ActualHeight, Mode=OneWayToSource}" />
+                        <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=VisibleRange}" Target="{Binding Path=VisibleRange, Mode=OneWayToSource}" />
                     </app:DataPipeCollection>
                 </app:DataPiping.DataPipes>
             </app:DataAxis>
         </DockPanel>
-        <DockPanel Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Bottom" Visibility="{Binding BottomAxis.Visibility}">
-            <TextBlock Width="{Binding ActualWidth, ElementName=LeftAxis}" Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Left" Visibility="{Binding LeftAxis.Visibility}" />
-            <TextBlock Width="{Binding ActualWidth, ElementName=RightAxis}" Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Right" Visibility="{Binding RightAxis.Visibility}" />
+        <DockPanel Height="{Binding ActualHeight,
+                                    ElementName=BottomAxis}"
+                   DockPanel.Dock="Bottom"
+                   Visibility="{Binding BottomAxis.Visibility}">
+            <TextBlock Width="{Binding ActualWidth,
+                                       ElementName=LeftAxis}"
+                       Height="{Binding ActualHeight,
+                                        ElementName=BottomAxis}"
+                       DockPanel.Dock="Left"
+                       Visibility="{Binding LeftAxis.Visibility}" />
+            <TextBlock Width="{Binding ActualWidth,
+                                       ElementName=RightAxis}"
+                       Height="{Binding ActualHeight,
+                                        ElementName=BottomAxis}"
+                       DockPanel.Dock="Right"
+                       Visibility="{Binding RightAxis.Visibility}" />
             <app:DataAxis x:Name="BottomAxis"
                           AxisLabel="{Binding Label}"
                           AxisLabelMargin="0 0 0 5"
@@ -77,11 +104,12 @@
                                                     Mode=OneWayToSource}"
                           ValueToPosition="{Binding ValueToPosition,
                                                     Mode=OneWayToSource}"
-                          VisibleRange="{Binding VisibleRange}">
+                          Visibility="{Binding Visibility}">
                 <app:DataPiping.DataPipes>
                     <app:DataPipeCollection>
                         <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualWidth}" Target="{Binding Path=ActualWidth, Mode=OneWayToSource}" />
                         <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualHeight}" Target="{Binding Path=ActualHeight, Mode=OneWayToSource}" />
+                        <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=VisibleRange}" Target="{Binding Path=VisibleRange, Mode=OneWayToSource}" />
                     </app:DataPipeCollection>
                 </app:DataPiping.DataPipes>
             </app:DataAxis>
@@ -105,13 +133,13 @@
                                                 Mode=OneWayToSource}"
                       ValueToPosition="{Binding ValueToPosition,
                                                 Mode=OneWayToSource}"
-                      Visibility="{Binding Visibility}"
-                      VisibleRange="{Binding VisibleRange}">
+                      Visibility="{Binding Visibility}">
             <app:DataPiping.DataPipes>
                 <app:DataPipeCollection>
                     <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualWidth}" Target="{Binding Path=ActualWidth, Mode=OneWayToSource}" />
                     <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualHeight}" Target="{Binding Path=ActualHeight, Mode=OneWayToSource}" />
                     <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=VisibleRange}" Target="{Binding Path=VisibleRange, Mode=TwoWay}" />
+                    <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=VisibleRange}" Target="{Binding Path=VisibleRange, Mode=OneWayToSource}" />
                 </app:DataPipeCollection>
             </app:DataPiping.DataPipes>
         </app:DataAxis>
@@ -135,12 +163,12 @@
                                                 Mode=OneWayToSource}"
                       ValueToPosition="{Binding ValueToPosition,
                                                 Mode=OneWayToSource}"
-                      Visibility="{Binding Visibility}"
-                      VisibleRange="{Binding VisibleRange}">
+                      Visibility="{Binding Visibility}">
             <app:DataPiping.DataPipes>
                 <app:DataPipeCollection>
                     <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualWidth}" Target="{Binding Path=ActualWidth, Mode=OneWayToSource}" />
                     <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualHeight}" Target="{Binding Path=ActualHeight, Mode=OneWayToSource}" />
+                    <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=VisibleRange}" Target="{Binding Path=VisibleRange, Mode=OneWayToSource}" />
                 </app:DataPipeCollection>
             </app:DataPiping.DataPipes>
         </app:DataAxis>

@@ -15,7 +15,7 @@
     <UserControl.Resources>
         <TransmissionLossViewer:RadialViewModel x:Key="DesignViewModel" />
     </UserControl.Resources>
-    <Grid Margin="0 22 0 0">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
@@ -33,14 +33,28 @@
         <DockPanel Grid.Row="0" Grid.Column="0">
             <DockPanel Width="80" DockPanel.Dock="Right">
                 <TextBlock Height="{Binding AxisSeriesViewModel.BottomAxis.ActualHeight, Mode=OneWay}" DockPanel.Dock="Bottom" />
-                <controls:ColorBarControl Margin="5 0 0 0" 
-                                          AxisTitle="{Binding ColorMapViewModel.Name}"
+                <controls:ColorBarControl Height="{Binding AxisSeriesViewModel.LeftAxis.ActualHeight,
+                                                           Mode=OneWay}"
+                                          Margin="5 0 0 0"
+                                          AnimationTargetRange="{Binding AnimationTargetRange}"
+                                          AnimationTime="{Binding AnimationTime}"
+                                          AxisTitle="Transmission loss (dB)"
                                           ColorBarImage="{Binding ColorMapViewModel.ColorBitmap}"
-                                          CurrentRange="{Binding ColorMapViewModel.CurrentRange}" 
-                                          FullRange="{Binding ColorMapViewModel.DataRange}" 
-                                          StatisticalRange="{Binding ColorMapViewModel.StatisticalRange}"/>
+                                          CurrentRange="{Binding ColorMapViewModel.Range}"
+                                          DockPanel.Dock="Bottom"
+                                          FullRange="{Binding FullRange}"
+                                          ToolTip="Dragging, double-clicking, or moving the mouse wheel will adjust the colorbar range">
+                    <controls:ColorBarControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{Binding ReverseColorbarCommand}" Header="Reverse" />
+                        </ContextMenu>
+                    </controls:ColorBarControl.ContextMenu>
+                </controls:ColorBarControl>
+                <TextBlock DockPanel.Dock="Top" />
             </DockPanel>
-            <Plotting:FourAxisSeriesView x:Name="AxisView" DataContext="{Binding AxisSeriesViewModel}" DockPanel.Dock="Left" />
+            <Plotting:FourAxisSeriesView x:Name="AxisView"
+                                         DataContext="{Binding AxisSeriesViewModel}"
+                                         DockPanel.Dock="Left" />
         </DockPanel>
     </Grid>
 </UserControl>

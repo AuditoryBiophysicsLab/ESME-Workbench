@@ -29,6 +29,14 @@ namespace ESME.Views.TransmissionLossViewer
 {
     public class RadialViewModel : ViewModelBase, IDisposable
     {
+        public RadialViewModel() 
+        {
+            FullRange = new Range(0, 200);
+            CurrentRange = new Range(50, 150);
+            StatisticalRange = new Range(75, 125);
+	    AnimationTime = TimeSpan.FromSeconds(0);
+        }
+
         public void Initialize()
         {
             _view = RadialView;
@@ -62,7 +70,7 @@ namespace ESME.Views.TransmissionLossViewer
                                        {
                                            if (e.EventArgs.PropertyName == "ActualWidth" || e.EventArgs.PropertyName == "ActualHeight")
                                            {
-                                               ColorMapViewModel.CurrentRange.ForceUpdate(ColorMapViewModel.CurrentRange);
+                                               ColorMapViewModel.Range.ForceUpdate(ColorMapViewModel.Range);
                                                Render();
                                                CalculateBottomProfileGeometry();
                                            }
@@ -118,7 +126,7 @@ namespace ESME.Views.TransmissionLossViewer
             if (WriteableBitmap == null) _dispatcher.InvokeIfRequired(() => WriteableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null));
             var renderRect = new Int32Rect(0, 0, width, height);
             //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} Starting render", DateTime.Now));
-            if (Radial != null && _transmissionLossRadial != null) _renderQueue.Post(Tuple.Create(_transmissionLossRadial, ColorMapViewModel, renderRect, new Range(ColorMapViewModel.CurrentRange), _sourceSequenceNumber, _displayQueue));
+            if (Radial != null && _transmissionLossRadial != null) _renderQueue.Post(Tuple.Create(_transmissionLossRadial, ColorMapViewModel, renderRect, new Range(ColorMapViewModel.Range), _sourceSequenceNumber, _displayQueue));
             else WaitToRenderText = "This radial has not yet been calculated";
             //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} Render complete", DateTime.Now));
             Interlocked.Increment(ref _sourceSequenceNumber);
@@ -161,6 +169,11 @@ namespace ESME.Views.TransmissionLossViewer
         [Initialize] public ColorMapViewModel ColorMapViewModel { get; set; }
         public Visibility WriteableBitmapVisibility { get; set; }
         public Radial Radial { get; set; }
+        public TimeSpan AnimationTime { get; set; }
+        public Range FullRange { get; set; }
+        public Range CurrentRange { get; set; }
+        public Range StatisticalRange { get; set; }
+        public Range AnimationTargetRange { get; set; }
 
         void RadialChanged()
         {
@@ -193,13 +206,13 @@ namespace ESME.Views.TransmissionLossViewer
                 _imageSeriesViewModel.Bottom = Radial.Depths.Last();
                 _imageSeriesViewModel.Right = Radial.Ranges.Last();
                 //Debug.WriteLine(string.Format("Radial max depth: {0} max range: {1}", Radial.Depths.Last(), Radial.Ranges.Last()));
-                ColorMapViewModel.StatisticalRange.ForceUpdate(_transmissionLossRadial.StatMin, _transmissionLossRadial.StatMax);
-                ColorMapViewModel.CurrentRange.ForceUpdate(ColorMapViewModel.StatisticalRange);
+                StatisticalRange.ForceUpdate(_transmissionLossRadial.StatMin, _transmissionLossRadial.StatMax);
+                ColorMapViewModel.Range.ForceUpdate(StatisticalRange);
                 AxisSeriesViewModel.XAxis.DataRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
                 AxisSeriesViewModel.YAxis.DataRange.Update(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
                 AxisSeriesViewModel.XAxis.VisibleRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
                 AxisSeriesViewModel.YAxis.VisibleRange.ForceUpdate(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
-                _radialObservers.Add(ColorMapViewModel.CurrentRange.ObserveOn(TaskPoolScheduler.Default).Sample(TimeSpan.FromMilliseconds(50)).Subscribe(e => Render()));
+                _radialObservers.Add(ColorMapViewModel.Range.ObserveOn(TaskPoolScheduler.Default).Sample(TimeSpan.FromMilliseconds(50)).Subscribe(e => Render()));
                 Render();
             }
             catch (Exception e)
@@ -348,11 +361,30 @@ namespace ESME.Views.TransmissionLossViewer
                     YAxisTicks = null,
                 },
                 ColorMapViewModel = ColorMapViewModel.DesignTimeData,
+                FullRange = new Range(0, 200),
+                StatisticalRange = new Range(75, 125),
+                AnimationTargetRange = new Range(50, 100),
+                AnimationTime = TimeSpan.FromSeconds(0),
             };
             DesignTimeData.AxisSeriesViewModel.BottomAxis.DataRange = axisRanges;
             DesignTimeData.AxisSeriesViewModel.LeftAxis.DataRange = axisRanges;
-            DesignTimeData.ColorMapViewModel.Name = "Transmission loss (dB)";
         }
+
+        #region ReverseColorbarCommand
+        public SimpleCommand<object, object> ReverseColorbarCommand
+        {
+            get
+            {
+                return _reverseColorbar ?? (_reverseColorbar = new SimpleCommand<object, object>(_ =>
+                {
+                    ColorMapViewModel.Reverse();
+                    Render();
+                }));
+            }
+        }
+
+        SimpleCommand<object, object> _reverseColorbar;
+        #endregion
 
         #region IDisposable implementation
         // Implement IDisposable.
