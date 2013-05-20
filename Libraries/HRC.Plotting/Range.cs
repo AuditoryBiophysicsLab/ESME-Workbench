@@ -46,7 +46,6 @@ namespace HRC.Plotting
                 OnRangeChanged(oldRange);
             }
         }
-        public double Size { get { return Max - Min; } }
         /// <summary>
         /// Sets the range to the minimum and maxumum values in the provided enumerable
         /// </summary>
@@ -102,21 +101,11 @@ namespace HRC.Plotting
             var realMax = double.IsNaN(Max) ? max : Math.Max(Max, max);
             Update(realMin, realMax);
         }
-        public override void Add(IRange range)
-        {
-            Add(range.Min, range.Max);
-        }
+        public override void Add(IRange range) { Add(range.Min, range.Max); }
         public void Add(IEnumerable<Range> ranges)
         {
             var rangeList = ranges.ToList();
             Add(rangeList.Min(r => r.Min), rangeList.Max(r => r.Max));
         }
-
-        public double ValueToRange(double value) { return (value - Min) / Size; }
-
-        public double RangeToValue(double range) { return (range * Size) + Min; }
-
-        public bool Contains(Range otherRange) { return Min <= otherRange.Min && Max >= otherRange.Max; }
-        public bool Contains(double value) { return Min <= value && Max >= value; }
     };
 }

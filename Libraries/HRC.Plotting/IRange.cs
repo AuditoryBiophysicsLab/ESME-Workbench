@@ -6,7 +6,9 @@ namespace HRC.Plotting
     {
         double Min { get; }
         double Max { get; }
-        double Value { get; }
+        double Size { get; }
         bool IsEmpty { get; }
+        bool Contains(IRange otherRange);
+        bool Contains(double value);
     }
 }

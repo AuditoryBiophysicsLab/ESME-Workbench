@@ -128,11 +128,13 @@ namespace HRC.Plotting
 
         public virtual double Min { get { return Minimum; } }
         public virtual double Max { get { return Maximum; } }
-        public double Value { get { return Max - Min; } }
+        public double Size { get { return Max - Min; } }
 
         public bool Equals(IRange other) { return Equals((RangeBase)other); }
         public virtual bool IsEmpty { get { return double.IsNaN(Minimum) || double.IsNaN(Maximum); } }
-        
+        public bool Contains(IRange otherRange) { return Min <= otherRange.Min && Max >= otherRange.Max; }
+        public bool Contains(double value) { return Min <= value && Max >= value; }
+
         public override string ToString() { return string.Format("Range {{ Min = {0:0.##}, Max = {1:0.##} }}", Min, Max); }
 
         public IDisposable Subscribe(IObserver<IRange> observer) { return _rangeChangedObservable.Subscribe(observer); }

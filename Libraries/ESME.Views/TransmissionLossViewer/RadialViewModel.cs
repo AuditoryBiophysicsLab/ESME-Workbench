@@ -70,7 +70,7 @@ namespace ESME.Views.TransmissionLossViewer
                                        {
                                            if (e.EventArgs.PropertyName == "ActualWidth" || e.EventArgs.PropertyName == "ActualHeight")
                                            {
-                                               ColorMapViewModel.Range.ForceUpdate(ColorMapViewModel.Range);
+                                               //ColorMapViewModel.Range.ForceUpdate(ColorMapViewModel.Range);
                                                Render();
                                                CalculateBottomProfileGeometry();
                                            }
@@ -206,8 +206,8 @@ namespace ESME.Views.TransmissionLossViewer
                 _imageSeriesViewModel.Bottom = Radial.Depths.Last();
                 _imageSeriesViewModel.Right = Radial.Ranges.Last();
                 //Debug.WriteLine(string.Format("Radial max depth: {0} max range: {1}", Radial.Depths.Last(), Radial.Ranges.Last()));
-                StatisticalRange.ForceUpdate(_transmissionLossRadial.StatMin, _transmissionLossRadial.StatMax);
-                ColorMapViewModel.Range.ForceUpdate(StatisticalRange);
+                StatisticalRange.Update(_transmissionLossRadial.StatMin, _transmissionLossRadial.StatMax);
+                ColorMapViewModel.Range.Update(StatisticalRange);
                 AxisSeriesViewModel.XAxis.DataRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
                 AxisSeriesViewModel.YAxis.DataRange.Update(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
                 AxisSeriesViewModel.XAxis.VisibleRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);

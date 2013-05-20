@@ -49,7 +49,7 @@ namespace ESME.Views.Environment
             //FourAxisSeriesViewModel.XAxis.DataRange.Add(new Range(seriesData.Select(p => p.X).Min(), seriesData.Select(p => p.X).Max()));
             //FourAxisSeriesViewModel.YAxis.DataRange.Add(new Range(seriesData.Select(p => p.X).Min(), seriesData.Select(p => p.X).Max()));
             FourAxisSeriesViewModel.DataSeriesCollection.Add(lineSeries);
-            FourAxisSeriesViewModel.XAxis.VisibleRange = FourAxisSeriesViewModel.XAxis.DataRange.Expand(FourAxisSeriesViewModel.XAxis.DataRange.Value * .05);
+            FourAxisSeriesViewModel.XAxis.VisibleRange = FourAxisSeriesViewModel.XAxis.DataRange.Expand(FourAxisSeriesViewModel.XAxis.DataRange.Size * .05);
             FourAxisSeriesViewModel.XAxis.Label = "Sound speed (m/s)";
             FourAxisSeriesViewModel.YAxis.Label = "Depth (m)";
             FourAxisSeriesViewModel.PlotTitle = OutputFileName;

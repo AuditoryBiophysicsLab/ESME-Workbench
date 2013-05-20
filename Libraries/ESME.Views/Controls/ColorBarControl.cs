@@ -17,9 +17,8 @@ namespace ESME.Views.Controls
     {
         static ColorBarControl() { DefaultStyleKeyProperty.OverrideMetadata(typeof(ColorBarControl), new FrameworkPropertyMetadata(typeof(ColorBarControl))); }
 
-        double _curRange;
         double _axisRange;
-        Point _previousPoint;
+        double _previousY;
         StepFunction _steps;
         IDisposable _currentRangeObserver, _axisRangeObserver, _animationTargetRangeObserver;
 
@@ -61,19 +60,26 @@ namespace ESME.Views.Controls
 
         void CurrentRangeChanged()
         {
-            var axisVisibleRange = _axisVisibleRange ?? FullRange;
-            if (CurrentRange == null || CurrentRange.IsEmpty || axisVisibleRange == null || axisVisibleRange.IsEmpty) return;
+            if (CurrentRange == null || CurrentRange.IsEmpty || AxisRange == null || AxisRange.IsEmpty) return;
             Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: CurrentRange changed to {1}", DateTime.Now, CurrentRange));
-            if (_steps != null)
-            {
-                CurrentRange.Update(Math.Max(CurrentRange.Min, axisVisibleRange.Min), Math.Min(CurrentRange.Max, axisVisibleRange.Max));
-                if ((CurrentRange.Min >= (CurrentRange.Max - _steps.Last().Y)) && 
-                    ((CurrentRange.Max <= (CurrentRange.Min + _steps.Last().Y)))) return;
-            }
-            _curRange = CurrentRange.Value;
-            var top = Math.Max(0, ActualHeight * (axisVisibleRange.Max - CurrentRange.Max) / _axisRange);
-            var bottom = Math.Max(0, ActualHeight * (CurrentRange.Min - axisVisibleRange.Min) / _axisRange);
+            //if (_steps != null)
+            //{
+            //    if ((CurrentRange.Min < axisVisibleRange.Min) || (CurrentRange.Max > axisVisibleRange.Max)) CurrentRange.Update(Math.Max(CurrentRange.Min, axisVisibleRange.Min), Math.Min(CurrentRange.Max, axisVisibleRange.Max));
+            //    if ((CurrentRange.Min >= (CurrentRange.Max - _steps.Last().Y)) && 
+            //        ((CurrentRange.Max <= (CurrentRange.Min + _steps.Last().Y)))) return;
+            //}
+            var top = Math.Max(0, ActualHeight * (AxisRange.Max - CurrentRange.Max) / _axisRange);
+            var bottom = Math.Max(0, ActualHeight * (CurrentRange.Min - AxisRange.Min) / _axisRange);
             ColorbarAdjustmentMargins = new Thickness(0, top, 0, bottom);
+        }
+
+        void UpdateCurrentRange(double minDelta, double maxDelta = double.NaN)
+        {
+            if (double.IsNaN(minDelta)) throw new ArgumentException(@"Cannot be NaN", "minDelta");
+            if (double.IsNaN(maxDelta)) maxDelta = minDelta;
+
+            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: UpdateCurrentRange by [{1:0.##}, {2:0.##}]", DateTime.Now, minDelta, maxDelta));
+            CurrentRange.Update(Math.Max(FullRange.Min, CurrentRange.Min + minDelta), Math.Min(FullRange.Max, CurrentRange.Max + maxDelta));
         }
         #endregion
 
@@ -87,11 +93,7 @@ namespace ESME.Views.Controls
         public Range FullRange { get { return (Range)GetValue(FullRangeProperty); } set { SetValue(FullRangeProperty, value); } }
 
         static void FullRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarControl)obj).FullRangePropertyChanged(); }
-        void FullRangePropertyChanged()
-        {
-            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: FullRange changed to {1}", DateTime.Now, FullRange));
-            if (_axisVisibleRange == null) AxisRangeChanged(FullRange);
-        }
+        void FullRangePropertyChanged() { }
         #endregion
 
         #region dependency property Range AnimationTargetRange
@@ -175,22 +177,41 @@ namespace ESME.Views.Controls
         void ColorbarAdjustmentMarginsPropertyChanged() { }
         #endregion
 
-        #endregion
+        #region dependency property Range AxisRange
 
-        #endregion
+        static readonly DependencyPropertyKey AxisRangePropertyKey = DependencyProperty.RegisterReadOnly("AxisRange",
+                                                                                                         typeof(Range),
+                                                                                                         typeof(ColorBarControl),
+                                                                                                         new FrameworkPropertyMetadata(null,
+                                                                                                                                       FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                                                                                                                                       AxisRangePropertyChanged));
+        public static readonly DependencyProperty AxisRangeProperty = AxisRangePropertyKey.DependencyProperty;
+        public Range AxisRange { get { return (Range)GetValue(AxisRangeProperty); } protected set { SetValue(AxisRangePropertyKey, value); } }
 
-        Range _axisVisibleRange;
-        void AxisRangeChanged(IRange axisVisibleRange)
+        static void AxisRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarControl)obj).AxisRangePropertyChanged(); }
+        void AxisRangePropertyChanged()
         {
-            if (axisVisibleRange == null) return;
-            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: AxisRange changed to {1}", DateTime.Now, axisVisibleRange));
-            _axisRange = axisVisibleRange.Value;
-            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: AxisRange changed to {1}", DateTime.Now, AxisRange));
+            if (_axisRangeObserver != null) _axisRangeObserver.Dispose();
+            if (AxisRange == null) return;
+            _axisRangeObserver = AxisRange.ObserveOnDispatcher().Subscribe(e => AxisRangeChanged());
+            AxisRangeChanged();
+
+        }
+        void AxisRangeChanged()
+        {
+            if (AxisRange == null) return;
+            _axisRange = AxisRange.Size;
+            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: AxisRange changed to {1}", DateTime.Now, AxisRange));
             if (Math.Abs(_axisRange) < double.Epsilon) _axisRange = 1.0;
             _steps = new StepFunction(0, 95, 95, x => _axisRange * Math.Exp(-0.047 * x));
             CurrentRangeChanged();
             //ResetColorbarRange();
         }
+        #endregion
+
+        #endregion
+
+        #endregion
 
         public override void OnApplyTemplate()
         {
@@ -200,31 +221,28 @@ namespace ESME.Views.Controls
             if (_mouseWheels != null) _mouseWheels.Dispose();
             if (_axisRangeObserver != null) _axisRangeObserver.Dispose();
             var imageInTemplate = (Image)GetTemplateChild("PART_Image");
-            var dataAxisInTemplate = GetTemplateChild("PART_DataAxis") as DataAxis;
-            if (dataAxisInTemplate != null)
-            {
-                _axisVisibleRange = dataAxisInTemplate.VisibleRange;
-                _axisRangeObserver = dataAxisInTemplate.VisibleRange.Subscribe(AxisRangeChanged);
-                AxisRangeChanged(dataAxisInTemplate.VisibleRange);
-            }
-            if (imageInTemplate == null) return;
+            var dataAxisInTemplate = (DataAxis)GetTemplateChild("PART_DataAxis");
+            if (imageInTemplate == null) throw new NullReferenceException("PART_Image required in template for ColorBarControl");
+            if (dataAxisInTemplate == null) throw new NullReferenceException("PART_DataAxis required in template for ColorBarControl");
+            AxisRange = dataAxisInTemplate.VisibleRange;
             if (imageInTemplate.ToolTip == null) imageInTemplate.ToolTip = new ToolTip { Content = new TextBlock { Text = "Left-click and drag or use the mouse wheel to change colorbar range" } };
+            Observable.FromEventPattern<MouseEventArgs>(imageInTemplate, "MouseMove")
+                .Select(e => new { IsDown = (bool?)null, Location = e.EventArgs.GetPosition(this) });
             _mouseClicks = Observable.FromEventPattern<MouseButtonEventArgs>(imageInTemplate, "MouseDown")
                 .Where(e => e.EventArgs.ChangedButton == MouseButton.Left)
-                .Select(e => new { IsDown = true, e.EventArgs.ClickCount, Location = e.EventArgs.GetPosition(imageInTemplate), e.EventArgs.MouseDevice, e.EventArgs.Timestamp })
+                .Select(e => new { IsDown = true, e.EventArgs.ClickCount, Location = e.EventArgs.GetPosition(this), e.EventArgs.MouseDevice, e.EventArgs.Timestamp })
                 .Merge(Observable.FromEventPattern<MouseButtonEventArgs>(imageInTemplate, "MouseUp")
                            .Where(e => e.EventArgs.ChangedButton == MouseButton.Left)
-                           .Select(e => new { IsDown = false, e.EventArgs.ClickCount, Location = e.EventArgs.GetPosition(imageInTemplate), e.EventArgs.MouseDevice, e.EventArgs.Timestamp }))
+                           .Select(e => new { IsDown = false, e.EventArgs.ClickCount, Location = e.EventArgs.GetPosition(this), e.EventArgs.MouseDevice, e.EventArgs.Timestamp }))
                 .Subscribe(leftButton =>
                 {
                     if (leftButton.IsDown)
                     {
-                        _previousPoint = leftButton.Location;
                         switch (leftButton.ClickCount)
                         {
                             case 1:
-                                Mouse.Capture(imageInTemplate, CaptureMode.Element);
-                                Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Mouse captured", DateTime.Now));
+                                //Mouse.Capture(this, CaptureMode.Element);
+                                //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Mouse captured", DateTime.Now));
                                 break;
                             case 2:
                                 RaiseEvent(new RoutedEventArgs(MouseDoubleClickEvent));
@@ -233,14 +251,14 @@ namespace ESME.Views.Controls
                     }
                     else
                     {
-                        Mouse.Capture(null);
-                        Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Mouse released", DateTime.Now));
+                        //Mouse.Capture(null);
+                        //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Mouse released", DateTime.Now));
                         //InvalidateVisual();
                     }
                     _isLeftButtonDown = leftButton.IsDown;
                 });
             _mouseMoves = Observable.FromEventPattern<MouseEventArgs>(imageInTemplate, "MouseMove")
-                .Select(e => e.EventArgs.GetPosition(imageInTemplate))
+                .Select(e => e.EventArgs.GetPosition(this))
                 .Subscribe(mouseLocation =>
                 {
                     if (_isLeftButtonDown)
@@ -252,28 +270,30 @@ namespace ESME.Views.Controls
                         //YMove changes min/max by +/-DeltaValuePP
                         var deltaValuePerPixel = _axisRange / ActualHeight;
                         Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: deltaValuePerPixel is now {1}", DateTime.Now, deltaValuePerPixel));
-                        Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: mouseDeltaY is {1}", DateTime.Now, _previousPoint.Y - mouseLocation.Y));
-                        var yDeltaValue = (_previousPoint.Y - mouseLocation.Y) * deltaValuePerPixel;
+                        Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: mouseDeltaY is {1}", DateTime.Now, _previousY - mouseLocation.Y));
+                        var yDeltaValue = (_previousY - mouseLocation.Y) * deltaValuePerPixel;
                         Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: yDeltaValue is now {1}", DateTime.Now, yDeltaValue));
                         //var xDeltaValue = (mouseLocation.X - _previousPoint.X) * deltaValuePerPixel;
                         //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: xDeltaValue is now {1}", DateTime.Now, xDeltaValue));
                         //var netMouseMove = (xDeltaValue / 2) - yDeltaValue;
                         //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: netMouseMove is now {1}", DateTime.Now, netMouseMove));
-                        CurrentRange.Update(CurrentRange.Min + yDeltaValue, CurrentRange.Max + yDeltaValue);
+                        //CurrentRange.Update(CurrentRange.Min + yDeltaValue, CurrentRange.Max + yDeltaValue);
+                        UpdateCurrentRange(yDeltaValue);
                         Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: CurrentRange is now {1}", DateTime.Now, CurrentRange));
                     }
-                    _previousPoint = mouseLocation;
-                    Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: _previousPoint is now {1}", DateTime.Now, _previousPoint.ToString()));
-
+                    _previousY = mouseLocation.Y;
+                    Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: _previousY is now {1}", DateTime.Now, _previousY));
                 });
             _mouseWheels = Observable.FromEventPattern<MouseWheelEventArgs>(imageInTemplate, "MouseWheel")
                 .Select(e => e.EventArgs.Delta)
                 .Subscribe(delta =>
                 {
-                    var newRange = delta < 0 ? _steps.StepForward(_curRange) : _steps.StepBack(_curRange);
+                    var curRange = CurrentRange.Size;
+                    var newRange = delta < 0 ? _steps.StepForward(curRange) : _steps.StepBack(curRange);
 
-                    var newDelta = (_curRange - newRange) / 2;
+                    var newDelta = (curRange - newRange) / 2;
                     CurrentRange.Update(CurrentRange.Min - newDelta, CurrentRange.Max + newDelta);
+                    UpdateCurrentRange(-newDelta, newDelta);
                     Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Expanding current range by {1}", DateTime.Now, newDelta));
                 });
         }

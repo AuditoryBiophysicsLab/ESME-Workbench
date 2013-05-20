@@ -66,7 +66,7 @@ namespace ESME.Views.Controls
             if (value >= max) return _firstColor;
             if (value <= min) return _lastColor;
 
-            if (currentRange.Value > 0)
+            if (((RangeBase)currentRange).Size > 0)
             {
                 var fraction = 1.0 - (value - min) / range;
                 var index = (int)(fraction * _colorCount);
