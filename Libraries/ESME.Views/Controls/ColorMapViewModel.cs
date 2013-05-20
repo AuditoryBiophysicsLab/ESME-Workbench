@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -19,13 +16,7 @@ namespace ESME.Views.Controls
         {
             Range = new Range(50, 150);
             Colors = Colormaps["Jet"].ToObservableList();
-
-            _observers.Add(Range
-                               .ObserveOn(TaskPoolScheduler.Default)
-                               .Subscribe(r => Debug.WriteLine(string.Format("{0:HH:mm:ss:fff} ColorMapViewModel.CurrentRange changed to {1}", DateTime.Now, Range))));
         }
-
-        readonly List<IDisposable> _observers = new List<IDisposable>();
 
         #region public properties
 
@@ -66,7 +57,7 @@ namespace ESME.Views.Controls
             if (value >= max) return _firstColor;
             if (value <= min) return _lastColor;
 
-            if (((RangeBase)currentRange).Size > 0)
+            if (currentRange.Size > 0)
             {
                 var fraction = 1.0 - (value - min) / range;
                 var index = (int)(fraction * _colorCount);
