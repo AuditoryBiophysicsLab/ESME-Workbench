@@ -3,9 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:ESME.Views.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
              xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
+             xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
              Background="White"
              d:DataContext="{Binding Source={StaticResource DesignViewModel},
                                      Path=DesignTimeData}"
@@ -49,12 +51,20 @@
                             <MenuItem Command="{Binding ReverseColorbarCommand}" Header="Reverse" />
                         </ContextMenu>
                     </controls:ColorBarControl.ContextMenu>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <WPF:EventToCommandTrigger Command="{Binding ColorBarDoubleClickCommand}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <Plotting:DataPiping.DataPipes>
+                        <Plotting:DataPipeCollection>
+                            <Plotting:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type controls:ColorBarControl}}, Path=AxisRange}" Target="{Binding Path=AxisRange, Mode=OneWayToSource}" />
+                        </Plotting:DataPipeCollection>
+                    </Plotting:DataPiping.DataPipes>
                 </controls:ColorBarControl>
                 <TextBlock DockPanel.Dock="Top" />
             </DockPanel>
-            <Plotting:FourAxisSeriesView x:Name="AxisView"
-                                         DataContext="{Binding AxisSeriesViewModel}"
-                                         DockPanel.Dock="Left" />
+            <Plotting:FourAxisSeriesView x:Name="AxisView" DataContext="{Binding AxisSeriesViewModel}" DockPanel.Dock="Left" />
         </DockPanel>
     </Grid>
 </UserControl>

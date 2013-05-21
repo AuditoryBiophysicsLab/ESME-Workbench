@@ -32,9 +32,9 @@ namespace ESME.Views.TransmissionLossViewer
         public RadialViewModel() 
         {
             FullRange = new Range(0, 200);
-            CurrentRange = new Range(50, 150);
             StatisticalRange = new Range(75, 125);
-	    AnimationTime = TimeSpan.FromSeconds(0);
+            AnimationTargetRange = new Range();
+	        AnimationTime = TimeSpan.FromSeconds(0);
         }
 
         public void Initialize()
@@ -55,15 +55,28 @@ namespace ESME.Views.TransmissionLossViewer
                 .RegisterHandler(x => x.MouseDataLocation, UpdateStatusProperties);
             _yAxisPropertyObserver = new PropertyObserver<DataAxisViewModel>(AxisSeriesViewModel.YAxis)
                 .RegisterHandler(y => y.MouseDataLocation, UpdateStatusProperties);
+            _propertyObserver = new PropertyObserver<RadialViewModel>(this)
+                .RegisterHandler(p => p.AxisRange, () =>
+                {
+                    if (_axisRangeObserver != null)
+                    {
+                        _instanceObservers.Remove(_axisRangeObserver);
+                        _axisRangeObserver.Dispose();
+                    }
+                    if (AxisRange == null) return;
+                    _axisRangeObserver = AxisRange.ObserveOnDispatcher().Subscribe(r =>
+                    {
+                        if (FullRange == null) FullRange = new Range(AxisRange);
+                        else FullRange.Update(AxisRange);
+                    });
+                    _instanceObservers.Add(_axisRangeObserver);
+                });
             _instanceObservers.Add(AxisSeriesViewModel.YAxis.VisibleRange
                                        .ObserveOn(TaskPoolScheduler.Default)
                                        .Subscribe(e => CalculateBottomProfileGeometry()));
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged")
                                        .ObserveOnDispatcher()
-                                       .Subscribe(e =>
-                                       {
-                                           if (e.EventArgs.PropertyName == "Radial") RadialChanged();
-                                       }));
+                                       .Subscribe(e => { if (e.EventArgs.PropertyName == "Radial") RadialChanged(); }));
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(AxisSeriesViewModel, "PropertyChanged")
                                        .ObserveOnDispatcher()
                                        .Subscribe(e =>
@@ -71,13 +84,11 @@ namespace ESME.Views.TransmissionLossViewer
                                            if (e.EventArgs.PropertyName == "ActualWidth" || e.EventArgs.PropertyName == "ActualHeight")
                                            {
                                                //ColorMapViewModel.Range.ForceUpdate(ColorMapViewModel.Range);
+                                               WriteableBitmap = null;
                                                Render();
                                                CalculateBottomProfileGeometry();
                                            }
                                        }));
-            _instanceObservers.Add(Observable.FromEventPattern<SizeChangedEventArgs>(_view, "SizeChanged")
-                                       .ObserveOn(TaskPoolScheduler.Default)
-                                       .Subscribe(e => Render()));
             _displayQueue
                 .ObserveOnDispatcher()
                 .Subscribe(result =>
@@ -111,6 +122,7 @@ namespace ESME.Views.TransmissionLossViewer
 
         readonly List<IDisposable> _instanceObservers = new List<IDisposable>();
         readonly List<IDisposable> _radialObservers = new List<IDisposable>();
+        IDisposable _axisRangeObserver;
         public RadialView RadialView { get; set; }
         void Render()
         {
@@ -156,6 +168,7 @@ namespace ESME.Views.TransmissionLossViewer
         [UsedImplicitly] PropertyObserver<DataAxisViewModel> _xAxisPropertyObserver;
         [UsedImplicitly] PropertyObserver<DataAxisViewModel> _yAxisPropertyObserver;
         [UsedImplicitly] PropertyObserver<FourAxisSeriesViewModel> _fourAxisSeriesObserver;
+        [UsedImplicitly] PropertyObserver<RadialViewModel> _propertyObserver;
 
         RadialView _view;
         Dispatcher _dispatcher;
@@ -171,9 +184,9 @@ namespace ESME.Views.TransmissionLossViewer
         public Radial Radial { get; set; }
         public TimeSpan AnimationTime { get; set; }
         public Range FullRange { get; set; }
-        public Range CurrentRange { get; set; }
         public Range StatisticalRange { get; set; }
         public Range AnimationTargetRange { get; set; }
+        public Range AxisRange { get; set; }
 
         void RadialChanged()
         {
@@ -386,6 +399,16 @@ namespace ESME.Views.TransmissionLossViewer
         SimpleCommand<object, object> _reverseColorbar;
         #endregion
 
+        #region ColorBarDoubleClickCommand
+        public SimpleCommand<object, EventToCommandArgs> ColorBarDoubleClickCommand { get { return _colorBarDoubleClick ?? (_colorBarDoubleClick = new SimpleCommand<object, EventToCommandArgs>(ColorBarDoubleClickHandler)); } }
+        SimpleCommand<object, EventToCommandArgs> _colorBarDoubleClick;
+
+        void ColorBarDoubleClickHandler(EventToCommandArgs args)
+        {
+            AnimationTime = TimeSpan.FromMilliseconds(200);
+            AnimationTargetRange.ForceUpdate(ColorMapViewModel.Range == FullRange ? StatisticalRange : FullRange);
+        }
+        #endregion
         #region IDisposable implementation
         // Implement IDisposable.
         // Do not make this method virtual.

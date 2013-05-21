@@ -79,7 +79,14 @@ namespace ESME.Views.Controls
             if (double.IsNaN(maxDelta)) maxDelta = minDelta;
 
             //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: UpdateCurrentRange by [{1:0.##}, {2:0.##}]", DateTime.Now, minDelta, maxDelta));
-            CurrentRange.Update(Math.Max(FullRange.Min, CurrentRange.Min + minDelta), Math.Min(FullRange.Max, CurrentRange.Max + maxDelta));
+            var proposedRange = new Range(Math.Max(FullRange.Min, CurrentRange.Min + minDelta), Math.Min(FullRange.Max, CurrentRange.Max + maxDelta));
+            // Don't let CurrentRange get smaller than 5% of AxisRange
+            if (proposedRange.Size < (AxisRange.Size * 0.05))
+            {
+                var center = (proposedRange.Size / 2) + proposedRange.Min;
+                proposedRange.Update(center - (AxisRange.Size * 0.025), center + (AxisRange.Size * 0.025));
+            }
+            CurrentRange.Update(proposedRange);
         }
         #endregion
 
@@ -121,17 +128,27 @@ namespace ESME.Views.Controls
             else
             {
                 //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Animating CurrentRange from {1} to {2}", DateTime.Now, CurrentRange, _animationTarget));
+                if (_animationObserver != null)
+                {
+                    _animationObserver.Dispose();
+                    _animationObserver = null;
+                    BeginAnimation(CurrentRangeProperty, null);
+                }
                 var duration = new Duration(AnimationTime);
                 var rangeAnimation = new RangeAnimation(CurrentRange, AnimationTargetRange, duration);
-                Observable.FromEventPattern<EventArgs>(rangeAnimation, "Completed").Subscribe(e =>
+                _animationObserver = Observable.FromEventPattern<EventArgs>(rangeAnimation, "Completed").Subscribe(e =>
                 {
                     //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} AnimationCompleted", DateTime.Now));
+                    _animationObserver.Dispose();
+                    _animationObserver = null;
                     BeginAnimation(CurrentRangeProperty, null);
                     CurrentRange.Update(AnimationTargetRange);
                 });
                 BeginAnimation(CurrentRangeProperty, rangeAnimation);
             }
         }
+
+        IDisposable _animationObserver;
         #endregion
 
         #region dependency property string AxisTitle
@@ -217,7 +234,6 @@ namespace ESME.Views.Controls
         {
             base.OnApplyTemplate();
             if (_mouseClicks != null) _mouseClicks.Dispose();
-            if (_mouseMoves != null) _mouseMoves.Dispose();
             if (_mouseWheels != null) _mouseWheels.Dispose();
             if (_axisRangeObserver != null) _axisRangeObserver.Dispose();
             var imageInTemplate = (Image)GetTemplateChild("PART_Image");
@@ -226,56 +242,34 @@ namespace ESME.Views.Controls
             if (dataAxisInTemplate == null) throw new NullReferenceException("PART_DataAxis required in template for ColorBarControl");
             AxisRange = dataAxisInTemplate.VisibleRange;
             if (imageInTemplate.ToolTip == null) imageInTemplate.ToolTip = new ToolTip { Content = new TextBlock { Text = "Left-click and drag or use the mouse wheel to change colorbar range" } };
-            var leftButtonDown = Observable.FromEventPattern<MouseButtonEventArgs>(imageInTemplate, "MouseDown")
-                .Where(e => e.EventArgs.ChangedButton == MouseButton.Left).Select(e => true)
-                .Merge(Observable.FromEventPattern<MouseButtonEventArgs>(imageInTemplate, "MouseUp")
-                           .Where(e => e.EventArgs.ChangedButton == MouseButton.Left)
-                           .Select(e => false));
-            var mouseLocation = 
+            
             _mouseClicks = Observable.FromEventPattern<MouseEventArgs>(this, "MouseMove")
-                .Select(e => new { Location = e.EventArgs.GetPosition(this), ClickCount = 0, IsDown = (bool?)null })
+                .Select(e => new { Location = e.EventArgs.GetPosition(this), ClickCount = 0, IsDown = (bool?)null, e.EventArgs.Device, e.EventArgs.Timestamp })
                 .Merge(Observable.FromEventPattern<MouseEventArgs>(imageInTemplate, "MouseLeave")
-                           .Select(e => new { Location = e.EventArgs.GetPosition(this), ClickCount = 0, IsDown = (bool?)false }))
+                           .Select(e => new { Location = e.EventArgs.GetPosition(this), ClickCount = 0, IsDown = (bool?)false, e.EventArgs.Device, e.EventArgs.Timestamp }))
                 .Merge(Observable.FromEventPattern<MouseButtonEventArgs>(imageInTemplate, "MouseDown")
                            .Where(e => e.EventArgs.ChangedButton == MouseButton.Left)
-                           .Select(e => new { Location = e.EventArgs.GetPosition(this), e.EventArgs.ClickCount, IsDown = (bool?)true }))
+                           .Select(e => new { Location = e.EventArgs.GetPosition(this), e.EventArgs.ClickCount, IsDown = (bool?)true, e.EventArgs.Device, e.EventArgs.Timestamp }))
                 .Merge(Observable.FromEventPattern<MouseButtonEventArgs>(imageInTemplate, "MouseUp")
                            .Where(e => e.EventArgs.ChangedButton == MouseButton.Left)
-                           .Select(e => new { Location = e.EventArgs.GetPosition(this), e.EventArgs.ClickCount, IsDown = (bool?)false }))
+                           .Select(e => new { Location = e.EventArgs.GetPosition(this), e.EventArgs.ClickCount, IsDown = (bool?)false, e.EventArgs.Device, e.EventArgs.Timestamp }))
                 .Subscribe(e =>
                 {
-                    //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Mouse: {1}, ClickCount: {2}, IsDown: {3}", DateTime.Now, e.Location, e.ClickCount, e.IsDown));
-                    // If the event is either MouseDown or MouseUp
                     if (e.IsDown.HasValue)
                     {
-                        // Remember the current state of the left button
                         _isLeftButtonDown = e.IsDown.Value;
-                        if (e.ClickCount == 2)
-                        {
-                            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Mouse double click at Y-location {1}", DateTime.Now, e.Location.Y));
-                            RaiseEvent(new RoutedEventArgs(MouseDoubleClickEvent));
-                        }
+                        if (e.ClickCount == 2 && !_isLeftButtonDown)
+                            RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, new TimeSpan(DateTime.Now.Ticks).Milliseconds, MouseButton.Left)
+                            {
+                                RoutedEvent = MouseDoubleClickEvent,
+                                Source = this
+                            });
                     }
                     else if (_isLeftButtonDown)
                     {
-                        //Detect if moving up or down, left or right:
-                        //Up Positive, Down Negative, Left Negative, Right Positive.
-                        //AxisRange / ActualHeightInPixels -> DeltaValuePP
-                        //XMove changes min, max by DeltaValuePP /2
-                        //YMove changes min/max by +/-DeltaValuePP
-                        //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Mouse dragged to Y-location {1}, delta from last move: {2}", DateTime.Now, e.Location.Y, _previousY - e.Location.Y));
                         var deltaValuePerPixel = _axisRange / ActualHeight;
-                        //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: deltaValuePerPixel is now {1}", DateTime.Now, deltaValuePerPixel));
-                        //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: mouseDeltaY is {1}", DateTime.Now, _previousY - e.Location.Y));
                         var yDeltaValue = (_previousY - e.Location.Y) * deltaValuePerPixel;
-                        //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: yDeltaValue is now {1}", DateTime.Now, yDeltaValue));
-                        //var xDeltaValue = (mouseLocation.X - _previousPoint.X) * deltaValuePerPixel;
-                        //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: xDeltaValue is now {1}", DateTime.Now, xDeltaValue));
-                        //var netMouseMove = (xDeltaValue / 2) - yDeltaValue;
-                        //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: netMouseMove is now {1}", DateTime.Now, netMouseMove));
-                        //CurrentRange.Update(CurrentRange.Min + yDeltaValue, CurrentRange.Max + yDeltaValue);
                         UpdateCurrentRange(yDeltaValue);
-                        //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: CurrentRange is now {1}", DateTime.Now, CurrentRange));
                     }
                     _previousY = e.Location.Y;
                 });
@@ -284,16 +278,14 @@ namespace ESME.Views.Controls
                 .Subscribe(delta =>
                 {
                     var curRange = CurrentRange.Size;
-                    var newRange = delta < 0 ? _steps.StepForward(curRange) : _steps.StepBack(curRange);
+                    var newRange = delta > 0 ? _steps.StepForward(curRange) : _steps.StepBack(curRange);
 
                     var newDelta = (curRange - newRange) / 2;
-                    CurrentRange.Update(CurrentRange.Min - newDelta, CurrentRange.Max + newDelta);
-                    UpdateCurrentRange(-newDelta, newDelta);
-                    //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: Expanding current range by {1}", DateTime.Now, newDelta));
+                    UpdateCurrentRange(newDelta, -newDelta);
                 });
         }
 
-        IDisposable _mouseClicks, _mouseMoves, _mouseWheels;
+        IDisposable _mouseClicks, _mouseWheels;
         bool _isLeftButtonDown;
 #if false
         #region Colorbar Animation
