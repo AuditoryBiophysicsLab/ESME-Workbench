@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows;
@@ -211,11 +210,9 @@ namespace ESME.Views.Controls
         {
             if (AxisRange == null) return;
             _axisRange = AxisRange.Size;
-            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: AxisRange changed to {1}", DateTime.Now, AxisRange));
             if (Math.Abs(_axisRange) < double.Epsilon) _axisRange = 1.0;
             _steps = new StepFunction(0, 95, 95, x => _axisRange * Math.Exp(-0.047 * x));
             CurrentRangeChanged();
-            //ResetColorbarRange();
         }
         #endregion
 

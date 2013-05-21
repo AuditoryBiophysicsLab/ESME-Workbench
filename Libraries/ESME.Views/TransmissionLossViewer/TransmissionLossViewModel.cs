@@ -15,7 +15,7 @@ using HRC.WPF;
 
 namespace ESME.Views.TransmissionLossViewer
 {
-    public class TransmissionLossViewModel : ViewModelBase, IViewStatusAwareInjectionAware
+    public class TransmissionLossViewModel : ViewModelBase
     {
         public IHRCSaveFileService SaveFileService { get; set; }
         
@@ -110,12 +110,7 @@ namespace ESME.Views.TransmissionLossViewer
             set
             {
                 _window = value;
-                if (RadialViewModel == null)
-                {
-                    RadialViewModel = new RadialViewModel();
-                    RadialViewModel.RadialView = _window.FindChildren<RadialView>().First();
-                    RadialViewModel.Initialize();
-                }
+                if (RadialViewModel == null) RadialViewModel = new RadialViewModel { RadialView = _window.FindChildren<RadialView>().First() };
             }
         }
         #endregion
@@ -221,14 +216,6 @@ namespace ESME.Views.TransmissionLossViewer
 
         public float MaxTransmissionLoss { get; set; }
         public float MinTransmissionLoss { get; set; }
-
-        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
-        {
-            if (RadialViewModel != null) return;
-            RadialViewModel = new RadialViewModel { RadialView = ((Window)viewAwareStatusService.View).FindChildren<RadialView>().First() };
-            RadialViewModel.Initialize();
-            //RadialViewModels.ForEach(r => r.Initialize());
-        }
 
         #region commands
         bool AreSaveCommandsEnabled { get { return RadialViewModel != null && RadialViewModel.Radial != null; } }

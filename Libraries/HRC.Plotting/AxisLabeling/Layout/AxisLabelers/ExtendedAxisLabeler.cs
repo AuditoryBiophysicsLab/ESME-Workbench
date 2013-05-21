@@ -185,8 +185,9 @@ namespace HRC.Plotting.AxisLabeling.Layout.AxisLabelers
                 j = j + 1;
             }
 
-            if (best == null) Console.WriteLine(@"WARNING: Extended algorithm found 0 solutions");
-            else best.VisibleRange = new Range(Math.Min(options.VisibleRange.Min, best.Labels.Min(t => t.Value)), Math.Max(options.VisibleRange.Max, best.Labels.Max(t => t.Value)));
+            //if (best == null) Console.WriteLine(@"WARNING: Extended algorithm found 0 solutions");
+            //else best.VisibleRange = new Range(Math.Min(options.VisibleRange.Min, best.Labels.Min(t => t.Value)), Math.Max(options.VisibleRange.Max, best.Labels.Max(t => t.Value)));
+            if (best != null) best.VisibleRange = new Range(Math.Min(options.VisibleRange.Min, best.Labels.Min(t => t.Value)), Math.Max(options.VisibleRange.Max, best.Labels.Max(t => t.Value)));
             return best;
         }
     }
