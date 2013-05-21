@@ -77,7 +77,6 @@ namespace ESME.Views.TransmissionLossViewer
                                        {
                                            if (e.EventArgs.PropertyName == "ActualWidth" || e.EventArgs.PropertyName == "ActualHeight")
                                            {
-                                               //ColorMapViewModel.Range.ForceUpdate(ColorMapViewModel.Range);
                                                WriteableBitmap = null;
                                                Render();
                                                CalculateBottomProfileGeometry();
@@ -128,6 +127,7 @@ namespace ESME.Views.TransmissionLossViewer
             var height = (int)Math.Min(_transmissionLossRadial.Depths.Count, AxisSeriesViewModel.ActualHeight);
             if (WriteableBitmap == null) _dispatcher.InvokeIfRequired(() => WriteableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null));
             var renderRect = new Int32Rect(0, 0, width, height);
+            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} Rendering radial {1:0.0}deg at width {2} and height {3}", DateTime.Now, Radial.Bearing, width, height));
             if (Radial != null && _transmissionLossRadial != null) _renderQueue.Post(Tuple.Create(_transmissionLossRadial, ColorMapViewModel, renderRect, new Range(ColorMapViewModel.Range), _sourceSequenceNumber, _displayQueue));
             else WaitToRenderText = "This radial has not yet been calculated";
             Interlocked.Increment(ref _sourceSequenceNumber);
@@ -394,6 +394,7 @@ namespace ESME.Views.TransmissionLossViewer
         {
             AnimationTime = TimeSpan.FromMilliseconds(200);
             AnimationTargetRange.ForceUpdate(ColorMapViewModel.Range == FullRange ? StatisticalRange : FullRange);
+            AnimationTime = TimeSpan.Zero;
         }
         #endregion
         #region IDisposable implementation
