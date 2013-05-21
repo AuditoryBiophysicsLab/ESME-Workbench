@@ -14,13 +14,12 @@ namespace HRC.Plotting
         {
             DataRange = new RangeCollection();
             Label = "Axis";
-            VisibleRange = new Range();
-            DataRange.RangeChanged += (sender, args) => VisibleRange.Update(DataRange);
+            AxisTicks = new ObservableCollection<NewDataAxisTick>();
         }
 
         public string Label { get; set; }
         [Initialize(AxisLayoutAlgorithm.ExtendedWilkinson)] public AxisLayoutAlgorithm AxisLayoutAlgorithm { get; set; }
-        [Initialize] public ObservableCollection<NewDataAxisTick> AxisTicks { get; set; }
+        public ObservableCollection<NewDataAxisTick> AxisTicks { get; set; }
         [Initialize(AxisType.Linear)] public AxisType AxisType { get; set; }
         public RangeCollection DataRange { get; set; }
         public bool IsInverted { get; set; }
@@ -48,7 +47,7 @@ namespace HRC.Plotting
         [Initialize(4.0)] public double MinorTicksPerInch { get; set; }
         public Func<double, double> PositionToValue { get; set; }
         public Func<double, double> ValueToPosition { get; set; }
-        public Range VisibleRange { get; set; }
+        [Initialize] public Range VisibleRange { get; set; }
         public double ActualWidth { get; set; }
         public double ActualHeight { get; set; }
 

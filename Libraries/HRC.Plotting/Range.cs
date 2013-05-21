@@ -11,10 +11,10 @@ namespace HRC.Plotting
             Minimum = Maximum = double.NaN;
         }
 
-        public Range(Range source)
+        public Range(IRange source)
         {
-            Minimum = source.Minimum;
-            Maximum = source.Maximum;
+            Minimum = source.Min;
+            Maximum = source.Max;
         }
 
         public Range(double min, double max)

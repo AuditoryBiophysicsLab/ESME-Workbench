@@ -61,13 +61,6 @@ namespace ESME.Views.Controls
         void CurrentRangeChanged()
         {
             if (CurrentRange == null || CurrentRange.IsEmpty || AxisRange == null || AxisRange.IsEmpty) return;
-            //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} ColorBarControl: CurrentRange changed to {1}", DateTime.Now, CurrentRange));
-            //if (_steps != null)
-            //{
-            //    if ((CurrentRange.Min < axisVisibleRange.Min) || (CurrentRange.Max > axisVisibleRange.Max)) CurrentRange.Update(Math.Max(CurrentRange.Min, axisVisibleRange.Min), Math.Min(CurrentRange.Max, axisVisibleRange.Max));
-            //    if ((CurrentRange.Min >= (CurrentRange.Max - _steps.Last().Y)) && 
-            //        ((CurrentRange.Max <= (CurrentRange.Min + _steps.Last().Y)))) return;
-            //}
             var top = Math.Max(0, ActualHeight * (AxisRange.Max - CurrentRange.Max) / _axisRange);
             var bottom = Math.Max(0, ActualHeight * (CurrentRange.Min - AxisRange.Min) / _axisRange);
             ColorbarAdjustmentMargins = new Thickness(0, top, 0, bottom);

@@ -223,10 +223,11 @@ namespace ESME.Views.TransmissionLossViewer
                 ColorMapViewModel.Range.Update(StatisticalRange);
                 AxisSeriesViewModel.XAxis.DataRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
                 AxisSeriesViewModel.YAxis.DataRange.Update(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
-                AxisSeriesViewModel.XAxis.VisibleRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
-                AxisSeriesViewModel.YAxis.VisibleRange.ForceUpdate(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
+                //AxisSeriesViewModel.XAxis.VisibleRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
+                //AxisSeriesViewModel.YAxis.VisibleRange.ForceUpdate(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
                 _radialObservers.Add(ColorMapViewModel.Range.ObserveOn(TaskPoolScheduler.Default).Sample(TimeSpan.FromMilliseconds(50)).Subscribe(e => Render()));
                 Render();
+                CalculateBottomProfileGeometry();
             }
             catch (Exception e)
             {

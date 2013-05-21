@@ -134,6 +134,13 @@ namespace HRC.Plotting
         public virtual bool IsEmpty { get { return double.IsNaN(Minimum) || double.IsNaN(Maximum); } }
         public bool Contains(IRange otherRange) { return Min <= otherRange.Min && Max >= otherRange.Max; }
         public bool Contains(double value) { return Min <= value && Max >= value; }
+        public virtual void Clear()
+        {
+            var oldRange = new Range(this);
+            Minimum = double.NaN;
+            Maximum = double.NaN;
+            OnRangeChanged(oldRange);
+        }
 
         public override string ToString() { return string.Format("Range {{ Min = {0:0.##}, Max = {1:0.##} }}", Min, Max); }
 
