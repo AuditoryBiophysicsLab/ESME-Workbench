@@ -14,14 +14,6 @@ namespace HRC.Plotting
         {
             DataRange = new RangeCollection();
             Label = "Axis";
-#if false
-            //_propertyObserver = new PropertyObserver<DataAxisViewModel>(this)
-            //    .RegisterHandler(d => d.VisibleRange, () => Debug.WriteLine(string.Format("{0} VisibleRange changed, new value: {1}", Label, VisibleRange == null ? "(null)" : VisibleRange.ToString())));
-            //.RegisterHandler(d => d.ActualHeight, () => Debug.WriteLine(string.Format("{0} ActualHeight changed, new value: {1}", Label, ActualHeight)))
-            //.RegisterHandler(d => d.ActualHeight, () => Debug.WriteLine(string.Format("{0} ActualWidth changed, new value: {1}", Label, ActualWidth)));
-            //VisibleRange.RangeChanged += (sender, args) => Debug.WriteLine(string.Format("{0} VisibleRange RangeChanged, new value: {1}", Label, VisibleRange == null ? "(null)" : VisibleRange.ToString()));
-            //DataRange.RangeChanged += (sender, args) => Debug.WriteLine(string.Format("{0} DataRange RangeChanged, new value: {1}", Label, DataRange == null ? "(null)" : DataRange.ToString()));
-#endif
             VisibleRange = new Range();
             DataRange.RangeChanged += (sender, args) => VisibleRange.Update(DataRange);
         }
