@@ -7,7 +7,7 @@ namespace HRC.Plotting
 {
     public abstract class RangeBase : IRange
     {
-        protected RangeBase() { _rangeChangedObservable = Observable.FromEventPattern<NotifyRangeChangedEventArgs>(this, "RangeChanged").Select(e => (IRange)e.Sender); }
+        protected RangeBase() { _rangeChangedObservable = Observable.FromEventPattern<NotifyRangeChangedEventArgs>(h => RangeChanged += h, h => RangeChanged -= h).Select(e => (IRange)e.Sender); }
 
         /// <summary>
         /// Reset the range to the empty state

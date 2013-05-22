@@ -53,7 +53,6 @@ namespace ESME.Views.TransmissionLossViewer
                                        .ObserveOnDispatcher()
                                        .Where(e => e.EventArgs.PropertyName == "VisibleRange")
                                        .Select(e => AxisSeriesViewModel.YAxis.VisibleRange)
-                                       .DistinctUntilChanged()
                                        .Subscribe(visibleRange =>
                                        {
                                            if (_visibleRangeObserver != null)
@@ -61,6 +60,7 @@ namespace ESME.Views.TransmissionLossViewer
                                                _instanceObservers.Remove(_visibleRangeObserver);
                                                _visibleRangeObserver.Dispose();
                                            }
+                                           Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Visible range on Y axis changed to {1}", DateTime.Now, visibleRange == null ? "(null)" : visibleRange.ToString()));
                                            if (visibleRange == null) return;
                                            _visibleRangeObserver = visibleRange.ObserveOnDispatcher().Subscribe(r => CalculateBottomProfileGeometry());
                                            _instanceObservers.Add(_visibleRangeObserver);
@@ -243,6 +243,7 @@ namespace ESME.Views.TransmissionLossViewer
         {
             var profileData = Radial.BottomProfile.Select(bpp => new Point(bpp.Range * 1000, Math.Max(0.0, bpp.Depth))).ToList();
             var yRange = AxisSeriesViewModel.YAxis.VisibleRange == null || AxisSeriesViewModel.YAxis.VisibleRange.IsEmpty ? AxisSeriesViewModel.YAxis.DataRange : (IRange)AxisSeriesViewModel.YAxis.VisibleRange;
+            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Visible range on Y axis is {1}", DateTime.Now, AxisSeriesViewModel.YAxis.VisibleRange == null ? "(null)" : AxisSeriesViewModel.YAxis.VisibleRange.ToString()));
             profileData.Insert(0, new Point(profileData[0].X, yRange.Max));
             profileData.Add(new Point(profileData.Last().X, yRange.Max));
             profileData.Add(new Point(profileData.First().X, profileData.First().Y));

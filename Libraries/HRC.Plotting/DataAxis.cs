@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -107,7 +108,7 @@ namespace HRC.Plotting
                     _axisLabel.LayoutTransform = new RotateTransform(-90);
                     break;
                 default:
-                    throw new NotImplementedException(string.Format("AxisLocation of {0} is not implemented", AxisLocation));
+                    throw new InvalidEnumArgumentException(string.Format("AxisLocation of {0} is not implemented", AxisLocation));
             }
             _axisOptions.AxisLocation = AxisLocation;
         }
@@ -186,11 +187,11 @@ namespace HRC.Plotting
             if (DataRange == null)
             {
                 _axisOptions.DataRange = null;
-                VisibleRange.Clear();
+                _visibleRange.Clear();
                 return;
             }
             if (AxisType == AxisType.Logarithmic && DataRange.Min <= 0) throw new InvalidOperationException("Cannot plot negative or zero values on a log scale");
-            VisibleRange.Update(DataRange.Min, DataRange.Max);
+            _visibleRange.Update(DataRange.Min, DataRange.Max);
         }
         #endregion
 
@@ -289,24 +290,14 @@ namespace HRC.Plotting
         static readonly DependencyPropertyKey VisibleRangePropertyKey = DependencyProperty.RegisterReadOnly("VisibleRange",
                                                                                                             typeof(Range),
                                                                                                             typeof(DataAxis),
-                                                                                                            new FrameworkPropertyMetadata(null,
+                                                                                                            new FrameworkPropertyMetadata(new Range(2, 3),
                                                                                                                                           FrameworkPropertyMetadataOptions.AffectsArrange |
                                                                                                                                           FrameworkPropertyMetadataOptions.AffectsRender |
                                                                                                                                           FrameworkPropertyMetadataOptions.AffectsMeasure |
-                                                                                                                                          FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                                                                                                                                          VisibleRangePropertyChanged));
+                                                                                                                                          FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         public static readonly DependencyProperty VisibleRangeProperty = VisibleRangePropertyKey.DependencyProperty;
-        public Range VisibleRange { get { return (Range)GetValue(VisibleRangeProperty); } protected set { SetValue(VisibleRangePropertyKey, value); } }
-        static void VisibleRangePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).VisibleRangePropertyChanged(); }
-
-        void VisibleRangePropertyChanged()
-        {
-            if (_visibleRangeObserver != null) _visibleRangeObserver.Dispose();
-            _visibleRangeObserver = VisibleRange.ObserveOnDispatcher().Subscribe(e => VisibleRangeChanged());
-            VisibleRangeChanged();
-        }
-        IDisposable _visibleRangeObserver;
+        public Range VisibleRange { get { return (Range)GetValue(VisibleRangeProperty); } }
 
         void VisibleRangeChanged()
         {
@@ -327,38 +318,42 @@ namespace HRC.Plotting
 
         void UpdateVisibleRange()
         {
-            if (VisibleRange.IsEmpty)
+            if (_visibleRange.IsEmpty)
             {
                 ValueToPosition = null;
                 PositionToValue = null;
                 return;
             }
             //if (VisibleRange.Min == 0.9 && VisibleRange.Max == 100) Debugger.Break();
+            SetValue(VisibleRangePropertyKey, _visibleRange);
             if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis: Visible range on axis {1} changed to {2}", DateTime.Now, AxisLabel, VisibleRange));
-            _visibleRange.Update(VisibleRange);
+            _internalVisibleRange.Update(_visibleRange);
+            //ClearValue(VisibleRangePropertyKey);
+            //InvalidateProperty(VisibleRangeProperty);
+            if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis: (after ClearValue) Visible range on axis {1} changed to {2}", DateTime.Now, AxisLabel, VisibleRange));
             if (AxisType == AxisType.Logarithmic)
             {
-                _visibleRange.Min = Math.Log10(_visibleRange.Min);
-                _visibleRange.Max = Math.Log10(_visibleRange.Max);
+                _internalVisibleRange.Min = Math.Log10(_internalVisibleRange.Min);
+                _internalVisibleRange.Max = Math.Log10(_internalVisibleRange.Max);
             }
-            _axisOptions.DataRange = _visibleRange.Expand(0);
-            _axisOptions.VisibleRange = _visibleRange.Expand(0);
+            _axisOptions.DataRange = _internalVisibleRange.Expand(0);
+            _axisOptions.VisibleRange = _internalVisibleRange.Expand(0);
             OnTransformChanged();
         }
 
         void OnTransformChanged()
         {
-            if (_visibleRange == null || _visibleRange.IsEmpty) UpdateVisibleRange();
-            if (_visibleRange == null || _visibleRange.IsEmpty) return;
-            _valueToPositionTransform = CreateAxisTransform(_visibleRange, new Size(ActualWidth, ActualHeight), false, IsInverted, IsLogarithmic);
+            if (_internalVisibleRange == null || _internalVisibleRange.IsEmpty) UpdateVisibleRange();
+            if (_internalVisibleRange == null || _internalVisibleRange.IsEmpty) return;
+            _valueToPositionTransform = CreateAxisTransform(_internalVisibleRange, new Size(ActualWidth, ActualHeight), false, IsInverted, IsLogarithmic);
             _positionToValueTransform = _valueToPositionTransform.Inverse;
             //Debug.WriteLine(string.Format("{0}: Transforms changing. VisibleRange min: {1} max: {2}", AxisLabel, VisibleRange.Min, VisibleRange.Max));
             ValueToPosition = v => _valueToPositionTransform.Transform(new Point(v, 0)).X;
             PositionToValue = p => _positionToValueTransform.Transform(new Point(p, 0)).X;
         }
 
+        readonly Range _internalVisibleRange = new Range();
         readonly Range _visibleRange = new Range();
-
         #endregion
 
         #region dependency property bool ShowDebugMessages
@@ -390,7 +385,13 @@ namespace HRC.Plotting
                 Typeface = new Typeface(TextBlock.GetFontFamily(this), TextBlock.GetFontStyle(this), TextBlock.GetFontWeight(this), TextBlock.GetFontStretch(this))
             };
             _axisLabeler = new ExtendedAxisLabeler();
-            VisibleRange = new Range();
+
+            SetValue(VisibleRangePropertyKey, _visibleRange);
+            _visibleRange.ObserveOnDispatcher().Subscribe(e =>
+            {
+                if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis: Axis \"{1}\": Updated _visbleRange to: {2}", DateTime.Now, AxisLabel, _visibleRange));
+                VisibleRangeChanged();
+            });
 
             var presentationSource = PresentationSource.FromVisual(this);
             if (presentationSource == null || presentationSource.CompositionTarget == null) return;
@@ -553,20 +554,20 @@ namespace HRC.Plotting
         {
             if (Double.IsNaN(availableSize.Width) || Double.IsInfinity(availableSize.Width)) availableSize.Width = SystemParameters.VirtualScreenWidth;
             if (Double.IsNaN(availableSize.Height) || Double.IsInfinity(availableSize.Height)) availableSize.Height = SystemParameters.VirtualScreenHeight;
-            if (_visibleRange == null || _visibleRange.IsEmpty) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
+            if (_internalVisibleRange == null || _internalVisibleRange.IsEmpty) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
             // We need to fake out the layout code re: inversion and logarithmic mode so we NEVER set these two parameters to true
-            _axisOptions.AxisTransform = CreateAxisTransform(_visibleRange, availableSize, true, false, false); 
+            _axisOptions.AxisTransform = CreateAxisTransform(_internalVisibleRange, availableSize, true, false, false); 
             _axisOptions.Screen = new Rect(availableSize);
             _axis = _axisLabeler.Generate(_axisOptions, MajorTicksPerInch / _pixelsPerInch);
             if (_axis == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(availableSize.Width, 22) : new Size(availableSize.Height, 22);
             if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis.MeasureNonEnumerated: Axis \"{1}\": _axis.VisibleRange {2} _axis.Labels.First(): {3} _axis.Labels.Last(): {4}", DateTime.Now, AxisLabel, _axis.VisibleRange, _axis.Labels.First().Value, _axis.Labels.Last().Value));
             var majorTickLabels = _axis.Labels;
-            if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis.MeasureNonEnumerated: Axis \"{1}\": _visibleRange {2} _visibleRange.Contains(_axis.VisibleRange): {3}", DateTime.Now, AxisLabel, _visibleRange, _visibleRange.Contains(_axis.VisibleRange)));
-            if (!_visibleRange.Contains(_axis.VisibleRange))
+            if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis.MeasureNonEnumerated: Axis \"{1}\": _internalVisibleRange {2} _internalVisibleRange.Contains(_axis.VisibleRange): {3}", DateTime.Now, AxisLabel, _internalVisibleRange, _internalVisibleRange.Contains(_axis.VisibleRange)));
+            if (_visibleRange != _axis.VisibleRange)
             {
-                if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis.MeasureNonEnumerated: Axis \"{1}\": Updating VisbleRange. Pre-update: {2}", DateTime.Now, AxisLabel, VisibleRange));
-                VisibleRange.Update(_axis.VisibleRange);
-                if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis.MeasureNonEnumerated: Axis \"{1}\": Updated VisbleRange. Post-update: {2}", DateTime.Now, AxisLabel, VisibleRange));
+                if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis.MeasureNonEnumerated: Axis \"{1}\": Updated VisbleRange. Post-update: {2}", DateTime.Now, AxisLabel, _visibleRange));
+                _visibleRange.Update(_axis.VisibleRange);
+                if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis.MeasureNonEnumerated: Axis \"{1}\": Updated VisbleRange. Post-update: {2}", DateTime.Now, AxisLabel, _visibleRange));
                 OnTransformChanged();
             }
             Children.Clear();
@@ -594,12 +595,12 @@ namespace HRC.Plotting
                         for (var j = majorTickLogValues[i] - 1; j > majorTickLogValues[i + 1]; j--) 
                             AxisTicks.Add(new NewDataAxisTick(Math.Pow(10, j), null, false, IsLogarithmic));
                     // Add minor ticks at the usual places for a log scale (2, 3, 4, 5, 6, 7, 8, 9)
-                    for (var baseValue = Math.Floor(_visibleRange.Min); baseValue < Math.Ceiling(_visibleRange.Max); baseValue++)
+                    for (var baseValue = Math.Floor(_internalVisibleRange.Min); baseValue < Math.Ceiling(_internalVisibleRange.Max); baseValue++)
                     {
                         foreach (var logOffset in LogMinorTicks)
                         {
                             var logValue = baseValue + logOffset;
-                            if (_visibleRange.Min <= logValue && logValue <= _visibleRange.Max) 
+                            if (_internalVisibleRange.Min <= logValue && logValue <= _internalVisibleRange.Max) 
                                 AxisTicks.Add(new NewDataAxisTick(Math.Pow(10, logValue), null, false, IsLogarithmic));
                         }
                     }
@@ -618,7 +619,7 @@ namespace HRC.Plotting
                         for (var j = 1; j < minorTicksPerMajorTick; j++)
                         {
                             var tickValue = t + (stepSize * j);
-                            if (tickValue < _visibleRange.Min || tickValue > _visibleRange.Max) continue;
+                            if (tickValue < _internalVisibleRange.Min || tickValue > _internalVisibleRange.Max) continue;
                             var minorTick = new NewDataAxisTick(tickValue, null, false, IsLogarithmic);
                             AxisTicks.Add(minorTick);
                         }
@@ -667,10 +668,10 @@ namespace HRC.Plotting
 
         Size ArrangeNonEnumerated(Size arrangeSize)
         {
-            if (_visibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(arrangeSize.Width, 22) : new Size(arrangeSize.Height, 22);
-            var axisTransform = CreateAxisTransform(_visibleRange, arrangeSize, true, IsInverted, false);
+            if (_internalVisibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(arrangeSize.Width, 22) : new Size(arrangeSize.Height, 22);
+            var axisTransform = CreateAxisTransform(_internalVisibleRange, arrangeSize, true, IsInverted, false);
             Point axisLabelPosition;
-            var midpoint = _visibleRange.Min + (_visibleRange.Size / 2);
+            var midpoint = _internalVisibleRange.Min + (_internalVisibleRange.Size / 2);
             switch (AxisLocation)
             {
                 case AxisLocation.Top:
@@ -693,7 +694,7 @@ namespace HRC.Plotting
                     throw new ApplicationException("DataAxis: Unknown AxisLocation value.");
             }
             _axisLabel.Arrange(new Rect(axisLabelPosition, _axisLabel.DesiredSize));
-            axisTransform = CreateAxisTransform(_visibleRange, arrangeSize, true, IsInverted, IsLogarithmic);
+            axisTransform = CreateAxisTransform(_internalVisibleRange, arrangeSize, true, IsInverted, IsLogarithmic);
 
             if (AxisTicks != null)
                 foreach (var tick in AxisTicks)
@@ -738,15 +739,15 @@ namespace HRC.Plotting
         protected override void OnRender(DrawingContext dc)
         {
             base.OnRender(dc);
-            if (_visibleRange == null) return;
+            if (_internalVisibleRange == null) return;
             var size = new Size(ActualWidth, ActualHeight);
-            var axisTransform = CreateAxisTransform(_visibleRange, size, true, IsInverted, false);
+            var axisTransform = CreateAxisTransform(_internalVisibleRange, size, true, IsInverted, false);
             var pen = new Pen(Brushes.Black, 1) { StartLineCap = PenLineCap.Square, EndLineCap = PenLineCap.Square };
-            dc.DrawLine(pen, axisTransform.Transform(new Point(_visibleRange.Min, 0)), axisTransform.Transform(new Point(_visibleRange.Max, 0)));
-            axisTransform = CreateAxisTransform(_visibleRange, size, true, IsInverted, IsLogarithmic);
+            dc.DrawLine(pen, axisTransform.Transform(new Point(_internalVisibleRange.Min, 0)), axisTransform.Transform(new Point(_internalVisibleRange.Max, 0)));
+            axisTransform = CreateAxisTransform(_internalVisibleRange, size, true, IsInverted, IsLogarithmic);
             if (AxisTicks != null) foreach (var tick in AxisTicks) dc.DrawLine(pen, axisTransform.Transform(new Point(tick.Value, 0)), axisTransform.Transform(new Point(tick.Value, tick.IsMajorTick ? MajorTickLength : MinorTickLength)));
             // This draws a 50-pixel line in the center of the axis, used to check the centering of the axis label
-            //dc.DrawLine(pen, axisTransform.Transform(new Point(_visibleRange.Min + (_visibleRange.Size / 2), 0)), axisTransform.Transform(new Point(_visibleRange.Min + (_visibleRange.Size / 2), 50)));
+            //dc.DrawLine(pen, axisTransform.Transform(new Point(_internalVisibleRange.Min + (_internalVisibleRange.Size / 2), 0)), axisTransform.Transform(new Point(_internalVisibleRange.Min + (_internalVisibleRange.Size / 2), 50)));
         }
         #endregion
 

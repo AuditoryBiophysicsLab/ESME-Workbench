@@ -15,6 +15,7 @@ namespace HRC.Plotting
             DataRange = new RangeCollection();
             Label = "Axis";
             AxisTicks = new ObservableCollection<NewDataAxisTick>();
+            VisibleRange = new Range(1, 2);
         }
 
         public string Label { get; set; }
