@@ -49,37 +49,101 @@ namespace ESME.Views.TransmissionLossViewer
                 .RegisterHandler(x => x.MouseDataLocation, UpdateStatusProperties);
             _yAxisPropertyObserver = new PropertyObserver<DataAxisViewModel>(AxisSeriesViewModel.YAxis)
                 .RegisterHandler(y => y.MouseDataLocation, UpdateStatusProperties);
-            _propertyObserver = new PropertyObserver<RadialViewModel>(this)
-                .RegisterHandler(p => p.AxisRange, () =>
-                {
-                    if (_axisRangeObserver != null)
-                    {
-                        _instanceObservers.Remove(_axisRangeObserver);
-                        _axisRangeObserver.Dispose();
-                    }
-                    if (AxisRange == null) return;
-                    _axisRangeObserver = AxisRange.ObserveOnDispatcher().Subscribe(r =>
-                    {
-                        if (FullRange == null) FullRange = new Range(AxisRange);
-                        else FullRange.Update(AxisRange);
-                    });
-                    _instanceObservers.Add(_axisRangeObserver);
-                });
-            _instanceObservers.Add(AxisSeriesViewModel.YAxis.VisibleRange
-                                       .ObserveOn(TaskPoolScheduler.Default)
-                                       .Subscribe(e => CalculateBottomProfileGeometry()));
+            _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(AxisSeriesViewModel.YAxis, "PropertyChanged")
+                                       .ObserveOnDispatcher()
+                                       .Where(e => e.EventArgs.PropertyName == "VisibleRange")
+                                       .Select(e => AxisSeriesViewModel.YAxis.VisibleRange)
+                                       .DistinctUntilChanged()
+                                       .Subscribe(visibleRange =>
+                                       {
+                                           if (_visibleRangeObserver != null)
+                                           {
+                                               _instanceObservers.Remove(_visibleRangeObserver);
+                                               _visibleRangeObserver.Dispose();
+                                           }
+                                           if (visibleRange == null) return;
+                                           _visibleRangeObserver = visibleRange.ObserveOnDispatcher().Subscribe(r => CalculateBottomProfileGeometry());
+                                           _instanceObservers.Add(_visibleRangeObserver);
+                                           CalculateBottomProfileGeometry();
+                                       }));
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged")
                                        .ObserveOnDispatcher()
-                                       .Subscribe(e => { if (e.EventArgs.PropertyName == "Radial") RadialChanged(); }));
+                                       .Where(e => e.EventArgs.PropertyName == "AxisRange")
+                                       .Select(e => AxisRange)
+                                       .DistinctUntilChanged()
+                                       .Subscribe(axisRange =>
+                                       {
+                                           if (_axisRangeObserver != null)
+                                           {
+                                               _instanceObservers.Remove(_axisRangeObserver);
+                                               _axisRangeObserver.Dispose();
+                                           }
+                                           if (axisRange == null) return;
+                                           _axisRangeObserver = axisRange.ObserveOnDispatcher().Subscribe(r =>
+                                           {
+                                               if (FullRange == null) FullRange = new Range(axisRange);
+                                               else FullRange.Update(axisRange);
+                                           });
+                                           _instanceObservers.Add(_axisRangeObserver);
+                                       }));
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(AxisSeriesViewModel, "PropertyChanged")
                                        .ObserveOnDispatcher()
+                                       .Where(e => (e.EventArgs.PropertyName == "ActualWidth" || e.EventArgs.PropertyName == "ActualHeight"))
+                                       .Select(e => new { AxisSeriesViewModel.ActualWidth, AxisSeriesViewModel.ActualHeight })
+                                       .DistinctUntilChanged()
                                        .Subscribe(e =>
                                        {
-                                           if (e.EventArgs.PropertyName == "ActualWidth" || e.EventArgs.PropertyName == "ActualHeight")
+                                           WriteableBitmap = null;
+                                           Render();
+                                           CalculateBottomProfileGeometry();
+                                       }));
+            _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged")
+                                       .ObserveOnDispatcher()
+                                       .Where(e => e.EventArgs.PropertyName == "Radial")
+                                       .Subscribe(e =>
+                                       {
+                                           _radialObservers.ForEach(o => o.Dispose());
+                                           _radialObservers.Clear();
+                                           WriteableBitmapVisibility = Visibility.Collapsed;
+                                           WriteableBitmap = null;
+                                           if (Radial == null || !Radial.IsCalculated)
                                            {
-                                               WriteableBitmap = null;
+                                               WriteableBitmapVisibility = Visibility.Collapsed;
+                                               if (Radial == null) WaitToRenderText = "Please wait...";
+                                               else
+                                               {
+                                                   if (!string.IsNullOrEmpty(Radial.Errors))
+                                                   {
+                                                       var sb = new StringBuilder();
+                                                       sb.AppendLine("This radial was not calculated due to the following error(s):");
+                                                       sb.AppendLine(Radial.Errors);
+                                                       WaitToRenderText = sb.ToString();
+                                                   }
+                                                   else WaitToRenderText = "This radial has not yet been calculated";
+                                                   WriteableBitmap = null;
+                                               }
+                                               return;
+                                           }
+                                           try
+                                           {
+                                               _transmissionLossRadial = new TransmissionLossRadial((float)Radial.Bearing, new BellhopOutput(Radial.BasePath + ".shd"));
+                                               _imageSeriesViewModel.Top = Radial.Depths.First();
+                                               _imageSeriesViewModel.Left = Radial.Ranges.First();
+                                               _imageSeriesViewModel.Bottom = Radial.Depths.Last();
+                                               _imageSeriesViewModel.Right = Radial.Ranges.Last();
+                                               StatisticalRange.Update(_transmissionLossRadial.StatMin, _transmissionLossRadial.StatMax);
+                                               ColorMapViewModel.Range.Update(StatisticalRange);
+                                               AxisSeriesViewModel.XAxis.DataRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
+                                               AxisSeriesViewModel.YAxis.DataRange.Update(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
+                                               _radialObservers.Add(ColorMapViewModel.Range.ObserveOn(TaskPoolScheduler.Default).Sample(TimeSpan.FromMilliseconds(50)).Subscribe(r => Render()));
                                                Render();
                                                CalculateBottomProfileGeometry();
+                                           }
+                                           catch (Exception ex)
+                                           {
+                                               WriteableBitmapVisibility = Visibility.Collapsed;
+                                               WaitToRenderText = ex.Message;
+                                               _transmissionLossRadial = null;
                                            }
                                        }));
             _displayQueue
@@ -112,7 +176,7 @@ namespace ESME.Views.TransmissionLossViewer
 
         readonly List<IDisposable> _instanceObservers = new List<IDisposable>();
         readonly List<IDisposable> _radialObservers = new List<IDisposable>();
-        IDisposable _axisRangeObserver;
+        IDisposable _axisRangeObserver, _visibleRangeObserver;
         public RadialView RadialView { get; set; }
         void Render()
         {
@@ -157,7 +221,6 @@ namespace ESME.Views.TransmissionLossViewer
         [UsedImplicitly] PropertyObserver<DataAxisViewModel> _xAxisPropertyObserver;
         [UsedImplicitly] PropertyObserver<DataAxisViewModel> _yAxisPropertyObserver;
         [UsedImplicitly] PropertyObserver<FourAxisSeriesViewModel> _fourAxisSeriesObserver;
-        [UsedImplicitly] PropertyObserver<RadialViewModel> _propertyObserver;
 
         readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
         readonly ImageSeriesViewModel _imageSeriesViewModel = new ImageSeriesViewModel();
@@ -176,61 +239,9 @@ namespace ESME.Views.TransmissionLossViewer
         public Range AnimationTargetRange { get; set; }
         public Range AxisRange { get; set; }
 
-        void RadialChanged()
-        {
-            _radialObservers.ForEach(o => o.Dispose());
-            _radialObservers.Clear();
-            WriteableBitmapVisibility = Visibility.Collapsed;
-            WriteableBitmap = null;
-            if (Radial == null || !Radial.IsCalculated)
-            {
-                WriteableBitmapVisibility = Visibility.Collapsed;
-                if (Radial == null) WaitToRenderText = "Please wait...";
-                else
-                {
-                    if (!string.IsNullOrEmpty(Radial.Errors))
-                    {
-                        var sb = new StringBuilder();
-                        sb.AppendLine("This radial was not calculated due to the following error(s):");
-                        sb.AppendLine(Radial.Errors);
-                        WaitToRenderText = sb.ToString();
-                    }
-                    else WaitToRenderText = "This radial has not yet been calculated";
-                    WriteableBitmap = null;
-                }
-                return;
-            }
-            try
-            {
-                _transmissionLossRadial = new TransmissionLossRadial((float)Radial.Bearing, new BellhopOutput(Radial.BasePath + ".shd"));
-                _imageSeriesViewModel.Top = Radial.Depths.First();
-                _imageSeriesViewModel.Left = Radial.Ranges.First();
-                _imageSeriesViewModel.Bottom = Radial.Depths.Last();
-                _imageSeriesViewModel.Right = Radial.Ranges.Last();
-                StatisticalRange.Update(_transmissionLossRadial.StatMin, _transmissionLossRadial.StatMax);
-                ColorMapViewModel.Range.Update(StatisticalRange);
-                AxisSeriesViewModel.XAxis.DataRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
-                AxisSeriesViewModel.YAxis.DataRange.Update(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
-                _radialObservers.Add(ColorMapViewModel.Range.ObserveOn(TaskPoolScheduler.Default).Sample(TimeSpan.FromMilliseconds(50)).Subscribe(e => Render()));
-                Render();
-                CalculateBottomProfileGeometry();
-            }
-            catch (Exception e)
-            {
-                WriteableBitmapVisibility = Visibility.Collapsed;
-                WaitToRenderText = e.Message;
-                _transmissionLossRadial = null;
-            }
-        }
-
         void CalculateBottomProfileGeometry()
         {
             var profileData = Radial.BottomProfile.Select(bpp => new Point(bpp.Range * 1000, Math.Max(0.0, bpp.Depth))).ToList();
-            //var deepestPoint = (from profile in profileData
-            //                    where !double.IsNaN(profile.Y)
-            //                    orderby profile.Y descending
-            //                    select profile).FirstOrDefault();
-            //Debug.WriteLine(string.Format("CalculateBottomProfileGeometry: Deepest point: {0}m at range {1}m", deepestPoint.Y, deepestPoint.X));
             var yRange = AxisSeriesViewModel.YAxis.VisibleRange == null || AxisSeriesViewModel.YAxis.VisibleRange.IsEmpty ? AxisSeriesViewModel.YAxis.DataRange : (IRange)AxisSeriesViewModel.YAxis.VisibleRange;
             profileData.Insert(0, new Point(profileData[0].X, yRange.Max));
             profileData.Add(new Point(profileData.Last().X, yRange.Max));
@@ -238,7 +249,6 @@ namespace ESME.Views.TransmissionLossViewer
             _bottomProfileViewModel.SeriesData = profileData;
             _bottomProfileViewModel.ItemToPoint = p => (Point)p;
             _bottomProfileViewModel.LineStrokeThickness = 5.0;
-            //_bottomProfileViewModel.LineStroke = Brushes.Black;
             _bottomProfileViewModel.LineFill = Brushes.LightGray;
         }
 

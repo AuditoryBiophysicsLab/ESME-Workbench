@@ -47,7 +47,7 @@ namespace HRC.Plotting
         [Initialize(4.0)] public double MinorTicksPerInch { get; set; }
         public Func<double, double> PositionToValue { get; set; }
         public Func<double, double> ValueToPosition { get; set; }
-        [Initialize] public Range VisibleRange { get; set; }
+        public Range VisibleRange { get; set; }
         public double ActualWidth { get; set; }
         public double ActualHeight { get; set; }
 

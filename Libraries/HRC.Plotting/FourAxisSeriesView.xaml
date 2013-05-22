@@ -63,7 +63,7 @@
                     <app:DataPipeCollection>
                         <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualWidth}" Target="{Binding Path=ActualWidth, Mode=OneWayToSource}" />
                         <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualHeight}" Target="{Binding Path=ActualHeight, Mode=OneWayToSource}" />
-                        <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=VisibleRange}" Target="{Binding Path=VisibleRange, Mode=OneWayToSource}" />
+                        <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=VisibleRange}" Target="{Binding Path=VisibleRange, Mode=OneWay}" />
                     </app:DataPipeCollection>
                 </app:DataPiping.DataPipes>
             </app:DataAxis>
@@ -109,7 +109,7 @@
                     <app:DataPipeCollection>
                         <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualWidth}" Target="{Binding Path=ActualWidth, Mode=OneWayToSource}" />
                         <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualHeight}" Target="{Binding Path=ActualHeight, Mode=OneWayToSource}" />
-                        <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=VisibleRange}" Target="{Binding Path=VisibleRange, Mode=OneWayToSource}" />
+                        <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=VisibleRange}" Target="{Binding Path=VisibleRange, Mode=OneWay}" />
                     </app:DataPipeCollection>
                 </app:DataPiping.DataPipes>
             </app:DataAxis>
@@ -138,8 +138,7 @@
                 <app:DataPipeCollection>
                     <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualWidth}" Target="{Binding Path=ActualWidth, Mode=OneWayToSource}" />
                     <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualHeight}" Target="{Binding Path=ActualHeight, Mode=OneWayToSource}" />
-                    <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=VisibleRange}" Target="{Binding Path=VisibleRange, Mode=TwoWay}" />
-                    <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=VisibleRange}" Target="{Binding Path=VisibleRange, Mode=OneWayToSource}" />
+                    <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=VisibleRange}" Target="{Binding Path=VisibleRange, Mode=OneWay}" />
                 </app:DataPipeCollection>
             </app:DataPiping.DataPipes>
         </app:DataAxis>
@@ -168,7 +167,7 @@
                 <app:DataPipeCollection>
                     <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualWidth}" Target="{Binding Path=ActualWidth, Mode=OneWayToSource}" />
                     <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=ActualHeight}" Target="{Binding Path=ActualHeight, Mode=OneWayToSource}" />
-                    <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=VisibleRange}" Target="{Binding Path=VisibleRange, Mode=OneWayToSource}" />
+                    <app:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type app:DataAxis}}, Path=VisibleRange}" Target="{Binding Path=VisibleRange, Mode=OneWay}" />
                 </app:DataPipeCollection>
             </app:DataPiping.DataPipes>
         </app:DataAxis>
