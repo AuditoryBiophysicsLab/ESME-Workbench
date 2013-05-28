@@ -28,7 +28,7 @@ namespace ESME.Views.TransmissionLossViewer
             {
                 _radialViewModel = value;
                 _radialViewModel.SelectedMode = SelectedMode;
-                _radialViewModel.PropertyChanged += (s, e) => { if (e.PropertyName == "WriteableBitmap" && Window != null) Window.Activate(); };
+                _radialViewModel.PropertyChanged += (s, e) => { if (e.PropertyName == "WriteableBitmap" && Window != null) Window.Dispatcher.InvokeIfRequired(() => Window.Activate()); };
             }
         } 
         #endregion
@@ -50,20 +50,22 @@ namespace ESME.Views.TransmissionLossViewer
         #endregion
 
         #region public int SelectedRadialIndex {get; set;}
-        int _selectedRadialIndex;
+        int _selectedRadialIndex = -1;
 
         [Affects("SelectedBearingGeometry", "SelectedRadial", "TitleString")] public int SelectedRadialIndex
         {
             get { return _selectedRadialIndex; }
             set
             {
+                if (_selectedRadialIndex == value) return;
                 _selectedRadialIndex = value;
+                Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} TransmissionLossViewModel: SelectedRadialIndex is now {1}", DateTime.Now, _selectedRadialIndex));
                 //CurrentRadialView = RadialViews[value];
                // var foo = SelectedMode.TransmissionLossPluginType. some regex here.
                 var tlstring = "";
                 if (SelectedMode.TransmissionLossPluginType.ToLowerInvariant().Contains("bellhop")) tlstring = "Bellhop";
                 if (SelectedMode.TransmissionLossPluginType.ToLowerInvariant().Contains("ramgeo")) tlstring = "RAMGeo";
-                var nameString = Radials == null ? "<no radial selected>" : string.Format("OLD: Radial bearing: {0:000.0} degrees. Calculator: {1}", Radials[_selectedRadialIndex].Bearing,tlstring);
+                var nameString = Radials == null ? "<no radial selected>" : string.Format("Radial bearing: {0:000.0} degrees. Calculator: {1}", Radials[_selectedRadialIndex].Bearing,tlstring);
                 TitleString = nameString;
                 if (RadialViewModel != null)
                 {
@@ -204,7 +206,7 @@ namespace ESME.Views.TransmissionLossViewer
                     }
 #endif
                 }
-                SelectedRadialIndex = 0;
+                //SelectedRadialIndex = 0;
             }
         }
         #endregion

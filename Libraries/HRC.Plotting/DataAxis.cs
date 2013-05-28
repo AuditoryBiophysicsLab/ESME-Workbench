@@ -8,12 +8,15 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
+using System.Windows.Threading;
 using HRC.Plotting.AxisLabeling.Layout;
 using HRC.Plotting.AxisLabeling.Layout.AxisLabelers;
 using HRC.Plotting.Transforms;
 using HRC.ViewModels;
+using HRC.WPF;
 
 namespace HRC.Plotting
 {
@@ -325,12 +328,8 @@ namespace HRC.Plotting
                 return;
             }
             //if (VisibleRange.Min == 0.9 && VisibleRange.Max == 100) Debugger.Break();
-            SetValue(VisibleRangePropertyKey, _visibleRange);
             if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis: Visible range on axis {1} changed to {2}", DateTime.Now, AxisLabel, VisibleRange));
             _internalVisibleRange.Update(_visibleRange);
-            //ClearValue(VisibleRangePropertyKey);
-            //InvalidateProperty(VisibleRangeProperty);
-            if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis: (after ClearValue) Visible range on axis {1} changed to {2}", DateTime.Now, AxisLabel, VisibleRange));
             if (AxisType == AxisType.Logarithmic)
             {
                 _internalVisibleRange.Min = Math.Log10(_internalVisibleRange.Min);
@@ -389,8 +388,9 @@ namespace HRC.Plotting
             SetValue(VisibleRangePropertyKey, _visibleRange);
             _visibleRange.ObserveOnDispatcher().Subscribe(e =>
             {
-                if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis: Axis \"{1}\": Updated _visbleRange to: {2}", DateTime.Now, AxisLabel, _visibleRange));
+                //if (_showDebugMessages) Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} DataAxis: Axis \"{1}\": Updated _visbleRange to: {2}", DateTime.Now, AxisLabel, _visibleRange));
                 VisibleRangeChanged();
+                SetValue(VisibleRangePropertyKey, new Range(_visibleRange));
             });
 
             var presentationSource = PresentationSource.FromVisual(this);

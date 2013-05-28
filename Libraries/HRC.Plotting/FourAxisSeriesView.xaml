@@ -105,7 +105,6 @@
                       MinorTicksPerInch="{Binding MinorTicksPerInch}"
                       PositionToValue="{Binding PositionToValue,
                                                 Mode=OneWayToSource}"
-                      ShowDebugMessages="True"
                       ValueToPosition="{Binding ValueToPosition,
                                                 Mode=OneWayToSource}"
                       Visibility="{Binding Visibility}">

@@ -53,17 +53,11 @@ namespace ESME.Views.TransmissionLossViewer
                                        .ObserveOnDispatcher()
                                        .Where(e => e.EventArgs.PropertyName == "VisibleRange")
                                        .Select(e => AxisSeriesViewModel.YAxis.VisibleRange)
+                                       .Throttle(TimeSpan.FromMilliseconds(100))
                                        .Subscribe(visibleRange =>
                                        {
-                                           if (_visibleRangeObserver != null)
-                                           {
-                                               _instanceObservers.Remove(_visibleRangeObserver);
-                                               _visibleRangeObserver.Dispose();
-                                           }
                                            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Visible range on Y axis changed to {1}", DateTime.Now, visibleRange == null ? "(null)" : visibleRange.ToString()));
                                            if (visibleRange == null) return;
-                                           _visibleRangeObserver = visibleRange.ObserveOnDispatcher().Subscribe(r => CalculateBottomProfileGeometry());
-                                           _instanceObservers.Add(_visibleRangeObserver);
                                            CalculateBottomProfileGeometry();
                                        }));
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged")
@@ -90,12 +84,13 @@ namespace ESME.Views.TransmissionLossViewer
                                        .ObserveOnDispatcher()
                                        .Where(e => (e.EventArgs.PropertyName == "ActualWidth" || e.EventArgs.PropertyName == "ActualHeight"))
                                        .Select(e => new { AxisSeriesViewModel.ActualWidth, AxisSeriesViewModel.ActualHeight })
+                                       .Sample(TimeSpan.FromMilliseconds(100))
                                        .DistinctUntilChanged()
                                        .Subscribe(e =>
                                        {
                                            WriteableBitmap = null;
                                            Render();
-                                           CalculateBottomProfileGeometry();
+                                           //CalculateBottomProfileGeometry();
                                        }));
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged")
                                        .ObserveOnDispatcher()
@@ -176,7 +171,7 @@ namespace ESME.Views.TransmissionLossViewer
 
         readonly List<IDisposable> _instanceObservers = new List<IDisposable>();
         readonly List<IDisposable> _radialObservers = new List<IDisposable>();
-        IDisposable _axisRangeObserver, _visibleRangeObserver;
+        IDisposable _axisRangeObserver;
         public RadialView RadialView { get; set; }
         void Render()
         {
@@ -209,6 +204,7 @@ namespace ESME.Views.TransmissionLossViewer
             var displayQueue = job.Item6;
             //Debug.WriteLine(string.Format("Begin rendering sequence number {0}", sequenceNumber));
             var buffer = tlRadial.RenderToPixelBuffer(v => float.IsInfinity(v) ? colorMap.Colors[0] : colorMap.Lookup(v, range), renderRect.Width, renderRect.Height);
+            //var buffer = tlRadial.RenderToPixelBuffer(v => float.IsInfinity(v) ? Colors.Gray : colorMap.Lookup(v, range), renderRect.Width, renderRect.Height);
             //Debug.WriteLine(string.Format("Done rendering sequence number {0}", sequenceNumber));
             displayQueue.OnNext(Tuple.Create(buffer, renderRect, sequenceNumber));
         },
@@ -243,7 +239,6 @@ namespace ESME.Views.TransmissionLossViewer
         {
             var profileData = Radial.BottomProfile.Select(bpp => new Point(bpp.Range * 1000, Math.Max(0.0, bpp.Depth))).ToList();
             var yRange = AxisSeriesViewModel.YAxis.VisibleRange == null || AxisSeriesViewModel.YAxis.VisibleRange.IsEmpty ? AxisSeriesViewModel.YAxis.DataRange : (IRange)AxisSeriesViewModel.YAxis.VisibleRange;
-            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Visible range on Y axis is {1}", DateTime.Now, AxisSeriesViewModel.YAxis.VisibleRange == null ? "(null)" : AxisSeriesViewModel.YAxis.VisibleRange.ToString()));
             profileData.Insert(0, new Point(profileData[0].X, yRange.Max));
             profileData.Add(new Point(profileData.Last().X, yRange.Max));
             profileData.Add(new Point(profileData.First().X, profileData.First().Y));
@@ -375,7 +370,7 @@ namespace ESME.Views.TransmissionLossViewer
                 FullRange = new Range(0, 200),
                 StatisticalRange = new Range(75, 125),
                 AnimationTargetRange = new Range(50, 100),
-                AnimationTime = TimeSpan.FromSeconds(0),
+                AnimationTime = TimeSpan.FromMilliseconds(200),
             };
             DesignTimeData.AxisSeriesViewModel.BottomAxis.DataRange = axisRanges;
             DesignTimeData.AxisSeriesViewModel.LeftAxis.DataRange = axisRanges;
@@ -405,7 +400,6 @@ namespace ESME.Views.TransmissionLossViewer
         {
             AnimationTime = TimeSpan.FromMilliseconds(200);
             AnimationTargetRange.ForceUpdate(ColorMapViewModel.Range == FullRange ? StatisticalRange : FullRange);
-            AnimationTime = TimeSpan.Zero;
         }
         #endregion
         #region IDisposable implementation

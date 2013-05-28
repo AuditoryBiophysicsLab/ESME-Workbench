@@ -56,6 +56,8 @@ namespace ESME.Views.Controls
             var range = max - min;
             if (value >= max) return _firstColor;
             if (value <= min) return _lastColor;
+            //if (value >= max) return System.Windows.Media.Colors.Black;
+            //if (value <= min) return System.Windows.Media.Colors.White;
 
             if (currentRange.Size > 0)
             {

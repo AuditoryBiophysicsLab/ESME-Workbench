@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -280,8 +281,21 @@ namespace HRC.Plotting
 
         protected virtual void OnSourceChanged(DependencyPropertyChangedEventArgs e)
         {
+            if (ShowDebugMessages && e.NewValue is IRange) Debug.WriteLine("{0:HH:mm:ss.fff} SourceChanged: Range changed from {1} to {2}", DateTime.Now, (IRange)e.OldValue, (IRange)e.NewValue);
             Target = e.NewValue;
         }
+        #endregion
+
+        #region ShowDebugMessages (DependencyProperty)
+
+        public bool ShowDebugMessages
+        {
+            get { return (bool)GetValue(ShowDebugMessagesProperty); }
+            set { SetValue(ShowDebugMessagesProperty, value); }
+        }
+        public static readonly DependencyProperty ShowDebugMessagesProperty =
+            DependencyProperty.Register("ShowDebugMessages", typeof(bool), typeof(DataPipe),
+            new FrameworkPropertyMetadata(false));
 
         #endregion
 
