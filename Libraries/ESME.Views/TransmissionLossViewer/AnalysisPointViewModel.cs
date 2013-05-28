@@ -1,5 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Linq;
 using ESME.Scenarios;
 using HRC.ViewModels;
 using HRC.WPF;
@@ -8,6 +10,10 @@ namespace ESME.Views.TransmissionLossViewer
 {
     public class AnalysisPointViewModel : ViewModelBase
     {
+        public AnalysisPointViewModel()
+        {
+        }
+
         public AnalysisPoint AnalysisPoint { get; private set; }
         public TransmissionLossViewModel TransmissionLossViewModel { get; set; }
 
@@ -21,7 +27,17 @@ namespace ESME.Views.TransmissionLossViewer
                     CloseDialog(null);
                 }
             };
-            TransmissionLossViewModel = new TransmissionLossViewModel { TransmissionLoss = analysisPoint.TransmissionLosses.FirstOrDefault() };
+            TransmissionLossViewModel = new TransmissionLossViewModel();
+            Observable.FromEventPattern<PropertyChangedEventArgs>(TransmissionLossViewModel, "PropertyChanged")
+                .Where(e => e.EventArgs.PropertyName == "TransmissionLoss")
+                .Select(e => TransmissionLossViewModel.TransmissionLoss)
+                .DistinctUntilChanged()
+                .ObserveOnDispatcher()
+                .Subscribe(transmissionLoss =>
+                {
+                    
+                });
+            TransmissionLossViewModel.TransmissionLoss = analysisPoint.TransmissionLosses.FirstOrDefault();
             _oldTL = TransmissionLossViewModel.TransmissionLoss;
             if (_oldTL != null)
             {
@@ -46,7 +62,10 @@ namespace ESME.Views.TransmissionLossViewer
         void TransmissionLossChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "IsDeleted" && AnalysisPoint.TransmissionLosses.Count > 1)
-                TransmissionLossViewModel.TransmissionLoss = AnalysisPoint.TransmissionLosses[_oldIndex % (AnalysisPoint.TransmissionLosses.Count-1)];
+            {
+                TransmissionLossViewModel.TransmissionLoss = AnalysisPoint.TransmissionLosses[_oldIndex % (AnalysisPoint.TransmissionLosses.Count - 1)];
+            }
+            TransmissionLossViewModel.SelectedRadialIndex = 0;
         }
         #region CloseCommand
         public SimpleCommand<object, EventToCommandArgs> CloseCommand { get { return _close ?? (_close = new SimpleCommand<object, EventToCommandArgs>(o => CloseDialog(null))); } }

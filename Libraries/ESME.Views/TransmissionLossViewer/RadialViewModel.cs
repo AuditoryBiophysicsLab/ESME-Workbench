@@ -223,7 +223,7 @@ namespace ESME.Views.TransmissionLossViewer
         readonly LineSeriesViewModel _bottomProfileViewModel = new LineSeriesViewModel();
         TransmissionLossRadial _transmissionLossRadial;
 
-        public string WaitToRenderText { get; set; }
+        [Initialize("Please wait...")]public string WaitToRenderText { get; set; }
         [Initialize] public FourAxisSeriesViewModel AxisSeriesViewModel { get; set; }
         public WriteableBitmap WriteableBitmap { get; set; }
         [Initialize] public ColorMapViewModel ColorMapViewModel { get; set; }

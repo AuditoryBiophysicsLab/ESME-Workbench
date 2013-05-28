@@ -468,13 +468,12 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             try
             {
-            var transmissionLossViewModel = new TransmissionLossViewModel {TransmissionLoss = transmissionLoss,};
-            var window = _visualizer.ShowWindow("TransmissionLossWindowView", transmissionLossViewModel);
-            _openPopups.Add(window);
-            transmissionLossViewModel.Window = window;
-            transmissionLossViewModel.SaveFileService = _saveFile;
-            transmissionLossViewModel.SelectedRadialIndex = 0;
-            transmissionLossViewModel.RadialViewModel.WaitToRenderText = "Please wait...";
+                var transmissionLossViewModel = new TransmissionLossViewModel { TransmissionLoss = transmissionLoss, };
+                var window = _visualizer.ShowWindow("TransmissionLossWindowView", transmissionLossViewModel);
+                _openPopups.Add(window);
+                transmissionLossViewModel.Window = window;
+                transmissionLossViewModel.SaveFileService = _saveFile;
+                transmissionLossViewModel.SelectedRadialIndex = 0;
             }
             catch (InvalidOperationException ex)
             {
@@ -493,7 +492,6 @@ namespace ESMEWorkbench.ViewModels.Main
                 analysisPointViewModel.TransmissionLossViewModel.Window = window;
                 analysisPointViewModel.TransmissionLossViewModel.SaveFileService = _saveFile;
                 analysisPointViewModel.TransmissionLossViewModel.SelectedRadialIndex = 0;
-                analysisPointViewModel.TransmissionLossViewModel.RadialViewModel.WaitToRenderText = "Please wait...";
             }
             catch (InvalidOperationException ex)
             {
