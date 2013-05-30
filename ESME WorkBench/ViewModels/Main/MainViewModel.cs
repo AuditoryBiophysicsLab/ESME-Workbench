@@ -473,7 +473,6 @@ namespace ESMEWorkbench.ViewModels.Main
                 _openPopups.Add(window);
                 transmissionLossViewModel.Window = window;
                 transmissionLossViewModel.SaveFileService = _saveFile;
-                transmissionLossViewModel.SelectedRadialIndex = 0;
             }
             catch (InvalidOperationException ex)
             {
@@ -491,7 +490,6 @@ namespace ESMEWorkbench.ViewModels.Main
                 _openPopups.Add(window);
                 analysisPointViewModel.TransmissionLossViewModel.Window = window;
                 analysisPointViewModel.TransmissionLossViewModel.SaveFileService = _saveFile;
-                analysisPointViewModel.TransmissionLossViewModel.SelectedRadialIndex = 0;
             }
             catch (InvalidOperationException ex)
             {

@@ -21,9 +21,7 @@
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <Window.InputBindings>
-        <KeyBinding Key="W"
-                    Command="{Binding CloseCommand}"
-                    Modifiers="Control" />
+        <KeyBinding Key="W" Command="{Binding CloseCommand}" Modifiers="Control" />
     </Window.InputBindings>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
@@ -34,28 +32,18 @@
         <DockPanel DockPanel.Dock="Bottom">
             <Controls:TLStatusBar DataContext="{Binding TransmissionLossViewModel.RadialViewModel}" DockPanel.Dock="Bottom" />
         </DockPanel>
-        <ToolBarTray Height="22"
-                     DockPanel.Dock="Top"
-                     IsLocked="True">
+        <ToolBarTray Height="22" DockPanel.Dock="Top" IsLocked="True">
             <ToolBar Band="0" BandIndex="0">
-                <Button Command="{Binding TransmissionLossViewModel.SaveAsCSVCommand}"
-                        ToolBar.OverflowMode="Never"
-                        ToolTip="Save to CSV">
+                <Button Command="{Binding TransmissionLossViewModel.SaveAsCSVCommand}" ToolBar.OverflowMode="Never" ToolTip="Save to CSV">
                     <Image Source="..\Images\CSV_16.png" />
                 </Button>
-                <Button Command="{Binding TransmissionLossViewModel.SaveAsImageCommand}"
-                        ToolBar.OverflowMode="AsNeeded"
-                        ToolTip="Save to Image">
+                <Button Command="{Binding TransmissionLossViewModel.SaveAsImageCommand}" ToolBar.OverflowMode="AsNeeded" ToolTip="Save to Image">
                     <Image Source="..\Images\PNG_16.png" />
                 </Button>
-                <Button Command="{Binding TransmissionLossViewModel.CopyCSVToClipboardCommand}"
-                        ToolBar.OverflowMode="Never"
-                        ToolTip="Copy text to clipboard">
+                <Button Command="{Binding TransmissionLossViewModel.CopyCSVToClipboardCommand}" ToolBar.OverflowMode="Never" ToolTip="Copy text to clipboard">
                     <Image Source="..\Images\clipboard_text_16.png" />
                 </Button>
-                <Button Command="{Binding TransmissionLossViewModel.CopyImageToClipboardCommand}"
-                        ToolBar.OverflowMode="AsNeeded"
-                        ToolTip="Copy image to clipboard">
+                <Button Command="{Binding TransmissionLossViewModel.CopyImageToClipboardCommand}" ToolBar.OverflowMode="AsNeeded" ToolTip="Copy image to clipboard">
                     <Image Source="..\Images\clipboard_add_16.png" />
                 </Button>
             </ToolBar>
@@ -63,7 +51,7 @@
         <ComboBox DisplayMemberPath="Modes[0]"
                   DockPanel.Dock="Bottom"
                   ItemsSource="{Binding AnalysisPoint.TransmissionLosses}"
-                  SelectedItem="{Binding TransmissionLossViewModel.TransmissionLoss}"
+                  SelectedItem="{Binding TransmissionLoss}"
                   ToolTip="{Binding TransmissionLossListToolTip}" />
         <TransmissionLossViewer:TransmissionLossView DataContext="{Binding TransmissionLossViewModel}" DockPanel.Dock="Top" />
     </DockPanel>

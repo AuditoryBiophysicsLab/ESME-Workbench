@@ -29,7 +29,7 @@ namespace ESME.Views.TransmissionLossViewer
                 .Select(e => SelectedRadialIndex)
                 .DistinctUntilChanged()
                 .Where(selectedRadialIndex => selectedRadialIndex >= 0)
-                .Throttle(TimeSpan.FromMilliseconds(50))
+                .Throttle(TimeSpan.FromMilliseconds(200))
                 .ObserveOnDispatcher()
                 .Subscribe(selectedRadialIndex =>
                 {
