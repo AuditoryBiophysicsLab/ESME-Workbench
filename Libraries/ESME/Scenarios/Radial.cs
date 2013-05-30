@@ -145,9 +145,13 @@ namespace ESME.Scenarios
                 var deleteFailed = false;
                 try
                 {
-                    File.Delete(fileName);
+                    if (File.Exists(fileName)) File.Delete(fileName);
                 }
                 catch (IOException)
+                {
+                    deleteFailed = true;
+                }
+                catch (UnauthorizedAccessException)
                 {
                     deleteFailed = true;
                 }
