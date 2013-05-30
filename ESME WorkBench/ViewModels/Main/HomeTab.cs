@@ -37,7 +37,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [Initialize] public LayerTreeViewModel LayerTreeViewModel { get; set; }
         public MapViewModel MapViewModel { get; set; }
 
-        [Affects("IsScenarioLoaded", "CanPlaceAnalysisPoint", "IsRunSimulationCommandEnabled", "MainWindowTitle")] 
+        [Affects("IsScenarioLoaded", "CanPlaceAnalysisPoint", "IsRunSimulationCommandEnabled", "MainWindowTitle", "IsSaveScenarioCommandEnabled")] 
         public Scenario Scenario
         {
             get { return _scenario; }
@@ -144,6 +144,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 }
                 CanPlaceAnalysisPointTooltip = "After clicking on this button, click within the simulation boundaries on the map to place a new analysis point";
                 OnPropertyChanged("IsRunSimulationCommandEnabled");
+                OnPropertyChanged("IsSaveScenarioCommandEnabled");
                 return true;
             }
         }
@@ -208,6 +209,16 @@ namespace ESMEWorkbench.ViewModels.Main
         }
         #endregion
 
+        #region SaveScenarioCommand
+        public SimpleCommand<object, object> SaveScenarioCommand { get { return _save ?? (_save = new SimpleCommand<object, object>(o =>
+        {
+            Database.SaveChanges();
+            OnPropertyChanged("IsSaveScenarioCommandEnabled");
+        })); } }
+        SimpleCommand<object, object> _save;
+        public bool IsSaveScenarioCommandEnabled { get { return (!IsTransmissionLossBusy) && Database != null && Database.Context != null && Database.Context.IsModified; } }
+        #endregion
+
         #region Handlers for Scenario-related MediatorMessages
         [MediatorMessageSink(MediatorMessage.LoadScenario), UsedImplicitly]
         void LoadScenario(Scenario scenario) { Scenario = scenario; }
@@ -262,6 +273,7 @@ namespace ESMEWorkbench.ViewModels.Main
             //await TaskEx.Delay(50);
             analysisPoint.Delete();
             OnPropertyChanged("IsRunSimulationCommandEnabled");
+            OnPropertyChanged("IsSaveScenarioCommandEnabled");
         }
 
         [MediatorMessageSink(MediatorMessage.DeleteAllAnalysisPoints), UsedImplicitly]
@@ -345,6 +357,7 @@ namespace ESMEWorkbench.ViewModels.Main
             scenario.Platforms.Add(platform);
             platform.UpdateMapLayers();
             OnPropertyChanged("CanPlaceAnalysisPoint");
+            OnPropertyChanged("IsSaveScenarioCommandEnabled");
         }
 
         static void AddPlatform(Scenario scenario, Platform platform)
@@ -369,6 +382,7 @@ namespace ESMEWorkbench.ViewModels.Main
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the platform \"{0}\"?", platform.PlatformName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             platform.Delete();
             OnPropertyChanged("CanPlaceAnalysisPoint");
+            OnPropertyChanged("IsSaveScenarioCommandEnabled");
         }
 
         [MediatorMessageSink(MediatorMessage.PlatformProperties), UsedImplicitly]
@@ -389,6 +403,7 @@ namespace ESMEWorkbench.ViewModels.Main
             //if (!result.HasValue || !result.Value) return;
             ((LayerControl)platform.LayerControl).Expand();
             AddSource(platform, "New Source", true);
+            OnPropertyChanged("IsSaveScenarioCommandEnabled");
         }
 
         static Source AddSource(Platform platform, string name, bool isNew)
@@ -420,6 +435,7 @@ namespace ESMEWorkbench.ViewModels.Main
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the source \"{0}\"?", source.SourceName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             source.Delete();
             OnPropertyChanged("CanPlaceAnalysisPoint");
+            OnPropertyChanged("IsSaveScenarioCommandEnabled");
         }
 
         [MediatorMessageSink(MediatorMessage.SourceProperties), UsedImplicitly]
@@ -441,6 +457,7 @@ namespace ESMEWorkbench.ViewModels.Main
             ((LayerControl)source.LayerControl).Expand();
             AddMode(source, "New Mode", true);
             OnPropertyChanged("CanPlaceAnalysisPoint");
+            OnPropertyChanged("IsSaveScenarioCommandEnabled");
         }
 
         void AddMode(Source source, string name, bool isNew, float frequency = 1000f, float depth = 0f, float maxPropagationRadius = 25000f)
@@ -486,6 +503,7 @@ namespace ESMEWorkbench.ViewModels.Main
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             mode.Delete();
             OnPropertyChanged("CanPlaceAnalysisPoint");
+            OnPropertyChanged("IsSaveScenarioCommandEnabled");
         }
 
         [MediatorMessageSink(MediatorMessage.RecalculateMode), UsedImplicitly]
@@ -544,6 +562,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 _messageBox.ShowError(e.Message);
             }
             OnPropertyChanged("IsRunSimulationCommandEnabled");
+            OnPropertyChanged("IsSaveScenarioCommandEnabled");
         }
 
         [MediatorMessageSink(MediatorMessage.DeleteAllSpecies), UsedImplicitly]
@@ -555,6 +574,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 species.Delete();
                 OnPropertyChanged("IsRunSimulationCommandEnabled");
             }
+            OnPropertyChanged("IsSaveScenarioCommandEnabled");
         }
 
         [MediatorMessageSink(MediatorMessage.RepopulateAllSpecies), UsedImplicitly]
@@ -570,12 +590,14 @@ namespace ESMEWorkbench.ViewModels.Main
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the species \"{0}\"?", species.LatinName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             species.Delete();
             OnPropertyChanged("IsRunSimulationCommandEnabled");
+            OnPropertyChanged("IsSaveScenarioCommandEnabled");
         }
 
         [MediatorMessageSink(MediatorMessage.RepopulateSpecies), UsedImplicitly]
         void RepopulateSpecies(ScenarioSpecies species)
         {
             RepopulateSpeciesAsync(species);
+            OnPropertyChanged("IsSaveScenarioCommandEnabled");
         }
 
         static async Task RepopulateSpeciesAsync(ScenarioSpecies species)
@@ -635,6 +657,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                            perimeter.UpdateMapLayers();
                                            perimeter.LayerSettings.IsChecked = true;
                                        });
+                OnPropertyChanged("IsSaveScenarioCommandEnabled");
             }
             catch (Exception e) { _messageBox.ShowError(e.Message); }
         }
@@ -643,6 +666,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void DeletePerimeter(Perimeter perimeter)
         {
             perimeter.Delete();
+            OnPropertyChanged("IsSaveScenarioCommandEnabled");
         }
 
         [MediatorMessageSink(MediatorMessage.EditPerimeter), UsedImplicitly]
@@ -672,6 +696,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                            perimeter.UpdateMapLayers();
                                            foreach (var platform in Scenario.Platforms.Where(platform => (platform.Perimeter!=null && platform.Perimeter.Guid == perimeter.Guid))) platform.UpdateMapLayers();
                                        });
+                OnPropertyChanged("IsSaveScenarioCommandEnabled");
             }
             catch (Exception e) { _messageBox.ShowError(e.Message); }
         }

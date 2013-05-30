@@ -141,7 +141,10 @@
             </r:Ribbon.ApplicationMenu>
             <r:RibbonTab Header="Home" KeyTip="H">
                 <r:RibbonGroup Header="Map">
-                    <r:RibbonButton Command="{Binding ZoomToWorldMapCommand}" Label="World Map" LargeImageSource="..\Images\LargeIcons\globe-icon.png" SmallImageSource="..\Images\SmallIcons\globe-icon.png" />
+                    <r:RibbonButton Command="{Binding ZoomToWorldMapCommand}"
+                                    Label="World Map"
+                                    LargeImageSource="..\Images\LargeIcons\globe-icon.png"
+                                    SmallImageSource="..\Images\SmallIcons\globe-icon.png" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Scenario">
                     <ListView Width="150"
@@ -160,8 +163,8 @@
                     <r:RibbonButton Command="{Binding CreateScenarioCommand}"
                                     Label="Create"
                                     SmallImageSource="..\Images\SmallIcons\application_form_add.png"
-                                    ToolTipDescription="This feature is not yet implemented"
-                                    ToolTipTitle="Create a new scenario" />
+                                    ToolTipDescription=""
+                                    ToolTipTitle="Create a new Scenario" />
                     <!--
                         <r:RibbonButton Command="{Binding Scenario.ViewScenarioPropertiesCommand}"
                         IsEnabled="{Binding IsScenarioLoaded}"
@@ -184,14 +187,20 @@
                                     IsEnabled="{Binding IsScenarioLoaded}"
                                     Label="Delete"
                                     SmallImageSource="..\Images\SmallIcons\application_form_delete.png"
-                                    ToolTipDescription="Not yet implemented"
+                                    ToolTipDescription=""
                                     ToolTipTitle="Delete the currently selected scenario" />
                     <r:RibbonButton Command="{Binding Scenario.Location.ZoomToLocationCommand}"
                                     IsEnabled="{Binding IsScenarioLoaded}"
                                     Label="Zoom"
                                     SmallImageSource="..\Images\SmallIcons\application_form_magnify.png"
-                                    ToolTipDescription="Not yet implemented"
+                                    ToolTipDescription=""
                                     ToolTipTitle="Resets the map position to the current scenario" />
+                    <r:RibbonButton Command="{Binding SaveScenarioCommand}"
+                                    IsEnabled="{Binding IsSaveScenarioCommandEnabled}"
+                                    Label="Save"
+                                    SmallImageSource="..\Images\SmallIcons\save-icon.png"
+                                    ToolTipDescription=""
+                                    ToolTipTitle="Save the current Scenario" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Acoustics">
                     <r:RibbonToggleButton IsChecked="{Binding IsInAnalysisPointMode}"
@@ -234,7 +243,9 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <LocalControls:LayerTreeView Grid.Row="0" Margin="5 5 0 0" DataContext="{Binding}" />
+                <LocalControls:LayerTreeView Grid.Row="0"
+                                             Margin="5 5 0 0"
+                                             DataContext="{Binding}" />
                 <GridSplitter Grid.Row="1"
                               Height="2"
                               Margin="0 5 -5 5"
@@ -243,7 +254,9 @@
                               Background="Black"
                               ResizeBehavior="BasedOnAlignment"
                               ResizeDirection="Rows" />
-                <LocalControls:LocationsTreeView Grid.Row="2" Margin="5 0 0 5" DataContext="{Binding}" />
+                <LocalControls:LocationsTreeView Grid.Row="2"
+                                                 Margin="5 0 0 5"
+                                                 DataContext="{Binding}" />
             </Grid>
             <GridSplitter Grid.Column="1"
                           Width="2"
@@ -253,7 +266,9 @@
                           Background="Black"
                           ResizeBehavior="BasedOnAlignment"
                           ResizeDirection="Columns" />
-            <LocalControls:MapView x:Name="MapView" Grid.Column="2" DataContext="{Binding MapViewModel}" />
+            <LocalControls:MapView x:Name="MapView"
+                                   Grid.Column="2"
+                                   DataContext="{Binding MapViewModel}" />
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="Drop">
                     <ia:CallMethodAction MethodName="FilesDropped" TargetObject="{Binding}" />
