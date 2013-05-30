@@ -468,7 +468,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             try
             {
-                var transmissionLossViewModel = new TransmissionLossViewModel { TransmissionLoss = transmissionLoss, };
+                var transmissionLossViewModel = new TransmissionLossViewModel { TransmissionLoss = transmissionLoss };
                 var window = _visualizer.ShowWindow("TransmissionLossWindowView", transmissionLossViewModel);
                 _openPopups.Add(window);
                 transmissionLossViewModel.Window = window;

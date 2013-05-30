@@ -152,14 +152,14 @@ namespace ESME.Views.TransmissionLossViewer
         [Initialize(-1)] 
         public int SelectedRadialIndex { get; set; }
 
-        public List<Radial> Radials { get; set; }
+        public Window Window { get; set; }
 
+        public List<Radial> Radials { get; set; }
         public int RadialCount { get; private set; }
         public double MinRadialBearing { get; private set; }
         public double MaxRadialBearing { get; private set; }
         public double RadialBearingChange { get; private set; }
         public double SelectedRadialBearing { get; set; }
-        public Window Window { get; set; }
         public Mode SelectedMode { get; set; }
         public string SelectedBearingGeometry { get; set; }
         public RadialViewModel RadialViewModel { get; set; }

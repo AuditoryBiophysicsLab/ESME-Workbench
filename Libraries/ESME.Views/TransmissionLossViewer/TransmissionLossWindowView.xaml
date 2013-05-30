@@ -16,6 +16,7 @@
                          Path=TLHeight,
                          Mode=TwoWay}"
         d:DataContext="{d:DesignInstance TransmissionLossViewer:TransmissionLossViewModel}"
+        Grid.IsSharedSizeScope="True"
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <i:Interaction.Triggers>
@@ -24,36 +25,24 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Window.InputBindings>
-        <KeyBinding Key="W"
-                    Command="{Binding CloseCommand}"
-                    Modifiers="Control" />
+        <KeyBinding Key="W" Command="{Binding CloseCommand}" Modifiers="Control" />
     </Window.InputBindings>
     <DockPanel>
         <DockPanel DockPanel.Dock="Bottom">
             <Controls:TLStatusBar DataContext="{Binding RadialViewModel}" DockPanel.Dock="Bottom" />
         </DockPanel>
-        <ToolBarTray Height="22"
-                     DockPanel.Dock="Top"
-                     IsLocked="True">
+        <ToolBarTray Height="22" DockPanel.Dock="Top" IsLocked="True">
             <ToolBar Band="0" BandIndex="0">
-                <Button Command="{Binding SaveAsCSVCommand}"
-                        ToolBar.OverflowMode="Never"
-                        ToolTip="Save to CSV">
+                <Button Command="{Binding SaveAsCSVCommand}" ToolBar.OverflowMode="Never" ToolTip="Save to CSV">
                     <Image Source="..\Images\CSV_16.png" />
                 </Button>
-                <Button Command="{Binding SaveAsImageCommand}"
-                        ToolBar.OverflowMode="AsNeeded"
-                        ToolTip="Save to Image">
+                <Button Command="{Binding SaveAsImageCommand}" ToolBar.OverflowMode="AsNeeded" ToolTip="Save to Image">
                     <Image Source="..\Images\PNG_16.png" />
                 </Button>
-                <Button Command="{Binding CopyCSVToClipboardCommand}"
-                        ToolBar.OverflowMode="AsNeeded"
-                        ToolTip="Copy text to clipboard">
+                <Button Command="{Binding CopyCSVToClipboardCommand}" ToolBar.OverflowMode="AsNeeded" ToolTip="Copy text to clipboard">
                     <Image Source="..\Images\clipboard_text_16.png" />
                 </Button>
-                <Button Command="{Binding CopyImageToClipboardCommand}"
-                        ToolBar.OverflowMode="Never"
-                        ToolTip="Copy image to clipboard">
+                <Button Command="{Binding CopyImageToClipboardCommand}" ToolBar.OverflowMode="Never" ToolTip="Copy image to clipboard">
                     <Image Source="..\Images\clipboard_add_16.png" />
                 </Button>
             </ToolBar>
