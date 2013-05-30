@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -8,15 +8,13 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
-using System.Windows.Threading;
 using HRC.Plotting.AxisLabeling.Layout;
 using HRC.Plotting.AxisLabeling.Layout.AxisLabelers;
 using HRC.Plotting.Transforms;
+using HRC.Utility;
 using HRC.ViewModels;
-using HRC.WPF;
 
 namespace HRC.Plotting
 {
@@ -117,14 +115,14 @@ namespace HRC.Plotting
         }
         #endregion
 
-        #region dependency property ObservableCollection<AxisTick> AxisTicks
+        #region dependency property ObservableList<DataAxisTick> AxisTicks
 
         public static DependencyProperty AxisTicksProperty = DependencyProperty.Register("AxisTicks",
-                                                                                          typeof(ObservableCollection<NewDataAxisTick>),
+                                                                                          typeof(ObservableList<DataAxisTick>),
                                                                                           typeof(DataAxis),
                                                                                           new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, AxisTicksPropertyChanged));
 
-        public ObservableCollection<NewDataAxisTick> AxisTicks { get { return (ObservableCollection<NewDataAxisTick>)GetValue(AxisTicksProperty); } set { SetValue(AxisTicksProperty, value); } }
+        public ObservableList<DataAxisTick> AxisTicks { get { return (ObservableList<DataAxisTick>)GetValue(AxisTicksProperty); } set { SetValue(AxisTicksProperty, value); } }
         static void AxisTicksPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).AxisTicksPropertyChanged(); }
         [UsedImplicitly] CollectionObserver _axisTicksObserver;
         void AxisTicksPropertyChanged()
@@ -369,13 +367,44 @@ namespace HRC.Plotting
         bool _showDebugMessages;
         #endregion
 
+        #region dependency property ObservableList<DataAxisTick> AxisMarkers
+
+        public static DependencyProperty AxisMarkersProperty = DependencyProperty.Register("AxisMarkers",
+                                                                                           typeof(ObservableList<DataAxisTick>),
+                                                                                           typeof(DataAxis),
+                                                                                           new FrameworkPropertyMetadata(null,
+                                                                                                                         FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                                                                                                                         AxisMarkersPropertyChanged));
+
+        public ObservableList<DataAxisTick> AxisMarkers { get { return (ObservableList<DataAxisTick>)GetValue(AxisMarkersProperty); } set { SetValue(AxisMarkersProperty, value); } }
+
+        static void AxisMarkersPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).AxisMarkersPropertyChanged(); }
+        [UsedImplicitly] CollectionObserver _markersObserver;
+        void AxisMarkersPropertyChanged()
+        {
+            if (AxisType == AxisType.Logarithmic) throw new InvalidOperationException("Cannot set AxisTicks on a Logarithmic axis");
+            if (_markersObserver != null)
+            {
+                _markersObserver.UnregisterHandler(AxisMarkersCollectionChanged);
+                _markersObserver = null;
+            }
+            if (AxisTicks == null) return;
+            _markersObserver = new CollectionObserver(AxisMarkers);
+            _markersObserver.RegisterHandler(AxisMarkersCollectionChanged);
+
+        }
+
+        void AxisMarkersCollectionChanged(object sender, NotifyCollectionChangedEventArgs args) { InvalidateMeasure(); }
+        #endregion
+
+
         #endregion
 
         public DataAxis()
         {
             SnapsToDevicePixels = true;
             UseLayoutRounding = true;
-            AxisTicks = new ObservableCollection<NewDataAxisTick>();
+            AxisTicks = new ObservableList<DataAxisTick>();
             SizeChanged += (s, e) => OnSizeChanged();
             _axisOptions = new AxisLabelerOptions
             {
@@ -575,12 +604,17 @@ namespace HRC.Plotting
             foreach (var label in majorTickLabels)
             {
                 // For logarithmic axes make sure we are only using integral label values
-                if (IsLogarithmic && (Math.Floor(label.Value) != label.Value)) continue;
+                if (IsLogarithmic && (Math.Abs(Math.Floor(label.Value) - label.Value) > double.Epsilon)) continue;
                 var labelValue = IsLogarithmic ? Math.Pow(10, label.Value) : label.Value;
-                var majorTick = new NewDataAxisTick(labelValue, label.Label, true, IsLogarithmic);
+                var majorTick = new DataAxisTick(labelValue, label.Label, true, IsLogarithmic);
                 AxisTicks.Add(majorTick);
                 Children.Add(majorTick.TextBlock);
                 majorTick.TextBlock.Measure(availableSize);
+            }
+            if (AxisMarkers != null) foreach (var marker in AxisMarkers)
+            {
+                Children.Add(marker.TextBlock);
+                marker.TextBlock.Measure(availableSize);
             }
             // If the minor tick frequency isn't at least twice the major tick frequency, don't do any minor ticks
             var minorTicksPerMajorTick = IsLogarithmic ? 10 : (int)(MinorTicksPerInch / MajorTicksPerInch);
@@ -593,7 +627,7 @@ namespace HRC.Plotting
                     // Add minor ticks at whole-number log values if any are needed
                     for (var i = 0; i < majorTickLogValues.Count - 1; i++) 
                         for (var j = majorTickLogValues[i] - 1; j > majorTickLogValues[i + 1]; j--) 
-                            AxisTicks.Add(new NewDataAxisTick(Math.Pow(10, j), null, false, IsLogarithmic));
+                            AxisTicks.Add(new DataAxisTick(Math.Pow(10, j), null, false, IsLogarithmic));
                     // Add minor ticks at the usual places for a log scale (2, 3, 4, 5, 6, 7, 8, 9)
                     for (var baseValue = Math.Floor(_internalVisibleRange.Min); baseValue < Math.Ceiling(_internalVisibleRange.Max); baseValue++)
                     {
@@ -601,7 +635,7 @@ namespace HRC.Plotting
                         {
                             var logValue = baseValue + logOffset;
                             if (_internalVisibleRange.Min <= logValue && logValue <= _internalVisibleRange.Max) 
-                                AxisTicks.Add(new NewDataAxisTick(Math.Pow(10, logValue), null, false, IsLogarithmic));
+                                AxisTicks.Add(new DataAxisTick(Math.Pow(10, logValue), null, false, IsLogarithmic));
                         }
                     }
                 }
@@ -620,13 +654,18 @@ namespace HRC.Plotting
                         {
                             var tickValue = t + (stepSize * j);
                             if (tickValue < _internalVisibleRange.Min || tickValue > _internalVisibleRange.Max) continue;
-                            var minorTick = new NewDataAxisTick(tickValue, null, false, IsLogarithmic);
+                            var minorTick = new DataAxisTick(tickValue, null, false, IsLogarithmic);
                             AxisTicks.Add(minorTick);
                         }
                 }
             }
             _tickLabelMaxWidth = AxisTicks.Where(t => t.TextBlock != null).Max(t => t.TextBlock.DesiredSize.Width);
             _tickLabelMaxHeight = AxisTicks.Where(t => t.TextBlock != null).Max(t => t.TextBlock.DesiredSize.Height);
+            if (AxisMarkers != null && AxisMarkers.Count > 0)
+            {
+                _tickLabelMaxWidth = Math.Max(_tickLabelMaxWidth, AxisMarkers.Where(t => t.TextBlock != null).Max(t => t.TextBlock.DesiredSize.Width));
+                _tickLabelMaxHeight = Math.Max(_tickLabelMaxHeight, AxisMarkers.Where(t => t.TextBlock != null).Max(t => t.TextBlock.DesiredSize.Height));
+            }
             var axisLabel = string.IsNullOrEmpty(_axis.AxisTitleExtension) ? AxisLabel : string.Format("{0} ({1})", AxisLabel, _axis.AxisTitleExtension);
             _axisLabel.Text = axisLabel;
             _axisLabel.FontSize = _axis.FontSize + 2;
@@ -661,13 +700,6 @@ namespace HRC.Plotting
 
         protected override Size ArrangeOverride(Size arrangeSize)
         {
-            if (AxisType == AxisType.Enumerated)
-                return ArrangeNonEnumerated(arrangeSize);
-            return ArrangeNonEnumerated(arrangeSize);
-        }
-
-        Size ArrangeNonEnumerated(Size arrangeSize)
-        {
             if (_internalVisibleRange == null) return AxisLocation == AxisLocation.Top || AxisLocation == AxisLocation.Bottom ? new Size(arrangeSize.Width, 22) : new Size(arrangeSize.Height, 22);
             var axisTransform = CreateAxisTransform(_internalVisibleRange, arrangeSize, true, IsInverted, false);
             Point axisLabelPosition;
@@ -696,44 +728,49 @@ namespace HRC.Plotting
             _axisLabel.Arrange(new Rect(axisLabelPosition, _axisLabel.DesiredSize));
             axisTransform = CreateAxisTransform(_internalVisibleRange, arrangeSize, true, IsInverted, IsLogarithmic);
 
-            if (AxisTicks != null)
-                foreach (var tick in AxisTicks)
-                {
-                    Point tickLabelPosition;
-                    switch (AxisLocation)
-                    {
-                        case AxisLocation.Top:
-                        case AxisLocation.Bottom:
-                            tick.Location = axisTransform.Transform(new Point(tick.Value, 0)).X;
-                            if (tick.TextBlock != null)
-                            {
-                                var yPos = MajorTickLength;
-                                if (AxisLocation == AxisLocation.Top) yPos += tick.TextBlock.DesiredSize.Height;
-                                tickLabelPosition = axisTransform.Transform(new Point(tick.Value, yPos));
-                                tickLabelPosition.X -= tick.TextBlock.DesiredSize.Width / 2;
-                                tickLabelPosition.X = Math.Min(Math.Max(tickLabelPosition.X, 0), arrangeSize.Width - tick.TextBlock.DesiredSize.Width);
-                                tick.TextBlock.Arrange(new Rect(tickLabelPosition, tick.TextBlock.DesiredSize));
-                            }
-                            break;
-                        case AxisLocation.Left:
-                        case AxisLocation.Right:
-                            tick.Location = axisTransform.Transform(new Point(tick.Value, 0)).Y;
-                            if (tick.TextBlock != null)
-                            {
-                                tickLabelPosition = axisTransform.Transform(new Point(tick.Value, MajorTickLength + 2));
-                                if (AxisLocation == AxisLocation.Left) tickLabelPosition.X -= tick.TextBlock.DesiredSize.Width;
-                                tickLabelPosition.Y -= tick.TextBlock.DesiredSize.Height / 2;
-                                tickLabelPosition.Y = Math.Min(Math.Max(tickLabelPosition.Y, 0), arrangeSize.Height - tick.TextBlock.DesiredSize.Height);
-                                tick.TextBlock.Arrange(new Rect(tickLabelPosition, tick.TextBlock.DesiredSize));
-                            }
-                            break;
-                        default:
-                            throw new ApplicationException("DataAxis: Unknown AxisLocation value.");
-                    }
-                }
-            //Debug.WriteLine(string.Format("DataAxis: ArrangeOverride for {0} returning desired width {1} and height {2}", AxisLabel, arrangeSize.Width, arrangeSize.Height));
+            if (AxisTicks != null) ArrangeTicksAndMarkers(AxisTicks, axisTransform, arrangeSize, MajorTickLength);
+            if (AxisMarkers != null) ArrangeTicksAndMarkers(AxisMarkers, axisTransform, arrangeSize, MajorTickLength);
+
             InvalidateVisual();
             return arrangeSize;
+        }
+
+        void ArrangeTicksAndMarkers(IEnumerable<DataAxisTick> ticksOrMarkers, GeneralTransform axisTransform, Size arrangeSize, double tickLength)
+        {
+            foreach (var tick in ticksOrMarkers)
+            {
+                Point tickLabelPosition;
+                switch (AxisLocation)
+                {
+                    case AxisLocation.Top:
+                    case AxisLocation.Bottom:
+                        tick.Location = axisTransform.Transform(new Point(tick.Value, 0)).X;
+                        if (tick.TextBlock != null)
+                        {
+                            var yPos = tickLength;
+                            if (AxisLocation == AxisLocation.Top) yPos += tick.TextBlock.DesiredSize.Height;
+                            tickLabelPosition = axisTransform.Transform(new Point(tick.Value, yPos));
+                            tickLabelPosition.X -= tick.TextBlock.DesiredSize.Width / 2;
+                            tickLabelPosition.X = Math.Min(Math.Max(tickLabelPosition.X, 0), arrangeSize.Width - tick.TextBlock.DesiredSize.Width);
+                            tick.TextBlock.Arrange(new Rect(tickLabelPosition, tick.TextBlock.DesiredSize));
+                        }
+                        break;
+                    case AxisLocation.Left:
+                    case AxisLocation.Right:
+                        tick.Location = axisTransform.Transform(new Point(tick.Value, 0)).Y;
+                        if (tick.TextBlock != null)
+                        {
+                            tickLabelPosition = axisTransform.Transform(new Point(tick.Value, tickLength + 2));
+                            if (AxisLocation == AxisLocation.Left) tickLabelPosition.X -= tick.TextBlock.DesiredSize.Width;
+                            tickLabelPosition.Y -= tick.TextBlock.DesiredSize.Height / 2;
+                            tickLabelPosition.Y = Math.Min(Math.Max(tickLabelPosition.Y, 0), arrangeSize.Height - tick.TextBlock.DesiredSize.Height);
+                            tick.TextBlock.Arrange(new Rect(tickLabelPosition, tick.TextBlock.DesiredSize));
+                        }
+                        break;
+                    default:
+                        throw new ApplicationException("DataAxis: Unknown AxisLocation value.");
+                }
+            }
         }
 
         protected override void OnRender(DrawingContext dc)
@@ -746,6 +783,7 @@ namespace HRC.Plotting
             dc.DrawLine(pen, axisTransform.Transform(new Point(_internalVisibleRange.Min, 0)), axisTransform.Transform(new Point(_internalVisibleRange.Max, 0)));
             axisTransform = CreateAxisTransform(_internalVisibleRange, size, true, IsInverted, IsLogarithmic);
             if (AxisTicks != null) foreach (var tick in AxisTicks) dc.DrawLine(pen, axisTransform.Transform(new Point(tick.Value, 0)), axisTransform.Transform(new Point(tick.Value, tick.IsMajorTick ? MajorTickLength : MinorTickLength)));
+            if (AxisMarkers != null) foreach (var marker in AxisMarkers) dc.DrawLine(pen, axisTransform.Transform(new Point(marker.Value, 0)), axisTransform.Transform(new Point(marker.Value, marker.IsMajorTick ? MajorTickLength : MinorTickLength)));
             // This draws a 50-pixel line in the center of the axis, used to check the centering of the axis label
             //dc.DrawLine(pen, axisTransform.Transform(new Point(_internalVisibleRange.Min + (_internalVisibleRange.Size / 2), 0)), axisTransform.Transform(new Point(_internalVisibleRange.Min + (_internalVisibleRange.Size / 2), 50)));
         }
@@ -760,9 +798,9 @@ namespace HRC.Plotting
         #endregion
     }
 
-    public class NewDataAxisTick
+    public class DataAxisTick
     {
-        internal NewDataAxisTick(double value, string text, bool isMajorTick, bool isMagnitude)
+        internal DataAxisTick(double value, string text, bool isMajorTick, bool isMagnitude)
         {
             Value = value;
             Text = text;
@@ -778,7 +816,7 @@ namespace HRC.Plotting
             else TextBlock = new TextBlock { Text = text };
         }
 
-        public NewDataAxisTick(double value, string text, bool isMajorTick)
+        public DataAxisTick(double value, string text, bool isMajorTick)
         {
             Value = value;
             Text = text;
@@ -791,7 +829,7 @@ namespace HRC.Plotting
         public double Value { get; private set; }
         public bool IsMajorTick { get; private set; }
         public double Location { get; internal set; }
-        ~NewDataAxisTick() { TextBlock = null; }
+        ~DataAxisTick() { TextBlock = null; }
     }
 
     public enum AxisLocation

@@ -1,8 +1,8 @@
 using System;
-using System.Collections.ObjectModel;
 using System.Windows;
 using HRC.Aspects;
 using HRC.Plotting.AxisLabeling.Layout;
+using HRC.Utility;
 using HRC.ViewModels;
 
 namespace HRC.Plotting
@@ -14,14 +14,17 @@ namespace HRC.Plotting
         {
             DataRange = new RangeCollection();
             Label = "Axis";
-            AxisTicks = new ObservableCollection<NewDataAxisTick>();
+            AxisTicks = new ObservableList<DataAxisTick>();
+            AxisMarkers = new ObservableList<DataAxisTick>();
             VisibleRange = new Range(1, 2);
         }
 
         public string Label { get; set; }
         [Initialize(AxisLayoutAlgorithm.ExtendedWilkinson)] public AxisLayoutAlgorithm AxisLayoutAlgorithm { get; set; }
-        public ObservableCollection<NewDataAxisTick> AxisTicks { get; set; }
-        [Initialize(AxisType.Linear)] public AxisType AxisType { get; set; }
+        public ObservableList<DataAxisTick> AxisTicks { get; set; }
+        public ObservableList<DataAxisTick> AxisMarkers { get; set; }
+        [Initialize(AxisType.Linear)]
+        public AxisType AxisType { get; set; }
         public RangeCollection DataRange { get; set; }
         public bool IsInverted { get; set; }
         /// <summary>

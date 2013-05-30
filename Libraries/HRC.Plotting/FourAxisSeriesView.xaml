@@ -23,13 +23,27 @@
                    FontSize="{Binding PlotTitleSize}"
                    Text="{Binding PlotTitle}"
                    TextAlignment="Center" />
-        <DockPanel Height="{Binding ActualHeight, ElementName=TopAxis}" DockPanel.Dock="Top" Visibility="{Binding TopAxis.Visibility}">
-            <TextBlock Width="{Binding ActualWidth, ElementName=LeftAxis}" Height="{Binding ActualHeight, ElementName=TopAxis}" DockPanel.Dock="Left" Visibility="{Binding LeftAxis.Visibility}" />
-            <TextBlock Width="{Binding ActualWidth, ElementName=RightAxis}" Height="{Binding ActualHeight, ElementName=TopAxis}" DockPanel.Dock="Right" Visibility="{Binding RightAxis.Visibility}" />
+        <DockPanel Height="{Binding ActualHeight,
+                                    ElementName=TopAxis}"
+                   DockPanel.Dock="Top"
+                   Visibility="{Binding TopAxis.Visibility}">
+            <TextBlock Width="{Binding ActualWidth,
+                                       ElementName=LeftAxis}"
+                       Height="{Binding ActualHeight,
+                                        ElementName=TopAxis}"
+                       DockPanel.Dock="Left"
+                       Visibility="{Binding LeftAxis.Visibility}" />
+            <TextBlock Width="{Binding ActualWidth,
+                                       ElementName=RightAxis}"
+                       Height="{Binding ActualHeight,
+                                        ElementName=TopAxis}"
+                       DockPanel.Dock="Right"
+                       Visibility="{Binding RightAxis.Visibility}" />
             <app:DataAxis x:Name="TopAxis"
                           AxisLabel="{Binding Label}"
                           AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
                           AxisLocation="Top"
+                          AxisMarkers="{Binding AxisMarkers}"
                           AxisTicks="{Binding AxisTicks}"
                           AxisType="{Binding AxisType}"
                           DataContext="{Binding TopAxis}"
@@ -55,14 +69,28 @@
                 </app:DataPiping.DataPipes>
             </app:DataAxis>
         </DockPanel>
-        <DockPanel Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Bottom" Visibility="{Binding BottomAxis.Visibility}">
-            <TextBlock Width="{Binding ActualWidth, ElementName=LeftAxis}" Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Left" Visibility="{Binding LeftAxis.Visibility}" />
-            <TextBlock Width="{Binding ActualWidth, ElementName=RightAxis}" Height="{Binding ActualHeight, ElementName=BottomAxis}" DockPanel.Dock="Right" Visibility="{Binding RightAxis.Visibility}" />
+        <DockPanel Height="{Binding ActualHeight,
+                                    ElementName=BottomAxis}"
+                   DockPanel.Dock="Bottom"
+                   Visibility="{Binding BottomAxis.Visibility}">
+            <TextBlock Width="{Binding ActualWidth,
+                                       ElementName=LeftAxis}"
+                       Height="{Binding ActualHeight,
+                                        ElementName=BottomAxis}"
+                       DockPanel.Dock="Left"
+                       Visibility="{Binding LeftAxis.Visibility}" />
+            <TextBlock Width="{Binding ActualWidth,
+                                       ElementName=RightAxis}"
+                       Height="{Binding ActualHeight,
+                                        ElementName=BottomAxis}"
+                       DockPanel.Dock="Right"
+                       Visibility="{Binding RightAxis.Visibility}" />
             <app:DataAxis x:Name="BottomAxis"
                           AxisLabel="{Binding Label}"
                           AxisLabelMargin="0 0 0 5"
                           AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
                           AxisLocation="Bottom"
+                          AxisMarkers="{Binding AxisMarkers}"
                           AxisTicks="{Binding AxisTicks}"
                           AxisType="{Binding AxisType}"
                           DataContext="{Binding BottomAxis}"
@@ -92,6 +120,7 @@
                       AxisLabel="{Binding Label}"
                       AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
                       AxisLocation="Left"
+                      AxisMarkers="{Binding AxisMarkers}"
                       AxisTicks="{Binding AxisTicks}"
                       AxisType="{Binding AxisType}"
                       DataContext="{Binding LeftAxis}"
@@ -121,6 +150,7 @@
                       AxisLabelMargin="0 0 5 0"
                       AxisLayoutAlgorithm="{Binding AxisLayoutAlgorithm}"
                       AxisLocation="Right"
+                      AxisMarkers="{Binding AxisMarkers}"
                       AxisTicks="{Binding AxisTicks}"
                       AxisType="{Binding AxisType}"
                       DataContext="{Binding RightAxis}"

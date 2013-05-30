@@ -40,6 +40,7 @@
                                           Margin="5 0 0 0"
                                           AnimationTargetRange="{Binding AnimationTargetRange}"
                                           AnimationTime="{Binding AnimationTime}"
+                                          AxisMarkers="{Binding AxisMarkers}"
                                           AxisTitle="Transmission loss (dB)"
                                           ColorBarImage="{Binding ColorMapViewModel.ColorBitmap}"
                                           CurrentRange="{Binding ColorMapViewModel.Range}"
@@ -64,7 +65,9 @@
                 </controls:ColorBarControl>
                 <TextBlock DockPanel.Dock="Top" />
             </DockPanel>
-            <Plotting:FourAxisSeriesView x:Name="AxisView" DataContext="{Binding AxisSeriesViewModel}" DockPanel.Dock="Left" />
+            <Plotting:FourAxisSeriesView x:Name="AxisView"
+                                         DataContext="{Binding AxisSeriesViewModel}"
+                                         DockPanel.Dock="Left" />
         </DockPanel>
     </Grid>
 </UserControl>

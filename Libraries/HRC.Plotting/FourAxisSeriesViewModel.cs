@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Media;
 using HRC.Aspects;
 using HRC.Services;
+using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -60,8 +61,8 @@ namespace HRC.Plotting
         public DataAxisViewModel YAxis { get; set; }
         public Color MajorTickLineColor { get; set; }
         public Color MinorTickLineColor { get; set; }
-        public ObservableCollection<NewDataAxisTick> XAxisTicks { get; set; }
-        public ObservableCollection<NewDataAxisTick> YAxisTicks { get; set; }
+        public ObservableList<DataAxisTick> XAxisTicks { get; set; }
+        public ObservableList<DataAxisTick> YAxisTicks { get; set; }
         public double ActualWidth { get; set; }
         public double ActualHeight { get; set; }
         public bool IsMouseOver { get; set; }

@@ -173,21 +173,21 @@ namespace DavesWPFTester
             const double rangeStep = 1;
             BottomRight.XAxis.AxisType = AxisType.Enumerated;
             BottomRight.YAxis.AxisType = AxisType.Logarithmic;
-            BottomRight.XAxis.AxisTicks = new ObservableCollection<NewDataAxisTick>
+            BottomRight.XAxis.AxisTicks = new ObservableCollection<DataAxisTick>
             {
-                new NewDataAxisTick(-1, null, false),
-                new NewDataAxisTick(0, "Zero", false),
-                new NewDataAxisTick(1, "One", false),
-                new NewDataAxisTick(2, "Two", false),
-                new NewDataAxisTick(3, "Three", false),
-                new NewDataAxisTick(4, "Four", false),
-                new NewDataAxisTick(5, "Five", false),
-                new NewDataAxisTick(6, "Six", false),
-                new NewDataAxisTick(7, "Seven", false),
-                new NewDataAxisTick(8, "Eight", false),
-                new NewDataAxisTick(9, "Nine", false),
-                new NewDataAxisTick(10, "Ten", false),
-                new NewDataAxisTick(11, null, false),
+                new DataAxisTick(-1, null, false),
+                new DataAxisTick(0, "Zero", false),
+                new DataAxisTick(1, "One", false),
+                new DataAxisTick(2, "Two", false),
+                new DataAxisTick(3, "Three", false),
+                new DataAxisTick(4, "Four", false),
+                new DataAxisTick(5, "Five", false),
+                new DataAxisTick(6, "Six", false),
+                new DataAxisTick(7, "Seven", false),
+                new DataAxisTick(8, "Eight", false),
+                new DataAxisTick(9, "Nine", false),
+                new DataAxisTick(10, "Ten", false),
+                new DataAxisTick(11, null, false),
             };
             BottomRight.YAxis.DataRange.Update(0.1, 10);
             BottomRight.XAxis.DataRange.Update(-1, 11);
@@ -269,21 +269,21 @@ namespace DavesWPFTester
             const double rangeStep = 1;
             BottomLeft.XAxis.AxisType = AxisType.Enumerated;
             BottomLeft.YAxis.AxisType = AxisType.Logarithmic;
-            BottomLeft.XAxis.AxisTicks = new ObservableCollection<NewDataAxisTick>
+            BottomLeft.XAxis.AxisTicks = new ObservableCollection<DataAxisTick>
             {
-                new NewDataAxisTick(-1, null, false),
-                new NewDataAxisTick(0, "Zero", false),
-                new NewDataAxisTick(1, "One", false),
-                new NewDataAxisTick(2, "Two", false),
-                new NewDataAxisTick(3, "Three", false),
-                new NewDataAxisTick(4, "Four", false),
-                new NewDataAxisTick(5, "Five", false),
-                new NewDataAxisTick(6, "Six", false),
-                new NewDataAxisTick(7, "Seven", false),
-                new NewDataAxisTick(8, "Eight", false),
-                new NewDataAxisTick(9, "Nine", false),
-                new NewDataAxisTick(10, "Ten", false),
-                new NewDataAxisTick(11, null, false),
+                new DataAxisTick(-1, null, false),
+                new DataAxisTick(0, "Zero", false),
+                new DataAxisTick(1, "One", false),
+                new DataAxisTick(2, "Two", false),
+                new DataAxisTick(3, "Three", false),
+                new DataAxisTick(4, "Four", false),
+                new DataAxisTick(5, "Five", false),
+                new DataAxisTick(6, "Six", false),
+                new DataAxisTick(7, "Seven", false),
+                new DataAxisTick(8, "Eight", false),
+                new DataAxisTick(9, "Nine", false),
+                new DataAxisTick(10, "Ten", false),
+                new DataAxisTick(11, null, false),
             };
             //BottomLeft.YAxis.DataRange.Update(0, 2);
             BottomLeft.XAxis.DataRange.Update(-1, 11);

@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using HRC.Utility;
 
 namespace HRC.Plotting
 {
@@ -15,24 +16,24 @@ namespace HRC.Plotting
     {
         static DataCanvas() { DefaultStyleKeyProperty.OverrideMetadata(typeof(DataCanvas), new FrameworkPropertyMetadata(typeof(DataCanvas))); }
 
-        #region dependency property ObservableCollection<NewDataAxisTick> XAxisTicks
+        #region dependency property ObservableList<DataAxisTick> XAxisTicks
 
         public static DependencyProperty XAxisTicksProperty = DependencyProperty.Register("XAxisTicks",
-                                                                                 typeof(ObservableCollection<NewDataAxisTick>),
+                                                                                 typeof(ObservableList<DataAxisTick>),
                                                                                  typeof(DataCanvas),
                                                                                  new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
 
-        public ObservableCollection<NewDataAxisTick> XAxisTicks { get { return (ObservableCollection<NewDataAxisTick>)GetValue(XAxisTicksProperty); } set { SetValue(XAxisTicksProperty, value); } }
+        public ObservableList<DataAxisTick> XAxisTicks { get { return (ObservableList<DataAxisTick>)GetValue(XAxisTicksProperty); } set { SetValue(XAxisTicksProperty, value); } }
         #endregion
 
-        #region dependency property ObservableCollection<NewDataAxisTick> YAxisTicks
+        #region dependency property ObservableList<DataAxisTick> YAxisTicks
 
         public static DependencyProperty YAxisTicksProperty = DependencyProperty.Register("YAxisTicks",
-                                                                                 typeof(ObservableCollection<NewDataAxisTick>),
+                                                                                 typeof(ObservableList<DataAxisTick>),
                                                                                  typeof(DataCanvas),
                                                                                  new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
 
-        public ObservableCollection<NewDataAxisTick> YAxisTicks { get { return (ObservableCollection<NewDataAxisTick>)GetValue(YAxisTicksProperty); } set { SetValue(YAxisTicksProperty, value); } }
+        public ObservableList<DataAxisTick> YAxisTicks { get { return (ObservableList<DataAxisTick>)GetValue(YAxisTicksProperty); } set { SetValue(YAxisTicksProperty, value); } }
         #endregion
 
         #region dependency property Color MinorTickLineColor

@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Windows;
 using ESME.SimulationAnalysis;
 using HRC.Aspects;
 using HRC.Plotting;
-using HRC.Services;
+using HRC.Utility;
 using HRC.ViewModels;
 
 namespace ESME.Views.Simulation
@@ -31,7 +30,7 @@ namespace ESME.Views.Simulation
                 BottomAxis =
                 {
                     Visibility = Visibility.Visible,
-                    AxisTicks = new ObservableCollection<NewDataAxisTick>(),
+                    AxisTicks = new ObservableList<DataAxisTick>(),
                     AxisType = AxisType.Enumerated,
                     Label = string.Format("Peak pressure per ping (±{0:0}dB) [dB re: 1 µPa]", groupedExposuresHistogram.BinWidth / 2)
                 },
@@ -51,7 +50,7 @@ namespace ESME.Views.Simulation
                 BottomAxis =
                 {
                     Visibility = Visibility.Visible,
-                    AxisTicks = new ObservableCollection<NewDataAxisTick>(),
+                    AxisTicks = new ObservableList<DataAxisTick>(),
                     AxisType = AxisType.Enumerated,
                     Label = string.Format("Sound exposure level per ping (±{0:0}dB) [dB re: 1 µPa²•s]", groupedExposuresHistogram.BinWidth / 2)
                 },
@@ -66,15 +65,15 @@ namespace ESME.Views.Simulation
                 PlotTitle = groupedExposuresHistogram.GroupName,
             };
 
-            PressureViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(-1, null, false));
-            EnergyViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(-1, null, false));
+            PressureViewModel.BottomAxis.AxisTicks.Add(new DataAxisTick(-1, null, false));
+            EnergyViewModel.BottomAxis.AxisTicks.Add(new DataAxisTick(-1, null, false));
             for (var binIndex = 0; binIndex < groupedExposuresHistogram.BinNames.Length; binIndex++)
             {
-                PressureViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(binIndex, groupedExposuresHistogram.BinNames[binIndex], false));
-                EnergyViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(binIndex, groupedExposuresHistogram.BinNames[binIndex], false));
+                PressureViewModel.BottomAxis.AxisTicks.Add(new DataAxisTick(binIndex, groupedExposuresHistogram.BinNames[binIndex], false));
+                EnergyViewModel.BottomAxis.AxisTicks.Add(new DataAxisTick(binIndex, groupedExposuresHistogram.BinNames[binIndex], false));
             }
-            PressureViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(groupedExposuresHistogram.BinNames.Length, null, false));
-            EnergyViewModel.BottomAxis.AxisTicks.Add(new NewDataAxisTick(groupedExposuresHistogram.BinNames.Length, null, false));
+            PressureViewModel.BottomAxis.AxisTicks.Add(new DataAxisTick(groupedExposuresHistogram.BinNames.Length, null, false));
+            EnergyViewModel.BottomAxis.AxisTicks.Add(new DataAxisTick(groupedExposuresHistogram.BinNames.Length, null, false));
 
             PressureViewModel.DataSeriesCollection.Add(groupedExposuresHistogram.GroupedBarSeriesViewModels[0]);
             EnergyViewModel.DataSeriesCollection.Add(groupedExposuresHistogram.GroupedBarSeriesViewModels[1]);
@@ -101,22 +100,22 @@ namespace ESME.Views.Simulation
                     BottomAxis =
                         {
                             Visibility = Visibility.Visible,
-                            AxisTicks = new ObservableCollection<NewDataAxisTick>
+                            AxisTicks = new ObservableList<DataAxisTick>
                             {
-                                new NewDataAxisTick(-1, null, false),
-                                new NewDataAxisTick(0, "<100", false),
-                                new NewDataAxisTick(1, "105", false),
-                                new NewDataAxisTick(2, "115", false),
-                                new NewDataAxisTick(3, "125", false),
-                                new NewDataAxisTick(4, "135", false),
-                                new NewDataAxisTick(5, "145", false),
-                                new NewDataAxisTick(6, "155", false),
-                                new NewDataAxisTick(7, "165", false),
-                                new NewDataAxisTick(8, "175", false),
-                                new NewDataAxisTick(9, "185", false),
-                                new NewDataAxisTick(10, "195", false),
-                                new NewDataAxisTick(11, ">200", false),
-                                new NewDataAxisTick(12, null, false),
+                                new DataAxisTick(-1, null, false),
+                                new DataAxisTick(0, "<100", false),
+                                new DataAxisTick(1, "105", false),
+                                new DataAxisTick(2, "115", false),
+                                new DataAxisTick(3, "125", false),
+                                new DataAxisTick(4, "135", false),
+                                new DataAxisTick(5, "145", false),
+                                new DataAxisTick(6, "155", false),
+                                new DataAxisTick(7, "165", false),
+                                new DataAxisTick(8, "175", false),
+                                new DataAxisTick(9, "185", false),
+                                new DataAxisTick(10, "195", false),
+                                new DataAxisTick(11, ">200", false),
+                                new DataAxisTick(12, null, false),
                             },
                             AxisType = AxisType.Enumerated,
                             Label = "Peak pressure per ping (±5dB) [dB re: 1 µPa]",
@@ -136,22 +135,22 @@ namespace ESME.Views.Simulation
                     BottomAxis =
                         {
                             Visibility = Visibility.Visible,
-                            AxisTicks = new ObservableCollection<NewDataAxisTick>
+                            AxisTicks = new ObservableList<DataAxisTick>
                             {
-                                new NewDataAxisTick(-1, null, false),
-                                new NewDataAxisTick(0, "<100", false),
-                                new NewDataAxisTick(1, "105", false),
-                                new NewDataAxisTick(2, "115", false),
-                                new NewDataAxisTick(3, "125", false),
-                                new NewDataAxisTick(4, "135", false),
-                                new NewDataAxisTick(5, "145", false),
-                                new NewDataAxisTick(6, "155", false),
-                                new NewDataAxisTick(7, "165", false),
-                                new NewDataAxisTick(8, "175", false),
-                                new NewDataAxisTick(9, "185", false),
-                                new NewDataAxisTick(10, "195", false),
-                                new NewDataAxisTick(11, ">200", false),
-                                new NewDataAxisTick(12, null, false),
+                                new DataAxisTick(-1, null, false),
+                                new DataAxisTick(0, "<100", false),
+                                new DataAxisTick(1, "105", false),
+                                new DataAxisTick(2, "115", false),
+                                new DataAxisTick(3, "125", false),
+                                new DataAxisTick(4, "135", false),
+                                new DataAxisTick(5, "145", false),
+                                new DataAxisTick(6, "155", false),
+                                new DataAxisTick(7, "165", false),
+                                new DataAxisTick(8, "175", false),
+                                new DataAxisTick(9, "185", false),
+                                new DataAxisTick(10, "195", false),
+                                new DataAxisTick(11, ">200", false),
+                                new DataAxisTick(12, null, false),
                             },
                             AxisType = AxisType.Enumerated,
                             Label = "Sound exposure level per ping (±5dB) [dB re: 1 µPa²•s]",

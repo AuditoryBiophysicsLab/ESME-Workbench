@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using HRC.Plotting;
+using HRC.Utility;
 
 namespace ESME.Views.Controls
 {
@@ -167,6 +168,19 @@ namespace ESME.Views.Controls
 
         static void AnimationTimePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarControl)obj).AnimationTimePropertyChanged(); }
         void AnimationTimePropertyChanged() { }
+        #endregion
+
+        #region dependency property ObservableList<DataAxisTick> AxisMarkers
+
+        public static DependencyProperty AxisMarkersProperty = DependencyProperty.Register("AxisMarkers",
+                                                                                 typeof(ObservableList<DataAxisTick>),
+                                                                                 typeof(ColorBarControl),
+                                                                                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, AxisMarkersPropertyChanged));
+
+        public ObservableList<DataAxisTick> AxisMarkers { get { return (ObservableList<DataAxisTick>)GetValue(AxisMarkersProperty); } set { SetValue(AxisMarkersProperty, value); } }
+
+        static void AxisMarkersPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((ColorBarControl)obj).AxisMarkersPropertyChanged(); }
+        void AxisMarkersPropertyChanged() { }
         #endregion
     
         #region Read-only Dependency Properties

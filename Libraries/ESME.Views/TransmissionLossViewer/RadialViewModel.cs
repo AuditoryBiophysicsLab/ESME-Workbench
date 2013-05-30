@@ -22,6 +22,7 @@ using ESME.Views.Controls;
 using HRC;
 using HRC.Aspects;
 using HRC.Plotting;
+using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -141,6 +142,20 @@ namespace ESME.Views.TransmissionLossViewer
                                                _transmissionLossRadial = null;
                                            }
                                        }));
+            _instanceObservers.Add(
+                                   ColorMapViewModel.Range.ObserveOnDispatcher().Subscribe(
+                                                                                           r =>
+                                                                                           {
+                                                                                               AxisMarkers.Clear();
+                                                                                               if (ColorMapViewModel.Range != FullRange) 
+                                                                                               {
+                                                                                                   AxisMarkers.Add(new DataAxisTick(ColorMapViewModel.Range.Min, string.Format("{0:0}", ColorMapViewModel.Range.Min), true));
+                                                                                                   AxisMarkers.Add(new DataAxisTick(ColorMapViewModel.Range.Max, string.Format("{0:0}", ColorMapViewModel.Range.Max), true));
+                                                                                               }
+                                                                                               Debug.WriteLine("{0:HH:mm:ss.fff} ColorMapViewModel.Range changed to {1}",
+                                                                                                               DateTime.Now,
+                                                                                                               r);
+                                                                                           }));
             _displayQueue
                 .ObserveOnDispatcher()
                 .Subscribe(result =>
@@ -225,8 +240,10 @@ namespace ESME.Views.TransmissionLossViewer
 
         [Initialize("Please wait...")]public string WaitToRenderText { get; set; }
         [Initialize] public FourAxisSeriesViewModel AxisSeriesViewModel { get; set; }
-        public WriteableBitmap WriteableBitmap { get; set; }
         [Initialize] public ColorMapViewModel ColorMapViewModel { get; set; }
+        [Initialize] public ObservableList<DataAxisTick> AxisMarkers { get; set; }
+
+        public WriteableBitmap WriteableBitmap { get; set; }
         public Visibility WriteableBitmapVisibility { get; set; }
         public Radial Radial { get; set; }
         public TimeSpan AnimationTime { get; set; }
@@ -234,7 +251,6 @@ namespace ESME.Views.TransmissionLossViewer
         public Range StatisticalRange { get; set; }
         public Range AnimationTargetRange { get; set; }
         public Range AxisRange { get; set; }
-
         void CalculateBottomProfileGeometry()
         {
             var profileData = Radial.BottomProfile.Select(bpp => new Point(bpp.Range * 1000, Math.Max(0.0, bpp.Depth))).ToList();
@@ -271,6 +287,9 @@ namespace ESME.Views.TransmissionLossViewer
                 }
                 else
                 {
+                    if (_mouseTLMarker != null) AxisMarkers.Remove(_mouseTLMarker);
+                    _mouseTLMarker = new DataAxisTick(_transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex], string.Format("{0:0}", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]), true);
+                    AxisMarkers.Add(_mouseTLMarker);
                     MouseTransmissionLossInfo = string.Format("Transmission Loss: {0:0.0}dB", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
                     MouseSPLInfo = string.Format("Sound Pressure: {0:0.0}dB", SelectedMode.SourceLevel - _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
                 }
@@ -281,9 +300,12 @@ namespace ESME.Views.TransmissionLossViewer
                 MouseRange = "Range: N/A";
                 MouseTransmissionLossInfo = "Transmission Loss: N/A";
                 MouseSPLInfo = "Sound Pressure: N/A";
+                if (_mouseTLMarker != null) AxisMarkers.Remove(_mouseTLMarker);
+                _mouseTLMarker = null;
             }
         }
 
+        DataAxisTick _mouseTLMarker;
         #region File and clipboard-oriented stuff
         #region public string OutputFileName { get; }
         public string OutputFileName
