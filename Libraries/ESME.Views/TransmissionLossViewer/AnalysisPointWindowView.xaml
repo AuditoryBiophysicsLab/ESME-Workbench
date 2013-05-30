@@ -18,6 +18,7 @@
         d:DataContext="{d:DesignInstance TransmissionLossViewer:AnalysisPointViewModel}"
         d:DesignHeight="300"
         d:DesignWidth="300"
+        Grid.IsSharedSizeScope="True"
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <Window.InputBindings>
@@ -48,11 +49,22 @@
                 </Button>
             </ToolBar>
         </ToolBarTray>
-        <ComboBox DisplayMemberPath="Modes[0]"
-                  DockPanel.Dock="Bottom"
-                  ItemsSource="{Binding AnalysisPoint.TransmissionLosses}"
-                  SelectedItem="{Binding TransmissionLoss}"
-                  ToolTip="{Binding TransmissionLossListToolTip}" />
+        <Grid Margin="5" DockPanel.Dock="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       Margin="0 0 5 0"
+                       VerticalAlignment="Top"
+                       Text="Sound field:"
+                       TextAlignment="Right" />
+            <ComboBox Grid.Column="1"
+                      DisplayMemberPath="Modes[0]"
+                      ItemsSource="{Binding AnalysisPoint.TransmissionLosses}"
+                      SelectedItem="{Binding TransmissionLoss}"
+                      ToolTip="{Binding TransmissionLossListToolTip}" />
+        </Grid>
         <TransmissionLossViewer:TransmissionLossView DataContext="{Binding TransmissionLossViewModel}" DockPanel.Dock="Top" />
     </DockPanel>
 </Window>

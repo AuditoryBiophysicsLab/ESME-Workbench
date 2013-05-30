@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using ESME.Scenarios;
@@ -46,7 +47,7 @@ namespace ESME.Views.TransmissionLossViewer
                             if (e.EventArgs.PropertyName == "IsDeleted" && AnalysisPoint.TransmissionLosses.Count > 1) 
                                 TransmissionLossViewModel.TransmissionLoss = AnalysisPoint.TransmissionLosses[_oldIndex % (AnalysisPoint.TransmissionLosses.Count - 1)];
                         });
-                    TransmissionLossViewModel.SelectedRadialIndex = 0;
+                    Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} AnalysisPointViewModel: TransmissionLossViewModel.SelectedRadialIndex set to 0", DateTime.Now));
                 });
             TransmissionLoss = analysisPoint.TransmissionLosses.FirstOrDefault();
         }

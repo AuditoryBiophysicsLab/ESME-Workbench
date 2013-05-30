@@ -23,7 +23,6 @@ namespace ESME.Views.TransmissionLossViewer
         public TransmissionLossViewModel()
         {
             TitleString = "<no radial selected>";
-            SelectedRadialIndex = -1;
             Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged")
                 .Where(e => e.EventArgs.PropertyName == "SelectedRadialIndex")
                 .Select(e => SelectedRadialIndex)
@@ -60,7 +59,7 @@ namespace ESME.Views.TransmissionLossViewer
                     else
                     {
                         var geometryString = new StringBuilder();
-                        var bearing = Radials[selectedRadialIndex].Bearing;
+                        SelectedRadialBearing = Radials[selectedRadialIndex].Bearing;
                         const double radius = 8;
                         double x, y;
                         for (double angle = 0; angle <= 2 * Math.PI; angle += Math.PI / 32.0)
@@ -71,8 +70,8 @@ namespace ESME.Views.TransmissionLossViewer
                             geometryString.Append(string.Format(CultureInfo.InvariantCulture, " {0:0.###},{1:0.###} ", x, y));
                         }
                         geometryString.Append(string.Format("M {0:0.###}, {0:0.###} ", radius));
-                        x = (Math.Sin(bearing * (Math.PI / 180)) * radius) + radius;
-                        y = (-Math.Cos(bearing * (Math.PI / 180)) * radius) + radius;
+                        x = (Math.Sin(SelectedRadialBearing * (Math.PI / 180)) * radius) + radius;
+                        y = (-Math.Cos(SelectedRadialBearing * (Math.PI / 180)) * radius) + radius;
                         geometryString.Append(string.Format(CultureInfo.InvariantCulture, "L {0:0.###},{1:0.###} ", x, y));
                         SelectedBearingGeometry = geometryString.ToString();
                     }
@@ -93,55 +92,21 @@ namespace ESME.Views.TransmissionLossViewer
                     RadialViewModel.SelectedMode = SelectedMode;
                     RadialViewModel.PropertyChanged += (s, e) => { if (e.PropertyName == "WriteableBitmap" && Window != null) Window.Dispatcher.InvokeIfRequired(() => Window.Activate()); };
                 });
-        }
-
-        #region public int RadialCount { get; }
-        public int RadialCount
-        {
-            get
-            {
-                if (TransmissionLoss == null) return 0;
-                return Radials.Count - 1;
-            }
-        }
-        #endregion
-
-        [Initialize("<No radial selected>")] 
-        public string TitleString { get; set; }
-        
-        [Affects("TitleString")] 
-        public int SelectedRadialIndex { get; set; }
-
-        [Initialize]
-        public List<Radial> Radials { get; set; }
-
-        public Window Window { get; set; }
-        public Mode SelectedMode { get; set; }
-        public string SelectedBearingGeometry { get; set; }
-        public RadialViewModel RadialViewModel { get; set; }
-        public float MaxTransmissionLoss { get; set; }
-        public float MinTransmissionLoss { get; set; }
-
-
-        #region public TransmissionLoss TransmissionLoss { get; set; }
-        ESME.Scenarios.TransmissionLoss _transmissionLoss;
-
-        [Affects("Radials", "RadialCount", "SelectedRadialIndex", "SelectedBearingGeometry")] 
-        public ESME.Scenarios.TransmissionLoss TransmissionLoss
-        {
-            get { return _transmissionLoss; }
-            set
-            {
-                _transmissionLoss = value;
-                Radials.Clear();
-                if (_transmissionLoss != null)
+            Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged")
+                .Where(e => e.EventArgs.PropertyName == "TransmissionLoss")
+                .Select(e => TransmissionLoss)
+                .DistinctUntilChanged()
+                .ObserveOnDispatcher()
+                .Subscribe(transmissionLoss =>
                 {
-                    Radials = _transmissionLoss == null ? null : _transmissionLoss.Radials.OrderBy(r => r.Bearing).ToList();
-                    if (Radials == null)
-                    {
-                        Debug.WriteLine("This transmission loss contains no radials");
-                        return;
-                    }
+                    if (_transmissionLossObserver != null) _transmissionLossObserver.Dispose();
+                    _transmissionLossObserver = null;
+                    Radials = TransmissionLoss == null ? null : TransmissionLoss.Radials.OrderBy(r => r.Bearing).ToList();
+                    if (Radials == null) RadialCount = 0;
+                    if (transmissionLoss == null || Radials == null) return;
+                    Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} TransmissionLossViewModel: TransmissionLoss changed to {1}", DateTime.Now, transmissionLoss.ToString()));
+                    RadialCount = Radials.Count - 1;
+                    SelectedRadialIndex = -1;
                     try
                     {
                         MinTransmissionLoss = (from radial in Radials
@@ -165,40 +130,42 @@ namespace ESME.Views.TransmissionLossViewer
                     {
                         Debug.WriteLine(string.Format("Invalid operation exception loading radial: {0}", ex.Message));
                     }
-                    ((INotifyPropertyChanged)_transmissionLoss).PropertyChanged += (s, e) =>
-                    {
-                        if (e.PropertyName == "IsDeleted" && Window != null)
-                        {
-                            CloseDialog(null);
-                        }
-                    };
-                    SelectedMode = (from m in _transmissionLoss.Modes
-                                    orderby m.MaxPropagationRadius
-                                    select m).Last();
-                    SelectedRadialIndex = -1;
-#if false
-                    var tlstring = "";
-                    if (SelectedMode.TransmissionLossPluginType.ToLowerInvariant().Contains("bellhop")) tlstring = "Bellhop";
-                    if (SelectedMode.TransmissionLossPluginType.ToLowerInvariant().Contains("ramgeo")) tlstring = "RAMGeo";
-                    foreach (var radial in Radials)
-                    {
-                        var radialViewModel = new RadialViewModel();
-                        radialViewModel.ColorMapViewModel.DataRange.Update(MinTransmissionLoss, MaxTransmissionLoss);
-                        radialViewModel.SelectedMode = SelectedMode;
-                        radialViewModel.AxisSeriesViewModel.PlotTitle = string.Format("NEW: Radial bearing: {0:000.0} degrees. Calculator: {1}", radial.Bearing, tlstring);
-                        radialViewModel.WaitToRenderText = "Please wait...";
-                        var radialView = new RadialView { DataContext = radialViewModel };
-                        radialViewModel.RadialView = radialView;
-                        radialViewModel.Initialize();
-                        radialViewModel.Radial = radial;
-                        RadialViews.Add(radialView);
-                        RadialViewModels.Add(radialViewModel);
-                    }
-#endif
-                }
-            }
+                    SelectedMode = transmissionLoss.Modes.OrderBy(m => m.MaxPropagationRadius).Last();
+                    MinRadialBearing = Radials.Min(r => r.Bearing);
+                    MaxRadialBearing = Radials.Max(r => r.Bearing);
+                    RadialBearingChange = (MaxRadialBearing - MinRadialBearing) / RadialCount;
+                    SelectedRadialBearing = MinRadialBearing;
+                    Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} TransmissionLossViewModel: SelectedRadialIndex set to -1", DateTime.Now));
+                    _transmissionLossObserver = Observable.FromEventPattern<PropertyChangedEventArgs>(transmissionLoss, "PropertyChanged")
+                        .ObserveOnDispatcher()
+                        .Select(e => TransmissionLoss)
+                        .DistinctUntilChanged()
+                        .Subscribe(tl => { if (tl.IsDeleted && Window != null) CloseDialog(null); });
+                    SelectedRadialIndex = 0;
+                });
         }
-        #endregion
+        IDisposable _transmissionLossObserver;
+
+        [Initialize("<No radial selected>")] 
+        public string TitleString { get; set; }
+        
+        [Initialize(-1)] 
+        public int SelectedRadialIndex { get; set; }
+
+        public List<Radial> Radials { get; set; }
+
+        public int RadialCount { get; private set; }
+        public double MinRadialBearing { get; private set; }
+        public double MaxRadialBearing { get; private set; }
+        public double RadialBearingChange { get; private set; }
+        public double SelectedRadialBearing { get; set; }
+        public Window Window { get; set; }
+        public Mode SelectedMode { get; set; }
+        public string SelectedBearingGeometry { get; set; }
+        public RadialViewModel RadialViewModel { get; set; }
+        public float MaxTransmissionLoss { get; set; }
+        public float MinTransmissionLoss { get; set; }
+        public ESME.Scenarios.TransmissionLoss TransmissionLoss { get; set; }
 
         #region Commands
         bool AreSaveCommandsEnabled { get { return RadialViewModel != null && RadialViewModel.Radial != null; } }

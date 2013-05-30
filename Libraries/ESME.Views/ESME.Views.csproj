@@ -137,6 +137,7 @@
       <DependentUpon>EditableTextBlock.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\FileOrDirectorySetting.cs" />
+    <Compile Include="Controls\FormattedSlider.cs" />
     <Compile Include="Controls\HeaderedPropertyDisplayPopup.xaml.cs">
       <DependentUpon>HeaderedPropertyDisplayPopup.xaml</DependentUpon>
     </Compile>
