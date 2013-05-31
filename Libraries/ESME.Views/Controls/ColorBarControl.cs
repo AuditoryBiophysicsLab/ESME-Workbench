@@ -17,6 +17,13 @@ namespace ESME.Views.Controls
     {
         static ColorBarControl() { DefaultStyleKeyProperty.OverrideMetadata(typeof(ColorBarControl), new FrameworkPropertyMetadata(typeof(ColorBarControl))); }
 
+        public ColorBarControl()
+        {
+            Observable.FromEventPattern<SizeChangedEventArgs>(this, "SizeChanged")
+                .ObserveOnDispatcher()
+                .Subscribe(e => CurrentRangeChanged());
+        }
+
         double _axisRange;
         double _previousY;
         StepFunction _steps;

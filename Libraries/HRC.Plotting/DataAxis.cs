@@ -808,7 +808,7 @@ namespace HRC.Plotting
                     default:
                         throw new ApplicationException("DataAxis: Unknown AxisLocation value.");
                 }
-                dc.DrawGeometry(new SolidColorBrush(Colors.Black), 
+                dc.DrawGeometry(Brushes.Black, 
                                 null,
                                 new PathGeometry
                                 {
@@ -864,12 +864,13 @@ namespace HRC.Plotting
             TextBlockBorder = new Border { Child = TextBlock };
         }
 
-        public DataAxisTick(double value, string text, bool isMajorTick, Color backgroundColor) : this(value, text, isMajorTick)
+        public DataAxisTick(double value, string text, bool isMajorTick, Brush backgroundBrush, Brush borderBrush, Brush textBrush) : this(value, text, isMajorTick)
         {
             if (TextBlockBorder == null) return;
             TextBlock.Margin = new Thickness(1);
-            TextBlockBorder.Background = new SolidColorBrush(backgroundColor);
-            TextBlockBorder.BorderBrush = new SolidColorBrush(Colors.Black);
+            TextBlock.Foreground = textBrush;
+            TextBlockBorder.Background = backgroundBrush;
+            TextBlockBorder.BorderBrush = borderBrush;
             TextBlockBorder.BorderThickness = new Thickness(1);
         }
 

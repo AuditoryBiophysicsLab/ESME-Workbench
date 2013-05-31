@@ -149,8 +149,8 @@ namespace ESME.Views.TransmissionLossViewer
                                                                                                AxisMarkers.Clear();
                                                                                                if (ColorMapViewModel.Range != FullRange) 
                                                                                                {
-                                                                                                   AxisMarkers.Add(new DataAxisTick(ColorMapViewModel.Range.Min, string.Format("{0:0}", ColorMapViewModel.Range.Min), true, Colors.White));
-                                                                                                   AxisMarkers.Add(new DataAxisTick(ColorMapViewModel.Range.Max, string.Format("{0:0}", ColorMapViewModel.Range.Max), true, Colors.White));
+                                                                                                   AxisMarkers.Add(new DataAxisTick(ColorMapViewModel.Range.Min, string.Format("{0:0}", ColorMapViewModel.Range.Min), true, Brushes.White, Brushes.Black, Brushes.Black));
+                                                                                                   AxisMarkers.Add(new DataAxisTick(ColorMapViewModel.Range.Max, string.Format("{0:0}", ColorMapViewModel.Range.Max), true, Brushes.White, Brushes.Black, Brushes.Black));
                                                                                                }
                                                                                                Debug.WriteLine("{0:HH:mm:ss.fff} ColorMapViewModel.Range changed to {1}",
                                                                                                                DateTime.Now,
@@ -288,7 +288,7 @@ namespace ESME.Views.TransmissionLossViewer
                 else
                 {
                     if (_mouseTransmissionLossMarker != null) AxisMarkers.Remove(_mouseTransmissionLossMarker);
-                    _mouseTransmissionLossMarker = new DataAxisTick(_transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex], string.Format("{0:0}", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]), true, Colors.White);
+                    _mouseTransmissionLossMarker = new DataAxisTick(_transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex], string.Format("{0:0}", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]), true, Brushes.Black, Brushes.LightGray, Brushes.White);
                     AxisMarkers.Add(_mouseTransmissionLossMarker);
                     MouseTransmissionLossInfo = string.Format("Transmission Loss: {0:0.0}dB", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
                     MouseSPLInfo = string.Format("Sound Pressure: {0:0.0}dB", SelectedMode.SourceLevel - _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
