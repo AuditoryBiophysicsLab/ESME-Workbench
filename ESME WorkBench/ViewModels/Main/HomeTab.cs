@@ -210,11 +210,21 @@ namespace ESMEWorkbench.ViewModels.Main
         #endregion
 
         #region SaveScenarioCommand
-        public SimpleCommand<object, object> SaveScenarioCommand { get { return _save ?? (_save = new SimpleCommand<object, object>(o =>
+        public SimpleCommand<object, object> SaveScenarioCommand
         {
-            Database.SaveChanges();
-            OnPropertyChanged("IsSaveScenarioCommandEnabled");
-        })); } }
+            get
+            {
+                return _save ?? (_save = new SimpleCommand<object, object>(o =>
+                {
+                    if (IsSaveScenarioCommandEnabled)
+                    {
+                        Database.SaveChanges();
+                        OnPropertyChanged("IsSaveScenarioCommandEnabled");
+                    }
+                }));
+            }
+        }
+
         SimpleCommand<object, object> _save;
         public bool IsSaveScenarioCommandEnabled { get { return (!IsTransmissionLossBusy) && Database != null && Database.Context != null && Database.Context.IsModified; } }
         #endregion

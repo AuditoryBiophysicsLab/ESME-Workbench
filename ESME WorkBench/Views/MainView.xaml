@@ -40,7 +40,7 @@
         <Utility:BooleanNegatingConverter x:Key="NegatingConverter" />
     </r:RibbonWindow.Resources>
     <r:RibbonWindow.InputBindings>
-        <KeyBinding Command="{Binding SaveCommand}" Gesture="CTRL+S" />
+        <KeyBinding Command="{Binding SaveScenarioCommand}" Gesture="CTRL+S" />
     </r:RibbonWindow.InputBindings>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">

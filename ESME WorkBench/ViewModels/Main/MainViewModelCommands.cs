@@ -69,8 +69,6 @@ namespace ESMEWorkbench.ViewModels.Main
         SimpleCommand<object, object> _disabled;
         #endregion
 
-      
-
         #region ViewClosingCommand
         public SimpleCommand<object, EventToCommandArgs> ViewClosingCommand
         {
