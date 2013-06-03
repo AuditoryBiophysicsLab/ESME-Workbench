@@ -1,0 +1,55 @@
+﻿<Window x:Class="ESME.Views.Scenarios.PSMContextView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:l="clr-namespace:ESME.Views.Scenarios"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="{Binding WindowTitle}"
+        d:DataContext="{d:DesignInstance l:PSMContextViewModel}"
+        SizeToContent="WidthAndHeight"
+        WindowStyle="ToolWindow"
+        mc:Ignorable="d">
+    <Window.Resources>
+        <DataTemplate x:Key="SelectedPlatform" DataType="{x:Type l:PlatformPropertiesViewModel}">
+            <l:PlatformPropertiesControlView/>
+        </DataTemplate>
+        <DataTemplate x:Key="CollapsedPlatform" DataType="{x:Type l:PlatformPropertiesViewModel}">
+            <TextBlock Text="{Binding PropertyObject.Name}"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SelectedSource" DataType="{x:Type l:PropertiesViewModel}">
+            <l:SourcePropertiesControlView/>
+        </DataTemplate>
+        <DataTemplate x:Key="CollapsedSource" DataType="{x:Type l:PropertiesViewModel}">
+            <TextBlock Text="{Binding PropertyObject.Name}"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SelectedMode" DataType="{x:Type l:PropertiesViewModel}">
+            <l:ModePropertiesControlView/>
+        </DataTemplate>
+        <DataTemplate x:Key="CollapsedMode" DataType="{x:Type l:PropertiesViewModel}">
+            <TextBlock Text="{Binding PropertyObject.Name}"/>
+        </DataTemplate>
+    </Window.Resources>    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <!--<ListBox Grid.Column="0" ItemsSource="{Binding Platforms}" SelectedItem="{Binding SelectedPlatform}" ItemTemplate="{StaticResource SelectedPlatform}"/>-->
+        <ListBox Grid.Column="0">
+            <l:PlatformPropertiesControlView/>
+        </ListBox>
+        <GridSplitter Grid.Column="1" />
+        <ListBox Grid.Column="2">
+            <l:SourcePropertiesControlView />
+        </ListBox>
+        <GridSplitter Grid.Column="3" />
+        <ListBox Grid.Column="4">
+            <l:ModePropertiesControlView />
+        </ListBox>
+    </Grid>
+</Window>
