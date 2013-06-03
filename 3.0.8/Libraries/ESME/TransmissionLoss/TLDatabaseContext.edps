@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EntityDeveloper>
+  <ProjectSettings AppConnectionStringName="TLDatabaseContextConnectionString">
+    <Rules>
+      <EntitySet PluralizationName="Pluralize" />
+      <Class UseSchemaAsPrefix="False" RemoveUnderscores="False" CodeCase="FirstLetterUppercase" AddPrefix="" AddSuffix="" RemovePrefixes="" RemoveSuffixes="" PluralizationName="Singularize" />
+      <Property RemoveUnderscores="False" CodeCase="FirstLetterUppercase" AddPrefix="" AddSuffix="" RemovePrefixes="" RemoveSuffixes="" PluralizationName="Unchanged" />
+    </Rules>
+    <Generation Template="LINQ C#" DestinationFolder="C:\Projects\ESME\Libraries\ESME\TransmissionLoss">
+      <GeneratedFiles>
+        <File Name="TLDatabaseContext.Designer.cs" />
+      </GeneratedFiles>
+    </Generation>
+  </ProjectSettings>
+</EntityDeveloper>
