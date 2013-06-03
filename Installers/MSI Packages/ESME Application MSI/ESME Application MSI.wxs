@@ -242,6 +242,23 @@
                   Name="AsyncCtpLibrary.dll"
                   Source="$(var.ExternalsPath)\AsyncCtpLibrary.dll" />
 
+            <!-- Reactive Framework assemblies -->
+            <File Id="System.Reactive.Core.dll"
+                  Name="System.Reactive.Core.dll"
+                  Source="$(var.ExternalsPath)\System.Reactive.Core.dll" />
+            <File Id="System.Reactive.Interfaces.dll"
+                  Name="System.Reactive.Interfaces.dll"
+                  Source="$(var.ExternalsPath)\System.Reactive.Interfaces.dll" />
+            <File Id="System.Reactive.Linq.dll"
+                  Name="System.Reactive.Linq.dll"
+                  Source="$(var.ExternalsPath)\System.Reactive.Linq.dll" />
+            <File Id="System.Reactive.PlatformServices.dll"
+                  Name="System.Reactive.PlatformServices.dll"
+                  Source="$(var.ExternalsPath)\System.Reactive.PlatformServices.dll" />
+            <File Id="System.Reactive.Windows.Threading.dll"
+                  Name="System.Reactive.Windows.Threading.dll"
+                  Source="$(var.ExternalsPath)\System.Reactive.Windows.Threading.dll" />
+
             <!-- SQL Server Compact Edition assemblies -->
             <File Id="System.Data.SqlServerCe.dll"
                   Name="System.Data.SqlServerCe.dll"
@@ -249,24 +266,6 @@
             <File Id="System.Data.SqlServerCe.Entity.dll"
                   Name="System.Data.SqlServerCe.Entity.dll"
                   Source="$(var.ExternalsPath)\System.Data.SqlServerCe.Entity.dll" />
-            <File Id="sqlceca40.dll"
-                  Name="sqlceca40.dll"
-                  Source="$(var.ExternalsPathArchDependent)\sqlceca40.dll" />
-            <File Id="sqlcecompact40.dll"
-                  Name="sqlcecompact40.dll"
-                  Source="$(var.ExternalsPathArchDependent)\sqlcecompact40.dll" />
-            <File Id="sqlceer40EN.dll"
-                  Name="sqlceer40EN.dll"
-                  Source="$(var.ExternalsPathArchDependent)\sqlceer40EN.dll" />
-            <File Id="sqlceme40.dll"
-                  Name="sqlceme40.dll"
-                  Source="$(var.ExternalsPathArchDependent)\sqlceme40.dll" />
-            <File Id="sqlceqp40.dll"
-                  Name="sqlceqp40.dll"
-                  Source="$(var.ExternalsPathArchDependent)\sqlceqp40.dll" />
-            <File Id="sqlcese40.dll"
-                  Name="sqlcese40.dll"
-                  Source="$(var.ExternalsPathArchDependent)\sqlcese40.dll" />
 
             <!-- Microsoft Ribbon assembly -->
             <File Id="RibbonControlsLibrary.dll"
@@ -278,6 +277,77 @@
                   Name="WPFToolkit.Extended.dll"
                   Source="$(var.ExternalsPath)\WPFToolkit.Extended.dll" />
           </Component>
+          <Directory Id="amd64" Name="amd64">
+            <Component Id="x64_SqlCE" Guid="{B3CAEAF0-DA05-491C-BECF-62397C9EE3F9}">
+              <File Id="x64_sqlceca40.dll"       
+                    Name="sqlceca40.dll"       
+                    Source="$(var.ExternalsPath)\x64\sqlceca40.dll" />
+              <File Id="x64_sqlcecompact40.dll"
+                    Name="sqlcecompact40.dll"
+                    Source="$(var.ExternalsPath)\x64\sqlcecompact40.dll" />
+              <File Id="x64_sqlceer40EN.dll"
+                    Name="sqlceer40EN.dll"
+                    Source="$(var.ExternalsPath)\x64\sqlceer40EN.dll" />
+              <File Id="x64_sqlceme40.dll"
+                    Name="sqlceme40.dll"
+                    Source="$(var.ExternalsPath)\x64\sqlceme40.dll" />
+              <File Id="x64_sqlceqp40.dll"
+                    Name="sqlceqp40.dll"
+                    Source="$(var.ExternalsPath)\x64\sqlceqp40.dll" />
+              <File Id="x64_sqlcese40.dll"
+                    Name="sqlcese40.dll"
+                    Source="$(var.ExternalsPath)\x64\sqlcese40.dll" />
+            </Component>
+            <Directory Id="x64_Microsoft.VC90.CRT" Name="Microsoft.VC90.CRT">
+              <Component Id="x64_Microsoft.VC90.CRT" Guid="{A337A500-DE58-4F97-B8EF-472080C79498}">
+                <File Id="x64_Microsoft.VC90.CRT.manifest"
+                      Name="Microsoft.VC90.CRT.manifest"
+                      Source="$(var.ExternalsPath)\x64\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest" />
+                <File Id="x64_msvcr90.dll"
+                      Name="msvcr90.dll"
+                      Source="$(var.ExternalsPath)\x64\Microsoft.VC90.CRT\msvcr90.dll" />
+                <File Id="x64_README_ENU.txt"
+                      Name="README_ENU.txt"
+                      Source="$(var.ExternalsPath)\x64\Microsoft.VC90.CRT\README_ENU.txt" />
+              </Component>
+            </Directory>
+          </Directory>
+          <Directory Id="x86" Name="x86">
+            <Component Id="x86_SqlCE" Guid="{2F1E880E-7B67-45B9-9690-32E345BE40E4}">
+              <File Id="x86_sqlceca40.dll"
+                    Name="sqlceca40.dll"
+                    Source="$(var.ExternalsPath)\x64\sqlceca40.dll" />
+              <File Id="x86_sqlcecompact40.dll"
+                    Name="sqlcecompact40.dll"
+                    Source="$(var.ExternalsPath)\x64\sqlcecompact40.dll" />
+              <File Id="x86_sqlceer40EN.dll"
+                    Name="sqlceer40EN.dll"
+                    Source="$(var.ExternalsPath)\x64\sqlceer40EN.dll" />
+              <File Id="x86_sqlceme40.dll"
+                    Name="sqlceme40.dll"
+                    Source="$(var.ExternalsPath)\x64\sqlceme40.dll" />
+              <File Id="x86_sqlceqp40.dll"
+                    Name="sqlceqp40.dll"
+                    Source="$(var.ExternalsPath)\x64\sqlceqp40.dll" />
+              <File Id="x86_sqlcese40.dll"
+                    Name="sqlcese40.dll"
+                    Source="$(var.ExternalsPath)\x64\sqlcese40.dll" />
+            </Component>
+            <Directory Id="x86_Microsoft.VC90.CRT" Name="Microsoft.VC90.CRT">
+              <Component Id="x86_Microsoft.VC90.CRT" Guid="{B4E749DA-1E24-4B0C-9616-DEC84B444C14}">
+                <File Id="x86_Microsoft.VC90.CRT.manifest"
+                      Name="Microsoft.VC90.CRT.manifest"
+                      Source="$(var.ExternalsPath)\x64\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest" />
+                <File Id="x86_msvcr90.dll"
+                      Name="msvcr90.dll"
+                      Source="$(var.ExternalsPath)\x64\Microsoft.VC90.CRT\msvcr90.dll" />
+                <File Id="x86_README_ENU.txt"
+                      Name="README_ENU.txt"
+                      Source="$(var.ExternalsPath)\x64\Microsoft.VC90.CRT\README_ENU.txt" />
+              </Component>
+            </Directory>
+          </Directory>
+
           <?if $(var.Platform) = x64 ?>
           <!-- 64-bit components go here -->
             <Merge Id="vc100" Language="1033" SourceFile="$(var.MergeModulesPath)\Microsoft_VC100_CRT_x64.msm" DiskId="1" />
@@ -414,6 +484,10 @@
       <ComponentGroupRef Id="SpeciesDefinitionFiles" />
       <ComponentRef Id="ESMEWorkbench_Shortcuts"/>
       <ComponentRef Id="RegistryEntries"/>
+      <ComponentRef Id="x64_SqlCE"/>
+      <ComponentRef Id="x64_Microsoft.VC90.CRT"/>
+      <ComponentRef Id="x86_SqlCE"/>
+      <ComponentRef Id="x86_Microsoft.VC90.CRT"/>
     </Feature>
 
 
