@@ -316,34 +316,34 @@
             <Component Id="x86_SqlCE" Guid="{2F1E880E-7B67-45B9-9690-32E345BE40E4}">
               <File Id="x86_sqlceca40.dll"
                     Name="sqlceca40.dll"
-                    Source="$(var.ExternalsPath)\x64\sqlceca40.dll" />
+                    Source="$(var.ExternalsPath)\x86\sqlceca40.dll" />
               <File Id="x86_sqlcecompact40.dll"
                     Name="sqlcecompact40.dll"
-                    Source="$(var.ExternalsPath)\x64\sqlcecompact40.dll" />
+                    Source="$(var.ExternalsPath)\x86\sqlcecompact40.dll" />
               <File Id="x86_sqlceer40EN.dll"
                     Name="sqlceer40EN.dll"
-                    Source="$(var.ExternalsPath)\x64\sqlceer40EN.dll" />
+                    Source="$(var.ExternalsPath)\x86\sqlceer40EN.dll" />
               <File Id="x86_sqlceme40.dll"
                     Name="sqlceme40.dll"
-                    Source="$(var.ExternalsPath)\x64\sqlceme40.dll" />
+                    Source="$(var.ExternalsPath)\x86\sqlceme40.dll" />
               <File Id="x86_sqlceqp40.dll"
                     Name="sqlceqp40.dll"
-                    Source="$(var.ExternalsPath)\x64\sqlceqp40.dll" />
+                    Source="$(var.ExternalsPath)\x86\sqlceqp40.dll" />
               <File Id="x86_sqlcese40.dll"
                     Name="sqlcese40.dll"
-                    Source="$(var.ExternalsPath)\x64\sqlcese40.dll" />
+                    Source="$(var.ExternalsPath)\x86\sqlcese40.dll" />
             </Component>
             <Directory Id="x86_Microsoft.VC90.CRT" Name="Microsoft.VC90.CRT">
               <Component Id="x86_Microsoft.VC90.CRT" Guid="{B4E749DA-1E24-4B0C-9616-DEC84B444C14}">
                 <File Id="x86_Microsoft.VC90.CRT.manifest"
                       Name="Microsoft.VC90.CRT.manifest"
-                      Source="$(var.ExternalsPath)\x64\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest" />
+                      Source="$(var.ExternalsPath)\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest" />
                 <File Id="x86_msvcr90.dll"
                       Name="msvcr90.dll"
-                      Source="$(var.ExternalsPath)\x64\Microsoft.VC90.CRT\msvcr90.dll" />
+                      Source="$(var.ExternalsPath)\x86\Microsoft.VC90.CRT\msvcr90.dll" />
                 <File Id="x86_README_ENU.txt"
                       Name="README_ENU.txt"
-                      Source="$(var.ExternalsPath)\x64\Microsoft.VC90.CRT\README_ENU.txt" />
+                      Source="$(var.ExternalsPath)\x86\Microsoft.VC90.CRT\README_ENU.txt" />
               </Component>
             </Directory>
           </Directory>
