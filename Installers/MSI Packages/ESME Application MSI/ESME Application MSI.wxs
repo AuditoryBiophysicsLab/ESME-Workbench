@@ -137,16 +137,6 @@
                   Source="$(var.DocRoot)\Read Me.pdf" />
             -->
 
-            <!-- Bellhop acoustic simulator -->
-            <File Id="bellhop.exe"
-                  Name="bellhop.exe"
-                  Source="$(var.BellhopPath)\bellhop.exe" />
-
-            <!-- RAMGeo acoustic simulator -->
-            <File Id="ramgeo.exe"
-                  Name="ramgeo.exe"
-                  Source="$(var.RAMGeoPath)\ramgeo.exe" />
-
             <!-- Standard Transmission Loss Engines plugin (interface between ESME and Bellhop/RAMGeo) -->
             <File Id="StandardTransmissionLossEngines.dll"
                   Name="StandardTransmissionLossEngines.dll"
@@ -276,6 +266,42 @@
             <File Id="WPFToolkit.Extended.dll"
                   Name="WPFToolkit.Extended.dll"
                   Source="$(var.ExternalsPath)\WPFToolkit.Extended.dll" />
+          </Component>
+          <Component Id="AcousticSimulatorsForNonXP" Guid="{788AD36D-BBF7-4441-AEED-B266767777E0}">
+            <!-- Bellhop acoustic simulator -->
+            <File Id="bellhop_nonXP.exe"
+                  Name="bellhop_nonXP.exe"
+                  Source="$(var.BellhopPath)\bellhop.exe" />
+
+            <!-- RAMGeo acoustic simulator -->
+            <File Id="ramgeo_nonXP.exe"
+                  Name="ramgeo_nonXP.exe"
+                  Source="$(var.RAMGeoPath)\ramgeo.exe" />
+            <CopyFile Id="bellhop_nonXPcopy" FileId="bellhop_nonXP.exe" DestinationName="bellhop.exe"/>
+            <CopyFile Id="ramgeo_nonXPcopy" FileId="ramgeo_nonXP.exe" DestinationName="ramgeo.exe"/>
+          </Component>
+          <Component Id="AcousticSimulatorsForXP" Guid="{4DE2BDBC-20B4-40CE-B864-C95B6260B53C}">
+            <!-- Bellhop acoustic simulator -->
+            <File Id="bellhop_XP.exe"
+                  Name="bellhop_XP.exe"
+                  Source="$(var.BellhopPath)\bellhop-cygwin.exe" />
+
+            <!-- RAMGeo acoustic simulator -->
+            <File Id="ramgeo_XP.exe"
+                  Name="ramgeo_XP.exe"
+                  Source="$(var.RAMGeoPath)\ramgeo-cygwin.exe" />
+            <!-- CYGWIN DLLs for Bellhop and RAMGeo -->
+            <File Id="cyggcc_s_1.dll"
+                  Name="cyggcc_s-1.dll"
+                  Source="$(var.BellhopPath)\cyggcc_s-1.dll" />
+            <File Id="cyggfortran_3.dll"
+                  Name="cyggfortran-3.dll"
+                  Source="$(var.BellhopPath)\cyggfortran-3.dll" />
+            <File Id="cygwin1.dll"
+                  Name="cygwin1.dll"
+                  Source="$(var.BellhopPath)\cygwin1.dll" />
+            <CopyFile Id="bellhop_XPcopy" FileId="bellhop_XP.exe" DestinationName="bellhop.exe"/>
+            <CopyFile Id="ramgeo_XPcopy" FileId="ramgeo_XP.exe" DestinationName="ramgeo.exe"/>
           </Component>
           <Directory Id="amd64" Name="amd64">
             <Component Id="x64_SqlCE" Guid="{B3CAEAF0-DA05-491C-BECF-62397C9EE3F9}">
@@ -486,10 +512,17 @@
       <ComponentRef Id="RegistryEntries"/>
       <ComponentRef Id="x64_SqlCE"/>
       <ComponentRef Id="x64_Microsoft.VC90.CRT"/>
-      <ComponentRef Id="x86_SqlCE"/>
+      <ComponentRef Id="x86_SqlCE" />
       <ComponentRef Id="x86_Microsoft.VC90.CRT"/>
     </Feature>
-
+    <Feature Id="AcousticSimulatorsForXP" Level="1" ConfigurableDirectory="TARGETDIR">
+      <Condition Level="0"> VersionNT = 501 AND ServicePackLevel >= 2 </Condition>
+      <ComponentRef Id="AcousticSimulatorsForXP" />
+    </Feature>
+    <Feature Id="AcousticSimulatorsForNonXP" Level="1" ConfigurableDirectory="TARGETDIR">
+      <Condition Level="0"> VersionNT > 501 </Condition>
+      <ComponentRef Id="AcousticSimulatorsForNonXP" />
+    </Feature>
 
     <!-- 
 		Set default destination folder (full path) unless it comes from registry 
