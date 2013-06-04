@@ -515,12 +515,12 @@
       <ComponentRef Id="x86_SqlCE" />
       <ComponentRef Id="x86_Microsoft.VC90.CRT"/>
     </Feature>
-    <Feature Id="AcousticSimulatorsForXP" Level="1" ConfigurableDirectory="TARGETDIR">
-      <Condition Level="0"> VersionNT = 501 AND ServicePackLevel >= 2 </Condition>
+    <Feature Id="AcousticSimulatorsForXP" Level="0" ConfigurableDirectory="TARGETDIR">
+      <Condition Level="1"><![CDATA[VersionNT <= 502]]></Condition>
       <ComponentRef Id="AcousticSimulatorsForXP" />
     </Feature>
-    <Feature Id="AcousticSimulatorsForNonXP" Level="1" ConfigurableDirectory="TARGETDIR">
-      <Condition Level="0"> VersionNT > 501 </Condition>
+    <Feature Id="AcousticSimulatorsForNonXP" Level="0" ConfigurableDirectory="TARGETDIR">
+      <Condition Level="1"><![CDATA[VersionNT >= 600]]></Condition>
       <ComponentRef Id="AcousticSimulatorsForNonXP" />
     </Feature>
 
