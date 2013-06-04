@@ -1,0 +1,74 @@
+﻿<Window x:Class="ESME.Views.Scenarios.SpeciesPropertiesView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:l="clr-namespace:ESME.Views.Scenarios"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC" Title="{Binding WindowTitle}"
+        Background="#fff0f0f0"
+        d:DataContext="{d:DesignInstance l:SpeciesPropertiesViewModel}"
+        Grid.IsSharedSizeScope="True"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        WindowStyle="ToolWindow"
+        mc:Ignorable="d">    
+    <DockPanel LastChildFill="True">
+        <StackPanel HorizontalAlignment="Right"
+                    DockPanel.Dock="Bottom"
+                    Orientation="Horizontal">
+            <Button Width="75"
+                    Margin="5"
+                    Command="{Binding OkCommand}"
+                    Content="OK"
+                    IsDefault="True" />
+        </StackPanel>
+        <Border BorderThickness="0"
+                DockPanel.Dock="Top"
+                Padding="5">
+            <StackPanel Orientation="Vertical">
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Width="75"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               Text="Species Name"
+                               TextAlignment="Right" />
+                    <TextBox Grid.Column="1" Text="{Binding LatinName}" />
+                </Grid>
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Center"
+                               Text="Density (#/sq km)"
+                               TextAlignment="Right"
+                               ToolTip="Animals per square kilometer" />
+                    <TextBox Grid.Column="1"
+                             Text="{Binding PopulationDensity}"
+                             ToolTip="Animals per square kilometer" />
+                </Grid>
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Center"
+                               Text="Species Type"
+                               TextAlignment="Right"
+                               ToolTip="Defines the paramters of the animal movement model" />
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding PredefinedSpecies}"
+                              SelectedItem="{Binding SelectedSpecies}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+    </DockPanel>
+</Window>
