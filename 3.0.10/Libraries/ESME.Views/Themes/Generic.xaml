@@ -1,0 +1,732 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:colorPicker="clr-namespace:ESME.Views.ColorPicker"
+                    xmlns:Controls="clr-namespace:ESME.Views.Controls"
+                    xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
+                    xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
+                    xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC">
+    <WPF:BooleanInverter x:Key="BooleanInverter" />
+    <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed"
+                                      FalseValue="Collapsed"
+                                      TrueValue="Visible" />
+    <Style TargetType="{x:Type Controls:ImageToggleButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Controls:ImageToggleButton}">
+                    <Rectangle Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
+                        <Rectangle.Fill>
+                            <ImageBrush ImageSource="{Binding Path=ImageSource, RelativeSource={RelativeSource TemplatedParent}}" />
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="{x:Type Controls:ColorBarControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Controls:ColorBarControl}">
+                    <DockPanel>
+                        <Plotting:DataAxis Name="PART_DataAxis"
+                                           AxisLabel="{TemplateBinding AxisTitle}"
+                                           AxisLocation="Right"
+                                           AxisMarkers="{TemplateBinding AxisMarkers}"
+                                           DataRange="{TemplateBinding FullRange}"
+                                           DockPanel.Dock="Right" />
+                        <DockPanel>
+                            <Image Name="PART_Image"
+                                   Margin="{TemplateBinding ColorbarAdjustmentMargins}"
+                                   Source="{TemplateBinding ColorBarImage}"
+                                   Stretch="Fill"
+                                   ToolTip="{TemplateBinding ToolTip}" />
+                        </DockPanel>
+                    </DockPanel>
+
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="{x:Type Controls:LayerControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Controls:LayerControl}">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <StackPanel Orientation="Horizontal">
+                            <Grid DockPanel.Dock="Top">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Row="0"
+                                          Grid.Column="0"
+                                          VerticalAlignment="Center"
+                                          Focusable="False"
+                                          IsChecked="{Binding Path=IsChecked,
+                                                              RelativeSource={RelativeSource TemplatedParent}}"
+                                          Visibility="{TemplateBinding CheckBoxVisibility}" />
+                                <ToggleButton x:Name="LineColorToggle"
+                                              Grid.Row="0"
+                                              Grid.Column="1"
+                                              Width="16"
+                                              VerticalAlignment="Center"
+                                              Background="{TemplateBinding LineOrSymbolColor}"
+                                              IsHitTestVisible="{Binding ElementName=LineColorPopup,
+                                                                         Path=IsOpen,
+                                                                         Mode=OneWay,
+                                                                         Converter={StaticResource BooleanInverter}}"
+                                              ToolTip="Click to change line color and weight"
+                                              Visibility="{TemplateBinding LineColorVisibility}">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate>
+                                            <Rectangle Width="12"
+                                                       Height="12"
+                                                       RadiusX="3"
+                                                       RadiusY="3">
+                                                <Rectangle.Fill>
+                                                    <SolidColorBrush Color="{Binding Path=LineOrSymbolColor, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:LayerControl}}}" />
+                                                </Rectangle.Fill>
+                                            </Rectangle>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+                                <Popup x:Name="LineColorPopup"
+                                       IsOpen="{Binding IsChecked,
+                                                        ElementName=LineColorToggle}"
+                                       StaysOpen="False">
+                                    <Border Background="LightYellow"
+                                            BorderBrush="Black"
+                                            BorderThickness="1">
+                                        <StackPanel Orientation="Vertical">
+                                            <TextBlock Margin="5 5 5 2" Text="Color" />
+                                            <colorPicker:ColorPicker Padding="5" SelectedColor="{Binding Path=LineOrSymbolColor, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:LayerControl}}, Mode=TwoWay}" />
+                                            <TextBlock Margin="5 5 5 2" Text="Line Weight" />
+                                            <Slider Maximum="10"
+                                                    Minimum="0.5"
+                                                    Orientation="Horizontal"
+                                                    Padding="5"
+                                                    SmallChange="0.1"
+                                                    TickFrequency="0.5"
+                                                    ToolTip="Line weight"
+                                                    Value="{Binding Path=LineOrSymbolSize,
+                                                                    RelativeSource={RelativeSource TemplatedParent},
+                                                                    Mode=TwoWay}" />
+                                        </StackPanel>
+                                    </Border>
+                                </Popup>
+                                <Image Grid.Row="0"
+                                       Grid.Column="2"
+                                       Source="{Binding Path=ErrorIcon,
+                                                        RelativeSource={RelativeSource FindAncestor,
+                                                                                       AncestorType={x:Type Controls:LayerControl}}}"
+                                       ToolTip="{Binding Path=ErrorString,
+                                                         RelativeSource={RelativeSource FindAncestor,
+                                                                                        AncestorType={x:Type Controls:LayerControl}}}"
+                                       Visibility="{Binding Path=ErrorIconVisibility,
+                                                            RelativeSource={RelativeSource FindAncestor,
+                                                                                           AncestorType={x:Type Controls:LayerControl}}}" />
+                                <ContentPresenter x:Name="LayerName"
+                                                  Grid.Row="0"
+                                                  Grid.Column="3"
+                                                  Content="{TemplateBinding LayerNameContentControl}" />
+                                <!--
+                                    <ContentPresenter x:Name="ContextControls"
+                                    Grid.Row="1"
+                                    Grid.Column="2"
+                                    Content="{TemplateBinding ContextControl}"
+                                    Visibility="{Binding Path=IsSelected,
+                                    RelativeSource={RelativeSource TemplatedParent},
+                                    Converter={StaticResource TrueVisibleFalseCollapsed}}" />
+                                -->
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="{x:Type Controls:PluginSelector}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Controls:PluginSelector}">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <StackPanel HorizontalAlignment="Stretch" Orientation="Vertical">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="PluginLabelColumn" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter Grid.Row="0"
+                                                  Grid.Column="0"
+                                                  Margin="0 0 5 0"
+                                                  HorizontalAlignment="Right"
+                                                  VerticalAlignment="Center"
+                                                  Content="{TemplateBinding PluginTypeName}" />
+                                <TextBox Grid.Row="0"
+                                         Grid.Column="1"
+                                         VerticalAlignment="Center"
+                                         HorizontalContentAlignment="Center"
+                                         IsEnabled="False"
+                                         Text="None available" />
+                                <ComboBox x:Name="AvailablePlugins"
+                                          Grid.Row="0"
+                                          Grid.Column="1"
+                                          VerticalAlignment="Center"
+                                          DisplayMemberPath="PluginName"
+                                          ItemsSource="{Binding Path=ItemsSource,
+                                                                RelativeSource={RelativeSource TemplatedParent}}"
+                                          SelectedItem="{Binding Path=SelectedItem,
+                                                                 RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Grid>
+                            <ContentPresenter x:Name="UsageOptions" Content="{Binding Path=SelectedPlugin.SelectionControl, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <Expander x:Name="Configuration">
+                                <Expander.Header>
+                                    <TextBlock x:Name="ConfigurationHeader" Text="{Binding Path=SelectedPlugin.PluginName, RelativeSource={RelativeSource TemplatedParent}, StringFormat=\{0\} configuration}" />
+                                </Expander.Header>
+                                <ContentPresenter Content="{Binding Path=SelectedPlugin.ConfigurationControl, RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Expander>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Path=SelectedPlugin, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                            <Setter TargetName="ConfigurationHeader" Property="Text" Value="{Binding Path=PluginTypeName, RelativeSource={RelativeSource TemplatedParent}, StringFormat=\{0\} configuration}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SelectedPlugin.IsConfigured, RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter TargetName="Configuration" Property="IsExpanded" Value="False" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SelectedPlugin.IsConfigured, RelativeSource={RelativeSource Self}}" Value="False">
+                            <Setter TargetName="Configuration" Property="IsExpanded" Value="True" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SelectedPlugin.ConfigurationControl, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                            <Setter TargetName="Configuration" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SelectedPlugin.IsConfigured, RelativeSource={RelativeSource Self}}" Value="False">
+                            <Setter TargetName="UsageOptions" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SelectedPlugin.SelectionControl, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                            <Setter TargetName="UsageOptions" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=ItemsSource, RelativeSource={RelativeSource Self}}" Value="{x:Null}">
+                            <Setter TargetName="AvailablePlugins" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="{x:Type Controls:FileOrDirectorySetting}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Controls:FileOrDirectorySetting}">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="{TemplateBinding Caption}" Visibility="{TemplateBinding CaptionVisibility}" />
+                            <DockPanel LastChildFill="True">
+                                <ContentPresenter MinWidth="30"
+                                                  Margin=" 5 0 0 0"
+                                                  Content="{TemplateBinding BrowserButton}"
+                                                  DockPanel.Dock="Right" />
+                                <TextBox x:Name="FileOrDirectoryName"
+                                         DockPanel.Dock="Left"
+                                         Text="{Binding Path=FileName,
+                                                        RelativeSource={RelativeSource TemplatedParent},
+                                                        ValidatesOnDataErrors=True,
+                                                        ValidatesOnExceptions=True,
+                                                        NotifyOnValidationError=True,
+                                                        UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="{TemplateBinding FileName}" />
+                            </DockPanel>
+                        </StackPanel>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="ColorPickerRepeatButtonStyle" TargetType="{x:Type RepeatButton}">
+        <Setter Property="IsTabStop" Value="false" />
+        <Setter Property="Focusable" Value="false" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RepeatButton}">
+                    <Border Background="Transparent" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="ColorSliderThumbStyle" TargetType="{x:Type Thumb}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Grid Width="9" Height="12">
+                        <Polygon Fill="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}" Points="4.5,0 9,5 9,12 0,12 0,5" />
+                        <Polygon Fill="Black" Points="4.5,1 8,5 1,5" />
+                        <Polygon Points="7.5,5.5 7.5,10.5 1.5,10.5 1.5,5.5"
+                                 Stroke="Black"
+                                 StrokeThickness="1" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="SpectrumSliderThumbStyle" TargetType="{x:Type Thumb}">
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Grid Width="16"
+                          Height="9"
+                          Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="4" />
+                            <ColumnDefinition Width="6" />
+                        </Grid.ColumnDefinitions>
+                        <Polygon Grid.Column="0"
+                                 Fill="Black"
+                                 Points="0.5,0  5.5,4.5  0.5,9"
+                                 Stroke="White"
+                                 StrokeThickness="1" />
+                        <Polygon Grid.Column="2"
+                                 Fill="Black"
+                                 Points="5.5,0  0.5,4.5  5.5,9"
+                                 Stroke="White"
+                                 StrokeThickness="1" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <DrawingBrush x:Key="CheckersBrush"
+                  TileMode="Tile"
+                  Viewport="0,0,11,11"
+                  ViewportUnits="Absolute">
+        <DrawingBrush.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="White" Geometry="M0,0 L2,0 2,2, 0,2Z" />
+                <GeometryDrawing Brush="LightGray" Geometry="M0,1 L2,1 2,2 1,2 1,0 0,0Z" />
+            </DrawingGroup>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+    <Style x:Key="SunkenFrameStyle" TargetType="{x:Type Label}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Grid>
+                        <Border Margin="0,1"
+                                BorderBrush="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
+                                BorderThickness="1,0,0,0" />
+                        <Border Margin="1,0"
+                                BorderBrush="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
+                                BorderThickness="0,1,0,0" />
+                        <Border Margin="0,1"
+                                BorderBrush="#F8F8F8"
+                                BorderThickness="0,0,1,0" />
+                        <Border Margin="1,0"
+                                BorderBrush="#F8F8F8"
+                                BorderThickness="0,0,0,1" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="{x:Type colorPicker:ColorSlider}">
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Maximum" Value="255" />
+        <Setter Property="IsTabStop" Value="false" />
+        <Setter Property="SmallChange" Value="1" />
+        <Setter Property="LargeChange" Value="10" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type colorPicker:ColorSlider}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="8*" />
+                            <RowDefinition Height="13" />
+                            <RowDefinition Height="12*" />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="1"
+                                Margin="1"
+                                Background="{TemplateBinding Background}" />
+                        <Border Grid.Row="1" Margin="1">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Offset="0" Color="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=LeftColor}" />
+                                    <GradientStop Offset="1" Color="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=RightColor}" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <Label Grid.Row="1" Style="{StaticResource SunkenFrameStyle}" />
+                        <Track x:Name="PART_Track"
+                               Grid.Row="1"
+                               Margin="-3,0,-2,0">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource ColorPickerRepeatButtonStyle}" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="{x:Static Slider.IncreaseLarge}" Style="{StaticResource ColorPickerRepeatButtonStyle}" />
+                            </Track.IncreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb x:Name="Thumb" Style="{StaticResource ColorSliderThumbStyle}">
+                                    <Thumb.RenderTransform>
+                                        <TranslateTransform Y="5" />
+                                    </Thumb.RenderTransform>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!--  <colorPicker:ValueToSelectedColorConverter x:Key="ValueToSelectedColorConverter" />  -->
+    <Style TargetType="{x:Type colorPicker:SpectrumSlider}">
+        <Setter Property="IsTabStop" Value="false" />
+        <Setter Property="Orientation" Value="Vertical" />
+        <Setter Property="Maximum" Value="360" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type colorPicker:SpectrumSlider}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="10*" />
+                            <ColumnDefinition Width="17" />
+                            <ColumnDefinition Width="10*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="1">
+                            <Border Margin="1" Background="{TemplateBinding Background}" />
+                            <Label Style="{StaticResource SunkenFrameStyle}" />
+                        </Grid>
+                        <Track x:Name="PART_Track"
+                               Grid.Column="1"
+                               Margin="0,-3">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource ColorPickerRepeatButtonStyle}" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="{x:Static Slider.IncreaseLarge}" Style="{StaticResource ColorPickerRepeatButtonStyle}" />
+                            </Track.IncreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb x:Name="Thumb" Style="{StaticResource SpectrumSliderThumbStyle}" />
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <colorPicker:HueToColorConverter x:Key="HueToColorConverter" />
+
+    <Style x:Key="HsvControlThumbStyle" TargetType="{x:Type Thumb}">
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Stylus.IsPressAndHoldEnabled" Value="True" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Grid Width="12" Height="12">
+                        <Ellipse Margin="0" Stroke="White" />
+                        <Ellipse Margin="1" Stroke="Black" />
+                        <Ellipse Margin="2" Stroke="White" />
+                        <Line Stroke="#80000000"
+                              X1="0"
+                              X2="12"
+                              Y1="6"
+                              Y2="6" />
+                        <Line Stroke="#80000000"
+                              X1="6"
+                              X2="6"
+                              Y1="0"
+                              Y2="12" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type colorPicker:HsvControl}">
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type colorPicker:HsvControl}">
+                    <Grid>
+                        <Rectangle>
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                                    <GradientStop Offset="0" Color="#FFFFFFFF" />
+                                    <GradientStop Offset="1" Color="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Hue, Converter={StaticResource HueToColorConverter}}" />
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <Rectangle>
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                    <GradientStop Offset="0" Color="#00000000" />
+                                    <GradientStop Offset="1" Color="#FF000000" />
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                        <Grid>
+                            <Border BorderBrush="#A0808080" BorderThickness="1,1,0,0" />
+                            <Border BorderBrush="#A0F0F0F0" BorderThickness="0,0,1,1" />
+                        </Grid>
+                        <Canvas ClipToBounds="true">
+                            <Thumb x:Name="PART_Thumb"
+                                   Canvas.Left="-5"
+                                   Canvas.Top="-5"
+                                   Style="{StaticResource HsvControlThumbStyle}">
+                                <Thumb.RenderTransform>
+                                    <TranslateTransform X="0" Y="0" />
+                                </Thumb.RenderTransform>
+                            </Thumb>
+                        </Canvas>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <colorPicker:DoubleToIntegerStringConverter x:Key="DoubleToIntegerStringConverter" />
+    <Style x:Key="ColorPickerTextBox" TargetType="{x:Type TextBox}">
+        <Setter Property="Margin" Value="5,1,3,3" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style TargetType="{x:Type colorPicker:ColorPicker}">
+        <Setter Property="Focusable" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="{TemplateBinding Padding}">
+                        <Grid Width="270" Height="80">
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="110" />
+                                <ColumnDefinition Width="40" />
+                            </Grid.ColumnDefinitions>
+                            <colorPicker:HsvControl x:Name="PART_HsvControl"
+                                                    Grid.Row="0"
+                                                    Grid.RowSpan="4"
+                                                    Grid.Column="0" />
+                            <colorPicker:SpectrumSlider x:Name="PART_SpectrumSlider1"
+                                                        Grid.RowSpan="4"
+                                                        Grid.Column="1"
+                                                        BorderBrush="Black"
+                                                        BorderThickness="1"
+                                                        Hue="0"
+                                                        LargeChange="30"
+                                                        SmallChange="10" />
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="2"
+                                       HorizontalAlignment="Center"
+                                       Text="R" />
+                            <TextBlock Grid.Row="1"
+                                       Grid.Column="2"
+                                       HorizontalAlignment="Center"
+                                       Text="G" />
+                            <TextBlock Grid.Row="2"
+                                       Grid.Column="2"
+                                       HorizontalAlignment="Center"
+                                       Text="B" />
+                            <TextBlock Grid.Row="3"
+                                       Grid.Column="2"
+                                       HorizontalAlignment="Center"
+                                       Text="A" />
+                            <colorPicker:BindOnEnterTextBox x:Name="RedTextBox"
+                                                            Grid.Row="0"
+                                                            Grid.Column="4"
+                                                            Style="{StaticResource ColorPickerTextBox}"
+                                                            Text="{Binding Path=Value,
+                                                                           ElementName=PART_RedColorSlider,
+                                                                           Mode=TwoWay,
+                                                                           Converter={StaticResource DoubleToIntegerStringConverter}}" />
+                            <colorPicker:BindOnEnterTextBox x:Name="GreenTextBox"
+                                                            Grid.Row="1"
+                                                            Grid.Column="4"
+                                                            Style="{StaticResource ColorPickerTextBox}"
+                                                            Text="{Binding Path=Value,
+                                                                           ElementName=PART_GreenColorSlider,
+                                                                           Mode=TwoWay,
+                                                                           Converter={StaticResource DoubleToIntegerStringConverter}}" />
+                            <colorPicker:BindOnEnterTextBox x:Name="BlueTextBox"
+                                                            Grid.Row="2"
+                                                            Grid.Column="4"
+                                                            Style="{StaticResource ColorPickerTextBox}"
+                                                            Text="{Binding Path=Value,
+                                                                           ElementName=PART_BlueColorSlider,
+                                                                           Mode=TwoWay,
+                                                                           Converter={StaticResource DoubleToIntegerStringConverter}}" />
+                            <colorPicker:BindOnEnterTextBox x:Name="AlphaTextBox"
+                                                            Grid.Row="3"
+                                                            Grid.Column="4"
+                                                            Style="{StaticResource ColorPickerTextBox}"
+                                                            Text="{Binding Path=Value,
+                                                                           ElementName=PART_AlphaColorSlider,
+                                                                           Mode=TwoWay,
+                                                                           Converter={StaticResource DoubleToIntegerStringConverter}}" />
+                            <colorPicker:ColorSlider x:Name="PART_RedColorSlider"
+                                                     Grid.Row="0"
+                                                     Grid.Column="3"
+                                                     BorderBrush="Black"
+                                                     BorderThickness="1" />
+                            <colorPicker:ColorSlider x:Name="PART_GreenColorSlider"
+                                                     Grid.Row="1"
+                                                     Grid.Column="3"
+                                                     BorderBrush="Black"
+                                                     BorderThickness="1" />
+                            <colorPicker:ColorSlider x:Name="PART_BlueColorSlider"
+                                                     Grid.Row="2"
+                                                     Grid.Column="3"
+                                                     BorderBrush="Black"
+                                                     BorderThickness="1" />
+                            <colorPicker:ColorSlider x:Name="PART_AlphaColorSlider"
+                                                     Grid.Row="3"
+                                                     Grid.Column="3"
+                                                     Background="{StaticResource CheckersBrush}"
+                                                     BorderBrush="Black"
+                                                     BorderThickness="1"
+                                                     LeftColor="#00000000"
+                                                     RightColor="#FF000000" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <LinearGradientBrush x:Key="GlassBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0" Color="#96FFFFFF" />
+        <GradientStop Offset="0.5" Color="#28FFFFFF" />
+        <GradientStop Offset="0.5" Color="#00FFFFFF" />
+    </LinearGradientBrush>
+    <colorPicker:ColorToStringConverter x:Key="ColorToStringConverter" />
+    <Style TargetType="{x:Type colorPicker:ColorComboBox}">
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type colorPicker:ColorComboBox}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="25" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Border x:Name="OverallBorder"
+                                Grid.Row="1"
+                                BorderBrush="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"
+                                BorderThickness="1" />
+                        <Grid Grid.Row="1" Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="25" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="15" />
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Column="0" Margin="4">
+                                <Rectangle Fill="{StaticResource CheckersBrush}" />
+                                <Rectangle Stroke="Black" StrokeThickness="1">
+                                    <Rectangle.Fill>
+                                        <SolidColorBrush Color="{Binding SelectedColor, RelativeSource={RelativeSource TemplatedParent}}" />
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                                <!--  <Border BorderBrush="Black" BorderThickness="1"/>  -->
+                            </Grid>
+                            <TextBlock Grid.Column="1"
+                                       Margin="5,0"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding SelectedColor,
+                                                      RelativeSource={RelativeSource TemplatedParent},
+                                                      Converter={StaticResource ColorToStringConverter}}" />
+                            <Grid Grid.Column="2">
+                                <Border x:Name="ToggleButtonFill"
+                                        Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}"
+                                        Visibility="Hidden" />
+                                <Border x:Name="ToggleButtonGlass"
+                                        Background="{StaticResource GlassBrush}"
+                                        Visibility="Hidden" />
+                                <Border x:Name="ToggleButtonBorder"
+                                        BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+                                        BorderThickness="1"
+                                        Visibility="Hidden" />
+                                <ToggleButton x:Name="PART_ToggleButton"
+                                              Focusable="False"
+                                              IsChecked="{Binding IsDropDownOpen,
+                                                                  RelativeSource={RelativeSource TemplatedParent}}">
+                                    <ToggleButton.Style>
+                                        <Style TargetType="ToggleButton">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate>
+                                                        <Grid Background="Transparent">
+                                                            <Path HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"
+                                                                  Data="M 0 0 L 3.5 4 L 7 0 Z"
+                                                                  Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+                                                        </Grid>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ToggleButton.Style>
+                                </ToggleButton>
+                            </Grid>
+                            <Popup x:Name="PART_Popup"
+                                   AllowsTransparency="True"
+                                   Focusable="True"
+                                   IsOpen="{Binding IsDropDownOpen,
+                                                    RelativeSource={RelativeSource TemplatedParent}}"
+                                   Placement="Bottom"
+                                   PopupAnimation="{DynamicResource {x:Static SystemParameters.ComboBoxPopupAnimationKey}}"
+                                   StaysOpen="False">
+                                <!--  IsOpen="{Binding IsChecked, ElementName=PART_ToggleButton}">  -->
+                                <!--  IsOpen="{TemplateBinding IsDropDownOpen}">  -->
+                                <Border Background="#F6F6F6"
+                                        BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}"
+                                        BorderThickness="1"
+                                        Padding="5">
+                                    <colorPicker:ColorPicker x:Name="PART_ColorPicker" />
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="ToggleButtonFill" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="ToggleButtonGlass" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="ToggleButtonBorder" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="OverallBorder" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" />
+                        </Trigger>
+                        <Trigger Property="IsDropDownOpen" Value="True">
+                            <Setter TargetName="ToggleButtonFill" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="ToggleButtonGlass" Property="Visibility" Value="Hidden" />
+                            <Setter TargetName="ToggleButtonBorder" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="OverallBorder" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>
