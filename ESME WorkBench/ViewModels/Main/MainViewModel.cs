@@ -112,11 +112,11 @@ namespace ESMEWorkbench.ViewModels.Main
 
                 if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"))) Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
                 var databaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
-                var databaseFile = Path.Combine(databaseDirectory, "esme.db");
+                var databaseFile = Path.Combine(databaseDirectory, "esme.db.sdf");
                 if (Directory.Exists(databaseDirectory) && File.Exists(databaseFile))
                 {
                     var fileInfo = new FileInfo(databaseFile);
-                    var cutoffTime = new DateTime(2012, 12, 19, 00, 00, 00);
+                    var cutoffTime = new DateTime(2013, 5, 1, 00, 00, 00);
                     if (fileInfo.CreationTime < cutoffTime) Directory.Delete(databaseDirectory, true);
                 }
                 Database.MasterDatabaseDirectory = databaseDirectory;
