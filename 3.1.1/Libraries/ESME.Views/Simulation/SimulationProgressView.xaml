@@ -1,0 +1,132 @@
+﻿<Window x:Class="ESME.Views.Simulation.SimulationProgressView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
+        xmlns:MaskedTextBox="clr-namespace:ESME.Views.MaskedTextBox"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Simulation="clr-namespace:ESME.Views.Simulation" xmlns:System="clr-namespace:System;assembly=mscorlib"
+        Title="{Binding Simulation.Scenario.Name,
+                        StringFormat=Scenario: {0}}"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        mc:Ignorable="d">
+    <Window.Resources>
+        <Simulation:SimulationProgressViewModel x:Key="DesignViewModel" />
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="5 0 5 0" />
+            <Setter Property="Height" Value="22" />
+        </Style>
+        <Style TargetType="{x:Type MaskedTextBox:MaskedTextBox}">
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <DockPanel LastChildFill="True">
+                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
+                                <AdornedElementPlaceholder />
+                            </Border>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed" FalseValue="Collapsed" TrueValue="Visible" />
+        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed" FalseValue="Visible" TrueValue="Collapsed" />
+    </Window.Resources>
+    <StackPanel d:DataContext="{Binding Source={StaticResource DesignViewModel}, Path=DesignTimeData}" Grid.IsSharedSizeScope="True" Orientation="Vertical">
+        <Grid Margin="0 5 0 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
+                <ColumnDefinition Width="*" SharedSizeGroup="ValueColumn" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       IsEnabled="{Binding IsStartCommandEnabled}"
+                       Style="{StaticResource LabelStyle}"
+                       Text="Time Step Length:"
+                       TextAlignment="Left"
+                       ToolTip="The length of a single time step, in hh:mm:ss format" />
+            <MaskedTextBox:MaskedTextBox Grid.Column="1"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Top"
+                                         IsEnabled="{Binding SimulationNotRunning}"
+                                         ValueDataType="{x:Type System:String}"
+                                         Mask="00:00:00"
+                                         Value="{Binding TimeStepString,
+                                                         ValidatesOnDataErrors=True,
+                                                         UpdateSourceTrigger=PropertyChanged}" />
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
+                <ColumnDefinition Width="*" SharedSizeGroup="ValueColumn" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       IsEnabled="{Binding SimulationNotRunning}"
+                       Style="{StaticResource LabelStyle}"
+                       Text="Animate Display:" />
+            <CheckBox Grid.Column="1"
+                      VerticalAlignment="Center"
+                      IsChecked="{Binding Simulation.AnimateSimulation}"
+                      IsEnabled="{Binding SimulationNotRunning}"
+                      ToolTip="Show movement of animals and platforms on map" />
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
+                <ColumnDefinition Width="*" SharedSizeGroup="ValueColumn" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       IsEnabled="{Binding SimulationNotRunning}"
+                       Style="{StaticResource LabelStyle}"
+                       Text="Display exposure histograms:" />
+            <CheckBox Grid.Column="1"
+                      VerticalAlignment="Center"
+                      IsChecked="{Binding DisplayExposureHistograms}"
+                      IsEnabled="{Binding SimulationNotRunning}"
+                      ToolTip="Display exposure histograms during the simulation run" />
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
+                <ColumnDefinition Width="*" SharedSizeGroup="ValueColumn" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       HorizontalAlignment="Right"
+                       IsEnabled="{Binding SimulationNotRunning}"
+                       Style="{StaticResource LabelStyle}"
+                       Text="Simulate animal movement:" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <CheckBox VerticalAlignment="Center" IsChecked="{Binding Simulation.MovingAnimats}" IsEnabled="{Binding SimulationNotRunning}" ToolTip="Simulate animal movement using the Marine Mammal Movement and Behavior Simulator" />
+                <Image Margin="5 0 0 0" Source="..\Images\information.png" ToolTip="Warning: Enabling this option will make the simulation run MUCH more slowly!" Visibility="{Binding Simulation.MovingAnimats, Converter={StaticResource TrueVisibleFalseCollapsed}}" />
+            </StackPanel>
+        </Grid>
+        <Grid Visibility="{Binding IsStartCommandEnabled, Converter={StaticResource FalseVisibleTrueCollapsed}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" SharedSizeGroup="LabelColumn" />
+                <ColumnDefinition Width="*" SharedSizeGroup="ValueColumn" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" HorizontalAlignment="Right" Style="{StaticResource LabelStyle}" Text="Simulation progress:" />
+            <Grid Grid.Column="1">
+                <ProgressBar Height="22" Margin="0 0 5 0" Value="{Binding Simulation.PercentProgress.PercentComplete}" />
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding SimulationProgressText}" />
+            </Grid>
+        </Grid>
+        <StackPanel Grid.Column="1" Margin="0 20 5 5" HorizontalAlignment="Right" Orientation="Horizontal">
+            <Button Width="75"
+                    Height="22"
+                    Margin="0 0 10 0"
+                    Command="{Binding StartCommand}"
+                    Content="Start" />
+            <Button Width="75" Height="22" Command="{Binding CancelCommand}" Content="Cancel" />
+        </StackPanel>
+    </StackPanel>
+</Window>

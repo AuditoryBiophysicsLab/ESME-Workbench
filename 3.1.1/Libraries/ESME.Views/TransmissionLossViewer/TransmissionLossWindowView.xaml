@@ -1,0 +1,52 @@
+﻿<Window x:Class="ESME.Views.TransmissionLossViewer.TransmissionLossWindowView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Controls="clr-namespace:ESME.Views.Controls"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Properties="clr-namespace:ESME.Views.Properties"
+        xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+        Title="{Binding TitleString}"
+        Width="{Binding Source={x:Static Properties:Settings.Default},
+                        Path=TLWidth,
+                        Mode=TwoWay}"
+        Height="{Binding Source={x:Static Properties:Settings.Default},
+                         Path=TLHeight,
+                         Mode=TwoWay}"
+        d:DataContext="{d:DesignInstance TransmissionLossViewer:TransmissionLossViewModel}"
+        Grid.IsSharedSizeScope="True"
+        WindowStyle="ToolWindow"
+        mc:Ignorable="d">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <WPF:EventToCommandTrigger Command="{Binding InternalViewClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Window.InputBindings>
+        <KeyBinding Key="W" Command="{Binding CloseCommand}" Modifiers="Control" />
+    </Window.InputBindings>
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Bottom">
+            <Controls:TLStatusBar DataContext="{Binding RadialViewModel}" DockPanel.Dock="Bottom" />
+        </DockPanel>
+        <ToolBarTray Height="22" DockPanel.Dock="Top" IsLocked="True">
+            <ToolBar Band="0" BandIndex="0">
+                <Button Command="{Binding SaveAsCSVCommand}" ToolBar.OverflowMode="Never" ToolTip="Save to CSV">
+                    <Image Source="..\Images\CSV_16.png" />
+                </Button>
+                <Button Command="{Binding SaveAsImageCommand}" ToolBar.OverflowMode="AsNeeded" ToolTip="Save to Image">
+                    <Image Source="..\Images\PNG_16.png" />
+                </Button>
+                <Button Command="{Binding CopyCSVToClipboardCommand}" ToolBar.OverflowMode="AsNeeded" ToolTip="Copy text to clipboard">
+                    <Image Source="..\Images\clipboard_text_16.png" />
+                </Button>
+                <Button Command="{Binding CopyImageToClipboardCommand}" ToolBar.OverflowMode="Never" ToolTip="Copy image to clipboard">
+                    <Image Source="..\Images\clipboard_add_16.png" />
+                </Button>
+            </ToolBar>
+        </ToolBarTray>
+        <TransmissionLossViewer:TransmissionLossView DockPanel.Dock="Bottom" />
+    </DockPanel>
+</Window>
