@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="ESMEWorkbench.Controls.EditableTextBlock"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:Controls="clr-namespace:ESMEWorkbench.Controls"
+             x:Name="mainControl">
+    <UserControl.Resources>
+
+        <DataTemplate x:Key="EditModeTemplate">
+            <TextBox Margin="0"
+                     BorderThickness="1"
+                     KeyDown="TextBox_KeyDown"
+                     Loaded="TextBox_Loaded"
+                     LostFocus="TextBox_LostFocus"
+                     Text="{Binding ElementName=mainControl,
+                                    Path=Text,
+                                    UpdateSourceTrigger=PropertyChanged}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="DisplayModeTemplate">
+            <TextBlock Margin="5,3,5,3" Text="{Binding ElementName=mainControl, Path=FormattedText}" />
+        </DataTemplate>
+
+        <Style TargetType="{x:Type Controls:EditableTextBlock}">
+            <Style.Triggers>
+                <Trigger Property="IsInEditMode" Value="True">
+                    <Setter Property="ContentTemplate" Value="{StaticResource EditModeTemplate}" />
+                </Trigger>
+                <Trigger Property="IsInEditMode" Value="False">
+                    <Setter Property="ContentTemplate" Value="{StaticResource DisplayModeTemplate}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+</UserControl>
