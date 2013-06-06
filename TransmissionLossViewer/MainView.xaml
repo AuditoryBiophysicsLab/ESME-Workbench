@@ -1,6 +1,7 @@
 ﻿<Window x:Class="TransmissionLossViewer.MainView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -9,7 +10,6 @@
         xmlns:TransmissionLossViewer="clr-namespace:TransmissionLossViewer"
         xmlns:View="clr-namespace:ESME.Views.TransmissionLossViewer;assembly=ESME.Views"
         xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
-        xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         Title="{Binding TransmissionLossViewModel.TitleString,
                         Mode=TwoWay}"
         Width="{Binding Source={x:Static Properties:Settings.Default},
@@ -19,6 +19,7 @@
                          Path=WindowHeight,
                          Mode=TwoWay}"
         d:DataContext="{d:DesignInstance TransmissionLossViewer:MainViewModel}"
+        Grid.IsSharedSizeScope="True"
         Icon="gnome_sound_recorder.ico"
         Left="{Binding Source={x:Static Properties:Settings.Default},
                        Path=WindowLeft,
@@ -47,9 +48,11 @@
     </i:Interaction.Triggers>
     <DockPanel LastChildFill="True">
         <DockPanel DockPanel.Dock="Bottom">
-            <Controls:TLStatusBar DockPanel.Dock="Bottom" DataContext="{Binding TransmissionLossViewModel.RadialViewModel}"/>                
+            <Controls:TLStatusBar DataContext="{Binding TransmissionLossViewModel.RadialViewModel}" DockPanel.Dock="Bottom" />
         </DockPanel>
-        <ToolBarTray Height="22" DockPanel.Dock="Top" IsLocked="True">
+        <ToolBarTray Height="22"
+                     DockPanel.Dock="Top"
+                     IsLocked="True">
             <ToolBar Band="0" BandIndex="0">
                 <Button Command="{Binding TransmissionLossViewModel.SaveAsCSVCommand}"
                         ToolBar.OverflowMode="Never"
@@ -83,7 +86,7 @@
                 <ListBox DisplayMemberPath="Geo"
                          ItemsSource="{Binding Scenario.AnalysisPoints}"
                          SelectedItem="{Binding AnalysisPoint}" />
-            </GroupBox>            
+            </GroupBox>
         </StackPanel>
         <View:TransmissionLossView x:Name="TransmissionLossView"
                                    DataContext="{Binding TransmissionLossViewModel}"
