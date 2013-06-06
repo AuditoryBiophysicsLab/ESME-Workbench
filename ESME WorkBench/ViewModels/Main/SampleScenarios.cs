@@ -16,6 +16,7 @@ namespace ESMEWorkbench.ViewModels.Main
 {
     public partial class MainViewModel
     {
+        public bool IsSaveSampleDataRequested { get; set; }
         public async void CreateSampleScenariosIfRequested()
         {
             var wind = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Wind];
@@ -46,6 +47,7 @@ namespace ESMEWorkbench.ViewModels.Main
             progress.ProgressMessage = string.Format("Updating database...");
             progress.CurrentItem++;
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+            IsSaveSampleDataRequested = true;
             //Database.SaveChanges();
             window.Close();
         }

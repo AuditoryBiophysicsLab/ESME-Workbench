@@ -97,6 +97,11 @@ namespace ESMEWorkbench.ViewModels.Main
                             // Debug.WriteLine(string.Format("TransmissionLossActivity: {0}", TransmissionLossActivity));
                             var isBusy = _transmissionLoss.WorkQueue.Keys.Count > 0;
                             IsTransmissionLossBusy = isBusy;
+                            if(!isBusy && IsSaveSampleDataRequested)
+                            {
+                                Database.SaveChanges();
+                                IsSaveSampleDataRequested = false;
+                            }
                         
                     }
                 };
