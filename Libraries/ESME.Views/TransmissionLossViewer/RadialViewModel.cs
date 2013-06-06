@@ -57,9 +57,15 @@ namespace ESME.Views.TransmissionLossViewer
                                        .Throttle(TimeSpan.FromMilliseconds(100))
                                        .Subscribe(visibleRange =>
                                        {
-                                           Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Visible range on Y axis changed to {1}", DateTime.Now, visibleRange == null ? "(null)" : visibleRange.ToString()));
-                                           if (visibleRange == null) return;
+                                           Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Entering VisibleRangeChanged", DateTime.Now));
+                                           //Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Visible range on Y axis changed to {1}", DateTime.Now, visibleRange == null ? "(null)" : visibleRange.ToString()));
+                                           if (visibleRange == null)
+                                           {
+                                               Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving (1) VisibleRangeChanged", DateTime.Now));
+                                               return;
+                                           }
                                            CalculateBottomProfileGeometry();
+                                           Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving VisibleRangeChanged", DateTime.Now));
                                        }));
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged")
                                        .ObserveOnDispatcher()
@@ -68,18 +74,24 @@ namespace ESME.Views.TransmissionLossViewer
                                        .DistinctUntilChanged()
                                        .Subscribe(axisRange =>
                                        {
+                                           Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Entering AxisRangeChanged", DateTime.Now));
                                            if (_axisRangeObserver != null)
                                            {
                                                _instanceObservers.Remove(_axisRangeObserver);
                                                _axisRangeObserver.Dispose();
                                            }
-                                           if (axisRange == null) return;
+                                           if (axisRange == null)
+                                           {
+                                               Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving (1) AxisRangeChanged", DateTime.Now));
+                                               return;
+                                           }
                                            _axisRangeObserver = axisRange.ObserveOnDispatcher().Subscribe(r =>
                                            {
                                                if (FullRange == null) FullRange = new Range(axisRange);
                                                else FullRange.Update(axisRange);
                                            });
                                            _instanceObservers.Add(_axisRangeObserver);
+                                           Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving AxisRangeChanged", DateTime.Now));
                                        }));
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(AxisSeriesViewModel, "PropertyChanged")
                                        .ObserveOnDispatcher()
@@ -89,15 +101,18 @@ namespace ESME.Views.TransmissionLossViewer
                                        .DistinctUntilChanged()
                                        .Subscribe(e =>
                                        {
+                                           Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Entering ActualHeightWidthChanged", DateTime.Now));
                                            WriteableBitmap = null;
                                            Render();
                                            //CalculateBottomProfileGeometry();
+                                           Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving ActualHeightWidthChanged", DateTime.Now));
                                        }));
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged")
                                        .ObserveOnDispatcher()
                                        .Where(e => e.EventArgs.PropertyName == "Radial")
                                        .Subscribe(e =>
                                        {
+                                           Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Entering RadialChanged", DateTime.Now));
                                            _radialObservers.ForEach(o => o.Dispose());
                                            _radialObservers.Clear();
                                            WriteableBitmapVisibility = Visibility.Collapsed;
@@ -118,6 +133,7 @@ namespace ESME.Views.TransmissionLossViewer
                                                    else WaitToRenderText = "This radial has not yet been calculated";
                                                    WriteableBitmap = null;
                                                }
+                                               Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving (1) RadialChanged", DateTime.Now));
                                                return;
                                            }
                                            try
@@ -141,11 +157,13 @@ namespace ESME.Views.TransmissionLossViewer
                                                WaitToRenderText = ex.Message;
                                                _transmissionLossRadial = null;
                                            }
+                                           Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving RadialChanged", DateTime.Now));
                                        }));
             _instanceObservers.Add(
                                    ColorMapViewModel.Range.ObserveOnDispatcher().Subscribe(
                                                                                            r =>
                                                                                            {
+                                                                                               Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Entering ColorMapViewModel.RangeChanged", DateTime.Now));
                                                                                                AxisMarkers.Clear();
                                                                                                if (ColorMapViewModel.Range != FullRange) 
                                                                                                {
@@ -155,11 +173,13 @@ namespace ESME.Views.TransmissionLossViewer
                                                                                                Debug.WriteLine("{0:HH:mm:ss.fff} ColorMapViewModel.Range changed to {1}",
                                                                                                                DateTime.Now,
                                                                                                                r);
+                                                                                               Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving ColorMapViewModel.RangeChanged", DateTime.Now));
                                                                                            }));
             _displayQueue
                 .ObserveOnDispatcher()
                 .Subscribe(result =>
                 {
+                    Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Entering DisplayQueue", DateTime.Now));
                     var pixelBuffer = result.Item1;
                     var renderRect = result.Item2;
                     var sequenceNumber = result.Item3;
@@ -171,6 +191,7 @@ namespace ESME.Views.TransmissionLossViewer
                                                       WriteableBitmap == null
                                                           ? " No bitmap"
                                                           : WriteableBitmap.PixelWidth != renderRect.Width || WriteableBitmap.PixelHeight != renderRect.Height ? " Size mismatch" : ""));
+                        Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving (1) DisplayQueue", DateTime.Now));
                         return;
                     }
                     _displayedSequenceNumber = sequenceNumber;
@@ -181,6 +202,7 @@ namespace ESME.Views.TransmissionLossViewer
                     WriteableBitmap.Unlock();
                     WriteableBitmapVisibility = Visibility.Visible;
                     _imageSeriesViewModel.ImageSource = WriteableBitmap;
+                    Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving DisplayQueue", DateTime.Now));
                 });
         }
 
