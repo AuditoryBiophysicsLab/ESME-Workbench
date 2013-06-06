@@ -153,40 +153,50 @@ namespace SimulationLogAnalysis
             IsLogFileSelected = false;
             if (SelectedFileName == null || !File.Exists(SelectedFileName)) return;
             IsLogFileSelected = true;
-            SimulationLog = SimulationLog.Open(SelectedFileName);
-            StartTimeString = _simulationStartTime.ToString(TimeSpanFormatString);
-            _simulationEndTime = new TimeSpan(SimulationLog.TimeStepSize.Ticks * SimulationLog.TimeStepCount);
-            StopTimeString = _simulationEndTime.ToString(TimeSpanFormatString);
-            _startTimeValidationRule.Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString));
-            _endTimeValidationRule.Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString));
+            try
+            {
+                SimulationLog = SimulationLog.Open(SelectedFileName);
+                StartTimeString = _simulationStartTime.ToString(TimeSpanFormatString);
+                _simulationEndTime = new TimeSpan(SimulationLog.TimeStepSize.Ticks * SimulationLog.TimeStepCount);
+                StopTimeString = _simulationEndTime.ToString(TimeSpanFormatString);
+                _startTimeValidationRule.Description = string.Format("Must be between {0} and {1}",
+                                                                     _simulationStartTime.ToString(TimeSpanFormatString),
+                                                                     _simulationEndTime.ToString(TimeSpanFormatString));
+                _endTimeValidationRule.Description = string.Format("Must be between {0} and {1}", _simulationStartTime.ToString(TimeSpanFormatString), _simulationEndTime.ToString(TimeSpanFormatString));
 
-            //for (var speciesIndex = 0; speciesIndex < SimulationLog.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(SimulationLog.SpeciesRecords[speciesIndex].Guid, BarColors[speciesIndex % BarColors.Count]);
+                //for (var speciesIndex = 0; speciesIndex < SimulationLog.SpeciesRecords.Count; speciesIndex++) GuidToColorMap.Add(SimulationLog.SpeciesRecords[speciesIndex].Guid, BarColors[speciesIndex % BarColors.Count]);
 
-            // todo: Populate platform, mode and species lists
-            foreach (var modeFilter in SimulationLog.ModeRecords.Select(mode => new ContentFilterRecordBase(mode) { Name = string.Format("{0}:{1}", mode.PlatformRecord.Name, mode.Name) })) 
-            {
-                _modeSelectionObservers.Add(new PropertyObserver<ContentFilterRecordBase>(modeFilter).RegisterHandler(p => p.IsSelected, ModeFilterSelectionChanged));
-                AvailableModes.Add(modeFilter);
+                // todo: Populate platform, mode and species lists
+                foreach (var modeFilter in SimulationLog.ModeRecords.Select(mode => new ContentFilterRecordBase(mode) { Name = string.Format("{0}:{1}", mode.PlatformRecord.Name, mode.Name) }))
+                {
+                    _modeSelectionObservers.Add(new PropertyObserver<ContentFilterRecordBase>(modeFilter).RegisterHandler(p => p.IsSelected, ModeFilterSelectionChanged));
+                    AvailableModes.Add(modeFilter);
+                }
+                ModeFilterSelectionChanged();
+                foreach (var platform in SimulationLog.PlatformRecords)
+                {
+                    var curPlatform = platform;
+                    var dependentModes = from mode in AvailableModes
+                                         where ((ModeNameGuid)mode.NameGuidRecord).PlatformGuid == curPlatform.Guid
+                                         select mode;
+                    var platformFilter = new PlatformContentFilterRecord(curPlatform, dependentModes);
+                    _platformSelectionObservers.Add(new PropertyObserver<ContentFilterRecordBase>(platformFilter).RegisterHandler(p => p.IsSelected, PlatformFilterSelectionChanged));
+                    AvailablePlatforms.Add(platformFilter);
+                }
+                PlatformFilterSelectionChanged();
+                foreach (var speciesFilter in SimulationLog.SpeciesRecords.Select(species => new ContentFilterRecordBase(species)))
+                {
+                    _speciesSelectionObservers.Add(new PropertyObserver<ContentFilterRecordBase>(speciesFilter).RegisterHandler(p => p.IsSelected, SpeciesFilterSelectionChanged));
+                    AvailableSpecies.Add(speciesFilter);
+                }
+                SpeciesFilterSelectionChanged();
+                CommandManager.InvalidateRequerySuggested();
             }
-            ModeFilterSelectionChanged();
-            foreach (var platform in SimulationLog.PlatformRecords)
+            catch (FileFormatException f)
             {
-                var curPlatform = platform;
-                var dependentModes = from mode in AvailableModes
-                                     where ((ModeNameGuid)mode.NameGuidRecord).PlatformGuid == curPlatform.Guid
-                                     select mode;
-                var platformFilter = new PlatformContentFilterRecord(curPlatform, dependentModes);
-                _platformSelectionObservers.Add(new PropertyObserver<ContentFilterRecordBase>(platformFilter).RegisterHandler(p => p.IsSelected, PlatformFilterSelectionChanged)); 
-                AvailablePlatforms.Add(platformFilter);
+                SelectedFileName = "";
+                _messageBox.ShowError("An incomplete or invalid simulation file was selected: "+ f.Message);
             }
-            PlatformFilterSelectionChanged();
-            foreach (var speciesFilter in SimulationLog.SpeciesRecords.Select(species => new ContentFilterRecordBase(species))) 
-            {
-                _speciesSelectionObservers.Add(new PropertyObserver<ContentFilterRecordBase>(speciesFilter).RegisterHandler(p => p.IsSelected, SpeciesFilterSelectionChanged));
-                AvailableSpecies.Add(speciesFilter);
-            }
-            SpeciesFilterSelectionChanged();
-            CommandManager.InvalidateRequerySuggested();
         }
 
         void PlatformFilterSelectionChanged() { AreAnyPlatformsSelected = (from p in AvailablePlatforms where p.IsSelected select p).Any(); }
